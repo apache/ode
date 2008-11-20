@@ -18,6 +18,9 @@
  */
 package org.apache.ode.bpel.o;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,5 +58,22 @@ public class OReply extends OActivity {
 
     public OReply(OProcess owner, OActivity parent) {
         super(owner, parent);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    	in.defaultReadObject();
+
+    	// backward compatibility; joinCorrelations could be null if read from old definition
+    	if( joinCorrelations == null ) {
+    		try {
+    			Field field = OReply.class.getDeclaredField("joinCorrelations");
+    			field.setAccessible(true);
+    			field.set(this, new ArrayList<OScope.CorrelationSet>());
+    		} catch( NoSuchFieldException nfe ) {
+    			throw new IOException(nfe.getMessage());
+    		} catch( IllegalAccessException iae ) {
+    			throw new IOException(iae.getMessage());
+    		}
+    	}
     }
 }

@@ -148,12 +148,16 @@ public class OScope extends OActivity {
     }
 
     public static final class CorrelationSet extends OBase {
-      
         static final long serialVersionUID = -1L  ;
+        
         public String name;
         public OScope declaringScope;
         public final List<OProcess.OProperty>properties = new ArrayList<OProcess.OProperty>();
-
+        
+        /**
+         * Indicates that this correlation set has a join use case in the scope.
+         */
+        public boolean hasJoinUseCases = false;
 
         public CorrelationSet(OProcess owner) {
             super(owner);

@@ -21,7 +21,7 @@ package org.apache.ode.dao.jpa;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
@@ -51,7 +51,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 @Entity
 @Table(name="ODE_MESSAGE_EXCHANGE")
@@ -323,25 +322,12 @@ public class MessageExchangeDAOImpl extends OpenJPADAO implements MessageExchang
         _pipedMessageExchangeId = pipedMessageExchangeId;
     }
 
-    public void addCorrelationKey(CorrelationKey correlationKey) {
-        if (_correlationKeys == null)
-            _correlationKeys = correlationKey.toCanonicalString();
-        else
-            _correlationKeys = _correlationKeys + "^" + correlationKey.toCanonicalString();
+    void setCorrelationKeySet(CorrelationKeySet correlationKeySet) {
+    	_correlationKeys = correlationKeySet.toCanonicalString();
 	}
 
-	public Collection<CorrelationKey> getCorrelationKeys() {
-        ArrayList<CorrelationKey> correlationKeys = new ArrayList<CorrelationKey>();
-        if (_correlationKeys != null) {
-            if (_correlationKeys.indexOf("^") > 0) {
-                for (StringTokenizer tokenizer = new StringTokenizer(_correlationKeys, "^"); tokenizer.hasMoreTokens();) {
-                    String corrStr = tokenizer.nextToken();
-                    correlationKeys.add(new CorrelationKey(corrStr));
-                }
-                return correlationKeys;
-            } else correlationKeys.add(new CorrelationKey(_correlationKeys));
-        }
-        return correlationKeys;
+	CorrelationKeySet getCorrelationKeySet() {
+		return new CorrelationKeySet(_correlationKeys);
     }
 
 	public void release(boolean doClean) {

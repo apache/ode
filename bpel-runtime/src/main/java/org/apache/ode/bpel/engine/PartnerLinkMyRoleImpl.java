@@ -19,7 +19,6 @@
 package org.apache.ode.bpel.engine;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -31,8 +30,10 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.InvalidMessageException;
+import org.apache.ode.bpel.common.OptionalCorrelationKey;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageRouteDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
@@ -51,7 +52,6 @@ import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.InvalidProcessException;
 import org.apache.ode.bpel.runtime.PROCESS;
-import org.apache.ode.utils.CollectionUtils;
 import org.apache.ode.utils.ObjectPrinter;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
@@ -111,7 +111,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 
         CorrelatorDAO correlator = _process.getProcessDAO().getCorrelator(correlatorId);
 
-        CorrelationKey[] keys;
+        CorrelationKeySet keySet;
 
         // We need to compute the correlation keys (based on the operation
         // we can  infer which correlation keys to compute - this is merely a set
@@ -119,7 +119,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         // that is ever referenced in an <receive>/<onMessage> on this
         // partnerlink/operation.
         try {
-            keys = computeCorrelationKeys(mex);
+            keySet = computeCorrelationKeys(mex);
         } catch (InvalidMessageException ime) {
             // We'd like to do a graceful exit here, no sense in rolling back due to a
             // a message format problem.
@@ -132,30 +132,23 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         String partnerSessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
         if (__log.isDebugEnabled()) {
             __log.debug("INPUTMSG: " + correlatorId + ": MSG RCVD keys="
-                    + CollectionUtils.makeCollection(HashSet.class, keys) + " mySessionId=" + mySessionId
+                    + keySet + " mySessionId=" + mySessionId
                     + " partnerSessionId=" + partnerSessionId);
         }
 
-        if (keys == null || keys.length == 0) {
-        	keys = new CorrelationKey[] { null };
-        }
-        
         // Try to find a route for one of our keys.
-        for (CorrelationKey key : keys) {
-            List<MessageRouteDAO> messageRoutes = correlator.findRoute(key);
-            if (messageRoutes != null && messageRoutes.size() > 0) {
-                for (MessageRouteDAO messageRoute : messageRoutes) {
-                    if (__log.isDebugEnabled()) {
-                        __log.debug("INPUTMSG: " + correlatorId + ": ckey " + key + " route is to " + messageRoute);
-                    }
-	                routingInfos.add(new RoutingInfo(messageRoute, key, correlator, keys));
+        List<MessageRouteDAO> messageRoutes = correlator.findRoute(keySet);
+        if (messageRoutes != null && messageRoutes.size() > 0) {
+            for (MessageRouteDAO messageRoute : messageRoutes) {
+                if (__log.isDebugEnabled()) {
+                    __log.debug("INPUTMSG: " + correlatorId + ": ckeySet " + messageRoute.getCorrelationKeySet() + " route is to " + messageRoute);
                 }
-                break;
+                routingInfos.add(new RoutingInfo(messageRoute, messageRoute.getCorrelationKeySet(), correlator, keySet));
             }
         }
         
         if (routingInfos.size() == 0) {
-        	routingInfos.add(new RoutingInfo(null, null, correlator, keys));
+        	routingInfos.add(new RoutingInfo(null, null, correlator, keySet));
         }
 
         return routingInfos;
@@ -163,16 +156,17 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 
     class RoutingInfo {
         MessageRouteDAO messageRoute;
-        CorrelationKey matchedKey;
+        CorrelationKeySet matchedKeySet;
         CorrelatorDAO correlator;
-        CorrelationKey[] keys;
+//        CorrelationKey[] keys;
+        CorrelationKeySet wholeKeySet;
 
-        public RoutingInfo(MessageRouteDAO messageRoute, CorrelationKey matchedKey,
-                           CorrelatorDAO correlator, CorrelationKey[] keys) {
+        public RoutingInfo(MessageRouteDAO messageRoute, CorrelationKeySet matchedKeySet,
+                           CorrelatorDAO correlator, CorrelationKeySet wholeKeySet) {
             this.messageRoute = messageRoute;
-            this.matchedKey = matchedKey;
+            this.matchedKeySet = matchedKeySet;
             this.correlator = correlator;
-            this.keys = keys;
+            this.wholeKeySet = wholeKeySet;
         }
     }
 
@@ -232,7 +226,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         // send process instance event
         CorrelationMatchEvent evt = new CorrelationMatchEvent(new QName(_process.getOProcess().targetNamespace,
                 _process.getOProcess().getName()), _process.getProcessDAO().getProcessId(),
-                instanceDao.getInstanceId(), routing.matchedKey);
+                instanceDao.getInstanceId(), routing.matchedKeySet);
         evt.setPortType(mex.getPortType().getQName());
         evt.setOperation(operation.getName());
         evt.setMexId(mex.getMessageExchangeId());
@@ -261,7 +255,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 
 	            // send event
 	            CorrelationNoMatchEvent evt = new CorrelationNoMatchEvent(mex.getPortType().getQName(), mex
-	                    .getOperation().getName(), mex.getMessageExchangeId(), routing.keys);
+	                    .getOperation().getName(), mex.getMessageExchangeId(), routing.wholeKeySet);
 	
 	            evt.setProcessId(_process.getProcessDAO().getProcessId());
 	            evt.setProcessName(new QName(_process.getOProcess().targetNamespace, _process.getOProcess().getName()));
@@ -270,7 +264,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 	            mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.QUEUED);
 	
 	            // No match, means we add message exchange to the queue.
-	            routing.correlator.enqueueMessage(mex.getDAO(), routing.keys);
+	            routing.correlator.enqueueMessage(mex.getDAO(), routing.wholeKeySet);
         	}
         }
     }
@@ -283,35 +277,44 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
                 : MessageExchange.MessageExchangePattern.REQUEST_RESPONSE);
     }
 
-    @SuppressWarnings("unchecked")
     private Operation getMyRoleOperation(String operationName) {
         return _plinkDef.getMyRoleOperation(operationName);
     }
 
-    private CorrelationKey[] computeCorrelationKeys(MyRoleMessageExchangeImpl mex) {
+    private CorrelationKeySet computeCorrelationKeys(MyRoleMessageExchangeImpl mex) {
+        CorrelationKeySet keySet = new CorrelationKeySet();
+
         Operation operation = mex.getOperation();
         Element msg = mex.getRequest().getMessage();
         javax.wsdl.Message msgDescription = operation.getInput().getMessage();
-        List<CorrelationKey> keys = new ArrayList<CorrelationKey>();
 
-        Set<OScope.CorrelationSet> csets = _plinkDef.getCorrelationSetsForOperation(operation);
-
+        Set<OScope.CorrelationSet> csets = _plinkDef.getNonInitiatingCorrelationSetsForOperation(operation);
         for (OScope.CorrelationSet cset : csets) {
             CorrelationKey key = computeCorrelationKey(cset,
                     _process.getOProcess().messageTypes.get(msgDescription.getQName()), msg);
-            keys.add(key);
+            keySet.add(key);
+        }
+
+        csets = _plinkDef.getJoinningCorrelationSetsForOperation(operation);
+        for (OScope.CorrelationSet cset : csets) {
+            CorrelationKey key = computeCorrelationKey(cset,
+                    _process.getOProcess().messageTypes.get(msgDescription.getQName()), msg);
+            keySet.add(key);
         }
 
         // Let's creata a key based on the sessionId
         String mySessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
         if (mySessionId != null)
-            keys.add(new CorrelationKey(-1, new String[] { mySessionId }));
+            keySet.add(new CorrelationKey(-1, new String[] { mySessionId }));
 
-        return keys.toArray(new CorrelationKey[keys.size()]);
+        return keySet;
     }
 
+    @SuppressWarnings("unchecked")
     private CorrelationKey computeCorrelationKey(OScope.CorrelationSet cset, OMessageVarType messagetype,
             Element msg) {
+    	CorrelationKey key = null;
+    	
         String[] values = new String[cset.properties.size()];
 
         int jIdx = 0;
@@ -337,10 +340,16 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
             values[jIdx] = value;
         }
 
-        CorrelationKey key = new CorrelationKey(cset.getId(), values);
+        if( cset.hasJoinUseCases ) {
+        	key = new OptionalCorrelationKey(cset.getId(), values);
+        } else {
+        	key = new CorrelationKey(cset.getId(), values);
+        }
+        
         return key;
     }
     
+    @SuppressWarnings("unchecked")
     public boolean isOneWayOnly() {
 		PortType portType = _plinkDef.myRolePortType;
 		if (portType == null) {

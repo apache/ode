@@ -37,7 +37,11 @@ public abstract class CleanTestBase extends Axis2TestBase {
     
     protected void initTM() throws Exception {
     	if( txm != null ) {
-    		txm.commit();
+    		try {
+    			txm.commit();
+    		} catch( Exception e ) { 
+    			//ignore 
+    		}
     	}
         EmbeddedGeronimoFactory factory = new EmbeddedGeronimoFactory();
         txm = factory.getTransactionManager();
@@ -51,7 +55,11 @@ public abstract class CleanTestBase extends Axis2TestBase {
 
     protected void stopTM() throws Exception {
     	if( txm != null ) {
-	        txm.commit();
+    		try {
+    			txm.commit();
+    		} catch( Exception e ) { 
+    			//ignore 
+    		}
 	        txm = null;
     	}
     }

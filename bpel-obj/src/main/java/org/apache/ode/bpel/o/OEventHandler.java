@@ -18,6 +18,9 @@
  */
 package org.apache.ode.bpel.o;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,10 +59,12 @@ public class OEventHandler extends OAgent {
         public final List <OScope.CorrelationSet> initCorrelations = new ArrayList<OScope.CorrelationSet>();
 
         /** Correlation set to match on. */
-        public OScope.CorrelationSet matchCorrelation;
+        public final List <OScope.CorrelationSet> matchCorrelations = new ArrayList<OScope.CorrelationSet>();
+        private OScope.CorrelationSet matchCorrelation;
 
         /** Correlation set to join on. */
-        public OScope.CorrelationSet joinCorrelation;
+        public final List<OScope.CorrelationSet> joinCorrelations = new ArrayList<CorrelationSet>();
+        private OScope.CorrelationSet joinCorrelation;
 
         public OPartnerLink partnerLink;
         public Operation operation;
@@ -76,6 +81,32 @@ public class OEventHandler extends OAgent {
 
         public OEvent(OProcess owner, OActivity parent) {
             super(owner, parent);
+        }
+
+        private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        	in.defaultReadObject();
+
+        	// backward compatibility; matchCorrelation could have a value if read from old definition
+        	if( matchCorrelation != null ) {
+        		matchCorrelations.add(matchCorrelation);
+        	}
+        	// backward compatibility; joinCorrelations could be null if read from old definition
+        	if( joinCorrelations == null ) {
+        		try {
+        			Field field = OEvent.class.getDeclaredField("joinCorrelations");
+        			field.setAccessible(true);
+        			field.set(this, new ArrayList<CorrelationSet>());
+        		} catch( NoSuchFieldException nfe ) {
+        			throw new IOException(nfe.getMessage());
+        		} catch( IllegalAccessException iae ) {
+        			throw new IOException(iae.getMessage());
+        		}
+        	}
+        	// backward compatibility; joinCorrelation could have a value if read from old definition
+        	if( joinCorrelation != null ) {
+        		joinCorrelation.hasJoinUseCases = true;
+        		joinCorrelations.add(joinCorrelation);
+        	}
         }
     }
 }

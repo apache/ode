@@ -29,6 +29,8 @@ import org.apache.ode.utils.msg.MessageBundle;
 
 import javax.xml.namespace.QName;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Base class for the {@link PickGenerator} and {@link ReceiveGenerator}
@@ -81,7 +83,13 @@ abstract class PickReceiveGenerator extends DefaultActivityGenerator {
         if (createInstance)
             onMessage.partnerLink.addCreateInstanceOperation(onMessage.operation);
 
+        Set<String> csetNames = new HashSet<String>(); // prevents duplicate cset in on one set of correlations
         for (Correlation correlation : correlations) {
+        	if( csetNames.contains(correlation.getCorrelationSet() ) ) {
+                throw new CompilationException(__cmsgsGeneral.errDuplicateUseCorrelationSet(correlation
+                        .getCorrelationSet()));
+        	}
+        	
             OScope.CorrelationSet cset = _context.resolveCorrelationSet(correlation.getCorrelationSet());
 
             switch (correlation.getInitiate()) {
@@ -90,22 +98,16 @@ abstract class PickReceiveGenerator extends DefaultActivityGenerator {
                 if (createInstance)
                     throw new CompilationException(__cmsgsGeneral.errUseOfUninitializedCorrelationSet(correlation
                             .getCorrelationSet()));
-                if (onMessage.matchCorrelation != null || onMessage.joinCorrelation != null)
-                    throw new CompilationException(__cmsgs.errSecondNonInitiateOrJoinCorrelationSet(correlation
-                            .getCorrelationSet()));
-                onMessage.matchCorrelation = cset;
-                onMessage.partnerLink.addCorrelationSetForOperation(onMessage.operation, cset);
+                onMessage.matchCorrelations.add(cset);
+                onMessage.partnerLink.addCorrelationSetForOperation(onMessage.operation, cset, false);
                 break;
             case YES:
                 onMessage.initCorrelations.add(cset);
-                onMessage.partnerLink.addCorrelationSetForOperation(onMessage.operation, cset);
                 break;
             case JOIN:
-                if (onMessage.matchCorrelation != null || onMessage.joinCorrelation != null)
-                    throw new CompilationException(__cmsgs.errSecondNonInitiateOrJoinCorrelationSet(correlation
-                            .getCorrelationSet()));
-            	onMessage.joinCorrelation = cset;
-                onMessage.partnerLink.addCorrelationSetForOperation(onMessage.operation, cset);
+            	cset.hasJoinUseCases = true;
+            	onMessage.joinCorrelations.add(cset);
+                onMessage.partnerLink.addCorrelationSetForOperation(onMessage.operation, cset, true);
                 break;
 
             default:
@@ -117,6 +119,8 @@ abstract class PickReceiveGenerator extends DefaultActivityGenerator {
                 // this variable-property pair.
                 _context.resolvePropertyAlias(onMessage.variable, property.name);
             }
+
+            csetNames.add(correlation.getCorrelationSet());
         }
 
         if (!onMessage.partnerLink.hasMyRole()) {

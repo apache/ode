@@ -325,7 +325,9 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
       entering("ProcessInstanceDaoImpl.delete");
 	  if(__log.isDebugEnabled()) __log.debug("Cleaning up instance data with categories = " + cleanupCategories);
       
-	  getSession().delete(_instance.getJacobState());
+	  if( _instance.getJacobState() != null ) {
+		  getSession().delete(_instance.getJacobState());
+	  }
 	  
       if( cleanupCategories.contains(CLEANUP_CATEGORY.EVENTS) ) {
     	  deleteEvents();
@@ -374,6 +376,11 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
   	}
 
     private void deleteMessages() {
+    	// there are chances that some unmatched messages are still there
+  		getSession().getNamedQuery(HLargeData.DELETE_UNMATCHED_MESSAGE_LDATA_BY_INSTANCE).setParameter("instance", _instance).setParameter("instance2", _instance).executeUpdate();
+  		getSession().getNamedQuery(HMessageExchange.DELETE_UNMATCHED_MEX_BY_INSTANCE).setParameter("instance", _instance).executeUpdate();
+  		getSession().getNamedQuery(HCorrelatorMessage.DELETE_CORMESSAGES_BY_INSTANCE).setParameter("instance", _instance).executeUpdate();
+
   		getSession().getNamedQuery(HCorrelatorSelector.DELETE_MESSAGE_ROUTES_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
   	}
   

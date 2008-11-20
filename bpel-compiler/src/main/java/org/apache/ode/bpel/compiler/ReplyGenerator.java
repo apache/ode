@@ -29,7 +29,10 @@ import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.utils.msg.MessageBundle;
 
 import javax.wsdl.Fault;
+
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 
 /**
@@ -87,8 +90,14 @@ class ReplyGenerator extends DefaultActivityGenerator  {
                 throw new CompilationException(_cmsgsGeneral.errVariableTypeMismatch(oreply.variable.name, oreply.operation.getOutput().getMessage().getQName(),((OMessageVarType)oreply.variable.type).messageType));
         }
 
+        Set<String> csetNames = new HashSet<String>(); // prevents duplicate cset in on one set of correlations
         for (Correlation correlation  : replyDef.getCorrelations()) {
-            OScope.CorrelationSet cset = _context.resolveCorrelationSet(correlation.getCorrelationSet());
+        	if( csetNames.contains(correlation.getCorrelationSet() ) ) {
+                throw new CompilationException(_cmsgsGeneral.errDuplicateUseCorrelationSet(correlation
+                        .getCorrelationSet()));
+        	}
+
+        	OScope.CorrelationSet cset = _context.resolveCorrelationSet(correlation.getCorrelationSet());
 
             switch (correlation.getInitiate()) {
                 case UNSET:
@@ -99,6 +108,7 @@ class ReplyGenerator extends DefaultActivityGenerator  {
                     oreply.initCorrelations.add(cset);
                     break;
                 case JOIN:
+                	cset.hasJoinUseCases = true;
                 	oreply.joinCorrelations.add(cset);
                 	break;
                 default:
@@ -111,6 +121,8 @@ class ReplyGenerator extends DefaultActivityGenerator  {
                 // Force resolution of alias, to make sure that we have one for this variable-property pair.
                 _context.resolvePropertyAlias(oreply.variable, property.name);
             }
+
+            csetNames.add(correlation.getCorrelationSet());
         }
     }
 }

@@ -108,6 +108,12 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
             "Attempt to reference undeclared correlation set \"{0}\".", csetName);
     }
 
+    /** Attempt to reference undeclared correlation set "{0}". */
+    public CompilationMessage errDuplicateUseCorrelationSet(String csetName) {
+        return this.formatCompilationMessage(
+            "Attempt to use a correlation set \"{0}\" more than once for a set of correlations.", csetName);
+    }
+
     /**
      * Cannot use non-message variable "{0}" in this context (message variable is
      * required).

@@ -175,6 +175,8 @@ public class BpelProcess {
      * @param mex
      */
     void invokeProcess(MyRoleMessageExchangeImpl mex) {
+        boolean routed = false;
+
         try {
             _hydrationLatch.latch(1);
             List<PartnerLinkMyRoleImpl> targets = getMyRolesForService(mex.getServiceName());
@@ -197,7 +199,6 @@ public class BpelProcess {
             // Ideally, if Java supported closure, the routing code would return null or the appropriate
             // closure to handle the route.
             List<PartnerLinkMyRoleImpl.RoutingInfo> routings = null;
-            boolean routed = false;
             for (PartnerLinkMyRoleImpl target : targets) {
                 routings = target.findRoute(mex);
                 boolean createInstance = target.isCreateInstance(mex);
@@ -241,7 +242,8 @@ public class BpelProcess {
         }
 
         // For a one way, once the engine is done, the mex can be safely released.
-        if (mex.getPattern().equals(MessageExchange.MessageExchangePattern.REQUEST_ONLY)) {
+        // Sean: not really, if route is not found, we cannot delete the mex yet
+        if (mex.getPattern().equals(MessageExchange.MessageExchangePattern.REQUEST_ONLY) && routed) {
             mex.release();
         }
     }
@@ -414,7 +416,7 @@ public class BpelProcess {
                     if (__log.isDebugEnabled()) {
                         __log.debug("Matcher event for iid " + we.getIID());
                     }
-                    processInstance.matcherEvent(we.getCorrelatorId(), we.getCorrelationKey());
+                    processInstance.matcherEvent(we.getCorrelatorId(), we.getCorrelationKeySet());
                 }
             }
         } finally {

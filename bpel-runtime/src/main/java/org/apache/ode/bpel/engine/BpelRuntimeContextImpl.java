@@ -29,6 +29,7 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
@@ -333,8 +334,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         _outstandingRequests.register(pickResponseChannelStr, selectors);
 
-        // TODO - ODE-58
-
         // First check if we match to a new instance.
         if (_instantiatingMessageExchange != null && _dao.getState() == ProcessState.STATE_READY) {
             if (BpelProcess.__log.isDebugEnabled()) {
@@ -353,38 +352,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             }
         }
 
-        // if (BpelProcess.__log.isDebugEnabled()) {
-        // BpelProcess.__log.debug("SELECT: " + pickResponseChannel
-        // + ": NEW instance match NOT FOUND; CHECKING MESSAGES. ");
-        // }
-        //
-        //
-        // for (int i = 0; i < selectors.length; ++i) {
-        // CorrelatorDAO correlator = correlators.get(i);
-        // Selector selector = selectors[i];
-        // MessageExchangeDAO mexdao = correlator
-        // .dequeueMessage(selector.correlationKey);
-        // if (mexdao != null) {
-        // // Found message matching one of our selectors.
-        // if (BpelProcess.__log.isDebugEnabled()) {
-        // BpelProcess.__log.debug("SELECT: " + pickResponseChannel
-        // + ": FOUND match to MESSAGE " + mexdao + " on CKEY "
-        // + selector.correlationKey);
-        // }
-        //
-        // MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(
-        // _bpelProcess._engine, mexdao);
-        //
-        // inputMsgMatch(pickResponseChannel.export(), i, mex);
-        // return;
-        // }
-        // }
-        //
-        // if (BpelProcess.__log.isDebugEnabled()) {
-        // BpelProcess.__log.debug("SELECT: " + pickResponseChannel
-        // + ": MESSAGE match NOT FOUND.");
-        // }
-
         if (timeout != null) {
             registerTimer(pickResponseChannel, timeout);
             if (BpelProcess.__log.isDebugEnabled()) {
@@ -396,16 +363,14 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             CorrelatorDAO correlator = correlators.get(i);
             Selector selector = selectors[i];
 
-            correlator.addRoute(pickResponseChannel.export(), _dao, i, selector.correlationKey, selector.route);
-            scheduleCorrelatorMatcher(correlator.getCorrelatorId(), selector.correlationKey);
+            correlator.addRoute(pickResponseChannel.export(), _dao, i, selector.correlationKeySet, selector.route);
+            scheduleCorrelatorMatcher(correlator.getCorrelatorId(), selector.correlationKeySet);
 
             if (BpelProcess.__log.isDebugEnabled()) {
                 BpelProcess.__log.debug("SELECT: " + pickResponseChannel + ": ADDED ROUTE " + correlator.getCorrelatorId() + ": "
-                        + selector.correlationKey + " --> " + _dao.getInstanceId());
+                        + selector.correlationKeySet + " --> " + _dao.getInstanceId());
             }
         }
-
-
     }
 
     /**
@@ -670,12 +635,12 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), timeToFire);
     }
 
-    private void scheduleCorrelatorMatcher(String correlatorId, CorrelationKey key) {
+    private void scheduleCorrelatorMatcher(String correlatorId, CorrelationKeySet keySet) {
         WorkEvent we = new WorkEvent();
         we.setIID(_dao.getInstanceId());
         we.setType(WorkEvent.Type.MATCHER);
         we.setCorrelatorId(correlatorId);
-        we.setCorrelationKey(key);
+        we.setCorrelationKeySet(keySet);
         we.setInMem(_bpelProcess.isInMemory());
         _bpelProcess._engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
     }
@@ -1357,15 +1322,15 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
      * Attempt to match message exchanges on a correlator.
      *
      */
-    public void matcherEvent(String correlatorId, CorrelationKey ckey) {
+    public void matcherEvent(String correlatorId, CorrelationKeySet ckeySet) {
         if (BpelProcess.__log.isDebugEnabled()) {
-            __log.debug("MatcherEvent handling: correlatorId=" + correlatorId + ", ckey=" + ckey);
+            __log.debug("MatcherEvent handling: correlatorId=" + correlatorId + ", ckeySet=" + ckeySet);
         }
         CorrelatorDAO correlator = _dao.getProcess().getCorrelator(correlatorId);
 
         // Find the route first, this is a SELECT FOR UPDATE on the "selector" row,
         // So we want to acquire the lock before we do anthing else.
-        List<MessageRouteDAO> mroutes = correlator.findRoute(ckey);
+        List<MessageRouteDAO> mroutes = correlator.findRoute(ckeySet);
         if (mroutes == null || mroutes.size() == 0) {
             // Ok, this means that a message arrived before we did, so nothing to do.
             __log.debug("MatcherEvent handling: nothing to do, route no longer in DB");
@@ -1373,7 +1338,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
 
         // Now see if there is a message that matches this selector.
-        MessageExchangeDAO mexdao = correlator.dequeueMessage(ckey);
+        MessageExchangeDAO mexdao = correlator.dequeueMessage(ckeySet);
         if (mexdao != null) {
             __log.debug("MatcherEvent handling: found matching message in DB (i.e. message arrived before <receive>)");
 
@@ -1385,7 +1350,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 	            // Found message matching one of our selectors.
 	            if (BpelProcess.__log.isDebugEnabled()) {
 	                BpelProcess.__log.debug("SELECT: " + mroute.getGroupId() + ": matched to MESSAGE " + mexdao
-	                        + " on CKEY " + ckey);
+	                        + " on CKEYSET " + ckeySet);
 	            }
 	
 	            MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess, _bpelProcess._engine, mexdao);
@@ -1396,6 +1361,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             for (String groupId : groupIds) {
 	            correlator.removeRoutes(groupId, _dao);
             }
+            
+            mexdao.release(true);
         } else {
             __log.debug("MatcherEvent handling: nothing to do, no matching message in DB");
 

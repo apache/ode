@@ -157,14 +157,6 @@ public class CorrelationKey implements Serializable {
         return hashCode;
     }
 
-    public List<String> toCanonicalList() {
-        ArrayList<String> ret = new ArrayList<String>(_keyValues.length + 1);
-        ret.add(((Integer) _csetId).toString());
-        for (String i : _keyValues)
-            ret.add(i);
-        return ret;
-    }
-
     /**
      * @see Object#toString
      */
