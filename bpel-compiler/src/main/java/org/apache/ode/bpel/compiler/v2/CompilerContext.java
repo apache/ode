@@ -18,10 +18,13 @@
  */
 package org.apache.ode.bpel.compiler.v2;
 
+import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
+import javax.xml.transform.Source;
 
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.Expression;
@@ -132,6 +135,8 @@ public interface CompilerContext {
 
     List<OActivity> getActivityStack();
 
+    Map<URI, Source> getSchemaSources();
+    
     OActivity getCurrent();
 
     boolean isExtensionDeclared(String namespace);

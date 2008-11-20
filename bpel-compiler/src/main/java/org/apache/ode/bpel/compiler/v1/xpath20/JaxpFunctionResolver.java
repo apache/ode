@@ -67,7 +67,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             throw new WrappedResolverException("Undeclared namespace for " + functionName);
         } else if (functionName.getNamespaceURI().equals(_bpelNS)) {
             String localName = functionName.getLocalPart();
-            if (Constants.EXT_FUNCTION_GETVARIABLEPROPRTY.equals(localName)) {
+            if (Constants.EXT_FUNCTION_GETVARIABLEPROPERTY.equals(localName)) {
                 return new GetVariableProperty();
             } else if (Constants.EXT_FUNCTION_DOXSLTRANSFORM.equals(localName)) {
                 return new DoXslTransform();
@@ -113,7 +113,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
         public Object evaluate(List params) throws XPathFunctionException {
             if (params.size() != 2) {
                 throw new CompilationException(
-                        __msgs.errInvalidNumberOfArguments(Constants.EXT_FUNCTION_GETVARIABLEPROPRTY));
+                        __msgs.errInvalidNumberOfArguments(Constants.EXT_FUNCTION_GETVARIABLEPROPERTY));
             }
             String varName = (String) params.get(0);
             OScope.Variable v = _cctx.resolveVariable(varName);

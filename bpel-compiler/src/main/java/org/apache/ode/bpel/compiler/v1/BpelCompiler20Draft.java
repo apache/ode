@@ -32,6 +32,7 @@ public class BpelCompiler20Draft extends BpelCompiler {
 
     public static final String OASIS_EXPLANG_XPATH_1_0 = "urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0";
     public static final String OASIS_EXPLANG_XPATH_2_0 = "urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0";
+    public static final String OASIS_EXPLANG_XQUERY_1_0 = "urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0";
 
     public BpelCompiler20Draft() throws Exception {
         super((WSDLFactory4BPEL) WSDLFactoryBPEL20Draft.newInstance());
@@ -55,10 +56,18 @@ public class BpelCompiler20Draft extends BpelCompiler {
         registerActivityCompiler(ForEachActivity.class, new ForEachGenerator());
 
         registerExpressionLanguage(OASIS_EXPLANG_XPATH_1_0, new XPath10ExpressionCompilerBPEL20Draft());
+
         try {
             registerExpressionLanguage(OASIS_EXPLANG_XPATH_2_0, new XPath20ExpressionCompilerBPEL20Draft());
         } catch (Exception e) {
             __log.error("Error loading XPath 2.0 Expression Language: it will not be available.");
+        }
+
+        try {
+            registerExpressionLanguage(OASIS_EXPLANG_XQUERY_1_0,
+                    "org.apache.ode.bpel.comipler.v2.xquery10.compiler.XQuery10ExpressionCompilerBPEL20Draft");
+        } catch (Exception e) {
+            __log.error("Error loading XQuery 1.0 Expression Language: it will not be available.");
         }
     }
 

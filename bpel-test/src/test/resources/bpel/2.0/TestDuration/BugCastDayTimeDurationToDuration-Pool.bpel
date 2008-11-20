@@ -21,7 +21,8 @@
     </bpel:assign>
     <bpel:assign bpmn:label="Task" bpmn:id="_6_3QwOu1EdyUWbG-WWtMzg">
       <bpel:copy>
-        <bpel:from xmlns:xdt="http://www.w3.org/2003/11/xpath-datatypes">xdt:dayTimeDuration ("PT2S")</bpel:from>
+        <!--<bpel:from xmlns:xdt="http://www.w3.org/2003/11/xpath-datatypes">xdt:dayTimeDuration ("PT2S")</bpel:from>-->
+        <bpel:from>xs:dayTimeDuration ("PT2S")</bpel:from>
         <bpel:to>$thisTaskRequestMsg.body/tns:duration</bpel:to>
       </bpel:copy>
     </bpel:assign>

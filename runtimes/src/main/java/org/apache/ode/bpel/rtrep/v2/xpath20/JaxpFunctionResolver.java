@@ -19,8 +19,6 @@
 
 package org.apache.ode.bpel.rtrep.v2.xpath20;
 
-import java.io.IOException;
-import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -33,12 +31,12 @@ import java.util.Map;
 import javax.xml.namespace.QName;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPathFunction;
 import javax.xml.xpath.XPathFunctionException;
 import javax.xml.xpath.XPathFunctionResolver;
 
 import net.sf.saxon.dom.NodeWrapper;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.QNameValue;
 
@@ -63,7 +61,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
-import org.xml.sax.SAXException;
 
 /**
  * @author mriou <mriou at apache dot org>
@@ -89,7 +86,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             String localName = functionName.getLocalPart();
             if (Constants.EXT_FUNCTION_GETVARIABLEDATA.equals(localName)) {
                 return new GetVariableData();
-            } else if (Constants.EXT_FUNCTION_GETVARIABLEPROPRTY.equals(localName)) {
+            } else if (Constants.EXT_FUNCTION_GETVARIABLEPROPERTY.equals(localName)) {
                 return new GetVariableProperty();
             } else if (Constants.EXT_FUNCTION_GETLINKSTATUS.equals(localName)) {
                 return new GetLinkStatus();
@@ -473,11 +470,16 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 }
             } else {
                 try {
-                    List elmts = (List) args.get(1);
-                    Element elt = (Element) elmts.get(0);
+                	Element elt = null;
+                	if (args.get(1) instanceof List) {
+	                    List elmts = (List) args.get(1);
+	                    elt = (Element) elmts.get(0);
+                	} else if (args.get(1) instanceof Element) {
+                		elt = (Element) args.get(1);
+                	}
                     pairs = Helper.extractNameValueMap(elt);
                 } catch (ClassCastException e) {
-                    throw new XPathFunctionException(new FaultException(faultQName, "Expected an element similar too: <foo><name1>value1</name1>name2>value2</name2>...</foo>"));
+                    throw new XPathFunctionException(new FaultException(faultQName, "Expected an element similar too: <foo><name1>value1</name1><name2>value2</name2>...</foo>"));
                 }
             }
 
@@ -975,6 +977,11 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 	} else {
                 		localName = qName;
                 	}
+                } else if (args.get(1) instanceof QName) {
+                	QName qName = (QName) args.get(1);
+                	namespaceUri = qName.getNamespaceURI();
+                	localName = qName.getLocalPart();
+                	prefix = qName.getPrefix();
                 } else {
                     throw new XPathFunctionException("Unexpected argument type: "+args.get(1).getClass());
                 }
@@ -1126,10 +1133,13 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
         	try {
 	    		return Integer.parseInt(extractString(arg));
             } catch (ClassCastException cce) {
-            	if (arg instanceof IntegerValue) {
-            		return (int) ((IntegerValue) arg).getDoubleValue();
-            	}
-                throw new IllegalArgumentException("Parameter MUST point to an integer, single element or text node.", cce);
+        		try {
+					return (int) ((IntegerValue) arg).longValue();
+				} catch (XPathException xpe) {
+	                throw new IllegalArgumentException("Parameter MUST point to an integer, single element or text node.", xpe);
+				} catch (ClassCastException ccce) {
+	                throw new IllegalArgumentException("Parameter MUST point to an integer, single element or text node.", ccce);
+				}
         	} catch (NumberFormatException nfe) {
                 throw new IllegalArgumentException("Parameter MUST point to an integer, single element or text node.", nfe);
         	}

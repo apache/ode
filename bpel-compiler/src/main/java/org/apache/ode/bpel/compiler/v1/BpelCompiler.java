@@ -40,20 +40,77 @@ import javax.wsdl.PortType;
 import javax.wsdl.WSDLException;
 import javax.wsdl.xml.WSDLReader;
 import javax.xml.namespace.QName;
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.compiler.CommonCompilationMessages;
+import org.apache.ode.bpel.compiler.DefaultResourceFinder;
+import org.apache.ode.bpel.compiler.ResourceFinder;
+import org.apache.ode.bpel.compiler.SourceLocation;
+import org.apache.ode.bpel.compiler.WSDLLocatorImpl;
+import org.apache.ode.bpel.compiler.WsdlFinderXMLEntityResolver;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
+import org.apache.ode.bpel.compiler.bom.Activity;
+import org.apache.ode.bpel.compiler.bom.Bpel11QNames;
+import org.apache.ode.bpel.compiler.bom.Bpel20QNames;
+import org.apache.ode.bpel.compiler.bom.BpelObject;
+import org.apache.ode.bpel.compiler.bom.Catch;
+import org.apache.ode.bpel.compiler.bom.CompensationHandler;
+import org.apache.ode.bpel.compiler.bom.Correlation;
+import org.apache.ode.bpel.compiler.bom.CorrelationSet;
+import org.apache.ode.bpel.compiler.bom.Expression;
+import org.apache.ode.bpel.compiler.bom.Expression11;
+import org.apache.ode.bpel.compiler.bom.FaultHandler;
+import org.apache.ode.bpel.compiler.bom.Import;
+import org.apache.ode.bpel.compiler.bom.LinkSource;
+import org.apache.ode.bpel.compiler.bom.LinkTarget;
+import org.apache.ode.bpel.compiler.bom.OnAlarm;
+import org.apache.ode.bpel.compiler.bom.OnEvent;
+import org.apache.ode.bpel.compiler.bom.PartnerLink;
+import org.apache.ode.bpel.compiler.bom.PartnerLinkType;
+import org.apache.ode.bpel.compiler.bom.Process;
+import org.apache.ode.bpel.compiler.bom.Property;
+import org.apache.ode.bpel.compiler.bom.PropertyAlias;
+import org.apache.ode.bpel.compiler.bom.Scope;
+import org.apache.ode.bpel.compiler.bom.ScopeActivity;
+import org.apache.ode.bpel.compiler.bom.ScopeLikeActivity;
+import org.apache.ode.bpel.compiler.bom.TerminationHandler;
+import org.apache.ode.bpel.compiler.bom.Variable;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
-import org.apache.ode.bpel.compiler.*;
-import org.apache.ode.bpel.compiler.bom.*;
-import org.apache.ode.bpel.compiler.bom.Process;
-import org.apache.ode.bpel.compiler.bom.CompensationHandler;
-import org.apache.ode.bpel.rtrep.v1.*;
 import org.apache.ode.bpel.extension.ExtensionValidator;
+import org.apache.ode.bpel.rtrep.v1.DebugInfo;
+import org.apache.ode.bpel.rtrep.v1.OActivity;
+import org.apache.ode.bpel.rtrep.v1.OAssign;
+import org.apache.ode.bpel.rtrep.v1.OCatch;
+import org.apache.ode.bpel.rtrep.v1.OCompensate;
+import org.apache.ode.bpel.rtrep.v1.OCompensationHandler;
+import org.apache.ode.bpel.rtrep.v1.OConstantExpression;
+import org.apache.ode.bpel.rtrep.v1.OConstantVarType;
+import org.apache.ode.bpel.rtrep.v1.OConstants;
+import org.apache.ode.bpel.rtrep.v1.OElementVarType;
+import org.apache.ode.bpel.rtrep.v1.OEventHandler;
+import org.apache.ode.bpel.rtrep.v1.OExpression;
+import org.apache.ode.bpel.rtrep.v1.OExpressionLanguage;
+import org.apache.ode.bpel.rtrep.v1.OExtVar;
+import org.apache.ode.bpel.rtrep.v1.OFaultHandler;
+import org.apache.ode.bpel.rtrep.v1.OFlow;
+import org.apache.ode.bpel.rtrep.v1.OLValueExpression;
+import org.apache.ode.bpel.rtrep.v1.OLink;
+import org.apache.ode.bpel.rtrep.v1.OMessageVarType;
+import org.apache.ode.bpel.rtrep.v1.OPartnerLink;
+import org.apache.ode.bpel.rtrep.v1.OProcess;
+import org.apache.ode.bpel.rtrep.v1.ORethrow;
+import org.apache.ode.bpel.rtrep.v1.OScope;
+import org.apache.ode.bpel.rtrep.v1.OSequence;
+import org.apache.ode.bpel.rtrep.v1.OTerminationHandler;
+import org.apache.ode.bpel.rtrep.v1.OVarType;
+import org.apache.ode.bpel.rtrep.v1.OXsdTypeVarType;
+import org.apache.ode.bpel.rtrep.v1.OXslSheet;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.StreamUtils;
@@ -62,10 +119,11 @@ import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 import org.apache.ode.utils.stl.UnaryFunction;
+import org.apache.ode.utils.xsd.SchemaModel;
 import org.apache.ode.utils.xsd.XSUtils;
 import org.apache.ode.utils.xsd.XsdException;
-import org.apache.ode.utils.xsd.SchemaModel;
 import org.apache.xerces.xni.parser.XMLEntityResolver;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 /**
@@ -1617,6 +1675,16 @@ abstract class BpelCompiler implements CompilerContext, org.apache.ode.bpel.comp
         oextvar.related = resolveVariable(src.getRelated());
         
         return oextvar;
+    }
+
+    public Map<URI, Source> getSchemaSources() {    	
+    	Map<URI, Document> schemaBytes = _wsdlRegistry.getSchemaDocuments();
+    	Map<URI, Source> schemaSources = new HashMap<URI, Source>();
+    	for (URI uri : schemaBytes.keySet()) {
+    		Document document = schemaBytes.get(uri);
+    		schemaSources.put(uri, new DOMSource(document));
+    	}
+    	return schemaSources;
     }
 
     private static class StructureStack {

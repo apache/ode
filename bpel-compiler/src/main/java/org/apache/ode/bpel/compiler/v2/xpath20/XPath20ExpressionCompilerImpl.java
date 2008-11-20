@@ -24,25 +24,27 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import javax.xml.xpath.XPathFactoryConfigurationException;
 
-import net.sf.saxon.xpath.XPathEvaluator;
-import net.sf.saxon.xpath.XPathFactoryImpl;
+import net.sf.saxon.om.NamespaceConstant;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.compiler.WrappedResolverException;
+import org.apache.ode.bpel.compiler.XPathMessages;
 import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.compiler.v2.CompilerContext;
 import org.apache.ode.bpel.compiler.v2.ExpressionCompiler;
 import org.apache.ode.bpel.compiler.v2.xpath10.XslCompilationErrorListener;
-import org.apache.ode.bpel.compiler.bom.Expression;
-import org.apache.ode.bpel.compiler.XPathMessages;
-import org.apache.ode.bpel.compiler.WrappedResolverException;
-import org.apache.ode.bpel.compiler.v2.xpath20.SaxonContext;
-import org.apache.ode.bpel.rtrep.v2.xpath20.OXPath20ExpressionBPEL20;
+import org.apache.ode.bpel.rtrep.common.Constants;
 import org.apache.ode.bpel.rtrep.v2.OExpression;
 import org.apache.ode.bpel.rtrep.v2.OLValueExpression;
-import org.apache.ode.bpel.rtrep.common.Constants;
+import org.apache.ode.bpel.rtrep.v2.xpath20.OXPath20ExpressionBPEL20;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.xsl.XslTransformHandler;
@@ -69,7 +71,7 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
     public XPath20ExpressionCompilerImpl(String bpelNS) {
         _bpelNS = bpelNS;
         _qnLinkStatus = new QName(_bpelNS, Constants.EXT_FUNCTION_GETLINKSTATUS);
-        _qnVarProp = new QName(_bpelNS, Constants.EXT_FUNCTION_GETVARIABLEPROPRTY);
+        _qnVarProp = new QName(_bpelNS, Constants.EXT_FUNCTION_GETVARIABLEPROPERTY);
         _qnVarData = new QName(_bpelNS, Constants.EXT_FUNCTION_GETVARIABLEDATA);
         _qnXslTransform = new QName(_bpelNS, Constants.EXT_FUNCTION_DOXSLTRANSFORM);
 
@@ -133,20 +135,29 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
         }
 
         out.xpath = xpathStr;
-        try {
-            __log.debug("Compiling expression " + xpathStr);
-            XPathFactoryImpl xpf = new net.sf.saxon.xpath.XPathFactoryImpl();
+        try {        	
+            __log.debug("Compiling expression " + xpathStr);            
+            System.setProperty(
+            		"javax.xml.xpath.XPathFactory:" + NamespaceConstant.OBJECT_MODEL_SAXON,
+            		"net.sf.saxon.xpath.XPathFactoryImpl");
+            XPathFactory xpf = XPathFactory.newInstance(NamespaceConstant.OBJECT_MODEL_SAXON);
             JaxpFunctionResolver funcResolver = new JaxpFunctionResolver(
                     _compilerContext, out, source.getNamespaceContext(), _bpelNS);
-            xpf.setXPathFunctionResolver(funcResolver);
             JaxpVariableResolver varResolver = new JaxpVariableResolver(_compilerContext, out);
-            xpf.setXPathVariableResolver(varResolver);
-
-            XPathEvaluator xpe = (XPathEvaluator) xpf.newXPath();
-            xpe.setStaticContext(new SaxonContext(xpf.getConfiguration(), varResolver, funcResolver));
+            XPath xpe = xpf.newXPath();
             xpe.setXPathFunctionResolver(funcResolver);
+            xpe.setXPathVariableResolver(varResolver);
             xpe.setNamespaceContext(source.getNamespaceContext());
-            xpe.compile(xpathStr);
+            XPathExpression expr = xpe.compile(xpathStr);
+            // evaluate the expression so as to initialize the variables
+            try { 
+            	expr.evaluate(node); 
+            } catch (XPathExpressionException xpee) { 
+            	// swallow errors caused by uninitialized variable 
+            }
+        } catch (XPathFactoryConfigurationException xpfce) {
+            __log.debug(xpfce);
+            __log.info("Couldn't validate properly expression " + xpathStr);
         } catch (XPathExpressionException e) {
             __log.debug(e);
             __log.info("Couldn't validate properly expression " + xpathStr);

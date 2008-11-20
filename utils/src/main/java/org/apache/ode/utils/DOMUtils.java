@@ -1044,6 +1044,15 @@ public class DOMUtils {
         return ret;
     }
 
+    public static QName getNodeQName(String qualifiedName) {
+    	int index = qualifiedName.indexOf(":");
+    	if (index >= 0) {
+    		return new QName(qualifiedName.substring(0, index), qualifiedName.substring(index + 1));
+    	} else {
+    		return new QName(qualifiedName);
+    	}
+    }
+
 	public static Document getDocument(Node contextNode) {
 		return (contextNode == null) ? DOMUtils.newDocument() : contextNode.getOwnerDocument();
     }

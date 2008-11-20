@@ -564,7 +564,7 @@ public abstract class BPELTestAbstract {
 
             // Wait for it....
             try {
-                Thread.sleep(_invocation.invokeDelayMs * 1000 );
+                Thread.sleep(_invocation.invokeDelayMs * 1000);
             } catch (Exception ex) {
             }
 

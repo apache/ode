@@ -18,29 +18,45 @@
  */
 package org.apache.ode.bpel.rtrep.v1.xpath20;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
+import net.sf.saxon.om.NamespaceConstant;
 import net.sf.saxon.trans.DynamicError;
 import net.sf.saxon.value.DurationValue;
-import net.sf.saxon.xpath.XPathEvaluator;
+import net.sf.saxon.xpath.XPathFactoryImpl;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.rtrep.v1.OExpression;
+import org.apache.ode.bpel.rtrep.common.ConfigurationException;
 import org.apache.ode.bpel.rtrep.v1.EvaluationContext;
 import org.apache.ode.bpel.rtrep.v1.ExpressionLanguageRuntime;
+import org.apache.ode.bpel.rtrep.v1.OExpression;
 import org.apache.ode.bpel.rtrep.v1.xpath10.OXPath10Expression;
-import org.apache.ode.bpel.rtrep.common.ConfigurationException;
+import org.apache.ode.bpel.rtrep.v2.xpath20.WrappedFaultException;
+import org.apache.ode.bpel.rtrep.v2.xpath20.XPath20ExpressionModifier;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.xsd.Duration;
 import org.apache.ode.utils.xsl.XslTransformHandler;
-import org.w3c.dom.*;
-
-import javax.xml.namespace.QName;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import java.util.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 
 /**
  * XPath 2.0 Expression Language run-time subsytem.
@@ -86,9 +102,15 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
     /**
      * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluate(org.apache.ode.bpel.rtrep.v1.OExpression, org.apache.ode.bpel.explang.EvaluationContext)
      */
-    public List evaluate(OExpression cexp, EvaluationContext ctx) throws FaultException {
+    @SuppressWarnings("unchecked")
+	public List evaluate(OExpression cexp, EvaluationContext ctx) throws FaultException {
         List result;
-        Object someRes = evaluate(cexp, ctx, XPathConstants.NODESET);
+        Object someRes = null;
+        try { 
+        	someRes = evaluate(cexp, ctx, XPathConstants.NODESET);
+        } catch (Exception e) {
+        	someRes = evaluate(cexp, ctx, XPathConstants.STRING);
+        }
         if (someRes instanceof List) {
             result = (List) someRes;
             __log.debug("Returned list of size " + result.size());
@@ -97,20 +119,21 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
                 Object simpleType = result.get(0);
                 // Dates get a separate treatment as we don't want to call toString on them
                 String textVal;
-                if (simpleType instanceof Date)
+                if (simpleType instanceof Date) {
                     textVal = ISO8601DateParser.format((Date) simpleType);
-                else if (simpleType instanceof DurationValue)
+                } else if (simpleType instanceof DurationValue) {
                     textVal = ((DurationValue)simpleType).getStringValue();
-                else
+                } else {
                     textVal = simpleType.toString();
+                }
 
                 // Wrapping in a document
-                Document d = DOMUtils.newDocument();
+                Document document = DOMUtils.newDocument();
                 // Giving our node a parent just in case it's an LValue expression
-                Element wrapper = d.createElement("wrapper");
-                Text text = d.createTextNode(textVal);
+                Element wrapper = document.createElement("wrapper");
+                Text text = document.createTextNode(textVal);
                 wrapper.appendChild(text);
-                d.appendChild(wrapper);
+                document.appendChild(wrapper);
                 result = Collections.singletonList(text);
             }
         } else if (someRes instanceof NodeList) {
@@ -119,9 +142,19 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             result = new ArrayList(retVal.getLength());
             for(int m = 0; m < retVal.getLength(); ++m) {
                 Node val = retVal.item(m);
-                if (val.getNodeType() == Node.DOCUMENT_NODE) val = ((Document)val).getDocumentElement();
+                if (val.getNodeType() == Node.DOCUMENT_NODE) {
+                	val = ((Document)val).getDocumentElement();
+                }
                 result.add(val);
             }
+        } else if (someRes instanceof String) {
+            // Wrapping in a document
+        	Document document = DOMUtils.newDocument();
+            Element wrapper = document.createElement("wrapper");
+            Text text = document.createTextNode((String) someRes);
+            wrapper.appendChild(text);
+            document.appendChild(wrapper);
+            result = Collections.singletonList(text);
         } else {
             result = null;
         }
@@ -139,7 +172,7 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
     }
 
     public Calendar evaluateAsDate(OExpression cexp, EvaluationContext context) throws FaultException {
-        List literal = DOMUtils.toList(evaluate(cexp, context, XPathConstants.NODESET));
+        List literal = DOMUtils.toList(evaluate(cexp, context));
         if (literal.size() == 0)
             throw new FaultException(cexp.getOwner().constants.qnSelectionFailure, "No results for expression: " + cexp);
         if (literal.size() > 1)
@@ -152,7 +185,13 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             cal.setTime((Date) date);
             return cal;
         }
-        if (date instanceof Element) date = ((Element)date).getTextContent();
+        if (date instanceof Element) {
+        	date = ((Element) date).getTextContent();
+        }
+        
+        if (date instanceof Text) {
+        	date = ((Text) date).getTextContent();
+        }
 
         try {
             return ISO8601DateParser.parseCal(date.toString());
@@ -176,17 +215,29 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
 
     private Object evaluate(OExpression cexp, EvaluationContext ctx, QName type) throws FaultException {
         try {
-            net.sf.saxon.xpath.XPathFactoryImpl xpf = new net.sf.saxon.xpath.XPathFactoryImpl();
-
             OXPath20ExpressionBPEL20 oxpath20 = ((OXPath20ExpressionBPEL20) cexp);
-            xpf.setXPathFunctionResolver(new JaxpFunctionResolver(ctx, oxpath20));
-            xpf.setXPathVariableResolver(new JaxpVariableResolver(ctx, oxpath20));
-            XPathEvaluator xpe = (XPathEvaluator) xpf.newXPath();
+            System.setProperty("javax.xml.xpath.XPathFactory:"+NamespaceConstant.OBJECT_MODEL_SAXON,
+		            "net.sf.saxon.xpath.XPathFactoryImpl");
+		    System.setProperty("javax.xml.xpath.XPathFactory:"+XPathConstants.DOM_OBJECT_MODEL,
+		            "net.sf.saxon.xpath.XPathFactoryImpl");
+		    System.setProperty("javax.xml.xpath.XPathFactory:"+NamespaceConstant.OBJECT_MODEL_JDOM,
+		            "net.sf.saxon.xpath.XPathFactoryImpl");
+		    System.setProperty("javax.xml.xpath.XPathFactory:"+NamespaceConstant.OBJECT_MODEL_XOM,
+		            "net.sf.saxon.xpath.XPathFactoryImpl");
+		    System.setProperty("javax.xml.xpath.XPathFactory:"+NamespaceConstant.OBJECT_MODEL_DOM4J,
+		            "net.sf.saxon.xpath.XPathFactoryImpl");
+    
+            XPathFactory xpf = XPathFactory.newInstance(NamespaceConstant.OBJECT_MODEL_SAXON);
+            JaxpFunctionResolver funcResolver = new JaxpFunctionResolver(
+                    ctx, oxpath20);
+            JaxpVariableResolver varResolver = new JaxpVariableResolver(ctx, oxpath20, ((XPathFactoryImpl) xpf).getConfiguration());
+            xpf.setXPathFunctionResolver(funcResolver);
+            xpf.setXPathVariableResolver(varResolver);            
+            XPath xpe = xpf.newXPath();
             xpe.setNamespaceContext(oxpath20.namespaceCtx);
-            // Just checking that the expression is valid
             XPathExpression expr = xpe.compile(((OXPath10Expression)cexp).xpath);
-
-            Object evalResult = expr.evaluate(ctx.getRootNode() == null ? DOMUtils.newDocument() : ctx.getRootNode(), type);
+            Node contextNode = ctx.getRootNode() == null ? DOMUtils.newDocument() : ctx.getRootNode();
+            Object evalResult = expr.evaluate(contextNode, type);
             if (evalResult != null && __log.isDebugEnabled()) {
                 __log.debug("Expression " + cexp.toString() + " generated result " + evalResult
                         + " - type=" + evalResult.getClass().getName());
@@ -212,7 +263,6 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             __log.debug("Could not evaluate expression because of ", t);
             throw new FaultException(cexp.getOwner().constants.qnSubLanguageExecutionFault, t.getMessage(), t);
         }
-
     }
 
 }
