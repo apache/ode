@@ -1015,19 +1015,14 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         event.setProcessInstanceId(_dao.getInstanceId());
         _bpelProcess._debugger.onEvent(event);
 
-        //filter events
+        // filter scopes
         List<String> scopeNames = null;
         if (event instanceof ScopeEvent) {
             scopeNames = ((ScopeEvent) event).getParentScopesNames();
         }
 
-        if (_bpelProcess._pconf.isEventEnabled(scopeNames, event.getType())) {
-	        // notify the listeners
-	        _bpelProcess._engine.fireEvent(event);
-
-	        // saving
-	        _bpelProcess.saveEvent(event, _dao);
-		}
+        // saving
+        _bpelProcess.saveEvent(event, _dao, scopeNames);
     }
 
     /**

@@ -396,8 +396,8 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
 
   public void insertBpelEvent(ProcessInstanceEvent event) {
       entering("ProcessInstanceDaoImpl.insertBpelEvent");
-    // Defer to the BpelDAOConnectionImpl
-    BpelDAOConnectionImpl._insertBpelEvent(getSession(), event, this.getProcess(), this);
+      // Defer to the BpelDAOConnectionImpl
+      BpelDAOConnectionImpl._insertBpelEvent(getSession(), event, this.getProcess(), this);
   }
 
   public EventsFirstLastCountTuple getEventsFirstLastCount() {
