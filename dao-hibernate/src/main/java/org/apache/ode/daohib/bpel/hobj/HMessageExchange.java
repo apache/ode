@@ -344,6 +344,9 @@ public class HMessageExchange extends HObject {
         _pipedMessageExchangeId = pipedMessageExchangeId;
     }
     
+    /**
+     * @hibernate.property column="SUBSCRIBER_COUNT"
+     */
     public int getSubscriberCount() {
     	return _subscriberCount;
     }
