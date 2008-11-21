@@ -783,16 +783,20 @@ public class ODEProcess {
     }
 
     public void saveEvent(ProcessInstanceEvent event, ProcessInstanceDAO instanceDao) {
+        saveEvent(event, instanceDao, null);
+    }
+    public void saveEvent(ProcessInstanceEvent event, ProcessInstanceDAO instanceDao, List<String> scopeNames) {
         markused();
-        if (instanceDao != null)
-            saveInstanceEvent(event, instanceDao);
-        else
-            __log.debug("Couldn't find instance to save event, no event generated!");
+        if (_pconf.isEventEnabled(scopeNames, event.getType())) {
+	        // notify the listeners
+	        _server.fireEvent(event);
+            if (instanceDao != null)
+                instanceDao.insertBpelEvent(event);
+            else
+                __log.debug("Couldn't find instance to save event, no event generated!");
+        }
     }
 
-    void saveInstanceEvent(ProcessInstanceEvent event, ProcessInstanceDAO instanceDao) {
-        instanceDao.insertBpelEvent(event);
-    }
 
     /**
      * Ask the process to dehydrate.
