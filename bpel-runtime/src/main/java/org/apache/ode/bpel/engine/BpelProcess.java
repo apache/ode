@@ -640,15 +640,20 @@ public class BpelProcess {
     }
 
     public void saveEvent(ProcessInstanceEvent event, ProcessInstanceDAO instanceDao) {
-        markused();
-        if (instanceDao != null)
-            saveInstanceEvent(event, instanceDao);
-        else
-            __log.debug("Couldn't find instance to save event, no event generated!");
+        saveEvent(event, instanceDao, null);
     }
 
-    void saveInstanceEvent(ProcessInstanceEvent event, ProcessInstanceDAO instanceDao) {
-        instanceDao.insertBpelEvent(event);
+    public void saveEvent(ProcessInstanceEvent event, ProcessInstanceDAO instanceDao, List<String> scopeNames) {
+        markused();
+        if (_pconf.isEventEnabled(scopeNames, event.getType())) {
+            // notify the listeners
+            _engine.fireEvent(event);
+
+            if (instanceDao != null)
+                instanceDao.insertBpelEvent(event);
+            else
+                __log.debug("Couldn't find instance to save event, no event generated!");
+        }
     }
 
     /**
