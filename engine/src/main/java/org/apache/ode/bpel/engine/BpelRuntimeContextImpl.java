@@ -739,13 +739,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
             scopeNames = ((ScopeEvent) event).getParentScopesNames();
         }
 
-        if (_bpelProcess._pconf.isEventEnabled(scopeNames, event.getType())) {
-	        // notify the listeners
-	        _bpelProcess._server.fireEvent(event);
-	
-	        // saving
-	        _bpelProcess.saveEvent(event, _dao);
-        }
+        _bpelProcess.saveEvent(event, _dao, scopeNames);
     }
 
     public void noreply(String mexId, FaultInfo optionalFaultData) {
