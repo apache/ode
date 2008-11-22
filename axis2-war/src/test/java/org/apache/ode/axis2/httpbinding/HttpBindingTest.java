@@ -35,7 +35,6 @@ public class HttpBindingTest extends Axis2TestBase {
 
   @BeforeMethod
     protected void setUp() throws Exception {
-      if(true)throw new Exception();
         super.setUp();
         final CountDownLatch latch = new CountDownLatch(1);
         jettyWrapper = new JettyWrapper(7070);
