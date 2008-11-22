@@ -275,6 +275,7 @@ define "ode" do
       cp AXIS2_MODULES.mods.map {|a| repositories.locate(a)} , _("target/test/webapp/WEB-INF/modules")
     end
     test.setup unzip(_("target/test/webapp/WEB-INF")=>project("dao-jpa-db").package(:zip))
+    test.setup unzip(_("target/test/webapp/WEB-INF")=>project("dao-hibernate-db").package(:zip))
     test.exclude('*') unless Buildr.environment != 'test'
 
      test.setup task(:prepare_rampart_policy_test) do |task|
