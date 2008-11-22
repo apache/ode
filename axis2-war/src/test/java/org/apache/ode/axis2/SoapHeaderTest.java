@@ -31,10 +31,7 @@ public class SoapHeaderTest extends Axis2TestBase {
 		super(name);
     }
 
-    @Test
-    public void emptyTest(){
-         throw new RuntimeException();
-    }
+
   @Test
     public void testSimplePassing() throws Exception {
         server.deployService("TestSoapHeader", "dummy-service.wsdl",
