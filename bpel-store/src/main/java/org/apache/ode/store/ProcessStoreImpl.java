@@ -140,7 +140,7 @@ public class ProcessStoreImpl implements ProcessStore {
         DataSource hsqlds = createInternalDS(new GUID().toString());
         //when in memory we always create the model as we are starting from scratch
         _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(hsqlds, true);
-        _inMemDs = inMemDs;
+        _inMemDs = hsqlds;
     }
 
     public void shutdown() {
