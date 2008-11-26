@@ -296,15 +296,21 @@ class PICK extends ACTIVITY {
                         dpe(_alarm.activity);
                     }
 
+                    if (_opick.onMessages.size() > 1 && onMessage.operation.getOutput() == null) {
+                        // Releasing other onMessage that could be two-ways with an oustanding request
+                        getBpelRuntimeContext().cancelOutstandingRequests(_pickResponseChannel.export());
+                    }
+
                     FaultData fault;
                     initVariable(mexId, onMessage);
                     try {
+                        VariableInstance vinst = _scopeFrame.resolve(onMessage.variable);
                         for (OScope.CorrelationSet cset : onMessage.initCorrelations) {
-                            initializeCorrelation(_scopeFrame.resolve(cset), _scopeFrame.resolve(onMessage.variable));
+                            initializeCorrelation(_scopeFrame.resolve(cset), vinst);
                         }
                         for( OScope.CorrelationSet cset : onMessage.joinCorrelations ) {
                         	// will be ignored if already initialized
-                        	initializeCorrelation(_scopeFrame.resolve(cset), _scopeFrame.resolve(onMessage.variable));
+                        	initializeCorrelation(_scopeFrame.resolve(cset), vinst);
                         }
                         if (onMessage.partnerLink.hasPartnerRole()) {
                             // Trying to initialize partner epr based on a

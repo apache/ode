@@ -185,6 +185,8 @@ public interface BpelRuntimeContext {
      */
     void cancel(TimerResponseChannel timerResponseChannel);
 
+    void cancelOutstandingRequests(String channelId);
+
     /**
      * Send a reply to an open message-exchange.
      * @param msg response message
