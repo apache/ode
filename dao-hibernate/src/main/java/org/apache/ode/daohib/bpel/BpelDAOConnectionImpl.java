@@ -74,7 +74,9 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
 
     public MessageExchangeDAO getMessageExchange(String mexId) {
         try {
-            HMessageExchange mex = (HMessageExchange) _session.get(HMessageExchange.class, new Long(mexId));
+            org.hibernate.Query query = _session.createQuery("from HMessageExchange x where x.mexId = ?");
+            query.setString(0, mexId);
+            HMessageExchange mex = (HMessageExchange) query.uniqueResult();
             return mex == null ? null : new MessageExchangeDaoImpl(_sm, mex);
         } catch (HibernateException e) {
             __log.error("DbError", e);

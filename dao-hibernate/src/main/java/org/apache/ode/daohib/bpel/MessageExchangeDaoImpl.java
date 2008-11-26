@@ -61,7 +61,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public String getMessageExchangeId() {
-        return _hself.getId().toString();
+        return _hself.getMexId();
     }
 
     public MessageDAO getResponse() {
