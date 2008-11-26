@@ -214,10 +214,12 @@ public class JdbcDelegate implements DatabaseDelegate {
         PreparedStatement ps = null;
         try {
             con = getConnection();
-            if (_dialect == Dialect.SQLSERVER) {
-                ps = con.prepareStatement(UPGRADE_JOB_SQLSERVER);
+            if (_dialect == Dialect.SQLSERVER || _dialect == Dialect.SYBASE) {
+              ps = con.prepareStatement(UPGRADE_JOB_SQLSERVER);
+            } else if (_dialect == Dialect.DB2) {
+              ps = con.prepareStatement(UPGRADE_JOB_DB2);
             } else {
-                ps = con.prepareStatement(UPGRADE_JOB_DEFAULT);
+              ps = con.prepareStatement(UPGRADE_JOB_DEFAULT);
             }
             ps.setString(1, node);
             ps.setInt(2, numNodes);
