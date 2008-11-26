@@ -105,7 +105,10 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
 
     public void initializePartnerLinks(Long parentScopeId, Collection<OPartnerLink> partnerLinks) {
         _brc.initializePartnerLinks(parentScopeId, partnerLinks);
+    }
 
+    public void cancelOutstandingRequests(String channelId) {
+        getORM().cancel(channelId);
     }
 
     public void select(PickResponseChannel pickResponseChannel, Date timeout, boolean createInstance, Selector[] selectors)

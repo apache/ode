@@ -74,6 +74,8 @@ public interface OdeInternalInstance {
     void select(PickResponseChannel pickResponseChannel, Date timeout, boolean createInstance, Selector[] selectors)
             throws FaultException;
 
+    void cancelOutstandingRequests(String channelId);
+
     CorrelationKey readCorrelation(CorrelationSetInstance cset);
 
     ExpressionLanguageRuntimeRegistry getExpLangRuntime();

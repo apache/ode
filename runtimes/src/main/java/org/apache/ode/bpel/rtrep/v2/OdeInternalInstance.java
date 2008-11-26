@@ -71,6 +71,8 @@ public interface OdeInternalInstance {
 
     void unregisterActivityForRecovery(ActivityRecoveryChannel recoveryChannel);
 
+    void cancelOutstandingRequests(String channelId);
+
     void select(PickResponseChannel pickResponseChannel, Date timeout, boolean createInstance, Selector[] selectors)
             throws FaultException;
 
