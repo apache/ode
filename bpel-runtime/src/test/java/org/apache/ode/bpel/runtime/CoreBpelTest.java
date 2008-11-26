@@ -142,6 +142,9 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
             throws FaultException {
     }
 
+    public void cancelOutstandingRequests(String channelId) {        
+    }
+
     public void reply(PartnerLinkInstance plink, String opName, String mexId, Element msg, QName fault)
             throws FaultException {
     }

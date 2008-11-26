@@ -121,7 +121,7 @@ class OutstandingRequestManager implements Serializable {
 
     Entry entry = _byChannel.remove(pickResponseChannel);
     if (entry != null) {
-      _byRid.values().remove(entry);
+      while(_byRid.values().remove(entry));
     }
   }
 

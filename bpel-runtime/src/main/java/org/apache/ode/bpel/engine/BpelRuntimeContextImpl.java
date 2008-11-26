@@ -477,6 +477,10 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         return dataDAO.get();
     }
 
+    public void cancelOutstandingRequests(String channelId) {
+        _outstandingRequests.cancel(channelId);
+    }
+
     public void reply(final PartnerLinkInstance plinkInstnace, final String opName, final String mexId, Element msg,
                       QName fault) throws FaultException {
         String mexRef = _outstandingRequests.release(plinkInstnace, opName, mexId);
