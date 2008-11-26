@@ -356,6 +356,6 @@ public class HMessageExchange extends HObject {
     }
     
     public void incrementSubscriberCount() {
-    	_subscriberCount++;
+    	setSubscriberCount(getSubscriberCount() + 1);
     }
 }
