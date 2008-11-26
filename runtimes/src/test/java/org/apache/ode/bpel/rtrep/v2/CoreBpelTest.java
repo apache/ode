@@ -116,6 +116,9 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    public void cancelOutstandingRequests(String channelId) {
+    }
+
     public String invoke(String invokeId, PartnerLinkInstance instance, Operation operation, Element outboundMsg, Object object) throws FaultException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }

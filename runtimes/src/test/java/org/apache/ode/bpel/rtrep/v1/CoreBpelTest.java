@@ -114,6 +114,9 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    public void cancelOutstandingRequests(String channelId) {
+    }
+
     public void initializePartnerLinks(Long parentScopeId, Collection<OPartnerLink> partnerLinks) {
         //To change body of implemented methods use File | Settings | File Templates.
     }

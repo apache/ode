@@ -261,6 +261,11 @@ class PICK extends ACTIVITY {
                         dpe(_alarm.activity);
                     }
 
+                    if (_opick.onMessages.size() > 1 && onMessage.operation.getOutput() == null) {
+                        // Releasing other onMessage that could be two-ways with an oustanding request
+                        getBpelRuntime().cancelOutstandingRequests(_pickResponseChannel.export());
+                    }
+                    
                     FaultData fault;
                     initVariable(mexId, onMessage);
                     try {

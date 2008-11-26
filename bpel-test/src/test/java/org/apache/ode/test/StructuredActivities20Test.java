@@ -45,4 +45,9 @@ public class StructuredActivities20Test extends BPELTestAbstract {
     @Test public void testForEach() throws Throwable {
         go("/bpel/2.0/TestForEach");
     }
+    @Test public void testPickOneWay() throws Throwable {
+        // Test Flow with XPath10
+        go("/bpel/2.0/TestPickOneWay");
+    }
+    
 }
