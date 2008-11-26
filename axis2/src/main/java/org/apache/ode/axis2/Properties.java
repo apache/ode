@@ -23,6 +23,7 @@ import org.apache.axis2.Constants;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.transport.http.HttpTransportProperties;
+import org.apache.axis2.transport.jms.JMSConstants;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpVersion;
 import org.apache.commons.httpclient.ProtocolException;
@@ -73,6 +74,8 @@ public class Properties {
     public static final String PROP_HTTP_REQUEST_GZIP = "http.request.gzip";
     public static final String PROP_HTTP_ACCEPT_GZIP = "http.accept.gzip";
     public static final String PROP_SECURITY_POLICY = "security.policy";
+    public static final String PROP_JMS_REPLY_DESTINATION = "jms.reply.destination";
+    public static final String PROP_JMS_REPLY_TIMEOUT = "jms.reply.timeout";
 
 
     protected static final Log log = LogFactory.getLog(Properties.class);
@@ -134,7 +137,7 @@ public class Properties {
                     options.setProperty(HTTPConstants.CONNECTION_TIMEOUT, Integer.valueOf(value));
                 } catch (NumberFormatException e) {
                     if (log.isWarnEnabled())
-                        log.warn("Mal-formatted Property: [" + Properties.PROP_HTTP_CONNECTION_TIMEOUT + "=" + value + "] Property will be skipped.");
+                        log.warn("Mal-formatted Property: [" + Properties.PROP_HTTP_CONNECTION_TIMEOUT + "=" + value + "]. Integer expected. Property will be skipped.");
                 }
             }
             if (properties.containsKey(PROP_HTTP_SOCKET_TIMEOUT)) {
@@ -143,7 +146,7 @@ public class Properties {
                     options.setProperty(HTTPConstants.SO_TIMEOUT, Integer.valueOf(value));
                 } catch (NumberFormatException e) {
                     if (log.isWarnEnabled())
-                        log.warn("Mal-formatted Property: [" + Properties.PROP_HTTP_SOCKET_TIMEOUT + "=" + value + "] Property will be skipped.");
+                        log.warn("Mal-formatted Property: [" + Properties.PROP_HTTP_SOCKET_TIMEOUT + "=" + value + "]. Integer expected. Property will be skipped.");
                 }
             }
             if (properties.containsKey(PROP_HTTP_PROTOCOL_ENCODING)) {
@@ -163,6 +166,18 @@ public class Properties {
             }
             if (properties.containsKey(PROP_HTTP_MAX_REDIRECTS)) {
                 if (log.isWarnEnabled()) log.warn("Property Not Supported: " + PROP_HTTP_MAX_REDIRECTS);
+            }
+            if (properties.containsKey(PROP_JMS_REPLY_DESTINATION)) {
+                options.setProperty(JMSConstants.REPLY_PARAM, properties.get(PROP_JMS_REPLY_DESTINATION));
+            }
+            if (properties.containsKey(PROP_JMS_REPLY_TIMEOUT)) {
+                String value = properties.get(PROP_JMS_REPLY_TIMEOUT);
+                try {
+                    options.setProperty(JMSConstants.JMS_WAIT_REPLY, Long.valueOf(value));
+                } catch (NumberFormatException e) {
+                    if (log.isWarnEnabled())
+                        log.warn("Mal-formatted Property: [" + Properties.PROP_JMS_REPLY_TIMEOUT + "=" + value + "]. Long expected. Property will be skipped.");
+                }
             }
 
             // iterate through the properties to get Headers & Proxy information
@@ -268,6 +283,7 @@ public class Properties {
         static class UnmodifiableHttpParams implements HttpParams {
 
             final HttpParams p;
+
             private UnmodifiableHttpParams(HttpParams p) {
                 this.p = p;
             }
