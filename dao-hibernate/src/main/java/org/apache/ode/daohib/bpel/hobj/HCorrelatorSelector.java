@@ -103,7 +103,7 @@ public class HCorrelatorSelector extends HObject {
     }
 
     /**
-     * @hibernate.property column="ROUTE_POLICY" not-null="true"
+     * @hibernate.property column="ROUTE_POLICY" not-null="false"
      */
     public String getRoute() {
         return _routePolicy;
