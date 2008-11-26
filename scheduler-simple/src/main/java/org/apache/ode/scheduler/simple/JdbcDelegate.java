@@ -54,8 +54,11 @@ public class JdbcDelegate implements DatabaseDelegate {
     private static final String UPGRADE_JOB_DEFAULT = "update ODE_JOB set nodeid = ? where nodeid is null "
             + "and mod(ts,?) = ? and ts < ?";
 
+    private static final String UPGRADE_JOB_DB2 = "update ODE_JOB set nodeid = ? where nodeid is null "
+            + "and mod(ts,CAST(? AS BIGINT)) = ? and ts < ?";
+    
     private static final String UPGRADE_JOB_SQLSERVER = "update ODE_JOB set nodeid = ? where nodeid is null "
-        + "and (ts % ?) = ? and ts < ?";
+            + "and (ts % ?) = ? and ts < ?";
 
     private static final String SAVE_JOB = "insert into ODE_JOB "
             + " (jobid, nodeid, ts, scheduled, transacted, details) values(?, ?, ?, ?, ?, ?)";
