@@ -63,6 +63,9 @@ public class Properties {
     public static final String PROP_HTTP_PROXY_DOMAIN = PROP_HTTP_PROXY_PREFIX + "domain";
     public static final String PROP_HTTP_PROXY_USER = PROP_HTTP_PROXY_PREFIX + "user";
     public static final String PROP_HTTP_PROXY_PASSWORD = PROP_HTTP_PROXY_PREFIX + "password";
+    /**
+     * @deprecated use org.apache.commons.httpclient.params.HttpMethodParams#HTTP_CONTENT_CHARSET (="http.protocol.content-charset")
+     */
     public static final String PROP_HTTP_PROTOCOL_ENCODING = "http.protocol.encoding";
 
     // Httpclient specific
@@ -124,7 +127,11 @@ public class Properties {
             if (log.isDebugEnabled()) log.debug("Translating Properties for Axis2");
             if (properties.isEmpty()) return options;
 
-            /*first add all property pairs so that new properties (with string value)
+            // First set any default values to make sure they can be overwriten
+            // set the default encoding for HttpClient (HttpClient uses ISO-8859-1 by default)
+            options.setProperty(Constants.Configuration.CHARACTER_SET_ENCODING, "UTF-8");
+
+            /*then add all property pairs so that new properties (with string value)
                 are automatically handled (i.e no translation needed) */
             for (Map.Entry<String, String> e : properties.entrySet()) {
                 options.setProperty(e.getKey(), e.getValue());
@@ -148,7 +155,11 @@ public class Properties {
                 }
             }
             if (properties.containsKey(PROP_HTTP_PROTOCOL_ENCODING)) {
+                if(log.isWarnEnabled())log.warn("Deprecated property: http.protocol.encoding. Use http.protocol.content-charset");
                 options.setProperty(Constants.Configuration.CHARACTER_SET_ENCODING, properties.get(PROP_HTTP_PROTOCOL_ENCODING));
+            }
+            if (properties.containsKey(HttpMethodParams.HTTP_CONTENT_CHARSET)) {
+                options.setProperty(Constants.Configuration.CHARACTER_SET_ENCODING, properties.get(HttpMethodParams.HTTP_CONTENT_CHARSET));
             }
             if (properties.containsKey(PROP_HTTP_PROTOCOL_VERSION)) {
                 options.setProperty(HTTPConstants.HTTP_PROTOCOL_VERSION, properties.get(PROP_HTTP_PROTOCOL_VERSION));
@@ -200,7 +211,11 @@ public class Properties {
                 log.debug("Translating Properties for HttpClient. Properties size=" + properties.size());
             if (properties.isEmpty()) return p;
 
-            /*first add all property pairs so that new properties (with string value)
+            // First set any default values to make sure they can be overwriten
+            // set the default encoding for HttpClient (HttpClient uses ISO-8859-1 by default)
+            p.setParameter(HttpMethodParams.HTTP_CONTENT_CHARSET, "UTF-8");
+
+            /*then all property pairs so that new properties (with string value)
              are automatically handled (i.e no translation needed) */
             for (Map.Entry<String, String> e : properties.entrySet()) {
                 p.setParameter(e.getKey(), e.getValue());
@@ -228,16 +243,23 @@ public class Properties {
                 }
             }
 
-            // set the default encoding for HttpClient (HttpClient uses ISO-8859-1 by default)
-            p.setParameter(HttpMethodParams.HTTP_CONTENT_CHARSET, "UTF-8");
             if (properties.containsKey(PROP_HTTP_PROTOCOL_ENCODING)) {
+                if(log.isWarnEnabled())log.warn("Deprecated property: http.protocol.encoding. Use http.protocol.content-charset");
                 p.setParameter(HttpMethodParams.HTTP_CONTENT_CHARSET, properties.get(PROP_HTTP_PROTOCOL_ENCODING));
             }
+            // the next one is redundant because HttpMethodParams.HTTP_CONTENT_CHARSET accepts a string and we use the same property name
+            // so the property has already been added.
+            if (properties.containsKey(HttpMethodParams.HTTP_CONTENT_CHARSET)) {
+                p.setParameter(HttpMethodParams.HTTP_CONTENT_CHARSET, properties.get(HttpMethodParams.HTTP_CONTENT_CHARSET));
+            }
+
             if (properties.containsKey(PROP_HTTP_PROTOCOL_VERSION)) {
                 try {
                     p.setParameter(HttpMethodParams.PROTOCOL_VERSION, HttpVersion.parse(properties.get(PROP_HTTP_PROTOCOL_VERSION)));
                 } catch (ProtocolException e) {
                     if (log.isWarnEnabled())
+
+                    
                         log.warn("Mal-formatted Property: [" + PROP_HTTP_PROTOCOL_VERSION + "]", e);
                 }
             }
