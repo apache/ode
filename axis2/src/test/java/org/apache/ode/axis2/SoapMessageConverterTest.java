@@ -136,15 +136,15 @@ public class SoapMessageConverterTest extends TestCase {
         MemBackedMessageImpl odeMsg2 = new MemBackedMessageImpl(null, odeMsgElmt, null, false);
         portmapper.parseSoapRequest(odeMsg2, env, op1);
 
+        System.out.println(DOMUtils.domToString(odeMsg2.getMessage()));
         Element params = DOMUtils.findChildByName(odeMsg2.getMessage(), new QName(null, "parameters"));
         assertNotNull(params);
+        // the part 'DocumentumRequestHeader' is bound to a soap:header, it should be accessible as a header part
         assertNotNull(odeMsg2.getHeaderPart("DocumentumRequestHeader"));
         Element hdrElmt = DOMUtils.findChildByName(odeMsg2.getHeaderPart("DocumentumRequestHeader"), new QName("http://documentum.com/ws/2005/services",
                 "DocumentumSecurityToken"));
         assertNotNull(hdrElmt);
-        Element hdrBdyElmt = DOMUtils.findChildByName(odeMsg2.getPart("DocumentumRequestHeader"), new QName("http://documentum.com/ws/2005/services",
-                "DocumentumSecurityToken"));
-        assertNotNull(hdrBdyElmt);
+        assertNull(odeMsg2.getPart("DocumentumRequestHeader"));
     }
 
     /** Make sure hello world request parses correctly. */
