@@ -53,7 +53,6 @@ public class RESTMessageExchangeImpl extends MessageExchangeImpl implements REST
 
     public Future<Status> invokeAsync() {
         if (_future != null) return _future;
-        if (_request == null) throw new IllegalStateException("Must call setRequest(...)!");
 
         _future = new ResponseFuture();
         _process.enqueueTransaction(new Callable<Void>() {
@@ -73,7 +72,8 @@ public class RESTMessageExchangeImpl extends MessageExchangeImpl implements REST
         if (getStatus() != Status.NEW) throw new IllegalStateException("Invalid state: " + getStatus());
         request();
 
-        MessageExchangeDAO dao = _process.createMessageExchange(getMessageExchangeId(), MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
+        MessageExchangeDAO dao = _process.createMessageExchange(getMessageExchangeId(),
+                MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE);
         save(dao);
         if (__log.isDebugEnabled()) __log.debug("invoke() EPR= " + _epr + " ==> " + _process);
         try {

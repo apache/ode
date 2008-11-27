@@ -241,7 +241,9 @@ public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstan
     }
 
     public void createResourceRoute(String url, String method, String pickResponseChannel, int selectorIdx) {
-        _resourceRoutes.put(url, new ResourceRouteDAOImpl(url, method, pickResponseChannel, selectorIdx));
+        ResourceRouteDAOImpl rroute = new ResourceRouteDAOImpl(url, method, pickResponseChannel, selectorIdx, this);
+        ((BpelDAOConnectionImpl)_conn).addResourceRoute(rroute);
+        _resourceRoutes.put(url, rroute);
     }
 
     /**
@@ -418,5 +420,9 @@ public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstan
 
     public void setExecutionStateCounter(int stateCounter) {
         _execStateCount = stateCounter;
+    }
+
+    public Map<String, ResourceRouteDAO> geResourceRoutes() {
+        return _resourceRoutes;
     }
 }

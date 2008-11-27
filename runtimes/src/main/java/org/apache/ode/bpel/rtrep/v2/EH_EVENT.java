@@ -115,22 +115,27 @@ class EH_EVENT extends BpelJacobRunnable {
             Selector selector;
             try {
                 PickResponseChannel pickResponseChannel = newChannel(PickResponseChannel.class);
-                CorrelationKey key;
-                PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(_oevent.partnerLink);
-                if (_oevent.matchCorrelation == null) {
-                    // Adding a route for opaque correlation. In this case correlation is done on "out-of-band" session id.
-                    String sessionId = getBpelRuntime().fetchMySessionId(pLinkInstance);
-                    key = new CorrelationKey(-1, new String[] {sessionId});
+                if (_oevent.isRestful()) {
+                    getBpelRuntime().checkResourceRoute(_scopeFrame.resolve(_oevent.resource),
+                            _oevent.messageExchangeId, pickResponseChannel, 0);
                 } else {
-                    if (!getBpelRuntime().isCorrelationInitialized(_scopeFrame.resolve(_oevent.matchCorrelation))) {
-                        throw new FaultException(_oevent.getOwner().constants.qnCorrelationViolation,"Correlation not initialized.");
+                    CorrelationKey key;
+                    PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(_oevent.partnerLink);
+                    if (_oevent.matchCorrelation == null) {
+                        // Adding a route for opaque correlation. In this case correlation is done on "out-of-band" session id.
+                        String sessionId = getBpelRuntime().fetchMySessionId(pLinkInstance);
+                        key = new CorrelationKey(-1, new String[] {sessionId});
+                    } else {
+                        if (!getBpelRuntime().isCorrelationInitialized(_scopeFrame.resolve(_oevent.matchCorrelation))) {
+                            throw new FaultException(_oevent.getOwner().constants.qnCorrelationViolation,"Correlation not initialized.");
+                        }
+                        key = getBpelRuntime().readCorrelation(_scopeFrame.resolve(_oevent.matchCorrelation));
+                        assert key != null;
                     }
-                    key = getBpelRuntime().readCorrelation(_scopeFrame.resolve(_oevent.matchCorrelation));
-                    assert key != null;
-                }
 
-                selector =  new Selector(0,pLinkInstance,_oevent.operation.getName(), _oevent.operation.getOutput() == null, _oevent.messageExchangeId, key);
-                getBpelRuntime().select(pickResponseChannel, null, false, new Selector[] { selector} );
+                    selector =  new Selector(0,pLinkInstance,_oevent.operation.getName(), _oevent.operation.getOutput() == null, _oevent.messageExchangeId, key);
+                    getBpelRuntime().select(pickResponseChannel, null, false, new Selector[] { selector} );
+                }
                 instance(new WAITING(pickResponseChannel, _scopeFrame));
             } catch(FaultException e){
                 __log.error(e);
@@ -218,14 +223,11 @@ class EH_EVENT extends BpelJacobRunnable {
                     mlset.add(new PickResponseChannelListener(_pickResponseChannel) {
                         private static final long serialVersionUID = -4929999153478677288L;
 
-
                         public void onRequestRcvd(int selectorIdx, String mexId) {
                             // The receipt of the message causes a new scope to be created:
                             ScopeFrame ehScopeFrame = new ScopeFrame(_oevent,
                                     getBpelRuntime().createScopeInstance(_scopeFrame.scopeInstanceId, _oevent),
-                                    _scopeFrame,
-                                    _comps,
-                                    _fault);
+                                    _scopeFrame, _comps, _fault);
 
                             if (_oevent.variable != null) {
                                 Element msgEl = getBpelRuntime().getMyRequest(mexId);
@@ -254,7 +256,7 @@ class EH_EVENT extends BpelJacobRunnable {
                                     initializeCorrelation(ehScopeFrame.resolve(cset), ehScopeFrame.resolve(_oevent.variable));
                                 }
 
-                                if (_oevent.partnerLink.hasPartnerRole()) {
+                                if (_oevent.partnerLink != null && _oevent.partnerLink.hasPartnerRole()) {
                                     // Trying to initialize partner epr based on a message-provided epr/session.
                                     if (!getBpelRuntime().isPartnerRoleEndpointInitialized(ehScopeFrame
                                             .resolve(_oevent.partnerLink)) || !_oevent.partnerLink.initializePartnerRole) {
@@ -271,9 +273,6 @@ class EH_EVENT extends BpelJacobRunnable {
                                                 partnersSessionId);
                                 }
 
-
-
-
                             } catch (FaultException e) {
                                 __log.error(e);
                                 if (_fault == null) {
@@ -284,14 +283,10 @@ class EH_EVENT extends BpelJacobRunnable {
                                 return;
                             }
 
-
-
                             // load 'onMessage' activity; we'll do this even if a stop/terminate has been
                             // requested becasue we cannot undo the receipt of the message at this point.
-                            ActivityInfo child = new ActivityInfo(genMonotonic(),
-                                    _oevent.activity,
+                            ActivityInfo child = new ActivityInfo(genMonotonic(), _oevent.activity,
                                     newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
-
 
                             _active.add(child);
 
@@ -301,9 +296,7 @@ class EH_EVENT extends BpelJacobRunnable {
 
                             // If we previously terminated the other activiites, then we do the same
                             // here; this is easier then undoing the receive.
-                            if (_childrenTerminated)
-                                replication(child.self).terminate();
-
+                            if (_childrenTerminated) replication(child.self).terminate();
 
                             if (_terminated || _stopped || _fault != null)
                                 instance(new WAITING(null, _scopeFrame));

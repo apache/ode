@@ -18,15 +18,7 @@
  */
 package org.apache.ode.bpel.memdao;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.transaction.Status;
@@ -40,11 +32,7 @@ import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.Filter;
 import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.bpel.common.ProcessFilter;
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ScopeDAO;
+import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.stl.CollectionsX;
@@ -65,6 +53,8 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
 
     private final List<MessageExchangeDAOImpl> _mexList = new LinkedList<MessageExchangeDAOImpl>();
     private final Map<String, MessageExchangeDAOImpl> _mexStore = new HashMap<String, MessageExchangeDAOImpl>();
+
+    private final HashMap<String,ResourceRouteDAOImpl> _resRouteStore = new HashMap<String,ResourceRouteDAOImpl>();
 
     private static AtomicLong counter = new AtomicLong(Long.MAX_VALUE / 2);
     private static volatile long _lastRemoval = 0;
@@ -192,8 +182,6 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
             _mexStore.put(mexId, mex);
             _mexList.add(mex);
         }
-
-
         cleanupDeadWood();
         
         // Removing right away on rollback
@@ -201,17 +189,13 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
             public void run() {
                 synchronized (_mexStore) {
                     MessageExchangeDAOImpl mexdao = _mexStore.remove(mexId);
-                    
-                    if (mexdao != null) 
-                        _mexList.remove(mexdao);
+                    if (mexdao != null) _mexList.remove(mexdao);
                 }
             }
         });
 
         return mex;
     }
-
-
     
     /**
      * Remove old message exchanges from the Mex store.
@@ -244,6 +228,22 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
     public MessageExchangeDAO getMessageExchange(String mexid) {
         synchronized (_mexStore) {
             return _mexStore.get(mexid);
+        }
+    }
+
+    public ResourceRouteDAO getResourceRoute(String url, String method) {
+        return _resRouteStore.get(url+"~"+method);
+    }
+
+    public void addResourceRoute(ResourceRouteDAOImpl rroute) {
+        _resRouteStore.put(rroute.getUrl()+"~"+rroute.getMethod(), rroute);
+    }
+
+    public void cleanupResourceRoutes(Long piid) {
+        Iterator<ResourceRouteDAOImpl> rrIter = _resRouteStore.values().iterator();
+        while (rrIter.hasNext()) {
+            ResourceRouteDAOImpl rr = rrIter.next();
+            if (rr.getInstance().getInstanceId().equals(piid)) rrIter.remove();
         }
     }
 

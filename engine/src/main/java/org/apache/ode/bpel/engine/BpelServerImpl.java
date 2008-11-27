@@ -40,10 +40,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.iapi.*;
@@ -606,12 +603,30 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         }
     }
 
-    public RESTMessageExchange createMessageExchange(Resource resource, String foreignKey) throws BpelEngineException {
+    public RESTMessageExchange createMessageExchange(final Resource resource, String foreignKey) throws BpelEngineException {
         _mngmtLock.readLock().lock();
         try {
-            // Do stuff
             ODERESTProcess target = _restServiceMap.get(resource.getUrl());
-            if (target == null) throw new BpelEngineException("NoSuchResource: " + resource.getUrl());
+            if (target == null) {
+                try {
+                    QName processId = _contexts.execTransaction(new Callable<QName>() {
+                        public QName call() {
+                            ResourceRouteDAO rr = _contexts.dao.getConnection()
+                                    .getResourceRoute(resource.getUrl(), resource.getMethod());
+                            if (rr == null) return null;
+                            ProcessDAO processDao = rr.getInstance().getProcess();
+                            return processDao.getProcessId();
+                        }
+                    });
+                    for (ODERESTProcess odeRestProcess : _restServiceMap.values()) {
+                        if (odeRestProcess._pid.equals(processId)) target = odeRestProcess;
+                    }
+                } catch (Exception e) {
+                    throw new BpelEngineException(e);
+                }
+            }
+
+            if (target == null) throw new BpelEngineException("No such resource: " + resource.getUrl());
             assertNoTransaction();
             return target.createRESTMessageExchange(resource, foreignKey);
         } finally {
@@ -808,15 +823,12 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     void scheduleRunnable(final Runnable runnable) {
         assertTransaction();
         _contexts.registerCommitSynchronizer(new Runnable() {
-
             public void run() {
                 _exec.submit(new ServerRunnable(runnable));
             }
             
         });
-        
     }
-
     
     protected void assertTransaction() {
         if (!_contexts.isTransacted())
@@ -908,7 +920,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         _lastTimeOfServerCallable.set(System.currentTimeMillis());
         
     }
-   
     
     class ServerRunnable implements Runnable {
         final Runnable _work;

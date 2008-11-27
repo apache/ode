@@ -93,7 +93,7 @@ public abstract class ODEProcess {
         _pid = conf.getProcessId();
         _pconf = conf;
         _contexts = server._contexts;
-        _inMemDao = new BpelDAOConnectionFactoryImpl(_contexts.txManager);
+        _inMemDao = conf.isTransient() ? ((BpelDAOConnectionFactoryImpl)_contexts.dao) : new BpelDAOConnectionFactoryImpl(_contexts.txManager);
         _incomingMexCache = mexCache;
 
         // TODO : do this on a per-partnerlink basis, support transacted styles.

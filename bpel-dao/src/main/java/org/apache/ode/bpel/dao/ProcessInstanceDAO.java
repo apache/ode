@@ -259,6 +259,7 @@ public interface ProcessInstanceDAO {
     void createActivityRecovery(String channel, long activityId, String reason, Date dateTime,
                                 Element data, String[] actions, int retries);
 
+
     void createResourceRoute(String url, String method, String pickResponseChannel, int selectorIdx);
 
     /**

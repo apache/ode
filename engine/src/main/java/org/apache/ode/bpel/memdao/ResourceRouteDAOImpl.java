@@ -1,6 +1,7 @@
 package org.apache.ode.bpel.memdao;
 
 import org.apache.ode.bpel.dao.ResourceRouteDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 
 public class ResourceRouteDAOImpl extends DaoBaseImpl implements ResourceRouteDAO {
     private Long _id;
@@ -9,12 +10,16 @@ public class ResourceRouteDAOImpl extends DaoBaseImpl implements ResourceRouteDA
     private String pickResponseChannel;
     private int selectorIdx;
 
-    public ResourceRouteDAOImpl(String url, String method, String pickResponseChannel, int selectorIdx) {
+    private ProcessInstanceDaoImpl instance;
+
+    public ResourceRouteDAOImpl(String url, String method, String pickResponseChannel,
+                                int selectorIdx, ProcessInstanceDaoImpl instance) {
         _id = IdGen.newProcessId();
         this.url = url;
         this.method = method;
         this.pickResponseChannel = pickResponseChannel;
         this.selectorIdx = selectorIdx;
+        this.instance = instance;
     }
 
     public String getUrl() {
@@ -47,5 +52,9 @@ public class ResourceRouteDAOImpl extends DaoBaseImpl implements ResourceRouteDA
 
     public void setSelectorIdx(int selectorIdx) {
         this.selectorIdx = selectorIdx;
+    }
+
+    public ProcessInstanceDAO getInstance() {
+        return instance;
     }
 }

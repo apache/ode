@@ -37,11 +37,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.Filter;
 import org.apache.ode.bpel.common.InstanceFilter;
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ScopeDAO;
+import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.utils.ISO8601DateParser;
@@ -300,6 +296,14 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         .setParameter(1, mexid).getResultList();
         if (l.size() == 0) return null;
         MessageExchangeDAOImpl m = (MessageExchangeDAOImpl) l.get(0);
+        return m;
+    }
+
+    public ResourceRouteDAO getResourceRoute(String url, String method) {
+        List l = _em.createQuery("select r from ResourceRouteDAOImpl r where r._url = ?1 and r._method = ?2")
+            .setParameter(1, url).setParameter(2, method).getResultList();
+        if (l.size() == 0) return null;
+        ResourceRouteDAOImpl m = (ResourceRouteDAOImpl) l.get(0);
         return m;
     }
 

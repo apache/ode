@@ -4,6 +4,7 @@ import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.rapi.ResourceModel;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.ResourceRouteDAO;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.runtime.InvalidProcessException;
 import org.apache.ode.bpel.evt.NewProcessInstanceEvent;
@@ -30,14 +31,17 @@ public class ODERESTProcess extends ODEProcess {
     public Collection<String> getInitialResourceUrls() {
         if (_staticResources.size() > 0 ) return _staticResources.values();
 
+        // Caching instantiating resource urls as those can be expressions
         ArrayList<String> addresses = new ArrayList<String>();
         for (ResourceModel resourceModel : _processModel.getProvidedResources()) {
-            try {
-                String addr = _runtime.extractAddress(resourceModel);
-                addresses.add(addr);
-                _staticResources.put(resourceModel, addr);
-            } catch (FaultException e) {
-                throw new BpelEngineException(e);
+            if (resourceModel.isInstantiateResource()) {
+                try {
+                    String addr = _runtime.extractAddress(resourceModel);
+                    addresses.add(addr);
+                    _staticResources.put(resourceModel, addr);
+                } catch (FaultException e) {
+                    throw new BpelEngineException(e);
+                }
             }
         }
         return addresses;
@@ -45,7 +49,8 @@ public class ODERESTProcess extends ODEProcess {
 
     void activate() {
         bounceProcessDAO();
-        
+
+        // Activating instantiating resources
         for (ResourceModel resourceModel : _staticResources.keySet()) {
             Resource resource = new Resource(_staticResources.get(resourceModel),
                     "application/xml", resourceModel.getMethod());
@@ -63,26 +68,27 @@ public class ODERESTProcess extends ODEProcess {
     }
 
     void invokeProcess(final MessageExchangeDAO mexdao) {
-        Resource msgResource = getResource(mexdao.getResource());
-        mexdao.setProcess(getProcessDAO());
-
         if (_pconf.getState() == ProcessState.RETIRED) {
             throw new InvalidProcessException("Process is retired.", InvalidProcessException.RETIRED_CAUSE_CODE);
         }
+        mexdao.setProcess(getProcessDAO());
 
-        ProcessInstanceDAO newInstance = getProcessDAO().createInstance(null);
-        newInstance.setInstantiatingUrl(mexdao.getResource());
+        Resource instantiatingResource = getResource(mexdao.getResource());
+        InvocationStyle istyle = mexdao.getInvocationStyle();
 
-        // send process instance event
-        NewProcessInstanceEvent evt = new NewProcessInstanceEvent(getProcessModel().getQName(),
-                getProcessDAO().getProcessId(), newInstance.getInstanceId());
-        evt.setMexId(mexdao.getMessageExchangeId());
-        saveEvent(evt, newInstance);
+        if (instantiatingResource != null) {
+            ProcessInstanceDAO newInstance = getProcessDAO().createInstance(null);
+            newInstance.setInstantiatingUrl(mexdao.getResource());
 
-        mexdao.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.CREATE_INSTANCE.toString());
-        mexdao.setInstance(newInstance);
+            // send process instance event
+            NewProcessInstanceEvent evt = new NewProcessInstanceEvent(getProcessModel().getQName(),
+                    getProcessDAO().getProcessId(), newInstance.getInstanceId());
+            evt.setMexId(mexdao.getMessageExchangeId());
+            saveEvent(evt, newInstance);
 
-        if (isInstantiating(msgResource)) {
+            mexdao.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.CREATE_INSTANCE.toString());
+            mexdao.setInstance(newInstance);
+
             doInstanceWork(mexdao.getInstance().getInstanceId(), new Callable<Void>() {
                 public Void call() {
                     executeCreateInstance(mexdao);
@@ -90,7 +96,32 @@ public class ODERESTProcess extends ODEProcess {
                 }
             });
         } else {
-            throw new UnsupportedOperationException("not yet");
+            // TODO avoid reloading the resource routing, it's just been loaded by the server on mex creation
+            String[] urlMeth = mexdao.getResource().split("~");
+            ResourceRouteDAO rr = _contexts.dao.getConnection().getResourceRoute(urlMeth[0], urlMeth[1]);
+            // This really should have been caught by the server
+            if (rr == null) throw new BpelEngineException("NoSuchResource: " + mexdao.getResource());
+            mexdao.setInstance(rr.getInstance());
+            mexdao.setChannel(rr.getPickResponseChannel() + "&" + rr.getSelectorIdx());
+
+            if (istyle == InvocationStyle.TRANSACTED) {
+                doInstanceWork(mexdao.getInstance().getInstanceId(), new Callable<Void>() {
+                    public Void call() {
+                        executeContinueInstanceMyRoleRequestReceived(mexdao);
+                        return null;
+                    }
+                });
+            } else /* non-transacted style */ {
+                WorkEvent we = new WorkEvent();
+                we.setType(WorkEvent.Type.MYROLE_INVOKE);
+                we.setIID(mexdao.getInstance().getInstanceId());
+                we.setMexId(mexdao.getMessageExchangeId());
+                // Could be different to this pid when routing to an older version
+                we.setProcessId(mexdao.getInstance().getProcess().getProcessId());
+
+                scheduleWorkEvent(we, null);
+            }
+
         }
     }
 

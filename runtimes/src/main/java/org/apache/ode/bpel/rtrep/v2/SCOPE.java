@@ -91,28 +91,46 @@ class SCOPE extends ACTIVITY {
         getBpelRuntime().initializePartnerLinks(_scopeFrame.scopeInstanceId,
             _oscope.partnerLinks.values());
 
-        // Initializing resource values
-        for (Map.Entry<String,OResource> resource : _oscope.resource.entrySet()) {
+        initializeResources();
+
+        sendEvent(new ScopeStartEvent());
+        instance(new ACTIVE());
+    }
+
+    private void initializeResources() {
+        // Filter instantiating resource to handle it first
+        ArrayList<OResource> resources = new ArrayList<OResource>();
+        OResource instantiating = null;
+        for (OResource resource : _oscope.resource.values()) {
+            if (resource.isInstantiateResource()) instantiating = resource;
+            else resources.add(resource);
+        }
+
+        if (instantiating != null) {
             try {
                 String url = getBpelRuntime().getExpLangRuntime().evaluateAsString(
-                        resource.getValue().getSubpath(), getEvaluationContext());
-                // TODO implement a better URL building heuristic
-                if (resource.getValue().isInstantiateResource()) {
-                    url = url + "/" + getBpelRuntime().getInstanceId();
-                    getBpelRuntime().initializeInstantiatingUrl(url);
-                } else {
-                    url = getBpelRuntime().getInstantiatingUrl() + "/" + url;
-                }
-
-                getBpelRuntime().initializeResource(_scopeFrame.scopeInstanceId, resource.getValue(), url);
+                        instantiating.getSubpath(), getEvaluationContext());
+                url = url + "/" + getBpelRuntime().getInstanceId();
+                getBpelRuntime().initializeInstantiatingUrl(url);
+                getBpelRuntime().initializeResource(_scopeFrame.scopeInstanceId, instantiating, url);
             } catch (FaultException e) {
-                _self.parent.completed(new FaultData(e.getQName(), resource.getValue(),
+                _self.parent.completed(new FaultData(e.getQName(), instantiating,
                         "Error in resource evaluation: " + e.toString()), CompensationHandler.emptySet());
             }
         }
 
-        sendEvent(new ScopeStartEvent());
-        instance(new ACTIVE());
+        for (OResource resource : resources) {
+            try {
+                String url = getBpelRuntime().getExpLangRuntime().evaluateAsString(
+                        resource.getSubpath(), getEvaluationContext());
+                url = getBpelRuntime().getInstantiatingUrl() + url;
+
+                getBpelRuntime().initializeResource(_scopeFrame.scopeInstanceId, resource, url);
+            } catch (FaultException e) {
+                _self.parent.completed(new FaultData(e.getQName(), resource,
+                        "Error in resource evaluation: " + e.toString()), CompensationHandler.emptySet());
+            }
+        }
     }
 
     private List<CompensationHandler> findCompensationData(OScope scope) {

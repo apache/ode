@@ -119,4 +119,6 @@ public interface BpelDAOConnection {
 
     MessageExchangeDAO getMessageExchange(String mexid);
 
+    ResourceRouteDAO getResourceRoute(String url, String method);
+
 }
