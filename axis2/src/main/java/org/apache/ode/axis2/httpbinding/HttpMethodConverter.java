@@ -30,6 +30,7 @@ import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.httpclient.params.HostParams;
 import org.apache.commons.httpclient.params.HttpParams;
+import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -170,6 +171,7 @@ public class HttpMethodConverter {
             } else if ("DELETE".equalsIgnoreCase(verb)) {
                 method = new DeleteMethod();
             }
+            method.getParams().setDefaults(params);
             if (useUrlEncoded) {
                 queryPath = encodedParams;
             }
@@ -185,7 +187,7 @@ public class HttpMethodConverter {
             } else if ("PUT".equalsIgnoreCase(verb)) {
                 method = new PutMethod();
             }
-
+            method.getParams().setDefaults(params);
             // some body-building...
             final String contentCharset = method.getParams().getContentCharset();
             if (log.isDebugEnabled()) log.debug("Content-Type [" + contentType + "] Charset [" + contentCharset + "]");
