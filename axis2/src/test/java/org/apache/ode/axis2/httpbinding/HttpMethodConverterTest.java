@@ -24,6 +24,7 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.params.DefaultHttpParams;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.utils.DOMUtils;
@@ -45,6 +46,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
 
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
@@ -149,8 +151,7 @@ public class HttpMethodConverterTest extends TestCase {
         assertTrue("POST".equalsIgnoreCase(httpMethod.getName()));
         assertEquals("Generated URI does not match", expectedUri, httpMethod.getURI().toString());
 
-        byte[] content = ((ByteArrayRequestEntity) ((PostMethod) httpMethod).getRequestEntity()).getContent();
-        String b = new String(content);
+        String b =  ((StringRequestEntity) ((PostMethod) httpMethod).getRequestEntity()).getContent();
         assertEquals("Invalid body in generated http query", DOMUtils.domToString(helloEl), b);
     }
 
@@ -205,7 +206,7 @@ public class HttpMethodConverterTest extends TestCase {
         }
 
         public Map<String, Node> getHeaderParts() {
-            return null;
+            return Collections.EMPTY_MAP;
         }
 
         public Element getPart(String partName) {
