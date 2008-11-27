@@ -39,6 +39,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 
+/**
+ * @deprecated Needs to be migrated in axis2-war and upgraded to the new Axis2TestBase test fwk.
+ */
 public class ProcessManagementTest extends TestCase {
 
     private OMFactory _factory;
