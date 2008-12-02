@@ -102,7 +102,7 @@ public class ProcessConfImpl implements ProcessConf {
     private EndpointReferenceContext eprContext;
 
     private final ProcessCleanupConfImpl processCleanupConfImpl;
-    
+
     ProcessConfImpl(QName pid, QName type, long version, DeploymentUnitDir du, TDeployment.Process pinfo, Date deployDate,
                     Map<QName, Node> props, ProcessState pstate, EndpointReferenceContext eprContext, File configDir) {
         _pid = pid;
@@ -122,7 +122,7 @@ public class ProcessConfImpl implements ProcessConf {
         initLinks();
         initMexInterceptors();
         initEventList();
-        
+
         processCleanupConfImpl = new ProcessCleanupConfImpl(pinfo);
     }
 
@@ -131,18 +131,23 @@ public class ProcessConfImpl implements ProcessConf {
         List<File> propFiles = new ArrayList<File>();
 
         propFiles.addAll(_du.getEndpointConfigFiles());
-        if (_configDir != null && _configDir.isDirectory()) {
+        if (_configDir == null) {
+            if (__log.isDebugEnabled()) __log.debug("No config directory set up.");
+        } else if (_configDir.isDirectory()) {
             // list and sort endpoint config files
             File[] files = _configDir.listFiles(new FileFilter() {
                 public boolean accept(File path) {
                     return path.getName().endsWith(".endpoint") && path.isFile();
                 }
             });
-            Arrays.sort(files);
-            propFiles.addAll(Arrays.asList(files));
-        }else{
-            // this case should not happen since the dir exsistence is tested in ODEServer
-            if(__log.isWarnEnabled()) __log.warn(_configDir+" does not exist or is not a directory");
+            if (files != null) {
+                Arrays.sort(files);
+                propFiles.addAll(Arrays.asList(files));
+            } else {
+                if (__log.isErrorEnabled()) __log.error(_configDir + " does not exist or is not a directory");
+            }
+        } else {
+            if (__log.isErrorEnabled()) __log.error(_configDir + " does not exist or is not a directory");
         }
         return propFiles;
     }
@@ -492,10 +497,10 @@ public class ProcessConfImpl implements ProcessConf {
     }
 
     public boolean isCleanupCategoryEnabled(boolean instanceSucceeded, CLEANUP_CATEGORY category) {
-    	return processCleanupConfImpl.isCleanupCategoryEnabled(instanceSucceeded, category);
+        return processCleanupConfImpl.isCleanupCategoryEnabled(instanceSucceeded, category);
     }
-    
+
     public Set<CLEANUP_CATEGORY> getCleanupCategories(boolean instanceSucceeded) {
-    	return processCleanupConfImpl.getCleanupCategories(instanceSucceeded);
+        return processCleanupConfImpl.getCleanupCategories(instanceSucceeded);
     }
 }
