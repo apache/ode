@@ -18,14 +18,16 @@
  */
 package org.apache.ode.bpel.dao;
 
-import org.apache.ode.bpel.common.BpelEventFilter;
-import org.apache.ode.bpel.common.InstanceFilter;
-import org.apache.ode.bpel.evt.BpelEvent;
-
-import javax.xml.namespace.QName;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.common.BpelEventFilter;
+import org.apache.ode.bpel.common.InstanceFilter;
+import org.apache.ode.bpel.evt.BpelEvent;
 
 
 /**
@@ -64,6 +66,8 @@ public interface BpelDAOConnection  {
    */
   Collection<ProcessInstanceDAO> instanceQuery(InstanceFilter criteria);
 
+  Collection<ProcessInstanceDAO> instanceQuery(String expression);
+
   /**
    * Insert a BPEL event into the database.
    * @param event a BPEL event
@@ -91,10 +95,10 @@ public interface BpelDAOConnection  {
 
   void close();
   
-  Collection<ProcessInstanceDAO> instanceQuery(String expression);
+  
+  Map<Long, Collection<CorrelationSetDAO>> getCorrelationSets(Collection<ProcessInstanceDAO> instances);
 
   ProcessDAO createProcess(QName pid, QName type, String guid, long version);
-
 
   /**
    * Create a message exchange.
@@ -104,4 +108,5 @@ public interface BpelDAOConnection  {
   MessageExchangeDAO createMessageExchange(char dir);
 
   MessageExchangeDAO getMessageExchange(String mexid);
+
 }

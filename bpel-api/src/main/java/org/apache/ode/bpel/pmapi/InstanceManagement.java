@@ -124,12 +124,29 @@ public interface InstanceManagement {
      */
     InstanceInfoListDocument listInstances(String filter, String order, int limit);
 
+    /**
+     * List instances and only return summary information about the instance,
+     * combined with all correlation properties.
+     *  
+     * @param filter See listInstances' filter argument
+     * @param order  See listInstances' order argument
+     * @param limit maximum number of instances to return
+     * @return list of matching instances
+     */
+    InstanceInfoListDocument listInstancesSummary(String filter, String order, int limit);
+
+    /**
+     * @deprecated As of Ode 1.3, this method is deprecated in favor of 
+     *             listInstances(filter, order, limit)
+     */
     InstanceInfoListDocument queryInstances(String query);
 
     /**
      * List all instances in the default (database) order.
      * @see #listInstances(String, String, int)
      * @return list of matching instances
+     * @deprecated As of Ode 1.3, this method is deprecated in favor of 
+     *             listInstancesSummary(filter, order, limit)
      */
     InstanceInfoListDocument listAllInstances();
 
@@ -138,6 +155,8 @@ public interface InstanceManagement {
      * @see #listInstances(String, String, int)
      * @param limit maximum number of instances to return
      * @return list of matching instances
+     * @deprecated As of Ode 1.3, this method is deprecated in favor of 
+     *             listInstancesSummary(filter, order, limit)
      */
     InstanceInfoListDocument listAllInstancesWithLimit(int limit);
 

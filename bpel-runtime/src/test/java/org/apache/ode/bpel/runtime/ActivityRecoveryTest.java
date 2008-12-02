@@ -305,7 +305,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
     }
 
     protected TInstanceInfo lastInstance() {
-        TInstanceInfoList instances = _management.listAllInstances().getInstanceInfoList();
+        TInstanceInfoList instances = _management.listInstances("", "", 1000).getInstanceInfoList();
         return instances.getInstanceInfoArray(instances.sizeOfInstanceInfoArray() - 1);
     }
 

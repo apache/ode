@@ -27,10 +27,12 @@ import java.util.Collection;
  * @hibernate.class table="BPEL_CORRELATION_SET"
  * @hibernate.query name="DELETE_CORSETS_BY_INSTANCE" query="delete from HCorrelationSet as c where c.instance = :instance"
  * @hibernate.query name="DELETE_CORSETS_BY_PROCESS" query="delete from HCorrelationSet as c where c.process = :process"
+ * @hibernate.query name="SELECT_CORSETS_BY_INSTANCES" query="from HCorrelationSet as c left join fetch c.properties where c.instance.id in (:instances)"
  */
 public class HCorrelationSet extends HObject{
   public static final String DELETE_CORSETS_BY_INSTANCE = "DELETE_CORSETS_BY_INSTANCE";
   public static final String DELETE_CORSETS_BY_PROCESS = "DELETE_CORSETS_BY_PROCESS";
+  public static final String SELECT_CORSETS_BY_INSTANCES = "SELECT_CORSETS_BY_INSTANCES";
 
   private HProcess _process;
   private HProcessInstance _instance;

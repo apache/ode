@@ -18,15 +18,40 @@
  */
 package org.apache.ode.daohib.bpel;
 
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.InstanceFilter;
-import org.apache.ode.bpel.dao.*;
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.CorrelationSetDAO;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.daohib.SessionManager;
-import org.apache.ode.daohib.bpel.hobj.*;
+import org.apache.ode.daohib.bpel.hobj.HBpelEvent;
+import org.apache.ode.daohib.bpel.hobj.HCorrelationSet;
+import org.apache.ode.daohib.bpel.hobj.HLargeData;
+import org.apache.ode.daohib.bpel.hobj.HMessageExchange;
+import org.apache.ode.daohib.bpel.hobj.HProcess;
+import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
+import org.apache.ode.daohib.bpel.hobj.HScope;
 import org.apache.ode.daohib.bpel.ql.HibernateInstancesQueryCompiler;
 import org.apache.ode.ql.eval.skel.CommandEvaluator;
 import org.apache.ode.ql.tree.Builder;
@@ -41,12 +66,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Projections;
-
-import javax.xml.namespace.QName;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
-import java.sql.Timestamp;
-import java.util.*;
 
 /**
  * Hibernate-based {@link BpelDAOConnection} implementation.
@@ -243,6 +262,31 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection {
             result.add(getInstance(instance.getId()));
         }
         return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<Long, Collection<CorrelationSetDAO>> getCorrelationSets(Collection<ProcessInstanceDAO> instances) {
+        if (instances.size() == 0) {
+            return new HashMap<Long, Collection<CorrelationSetDAO>>();
+        }
+        Long[] iids = new Long[instances.size()];
+        int i=0;
+        for (ProcessInstanceDAO dao: instances) {
+            iids[i] = dao.getInstanceId();
+            i++;
+        }
+        Collection<HCorrelationSet> csets = _session.getNamedQuery(HCorrelationSet.SELECT_CORSETS_BY_INSTANCES).setParameterList("instances", iids).list();        
+        Map<Long, Collection<CorrelationSetDAO>> map = new HashMap<Long, Collection<CorrelationSetDAO>>();
+        for (HCorrelationSet cset: csets) {
+            Long id = cset.getInstance().getId();
+            Collection<CorrelationSetDAO> existing = map.get(id);
+            if (existing == null) {
+                existing = new ArrayList<CorrelationSetDAO>();
+                map.put(id, existing);
+            }
+            existing.add(new CorrelationSetDaoImpl(_sm, cset));
+        }
+        return map;
     }
 
 }

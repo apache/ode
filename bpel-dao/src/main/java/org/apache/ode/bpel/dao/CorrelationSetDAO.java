@@ -67,4 +67,5 @@ public interface CorrelationSetDAO {
    * @return Map with the property qualified name as key and value as Map value.
    */
   public Map<QName, String> getProperties();
+
 }
