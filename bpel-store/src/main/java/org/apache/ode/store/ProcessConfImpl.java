@@ -126,17 +126,23 @@ public class ProcessConfImpl implements ProcessConf {
         List<File> propFiles = new ArrayList<File>();
 
         propFiles.addAll(_du.getEndpointConfigFiles());
-        if (_configDir != null) {
+        if (_configDir == null) {
+            if (__log.isDebugEnabled()) __log.debug("No config directory set up.");
+        } else if (_configDir.isDirectory()) {
             // list and sort endpoint config files
             File[] files = _configDir.listFiles(new FileFilter() {
                 public boolean accept(File path) {
                     return path.getName().endsWith(".endpoint") && path.isFile();
                 }
             });
-            if( files != null ) {
-	            Arrays.sort(files);
-	            propFiles.addAll(Arrays.asList(files));
+            if (files != null) {
+                Arrays.sort(files);
+                propFiles.addAll(Arrays.asList(files));
+            } else {
+                if (__log.isErrorEnabled()) __log.error(_configDir + " does not exist or is not a directory");
             }
+        } else {
+            if (__log.isErrorEnabled()) __log.error(_configDir + " does not exist or is not a directory");
         }
         return propFiles;
     }    

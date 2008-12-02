@@ -122,11 +122,15 @@ public class ODEServer {
             String rootDir = System.getProperty("org.apache.ode.rootDir");
             if (rootDir != null) _appRoot = new File(rootDir);
             else _appRoot = new File(contextPath);
+
+            if(!_appRoot.isDirectory()) throw new IllegalArgumentException(_appRoot+" does not exist or is not a directory");
             TempFileManager.setWorkingDirectory(_appRoot);
 
             __log.debug("Loading properties");
             String confDir = System.getProperty("org.apache.ode.configDir");
             _configRoot = confDir == null ? new File(_appRoot, "conf") : new File(confDir);
+            if(!_configRoot.isDirectory()) throw new IllegalArgumentException(_configRoot+" does not exist or is not a directory");
+
             _odeConfig = new ODEConfigProperties(_configRoot);
 
             try {
@@ -144,6 +148,7 @@ public class ODEServer {
             String wdir = _odeConfig.getWorkingDir();
             if (wdir == null) _workRoot = _appRoot;
             else _workRoot = new File(wdir.trim());
+            if(!_workRoot.isDirectory()) throw new IllegalArgumentException(_workRoot+" does not exist or is not a directory");
 
             __log.debug("Initializing transaction manager");
             initTxMgr();
