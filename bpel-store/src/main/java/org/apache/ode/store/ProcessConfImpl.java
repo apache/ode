@@ -131,17 +131,18 @@ public class ProcessConfImpl implements ProcessConf {
         List<File> propFiles = new ArrayList<File>();
 
         propFiles.addAll(_du.getEndpointConfigFiles());
-        if (_configDir != null) {
+        if (_configDir != null && _configDir.isDirectory()) {
             // list and sort endpoint config files
             File[] files = _configDir.listFiles(new FileFilter() {
                 public boolean accept(File path) {
                     return path.getName().endsWith(".endpoint") && path.isFile();
                 }
             });
-            if( files != null ) {
-	            Arrays.sort(files);
-	            propFiles.addAll(Arrays.asList(files));
-            }
+            Arrays.sort(files);
+            propFiles.addAll(Arrays.asList(files));
+        }else{
+            // this case should not happen since the dir exsistence is tested in ODEServer
+            if(__log.isWarnEnabled()) __log.warn(_configDir+" does not exist or is not a directory");
         }
         return propFiles;
     }
