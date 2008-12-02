@@ -155,7 +155,7 @@ public class ODEService {
             } catch (Exception e) {
                 String errorMsg = "Timeout or execution error when waiting for response to MEX "
                         + odeMex + " " + e.toString();
-                __log.error(errorMsg);
+                __log.error(errorMsg, e);
                 throw new OdeFault(errorMsg);
             }
 
