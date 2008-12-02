@@ -46,11 +46,13 @@ import java.util.Map;
 @Table(name="ODE_CORRELATION_SET")
 @NamedQueries({
     @NamedQuery(name=CorrelationSetDAOImpl.DELETE_CORRELATION_SETS_BY_PROCESS, query="delete from CorrelationSetDAOImpl as c where c._scope in (select s from ScopeDAOImpl s where s._processInstance._process = :process)"),
-    @NamedQuery(name=CorrelationSetDAOImpl.DELETE_CORRELATION_SETS_BY_INSTANCE, query="delete from CorrelationSetDAOImpl as c where c._scope in (select s from ScopeDAOImpl s where s._processInstance = :instance)")
+    @NamedQuery(name=CorrelationSetDAOImpl.DELETE_CORRELATION_SETS_BY_INSTANCE, query="delete from CorrelationSetDAOImpl as c where c._scope in (select s from ScopeDAOImpl s where s._processInstance = :instance)"),
+    @NamedQuery(name=CorrelationSetDAOImpl.SELECT_CORRELATION_SETS_BY_INSTANCES, query="select c from CorrelationSetDAOImpl as c left join fetch c._scope left join fetch c._props where c._scope._processInstance._instanceId in (:instances)")
 })
 public class CorrelationSetDAOImpl implements CorrelationSetDAO {
 	public final static String DELETE_CORRELATION_SETS_BY_PROCESS = "DELETE_CORRELATION_SETS_BY_PROCESS";
-	public final static String DELETE_CORRELATION_SETS_BY_INSTANCE = "DELETE_CORRELATION_SETS_BY_INSTANCE";
+    public final static String DELETE_CORRELATION_SETS_BY_INSTANCE = "DELETE_CORRELATION_SETS_BY_INSTANCE";
+    public final static String SELECT_CORRELATION_SETS_BY_INSTANCES = "SELECT_CORRELATION_SETS_BY_INSTANCES";
 	
 	@Id @Column(name="CORRELATION_SET_ID") 
 	@GeneratedValue(strategy=GenerationType.AUTO)

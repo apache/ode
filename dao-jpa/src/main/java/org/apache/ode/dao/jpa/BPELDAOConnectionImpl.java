@@ -24,6 +24,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.Filter;
 import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
@@ -277,8 +279,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         int num = 0;       
         for (Iterator iterator = ql.iterator(); iterator.hasNext();) {
             if(num++ > criteria.getLimit()) break;
-            ProcessInstanceDAO processInstanceDAO = (ProcessInstanceDAO) iterator
-                    .next();
+            ProcessInstanceDAO processInstanceDAO = (ProcessInstanceDAO) iterator.next();
             list.add(processInstanceDAO);            
         }     
         
@@ -305,4 +306,28 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
     public EntityManager getEntityManager() {
         return _em;
     }
+
+    @SuppressWarnings("unchecked")
+    public Map<Long, Collection<CorrelationSetDAO>> getCorrelationSets(Collection<ProcessInstanceDAO> instances) {
+        if (instances.size() == 0) {
+            return new HashMap<Long, Collection<CorrelationSetDAO>>();
+        }
+        ArrayList<Long> iids = new ArrayList<Long>(instances.size());
+        for (ProcessInstanceDAO dao: instances) {
+            iids.add(dao.getInstanceId());
+        }
+        Collection<CorrelationSetDAOImpl> csets = _em.createNamedQuery(CorrelationSetDAOImpl.SELECT_CORRELATION_SETS_BY_INSTANCES).setParameter("instances", iids).getResultList();        
+        Map<Long, Collection<CorrelationSetDAO>> map = new HashMap<Long, Collection<CorrelationSetDAO>>();
+        for (CorrelationSetDAOImpl cset: csets) {
+            Long id = cset.getScope().getProcessInstance().getInstanceId();
+            Collection<CorrelationSetDAO> existing = map.get(id);
+            if (existing == null) {
+                existing = new ArrayList<CorrelationSetDAO>();
+                map.put(id, existing);
+            }
+            existing.add(cset);
+        }
+        return map;
+    }
+
 }

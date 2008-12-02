@@ -125,7 +125,8 @@ public class InstanceManagementTest extends Axis2TestBase {
     // ODE-385 please fix me
     @Test
     public void testGetScopeInfo() throws Exception {
-        OMElement root = _client.buildMessage("listAllInstances", new String[] {}, new String[] {});
+        OMElement root = _client.buildMessage("listInstances", new String[] {"filter", "order", "limit"},
+                new String[] {"name=DynPartnerMain", "", "10"});
         OMElement result = sendToIM(root);
         String siid = result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "instance-info"))
                 .getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "root-scope"))

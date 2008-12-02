@@ -19,6 +19,22 @@
 
 package org.apache.ode.bpel.engine;
 
+import java.io.File;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+
+import javax.xml.namespace.QName;
+
 import org.apache.commons.collections.comparators.ComparatorChain;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -115,21 +131,6 @@ import org.apache.ode.utils.stl.UnaryFunction;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import javax.xml.namespace.QName;
-import java.io.File;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 /**
  * Implentation of the Process and InstanceManagement APIs.
@@ -266,8 +267,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             }
 
             // We have to do this after we set the property, since the
-            // ProcessConf object
-            // is immutable.
+            // ProcessConf object is immutable.
             ProcessConf proc = _store.getProcessConfiguration(pid);
             if (proc == null)
                 throw new ProcessNotFoundException("ProcessNotFound:" + pid);
@@ -289,7 +289,6 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         final TInstanceInfoList infolist = ret.addNewInstanceInfoList();
         final InstanceFilter instanceFilter = new InstanceFilter(filter, order, limit);
         try {
-
             _db.exec(new BpelDatabase.Callable<Object>() {
                 public Object run(BpelDAOConnection conn) {
                     Collection<ProcessInstanceDAO> instances = conn.instanceQuery(instanceFilter);
@@ -306,12 +305,42 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         return ret;
     }
 
+    public InstanceInfoListDocument listInstancesSummary(String filter, String order, int limit) {
+        InstanceInfoListDocument ret = InstanceInfoListDocument.Factory.newInstance();
+        final TInstanceInfoList infolist = ret.addNewInstanceInfoList();
+        final InstanceFilter instanceFilter = new InstanceFilter(filter, order, limit);
+        try {
+            _db.exec(new BpelDatabase.Callable<Object>() {
+                public Object run(BpelDAOConnection conn) {
+                    Collection<ProcessInstanceDAO> instances = conn.instanceQuery(instanceFilter);
+                    Map<Long, Collection<CorrelationSetDAO>> icsets = conn.getCorrelationSets(instances);
+                    for (ProcessInstanceDAO instance : instances) {
+                        TInstanceInfo info = infolist.addNewInstanceInfo();
+                        fillInstanceSummary(info, instance);
+                        Collection<CorrelationSetDAO> csets = icsets.get(instance.getInstanceId());
+                        if (csets != null) {
+                            for (CorrelationSetDAO cset: csets) {
+                                Map<QName, String> props = cset.getProperties();
+                                fillProperties(info, instance, props);
+                            }
+                        }
+                    }
+                    return null;
+                }
+            });
+        } catch (Exception e) {
+            __log.error("Exception while listing instances", e);
+            throw new ProcessingException("Exception while listing instances: " + e.toString());
+        }
+        return ret;
+    }
+
     public InstanceInfoListDocument listAllInstances() {
-        return listInstances(null, null, Integer.MAX_VALUE);
+        return listInstancesSummary(null, null, Integer.MAX_VALUE);
     }
 
     public InstanceInfoListDocument listAllInstancesWithLimit(int limit) {
-        return listInstances(null, null, limit);
+        return listInstancesSummary(null, null, limit);
     }
 
     public InstanceInfoDocument getInstanceInfo(Long iid) throws InstanceNotFoundException {
@@ -864,13 +893,22 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         });
     }
 
-    private void fillInstanceInfo(TInstanceInfo info, ProcessInstanceDAO instance) {
+    private void fillProperties(TInstanceInfo info, ProcessInstanceDAO instance, Map<QName, String> props) {
+        TInstanceInfo.CorrelationProperties corrProperties = info.addNewCorrelationProperties();
+        for (Map.Entry<QName, String> property : props.entrySet()) {
+            TCorrelationProperty tproperty = corrProperties.addNewCorrelationProperty();
+            // not setting correlation-set id here -- too inconvenient for performance
+            // tproperty.setCsetid("" + cset.getCorrelationSetId());
+            tproperty.setPropertyName(property.getKey());
+            tproperty.setStringValue(property.getValue());
+        }
+    }
+
+    private void fillInstanceSummary(TInstanceInfo info, ProcessInstanceDAO instance) {
         info.setIid("" + instance.getInstanceId());
         ProcessDAO processDAO = instance.getProcess();
         info.setPid(processDAO.getProcessId().toString());
         info.setProcessName(processDAO.getType());
-        if (instance.getRootScope() != null)
-            info.setRootScope(genScopeRef(instance.getRootScope()));
         info.setDtStarted(toCalendar(instance.getCreateTime()));
         info.setDtLastActive(toCalendar(instance.getLastActiveTime()));
         info.setStatus(__psc.cvtInstanceStatus(instance.getState()));
@@ -881,9 +919,21 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             faultInfo.setAiid(instance.getFault().getActivityId());
             faultInfo.setLineNumber(instance.getFault().getLineNo());
         }
+    }
+    
+    private void fillInstanceInfo(TInstanceInfo info, ProcessInstanceDAO instance) {
+        fillInstanceSummary(info, instance);
+
+        if (instance.getRootScope() != null)
+            info.setRootScope(genScopeRef(instance.getRootScope()));
 
         ProcessInstanceDAO.EventsFirstLastCountTuple flc = instance.getEventsFirstLastCount();
         TInstanceInfo.EventInfo eventInfo = info.addNewEventInfo();
+        if (flc != null) {
+            eventInfo.setFirstDtime(toCalendar(flc.first));
+            eventInfo.setLastDtime(toCalendar(flc.last));
+            eventInfo.setCount(flc.count);
+        }
 
         // Setting valued correlation properties
         if (!instance.getCorrelationSets().isEmpty()) {
@@ -896,12 +946,6 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                     tproperty.setStringValue(property.getValue());
                 }
             }
-        }
-
-        if (flc != null) {
-            eventInfo.setFirstDtime(toCalendar(flc.first));
-            eventInfo.setLastDtime(toCalendar(flc.last));
-            eventInfo.setCount(flc.count);
         }
 
         if (instance.getActivityFailureCount() > 0) {
