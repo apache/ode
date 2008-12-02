@@ -114,7 +114,7 @@ public class ODEService {
                 odeMex.invokeBlocking();
             } catch (java.util.concurrent.TimeoutException te) {
                 String errmsg = "Call to " + _serviceName + "." + odeMex.getOperationName() + " timed out.";
-                __log.error(errmsg);
+                __log.error(errmsg, te);
                 throw new OdeFault(errmsg);         
             }
             

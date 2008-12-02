@@ -133,8 +133,10 @@ public class ProcessConfImpl implements ProcessConf {
                     return path.getName().endsWith(".endpoint") && path.isFile();
                 }
             });
-            Arrays.sort(files);
-            propFiles.addAll(Arrays.asList(files));
+            if( files != null ) {
+	            Arrays.sort(files);
+	            propFiles.addAll(Arrays.asList(files));
+            }
         }
         return propFiles;
     }    
