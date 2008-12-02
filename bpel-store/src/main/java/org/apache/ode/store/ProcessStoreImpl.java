@@ -731,6 +731,8 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     public void setDeployDir(File depDir) {
+        if (depDir != null && !depDir.isDirectory())
+            throw new IllegalArgumentException("Deploy directory is not a directory or does not exist:  " + depDir);
         _deployDir = depDir;
     }
 
@@ -743,6 +745,8 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     public void setConfigDir(File configDir) {
+        if (configDir != null && !configDir.isDirectory())
+            throw new IllegalArgumentException("Config directory is not a directory or does not exist: " + configDir);
         this._configDir = configDir;
     }
 

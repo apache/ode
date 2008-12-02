@@ -6,7 +6,7 @@ public class CorrelationMultiHibTest extends CorrelationMultiTest {
     @BeforeMethod
     protected void setUp() throws Exception {
     	System.setProperty("org.apache.ode.configDir", 
-    			getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.hib");
+    			getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.hib-derby");
         super.setUp();
     }
 }
