@@ -137,6 +137,10 @@ public class SoapExternalService implements ExternalService {
             // Override options are passed to the axis MessageContext so we can
             // retrieve them in our session out changeHandler.
             MessageContext mctx = new MessageContext();
+            /* make the given options the parent so it becomes the defaults of the MessageContexgt. That allows the user to override
+            *  specific options on a given message context and not affect the overall options.
+            */
+            mctx.getOptions().setParent(getOptions());
             writeHeader(mctx, odeMex);
 
             _converter.createSoapRequest(mctx, odeMex.getRequest(), odeMex.getOperation());
@@ -225,7 +229,6 @@ public class SoapExternalService implements ExternalService {
             // call manually the check procedure
             // we dont want a dedicated thread for that
             _axisServiceWatchDog.check();
-            _axisOptionsWatchDog.check();
         } catch (RuntimeException e) {
             throw AxisFault.makeFault(e.getCause() != null ? e.getCause() : e);
         }
@@ -238,11 +241,20 @@ public class SoapExternalService implements ExternalService {
         }
         AxisService anonymousService = _axisServiceWatchDog.getObserver().anonymousService;
         serviceClient.setAxisService(anonymousService);
-        serviceClient.setOptions(_axisOptionsWatchDog.getObserver().options);
+        serviceClient.setOptions(getOptions());
 
-        applySecuritySettings(_axisOptionsWatchDog.getObserver().options, serviceClient);
+        applySecuritySettings(getOptions(), serviceClient);
 
         return serviceClient;
+    }
+
+    private Options getOptions() throws AxisFault {
+        try {
+            _axisOptionsWatchDog.check();
+        } catch (RuntimeException e) {
+            throw AxisFault.makeFault(e.getCause() != null ? e.getCause() : e);
+        }
+        return _axisOptionsWatchDog.getObserver().options;
     }
 
     private void applySecuritySettings(Options options, ServiceClient serviceClient) throws AxisFault {
@@ -319,44 +331,44 @@ public class SoapExternalService implements ExternalService {
                 myRoleEPR.setSessionId(myRoleSessionId);
             }
             options.setProperty("callbackSessionEndpoint", odeMex.getMyRoleEndpointReference());
-            
+
             // Map My Session ID to JMS Correlation ID
             Document callbackEprXml = odeMex.getMyRoleEndpointReference().toXML();
             Element serviceElement = callbackEprXml.getDocumentElement();
-            Element address = DOMUtils.findChildByName(serviceElement, 
-            		new QName(Namespaces.WS_ADDRESSING_NS, "Address"), true);
+            Element address = DOMUtils.findChildByName(serviceElement,
+                    new QName(Namespaces.WS_ADDRESSING_NS, "Address"), true);
             if (address != null) {
-	            String jmsUrl = address.getTextContent();
-	            String jmsDestination = (String) options.getProperty(JMSConstants.REPLY_PARAM);
-	            if (jmsDestination == null || "".equals(jmsDestination.trim())) {
-	            	// If the REPLY_PARAM property is not user-defined, then use the default value from myRole EPR
-		            int jmsStartIndex = jmsUrl.indexOf("jms:/");
-		            if (jmsStartIndex != -1) {
-		            	if (myRoleSessionId != null) {
-				            options.setProperty(JMSConstants.JMS_COORELATION_ID, myRoleSessionId);
-		            	} else {
-		            		Element sessionElement = DOMUtils.findChildByName(serviceElement, 
-		            				new QName(Namespaces.INTALIO_SESSION_NS, "session"), true);
-		            		myRoleSessionId = sessionElement.getNodeValue();
-		            		if (myRoleSessionId != null) {
-					            options.setProperty(JMSConstants.JMS_COORELATION_ID, myRoleSessionId);
-		            		}
-		            	}
-		            	jmsStartIndex += "jms:/".length();
-		            	if (jmsUrl.charAt(jmsStartIndex + 1) == '/') {
-		            		jmsStartIndex++;
-		            	}
-		            	if (jmsUrl.startsWith("dynamic")) {
-		            		jmsStartIndex += "dynamicQueues".length();
-		            	}
-		            	int jmsEndIndex = jmsUrl.indexOf("?", jmsStartIndex);
-		            	if (jmsEndIndex == -1) {
-		            		jmsEndIndex = jmsUrl.length();
-		            	}
-		        		jmsDestination = jmsUrl.substring(jmsStartIndex, jmsEndIndex);
-		                options.setProperty(JMSConstants.REPLY_PARAM, jmsDestination);
-		            }
-	            }
+                String jmsUrl = address.getTextContent();
+                String jmsDestination = (String) options.getProperty(JMSConstants.REPLY_PARAM);
+                if (jmsDestination == null || "".equals(jmsDestination.trim())) {
+                    // If the REPLY_PARAM property is not user-defined, then use the default value from myRole EPR
+                    int jmsStartIndex = jmsUrl.indexOf("jms:/");
+                    if (jmsStartIndex != -1) {
+                        if (myRoleSessionId != null) {
+                            options.setProperty(JMSConstants.JMS_COORELATION_ID, myRoleSessionId);
+                        } else {
+                            Element sessionElement = DOMUtils.findChildByName(serviceElement,
+                                    new QName(Namespaces.INTALIO_SESSION_NS, "session"), true);
+                            myRoleSessionId = sessionElement.getNodeValue();
+                            if (myRoleSessionId != null) {
+                                options.setProperty(JMSConstants.JMS_COORELATION_ID, myRoleSessionId);
+                            }
+                        }
+                        jmsStartIndex += "jms:/".length();
+                        if (jmsUrl.charAt(jmsStartIndex + 1) == '/') {
+                            jmsStartIndex++;
+                        }
+                        if (jmsUrl.startsWith("dynamic")) {
+                            jmsStartIndex += "dynamicQueues".length();
+                        }
+                        int jmsEndIndex = jmsUrl.indexOf("?", jmsStartIndex);
+                        if (jmsEndIndex == -1) {
+                            jmsEndIndex = jmsUrl.length();
+                        }
+                        jmsDestination = jmsUrl.substring(jmsStartIndex, jmsEndIndex);
+                        options.setProperty(JMSConstants.REPLY_PARAM, jmsDestination);
+                    }
+                }
             }
         } else {
             __log.debug("My-Role EPR not specified, SEP will not be used.");
@@ -524,8 +536,8 @@ public class SoapExternalService implements ExternalService {
                     }
                 }
             } catch (Exception e) {
-                if (__log.isWarnEnabled()) __log.warn("Exception while configuring service: " + _serviceName,e);
-                throw new RuntimeException("Exception while configuring service: " + _serviceName,e);
+                if (__log.isWarnEnabled()) __log.warn("Exception while configuring service: " + _serviceName, e);
+                throw new RuntimeException("Exception while configuring service: " + _serviceName, e);
             }
         }
     }
