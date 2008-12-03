@@ -133,7 +133,7 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 
     @SuppressWarnings("unchecked")
     public Collection<CorrelationSetDAO> selectCorrelationSets(Collection<ProcessInstanceDAO> instances) {
-	    return getEM().createNamedQuery(CorrelationSetDAOImpl.SELECT_CORRELATION_SETS_BY_INSTANCE).setParameter("instances", instances).getResultList();
+	    return getEM().createNamedQuery(CorrelationSetDAOImpl.SELECT_CORRELATION_SETS_BY_INSTANCES).setParameter("instances", instances).getResultList();
 	}
 	
 	public void delete(Set<CLEANUP_CATEGORY> cleanupCategories) {
