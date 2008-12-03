@@ -60,6 +60,7 @@ import org.apache.ode.utils.fs.FileUtils;
 import org.apache.ode.utils.uuid.UUID;
 import org.apache.ode.utils.wsdl.Messages;
 import org.apache.rampart.RampartMessageData;
+import org.apache.derby.iapi.services.property.PersistentSet;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -245,11 +246,12 @@ public class SoapExternalService implements ExternalService {
         serviceClient.setAxisService(anonymousService);
         serviceClient.setOptions(_axisOptionsWatchDog.getObserver().options);
 
-        applySecuritySettings(_axisOptionsWatchDog.getObserver().options, serviceClient);
+        applySecuritySettings(serviceClient);
 
         return serviceClient;
     }
-    private void applySecuritySettings(Options options, ServiceClient serviceClient) throws AxisFault {
+    private void applySecuritySettings(ServiceClient serviceClient) throws AxisFault {
+        Options options = serviceClient.getOptions();
         if (options.getProperty(Properties.PROP_SECURITY_POLICY) != null) {
             String policy = (String) options.getProperty(Properties.PROP_SECURITY_POLICY);
             // if the policy path is relative, the full uri is resolved against the process conf directory
