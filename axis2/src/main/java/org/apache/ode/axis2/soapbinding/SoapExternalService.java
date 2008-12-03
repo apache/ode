@@ -60,6 +60,7 @@ import org.apache.ode.utils.fs.FileUtils;
 import org.apache.ode.utils.uuid.UUID;
 import org.apache.ode.utils.wsdl.Messages;
 import org.apache.rampart.RampartMessageData;
+import org.apache.derby.iapi.services.property.PersistentSet;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -123,9 +124,16 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
     public void invoke(final PartnerRoleMessageExchange odeMex) {
         boolean isTwoWay = odeMex.getMessageExchangePattern() == org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern.REQUEST_RESPONSE;
         try {
+
+            ServiceClient client = getServiceClient();
+
             // Override options are passed to the axis MessageContext so we can
             // retrieve them in our session out changeHandler.
             MessageContext mctx = new MessageContext();
+            /* make the given options the parent so it becomes the defaults of the MessageContexgt. That allows the user to override
+            *  specific options on a given message context and not affect the overall options.
+            */
+            mctx.getOptions().setParent(client.getOptions());
             writeHeader(mctx, odeMex);
 
             _converter.createSoapRequest(mctx, odeMex.getRequest(), odeMex.getOperation());
@@ -137,7 +145,6 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
                 __log.debug("Message: " + soapEnv);
             }
 
-            ServiceClient client = getServiceClient();
             final OperationClient operationClient = client.createClient(isTwoWay ? ServiceClient.ANON_OUT_IN_OP
                     : ServiceClient.ANON_OUT_ONLY_OP);
             operationClient.addMessageContext(mctx);
@@ -198,12 +205,12 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
         serviceClient.setAxisService(anonymousService);
         serviceClient.setOptions(_axisOptionsWatchDog.getObserver().options);
 
-        applySecuritySettings(_axisOptionsWatchDog.getObserver().options, serviceClient);
+        applySecuritySettings(serviceClient);
 
         return serviceClient;
     }
-
-    private void applySecuritySettings(Options options, ServiceClient serviceClient) throws AxisFault {
+    private void applySecuritySettings(ServiceClient serviceClient) throws AxisFault {
+        Options options = serviceClient.getOptions();
         if (options.getProperty(Properties.PROP_SECURITY_POLICY) != null) {
             String policy = (String) options.getProperty(Properties.PROP_SECURITY_POLICY);
             // if the policy path is relative, the full uri is resolved against the process conf directory
@@ -419,8 +426,8 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
                     }
                 }
             } catch (Exception e) {
-                if (__log.isWarnEnabled()) __log.warn("Exception while configuring service: " + _serviceName,e);
-                throw new RuntimeException("Exception while configuring service: " + _serviceName,e);
+                if (__log.isWarnEnabled()) __log.warn("Exception while configuring service: " + _serviceName, e);
+                throw new RuntimeException("Exception while configuring service: " + _serviceName, e);
             }
         }
     }
