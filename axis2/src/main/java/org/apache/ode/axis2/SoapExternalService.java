@@ -134,13 +134,16 @@ public class SoapExternalService implements ExternalService {
     public void invoke(final PartnerRoleMessageExchange odeMex) {
         boolean isTwoWay = odeMex.getMessageExchangePattern() == org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern.REQUEST_RESPONSE;
         try {
+
+            ServiceClient client = getServiceClient();
+
             // Override options are passed to the axis MessageContext so we can
             // retrieve them in our session out changeHandler.
             MessageContext mctx = new MessageContext();
             /* make the given options the parent so it becomes the defaults of the MessageContexgt. That allows the user to override
             *  specific options on a given message context and not affect the overall options.
             */
-            mctx.getOptions().setParent(getOptions());
+            mctx.getOptions().setParent(client.getOptions());
             writeHeader(mctx, odeMex);
 
             _converter.createSoapRequest(mctx, odeMex.getRequest(), odeMex.getOperation());
@@ -152,8 +155,6 @@ public class SoapExternalService implements ExternalService {
                 __log.debug("Axis2 sending message to " + axisEPR.getAddress() + " using MEX " + odeMex);
                 __log.debug("Message: " + soapEnv);
             }
-
-            ServiceClient client = getServiceClient();
 
             final OperationClient operationClient = client.createClient(isTwoWay ? ServiceClient.ANON_OUT_IN_OP
                     : ServiceClient.ANON_OUT_ONLY_OP);
@@ -229,6 +230,7 @@ public class SoapExternalService implements ExternalService {
             // call manually the check procedure
             // we dont want a dedicated thread for that
             _axisServiceWatchDog.check();
+            _axisOptionsWatchDog.check();
         } catch (RuntimeException e) {
             throw AxisFault.makeFault(e.getCause() != null ? e.getCause() : e);
         }
@@ -241,22 +243,12 @@ public class SoapExternalService implements ExternalService {
         }
         AxisService anonymousService = _axisServiceWatchDog.getObserver().anonymousService;
         serviceClient.setAxisService(anonymousService);
-        serviceClient.setOptions(getOptions());
+        serviceClient.setOptions(_axisOptionsWatchDog.getObserver().options);
 
-        applySecuritySettings(getOptions(), serviceClient);
+        applySecuritySettings(_axisOptionsWatchDog.getObserver().options, serviceClient);
 
         return serviceClient;
     }
-
-    private Options getOptions() throws AxisFault {
-        try {
-            _axisOptionsWatchDog.check();
-        } catch (RuntimeException e) {
-            throw AxisFault.makeFault(e.getCause() != null ? e.getCause() : e);
-        }
-        return _axisOptionsWatchDog.getObserver().options;
-    }
-
     private void applySecuritySettings(Options options, ServiceClient serviceClient) throws AxisFault {
         if (options.getProperty(Properties.PROP_SECURITY_POLICY) != null) {
             String policy = (String) options.getProperty(Properties.PROP_SECURITY_POLICY);
