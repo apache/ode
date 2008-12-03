@@ -271,6 +271,8 @@ public interface ProcessInstanceDAO {
 
     public void setExecutionStateCounter(int stateCounter);
 
+    Set<String> getAllResourceRoutes();
+
     /**
      * Transport object holding the date of the first and last instance event along with the number events.
      */

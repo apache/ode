@@ -140,10 +140,10 @@ class OutstandingRequestManager implements Serializable {
 
         Entry entry = _byChannel.remove(pickResponseChannel);
         if (entry != null)
-            _byRid.values().remove(entry);
+            while(_byRid.values().remove(entry));
         RestEntry restEntry = _byRestChannel.remove(pickResponseChannel);
         if (restEntry != null)
-            _byRestRid.values().remove(restEntry);
+            while(_byRestRid.values().remove(restEntry));
     }
 
     /**
@@ -182,6 +182,20 @@ class OutstandingRequestManager implements Serializable {
             }
             entry.mexRef = mexRef;
         }
+    }
+
+    public void associateEvent(PartnerLinkInstance plinkInstance, String opName, String mexRef, String scopeIid) {
+        RequestIdTuple rid = new RequestIdTuple(plinkInstance, opName, mexRef);
+        Entry entry = _byRid.remove(rid);
+        rid.mexId = scopeIid;
+        _byRid.put(rid, entry);
+    }
+
+    public void associateEvent(ResourceInstance resourceInstance, String method, String mexRef, String scopeIid) {
+        RequestResTuple rid = new RequestResTuple(resourceInstance, method, mexRef);
+        RestEntry entry = _byRestRid.remove(rid);
+        rid.mexId = scopeIid;
+        _byRestRid.put(rid, entry);
     }
 
     /**

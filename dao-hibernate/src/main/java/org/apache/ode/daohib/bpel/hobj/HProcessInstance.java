@@ -50,6 +50,8 @@ public class HProcessInstance extends HObject {
 
     private Set<HMessageExchange> _messageExchanges = new HashSet<HMessageExchange>();
 
+    private Set<HResourceRoute> _resourceRoutes = new HashSet<HResourceRoute>();
+
     private HFaultData _fault;
 
     private HLargeData _jacobState;
@@ -151,6 +153,19 @@ public class HProcessInstance extends HObject {
 
     public void setMessageExchanges(Set<HMessageExchange> exchanges) {
         _messageExchanges = exchanges;
+    }
+
+    /**
+     * @hibernate.set lazy="true" inverse="true" cascade="delete"
+     * @hibernate.collection-key column="PIID"
+     * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HResourceRoute"
+     */
+    public Set<HResourceRoute> getResourceRoutes() {
+        return _resourceRoutes;
+    }
+
+    public void setResourceRoutes(Set<HResourceRoute> rroutes) {
+        _resourceRoutes = rroutes;
     }
 
     /**

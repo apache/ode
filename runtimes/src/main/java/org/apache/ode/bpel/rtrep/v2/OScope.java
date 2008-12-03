@@ -214,7 +214,7 @@ public class OScope extends OActivity {
         }
 
         public String getDescription() {
-            StringBuffer buf = new StringBuffer(declaringScope.name);
+            StringBuffer buf = new StringBuffer(declaringScope.name != null ? declaringScope.name : "");
             buf.append('.');
             buf.append(name);
             return buf.toString();

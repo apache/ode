@@ -50,6 +50,8 @@ class ScopeFrame implements Serializable {
     
     final InstanceGlobals globals;
 
+    boolean eventScope = false;
+
     /** Constructor used to create "fault" scopes. */
     ScopeFrame( OScope scopeDef,
                 Long scopeInstanceId,
@@ -83,6 +85,12 @@ class ScopeFrame implements Serializable {
     public ScopeFrame find(OScope scope) {
         if (oscope.getId() == scope.getId()) return this;
         return (parent != null) ? parent.find(scope) : null;
+    }
+
+    public ScopeFrame findEventScope() {
+        if (eventScope) return this;
+        else if (parent == null) return null;
+        else return parent.findEventScope();
     }
 
     public VariableInstance resolve(OScope.Variable variable) {

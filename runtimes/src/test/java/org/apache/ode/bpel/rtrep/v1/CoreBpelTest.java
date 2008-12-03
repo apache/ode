@@ -126,6 +126,10 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    public void cancelOutstandingRequests(String channelId) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public void select(PickResponseChannel pickResponseChannel, Date timeout, boolean createInstance, Selector[] selectors) throws FaultException {
         //To change body of implemented methods use File | Settings | File Templates.
     }

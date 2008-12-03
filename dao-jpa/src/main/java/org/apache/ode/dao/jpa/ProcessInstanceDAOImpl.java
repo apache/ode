@@ -20,16 +20,7 @@
 package org.apache.ode.dao.jpa;
 
 import org.apache.ode.bpel.common.ProcessState;
-import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.CorrelationSetDAO;
-import org.apache.ode.bpel.dao.CorrelatorDAO;
-import org.apache.ode.bpel.dao.FaultDAO;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ScopeDAO;
-import org.apache.ode.bpel.dao.ScopeStateEnum;
-import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.w3c.dom.Element;
 
@@ -94,6 +85,8 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 	private Collection<ScopeDAO> _scopes = new ArrayList<ScopeDAO>();
 	@OneToMany(targetEntity=ActivityRecoveryDAOImpl.class,mappedBy="_instance",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
     private Collection<ActivityRecoveryDAO> _recoveries = new ArrayList<ActivityRecoveryDAO>();
+	@OneToMany(targetEntity=ResourceRouteDAOImpl.class,mappedBy="_instance",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
+    private Collection<ResourceRouteDAO> _resourceRoutes = new ArrayList<ResourceRouteDAO>();
 	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL}) @Column(name="FAULT_ID")
 	private FaultDAOImpl _fault;
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROCESS_ID")
@@ -158,7 +151,17 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
     }
 
     public void createResourceRoute(String url, String method, String pickResponseChannel, int selectorIdx) {
-        new ResourceRouteDAOImpl(url, method, pickResponseChannel, selectorIdx, this);
+        ResourceRouteDAOImpl rr = new ResourceRouteDAOImpl(url, method, pickResponseChannel, selectorIdx, this);
+        rr.setInstance(this);
+        _resourceRoutes.add(rr);
+    }
+
+    public Set<String> getAllResourceRoutes() {
+        HashSet<String> rs = new HashSet<String>();
+        for (ResourceRouteDAO resourceRoute : _resourceRoutes) {
+            rs.add(resourceRoute.getUrl() + "~" + resourceRoute.getMethod());
+        }
+        return rs;
     }
 
     public void finishCompletion() {

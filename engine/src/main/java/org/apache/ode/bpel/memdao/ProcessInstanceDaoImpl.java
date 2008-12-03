@@ -246,6 +246,14 @@ public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstan
         _resourceRoutes.put(url, rroute);
     }
 
+    public Set<String> getAllResourceRoutes() {
+        HashSet<String> rs = new HashSet<String>();
+        for (ResourceRouteDAO routeDAO : _resourceRoutes.values()) {
+            rs.add(routeDAO.getUrl() + "~" + routeDAO.getMethod());
+        }
+        return rs;
+    }
+
     /**
      * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getScopes(java.lang.String)
      */

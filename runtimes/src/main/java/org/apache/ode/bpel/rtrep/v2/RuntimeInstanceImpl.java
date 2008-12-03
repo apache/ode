@@ -119,6 +119,10 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
         return _brc.getInstantiatingUrl();
     }
 
+    public void cancelOutstandingRequests(String channelId) {
+        getORM().cancel(channelId);
+    }
+
     public void select(PickResponseChannel pickResponseChannel, Date timeout, boolean createInstance, Selector[] selectors)
             throws FaultException {
 
@@ -447,6 +451,14 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
      */
     public void sendEvent(ProcessInstanceStartedEvent evt) {
         _brc.sendEvent(evt);
+    }
+
+    public void associateEvent(PartnerLinkInstance plinkInstance, String opName, String mexRef, String scopeIid) {
+        getORM().associateEvent(plinkInstance, opName, mexRef, scopeIid);
+    }
+
+    public void associateEvent(ResourceInstance resourceInstance, String mexRef, String scopeIid) {
+        getORM().associateEvent(resourceInstance, resourceInstance.getModel().getMethod(), mexRef, scopeIid);
     }
 
     public void reply(PartnerLinkInstance plink, String opName, String bpelmex, Element element, QName fault) throws FaultException {

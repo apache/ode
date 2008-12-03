@@ -128,6 +128,14 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    public void associateEvent(PartnerLinkInstance plinkInstance, String opName, String mexRef, String scopeIid) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void associateEvent(ResourceInstance resourceInstance, String mexRef, String scopeIid) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public void reply(ResourceInstance resource, String bpelmex, Element element, QName fault) throws FaultException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
@@ -141,6 +149,10 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
     }
 
     public void registerTimer(TimerResponseChannel timerChannel, Date future) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void cancelOutstandingRequests(String channelId) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 

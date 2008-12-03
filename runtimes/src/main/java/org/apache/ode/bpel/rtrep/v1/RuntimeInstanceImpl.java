@@ -108,6 +108,10 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
 
     }
 
+    public void cancelOutstandingRequests(String channelId) {
+        getORM().cancel(channelId);
+    }
+
     public void select(PickResponseChannel pickResponseChannel, Date timeout, boolean createInstance, Selector[] selectors)
             throws FaultException {
 

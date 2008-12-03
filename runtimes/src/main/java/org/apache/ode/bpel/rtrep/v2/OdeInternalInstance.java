@@ -77,6 +77,8 @@ public interface OdeInternalInstance {
 
     void unregisterActivityForRecovery(ActivityRecoveryChannel recoveryChannel);
 
+    void cancelOutstandingRequests(String channelId);
+
     void select(PickResponseChannel pickResponseChannel, Date timeout, boolean createInstance, Selector[] selectors)
             throws FaultException;
 
@@ -123,6 +125,10 @@ public interface OdeInternalInstance {
     void terminate();
 
     void forceFlush();
+
+    void associateEvent(PartnerLinkInstance plinkInstance, String opName, String mexRef, String scopeIid);
+
+    void associateEvent(ResourceInstance resourceInstance, String mexRef, String scopeIid);
 
     void reply(PartnerLinkInstance plink, String opName, String bpelmex, Element element, QName fault)
             throws FaultException;

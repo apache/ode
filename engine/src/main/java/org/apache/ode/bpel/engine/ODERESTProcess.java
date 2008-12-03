@@ -73,56 +73,62 @@ public class ODERESTProcess extends ODEProcess {
         }
         mexdao.setProcess(getProcessDAO());
 
-        Resource instantiatingResource = getResource(mexdao.getResource());
-        InvocationStyle istyle = mexdao.getInvocationStyle();
+        try {
+            Resource instantiatingResource = getResource(mexdao.getResource());
+            InvocationStyle istyle = mexdao.getInvocationStyle();
 
-        if (instantiatingResource != null) {
-            ProcessInstanceDAO newInstance = getProcessDAO().createInstance(null);
-            newInstance.setInstantiatingUrl(mexdao.getResource());
+            if (instantiatingResource != null) {
+                ProcessInstanceDAO newInstance = getProcessDAO().createInstance(null);
+                newInstance.setInstantiatingUrl(mexdao.getResource());
 
-            // send process instance event
-            NewProcessInstanceEvent evt = new NewProcessInstanceEvent(getProcessModel().getQName(),
-                    getProcessDAO().getProcessId(), newInstance.getInstanceId());
-            evt.setMexId(mexdao.getMessageExchangeId());
-            saveEvent(evt, newInstance);
+                // send process instance event
+                NewProcessInstanceEvent evt = new NewProcessInstanceEvent(getProcessModel().getQName(),
+                        getProcessDAO().getProcessId(), newInstance.getInstanceId());
+                evt.setMexId(mexdao.getMessageExchangeId());
+                saveEvent(evt, newInstance);
 
-            mexdao.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.CREATE_INSTANCE.toString());
-            mexdao.setInstance(newInstance);
+                mexdao.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.CREATE_INSTANCE.toString());
+                mexdao.setInstance(newInstance);
 
-            doInstanceWork(mexdao.getInstance().getInstanceId(), new Callable<Void>() {
-                public Void call() {
-                    executeCreateInstance(mexdao);
-                    return null;
-                }
-            });
-        } else {
-            // TODO avoid reloading the resource routing, it's just been loaded by the server on mex creation
-            String[] urlMeth = mexdao.getResource().split("~");
-            ResourceRouteDAO rr = _contexts.dao.getConnection().getResourceRoute(urlMeth[0], urlMeth[1]);
-            // This really should have been caught by the server
-            if (rr == null) throw new BpelEngineException("NoSuchResource: " + mexdao.getResource());
-            mexdao.setInstance(rr.getInstance());
-            mexdao.setChannel(rr.getPickResponseChannel() + "&" + rr.getSelectorIdx());
-
-            if (istyle == InvocationStyle.TRANSACTED) {
                 doInstanceWork(mexdao.getInstance().getInstanceId(), new Callable<Void>() {
                     public Void call() {
-                        executeContinueInstanceMyRoleRequestReceived(mexdao);
+                        executeCreateInstance(mexdao);
                         return null;
                     }
                 });
-            } else /* non-transacted style */ {
-                WorkEvent we = new WorkEvent();
-                we.setType(WorkEvent.Type.MYROLE_INVOKE);
-                we.setIID(mexdao.getInstance().getInstanceId());
-                we.setMexId(mexdao.getMessageExchangeId());
-                // Could be different to this pid when routing to an older version
-                we.setProcessId(mexdao.getInstance().getProcess().getProcessId());
+            } else {
+                // TODO avoid reloading the resource routing, it's just been loaded by the server on mex creation
+                String[] urlMeth = mexdao.getResource().split("~");
+                ResourceRouteDAO rr = _contexts.dao.getConnection().getResourceRoute(urlMeth[0], urlMeth[1]);
+                // This really should have been caught by the server
+                if (rr == null) throw new BpelEngineException("NoSuchResource: " + mexdao.getResource());
+                mexdao.setInstance(rr.getInstance());
+                mexdao.setChannel(rr.getPickResponseChannel() + "&" + rr.getSelectorIdx());
 
-                scheduleWorkEvent(we, null);
+                if (istyle == InvocationStyle.TRANSACTED) {
+                    doInstanceWork(mexdao.getInstance().getInstanceId(), new Callable<Void>() {
+                        public Void call() {
+                            executeContinueInstanceMyRoleRequestReceived(mexdao);
+                            return null;
+                        }
+                    });
+                } else /* non-transacted style */ {
+                    WorkEvent we = new WorkEvent();
+                    we.setType(WorkEvent.Type.MYROLE_INVOKE);
+                    we.setIID(mexdao.getInstance().getInstanceId());
+                    we.setMexId(mexdao.getMessageExchangeId());
+                    // Could be different to this pid when routing to an older version
+                    we.setProcessId(mexdao.getInstance().getProcess().getProcessId());
+
+                    scheduleWorkEvent(we, null);
+                }
+
             }
-
+        } finally {
+            // If we did not get an ACK during this method, then mark this MEX as needing an ASYNC wake-up
+            if (mexdao.getStatus() != MessageExchange.Status.ACK) mexdao.setStatus(MessageExchange.Status.ASYNC);
         }
+
     }
 
     void onRestMexAck(MessageExchangeDAO mexdao, MessageExchange.Status old, String url) {

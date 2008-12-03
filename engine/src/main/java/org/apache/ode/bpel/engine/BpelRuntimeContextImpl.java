@@ -21,10 +21,7 @@ package org.apache.ode.bpel.engine;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -148,6 +145,8 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         _dao.setFault(faultData.getFaultName(), faultData.getExplanation(), faultData.getFaultLineNo(),
                 faultData.getActivityId(), faultData.getFaultMessage());
 
+        cleanupResourceRoutes();
+
         // send event
         ProcessInstanceStateChangeEvent evt = new ProcessInstanceStateChangeEvent();
         evt.setOldState(_dao.getState());
@@ -163,6 +162,8 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         if (ODEProcess.__log.isDebugEnabled()) {
             ODEProcess.__log.debug("ProcessImpl " + _bpelProcess.getPID() + " completed OK.");
         }
+
+        cleanupResourceRoutes();
 
         // send event
         ProcessInstanceStateChangeEvent evt = new ProcessInstanceStateChangeEvent();
@@ -317,6 +318,15 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         }
 
         // TODO schedule a matcher to see if the message arrived already
+    }
+
+    private void cleanupResourceRoutes() {
+        Set<String> routes = _dao.getAllResourceRoutes();
+        for (String route : routes) {
+            String[] resArr = route.split("~");
+            org.apache.ode.bpel.iapi.Resource res = new org.apache.ode.bpel.iapi.Resource(resArr[0], "application/xml", resArr[1]);
+            _bpelProcess._contexts.bindingContext.deactivateProvidedResource(res);
+        }
     }
 
     public CorrelationKey readCorrelation(CorrelationSet cset) {
