@@ -329,40 +329,62 @@ public class SoapExternalService implements ExternalService {
             // Map My Session ID to JMS Correlation ID
             Document callbackEprXml = odeMex.getMyRoleEndpointReference().toXML();
             Element serviceElement = callbackEprXml.getDocumentElement();
-            Element address = DOMUtils.findChildByName(serviceElement,
-                    new QName(Namespaces.WS_ADDRESSING_NS, "Address"), true);
+            
+        	if (myRoleSessionId != null) {
+	            options.setProperty(JMSConstants.JMS_COORELATION_ID, myRoleSessionId);
+        	} else {
+        		Element sessionElement = DOMUtils.findChildByName(serviceElement, 
+        				new QName(Namespaces.INTALIO_SESSION_NS, "session"), true);
+        		myRoleSessionId = sessionElement.getNodeValue();
+        		if (myRoleSessionId != null) {
+		            options.setProperty(JMSConstants.JMS_COORELATION_ID, myRoleSessionId);
+        		}
+        	}
+
+            Element address = DOMUtils.findChildByName(serviceElement, 
+            		new QName(Namespaces.WS_ADDRESSING_NS, "Address"), true);
+            if (__log.isDebugEnabled()) {
+                __log.debug("The system-defined wsa address is : "
+                        + address);
+            }
             if (address != null) {
-                String jmsUrl = address.getTextContent();
-                String jmsDestination = (String) options.getProperty(JMSConstants.REPLY_PARAM);
-                if (jmsDestination == null || "".equals(jmsDestination.trim())) {
-                    // If the REPLY_PARAM property is not user-defined, then use the default value from myRole EPR
-                    int jmsStartIndex = jmsUrl.indexOf("jms:/");
-                    if (jmsStartIndex != -1) {
-                        if (myRoleSessionId != null) {
-                            options.setProperty(JMSConstants.JMS_COORELATION_ID, myRoleSessionId);
-                        } else {
-                            Element sessionElement = DOMUtils.findChildByName(serviceElement,
-                                    new QName(Namespaces.INTALIO_SESSION_NS, "session"), true);
-                            myRoleSessionId = sessionElement.getNodeValue();
-                            if (myRoleSessionId != null) {
-                                options.setProperty(JMSConstants.JMS_COORELATION_ID, myRoleSessionId);
-                            }
-                        }
-                        jmsStartIndex += "jms:/".length();
-                        if (jmsUrl.charAt(jmsStartIndex + 1) == '/') {
-                            jmsStartIndex++;
-                        }
-                        if (jmsUrl.startsWith("dynamic")) {
-                            jmsStartIndex += "dynamicQueues".length();
-                        }
-                        int jmsEndIndex = jmsUrl.indexOf("?", jmsStartIndex);
-                        if (jmsEndIndex == -1) {
-                            jmsEndIndex = jmsUrl.length();
-                        }
-                        jmsDestination = jmsUrl.substring(jmsStartIndex, jmsEndIndex);
-                        options.setProperty(JMSConstants.REPLY_PARAM, jmsDestination);
-                    }
+	            String url = address.getTextContent();
+	            String jmsDestination = (String) options.getProperty(JMSConstants.REPLY_PARAM);
+                if (__log.isDebugEnabled()) {
+                    __log.debug("The user-defined JMS replyTo destination is: "
+                            + jmsDestination);
+                    __log.debug("The user-defined JMS wait timeout is: "
+                            + options.getProperty(JMSConstants.JMS_WAIT_REPLY));
                 }
+	            if (jmsDestination == null || "".equals(jmsDestination.trim())) {
+	            	// If the REPLY_PARAM property is not user-defined, then use the default value from myRole EPR
+		            int startIndex = url.indexOf("jms:/");
+		            if (startIndex != -1) {
+		            	startIndex += "jms:/".length();
+		            	if (url.charAt(startIndex + 1) == '/') {
+		            		startIndex++;
+		            	}
+		            	if (url.startsWith("dynamic")) {
+		            		startIndex += "dynamicQueues".length();
+		            	}
+		            	int jmsEndIndex = url.indexOf("?", startIndex);
+		            	if (jmsEndIndex == -1) {
+		            		jmsEndIndex = url.length();
+		            	}
+		        		jmsDestination = url.substring(startIndex, jmsEndIndex);
+		                options.setProperty(JMSConstants.REPLY_PARAM, jmsDestination);
+		            } else {
+			            startIndex = url.indexOf("http://");
+			            if (startIndex != -1) {
+			            	startIndex = url.indexOf("/processes/");
+			            	if (startIndex != -1) {
+			            		startIndex += "/processes/".length();
+			            		jmsDestination = url.substring(startIndex);
+				                options.setProperty(JMSConstants.REPLY_PARAM, jmsDestination);
+			            	}
+			            }
+		            }
+	            }
             }
         } else {
             __log.debug("My-Role EPR not specified, SEP will not be used.");
