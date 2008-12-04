@@ -83,6 +83,14 @@ public class HMessageExchangeProperty implements Serializable {
 	}
 
 	public boolean equals(Object another) {
+		// fake implementation to suppress hibernate warning on key not hash-searchable; 
+		// actually HMessageExchangePropery is never retrieved by the id 
 		return super.equals(another);
+	}
+	
+	public int hashCode() {
+		// fake implementation to suppress hibernate warning on key not hash-searchable
+		// actually HMessageExchangePropery is never retrieved by the id 
+		return _mex.hashCode() * 29 + _name.hashCode() * 13;
 	}
 }
