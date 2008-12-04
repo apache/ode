@@ -127,6 +127,8 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             	return new Delete();
             } else if (Constants.NON_STDRD_FUNCTION_RENAME.equals(localName)) {
             	return new Rename();
+            } else if (Constants.NON_STDRD_FUNCTION_PROCESS_PROPERTY.equals(localName)) {
+            	return new ProcessProperty();
             }
         }
 
@@ -1063,6 +1065,70 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             			elementTypeQName.getPrefix() + ":" + elementTypeQName.getLocalPart());
             }
             return clonedElmt;
+    	}
+    }
+    
+    public class ProcessProperty implements XPathFunction {
+    	public Object evaluate(List args) throws XPathFunctionException {
+            if (args.size() != 1)
+                throw new XPathFunctionException(new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "processPropertyInvalidSource"), "Invalid arguments"));
+
+            if (__log.isDebugEnabled()) {
+                __log.debug("process-property call(context=" + _ectx + " args=" + args + ")");
+            }
+
+            QName propertyName = null;
+            Element targetElmt = null;
+            try {
+                if (args.get(0) instanceof List) {
+                    List elmts = (List) args.get(0);
+                    if (elmts.size() != 1) throw new XPathFunctionException(
+                            new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                                    "The bpws:process-property function MUST be passed a single " +
+                                            "element node."));
+                    if (elmts.get(0) instanceof Element) {
+                        targetElmt = (Element) elmts.get(0);
+                    } else if (elmts.get(0) instanceof String) {
+                    	propertyName = new QName((String) elmts.get(0));
+                    }
+                } else if (args.get(0) instanceof NodeWrapper) {
+                    targetElmt = (Element) ((NodeWrapper) args.get(0)).getUnderlyingNode();
+                } else if (args.get(0) instanceof Element) {
+                    targetElmt = (Element) args.get(0);
+                } else if (args.get(0) instanceof QNameValue) {
+                	QNameValue qNameValue = (QNameValue) args.get(0);
+                    propertyName = new QName(qNameValue.getNamespaceURI(), qNameValue.getLocalName(), qNameValue.getPrefix());
+                } else if (args.get(0) instanceof String)	{
+                	String stringValue = (String) args.get(0);
+                	if (stringValue.indexOf(":") > 0) {
+                		String prefix = stringValue.substring(0, stringValue.indexOf(":"));
+                		String localPart = stringValue.substring(stringValue.indexOf(":") + 1);
+                		String namespaceUri = _oxpath.namespaceCtx.getNamespaceURI(prefix);
+                		propertyName = new QName(namespaceUri, localPart, prefix);
+                	} else {
+                    	propertyName = new QName(stringValue);
+                	}
+                } else if (args.get(0) instanceof QName) {
+                	propertyName = (QName) args.get(0);
+                } else {
+                    throw new XPathFunctionException("Unexpected argument type: "+args.get(0).getClass());
+                }
+                if (propertyName == null) {
+                	if (targetElmt != null) {
+                		propertyName = new QName(targetElmt.getTextContent());
+                	}
+                }
+            } catch (IllegalArgumentException e) {
+                throw new XPathFunctionException(
+                		new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                				"Invalid argument: URI Template expected. " + args.get(0), e));
+            } catch (ClassCastException e) {
+                throw new XPathFunctionException(
+                        new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                                "The bpws:process-property function MUST be passed a single " +
+                                        "element node."));
+            }
+            return _ectx.getPropertyValue(propertyName);
     	}
     }
     

@@ -23,6 +23,18 @@
 
 
 	<process name="pns:TestAssign">
+        <property name="punctuation">!</property>
+        <property name="epr">
+            <sref:service-ref 
+                xmlns:sref=" http://docs.oasis-open.org/wsbpel/2.0/serviceref"
+                xmlns:addr="http://example.com/addressing"
+                xmlns:as="http://example.com/auction/wsdl/auctionService/">
+                <addr:EndpointReference>
+                    <addr:Address>http://example.com/auction/RegistrationService/</addr:Address>
+                    <addr:ServiceName>as:RegistrationService</addr:ServiceName>
+                </addr:EndpointReference>
+            </sref:service-ref>
+        </property>
 		<active>true</active>
 		<provide partnerLink="TestAssignPartnerLink">
 			<service name="wns:TestAssignService" port="TestAssignPort"/>

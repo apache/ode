@@ -94,4 +94,8 @@ public class PropertyAliasEvaluationContext implements EvaluationContext {
     	return null;
     }
 
+	public Node getPropertyValue(QName propertyName) {
+		return null;
+	}
+
 }

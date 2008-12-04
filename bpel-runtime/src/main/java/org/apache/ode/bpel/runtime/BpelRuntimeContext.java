@@ -20,6 +20,7 @@ package org.apache.ode.bpel.runtime;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import java.net.URI;
 
 import javax.wsdl.Operation;
@@ -275,4 +276,12 @@ public interface BpelRuntimeContext {
 	 * @return URI - the URI representing the absolute physical file path location that this process is defined within.
 	 */
 	URI getBaseResourceURI();
+	
+	/**
+	 * Retrieves the property value that has been defined for this BPEL Process type.
+	 * 
+	 * @return propertyValue - the value corresponding to the process property name.
+	 */
+	Node getProcessProperty(QName propertyName);
+
 }

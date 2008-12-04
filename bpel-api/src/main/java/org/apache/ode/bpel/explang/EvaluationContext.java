@@ -20,6 +20,8 @@ package org.apache.ode.bpel.explang;
 
 import java.net.URI;
 
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLink;
@@ -105,5 +107,13 @@ public interface EvaluationContext {
 	 * 
 	 * @return URI - the URI representing the absolute physical file path location that this process is defined within.
 	 */
-	URI getBaseResourceURI();    
+	URI getBaseResourceURI();
+	
+	/**
+	 * Retrieves the property value that has been defined for this BPEL Process type.
+	 * 
+	 * @return propertyValue - the value corresponding to the process property name.
+	 */
+	Node getPropertyValue(QName propertyName);
+
 }

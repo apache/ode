@@ -916,4 +916,12 @@ public class BpelProcess {
     public Set<CLEANUP_CATEGORY> getCleanupCategories(boolean instanceSucceeded) {
     	return _pconf.getCleanupCategories(instanceSucceeded);
     }
+    
+    public Node getProcessProperty(QName propertyName) {
+    	Map<QName, Node> properties = _pconf.getProcessProperties();
+    	if (properties != null) {
+    		return properties.get(propertyName);
+    	}
+    	return null;
+    }
 }

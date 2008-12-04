@@ -21,9 +21,13 @@
     targetNamespace="http://ode/bpel/unit-testAssign2"
          xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
          xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
-    xmlns:tns="http://ode/bpel/unit-testAssign2"
+         xmlns:ode="http://www.apache.org/ode/type/extension"
+         xmlns:tns="http://ode/bpel/unit-testAssign2"
          xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    xmlns:test="http://ode/bpel/unit-testAssign2.wsdl"
+         xmlns:test="http://ode/bpel/unit-testAssign2.wsdl"
+         xmlns:sref=" http://docs.oasis-open.org/wsbpel/2.0/serviceref"
+         xmlns:addr="http://example.com/addressing"
+         xmlns:dd="http://www.apache.org/ode/schemas/dd/2007/03"
          queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
          expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
 
@@ -52,7 +56,19 @@
                 <to variable="strVar"/>
             </copy>
             <copy>
-                <from>concat($strVar,' World')</from>
+                <from>concat($strVar, " ")</from>
+                <to variable="strVar"/>
+            </copy>
+            <copy>
+                <from>concat($strVar, string(ode:process-property("dd:epr")/addr:EndpointReference/addr:ServiceName))</from>
+                <to variable="strVar"/>
+            </copy>
+            <copy>
+                <from>concat($strVar, string(ode:process-property("dd:punctuation")))</from>
+                <to variable="strVar"/>
+            </copy>
+            <copy>
+                <from>$strVar</from>
                 <to variable="myVar" part="TestPart"/>
             </copy>
             <copy>

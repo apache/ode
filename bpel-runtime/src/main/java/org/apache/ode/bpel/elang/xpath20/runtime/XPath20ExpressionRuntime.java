@@ -232,7 +232,8 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             xpf.setXPathVariableResolver(varResolver);            
             XPath xpe = xpf.newXPath();
             xpe.setNamespaceContext(oxpath20.namespaceCtx);
-            XPathExpression expr = xpe.compile(((OXPath10Expression)cexp).xpath);
+            String xpath = ((OXPath10Expression)cexp).xpath;
+            XPathExpression expr = xpe.compile(xpath);
             Node contextNode = ctx.getRootNode() == null ? DOMUtils.newDocument() : ctx.getRootNode();
             // Create step nodes in XPath in case it is incompletely instantiated 
             if (oxpath20.insertMissingData) {
