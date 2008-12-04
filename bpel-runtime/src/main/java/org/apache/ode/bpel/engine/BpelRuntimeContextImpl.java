@@ -1386,4 +1386,8 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
 	public URI getBaseResourceURI() {
 		return _bpelProcess.getBaseResourceURI();
 	}
+	
+	public Node getProcessProperty(QName propertyName) {
+		return _bpelProcess.getProcessProperty(propertyName);
+	}
 }

@@ -60,5 +60,6 @@ public class Namespaces {
     public static final String ODE_EXTENSION_NS = "http://www.apache.org/ode/type/extension";
     public static final String ODE_HTTP_EXTENSION_NS = "http://www.apache.org/ode/type/extension/http";
     public static final String INTALIO_SESSION_NS = "http://www.intalio.com/type/session";
+    public static final String DEPRECATED_XDT_NS = "http://www.w3.org/2003/11/xpath-datatypes";
 
 }

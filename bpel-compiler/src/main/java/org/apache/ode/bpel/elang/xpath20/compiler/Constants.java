@@ -65,6 +65,7 @@ public class Constants {
     public static final String NON_STDRD_FUNCTION_INSERT_AS_LAST_INTO = "insert-as-last-into";
     public static final String NON_STDRD_FUNCTION_DELETE = "delete";
     public static final String NON_STDRD_FUNCTION_RENAME = "rename";
+    public static final String NON_STDRD_FUNCTION_PROCESS_PROPERTY = "process-property";
     
     public static final String XQUERY_FUNCTION_HANDLER_COMPILER = "org.apache.ode.bpel.elang.xquery10.compiler.XQuery10BpelFunctions";
     public static final String XQUERY_FUNCTION_HANDLER_RUNTIME = "org.apache.ode.bpel.elang.xquery10.runtime.XQuery10BpelFunctions";
