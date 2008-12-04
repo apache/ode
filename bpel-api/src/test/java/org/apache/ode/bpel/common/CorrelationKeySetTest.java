@@ -10,6 +10,7 @@ public class CorrelationKeySetTest {
 	private CorrelationKey optX = new OptionalCorrelationKey("1~a~b");
 	private CorrelationKey optY = new OptionalCorrelationKey("2~b~c");
 	private CorrelationKey optZ = new OptionalCorrelationKey("3~c~d");
+	private CorrelationKey implicit = new CorrelationKey("-1~a");
 
 	@Test
 	public void testCanonicalString() throws Exception {
@@ -57,7 +58,7 @@ public class CorrelationKeySetTest {
 		assertEquals(new CorrelationKeySet("@2[1~key1],[2~key2~key3]?"), 
 				new CorrelationKeySet().add(new CorrelationKey(1, new String[] {"key1"}))
 				.add(new CorrelationKey(2, new String[] {"key2", "key3"})));
-		assertEquals(2, new CorrelationKeySet("@2[1~key1],[2~key2~key3]?").findSubSets().size());
+		assertEquals(3, new CorrelationKeySet("@2[1~key1],[2~key2~key3]?").findSubSets().size());
 	}
 	
 	@Test
@@ -89,6 +90,13 @@ public class CorrelationKeySetTest {
 		inbound.add(new CorrelationKey("-1~session_key_different"));
 		assertFalse(inbound.isRoutableTo(candidate, false));
 		assertFalse(inbound.isRoutableTo(candidate, true));
+		
+		inbound.clear();
+		inbound.add(keyX);
+		inbound.add(implicit);
+		candidate.clear();
+		candidate.add(keyX);
+		assertTrue(inbound.isRoutableTo(candidate, false));
 	}
 	
 	@Test
@@ -106,7 +114,7 @@ public class CorrelationKeySetTest {
 		keySet.add(keyX);
 		keySet.add(keyY);
 		keySet.add(keyZ);
-		assertTrue(keySet.findSubSets().size() == 1 && keySet.findSubSets().get(0).equals(keySet));
+		assertTrue(keySet.findSubSets().size() == 7);
 
 		keySet = new CorrelationKeySet();		
 		keySet.add(optX);
@@ -133,7 +141,7 @@ public class CorrelationKeySetTest {
 			}
 			buf.append("'").append(subSet.toCanonicalString()).append("'");
 		}
-		assertEquals("'@2[1~a~b],[2~b~c]','@2[1~a~b],[2~b~c],[3~c~d]'", buf.toString());
+		assertEquals("'@2[1~a~b]','@2[2~b~c]','@2[1~a~b],[2~b~c]','@2[3~c~d]','@2[1~a~b],[3~c~d]','@2[2~b~c],[3~c~d]','@2[1~a~b],[2~b~c],[3~c~d]'", buf.toString());
 
 		keySet = new CorrelationKeySet();		
 		keySet.add(keyX);
@@ -146,6 +154,6 @@ public class CorrelationKeySetTest {
 			}
 			buf.append("'").append(subSet.toCanonicalString()).append("'");
 		}
-		assertEquals("'@2[1~a~b]','@2[1~a~b],[2~b~c]','@2[1~a~b],[3~c~d]','@2[1~a~b],[2~b~c],[3~c~d]'", buf.toString());
+		assertEquals("'@2[1~a~b]','@2[2~b~c]','@2[1~a~b],[2~b~c]','@2[3~c~d]','@2[1~a~b],[3~c~d]','@2[2~b~c],[3~c~d]','@2[1~a~b],[2~b~c],[3~c~d]'", buf.toString());
 	}
 }
