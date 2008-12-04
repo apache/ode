@@ -180,39 +180,43 @@ public class CorrelationKeySet implements Serializable {
     public List<CorrelationKeySet> findSubSets() {
     	List<CorrelationKeySet> subSets = new ArrayList<CorrelationKeySet>();
     	
-    	// split into two sets: with mandatory keys and with optional keys
-    	CorrelationKeySet mandatoryKeySet = new CorrelationKeySet();
-    	CorrelationKeySet optionalKeySet = new CorrelationKeySet();
+    	// if the key set contains a opaque key and at least one non-opaque key, take out the opaque key
+    	CorrelationKey opaqueKey = null;
+    	boolean containsNonOpaque = false;
+    	CorrelationKeySet explicitKeySet = new CorrelationKeySet();
     	for( CorrelationKey ckey : correlationKeys ) {
-    		if( ckey instanceof OptionalCorrelationKey ) {
-    			optionalKeySet.add(ckey);
+    		// assumes only ONE opaque key if there is
+    		if( ckey.getCSetId() == -1 ) {
+    			opaqueKey = ckey;
     		} else {
-    			mandatoryKeySet.add(ckey);
+    			containsNonOpaque = true;
+    		}
+    		explicitKeySet.add(ckey);
+    	}
+    	if( opaqueKey != null && containsNonOpaque ) {
+    		explicitKeySet.correlationKeys.remove(opaqueKey);
+    	}
+    	
+		// we are generating (2 powered by the number of correlation keys) number of sub-sets
+    	for( int setIndex = 0; setIndex < Math.pow(2, explicitKeySet.correlationKeys.size()); setIndex++ ) {
+    		CorrelationKeySet subKeySet = new CorrelationKeySet(); 
+    		int bitPattern = setIndex; // the bitPattern will be 0b0000, 0b0001, 0b0010 and so on
+    		Iterator<CorrelationKey> ckeys = explicitKeySet.iterator();
+    		while( ckeys.hasNext() && bitPattern > 0 ) { // bitPattern > 0 condition saves half of the iterations
+    			CorrelationKey ckey = ckeys.next();
+    			if( (bitPattern & 0x01) > 0 ) {
+    				subKeySet.add(ckey);
+    			}
+        		bitPattern = bitPattern >> 1;
+    		}
+
+    		if(!subKeySet.isEmpty()) { // we don't want an empty set
+    			subSets.add(subKeySet);
     		}
     	}
     	
-    	if( optionalKeySet.isEmpty() ) {
-    		// no optional keys found
-    		subSets.add(this);
-    	} else {
-    		// we are generating (2 powered by the number of correlation keys) number of sub-sets
-	    	for( int setIndex = 0; setIndex < Math.pow(2, optionalKeySet.correlationKeys.size()); setIndex++ ) {
-	    		CorrelationKeySet subKeySet = new CorrelationKeySet(); 
-	    		int bitPattern = setIndex; // the bitPattern will be 0b0000, 0b0001, 0b0010 and so on
-	    		Iterator<CorrelationKey> ckeys = optionalKeySet.iterator();
-	    		while( ckeys.hasNext() && bitPattern > 0 ) { // bitPattern > 0 condition saves half of the iterations
-	    			CorrelationKey ckey = ckeys.next();
-	    			if( (bitPattern & 0x01) > 0 ) {
-	    				subKeySet.add(ckey);
-	    			}
-	        		bitPattern = bitPattern >> 1;
-	    		}
-	    		// add the mandatory keys
-	    		subKeySet.correlationKeys.addAll(mandatoryKeySet.correlationKeys);
-	    		if(!subKeySet.isEmpty()) { // we don't want an empty set
-	    			subSets.add(subKeySet);
-	    		}
-	    	}
+    	if( subSets.isEmpty() ) {
+    		subSets.add(new CorrelationKeySet());
     	}
     	
     	return subSets;
