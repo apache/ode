@@ -103,6 +103,13 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             } else if (Constants.NON_STDRD_FUNCTION_PROCESS_PROPERTY.equals(localName)) {
             	return new ProcessProperty();
             }
+        } else if (functionName.getNamespaceURI().equals(Namespaces.DEPRECATED_XDT_NS)) {
+            String localName = functionName.getLocalPart();
+            if (Constants.NON_STDRD_FUNCTION_DAY_TIME_DURATION.equals(localName)) {
+                return new DayTimeDuration();
+            } else if (Constants.NON_STDRD_FUNCTION_YEAR_MONTH_DURATION.equals(localName)) {
+                return new YearMonthDuration();
+            }
         }
 
         return null;
@@ -265,6 +272,24 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
     	public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 1) {
                 throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_PROCESS_PROPERTY));
+            }
+            return "";
+    	}
+    }
+
+    public class DayTimeDuration implements XPathFunction {
+    	public Object evaluate(List args) throws XPathFunctionException {
+            if (args.size() != 1) {
+                throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_DAY_TIME_DURATION));
+            }
+            return "";
+    	}
+    }
+
+    public class YearMonthDuration implements XPathFunction {
+    	public Object evaluate(List args) throws XPathFunctionException {
+            if (args.size() != 1) {
+                throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_YEAR_MONTH_DURATION));
             }
             return "";
     	}
