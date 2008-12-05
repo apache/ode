@@ -144,6 +144,8 @@ public class JaxpVariableResolver implements XPathVariableResolver {
             	try {
             		return Integer.valueOf(text);
             	} catch (NumberFormatException e) { }
+        	} else if (jobj instanceof Boolean) {
+            		return jobj;
             } else {
             	// return the value wrapped in a text node
                 return doc.createTextNode(jobj.toString());
