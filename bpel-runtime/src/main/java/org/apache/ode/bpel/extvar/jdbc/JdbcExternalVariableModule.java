@@ -109,10 +109,12 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
         DatabaseMetaData metaData;
         try {
             conn = ds.getConnection();
+            conn.setAutoCommit(false);
             metaData = conn.getMetaData();
         } catch (Exception ex) {
             throw new ExternalVariableModuleException("Unable to open database connection for external variable " + evarId, ex);
         }
+        
 
         try {
             DbExternalVariable dbev = new DbExternalVariable(evarId, ds);
@@ -211,7 +213,13 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
                 throw new ExternalVariableModuleException("External variable " + evarId + " did not have any <column> elements!");
 
             _vars.put(evarId, dbev);
+            
+            conn.commit();
         } catch (SQLException se) {
+        	try {
+	        	conn.rollback();
+        	} catch (SQLException e) {        		
+        	}
             throw new ExternalVariableModuleException("SQL Error", se);
         } finally {
             try {
