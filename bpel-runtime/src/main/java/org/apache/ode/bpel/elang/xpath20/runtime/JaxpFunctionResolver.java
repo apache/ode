@@ -19,7 +19,6 @@
 
 package org.apache.ode.bpel.elang.xpath20.runtime;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -38,8 +37,10 @@ import javax.xml.xpath.XPathFunctionResolver;
 
 import net.sf.saxon.dom.NodeWrapper;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.DayTimeDurationValue;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.QNameValue;
+import net.sf.saxon.value.YearMonthDurationValue;
 
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.logging.Log;
@@ -63,7 +64,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
-import org.xml.sax.SAXException;
 
 /**
  * @author mriou <mriou at apache dot org>
@@ -129,6 +129,13 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             	return new Rename();
             } else if (Constants.NON_STDRD_FUNCTION_PROCESS_PROPERTY.equals(localName)) {
             	return new ProcessProperty();
+            }
+        } else if (functionName.getNamespaceURI().equals(Namespaces.DEPRECATED_XDT_NS)) {
+            String localName = functionName.getLocalPart();
+            if (Constants.NON_STDRD_FUNCTION_DAY_TIME_DURATION.equals(localName)) {
+                return new DayTimeDuration();
+            } else if (Constants.NON_STDRD_FUNCTION_YEAR_MONTH_DURATION.equals(localName)) {
+                return new YearMonthDuration();
             }
         }
 
@@ -1129,6 +1136,108 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                                         "element node."));
             }
             return _ectx.getPropertyValue(propertyName);
+    	}
+    }
+    
+    public class DayTimeDuration implements XPathFunction {
+    	public Object evaluate(List args) throws XPathFunctionException {
+            if (args.size() != 1)
+                throw new XPathFunctionException(new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "dayTimeDurationPropertyInvalidSource"), "Invalid arguments"));
+
+            if (__log.isDebugEnabled()) {
+                __log.debug("dayTimeDuration call(context=" + _ectx + " args=" + args + ")");
+            }
+
+            String argument = null;
+            Element targetElmt = null;
+            try {
+                if (args.get(0) instanceof List) {
+                    List elmts = (List) args.get(0);
+                    if (elmts.size() != 1) throw new XPathFunctionException(
+                            new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                                    "The bpws:dayTimeDuration function MUST be passed a single " +
+                                            "element node."));
+                    if (elmts.get(0) instanceof Element) {
+                        targetElmt = (Element) elmts.get(0);
+                    } else if (elmts.get(0) instanceof String) {
+                    	argument = (String) elmts.get(0);
+                    }
+                } else if (args.get(0) instanceof NodeWrapper) {
+                    targetElmt = (Element) ((NodeWrapper) args.get(0)).getUnderlyingNode();
+                } else if (args.get(0) instanceof Element) {
+                    targetElmt = (Element) args.get(0);
+                } else if (args.get(0) instanceof String)	{
+                	argument = (String) args.get(0);
+                } else {
+                    throw new XPathFunctionException("Unexpected argument type: "+args.get(0).getClass());
+                }
+                if (argument == null) {
+                	if (targetElmt != null) {
+                		argument = targetElmt.getTextContent();
+                	}
+                }
+            } catch (IllegalArgumentException e) {
+                throw new XPathFunctionException(
+                		new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                				"Invalid argument: URI Template expected. " + args.get(0), e));
+            } catch (ClassCastException e) {
+                throw new XPathFunctionException(
+                        new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                                "The bpws:dayTimeDuration function MUST be passed a single " +
+                                        "element node."));
+            }
+            return DayTimeDurationValue.makeDayTimeDurationValue(argument);
+    	}
+    }
+    
+    public class YearMonthDuration implements XPathFunction {
+    	public Object evaluate(List args) throws XPathFunctionException {
+            if (args.size() != 1)
+                throw new XPathFunctionException(new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "yearMonthDurationPropertyInvalidSource"), "Invalid arguments"));
+
+            if (__log.isDebugEnabled()) {
+                __log.debug("yearMonthDuration call(context=" + _ectx + " args=" + args + ")");
+            }
+
+            String argument = null;
+            Element targetElmt = null;
+            try {
+                if (args.get(0) instanceof List) {
+                    List elmts = (List) args.get(0);
+                    if (elmts.size() != 1) throw new XPathFunctionException(
+                            new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                                    "The bpws:yearMonthDuration function MUST be passed a single " +
+                                            "element node."));
+                    if (elmts.get(0) instanceof Element) {
+                        targetElmt = (Element) elmts.get(0);
+                    } else if (elmts.get(0) instanceof String) {
+                    	argument = (String) elmts.get(0);
+                    }
+                } else if (args.get(0) instanceof NodeWrapper) {
+                    targetElmt = (Element) ((NodeWrapper) args.get(0)).getUnderlyingNode();
+                } else if (args.get(0) instanceof Element) {
+                    targetElmt = (Element) args.get(0);
+                } else if (args.get(0) instanceof String)	{
+                	argument = (String) args.get(0);
+                } else {
+                    throw new XPathFunctionException("Unexpected argument type: "+args.get(0).getClass());
+                }
+                if (argument == null) {
+                	if (targetElmt != null) {
+                		argument = targetElmt.getTextContent();
+                	}
+                }
+            } catch (IllegalArgumentException e) {
+                throw new XPathFunctionException(
+                		new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                				"Invalid argument: URI Template expected. " + args.get(0), e));
+            } catch (ClassCastException e) {
+                throw new XPathFunctionException(
+                        new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                                "The bpws:yearMonthDuration function MUST be passed a single " +
+                                        "element node."));
+            }
+            return YearMonthDurationValue.makeYearMonthDurationValue(argument);
     	}
     }
     
