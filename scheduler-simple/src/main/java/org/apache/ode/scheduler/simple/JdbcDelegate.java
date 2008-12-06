@@ -60,6 +60,9 @@ public class JdbcDelegate implements DatabaseDelegate {
     private static final String UPGRADE_JOB_SQLSERVER = "update ODE_JOB set nodeid = ? where nodeid is null "
             + "and (ts % ?) = ? and ts < ?";
 
+    private static final String UPGRADE_JOB_SYBASE12 = "update ODE_JOB set nodeid = ? where nodeid is null "
+        + "and -1 <> ? and -1 <> ? and ts < ?";
+    
     private static final String SAVE_JOB = "insert into ODE_JOB "
             + " (jobid, nodeid, ts, scheduled, transacted, details) values(?, ?, ?, ?, ?, ?)";
 
@@ -221,6 +224,8 @@ public class JdbcDelegate implements DatabaseDelegate {
               ps = con.prepareStatement(UPGRADE_JOB_SQLSERVER);
             } else if (_dialect == Dialect.DB2) {
               ps = con.prepareStatement(UPGRADE_JOB_DB2);
+            } else if (_dialect == Dialect.SYBASE12) {
+                ps = con.prepareStatement(UPGRADE_JOB_SYBASE12);
             } else {
               ps = con.prepareStatement(UPGRADE_JOB_DEFAULT);
             }
@@ -278,7 +283,7 @@ public class JdbcDelegate implements DatabaseDelegate {
             if (metaData != null) {
                 String dbProductName = metaData.getDatabaseProductName();
                 int dbMajorVer = metaData.getDatabaseMajorVersion();
-                __log.debug("Using database " + dbProductName + " major version " + dbMajorVer);
+                __log.info("Using database " + dbProductName + " major version " + dbMajorVer);
                 if (dbProductName.indexOf("DB2") >= 0) {
                     d = Dialect.DB2;
                 } else if (dbProductName.indexOf("Derby") >= 0) {
@@ -293,6 +298,9 @@ public class JdbcDelegate implements DatabaseDelegate {
                     d = Dialect.MYSQL;
                 } else if (dbProductName.indexOf("Sybase") >= 0 || dbProductName.indexOf("Adaptive") >= 0) {
                     d = Dialect.SYBASE;
+                    if( dbMajorVer == 12 ) {
+                    	d = Dialect.SYBASE12;
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -305,7 +313,7 @@ public class JdbcDelegate implements DatabaseDelegate {
     }
 
     enum Dialect {
-        DB2, DERBY, FIREBIRD, HSQL, MYSQL, ORACLE, SQLSERVER, SYBASE, UNKNOWN 
+        DB2, DERBY, FIREBIRD, HSQL, MYSQL, ORACLE, SQLSERVER, SYBASE, SYBASE12, UNKNOWN 
     }
     
 }
