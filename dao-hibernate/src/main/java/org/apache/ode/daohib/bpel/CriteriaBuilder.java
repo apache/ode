@@ -48,11 +48,23 @@ class CriteriaBuilder {
     Criteria processCrit = crit.createCriteria("process");
 
     // Filtering on PID
-    if (filter.getPidFilter() != null)
-      processCrit.add(Restrictions.like("processId",filter.getPidFilter().replaceAll("\\*","%")));
+    List<String> pids = filter.getPidFilter();
+    if (pids != null && pids.size() > 0) {
+        Disjunction disj = Restrictions.disjunction();
+        for (String pid: pids) {
+          disj.add(Restrictions.eq("processId", pid));
+        }
+        processCrit.add(disj);
+    }
     
-    if (filter.getIidFilter() != null)
-      crit.add(Restrictions.eq("id",new Long(filter.getIidFilter())));
+    List<String> iids = filter.getIidFilter();
+    if (iids != null && iids.size() > 0) {
+        Disjunction disj = Restrictions.disjunction();
+        for (String iid: iids) {
+            crit.add(Restrictions.eq("id", new Long(iid)));
+        }
+        crit.add(disj);
+    }
     
     // Filtering on name and namespace
     if (filter.getNameFilter() != null) {

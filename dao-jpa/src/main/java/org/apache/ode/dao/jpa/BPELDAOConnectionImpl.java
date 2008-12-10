@@ -149,12 +149,25 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
  
             // iid filter
             if ( criteria.getIidFilter() != null ) {
-               	clauses.add(" pi._instanceId = " + criteria.getIidFilter() );
+                StringBuffer filters = new StringBuffer();
+                List<String> iids = criteria.getIidFilter();
+                for (int m = 0; m < iids.size(); m++) {
+                    filters.append(" pi._instanceId = '").append(iids.get(m)).append("'");
+                    if (m < iids.size() - 1) filters.append(" or");
+                }
+                clauses.add(" (" + filters + "')");
             }
            
             // pid filter
-            if (criteria.getPidFilter() != null)
-                clauses.add(" pi._process._processId = '" + criteria.getPidFilter() + "'");
+            if (criteria.getPidFilter() != null) {
+                StringBuffer filters = new StringBuffer();
+                List<String> pids = criteria.getPidFilter();
+                for (int m = 0; m < pids.size(); m++) {
+                    filters.append(" pi._process._processId = '").append(pids.get(m)).append("'");
+                    if (m < pids.size() - 1) filters.append(" or");
+                }
+                clauses.add(" (" + filters + "')");
+            }
             
             // name filter
             if (criteria.getNameFilter() != null) {
