@@ -314,24 +314,9 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
         _vpu.inject(new PROCESS(proc));
         for (int i = 0; i < 100000 && !_completedOk && _fault == null && !_terminate; ++i) {
             _vpu.execute();
-            try {
-                _soup.write(new FileOutputStream("soup-" + count++));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
 
         Assert.assertTrue(_soup.isComplete());
-
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-
-        try {
-            _soup.write(bos);
-            _soup.read(new ByteArrayInputStream(bos.toByteArray()));
-            // check empty soup.
-        } catch (Exception ex) {
-
-        }
     }
 
     public long genId() {
