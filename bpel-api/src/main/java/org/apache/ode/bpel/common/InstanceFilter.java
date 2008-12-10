@@ -42,11 +42,11 @@ public class InstanceFilter extends Filter<InstanceFilter.Criteria> implements S
 
     private static final long serialVersionUID = 9999;
 
-    /** If set, will filter on the instance id (IID) */
-    private String iid;
+    /** If set, will filter on the instance id (IID) and select all matching instances */
+    private List<String> iids;
 
-    /** If set, will filter on the process id (PID) */
-    private String pid;
+    /** If set, will filter on the process id (PID) and select all matching process definitions */
+    private List<String> pids;
 
     /** If set, will filter on the process name (accepts ending with wildcard) */
     private String nameFilter;
@@ -99,12 +99,12 @@ public class InstanceFilter extends Filter<InstanceFilter.Criteria> implements S
     enum Criteria {
         IID {
             void process(InstanceFilter filter, String key, String op, String value) {
-                filter.iid = value;
+                filter.iids = parse(value);
             }
         },
         PID {
             void process(InstanceFilter filter, String key, String op, String value) {
-                filter.pid = value;
+                filter.pids = parse(value);
             }
         },
         NAME {
@@ -119,14 +119,7 @@ public class InstanceFilter extends Filter<InstanceFilter.Criteria> implements S
         },
         STATUS {
             void process(InstanceFilter filter, String key, String op, String value) {
-                if (filter.statusFilter == null)
-                    filter.statusFilter = new ArrayList<String>(5);
-                // Status can have '|' to assemble several status with or
-                for (StringTokenizer statusTok = new StringTokenizer(value, "|"); statusTok
-                        .hasMoreTokens();) {
-                    String status = statusTok.nextToken();
-                    filter.statusFilter.add(status);
-                }
+                filter.statusFilter = parse(value);
             }
         },
         STARTED {
@@ -302,12 +295,12 @@ public class InstanceFilter extends Filter<InstanceFilter.Criteria> implements S
         return orders;
     }
 
-    public String getPidFilter() {
-        return pid;
+    public List<String> getPidFilter() {
+        return pids;
     }
 
-    public String getIidFilter() {
-        return iid;
+    public List<String> getIidFilter() {
+        return iids;
     }
 
     public static void main(String[] args) {
@@ -343,20 +336,28 @@ public class InstanceFilter extends Filter<InstanceFilter.Criteria> implements S
 
 
     public String toString() {
-    	StringBuffer buf = new StringBuffer();
-    	buf.append("InstanceFilter {");
-    	buf.append("iid="+iid);
-    	buf.append(",pid="+pid);
-    	buf.append(",name="+nameFilter);
-    	buf.append(",namespace="+namespaceFilter);
-    	buf.append(",status="+statusFilter);
-    	buf.append(",startedDate="+startedDateFilter);
-    	buf.append(",lastActiveDate="+lastActiveDateFilter);
-    	buf.append(",propertyValues="+propertyValuesFilter);
-    	buf.append(",orders="+orders);
-    	buf.append(",limit="+limit);
-    	buf.append("}");
-    	return buf.toString();
+        StringBuffer buf = new StringBuffer();
+        buf.append("InstanceFilter {");
+        buf.append("iids="+iids);
+        buf.append(",pids="+pids);
+        buf.append(",name="+nameFilter);
+        buf.append(",namespace="+namespaceFilter);
+        buf.append(",status="+statusFilter);
+        buf.append(",startedDate="+startedDateFilter);
+        buf.append(",lastActiveDate="+lastActiveDateFilter);
+        buf.append(",propertyValues="+propertyValuesFilter);
+        buf.append(",orders="+orders);
+        buf.append(",limit="+limit);
+        buf.append("}");
+        return buf.toString();
     }
-
+    
+    private static List<String> parse(String pipeDelimited) {
+        List<String> list = new ArrayList<String>();
+        StringTokenizer tok = new StringTokenizer(pipeDelimited, "|");
+        while (tok.hasMoreTokens()) {
+            list.add(tok.nextToken());
+        }
+        return list;
+    }        
 }
