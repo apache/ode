@@ -155,7 +155,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
                     filters.append(" pi._instanceId = '").append(iids.get(m)).append("'");
                     if (m < iids.size() - 1) filters.append(" or");
                 }
-                clauses.add(" (" + filters + "')");
+                clauses.add(" (" + filters + ")");
             }
            
             // pid filter
@@ -166,7 +166,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
                     filters.append(" pi._process._processId = '").append(pids.get(m)).append("'");
                     if (m < pids.size() - 1) filters.append(" or");
                 }
-                clauses.add(" (" + filters + "')");
+                clauses.add(" (" + filters + ")");
             }
             
             // name filter
