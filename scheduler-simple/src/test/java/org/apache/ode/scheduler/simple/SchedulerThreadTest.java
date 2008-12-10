@@ -39,7 +39,7 @@ import junit.framework.TestCase;
  */
 public class SchedulerThreadTest extends TestCase implements TaskRunner {
 
-    static final long SCHED_TOLERANCE = 40;
+    static final long SCHED_TOLERANCE = 100;
     SchedulerThread _st;
     
     List<TR> _tasks = new ArrayList<TR>(100); 
