@@ -19,19 +19,12 @@
 
 package org.apache.ode.bpel.elang.xpath20.runtime;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 import javax.xml.namespace.QName;
 import javax.xml.xpath.XPathVariableResolver;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.dom.DocumentWrapper;
-import net.sf.saxon.dom.NodeWrapper;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.value.DateTimeValue;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,7 +40,6 @@ import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.xsd.XSTypes;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * @author mriou <mriou at apache dot org>
@@ -124,47 +116,35 @@ public class JaxpVariableResolver implements XPathVariableResolver {
     }
     
     private Object getSimpleContent(Node simpleNode, QName type) {
-    	Document doc = (simpleNode instanceof Document) ? ((Document) simpleNode) : simpleNode
-              .getOwnerDocument();
+        Document doc = (simpleNode instanceof Document) 
+        	? ((Document) simpleNode) 
+        	: simpleNode.getOwnerDocument();
         String text = simpleNode.getTextContent();
         try {
-    		Object jobj = XSTypes.toJavaObject(type,text);
-            // Saxon wants its own dateTime type and doesn't like Calendar or Date
+            Object jobj = XSTypes.toJavaObject(type,text);
             if (jobj instanceof Calendar) {
-            	return new DateTimeValue((Calendar) jobj, true);
-            } else if (jobj instanceof Long) {
-            	 try {
-            		return Long.valueOf(text);
-            	} catch (NumberFormatException e) { }
-        	} else if (jobj instanceof Double) {
-            	try {
-            		return Double.valueOf(text);
-            	} catch (NumberFormatException e) { }
-        	} else if (jobj instanceof Integer) {
-            	try {
-            		return Integer.valueOf(text);
-            	} catch (NumberFormatException e) { }
-        	} else if (jobj instanceof Boolean) {
-            		return jobj;
-            } else {
-            	// return the value wrapped in a text node
+                // Saxon 9.x prefers Dates over Calendars.
+                return ((Calendar) jobj).getTime();
+            } else if (jobj instanceof String) {
+                // Saxon 9.x has a bug for which this is a workaround.
                 return doc.createTextNode(jobj.toString());
-            }
-        } catch (Exception e) { }
-        // Elegant way failed, trying brute force 
-        // Actually, we don't want to return simple types, so no more brute force
-        try {
-    		return Integer.valueOf(text);
-    	} catch (NumberFormatException e) { }
-    	try {
-    		return Double.valueOf(text);
-    	} catch (NumberFormatException e) { }
-        
-        // Remember: always a node set
-        if (simpleNode.getParentNode() != null)
-            return simpleNode.getParentNode().getChildNodes();
-        else {        	
-        	return doc.createTextNode(text);
+            } 
+            return jobj;
+        } catch (Exception e) {
+	        // Elegant way failed, trying brute force 
+	        try {
+	    	    return Integer.valueOf(text);
+	      	} catch (NumberFormatException nfe) { }
+	      	try {
+	      		return Double.valueOf(text);
+	      	} catch (NumberFormatException nfe) { }
+	      
+	        // Remember: always a node set
+	        if (simpleNode.getParentNode() != null)
+	            return simpleNode.getParentNode().getChildNodes();
+	        else {        	
+	            return doc.createTextNode(text);
+	        }
         }
     }
 }
