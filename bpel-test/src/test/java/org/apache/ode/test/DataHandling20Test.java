@@ -22,64 +22,64 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 public class DataHandling20Test extends BPELTestAbstract {
-	@Ignore @Test public void testComposeUrl() throws Throwable {
+	 @Test public void testComposeUrl() throws Throwable {
         go("/bpel/2.0/TestComposeUrl");
     }
-    @Ignore @Test public void testCombineUrl() throws Throwable {
+     @Test public void testCombineUrl() throws Throwable {
         go("/bpel/2.0/TestCombineUrl");
     }
-    @Ignore @Test public void testExpandTemplate() throws Throwable {
+     @Test public void testExpandTemplate() throws Throwable {
         go("/bpel/2.0/TestExpandTemplate");
     }
-    @Ignore @Test public void testXPathNamespace1() throws Throwable {
+     @Test public void testXPathNamespace1() throws Throwable {
         go("/bpel/2.0/TestXPathNamespace1");
     }
-    @Ignore @Test public void testXPathNamespace2() throws Throwable {
+     @Test public void testXPathNamespace2() throws Throwable {
         go("/bpel/2.0/TestXPathNamespace2");
     }
-    @Ignore @Test public void testSubTreeAssign() throws Throwable {
+     @Test public void testSubTreeAssign() throws Throwable {
         go("/bpel/2.0/TestSubTreeAssign");
     }
-    @Ignore @Test public void testAssignActivity1() throws Throwable {
+     @Test public void testAssignActivity1() throws Throwable {
         go("/bpel/2.0/TestAssignActivity1");
     }
     @Test public void testAssignActivity2() throws Throwable {
         go("/bpel/2.0/TestAssignActivity2");
     }
-    @Ignore @Test public void testAssignComplex() throws Throwable {
+     @Test public void testAssignComplex() throws Throwable {
         go("/bpel/2.0/TestAssignComplex");
     }
-    @Ignore @Test public void testSimpleTypeParts() throws Throwable {
+     @Test public void testSimpleTypeParts() throws Throwable {
         go("/bpel/2.0/TestSimpleTypeParts");
     }
-    @Ignore @Test public void testSimpleVariableType() throws Throwable {
+     @Test public void testSimpleVariableType() throws Throwable {
         go("/bpel/2.0/TestSimpleVariableType");
     }
-   @Ignore @Test public void testXslTransform() throws Throwable {
+    @Test public void testXslTransform() throws Throwable {
         go("/bpel/2.0/TestXslTransform");
     }
-    @Ignore @Test public void testSplit() throws Throwable {
+     @Test public void testSplit() throws Throwable {
         go("/bpel/2.0/TestSplit");
     }
-    @Ignore @Test public void testCounter() throws Throwable {
+     @Test public void testCounter() throws Throwable {
         go("/bpel/2.0/TestCounter");
     }
-    @Ignore @Test public void testDate() throws Throwable {
+     @Test public void testDate() throws Throwable {
         go("/bpel/2.0/TestAssignDate");
     }
-    @Ignore @Test public void testMsgDate() throws Throwable {
+     @Test public void testMsgDate() throws Throwable {
         go("/bpel/2.0/TestMsgDate");
     }
-    @Ignore @Test public void testDuration() throws Throwable {
+     @Test public void testDuration() throws Throwable {
         go("/bpel/2.0/TestDuration");
     }
-    @Ignore @Test public void testAssignMissingData() throws Throwable {
+     @Test public void testAssignMissingData() throws Throwable {
       go("/bpel/2.0/TestAssignMissingData");
     }
-    @Ignore @Test public void testXQueryExpression() throws Throwable {
+     @Test public void testXQueryExpression() throws Throwable {
         go("/bpel/2.0/TestXQueryExpression");
     }
-    @Ignore @Test public void testInsertMissingData() throws Throwable {
+     @Test public void testInsertMissingData() throws Throwable {
         go("/bpel/2.0/TestInsertMissingData");
      }
 }
