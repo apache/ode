@@ -254,7 +254,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 // Shouldn't happen, checked at compilation time
                 throw new XPathFunctionException("First parameter of the bpws:doXslTransform isn't a valid URI!");
             }
-            OXslSheet xslSheet = _oxpath.xslSheets.get(xslUri);
+            OXslSheet xslSheet = _oxpath.getXslSheet(xslUri);
             // Shouldn't happen, checked at compilation time
             if (xslSheet == null) throw new XPathFunctionException("Couldn't find the XSL sheet " + args.get(0)
                     + ", process compilation or deployment was probably incomplete!");
@@ -296,9 +296,9 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             DOMSource source = new DOMSource(varDoc);
             Object result;
             XslRuntimeUriResolver resolver = new XslRuntimeUriResolver(_oxpath, _ectx.getBaseResourceURI());
-            XslTransformHandler.getInstance().cacheXSLSheet(xslUri, xslSheet.sheetBody, resolver);
+            XslTransformHandler.getInstance().cacheXSLSheet(_ectx.getBaseResourceURI(), xslUri, xslSheet.sheetBody, resolver);
             try {
-                result = XslTransformHandler.getInstance().transform(xslUri, source, parametersMap, resolver);
+                result = XslTransformHandler.getInstance().transform(_ectx.getBaseResourceURI(), xslUri, source, parametersMap, resolver);
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new XPathFunctionException(

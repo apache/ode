@@ -45,7 +45,7 @@ public class XslCompileUriResolver implements URIResolver {
 
   public Source resolve(String href, String base) throws TransformerException {
     OXslSheet xslSheet = _cc.compileXslt(href);
-    _expr.xslSheets.put(xslSheet.uri, xslSheet);
+    _expr.setXslSheet(xslSheet.uri, xslSheet);
     return new StreamSource(new StringReader(xslSheet.sheetBody));
   }
 }

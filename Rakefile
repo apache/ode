@@ -299,7 +299,7 @@ define "ode" do
   desc "ODE BPEL Compiler"
   define "bpel-compiler" do
     compile.with projects("bpel-api", "bpel-obj", "bpel-schemas", "utils"),
-      COMMONS.logging, JAVAX.stream, JAXEN, SAXON, WSDL4J, XALAN, XERCES
+      COMMONS.logging, JAVAX.stream, JAXEN, SAXON, WSDL4J, XALAN, XERCES, COMMONS.collections
     test.resources { filter(project("bpel-scripts").path_to("src/main/resources")).into(test.resources.target).run }
     package :jar
   end
@@ -325,7 +325,7 @@ define "ode" do
 
   desc "ODE BPEL Object Model"
   define "bpel-obj" do
-    compile.with project("utils"), SAXON, WSDL4J
+    compile.with project("utils"), SAXON, WSDL4J, COMMONS.collections
     package :jar
   end
 

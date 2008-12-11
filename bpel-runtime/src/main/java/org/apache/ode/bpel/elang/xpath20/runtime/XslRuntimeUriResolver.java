@@ -65,7 +65,7 @@ public class XslRuntimeUriResolver implements URIResolver {
             return null;
         }
 
-        OXslSheet sheet = _expr.xslSheets.get(uri);
+        OXslSheet sheet = _expr.getXslSheet(uri);
         if( sheet != null) {
             result = sheet.sheetBody;
         } else {

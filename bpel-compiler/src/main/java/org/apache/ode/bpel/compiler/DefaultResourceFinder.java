@@ -101,5 +101,9 @@ public class DefaultResourceFinder implements ResourceFinder {
 
         return new FileInputStream(f);
     }
+    
+    public URI getBaseResourceURI() {
+        return _absoluteDir.toURI();
+    }
 
 }

@@ -320,7 +320,7 @@ class JaxenContexts implements FunctionContext, VariableContext {
                 // Shouldn't happen, checked at compilation time
                 throw new FunctionCallException("First parameter of the bpws:doXslTransform isn't a valid URI!", use);
             }
-            OXslSheet xslSheet = _oxpath.xslSheets.get(xslUri);
+            OXslSheet xslSheet = _oxpath.getXslSheet(xslUri);
             // Shouldn't happen, checked at compilation time
             if (xslSheet == null) throw new FunctionCallException("Couldn't find the XSL sheet " + args.get(0)
                     + ", process compilation or deployment was probably incomplete!");
@@ -347,9 +347,9 @@ class JaxenContexts implements FunctionContext, VariableContext {
             DOMSource source = new DOMSource(varDoc);
             Object result;
             XslRuntimeUriResolver resolver = new XslRuntimeUriResolver(_oxpath, _xpathEvalCtx.getBaseResourceURI());
-            XslTransformHandler.getInstance().cacheXSLSheet(xslUri, xslSheet.sheetBody, resolver);
+            XslTransformHandler.getInstance().cacheXSLSheet(_xpathEvalCtx.getBaseResourceURI(), xslUri, xslSheet.sheetBody, resolver);
             try {
-            	result = XslTransformHandler.getInstance().transform(xslUri, source, parametersMap, resolver);
+            	result = XslTransformHandler.getInstance().transform(_xpathEvalCtx.getBaseResourceURI(), xslUri, source, parametersMap, resolver);
             } catch (Exception e) {
                 throw new WrappedFaultException.JaxenFunctionException(
                         new FaultException(_oxpath.getOwner().constants.qnSubLanguageExecutionFault,

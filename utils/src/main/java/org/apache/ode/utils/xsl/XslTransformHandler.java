@@ -38,6 +38,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.collections.keyvalue.MultiKey;
 import org.w3c.dom.Node;
 import org.w3c.dom.Document;
 
@@ -55,7 +56,7 @@ public class XslTransformHandler {
   private static XslTransformHandler __singleton;
 
   private TransformerFactory _transformerFactory = null;
-  private final HashMap<URI,Templates> _templateCache = new HashMap<URI, Templates>();
+  private final HashMap<MultiKey, Templates> _templateCache = new HashMap<MultiKey, Templates>();
 
   /**
    * Singleton access.
@@ -84,7 +85,7 @@ public class XslTransformHandler {
    * @param body of the XSL document
    * @param resolver used to resolve includes and imports
    */
-  public void parseXSLSheet(URI uri, String body, URIResolver resolver) {
+  public void parseXSLSheet(URI baseUri, URI uri, String body, URIResolver resolver) {
     Templates tm;
     try {
       _transformerFactory.setURIResolver(resolver);
@@ -93,7 +94,7 @@ public class XslTransformHandler {
       throw new XslTransformException(e);
     }
     synchronized(_templateCache) {
-      _templateCache.put(uri, tm);
+      _templateCache.put(new MultiKey(baseUri, uri), tm);
     }
   }
 
@@ -104,12 +105,12 @@ public class XslTransformHandler {
    * @param body of the XSL document
    * @param resolver used to resolve includes and imports
    */
-  public void cacheXSLSheet(URI uri, String body, URIResolver resolver) {
+  public void cacheXSLSheet(URI baseUri, URI uri, String body, URIResolver resolver) {
     Templates tm;
     synchronized (_templateCache) {
-      tm = _templateCache.get(uri);
+      tm = _templateCache.get(new MultiKey(baseUri, uri));
     }
-    if (tm == null) parseXSLSheet(uri, body, resolver);
+    if (tm == null) parseXSLSheet(baseUri, uri, body, resolver);
   }
 
   /**
@@ -121,11 +122,11 @@ public class XslTransformHandler {
    * @param resolver used to resolve includes and imports
    * @return result of the transformation (XSL, HTML or text depending of the output method specified in stylesheet.
    */
-  public Object transform(URI uri, Source source,
+  public Object transform(URI baseUri, URI uri, Source source,
                         Map<QName, Object> parameters, URIResolver resolver) {
     Templates tm;
     synchronized (_templateCache) {
-      tm = _templateCache.get(uri);
+      tm = _templateCache.get(new MultiKey(baseUri, uri));
     }
     if (tm == null)
       throw new XslTransformException("XSL sheet" + uri + " has not been parsed before transformation!");
@@ -138,7 +139,7 @@ public class XslTransformHandler {
         }
       }
       String method = tf.getOutputProperties().getProperty("method");
-      if(method.equals("xml") || method.equals("html")) {
+      if (method == null || method.equals("xml") || method.equals("html")) {
     	  DOMResult result = new DOMResult();
     	  tf.transform(source, result);
     	  Node node = result.getNode();
