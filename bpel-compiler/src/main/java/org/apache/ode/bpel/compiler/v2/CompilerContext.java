@@ -144,4 +144,11 @@ public interface CompilerContext {
     //void setExtensionValidators(Map<QName, ExtensionValidator> extensionValidators);
     
     ExtensionValidator getExtensionValidator(QName extensionElementName);
+
+	/**
+	 * Retrieves the base URI that the BPEL Process execution contextis running relative to.
+	 * 
+	 * @return URI - the URI representing the absolute physical file path location that this process is defined within.
+	 */
+	URI getBaseResourceURI();
 }

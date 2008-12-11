@@ -1749,4 +1749,17 @@ abstract class BpelCompilerImpl implements CompilerContext, org.apache.ode.bpel.
 
     public void setExtensionValidators(Map<QName, ExtensionValidator> validators) {
     }
+    
+    
+	/**
+	 * Retrieves the base URI that the BPEL Process execution contextis running relative to.
+	 * 
+	 * @return URI - the URI representing the absolute physical file path location that this process is defined within.
+	 * @throws IOException 
+	 * @throws MalformedURLException 
+	 */
+	 public URI getBaseResourceURI() {
+		return _resourceFinder.getBaseResourceURI();
+	}
+        
 }

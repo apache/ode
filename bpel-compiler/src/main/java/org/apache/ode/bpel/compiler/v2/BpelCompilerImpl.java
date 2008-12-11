@@ -1706,6 +1706,16 @@ abstract class BpelCompilerImpl extends BaseCompiler implements CompilerContext,
     	return schemaSources;
     }
     
+    
+	/**
+	 * Retrieves the base URI that the BPEL Process execution context is running relative to.
+	 * 
+	 * @return URI - the URI representing the absolute physical file path location that this process is defined within.
+	 */
+	 public URI getBaseResourceURI() {
+		return _resourceFinder.getBaseResourceURI();
+	}
+	 
     /**
      * Compile external variable declaration.
      * @param src variable object

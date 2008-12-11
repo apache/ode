@@ -38,6 +38,14 @@ public interface ResourceFinder {
      * @throws IOException in case of read error
      */
     InputStream openResource(URI uri) throws MalformedURLException, IOException;
+    
+    
+	/**
+	 * Retrieves the base URI that the BPEL Process execution context is running relative to.
+	 * 
+	 * @return URI - the URI representing the absolute physical file path location that this process is defined within.
+	 */
+	 public URI getBaseResourceURI();
 
 }
 
