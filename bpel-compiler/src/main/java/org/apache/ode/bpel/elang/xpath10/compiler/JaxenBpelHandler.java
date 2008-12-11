@@ -226,14 +226,14 @@ class JaxenBpelHandler extends JaxenHandler {
     String xslUri = getLiteralFromExpression((Expr)params.get(0));
     OXslSheet xslSheet = _cctx.compileXslt(xslUri);
     try {
-      XslTransformHandler.getInstance().parseXSLSheet(xslSheet.uri, xslSheet.sheetBody,
+      XslTransformHandler.getInstance().parseXSLSheet(_cctx.getBaseResourceURI(), xslSheet.uri, xslSheet.sheetBody,
                       new XslCompileUriResolver(_cctx, _out));
     } catch (Exception e) {
       throw new CompilationException(
           __msgs.errInvalidNumberOfArguments(xslUri));
     }
 
-    _out.xslSheets.put(xslSheet.uri, xslSheet);
+    _out.setXslSheet(xslSheet.uri, xslSheet);
   }
 
   private String getLiteralFromExpression(Expr expr)

@@ -18,6 +18,13 @@
  */
 package org.apache.ode.bpel.elang.xpath10.o;
 
+import java.io.Serializable;
+import java.net.URI;
+import java.util.HashMap;
+
+import javax.xml.namespace.QName;
+
+import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.ode.bpel.o.OBase;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLValueExpression;
@@ -25,14 +32,9 @@ import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.o.OXslSheet;
+import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.utils.NSContext;
-
-import javax.xml.namespace.QName;
-import java.io.Serializable;
-import java.net.URI;
-import java.util.HashMap;
 
 
 /**
@@ -50,8 +52,6 @@ public class OXPath10Expression extends OLValueExpression implements Serializabl
 
   public final HashMap<String, OLink> links = new HashMap<String,OLink>();
 
-  public final HashMap<URI,OXslSheet> xslSheets = new HashMap<URI, OXslSheet>();
-
   /** Map getVariableData invocation signature to compiled objects. */
   private final HashMap<SigGetVariableData,OSigGetVariableData> _getVariableDataSigs =
     new HashMap<SigGetVariableData,OSigGetVariableData>();
@@ -68,6 +68,7 @@ public class OXPath10Expression extends OLValueExpression implements Serializabl
   /** QName of the <code>bpws:getVariableData</code> function. */
   public final QName qname_getLinkStatus;
 
+  protected final HashMap<URI, OXslSheet> xslSheets = new HashMap<URI, OXslSheet>();
 
   public OXPath10Expression(OProcess owner,
                             QName qname_getVariableData,
@@ -101,7 +102,15 @@ public class OXPath10Expression extends OLValueExpression implements Serializabl
   public void addGetVariableDataSig(String varname, String partname, String location, OSigGetVariableData compiled) {
     _getVariableDataSigs.put(new SigGetVariableData(varname,  partname, location), compiled);
   }
+  
+  public void setXslSheet(URI projectRelativeXslUri, OXslSheet xslSheet) {
+	  xslSheets.put(projectRelativeXslUri, xslSheet);
+  }
 
+  public OXslSheet getXslSheet(URI projectRelativeXslUri) {
+	  return xslSheets.get(projectRelativeXslUri);
+  }
+  
   public String toString() {
     return "{OXPath10Expression " + xpath + "}";
   }
