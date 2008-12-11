@@ -214,4 +214,8 @@ public class MockCompilerContext implements CompilerContext {
     	// TODO Auto-generated method stub
     	return null;
     }
+	public URI getBaseResourceURI() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

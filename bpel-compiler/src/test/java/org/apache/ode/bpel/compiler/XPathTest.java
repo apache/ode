@@ -277,4 +277,9 @@ class MockCompilerContext implements CompilerContext {
     public Map<URI, Source> getSchemaSources() {
     	return null;
     }
+
+	public URI getBaseResourceURI() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
