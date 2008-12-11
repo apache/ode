@@ -29,5 +29,11 @@ public interface BpelCompiler {
     void addWsdlImport(URI from, URI wsdlImport, SourceLocation sloc);
 
     ProcessModel compile(Process p, ResourceFinder rf);
-
+    
+	/**
+	 * Retrieves the base URI that the BPEL Process execution context is running relative to.
+	 * 
+	 * @return URI - the URI representing the absolute physical file path location that this process is defined within.
+	 */
+	 public URI getBaseResourceURI();        
 }

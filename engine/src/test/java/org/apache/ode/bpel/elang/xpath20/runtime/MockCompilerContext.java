@@ -206,4 +206,8 @@ public class MockCompilerContext implements CompilerContext {
 	public Map<URI, Source> getSchemaSources() {
 		return null;
 	}
+
+	public URI getBaseResourceURI() {
+		return null;
+	}
 }

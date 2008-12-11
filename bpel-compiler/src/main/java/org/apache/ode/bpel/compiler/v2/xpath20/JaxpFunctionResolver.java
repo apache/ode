@@ -146,7 +146,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             String xslUri = (String) params.get(0);
             OXslSheet xslSheet = _cctx.compileXslt(xslUri);
             try {
-                XslTransformHandler.getInstance().parseXSLSheet(xslSheet.uri, xslSheet.sheetBody,
+                XslTransformHandler.getInstance().parseXSLSheet(_cctx.getBaseResourceURI(), xslSheet.uri, xslSheet.sheetBody,
                         new XslCompileUriResolver(_cctx, _out));
             } catch (Exception e) {
                 throw new CompilationException(__msgs.errXslCompilation(xslUri, e.toString()));
