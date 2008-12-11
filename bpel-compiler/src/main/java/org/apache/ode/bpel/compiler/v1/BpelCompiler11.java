@@ -26,7 +26,7 @@ import org.apache.ode.bpel.compiler.v1.xpath10.XPath10ExpressionCompilerBPEL11;
 /**
  * BPEL v1.1 compiler.
  */
-public class BpelCompiler11 extends BpelCompiler {
+public class BpelCompiler11 extends BpelCompilerImpl {
 
     /** URI for the XPath 1.0 expression language. */
     public static final String EXPLANG_XPATH = "http://www.w3.org/TR/1999/REC-xpath-19991116";

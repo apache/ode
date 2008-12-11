@@ -27,7 +27,7 @@ import org.apache.ode.bpel.compiler.v1.xpath20.XPath20ExpressionCompilerBPEL20;
 /**
  * OASIS BPEL V2.0 Compiler
  */
-public class BpelCompiler20 extends BpelCompiler {
+public class BpelCompiler20 extends BpelCompilerImpl {
 
     public static final String OASIS_EXPLANG_XPATH_1_0 = "urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0";
     public static final String OASIS_EXPLANG_XPATH_2_0 = "urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0";

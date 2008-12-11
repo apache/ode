@@ -28,7 +28,7 @@ import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
 /**
  * @author Matthieu Riou <mriou at apache dot org>
  */
-public class BpelCompiler20Draft extends BpelCompiler {
+public class BpelCompiler20Draft extends BpelCompilerImpl {
 
     public static final String OASIS_EXPLANG_XPATH_1_0 = "urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0";
     public static final String OASIS_EXPLANG_XPATH_2_0 = "urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0";
