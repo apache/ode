@@ -18,6 +18,7 @@
  */
 package org.apache.ode.test;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class DataHandling20Test extends BPELTestAbstract {
