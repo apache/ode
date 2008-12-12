@@ -29,6 +29,7 @@ import javax.xml.xpath.XPathFunctionResolver;
 import org.apache.ode.bpel.compiler.WrappedResolverException;
 import org.apache.ode.bpel.compiler.XPathMessages;
 import org.apache.ode.bpel.compiler.api.CompilationException;
+import org.apache.ode.bpel.compiler.v1.xpath20.JaxpFunctionResolver.ProcessProperty;
 import org.apache.ode.bpel.compiler.v2.CompilerContext;
 import org.apache.ode.bpel.compiler.v2.xpath10.XslCompileUriResolver;
 import org.apache.ode.bpel.rtrep.common.Constants;
@@ -102,6 +103,8 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             	return new Delete();
             } else if (Constants.NON_STDRD_FUNCTION_RENAME.equals(localName)) {
             	return new Rename();
+            } else if (Constants.NON_STDRD_FUNCTION_PROCESS_PROPERTY.equals(localName)) {
+            	return new ProcessProperty();
             }
         }
 
@@ -261,5 +264,14 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
     	}
     }
     
+    public class ProcessProperty implements XPathFunction {
+    	public Object evaluate(List args) throws XPathFunctionException {
+            if (args.size() != 1) {
+                throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_PROCESS_PROPERTY));
+            }
+            return "";
+    	}
+    }
+
 
 }

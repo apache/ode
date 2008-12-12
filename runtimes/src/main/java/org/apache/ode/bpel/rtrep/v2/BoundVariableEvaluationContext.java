@@ -68,4 +68,8 @@ public class BoundVariableEvaluationContext implements EvaluationContext {
     public URI getBaseResourceURI() {
         throw new InvalidProcessException("Base URI not available in this context.");
     }
+
+	public Node getPropertyValue(QName propertyName) {
+        throw new InvalidProcessException("Property value not available in this context.");
+	}
 }

@@ -153,4 +153,8 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
     public URI getBaseResourceURI() {
     	return null;
     }
+
+	public Node getPropertyValue(QName propertyName) {
+		return null;
+	}
 }

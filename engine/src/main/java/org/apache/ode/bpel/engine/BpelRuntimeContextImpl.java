@@ -993,5 +993,8 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
 	public boolean isAtomicScope() {
 		return _atomicScope;
 	}
-	
+
+	public Node getProcessProperty(QName propertyName) {
+		return _bpelProcess.getProcessProperty(propertyName);
+	}	
 }

@@ -133,4 +133,11 @@ public interface OdeInternalInstance {
 	void setRetriesDone();
 
 	void setAtomicScope(boolean atomicScope);
+	
+	/**
+	 * Retrieves the property value that has been defined for this BPEL Process type.
+	 * 
+	 * @return propertyValue - the value corresponding to the process property name.
+	 */
+	Node getProcessProperty(QName propertyName);
 }

@@ -102,6 +102,8 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             	return new Delete();
             } else if (Constants.NON_STDRD_FUNCTION_RENAME.equals(localName)) {
             	return new Rename();
+            } else if (Constants.NON_STDRD_FUNCTION_PROCESS_PROPERTY.equals(localName)) {
+            	return new ProcessProperty();
             }
         }
 
@@ -261,5 +263,14 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
     	}
     }
     
+    public class ProcessProperty implements XPathFunction {
+    	public Object evaluate(List args) throws XPathFunctionException {
+            if (args.size() != 1) {
+                throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_PROCESS_PROPERTY));
+            }
+            return "";
+    	}
+    }
+
 
 }

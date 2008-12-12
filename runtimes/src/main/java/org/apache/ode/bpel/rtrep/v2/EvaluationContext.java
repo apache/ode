@@ -20,6 +20,8 @@ package org.apache.ode.bpel.rtrep.v2;
 
 import java.net.URI;
 
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.common.FaultException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -99,4 +101,11 @@ public interface EvaluationContext {
     boolean narrowTypes();
 
     URI getBaseResourceURI();
+
+	/**
+	 * Retrieves the property value that has been defined for this BPEL Process type.
+	 * 
+	 * @return propertyValue - the value corresponding to the process property name.
+	 */
+	Node getPropertyValue(QName propertyName);
 }
