@@ -18,7 +18,10 @@
  */
 package org.apache.ode.bpel.rapi;
 
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
+import org.w3c.dom.Node;
 
 /**
  *<p>A collection of interfaces that are implemented by the engine for the 
@@ -69,5 +72,6 @@ public interface OdeRTInstanceContext extends IOContext, ProcessControlContext, 
 	void setAtomicScopeRetriesDone();
 
 	void setAtomicScope(boolean atomicScope);
-	
+
+	Node getProcessProperty(QName propertyName);
 }

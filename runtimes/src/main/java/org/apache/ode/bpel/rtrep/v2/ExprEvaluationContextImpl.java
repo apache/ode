@@ -21,6 +21,8 @@ package org.apache.ode.bpel.rtrep.v2;
 import java.util.Map;
 import java.net.URI;
 
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
@@ -131,4 +133,9 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
     public URI getBaseResourceURI() {
         return _native.getBaseResourceURI();
     }
+
+	public Node getPropertyValue(QName propertyName) {
+		return _native.getProcessProperty(propertyName);
+	}
+
 }

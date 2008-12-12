@@ -732,4 +732,8 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
     public URI getBaseResourceURI() {
         return _runtime._pconf.getBaseURI();
     }
+
+	public Node getProcessProperty(QName propertyName) {
+		return _brc.getProcessProperty(propertyName);
+	}
 }

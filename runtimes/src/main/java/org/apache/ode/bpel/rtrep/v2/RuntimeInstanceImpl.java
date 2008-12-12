@@ -762,5 +762,8 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
 	public void setAtomicScope(boolean atomicScope) {
 		_brc.setAtomicScope(atomicScope);
 	}
-    
+	
+	public Node getProcessProperty(QName propertyName) {
+		return _brc.getProcessProperty(propertyName);
+	}
 }

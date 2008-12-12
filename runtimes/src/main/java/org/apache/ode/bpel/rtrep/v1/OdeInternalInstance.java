@@ -119,4 +119,6 @@ public interface OdeInternalInstance {
 
     void reply(PartnerLinkInstance plink, String opName, String bpelmex, Element element, QName fault)
             throws FaultException;
+    
+	Node getProcessProperty(QName propertyName);
 }

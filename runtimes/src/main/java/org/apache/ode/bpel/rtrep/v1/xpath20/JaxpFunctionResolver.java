@@ -19,8 +19,6 @@
 
 package org.apache.ode.bpel.rtrep.v1.xpath20;
 
-import java.io.IOException;
-import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -32,7 +30,6 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPathFunction;
 import javax.xml.xpath.XPathFunctionException;
 import javax.xml.xpath.XPathFunctionResolver;
@@ -47,7 +44,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.rtrep.common.Constants;
-import org.apache.ode.bpel.rtrep.v1.*;
+import org.apache.ode.bpel.rtrep.v1.EvaluationContext;
+import org.apache.ode.bpel.rtrep.v1.OLink;
+import org.apache.ode.bpel.rtrep.v1.OProcess;
+import org.apache.ode.bpel.rtrep.v1.OScope;
+import org.apache.ode.bpel.rtrep.v1.OXslSheet;
 import org.apache.ode.bpel.rtrep.v1.xpath10.OXPath10Expression;
 import org.apache.ode.bpel.rtrep.v1.xpath10.OXPath10ExpressionBPEL20;
 import org.apache.ode.utils.DOMUtils;
@@ -59,7 +60,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
-import org.xml.sax.SAXException;
 
 /**
  * @author mriou <mriou at apache dot org>
@@ -123,6 +123,8 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             	return new Delete();
             } else if (Constants.NON_STDRD_FUNCTION_RENAME.equals(localName)) {
             	return new Rename();
+            } else if (Constants.NON_STDRD_FUNCTION_PROCESS_PROPERTY.equals(localName)) {
+            	return new ProcessProperty();
             }
         }
 
@@ -1050,6 +1052,70 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             			elementTypeQName.getPrefix() + ":" + elementTypeQName.getLocalPart());
             }
             return clonedElmt;
+    	}
+    }
+    
+    public class ProcessProperty implements XPathFunction {
+    	public Object evaluate(List args) throws XPathFunctionException {
+            if (args.size() != 1)
+                throw new XPathFunctionException(new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "processPropertyInvalidSource"), "Invalid arguments"));
+
+            if (__log.isDebugEnabled()) {
+                __log.debug("process-property call(context=" + _ectx + " args=" + args + ")");
+            }
+
+            QName propertyName = null;
+            Element targetElmt = null;
+            try {
+                if (args.get(0) instanceof List) {
+                    List elmts = (List) args.get(0);
+                    if (elmts.size() != 1) throw new XPathFunctionException(
+                            new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                                    "The bpws:process-property function MUST be passed a single " +
+                                            "element node."));
+                    if (elmts.get(0) instanceof Element) {
+                        targetElmt = (Element) elmts.get(0);
+                    } else if (elmts.get(0) instanceof String) {
+                    	propertyName = new QName((String) elmts.get(0));
+                    }
+                } else if (args.get(0) instanceof NodeWrapper) {
+                    targetElmt = (Element) ((NodeWrapper) args.get(0)).getUnderlyingNode();
+                } else if (args.get(0) instanceof Element) {
+                    targetElmt = (Element) args.get(0);
+                } else if (args.get(0) instanceof QNameValue) {
+                	QNameValue qNameValue = (QNameValue) args.get(0);
+                    propertyName = new QName(qNameValue.getNamespaceURI(), qNameValue.getLocalName(), qNameValue.getPrefix());
+                } else if (args.get(0) instanceof String)	{
+                	String stringValue = (String) args.get(0);
+                	if (stringValue.indexOf(":") > 0) {
+                		String prefix = stringValue.substring(0, stringValue.indexOf(":"));
+                		String localPart = stringValue.substring(stringValue.indexOf(":") + 1);
+                		String namespaceUri = _oxpath.namespaceCtx.getNamespaceURI(prefix);
+                		propertyName = new QName(namespaceUri, localPart, prefix);
+                	} else {
+                    	propertyName = new QName(stringValue);
+                	}
+                } else if (args.get(0) instanceof QName) {
+                	propertyName = (QName) args.get(0);
+                } else {
+                    throw new XPathFunctionException("Unexpected argument type: "+args.get(0).getClass());
+                }
+                if (propertyName == null) {
+                	if (targetElmt != null) {
+                		propertyName = new QName(targetElmt.getTextContent());
+                	}
+                }
+            } catch (IllegalArgumentException e) {
+                throw new XPathFunctionException(
+                		new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                				"Invalid argument: URI Template expected. " + args.get(0), e));
+            } catch (ClassCastException e) {
+                throw new XPathFunctionException(
+                        new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                                "The bpws:process-property function MUST be passed a single " +
+                                        "element node."));
+            }
+            return _ectx.getPropertyValue(propertyName);
     	}
     }
     

@@ -675,6 +675,10 @@ class ASSIGN extends ACTIVITY {
 		public URI getBaseResourceURI() {
 			return _ctx.getBaseResourceURI();
 		}
+
+		public Node getPropertyValue(QName propertyName) {
+			return _ctx.getPropertyValue(propertyName);
+		}
     }
 
 }

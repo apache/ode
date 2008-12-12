@@ -493,4 +493,9 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
 		// TODO Auto-generated method stub
 		
 	}
+
+	public Node getProcessProperty(QName propertyName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

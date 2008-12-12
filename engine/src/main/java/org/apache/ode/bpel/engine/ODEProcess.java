@@ -84,6 +84,7 @@ import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.ObjectPrinter;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * Entry point into the runtime of a BPEL process.
@@ -1411,4 +1412,11 @@ public class ODEProcess {
         }
     }
 
+    public Node getProcessProperty(QName propertyName) {
+    	Map<QName, Node> properties = _pconf.getProcessProperties();
+    	if (properties != null) {
+    		return properties.get(propertyName);
+    	}
+    	return null;
+    }
 }
