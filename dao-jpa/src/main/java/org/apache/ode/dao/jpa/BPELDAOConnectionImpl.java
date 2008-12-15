@@ -43,6 +43,7 @@ import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.ProcessManagementDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
@@ -141,7 +142,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
 	@SuppressWarnings("unchecked")
     public Collection<ProcessInstanceDAO> instanceQuery(InstanceFilter criteria) {
         StringBuffer query = new StringBuffer();
-        query.append("select pi from ProcessInstanceDAOImpl as pi");
+        query.append("select pi from ProcessInstanceDAOImpl as pi left join fetch pi._fault ");
 
         if (criteria != null) {
             // Building each clause
@@ -343,4 +344,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         return map;
     }
 
+    public ProcessManagementDAO getProcessManagement() {
+    	return new ProcessManagementDAOImpl(_em);
+    }
 }
