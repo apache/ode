@@ -29,9 +29,12 @@ import java.util.Set;
  * 
  * @hibernate.class table="BPEL_INSTANCE" dynamic-update="true" lazy="true"
  * @hibernate.query name="DELETE_INSTANCES_BY_PROCESS" query="delete from HProcessInstance as p where p.process = :process"
+ * @hibernate.query name="COUNT_INSTANCES_BY_STATUS_AND_PROCESS_ID" query="select count(i.id) as cnt, max(i.activityFailureDateTime) as lastFailureDt from HProcessInstance as i where i.process.processId = :processId and i.state in(:states) and i.activityFailureCount > 0"
+ * @hibernate.query name="COUNT_FAILED_INSTANCES_BY_STATUS_AND_PROCESS_ID" query="select count(i.id) as cnt, max(i.activityFailureDateTime) as lastFailureDt from HProcessInstance as i where i.process.processId = :processId and i.state in(:states) and i.activityFailureCount > 0"
  */
 public class HProcessInstance extends HObject {
 	public static final String DELETE_INSTANCES_BY_PROCESS="DELETE_INSTANCES_BY_PROCESS";
+	public static final String COUNT_FAILED_INSTANCES_BY_STATUS_AND_PROCESS_ID="COUNT_FAILED_INSTANCES_BY_STATUS_AND_PROCESS_ID";
 
 	/** Foreign key to owner {@link HProcess}. */
     private HProcess _process;

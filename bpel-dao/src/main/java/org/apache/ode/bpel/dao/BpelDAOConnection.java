@@ -109,4 +109,10 @@ public interface BpelDAOConnection  {
 
   MessageExchangeDAO getMessageExchange(String mexid);
 
+  /**
+   * Returns an interface for process and instance management.
+   * 
+   * @return a ProcessManagement DAO
+   */
+  ProcessManagementDAO getProcessManagement();
 }

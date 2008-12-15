@@ -63,12 +63,15 @@ import java.util.Set;
 @Entity
 @Table(name="ODE_PROCESS_INSTANCE")
 @NamedQueries({
-	@NamedQuery(name=ProcessInstanceDAOImpl.DELETE_INSTANCES_BY_PROCESS, query="delete from ProcessInstanceDAOImpl as i where i._process = :process")
+	@NamedQuery(name=ProcessInstanceDAOImpl.DELETE_INSTANCES_BY_PROCESS, query="delete from ProcessInstanceDAOImpl as i where i._process = :process"),
+	@NamedQuery(name=ProcessInstanceDAOImpl.COUNT_FAILED_INSTANCES_BY_STATUS_AND_PROCESS_ID, 
+			query="select count(i._instanceId), max(i._lastRecovery) from ProcessInstanceDAOImpl as i where i._process._processId = :processId and i._state in(:states) and exists(select r from ActivityRecoveryDAOImpl r where i = r._instance)")
 })
 public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanceDAO {
 	private static final Log __log = LogFactory.getLog(ProcessInstanceDAOImpl.class);
 	
 	public final static String DELETE_INSTANCES_BY_PROCESS = "DELETE_INSTANCES_BY_PROCESS";
+	public final static String COUNT_FAILED_INSTANCES_BY_STATUS_AND_PROCESS_ID = "COUNT_FAILED_INSTANCES_BY_STATUS_AND_PROCESS_ID";
 	
     @Id @Column(name="ID")
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -104,6 +107,8 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 	@OneToMany(targetEntity=MessageExchangeDAOImpl.class,mappedBy="_processInst",fetch=FetchType.LAZY)
 	@SuppressWarnings("unused")
 	private Collection<MessageExchangeDAO> _messageExchanges = new ArrayList<MessageExchangeDAO>();
+	
+	private transient int _activityFailureCount = -1;
 	
 	public ProcessInstanceDAOImpl() {}
 	public ProcessInstanceDAOImpl(CorrelatorDAOImpl correlator, ProcessDAOImpl process) {
@@ -215,7 +220,15 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 	}
 
 	public int getActivityFailureCount() {
-		return _recoveries.size();
+		if( _activityFailureCount == -1 ) {
+			_activityFailureCount = _recoveries.size();
+		}
+		
+		return _activityFailureCount;
+	}
+	
+	public void setActivityFailureCount(int activityFailureCount) {
+		_activityFailureCount = activityFailureCount;
 	}
 
 	public Date getActivityFailureDateTime() {

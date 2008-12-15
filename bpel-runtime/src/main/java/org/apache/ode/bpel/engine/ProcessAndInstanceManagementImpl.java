@@ -314,6 +314,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                 public Object run(BpelDAOConnection conn) {
                     Collection<ProcessInstanceDAO> instances = conn.instanceQuery(instanceFilter);
                     Map<Long, Collection<CorrelationSetDAO>> icsets = conn.getCorrelationSets(instances);
+                    conn.getProcessManagement().prefetchActivityFailureCounts(instances);
                     for (ProcessInstanceDAO instance : instances) {
                         TInstanceInfo info = infolist.addNewInstanceInfo();
                         fillInstanceSummary(info, instance);
@@ -862,34 +863,23 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         instances.setCount(count);
     }
 
-    private void getInstanceSummaryActivityFailure(final TInstanceSummary summary, ProcessConf pconf) {
-        String queryStatus = InstanceFilter.StatusKeys.valueOf(TInstanceStatus.ACTIVE.toString()).toString()
-                .toLowerCase();
-        final InstanceFilter instanceFilter = new InstanceFilter("status=" + queryStatus 
-        		+ " pid="+ pconf.getProcessId());
+    private void getInstanceSummaryActivityFailure(final TInstanceSummary summary, final ProcessConf pconf) {
         dbexec(new BpelDatabase.Callable<Void>() {
-
             public Void run(BpelDAOConnection conn) throws Exception {
-                Date lastFailureDt = null;
-                int failureInstances = 0;
-                for (ProcessInstanceDAO instance : conn.instanceQuery(instanceFilter)) {
-                    int count = instance.getActivityFailureCount();
-                    if (count > 0) {
-                        ++failureInstances;
-                        Date failureDt = instance.getActivityFailureDateTime();
-                        if (lastFailureDt == null || lastFailureDt.before(failureDt))
-                            lastFailureDt = failureDt;
-                    }
-                }
+                String queryStatus = InstanceFilter.StatusKeys.valueOf(TInstanceStatus.ACTIVE.toString()).toString().toLowerCase();
+            	Object[] results = conn.getProcessManagement().findFailedCountAndLastFailedDateForProcessId(
+            			conn, queryStatus, String.valueOf(pconf.getProcessId()));
+            	
+            	long failureInstances = (Long)results[0];
+            	Date lastFailureDt = (Date)results[1];
                 if (failureInstances > 0) {
                     TFailuresInfo failures = summary.addNewFailures();
                     failures.setDtFailure(toCalendar(lastFailureDt));
-                    failures.setCount(failureInstances);
+                    failures.setCount((int)failureInstances);
                 }
 
                 return null;
             }
-
         });
     }
 
@@ -918,6 +908,11 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             faultInfo.setExplanation(instance.getFault().getExplanation());
             faultInfo.setAiid(instance.getFault().getActivityId());
             faultInfo.setLineNumber(instance.getFault().getLineNo());
+        }
+        if (instance.getActivityFailureCount() > 0) {
+            TFailuresInfo failures = info.addNewFailures();
+            failures.setDtFailure(toCalendar(instance.getActivityFailureDateTime()));
+            failures.setCount(instance.getActivityFailureCount());
         }
     }
     

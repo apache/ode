@@ -366,4 +366,7 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         return map;
     }
 
+    public ProcessManagementDaoImpl getProcessManagement() {
+        return new ProcessManagementDaoImpl();
+    }
 }

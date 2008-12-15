@@ -41,6 +41,7 @@ import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.ProcessManagementDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
@@ -49,6 +50,7 @@ import org.apache.ode.daohib.bpel.hobj.HBpelEvent;
 import org.apache.ode.daohib.bpel.hobj.HCorrelationSet;
 import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HMessageExchange;
+import org.apache.ode.daohib.bpel.hobj.HObject;
 import org.apache.ode.daohib.bpel.hobj.HProcess;
 import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
 import org.apache.ode.daohib.bpel.hobj.HScope;
@@ -155,6 +157,7 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection {
         Criteria crit = session.createCriteria(HProcessInstance.class);
         CriteriaBuilder cb = new CriteriaBuilder();
         cb.buildCriteria(crit, filter);
+        crit.setFetchMode("fault", FetchMode.JOIN);
         return crit.list().iterator();
     }
 
@@ -289,4 +292,7 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection {
         return map;
     }
 
+    public ProcessManagementDAO getProcessManagement() {
+        return new ProcessManagementDaoImpl(_sm);
+    }
 }
