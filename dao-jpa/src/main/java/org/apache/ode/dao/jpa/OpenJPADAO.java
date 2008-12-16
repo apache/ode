@@ -18,16 +18,23 @@
  */
 package org.apache.ode.dao.jpa;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.openjpa.persistence.OpenJPAPersistence;
+import org.apache.openjpa.persistence.OpenJPAQuery;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class OpenJPADAO {
+	private static final Log __log = LogFactory.getLog(OpenJPADAO.class);
 
     protected BPELDAOConnectionImpl getConn() {
         return BPELDAOConnectionFactoryImpl._connections.get();
@@ -44,10 +51,28 @@ public class OpenJPADAO {
      * @param qry query to execute
      * @return whatever you assign it to
      */
+    @SuppressWarnings("unchecked")
     protected <T> T getSingleResult(Query qry) {
         List res = qry.getResultList();
         if (res.size() == 0) return null;
         return (T) res.get(0);
+    }
 
+    protected <T> void batchUpdateByIds(Iterator<T> ids, Query query, String parameterName) {
+    	if( query instanceof OpenJPAQuery ) {
+    		OpenJPAQuery openJpaQuery = (OpenJPAQuery)query;
+    		int batchSize = openJpaQuery.getFetchPlan().getFetchBatchSize();
+    		if( __log.isTraceEnabled() ) __log.trace("BATCH fetchBatchSize = " + batchSize);
+    		List<T> batch = new ArrayList<T>();
+    		while( ids.hasNext() ) {
+	    		for( int i = 0; i < batchSize && ids.hasNext(); i++ ) {
+	    			batch.add(ids.next());
+	    		}
+	    		if( __log.isTraceEnabled() ) __log.trace("BATCH updating " + batch.size() + " objects.");
+	    		query.setParameter(parameterName, batch);
+	    		query.executeUpdate();
+	    		batch.clear();
+    		}
+    	}
     }
 }

@@ -63,7 +63,9 @@ import java.util.Set;
 @Entity
 @Table(name="ODE_PROCESS_INSTANCE")
 @NamedQueries({
-	@NamedQuery(name=ProcessInstanceDAOImpl.DELETE_INSTANCES_BY_PROCESS, query="delete from ProcessInstanceDAOImpl as i where i._process = :process"),
+ 	@NamedQuery(name=ProcessInstanceDAOImpl.DELETE_INSTANCES_BY_PROCESS, query="delete from ProcessInstanceDAOImpl as i where i._process = :process"),
+ 	@NamedQuery(name=ProcessInstanceDAOImpl.SELECT_INSTANCE_IDS_BY_PROCESS, query="select i._instanceId from ProcessInstanceDAOImpl as i where i._process = :process"),
+ 	@NamedQuery(name=ProcessInstanceDAOImpl.SELECT_FAULT_IDS_BY_PROCESS, query="select i._faultId from ProcessInstanceDAOImpl as i where i._process = :process and i._faultId is not null"),
 	@NamedQuery(name=ProcessInstanceDAOImpl.COUNT_FAILED_INSTANCES_BY_STATUS_AND_PROCESS_ID, 
 			query="select count(i._instanceId), max(i._lastRecovery) from ProcessInstanceDAOImpl as i where i._process._processId = :processId and i._state in(:states) and exists(select r from ActivityRecoveryDAOImpl r where i = r._instance)")
 })
@@ -71,6 +73,8 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 	private static final Log __log = LogFactory.getLog(ProcessInstanceDAOImpl.class);
 	
 	public final static String DELETE_INSTANCES_BY_PROCESS = "DELETE_INSTANCES_BY_PROCESS";
+ 	public final static String SELECT_INSTANCE_IDS_BY_PROCESS = "SELECT_INSTANCE_IDS_BY_PROCESS";
+ 	public final static String SELECT_FAULT_IDS_BY_PROCESS = "SELECT_FAULT_IDS_BY_PROCESS";
 	public final static String COUNT_FAILED_INSTANCES_BY_STATUS_AND_PROCESS_ID = "COUNT_FAILED_INSTANCES_BY_STATUS_AND_PROCESS_ID";
 	
     @Id @Column(name="ID")
@@ -97,6 +101,10 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 	private Collection<ScopeDAO> _scopes = new ArrayList<ScopeDAO>();
 	@OneToMany(targetEntity=ActivityRecoveryDAOImpl.class,mappedBy="_instance",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
     private Collection<ActivityRecoveryDAO> _recoveries = new ArrayList<ActivityRecoveryDAO>();
+
+	@SuppressWarnings("unused")
+	@Basic @Column(name="FAULT_ID", insertable=false, updatable=false, nullable=true)
+    private long _faultId;
 	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}) @Column(name="FAULT_ID")
 	private FaultDAOImpl _fault;
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROCESS_ID")
@@ -147,6 +155,13 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 		// remove jacob state
 		setExecutionState(null);
 		if (getEM() != null) {
+			if( !cleanupCategories.isEmpty() ) {
+				// by default, we do not flush before select; flush it, so we can delete no matter if an entity is loaded up
+				// or not; more importantly, OpenJPA will secretly load from the entire table if some entities reside only
+				// in memory
+				getEM().flush();
+			}
+			
 			if (cleanupCategories.contains(CLEANUP_CATEGORY.EVENTS)) {
 				deleteEvents();
 			}
@@ -168,25 +183,32 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 	}
 	
 	private void deleteInstance() {
-		getEM().createNamedQuery(FaultDAOImpl.DELETE_FAULTS_BY_INSTANCE).setParameter("instance", this).executeUpdate();		
+		if( _fault != null ) {
+			getEM().remove(_fault);
+		}
 		getEM().remove(this); // This deletes ActivityRecoveryDAO 
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void deleteVariables() {
-		getEM().createNamedQuery(XmlDataProperty.DELETE_XML_DATA_PROPERTIES_BY_INSTANCE).setParameter("instance", this).executeUpdate();
-		getEM().createNamedQuery(XmlDataDAOImpl.DELETE_XMLDATA_BY_INSTANCE).setParameter("instance", this).executeUpdate();
+		Collection xmlDataIds = getEM().createNamedQuery(XmlDataDAOImpl.SELECT_XMLDATA_IDS_BY_INSTANCE).setParameter("instance", this).getResultList();
+		batchUpdateByIds(xmlDataIds.iterator(), getEM().createNamedQuery(XmlDataProperty.DELETE_XML_DATA_PROPERTIES_BY_XML_DATA_IDS), "xmlDataIds");
+		Collection scopeIds = getEM().createNamedQuery(ScopeDAOImpl.SELECT_SCOPE_IDS_BY_INSTANCE).setParameter("instance", this).getResultList();
+		batchUpdateByIds(scopeIds.iterator(), getEM().createNamedQuery(XmlDataDAOImpl.DELETE_XMLDATA_BY_SCOPE_IDS), "scopeIds");
 
-		getEM().createNamedQuery(PartnerLinkDAOImpl.DELETE_PARTNER_LINKS_BY_INSTANCE).setParameter("instance", this).executeUpdate();
-		getEM().createNamedQuery(ScopeDAOImpl.DELETE_SCOPES_BY_INSTANCE).setParameter("instance", this).executeUpdate();
+		batchUpdateByIds(scopeIds.iterator(), getEM().createNamedQuery(PartnerLinkDAOImpl.DELETE_PARTNER_LINKS_BY_SCOPE_IDS), "scopeIds");
+		batchUpdateByIds(scopeIds.iterator(), getEM().createNamedQuery(ScopeDAOImpl.DELETE_SCOPES_BY_SCOPE_IDS), "ids");
 	}
 
 	private void deleteMessageRoutes() {
 		getEM().createNamedQuery(MessageRouteDAOImpl.DELETE_MESSAGE_ROUTES_BY_INSTANCE).setParameter ("instance", this).executeUpdate();
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void deleteCorrelations() {
-		getEM().createNamedQuery(CorrSetProperty.DELETE_CORSET_PROPERTIES_BY_INSTANCE).setParameter("instance", this).executeUpdate();
-		getEM().createNamedQuery(CorrelationSetDAOImpl.DELETE_CORRELATION_SETS_BY_INSTANCE).setParameter("instance", this).executeUpdate();
+		Collection corrSetIds = getEM().createNamedQuery(CorrelationSetDAOImpl.SELECT_CORRELATION_SET_IDS_BY_INSTANCE).setParameter("instance", this).getResultList();
+		batchUpdateByIds(corrSetIds.iterator(), getEM().createNamedQuery(CorrSetProperty.DELETE_CORSET_PROPERTIES_BY_PROPERTY_IDS), "corrSetIds");
+		batchUpdateByIds(corrSetIds.iterator(), getEM().createNamedQuery(CorrelationSetDAOImpl.DELETE_CORRELATION_SETS_BY_IDS), "ids");
 	}
 
 	private void deleteEvents() {

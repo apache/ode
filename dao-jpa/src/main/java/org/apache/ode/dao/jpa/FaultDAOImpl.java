@@ -39,12 +39,10 @@ import javax.xml.namespace.QName;
 @Entity
 @Table(name="ODE_FAULT")
 @NamedQueries({
-	@NamedQuery(name=FaultDAOImpl.DELETE_FAULTS_BY_PROCESS, query="delete from FaultDAOImpl as f where f._id in(select i._fault from ProcessInstanceDAOImpl as i where i._process = :process)"),
-	@NamedQuery(name=FaultDAOImpl.DELETE_FAULTS_BY_INSTANCE, query="delete from FaultDAOImpl as f where f._id in(select i._fault from ProcessInstanceDAOImpl as i where i = :instance)")
+	@NamedQuery(name=FaultDAOImpl.DELETE_FAULTS_BY_IDS, query="delete from FaultDAOImpl as f where f._id in(:ids)")
 })
 public class FaultDAOImpl implements FaultDAO {
-	public final static String DELETE_FAULTS_BY_PROCESS = "DELETE_FAULTS_BY_PROCESS";
-	public final static String DELETE_FAULTS_BY_INSTANCE = "DELETE_FAULTS_BY_INSTANCE";
+	public final static String DELETE_FAULTS_BY_IDS = "DELETE_FAULTS_BY_IDS";
 	
 	@Id @Column(name="FAULT_ID") 
 	@GeneratedValue(strategy=GenerationType.AUTO)

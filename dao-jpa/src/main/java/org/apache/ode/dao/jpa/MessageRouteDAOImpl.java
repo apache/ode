@@ -40,12 +40,12 @@ import javax.persistence.Table;
 @Entity
 @Table(name="ODE_MESSAGE_ROUTE")
 @NamedQueries ({
-	@NamedQuery(name=MessageRouteDAOImpl.DELETE_MESSAGE_ROUTES_BY_PROCESS, query="delete from MessageRouteDAOImpl as r where r._processInst._process = :process"),
+	@NamedQuery(name=MessageRouteDAOImpl.DELETE_MESSAGE_ROUTES_BY_INSTANCE_IDS, query="delete from MessageRouteDAOImpl as r where r._instanceId in(:instanceIds)"),
 	@NamedQuery(name=MessageRouteDAOImpl.DELETE_MESSAGE_ROUTES_BY_INSTANCE, query="delete from MessageRouteDAOImpl as r where r._processInst = :instance")
 })
 public class MessageRouteDAOImpl implements MessageRouteDAO {
-	public final static String DELETE_MESSAGE_ROUTES_BY_PROCESS = "DELETE_MESSAGE_ROUTES_BY_PROCESS";
 	public final static String DELETE_MESSAGE_ROUTES_BY_INSTANCE = "DELETE_MESSAGE_ROUTES_BY_INSTANCE";
+	public final static String DELETE_MESSAGE_ROUTES_BY_INSTANCE_IDS = "DELETE_MESSAGE_ROUTES_BY_INSTANCE_IDS";
 	
 	@Id @Column(name="MESSAGE_ROUTE_ID") 
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -59,8 +59,12 @@ public class MessageRouteDAOImpl implements MessageRouteDAO {
 	@Basic @Column(name="ROUTE_POLICY", length=16)
     private String _routePolicy;	
 
+	@SuppressWarnings("unused")
+	@Basic @Column(name="PROCESS_INSTANCE_ID", insertable=false, updatable=false, nullable=true)
+    private int _instanceId;
     @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROCESS_INSTANCE_ID")
     private ProcessInstanceDAOImpl _processInst;
+    
     @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="CORR_ID")
     @SuppressWarnings("unused")
     private CorrelatorDAOImpl _correlator;

@@ -43,12 +43,10 @@ import javax.xml.namespace.QName;
 @Entity
 @Table(name="ODE_PARTNER_LINK")
 @NamedQueries({
-    @NamedQuery(name=PartnerLinkDAOImpl.DELETE_PARTNER_LINKS_BY_PROCESS, query="delete from PartnerLinkDAOImpl as l where l._scope in (select s from ScopeDAOImpl s where s._processInstance._process = :process)"),
-    @NamedQuery(name=PartnerLinkDAOImpl.DELETE_PARTNER_LINKS_BY_INSTANCE, query="delete from PartnerLinkDAOImpl as l where l._scope in (select s from ScopeDAOImpl s where s._processInstance = :instance)")
+    @NamedQuery(name=PartnerLinkDAOImpl.DELETE_PARTNER_LINKS_BY_SCOPE_IDS, query="delete from PartnerLinkDAOImpl as l where l._scopeId in (:scopeIds)")
 })
 public class PartnerLinkDAOImpl implements PartnerLinkDAO {
-	public final static String DELETE_PARTNER_LINKS_BY_PROCESS = "DELETE_PARTNER_LINKS_BY_PROCESS";
-	public final static String DELETE_PARTNER_LINKS_BY_INSTANCE = "DELETE_PARTNER_LINKS_BY_INSTANCE";
+	public final static String DELETE_PARTNER_LINKS_BY_SCOPE_IDS = "DELETE_PARTNER_LINKS_BY_SCOPE_IDS";
 	
 	@Id @Column(name="PARTNER_LINK_ID") 
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -77,6 +75,9 @@ public class PartnerLinkDAOImpl implements PartnerLinkDAO {
 	@Basic @Column(name="PARTNER_SESSION_ID")
     private String _partnerSessionId;
 
+	@SuppressWarnings("unused")
+	@Basic @Column(name="SCOPE_ID", nullable=true, insertable=false, updatable=false)
+    private Long _scopeId;
     @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="SCOPE_ID")
     @SuppressWarnings("unused")
     private ScopeDAOImpl _scope;

@@ -49,12 +49,14 @@ import java.util.List;
 @Table(name="ODE_SCOPE")
 @NamedQueries({
     @NamedQuery(name="ScopeEvents", query="SELECT se FROM EventDAOImpl as se WHERE se._scopeId = :sid"),
-    @NamedQuery(name=ScopeDAOImpl.DELETE_SCOPES_BY_PROCESS, query="delete from ScopeDAOImpl as s where s._processInstance._process = :process"),
-    @NamedQuery(name=ScopeDAOImpl.DELETE_SCOPES_BY_INSTANCE, query="delete from ScopeDAOImpl as s where s._processInstance = :instance")
+    @NamedQuery(name=ScopeDAOImpl.SELECT_SCOPE_IDS_BY_PROCESS, query="select s._scopeInstanceId from ScopeDAOImpl as s where s._processInstance._process = :process"),
+    @NamedQuery(name=ScopeDAOImpl.SELECT_SCOPE_IDS_BY_INSTANCE, query="select s._scopeInstanceId from ScopeDAOImpl as s where s._processInstance = :instance"),
+    @NamedQuery(name=ScopeDAOImpl.DELETE_SCOPES_BY_SCOPE_IDS, query="delete from ScopeDAOImpl as s where s._scopeInstanceId in(:ids)")
 })
 public class ScopeDAOImpl extends OpenJPADAO implements ScopeDAO {
-	public final static String DELETE_SCOPES_BY_PROCESS = "DELETE_SCOPES_BY_PROCESS";
-	public final static String DELETE_SCOPES_BY_INSTANCE = "DELETE_SCOPES_BY_INSTANCE";
+	public final static String SELECT_SCOPE_IDS_BY_PROCESS = "SELECT_SCOPE_IDS_BY_PROCESS";
+	public final static String SELECT_SCOPE_IDS_BY_INSTANCE = "SELECT_SCOPE_IDS_BY_INSTANCE";
+	public final static String DELETE_SCOPES_BY_SCOPE_IDS = "DELETE_SCOPES_BY_SCOPE_IDS";
 	
     @Id @Column(name="SCOPE_ID")
     @GeneratedValue(strategy= GenerationType.AUTO)
