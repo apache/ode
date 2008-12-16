@@ -375,10 +375,14 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
 		getSession().getNamedQuery(HScope.DELETE_SCOPES_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
   	}
 
+  	@SuppressWarnings("unchecked")
     private void deleteMessages() {
     	// there are chances that some unmatched messages are still there
   		getSession().getNamedQuery(HLargeData.DELETE_UNMATCHED_MESSAGE_LDATA_BY_INSTANCE).setParameter("instance", _instance).setParameter("instance2", _instance).executeUpdate();
-  		getSession().getNamedQuery(HMessageExchange.DELETE_UNMATCHED_MEX_BY_INSTANCE).setParameter("instance", _instance).executeUpdate();
+  		Collection unmatchedMex = getSession().getNamedQuery(HMessageExchange.SELECT_UNMATCHED_MEX_BY_INSTANCE).setParameter("instance", _instance).list();
+  		if( !unmatchedMex.isEmpty() ) {
+  			getSession().getNamedQuery(HMessageExchange.DELETE_UNMATCHED_MEX).setParameter("mex", unmatchedMex).executeUpdate();
+  		}
   		getSession().getNamedQuery(HCorrelatorMessage.DELETE_CORMESSAGES_BY_INSTANCE).setParameter("instance", _instance).executeUpdate();
 
   		getSession().getNamedQuery(HCorrelatorSelector.DELETE_MESSAGE_ROUTES_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();

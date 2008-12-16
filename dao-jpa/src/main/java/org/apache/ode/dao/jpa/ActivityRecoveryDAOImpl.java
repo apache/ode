@@ -19,7 +19,6 @@
 
 package org.apache.ode.dao.jpa;
 
-
 import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
@@ -43,12 +42,12 @@ import java.util.Date;
 @Entity
 @Table(name="ODE_ACTIVITY_RECOVERY")
 @NamedQueries({
-	@NamedQuery(name=ActivityRecoveryDAOImpl.DELETE_ACTIVITY_RECOVERIES_BY_PROCESS, query="delete from ActivityRecoveryDAOImpl as a where a._instance._process = :process"),
+ 	@NamedQuery(name=ActivityRecoveryDAOImpl.DELETE_ACTIVITY_RECOVERIES_BY_IDS, query="delete from ActivityRecoveryDAOImpl as a where a._instanceId in(:ids)"),
 	@NamedQuery(name=ActivityRecoveryDAOImpl.COUNT_ACTIVITY_RECOVERIES_BY_INSTANCES,
 			query="select r._instanceId, count(r._id) from ActivityRecoveryDAOImpl r where r._instance in(:instances) group by r._instanceId")
 })
 public class ActivityRecoveryDAOImpl implements ActivityRecoveryDAO {
-	public final static String DELETE_ACTIVITY_RECOVERIES_BY_PROCESS = "DELETE_ACTIVITY_RECOVERIES_BY_PROCESS";
+ 	public final static String DELETE_ACTIVITY_RECOVERIES_BY_IDS = "DELETE_ACTIVITY_RECOVERIES_BY_IDS";
 	public final static String COUNT_ACTIVITY_RECOVERIES_BY_INSTANCES = "COUNT_ACTIVITY_RECOVERIES_BY_INSTANCES";
 	
     @Id @Column(name="ID")
@@ -71,8 +70,9 @@ public class ActivityRecoveryDAOImpl implements ActivityRecoveryDAO {
 	@Basic @Column(name="RETRIES")
     private int _retries;
 
-	@Basic @Column(name="INSTANCE_ID", nullable=true, insertable=false, updatable=false)
-    private Long _instanceId;
+ 	@SuppressWarnings("unused")
+ 	@Basic @Column(name="INSTANCE_ID", insertable=false, updatable=false, nullable=true)
+     private Long _instanceId;
 
 	// _instances is unused because this is a one-way relationship at the database level
     @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="INSTANCE_ID")

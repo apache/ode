@@ -37,12 +37,10 @@ import javax.persistence.Table;
 @Entity
 @Table(name="ODE_CORSET_PROP")
 @NamedQueries({
-	@NamedQuery(name=CorrSetProperty.DELETE_CORSET_PROPERTIES_BY_PROCESS, query="delete from CorrSetProperty as p where p._corrSet._scope._processInstance._process = :process"),
-	@NamedQuery(name=CorrSetProperty.DELETE_CORSET_PROPERTIES_BY_INSTANCE, query="delete from CorrSetProperty as p where p._corrSet._scope._processInstance = :instance")
+	@NamedQuery(name=CorrSetProperty.DELETE_CORSET_PROPERTIES_BY_PROPERTY_IDS, query="delete from CorrSetProperty as p where p.corrSetId in(:corrSetIds)")
 })
 public class CorrSetProperty {
-	public final static String DELETE_CORSET_PROPERTIES_BY_PROCESS = "DELETE_CORSET_PROPERTIES_BY_PROCESS";
-	public final static String DELETE_CORSET_PROPERTIES_BY_INSTANCE = "DELETE_CORSET_PROPERTIES_BY_INSTANCE";
+	public final static String DELETE_CORSET_PROPERTIES_BY_PROPERTY_IDS = "DELETE_CORSET_PROPERTIES_BY_PROPERTY_IDS";
 	
     @Id @Column(name="ID")
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -53,6 +51,10 @@ public class CorrSetProperty {
     @Basic @Column(name="PROP_VALUE")
     private String propertyValue;
 
+    @SuppressWarnings("unused")
+    @Basic @Column(name="CORRSET_ID", insertable=false, updatable=false, nullable=true)
+    private Long corrSetId;
+    
     @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="CORRSET_ID")
     private CorrelationSetDAOImpl _corrSet;
 

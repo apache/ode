@@ -38,10 +38,10 @@ import javax.persistence.Table;
 @Entity
 @Table(name="ODE_MEX_PROP")
 @NamedQueries({
-	@NamedQuery(name=MexProperty.DELETE_MEX_PROPERTIES_BY_PROCESS, query="delete from MexProperty as p where p._mex._process = :process")
+	@NamedQuery(name=MexProperty.DELETE_MEX_PROPERTIES_BY_MEX_IDS, query="delete from MexProperty as p where p._mexId in (:mexIds)")
 })
 public class MexProperty {
-	public final static String DELETE_MEX_PROPERTIES_BY_PROCESS = "DELETE_MEX_PROPERTIES_BY_PROCESS";
+	public final static String DELETE_MEX_PROPERTIES_BY_MEX_IDS = "DELETE_MEX_PROPERTIES_BY_MEX_IDS";
 
     @Id @Column(name="ID")
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -51,6 +51,10 @@ public class MexProperty {
     private String propertyKey;
     @Basic @Column(name="PROP_VALUE", length=2000)
     private String propertyValue;
+    
+    @SuppressWarnings("unused")
+    @Basic @Column(name="MEX_ID", insertable=false, updatable=false, nullable=true)
+    private String _mexId;
     @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST})
     @Column(name="MEX_ID")
     @SuppressWarnings("unused")

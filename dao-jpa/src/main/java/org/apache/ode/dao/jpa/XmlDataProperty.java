@@ -38,12 +38,10 @@ import javax.persistence.Table;
 @Entity
 @Table(name="ODE_XML_DATA_PROP")
 @NamedQueries({
-	@NamedQuery(name=XmlDataProperty.DELETE_XML_DATA_PROPERTIES_BY_PROCESS, query="delete from XmlDataProperty as p where p._xmlData._scope._processInstance._process = :process"),
-	@NamedQuery(name=XmlDataProperty.DELETE_XML_DATA_PROPERTIES_BY_INSTANCE, query="delete from XmlDataProperty as p where p._xmlData._scope._processInstance = :instance")
+	@NamedQuery(name=XmlDataProperty.DELETE_XML_DATA_PROPERTIES_BY_XML_DATA_IDS, query="delete from XmlDataProperty as p where p._xmlDataId in (:xmlDataIds)")
 })
 public class XmlDataProperty {
-	public final static String DELETE_XML_DATA_PROPERTIES_BY_PROCESS = "DELETE_XML_DATA_PROPERTIES_BY_PROCESS";
-	public final static String DELETE_XML_DATA_PROPERTIES_BY_INSTANCE = "DELETE_XML_DATA_PROPERTIES_BY_INSTANCE";
+	public final static String DELETE_XML_DATA_PROPERTIES_BY_XML_DATA_IDS = "DELETE_XML_DATA_PROPERTIES_BY_XML_DATA_IDS";
 	
     @Id @Column(name="ID")
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -53,6 +51,10 @@ public class XmlDataProperty {
     private String propertyKey;
     @Basic @Column(name="PROP_VALUE")
     private String propertyValue;
+    
+    @SuppressWarnings("unused")
+    @Basic @Column(name="XML_DATA_ID", insertable=false, updatable=false, nullable=true)
+    private Long _xmlDataId;
     @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST})
     @Column(name="XML_DATA_ID")
     @SuppressWarnings("unused")
