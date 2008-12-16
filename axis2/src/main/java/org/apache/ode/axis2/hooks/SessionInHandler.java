@@ -70,7 +70,7 @@ public class SessionInHandler extends AbstractHandler {
                 }
                 if (__log.isDebugEnabled())
                     __log.debug("Constructed a TO endpoint: " + DOMUtils.domToString(serviceEpr));
-                messageContext.setProperty(TARGET_SESSION_ENDPOINT, serviceEpr);
+                messageContext.setProperty(ODEService.TARGET_SESSION_ENDPOINT, serviceEpr);
             }
 
             // Seeing if there's a callback, in case our client would be stateful as well
