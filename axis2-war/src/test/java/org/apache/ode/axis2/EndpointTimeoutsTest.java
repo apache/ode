@@ -13,8 +13,7 @@ import org.testng.annotations.Test;
  *
  */
 public class EndpointTimeoutsTest extends Axis2TestBase {
-
-    @Test
+	@Test(dataProvider="configs")
     public void testTimeouts() throws Exception {
         String bundleName = "TestEndpointTimeouts";
         // deploy the required service

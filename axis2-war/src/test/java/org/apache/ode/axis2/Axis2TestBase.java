@@ -16,6 +16,8 @@ import org.apache.ode.axis2.util.Axis2WSDLLocator;
 import org.apache.ode.tools.sendsoap.cline.HttpSoapSender;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+
 
 import javax.servlet.ServletException;
 import javax.wsdl.WSDLException;
@@ -29,8 +31,10 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author Matthieu Riou <mriou@apache.org>
@@ -43,7 +47,60 @@ public abstract class Axis2TestBase {
 
     protected ODEAxis2Server server;
 
-    public void startServer() throws Exception {
+	protected String config;
+	
+	private static final String DO_NOT_OVERRIDE_CONFIG = "<DO_NOT_OVERRIDE_CONFIG>";
+
+	@DataProvider(name = "configs")
+	protected Iterator<Object[]> createConfigData() {
+		List<String> configDirList = new ArrayList<String>();
+		if( !(this instanceof ODEConfigDirAware) || ((ODEConfigDirAware)this).getODEConfigDir().contains("hib")) {
+			addToConfigDirList(configDirList, "org.apache.ode.jpadbs");
+		}
+		if( !(this instanceof ODEConfigDirAware) || !((ODEConfigDirAware)this).getODEConfigDir().contains("hib")) {
+			addToConfigDirList(configDirList, "org.apache.ode.hibdbs");
+		}
+
+		if( configDirList.isEmpty() ) {
+			// if no system property is set, fall back to default
+			System.out.println("WARNING: No Java system properties have been set to override ode configuration, using default.");
+			if( this instanceof ODEConfigDirAware ) {
+				configDirList.add(((ODEConfigDirAware)this).getODEConfigDir());
+			} else {
+				configDirList.add(DO_NOT_OVERRIDE_CONFIG);
+			}
+		}
+		
+		final Iterator<String> itr = configDirList.iterator();
+		return new Iterator<Object[]>() {
+			public boolean hasNext() {
+				return itr.hasNext();
+			}
+
+			public Object[] next() {
+				config = itr.next();
+				return new Object[] {};
+			}
+
+			public void remove() {
+			}
+		};
+	}
+
+	private void addToConfigDirList(List<String> configDirList, String propertyKey) {
+		String dbs = System.getProperty(propertyKey);
+		if( dbs != null ) {
+			String[] configDirs = dbs.split(",");
+			for( String configDir : configDirs ) {
+				String trimmed = configDir.trim();
+				if( trimmed.length() > 0 ) {
+					configDirList.add(trimmed);
+				}
+			}
+		}
+	}
+	
+	public void startServer() throws Exception {
         startServer("webapp/WEB-INF", "webapp/WEB-INF/conf/axis2.xml");
     }
 
@@ -59,12 +116,19 @@ public abstract class Axis2TestBase {
         server.stop();
     }
 
-  @BeforeMethod
+    @BeforeMethod
     protected void setUp() throws Exception {
-        startServer();
+    	if( config == null || DO_NOT_OVERRIDE_CONFIG.equals(config) ) {
+        	System.out.println("Using default config.");
+    	} else {
+        	System.out.println("Using config: " + config + ".");
+    		System.setProperty("org.apache.ode.configDir", config);
+    	}
+
+    	startServer();
     }
 
-  @AfterMethod
+    @AfterMethod
     protected void tearDown() throws Exception {
         stopServer();
     }

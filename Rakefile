@@ -213,6 +213,8 @@ define "ode" do
     test.setup unzip(_("target/test-classes/webapp/WEB-INF")=>project("dao-jpa-ojpa-derby").package(:zip))
     test.setup unzip(_("target/test-classes/webapp/WEB-INF")=>project("dao-hibernate-db").package(:zip))
     
+    NativeDB.prepare_configs test, _(".")
+
     test.setup task(:prepare_rampart_policy_test) do |task|
       # test_dir will be the Axis2 Repo dir
       test_dir = _("target/test-classes/TestRampartPolicy")
@@ -453,6 +455,8 @@ define "ode" do
       build concat(_("target/#{db}.sql")=>[ predefined_for[db], partial ])
     end
 
+    NativeDB.create_dbs self, _("."), :hib
+
     package(:zip).include(derby_db)
   end
 
@@ -486,6 +490,9 @@ define "ode" do
       JAVAX.transaction, LOG4J, OPENJPA, XERCES, WSDL4J
 
     build derby_db
+
+    NativeDB.create_dbs self, _("."), :jpa
+
     package(:zip).include(derby_db)
   end
 
