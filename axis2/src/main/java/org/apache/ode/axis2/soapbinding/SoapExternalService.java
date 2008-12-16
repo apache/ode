@@ -274,7 +274,7 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
             }
             targetEPR.setSessionId(partnerSessionId);
         }
-        options.setProperty("targetSessionEndpoint", targetEPR);
+        options.setProperty(ODEService.TARGET_SESSION_ENDPOINT, targetEPR);
 
         if (myRoleEPR != null) {
             if (myRoleSessionId != null) {
@@ -283,7 +283,7 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
                 }
                 myRoleEPR.setSessionId(myRoleSessionId);
             }
-            options.setProperty("callbackSessionEndpoint", odeMex.getMyRoleEndpointReference());
+            options.setProperty(ODEService.CALLBACK_SESSION_ENDPOINT, odeMex.getMyRoleEndpointReference());
         } else {
             __log.debug("My-Role EPR not specified, SEP will not be used.");
         }
