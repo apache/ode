@@ -2,17 +2,18 @@ package org.apache.ode.axis2.correlation;
 
 import org.apache.ode.axis2.Axis2TestBase;
 import org.apache.ode.axis2.DummyService;
+import org.apache.ode.axis2.ODEConfigDirAware;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
-public class CorrelationJoinTest extends Axis2TestBase {
+public class CorrelationJoinTest extends Axis2TestBase implements ODEConfigDirAware {
 	/**
 	 * Tests rendezvous
 	 * 
 	 * @throws Exception
 	 */
-	@Test 
+    @Test(dataProvider="configs")
 	public void testCorrelationJoin() throws Exception {
         final String bundleName = "TestCorrelationJoin";
         
@@ -55,5 +56,9 @@ public class CorrelationJoinTest extends Axis2TestBase {
         } finally {
             server.undeployProcess(bundleName);
         }
+    }
+
+    public String getODEConfigDir() {
+		return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby";	
     }
 }

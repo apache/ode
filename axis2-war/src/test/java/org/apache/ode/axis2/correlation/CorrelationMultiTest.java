@@ -2,12 +2,13 @@ package org.apache.ode.axis2.correlation;
 
 import org.apache.ode.axis2.Axis2TestBase;
 import org.apache.ode.axis2.DummyService;
+import org.apache.ode.axis2.ODEConfigDirAware;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
-public class CorrelationMultiTest extends Axis2TestBase {
-	@Test 
+public class CorrelationMultiTest extends Axis2TestBase implements ODEConfigDirAware {
+    @Test(dataProvider="configs")
 	public void testCorrelationMulti() throws Exception {
         final String bundleName = "TestCorrelationMulti";
         
@@ -37,5 +38,9 @@ public class CorrelationMultiTest extends Axis2TestBase {
         } finally {
             server.undeployProcess(bundleName);
         }
+    }
+
+	public String getODEConfigDir() {
+		return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby";	
     }
 }

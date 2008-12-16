@@ -5,7 +5,7 @@ import org.hibernate.Query;
 
 public class CleanSuccessHibTest extends CleanSuccessTest {
 	@Override
-	protected String getODEConfigDir() {
+	public String getODEConfigDir() {
 		return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.hib-derby";	
 	}
 

@@ -50,13 +50,13 @@ public class HttpBindingTest extends Axis2TestBase {
         latch.await();
     }
 
-  @AfterMethod
+  	@AfterMethod
     protected void tearDown() throws Exception {
         jettyWrapper.stop();
         super.tearDown();
     }
 
-  @Test
+  	@Test(dataProvider="configs")
     public void testHttpBinding() throws Exception {
         String bundleName = "TestHttpBinding";
         // deploy the required service
@@ -74,26 +74,26 @@ public class HttpBindingTest extends Axis2TestBase {
         }
     }
 
-  @Test
+    @Test(dataProvider="configs")
     public void testHttpBindingExt_GET() throws Exception {
         String bundleName = "TestHttpBindingExt_GET";
         executeBundle(bundleName);
 
     }
 
-  @Test
+    @Test(dataProvider="configs")
     public void testHttpBindingExt_DELETE() throws Exception {
         String bundleName = "TestHttpBindingExt_DELETE";
         executeBundle(bundleName);
     }
 
-  @Test
+    @Test(dataProvider="configs")
     public void testHttpBindingExt_POST() throws Exception {
         String bundleName = "TestHttpBindingExt_POST";
         executeBundle(bundleName);
     }
 
-  @Test
+    @Test(dataProvider="configs")
     public void testHttpBindingExt_PUT() throws Exception {
         String bundleName = "TestHttpBindingExt_PUT";
         executeBundle(bundleName);

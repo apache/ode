@@ -6,7 +6,7 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.testng.annotations.Test;
 
 public class CleanFailureTest extends CleanTestBase {
-    @Test
+	@Test(dataProvider="configs")
     public void testCleanAll() throws Exception {
         String bundleName = "TestCleanFailure";
         // deploy the required service
@@ -23,7 +23,6 @@ public class CleanFailureTest extends CleanTestBase {
         }
     }
 
-	@Override
 	public String getODEConfigDir() {
 		return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby";
 	}

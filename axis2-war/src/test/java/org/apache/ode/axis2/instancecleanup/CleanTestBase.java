@@ -6,6 +6,7 @@ import static org.testng.AssertJUnit.assertTrue;
 import java.io.File;
 
 import org.apache.ode.axis2.Axis2TestBase;
+import org.apache.ode.axis2.ODEConfigDirAware;
 import org.apache.ode.axis2.ODEConfigProperties;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
@@ -14,21 +15,14 @@ import org.apache.ode.bpel.dao.ProcessProfileDAO;
 import org.apache.ode.il.EmbeddedGeronimoFactory;
 import org.apache.ode.il.dbutil.Database;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 
 import javax.transaction.TransactionManager;
 
-public abstract class CleanTestBase extends Axis2TestBase {
+public abstract class CleanTestBase extends Axis2TestBase implements ODEConfigDirAware {
     protected ProfilingBpelDAOConnection daoConn;
     protected TransactionManager txm;
 	protected int initialLargeDataCount = 0;
 	
-    @BeforeMethod
-    protected void setUp() throws Exception {
-    	System.setProperty("org.apache.ode.configDir", getODEConfigDir());
-        super.setUp();
-    }
-
     @AfterMethod
     protected void tearDown() throws Exception {
         stopTM();
@@ -75,8 +69,6 @@ public abstract class CleanTestBase extends Axis2TestBase {
 		return db;
     }
 
-    protected abstract String getODEConfigDir();
-    
     protected TransactionManager getTransactionManager() {
         return txm;
     }

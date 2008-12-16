@@ -8,12 +8,12 @@ import org.testng.annotations.Test;
 import static org.testng.AssertJUnit.fail;
 
 public class CleanSuccessTest extends CleanTestBase {
-    @Test
+	@Test(dataProvider="configs")
     public void testCleanNone() throws Exception {
     	go("TestCleanSuccess_None", 1, 0, 0, 0, 3, 0, 6, 2, 3, 6, 59, 76);
     }
 
-    @Test
+	@Test(dataProvider="configs")
     public void testCleanInstance() throws Exception {
     	try {
     		go("TestCleanSuccess_Instance", 0, 0, 0, 0, 3, 0, 6, 2, 3, 6, 59, 70);
@@ -21,32 +21,32 @@ public class CleanSuccessTest extends CleanTestBase {
     	} catch(ContextException re) {}
     }
 
-    @Test
+	@Test(dataProvider="configs")
     public void testCleanVariables() throws Exception {
         go("TestCleanSuccess_Variables", 1, 0, 0, 0, 3, 0, 6, 0, 0, 0, 59, 70);
     }
 
-    @Test
+	@Test(dataProvider="configs")
     public void testCleanMessages() throws Exception {
         go("TestCleanSuccess_Messages", 1, 0, 0, 0, 0, 0, 0, 2, 3, 6, 59, 65);
     }
 
-    @Test
+	@Test(dataProvider="configs")
     public void testCleanCorrelations() throws Exception {
         go("TestCleanSuccess_Correlations", 1, 0, 0, 0, 3, 0, 6, 2, 3, 6, 59, 76);
     }
 
-    @Test
+	@Test(dataProvider="configs")
     public void testCleanEvents() throws Exception {
         go("TestCleanSuccess_Events", 1, 0, 0, 0, 3, 0, 6, 2, 3, 6, 0, 17);
     }
 
-    @Test
+	@Test(dataProvider="configs")
     public void testCleanMessageCorrEvents() throws Exception {
         go("TestCleanSuccess_MessageCorrEvents", 1, 0, 0, 0, 0, 0, 0, 2, 3, 6, 0, 6);
     }
 
-    @Test
+	@Test(dataProvider="configs")
     public void testCleanAll() throws Exception {
         go("TestCleanSuccess_All", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
@@ -66,8 +66,7 @@ public class CleanSuccessTest extends CleanTestBase {
         }
     }
 
-	@Override
-	protected String getODEConfigDir() {
+	public String getODEConfigDir() {
 		return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby";	
 	}
 	
