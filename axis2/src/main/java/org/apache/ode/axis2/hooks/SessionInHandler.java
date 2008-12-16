@@ -26,6 +26,7 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.axis2.ODEService;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.w3c.dom.Document;
@@ -38,7 +39,7 @@ import javax.xml.namespace.QName;
  * context.
  */
 public class SessionInHandler extends AbstractHandler {
-    private static final long serialVersionUID = -806564877582696569L;
+	private static final long serialVersionUID = -806564877582696569L;
 
     private static final Log __log = LogFactory.getLog(SessionInHandler.class);
 
@@ -69,7 +70,7 @@ public class SessionInHandler extends AbstractHandler {
                 }
                 if (__log.isDebugEnabled())
                     __log.debug("Constructed a TO endpoint: " + DOMUtils.domToString(serviceEpr));
-                messageContext.setProperty("targetSessionEndpoint", serviceEpr);
+                messageContext.setProperty(TARGET_SESSION_ENDPOINT, serviceEpr);
             }
 
             // Seeing if there's a callback, in case our client would be stateful as well
@@ -96,7 +97,7 @@ public class SessionInHandler extends AbstractHandler {
                     }
                     if (__log.isDebugEnabled())
                         __log.debug("Constructed a CALLBACK endpoint: " + DOMUtils.domToString(serviceEpr));
-                    messageContext.setProperty("callbackSessionEndpoint", serviceEpr);
+                    messageContext.setProperty(ODEService.CALLBACK_SESSION_ENDPOINT, serviceEpr);
                 }
             }
         }

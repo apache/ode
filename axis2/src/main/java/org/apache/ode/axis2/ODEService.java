@@ -58,8 +58,10 @@ import org.w3c.dom.Element;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class ODEService {
+	private static final Log __log = LogFactory.getLog(ODEService.class);
 
-    private static final Log __log = LogFactory.getLog(ODEService.class);
+    public static final String TARGET_SESSION_ENDPOINT = "targetSessionEndpoint";
+	public static final String CALLBACK_SESSION_ENDPOINT = "callbackSessionEndpoint";
 
     private AxisService _axisService;
     private BpelServer _server;
@@ -192,8 +194,8 @@ public class ODEService {
      * Extracts endpoint information from Axis MessageContext (taken from WSA headers) to stuff them into ODE mesage exchange.
      */
     private void readHeader(MessageContext msgContext, MyRoleMessageExchange odeMex) {
-        Object otse = msgContext.getProperty("targetSessionEndpoint");
-        Object ocse = msgContext.getProperty("callbackSessionEndpoint");
+        Object otse = msgContext.getProperty(TARGET_SESSION_ENDPOINT);
+        Object ocse = msgContext.getProperty(CALLBACK_SESSION_ENDPOINT);
         if (otse != null) {
             Element serviceEpr = (Element) otse;
             WSAEndpoint endpoint = new WSAEndpoint();
@@ -228,7 +230,7 @@ public class ODEService {
         // information (if available).
         if (odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID) != null) {
             _serviceRef.setSessionId(odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID));
-            msgContext.setProperty("callbackSessionEndpoint", _serviceRef);
+            msgContext.setProperty(CALLBACK_SESSION_ENDPOINT, _serviceRef);
         }
 
     }
