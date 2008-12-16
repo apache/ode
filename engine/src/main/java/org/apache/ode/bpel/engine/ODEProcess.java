@@ -272,7 +272,8 @@ public class ODEProcess {
             if (op.getOutput() == null) {
                 mexdao.setStatus(Status.ACK);
                 mexdao.setAckType(AckType.ONEWAY);
-                onMyRoleMexAck(mexdao, oldstatus);
+                //is it valid to assume that "oldstatus" is always ASYNC for ONEWAY mex?
+                onMyRoleMexAck(mexdao, Status.ASYNC);
             }
 
             mexdao.setProcess(getProcessDAO());
