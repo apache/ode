@@ -222,6 +222,9 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
             }
         });
         
+        // IL may acknowledge
+        partner.expects(atLeastOnce()).method("onMyRoleMessageExchangeStateChanged");
+        
         partner.expects(atLeastOnce()).method("getSupportedInvocationStyle").will(returnValue(Collections.singleton(InvocationStyle.UNRELIABLE)));
         
         // There will be multiple calls to invoke.
