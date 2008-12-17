@@ -57,7 +57,7 @@ public class SessionOutHandler extends AbstractHandler {
         if (otargetSession != null || ocallbackSession != null) {
             SOAPHeader header = messageContext.getEnvelope().getHeader();
             SOAPFactory factory = (SOAPFactory) messageContext.getEnvelope().getOMFactory();
-            OMNamespace intalioSessNS = factory.createOMNamespace(Namespaces.INTALIO_SESSION_NS, "intalio");
+            OMNamespace intalioSessNS = factory.createOMNamespace(Namespaces.ODE_SESSION_NS, "intalio");
             OMNamespace wsAddrNS = factory.createOMNamespace(Namespaces.WS_ADDRESSING_NS, "addr");
             if (header == null) {
                 header = factory.createSOAPHeader(messageContext.getEnvelope());

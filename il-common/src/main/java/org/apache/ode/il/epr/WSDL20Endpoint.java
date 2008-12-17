@@ -41,17 +41,17 @@ public class WSDL20Endpoint implements MutableEndpoint {
 
   public String getSessionId() {
     Element endpointElmt = (Element)_serviceElmt.getElementsByTagNameNS(Namespaces.WSDL_20, "endpoint").item(0);
-    NodeList idNodes = endpointElmt.getElementsByTagNameNS(Namespaces.INTALIO_SESSION_NS, "session");
+    NodeList idNodes = endpointElmt.getElementsByTagNameNS(Namespaces.ODE_SESSION_NS, "session");
     if (idNodes.getLength() > 0) return idNodes.item(0).getTextContent();
     else return null;
   }
 
   public void setSessionId(String sessionId) {
     Element endpointElmt = (Element)_serviceElmt.getElementsByTagNameNS(Namespaces.WSDL_20, "endpoint").item(0);
-    NodeList idList = endpointElmt.getElementsByTagNameNS(Namespaces.INTALIO_SESSION_NS, "session");
+    NodeList idList = endpointElmt.getElementsByTagNameNS(Namespaces.ODE_SESSION_NS, "session");
     if (idList.getLength() > 0) idList.item(0).setTextContent(sessionId);
     else {
-      Element sessElmt = _serviceElmt.getOwnerDocument().createElementNS(Namespaces.INTALIO_SESSION_NS, "session");
+      Element sessElmt = _serviceElmt.getOwnerDocument().createElementNS(Namespaces.ODE_SESSION_NS, "session");
       sessElmt.setTextContent(sessionId);
       endpointElmt.appendChild(sessElmt);
     }
@@ -122,7 +122,7 @@ public class WSDL20Endpoint implements MutableEndpoint {
     endpoint.setAttribute("binding", "");
     if (eprMap.get(ADDRESS) != null) endpoint.setAttribute("address", (String) eprMap.get(ADDRESS));
     if (eprMap.get(SESSION) != null) {
-      Element session = doc.createElementNS(Namespaces.INTALIO_SESSION_NS, "session");
+      Element session = doc.createElementNS(Namespaces.ODE_SESSION_NS, "session");
       session.setTextContent((String) eprMap.get(SESSION));
       endpoint.appendChild(session);
     }
