@@ -57,7 +57,7 @@ public class SessionOutHandler extends AbstractHandler {
         if (otargetSession != null || ocallbackSession != null) {
             SOAPHeader header = messageContext.getEnvelope().getHeader();
             SOAPFactory factory = (SOAPFactory) messageContext.getEnvelope().getOMFactory();
-            OMNamespace intalioSessNS = factory.createOMNamespace(Namespaces.ODE_SESSION_NS, "intalio");
+            OMNamespace odeSessNS = factory.createOMNamespace(Namespaces.ODE_SESSION_NS, "odesession");
             OMNamespace wsAddrNS = factory.createOMNamespace(Namespaces.WS_ADDRESSING_NS, "addr");
             if (header == null) {
                 header = factory.createSOAPHeader(messageContext.getEnvelope());
@@ -92,7 +92,7 @@ public class SessionOutHandler extends AbstractHandler {
                 }
 	            
                 if (targetEpr.getSessionId() != null) {
-                    OMElement session = factory.createSOAPHeaderBlock("session", intalioSessNS);
+                    OMElement session = factory.createSOAPHeaderBlock("session", odeSessNS);
                     header.addChild(session);
                     session.setText(targetEpr.getSessionId());
                 }
@@ -101,13 +101,13 @@ public class SessionOutHandler extends AbstractHandler {
 
             if (ocallbackSession != null && ocallbackSession instanceof MutableEndpoint) {
                 WSAEndpoint callbackEpr = EndpointFactory.convertToWSA((MutableEndpoint) ocallbackSession);
-                OMElement callback = factory.createSOAPHeaderBlock("callback", intalioSessNS);
+                OMElement callback = factory.createSOAPHeaderBlock("callback", odeSessNS);
                 header.addChild(callback);
                 OMElement address = factory.createOMElement("Address", wsAddrNS);
                 callback.addChild(address);
                 address.setText(callbackEpr.getUrl());
                 if (callbackEpr.getSessionId() != null) {
-                    OMElement session = factory.createOMElement("session", intalioSessNS);
+                    OMElement session = factory.createOMElement("session", odeSessNS);
                     session.setText(callbackEpr.getSessionId());
                     callback.addChild(session);
                 }
