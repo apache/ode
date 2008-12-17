@@ -91,7 +91,7 @@ JBI                 = "org.apache.servicemix:servicemix-jbi:jar:3.1.1-incubating
 JENCKS              = "org.jencks:jencks:jar:all:1.3"
 JIBX                = "jibx:jibx-run:jar:1.1-beta3"
 LOG4J               = "log4j:log4j:jar:1.2.13"
-OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.2.0",
+OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.3.0-SNAPSHOT",
                        "net.sourceforge.serp:serp:jar:1.13.1"]
 
 SAXON               = group("saxon", "saxon-xpath", "saxon-dom", "saxon-xqj", :under=>"net.sf.saxon", :version=>"9.x")
