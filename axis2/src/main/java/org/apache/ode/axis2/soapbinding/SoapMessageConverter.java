@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import org.w3c.dom.Document;
+import java.util.Map;
 
 import javax.wsdl.Binding;
 import javax.wsdl.BindingInput;
@@ -43,9 +43,9 @@ import javax.wsdl.extensions.soap.SOAPBody;
 import javax.wsdl.extensions.soap.SOAPHeader;
 import javax.wsdl.extensions.soap.SOAPOperation;
 import javax.xml.namespace.QName;
-import java.util.*;
 
 import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -54,6 +54,7 @@ import org.apache.axiom.soap.SOAPFault;
 import org.apache.axiom.soap.SOAPFaultCode;
 import org.apache.axiom.soap.SOAPFaultDetail;
 import org.apache.axiom.soap.SOAPFaultReason;
+import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.namespace.Constants;
@@ -63,9 +64,10 @@ import org.apache.ode.axis2.OdeFault;
 import org.apache.ode.il.OMUtils;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
+import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.wsdl.Messages;
 import org.apache.ode.utils.wsdl.WsdlUtils;
-import org.apache.ode.utils.stl.CollectionsX;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -205,8 +207,24 @@ public class SoapMessageConverter {
 
         for (Node headerNode : headers.values())
             if (headerNode.getNodeType() == Node.ELEMENT_NODE) {
-                if (soaphdr.getFirstChildWithName(new QName(headerNode.getNamespaceURI(), headerNode.getLocalName())) == null)
-                    soaphdr.addChild(OMUtils.toOM((Element) headerNode, _soapFactory));
+                if (soaphdr.getFirstChildWithName(new QName(headerNode.getNamespaceURI(), headerNode.getLocalName())) == null) {
+                	OMElement omHeaderNode = OMUtils.toOM((Element) headerNode, _soapFactory);
+                    SOAPHeaderBlock hb = soaphdr.addHeaderBlock(omHeaderNode.getLocalName(), omHeaderNode.getNamespace());
+
+                    // add child elements
+                    OMNode omNode = null;
+                    for (Iterator iter = omHeaderNode.getChildren(); iter.hasNext();){
+                         omNode = (OMNode) iter.next();
+                         hb.addChild(omNode);
+                    }
+
+                    OMAttribute omatribute = null;
+                    // add attributes
+                    for (Iterator iter = omHeaderNode.getAllAttributes(); iter.hasNext();){
+                         omatribute = (OMAttribute) iter.next();
+                         hb.addAttribute(omatribute);
+                    }
+                }
             } else {
                 throw new OdeFault(__msgs.msgSoapHeaderMustBeAnElement(headerNode));
             }
