@@ -40,10 +40,18 @@ public class WSDL20Endpoint implements MutableEndpoint {
   }
 
   public String getSessionId() {
-    Element endpointElmt = (Element)_serviceElmt.getElementsByTagNameNS(Namespaces.WSDL_20, "endpoint").item(0);
-    NodeList idNodes = endpointElmt.getElementsByTagNameNS(Namespaces.ODE_SESSION_NS, "session");
-    if (idNodes.getLength() > 0) return idNodes.item(0).getTextContent();
-    else return null;
+	  Element endpointElmt = (Element)_serviceElmt.getElementsByTagNameNS(Namespaces.WSDL_20, "endpoint").item(0);
+	  NodeList idNodes = endpointElmt.getElementsByTagNameNS(Namespaces.ODE_SESSION_NS, "session");
+	  if (idNodes.getLength() > 0) {
+		  return idNodes.item(0).getTextContent();
+	  } else {
+		  // perhaps there is an intalio header?
+		  idNodes = endpointElmt.getElementsByTagNameNS(Namespaces.INTALIO_SESSION_NS, "session");
+		  if (idNodes.getLength() > 0) {
+			  return idNodes.item(0).getTextContent();
+		  }    	
+	  }
+	  return null;
   }
 
   public void setSessionId(String sessionId) {
@@ -105,7 +113,7 @@ public class WSDL20Endpoint implements MutableEndpoint {
     HashMap<String,String> result = new HashMap<String,String>(1);
     result.put(ADDRESS, getUrl());
     String sid = getSessionId();
-    if (sid != null) result.put(ADDRESS, sid);
+    if (sid != null) result.put(SESSION, sid);
     return result;
   }
 

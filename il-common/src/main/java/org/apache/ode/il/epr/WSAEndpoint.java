@@ -51,10 +51,16 @@ public class WSAEndpoint implements MutableEndpoint {
 
     public String getSessionId() {
         NodeList idNodes = _eprElmt.getElementsByTagNameNS(Namespaces.ODE_SESSION_NS, "session");
-        if (idNodes.getLength() > 0)
+        if (idNodes.getLength() > 0) {
             return idNodes.item(0).getTextContent();
-        else
-            return null;
+        } else {
+        	// perhaps there is an intalio header?
+            idNodes = _eprElmt.getElementsByTagNameNS(Namespaces.INTALIO_SESSION_NS, "session");
+            if (idNodes.getLength() > 0) {
+                return idNodes.item(0).getTextContent();
+            }        	
+        }
+        return null;
     }
 
     public void setSessionId(String sessionId) {
