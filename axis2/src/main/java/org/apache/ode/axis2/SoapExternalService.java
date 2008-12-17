@@ -43,6 +43,7 @@ import org.apache.ode.axis2.util.SoapMessageConverter;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.epr.WSAEndpoint;
+import org.apache.ode.bpel.epr.WSDL20Endpoint;
 import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
@@ -333,12 +334,12 @@ public class SoapExternalService implements ExternalService {
         	if (myRoleSessionId != null) {
 	            options.setProperty(JMSConstants.JMS_COORELATION_ID, myRoleSessionId);
         	} else {
-        		Element sessionElement = DOMUtils.findChildByName(serviceElement, 
-        				new QName(Namespaces.INTALIO_SESSION_NS, "session"), true);
-        		myRoleSessionId = sessionElement.getNodeValue();
-        		if (myRoleSessionId != null) {
-		            options.setProperty(JMSConstants.JMS_COORELATION_ID, myRoleSessionId);
-        		}
+                if (odeMex.getMyRoleEndpointReference() instanceof MutableEndpoint) {
+                	WSAEndpoint epr = EndpointFactory.convertToWSA((MutableEndpoint) odeMex.getMyRoleEndpointReference());
+                	if (epr.getSessionId() != null) {
+                		options.setProperty(JMSConstants.JMS_COORELATION_ID, myRoleSessionId);
+                	}
+                }
         	}
 
             Element address = DOMUtils.findChildByName(serviceElement, 

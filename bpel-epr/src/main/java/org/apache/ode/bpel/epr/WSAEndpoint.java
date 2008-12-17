@@ -50,15 +50,31 @@ public class WSAEndpoint implements MutableEndpoint {
     }
 
     public String getSessionId() {
-        NodeList idNodes = _eprElmt.getElementsByTagNameNS(Namespaces.INTALIO_SESSION_NS, "session");
-        if (idNodes.getLength() > 0)
+        NodeList idNodes = _eprElmt.getElementsByTagNameNS(Namespaces.ODE_SESSION_NS, "session");
+        if (idNodes.getLength() > 0) {
             return idNodes.item(0).getTextContent();
-        else
-            return null;
+        } else {
+        	// try the same with the intalio header
+            idNodes = _eprElmt.getElementsByTagNameNS(Namespaces.INTALIO_SESSION_NS, "session");
+            if (idNodes.getLength() > 0) {
+                return idNodes.item(0).getTextContent();
+            } 
+           	return null;
+        }
     }
 
     public void setSessionId(String sessionId) {
-        NodeList idList = _eprElmt.getElementsByTagNameNS(Namespaces.INTALIO_SESSION_NS, "session");
+        NodeList idList = _eprElmt.getElementsByTagNameNS(Namespaces.ODE_SESSION_NS, "session");
+        if (idList.getLength() > 0)
+            idList.item(0).setTextContent(sessionId);
+        else {
+            Element sessElmt = _eprElmt.getOwnerDocument().createElementNS(Namespaces.ODE_SESSION_NS, "session");
+            sessElmt.setTextContent(sessionId);
+            _eprElmt.appendChild(sessElmt);
+        }
+
+    	// and the same for the intalio header
+        idList = _eprElmt.getElementsByTagNameNS(Namespaces.INTALIO_SESSION_NS, "session");
         if (idList.getLength() > 0)
             idList.item(0).setTextContent(sessionId);
         else {
@@ -190,7 +206,11 @@ public class WSAEndpoint implements MutableEndpoint {
         Element addrElmt = doc.createElementNS(Namespaces.WS_ADDRESSING_NS, "Address");
         addrElmt.setTextContent((String) eprMap.get(ADDRESS));
         if (eprMap.get(SESSION) != null) {
-            Element sessElmt = doc.createElementNS(Namespaces.INTALIO_SESSION_NS, "session");
+            Element sessElmt = doc.createElementNS(Namespaces.ODE_SESSION_NS, "session");
+            sessElmt.setTextContent((String) eprMap.get(SESSION));
+            _eprElmt.appendChild(sessElmt);
+            // and the same for the (deprecated) intalio namespace for backward compatibility
+            sessElmt = doc.createElementNS(Namespaces.INTALIO_SESSION_NS, "session");
             sessElmt.setTextContent((String) eprMap.get(SESSION));
             _eprElmt.appendChild(sessElmt);
         }
