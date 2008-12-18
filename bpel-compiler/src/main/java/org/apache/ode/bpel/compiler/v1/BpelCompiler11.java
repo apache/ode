@@ -1,20 +1,14 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE
+ * file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  */
 package org.apache.ode.bpel.compiler.v1;
 
@@ -22,6 +16,7 @@ import org.apache.ode.bpel.compiler.bom.*;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactoryBPEL11;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
 import org.apache.ode.bpel.compiler.v1.xpath10.XPath10ExpressionCompilerBPEL11;
+import org.apache.ode.bpel.compiler.v1.xpath10.jaxp.JaxpXPath10ExpressionCompilerBPEL11;
 
 /**
  * BPEL v1.1 compiler.
@@ -49,9 +44,20 @@ public class BpelCompiler11 extends BpelCompilerImpl {
         registerActivityCompiler(WaitActivity.class, new WaitGenerator());
         registerActivityCompiler(TerminateActivity.class, new TerminateGenerator());
 
-        registerExpressionLanguage(EXPLANG_XPATH, new XPath10ExpressionCompilerBPEL11());
+        // try to instantiate Jaxen based XPath 1.0 expression language compiler.
+        // if this fails (e.g. because Jaxen is not in classpath), use a pure JAXP based one as fallback.
+        try {
+            registerExpressionLanguage(EXPLANG_XPATH, new XPath10ExpressionCompilerBPEL11());
+        } catch (Exception e) {
+            __log
+                .warn("Error loading Jaxen based XPath 1.0 Expression Language, falling back to Jaxp based implementation.");
+            registerExpressionLanguage(EXPLANG_XPATH, new JaxpXPath10ExpressionCompilerBPEL11());
+        } catch (NoClassDefFoundError e) {
+            __log
+                .warn("Error loading Jaxen based XPath 1.0 Expression Language, falling back to Jaxp based implementation.");
+            registerExpressionLanguage(EXPLANG_XPATH, new JaxpXPath10ExpressionCompilerBPEL11());
+        }
     }
-
 
     protected String getBpwsNamespace() {
         return Bpel11QNames.NS_BPEL4WS_2003_03;
