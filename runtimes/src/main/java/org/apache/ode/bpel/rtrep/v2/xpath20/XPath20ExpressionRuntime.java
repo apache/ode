@@ -207,8 +207,9 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             OXPath20ExpressionBPEL20 oxpath20 = ((OXPath20ExpressionBPEL20) cexp);
             System.setProperty("javax.xml.xpath.XPathFactory:"+NamespaceConstant.OBJECT_MODEL_SAXON,
 		            "net.sf.saxon.xpath.XPathFactoryImpl");
-		    System.setProperty("javax.xml.xpath.XPathFactory:"+XPathConstants.DOM_OBJECT_MODEL,
-		            "net.sf.saxon.xpath.XPathFactoryImpl");
+            // JAXP based XPath 1.0 runtime does not work anymore after a XPath 2.0 has been evaluated if this is set.
+		    // System.setProperty("javax.xml.xpath.XPathFactory:"+XPathConstants.DOM_OBJECT_MODEL,
+		    //        "net.sf.saxon.xpath.XPathFactoryImpl");
 		    System.setProperty("javax.xml.xpath.XPathFactory:"+NamespaceConstant.OBJECT_MODEL_JDOM,
 		            "net.sf.saxon.xpath.XPathFactoryImpl");
 		    System.setProperty("javax.xml.xpath.XPathFactory:"+NamespaceConstant.OBJECT_MODEL_XOM,
