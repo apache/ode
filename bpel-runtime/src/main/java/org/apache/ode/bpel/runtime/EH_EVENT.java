@@ -24,7 +24,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.common.CorrelationKeySet;
+import org.apache.ode.bpel.common.CorrelationKeys;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.o.OEventHandler;
 import org.apache.ode.bpel.o.OScope;
@@ -114,7 +114,7 @@ class EH_EVENT extends BpelJacobRunnable {
             Selector selector;
             try {
                 PickResponseChannel pickResponseChannel = newChannel(PickResponseChannel.class);
-                CorrelationKeySet keySet = new CorrelationKeySet();
+                CorrelationKeys keySet = new CorrelationKeys();
                 PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(_oevent.partnerLink);
                 for( OScope.CorrelationSet cset : _oevent.joinCorrelations ) {
                 	if(getBpelRuntimeContext().isCorrelationInitialized(_scopeFrame.resolve(cset))) {

@@ -24,7 +24,7 @@ import java.util.Set;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.common.CorrelationKeySet;
+import org.apache.ode.bpel.common.CorrelationKeys;
 
 /**
  * Message arrived and matched neither (a) createInstance or (b) correlation
@@ -35,19 +35,19 @@ public class CorrelationNoMatchEvent extends CorrelationEvent {
 	
 	// left out for backward-compatibility
 	private final Set<CorrelationKey> _keys = new HashSet<CorrelationKey>();
-	private CorrelationKeySet _keySet = null;
+	private CorrelationKeys _keySet = null;
 
 	public CorrelationNoMatchEvent(QName qName, String opName, String mexId,
-			CorrelationKeySet keySet) {
+			CorrelationKeys keySet) {
 		super(qName, opName, mexId);
 
 		_keySet = keySet;
 	}
 
-	public CorrelationKeySet getKeySet() {
+	public CorrelationKeys getKeySet() {
 		// backward-compatibility; add up keys
 		if( _keys.size() > 0 && _keySet == null ) {
-			_keySet = new CorrelationKeySet();
+			_keySet = new CorrelationKeys();
 		}
 		for (CorrelationKey aKey : _keys) {
 			if (aKey != null && !_keySet.contains(aKey)) {
@@ -58,7 +58,7 @@ public class CorrelationNoMatchEvent extends CorrelationEvent {
 		return _keySet;
 	}
 
-	public void setKeys(CorrelationKeySet keySet) {
+	public void setKeys(CorrelationKeys keySet) {
 		_keySet = keySet;
 	}
 

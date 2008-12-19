@@ -19,7 +19,7 @@
 package org.apache.ode.bpel.runtime;
 
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.common.CorrelationKeySet;
+import org.apache.ode.bpel.common.CorrelationKeys;
 import org.apache.ode.utils.ObjectPrinter;
 
 import java.io.Serializable;
@@ -31,14 +31,14 @@ public class Selector implements Serializable {
 	// here for the backward compatibility
 	@SuppressWarnings("unused")
 	private final CorrelationKey correlationKey = null;
-  public final CorrelationKeySet correlationKeySet;
+  public final CorrelationKeys correlationKeySet;
   public final String opName;
   public final String messageExchangeId;
   public final int idx;
   public final boolean oneWay;
   public final String route;
 
-  Selector(int idx, PartnerLinkInstance plinkInstance, String opName, boolean oneWay, String mexId, CorrelationKeySet keySet, String route) {
+  Selector(int idx, PartnerLinkInstance plinkInstance, String opName, boolean oneWay, String mexId, CorrelationKeys keySet, String route) {
     this.idx = idx;
     this.plinkInstance = plinkInstance;
     this.correlationKeySet = keySet;

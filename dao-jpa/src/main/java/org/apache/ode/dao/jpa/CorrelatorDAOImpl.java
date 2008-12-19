@@ -19,7 +19,7 @@
 
 package org.apache.ode.dao.jpa;
 
-import org.apache.ode.bpel.common.CorrelationKeySet;
+import org.apache.ode.bpel.common.CorrelationKeys;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.MessageRouteDAO;
@@ -59,13 +59,13 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
         _process = process;
     }
 
-    public void addRoute(String routeGroupId, ProcessInstanceDAO target, int index, CorrelationKeySet correlationKeySet, String routePolicy) {
+    public void addRoute(String routeGroupId, ProcessInstanceDAO target, int index, CorrelationKeys correlationKeySet, String routePolicy) {
         MessageRouteDAOImpl mr = new MessageRouteDAOImpl(correlationKeySet,
                 routeGroupId, index, (ProcessInstanceDAOImpl) target, this, routePolicy);
         _routes.add(mr);
     }
 
-    public MessageExchangeDAO dequeueMessage(CorrelationKeySet correlationKeySet) {
+    public MessageExchangeDAO dequeueMessage(CorrelationKeys correlationKeySet) {
     	// TODO: this thing does not seem to be scalable: loading up based on a correlator???
         for (Iterator<MessageExchangeDAOImpl> itr=_exchanges.iterator(); itr.hasNext();){
             MessageExchangeDAOImpl mex = itr.next();
@@ -78,7 +78,7 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
     }
 
     public void enqueueMessage(MessageExchangeDAO mex,
-                               CorrelationKeySet correlationKeySet) {
+                               CorrelationKeys correlationKeySet) {
         MessageExchangeDAOImpl mexImpl = (MessageExchangeDAOImpl) mex;
         mexImpl.setCorrelationKeySet(correlationKeySet);
         _exchanges.add(mexImpl);
@@ -87,8 +87,8 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
     }
 
     @SuppressWarnings("unchecked")
-    public List<MessageRouteDAO> findRoute(CorrelationKeySet correlationKeySet) {
-    	List<CorrelationKeySet> subSets = correlationKeySet.findSubSets();
+    public List<MessageRouteDAO> findRoute(CorrelationKeys correlationKeySet) {
+    	List<CorrelationKeys> subSets = correlationKeySet.findSubSets();
     	Query qry = getEM().createQuery(generateSelectorQuery(ROUTE_BY_CKEY_HEADER, subSets));
         qry.setParameter("ptype", _process.getType().toString());
         qry.setParameter("corrkey", _correlatorKey);
@@ -114,7 +114,7 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
         }
     }
 
-    private String generateSelectorQuery(String header, List<CorrelationKeySet> subSets) {
+    private String generateSelectorQuery(String header, List<CorrelationKeys> subSets) {
     	StringBuffer filterQuery = new StringBuffer(header);
     	
     	if( subSets.size() == 1 ) {

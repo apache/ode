@@ -79,11 +79,11 @@ public interface ProcessDAO {
     /**
      * Locates a process instance based on a correlation key.
      * 
-     * @param cckey
-     *            correlation key
+     * @param cckey correlation key
+     *        wait <code>false</code> if you don't want the query to block 
      * @return collection of {@link ProcessInstanceDAO} that match correlation key, ordered by date
      */
-    Collection<ProcessInstanceDAO> findInstance(CorrelationKey cckey);
+    Collection<ProcessInstanceDAO> findInstance(CorrelationKey cckey, boolean wait);
 
     /**
      * Remove the routes with the given Id for all the correlators in the process.
