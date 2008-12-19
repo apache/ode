@@ -131,7 +131,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
         return _instances.get(instanceId);
     }
 
-    public Collection<ProcessInstanceDAO> findInstance(CorrelationKey key) {
+    public Collection<ProcessInstanceDAO> findInstance(CorrelationKey key, boolean wait) {
         ArrayList<ProcessInstanceDAO> result = new ArrayList<ProcessInstanceDAO>();
         for (ProcessInstanceDAO instance : _instances.values()) {
             for (CorrelationSetDAO corrSet : instance.getCorrelationSets()) {

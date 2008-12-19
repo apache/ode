@@ -253,8 +253,21 @@ public abstract class BPELTestAbstract {
         inv.request = DOMUtils.stringToDOM(request);
         inv.expectedStatus = null;
         if (responsePattern != null) {
-            inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
-            inv.expectedResponsePattern = Pattern.compile(responsePattern, Pattern.DOTALL);
+            if ("ASYNC".equals(responsePattern)) {
+            	inv.expectedFinalStatus = MessageExchange.Status.ASYNC;
+            	inv.expectedResponsePattern = null;
+            } else if ("FAULT".equals(responsePattern)) {
+            	inv.expectedFinalStatus = MessageExchange.Status.COMPLETED_FAULT;
+            	inv.expectedResponsePattern = null;
+            } else if ("FAILURE".equals(responsePattern)) {
+            	inv.expectedFinalStatus = MessageExchange.Status.COMPLETED_FAILURE;
+            	inv.expectedResponsePattern = null;
+            } else {
+                inv.expectedResponsePattern = Pattern.compile(responsePattern, Pattern.DOTALL);
+                inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
+            }        
+        } else {
+        	inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
         }
 
         _invocations.add(inv);
@@ -353,6 +366,7 @@ public abstract class BPELTestAbstract {
             store.undeploy(d.deployDir);
         }
     }
+
     protected void doInvokes() throws Exception {
         ArrayList<Thread> testThreads = new ArrayList<Thread>();
         for (Invocation i : _invocations) {
@@ -370,6 +384,14 @@ public abstract class BPELTestAbstract {
 
     }
     
+    protected int getMaximumWaitInMillis() {
+    	return 60 * 1000;
+    }
+
+    protected int getMinimumWaitInMillis() {
+    	return -1;
+    }
+   
     protected long getWaitBeforeInvokeTimeout() {
     	return WAIT_BEFORE_INVOKE_TIMEOUT;
     }
@@ -521,8 +543,8 @@ public abstract class BPELTestAbstract {
         /** Maximum number of ms to wait for a response. */
         public long maximumWaitMs = 60 * 1000;
 
-        /** If non-null, minimum number of ms before a response should be available. */
-        public Long minimumWaitMs = null;
+        /** If positive, minimum number of ms before a response should be available. */
+        public long minimumWaitMs = -1;
 
         long invokeTime;
 
@@ -545,6 +567,8 @@ public abstract class BPELTestAbstract {
 
         InvokerThread(Invocation invocation) {
             _invocation = invocation;
+            _invocation.maximumWaitMs = getMaximumWaitInMillis();
+            _invocation.minimumWaitMs = getMinimumWaitInMillis();
         }
 
         public void run() {
@@ -598,7 +622,7 @@ public abstract class BPELTestAbstract {
 
             long ctime = System.currentTimeMillis();
             long itime = ctime - _invocation.invokeTime;
-            if (_invocation.minimumWaitMs != null && _invocation.minimumWaitMs >= itime)
+            if (_invocation.minimumWaitMs != -1 && _invocation.minimumWaitMs >= itime)
                 failure(_invocation, "Response received too soon.", _invocation.minimumWaitMs, itime);
 
             if (_invocation.maximumWaitMs <= itime)

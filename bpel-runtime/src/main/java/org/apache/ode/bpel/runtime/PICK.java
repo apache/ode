@@ -29,7 +29,7 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.common.CorrelationKeySet;
+import org.apache.ode.bpel.common.CorrelationKeys;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.explang.EvaluationException;
@@ -90,7 +90,7 @@ class PICK extends ACTIVITY {
             	}
 
                 PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(onMessage.partnerLink);
-                CorrelationKeySet keySet = resolveCorrelationKey(pLinkInstance, matchCorrelations);
+                CorrelationKeys keySet = resolveCorrelationKey(pLinkInstance, matchCorrelations);
 
                 selectors[idx] = new Selector(idx, pLinkInstance, onMessage.operation.getName(), onMessage.operation
                         .getOutput() == null, onMessage.messageExchangeId, keySet, onMessage.route);
@@ -139,8 +139,8 @@ class PICK extends ACTIVITY {
      * @return returns the resolved CorrelationKey
      * @throws FaultException thrown when the correlation is not initialized and createInstance flag is not set
      */
-    private CorrelationKeySet resolveCorrelationKey(PartnerLinkInstance pLinkInstance, Set<OScope.CorrelationSet> matchCorrelations) throws FaultException {
-        CorrelationKeySet keySet = new CorrelationKeySet(); // is empty for the case of the createInstance activity
+    private CorrelationKeys resolveCorrelationKey(PartnerLinkInstance pLinkInstance, Set<OScope.CorrelationSet> matchCorrelations) throws FaultException {
+        CorrelationKeys keySet = new CorrelationKeys(); // is empty for the case of the createInstance activity
 
         if (matchCorrelations.isEmpty() && !_opick.createInstanceFlag) {
             // Adding a route for opaque correlation. In this case,

@@ -25,7 +25,7 @@ import java.util.TreeSet;
  * @author sean
  *
  */
-public class CorrelationKeySet implements Serializable {
+public class CorrelationKeys implements Iterable<CorrelationKey>, Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	public final static String VERSION_1 = "1";
@@ -39,7 +39,7 @@ public class CorrelationKeySet implements Serializable {
 	/**
 	 * Default Constructor
 	 */
-	public CorrelationKeySet() {
+	public CorrelationKeys() {
 	}
 	
 	/**
@@ -47,7 +47,7 @@ public class CorrelationKeySet implements Serializable {
 	 * 
 	 * @param canonicalForm canonical form of correlation key set
 	 */
-	public CorrelationKeySet(String canonicalForm) {
+	public CorrelationKeys(String canonicalForm) {
 		restore(canonicalForm);
 	}
 	
@@ -58,7 +58,7 @@ public class CorrelationKeySet implements Serializable {
 	 * @param ck a correlation key to add
 	 * @return returns this correlation key set
 	 */
-	public CorrelationKeySet add(CorrelationKey ck) {
+	public CorrelationKeys add(CorrelationKey ck) {
 		for( CorrelationKey key : correlationKeys ) {
 			if( key.getCSetId() == ck.getCSetId() ) {
 				correlationKeys.remove(ck);
@@ -88,7 +88,7 @@ public class CorrelationKeySet implements Serializable {
 	 * @param isAllRoute use true if the route="all" is set
 	 * @return return true if routable
 	 */
-	public boolean isRoutableTo(CorrelationKeySet candidateKeySet, boolean isAllRoute) {
+	public boolean isRoutableTo(CorrelationKeys candidateKeySet, boolean isAllRoute) {
 		boolean isRoutable = containsAll(candidateKeySet);
 		
 		if( isAllRoute ) {
@@ -104,7 +104,7 @@ public class CorrelationKeySet implements Serializable {
 	 * @param c a correlation key set
 	 * @return return true if this correlation key set is a superset
 	 */
-    public boolean containsAll(CorrelationKeySet c) {
+    public boolean containsAll(CorrelationKeys c) {
 		Iterator<CorrelationKey> e = c.iterator();
 		while (e.hasNext())
 			if (!contains(e.next()))
@@ -160,10 +160,10 @@ public class CorrelationKeySet implements Serializable {
 
     @Override
 	public boolean equals(Object o) {
-		if( o == null || !(o instanceof CorrelationKeySet) ) {
+		if( o == null || !(o instanceof CorrelationKeys) ) {
 			return false;
 		}
-		CorrelationKeySet another = (CorrelationKeySet)o;
+		CorrelationKeys another = (CorrelationKeys)o;
 		
 		if( correlationKeys.size() != another.correlationKeys.size() ) {
 			return false;
@@ -177,13 +177,13 @@ public class CorrelationKeySet implements Serializable {
      * 
      * @return a list of all subset correlation key sets
      */
-    public List<CorrelationKeySet> findSubSets() {
-    	List<CorrelationKeySet> subSets = new ArrayList<CorrelationKeySet>();
+    public List<CorrelationKeys> findSubSets() {
+    	List<CorrelationKeys> subSets = new ArrayList<CorrelationKeys>();
     	
     	// if the key set contains a opaque key and at least one non-opaque key, take out the opaque key
     	CorrelationKey opaqueKey = null;
     	boolean containsNonOpaque = false;
-    	CorrelationKeySet explicitKeySet = new CorrelationKeySet();
+    	CorrelationKeys explicitKeySet = new CorrelationKeys();
     	for( CorrelationKey ckey : correlationKeys ) {
     		// assumes only ONE opaque key if there is
     		if( ckey.getCSetId() == -1 ) {
@@ -199,7 +199,7 @@ public class CorrelationKeySet implements Serializable {
     	
 		// we are generating (2 powered by the number of correlation keys) number of sub-sets
     	for( int setIndex = 0; setIndex < Math.pow(2, explicitKeySet.correlationKeys.size()); setIndex++ ) {
-    		CorrelationKeySet subKeySet = new CorrelationKeySet(); 
+    		CorrelationKeys subKeySet = new CorrelationKeys(); 
     		int bitPattern = setIndex; // the bitPattern will be 0b0000, 0b0001, 0b0010 and so on
     		Iterator<CorrelationKey> ckeys = explicitKeySet.iterator();
     		while( ckeys.hasNext() && bitPattern > 0 ) { // bitPattern > 0 condition saves half of the iterations
@@ -216,7 +216,7 @@ public class CorrelationKeySet implements Serializable {
     	}
     	
     	if( subSets.isEmpty() ) {
-    		subSets.add(new CorrelationKeySet());
+    		subSets.add(new CorrelationKeys());
     	}
     	
     	return subSets;

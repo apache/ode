@@ -111,6 +111,7 @@ import org.apache.ode.bpel.o.OXsdTypeVarType;
 import org.apache.ode.bpel.o.OXslSheet;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.NSContext;
+import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.StreamUtils;
 import org.apache.ode.utils.fs.FileUtils;
 import org.apache.ode.utils.msg.MessageBundle;
@@ -767,6 +768,10 @@ abstract class BpelCompiler implements CompilerContext {
         constants.qnForEachCounterError = new QName(getBpwsNamespace(), "forEachCounterError");
         constants.qnInvalidBranchCondition = new QName(getBpwsNamespace(), "invalidBranchCondition");
         constants.qnInvalidExpressionValue = new QName(getBpwsNamespace(), "invalidExpressionValue");
+        
+        constants.qnDuplicateInstance = new QName(getOdeNamespace(), "duplicateInstance");
+        constants.qnRetiredProcess = new QName(getOdeNamespace(), "retiredProcess");
+        constants.qnUnknownFault = new QName(getOdeNamespace(), "unknownFault");
         return constants;
     }
 
@@ -1058,6 +1063,7 @@ abstract class BpelCompiler implements CompilerContext {
         QName[] setprops = cset.getProperties();
         for (int j = 0; j < setprops.length; ++j)
             ocset.properties.add(resolveProperty(setprops[j]));
+        ocset.unique = cset.isUnique();
         oscope.addCorrelationSet(ocset);
     }
 
@@ -1299,6 +1305,7 @@ abstract class BpelCompiler implements CompilerContext {
                         break;
                     case YES:
                         oevent.initCorrelations.add(cset);
+                        oevent.partnerLink.addUniqueCorrelationSetForOperation(oevent.operation, cset);
                         break;
                     case JOIN:
                     	cset.hasJoinUseCases = true;
@@ -1647,6 +1654,10 @@ abstract class BpelCompiler implements CompilerContext {
     protected abstract String getDefaultExpressionLanguage();
 
     protected abstract String getBpwsNamespace();
+    
+    protected String getOdeNamespace() {
+    	return Namespaces.ODE_EXTENSION_NS;
+    }
 
     protected void registerExpressionLanguage(String expLangUri, ExpressionCompiler expressionCompiler) {
         _expLanguageCompilers.put(expLangUri, expressionCompiler);
