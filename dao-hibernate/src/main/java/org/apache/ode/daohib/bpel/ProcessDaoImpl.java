@@ -126,6 +126,10 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
         return new ProcessInstanceDaoImpl(_sm,instance);
     }
 
+    public Collection<ProcessInstanceDAO> findInstance(CorrelationKey key) {
+    	return findInstance(key, true);
+    }
+    
     /**
      * @see org.apache.ode.bpel.dao.ProcessDAO#findInstance(CorrelationKey)
      */
