@@ -303,8 +303,9 @@ public class SoapExternalService implements ExternalService {
      */
     private void writeHeader(MessageContext ctxt, PartnerRoleMessageExchange odeMex) {
         Options options = ctxt.getOptions();
-        WSAEndpoint targetEPR = EndpointFactory.convertToWSA((MutableEndpoint) odeMex.getEndpointReference());
-        WSAEndpoint myRoleEPR = EndpointFactory.convertToWSA((MutableEndpoint) odeMex.getMyRoleEndpointReference());
+        WSAEndpoint targetWSAEPR = EndpointFactory.convertToWSA((MutableEndpoint) odeMex.getEndpointReference());
+        WSAEndpoint myRoleWSAEPR = EndpointFactory.convertToWSA((MutableEndpoint) odeMex.getMyRoleEndpointReference());
+        WSAEndpoint targetEPR = new WSAEndpoint(targetWSAEPR);
 
         String partnerSessionId = odeMex.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
         String myRoleSessionId = odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
@@ -317,7 +318,8 @@ public class SoapExternalService implements ExternalService {
         }
         options.setProperty("targetSessionEndpoint", targetEPR);
 
-        if (myRoleEPR != null) {
+        if (myRoleWSAEPR != null) {
+            WSAEndpoint myRoleEPR = new WSAEndpoint(myRoleWSAEPR);
             if (myRoleSessionId != null) {
                 if (__log.isDebugEnabled()) {
                     __log.debug("MyRole session identifier found for myrole (callback) WSA endpoint: "
@@ -325,7 +327,7 @@ public class SoapExternalService implements ExternalService {
                 }
                 myRoleEPR.setSessionId(myRoleSessionId);
             }
-            options.setProperty("callbackSessionEndpoint", odeMex.getMyRoleEndpointReference());
+            options.setProperty("callbackSessionEndpoint", myRoleEPR);
 
             // Map My Session ID to JMS Correlation ID
             Document callbackEprXml = odeMex.getMyRoleEndpointReference().toXML();
@@ -334,11 +336,8 @@ public class SoapExternalService implements ExternalService {
         	if (myRoleSessionId != null) {
 	            options.setProperty(JMSConstants.JMS_COORELATION_ID, myRoleSessionId);
         	} else {
-                if (odeMex.getMyRoleEndpointReference() instanceof MutableEndpoint) {
-                	WSAEndpoint epr = EndpointFactory.convertToWSA((MutableEndpoint) odeMex.getMyRoleEndpointReference());
-                	if (epr.getSessionId() != null) {
-                		options.setProperty(JMSConstants.JMS_COORELATION_ID, myRoleSessionId);
-                	}
+                if (myRoleWSAEPR.getSessionId() != null) {
+                    options.setProperty(JMSConstants.JMS_COORELATION_ID, myRoleSessionId);
                 }
         	}
 
