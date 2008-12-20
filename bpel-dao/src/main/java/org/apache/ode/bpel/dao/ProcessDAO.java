@@ -83,6 +83,7 @@ public interface ProcessDAO {
      *        wait <code>false</code> if you don't want the query to block 
      * @return collection of {@link ProcessInstanceDAO} that match correlation key, ordered by date
      */
+    Collection<ProcessInstanceDAO> findInstance(CorrelationKey cckey);
     Collection<ProcessInstanceDAO> findInstance(CorrelationKey cckey, boolean wait);
 
     /**
