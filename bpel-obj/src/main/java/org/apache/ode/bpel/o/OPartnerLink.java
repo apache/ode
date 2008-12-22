@@ -173,6 +173,10 @@ public class OPartnerLink extends OBase {
      */
     @SuppressWarnings("unchecked")
     public Set<OScope.CorrelationSet> getUniqueCorrelationSetsForOperation(Operation operation) {
+    	// if we read an older version of this class, the unique set will be un-initialized!
+    	if (_uniqueInitiatingCorrelationSets == null) {
+    		return Collections.EMPTY_SET;
+    	}
         Set<OScope.CorrelationSet> ret = _uniqueInitiatingCorrelationSets.get(operation.getName());
         if (ret == null) {
             return Collections.EMPTY_SET;
