@@ -194,7 +194,7 @@ define "ode" do
       end
     end
     
-    test.using :testng
+    test.using :testng, :properties=>{ "log4j.debug" => true,  "log4j.configuration"=>"test-log4j.properties" }
     test.with projects("tools"), libs, AXIS2_TEST, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, DOM4J
     test.setup task(:prepare_webapp) do |task|
       webapp_dir = "target/test-classes/webapp"
