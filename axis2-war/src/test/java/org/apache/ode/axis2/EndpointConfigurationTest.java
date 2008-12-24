@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
  *
  */
 public class EndpointConfigurationTest extends Axis2TestBase {
-	@Test(dataProvider="configs")
+	@Test
     public void testEndpointProperties() throws Exception {
         executeProcess();
     }
@@ -66,7 +66,7 @@ public class EndpointConfigurationTest extends Axis2TestBase {
      * Redo the exact same test but with Basic Authentication activated on the external service
      * @throws Exception
      */
-    @Test(dataProvider="configs")
+    @Test
     public void testHttpAuthentication() throws Exception {
         ContextHandler securedEchoContext;
         {

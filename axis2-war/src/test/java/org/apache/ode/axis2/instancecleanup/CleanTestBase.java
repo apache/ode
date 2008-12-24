@@ -33,7 +33,7 @@ public abstract class CleanTestBase extends Axis2TestBase implements ODEConfigDi
     	if( txm != null ) {
     		try {
     			txm.commit();
-    		} catch( Exception e ) { 
+    		} catch( Exception e ) {
     			//ignore 
     		}
     	}
@@ -59,7 +59,14 @@ public abstract class CleanTestBase extends Axis2TestBase implements ODEConfigDi
     }
 
     protected Database getDatabase() throws Exception {
-		File configFile = new File(getODEConfigDir());
+    	String odeConfigDir = getODEConfigDir();
+    	if( config == null || DO_NOT_OVERRIDE_CONFIG.equals(config) || "<jpa>".equals(config) || "<hib>".equals(config) ) {
+        	System.out.println("Profiling config, default: " + odeConfigDir);
+    	} else {
+        	System.out.println("Profiling config: " + config + ".");
+    		odeConfigDir = config;
+    	}
+		File configFile = new File(odeConfigDir);
 		ODEConfigProperties odeProps = new ODEConfigProperties(configFile);
 		odeProps.load();
 		Database db = new Database(odeProps);
@@ -74,8 +81,9 @@ public abstract class CleanTestBase extends Axis2TestBase implements ODEConfigDi
     }
 
     protected ProcessDAO assertInstanceCleanup(int instances, int activityRecoveries, int correlationSets, int faults, int exchanges, int routes, int messsages, int partnerLinks, int scopes, int variables, int events, int largeData) throws Exception {
-    	initTM();
+        initTM();
         ProcessInstanceProfileDAO profile = daoConn.createProcessInstanceProfile(getInstance());
+
 		assertEquals("Number of instances", instances, profile.findInstancesByProcess().size());
 		assertEquals("Number of activity recoveries", activityRecoveries, profile.findActivityRecoveriesByInstance().size());
         assertEquals("Number of correlation sets", correlationSets, profile.findCorrelationSetsByInstance().size());
