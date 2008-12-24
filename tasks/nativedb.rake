@@ -31,8 +31,10 @@ module NativeDB
         require SETTINGS
 
         settings().each do |name, dbprops|
-          buildr.build create_hib_db(name, "#{base}/target/#{name}"=>dbprops) if orm == :hib and dbprops[:dao].downcase.include? "hib" 
-          buildr.build create_jpa_db(base, name, "#{base}/target/#{name}"=>dbprops) if orm == :jpa and !dbprops[:dao].downcase.include? "hib" 
+          if dbprops[:db] != "derby"
+            buildr.build create_hib_db(name, "#{base}/target/#{name}"=>dbprops) if orm == :hib and dbprops[:dao].downcase.include? "hib" 
+            buildr.build create_jpa_db(base, name, "#{base}/target/#{name}"=>dbprops) if orm == :jpa and !dbprops[:dao].downcase.include? "hib"
+          end
         end
       end
     end
@@ -109,13 +111,17 @@ module NativeDB
           hibdbs = ""
           jpadbs = ""
           settings().each do |name, dbprops|
-            test.with REQUIRES
-
-            prepare_config(name, dbprops, "#{base}/target/conf.#{name}", "#{base}/src/main/webapp/WEB-INF/conf.template")
-            dbs = jpadbs
-            dbs = hibdbs if dbprops[:dao].downcase.include? "hib"
-            dbs <<= ", " if dbs.length > 0
-            dbs <<= "#{base}/target/conf.#{name}"
+            dbs = (dbprops[:dao].downcase.include? "hib") ? hibdbs : jpadbs
+            if dbprops[:db] == "derby"
+              dbs <<= ", " if dbs.length > 0
+              dbs <<= (dbs == jpadbs ? "<jpa>" : "<hib>")
+            else
+              test.with REQUIRES
+  
+              prepare_config(name, dbprops, "#{base}/target/conf.#{name}", "#{base}/src/main/webapp/WEB-INF/conf.template")
+              dbs <<= ", " if dbs.length > 0
+              dbs <<= "#{base}/target/conf.#{name}"
+            end
           end
   
           test.using :properties=>{ "org.apache.ode.hibdbs"=>hibdbs, "org.apache.ode.jpadbs"=>jpadbs }

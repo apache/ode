@@ -5,6 +5,16 @@ DB2                 = "db2:jcc:jar:9.5"
 REQUIRES = [MYSQL, SYBASE, DB2]
 
 def settings
+  jpa_derby = {
+    :db=>"derby",
+    :dao=>"org.apache.ode.axis2.instancecleanup.JpaDaoConnectionFactoryImpl"
+  }
+
+  hib_derby = {
+    :db=>"derby",
+    :dao=>"org.apache.ode.axis2.instancecleanup.HibDaoConnectionFactoryImpl"
+  }
+
   local_hib_mysql = {
     :integr_branch=>"5.2.x",
     :db=>"mysql",
@@ -50,8 +60,10 @@ def settings
   }
 
   {
-#    "hib-mysql"=>local_hib_mysql,
+    "jpa-derby"=>jpa_derby,
+    "hib-derby"=>hib_derby
 #    "jpa-mysql"=>local_jpa_mysql,
+#    "hib-mysql"=>local_hib_mysql
 #    "hib-db2"=>pxetest_hib_db2_95,
 #    "hib-sybase"=>pxetest_hib_sybase_12
   }
