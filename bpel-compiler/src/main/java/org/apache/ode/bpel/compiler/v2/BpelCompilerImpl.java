@@ -1053,6 +1053,7 @@ abstract class BpelCompilerImpl extends BaseCompiler implements CompilerContext,
         QName[] setprops = cset.getProperties();
         for (int j = 0; j < setprops.length; ++j)
             ocset.properties.add(resolveProperty(setprops[j]));
+        ocset.unique = cset.isUnique();
         oscope.addCorrelationSet(ocset);
     }
 
@@ -1296,6 +1297,7 @@ abstract class BpelCompilerImpl extends BaseCompiler implements CompilerContext,
                         break;
                     case YES:
                         oevent.initCorrelations.add(cset);
+                        oevent.partnerLink.addUniqueCorrelationSetForOperation(oevent.operation, cset);
                         break;
                     case JOIN:
                         throw new CompilationException(__cmsgs.errTODO("Rendezvous."));

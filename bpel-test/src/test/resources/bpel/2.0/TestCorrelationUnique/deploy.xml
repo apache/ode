@@ -1,0 +1,9 @@
+﻿<?xml version='1.0' encoding='UTF-8'?>
+<dd:deploy xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd">
+<dd:process xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:this="http://example.com/bpel/counter" name="this:counter" fileName="counter.bpel">
+  <dd:property name="PATH">counter</dd:property>
+  <dd:property name="SVG">counter.svg</dd:property>
+  <dd:provide partnerLink="operations">
+    <dd:service name="this:counter" port="port" />
+  </dd:provide>
+</dd:process></dd:deploy>

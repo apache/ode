@@ -158,6 +158,7 @@ public class OScope extends OActivity {
         public String name;
         public OScope declaringScope;
         public final List<OProcess.OProperty>properties = new ArrayList<OProcess.OProperty>();
+        public boolean unique;
 
 
         public CorrelationSet(OProcess owner) {
@@ -183,7 +184,11 @@ public class OScope extends OActivity {
         }
 
         public List<PropertyExtractor> getExtractors() {
-            return new ArrayList();
+            return new ArrayList<PropertyExtractor>();
+        }
+        
+        public boolean isUnique() {
+        	return unique;
         }
     }
 

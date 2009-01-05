@@ -187,6 +187,7 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
             propNames[m] = oProperty.name;
         }
 
+        ckeyVal.setUnique(cset.declaration.unique);
         _brc.writeCorrelation(cset, propNames, ckeyVal);
 
     }
