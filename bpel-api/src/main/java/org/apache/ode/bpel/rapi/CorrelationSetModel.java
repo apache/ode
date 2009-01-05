@@ -10,4 +10,6 @@ public interface CorrelationSetModel {
     List<PropertyAliasModel> getAliases(QName messageType);
 
     List<PropertyExtractor> getExtractors();
+    
+    boolean isUnique();
 }

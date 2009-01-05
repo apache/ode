@@ -54,6 +54,7 @@ import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.InvocationStyle;
+import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
@@ -71,18 +72,23 @@ import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
+import org.apache.ode.bpel.rapi.ConstantsModel;
 import org.apache.ode.bpel.rapi.FaultInfo;
 import org.apache.ode.bpel.rapi.OdeRTInstance;
 import org.apache.ode.bpel.rapi.OdeRuntime;
 import org.apache.ode.bpel.rapi.PartnerLinkModel;
 import org.apache.ode.bpel.rapi.ProcessModel;
 import org.apache.ode.bpel.rapi.Serializer;
+import org.apache.ode.bpel.runtime.InvalidProcessException;
 import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.jacob.soup.ReplacementMap;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
+import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
+import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.ObjectPrinter;
 import org.apache.ode.utils.msg.MessageBundle;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -236,12 +242,14 @@ public class ODEProcess {
      */
     void invokeProcess(final MessageExchangeDAO mexdao) {
         InvocationStyle istyle = mexdao.getInvocationStyle();
+		ConstantsModel constants = null;
 
         _hydrationLatch.latch(1);
         try {
             // The following check is mostly for sanity purposes. MexImpls should prevent this from
             // happening.
             PartnerLinkMyRoleImpl target = getMyRoleForService(mexdao.getCallee());
+            constants = target._process.getProcessModel().getConstantsModel();
             Status oldstatus = mexdao.getStatus();
             if (target == null) {
                 String errmsg = __msgs.msgMyRoleRoutingFailure(mexdao.getMessageExchangeId());
@@ -322,6 +330,29 @@ public class ODEProcess {
             } else if (cstatus == CorrelationStatus.QUEUED) {
                 ; // do nothing
             }
+        } catch (InvalidProcessException ipe) {
+        	QName faultQName = null;
+        	if (constants != null) {
+        		Document document = DOMUtils.newDocument();
+        		Element faultElement = document.createElementNS(Namespaces.SOAP_ENV_NS, "Fault");
+        		Element faultDetail = document.createElementNS(Namespaces.ODE_EXTENSION_NS, "fault");
+        		faultElement.appendChild(faultDetail);
+	        	switch (ipe.getCauseCode()) {
+		        	case InvalidProcessException.DUPLICATE_CAUSE_CODE:
+		        		faultQName = constants.getDuplicateInstance();
+		        		faultDetail.setTextContent("Found a duplicate instance with the same message key");
+		        		break;
+		        	case InvalidProcessException.RETIRED_CAUSE_CODE:
+		        		faultQName = constants.getRetiredProcess();
+		        		faultDetail.setTextContent("The process you're trying to instantiate has been retired");
+		        		break;
+		        	case InvalidProcessException.DEFAULT_CAUSE_CODE:
+		        	default:
+		        		faultQName = constants.getUnknownFault();
+		        		break;
+	        	}
+	        	MexDaoUtil.setFaulted(mexdao, faultQName, faultElement);
+        	}
         } finally {
             _hydrationLatch.release(1);
 
