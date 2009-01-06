@@ -95,12 +95,8 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
 		return inst;
 	}
 
-    public Collection<ProcessInstanceDAO> findInstance(CorrelationKey key) {
-    	return findInstance(key, true);
-    }
-    
 	@SuppressWarnings("unchecked")
-    public Collection<ProcessInstanceDAO> findInstance(CorrelationKey ckey, boolean wait) {
+    public Collection<ProcessInstanceDAO> findInstance(CorrelationKey ckey) {
 		Query qry = getEM().createNamedQuery("InstanceByCKey");
         qry.setParameter("ckey", ckey.toCanonicalString());
         return qry.getResultList();

@@ -22,6 +22,4 @@ public interface ProcessModel {
     ActivityModel getChild(final int id);
 
     int getModelVersion();
-    
-    ConstantsModel getConstantsModel();
 }

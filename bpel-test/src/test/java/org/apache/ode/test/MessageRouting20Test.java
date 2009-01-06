@@ -84,7 +84,4 @@ public class MessageRouting20Test extends BPELTestAbstract {
 		negative("target/test-classes/bpel/2.0/NegativeInitializationTest");
 	}
 
-    @Test public void testCorrelationUnique() throws Throwable {
-        go("/bpel/2.0/TestCorrelationUnique");
-    }
 }
