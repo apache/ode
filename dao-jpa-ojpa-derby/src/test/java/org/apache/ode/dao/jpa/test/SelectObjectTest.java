@@ -21,7 +21,7 @@ package org.apache.ode.dao.jpa.test;
 
 import junit.framework.TestCase;
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.common.CorrelationKeys;
+import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
@@ -107,7 +107,7 @@ public class SelectObjectTest extends TestCase {
 		assertEquals(corr.getCorrelatorId(),CORRELATOR_ID1);
 		
 		// Assert the MessageRouteDAO
-		List<MessageRouteDAO> routes = corr.findRoute(new CorrelationKeys().add(key1));
+		List<MessageRouteDAO> routes = corr.findRoute(new CorrelationKeySet().add(key1));
         MessageRouteDAO route = null;
         if (routes != null && routes.size() > 0) {
             route = routes.get(0);
@@ -203,7 +203,7 @@ public class SelectObjectTest extends TestCase {
 			assertNotNull(ic);
 			assertEquals(ic.getCorrelatorId(),CORRELATOR_ID1);
 			// The message is dequeued but not persisted
-			MessageExchangeDAO me = ic.dequeueMessage(new CorrelationKeys().add(key1));
+			MessageExchangeDAO me = ic.dequeueMessage(new CorrelationKeySet().add(key1));
 			assertNotNull(me);
 			assertEquals(me.getCallee(),new QName(TEST_NS,"testCallee"));
 			assertEquals(me.getPropagateTransactionFlag(),false);

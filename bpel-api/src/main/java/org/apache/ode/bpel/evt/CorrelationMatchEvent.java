@@ -19,7 +19,7 @@
 package org.apache.ode.bpel.evt;
 
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.common.CorrelationKeys;
+import org.apache.ode.bpel.common.CorrelationKeySet;
 
 import javax.xml.namespace.QName;
 
@@ -31,18 +31,18 @@ public class CorrelationMatchEvent extends ProcessMessageExchangeEvent {
 
 	// left out for backward-compatibility
 	private CorrelationKey _correlationKey;
-	private CorrelationKeys _correlationKeySet;
+	private CorrelationKeySet _correlationKeySet;
 
-	public CorrelationMatchEvent(QName processName, QName processId, Long processInstanceId, CorrelationKeys correlationKeySet) {
+	public CorrelationMatchEvent(QName processName, QName processId, Long processInstanceId, CorrelationKeySet correlationKeySet) {
 		super(PROCESS_INPUT, processName, processId, processInstanceId);
 		_correlationKeySet = correlationKeySet;
 	}
 
-	public CorrelationKeys getCorrelationKeySet() {
+	public CorrelationKeySet getCorrelationKeySet() {
 		// backward compatibility; add up
 		if (_correlationKey != null) {
 			if( _correlationKeySet == null ) {
-				_correlationKeySet = new CorrelationKeys();
+				_correlationKeySet = new CorrelationKeySet();
 			}
 			if(!_correlationKeySet.contains(_correlationKey)) {
 				_correlationKeySet.add(_correlationKey);
@@ -52,7 +52,7 @@ public class CorrelationMatchEvent extends ProcessMessageExchangeEvent {
 		return _correlationKeySet;
 	}
 
-	public void setCorrelationKey(CorrelationKeys correlationKeySet) {
+	public void setCorrelationKey(CorrelationKeySet correlationKeySet) {
 		_correlationKeySet = correlationKeySet;
 	}
 

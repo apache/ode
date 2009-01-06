@@ -44,15 +44,12 @@ import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
-import org.apache.ode.bpel.o.OConstants;
 import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OExpressionLanguage;
 import org.apache.ode.bpel.o.OMessageVarType;
@@ -60,16 +57,12 @@ import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
-import org.apache.ode.bpel.runtime.InvalidProcessException;
 import org.apache.ode.bpel.runtime.PROCESS;
 import org.apache.ode.bpel.runtime.PropertyAliasEvaluationContext;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.jacob.soup.ReplacementMap;
-import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.ObjectPrinter;
 import org.apache.ode.utils.msg.MessageBundle;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -182,7 +175,6 @@ public class BpelProcess {
      * @param mex
      */
     void invokeProcess(MyRoleMessageExchangeImpl mex) {
-    	OProcess oProcess = null;
         boolean routed = false;
 
         try {
@@ -209,7 +201,6 @@ public class BpelProcess {
             List<PartnerLinkMyRoleImpl.RoutingInfo> routings = null;
             for (PartnerLinkMyRoleImpl target : targets) {
                 routings = target.findRoute(mex);
-                oProcess = target._process.getOProcess();
                 boolean createInstance = target.isCreateInstance(mex);
 
                 if (mex.getStatus() != MessageExchange.Status.FAILURE) {
@@ -246,43 +237,15 @@ public class BpelProcess {
             }
 
             markused();
-        } catch (InvalidProcessException ipe) {
-        	QName faultQName = null;
-        	if (oProcess != null) {
-        		Message faultMessage = mex.createMessage(faultQName);
-        		Document document = DOMUtils.newDocument();
-        		Element faultElement = document.createElementNS(Namespaces.SOAP_ENV_NS, "Fault");
-        		Element faultDetail = document.createElementNS(Namespaces.ODE_EXTENSION_NS, "fault");
-        		faultElement.appendChild(faultDetail);
-	        	switch (ipe.getCauseCode()) {
-		        	case InvalidProcessException.DUPLICATE_CAUSE_CODE:
-		        		faultQName = oProcess.constants.qnDuplicateInstance;
-		        		faultDetail.setTextContent("Found a duplicate instance with the same message key");
-		        		break;
-		        	case InvalidProcessException.RETIRED_CAUSE_CODE:
-		        		faultQName = oProcess.constants.qnRetiredProcess;
-		        		faultDetail.setTextContent("The process you're trying to instantiate has been retired");
-		        		break;
-		        	case InvalidProcessException.DEFAULT_CAUSE_CODE:
-		        	default:
-		        		faultQName = oProcess.constants.qnUnknownFault;
-		        		break;
-	        	}
-	        	faultMessage.setMessage(faultElement);
-	        	mex.setStatus(MessageExchange.Status.FAULT);
-	        	mex.setFault(faultQName, faultMessage);
-	        	mex.responseReceived();
-        	}
         } finally {
             _hydrationLatch.release(1);
         }
-        
+
         // For a one way, once the engine is done, the mex can be safely released.
         // Sean: not really, if route is not found, we cannot delete the mex yet
         if (mex.getPattern().equals(MessageExchange.MessageExchangePattern.REQUEST_ONLY) && routed) {
-        	mex.release();
+            mex.release();
         }
-        
     }
 
     /** Several myroles can use the same service in a given process */

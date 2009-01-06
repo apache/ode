@@ -128,7 +128,4 @@ public class MessageRouting20Test extends BPELTestAbstract {
         go("/bpel/2.0/TestConcurrentSyncMex");
     }
 
-    @Test public void testCorrelationUnique() throws Throwable {
-        go("/bpel/2.0/TestCorrelationUnique");
-    }
 }

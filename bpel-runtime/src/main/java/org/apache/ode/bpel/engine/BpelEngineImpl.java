@@ -420,9 +420,6 @@ public class BpelEngineImpl implements BpelEngine {
         } catch (ContextException ce) {
             __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), ce);
             throw new Scheduler.JobProcessorException(ce, checkRetry(jobInfo, ce));
-        } catch (NonRetriableException nre) {
-            __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), nre);
-            throw new Scheduler.JobProcessorException(nre, false);
         } catch (RuntimeException rte) {
             __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), rte);
             throw new Scheduler.JobProcessorException(rte, checkRetry(jobInfo, rte));

@@ -18,13 +18,6 @@
  */
 package org.apache.ode.daohib.bpel;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
-
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
@@ -38,6 +31,7 @@ import org.apache.ode.daohib.bpel.hobj.HCorrelationProperty;
 import org.apache.ode.daohib.bpel.hobj.HCorrelationSet;
 import org.apache.ode.daohib.bpel.hobj.HCorrelator;
 import org.apache.ode.daohib.bpel.hobj.HCorrelatorMessage;
+import org.apache.ode.daohib.bpel.hobj.HCorrelatorMessageKey;
 import org.apache.ode.daohib.bpel.hobj.HFaultData;
 import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HMessage;
@@ -51,13 +45,14 @@ import org.apache.ode.daohib.bpel.hobj.HVariableProperty;
 import org.apache.ode.daohib.bpel.hobj.HXmlData;
 import org.hibernate.Criteria;
 import org.hibernate.Hibernate;
-import org.hibernate.HibernateException;
-import org.hibernate.LockMode;
 import org.hibernate.Query;
-import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
+
+import javax.xml.namespace.QName;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
 
 /**
  * Hibernate-based {@link ProcessDAO} implementation.
@@ -126,28 +121,17 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
         return new ProcessInstanceDaoImpl(_sm,instance);
     }
 
-    public Collection<ProcessInstanceDAO> findInstance(CorrelationKey key) {
-    	return findInstance(key, true);
-    }
-    
     /**
      * @see org.apache.ode.bpel.dao.ProcessDAO#findInstance(CorrelationKey)
      */
     @SuppressWarnings("unchecked")
-    public Collection<ProcessInstanceDAO> findInstance(CorrelationKey ckeyValue, boolean wait) {
-    	try {
-	        entering("ProcessDaoImpl.findInstance");
-	        Criteria correlationSet = getSession().createCriteria(HCorrelationSet.class);
-	        Criteria instance = correlationSet.createCriteria("scope").createCriteria("instance");
-	        instance.addOrder(Order.desc("created"));
-	        Criteria process = instance.createCriteria("process");
-	        process.add(Restrictions.eq("id", _process.getId()));
-	        correlationSet.add(Expression.eq("value", ckeyValue.toCanonicalString()));	        
-	        correlationSet.setLockMode(wait ? LockMode.UPGRADE : LockMode.UPGRADE_NOWAIT);
-	        return correlationSet.list();
-    	} catch (HibernateException he) {
-    		return Collections.EMPTY_LIST;
-    	}
+    public Collection<ProcessInstanceDAO> findInstance(CorrelationKey ckeyValue) {
+        entering("ProcessDaoImpl.findInstance");
+        Criteria criteria = getSession().createCriteria(HCorrelationSet.class);
+        criteria.add(Expression.eq("scope.instance.process.id",_process.getId()));
+        criteria.add(Expression.eq("value", ckeyValue.toCanonicalString()));
+        criteria.addOrder(Order.desc("scope.instance.created"));
+        return criteria.list();
     }
 
     /**

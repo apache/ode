@@ -73,12 +73,4 @@ public class CorrelationSet extends BpelObject {
         return _props;
     }
 
-    /**
-     * Is the correlation set system-wide unique?
-     * 
-     * @return <code>true</code> iff the set is unique
-     */
-    public boolean isUnique() {
-        return getAttribute("unique", "no").equals("yes");
-    }
 }

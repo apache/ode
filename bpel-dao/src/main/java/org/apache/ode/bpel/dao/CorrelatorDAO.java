@@ -20,7 +20,7 @@ package org.apache.ode.bpel.dao;
 
 import java.util.List;
 
-import org.apache.ode.bpel.common.CorrelationKeys;
+import org.apache.ode.bpel.common.CorrelationKeySet;
 
 /**
  * <p>
@@ -60,7 +60,7 @@ public interface CorrelatorDAO {
    * @param mex message exchange
    * @param correlationKeys pre-computed set of correlation keys for this message
    */
-  void enqueueMessage(MessageExchangeDAO mex, CorrelationKeys correlationKeySet);
+  void enqueueMessage(MessageExchangeDAO mex, CorrelationKeySet correlationKeySet);
 
 
   /**
@@ -70,14 +70,14 @@ public interface CorrelatorDAO {
    * @return opaque message-related data previously enqueued with the
    *         given correlation correlationKey
    */
-  MessageExchangeDAO dequeueMessage(CorrelationKeys correlationKeySet);
+  MessageExchangeDAO dequeueMessage(CorrelationKeySet correlationKeySet);
 
   /**
    * Find a route matching the given correlation key.
    * @param correlationKey correlation key
    * @return route matching the given correlation key
    */
-  List<MessageRouteDAO> findRoute(CorrelationKeys correlationKeySet);
+  List<MessageRouteDAO> findRoute(CorrelationKeySet correlationKeySet);
 
   /**
    * Add a route from the given correlation key to the given process instance.
@@ -86,7 +86,7 @@ public interface CorrelatorDAO {
    * @param index relative order in which the route should be considered
    * @param correlationKey correlation key to match
    */
-  void addRoute(String routeGroupId, ProcessInstanceDAO target, int index, CorrelationKeys correlationKeySet, String routePolicy);
+  void addRoute(String routeGroupId, ProcessInstanceDAO target, int index, CorrelationKeySet correlationKeySet, String routePolicy);
 
   /**
    * Remove all routes with the given route-group identifier.

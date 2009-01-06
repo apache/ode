@@ -29,7 +29,7 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.common.CorrelationKeys;
+import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
@@ -607,7 +607,6 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
 
         CorrelationKey ckeyVal = new CorrelationKey(cset.declaration.getId(), propValues);
-        ckeyVal.setUnique(cset.declaration.unique);
         writeCorrelation(cset, ckeyVal);
     }
 
@@ -640,7 +639,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), timeToFire);
     }
 
-    private void scheduleCorrelatorMatcher(String correlatorId, CorrelationKeys keySet) {
+    private void scheduleCorrelatorMatcher(String correlatorId, CorrelationKeySet keySet) {
         WorkEvent we = new WorkEvent();
         we.setIID(_dao.getInstanceId());
         we.setType(WorkEvent.Type.MATCHER);
@@ -1322,7 +1321,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
      * Attempt to match message exchanges on a correlator.
      *
      */
-    public void matcherEvent(String correlatorId, CorrelationKeys ckeySet) {
+    public void matcherEvent(String correlatorId, CorrelationKeySet ckeySet) {
         if (BpelProcess.__log.isDebugEnabled()) {
             __log.debug("MatcherEvent handling: correlatorId=" + correlatorId + ", ckeySet=" + ckeySet);
         }

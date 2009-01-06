@@ -103,7 +103,6 @@ abstract class PickReceiveGenerator extends DefaultActivityGenerator {
                 break;
             case YES:
                 onMessage.initCorrelations.add(cset);
-                onMessage.partnerLink.addUniqueCorrelationSetForOperation(onMessage.operation, cset);
                 break;
             case JOIN:
             	cset.hasJoinUseCases = true;
