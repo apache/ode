@@ -450,7 +450,7 @@ define "ode" do
     derby_db = Derby.create(_("target/derby/hibdb")=>derby_sql)
     build derby_db
 
-    %w{ firebird hsql postgres sqlserver oracle }.each do |db|
+    %w{ mysql firebird hsql postgres sqlserver oracle }.each do |db|
       partial = export[ properties_for[db], dao_hibernate, _("target/partial.#{db}.sql") ]
       build concat(_("target/#{db}.sql")=>[ predefined_for[db], partial ])
     end
