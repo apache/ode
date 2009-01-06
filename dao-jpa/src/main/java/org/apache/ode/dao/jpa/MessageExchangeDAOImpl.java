@@ -21,7 +21,7 @@ package org.apache.ode.dao.jpa;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.common.CorrelationKeys;
+import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
@@ -322,12 +322,12 @@ public class MessageExchangeDAOImpl extends OpenJPADAO implements MessageExchang
         _pipedMessageExchangeId = pipedMessageExchangeId;
     }
 
-    void setCorrelationKeySet(CorrelationKeys correlationKeySet) {
+    void setCorrelationKeySet(CorrelationKeySet correlationKeySet) {
     	_correlationKeys = correlationKeySet.toCanonicalString();
 	}
 
-	CorrelationKeys getCorrelationKeySet() {
-		return new CorrelationKeys(_correlationKeys);
+	CorrelationKeySet getCorrelationKeySet() {
+		return new CorrelationKeySet(_correlationKeys);
     }
 
 	public void release(boolean doClean) {

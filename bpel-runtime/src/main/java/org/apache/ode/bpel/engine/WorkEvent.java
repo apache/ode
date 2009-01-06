@@ -19,7 +19,7 @@
 
 package org.apache.ode.bpel.engine;
 
-import org.apache.ode.bpel.common.CorrelationKeys;
+import org.apache.ode.bpel.common.CorrelationKeySet;
 
 import javax.xml.namespace.QName;
 import java.util.HashMap;
@@ -93,11 +93,11 @@ public class WorkEvent {
         _jobDetail.put("correlatorId", correlatorId);
     }
     
-    public CorrelationKeys getCorrelationKeySet() {
-        return new CorrelationKeys((String) _jobDetail.get("ckeySet"));
+    public CorrelationKeySet getCorrelationKeySet() {
+        return new CorrelationKeySet((String) _jobDetail.get("ckeySet"));
     }
     
-    public void setCorrelationKeySet(CorrelationKeys ckeySet) {
+    public void setCorrelationKeySet(CorrelationKeySet ckeySet) {
         _jobDetail.put("ckeySet", ckeySet == null ? null : ckeySet.toCanonicalString());
     }
 

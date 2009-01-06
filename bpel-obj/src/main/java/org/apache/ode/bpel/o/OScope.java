@@ -153,7 +153,6 @@ public class OScope extends OActivity {
         public String name;
         public OScope declaringScope;
         public final List<OProcess.OProperty>properties = new ArrayList<OProcess.OProperty>();
-        public boolean unique;
         
         /**
          * Indicates that this correlation set has a join use case in the scope.

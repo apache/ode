@@ -14,7 +14,7 @@ public class CorrelationKeySetTest {
 
 	@Test
 	public void testCanonicalString() throws Exception {
-		CorrelationKeys setA = new CorrelationKeys();
+		CorrelationKeySet setA = new CorrelationKeySet();
 		setA.add(keyX);
 		setA.add(optY);
 		assertEquals("@2[1~a~b],[2~b~c]", setA.toCanonicalString());
@@ -22,8 +22,8 @@ public class CorrelationKeySetTest {
 	
 	@Test
 	public void testContainsAll() throws Exception {
-		CorrelationKeys setA = new CorrelationKeys();
-		CorrelationKeys setB = new CorrelationKeys();
+		CorrelationKeySet setA = new CorrelationKeySet();
+		CorrelationKeySet setB = new CorrelationKeySet();
 		assertTrue(setA.containsAll(setB));
 		
 		setA.add(keyX);
@@ -39,32 +39,32 @@ public class CorrelationKeySetTest {
 	
 	@Test
 	public void testRestoreFromCanonicalForm() throws Exception {
-		assertEquals(new CorrelationKeys(null), new CorrelationKeys());
-		assertEquals(new CorrelationKeys(""), new CorrelationKeys());
+		assertEquals(new CorrelationKeySet(null), new CorrelationKeySet());
+		assertEquals(new CorrelationKeySet(""), new CorrelationKeySet());
 		
-		assertEquals(new CorrelationKeys("-1~session_key"), 
-				new CorrelationKeys().add(new CorrelationKey(-1, new String[] {"session_key"})));
-		assertEquals(new CorrelationKeys("1~key1~key2"), 
-				new CorrelationKeys().add(new CorrelationKey(1, new String[] {"key1", "key2"})));
+		assertEquals(new CorrelationKeySet("-1~session_key"), 
+				new CorrelationKeySet().add(new CorrelationKey(-1, new String[] {"session_key"})));
+		assertEquals(new CorrelationKeySet("1~key1~key2"), 
+				new CorrelationKeySet().add(new CorrelationKey(1, new String[] {"key1", "key2"})));
 
-		assertEquals(new CorrelationKeys("@2"), new CorrelationKeys());
-		assertEquals(new CorrelationKeys("@2[-1~session_key]"), 
-				new CorrelationKeys().add(new CorrelationKey(-1, new String[] {"session_key"})));
-		assertEquals(new CorrelationKeys("@2[1~key1~key2]"), 
-				new CorrelationKeys().add(new CorrelationKey(1, new String[] {"key1", "key2"})));
-		assertEquals(new CorrelationKeys("@2[1~key1],[2~key2~key3]"), 
-				new CorrelationKeys().add(new CorrelationKey(1, new String[] {"key1"}))
+		assertEquals(new CorrelationKeySet("@2"), new CorrelationKeySet());
+		assertEquals(new CorrelationKeySet("@2[-1~session_key]"), 
+				new CorrelationKeySet().add(new CorrelationKey(-1, new String[] {"session_key"})));
+		assertEquals(new CorrelationKeySet("@2[1~key1~key2]"), 
+				new CorrelationKeySet().add(new CorrelationKey(1, new String[] {"key1", "key2"})));
+		assertEquals(new CorrelationKeySet("@2[1~key1],[2~key2~key3]"), 
+				new CorrelationKeySet().add(new CorrelationKey(1, new String[] {"key1"}))
 				.add(new CorrelationKey(2, new String[] {"key2", "key3"})));
-		assertEquals(new CorrelationKeys("@2[1~key1],[2~key2~key3]?"), 
-				new CorrelationKeys().add(new CorrelationKey(1, new String[] {"key1"}))
+		assertEquals(new CorrelationKeySet("@2[1~key1],[2~key2~key3]?"), 
+				new CorrelationKeySet().add(new CorrelationKey(1, new String[] {"key1"}))
 				.add(new CorrelationKey(2, new String[] {"key2", "key3"})));
-		assertEquals(3, new CorrelationKeys("@2[1~key1],[2~key2~key3]?").findSubSets().size());
+		assertEquals(3, new CorrelationKeySet("@2[1~key1],[2~key2~key3]?").findSubSets().size());
 	}
 	
 	@Test
 	public void testRoutableTo() throws Exception {
-		CorrelationKeys setA = new CorrelationKeys();
-		CorrelationKeys setB = new CorrelationKeys();
+		CorrelationKeySet setA = new CorrelationKeySet();
+		CorrelationKeySet setB = new CorrelationKeySet();
 		assertTrue(setA.isRoutableTo(setB, false));
 		assertTrue(setA.isRoutableTo(setB, true));
 		
@@ -81,8 +81,8 @@ public class CorrelationKeySetTest {
 		assertTrue(setA.isRoutableTo(setB, false));
 		assertTrue(setA.isRoutableTo(setB, true));
 		
-		CorrelationKeys inbound = new CorrelationKeys();
-		CorrelationKeys candidate = new CorrelationKeys();
+		CorrelationKeySet inbound = new CorrelationKeySet();
+		CorrelationKeySet candidate = new CorrelationKeySet();
 		candidate.add(new CorrelationKey("-1~session_key"));
 		assertFalse(inbound.isRoutableTo(candidate, false));
 		assertTrue(inbound.isRoutableTo(candidate, true));
@@ -102,7 +102,7 @@ public class CorrelationKeySetTest {
 	@Test
 	public void testFindSubSets() throws Exception {
 		StringBuffer buf = new StringBuffer();
-		for( CorrelationKeys subSet : new CorrelationKeys().findSubSets() ) {
+		for( CorrelationKeySet subSet : new CorrelationKeySet().findSubSets() ) {
 			if( buf.length() > 0 ) {
 				buf.append(",");
 			}
@@ -110,18 +110,18 @@ public class CorrelationKeySetTest {
 		}
 		assertEquals("'@2'",  buf.toString());
 
-		CorrelationKeys keySet = new CorrelationKeys();
+		CorrelationKeySet keySet = new CorrelationKeySet();
 		keySet.add(keyX);
 		keySet.add(keyY);
 		keySet.add(keyZ);
 		assertTrue(keySet.findSubSets().size() == 7);
 
-		keySet = new CorrelationKeys();		
+		keySet = new CorrelationKeySet();		
 		keySet.add(optX);
 		keySet.add(optY);
 		keySet.add(optZ);
 		buf = new StringBuffer();
-		for( CorrelationKeys subSet : keySet.findSubSets() ) {
+		for( CorrelationKeySet subSet : keySet.findSubSets() ) {
 			if( buf.length() > 0 ) {
 				buf.append(",");
 			}
@@ -130,12 +130,12 @@ public class CorrelationKeySetTest {
 		assertEquals("'@2[1~a~b]','@2[2~b~c]','@2[1~a~b],[2~b~c]','@2[3~c~d]','@2[1~a~b],[3~c~d]','@2[2~b~c],[3~c~d]','@2[1~a~b],[2~b~c],[3~c~d]'", 
 			buf.toString());
 
-		keySet = new CorrelationKeys();		
+		keySet = new CorrelationKeySet();		
 		keySet.add(keyX);
 		keySet.add(keyY);
 		keySet.add(optZ);
 		buf = new StringBuffer();
-		for( CorrelationKeys subSet : keySet.findSubSets() ) {
+		for( CorrelationKeySet subSet : keySet.findSubSets() ) {
 			if( buf.length() > 0 ) {
 				buf.append(",");
 			}
@@ -143,12 +143,12 @@ public class CorrelationKeySetTest {
 		}
 		assertEquals("'@2[1~a~b]','@2[2~b~c]','@2[1~a~b],[2~b~c]','@2[3~c~d]','@2[1~a~b],[3~c~d]','@2[2~b~c],[3~c~d]','@2[1~a~b],[2~b~c],[3~c~d]'", buf.toString());
 
-		keySet = new CorrelationKeys();		
+		keySet = new CorrelationKeySet();		
 		keySet.add(keyX);
 		keySet.add(optY);
 		keySet.add(optZ);
 		buf = new StringBuffer();
-		for( CorrelationKeys subSet : keySet.findSubSets() ) {
+		for( CorrelationKeySet subSet : keySet.findSubSets() ) {
 			if( buf.length() > 0 ) {
 				buf.append(",");
 			}

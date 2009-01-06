@@ -20,7 +20,7 @@
 package org.apache.ode.dao.jpa;
 
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.common.CorrelationKeys;
+import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.dao.MessageRouteDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 
@@ -70,7 +70,7 @@ public class MessageRouteDAOImpl implements MessageRouteDAO {
     private CorrelatorDAOImpl _correlator;
 
     public MessageRouteDAOImpl() {}
-	public MessageRouteDAOImpl(CorrelationKeys keySet, String groupId, int index,
+	public MessageRouteDAOImpl(CorrelationKeySet keySet, String groupId, int index,
                                ProcessInstanceDAOImpl processInst, CorrelatorDAOImpl correlator, String routePolicy) {
 		_correlationKey = keySet.toCanonicalString();
 		_groupId = groupId;
@@ -104,7 +104,7 @@ public class MessageRouteDAOImpl implements MessageRouteDAO {
 		return _routePolicy;
 	}
 	
-	public CorrelationKeys getCorrelationKeys() {
-		return new CorrelationKeys(_correlationKey);
+	public CorrelationKeySet getCorrelationKeySet() {
+		return new CorrelationKeySet(_correlationKey);
 	}
 }

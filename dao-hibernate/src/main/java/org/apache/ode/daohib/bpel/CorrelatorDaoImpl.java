@@ -26,7 +26,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.common.CorrelationKeys;
+import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.MessageRouteDAO;
@@ -65,7 +65,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
     }
 
     @SuppressWarnings("unchecked")
-    public MessageExchangeDAO dequeueMessage(CorrelationKeys keySet) {
+    public MessageExchangeDAO dequeueMessage(CorrelationKeySet keySet) {
         entering("CorrelatorDaoImpl.dequeueMessage");
         
         MessageExchangeDAO mex = null;
@@ -73,7 +73,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         String hdr = "dequeueMessage(" + keySet + "): ";
         __log.debug(hdr);
 
-        List<CorrelationKeys> subSets = keySet.findSubSets();
+        List<CorrelationKeySet> subSets = keySet.findSubSets();
         Query qry = getSession().createFilter(_hobj.getMessageCorrelations(), 
         		generateUnmatchedQuery(subSets));
     	for( int i = 0; i < subSets.size(); i++ ) {
@@ -100,7 +100,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
     }
 
     @SuppressWarnings("unchecked")
-    public List<MessageRouteDAO> findRoute(CorrelationKeys keySet) {
+    public List<MessageRouteDAO> findRoute(CorrelationKeySet keySet) {
     	List<MessageRouteDAO> routes = new ArrayList<MessageRouteDAO>();
     	
         entering("CorrelatorDaoImpl.findRoute");
@@ -114,7 +114,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         // resulting cursor, or for the lifetime of the transaction. So really, an UPDATE of the row
         // is a much safer alternative.
         String processType = new QName(_hobj.getProcess().getTypeNamespace(), _hobj.getProcess().getTypeName()).toString();
-    	List<CorrelationKeys> subSets = keySet.findSubSets();
+    	List<CorrelationKeySet> subSets = keySet.findSubSets();
         Query lockQry = getSession().createQuery(generateSelectorQuery(LOCK_SELECTORS, subSets));
         lockQry.setString("processType", processType);
     	for( int i = 0; i < subSets.size(); i++ ) {
@@ -161,7 +161,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         return null;
     }
 
-    private String generateUnmatchedQuery(List<CorrelationKeys> subSets) {
+    private String generateUnmatchedQuery(List<CorrelationKeySet> subSets) {
     	StringBuffer filterQuery = new StringBuffer();
     	
     	if( subSets.size() == 1 ) {
@@ -180,7 +180,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
     	return filterQuery.toString();
     }
     
-    private String generateSelectorQuery(String header, List<CorrelationKeys> subSets) {
+    private String generateSelectorQuery(String header, List<CorrelationKeySet> subSets) {
     	StringBuffer filterQuery = new StringBuffer(header);
     	
     	if( subSets.size() == 1 ) {
@@ -199,7 +199,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
     	return filterQuery.toString();
     }
     
-    public void enqueueMessage(MessageExchangeDAO mex, CorrelationKeys correlationKeySet) {
+    public void enqueueMessage(MessageExchangeDAO mex, CorrelationKeySet correlationKeySet) {
         entering("CorrelatorDaoImpl.enqueueMessage");
         String hdr = "enqueueMessage(mex=" + ((MessageExchangeDaoImpl) mex)._hobj.getId() + " keySet="
                 + correlationKeySet.toCanonicalString() + "): ";
@@ -207,7 +207,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         if (__log.isDebugEnabled())
             __log.debug(hdr);
 
-        for( CorrelationKeys aSubSet : correlationKeySet.findSubSets() ) {
+        for( CorrelationKeySet aSubSet : correlationKeySet.findSubSets() ) {
             HCorrelatorMessage mcor = new HCorrelatorMessage();
             mcor.setCorrelator(_hobj);
             mcor.setCreated(new Date());
@@ -220,7 +220,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         }
     }
 
-    public void addRoute(String routeGroupId, ProcessInstanceDAO target, int idx, CorrelationKeys correlationKeySet, String routePolicy) {
+    public void addRoute(String routeGroupId, ProcessInstanceDAO target, int idx, CorrelationKeySet correlationKeySet, String routePolicy) {
         entering("CorrelatorDaoImpl.addRoute");
         String hdr = "addRoute(" + routeGroupId + ", iid=" + target.getInstanceId() + ", idx=" + idx + ", ckeySet="
                 + correlationKeySet + "): ";

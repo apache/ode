@@ -65,7 +65,7 @@ public class BpelManagementFacadeImpl extends ProcessAndInstanceManagementImpl
 
         return dbexec(_db.getProcessDb(QName.valueOf(pid)).new Callable<Long>()  {
             public Long run(BpelDAOConnection session) throws Exception {
-                Iterator<ProcessInstanceDAO> i = getProcessDAO().findInstance(ckey, true).iterator();
+                Iterator<ProcessInstanceDAO> i = getProcessDAO().findInstance(ckey).iterator();
                 return (i.hasNext()) ? i.next().getInstanceId() : null;
             }
         });
