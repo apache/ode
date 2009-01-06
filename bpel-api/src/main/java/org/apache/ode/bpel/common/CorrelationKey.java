@@ -52,8 +52,6 @@ public class CorrelationKey implements Serializable {
     private int _csetId;
     /** Key values. */
     private final String _keyValues[];
-    /** System-Wide Unique? */
-    private boolean unique = false;
 
     /**
      * Constructor.
@@ -127,20 +125,6 @@ public class CorrelationKey implements Serializable {
         return false;
     }
 
-    /**
-     * Is this correlation key system-wide unique?
-     * 
-     * @return <code>true</code> if the key is declared to be unique  
-     *         otherwise <code>false</code>
-     */
-    public boolean isUnique() {
-    	return unique;
-    }
-    
-    public void setUnique(boolean unique) {
-    	this.unique = unique;
-    }
-    
     /**
      * Equals comperator method.
      * 

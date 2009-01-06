@@ -31,8 +31,6 @@ public class InvalidProcessException extends RuntimeException {
 
     public final static int RETIRED_CAUSE_CODE = 1;
 
-    public final static int DUPLICATE_CAUSE_CODE = 2;
-    
     private final int causeCode;
 
     public InvalidProcessException(String msg, Throwable cause) {

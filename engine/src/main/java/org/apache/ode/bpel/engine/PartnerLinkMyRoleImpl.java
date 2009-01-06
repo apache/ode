@@ -99,7 +99,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         }
 
         // Is this a /possible/ createInstance Operation?
-        boolean isCreateInstance = _plinkDef.isCreateInstanceOperation(operation);
+        boolean isCreateInstnace = _plinkDef.isCreateInstanceOperation(operation);
         String correlatorId = ODEProcess.genCorrelatorId(_plinkDef, operation.getName());
         CorrelatorDAO correlator = _process.getProcessDAO().getCorrelator(correlatorId);
 
@@ -108,7 +108,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         // now, the tricks begin: when a message arrives we have to see if there is anyone waiting for it. Get the correlator, a
         // persisted communnication-reduction data structure supporting correlation correlationKey matching!
 
-        CorrelationKey[] processKeys, uniqueKeys;
+        CorrelationKey[] keys;
 
         // We need to compute the correlation keys (based on the operation
         // we can infer which correlation keys to compute - this is merely a set
@@ -116,8 +116,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         // that is ever referenced in an <receive>/<onMessage> on this
         // partnerlink/operation.
         try {
-            processKeys = computeCorrelationKeys(mex, operation);
-            uniqueKeys = computeUniqueCorrelationKeys(mex, operation);
+            keys = computeCorrelationKeys(mex, operation);
         } catch (InvalidMessageException ime) {
             // We'd like to do a graceful exit here, no sense in rolling back due to a
             // a message format problem.
@@ -129,14 +128,14 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         String mySessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
         String partnerSessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
         if (__log.isDebugEnabled()) {
-            __log.debug("INPUTMSG: " + correlatorId + ": MSG RCVD keys=" + CollectionUtils.makeCollection(HashSet.class, processKeys)
+            __log.debug("INPUTMSG: " + correlatorId + ": MSG RCVD keys=" + CollectionUtils.makeCollection(HashSet.class, keys)
                     + " mySessionId=" + mySessionId + " partnerSessionId=" + partnerSessionId);
         }
 
         CorrelationKey matchedKey = null;
 
         // Try to find a route for one of our keys.
-        for (CorrelationKey key : processKeys) {
+        for (CorrelationKey key : keys) {
             messageRoute = correlator.findRoute(key);
             if (messageRoute != null) {
                 if (__log.isDebugEnabled()) {
@@ -152,8 +151,8 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         // If no luck, and this operation qualifies for create-instance
         // treatment, then create a new process
         // instance.
-        if (messageRoute == null && isCreateInstance) {
-            invokeMyRoleCreateInstance(mex, operation, correlatorId, correlator, uniqueKeys);
+        if (messageRoute == null && isCreateInstnace) {
+            invokeMyRoleCreateInstance(mex, operation, correlatorId, correlator);
         } else if (messageRoute != null) {
             if (__log.isDebugEnabled()) {
                 __log.debug("INPUTMSG: " + correlatorId + ": ROUTING to instance "
@@ -196,21 +195,21 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
             // } else {
             // send event
             CorrelationNoMatchEvent evt = new CorrelationNoMatchEvent(mex.getPortType(), mex.getOperation(), mex
-                    .getMessageExchangeId(), processKeys);
+                    .getMessageExchangeId(), keys);
 
             evt.setProcessId(_process.getProcessDAO().getProcessId());
             evt.setProcessName(_process.getProcessModel().getQName());
             _process._debugger.onEvent(evt);
 
             mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.QUEUED.toString());
-            correlator.enqueueMessage(mex, processKeys);
+            correlator.enqueueMessage(mex, keys);
         }
 
         return CorrelationStatus.valueOf(mex.getCorrelationStatus());
     }
 
     private void invokeMyRoleCreateInstance(MessageExchangeDAO mex, Operation operation, String correlatorId,
-            CorrelatorDAO correlator, CorrelationKey[] uniqueKeys) {
+            CorrelatorDAO correlator) {
         if (__log.isDebugEnabled()) {
             __log.debug("INPUTMSG: " + correlatorId + ": routing failed, CREATING NEW INSTANCE");
         }
@@ -225,19 +224,8 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         // return;
         // }
 
-        for (CorrelationKey uniqueKey : uniqueKeys) {
-        	// double-check that the correlation set is indeed unique
-        	if (uniqueKey.isUnique()) {
-        		Collection<ProcessInstanceDAO> instances = processDAO.findInstance(uniqueKey, false);
-        		if (instances.size() != 0) {
-                    __log.debug("Not creating a new instance for mex " + mex + "; unique correlation constraint would be violated!");
-                    throw new InvalidProcessException("Unique process constraint violated", InvalidProcessException.DUPLICATE_CAUSE_CODE);
-        		}
-        	}        	
-        }
-        
         ProcessInstanceDAO newInstance = processDAO.createInstance(correlator);
-        
+
         // send process instance event
         NewProcessInstanceEvent evt = new NewProcessInstanceEvent(_process.getProcessModel().getQName(),
                 processDAO.getProcessId(), newInstance.getInstanceId());
@@ -275,25 +263,6 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         return keys.toArray(new CorrelationKey[keys.size()]);
     }
 
-    private CorrelationKey[] computeUniqueCorrelationKeys(MessageExchangeDAO mex, Operation operation) {
-        Element msg = mex.getRequest().getData();
-        javax.wsdl.Message msgDescription = operation.getInput().getMessage();
-        List<CorrelationKey> keys = new ArrayList<CorrelationKey>();
-
-        Set<CorrelationSetModel> csets = _plinkDef.getUniqueCorrelationSetsForOperation(operation);
-        for (CorrelationSetModel cset : csets) {
-            CorrelationKey key = computeCorrelationKey(cset, msgDescription.getQName(), msg);
-            keys.add(key);
-        }
-
-        // Let's creata a key based on the sessionId
-        String mySessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
-        if (mySessionId != null)
-            keys.add(new CorrelationKey(-1, new String[] { mySessionId }));
-
-        return keys.toArray(new CorrelationKey[keys.size()]);
-    }
-    
     private CorrelationKey computeCorrelationKey(CorrelationSetModel cset, QName messageName, Element msg) {
         String[] values;
         if (cset.getExtractors().isEmpty()) {
@@ -326,9 +295,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
             }
         }
 
-        CorrelationKey key = new CorrelationKey(cset.getId(), values);
-        key.setUnique(cset.isUnique());
-        return key;
+        return new CorrelationKey(cset.getId(), values);
     }
 
 	public boolean isOneWayOnly() {

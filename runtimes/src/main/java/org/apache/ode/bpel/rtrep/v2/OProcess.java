@@ -18,7 +18,6 @@
  */
 package org.apache.ode.bpel.rtrep.v2;
 
-import org.apache.ode.bpel.rapi.ConstantsModel;
 import org.apache.ode.bpel.rapi.ProcessModel;
 import org.apache.ode.bpel.rapi.PartnerLinkModel;
 import org.apache.ode.bpel.rapi.PropertyAliasModel;
@@ -238,82 +237,5 @@ public class OProcess extends OBase implements ProcessModel {
 
     public int getModelVersion() {
         return 2;
-    }
-    
-    public ConstantsModel getConstantsModel() {
-    	return new ConstantsModel() {
-
-			public QName getConflictingReceive() {
-				return constants.qnConflictingReceive;
-			}
-
-			public QName getCorrelationViolation() {
-				return constants.qnCorrelationViolation;
-			}
-
-			public QName getDuplicateInstance() {
-				return constants.qnDuplicateInstance;
-			}
-
-			public QName getForEachCounterError() {
-				return constants.qnForEachCounterError;
-			}
-
-			public QName getForcedTermination() {
-				return constants.qnForcedTermination;
-			}
-
-			public QName getInvalidBranchCondition() {
-				return constants.qnInvalidBranchCondition;
-			}
-
-			public QName getInvalidExpressionValue() {
-				return constants.qnInvalidExpressionValue;
-			}
-
-			public QName getJoinFailure() {
-				return constants.qnJoinFailure;
-			}
-
-			public QName getMismatchedAssignmentFailure() {
-				return constants.qnMismatchedAssignmentFailure;
-			}
-
-			public QName getMissingReply() {
-				return constants.qnMissingReply;
-			}
-
-			public QName getMissingRequest() {
-				return constants.qnMissingRequest;
-			}
-
-			public QName getRetiredProcess() {
-				return constants.qnRetiredProcess;
-			}
-
-			public QName getSelectionFailure() {
-				return constants.qnSelectionFailure;
-			}
-
-			public QName getSubLanguageExecutionFault() {
-				return constants.qnSubLanguageExecutionFault;
-			}
-
-			public QName getUninitializedPartnerRole() {
-				return constants.qnUninitializedPartnerRole;
-			}
-
-			public QName getUninitializedVariable() {
-				return constants.qnUninitializedVariable;
-			}
-
-			public QName getUnknownFault() {
-				return constants.qnUnknownFault;
-			}
-
-			public QName getXsltInvalidSource() {
-				return constants.qnXsltInvalidSource;
-			}
-    	};
     }
 }

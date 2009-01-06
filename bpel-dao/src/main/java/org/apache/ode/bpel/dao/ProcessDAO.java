@@ -84,7 +84,6 @@ public interface ProcessDAO {
      * @return collection of {@link ProcessInstanceDAO} that match correlation key, ordered by date
      */
     Collection<ProcessInstanceDAO> findInstance(CorrelationKey cckey);
-    Collection<ProcessInstanceDAO> findInstance(CorrelationKey cckey, boolean wait);
 
     /**
      * Remove the routes with the given Id for all the correlators in the process.
