@@ -113,6 +113,7 @@ import org.apache.ode.bpel.rtrep.v1.OXsdTypeVarType;
 import org.apache.ode.bpel.rtrep.v1.OXslSheet;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.NSContext;
+import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.StreamUtils;
 import org.apache.ode.utils.fs.FileUtils;
 import org.apache.ode.utils.msg.MessageBundle;
@@ -768,6 +769,11 @@ abstract class BpelCompilerImpl implements CompilerContext, org.apache.ode.bpel.
         constants.qnForEachCounterError = new QName(getBpwsNamespace(), "forEachCounterError");
         constants.qnInvalidBranchCondition = new QName(getBpwsNamespace(), "invalidBranchCondition");
         constants.qnInvalidExpressionValue = new QName(getBpwsNamespace(), "invalidExpressionValue");
+        
+        // adding new fields in OConstants breaks compatibility
+        // constants.qnDuplicateInstance = new QName(getOdeNamespace(), "duplicateInstance");
+        // constants.qnRetiredProcess = new QName(getOdeNamespace(), "retiredProcess");
+        // constants.qnUnknownFault = new QName(getOdeNamespace(), "unknownFault");
         return constants;
     }
 
@@ -783,7 +789,11 @@ abstract class BpelCompilerImpl implements CompilerContext, org.apache.ode.bpel.
     // }
     // }
 
-    /**
+    protected String getOdeNamespace() {
+    	return Namespaces.ODE_EXTENSION_NS;
+    }
+
+	/**
      * Compile an import declaration. According to the specification:
      * <blockquote> A BPEL4WSWS-BPEL process definition relies on XML Schema and
      * WSDL 1.1 for the definition of datatypes and service interfaces. Process
@@ -1059,6 +1069,7 @@ abstract class BpelCompilerImpl implements CompilerContext, org.apache.ode.bpel.
         QName[] setprops = cset.getProperties();
         for (int j = 0; j < setprops.length; ++j)
             ocset.properties.add(resolveProperty(setprops[j]));
+        ocset.setUnique(cset.isUnique());
         oscope.addCorrelationSet(ocset);
     }
 

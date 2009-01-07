@@ -30,6 +30,10 @@ public abstract class BaseCompiler {
         constants.qnInvalidBranchCondition = new QName(getBpwsNamespace(), "invalidBranchCondition");
         constants.qnInvalidExpressionValue = new QName(getBpwsNamespace(), "invalidExpressionValue");
         constants.qnScopeRollback = new QName(getOdeNamespace(), "scopeRollback");
+        
+        constants.qnDuplicateInstance = new QName(getOdeNamespace(), "duplicateInstance");
+        constants.qnRetiredProcess = new QName(getOdeNamespace(), "retiredProcess");
+        constants.qnUnknownFault = new QName(getOdeNamespace(), "unknownFault");
         return constants;
     }
 

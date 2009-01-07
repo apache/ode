@@ -27,6 +27,8 @@ import javax.xml.namespace.QName;
 public class OConstants extends OBase {
 
     private static final long serialVersionUID = 1L;
+
+    // standard fault names
     public QName qnMissingRequest;
     public QName qnMissingReply;
     public QName qnUninitializedVariable;
@@ -43,6 +45,11 @@ public class OConstants extends OBase {
     public QName qnInvalidBranchCondition;
     public QName qnInvalidExpressionValue;
 
+    // non-standard fault names 
+    // for some reason unbeknownst to me, adding the fields below breaks compatibility!
+    // public QName qnRetiredProcess;
+    // public QName qnDuplicateInstance;
+    // public QName qnUnknownFault;
 
     public OConstants(OProcess owner) {
         super(owner);
