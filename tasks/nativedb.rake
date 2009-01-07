@@ -48,7 +48,7 @@ module NativeDB
           rm_rf task.name if File.exist?(task.name)
           Dir.mkdir(task.name)
           Buildr.ant(name) do |ant|
-            ant.get :src=>"http://release.intalio.com/gitweb/?p=integr.git;a=blob_plain;f=descriptors/package/#{dbprops[:db]}/ode_tables.sql;hb=#{dbprops[:integr_branch]}", 
+            ant.get :src=>"http://git.intalio.com/?p=integr.git;a=blob_plain;f=descriptors/package/#{dbprops[:db]}/ode_tables.sql;hb=#{dbprops[:integr_branch]}",
                     :dest=>"#{task.name}/ode_tables.sql"
             sqls = ["#{task.name}/ode_tables.sql"]
             
