@@ -38,6 +38,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.Filter;
 import org.apache.ode.bpel.common.InstanceFilter;
+import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
@@ -55,10 +56,10 @@ import org.apache.openjpa.persistence.OpenJPAQuery;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class BPELDAOConnectionImpl implements BpelDAOConnection {
-	
-	static final Log __log = LogFactory.getLog(BPELDAOConnectionImpl.class);
-	
-	protected EntityManager _em;
+
+    static final Log __log = LogFactory.getLog(BPELDAOConnectionImpl.class);
+
+    protected EntityManager _em;
 
     public BPELDAOConnectionImpl(EntityManager em) {
         _em = em;
@@ -75,8 +76,8 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         // TODO
         throw new UnsupportedOperationException();
     }
-	
-	public ProcessInstanceDAO getInstance(Long iid) {
+
+    public ProcessInstanceDAO getInstance(Long iid) {
         ProcessInstanceDAOImpl instance = _em.find(ProcessInstanceDAOImpl.class, iid);
         return instance;
     }
@@ -124,8 +125,8 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
             eventDao.setScopeId(((ScopeEvent) event).getScopeId());
         eventDao.setEvent(event);
         _em.persist(eventDao);
-	}
-    
+    }
+
     private static String dateFilter(String filter) {
         String date = Filter.getDateWithoutOp(filter);
         String op = filter.substring(0,filter.indexOf(date));
@@ -139,7 +140,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         return op + " '" + ts.toString() + "'";
     }
 
-	@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     public Collection<ProcessInstanceDAO> instanceQuery(InstanceFilter criteria) {
         StringBuffer query = new StringBuffer();
         query.append("select pi from ProcessInstanceDAOImpl as pi left join fetch pi._fault ");
@@ -147,7 +148,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         if (criteria != null) {
             // Building each clause
             ArrayList<String> clauses = new ArrayList<String>();
- 
+
             // iid filter
             if ( criteria.getIidFilter() != null ) {
                 StringBuffer filters = new StringBuffer();
@@ -158,7 +159,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
                 }
                 clauses.add(" (" + filters + ")");
             }
-           
+
             // pid filter
             if (criteria.getPidFilter() != null) {
                 StringBuffer filters = new StringBuffer();
@@ -169,7 +170,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
                 }
                 clauses.add(" (" + filters + ")");
             }
-            
+
             // name filter
             if (criteria.getNameFilter() != null) {
                 String val = criteria.getNameFilter();
@@ -181,30 +182,30 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
                 //because the name space and name are stored together 
                 clauses.add(" pi._process._processType like '%" + val + "'");
             }
-            
+
             // name space filter
             if (criteria.getNamespaceFilter() != null) {
                 //process type string begins with name space
                 //this could possibly match more than you want
                 //because the name space and name are stored together
-                clauses.add(" pi._process._processType like '{" + 
+                clauses.add(" pi._process._processType like '{" +
                         criteria.getNamespaceFilter() + "%'");
             }
-            
+
             // started filter
             if (criteria.getStartedDateFilter() != null) {
                 for ( String ds : criteria.getStartedDateFilter() ) {
                     clauses.add(" pi._dateCreated " + dateFilter(ds));
                 }
             }
-            
+
             // last-active filter
             if (criteria.getLastActiveDateFilter() != null) {
                 for ( String ds : criteria.getLastActiveDateFilter() ) {
                     clauses.add(" pi._lastActive " + dateFilter(ds));
                 }
             }
-            
+
             // status filter
             if (criteria.getStatusFilter() != null) {
                 StringBuffer filters = new StringBuffer();
@@ -215,12 +216,12 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
                 }
                 clauses.add(" (" + filters.toString() + ")");
             }
-            
+
             // $property filter
             if (criteria.getPropertyValuesFilter() != null) {
                 Map<String,String> props = criteria.getPropertyValuesFilter();
                 // join to correlation sets
-                query.append(" inner join pi._rootScope._correlationSets as cs");            
+                query.append(" inner join pi._rootScope._correlationSets as cs");
                 int i = 0;
                 for (String propKey : props.keySet()) {
                     i++;
@@ -233,7 +234,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
                             props.get(propKey).replaceAll("&#32;", " ")+"'");
                 }
             }
-            
+
             // order by
             StringBuffer orderby = new StringBuffer("");
             if (criteria.getOrders() != null) {
@@ -275,48 +276,48 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
                     if (m < clauses.size() - 1) query.append(" and");
                 }
             }
-            
+
             query.append(orderby);
         }
-        
+
         if (__log.isDebugEnabled()) {
-        	__log.debug(query.toString());
+            __log.debug(query.toString());
         }
-        
+
         // criteria limit
         Query pq = _em.createQuery(query.toString());
         OpenJPAQuery kq = OpenJPAPersistence.cast(pq);
-        kq.getFetchPlan().setFetchBatchSize(criteria.getLimit());       
+        kq.getFetchPlan().setFetchBatchSize(criteria.getLimit());
         List<ProcessInstanceDAO> ql = pq.getResultList();
-       
+
         Collection<ProcessInstanceDAO> list = new ArrayList<ProcessInstanceDAO>();
-        int num = 0;       
+        int num = 0;
         for (Iterator iterator = ql.iterator(); iterator.hasNext();) {
             if(num++ > criteria.getLimit()) break;
             ProcessInstanceDAO processInstanceDAO = (ProcessInstanceDAO) iterator.next();
-            list.add(processInstanceDAO);            
-        }     
-        
+            list.add(processInstanceDAO);
+        }
+
         return list;
-	}
+    }
 
-   
-	public Collection<ProcessInstanceDAO> instanceQuery(String expression) {
-	    return instanceQuery(new InstanceFilter(expression));
-	}
 
-	public void setEntityManger(EntityManager em) {
-		_em = em;
-	}
-	
+    public Collection<ProcessInstanceDAO> instanceQuery(String expression) {
+        return instanceQuery(new InstanceFilter(expression));
+    }
+
+    public void setEntityManger(EntityManager em) {
+        _em = em;
+    }
+
     public MessageExchangeDAO getMessageExchange(String mexid) {
         return _em.find(MessageExchangeDAOImpl.class, mexid);
     }
 
     public void deleteMessageExchange(MessageExchangeDAO mexDao) {
-    	_em.remove(mexDao);
+        _em.remove(mexDao);
     }
-    
+
     public EntityManager getEntityManager() {
         return _em;
     }
@@ -330,7 +331,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         for (ProcessInstanceDAO dao: instances) {
             iids.add(dao.getInstanceId());
         }
-        Collection<CorrelationSetDAOImpl> csets = _em.createNamedQuery(CorrelationSetDAOImpl.SELECT_CORRELATION_SETS_BY_INSTANCES).setParameter("instances", iids).getResultList();        
+        Collection<CorrelationSetDAOImpl> csets = _em.createNamedQuery(CorrelationSetDAOImpl.SELECT_CORRELATION_SETS_BY_INSTANCES).setParameter("instances", iids).getResultList();
         Map<Long, Collection<CorrelationSetDAO>> map = new HashMap<Long, Collection<CorrelationSetDAO>>();
         for (CorrelationSetDAOImpl cset: csets) {
             Long id = cset.getScope().getProcessInstance().getInstanceId();
@@ -344,7 +345,12 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         return map;
     }
 
+    public Collection<CorrelationSetDAO> getActiveCorrelationSets() {
+        return _em.createNamedQuery(CorrelationSetDAOImpl.SELECT_ACTIVE_SETS).setParameter("state", ProcessState.STATE_ACTIVE).getResultList();
+    }
+
+
     public ProcessManagementDAO getProcessManagement() {
-    	return new ProcessManagementDAOImpl(_em);
+        return new ProcessManagementDAOImpl(_em);
     }
 }

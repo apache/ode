@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Encapsulates transactional access to the BPEL database.
  */
-class BpelDatabase {
+public class BpelDatabase {
   static Log __log = LogFactory.getLog(BpelDatabase.class);
 
   protected BpelDAOConnectionFactory _sscf;
@@ -70,7 +70,7 @@ class BpelDatabase {
    * @return
    * @throws DConnectionException
    */
-  <T> T exec(final Callable<T> callable) throws Exception {
+  public <T> T exec(final Callable<T> callable) throws Exception {
     return _scheduler.execTransaction(new java.util.concurrent.Callable<T>() {
       public T call() throws Exception {
         return callable.run(_sscf.getConnection());
@@ -78,7 +78,7 @@ class BpelDatabase {
     });
   }
 
-  interface Callable<T> {
+  public interface Callable<T> {
      public T run(BpelDAOConnection conn) throws Exception;
   }
 }

@@ -68,7 +68,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
 
     private ClassLoader _classLoader;
 
-    private static ConcurrentHashMap<String, ObjectStreamClass> _classDescriptors
+    public static ConcurrentHashMap<String, ObjectStreamClass> _classDescriptors
         = new ConcurrentHashMap<String, ObjectStreamClass>();
 
     /**

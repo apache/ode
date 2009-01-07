@@ -137,6 +137,9 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
         _emf.close();
     }
 
+    public DataSource getDataSource() {
+        return _ds;
+    }
 
     private class TxMgrProvider implements ManagedRuntime {
         public TxMgrProvider() {

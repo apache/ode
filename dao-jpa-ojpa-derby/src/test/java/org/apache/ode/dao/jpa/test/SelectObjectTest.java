@@ -55,7 +55,7 @@ public class SelectObjectTest extends TestCase {
 	private static final String TEST_NS = "http://org.apache.ode.jpa.test";
 	private String[] correlationKeys = { "key1", "key2" };
 	private String[] actions = { "action1","action2" };
-	private CorrelationKey key1 = new CorrelationKey(1,correlationKeys);
+	private CorrelationKey key1 = new CorrelationKey("key",correlationKeys);
 	private static final String CORRELATOR_ID1 = "testCorrelator1";
 	private static final String CORRELATOR_ID2 = "testCorrelator2";
 

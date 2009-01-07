@@ -52,6 +52,7 @@ import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
+import org.apache.ode.bpel.engine.migration.MigrationHandler;
 
 /**
  * <p>
@@ -83,7 +84,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
      * Guarded by _mngmtLock.writeLock(). 
      */
     private final Set<BpelProcess> _registeredProcesses = new HashSet<BpelProcess>();
-
 
     private State _state = State.SHUTDOWN;
     private Contexts _contexts = new Contexts();
@@ -131,10 +131,11 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 __log.debug("start() ignored -- already started");
                 return;
             }
-
             __log.debug("BPEL SERVER starting.");
 
-            _contexts.scheduler.start();
+            // Eventually running some migrations before starting
+            new MigrationHandler(_contexts).migrate(_registeredProcesses);
+
             _state = State.RUNNING;
             __log.info(__msgs.msgServerStarted());
             if (_dehydrationPolicy != null) new Thread(new ProcessDefReaper()).start();

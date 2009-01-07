@@ -301,6 +301,10 @@ class MockBpelServer {
             return _scheduler.execTransaction(transaction);
         }
 
+        public void setRollbackOnly() throws Exception {
+            _scheduler.setRollbackOnly();
+        }
+
         public <T> Future<T> execIsolatedTransaction(Callable<T> transaction) throws Exception, ContextException {
             return _scheduler.execIsolatedTransaction(transaction);
         }

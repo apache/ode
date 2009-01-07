@@ -128,7 +128,7 @@ public class OProcess extends OBase {
             if (plink.hasMyRole()) {
                 for (Iterator opI = plink.myRolePortType.getOperations().iterator(); opI.hasNext();) {
                     Operation op = (Operation)opI.next();
-                    correlators.add(plink.getId() + "." + op.getName());
+                    correlators.add(plink.getName() + "." + op.getName());
                 }
             }
         }

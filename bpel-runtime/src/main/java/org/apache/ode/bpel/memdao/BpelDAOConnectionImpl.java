@@ -366,6 +366,10 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         return map;
     }
 
+    public Collection<CorrelationSetDAO> getActiveCorrelationSets() {
+        throw new UnsupportedOperationException();
+    }
+
     public ProcessManagementDaoImpl getProcessManagement() {
         return new ProcessManagementDaoImpl();
     }

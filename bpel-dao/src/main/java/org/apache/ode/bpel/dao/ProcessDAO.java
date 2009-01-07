@@ -111,4 +111,9 @@ public interface ProcessDAO {
     String getGuid();
 
     int getNumInstances();
+
+    /**
+     * @return all instances that haven't completed, use with care as there could be a lot of them 
+     */
+    Collection<ProcessInstanceDAO> getActiveInstances();
 }

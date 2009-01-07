@@ -36,6 +36,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.InstanceFilter;
+import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
@@ -108,7 +109,7 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection {
         _session.save(process);
         return new ProcessDaoImpl(_sm, process);
     }
-    
+
     public ProcessDAO getProcess(QName processId) {
 
         try {
@@ -177,7 +178,7 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection {
 
     /**
      * Helper method for inserting bpel events into the database.
-     * 
+     *
      * @param sess
      * @param event
      * @param process
@@ -278,7 +279,7 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection {
             iids[i] = dao.getInstanceId();
             i++;
         }
-        Collection<HCorrelationSet> csets = _session.getNamedQuery(HCorrelationSet.SELECT_CORSETS_BY_INSTANCES).setParameterList("instances", iids).list();        
+        Collection<HCorrelationSet> csets = _session.getNamedQuery(HCorrelationSet.SELECT_CORSETS_BY_INSTANCES).setParameterList("instances", iids).list();
         Map<Long, Collection<CorrelationSetDAO>> map = new HashMap<Long, Collection<CorrelationSetDAO>>();
         for (HCorrelationSet cset: csets) {
             Long id = cset.getInstance().getId();
@@ -291,6 +292,15 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection {
         }
         return map;
     }
+
+    public Collection<CorrelationSetDAO> getActiveCorrelationSets() {
+        ArrayList<CorrelationSetDAO> csetDaos = new ArrayList<CorrelationSetDAO>();
+        Collection<HCorrelationSet> csets = _session.getNamedQuery(HCorrelationSet.SELECT_ACTIVE_CORSETS).setParameter("state", ProcessState.STATE_ACTIVE).list();
+        for (HCorrelationSet cset : csets)
+            csetDaos.add(new CorrelationSetDaoImpl(_sm, cset));
+        return csetDaos;
+    }
+
 
     public ProcessManagementDAO getProcessManagement() {
         return new ProcessManagementDaoImpl(_sm);

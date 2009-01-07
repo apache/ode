@@ -28,107 +28,109 @@ import java.util.Collection;
  * @hibernate.query name="DELETE_CORSETS_BY_INSTANCE" query="delete from HCorrelationSet as c where c.instance = :instance"
  * @hibernate.query name="DELETE_CORSETS_BY_PROCESS" query="delete from HCorrelationSet as c where c.process = :process"
  * @hibernate.query name="SELECT_CORSETS_BY_INSTANCES" query="from HCorrelationSet as c left join fetch c.properties where c.instance.id in (:instances)"
+ * @hibernate.query name="SELECT_ACTIVE_CORSETS" query="from HCorrelationSet as c left join fetch c.process left join fetch c.instance where c.instance.state = (:state)"
  */
 public class HCorrelationSet extends HObject{
-  public static final String DELETE_CORSETS_BY_INSTANCE = "DELETE_CORSETS_BY_INSTANCE";
-  public static final String DELETE_CORSETS_BY_PROCESS = "DELETE_CORSETS_BY_PROCESS";
-  public static final String SELECT_CORSETS_BY_INSTANCES = "SELECT_CORSETS_BY_INSTANCES";
+    public static final String DELETE_CORSETS_BY_INSTANCE = "DELETE_CORSETS_BY_INSTANCE";
+    public static final String DELETE_CORSETS_BY_PROCESS = "DELETE_CORSETS_BY_PROCESS";
+    public static final String SELECT_CORSETS_BY_INSTANCES = "SELECT_CORSETS_BY_INSTANCES";
+    public static final String SELECT_ACTIVE_CORSETS = "SELECT_ACTIVE_CORSETS";
 
-  private HProcess _process;
-  private HProcessInstance _instance;
-  private Collection<HCorrelationProperty> _properties = new HashSet<HCorrelationProperty>();
-  private HScope _scope;
-  private String _name;
-  private String _value;
+    private HProcess _process;
+    private HProcessInstance _instance;
+    private Collection<HCorrelationProperty> _properties = new HashSet<HCorrelationProperty>();
+    private HScope _scope;
+    private String _name;
+    private String _value;
 
-  public HCorrelationSet() {
-    super();
-  }
+    public HCorrelationSet() {
+        super();
+    }
 
-  public HCorrelationSet(HScope scope, String name) {
-		super();
-    _scope = scope;
-    _instance = scope.getInstance();
-    _process = _instance.getProcess();
-    _name = name;
-	}
+    public HCorrelationSet(HScope scope, String name) {
+        super();
+        _scope = scope;
+        _instance = scope.getInstance();
+        _process = _instance.getProcess();
+        _name = name;
+    }
 
-  /**
-   * @hibernate.property
-   *    column="VALUE"
-   */
-	public String getValue() {
-		return _value;
-	}
+    /**
+     * @hibernate.property
+     *    column="VALUE"
+     */
+    public String getValue() {
+        return _value;
+    }
 
-  public void setName(String name) {
-    _name = name;
-  }
+    public void setName(String name) {
+        _name = name;
+    }
 
-  public void setScope(HScope scope) {
-    _scope = scope;
-  }
+    public void setScope(HScope scope) {
+        _scope = scope;
+    }
 
-	public void setValue(String value) {
-		_value = value;
-	}
+    public void setValue(String value) {
+        _value = value;
+    }
 
-   /**
-   * @hibernate.property
-   *  column="CORR_SET_NAME"
-   *  length="255"
-   */
-	public String getName() {
-		return _name;
-	}
+    /**
+     * @hibernate.property
+     *  column="CORR_SET_NAME"
+     *  length="255"
+     */
+    public String getName() {
+        return _name;
+    }
 
-  /**
-   * @hibernate.many-to-one
-   *  column="SCOPE_ID" foreign-key="none"
-   */
-	public HScope getScope() {
-		return _scope;
-	}
+    /**
+     * @hibernate.many-to-one
+     *  column="SCOPE_ID" foreign-key="none"
+     */
+    public HScope getScope() {
+        return _scope;
+    }
 
-  /**
-   * @hibernate.many-to-one
-   *  column="PIID" foreign-key="none"
-   */
-  public HProcessInstance getInstance() {
-    return _instance;
-  }
+    /**
+     * @hibernate.many-to-one
+     *  column="PIID" foreign-key="none"
+     */
+    public HProcessInstance getInstance() {
+        return _instance;
+    }
 
-  public void setInstance(HProcessInstance instance) {
-    _instance = instance;
-  }
+    public void setInstance(HProcessInstance instance) {
+        _instance = instance;
+    }
 
-  /**
-   * @hibernate.many-to-one
-   *  column="PROCESS_ID" foreign-key="none"
-   */
-  public HProcess getProcess() {
-    return _process;
-  }
+    /**
+     * @hibernate.many-to-one
+     *  column="PROCESS_ID" foreign-key="none"
+     */
+    public HProcess getProcess() {
+        return _process;
+    }
 
-  public void setProcess(HProcess process) {
-    _process = process;
-  }
+    public void setProcess(HProcess process) {
+        _process = process;
+    }
 
-  /**
-   * @hibernate.set
-   *  lazy="true"
-   *  inverse="true"
-   *  cascade="delete"
-   * @hibernate.collection-key
-   *  column="CORR_SET_ID" foreign-key="none"
-   * @hibernate.collection-one-to-many
-   *  class="org.apache.ode.daohib.bpel.hobj.HCorrelationProperty"
-   */
-  public Collection<HCorrelationProperty> getProperties() {
-    return _properties;
-  }
+    /**
+     * @hibernate.set
+     *  lazy="true"
+     *  inverse="true"
+     *  cascade="delete"
+     * @hibernate.collection-key
+     *  column="CORR_SET_ID" foreign-key="none"
+     * @hibernate.collection-one-to-many
+     *  class="org.apache.ode.daohib.bpel.hobj.HCorrelationProperty"
+     */
+    public Collection<HCorrelationProperty> getProperties() {
+        return _properties;
+    }
 
-  public void setProperties(Collection<HCorrelationProperty> properties) {
-    _properties = properties;
-  }
+    public void setProperties(Collection<HCorrelationProperty> properties) {
+        _properties = properties;
+    }
 }

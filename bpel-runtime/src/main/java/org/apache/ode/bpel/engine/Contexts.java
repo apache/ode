@@ -38,17 +38,17 @@ import javax.xml.namespace.QName;
  * Aggregation of all the contexts provided to the BPEL engine by the
  * integration layer.
  */
-class Contexts {
+public class Contexts {
 
     MessageExchangeContext mexContext;
 
-    Scheduler scheduler;
+    public Scheduler scheduler;
 
     EndpointReferenceContext eprContext;
 
     BindingContext bindingContext;
 
-    BpelDAOConnectionFactory dao;
+    public BpelDAOConnectionFactory dao;
     BpelDAOConnectionFactory inMemDao;
 
     /** Global Message-Exchange interceptors. Must be copy-on-write!!! */ 

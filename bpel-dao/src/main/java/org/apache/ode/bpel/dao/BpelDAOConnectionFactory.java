@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.dao;
 
 
+import javax.sql.DataSource;
 import java.util.Properties;
 
 public interface BpelDAOConnectionFactory {
@@ -42,5 +43,7 @@ public interface BpelDAOConnectionFactory {
   public void init(Properties properties);
   
   public void shutdown();
+
+    public DataSource getDataSource();
 
 }

@@ -144,8 +144,8 @@ public class InsertObjectTest extends TestCase {
 		ProcessInstanceDAO pi = null;
 		String[] actions = { "action1","action2" };
 		String[] correlationKeys = { "key1", "key2" };
-		CorrelationKey key1 = new CorrelationKey(1,correlationKeys);
-		CorrelationKey key2 = new CorrelationKey(2,correlationKeys);
+		CorrelationKey key1 = new CorrelationKey("key1",correlationKeys);
+		CorrelationKey key2 = new CorrelationKey("key2",correlationKeys);
 		CorrelationKey[] corrkeys = {key1,key2}; 
 		QName[] names = { new QName(TEST_NS,"name1"), new QName(TEST_NS,"name2") };
 

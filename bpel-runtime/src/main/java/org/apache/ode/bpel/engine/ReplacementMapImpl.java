@@ -31,10 +31,10 @@ import java.io.ObjectOutput;
  * A JACOB {@link ReplacementMap} implementation that eliminates unnecessary serialization
  * of the (constant) compiled process model.
  */
-class ReplacementMapImpl implements ReplacementMap {
+public class ReplacementMapImpl implements ReplacementMap {
     private OProcess _oprocess;
 
-    ReplacementMapImpl(OProcess oprocess) {
+    public ReplacementMapImpl(OProcess oprocess) {
         _oprocess = oprocess;
     }
 

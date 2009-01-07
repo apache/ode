@@ -22,6 +22,8 @@ import java.util.List;
 
 import org.apache.ode.bpel.common.CorrelationKeySet;
 
+import java.util.Collection;
+
 /**
  * <p>
  * Data access object representing a <em>correlator</em>. A correlator
@@ -54,6 +56,8 @@ public interface CorrelatorDAO {
    */
   String getCorrelatorId();
 
+    void setCorrelatorId(String newId);
+
   /**
    * Enqueue a message exchange to the queue with a set of correlation keys.
    *
@@ -71,6 +75,11 @@ public interface CorrelatorDAO {
    *         given correlation correlationKey
    */
   MessageExchangeDAO dequeueMessage(CorrelationKeySet correlationKeySet);
+
+    /**
+     * @return all messages waiting on this correlator, use with care as it can potentially return a lot of values
+     */
+    Collection<CorrelatorMessageDAO> getAllMessages();
 
   /**
    * Find a route matching the given correlation key.
@@ -93,4 +102,9 @@ public interface CorrelatorDAO {
    * @param routeGroupId
    */
   void removeRoutes(String routeGroupId, ProcessInstanceDAO target);
+
+    /**
+     * @return all routes registered on this correlator, use with care as it can potentially return a lot of values
+     */
+    Collection<MessageRouteDAO> getAllRoutes();
 }

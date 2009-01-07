@@ -76,6 +76,8 @@ public interface Scheduler {
     <T> T execTransaction(Callable<T> transaction)
             throws Exception, ContextException;
 
+    void setRollbackOnly() throws Exception;
+
     /**
      * Same as execTransaction but executes in a different thread to guarantee
      * isolation from the main execution thread.

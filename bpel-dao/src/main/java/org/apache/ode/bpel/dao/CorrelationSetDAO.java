@@ -68,4 +68,12 @@ public interface CorrelationSetDAO {
    */
   public Map<QName, String> getProperties();
 
+    /**
+     * @return the process this correlation is related to, gives a chance of optimization to the underlying impl
+     */
+    ProcessDAO getProcess();
+    /**
+     * @return the instance this correlation is related to, gives a chance of optimization to the underlying impl
+     */
+    ProcessInstanceDAO getInstance();
 }

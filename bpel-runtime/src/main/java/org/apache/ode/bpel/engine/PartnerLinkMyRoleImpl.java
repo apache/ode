@@ -305,7 +305,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         // Let's creata a key based on the sessionId
         String mySessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
         if (mySessionId != null)
-            keySet.add(new CorrelationKey(-1, new String[] { mySessionId }));
+            keySet.add(new CorrelationKey("-1", new String[] { mySessionId }));
 
         return keySet;
     }
@@ -341,9 +341,9 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         }
 
         if( cset.hasJoinUseCases ) {
-        	key = new OptionalCorrelationKey(cset.getId(), values);
+        	key = new OptionalCorrelationKey(cset.name, values);
         } else {
-        	key = new CorrelationKey(cset.getId(), values);
+        	key = new CorrelationKey(cset.name, values);
         }
         
         return key;

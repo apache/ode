@@ -61,7 +61,7 @@ public class OPickReceive extends OActivity{
         public final List<OScope.CorrelationSet> initCorrelations = new ArrayList<OScope.CorrelationSet>();
 
         /** Correlations to match on. */
-        public final List<OScope.CorrelationSet> matchCorrelations = new ArrayList<OScope.CorrelationSet>();
+        public List<OScope.CorrelationSet> matchCorrelations = new ArrayList<OScope.CorrelationSet>();
         // left out for backward-compatibility, java serialization is lenient about scope
         private OScope.CorrelationSet matchCorrelation;
         
@@ -92,6 +92,7 @@ public class OPickReceive extends OActivity{
         	in.defaultReadObject();
 
         	// backward compatibility; matchCorrelation could have a value if read from old definition
+            if (matchCorrelations == null) matchCorrelations = new ArrayList<OScope.CorrelationSet>();
         	if( matchCorrelation != null ) {
         		matchCorrelations.add(matchCorrelation);
         	}
