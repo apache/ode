@@ -23,6 +23,7 @@ import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.iapi.Scheduler;
 
 import javax.xml.namespace.QName;
+import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -57,4 +58,7 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactory {
     public void shutdown() {
     }
 
+    public DataSource getDataSource() {
+        return null;
+    }
 }

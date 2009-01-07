@@ -221,6 +221,10 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         }
     }
 
+    public void setRollbackOnly() throws Exception {
+        _txm.setRollbackOnly();
+    }
+
     public void registerSynchronizer(final Synchronizer synch) throws ContextException {
         try {
             _txm.getTransaction().registerSynchronization(new Synchronization() {

@@ -17,8 +17,8 @@ import org.apache.ode.utils.CollectionUtils;
 public class OptionalCorrelationKey extends CorrelationKey implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    public OptionalCorrelationKey(int csetId, String[] keyValues) {
-    	super(csetId, keyValues);
+    public OptionalCorrelationKey(String csetName, String[] keyValues) {
+    	super(csetName, keyValues);
     }
 
     public OptionalCorrelationKey(String canonicalForm) {
@@ -30,8 +30,8 @@ public class OptionalCorrelationKey extends CorrelationKey implements Serializab
      */
     public String toString() {
         StringBuffer buf = new StringBuffer("{OptionalCorrelationKey ");
-        buf.append("setId=");
-        buf.append(getCSetId());
+        buf.append("setName=");
+        buf.append(getCorrelationSetName());
         buf.append(", values=");
         buf.append(CollectionUtils.makeCollection(ArrayList.class, getValues()));
         buf.append('}');

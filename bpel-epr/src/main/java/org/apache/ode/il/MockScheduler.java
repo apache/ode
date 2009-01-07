@@ -141,6 +141,10 @@ public class MockScheduler implements Scheduler {
         }
     }
 
+    public void setRollbackOnly() throws Exception {
+        if (_txm != null) _txm.setRollbackOnly();
+    }
+
     public <T> Future<T> execIsolatedTransaction(final Callable<T> transaction) throws Exception, ContextException {
         return _executorSvc.submit(new Callable<T>() {
             public T call() throws Exception {

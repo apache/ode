@@ -20,6 +20,8 @@ package org.apache.ode.daohib.bpel;
 
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HCorrelationSet;
@@ -56,25 +58,27 @@ class CorrelationSetDaoImpl extends HibernateDao
     return new ScopeDaoImpl(_sm, _correlationSet.getScope());
   }
 
-  public void setValue(QName[] names, CorrelationKey values) {
-      entering("CorrelationSetDaoImpl.setValue");
-    _correlationSet.setValue(values.toCanonicalString());
-    if (_correlationSet.getProperties() == null || _correlationSet.getProperties().size() == 0) {
-      for (int m = 0; m < names.length; m++) {
-        HCorrelationProperty prop =
-                new HCorrelationProperty(names[m], values.getValues()[m], _correlationSet);
-        getSession().save(prop);
-      }
-    } else {
-      for (int m = 0; m < names.length; m++) {
-        HCorrelationProperty prop = getProperty(names[m]);
-        if (prop == null) prop = new HCorrelationProperty(names[m], values.getValues()[m], _correlationSet);
-        else prop.setValue(values.getValues()[m]);
-        getSession().save(prop);
-      }
+    public void setValue(QName[] names, CorrelationKey values) {
+        entering("CorrelationSetDaoImpl.setValue");
+        _correlationSet.setValue(values.toCanonicalString());
+        if (names != null) {
+            if (_correlationSet.getProperties() == null || _correlationSet.getProperties().size() == 0) {
+                for (int m = 0; m < names.length; m++) {
+                    HCorrelationProperty prop =
+                            new HCorrelationProperty(names[m], values.getValues()[m], _correlationSet);
+                    getSession().save(prop);
+                }
+            } else {
+                for (int m = 0; m < names.length; m++) {
+                    HCorrelationProperty prop = getProperty(names[m]);
+                    if (prop == null) prop = new HCorrelationProperty(names[m], values.getValues()[m], _correlationSet);
+                    else prop.setValue(values.getValues()[m]);
+                    getSession().save(prop);
+                }
+            }
+        }
+        getSession().update(_correlationSet);
     }
-    getSession().update(_correlationSet);
-  }
 
   public CorrelationKey getValue() {
       entering("CorrelationSetDaoImpl.getValue");
@@ -91,7 +95,15 @@ class CorrelationSetDaoImpl extends HibernateDao
     return result;
   }
 
-  private HCorrelationProperty getProperty(QName qName) {
+    public ProcessDAO getProcess() {
+        return new ProcessDaoImpl(_sm, _correlationSet.getProcess());
+    }
+
+    public ProcessInstanceDAO getInstance() {
+        return new ProcessInstanceDaoImpl(_sm, _correlationSet.getInstance());
+    }
+
+    private HCorrelationProperty getProperty(QName qName) {
       entering("CorrelationSetDaoImpl.getProperty");
     for (HCorrelationProperty property : _correlationSet.getProperties()) {
       if (qName.getLocalPart().equals(property.getName())

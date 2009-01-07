@@ -359,6 +359,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
                 throw new JBIException(errmsg, ex);
             }
 
+            _ode._scheduler.start();
             _receiver = new Receiver(_ode);
             _receiver.start();
             _started = true;

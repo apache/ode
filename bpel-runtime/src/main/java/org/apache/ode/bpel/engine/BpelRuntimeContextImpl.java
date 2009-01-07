@@ -557,11 +557,9 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
     public void writeCorrelation(CorrelationSetInstance cset, CorrelationKey correlation) {
         ScopeDAO scopeDAO = _dao.getScope(cset.scopeInstance);
         CorrelationSetDAO cs = scopeDAO.getCorrelationSet(cset.declaration.name);
-        OScope.CorrelationSet csetdef = (OScope.CorrelationSet) _bpelProcess.getOProcess()
-                .getChild(correlation.getCSetId());
-        QName[] propNames = new QName[csetdef.properties.size()];
-        for (int m = 0; m < csetdef.properties.size(); m++) {
-            OProcess.OProperty oProperty = csetdef.properties.get(m);
+        QName[] propNames = new QName[cset.declaration.properties.size()];
+        for (int m = 0; m < cset.declaration.properties.size(); m++) {
+            OProcess.OProperty oProperty = cset.declaration.properties.get(m);
             propNames[m] = oProperty.name;
         }
         cs.setValue(propNames, correlation);
@@ -606,7 +604,7 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
             propNames[i] = property.name.toString();
         }
 
-        CorrelationKey ckeyVal = new CorrelationKey(cset.declaration.getId(), propValues);
+        CorrelationKey ckeyVal = new CorrelationKey(cset.declaration.name, propValues);
         writeCorrelation(cset, ckeyVal);
     }
 

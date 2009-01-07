@@ -21,9 +21,11 @@ package org.apache.ode.daohib.bpel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HActivityRecovery;
 import org.apache.ode.daohib.bpel.hobj.HBpelEvent;
@@ -53,6 +55,7 @@ import javax.xml.namespace.QName;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.ArrayList;
 
 /**
  * Hibernate-based {@link ProcessDAO} implementation.
@@ -216,7 +219,16 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
         return new CorrelatorDaoImpl(_sm, correlator);
     }
 
-	public int getNumInstances() {
+    public Collection<ProcessInstanceDAO> getActiveInstances() {
+        ArrayList<ProcessInstanceDAO> instDaos = new ArrayList<ProcessInstanceDAO>();
+        Collection<HProcessInstance> insts = getSession().getNamedQuery(HProcessInstance.SELECT_ACTIVE_INSTANCES)
+                .setParameter("processId", _process.getId()).setParameter("state", ProcessState.STATE_ACTIVE).list();
+        for (HProcessInstance inst : insts)
+            instDaos.add(new ProcessInstanceDaoImpl(_sm, inst));
+        return instDaos;
+    }
+
+    public int getNumInstances() {
         entering("ProcessDaoImpl.getNumInstances");
         // this should be efficient if the relation is tagged as extra-lazy.
         // If the collection is not initialized yet, Hibernate will do a count(*) and the whole collection will not be fetched.

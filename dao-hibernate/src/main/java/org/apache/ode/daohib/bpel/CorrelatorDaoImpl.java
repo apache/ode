@@ -18,19 +18,13 @@
  */
 package org.apache.ode.daohib.bpel;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.CorrelationKeySet;
-import org.apache.ode.bpel.dao.CorrelatorDAO;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.dao.MessageRouteDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.*;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HCorrelator;
 import org.apache.ode.daohib.bpel.hobj.HCorrelatorMessage;
@@ -138,7 +132,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
             	while (selectors.hasNext()) {
                     selector = (HCorrelatorSelector) selectors.next();
                     if (selector != null) {
-                    	if ("all".equals(selector.getRoute()) || 
+                    	if ("all".equals(selector.getRoute()) ||
                     			("one".equals(selector.getRoute()) && !targets.contains(selector.getInstance()))) {
                         	routes.add(new MessageRouteDaoImpl(_sm, selector));
                         	targets.add(selector.getInstance());
@@ -250,8 +244,13 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         return lockQry.list().isEmpty();
         
     }
+
     public String getCorrelatorId() {
         return _hobj.getCorrelatorId();
+    }
+
+    public void setCorrelatorId(String newId) {
+        _hobj.setCorrelatorId(newId);
     }
 
     public void removeRoutes(String routeGroupId, ProcessInstanceDAO target) {
@@ -264,4 +263,19 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         int updates = q.executeUpdate();
         __log.debug(hdr + "deleted " + updates + " rows");
     }
+
+     public Collection<CorrelatorMessageDAO> getAllMessages() {
+         Collection<CorrelatorMessageDAO> msgs = new ArrayList<CorrelatorMessageDAO>();
+         for (HCorrelatorMessage correlatorMessage : _hobj.getMessageCorrelations())
+             msgs.add(new CorrelatorMessageDaoImpl(_sm, correlatorMessage));
+         return msgs;
+     }
+
+     public Collection<MessageRouteDAO> getAllRoutes() {
+         Collection<MessageRouteDAO> routes = new ArrayList<MessageRouteDAO>();
+         for (HCorrelatorSelector selector : _hobj.getSelectors())
+             routes.add(new MessageRouteDaoImpl(_sm, selector));
+         return routes;
+     }
+
 }

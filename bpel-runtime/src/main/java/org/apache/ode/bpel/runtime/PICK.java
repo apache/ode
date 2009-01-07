@@ -135,7 +135,7 @@ class PICK extends ACTIVITY {
      * already initialized join correlation).
      * 
      * @param pLinkInstance the partner link instance
-     * @param matchCorrelation the match type correlation
+     * @param matchCorrelations the match type correlation
      * @return returns the resolved CorrelationKey
      * @throws FaultException thrown when the correlation is not initialized and createInstance flag is not set
      */
@@ -146,7 +146,7 @@ class PICK extends ACTIVITY {
             // Adding a route for opaque correlation. In this case,
             // correlation is on "out-of-band" session-id
             String sessionId = getBpelRuntimeContext().fetchMySessionId(pLinkInstance);
-            keySet.add(new CorrelationKey(-1, new String[] { sessionId }));
+            keySet.add(new CorrelationKey("-1", new String[] { sessionId }));
         } else if (!matchCorrelations.isEmpty()) {
     		for( OScope.CorrelationSet cset : matchCorrelations ) {
     			CorrelationKey key = null;

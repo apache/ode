@@ -70,7 +70,7 @@ import org.w3c.dom.Text;
 
 /**
  * Entry point into the runtime of a BPEL process.
- * 
+ *
  * @author mszefler
  * @author Matthieu Riou <mriou at apache dot org>
  */
@@ -87,9 +87,9 @@ public class BpelProcess {
      * it's important to note that the same process with the same endpoint can have 2 different myroles. */
     private volatile Map<PartnerLinkMyRoleImpl, Endpoint> _endpointToMyRoleMap;
 
-    /** Mapping from a potentially shared endpoint to its EPR */ 
+    /** Mapping from a potentially shared endpoint to its EPR */
     private SharedEndpoints _sharedEps;
-    
+
     // Backup hashmaps to keep initial endpoints handy after dehydration
     private Map<Endpoint, EndpointReference> _myEprs = new HashMap<Endpoint, EndpointReference>();
     private Map<Endpoint, EndpointReference> _partnerEprs = new HashMap<Endpoint, EndpointReference>();
@@ -116,9 +116,9 @@ public class BpelProcess {
 
     /** Deploy-time configuraton for external variables. */
     private ExternalVariableConf _extVarConf;
-    
+
     private ExternalVariableManager _evm;
-    
+
     public BpelProcess(ProcessConf conf) {
         _pid = conf.getProcessId();
         _pconf = conf;
@@ -127,33 +127,33 @@ public class BpelProcess {
 
     /**
      * Retrives the base URI to use for local resource resolution.
-     * 
+     *
      * @return URI - instance representing the absolute file path to the physical location of the process definition folder.
      */
     public URI getBaseResourceURI() {
-    	return this._pconf.getBaseURI();
+        return this._pconf.getBaseURI();
     }
-    
+
     /**
      * Intiialize the external variable configuration/engine manager. This is called from hydration logic, so it 
      * is possible to change the external variable configuration at runtime.
-     * 
+     *
      */
     void initExternalVariables() {
         List<Element> conf = _pconf.getExtensionElement(ExternalVariableConf.EXTVARCONF_ELEMENT);
         _extVarConf = new ExternalVariableConf(conf);
         _evm = new ExternalVariableManager(_pid, _extVarConf, _engine._contexts.externalVariableEngines, _oprocess);
     }
-    
+
 
     public String toString() {
         return "BpelProcess[" + _pid + "]";
     }
- 
+
     public ExternalVariableManager getEVM() {
         return _evm;
     }
-   
+
     public void recoverActivity(ProcessInstanceDAO instanceDAO, String channel, long activityId, String action, FaultData fault) {
         if (__log.isDebugEnabled())
             __log.debug("Recovering activity in process " + instanceDAO.getInstanceId() + " with action " + action);
@@ -171,7 +171,7 @@ public class BpelProcess {
 
     /**
      * Entry point for message exchanges aimed at the my role.
-     * 
+     *
      * @param mex
      */
     void invokeProcess(MyRoleMessageExchangeImpl mex) {
@@ -204,20 +204,20 @@ public class BpelProcess {
                 boolean createInstance = target.isCreateInstance(mex);
 
                 if (mex.getStatus() != MessageExchange.Status.FAILURE) {
-                	for (PartnerLinkMyRoleImpl.RoutingInfo routing : routings) {
-	                    if (routing.messageRoute == null && createInstance) {
-	                        // No route but we can create a new instance
-	                        target.invokeNewInstance(mex, routing);
-	                        routed = true; 
-	                    } else if (routing.messageRoute != null) {
-	                        // Found a route, hitting it
-	                        target.invokeInstance(mex, routing);
-	                        routed = true; 
-	                    }
-                	}
+                    for (PartnerLinkMyRoleImpl.RoutingInfo routing : routings) {
+                        if (routing.messageRoute == null && createInstance) {
+                            // No route but we can create a new instance
+                            target.invokeNewInstance(mex, routing);
+                            routed = true;
+                        } else if (routing.messageRoute != null) {
+                            // Found a route, hitting it
+                            target.invokeInstance(mex, routing);
+                            routed = true;
+                        }
+                    }
                 }
                 if (routed) {
-                	break;
+                    break;
                 }
             }
 
@@ -279,7 +279,7 @@ public class BpelProcess {
 
     /**
      * Extract the value of a BPEL property from a BPEL messsage variable.
-     * 
+     *
      * @param msgData
      *            message variable data
      * @param alias
@@ -330,7 +330,7 @@ public class BpelProcess {
     /**
      * Get the element name for a given WSDL part. If the part is an <em>element</em> part, the name of that element is returned.
      * If the part is an XML schema typed part, then the name of the part is returned in the null namespace.
-     * 
+     *
      * @param part
      *            WSDL {@link javax.wsdl.Part}
      * @return name of element containing said part
@@ -341,7 +341,7 @@ public class BpelProcess {
 
     /**
      * Process the message-exchange interceptors.
-     * 
+     *
      * @param mex
      *            message exchange
      * @return <code>true</code> if execution should continue, <code>false</code> otherwise
@@ -393,30 +393,30 @@ public class BpelProcess {
 
                 BpelRuntimeContextImpl processInstance = createRuntimeContext(procInstance, null, null);
                 switch (we.getType()) {
-                case TIMER:
-                    if (__log.isDebugEnabled()) {
-                        __log.debug("handleWorkEvent: TimerWork event for process instance " + processInstance);
-                    }
-                    processInstance.timerEvent(we.getChannel());
-                    break;
-                case RESUME:
-                    if (__log.isDebugEnabled()) {
-                        __log.debug("handleWorkEvent: ResumeWork event for iid " + we.getIID());
-                    }
-                    processInstance.execute();
-                    break;
-                case INVOKE_RESPONSE:
-                    if (__log.isDebugEnabled()) {
-                        __log.debug("InvokeResponse event for iid " + we.getIID());
-                    }
-                    processInstance.invocationResponse(we.getMexId(), we.getChannel());
-                    processInstance.execute();
-                    break;
-                case MATCHER:
-                    if (__log.isDebugEnabled()) {
-                        __log.debug("Matcher event for iid " + we.getIID());
-                    }
-                    processInstance.matcherEvent(we.getCorrelatorId(), we.getCorrelationKeySet());
+                    case TIMER:
+                        if (__log.isDebugEnabled()) {
+                            __log.debug("handleWorkEvent: TimerWork event for process instance " + processInstance);
+                        }
+                        processInstance.timerEvent(we.getChannel());
+                        break;
+                    case RESUME:
+                        if (__log.isDebugEnabled()) {
+                            __log.debug("handleWorkEvent: ResumeWork event for iid " + we.getIID());
+                        }
+                        processInstance.execute();
+                        break;
+                    case INVOKE_RESPONSE:
+                        if (__log.isDebugEnabled()) {
+                            __log.debug("InvokeResponse event for iid " + we.getIID());
+                        }
+                        processInstance.invocationResponse(we.getMexId(), we.getChannel());
+                        processInstance.execute();
+                        break;
+                    case MATCHER:
+                        if (__log.isDebugEnabled()) {
+                            __log.debug("Matcher event for iid " + we.getIID());
+                        }
+                        processInstance.matcherEvent(we.getCorrelatorId(), we.getCorrelationKeySet());
                 }
             }
         } finally {
@@ -466,7 +466,7 @@ public class BpelProcess {
             }
 
             if (pl.hasPartnerRole()) {
-            	Endpoint endpoint = _pconf.getInvokeEndpoints().get(pl.getName());
+                Endpoint endpoint = _pconf.getInvokeEndpoints().get(pl.getName());
                 if (endpoint == null && pl.initializePartnerRole)
                     throw new IllegalArgumentException(pl.getName() + " must be bound to an endpoint in deploy.xml");
                 PartnerLinkPartnerRoleImpl partnerRole = new PartnerLinkPartnerRoleImpl(this, pl, endpoint);
@@ -481,12 +481,12 @@ public class BpelProcess {
     }
 
     static String genCorrelatorId(OPartnerLink plink, String opName) {
-        return plink.getId() + "." + opName;
+        return plink.getName() + "." + opName;
     }
 
     /**
      * De-serialize the compiled process representation from a stream.
-     * 
+     *
      * @param is
      *            input stream
      * @return process information from configuration database
@@ -500,7 +500,7 @@ public class BpelProcess {
 
     /**
      * Get all the services that are implemented by this process.
-     * 
+     *
      * @return list of qualified names corresponding to the myroles.
      */
     public Set<Endpoint> getServiceNames() {
@@ -519,24 +519,24 @@ public class BpelProcess {
         __log.debug("Activating " + _pid);
         // Activate all the my-role endpoints.
         for (Map.Entry<String, Endpoint> entry : _pconf.getProvideEndpoints().entrySet()) {
-        	Endpoint endpoint = entry.getValue();
-        	EndpointReference initialEPR = null;
-        	if (isShareable(endpoint)) {
-	        	// Check if the EPR already exists for the given endpoint
-	        	initialEPR = _sharedEps.getEndpointReference(endpoint); 
-	        	if (initialEPR == null) {
-	        		// Create an EPR by physically activating the endpoint 
-	                initialEPR = _engine._contexts.bindingContext.activateMyRoleEndpoint(_pid, entry.getValue());
-	                _sharedEps.addEndpoint(endpoint, initialEPR);
-	                __log.debug("Activated " + _pid + " myrole " + entry.getKey() + ": EPR is " + initialEPR);
-	        	}
-	            // Increment the reference count on the endpoint  
-	            _sharedEps.incrementReferenceCount(endpoint);
-        	} else {
-        		// Create an EPR by physically activating the endpoint 
+            Endpoint endpoint = entry.getValue();
+            EndpointReference initialEPR = null;
+            if (isShareable(endpoint)) {
+                // Check if the EPR already exists for the given endpoint
+                initialEPR = _sharedEps.getEndpointReference(endpoint);
+                if (initialEPR == null) {
+                    // Create an EPR by physically activating the endpoint
+                    initialEPR = _engine._contexts.bindingContext.activateMyRoleEndpoint(_pid, entry.getValue());
+                    _sharedEps.addEndpoint(endpoint, initialEPR);
+                    __log.debug("Activated " + _pid + " myrole " + entry.getKey() + ": EPR is " + initialEPR);
+                }
+                // Increment the reference count on the endpoint
+                _sharedEps.incrementReferenceCount(endpoint);
+            } else {
+                // Create an EPR by physically activating the endpoint
                 initialEPR = _engine._contexts.bindingContext.activateMyRoleEndpoint(_pid, entry.getValue());
                 __log.debug("Activated " + _pid + " myrole " + entry.getKey() + ": EPR is " + initialEPR);
-        	}
+            }
             _myEprs.put(endpoint, initialEPR);
         }
         __log.debug("Activated " + _pid);
@@ -547,46 +547,26 @@ public class BpelProcess {
     void deactivate() {
         // Deactivate all the my-role endpoints.
         for (Endpoint endpoint : _myEprs.keySet()) {
-        	// Deactivate the EPR only if there are no more references 
-        	// to this endpoint from any (active) BPEL process.
-        	if (isShareable(endpoint)) {
-	        	__log.debug("deactivating shared endpoint " + endpoint);
-	        	if (!_sharedEps.decrementReferenceCount(endpoint)) {
-		            _engine._contexts.bindingContext.deactivateMyRoleEndpoint(endpoint);
-		            _sharedEps.removeEndpoint(endpoint);
-	        	}
-        	} else {
-	        	__log.debug("deactivating non-shared endpoint " + endpoint);
-	            _engine._contexts.bindingContext.deactivateMyRoleEndpoint(endpoint);
-        	}
+            // Deactivate the EPR only if there are no more references
+            // to this endpoint from any (active) BPEL process.
+            if (isShareable(endpoint)) {
+                __log.debug("deactivating shared endpoint " + endpoint);
+                if (!_sharedEps.decrementReferenceCount(endpoint)) {
+                    _engine._contexts.bindingContext.deactivateMyRoleEndpoint(endpoint);
+                    _sharedEps.removeEndpoint(endpoint);
+                }
+            } else {
+                __log.debug("deactivating non-shared endpoint " + endpoint);
+                _engine._contexts.bindingContext.deactivateMyRoleEndpoint(endpoint);
+            }
         }
         // TODO Deactivate all the partner-role channels
     }
 
     private boolean isShareable(Endpoint endpoint) {
-    	return _pconf.isSharedService(endpoint.serviceName);
-
-// 		Can't use the logic below since it assumes process is loaded.
-//
-//    	if (!_pconf.isSharedService(endpoint.serviceName)) {
-//    		return false;
-//    	}
-//    	PartnerLinkMyRoleImpl partnerLink = null;
-//    	if (_endpointToMyRoleMap == null) {
-//    		return false;
-//    	}
-//    	for (Map.Entry<PartnerLinkMyRoleImpl, Endpoint> entry : _endpointToMyRoleMap.entrySet()) {
-//    		if (entry.getValue().equals(endpoint)) {
-//    			partnerLink = entry.getKey();
-//    			break;
-//    		}
-//    	}
-//    	if (partnerLink == null) {
-//    		return false;    	
-//    	}
-//    	return partnerLink.isOneWayOnly();
+        return _pconf.isSharedService(endpoint.serviceName);
     }
-    
+
     EndpointReference getInitialPartnerRoleEPR(OPartnerLink link) {
         try {
             _hydrationLatch.latch(1);
@@ -679,8 +659,8 @@ public class BpelProcess {
             _hydrationLatch.release(1);
         }
     }
-    
-    OProcess getOProcess() {
+
+    public OProcess getOProcess() {
         try {
             _hydrationLatch.latch(1);
             return _oprocess;
@@ -732,10 +712,10 @@ public class BpelProcess {
     public long getLastUsed() {
         return _lastUsed;
     }
-    
+
     QName getProcessType() {
-    	return _pconf.getType();
-    }    	 
+        return _pconf.getType();
+    }
 
     /**
      * Get a hint as to whether this process is hydrated. Note this is only a hint, since things could change.
@@ -751,7 +731,7 @@ public class BpelProcess {
 
     /** Create a version-appropriate runtime context. */
     BpelRuntimeContextImpl createRuntimeContext(ProcessInstanceDAO dao, PROCESS template,
-            MyRoleMessageExchangeImpl instantiatingMessageExchange) {
+                                                MyRoleMessageExchangeImpl instantiatingMessageExchange) {
         return new BpelRuntimeContextImpl(this, dao, template, instantiatingMessageExchange);
 
     }
@@ -839,8 +819,8 @@ public class BpelProcess {
             registerExprLang(_oprocess);
 
             setRoles(_oprocess);
-    		initExternalVariables();
-    
+            initExternalVariables();
+
             if (!_hydratedOnce) {
                 for (PartnerLinkPartnerRoleImpl prole : _partnerRoles.values()) {
                     // Null for initializePartnerRole = false
@@ -908,20 +888,25 @@ public class BpelProcess {
             }
         }
     }
-    
+
     public boolean isCleanupCategoryEnabled(boolean instanceSucceeded, CLEANUP_CATEGORY category) {
-    	return _pconf.isCleanupCategoryEnabled(instanceSucceeded, category);
+        return _pconf.isCleanupCategoryEnabled(instanceSucceeded, category);
     }
 
     public Set<CLEANUP_CATEGORY> getCleanupCategories(boolean instanceSucceeded) {
-    	return _pconf.getCleanupCategories(instanceSucceeded);
+        return _pconf.getCleanupCategories(instanceSucceeded);
     }
-    
+
     public Node getProcessProperty(QName propertyName) {
-    	Map<QName, Node> properties = _pconf.getProcessProperties();
-    	if (properties != null) {
-    		return properties.get(propertyName);
-    	}
-    	return null;
+        Map<QName, Node> properties = _pconf.getProcessProperties();
+        if (properties != null) {
+            return properties.get(propertyName);
+        }
+        return null;
     }
+
+    public ProcessConf getConf() {
+        return _pconf;
+    }
+
 }

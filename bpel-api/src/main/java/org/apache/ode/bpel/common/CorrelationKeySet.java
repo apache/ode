@@ -60,7 +60,7 @@ public class CorrelationKeySet implements Serializable {
 	 */
 	public CorrelationKeySet add(CorrelationKey ck) {
 		for( CorrelationKey key : correlationKeys ) {
-			if( key.getCSetId() == ck.getCSetId() ) {
+			if( key.getCorrelationSetName() == ck.getCorrelationSetName() ) {
 				correlationKeys.remove(ck);
 				break;
 			}
@@ -77,7 +77,7 @@ public class CorrelationKeySet implements Serializable {
 	 * @return returns true if the correlation key set is opaque
 	 */
 	public boolean isOpaque() {
-		return correlationKeys.size() == 1 && correlationKeys.iterator().next().getCSetId() == -1;
+		return correlationKeys.size() == 1 && correlationKeys.iterator().next().getCorrelationSetName().equals("-1");
 	}
 
 	/**
@@ -186,7 +186,7 @@ public class CorrelationKeySet implements Serializable {
     	CorrelationKeySet explicitKeySet = new CorrelationKeySet();
     	for( CorrelationKey ckey : correlationKeys ) {
     		// assumes only ONE opaque key if there is
-    		if( ckey.getCSetId() == -1 ) {
+    		if( ckey.getCorrelationSetName().equals("-1") ) {
     			opaqueKey = ckey;
     		} else {
     			containsNonOpaque = true;
@@ -280,7 +280,7 @@ public class CorrelationKeySet implements Serializable {
 	}
 
 	private static enum ParserState {
-		INITIAL, MET_ALPHA, MET_LEFT_BRACKET, MET_RIGHT_BRACKET, MET_QUESTION, MET_COMMA
+		INITIAL, MET_ALPHA, MET_LEFT_BRACKET, MET_RIGHT_BRACKET, MET_COMMA
 	}
 
 	// parses a canonical form of correlation key set through an automata subsystem(FSM)
@@ -328,10 +328,6 @@ public class CorrelationKeySet implements Serializable {
 					buf.setLength(0);
 					state = ParserState.MET_COMMA;
 				}
-			} else if( state == ParserState.MET_QUESTION ) {
-				if( ch == ',' ) {
-					state = ParserState.MET_COMMA;
-				}
 			} else if( state == ParserState.MET_COMMA ) {
 				if( ch == '[' ) {
 					state = ParserState.MET_LEFT_BRACKET;
@@ -354,9 +350,8 @@ public class CorrelationKeySet implements Serializable {
 			if( o1 == null || o2 == null ) {
 				return 0;
 			}
-			
 			// used only in sorting the correlation keys in the CorrelationKeySet; does not matter with the values
-			return o1.getCSetId() - o2.getCSetId();
+			return o1.getCorrelationSetName().compareTo(o2.getCorrelationSetName());
 		}
     }    
 }

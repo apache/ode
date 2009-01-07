@@ -20,10 +20,7 @@
 package org.apache.ode.dao.jpa;
 
 import org.apache.ode.bpel.common.CorrelationKeySet;
-import org.apache.ode.bpel.dao.CorrelatorDAO;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.dao.MessageRouteDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -83,7 +80,10 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
         mexImpl.setCorrelationKeySet(correlationKeySet);
         _exchanges.add(mexImpl);
         mexImpl.setCorrelator(this);
+    }
 
+    public Collection<CorrelatorMessageDAO> getAllMessages() {
+        return new ArrayList<CorrelatorMessageDAO>(_exchanges);
     }
 
     @SuppressWarnings("unchecked")
@@ -137,6 +137,10 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
         return _correlatorKey;
     }
 
+    public void setCorrelatorId(String newId) {
+        _correlatorKey = newId;
+    }
+
     public void removeRoutes(String routeGroupId, ProcessInstanceDAO target) {
         // remove route across all correlators of the process
         ((ProcessInstanceDAOImpl)target).removeRoutes(routeGroupId);
@@ -150,5 +154,9 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
                 getEM().remove(mr);
             }
         }
+    }
+
+    public Collection<MessageRouteDAO> getAllRoutes() {
+        return new ArrayList<MessageRouteDAO>(_routes);
     }
 }

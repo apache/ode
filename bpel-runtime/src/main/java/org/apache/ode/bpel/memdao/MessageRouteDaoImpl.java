@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.memdao;
 
 import org.apache.ode.bpel.common.CorrelationKeySet;
+import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.dao.MessageRouteDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 
@@ -27,37 +28,46 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
  * A very simple, in-memory implementation of the {@link MessageRouteDAO} interface.
  */
 class MessageRouteDaoImpl extends DaoBaseImpl implements MessageRouteDAO {
-  ProcessInstanceDaoImpl _instance;
-  String _groupId;
-  CorrelationKeySet _ckeySet;
-  int _idx;
-  String _route;
+    ProcessInstanceDaoImpl _instance;
+    String _groupId;
+    CorrelationKeySet _ckeySet;
+    int _idx;
+    String _route;
 
-  MessageRouteDaoImpl(ProcessInstanceDaoImpl owner, String groupId, CorrelationKeySet ckeySet, int idx, String routePolicy) {
-    _instance = owner;
-    _groupId = groupId;
-    _ckeySet = ckeySet;
-    _idx = idx;
-    _route = routePolicy;
-  }
+    MessageRouteDaoImpl(ProcessInstanceDaoImpl owner, String groupId, CorrelationKeySet ckeySet, int idx, String routePolicy) {
+        _instance = owner;
+        _groupId = groupId;
+        _ckeySet = ckeySet;
+        _idx = idx;
+        _route = routePolicy;
+    }
 
-  public ProcessInstanceDAO getTargetInstance() {
-    return _instance;
-  }
+    public ProcessInstanceDAO getTargetInstance() {
+        return _instance;
+    }
 
-  public String getGroupId() {
-    return _groupId;
-  }
+    public String getGroupId() {
+        return _groupId;
+    }
 
-  public int getIndex() {
-    return _idx;
-  }
-  
-  public String getRoute() {
-	  return _route;
-  }
-  
-  public CorrelationKeySet getCorrelationKeySet() {
-	  return _ckeySet;
-  }
+    public int getIndex() {
+        return _idx;
+    }
+
+    public String getRoute() {
+        return _route;
+    }
+
+    public CorrelationKeySet getCorrelationKeySet() {
+        return _ckeySet;
+    }
+
+    public void setCorrelationKey(CorrelationKey key) {
+        _ckeySet = new CorrelationKeySet();
+        _ckeySet.add(key);
+    }
+
+    public CorrelationKey getCorrelationKey() {
+        return _ckeySet.iterator().next();
+    }
 }

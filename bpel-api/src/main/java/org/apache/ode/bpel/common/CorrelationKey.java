@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.common;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,28 +48,27 @@ public class CorrelationKey implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /** CorrelationSet identifier. */
-    private int _csetId;
-
+    /** CorrelationSet name. */
+    private String _csetName;
     /** Key values. */
-    private final String _keyValues[];
+    private String _keyValues[];
 
     /**
      * Constructor.
      * 
-     * @param csetId
+     * @param csetName
      *            correlation set identifier
      * @param keyValues
      *            correlation key values
      */
-    public CorrelationKey(int csetId, String[] keyValues) {
-        _csetId = csetId;
+    public CorrelationKey(String csetName, String[] keyValues) {
+        _csetName = csetName;
         _keyValues = keyValues;
     }
 
     public CorrelationKey(String canonicalForm) {
         int firstTilde = canonicalForm.indexOf('~');
-        _csetId = Integer.parseInt(canonicalForm.substring(0, firstTilde == -1 ? canonicalForm.length() : firstTilde));
+        _csetName = canonicalForm.substring(0, firstTilde == -1 ? canonicalForm.length() : firstTilde);
 
         if (firstTilde != -1) {
             List<String> keys = new ArrayList<String>();
@@ -95,8 +94,8 @@ public class CorrelationKey implements Serializable {
     }
 
     /** Return the OCorrelation id for the correlation set */
-    public int getCSetId() {
-        return _csetId;
+    public String getCorrelationSetName() {
+        return _csetName;
     }
 
     /** Return the values for the correlation set */
@@ -134,7 +133,7 @@ public class CorrelationKey implements Serializable {
     public boolean equals(Object o) {
         CorrelationKey okey = (CorrelationKey) o;
 
-        if (okey == null || okey._csetId != _csetId || okey._keyValues.length != _keyValues.length)
+        if (okey == null || !okey._csetName.equals(_csetName) || okey._keyValues.length != _keyValues.length)
             return false;
 
         for (int i = 0; i < _keyValues.length; ++i)
@@ -151,7 +150,7 @@ public class CorrelationKey implements Serializable {
      * @see Object#hashCode
      */
     public int hashCode() {
-        int hashCode = _csetId;
+        int hashCode = _csetName.hashCode();
         for (String _keyValue : _keyValues)
             hashCode ^= _keyValue.hashCode();
         return hashCode;
@@ -163,7 +162,7 @@ public class CorrelationKey implements Serializable {
     public String toString() {
         StringBuffer buf = new StringBuffer("{CorrelationKey ");
         buf.append("setId=");
-        buf.append(_csetId);
+        buf.append(_csetName);
         buf.append(", values=");
         buf.append(CollectionUtils.makeCollection(ArrayList.class, _keyValues));
         buf.append('}');
@@ -173,7 +172,7 @@ public class CorrelationKey implements Serializable {
 
     public String toCanonicalString() {
         StringBuffer buf = new StringBuffer();
-        buf.append(this.getCSetId());
+        buf.append(_csetName);
         buf.append('~');
         for (int i = 0; i < getValues().length; ++i) {
             if (i != 0)

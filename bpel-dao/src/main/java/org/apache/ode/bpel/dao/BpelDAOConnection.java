@@ -94,9 +94,10 @@ public interface BpelDAOConnection  {
   List<BpelEvent> bpelEventQuery(InstanceFilter ifilter, BpelEventFilter efilter);
 
   void close();
-  
-  
+
   Map<Long, Collection<CorrelationSetDAO>> getCorrelationSets(Collection<ProcessInstanceDAO> instances);
+
+  Collection<CorrelationSetDAO> getActiveCorrelationSets();
 
   ProcessDAO createProcess(QName pid, QName type, String guid, long version);
 

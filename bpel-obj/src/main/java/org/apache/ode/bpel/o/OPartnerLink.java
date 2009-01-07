@@ -134,6 +134,8 @@ public class OPartnerLink extends OBase {
      */
     @SuppressWarnings("unchecked")
     public Set<OScope.CorrelationSet> getJoinningCorrelationSetsForOperation(Operation operation) {
+        if (_joiningCorrelationSets == null) return new HashSet();
+        
         Set<OScope.CorrelationSet> ret = _joiningCorrelationSets.get(operation.getName());
         if (ret == null) {
             return Collections.EMPTY_SET;
@@ -155,5 +157,17 @@ public class OPartnerLink extends OBase {
             if (op.getName().equals(name))
                 return op;
         return null;
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof OPartnerLink)) return false;
+        OPartnerLink other = (OPartnerLink) obj;
+        return (name == null && other.name == null && super.equals(obj)) || name.equals(other.name);        
     }
 }

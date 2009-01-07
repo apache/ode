@@ -22,6 +22,7 @@ package org.apache.ode.dao.jpa;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
@@ -39,6 +40,7 @@ import java.util.List;
 @Entity
 @Table(name="ODE_PROCESS")
 @NamedQueries({
+    @NamedQuery(name="ActiveInstances", query="select i from ProcessInstanceDAOImpl as i where i._process = :process and i._state = :state"),
     @NamedQuery(name="InstanceByCKey", query="select cs._scope._processInstance from CorrelationSetDAOImpl as cs where cs._correlationKey = :ckey"),
     @NamedQuery(name="CorrelatorByKey", query="select c from CorrelatorDAOImpl as c where c._correlatorKey = :ckey and c._process = :process")
 })
@@ -200,5 +202,12 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
 
     public String getGuid() {
         return _guid;
+    }
+
+    public Collection<ProcessInstanceDAO> getActiveInstances() {
+        Query qry = getEM().createNamedQuery("ActiveInstances");
+        qry.setParameter("process", this);
+        qry.setParameter("state", ProcessState.STATE_ACTIVE);
+        return qry.getResultList();
     }
 }

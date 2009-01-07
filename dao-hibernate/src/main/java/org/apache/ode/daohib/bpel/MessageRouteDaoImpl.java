@@ -21,6 +21,7 @@ package org.apache.ode.daohib.bpel;
 import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.dao.MessageRouteDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HCorrelatorSelector;
 import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
@@ -78,4 +79,13 @@ class MessageRouteDaoImpl extends HibernateDao implements MessageRouteDAO {
 	public CorrelationKeySet getCorrelationKeySet() {
 		return new CorrelationKeySet(_selector.getCorrelationKey());
 	}
+
+     public void setCorrelationKey(CorrelationKey key) {
+         _selector.setCorrelationKey(key.toCanonicalString());
+     }
+
+     public CorrelationKey getCorrelationKey() {
+         return new CorrelationKey(_selector.getCorrelationKey());
+     }
+
 }

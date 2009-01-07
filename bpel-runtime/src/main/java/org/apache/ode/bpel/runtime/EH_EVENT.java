@@ -130,7 +130,7 @@ class EH_EVENT extends BpelJacobRunnable {
                 if( keySet.isEmpty() ) {
                     // Adding a route for opaque correlation. In this case correlation is done on "out-of-band" session id.
                     String sessionId = getBpelRuntimeContext().fetchMySessionId(pLinkInstance);
-                    keySet.add(new CorrelationKey(-1, new String[] {sessionId}));
+                    keySet.add(new CorrelationKey("-1", new String[] {sessionId}));
                 }
 
                 selector =  new Selector(0,pLinkInstance,_oevent.operation.getName(), _oevent.operation.getOutput() == null, _oevent.messageExchangeId, keySet, _oevent.route);

@@ -181,6 +181,8 @@ public class ODEServer {
 
             registerExternalVariableModules();
 
+            _store.loadAll();
+
             try {
                 _server.start();
             } catch (Exception ex) {
@@ -197,7 +199,8 @@ public class ODEServer {
             new DeploymentWebService().enableService(_axisConfig, _server, _store, _poller, _appRoot.getAbsolutePath(), _workRoot
                     .getAbsolutePath());
 
-            _store.loadAll();
+            __log.debug("Starting scheduler");
+            _scheduler.start();
 
             __log.debug("Initializing JCA adapter.");
             initConnector();

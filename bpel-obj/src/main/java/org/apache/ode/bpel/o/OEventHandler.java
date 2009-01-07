@@ -59,7 +59,7 @@ public class OEventHandler extends OAgent {
         public final List <OScope.CorrelationSet> initCorrelations = new ArrayList<OScope.CorrelationSet>();
 
         /** Correlation set to match on. */
-        public final List <OScope.CorrelationSet> matchCorrelations = new ArrayList<OScope.CorrelationSet>();
+        public List <OScope.CorrelationSet> matchCorrelations = new ArrayList<OScope.CorrelationSet>();
         private OScope.CorrelationSet matchCorrelation;
 
         /** Correlation set to join on. */
@@ -87,6 +87,7 @@ public class OEventHandler extends OAgent {
         	in.defaultReadObject();
 
         	// backward compatibility; matchCorrelation could have a value if read from old definition
+            if (matchCorrelations == null) matchCorrelations = new ArrayList<OScope.CorrelationSet>();
         	if( matchCorrelation != null ) {
         		matchCorrelations.add(matchCorrelation);
         	}

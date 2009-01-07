@@ -87,7 +87,11 @@ public class MessageRouteDAOImpl implements MessageRouteDAO {
     public CorrelationKey getCorrelationKey() {
 		return new CorrelationKey(_correlationKey);
 	}
-	
+    
+    public void setCorrelationKey(CorrelationKey key) {
+        _correlationKey = key.toCanonicalString();
+    }
+
 	public String getGroupId() {
 		return _groupId;
 	}
@@ -107,4 +111,5 @@ public class MessageRouteDAOImpl implements MessageRouteDAO {
 	public CorrelationKeySet getCorrelationKeySet() {
 		return new CorrelationKeySet(_correlationKey);
 	}
+
 }

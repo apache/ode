@@ -43,13 +43,13 @@ import org.apache.commons.logging.LogFactory;
  * for asynchronous messages. 
  * </p> 
  */
-class OutstandingRequestManager implements Serializable {
+public class OutstandingRequestManager implements Serializable {
   private static final long serialVersionUID = -5556374398943757951L;
 
   private static final Log __log = LogFactory.getLog(OutstandingRequestManager.class);
 
-  private final Map<RequestIdTuple, Entry> _byRid = new HashMap<RequestIdTuple, Entry>();
-  private final Map<String, Entry> _byChannel = new HashMap<String, Entry>();
+  public final Map<RequestIdTuple, Entry> _byRid = new HashMap<RequestIdTuple, Entry>();
+  public final Map<String, Entry> _byChannel = new HashMap<String, Entry>();
 
   int findConflict(Selector selectors[]) {
     if (__log.isTraceEnabled()) {
@@ -252,10 +252,10 @@ class OutstandingRequestManager implements Serializable {
     }
   }
 
-  private class Entry implements Serializable {
+  public class Entry implements Serializable {
     private static final long serialVersionUID = -583743124656582887L;
     final String pickResponseChannel;
-    final Selector[] selectors;
+    public Object[] selectors;
     String mexRef;
 
     private Entry(String pickResponseChannel, Selector[] selectors) {

@@ -25,38 +25,38 @@ import org.apache.ode.utils.ObjectPrinter;
 import java.io.Serializable;
 
 public class Selector implements Serializable {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public final PartnerLinkInstance plinkInstance;
-	// here for the backward compatibility
-	@SuppressWarnings("unused")
-	private final CorrelationKey correlationKey = null;
-  public final CorrelationKeySet correlationKeySet;
-  public final String opName;
-  public final String messageExchangeId;
-  public final int idx;
-  public final boolean oneWay;
-  public final String route;
+    public final PartnerLinkInstance plinkInstance;
+    // here for the backward compatibility
+    @SuppressWarnings("unused")
+    public Object correlationKey = null;
+    public CorrelationKeySet correlationKeySet;
+    public final String opName;
+    public final String messageExchangeId;
+    public final int idx;
+    public final boolean oneWay;
+    public final String route;
 
-  Selector(int idx, PartnerLinkInstance plinkInstance, String opName, boolean oneWay, String mexId, CorrelationKeySet keySet, String route) {
-    this.idx = idx;
-    this.plinkInstance = plinkInstance;
-    this.correlationKeySet = keySet;
-    this.opName = opName;
-    this.messageExchangeId = mexId;
-    this.oneWay = oneWay;
-    this.route = route;
-  }
+    public Selector(int idx, PartnerLinkInstance plinkInstance, String opName, boolean oneWay, String mexId, CorrelationKeySet keySet, String route) {
+        this.idx = idx;
+        this.plinkInstance = plinkInstance;
+        this.correlationKeySet = keySet;
+        this.opName = opName;
+        this.messageExchangeId = mexId;
+        this.oneWay = oneWay;
+        this.route = route;
+    }
 
-  public String toString() {
-    return ObjectPrinter.toString(this, new Object[] {
-      "plinkInstnace", plinkInstance,
-      "ckeySet", correlationKeySet,
-      "opName" ,opName,
-      "oneWay", oneWay ? "yes" : "no",
-      "mexId", messageExchangeId,
-      "idx", Integer.valueOf(idx),
-      "route", route
-    });
-  }
+    public String toString() {
+        return ObjectPrinter.toString(this, new Object[] {
+                "plinkInstnace", plinkInstance,
+                "ckeySet", correlationKeySet,
+                "opName" ,opName,
+                "oneWay", oneWay ? "yes" : "no",
+                "mexId", messageExchangeId,
+                "idx", Integer.valueOf(idx),
+                "route", route
+        });
+    }
 }

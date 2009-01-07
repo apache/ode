@@ -31,6 +31,7 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
@@ -213,6 +214,15 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     
     public void setGuid(String guid) {
         _guid = guid;
+    }
+
+    public Collection<ProcessInstanceDAO> getActiveInstances() {
+        ArrayList<ProcessInstanceDAO> pis = new ArrayList<ProcessInstanceDAO>();
+        for (ProcessInstanceDAO processInstanceDAO : _instances.values()) {
+            if (processInstanceDAO.getState() == ProcessState.STATE_ACTIVE)
+                pis.add(processInstanceDAO);
+        }
+        return pis;
     }
 
     /**

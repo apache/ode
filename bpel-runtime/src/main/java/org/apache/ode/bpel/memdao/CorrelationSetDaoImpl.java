@@ -21,6 +21,8 @@ package org.apache.ode.bpel.memdao;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 
 import javax.xml.namespace.QName;
 import java.util.HashMap;
@@ -66,14 +68,15 @@ class CorrelationSetDaoImpl extends DaoBaseImpl implements CorrelationSetDAO {
     return _scope;
   }
 
-  public void setValue(QName[] names, CorrelationKey values) {
-    _key = values;
-    _corrValues = new HashMap<QName, String>();
-    for (int m = 0; m < names.length; m++) {
-      _corrValues.put(names[m], values.getValues()[m]);
+    public void setValue(QName[] names, CorrelationKey values) {
+        _key = values;
+        if (names != null) {
+            _corrValues = new HashMap<QName, String>();
+            for (int m = 0; m < names.length; m++) {
+                _corrValues.put(names[m], values.getValues()[m]);
+            }
+        }
     }
-  }
-
 
   public CorrelationKey getValue() {
     return _key;
@@ -82,4 +85,12 @@ class CorrelationSetDaoImpl extends DaoBaseImpl implements CorrelationSetDAO {
   public Map<QName, String> getProperties() {
     return _corrValues;
   }
+
+    public ProcessDAO getProcess() {
+        return getScope().getProcessInstance().getProcess();
+    }
+
+    public ProcessInstanceDAO getInstance() {
+        return getScope().getProcessInstance();
+    }
 }

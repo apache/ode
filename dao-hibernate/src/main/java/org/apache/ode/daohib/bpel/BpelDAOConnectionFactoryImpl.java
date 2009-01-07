@@ -206,9 +206,12 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
         _ds = ds;
     }
 
+    public DataSource getDataSource() {
+        return _ds;
+    }
+
     public void setTransactionManager(Object tm) {
         _tm = (TransactionManager) tm;
-
     }
 
     public void setUnmanagedDataSource(DataSource ds) {
