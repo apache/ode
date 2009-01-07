@@ -36,7 +36,14 @@ public class MigrationHandler {
             return false;
         }
 
-        final int version = getDbVersion();
+        final int version;
+        try {
+            version = getDbVersion();
+        } catch (Exception e) {
+            __log.info("The ODE_SCHEMA_VERSION database table doesn't exist. Unless you need to migrate your data" +
+                    "from a past version, this message can be safely ignored.");
+            return false;
+        }
         if (version == -1) {
             __log.info("No schema version available from the database, migrations will be skipped.");
             return false;
