@@ -96,6 +96,7 @@ public abstract class BpelJacobRunnable extends JacobRunnable {
         }
 
         CorrelationKey ckeyVal = new CorrelationKey(cset.declaration.getId(), propValues);
+        ckeyVal.setUnique(cset.declaration.isUnique());
         getBpelRuntime().writeCorrelation(cset,ckeyVal);
     }
 

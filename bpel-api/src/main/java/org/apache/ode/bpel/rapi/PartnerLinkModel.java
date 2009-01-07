@@ -32,4 +32,5 @@ public interface PartnerLinkModel {
 
     Set<CorrelationSetModel> getCorrelationSetsForOperation(Operation operation);
 
+    Set<CorrelationSetModel> getUniqueCorrelationSetsForOperation(Operation operation);
 }
