@@ -66,7 +66,7 @@ public class CompensationHandler implements Serializable, Comparable<Compensatio
   }
 
   public int compareTo(CompensationHandler that) {
-	return (int) (that.scopeEndTime - this.scopeEndTime);
+	return (int) (that.scopeStartTime - this.scopeEndTime);
   }
 
 }
