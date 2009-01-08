@@ -33,16 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.evt.ScopeFaultEvent;
 import org.apache.ode.bpel.evt.ScopeStartEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
-import org.apache.ode.bpel.rtrep.v1.OBase;
-import org.apache.ode.bpel.rtrep.v1.OCatch;
-import org.apache.ode.bpel.rtrep.v1.OElementVarType;
-import org.apache.ode.bpel.rtrep.v1.OEventHandler;
-import org.apache.ode.bpel.rtrep.v1.OFailureHandling;
-import org.apache.ode.bpel.rtrep.v1.OFaultHandler;
-import org.apache.ode.bpel.rtrep.v1.OLink;
-import org.apache.ode.bpel.rtrep.v1.OMessageVarType;
-import org.apache.ode.bpel.rtrep.v1.OScope;
-import org.apache.ode.bpel.rtrep.v1.OVarType;
+import org.apache.ode.bpel.rapi.InvalidProcessException;
 import org.apache.ode.bpel.rtrep.v1.channels.CompensationChannel;
 import org.apache.ode.bpel.rtrep.v1.channels.EventHandlerControlChannel;
 import org.apache.ode.bpel.rtrep.v1.channels.FaultData;
@@ -50,7 +41,6 @@ import org.apache.ode.bpel.rtrep.v1.channels.ParentScopeChannel;
 import org.apache.ode.bpel.rtrep.v1.channels.ParentScopeChannelListener;
 import org.apache.ode.bpel.rtrep.v1.channels.TerminationChannel;
 import org.apache.ode.bpel.rtrep.v1.channels.TerminationChannelListener;
-import org.apache.ode.bpel.rapi.InvalidProcessException;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
 import org.w3c.dom.Element;
@@ -116,7 +106,8 @@ class SCOPE extends ACTIVITY {
             if (null == scope || ch.compensated.oscope.equals(scope))
                 out.add(ch);
         }
-        // TODO: sort out in terms of completion order
+        // sort out in terms of completion order
+        Collections.sort(out);
         return out;
     }
 
