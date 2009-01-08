@@ -18,22 +18,19 @@
  */
 package org.apache.ode.bpel.rtrep.v1;
 
-import org.apache.ode.bpel.rtrep.v1.OActivity;
-import org.apache.ode.bpel.rtrep.v1.OScope;
-import org.apache.ode.bpel.rtrep.v1.OSequence;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
 import org.apache.ode.bpel.rtrep.v1.channels.FaultData;
 import org.apache.ode.bpel.rtrep.v1.channels.ParentScopeChannel;
 import org.apache.ode.bpel.rtrep.v1.channels.ParentScopeChannelListener;
 import org.apache.ode.bpel.rtrep.v1.channels.TerminationChannel;
 import org.apache.ode.bpel.rtrep.v1.channels.TerminationChannelListener;
 import org.apache.ode.jacob.SynchChannel;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 import org.w3c.dom.Element;
 
 /**
@@ -99,7 +96,7 @@ class SEQUENCE extends ACTIVITY {
                 }
 
                 public void completed(FaultData faultData, Set<CompensationHandler> compensations) {
-                    HashSet<CompensationHandler> comps = new HashSet<CompensationHandler>(_compensations);
+                    TreeSet<CompensationHandler> comps = new TreeSet<CompensationHandler>(_compensations);
                     comps.addAll(compensations);
                     if (faultData != null || _terminateRequested || _remaining.size() <= 1) {
                         deadPathRemaining(_remaining);
