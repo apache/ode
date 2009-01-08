@@ -34,6 +34,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
+
 import org.w3c.dom.Element;
 
 /**
@@ -99,7 +101,7 @@ class SEQUENCE extends ACTIVITY {
                 }
 
                 public void completed(FaultData faultData, Set<CompensationHandler> compensations) {
-                    HashSet<CompensationHandler> comps = new HashSet<CompensationHandler>(_compensations);
+                    TreeSet<CompensationHandler> comps = new TreeSet<CompensationHandler>(_compensations);
                     comps.addAll(compensations);
                     if (faultData != null || _terminateRequested || _remaining.size() <= 1) {
                         deadPathRemaining(_remaining);
