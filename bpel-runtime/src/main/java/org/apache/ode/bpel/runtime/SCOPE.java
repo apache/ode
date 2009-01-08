@@ -117,7 +117,8 @@ class SCOPE extends ACTIVITY {
             if (null == scope || ch.compensated.oscope.equals(scope))
                 out.add(ch);
         }
-        // TODO: sort out in terms of completion order
+        // sort out in terms of completion order
+        Collections.sort(out);
         return out;
     }
 
