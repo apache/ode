@@ -39,7 +39,7 @@ public class MigrationHandler {
         final int version;
         try {
             version = getDbVersion();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             __log.info("The ODE_SCHEMA_VERSION database table doesn't exist. Unless you need to migrate your data" +
                     "from a past version, this message can be safely ignored.");
             return false;
