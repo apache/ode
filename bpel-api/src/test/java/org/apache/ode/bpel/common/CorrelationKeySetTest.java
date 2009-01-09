@@ -43,21 +43,21 @@ public class CorrelationKeySetTest {
 		assertEquals(new CorrelationKeySet(""), new CorrelationKeySet());
 		
 		assertEquals(new CorrelationKeySet("-1~session_key"), 
-				new CorrelationKeySet().add(new CorrelationKey(-1, new String[] {"session_key"})));
+				new CorrelationKeySet().add(new CorrelationKey("-1", new String[] {"session_key"})));
 		assertEquals(new CorrelationKeySet("1~key1~key2"), 
-				new CorrelationKeySet().add(new CorrelationKey(1, new String[] {"key1", "key2"})));
+				new CorrelationKeySet().add(new CorrelationKey("1", new String[] {"key1", "key2"})));
 
 		assertEquals(new CorrelationKeySet("@2"), new CorrelationKeySet());
 		assertEquals(new CorrelationKeySet("@2[-1~session_key]"), 
-				new CorrelationKeySet().add(new CorrelationKey(-1, new String[] {"session_key"})));
+				new CorrelationKeySet().add(new CorrelationKey("-1", new String[] {"session_key"})));
 		assertEquals(new CorrelationKeySet("@2[1~key1~key2]"), 
-				new CorrelationKeySet().add(new CorrelationKey(1, new String[] {"key1", "key2"})));
+				new CorrelationKeySet().add(new CorrelationKey("1", new String[] {"key1", "key2"})));
 		assertEquals(new CorrelationKeySet("@2[1~key1],[2~key2~key3]"), 
-				new CorrelationKeySet().add(new CorrelationKey(1, new String[] {"key1"}))
-				.add(new CorrelationKey(2, new String[] {"key2", "key3"})));
+				new CorrelationKeySet().add(new CorrelationKey("1", new String[] {"key1"}))
+				.add(new CorrelationKey("2", new String[] {"key2", "key3"})));
 		assertEquals(new CorrelationKeySet("@2[1~key1],[2~key2~key3]?"), 
-				new CorrelationKeySet().add(new CorrelationKey(1, new String[] {"key1"}))
-				.add(new CorrelationKey(2, new String[] {"key2", "key3"})));
+				new CorrelationKeySet().add(new CorrelationKey("1", new String[] {"key1"}))
+				.add(new CorrelationKey("2", new String[] {"key2", "key3"})));
 		assertEquals(3, new CorrelationKeySet("@2[1~key1],[2~key2~key3]?").findSubSets().size());
 	}
 	
