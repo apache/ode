@@ -43,11 +43,12 @@ class REPLY extends ACTIVITY {
         }
 
         FaultData fault = null;
+        Node msg = null;
         try {
             if (oreply.variable != null)
                 sendVariableReadEvent(_scopeFrame.resolve(oreply.variable));
 
-            Node msg = oreply.variable == null ? null :
+            msg = oreply.variable == null ? null :
                     fetchVariableData(_scopeFrame.resolve(oreply.variable), false);
 
             assert msg == null || msg instanceof Element; // note msg can be null for faults 
@@ -61,6 +62,12 @@ class REPLY extends ACTIVITY {
         } catch (FaultException e) {
             __log.error(e);
             fault = createFault(e.getQName(), oreply);
+            try {
+	            getBpelRuntime().reply(_scopeFrame.resolve(oreply.partnerLink), oreply.operation.getName(),
+	                    oreply.messageExchangeId, (Element)msg, e.getQName());
+            } catch (FaultException fe) {
+                fault = createFault(e.getQName(), oreply);
+            }
         }
 
         _self.parent.completed(fault, CompensationHandler.emptySet());
