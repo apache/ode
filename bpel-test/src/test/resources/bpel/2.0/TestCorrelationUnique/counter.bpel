@@ -16,26 +16,32 @@
   </b:partnerLinks>
   
   <b:variables>
-    <b:variable name="counter" messageType="t:responseMessage" />
-    <b:variable name="initiation" messageType="t:requestMessage" />
+    <b:variable name="response" messageType="t:responseMessage" />
+    <b:variable name="request" messageType="t:requestMessage" />
     <b:variable name="empty" messageType="t:emptyResponse" />
   </b:variables>
   
   <b:correlationSets>
-    <b:correlationSet name="name" properties="t:counterProp" unique="yes"/>
+    <b:correlationSet name="init" properties="t:initProp" unique="yes"/>
+    <b:correlationSet name="incr" properties="t:incrProp" unique="yes"/>
+    <b:correlationSet name="get" properties="t:getProp" unique="yes"/>
   </b:correlationSets>
   
   <b:sequence>
     <b:receive partnerLink="operations" createInstance="yes" operation="init" portType="t:port"
-        variable="initiation">
+        variable="request">
       <b:correlations>
-        <b:correlation set="name" initiate="yes"/>
+        <b:correlation set="init" initiate="yes"/>
       </b:correlations>
     </b:receive>
     <b:assign>
       <b:copy>
         <b:from>0</b:from>
-        <b:to variable="counter" part="value"></b:to>
+        <b:to variable="response" part="value"></b:to>
+      </b:copy>
+      <b:copy>
+        <b:from variable="request" part="name"></b:from>
+        <b:to variable="response" part="name"></b:to>
       </b:copy>
     </b:assign>
     <b:reply partnerLink="operations" operation="init" variable="empty" />
@@ -44,20 +50,21 @@
         <b:condition>true()</b:condition>
           <b:scope>
             <b:variables>
-              <b:variable name="tmp" messageType="t:requestMessage" />
+              <b:variable name="ping" messageType="t:requestMessage" />
             </b:variables>
             <b:sequence>
               <b:receive partnerLink="operations" operation="getAndIncrement" portType="t:port"
-                  variable="tmp">
+                  variable="ping">
                 <b:correlations>
-                  <b:correlation set="name" initiate="no" />
+                  <b:correlation set="init" initiate="no" />
+                  <b:correlation set="incr" initiate="yes" />
                 </b:correlations>
               </b:receive>          
-              <b:reply partnerLink="operations" operation="getAndIncrement" variable="counter" />
+              <b:reply partnerLink="operations" operation="getAndIncrement" variable="response" />
               <b:assign>
                 <b:copy>
-                  <b:from>$counter.value+1</b:from>
-                  <b:to>$counter.value</b:to>
+                  <b:from>$response.value+1</b:from>
+                  <b:to>$response.value</b:to>
                 </b:copy>
               </b:assign>          
             </b:sequence>
@@ -67,26 +74,36 @@
         <b:condition>true()</b:condition>
         <b:scope>
           <b:variables>
-            <b:variable name="tmp" messageType="t:requestMessage" />
+            <b:variable name="ping" messageType="t:requestMessage" />
           </b:variables>
           <b:sequence>
-            <b:receive partnerLink="operations" operation="get" variable="tmp">
+            <b:receive partnerLink="operations" operation="get" variable="ping">
               <b:correlations>
-                <b:correlation set="name" initiate="no" />
+                <b:correlation set="init" initiate="no" />
               </b:correlations>            
             </b:receive>
-            <b:reply partnerLink="operations" operation="get" variable="counter" />
+            <b:assign>
+                <b:copy>
+                  <b:from variable="ping" part="alias"></b:from>
+                  <b:to variable="response" part="name"></b:to>
+                </b:copy>
+            </b:assign>          
+            <b:reply partnerLink="operations" operation="get" variable="response">
+              <b:correlations>
+                <b:correlation set="get" initiate="yes" />
+              </b:correlations>            
+            </b:reply>
           </b:sequence>
         </b:scope>
       </b:while>
         <b:scope>
           <b:variables>
-            <b:variable name="tmp" messageType="t:requestMessage" />
+            <b:variable name="ping" messageType="t:requestMessage" />
           </b:variables>          
           <b:sequence>
-            <b:receive partnerLink="operations" operation="close" variable="tmp">
+            <b:receive partnerLink="operations" operation="close" variable="ping">
               <b:correlations>
-                <b:correlation set="name" initiate="no" />
+                <b:correlation set="init" initiate="no" />
               </b:correlations>
             </b:receive>
             <b:reply partnerLink="operations" operation="close" variable="empty"/>

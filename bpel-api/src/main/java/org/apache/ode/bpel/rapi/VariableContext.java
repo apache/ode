@@ -156,7 +156,7 @@ public interface VariableContext {
     CorrelationKey readCorrelation(CorrelationSet cset);
 
     void writeCorrelation(CorrelationSet cset, QName[] propNames,
-                          CorrelationKey correlation);
+                          CorrelationKey correlation) throws FaultException;
 
     public class ValueReferencePair {
         public Node value;

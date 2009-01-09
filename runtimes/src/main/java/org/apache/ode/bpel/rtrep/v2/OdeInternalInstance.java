@@ -26,7 +26,7 @@ public interface OdeInternalInstance {
 
     String readProperty(VariableInstance variable, OProcess.OProperty property) throws FaultException;
 
-    void writeCorrelation(CorrelationSetInstance cset, CorrelationKey ckeyVal);
+    void writeCorrelation(CorrelationSetInstance cset, CorrelationKey ckeyVal) throws FaultException;
 
     Node initializeVariable(VariableInstance var, ScopeFrame scopeFrame, Node val)
             throws ExternalVariableModuleException;

@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.ode.bpel.rapi.CorrelationSet;
+import org.apache.ode.bpel.rapi.ProcessModel;
 
 public class CorrelationSetInstance implements CorrelationSet {
     public OScope.CorrelationSet declaration;
@@ -35,5 +36,9 @@ public class CorrelationSetInstance implements CorrelationSet {
 
     public long getScopeId() {
         return scopeInstance;
+    }
+    
+    public ProcessModel getOwner() {
+    	return declaration.getOwner();
     }
 }

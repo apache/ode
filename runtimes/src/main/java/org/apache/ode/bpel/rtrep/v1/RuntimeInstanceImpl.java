@@ -179,7 +179,7 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
         return val;
     }
 
-    public void writeCorrelation(CorrelationSetInstance cset, CorrelationKey ckeyVal) {
+    public void writeCorrelation(CorrelationSetInstance cset, CorrelationKey ckeyVal) throws FaultException {
         OScope.CorrelationSet csetdef = cset.declaration;
         QName[] propNames = new QName[csetdef.properties.size()];
         for (int m = 0; m < csetdef.properties.size(); m++) {
