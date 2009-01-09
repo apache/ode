@@ -81,7 +81,7 @@ public abstract class BpelJacobRunnable extends JacobRunnable {
         if (getBpelRuntime().isCorrelationInitialized(cset)) {
           // if already set, we ignore
             if (__log.isDebugEnabled()) __log.debug("OCorrelation set " + cset + " is already set: ignoring");
-            return;
+            throw new FaultException(cset.declaration.getOwner().constants.qnCorrelationViolation);
         }
 
         String[] propNames = new String[cset.declaration.properties.size()];
