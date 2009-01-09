@@ -33,6 +33,7 @@ public class OInvoke extends OActivity implements OComm {
     public OScope.Variable inputVar;
     public OScope.Variable outputVar;
     public Operation operation;
+    public OResource resource;
 
     /** Correlation sets initialized on the input message. */
     public final List<OScope.CorrelationSet> initCorrelationsInput = new ArrayList<OScope.CorrelationSet>();
@@ -59,10 +60,11 @@ public class OInvoke extends OActivity implements OComm {
     }
 
     public OResource getResource() {
-        return null;
+        return resource;
     }
+    
     public boolean isRestful() {
-        return false;
+        return resource != null;
     }
 
 }

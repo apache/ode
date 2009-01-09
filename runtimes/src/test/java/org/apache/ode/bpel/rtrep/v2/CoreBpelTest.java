@@ -40,6 +40,8 @@ import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.rapi.*;
 import org.apache.ode.bpel.rtrep.v2.channels.*;
 import org.apache.ode.bpel.extension.ExtensionOperation;
+import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.Resource;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.junit.Assert;
@@ -145,6 +147,10 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
     }
 
     public String invoke(String invokeId, PartnerLinkInstance instance, Operation operation, Element outboundMsg, Object object) throws FaultException {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public String invoke(String requestId, Resource resource, Element outgoingMessage) throws FaultException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 

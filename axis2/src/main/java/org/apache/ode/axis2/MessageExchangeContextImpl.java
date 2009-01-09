@@ -25,14 +25,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.iapi.InvocationStyle;
-import org.apache.ode.bpel.iapi.MessageExchangeContext;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.iapi.*;
 
 /**
  * Implementation of the ODE {@link org.apache.ode.bpel.iapi.MessageExchangeContext}
@@ -78,7 +71,9 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
         invokePartnerUnreliable(mex);
     }
 
-    
+    public void invokeRestful(RESTOutMessageExchange mex) throws ContextException {
+        throw new UnsupportedOperationException("No support for RESTful invocations");
+    }
 
     public void onMyRoleMessageExchangeStateChanged(MyRoleMessageExchange myRoleMessageExchange) throws BpelEngineException {
         // Add code here to handle MEXs that we've "forgotten" about due to system failure etc.. mostly

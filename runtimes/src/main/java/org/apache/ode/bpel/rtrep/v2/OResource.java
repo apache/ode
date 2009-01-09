@@ -12,6 +12,7 @@ public class OResource extends OBase implements ResourceModel {
     private OResource reference;
     private String method;
     private boolean instantiateResource;
+    private boolean inbound;
     private OScope declaringScope;
 
     public OResource(OProcess owner) {
@@ -56,6 +57,14 @@ public class OResource extends OBase implements ResourceModel {
 
     public void setInstantiateResource(boolean instantiateResource) {
         this.instantiateResource = instantiateResource;
+    }
+
+    public boolean isInbound() {
+        return inbound;
+    }
+
+    public void setInbound(boolean inbound) {
+        this.inbound = inbound;
     }
 
     public OScope getDeclaringScope() {

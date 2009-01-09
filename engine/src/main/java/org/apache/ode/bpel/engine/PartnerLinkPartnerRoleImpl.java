@@ -314,15 +314,8 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
 
         UnreliablePartnerRoleMessageExchangeImpl _unreliableMex;
 
-        BpelInstanceWorker _iworker;
-
-        /** Keep a copy of the last BpelRuntimeContextImpl; this is used to optimize away a DB read. */
-        BpelRuntimeContextImpl _lastBRC;
-
         /**
-         * 
-         * @param blockingMex
-         *            the MEX we're invoking on the partner
+         * @param blockingMex the MEX we're invoking on the partner
          */
         public UnreliableInvoker(UnreliablePartnerRoleMessageExchangeImpl blockingMex) {
             _unreliableMex = blockingMex;

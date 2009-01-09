@@ -60,6 +60,8 @@ public interface IOContext {
     String /* MexId */invoke(String invokeId, PartnerLink partnerLinkInstance, Operation operation, Element outboundMsg)
             throws UninitializedPartnerEPR;
 
+    String invoke(String requestId, org.apache.ode.bpel.iapi.Resource resource, Element outgoingMessage);
+
     /**
      * Get partner's response to an invoke.
      * 

@@ -603,7 +603,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         }
     }
 
-    public RESTMessageExchange createMessageExchange(final Resource resource, String foreignKey) throws BpelEngineException {
+    public RESTInMessageExchange createMessageExchange(final Resource resource, String foreignKey) throws BpelEngineException {
         _mngmtLock.readLock().lock();
         try {
             ODERESTProcess target = _restServiceMap.get(resource.getUrl());

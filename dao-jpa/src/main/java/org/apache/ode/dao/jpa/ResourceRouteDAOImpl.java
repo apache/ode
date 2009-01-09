@@ -4,6 +4,8 @@ import org.apache.ode.bpel.dao.ResourceRouteDAO;
 
 import javax.persistence.*;
 
+@Entity
+@Table(name="ODE_RESOURCE_ROUTE")
 public class ResourceRouteDAOImpl extends OpenJPADAO implements ResourceRouteDAO {
 
     @Id @Column(name="ID")

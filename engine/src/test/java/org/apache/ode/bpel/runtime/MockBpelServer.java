@@ -208,8 +208,6 @@ class MockBpelServer {
             }
 
             public void cancel(PartnerRoleMessageExchange mex) throws ContextException {
-                // TODO Auto-generated method stub
-
             }
 
             public Set<InvocationStyle> getSupportedInvocationStyle(PartnerRoleChannel prc, EndpointReference partnerEpr) {
@@ -217,20 +215,16 @@ class MockBpelServer {
             }
 
             public void invokePartnerUnreliable(PartnerRoleMessageExchange mex) throws ContextException {
-                // TODO Auto-generated method stub
-
             }
 
             public void invokePartnerReliable(PartnerRoleMessageExchange mex) throws ContextException {
-                // TODO Auto-generated method stub
-
             }
 
             public void invokePartnerTransacted(PartnerRoleMessageExchange mex) throws ContextException {
-                // TODO Auto-generated method stub
-
             }
 
+            public void invokeRestful(RESTOutMessageExchange mex) throws ContextException {
+            }
         };
         return _mexContext;
     }

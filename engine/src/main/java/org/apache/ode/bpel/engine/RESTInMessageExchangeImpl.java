@@ -9,16 +9,16 @@ import org.apache.commons.logging.LogFactory;
 import javax.xml.namespace.QName;
 import java.util.concurrent.*;
 
-public class RESTMessageExchangeImpl extends MessageExchangeImpl implements RESTMessageExchange {
+public class RESTInMessageExchangeImpl extends MessageExchangeImpl implements RESTInMessageExchange {
 
-    private static final Log __log = LogFactory.getLog(RESTMessageExchangeImpl.class);
+    private static final Log __log = LogFactory.getLog(RESTInMessageExchangeImpl.class);
 
     private boolean _done = false;
     private ResponseFuture _future;
 
     private Resource _resource;
 
-    public RESTMessageExchangeImpl(ODEProcess process, String mexId, Resource resource) {
+    public RESTInMessageExchangeImpl(ODEProcess process, String mexId, Resource resource) {
         super(process, null, mexId, null, null, null);
         _resource = resource;
     }

@@ -47,7 +47,6 @@ import org.w3c.dom.Element;
 public class MessageExchangeDaoImpl extends HibernateDao implements MessageExchangeDAO {
 
     private HMessageExchange _hself;
-    
 
     // Used when provided process and instance aren't hibernate implementations. The relation
     // therefore can't be persisted. Used for in-mem DAOs so that doesn't matter much. 

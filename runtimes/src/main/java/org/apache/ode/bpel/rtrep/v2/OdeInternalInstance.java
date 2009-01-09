@@ -46,6 +46,9 @@ public interface OdeInternalInstance {
     String invoke(String invokeId, PartnerLinkInstance instance, Operation operation, Element outboundMsg, Object object)
             throws FaultException;
 
+    String invoke(String requestId, org.apache.ode.bpel.iapi.Resource resource, Element outgoingMessage)
+            throws FaultException;
+
     Node getPartData(Element message, OMessageVarType.Part part);
 
     Element getPartnerResponse(String mexId);

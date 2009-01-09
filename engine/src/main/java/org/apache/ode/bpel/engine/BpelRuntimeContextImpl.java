@@ -523,7 +523,6 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
     }
 
     private void scheduleCorrelatorMatcher(String correlatorId, CorrelationKey key) {
-
         WorkEvent we = new WorkEvent();
         we.setIID(_dao.getInstanceId());
         we.setProcessId(_bpelProcess.getPID());
@@ -536,7 +535,6 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
     public String invoke(String requestId, PartnerLink partnerLink, Operation operation, Element outgoingMessage)
             throws UninitializedPartnerEPR {
 
-        // TODO: think we should move the dao creation into bpelprocess --mbs
         MessageExchangeDAO mexDao = _dao.getConnection().createMessageExchange(new GUID().toString(),
                 MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE);
         mexDao.setStatus(MessageExchange.Status.REQ);
@@ -584,7 +582,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
             __log.debug("INVOKING PARTNER: partnerLink=" + partnerLink + ", op=" +
                     operation.getName() + " channel=" + requestId + ")");
         }
-        ((ODEWSProcess)_bpelProcess).invokePartner(mexDao);
+        _bpelProcess.invokePartner(mexDao);
 
         // In case a response/fault was available right away, which will happen for BLOCKING/TRANSACTED invocations,
         // we need to inject a message on the response channel, so that the process continues.
@@ -599,6 +597,50 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
             throw new AssertionError("Unexpected MEX status: " + mexDao.getStatus());
         }
         
+        return mexDao.getMessageExchangeId();
+    }
+
+    public String invoke(String requestId, org.apache.ode.bpel.iapi.Resource resource, Element outgoingMessage) {
+
+        MessageExchangeDAO mexDao = _dao.getConnection().createMessageExchange(new GUID().toString(),
+                MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE);
+        mexDao.setStatus(MessageExchange.Status.REQ);
+        mexDao.setResource(resource.getUrl() + "~" + resource.getMethod());
+        mexDao.setProcess(_dao.getProcess());
+        mexDao.setInstance(_dao);
+        mexDao.setPattern(MessageExchangePattern.REQUEST_RESPONSE);
+        mexDao.setChannel(requestId);
+
+        MessageDAO message = mexDao.createMessage(null);
+        mexDao.setRequest(message);
+        mexDao.setTimeout(30000);
+        message.setData(outgoingMessage);
+
+        // prepare event
+        ProcessMessageExchangeEvent evt = new ProcessMessageExchangeEvent();
+        evt.setResource(resource.getUrl() + "~" + resource.getMethod());
+        evt.setAspect(ProcessMessageExchangeEvent.PARTNER_INPUT);
+        evt.setMexId(mexDao.getMessageExchangeId());
+        sendEvent(evt);
+
+        if (__log.isDebugEnabled())
+            __log.debug("INVOKING PARTNER: resource=" + resource + " channel=" + requestId + ")");
+
+        _bpelProcess.invokePartner(mexDao);
+
+        // In case a response/fault was available right away, which will happen for BLOCKING/TRANSACTED invocations,
+        // we need to inject a message on the response channel, so that the process continues.
+        switch (mexDao.getStatus()) {
+        case ACK:
+            if (mexDao.getChannel() != null) injectPartnerResponse(mexDao.getMessageExchangeId(), mexDao.getChannel());
+            break;
+        case ASYNC:
+            // we'll have to wait for the response.
+            break;
+        default:
+            throw new AssertionError("Unexpected MEX status: " + mexDao.getStatus());
+        }
+
         return mexDao.getMessageExchangeId();
     }
 

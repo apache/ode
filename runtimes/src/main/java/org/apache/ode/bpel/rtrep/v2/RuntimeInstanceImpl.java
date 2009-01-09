@@ -613,6 +613,11 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
         }
     }
 
+    public String invoke(String requestId, org.apache.ode.bpel.iapi.Resource resource, Element outgoingMessage)
+            throws FaultException {
+        return _brc.invoke(requestId, resource, outgoingMessage);
+    }
+
     /**
      * @return
      */

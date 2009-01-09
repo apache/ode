@@ -111,6 +111,8 @@ public abstract class ODEProcess {
     abstract void dehydrate();
 
     abstract void invokeProcess(final MessageExchangeDAO mexdao);
+    abstract void invokePartner(final MessageExchangeDAO mexdao);
+
     abstract MessageExchangeImpl recreateIncomingMex(MessageExchangeDAO mexdao);
 
     protected abstract void latch(int s);

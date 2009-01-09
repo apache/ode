@@ -133,7 +133,7 @@ public interface BpelServer {
     MyRoleMessageExchange createMessageExchange(InvocationStyle istyle, QName serviceId, String operation,
                                                 String foreignKey) throws BpelEngineException;
 
-    RESTMessageExchange createMessageExchange(Resource resource, String foreignKey) throws BpelEngineException;
+    RESTInMessageExchange createMessageExchange(Resource resource, String foreignKey) throws BpelEngineException;
 
     /**
      * Retrieve a message identified by the given identifer.
