@@ -160,24 +160,26 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
                         + messageRoute.getTargetInstance().getInstanceId());
             }
 
-            ProcessInstanceDAO instanceDao = messageRoute.getTargetInstance();
+            ProcessInstanceDAO instanceDAO = messageRoute.getTargetInstance();
+            ProcessDAO processDAO = instanceDAO.getProcess();
+            enforceUniqueConstraint(processDAO, uniqueKeys);
 
             // Reload process instance for DAO.
 
             // Kill the route so some new message does not get routed to
             // same process instance.
-            correlator.removeRoutes(messageRoute.getGroupId(), instanceDao);
+            correlator.removeRoutes(messageRoute.getGroupId(), instanceDAO);
 
             // send process instance event
             CorrelationMatchEvent evt = new CorrelationMatchEvent(_process.getProcessModel().getQName(),
-                    _process.getProcessDAO().getProcessId(), instanceDao.getInstanceId(), matchedKey);
+                    _process.getProcessDAO().getProcessId(), instanceDAO.getInstanceId(), matchedKey);
             evt.setPortType(mex.getPortType());
             evt.setOperation(operation.getName());
             evt.setMexId(mex.getMessageExchangeId());
 
             _process._debugger.onEvent(evt);
             // store event
-            _process.saveEvent(evt, instanceDao);
+            _process.saveEvent(evt, instanceDAO);
 
             mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.MATCHED.toString());
             mex.setInstance(messageRoute.getTargetInstance());
@@ -225,16 +227,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         // return;
         // }
 
-        for (CorrelationKey uniqueKey : uniqueKeys) {
-        	// double-check that the correlation set is indeed unique
-        	if (uniqueKey.isUnique()) {
-        		Collection<ProcessInstanceDAO> instances = processDAO.findInstance(uniqueKey, false);
-        		if (instances.size() != 0) {
-                    __log.debug("Not creating a new instance for mex " + mex + "; unique correlation constraint would be violated!");
-                    throw new InvalidProcessException("Unique process constraint violated", InvalidProcessException.DUPLICATE_CAUSE_CODE);
-        		}
-        	}        	
-        }
+        enforceUniqueConstraint(processDAO, uniqueKeys);
         
         ProcessInstanceDAO newInstance = processDAO.createInstance(correlator);
         
@@ -251,7 +244,20 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 
     }
 
-    @SuppressWarnings("unchecked")
+    private void enforceUniqueConstraint(ProcessDAO processDAO, CorrelationKey[] uniqueKeys) {
+        for (CorrelationKey uniqueKey : uniqueKeys) {
+        	// double-check that the correlation set is indeed unique
+        	if (uniqueKey.isUnique()) {
+        		Collection<ProcessInstanceDAO> instances = processDAO.findInstance(uniqueKey, false);
+        		if (instances.size() != 0) {
+                    __log.debug("Not creating a new instance for process " + processDAO.getProcessId() + "; unique correlation constraint would be violated!");
+                    throw new InvalidProcessException("Unique process constraint violated", InvalidProcessException.DUPLICATE_CAUSE_CODE);
+        		}
+        	}        	
+        }
+	}
+
+	@SuppressWarnings("unchecked")
     private Operation getMyRoleOperation(String operationName) {
         return _plinkDef.getMyRoleOperation(operationName);
     }

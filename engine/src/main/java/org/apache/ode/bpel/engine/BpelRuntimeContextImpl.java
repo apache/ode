@@ -435,7 +435,17 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         sendEvent(evt);
     }
 
-    public void writeCorrelation(CorrelationSet cset, QName[] propNames, CorrelationKey correlation) {
+    public void writeCorrelation(CorrelationSet cset, QName[] propNames, CorrelationKey correlation) throws FaultException {
+    	// enforce unique correlation set constraint
+    	ProcessDAO processDAO = _dao.getProcess();
+    	if (correlation.isUnique()) {
+    		Collection<ProcessInstanceDAO> instances = processDAO.findInstance(correlation, false);
+    		if (instances.size() != 0) {
+                __log.debug("Not creating a new instance for process " + processDAO.getProcessId() + "; unique correlation constraint would be violated!");
+                throw new FaultException(cset.getOwner().getConstantsModel().getDuplicateInstance());
+    		}
+    	}        	
+    	
         ScopeDAO scopeDAO = _dao.getScope(cset.getScopeId());
         CorrelationSetDAO cs = scopeDAO.getCorrelationSet(cset.getName());
         cs.setValue(propNames, correlation);

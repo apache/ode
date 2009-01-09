@@ -10,9 +10,11 @@
   
   <wsdl:message name="requestMessage">
     <wsdl:part name="name" type="xsd:string" />
+    <wsdl:part name="alias" type="xsd:string" />
   </wsdl:message>
   
   <wsdl:message name="responseMessage">
+    <wsdl:part name="name" type="xsd:string" />
     <wsdl:part name="value" type="xsd:int" />
   </wsdl:message>
   
@@ -78,7 +80,13 @@
     <p:role name="you" portType="t:port" />
   </p:partnerLinkType>
   
-  <v:property name="counterProp" type="xsd:string" />
+  <v:property name="initProp" type="xsd:string" />
+  <v:property name="incrProp" type="xsd:string" />
+  <v:property name="getProp" type="xsd:string" />
   
-  <v:propertyAlias propertyName="t:counterProp" part="name" messageType="t:requestMessage" />
+  <v:propertyAlias propertyName="t:initProp" part="name" messageType="t:requestMessage" />
+  <v:propertyAlias propertyName="t:incrProp" part="alias" messageType="t:requestMessage" />
+  <v:propertyAlias propertyName="t:incrProp" part="name" messageType="t:responseMessage" />
+  <v:propertyAlias propertyName="t:getProp" part="name" messageType="t:responseMessage" />
+  <v:propertyAlias propertyName="t:getProp" part="alias" messageType="t:requestMessage" />
 </wsdl:definitions>

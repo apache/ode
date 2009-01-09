@@ -123,7 +123,9 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
 	        instance.addOrder(Order.desc("created"));
 	        Criteria process = instance.createCriteria("process");
 	        process.add(Restrictions.eq("id", _process.getId()));
-	        correlationSet.add(Expression.eq("value", ckeyValue.toCanonicalString()));	        
+	        correlationSet.add(Expression.eq("value", ckeyValue.toCanonicalString()));
+	        // TODO: compare against the correlation set in question  
+	        // correlationSet.add(Expression.eq("name", ckeyValue.getCSetId()));	        
 	        correlationSet.setLockMode(wait ? LockMode.UPGRADE : LockMode.UPGRADE_NOWAIT);
 	        return correlationSet.list();
     	} catch (HibernateException he) {
