@@ -532,10 +532,14 @@ public class SoapExternalService implements ExternalService {
             init(); // create a new ServiceClient instance
             try {
                 InputStream ais = file.toURI().toURL().openStream();
-                if (ais != null) {
+                if (ais != null) {  
                     if (__log.isDebugEnabled()) __log.debug("Configuring service " + _serviceName + " using: " + file);
-                    ServiceBuilder builder = new ServiceBuilder(ais, _configContext, anonymousService);
-                    builder.populateService(builder.buildOM());
+                    try {
+                        ServiceBuilder builder = new ServiceBuilder(ais, _configContext, anonymousService);
+                        builder.populateService(builder.buildOM());
+                    } finally {
+                        ais.close();
+                    }
                     // do not allow the service.xml file to change the service name 
                     anonymousService.setName(serviceName);
 
