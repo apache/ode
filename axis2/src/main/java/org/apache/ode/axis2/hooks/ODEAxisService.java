@@ -103,9 +103,13 @@ public class ODEAxisService extends AxisService {
                 InputStream ais = axis2config.toURL().openStream();
                 if (ais != null) {
                     LOG.debug("Configuring service using: "+axis2config.toURL());
-                    ConfigurationContext configCtx = new ConfigurationContext(axisConfig);
-                    ServiceBuilder builder = new ServiceBuilder(ais, configCtx, axisService);
-                    builder.populateService(builder.buildOM());
+                    try {
+                        ConfigurationContext configCtx = new ConfigurationContext(axisConfig);
+                        ServiceBuilder builder = new ServiceBuilder(ais, configCtx, axisService);
+                        builder.populateService(builder.buildOM());
+                    } finally {
+                        ais.close();
+                    }
                 }
             } catch (FileNotFoundException except) {
                 LOG.debug("Axis2 service configuration not found: " + axis2config);
