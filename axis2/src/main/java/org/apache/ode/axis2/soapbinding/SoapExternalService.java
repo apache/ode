@@ -262,8 +262,9 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
      */
     private void writeHeader(MessageContext ctxt, PartnerRoleMessageExchange odeMex) {
         Options options = ctxt.getOptions();
-        WSAEndpoint targetEPR = EndpointFactory.convertToWSA((MutableEndpoint) odeMex.getEndpointReference());
-        WSAEndpoint myRoleEPR = EndpointFactory.convertToWSA((MutableEndpoint) odeMex.getMyRoleEndpointReference());
+        WSAEndpoint targetWSAEPR = EndpointFactory.convertToWSA((MutableEndpoint) odeMex.getEndpointReference());
+        WSAEndpoint myRoleWSAEPR = EndpointFactory.convertToWSA((MutableEndpoint) odeMex.getMyRoleEndpointReference());
+        WSAEndpoint targetEPR = new WSAEndpoint(targetWSAEPR);
 
         String partnerSessionId = odeMex.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
         String myRoleSessionId = odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
@@ -276,7 +277,8 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
         }
         options.setProperty(ODEService.TARGET_SESSION_ENDPOINT, targetEPR);
 
-        if (myRoleEPR != null) {
+        if (myRoleWSAEPR != null) {
+            WSAEndpoint myRoleEPR = new WSAEndpoint(myRoleWSAEPR);
             if (myRoleSessionId != null) {
                 if (__log.isDebugEnabled()) {
                     __log.debug("MyRole session identifier found for myrole (callback) WSA endpoint: " + myRoleSessionId);

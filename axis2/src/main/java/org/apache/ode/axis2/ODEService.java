@@ -229,8 +229,9 @@ public class ODEService {
         // endpoint in this case, except that it is updated with session
         // information (if available).
         if (odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID) != null) {
-            _serviceRef.setSessionId(odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID));
-            msgContext.setProperty(CALLBACK_SESSION_ENDPOINT, _serviceRef);
+            WSAEndpoint sessionAwareEndPoint = new WSAEndpoint(_serviceRef); 
+            sessionAwareEndPoint.setSessionId(odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID));
+            msgContext.setProperty("callbackSessionEndpoint", sessionAwareEndPoint);
         }
 
     }

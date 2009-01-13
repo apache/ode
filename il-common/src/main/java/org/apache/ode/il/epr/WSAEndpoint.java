@@ -44,6 +44,11 @@ public class WSAEndpoint implements MutableEndpoint {
     public WSAEndpoint() {
     }
 
+    // prototype constructor
+    public WSAEndpoint(WSAEndpoint prototype) {
+        _eprElmt = (Element)DOMUtils.newDocument().importNode(prototype._eprElmt, true);
+    }
+                   
     public WSAEndpoint(Map map) {
         this();
         fromMap(map);
