@@ -579,8 +579,7 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
         // borrowed from ASSIGN.evalQuery()
         Node ret = DOMUtils.findChildByName(message, new QName(null, part.name));
         if (part.type instanceof OElementVarType) {
-            QName elName = ((OElementVarType) part.type).elementType;
-            ret = DOMUtils.findChildByName((Element) ret, elName);
+            ret = DOMUtils.getFirstChildElement((Element) ret);
         } else if (part.type == null) {
             // Special case of header parts never referenced in the WSDL def
             if (ret != null && ret.getNodeType() == Node.ELEMENT_NODE

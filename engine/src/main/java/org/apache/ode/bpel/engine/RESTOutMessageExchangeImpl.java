@@ -2,6 +2,7 @@ package org.apache.ode.bpel.engine;
 
 import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.dao.MessageDAO;
 import org.w3c.dom.Element;
 
 public class RESTOutMessageExchangeImpl extends MessageExchangeImpl implements RESTOutMessageExchange {
@@ -20,8 +21,8 @@ public class RESTOutMessageExchangeImpl extends MessageExchangeImpl implements R
         DEAD
     };
 
-    public RESTOutMessageExchangeImpl(ODEProcess process, String mexId, Resource resource) {
-        super(process, null, mexId, null, null, null);
+    public RESTOutMessageExchangeImpl(ODEProcess process, Long iid, String mexId, Resource resource) {
+        super(process, iid, mexId, null, null, null);
         _resource = resource;
     }
 
@@ -38,6 +39,7 @@ public class RESTOutMessageExchangeImpl extends MessageExchangeImpl implements R
         _fault = null;
         _failureType = null;
         ack(AckType.RESPONSE);
+        save();
     }
 
     public void replyWithFailure(FailureType type, String description, Element details) throws BpelEngineException {
@@ -46,6 +48,7 @@ public class RESTOutMessageExchangeImpl extends MessageExchangeImpl implements R
         _fault = null;
         _response = null;
         ack(AckType.FAILURE);
+        save();
     }
 
     @Override
@@ -60,6 +63,12 @@ public class RESTOutMessageExchangeImpl extends MessageExchangeImpl implements R
     void save(MessageExchangeDAO dao) {
         super.save(dao);
         dao.setResource(_resource.getUrl() + "~" + _resource.getMethod());
+        if (_response != null) {
+            MessageDAO responseDao = dao.createMessage(_response.getType());
+            responseDao.setData(_response.getMessage());
+            responseDao.setHeader(_response.getHeader());
+            dao.setResponse(responseDao);
+        }        
     }
 
     public void setState(State s) {

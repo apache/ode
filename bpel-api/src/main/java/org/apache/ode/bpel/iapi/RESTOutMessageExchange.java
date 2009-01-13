@@ -6,7 +6,7 @@ import org.w3c.dom.Element;
  * Outgoing RESTful message exchange implemented by the engine and used by IL implementations
  * that can provide RESTful interactions.
  */
-public interface RESTOutMessageExchange {
+public interface RESTOutMessageExchange extends MessageExchange {
 
     Resource getTargetResource();
 

@@ -135,7 +135,7 @@ public class ODERESTProcess extends ODEProcess {
         mexdao.setStatus(MessageExchange.Status.REQ);
         try {
             String[] resStr = mexdao.getResource().split("~");
-            RESTOutMessageExchangeImpl outMex = new RESTOutMessageExchangeImpl(this,
+            RESTOutMessageExchangeImpl outMex = new RESTOutMessageExchangeImpl(this, mexdao.getInstance().getInstanceId(),
                     mexdao.getMessageExchangeId(), new Resource(resStr[0], "application/xml", resStr[1]));
             outMex.request();
 
@@ -235,6 +235,7 @@ public class ODERESTProcess extends ODEProcess {
             // Handle system failure in a transaction
             final Throwable ferr = err;
             if (ferr != null) {
+                __log.debug("Request failure from instance " + _restMex.getIID() + " for url " + _restMex.getTargetResource().getUrl());
                 enqueueInstanceTransaction(_restMex.getIID(),  new Runnable() {
                     public void run() {
                         MessageExchangeDAO mexdao = loadMexDao(_restMex.getMessageExchangeId());
