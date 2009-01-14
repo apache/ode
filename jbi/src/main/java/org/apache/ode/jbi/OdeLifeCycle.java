@@ -115,8 +115,6 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             __log.debug("Starting Dao.");
             initDao();
 
-            __log.info("Hibernate started.");
-
             __log.debug("Starting BPEL server.");
             initBpelServer();
 
