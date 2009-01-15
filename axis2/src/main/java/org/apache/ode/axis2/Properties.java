@@ -78,6 +78,7 @@ public class Properties {
     public static final String PROP_SECURITY_POLICY = "security.policy";
     public static final String PROP_JMS_REPLY_DESTINATION = "jms.reply.destination";
     public static final String PROP_JMS_REPLY_TIMEOUT = "jms.reply.timeout";
+    public static final String PROP_SEND_WS_ADDRESSING_HEADERS = "ws-adddressing.headers";
 
 
     protected static final Log log = LogFactory.getLog(Properties.class);
@@ -187,6 +188,10 @@ public class Properties {
                     if (log.isWarnEnabled())
                         log.warn("Mal-formatted Property: [" + Properties.PROP_JMS_REPLY_TIMEOUT + "=" + value + "]. Long expected. Property will be skipped.");
                 }
+            }
+            if(properties.containsKey(PROP_SEND_WS_ADDRESSING_HEADERS)){
+                String value = properties.get(PROP_SEND_WS_ADDRESSING_HEADERS);
+                options.setProperty(PROP_SEND_WS_ADDRESSING_HEADERS, Boolean.parseBoolean(value));
             }
 
             // iterate through the properties to get Headers & Proxy information
