@@ -746,4 +746,3 @@ define "apache-ode" do
 
   package(:zip, :id=>"#{id}-docs").include(javadoc(project("ode").projects).target) unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
 end
-
