@@ -23,109 +23,109 @@ import java.util.Date;
 
 /**
  * Persistent representation of activity recovery information.
+ * 
  * @hibernate.class table="BPEL_ACTIVITY_RECOVERY"
  */
 public class HActivityRecovery extends HObject {
 
-  /** Process instance to which this scope belongs. */
-  private HProcessInstance _instance;
-  private long        _activityId;
-  private String      _channel;
-  private String      _reason;
-  private Date        _dateTime;
-  private HLargeData  _details;
-  private String      _actions;
-  private int         _retries;
+    /** Process instance to which this scope belongs. */
+    private HProcessInstance _instance;
+    private long _activityId;
+    private String _channel;
+    private String _reason;
+    private Date _dateTime;
+    private HLargeData _details;
+    private String _actions;
+    private int _retries;
 
-  /**
-   * Get the {@link HProcessInstance} to which this scope object belongs.
-   * @hibernate.many-to-one
-   *  column="PIID"
-   */
-	public HProcessInstance getInstance() {
-		return _instance;
-	}
+    /**
+     * Get the {@link HProcessInstance} to which this scope object belongs.
+     * 
+     * @hibernate.many-to-one column="PIID"
+     */
+    public HProcessInstance getInstance() {
+        return _instance;
+    }
 
-  /** @see #getInstance() */
-  public void setInstance(HProcessInstance instance) {
-		_instance = instance;
-	}
+    /** @see #getInstance() */
+    public void setInstance(HProcessInstance instance) {
+        _instance = instance;
+    }
 
-  /**
-   * @hibernate.property column="AID"
-   */
-  public long getActivityId() {
-    return _activityId;
-  }
+    /**
+     * @hibernate.property column="AID"
+     */
+    public long getActivityId() {
+        return _activityId;
+    }
 
-  public void setActivityId(long activityId) {
-    _activityId = activityId;
-  }
+    public void setActivityId(long activityId) {
+        _activityId = activityId;
+    }
 
-  /**
-   * @hibernate.property column="CHANNEL"
-   */
-	public String getChannel() {
-		return _channel;
-	}
+    /**
+     * @hibernate.property column="CHANNEL"
+     */
+    public String getChannel() {
+        return _channel;
+    }
 
-  public void setChannel(String channel) {
-		_channel = channel;
-	}
+    public void setChannel(String channel) {
+        _channel = channel;
+    }
 
-  /**
-   * @hibernate.property column="REASON"
-   */
-	public String getReason() {
-		return _reason;
-	}
+    /**
+     * @hibernate.property column="REASON"
+     */
+    public String getReason() {
+        return _reason;
+    }
 
-  public void setReason(String reason) {
-		_reason = reason;
-	}
+    public void setReason(String reason) {
+        _reason = reason;
+    }
 
-  /**
-   * @hibernate.property column="DATE_TIME"
-   */
-	public Date getDateTime() {
-		return _dateTime;
-	}
+    /**
+     * @hibernate.property column="DATE_TIME"
+     */
+    public Date getDateTime() {
+        return _dateTime;
+    }
 
-  public void setDateTime(Date dateTime) {
-		_dateTime = dateTime;
-	}
+    public void setDateTime(Date dateTime) {
+        _dateTime = dateTime;
+    }
 
-  /**
-   * @hibernate.many-to-one column="LDATA_ID" cascade="delete"
-   */
-  public HLargeData getDetails() {
-    return _details;
-  }
+    /**
+     * @hibernate.many-to-one column="LDATA_ID" cascade="delete"
+     */
+    public HLargeData getDetails() {
+        return _details;
+    }
 
-  public void setDetails(HLargeData details) {
-    _details = details;
-  }
+    public void setDetails(HLargeData details) {
+        _details = details;
+    }
 
-  /**
-   * @hibernate.property column="ACTIONS"
-   */
-	public String getActions() {
-		return _actions;
-	}
+    /**
+     * @hibernate.property column="ACTIONS"
+     */
+    public String getActions() {
+        return _actions;
+    }
 
-  public void setActions(String actions) {
-		_actions = actions;
-	}
+    public void setActions(String actions) {
+        _actions = actions;
+    }
 
-  /**
-   * @hibernate.property column="RETRIES"
-   */
-  public int getRetries() {
-    return _retries;
-  }
+    /**
+     * @hibernate.property column="RETRIES"
+     */
+    public int getRetries() {
+        return _retries;
+    }
 
-  public void setRetries(int retries) {
-    _retries = retries;
-  }
-
+    public void setRetries(int retries) {
+        _retries = retries;
+    }
 }

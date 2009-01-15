@@ -18,155 +18,156 @@
  */
 package org.apache.ode.daohib.bpel.hobj;
 
-
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Hibernate table representing a BPEL scope instance. 
+ * Hibernate table representing a BPEL scope instance.
+ * 
  * @hibernate.class table="BPEL_SCOPE"
  */
-public class HScope extends HObject{
-  /** Process instance to which this scope belongs. */
-  private HProcessInstance _instance;
+public class HScope extends HObject {
+    /** Process instance to which this scope belongs. */
+    private HProcessInstance _instance;
 
-	/** Correlation set values for csets declared in this scope. */
-  private Set<HCorrelationSet> _correlationSets = new HashSet<HCorrelationSet>();
+    /** Correlation set values for csets declared in this scope. */
+    private Set<HCorrelationSet> _correlationSets = new HashSet<HCorrelationSet>();
 
-  /** Variable values for variables declared in this scope. */
-  private Set<HXmlData> _variables = new HashSet<HXmlData>();
+    /** Variable values for variables declared in this scope. */
+    private Set<HXmlData> _variables = new HashSet<HXmlData>();
 
-  /** Enpoint References for partner links declared in this scope */
-  private Set<HPartnerLink> _partnerLinks = new HashSet<HPartnerLink>();
+    /** Enpoint References for partner links declared in this scope */
+    private Set<HPartnerLink> _partnerLinks = new HashSet<HPartnerLink>();
 
-  /** Parent scope for this scope. */
-  private HScope _parentScope;
+    /** Parent scope for this scope. */
+    private HScope _parentScope;
 
-  /** State of the scope. */
-  private String _state;
+    /** State of the scope. */
+    private String _state;
 
-  /** Scope type / name. */
-  private String _name;
-  
-  private int _scopeModelId;
-  
-	public HScope() {}
+    /** Scope type / name. */
+    private String _name;
 
-  /**
-   * @hibernate.set
-   *  lazy="true"
-   *  inverse="true"
-   *  cascade="delete"
-   * @hibernate.collection-key
-   *  column="SCOPE_ID"
-   * @hibernate.collection-one-to-many
-   *  class="org.apache.ode.daohib.bpel.hobj.HCorrelationSet"
-   */
-  public Set<HCorrelationSet> getCorrelationSets() {
-    return _correlationSets;
-  }
+    private int _scopeModelId;
 
-  public void setCorrelationSets(Set<HCorrelationSet> correlationSets) {
-    _correlationSets = correlationSets;
-  }
+    public HScope() {
+    }
 
-  /**
-   * Get the {@link HProcessInstance} to which this scope object belongs.
-   * @hibernate.many-to-one
-   *  column="PIID"
-   */
-	public HProcessInstance getInstance() {
-		return _instance;
-	}
+    /**
+     * @hibernate.set lazy="true" inverse="true" cascade="delete"
+     * @hibernate.collection-key column="SCOPE_ID"
+     * @hibernate.collection-one-to-many 
+     *                                   class="org.apache.ode.daohib.bpel.hobj.HCorrelationSet"
+     */
+    public Set<HCorrelationSet> getCorrelationSets() {
+        return _correlationSets;
+    }
 
-  /** @see #getInstance() */
-  public void setInstance(HProcessInstance instance) {
-		_instance = instance;
-	}
+    public void setCorrelationSets(Set<HCorrelationSet> correlationSets) {
+        _correlationSets = correlationSets;
+    }
 
-  /**
-   * Get the "parent" {@link HScope} of this scope.
-   * @hibernate.many-to-one column="PARENT_SCOPE_ID"
-   */
-	public HScope getParentScope() {
-		return _parentScope;
-	}
+    /**
+     * Get the {@link HProcessInstance} to which this scope object belongs.
+     * 
+     * @hibernate.many-to-one column="PIID"
+     */
+    public HProcessInstance getInstance() {
+        return _instance;
+    }
 
-  /** @see #getParentScope() */
-  public void setParentScope(HScope parentScope) {
-		_parentScope = parentScope;
-	}
+    /** @see #getInstance() */
+    public void setInstance(HProcessInstance instance) {
+        _instance = instance;
+    }
 
-  /**
-   * @hibernate.property column="STATE" not-null="true"
-   */
-	public String getState() {
-		return _state;
-	}
+    /**
+     * Get the "parent" {@link HScope} of this scope.
+     * 
+     * @hibernate.many-to-one column="PARENT_SCOPE_ID"
+     */
+    public HScope getParentScope() {
+        return _parentScope;
+    }
 
-  /** @see #getState() */
-	public void setState(String state) {
-		_state = state;
-	}
+    /** @see #getParentScope() */
+    public void setParentScope(HScope parentScope) {
+        _parentScope = parentScope;
+    }
 
-  /**
-   * Get the type (i.e. the name) of the scope.
-   * @hibernate.property column="NAME" not-null="true"
-   */
-	public String getName() {
-		return _name;
-	}
+    /**
+     * @hibernate.property column="STATE" not-null="true"
+     */
+    public String getState() {
+        return _state;
+    }
 
-  /** @see #getName() */
-	public void setName(String name) {
-		_name = name;
-	}
+    /** @see #getState() */
+    public void setState(String state) {
+        _state = state;
+    }
 
+    /**
+     * Get the type (i.e. the name) of the scope.
+     * 
+     * @hibernate.property column="NAME" not-null="true"
+     */
+    public String getName() {
+        return _name;
+    }
 
-  /**
-   * Get the variable values associated with this scope.
-   *
-   * @return {@link Set}&lt;{@link HXmlData}&gt; with variable values
-   * @hibernate.set lazy="true" inverse="true" cascade="delete"
-   * @hibernate.collection-key column="SCOPE_ID"
-   * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HXmlData"
-   */
-  public Set<HXmlData> getVariables() {
-    return _variables;
-  }
-  
-  public void setVariables(Set<HXmlData> variables){
-  	_variables = variables;
-  }
+    /** @see #getName() */
+    public void setName(String name) {
+        _name = name;
+    }
 
-  /**
-   * Get the endpoint references for partner links roles associated with this scope.
-   *
-   * @return {@link Set}&lt;{@link HPartnerLink}&gt; with variable values
-   * @hibernate.set lazy="true" inverse="true" cascade="delete"
-   * @hibernate.collection-key column="SCOPE"
-   * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HPartnerLink"
-   */
-  public Set<HPartnerLink> getPartnerLinks() {
-    return _partnerLinks;
-  }
+    /**
+     * Get the variable values associated with this scope.
+     * 
+     * @return {@link Set}&lt;{@link HXmlData}&gt; with variable values
+     * @hibernate.set lazy="true" inverse="true" cascade="delete"
+     * @hibernate.collection-key column="SCOPE_ID"
+     * @hibernate.collection-one-to-many 
+     *                                   class="org.apache.ode.daohib.bpel.hobj.HXmlData"
+     */
+    public Set<HXmlData> getVariables() {
+        return _variables;
+    }
 
-  public void setPartnerLinks(Set<HPartnerLink> eprs) {
-    _partnerLinks = eprs;
-  }
+    public void setVariables(Set<HXmlData> variables) {
+        _variables = variables;
+    }
 
-  /**
-   * @hibernate.property column="MODELID"
-   */
-	public int getScopeModelId() {
-		return _scopeModelId;
-	}
-  
-	public void setScopeModelId(int scopeModelId) {
-		_scopeModelId = scopeModelId;
-	}
+    /**
+     * Get the endpoint references for partner links roles associated with this
+     * scope.
+     * 
+     * @return {@link Set}&lt;{@link HPartnerLink}&gt; with variable values
+     * @hibernate.set lazy="true" inverse="true" cascade="delete"
+     * @hibernate.collection-key column="SCOPE"
+     * @hibernate.collection-one-to-many 
+     *                                   class="org.apache.ode.daohib.bpel.hobj.HPartnerLink"
+     */
+    public Set<HPartnerLink> getPartnerLinks() {
+        return _partnerLinks;
+    }
+
+    public void setPartnerLinks(Set<HPartnerLink> eprs) {
+        _partnerLinks = eprs;
+    }
+
+    /**
+     * @hibernate.property column="MODELID"
+     */
+    public int getScopeModelId() {
+        return _scopeModelId;
+    }
+
+    public void setScopeModelId(int scopeModelId) {
+        _scopeModelId = scopeModelId;
+    }
 
     public String toString() {
-        return "HScope{id="+getId()+",name="+_name+"}";
+        return "HScope{id=" + getId() + ",name=" + _name + "}";
     }
 }
