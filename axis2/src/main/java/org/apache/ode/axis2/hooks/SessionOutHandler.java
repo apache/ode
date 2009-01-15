@@ -34,6 +34,7 @@ import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.epr.WSAEndpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.utils.Namespaces;
+import org.apache.ode.axis2.Properties;
 
 /**
  * An outgoing handler adding session id information in the message
@@ -46,6 +47,13 @@ public class SessionOutHandler extends AbstractHandler {
 
 
     public InvocationResponse invoke(MessageContext messageContext) throws AxisFault {
+        // Skip this handler if ask to do so
+        Boolean shouldSendWSAddrHeaders = ((Boolean)messageContext.getProperty(Properties.PROP_SEND_WS_ADDRESSING_HEADERS));
+        if(shouldSendWSAddrHeaders!=null && !shouldSendWSAddrHeaders.booleanValue()){
+            if(__log.isDebugEnabled()) __log.debug("WS-Adressing Headers skipped");
+            return InvocationResponse.CONTINUE;
+        }
+
         EndpointReference otargetSession = (EndpointReference) messageContext.getProperty("targetSessionEndpoint");
         EndpointReference ocallbackSession = (EndpointReference) messageContext.getProperty("callbackSessionEndpoint");
         if (otargetSession == null)
@@ -128,6 +136,6 @@ public class SessionOutHandler extends AbstractHandler {
             __log.debug(messageContext.getEnvelope().toString());
 
         }
-        return InvocationResponse.CONTINUE;        
+        return InvocationResponse.CONTINUE;
     }
 }
