@@ -611,10 +611,12 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         mexDao.setPattern(MessageExchangePattern.REQUEST_RESPONSE);
         mexDao.setChannel(requestId);
 
-        MessageDAO message = mexDao.createMessage(null);
-        mexDao.setRequest(message);
-        mexDao.setTimeout(30000);
-        message.setData(outgoingMessage);
+        if (outgoingMessage != null) {
+            MessageDAO message = mexDao.createMessage(null);
+            mexDao.setRequest(message);
+            mexDao.setTimeout(30000);
+            message.setData(outgoingMessage);
+        }
 
         // prepare event
         ProcessMessageExchangeEvent evt = new ProcessMessageExchangeEvent();
@@ -799,6 +801,12 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         case FAILURE:
             irt = OdeRTInstance.InvokeResponseType.FAILURE;
             evt.setAspect(ProcessMessageExchangeEvent.PARTNER_FAILURE);
+            break;
+        case ONEWAY:
+            // A ws-style one-way invoke won't even go there as there's no response channel, only used
+            // for rest style where you get a 204 after the fact.
+            irt = OdeRTInstance.InvokeResponseType.REPLY;
+            evt.setAspect(ProcessMessageExchangeEvent.PARTNER_OUTPUT);
             break;
         default:
             String msg = "Invalid response state for mex " + mexid + ": " + status;

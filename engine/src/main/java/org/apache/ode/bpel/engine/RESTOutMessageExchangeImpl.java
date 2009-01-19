@@ -30,10 +30,6 @@ public class RESTOutMessageExchangeImpl extends MessageExchangeImpl implements R
         return _resource;
     }
 
-    public Message getRequest() {
-        return _request;
-    }
-
     public void reply(Message response) throws BpelEngineException {
         _response = (MessageImpl) response;
         _fault = null;
@@ -48,6 +44,11 @@ public class RESTOutMessageExchangeImpl extends MessageExchangeImpl implements R
         _fault = null;
         _response = null;
         ack(AckType.FAILURE);
+        save();
+    }
+
+    public void replyOneWayOk() {
+        ack(AckType.ONEWAY);
         save();
     }
 

@@ -16,4 +16,5 @@ public interface RESTOutMessageExchange extends MessageExchange {
 
     void replyWithFailure(MessageExchange.FailureType type, String description, Element details) throws BpelEngineException;
 
+    void replyOneWayOk();
 }

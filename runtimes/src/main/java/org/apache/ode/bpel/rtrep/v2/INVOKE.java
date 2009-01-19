@@ -73,7 +73,8 @@ public class INVOKE extends ACTIVITY {
     }
 
     private void restInvoke(Element outboundMsg) {
-        VariableInstance outputVar = _scopeFrame.resolve(_oinvoke.outputVar);
+        VariableInstance outputVar = null;
+        if (_oinvoke.outputVar != null) outputVar = _scopeFrame.resolve(_oinvoke.outputVar);
         InvokeResponseChannel invokeResponseChannel = newChannel(InvokeResponseChannel.class);
         try {
             String path = getBpelRuntime().getExpLangRuntime()
@@ -126,17 +127,24 @@ public class INVOKE extends ACTIVITY {
                 // happened in the nativeAPI impl
                 FaultData fault = null;
 
-                Element response;
+                Element response = null;
                 try {
                     response = getBpelRuntime().getPartnerResponse(mexId);
                 } catch (Exception e) {
-                    __log.error(e);
-                    // TODO: Better error handling
-                    throw new RuntimeException(e);
+                    // In RESTful invokes, we discover an empty response after the fact (204), so we could
+                    // very well have no response here.
+                    __log.debug(e);
                 }
 
+                if (outputVar != null && response ==null) {
+                    String msg = "The process is expected to set an output variable after an invocation but " +
+                            "there's no response provided by the partner. The process is going to be failed.";
+                    __log.info(msg);
+                    _self.parent.failure(msg, null);
+                }                    
+
                 try {
-                    initializeVariable(outputVar, response);
+                    if (outputVar != null) initializeVariable(outputVar, response);
                 } catch (ExternalVariableModuleException e) {
                     __log.error("Exception while initializing external variable", e);
                     _self.parent.failure(e.toString(), null);
@@ -144,11 +152,13 @@ public class INVOKE extends ACTIVITY {
                 }
 
                 // Generating event
-                VariableModificationEvent se = new VariableModificationEvent(outputVar.declaration.name);
-                se.setNewValue(response);
-                if (_oinvoke.debugInfo != null)
-                    se.setLineNo(_oinvoke.debugInfo.startLine);
-                sendEvent(se);
+                if (outputVar != null) {
+                    VariableModificationEvent se = new VariableModificationEvent(outputVar.declaration.name);
+                    se.setNewValue(response);
+                    if (_oinvoke.debugInfo != null)
+                        se.setLineNo(_oinvoke.debugInfo.startLine);
+                    sendEvent(se);
+                }
 
                 try {
                     for (OScope.CorrelationSet anInitCorrelationsOutput : _oinvoke.initCorrelationsOutput) {
