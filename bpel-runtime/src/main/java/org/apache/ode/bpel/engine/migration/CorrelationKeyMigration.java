@@ -35,12 +35,15 @@ public class CorrelationKeyMigration implements Migration {
         for (CorrelationSetDAO cset : csets) {
             CorrelationKey ckey = cset.getValue();
             instances.put(cset.getInstance().getInstanceId(), cset.getInstance());
-            Integer ckeyInt = asInt(ckey.getCorrelationSetName());
-            if (ckeyInt != null) {
-                OScope.CorrelationSet ocset = findCorrelationById(ckeyInt, registeredProcesses, cset.getProcess().getProcessId());
-                if (ocset == null) __log.debug("Correlation set not found, couldn't upgrade set " + ckey.toCanonicalString());
-                else {
-                    cset.setValue(null, new CorrelationKey(ocset.name, ckey.getValues()));
+            if (ckey != null) {
+                __log.debug("Correlation set id " + cset.getCorrelationSetId() + " key " + ckey);
+                Integer ckeyInt = asInt(ckey.getCorrelationSetName());
+                if (ckeyInt != null) {
+                    OScope.CorrelationSet ocset = findCorrelationById(ckeyInt, registeredProcesses, cset.getProcess().getProcessId());
+                    if (ocset == null) __log.debug("Correlation set not found, couldn't upgrade set " + ckey.toCanonicalString());
+                    else {
+                        cset.setValue(null, new CorrelationKey(ocset.name, ckey.getValues()));
+                    }
                 }
             }
         }
@@ -59,24 +62,28 @@ public class CorrelationKeyMigration implements Migration {
                             // Changing all routes
                             for (MessageRouteDAO routeDAO : corr.getAllRoutes()) {
                                 CorrelationKey oldKey = routeDAO.getCorrelationKey();
-                                Integer ckeyInt = asInt(oldKey.getCorrelationSetName());
-                                if (ckeyInt != null) {
-                                    OScope.CorrelationSet ocset = findCorrelationById(ckeyInt, registeredProcesses, process.getConf().getProcessId());
-                                    if (ocset == null) __log.debug("Correlation set not found, couldn't upgrade route " + oldKey.toCanonicalString());
-                                    else {
-                                        routeDAO.setCorrelationKey(new CorrelationKey(ocset.name, oldKey.getValues()));
+                                if (oldKey != null) {
+                                    Integer ckeyInt = asInt(oldKey.getCorrelationSetName());
+                                    if (ckeyInt != null) {
+                                        OScope.CorrelationSet ocset = findCorrelationById(ckeyInt, registeredProcesses, process.getConf().getProcessId());
+                                        if (ocset == null) __log.debug("Correlation set not found, couldn't upgrade route " + oldKey.toCanonicalString());
+                                        else {
+                                            routeDAO.setCorrelationKey(new CorrelationKey(ocset.name, oldKey.getValues()));
+                                        }
                                     }
                                 }
                             }
                             // Changing all queued messages
                             for (CorrelatorMessageDAO corrMsgDAO : corr.getAllMessages()) {
                                 CorrelationKey oldKey = corrMsgDAO.getCorrelationKey();
-                                Integer ckeyInt = asInt(oldKey.getCorrelationSetName());
-                                if (ckeyInt != null) {
-                                    OScope.CorrelationSet ocset = findCorrelationById(ckeyInt, registeredProcesses, process.getConf().getProcessId());
-                                    if (ocset == null) __log.debug("Correlation set not found, couldn't upgrade route " + oldKey.toCanonicalString());
-                                    else {
-                                        corrMsgDAO.setCorrelationKey(new CorrelationKey(ocset.name, oldKey.getValues()));
+                                if (oldKey != null) {
+                                    Integer ckeyInt = asInt(oldKey.getCorrelationSetName());
+                                    if (ckeyInt != null) {
+                                        OScope.CorrelationSet ocset = findCorrelationById(ckeyInt, registeredProcesses, process.getConf().getProcessId());
+                                        if (ocset == null) __log.debug("Correlation set not found, couldn't upgrade route " + oldKey.toCanonicalString());
+                                        else {
+                                            corrMsgDAO.setCorrelationKey(new CorrelationKey(ocset.name, oldKey.getValues()));
+                                        }
                                     }
                                 }
                             }

@@ -59,6 +59,7 @@ public class CorrelationKeySetMigration implements Migration {
         ExecutionQueueImpl soup;
         try {
             soup = readOldState(instance, oproc, getClass().getClassLoader(), true);
+            if (soup == null) return false;
         } catch (Exception e) {
             __log.debug("  failed to read a v1 state for instance " + instance.getInstanceId());
             ExecutionQueueImpl._classDescriptors.clear();
@@ -96,6 +97,7 @@ public class CorrelationKeySetMigration implements Migration {
         ExecutionQueueImpl soup;
         try {
             soup = readOldState(instance, oproc, getClass().getClassLoader(), false);
+            if (soup == null) return false;
         } catch (Exception e) {
             __log.debug("  failed to read a v2 state for instance " + instance.getInstanceId());
             ExecutionQueueImpl._classDescriptors.clear();
@@ -126,6 +128,7 @@ public class CorrelationKeySetMigration implements Migration {
 
     private ExecutionQueueImpl readOldState(ProcessInstanceDAO instance, OProcess oprocess,
                                             ClassLoader cl, boolean changeKey) {
+        if (instance.getExecutionState() == null) return null;
         try {
             ExecutionQueueImpl soup = new ExecutionQueueImpl(cl);
             ObjectStreamClass osc;
