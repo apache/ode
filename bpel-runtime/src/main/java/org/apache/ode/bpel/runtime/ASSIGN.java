@@ -103,7 +103,7 @@ class ASSIGN extends ACTIVITY {
         }
 
         if (faultData != null) {
-            __log.error("Assignment Fault: " + faultData.getFaultName()
+            __log.info("Assignment Fault: " + faultData.getFaultName()
                     + ",lineNo=" + faultData.getFaultLineNo()
                     + ",faultExplanation=" + faultData.getExplanation());
             _self.parent.completed(faultData, CompensationHandler.emptySet());
