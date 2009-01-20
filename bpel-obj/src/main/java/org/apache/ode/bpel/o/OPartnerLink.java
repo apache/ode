@@ -55,7 +55,7 @@ public class OPartnerLink extends OBase {
     private final HashMap<String,Set<OScope.CorrelationSet>> _nonIntitiatingCorrelationSets = new HashMap<String,Set<OScope.CorrelationSet>>();
 
     /** The set of joining CorrelationSets that may be used as a match criteria, organized by {@link Operation} */
-    private final HashMap<String,Set<OScope.CorrelationSet>> _joiningCorrelationSets = new HashMap<String,Set<OScope.CorrelationSet>>();
+    private HashMap<String,Set<OScope.CorrelationSet>> _joiningCorrelationSets = new HashMap<String,Set<OScope.CorrelationSet>>();
 
     /** The set of {@link Operation}s that can be used to create a process instance. */
     private final HashSet<String> _createInstanceOperations = new HashSet<String>();
@@ -102,6 +102,10 @@ public class OPartnerLink extends OBase {
 	        }
 	        ret.add(cset);
     	} else {
+    		// serialization backward compatibility; joiningCorrelationSets could be null if read from old definition
+    		if( _joiningCorrelationSets == null ) {
+    			_joiningCorrelationSets = new HashMap<String,Set<OScope.CorrelationSet>>();
+    		}
 	        Set<OScope.CorrelationSet> ret = _joiningCorrelationSets.get(operation.getName());
 	        if (ret == null) {
 	            ret = new HashSet<OScope.CorrelationSet>();
