@@ -33,6 +33,7 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
@@ -415,6 +416,11 @@ public class BpelProcess {
                     case MATCHER:
                         if (__log.isDebugEnabled()) {
                             __log.debug("Matcher event for iid " + we.getIID());
+                        }
+                        if( procInstance.getState() == ProcessState.STATE_COMPLETED_OK 
+                        		|| procInstance.getState() == ProcessState.STATE_COMPLETED_WITH_FAULT ) {
+                        	__log.debug("A matcher event was aborted. The process is already completed.");
+                        	return;
                         }
                         processInstance.matcherEvent(we.getCorrelatorId(), we.getCorrelationKeySet());
                 }

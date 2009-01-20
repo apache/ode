@@ -327,6 +327,7 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
       
 	  if( _instance.getJacobState() != null ) {
 		  getSession().delete(_instance.getJacobState());
+		  _instance.setJacobState(null);
 	  }
 	  
       if( cleanupCategories.contains(CLEANUP_CATEGORY.EVENTS) ) {
