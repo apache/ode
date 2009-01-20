@@ -60,8 +60,11 @@ public class JdbcDelegate implements DatabaseDelegate {
     private static final String UPGRADE_JOB_SQLSERVER = "update ODE_JOB set nodeid = ? where nodeid is null "
             + "and (ts % ?) = ? and ts < ?";
 
+    private static final String UPGRADE_JOB_SYBASE = "update ODE_JOB set nodeid = ? where nodeid is null "
+            + "and convert(int, ts) % ? = ? and ts < ?";
+
     private static final String UPGRADE_JOB_SYBASE12 = "update ODE_JOB set nodeid = ? where nodeid is null "
-        + "and -1 <> ? and -1 <> ? and ts < ?";
+        	+ "and -1 <> ? and -1 <> ? and ts < ?";
     
     private static final String SAVE_JOB = "insert into ODE_JOB "
             + " (jobid, nodeid, ts, scheduled, transacted, details) values(?, ?, ?, ?, ?, ?)";
@@ -70,10 +73,6 @@ public class JdbcDelegate implements DatabaseDelegate {
 
     private static final String SCHEDULE_IMMEDIATE = "select jobid, ts, transacted, scheduled, details from ODE_JOB "
             + "where nodeid = ? and ts < ? order by ts";
-
-    private static final String UPDATE_SCHEDULED = "update ODE_JOB set scheduled = 1 where jobid in (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-    private static final int UPDATE_SCHEDULED_SLOTS = 10;
 
     private DataSource _ds;
 
@@ -220,14 +219,16 @@ public class JdbcDelegate implements DatabaseDelegate {
         PreparedStatement ps = null;
         try {
             con = getConnection();
-            if (_dialect == Dialect.SQLSERVER || _dialect == Dialect.SYBASE) {
-              ps = con.prepareStatement(UPGRADE_JOB_SQLSERVER);
+            if (_dialect == Dialect.SQLSERVER) {
+            	ps = con.prepareStatement(UPGRADE_JOB_SQLSERVER);
             } else if (_dialect == Dialect.DB2) {
-              ps = con.prepareStatement(UPGRADE_JOB_DB2);
+            	ps = con.prepareStatement(UPGRADE_JOB_DB2);
+            } else if (_dialect == Dialect.SYBASE) {
+            	ps = con.prepareStatement(UPGRADE_JOB_SYBASE);
             } else if (_dialect == Dialect.SYBASE12) {
                 ps = con.prepareStatement(UPGRADE_JOB_SYBASE12);
             } else {
-              ps = con.prepareStatement(UPGRADE_JOB_DEFAULT);
+            	ps = con.prepareStatement(UPGRADE_JOB_DEFAULT);
             }
             ps.setString(1, node);
             ps.setInt(2, numNodes);
