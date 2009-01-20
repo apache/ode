@@ -602,7 +602,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
         if (dd.isSetActive() && dd.getActive() == false)
             state = ProcessState.DISABLED;
-        if (dd.isSetRetired())
+        if (dd.isSetRetired() && dd.getRetired() == true)
             state = ProcessState.RETIRED;
 
         return state;
