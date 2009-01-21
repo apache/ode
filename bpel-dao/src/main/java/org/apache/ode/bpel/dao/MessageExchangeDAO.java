@@ -284,4 +284,7 @@ public interface MessageExchangeDAO {
     
     void setPipedPID(QName pipedPid);
 
+    boolean isInstantiatingResource();
+
+    void setInstantiatingResource(boolean inst);
  }

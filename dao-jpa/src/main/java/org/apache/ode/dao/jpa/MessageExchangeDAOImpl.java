@@ -130,6 +130,9 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
     @Basic @Column(name="PIPED_PID")
     private String _pipedPid;
 
+    @Basic @Column(name="INST_RES")
+    private boolean _instantiatingResource;
+
     public MessageExchangeDAOImpl() {}
     
 	public MessageExchangeDAOImpl(String mexId, char direction){
@@ -412,5 +415,13 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 
     public void setResource(String resourceStr) {
         _resource = resourceStr;
+    }
+
+    public boolean isInstantiatingResource() {
+        return _instantiatingResource;
+    }
+
+    public void setInstantiatingResource(boolean inst) {
+        _instantiatingResource = inst;
     }
 }

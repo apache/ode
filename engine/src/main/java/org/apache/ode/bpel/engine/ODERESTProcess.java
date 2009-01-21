@@ -19,7 +19,7 @@ public class ODERESTProcess extends ODEProcess {
 
     private ConcurrentHashMap<ResourceModel,String> _staticResources = new ConcurrentHashMap<ResourceModel,String>();
 
-    private ArrayList<Resource> _resources = new ArrayList<Resource>();
+    private ArrayList<Resource> _instantiatingResources = new ArrayList<Resource>();
 
     public ODERESTProcess(BpelServerImpl server, ProcessConf conf, BpelEventListener debugger, IncomingMessageExchangeCache mexCache) {
         super(server, conf, debugger, mexCache);
@@ -55,7 +55,7 @@ public class ODERESTProcess extends ODEProcess {
             Resource resource = new Resource(_staticResources.get(resourceModel),
                     "application/xml", resourceModel.getMethod());
             _contexts.bindingContext.activateProvidedResource(resource);
-            _resources.add(resource);
+            _instantiatingResources.add(resource);
         }
     }
 
@@ -74,10 +74,10 @@ public class ODERESTProcess extends ODEProcess {
         mexdao.setProcess(getProcessDAO());
 
         try {
-            Resource instantiatingResource = getResource(mexdao.getResource());
+            boolean instantiatingResource = isInstantiating(mexdao.getResource());
             InvocationStyle istyle = mexdao.getInvocationStyle();
 
-            if (instantiatingResource != null) {
+            if (instantiatingResource) {
                 ProcessInstanceDAO newInstance = getProcessDAO().createInstance(null);
                 newInstance.setInstantiatingUrl(mexdao.getResource());
 
@@ -156,6 +156,7 @@ public class ODERESTProcess extends ODEProcess {
             p2pCall(mexdao, old);
         } else /* not p2p */{
             RESTInMessageExchangeImpl mymex = (RESTInMessageExchangeImpl) _incomingMexCache.get(mexdao, this);
+            mymex.load(mexdao);
             mymex.getResource().setUrl(url);
             if (old == MessageExchange.Status.ASYNC) {
                 // Updating url for instantiating mexs so that the created resource url can be returned to the caller
@@ -183,28 +184,21 @@ public class ODERESTProcess extends ODEProcess {
         return new RESTInMessageExchangeImpl(this, mexdao.getMessageExchangeId(), resource);
     }
 
-    public Resource getResource(String url, String method) {
-        for (Resource resource : _resources) {
-            if (resource.getUrl().equals(url) && resource.getMethod().equals(method)) return resource;
-        }
-        return null;
-    }
-
     public Resource getResource(String serializedForm) {
         int sep = serializedForm.indexOf("~");
         String url = serializedForm.substring(0, sep);
         String method = serializedForm.substring(sep + 1);
 
-        for (Resource resource : _resources) {
-            if (resource.getUrl().equals(url) && resource.getMethod().equals(method)) return resource;
-        }
-        return null;
+        return new Resource(url, "application/xml", method);
     }
 
     public Resource getInstantiatingUrl(ProcessInstanceDAO instanceDao) {
         return getResource(instanceDao.getInstantiatingUrl());
     }
 
+    protected boolean isInstantiating(String serialized) {
+        return isInstantiating(getResource(serialized));
+    }
     protected boolean isInstantiating(Resource res) {
         for (Map.Entry<ResourceModel, String> resourceModel : _staticResources.entrySet()) {
             if (resourceModel.getValue().equals(res.getUrl())

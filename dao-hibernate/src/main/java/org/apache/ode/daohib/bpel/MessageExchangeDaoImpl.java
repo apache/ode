@@ -395,4 +395,11 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
         return _hself.getResource();
     }
 
+    public boolean isInstantiatingResource() {
+        return _hself.isInstantiatingResource();
+    }
+
+    public void setInstantiatingResource(boolean inst) {
+        _hself.setInstantiatingResource(inst);
+    }
 }

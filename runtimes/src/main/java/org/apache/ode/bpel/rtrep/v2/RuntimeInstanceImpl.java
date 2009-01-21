@@ -372,6 +372,10 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
         return _brc.getMyRequest(mexId);
     }
 
+    public void setInstantiatingMex(String mexId) {
+        _brc.setInstantiatingMex(mexId);
+    }
+
     /**
      * Proxy to {@link BpelRuntimeContext# }.
      */

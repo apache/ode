@@ -69,6 +69,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
     long _timeout;
     AckType _ackType;
     QName _pipedPID;
+    boolean _instantiatingResource;
 
 	public MessageExchangeDAOImpl(char direction, String messageEchangeId){
 		this.direction = direction;
@@ -329,5 +330,13 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
     public void setPipedPID(QName pipedPid) {
         _pipedPID = pipedPid;
         
+    }
+
+    public boolean isInstantiatingResource() {
+        return _instantiatingResource;
+    }
+
+    public void setInstantiatingResource(boolean inst) {
+        _instantiatingResource = inst;
     }
 }

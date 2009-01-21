@@ -269,6 +269,9 @@ class PICK extends ACTIVITY {
                     FaultData fault;
                     initVariable(mexId, onMessage);
                     try {
+                        if (onMessage.isRestful() && onMessage.getResource().isInstantiateResource())
+                            getBpelRuntime().setInstantiatingMex(mexId);
+
                         for (OScope.CorrelationSet cset : onMessage.initCorrelations) {
                             initializeCorrelation(_scopeFrame.resolve(cset), _scopeFrame.resolve(onMessage.variable));
                         }

@@ -73,6 +73,8 @@ public interface OdeInternalInstance {
 
     Element getMyRequest(String mexId);
 
+    void setInstantiatingMex(String mexId);
+
     void registerTimer(TimerResponseChannel timerChannel, Date future);
 
     void registerActivityForRecovery(ActivityRecoveryChannel recoveryChannel, long id, String reason, Date dateTime,

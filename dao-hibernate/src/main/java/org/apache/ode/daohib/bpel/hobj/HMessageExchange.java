@@ -89,6 +89,8 @@ public class HMessageExchange extends HObject {
 
     private String _pipedPid;
 
+    private boolean _instantiatingResource;
+
     /**
      * 
      */
@@ -433,4 +435,16 @@ public class HMessageExchange extends HObject {
     public void setResource(String resource) {
         this._resource = resource;
     }
+
+    /**
+     * @hibernate.property column="INST_RES"
+     */
+    public boolean isInstantiatingResource() {
+        return _instantiatingResource;
+    }
+
+    public void setInstantiatingResource(boolean inst) {
+        _instantiatingResource = inst;
+    }
+
 }

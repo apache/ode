@@ -432,7 +432,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         evt.setPortType(plink.getModel().getMyRolePortType().getQName());
 
         // Get the "my-role" mex from the DB.
-        MessageExchangeDAO myrolemex = _dao.getConnection().getMessageExchange(mexId);
+        MessageExchangeDAO myrolemex = getExistingMex(mexId);
 
         Operation operation = plink.getModel().getMyRoleOperation(opName);
         if (operation == null || operation.getOutput() == null) throw new NoSuchOperationException();
@@ -467,7 +467,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         evt.setMexId(mexId);
         evt.setResource(resource.getName());
 
-        MessageExchangeDAO mex = _dao.getConnection().getMessageExchange(mexId);
+        MessageExchangeDAO mex = getExistingMex(mexId);
         MessageDAO message = mex.createMessage(null);
         buildOutgoingMessage(message, msg);
         mex.setResponse(message);
@@ -779,7 +779,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
             __log.debug("<invoke> response for mexid " + mexid + " and channel " + invokeId);
         }
 
-        MessageExchangeDAO mex = _dao.getConnection().getMessageExchange(mexid);
+        MessageExchangeDAO mex = getExistingMex(mexid);
 
         ProcessMessageExchangeEvent evt = new ProcessMessageExchangeEvent();
         evt.setPortType(mex.getPortType());
@@ -866,18 +866,12 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
     }
 
     public Element getMyRequest(String mexId) {
-        MessageExchangeDAO dao = _dao.getConnection().getMessageExchange(mexId);
-        if (dao == null) {
-            // this should not happen....
-            String msg = "Engine requested non-existent message exchange: " + mexId;
-            __log.fatal(msg);
-            throw new BpelEngineException(msg);
-        }
+        MessageExchangeDAO dao = getExistingMex(mexId);
 
         if (dao.getDirection() != MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE) {
             // this should not happen....
             String msg = "Engine requested my-role request for a partner-role mex: " + mexId;
-            __log.fatal(msg);
+            __log.error(msg);
             throw new BpelEngineException(msg);
         }
 
@@ -885,11 +879,16 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         if (request == null) {
             // this also should not happen
             String msg = "Engine requested request for message exchange that did not have one: " + mexId;
-            __log.fatal(msg);
+            __log.error(msg);
             throw new BpelEngineException(msg);
         }
 
         return mergeHeaders(request);
+    }
+
+    public void setInstantiatingMex(String mexId) {
+        MessageExchangeDAO mex = getExistingMex(mexId);
+        mex.setInstantiatingResource(true);
     }
 
     private Element mergeHeaders(MessageDAO msg) {
@@ -915,13 +914,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
     }
 
     public QName getPartnerFault(String mexId) {
-        MessageExchangeDAO dao = _dao.getConnection().getMessageExchange(mexId);
-        if (dao == null) {
-            // this should not happen....
-            String msg = "Engine requested non-existent message exchange: " + mexId;
-            __log.fatal(msg);
-            throw new BpelEngineException(msg);
-        }
+        MessageExchangeDAO dao = getExistingMex(mexId);
         return dao.getFault();
     }
 
@@ -935,13 +928,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
     }
 
     private MessageDAO _getPartnerResponse(String mexId) {
-        MessageExchangeDAO dao = _dao.getConnection().getMessageExchange(mexId);
-        if (dao == null) {
-            // this should not happen....
-            String msg = "Engine requested non-existent message exchange: " + mexId;
-            __log.fatal(msg);
-            throw new BpelEngineException(msg);
-        }
+        MessageExchangeDAO dao = getExistingMex(mexId);
         if (dao.getDirection() != MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE) {
             // this should not happen....
             String msg = "Engine requested partner response for a my-role mex: " + mexId;
@@ -969,13 +956,13 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
     }
 
     public void releasePartnerMex(String mexId) {
-        MessageExchangeDAO dao = _dao.getConnection().getMessageExchange(mexId);
+        MessageExchangeDAO dao = getExistingMex(mexId);
         dao.release();
     }
 
 
     public Element getSourceEPR(String mexId) {
-        MessageExchangeDAO dao = _dao.getConnection().getMessageExchange(mexId);
+        MessageExchangeDAO dao = getExistingMex(mexId);
         String epr = dao.getProperty(WSMessageExchange.PROPERTY_SEP_PARTNERROLE_EPR);
         if (epr == null)
             return null;
@@ -989,7 +976,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
     }
 
     public String getSourceSessionId(String mexId) {
-        MessageExchangeDAO dao = _dao.getConnection().getMessageExchange(mexId);
+        MessageExchangeDAO dao = getExistingMex(mexId);
         return dao.getProperty(WSMessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
     }
 
@@ -1054,5 +1041,16 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
 	public URI getBaseResourceURI() {
 		return _bpelProcess.getBaseResourceURI();
 	}
+
+    private MessageExchangeDAO getExistingMex(String mexId) {
+        MessageExchangeDAO dao = _dao.getConnection().getMessageExchange(mexId);
+        if (dao == null) {
+            // this should not happen....
+            String msg = "Engine requested non-existent message exchange: " + mexId;
+            __log.error(msg);
+            throw new BpelEngineException(msg);
+        }
+        return dao;
+    }
 
 }

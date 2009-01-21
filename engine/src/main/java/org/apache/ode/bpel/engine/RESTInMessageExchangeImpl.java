@@ -17,6 +17,7 @@ public class RESTInMessageExchangeImpl extends MessageExchangeImpl implements RE
     private ResponseFuture _future;
 
     private Resource _resource;
+    private boolean _instantiatingResource;
 
     public RESTInMessageExchangeImpl(ODEProcess process, String mexId, Resource resource) {
         super(process, null, mexId, null, null, null);
@@ -125,6 +126,7 @@ public class RESTInMessageExchangeImpl extends MessageExchangeImpl implements RE
     void save(MessageExchangeDAO dao) {
         super.save(dao);
         dao.setResource(_resource.getUrl() + "~" + _resource.getMethod());
+        dao.setInstantiatingResource(_instantiatingResource);
 
         if (_changes.contains(Change.REQUEST)) {
             _changes.remove(Change.REQUEST);
@@ -139,5 +141,10 @@ public class RESTInMessageExchangeImpl extends MessageExchangeImpl implements RE
     void load(MessageExchangeDAO dao) {
         super.load(dao);
         _resource = ((ODERESTProcess)_process).getResource(dao.getResource());
+        _instantiatingResource = dao.isInstantiatingResource();
+    }
+
+    public boolean isInstantiatingResource() {
+        return _instantiatingResource;
     }
 }

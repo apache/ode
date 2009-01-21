@@ -90,6 +90,8 @@ public interface IOContext {
      */
     Element getMyRequest(String mexId);
 
+    void setInstantiatingMex(String mexId);
+
     void releasePartnerMex(String mexId);
 
     Element getSourceEPR(String mexId);

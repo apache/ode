@@ -13,4 +13,6 @@ public interface RESTInMessageExchange extends MessageExchange {
     Status invokeBlocking() throws BpelEngineException, TimeoutException;
 
     void setRequest(Message message);
+
+    boolean isInstantiatingResource();
 }
