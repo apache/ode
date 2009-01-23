@@ -191,8 +191,12 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
      */
     private List<String> extractVariableExprs(String xpathStr) {    	
 		ArrayList<String> variableExprs = new ArrayList<String>();
-		if (xpathStr.indexOf("$") > 0 && // the xpath references a variable
-				xpathStr.indexOf("(") > 0) { // the xpath contains a function
+		int firstVariable = xpathStr.indexOf("$"), 
+			lastVariable = xpathStr.lastIndexOf("$"),
+			firstFunction = xpathStr.indexOf("("); 
+		if ((firstVariable > 0 && // the xpath references a variable
+				firstFunction > 0) || // the xpath contains a function
+			(firstVariable < lastVariable)) { // the xpath references multiple variables  
 			// most likely, the variable reference has not been resolved, so make that happen
 			StringBuffer variableExpr = new StringBuffer();
 			boolean quoted = false, doubleQuoted = false, variable = false;
