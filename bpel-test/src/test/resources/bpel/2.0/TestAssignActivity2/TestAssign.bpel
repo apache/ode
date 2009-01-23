@@ -44,6 +44,7 @@
         <variable name="otherMsgVar" messageType="test:TestAssignMessage"/>
         <variable name="strVar" type="xsd:string"/>
         <variable name="txtVar" type="xsd:string"/>
+        <variable name="eprVar" type="xsd:anyType"/>
         <variable name="intVar" type="xsd:int"/>
     </variables>
 
@@ -89,7 +90,11 @@
                 <to variable="strVar"/>
             </copy>
             <copy>
-                <from>ode:process-property("dd:epr")/addr:EndpointReference/child::node()[$intVar]</from>
+                <from>ode:process-property("dd:epr")/addr:EndpointReference</from>
+                <to>$eprVar</to>
+            </copy>
+            <copy>
+                <from>$eprVar/child::node()[$intVar]</from>
                 <to variable="strVar"/>
             </copy>
         </assign>
