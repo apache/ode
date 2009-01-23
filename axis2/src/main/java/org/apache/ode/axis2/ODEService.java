@@ -62,8 +62,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * A running service, encapsulates the Axis service, its receivers and our
  * receivers as well.
- *
- * @author Matthieu Riou <mriou at apache dot org>
  */
 public class ODEService {
 
