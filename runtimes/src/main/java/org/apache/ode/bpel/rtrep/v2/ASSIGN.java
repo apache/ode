@@ -593,8 +593,9 @@ class ASSIGN extends ACTIVITY {
             QName partName = new QName(null, part.name);
             Node qualLVal = DOMUtils.findChildByName((Element) data, partName);
             if (part.type instanceof OElementVarType) {
-                QName elName = ((OElementVarType) part.type).elementType;
-                qualLVal = DOMUtils.findChildByName((Element) qualLVal, elName);
+//                QName elName = ((OElementVarType) part.type).elementType;
+//                qualLVal = DOMUtils.findChildByName((Element) qualLVal, elName);
+                qualLVal = DOMUtils.getFirstChildElement((Element) qualLVal);
             } else if (part.type == null) {
                 // Special case of header parts never referenced in the WSDL def
                 if (qualLVal != null && qualLVal.getNodeType() == Node.ELEMENT_NODE
