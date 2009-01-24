@@ -219,6 +219,10 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
 				} else {
 					if (variable) {
 						variableExpr.append(ch);
+						// in the name is qualified, don't check if its a qname when we're at the ":" character
+						if (ch == ':') {
+							continue;
+						}
 						if (index == xpathStr.length() || 
 								!nameChecker.isQName(variableExpr.substring(1))) {
 							variable = false;

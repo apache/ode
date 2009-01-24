@@ -86,6 +86,10 @@
                 <to variable="intVar"/>
             </copy>
             <copy>
+                <from><literal>1</literal></from>
+                <to variable="intVar"/>
+            </copy>
+            <copy>
                 <from>ode:process-property("dd:epr")/addr:EndpointReference/child::node()[position()=$intVar]</from>
                 <to variable="strVar"/>
             </copy>
@@ -95,6 +99,10 @@
             </copy>
             <copy>
                 <from>$eprVar/child::node()[$intVar]</from>
+                <to variable="strVar"/>
+            </copy>
+            <copy>
+                <from>concat($eprVar/text()[1], $ode:pid)</from>
                 <to variable="strVar"/>
             </copy>
         </assign>
