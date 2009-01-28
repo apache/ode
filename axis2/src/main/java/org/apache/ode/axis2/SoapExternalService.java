@@ -362,7 +362,7 @@ public class SoapExternalService implements ExternalService {
 		            if (startIndex != -1) {
 		            	startIndex += "jms:/".length();
 		            	if (url.charAt(startIndex + 1) == '/') {
-		            		startIndex++;
+		            		// startIndex++; // treat "/" as valid start character for queue name
 		            	}
 		            	if (url.startsWith("dynamic")) {
 		            		startIndex += "dynamicQueues".length();
