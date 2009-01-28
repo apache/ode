@@ -247,7 +247,8 @@ public class ODEAxisService extends AxisService {
                 // Qualify shared JMS names with unique baseUri
                 if (path.startsWith("jms:/")) {
                 	boolean slashPresent = baseUri.endsWith("/") || service.startsWith("/");
-                	service = baseUri + (slashPresent ? "" : "/") + service;
+                	// service = baseUri + (slashPresent ? "" : "/") + service; // allow successive slashes ("//") in the URI
+                	service = baseUri + "/" + service;
                 }
                 return service;
             }
