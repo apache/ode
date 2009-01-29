@@ -38,7 +38,7 @@ public class RampartPolicyTest extends Axis2TestBase {
     public Object[][] testPolicySamples() throws Exception {
         File[] policies = new File(getClass().getClassLoader().getResource("TestRampartPolicy").getFile()).listFiles(new FileFilter() {
             public boolean accept(File pathname) {
-                return pathname.isDirectory() && pathname.getName().matches("process-policy-sample\\d*");
+                return pathname.isDirectory() && pathname.getName().matches("process-sample\\d*\\-policy");
             }
         });
         Object[][] bundles = new Object[policies.length][];
