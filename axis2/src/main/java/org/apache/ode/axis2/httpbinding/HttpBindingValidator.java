@@ -138,7 +138,7 @@ public class HttpBindingValidator {
                 Matcher m = p.matcher(locationUri);
                 // WSLD spec requires that all message parts must be exactly once in the url pattern.
                 // However ODE relaxes this.
-                // The only test is to make sure a part is not mentionned more than once
+                // The only test is to make sure a part is not mentioned more than once
                 if (m.matches() && locationUri.split("(\\(" + name + "\\))", -1).length != 2) {
                     throw new IllegalArgumentException(httpMsgs.msgInvalidURIPattern(binding, bindingOperation, locationUri));
                 }

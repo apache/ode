@@ -26,7 +26,7 @@ public class AxisUtils {
 
     /**
      * Configure a service instance woth the specified service.xml document.
-     * If modules are mentionned in the document, <code>this</code> method will make sure they are properly engaged and engage them if necessary.
+     * If modules are mentioned in the document, <code>this</code> method will make sure they are properly engaged and engage them if necessary.
      * The modules have to be available in the module repository otherwise an AxisFault will be thrown.
      *
      * @param axisService  the service to configure

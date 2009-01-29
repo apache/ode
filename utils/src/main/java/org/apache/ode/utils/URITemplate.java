@@ -277,7 +277,7 @@ public class URITemplate {
         String var = (String) e.getKey();
         String defaultValue = (String) e.getValue();
         boolean hasDefaultValue = defaultValue != null;
-        // this boolean indicates if the var is mentionned in the map, not that the associated value is not null.
+        // this boolean indicates if the var is mentioned in the map, not that the associated value is not null.
         boolean varDefined = nameValuePairs.containsKey(var);
         String providedValue = nameValuePairs.get(var);
         String res;

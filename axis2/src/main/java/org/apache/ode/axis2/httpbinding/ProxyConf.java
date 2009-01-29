@@ -92,7 +92,7 @@ public class ProxyConf {
 
     /**
      *
-     * @return true if the targetHost is mentionned in the system properties "http.nonProxyHosts"
+     * @return true if the targetHost is mentioned in the system properties "http.nonProxyHosts"
      * @see http://java.sun.com/j2se/1.5.0/docs/guide/net/properties.html
      */
     public static boolean isNonProxyHost(String targetHost) {
