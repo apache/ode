@@ -27,11 +27,9 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.deployment.ServiceBuilder;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.OutInAxisOperation;
 import org.apache.axis2.description.OutOnlyAxisOperation;
-import org.apache.axis2.description.AxisModule;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.jms.JMSConstants;
 import org.apache.axis2.wsdl.WSDLConstants;
@@ -43,7 +41,6 @@ import org.apache.ode.axis2.util.SoapMessageConverter;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.epr.WSAEndpoint;
-import org.apache.ode.bpel.epr.WSDL20Endpoint;
 import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
@@ -52,16 +49,11 @@ import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.il.OMUtils;
-import org.apache.ode.utils.CollectionUtils;
-import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.Namespaces;
-import org.apache.ode.utils.WatchDog;
-import org.apache.ode.utils.GUID;
+import org.apache.ode.utils.*;
 import org.apache.ode.utils.fs.FileUtils;
 import org.apache.ode.utils.uuid.UUID;
 import org.apache.ode.utils.wsdl.Messages;
 import org.apache.rampart.RampartMessageData;
-import org.apache.derby.iapi.services.property.PersistentSet;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -89,8 +81,6 @@ public class SoapExternalService implements ExternalService {
 
     private static final org.apache.ode.utils.wsdl.Messages msgs = Messages.getMessages(Messages.class);
 
-
-    private static final int EXPIRE_SERVICE_CLIENT = 30000;
 
     private static ThreadLocal<ServiceClient> _cachedClients = new ThreadLocal<ServiceClient>();
     private WatchDog<Map, OptionsObserver> _axisOptionsWatchDog;
@@ -531,30 +521,9 @@ public class SoapExternalService implements ExternalService {
             // and load the new config.
             init(); // create a new ServiceClient instance
             try {
-                InputStream ais = file.toURI().toURL().openStream();
-                if (ais != null) {  
-                    if (__log.isDebugEnabled()) __log.debug("Configuring service " + _serviceName + " using: " + file);
-                    try {
-                        ServiceBuilder builder = new ServiceBuilder(ais, _configContext, anonymousService);
-                        builder.populateService(builder.buildOM());
-                    } finally {
-                        ais.close();
-                    }
-                    // do not allow the service.xml file to change the service name 
-                    anonymousService.setName(serviceName);
-
-                    // the service builder only updates the module list but do not engage them
-                    // module have to be engaged manually,
-                    for (int i = 0; i < anonymousService.getModules().size(); i++) {
-                        String moduleRef = (String) anonymousService.getModules().get(i);
-                        AxisModule module = _axisConfig.getModule(moduleRef);
-                        if (module != null) {
-                            anonymousService.engageModule(module);
-                        } else {
-                            throw new AxisFault("Unable to engage module : " + moduleRef);
-                        }
-                    }
-                }
+                AxisUtils.configureService(_configContext, anonymousService, file.toURI().toURL());
+                // do not allow the service.xml file to change the service name
+                anonymousService.setName(serviceName);
             } catch (Exception e) {
                 if (__log.isWarnEnabled()) __log.warn("Exception while configuring service: " + _serviceName, e);
                 throw new RuntimeException("Exception while configuring service: " + _serviceName, e);

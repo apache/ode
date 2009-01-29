@@ -36,6 +36,7 @@ import javax.wsdl.Port;
 import javax.wsdl.Service;
 import javax.wsdl.extensions.soap.SOAPAddress;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
@@ -50,6 +51,7 @@ import org.apache.ode.axis2.OdeFault;
 import org.apache.ode.axis2.util.Axis2UriResolver;
 import org.apache.ode.axis2.util.Axis2WSDLLocator;
 import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.utils.AxisUtils;
 import org.apache.ws.commons.schema.XmlSchema;
 import org.apache.ws.commons.schema.XmlSchemaCollection;
 import org.w3c.dom.Element;
@@ -95,24 +97,14 @@ public class ODEAxisService {
             if (wsdlUrl != null) axisService.setFileName(wsdlUrl);
 
             // axis2 service configuration  
-            URI axis2config = pconf.getBaseURI().resolve(wsdlServiceName.getLocalPart()+".axis2");
-            LOG.debug("Looking for Axis2 service configuration file: "+axis2config.toURL());
+            URL service_file = pconf.getBaseURI().resolve(wsdlServiceName.getLocalPart()+".axis2").toURL();
+            LOG.debug("Looking for Axis2 service configuration file: "+service_file);
             try {
-                InputStream ais = axis2config.toURL().openStream();
-                if (ais != null) {
-                    LOG.debug("Configuring service using: "+axis2config.toURL());
-                    try {
-                        ConfigurationContext configCtx = new ConfigurationContext(axisConfig);
-                        ServiceBuilder builder = new ServiceBuilder(ais, configCtx, axisService);
-                        builder.populateService(builder.buildOM());
-                    } finally {
-                        ais.close();
-                    }
-                }
+                AxisUtils.configureService(axisService, service_file);
             } catch (FileNotFoundException except) {
-                LOG.debug("Axis2 service configuration not found: " + axis2config);
+                LOG.debug("Axis2 service configuration not found: " + service_file);
             } catch (IOException except) {
-                LOG.warn("Exception while configuring service: " + axis2config, except);
+                LOG.warn("Exception while configuring service: " + service_file, except);
             }
 
             // In doc/lit we need to declare a mapping between operations and message element names
