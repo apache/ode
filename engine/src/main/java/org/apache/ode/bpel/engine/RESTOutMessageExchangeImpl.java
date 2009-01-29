@@ -5,6 +5,8 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.w3c.dom.Element;
 
+import javax.xml.namespace.QName;
+
 public class RESTOutMessageExchangeImpl extends MessageExchangeImpl implements RESTOutMessageExchange {
 
     private Resource _resource;
@@ -44,6 +46,14 @@ public class RESTOutMessageExchangeImpl extends MessageExchangeImpl implements R
         _fault = null;
         _response = null;
         ack(AckType.FAILURE);
+        save();
+    }
+
+    public void replyWithFault(QName faultType, Message outputFaultMessage) throws BpelEngineException {
+        _fault = faultType;
+        _failureType = null;
+        _response = (MessageImpl) outputFaultMessage;
+        ack(AckType.FAULT);
         save();
     }
 
