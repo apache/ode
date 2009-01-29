@@ -20,11 +20,12 @@ public class MigrationHandler {
     public static final int CURRENT_SCHEMA_VERSION = 3;
 
     private Contexts _contexts;
-    private List<Object[]> migrations = new ArrayList<Object[]>() {{
-        add(new Object[] { 2, new CorrelatorsMigration() });
-        add(new Object[] { 2, new CorrelationKeyMigration() });
-        add(new Object[] { 3, new CorrelationKeySetMigration() });
+    private List<MigrationLink> migrationLinks = new ArrayList<MigrationLink>() {{
+        add(new MigrationLink(1, 2, new Migration[] { new CorrelatorsMigration(), new CorrelationKeyMigration() } ));
+        add(new MigrationLink(2, 3, new Migration[] { new CorrelationKeySetMigration() } ));
+        add(new MigrationLink(4, 3, new Migration[] { new CorrelationKeySetMigration() } ));
     }};
+
 
     public MigrationHandler(Contexts _contexts) {
         this._contexts = _contexts;
@@ -48,22 +49,27 @@ public class MigrationHandler {
             __log.info("No schema version available from the database, migrations will be skipped.");
             return false;
         }
+        if (version == CURRENT_SCHEMA_VERSION) return true;
 
         try {
             boolean success = _contexts.scheduler.execTransaction(new Callable<Boolean>() {
                 public Boolean call() throws Exception {
-                    boolean res = true;
-                    boolean migrated = false;
-                    for (Object[] me : migrations) {
-                        if (((Integer)me[0]) > version) {
-                            __log.debug("Running migration " + me[1]);
-                            res = ((Migration)me[1]).migrate(registeredProcesses, _contexts.dao.getConnection()) && res;
-                            migrated = true;
+                    ArrayList<Migration> migrations = new ArrayList<Migration>();
+                    findMigrations(version, CURRENT_SCHEMA_VERSION, migrations);
+                    if (migrations.size() == 0) {
+                        __log.error("Don't know how to migrate from " + version + " to " + CURRENT_SCHEMA_VERSION + ", aborting");
+                        return false;
+                    } else {
+                        boolean success = true;
+                        for (Migration mig : migrations) {
+                            __log.debug("Running migration " + mig);
+                            success = mig.migrate(registeredProcesses, _contexts.dao.getConnection()) && success;
                         }
+
+                        if (!success) _contexts.scheduler.setRollbackOnly();
+                        else setDbVersion(CURRENT_SCHEMA_VERSION);
+                        return success;
                     }
-                    if (!res) _contexts.scheduler.setRollbackOnly();
-                    else if (migrated) setDbVersion(CURRENT_SCHEMA_VERSION);
-                    return res;
                 }
             });
             return success;
@@ -72,6 +78,45 @@ public class MigrationHandler {
                     "been aborted", e);
             throw new RuntimeException(e);
         }
+    }
+
+    private static class MigrationLink {
+        int source;
+        int target;
+        Migration[] migrations;
+        public MigrationLink(int source, int target, Migration[] migrations) {
+            this.source = source;
+            this.target = target;
+            this.migrations = migrations;
+        }
+    }
+
+    /**
+     * Attempts to find a way from a source to a target and collects the migrations found along. Assumes
+     * a directed graph with no loops. Guarantees that migrations are collected in the proper start-to-end
+     * order.
+     */
+    private boolean findMigrations(int source, int target, List<Migration> ms) {
+        List<MigrationLink> l = findLinksTo(target);
+        for (MigrationLink link : l) {
+            if (link.source == source || findMigrations(source, link.source, ms)) {
+                System.out.println(link.source + " -> " + link.target);
+                ms.addAll(Arrays.asList(link.migrations));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Finds all the links with a given target.
+     */
+    private List<MigrationLink> findLinksTo(int target) {
+        ArrayList<MigrationLink> mls = new ArrayList<MigrationLink>();
+        for (MigrationLink ml : migrationLinks) {
+            if (ml.target == target) mls.add(ml);
+        }
+        return mls;
     }
 
     private int getDbVersion() {
