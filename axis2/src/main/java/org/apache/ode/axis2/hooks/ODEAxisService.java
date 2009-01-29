@@ -61,7 +61,7 @@ import org.w3c.dom.Element;
  * Implementation of Axis Service used by ODE iapi to enlist itself its service. Allows us to build the service using a
  * WSDL definition using our own receiver.
  */
-public class ODEAxisService extends AxisService {
+public class ODEAxisService {
 
     private static final Log LOG = LogFactory.getLog(ODEAxisService.class);
 
