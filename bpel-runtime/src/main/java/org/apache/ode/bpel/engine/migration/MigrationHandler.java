@@ -100,7 +100,6 @@ public class MigrationHandler {
         List<MigrationLink> l = findLinksTo(target);
         for (MigrationLink link : l) {
             if (link.source == source || findMigrations(source, link.source, ms)) {
-                System.out.println(link.source + " -> " + link.target);
                 ms.addAll(Arrays.asList(link.migrations));
                 return true;
             }
