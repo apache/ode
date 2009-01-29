@@ -246,8 +246,8 @@ define "ode" do
     
     NativeDB.prepare_configs test, _(".")
 
-    test.setup prepare_rampart_test(_("target/test-classes/TestRampartPolicy"), "sample*-policy.xml")
-    test.setup prepare_rampart_test(_("target/test-classes/TestRampartBasic"), "sample*.axis2")
+    test.setup prepare_rampart_test(_("target/test-classes/TestRampartPolicy/secured-services"), "sample*-policy.xml")
+    test.setup prepare_rampart_test(_("target/test-classes/TestRampartBasic/secured-services"), "sample*.axis2")
 
   end
 
