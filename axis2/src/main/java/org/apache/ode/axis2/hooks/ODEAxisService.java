@@ -40,10 +40,7 @@ import javax.xml.namespace.QName;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.deployment.ServiceBuilder;
-import org.apache.axis2.description.AxisOperation;
-import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.Parameter;
-import org.apache.axis2.description.WSDL11ToAxisServiceBuilder;
+import org.apache.axis2.description.*;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.MessageReceiver;
 import org.apache.axis2.transport.jms.JMSConstants;
@@ -84,6 +81,7 @@ public class ODEAxisService {
             serviceBuilder.setServerSide(true);
 
             AxisService axisService = serviceBuilder.populateService();
+            axisService.setParent(axisConfig);
             axisService.setName(axisServiceName);
             axisService.setWsdlFound(true);
             axisService.setCustomWsdl(true);
