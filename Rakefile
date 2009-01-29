@@ -131,37 +131,6 @@ class Release
   end
 end
 
-def prepare_rampart_test(test_dir, file_pattern)
-    task(test_dir.to_sym) do 
-      # copy the required modules
-      mkdir "#{test_dir}/modules" unless File.directory? "#{test_dir}/modules"
-      artifacts(AXIS2_MODULES.mods).map {|a| a.invoke }
-      cp AXIS2_MODULES.mods.map {|a| repositories.locate(a)} , _("#{test_dir}/modules")
-      # generate one process per test
-      Dir.chdir(test_dir) do
-        Dir[file_pattern].each do |config_file| 
-          sample_name = File.basename(config_file, "."+config_file.split('.').last)
-          # create process directory
-          proc_dir = "process-#{sample_name}"
-          mkdir proc_dir unless File.directory? proc_dir
-          # copy files
-          [config_file, "README-#{sample_name}.txt"].each{|f| cp f, proc_dir }
-          # copy files from template and replace variable names
-          Dir["process-template/*"].each do |file|
-            lines = IO.readlines(file)
-            # copy file and replace template values
-            File.open("#{proc_dir}/#{File.basename(file)}", 'w') { |f| 
-              lines.each { |l| 
-                l.gsub!("{sample.namespace}", "http://#{sample_name.gsub('-','.')}.samples.rampart.apache.org")
-                l.gsub!("{sample.service.name}", sample_name)
-                f<<l
-              }
-            }
-          end
-        end
-      end
-   end
-end
 
 desc "Apache ODE"
 #define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
@@ -246,27 +215,11 @@ define "ode" do
     
     NativeDB.prepare_configs test, _(".")
 
-    test.setup prepare_rampart_test(_("target/test-classes/TestRampartPolicy/secured-services"), "sample*-policy.xml")
-    test.setup prepare_rampart_test(_("target/test-classes/TestRampartBasic/secured-services"), "sample*.axis2")
+    test.setup prepare_secured_services_tests(_("target/test-classes/TestRampartBasic/secured-services"), "sample*.axis2")
+    test.setup prepare_secured_services_tests(_("target/test-classes/TestRampartPolicy/secured-services"), "sample*-policy.xml")
 
-
-#    test.setup prepare_rampart_test(_("target/test-classes/TestRampartBasic/secured-processes"), "sample*.axis2")
-    test.setup task(:secured_processes_basic) do
-      test_dir = _("target/test-classes/TestRampartBasic/secured-processes")
-      mkdir "#{test_dir}/modules" unless File.directory? "#{test_dir}/modules"
-      artifacts(AXIS2_MODULES.mods).map {|a| a.invoke }
-      cp AXIS2_MODULES.mods.map {|a| repositories.locate(a)} , _("#{test_dir}/modules")
-     
-      Dir.chdir(test_dir) do
-        Dir['sample*-service.xml'].each do |service_file|
-          sample_name = service_file.split('-').first
-          proc_dir = "process-#{sample_name}"
-          cp_r "process-template/.", proc_dir
-          cp service_file, "#{proc_dir}/HelloService.axis2"
-        end
-      end
-  end
-
+    test.setup prepare_secured_processes_tests(_("target/test-classes/TestRampartBasic/secured-processes"))
+    test.setup prepare_secured_processes_tests(_("target/test-classes/TestRampartPolicy/secured-processes"))
   end
 
   desc "ODE APIs"
@@ -636,3 +589,52 @@ define "apache-ode" do
   package(:zip, :id=>"#{id}-docs").include(javadoc(project("ode").projects).target) unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
 end
 
+# Helper methods 
+###################
+def prepare_secured_processes_tests(test_dir)
+  task(test_dir.to_sym) do
+    mkdir "#{test_dir}/modules" unless File.directory? "#{test_dir}/modules"
+    artifacts(AXIS2_MODULES.mods).map {|a| a.invoke }
+    cp AXIS2_MODULES.mods.map {|a| repositories.locate(a)} , _("#{test_dir}/modules")
+
+    Dir.chdir(test_dir) do
+      Dir['sample*-service.xml'].each do |service_file|
+        sample_name = service_file.split('-').first
+        proc_dir = "process-#{sample_name}"
+        cp_r "process-template/.", proc_dir
+        cp service_file, "#{proc_dir}/HelloService.axis2"
+      end
+    end
+  end
+end
+def prepare_secured_services_tests(test_dir, file_pattern)
+    task(test_dir.to_sym) do 
+      # copy the required modules
+      mkdir "#{test_dir}/modules" unless File.directory? "#{test_dir}/modules"
+      artifacts(AXIS2_MODULES.mods).map {|a| a.invoke }
+      cp AXIS2_MODULES.mods.map {|a| repositories.locate(a)} , _("#{test_dir}/modules")
+      # generate one process per test
+      Dir.chdir(test_dir) do
+        Dir[file_pattern].each do |config_file| 
+          sample_name = File.basename(config_file, "."+config_file.split('.').last)
+          # create process directory
+          proc_dir = "process-#{sample_name}"
+          mkdir proc_dir unless File.directory? proc_dir
+          # copy files
+          [config_file, "README-#{sample_name}.txt"].each{|f| cp f, proc_dir }
+          # copy files from template and replace variable names
+          Dir["process-template/*"].each do |file|
+            lines = IO.readlines(file)
+            # copy file and replace template values
+            File.open("#{proc_dir}/#{File.basename(file)}", 'w') { |f| 
+              lines.each { |l| 
+                l.gsub!("{sample.namespace}", "http://#{sample_name.gsub('-','.')}.samples.rampart.apache.org")
+                l.gsub!("{sample.service.name}", sample_name)
+                f<<l
+              }
+            }
+          end
+        end
+      end
+   end
+end
