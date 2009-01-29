@@ -565,7 +565,7 @@ define "ode" do
 
   desc "ODE Utils"
   define "utils" do
-    compile.with COMMONS.collections, COMMONS.logging, COMMONS.pool, COMMONS.httpclient, COMMONS.codec, LOG4J, XERCES, JAVAX.stream, WSDL4J
+    compile.with AXIOM, AXIS2_ALL, COMMONS.collections, COMMONS.logging, COMMONS.pool, COMMONS.httpclient, COMMONS.codec, LOG4J, XERCES, JAVAX.stream, WSDL4J
 	test.exclude "*TestResources"
     package :jar
   end
