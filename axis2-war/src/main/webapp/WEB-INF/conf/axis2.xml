@@ -229,17 +229,17 @@
                 <order phase="Transport"/>
             </handler>
             <handler name="ODEAxisDispatcher"
-                     class="org.apache.ode.axis2.hooks.ODEAxisDispatcher">
-                <order phase="Transport"/>
-            </handler>
+                     class="org.apache.ode.axis2.hooks.ODEAxisDispatcher"/>
         </phase>
+        <phase name="Security"/>
         <phase name="Addressing">
+            <handler name="ODEAxisDispatcher"
+                     class="org.apache.ode.axis2.hooks.ODEAxisDispatcher"/>
             <handler name="AddressingBasedDispatcher"
                      class="org.apache.axis2.dispatchers.AddressingBasedDispatcher">
                 <order phase="Addressing"/>
             </handler>
         </phase>
-        <phase name="Security"/>
         <phase name="PreDispatch"/>
         <phase name="Dispatch" class="org.apache.axis2.engine.DispatchPhase">
             <handler name="RequestURIBasedDispatcher"

@@ -249,6 +249,24 @@ define "ode" do
     test.setup prepare_rampart_test(_("target/test-classes/TestRampartPolicy/secured-services"), "sample*-policy.xml")
     test.setup prepare_rampart_test(_("target/test-classes/TestRampartBasic/secured-services"), "sample*.axis2")
 
+
+#    test.setup prepare_rampart_test(_("target/test-classes/TestRampartBasic/secured-processes"), "sample*.axis2")
+    test.setup task(:secured_processes_basic) do
+      test_dir = _("target/test-classes/TestRampartBasic/secured-processes")
+      mkdir "#{test_dir}/modules" unless File.directory? "#{test_dir}/modules"
+      artifacts(AXIS2_MODULES.mods).map {|a| a.invoke }
+      cp AXIS2_MODULES.mods.map {|a| repositories.locate(a)} , _("#{test_dir}/modules")
+     
+      Dir.chdir(test_dir) do
+        Dir['sample*-service.xml'].each do |service_file|
+          sample_name = service_file.split('-').first
+          proc_dir = "process-#{sample_name}"
+          cp_r "process-template/.", proc_dir
+          cp service_file, "#{proc_dir}/HelloService.axis2"
+        end
+      end
+  end
+
   end
 
   desc "ODE APIs"
