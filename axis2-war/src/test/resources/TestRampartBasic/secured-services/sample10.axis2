@@ -18,22 +18,30 @@
 <service>
 
 	<module ref="rampart" />
+
+	<!-- sample-10 : MTOM optimize encrypted content -->
 	
-	<parameter name="OutflowSecurity">
+    <parameter name="OutflowSecurity">
       <action>
-        <items>Timestamp Signature</items>
+        <items>Timestamp Signature Encrypt</items>
         <user>client</user>
-        <signaturePropFile>TestRampartBasic/client.properties</signaturePropFile>
-        <passwordCallbackClass>org.apache.rampart.samples.sample04.PWCBHandler</passwordCallbackClass>
+        <passwordCallbackClass>org.apache.rampart.samples.sample10.PWCBHandler</passwordCallbackClass>
+        <signaturePropFile>TestRampartBasic/secured-services/client.properties</signaturePropFile>
         <signatureKeyIdentifier>DirectReference</signatureKeyIdentifier>
+        <encryptionKeyIdentifier>SKIKeyIdentifier</encryptionKeyIdentifier>
+        <encryptionUser>service</encryptionUser>
+        
+        <optimizeParts>//xenc:EncryptedData/xenc:CipherData/xenc:CipherValue</optimizeParts>
+        
       </action>
     </parameter>
 
     <parameter name="InflowSecurity">
       <action>
-        <items>Timestamp Signature</items>
-        <signaturePropFile>TestRampartBasic/client.properties</signaturePropFile>
+        <items>Timestamp Signature Encrypt</items>
+        <passwordCallbackClass>org.apache.rampart.samples.sample10.PWCBHandler</passwordCallbackClass>
+        <signaturePropFile>TestRampartBasic/secured-services/client.properties</signaturePropFile>
       </action>
     </parameter>
-    
+
  </service>

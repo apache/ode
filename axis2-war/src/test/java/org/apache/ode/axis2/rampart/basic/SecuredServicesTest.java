@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.axis2;
+package org.apache.ode.axis2.rampart.basic;
 
 import static org.testng.AssertJUnit.assertTrue;
 import org.testng.annotations.AfterClass;
@@ -28,6 +28,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.AfterTest;
 import org.apache.axis2.transport.http.server.SimpleHttpServer;
 import org.apache.axis2.transport.http.SimpleHTTPServer;
+import org.apache.ode.axis2.Axis2TestBase;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -36,18 +37,20 @@ import java.io.FileFilter;
  *
  *
  */
-public class RampartBasicTest extends Axis2TestBase {
+public class SecuredServicesTest extends Axis2TestBase {
 
-    @DataProvider(name = "bundles")
+    private String testDir= "TestRampartBasic/secured-services";
+
+    @DataProvider(name = "secured-services-bundles")
     public Object[][] testPolicySamples() throws Exception {
-        File[] policies = new File(getClass().getClassLoader().getResource("TestRampartBasic").getFile()).listFiles(new FileFilter() {
+        File[] policies = new File(getClass().getClassLoader().getResource(testDir).getFile()).listFiles(new FileFilter() {
             public boolean accept(File pathname) {
                 return pathname.isDirectory() && pathname.getName().matches("process-sample\\d*");
             }
         });
         Object[][] bundles = new Object[policies.length][];
         for (int i = 0; i < policies.length; i++) {
-            bundles[i] = new Object[]{"TestRampartBasic/" + policies[i].getName()};
+            bundles[i] = new Object[]{testDir + "/" + policies[i].getName()};
         }
 //        bundles = new Object[][]{new Object[]{"TestRampartBasic/process-basic-sample02"}};
         return bundles;
@@ -57,7 +60,7 @@ public class RampartBasicTest extends Axis2TestBase {
     @BeforeClass
     protected void setUp() throws Exception {
         // mind the annotation above: start the server only once for all tests
-        startServer("TestRampartBasic", "webapp/WEB-INF/conf/axis2.xml");
+        startServer(testDir, "webapp/WEB-INF/conf/axis2.xml");
     }
 
     @AfterClass
@@ -66,7 +69,7 @@ public class RampartBasicTest extends Axis2TestBase {
         super.tearDown();
     }
 
-    @Test(dataProvider = "bundles")
+    @Test(dataProvider = "secured-services-bundles")
     public void executeProcess(String bundleName) throws Exception {
         if (server.isDeployed(new File(bundleName).getName())) {
             server.undeployProcess(bundleName);

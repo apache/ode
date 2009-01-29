@@ -28,14 +28,14 @@
             <passwordCallbackClass>org.apache.rampart.samples.sample08.PWCBHandler</passwordCallbackClass>
             <signatureKeyIdentifier>DirectReference</signatureKeyIdentifier>
             <signatureParts>{Element}{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd}Timestamp</signatureParts>
-            <signaturePropFile>TestRampartBasic/client.properties</signaturePropFile>
+            <signaturePropFile>TestRampartBasic/secured-services/client.properties</signaturePropFile>
         </action>
 
         <action>
             <items>Signature</items>
             <user>client</user>
             <passwordCallbackClass>org.apache.rampart.samples.sample08.PWCBHandler</passwordCallbackClass>
-            <signaturePropFile>TestRampartBasic/client.properties</signaturePropFile>
+            <signaturePropFile>TestRampartBasic/secured-services/client.properties</signaturePropFile>
         </action>
 
     </parameter>

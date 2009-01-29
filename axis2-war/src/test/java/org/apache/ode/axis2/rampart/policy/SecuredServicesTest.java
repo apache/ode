@@ -17,13 +17,14 @@
  * under the License.
  */
 
-package org.apache.ode.axis2;
+package org.apache.ode.axis2.rampart.policy;
 
 import static org.testng.AssertJUnit.assertTrue;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import org.apache.ode.axis2.Axis2TestBase;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -32,18 +33,20 @@ import java.io.FileFilter;
  *
  *
  */
-public class RampartPolicyTest extends Axis2TestBase {
+public class SecuredServicesTest extends Axis2TestBase {
 
-    @DataProvider(name = "bundles")
+    private String testDir = "TestRampartPolicy/secured-services";
+
+    @DataProvider(name = "secured-services-bundles")
     public Object[][] testPolicySamples() throws Exception {
-        File[] policies = new File(getClass().getClassLoader().getResource("TestRampartPolicy").getFile()).listFiles(new FileFilter() {
+        File[] policies = new File(getClass().getClassLoader().getResource(testDir).getFile()).listFiles(new FileFilter() {
             public boolean accept(File pathname) {
                 return pathname.isDirectory() && pathname.getName().matches("process-sample\\d*\\-policy");
             }
         });
         Object[][] bundles = new Object[policies.length][];
         for (int i = 0; i < policies.length; i++) {
-            bundles[i] = new Object[]{"TestRampartPolicy/" + policies[i].getName()};
+            bundles[i] = new Object[]{testDir + "/" + policies[i].getName()};
         }
         return bundles;
     }
@@ -52,7 +55,7 @@ public class RampartPolicyTest extends Axis2TestBase {
     @BeforeClass
     protected void setUp() throws Exception {
         // mind the annotation above also
-        startServer("TestRampartPolicy", "webapp/WEB-INF/conf/axis2.xml");
+        startServer(testDir, "webapp/WEB-INF/conf/axis2.xml");
     }
 
     @AfterClass
@@ -61,7 +64,7 @@ public class RampartPolicyTest extends Axis2TestBase {
         super.tearDown();
     }
 
-    @Test(dataProvider = "bundles")
+    @Test(dataProvider = "secured-services-bundles")
     public void executeProcess(String bundleName) throws Exception {
         if (server.isDeployed(new File(bundleName).getName())) {
             server.undeployProcess(bundleName);
