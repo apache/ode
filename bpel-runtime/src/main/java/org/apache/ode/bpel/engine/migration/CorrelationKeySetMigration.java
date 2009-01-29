@@ -73,15 +73,17 @@ public class CorrelationKeySetMigration implements Migration {
                 for (Object selector : entry.selectors) {
                     OldSelector sel = (OldSelector)selector;
                     Object selCKey = sel.correlationKey;
-                    OldCorrelationKey old = (OldCorrelationKey) selCKey;
-                    __log.debug("   Changing V1 key " + old.toCanonicalString());
+                    if (selCKey != null) {
+                        OldCorrelationKey old = (OldCorrelationKey) selCKey;
+                        __log.debug("   Changing V1 key " + old.toCanonicalString());
 
-                    CorrelationKeySet newKeySet = new CorrelationKeySet();
-                    newKeySet.add(new CorrelationKey(""+old.getCSetId(), old.getValues()));
-                    Selector newSelector = new Selector(sel.idx, sel.plinkInstance, sel.opName,
-                            sel.oneWay, sel.messageExchangeId, newKeySet, "one");
-                    newSelector.correlationKey = new CorrelationKey(""+old.getCSetId(), old.getValues());
-                    newSelectors[index++] = newSelector;
+                        CorrelationKeySet newKeySet = new CorrelationKeySet();
+                        newKeySet.add(new CorrelationKey(""+old.getCSetId(), old.getValues()));
+                        Selector newSelector = new Selector(sel.idx, sel.plinkInstance, sel.opName,
+                                sel.oneWay, sel.messageExchangeId, newKeySet, "one");
+                        newSelector.correlationKey = new CorrelationKey(""+old.getCSetId(), old.getValues());
+                        newSelectors[index++] = newSelector;
+                    }
                 }
                 entry.selectors = newSelectors;
             }
@@ -110,14 +112,16 @@ public class CorrelationKeySetMigration implements Migration {
             for (Object selector : entry.selectors) {
                 OldSelector sel = (OldSelector)selector;
                 CorrelationKey selCKey = (CorrelationKey) sel.correlationKey;
-                __log.debug("   Changing V2 key " + selCKey.toCanonicalString());
+                if (selCKey != null) {
+                    __log.debug("   Changing V2 key " + selCKey.toCanonicalString());
 
-                CorrelationKeySet newKeySet = new CorrelationKeySet();
-                newKeySet.add(new CorrelationKey(""+selCKey.getCorrelationSetName(), selCKey.getValues()));
-                Selector newSelector = new Selector(sel.idx, sel.plinkInstance, sel.opName,
-                        sel.oneWay, sel.messageExchangeId, newKeySet, "one");
-                newSelector.correlationKey = new CorrelationKey(""+selCKey.getCorrelationSetName(), selCKey.getValues());
-                newSelectors[index++] = newSelector;
+                    CorrelationKeySet newKeySet = new CorrelationKeySet();
+                    newKeySet.add(new CorrelationKey(""+selCKey.getCorrelationSetName(), selCKey.getValues()));
+                    Selector newSelector = new Selector(sel.idx, sel.plinkInstance, sel.opName,
+                            sel.oneWay, sel.messageExchangeId, newKeySet, "one");
+                    newSelector.correlationKey = new CorrelationKey(""+selCKey.getCorrelationSetName(), selCKey.getValues());
+                    newSelectors[index++] = newSelector;
+                }
             }
             entry.selectors = newSelectors;
         }
