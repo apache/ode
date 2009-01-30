@@ -19,7 +19,6 @@
 <service>
 	
 	<module ref="rampart" />
-	<module ref="addressing" />
 
 	<wsp:Policy wsu:Id="SigOnly" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
 		<wsp:ExactlyOne>
