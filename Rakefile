@@ -621,7 +621,7 @@ def prepare_secured_services_tests(test_dir, file_pattern)
           proc_dir = "process-#{sample_name}"
           mkdir proc_dir unless File.directory? proc_dir
           # copy files
-          [config_file, "README-#{sample_name}.txt"].each{|f| cp f, proc_dir }
+          cp config_file, proc_dir
           # copy files from template and replace variable names
           Dir["process-template/*"].each do |file|
             lines = IO.readlines(file)
