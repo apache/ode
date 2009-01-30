@@ -67,7 +67,7 @@ public class SecuredProcessesTest extends Axis2TestBase {
             String policyFile = clientRepo + "/" + sampleIndex + "-policy.xml";
             bundles[i] = new Object[]{testDir + "/" + samples[i].getName(), clientRepo, policyFile};
         }
-//        bundles = new Object[][]{new Object[]{testDir+"/process-policy-sample04", clientRepo, clientRepo+"/process-policy-sample04.xml"}};
+//        bundles = new Object[][]{new Object[]{testDir+"/process-sample04", clientRepo, clientRepo+"/sample04-policy.xml"}};
         return bundles;
     }
 
@@ -94,12 +94,12 @@ public class SecuredProcessesTest extends Axis2TestBase {
             ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(clientRepo, null);
             ServiceClient client = new ServiceClient(ctx, null);
             Options options = new Options();
-            options.setAction("urn:hello");
+            // Rampart SymetricBinding (sample04) blows up if not provided with a soap action
+            options.setAction("");
             options.setTo(new EndpointReference("http://localhost:8888/processes/helloWorld"));
             options.setProperty(RampartMessageData.KEY_RAMPART_POLICY, loadPolicy(policyFile));
             client.setOptions(options);
 
-            client.engageModule("addressing");
             client.engageModule("rampart");
             client.engageModule("rahas");
 
