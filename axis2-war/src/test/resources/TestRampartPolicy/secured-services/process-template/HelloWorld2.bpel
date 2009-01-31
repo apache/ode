@@ -58,7 +58,7 @@
            </copy>
        </assign>
 
-       <invoke partnerLink="samplePartnerLink" portType="test:{sample.service.name}PortType"
+       <invoke partnerLink="samplePartnerLink" portType="dummy:{sample.service.name}PortType"
                operation="echo" inputVariable="req" outputVariable="resp"/>
 
        <assign>
