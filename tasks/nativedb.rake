@@ -123,8 +123,8 @@ module NativeDB
               dbs <<= "#{base}/target/conf.#{name}"
             end
           end
-  
-          test.using :properties=>{ "org.apache.ode.hibdbs"=>hibdbs, "org.apache.ode.jpadbs"=>jpadbs }
+           test.options[:properties]["org.apache.ode.hibdbs"] = hibdbs
+           test.options[:properties]["org.apache.ode.jpadbs"] =jpadbs
         end
       end
     end
