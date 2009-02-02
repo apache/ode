@@ -60,34 +60,37 @@ public class CorrelationKeyMigration implements Migration {
                         try {
                             CorrelatorDAO corr = processDao.getCorrelator(plink.getName() + "." + op.getName());
                             // Changing all routes
-                            for (MessageRouteDAO routeDAO : corr.getAllRoutes()) {
-                                CorrelationKey oldKey = routeDAO.getCorrelationKey();
-                                if (oldKey != null) {
-                                    Integer ckeyInt = asInt(oldKey.getCorrelationSetName());
-                                    if (ckeyInt != null) {
-                                        OScope.CorrelationSet ocset = findCorrelationById(ckeyInt, registeredProcesses, process.getConf().getProcessId());
-                                        if (ocset == null) __log.debug("Correlation set not found, couldn't upgrade route " + oldKey.toCanonicalString());
-                                        else {
-                                            routeDAO.setCorrelationKey(new CorrelationKey(ocset.name, oldKey.getValues()));
+                            if (corr != null) {
+                                for (MessageRouteDAO routeDAO : corr.getAllRoutes()) {
+                                    CorrelationKey oldKey = routeDAO.getCorrelationKey();
+                                    if (oldKey != null) {
+                                        Integer ckeyInt = asInt(oldKey.getCorrelationSetName());
+                                        if (ckeyInt != null) {
+                                            OScope.CorrelationSet ocset = findCorrelationById(ckeyInt, registeredProcesses, process.getConf().getProcessId());
+                                            if (ocset == null) __log.debug("Correlation set not found, couldn't upgrade route " + oldKey.toCanonicalString());
+                                            else {
+                                                routeDAO.setCorrelationKey(new CorrelationKey(ocset.name, oldKey.getValues()));
+                                            }
                                         }
                                     }
                                 }
-                            }
-                            // Changing all queued messages
-                            for (CorrelatorMessageDAO corrMsgDAO : corr.getAllMessages()) {
-                                CorrelationKey oldKey = corrMsgDAO.getCorrelationKey();
-                                if (oldKey != null) {
-                                    Integer ckeyInt = asInt(oldKey.getCorrelationSetName());
-                                    if (ckeyInt != null) {
-                                        OScope.CorrelationSet ocset = findCorrelationById(ckeyInt, registeredProcesses, process.getConf().getProcessId());
-                                        if (ocset == null) __log.debug("Correlation set not found, couldn't upgrade route " + oldKey.toCanonicalString());
-                                        else {
-                                            corrMsgDAO.setCorrelationKey(new CorrelationKey(ocset.name, oldKey.getValues()));
+
+                                // Changing all queued messages
+                                for (CorrelatorMessageDAO corrMsgDAO : corr.getAllMessages()) {
+                                    CorrelationKey oldKey = corrMsgDAO.getCorrelationKey();
+                                    if (oldKey != null) {
+                                        Integer ckeyInt = asInt(oldKey.getCorrelationSetName());
+                                        if (ckeyInt != null) {
+                                            OScope.CorrelationSet ocset = findCorrelationById(ckeyInt, registeredProcesses, process.getConf().getProcessId());
+                                            if (ocset == null) __log.debug("Correlation set not found, couldn't upgrade route " + oldKey.toCanonicalString());
+                                            else {
+                                                corrMsgDAO.setCorrelationKey(new CorrelationKey(ocset.name, oldKey.getValues()));
+                                            }
                                         }
                                     }
                                 }
-                            }
                             __log.debug("Migrated routes and message queue for correlator " + plink.getName() + "." + op.getName());
+                            }
                         } catch (IllegalArgumentException e) {
                             __log.debug("Correlator with id " + plink.getId() + "." +
                                     op.getName() + " couldn't be found, skipping.");
