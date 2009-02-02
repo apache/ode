@@ -296,6 +296,8 @@ public class SoapExternalService implements ExternalService {
         WSAEndpoint targetWSAEPR = EndpointFactory.convertToWSA((MutableEndpoint) odeMex.getEndpointReference());
         WSAEndpoint myRoleWSAEPR = EndpointFactory.convertToWSA((MutableEndpoint) odeMex.getMyRoleEndpointReference());
         WSAEndpoint targetEPR = new WSAEndpoint(targetWSAEPR);
+        
+        EndpointReference replyEPR = null; 
 
         String partnerSessionId = odeMex.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
         String myRoleSessionId = odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
@@ -347,7 +349,7 @@ public class SoapExternalService implements ExternalService {
                             + options.getProperty(JMSConstants.JMS_WAIT_REPLY));
                 }
 	            if (jmsDestination == null || "".equals(jmsDestination.trim())) {
-	            	// If the REPLY_PARAM property is not user-defined, then use the default value from myRole EPR
+	            	// If the REPLY_PARAM property is not user-defined, then use the default value from myRole EPR	            	
 		            int startIndex = url.indexOf("jms:/");
 		            if (startIndex != -1) {
 		            	startIndex += "jms:/".length();
@@ -374,6 +376,9 @@ public class SoapExternalService implements ExternalService {
 			            	}
 			            }
 		            }
+		            replyEPR = new EndpointReference(url);
+	            } else {
+	            	replyEPR = new EndpointReference("jms:/" + jmsDestination);
 	            }
             }
         } else {
@@ -383,10 +388,13 @@ public class SoapExternalService implements ExternalService {
         String action = getAction(odeMex.getOperationName());
         ctxt.setSoapAction(action);
 
-        if (MessageExchange.MessageExchangePattern.REQUEST_RESPONSE == odeMex.getMessageExchangePattern()) {
-            EndpointReference annonEpr =
-                    new EndpointReference(Namespaces.WS_ADDRESSING_ANON_URI);
-            ctxt.setReplyTo(annonEpr);
+        if (replyEPR == null) {
+        	if (MessageExchange.MessageExchangePattern.REQUEST_RESPONSE == odeMex.getMessageExchangePattern()) {
+	        	replyEPR = new EndpointReference(Namespaces.WS_ADDRESSING_ANON_URI);
+        	}
+        }
+        if (replyEPR != null) {
+            ctxt.setReplyTo(replyEPR);
             ctxt.setMessageID("uuid:" + new UUID().toString());
         }
     }
