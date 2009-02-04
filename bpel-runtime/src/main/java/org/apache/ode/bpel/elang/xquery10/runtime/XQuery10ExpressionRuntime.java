@@ -362,7 +362,10 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
                 XQItemType xqType = getItemType(xqconn, value);
                 
                 // Saxon doesn't like binding sequences to variables
-                if (value instanceof NodeList) {
+                if (value instanceof Node) {
+                	// a node is a node-list, but the inverse isn't true.
+                	// so, if the value is truly a node, leave it alone.
+                } else if (value instanceof NodeList) {
                     // So extract the first item from the node list
                 	NodeList nodeList = (NodeList) value;
                 	ArrayList nodeArray = new ArrayList();
@@ -543,12 +546,16 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
      * @throws XQException XQException 
      */
     private Object getResultValue(QName type, XQResultSequence result) throws XQException {
+    	Document document = DOMUtils.newDocument();
     	Object resultValue = null;
         if (XPathConstants.NODESET.equals(type)) {
             List list = new ArrayList();
 
             while (result.next()) {
                 Object itemValue = getItemValue(result.getItem());
+                if (itemValue instanceof Node) {
+                	itemValue = DOMUtils.cloneNode(document, (Node) itemValue); 
+                }
 
                 if (itemValue != null) {
                     list.add(itemValue);
@@ -558,6 +565,9 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
             resultValue = list;
         } else {
             resultValue = getItemValue(result.getItem());
+            if (resultValue instanceof Node) {
+            	resultValue = DOMUtils.cloneNode(document, (Node) resultValue); 
+            }
         }
     	return resultValue;
     }
