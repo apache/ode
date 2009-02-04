@@ -25,8 +25,8 @@
     xmlns:types="http://ode/bpel/types"
     xmlns:test="http://ode/bpel/unit-test.wsdl"
 	xmlns:ode="http://www.apache.org/ode/type/extension"
-    queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0"
-    expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
+    queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+    expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
 
     <import location="HelloXQueryWorld.wsdl"
         namespace="http://ode/bpel/unit-test.wsdl"
@@ -58,11 +58,11 @@
                 <to variable="otherVar"/>
             </copy>
             <copy>
-                <from><![CDATA[<test:content>Hello</test:content>]]></from>
+                <from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0"><![CDATA[<test:content>Hello</test:content>]]></from>
                 <to variable="tempVar"/>
             </copy>
             <copy>
-                <from>
+                <from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
 					typeswitch ($myVar.TestPart) 
 				      case $a as xs:string return "test"
 					  default return "default"
@@ -70,7 +70,7 @@
                 <to variable="otherVar"/>
             </copy>
             <copy>
-                <from><![CDATA[
+                <from  expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0"><![CDATA[
 					typeswitch ($myVar.TestPart) 
 				      case $a as text() return <test:content/>
 					  default return <test:content/>
@@ -80,7 +80,7 @@
             </copy>
 			<!-- this copy will fail since saxon is not schema-aware 
             <copy>
-                <from>
+                <from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
 					typeswitch ($myVar.TestPart) 
 				      case $a as element(*, test:content) return "test"
 					  default return "default"
@@ -89,7 +89,7 @@
             </copy>
 			-->
             <copy>
-                <from>
+                <from  expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
 					for $loopOnce in (1) 
 					return 
 						concat(bpws:getVariableProperty("myVar", "test:content"), "XQuery World")
