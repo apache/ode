@@ -365,6 +365,7 @@ public class SoapExternalService implements ExternalService {
 		            	}
 		        		jmsDestination = url.substring(startIndex, jmsEndIndex);
 		                options.setProperty(JMSConstants.REPLY_PARAM, jmsDestination);
+			            replyEPR = new EndpointReference(url);
 		            } else {
 			            startIndex = url.indexOf("http://");
 			            if (startIndex != -1) {
@@ -376,7 +377,6 @@ public class SoapExternalService implements ExternalService {
 			            	}
 			            }
 		            }
-		            replyEPR = new EndpointReference(url);
 	            } else {
 	            	replyEPR = new EndpointReference("jms:/" + jmsDestination);
 	            }
