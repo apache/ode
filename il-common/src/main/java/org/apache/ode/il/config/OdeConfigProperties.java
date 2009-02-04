@@ -46,6 +46,8 @@ public class OdeConfigProperties {
 
     public static final String PROP_DB_EMBEDDED_NAME = "db.emb.name";
 
+    public static final String PROP_DB_EMBEDDED_CREATE = "db.emb.create";
+
     public static final String PROP_DB_INTERNAL_URL = "db.int.jdbcurl";
 
     public static final String PROP_DB_INTERNAL_DRIVER = "db.int.driver";
@@ -90,7 +92,7 @@ public class OdeConfigProperties {
     private Properties _props;
 
     /** Default defaults for the database embedded name and dao connection factory class. */
-    private static String __dbEmbName = "jpadb";
+    public static String DEFAULT_DB_EMB_NAME = "jpadb";
     private static String __daoCfClass = "org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl";
 
     static {
@@ -98,7 +100,7 @@ public class OdeConfigProperties {
         if (odep != null &&
                 "hibernate".equalsIgnoreCase(odep)) {
             __log.debug("Using HIBERNATE due to system property override!");
-            __dbEmbName = "hibdb";
+            DEFAULT_DB_EMB_NAME = "hibdb";
             __daoCfClass = "org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl";
 
         }
@@ -165,8 +167,11 @@ public class OdeConfigProperties {
      * @return db mode
      */
     public String getDbEmbeddedName() {
-        return getProperty(OdeConfigProperties.PROP_DB_EMBEDDED_NAME, __dbEmbName);
+        return getProperty(OdeConfigProperties.PROP_DB_EMBEDDED_NAME, DEFAULT_DB_EMB_NAME);
+    }
 
+    public boolean isDbEmbeddedCreate() {
+        return Boolean.valueOf(getProperty(OdeConfigProperties.PROP_DB_EMBEDDED_CREATE, "false"));
     }
 
     public DatabaseMode getDbMode() {

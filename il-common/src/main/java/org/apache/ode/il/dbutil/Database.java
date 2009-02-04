@@ -227,6 +227,8 @@ public class Database {
         String db = _odeConfig.getDbEmbeddedName();
 
         String url = "jdbc:derby:" + _workRoot + "/" + db ;
+        if (_odeConfig.isDbEmbeddedCreate())
+            url += ";create=true";
         __log.info("Using Embedded Derby: " + url);
         _derbyUrl = url;
         initInternalDb(url, org.apache.derby.jdbc.EmbeddedDriver.class.getName(),"sa",null);

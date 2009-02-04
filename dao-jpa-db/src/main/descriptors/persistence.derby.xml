@@ -31,6 +31,7 @@
         <class>org.apache.ode.dao.jpa.PartnerLinkDAOImpl</class>
         <class>org.apache.ode.dao.jpa.ProcessDAOImpl</class>
         <class>org.apache.ode.dao.jpa.ProcessInstanceDAOImpl</class>
+        <class>org.apache.ode.dao.jpa.ResourceRouteDAOImpl</class>
         <class>org.apache.ode.dao.jpa.ScopeDAOImpl</class>
         <class>org.apache.ode.dao.jpa.XmlDataDAOImpl</class>
         

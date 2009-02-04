@@ -58,7 +58,7 @@ public class MessageDAOImpl implements MessageDAO {
 
     }
     public MessageDAOImpl(QName type, MessageExchangeDAOImpl me) {
-        _type = type.toString();
+        if (_type != null) _type = type.toString();
     }
 
     public Element getData() {
