@@ -112,4 +112,7 @@ public class MessageRouteDAOImpl implements MessageRouteDAO {
 		return new CorrelationKeySet(_correlationKey);
 	}
 
+    public void setCorrelationKeySet(CorrelationKeySet keySet) {
+        _correlationKey = keySet.toCanonicalString();
+    }
 }

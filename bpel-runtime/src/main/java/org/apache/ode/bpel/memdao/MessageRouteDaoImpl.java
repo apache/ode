@@ -70,4 +70,8 @@ class MessageRouteDaoImpl extends DaoBaseImpl implements MessageRouteDAO {
     public CorrelationKey getCorrelationKey() {
         return _ckeySet.iterator().next();
     }
+
+    public void setCorrelationKeySet(CorrelationKeySet keySet) {
+        _ckeySet = keySet;
+    }
 }

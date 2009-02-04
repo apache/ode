@@ -48,6 +48,8 @@ public interface MessageRouteDAO  {
      */
     public CorrelationKeySet getCorrelationKeySet();
 
+    void setCorrelationKeySet(CorrelationKeySet keySet);
+
     void setCorrelationKey(CorrelationKey key);
 
     CorrelationKey getCorrelationKey();
