@@ -56,12 +56,16 @@ import org.apache.xml.serialize.DOMSerializerImpl;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
 import org.w3c.dom.Attr;
+import org.w3c.dom.CDATASection;
 import org.w3c.dom.CharacterData;
+import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.ProcessingInstruction;
+import org.w3c.dom.Text;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -1060,5 +1064,66 @@ public class DOMUtils {
     public static String getQualifiedName(QName qName) {
     	String prefix = qName.getPrefix(), localPart = qName.getLocalPart();
     	return (prefix == null || "".equals(prefix)) ? localPart : (prefix + ":" + localPart);
+    }
+
+    public static Node cloneNode(Document document, Node node) {
+    	Node clone = null;
+    	String namespaceURI = node.getNamespaceURI();
+    	String localName = node.getLocalName();
+    	switch (node.getNodeType()) {
+    	case Node.ATTRIBUTE_NODE:
+    		if (namespaceURI == null) {
+    			clone = document.createAttribute(localName);
+    		} else {
+        		clone = document.createAttributeNS(namespaceURI, localName);
+    		}
+			break;
+    	case Node.CDATA_SECTION_NODE:
+    		clone = document.createCDATASection(((CDATASection) node).getData());
+			break;
+    	case Node.COMMENT_NODE:
+    		clone = document.createComment(((Comment) node).getData());
+			break;
+    	case Node.DOCUMENT_FRAGMENT_NODE:
+    		clone = document.createDocumentFragment();
+			break;
+    	case Node.DOCUMENT_NODE:
+    		clone = document;
+			break;
+    	case Node.ELEMENT_NODE:
+    		if (namespaceURI == null) {
+	    		clone = document.createElement(localName);
+    		} else {
+    			clone = document.createElementNS(namespaceURI, localName);
+    		}
+			break;
+    	case Node.ENTITY_NODE:
+    		// TODO
+			break;
+    	case Node.ENTITY_REFERENCE_NODE:
+    		clone = document.createEntityReference(localName);
+    		// TODO
+			break;
+    	case Node.NOTATION_NODE:
+    		// TODO
+			break;
+    	case Node.PROCESSING_INSTRUCTION_NODE:
+    		clone = document.createProcessingInstruction(((ProcessingInstruction) node).getData(), localName);
+			break;
+    	case Node.TEXT_NODE:
+    		clone = document.createTextNode(((Text) node ).getData());
+			break;
+		default:
+			break;
+    	}
+
+    	NodeList children = node.getChildNodes();
+    	if (children != null) {
+	    	for (int i = 0; i < children.getLength(); i++) {
+	    		clone.appendChild(cloneNode(document, children.item(i)));
+	    	}
+    	}
+	    		
+    	return clone;
     }
 }
