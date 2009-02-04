@@ -80,7 +80,11 @@ class MessageRouteDaoImpl extends HibernateDao implements MessageRouteDAO {
 		return new CorrelationKeySet(_selector.getCorrelationKey());
 	}
 
-     public void setCorrelationKey(CorrelationKey key) {
+    public void setCorrelationKeySet(CorrelationKeySet keySet) {
+        _selector.setCorrelationKey(keySet.toCanonicalString());
+    }
+
+    public void setCorrelationKey(CorrelationKey key) {
          _selector.setCorrelationKey(key.toCanonicalString());
      }
 

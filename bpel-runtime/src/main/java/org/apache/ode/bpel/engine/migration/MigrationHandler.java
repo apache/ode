@@ -17,13 +17,14 @@ import java.util.concurrent.Callable;
 public class MigrationHandler {
     private static final Log __log = LogFactory.getLog(MigrationHandler.class);
 
-    public static final int CURRENT_SCHEMA_VERSION = 3;
+    public static final int CURRENT_SCHEMA_VERSION = 5;
 
     private Contexts _contexts;
     private List<MigrationLink> migrationLinks = new ArrayList<MigrationLink>() {{
         add(new MigrationLink(1, 2, new Migration[] { new CorrelatorsMigration(), new CorrelationKeyMigration() } ));
         add(new MigrationLink(2, 3, new Migration[] { new CorrelationKeySetMigration() } ));
         add(new MigrationLink(4, 3, new Migration[] { new CorrelationKeySetMigration() } ));
+        add(new MigrationLink(3, 5, new Migration[] { new CorrelationKeySetDataMigration() } ));
     }};
 
 
