@@ -6,11 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 import javax.sql.DataSource;
 
@@ -77,13 +73,8 @@ public class LoggingInterceptor<T> implements InvocationHandler {
 	private void print(Method method, Object[] args) {
         if (shouldPrint()) {
         	// JDBC Connection
-        	if ("prepareStmt".equals(method.getName())) {
-        		print("prepareStmt: " + args[0]);
-                if (((String)args[0]).indexOf("ODE_SCOPE") > 0) {
-                    for (StackTraceElement traceElement : Thread.currentThread().getStackTrace()) {
-                        print(traceElement.toString());
-                    }
-                }
+        	if ("prepareStatement".equals(method.getName())) {
+        		print("prepareStatement: " + args[0]);
         	} else if ("prepareCall".equals(method.getName())) {
         		print("prepareCall: " + args[0]);
         	} else if ("close".equals(method.getName())) {
