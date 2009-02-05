@@ -57,7 +57,7 @@ public class SecuredProcessesTest extends Axis2TestBase {
     public Object[][] testPolicySamples() throws Exception {
         File[] samples = new File(getClass().getClassLoader().getResource(testDir).getFile()).listFiles(new FileFilter() {
             public boolean accept(File pathname) {
-                return pathname.isDirectory() && pathname.getName().matches("process-sample\\d*");
+                return pathname.isDirectory() && pathname.getName().matches("process-sample0[12]");
             }
         });
         Object[][] bundles = new Object[samples.length][];
