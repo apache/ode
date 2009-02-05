@@ -133,7 +133,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
                     selector = (HCorrelatorSelector) selectors.next();
                     if (selector != null) {
                     	if ("all".equals(selector.getRoute()) ||
-                    			("one".equals(selector.getRoute()) && !targets.contains(selector.getInstance()))) {
+                    			(!"all".equals(selector.getRoute()) && !targets.contains(selector.getInstance()))) {
                         	routes.add(new MessageRouteDaoImpl(_sm, selector));
                         	targets.add(selector.getInstance());
                     	}
