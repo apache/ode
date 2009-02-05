@@ -136,14 +136,14 @@
 					<ramp:signatureCrypto>
 						<ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin">
 							<ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type">JKS</ramp:property>
-							<ramp:property name="org.apache.ws.security.crypto.merlin.file">service.jks</ramp:property>
+							<ramp:property name="org.apache.ws.security.crypto.merlin.file">TestRampartPolicy/secured-processes/service.jks</ramp:property>
 							<ramp:property name="org.apache.ws.security.crypto.merlin.keystore.password">apache</ramp:property>
 						</ramp:crypto>
 					</ramp:signatureCrypto>
 					<ramp:encryptionCypto>
 						<ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin">
 							<ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type">JKS</ramp:property>
-							<ramp:property name="org.apache.ws.security.crypto.merlin.file">service.jks</ramp:property>
+							<ramp:property name="org.apache.ws.security.crypto.merlin.file">TestRampartPolicy/secured-processes/service.jks</ramp:property>
 							<ramp:property name="org.apache.ws.security.crypto.merlin.keystore.password">apache</ramp:property>
 						</ramp:crypto>
 					</ramp:encryptionCypto>
@@ -158,7 +158,7 @@
 			<cryptoProperties>
                <crypto provider="org.apache.ws.security.components.crypto.Merlin">
                     <property name="org.apache.ws.security.crypto.merlin.keystore.type">JKS</property>
-                    <property name="org.apache.ws.security.crypto.merlin.file">sts.jks</property>
+                    <property name="org.apache.ws.security.crypto.merlin.file">TestRampartPolicy/secured-processes/sts.jks</property>
                     <property name="org.apache.ws.security.crypto.merlin.keystore.password">password</property>
                 </crypto>
 			</cryptoProperties>
