@@ -177,6 +177,9 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
             XQueryDeclarations declarations = new XQueryDeclarations();            
             NSContext nsContext = source.getNamespaceContext();
         	Set<String> prefixes = nsContext.getPrefixes();
+        	if (!nsContext.getUriSet().contains(Namespaces.ODE_EXTENSION_NS)) {
+        		nsContext.register("ode", Namespaces.ODE_EXTENSION_NS);
+        	}
         	for (String prefix : prefixes) {
         		String uri = nsContext.getNamespaceURI(prefix);
         		staticContext.declareNamespace(prefix, uri);
