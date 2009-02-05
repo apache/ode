@@ -36,14 +36,12 @@ import javax.wsdl.Port;
 import javax.wsdl.Service;
 import javax.wsdl.extensions.soap.SOAPAddress;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.deployment.ServiceBuilder;
-import org.apache.axis2.description.AxisOperation;
-import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.Parameter;
-import org.apache.axis2.description.WSDL11ToAxisServiceBuilder;
+import org.apache.axis2.description.*;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.MessageReceiver;
 import org.apache.axis2.transport.jms.JMSConstants;
@@ -53,6 +51,7 @@ import org.apache.ode.axis2.OdeFault;
 import org.apache.ode.axis2.util.Axis2UriResolver;
 import org.apache.ode.axis2.util.Axis2WSDLLocator;
 import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.utils.AxisUtils;
 import org.apache.ws.commons.schema.XmlSchema;
 import org.apache.ws.commons.schema.XmlSchemaCollection;
 import org.w3c.dom.Element;
@@ -61,7 +60,7 @@ import org.w3c.dom.Element;
  * Implementation of Axis Service used by ODE iapi to enlist itself its service. Allows us to build the service using a
  * WSDL definition using our own receiver.
  */
-public class ODEAxisService extends AxisService {
+public class ODEAxisService {
 
     private static final Log LOG = LogFactory.getLog(ODEAxisService.class);
 
@@ -84,6 +83,7 @@ public class ODEAxisService extends AxisService {
             serviceBuilder.setServerSide(true);
 
             AxisService axisService = serviceBuilder.populateService();
+            axisService.setParent(axisConfig);
             axisService.setName(axisServiceName);
             axisService.setWsdlFound(true);
             axisService.setCustomWsdl(true);
@@ -97,20 +97,14 @@ public class ODEAxisService extends AxisService {
             if (wsdlUrl != null) axisService.setFileName(wsdlUrl);
 
             // axis2 service configuration  
-            URI axis2config = pconf.getBaseURI().resolve(wsdlServiceName.getLocalPart()+".axis2");
-            LOG.debug("Looking for Axis2 service configuration file: "+axis2config.toURL());
+            URL service_file = pconf.getBaseURI().resolve(wsdlServiceName.getLocalPart()+".axis2").toURL();
+            LOG.debug("Looking for Axis2 service configuration file: "+service_file);
             try {
-                InputStream ais = axis2config.toURL().openStream();
-                if (ais != null) {
-                    LOG.debug("Configuring service using: "+axis2config.toURL());
-                    ConfigurationContext configCtx = new ConfigurationContext(axisConfig);
-                    ServiceBuilder builder = new ServiceBuilder(ais, configCtx, axisService);
-                    builder.populateService(builder.buildOM());
-                }
+                AxisUtils.configureService(axisService, service_file);
             } catch (FileNotFoundException except) {
-                LOG.debug("Axis2 service configuration not found: " + axis2config);
+                LOG.debug("Axis2 service configuration not found: " + service_file);
             } catch (IOException except) {
-                LOG.warn("Exception while configuring service: " + axis2config, except);
+                LOG.warn("Exception while configuring service: " + service_file, except);
             }
 
             // In doc/lit we need to declare a mapping between operations and message element names

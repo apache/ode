@@ -51,11 +51,7 @@ import org.apache.ode.il.OMUtils;
 import org.apache.ode.il.epr.EndpointFactory;
 import org.apache.ode.il.epr.MutableEndpoint;
 import org.apache.ode.il.epr.WSAEndpoint;
-import org.apache.ode.utils.CollectionUtils;
-import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.Namespaces;
-import org.apache.ode.utils.WatchDog;
-import org.apache.ode.utils.GUID;
+import org.apache.ode.utils.*;
 import org.apache.ode.utils.fs.FileUtils;
 import org.apache.ode.utils.uuid.UUID;
 import org.apache.ode.utils.wsdl.Messages;
@@ -407,26 +403,9 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
             // and load the new config.
             init(); // create a new ServiceClient instance
             try {
-                InputStream ais = file.toURI().toURL().openStream();
-                if (ais != null) {
-                    if (__log.isDebugEnabled()) __log.debug("Configuring service " + _serviceName + " using: " + file);
-                    ServiceBuilder builder = new ServiceBuilder(ais, _configContext, anonymousService);
-                    builder.populateService(builder.buildOM());
-                    // do not allow the service.xml file to change the service name 
-                    anonymousService.setName(serviceName);
-
-                    // the service builder only updates the module list but do not engage them
-                    // module have to be engaged manually,
-                    for (int i = 0; i < anonymousService.getModules().size(); i++) {
-                        String moduleRef = (String) anonymousService.getModules().get(i);
-                        AxisModule module = _axisConfig.getModule(moduleRef);
-                        if (module != null) {
-                            anonymousService.engageModule(module);
-                        } else {
-                            throw new AxisFault("Unable to engage module : " + moduleRef);
-                        }
-                    }
-                }
+                 AxisUtils.configureService(_configContext, anonymousService, file.toURI().toURL());
+                 // do not allow the service.xml file to change the service name
+                 anonymousService.setName(serviceName);
             } catch (Exception e) {
                 if (__log.isWarnEnabled()) __log.warn("Exception while configuring service: " + _serviceName, e);
                 throw new RuntimeException("Exception while configuring service: " + _serviceName, e);

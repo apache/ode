@@ -243,7 +243,7 @@ public class HttpMethodConverter {
      * <p/>
      * Finally go through the list of {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :header} elements included in the input binding.
      * For each of them, set the HTTP Request Header with the static value defined by the attribute {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :value},
-     * or the part value mentionned in the attribute {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :part}.
+     * or the part value mentioned in the attribute {@linkplain Namespaces.ODE_HTTP_EXTENSION_NS}{@code :part}.
      * <p/>
      * Finally, set the 'Accept' header if the output content type of the operation exists.
      * <p/>

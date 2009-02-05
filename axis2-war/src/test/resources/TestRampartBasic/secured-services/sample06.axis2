@@ -16,22 +16,29 @@
  ! limitations under the License.
  !-->
 <service>
-
+    
+    <!--Signature and Encryption : Using the request's certificate-->
+	
 	<module ref="rampart" />
-
-	<parameter name="OutflowSecurity">
+	
+    <parameter name="OutflowSecurity">
       <action>
-        <items>Encrypt</items>
+        <items>Timestamp Signature Encrypt</items>
+        <user>client</user>
+        <passwordCallbackClass>org.apache.rampart.samples.sample06.PWCBHandler</passwordCallbackClass>
+        <signaturePropFile>TestRampartBasic/secured-services/client.properties</signaturePropFile>
+        <signatureKeyIdentifier>DirectReference</signatureKeyIdentifier>
+        <encryptionKeyIdentifier>DirectReference</encryptionKeyIdentifier>
         <encryptionUser>service</encryptionUser>
-        <encryptionPropFile>TestRampartBasic/client.properties</encryptionPropFile>
       </action>
     </parameter>
 
     <parameter name="InflowSecurity">
       <action>
-        <items>Encrypt</items>
-        <passwordCallbackClass>org.apache.rampart.samples.sample05.PWCBHandler</passwordCallbackClass>
-        <decryptionPropFile>TestRampartBasic/client.properties</decryptionPropFile>
+        <items>Timestamp Signature Encrypt</items>
+        <passwordCallbackClass>org.apache.rampart.samples.sample06.PWCBHandler</passwordCallbackClass>
+        <signaturePropFile>TestRampartBasic/secured-services/client.properties</signaturePropFile>
       </action>
     </parameter>
-</service>
+    
+ </service>
