@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Iterator;
 import java.util.StringTokenizer;
 
 import javax.servlet.ServletConfig;
@@ -329,10 +330,15 @@ public class ODEServer {
 
         _services.put(uniqueServiceName, portName, odeService);
 
-        // Setting our new service on the receiver, the same receiver handles
-        // all operations so the first one should fit them all
-        AxisOperation firstOp = (AxisOperation) axisService.getOperations().next();
-        ((ODEMessageReceiver) firstOp.getMessageReceiver()).setService(odeService);
+        // Setting our new service on the ODE receiver
+        Iterator operationIterator = axisService.getOperations();
+        while(operationIterator.hasNext()){
+            AxisOperation op = (AxisOperation) operationIterator.next();
+            if(op.getMessageReceiver() instanceof ODEMessageReceiver){
+                ((ODEMessageReceiver) op.getMessageReceiver()).setService(odeService);
+                break;
+            }
+        }
 
         // We're public!
         _axisConfig.addService(axisService);

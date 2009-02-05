@@ -18,22 +18,20 @@
 <service>
 
 	<module ref="rampart" />
-	
+
 	<parameter name="OutflowSecurity">
       <action>
-        <items>Timestamp Signature</items>
-        <user>client</user>
-        <signaturePropFile>TestRampartBasic/client.properties</signaturePropFile>
-        <passwordCallbackClass>org.apache.rampart.samples.sample04.PWCBHandler</passwordCallbackClass>
-        <signatureKeyIdentifier>DirectReference</signatureKeyIdentifier>
+        <items>Encrypt</items>
+        <encryptionUser>service</encryptionUser>
+        <encryptionPropFile>TestRampartBasic/secured-services/client.properties</encryptionPropFile>
       </action>
     </parameter>
 
     <parameter name="InflowSecurity">
       <action>
-        <items>Timestamp Signature</items>
-        <signaturePropFile>TestRampartBasic/client.properties</signaturePropFile>
+        <items>Encrypt</items>
+        <passwordCallbackClass>org.apache.rampart.samples.sample05.PWCBHandler</passwordCallbackClass>
+        <decryptionPropFile>TestRampartBasic/secured-services/client.properties</decryptionPropFile>
       </action>
     </parameter>
-    
- </service>
+</service>

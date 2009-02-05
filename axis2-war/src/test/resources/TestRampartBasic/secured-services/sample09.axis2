@@ -25,7 +25,7 @@
             <user>client</user>
             <encryptionKeyIdentifier>EmbeddedKeyName</encryptionKeyIdentifier>
             <EmbeddedKeyCallbackClass>org.apache.rampart.samples.sample09.PWCBHandler</EmbeddedKeyCallbackClass>
-            <encryptionPropFile>TestRampartBasic/client.properties</encryptionPropFile>
+            <encryptionPropFile>TestRampartBasic/secured-services/client.properties</encryptionPropFile>
             <EmbeddedKeyName>SessionKey</EmbeddedKeyName>
         </action>
     </parameter>
@@ -34,7 +34,7 @@
         <action>
             <items>Encrypt</items>
             <passwordCallbackClass>org.apache.rampart.samples.sample09.PWCBHandler</passwordCallbackClass>
-            <decryptionPropFile>TestRampartBasic/client.properties</decryptionPropFile>
+            <decryptionPropFile>TestRampartBasic/secured-services/client.properties</decryptionPropFile>
         </action>
     </parameter>
 

@@ -6,5 +6,5 @@ derby.log
 .project
 *.iml
 *.ipr
-*.iwl
+*.iws
 *.swp
