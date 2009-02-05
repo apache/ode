@@ -221,20 +221,16 @@
         <!--  System pre defined phases       -->
         <phase name="Transport">
             <handler name="RequestURIBasedDispatcher"
-                     class="org.apache.axis2.dispatchers.RequestURIBasedDispatcher">
-                <order phase="Transport"/>
-            </handler>
+                     class="org.apache.axis2.dispatchers.RequestURIBasedDispatcher"/>
             <handler name="SOAPActionBasedDispatcher"
-                     class="org.apache.axis2.dispatchers.SOAPActionBasedDispatcher">
-                <order phase="Transport"/>
-            </handler>
+                     class="org.apache.axis2.dispatchers.SOAPActionBasedDispatcher"/>
             <handler name="ODEAxisDispatcher"
-                     class="org.apache.ode.axis2.hooks.ODEAxisDispatcher"/>
+                     class="org.apache.ode.axis2.hooks.ODEAxisServiceDispatcher"/>
         </phase>
         <phase name="Security"/>
         <phase name="Addressing">
             <handler name="ODEAxisDispatcher"
-                     class="org.apache.ode.axis2.hooks.ODEAxisDispatcher"/>
+                     class="org.apache.ode.axis2.hooks.ODEAxisOperationDispatcher"/>
             <handler name="AddressingBasedDispatcher"
                      class="org.apache.axis2.dispatchers.AddressingBasedDispatcher">
                 <order phase="Addressing"/>
