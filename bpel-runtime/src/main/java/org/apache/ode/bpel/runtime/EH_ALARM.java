@@ -216,7 +216,7 @@ class EH_ALARM extends BpelJacobRunnable {
                     if (!_stopped && _oalarm.repeatExpr != null) {
                         Calendar next = Calendar.getInstance();
                         try {
-                            getBpelRuntimeContext().getExpLangRuntime().evaluateAsDuration(_oalarm.forExpr, getEvaluationContext()).addTo(next);
+                            getBpelRuntimeContext().getExpLangRuntime().evaluateAsDuration(_oalarm.repeatExpr, getEvaluationContext()).addTo(next);
                         } catch (EvaluationException e) {
                             throw new InvalidProcessException(e);
                         } catch (FaultException e) {
