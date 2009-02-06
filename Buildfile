@@ -25,8 +25,8 @@ require "tasks/xmlbeans"
 
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "2.0-beta1-SNAPSHOT"
-NEXT_VERSION = "2.0-beta2"
+VERSION_NUMBER = "2.0-beta1"
+NEXT_VERSION = "2.0-beta1"
 
 # finds one or artifacts by a regex in a set of artifacts
 def findArtifacts(artifacts, expr)
