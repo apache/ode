@@ -1,0 +1,81 @@
+<process xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:op="http://www.w3.org/2005/xpath-functions"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:test="http://xxx/yyy"
+         xmlns:testws="http://xxx/yyy/ws"
+         xmlns:ode="http://www.apache.org/ode/type/extension"
+         xmlns:fn="http://www.w3.org/2005/02/xpath-functions"
+         xmlns:dbg="java:tc.Test"
+         name="test"
+         targetNamespace="http://xxx/yyy/bpel"
+         queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+         expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+
+   <import location="test.wsdl"
+           namespace="http://xxx/yyy/ws"
+           importType="http://schemas.xmlsoap.org/wsdl/"/>
+
+  <partnerLinks>
+    <partnerLink name="test-pl" partnerLinkType="testws:test-plt" myRole="testService" />
+  </partnerLinks>
+  <variables>
+    <!-- invoking message for this process.  -->
+    <variable name="test-req-msg" messageType="testws:test-request-msg" />
+    <!-- response message for this process.  -->
+    <variable name="test-resp-msg" messageType="testws:test-response-msg" />
+    <variable name="id" type="xsd:string"/>
+
+    <variable name="is-it" type="xsd:boolean" />
+    <variable name="is-that" type="xsd:boolean" />
+  </variables>
+  <sequence name="HiddenSequence">
+    <receive createInstance="yes" name="Receive__test-request" partnerLink="test-pl"
+             variable="test-req-msg" portType="testws:testInterface" operation="test-op" />
+    <assign name="Assign__credentials_from_header">
+      <copy>
+        <from><literal>false</literal></from>
+        <to>$is-it</to>
+      </copy>
+      <copy>
+        <from><literal>false</literal></from>
+        <to>$is-that</to>
+      </copy>
+      <copy>
+        <from>string(false)</from>
+        <to>$id</to>
+      </copy>
+      <copy>
+        <from>string("")</from>
+        <to>$id</to>
+      </copy>
+      <copy>
+        <from>string($is-it)</from>
+        <to>$id</to>
+      </copy>
+      <copy>
+        <from>xsd:string(($is-it or $is-that))</from>
+        <to>$id</to>
+      </copy>
+      <copy>
+        <from>string(not($is-it or $is-that))</from>
+        <to>$id</to>
+      </copy>
+    </assign>
+    <assign name="Assign__test_response">
+      <copy>
+        <from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
+        <![CDATA[
+        <test-response xmlns="http://xxx/yyy">
+            <id>{$id}</id>
+        </test-response>
+        ]]>
+        </from>
+        <to variable="test-resp-msg" part="test-resp-part"></to>
+      </copy>
+    </assign>
+    <reply name="Reply__test_response" partnerLink="test-pl"
+           portType="testws:testInterface"
+           operation="test-op" variable="test-resp-msg" />
+  </sequence>
+</process>
