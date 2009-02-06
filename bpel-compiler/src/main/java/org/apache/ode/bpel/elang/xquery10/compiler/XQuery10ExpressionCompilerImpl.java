@@ -29,6 +29,7 @@ import java.util.Set;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xquery.XQConnection;
 import javax.xml.xquery.XQConstants;
 import javax.xml.xquery.XQDataSource;
@@ -254,7 +255,12 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
             		}
             	}
             }
-            exp.executeQuery();
+            // evaluate the expression so as to initialize the variables
+            try { 
+                exp.executeQuery();
+            } catch (XQException xpee) { 
+            	// swallow errors caused by uninitialized variables 
+            }
         } catch (XQException xqe) {
             __log.debug(xqe);
             __log.info("Couldn't validate properly expression " + xqueryStr);
