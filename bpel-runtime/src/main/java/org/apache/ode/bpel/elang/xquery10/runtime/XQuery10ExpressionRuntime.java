@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.xml.namespace.QName;
@@ -38,6 +39,7 @@ import javax.xml.xquery.XQItemType;
 import javax.xml.xquery.XQPreparedExpression;
 import javax.xml.xquery.XQResultSequence;
 import javax.xml.xquery.XQSequence;
+import javax.xml.xquery.XQSequenceType;
 import javax.xml.xquery.XQStaticContext;
 
 import net.sf.saxon.Configuration;
@@ -359,7 +361,7 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
                 Object value = variableResolver.resolveVariable(variable);
                 
                 // Figure out type of variable
-                XQItemType xqType = getItemType(xqconn, value);
+                XQSequenceType xqType = getItemType(xqconn, value);
                 
                 // Saxon doesn't like binding sequences to variables
                 if (value instanceof Node) {
@@ -381,7 +383,9 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
                 	if (value instanceof XQSequence) {
                 		exp.bindSequence(variable, (XQSequence) value);
                 	} else {
-		                exp.bindObject(variable, value, xqType);
+                		if (xqType instanceof XQItemType) {
+			                exp.bindObject(variable, value, (XQItemType) xqType);
+                		}
                 	}
                 }
             }
@@ -501,6 +505,7 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
             itemValue = item.getAtomicValue();
 
             break;
+            
         }
 
         return itemValue;
@@ -516,21 +521,17 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
      *
      * @throws XQException XQException 
      */
-    private XQItemType getItemType(XQConnection xqconn, Object value) throws XQException {
-        XQItemType xqType = null;
+    private XQSequenceType getItemType(XQConnection xqconn, Object value) throws XQException {
+        XQSequenceType xqType = null;
         if (value instanceof Long) {
             xqType = xqconn.createAtomicType(XQItemType.XQBASETYPE_LONG);
         } else if (value instanceof String) {
             xqType = xqconn.createAtomicType(XQItemType.XQBASETYPE_STRING);
-        } else if (value instanceof NodeList) {
-            NodeList nodeList = (NodeList) value;
-
-            if (nodeList.getLength() == 1) {
-                xqType = xqconn.createNodeType();
-                value = nodeList.item(0);
-            } else {
-                value = null;
-            }
+        } else if (value instanceof Node) {
+        	xqType = xqconn.createNodeType();
+        } else if (value instanceof NodeList || value instanceof XQSequence) {
+            XQItemType xqItemType = xqconn.createNodeType();
+            xqType = xqconn.createSequenceType(xqItemType, XQSequenceType.OCC_ZERO_OR_MORE);
         }
         return xqType;
     }
@@ -563,11 +564,28 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
             }
 
             resultValue = list;
-        } else {
-            resultValue = getItemValue(result.getItem());
-            if (resultValue instanceof Node) {
-            	resultValue = DOMUtils.cloneNode(document, (Node) resultValue); 
-            }
+        } else if (XPathConstants.NODE.equals(type)) {
+        	XQItem item = null;
+    		if (result.count() > 0) {
+    			result.first();
+    			if (result.isOnItem()) {
+    				item = result.getItem();
+    			}
+    		}
+    		if (item != null) {
+	            resultValue = getItemValue(item);
+	            if (resultValue instanceof Node) {
+	            	resultValue = DOMUtils.cloneNode(document, (Node) resultValue); 
+	            }
+    		}
+        } else if (XPathConstants.STRING.equals(type)) {
+        	resultValue = result.getSequenceAsString(new Properties());
+        } else if (XPathConstants.NUMBER.equals(type)) {
+        	resultValue = result.getSequenceAsString(new Properties());
+    		resultValue = Integer.parseInt((String) resultValue);
+        } else if (XPathConstants.BOOLEAN.equals(type)) {
+        	resultValue = result.getSequenceAsString(new Properties());
+    		resultValue = Boolean.parseBoolean((String) resultValue);
         }
     	return resultValue;
     }
