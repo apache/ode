@@ -19,7 +19,9 @@
 
 package org.apache.ode.bpel.compiler.v2.xpath20;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
@@ -30,6 +32,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import javax.xml.xpath.XPathFactoryConfigurationException;
 
+import net.sf.saxon.om.Name11Checker;
 import net.sf.saxon.om.NamespaceConstant;
 
 import org.apache.commons.logging.Log;
@@ -155,6 +158,14 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
             } catch (XPathExpressionException xpee) { 
             	// swallow errors caused by uninitialized variable 
             }
+            for (String varExpr : extractVariableExprs(xpathStr)) {
+                expr = xpe.compile(varExpr);
+            	try {
+            		expr.evaluate(node);
+            	} catch (XPathExpressionException xpee) {
+                	// swallow errors caused by uninitialized variable 
+            	}
+            }
         } catch (XPathFactoryConfigurationException xpfce) {
             __log.debug(xpfce);
             __log.info("Couldn't validate properly expression " + xpathStr);
@@ -173,5 +184,60 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
     public Map<String, String> getProperties() {
         return _properties;
     }
+
+    /**
+     * Returns the list of variable references in the given XPath expression
+     * that may not have been resolved properly, which is the case especially 
+     * if the expression contains a function, which short circuited the evaluation.
+     *  
+     * @param xpathStr
+     * @return list of variable expressions that may not have been resolved properly
+     */
+    private List<String> extractVariableExprs(String xpathStr) {    	
+		ArrayList<String> variableExprs = new ArrayList<String>();
+		int firstVariable = xpathStr.indexOf("$"), 
+			lastVariable = xpathStr.lastIndexOf("$"),
+			firstFunction = xpathStr.indexOf("("); 
+		if ((firstVariable > 0 && // the xpath references a variable
+				firstFunction > 0) || // the xpath contains a function
+			(firstVariable < lastVariable)) { // the xpath references multiple variables  
+			// most likely, the variable reference has not been resolved, so make that happen
+			StringBuffer variableExpr = new StringBuffer();
+			boolean quoted = false, doubleQuoted = false, variable = false;
+			Name11Checker nameChecker = Name11Checker.getInstance();
+			for (int index = 0; index < xpathStr.length(); index++) {
+				char ch = xpathStr.charAt(index);
+				if (ch == '\''){
+					quoted = !quoted;
+				}
+				if (ch == '\"') {
+					doubleQuoted = !doubleQuoted;
+				}
+				if (quoted || doubleQuoted){
+					continue;
+				}
+				if (ch == '$') {
+					variable = true;
+					variableExpr.setLength(0);
+					variableExpr.append(ch);
+				} else {
+					if (variable) {
+						variableExpr.append(ch);
+						// in the name is qualified, don't check if its a qname when we're at the ":" character
+						if (ch == ':') {
+							continue;
+						}
+						if (index == xpathStr.length() || 
+								!nameChecker.isQName(variableExpr.substring(1))) {
+							variable = false;
+							variableExpr.setLength(variableExpr.length() - 1);
+							variableExprs.add(variableExpr.toString());
+						}
+					}
+				}
+			}
+		}
+		return variableExprs;
+	}
 
 }

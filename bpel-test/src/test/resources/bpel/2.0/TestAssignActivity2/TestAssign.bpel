@@ -43,6 +43,8 @@
         <variable name="myVar" messageType="test:TestAssignMessage"/>
         <variable name="otherMsgVar" messageType="test:TestAssignMessage"/>
         <variable name="strVar" type="xsd:string"/>
+        <variable name="txtVar" type="xsd:string"/>
+        <variable name="eprVar" type="xsd:anyType"/>
         <variable name="intVar" type="xsd:int"/>
     </variables>
 
@@ -77,6 +79,34 @@
                 <to>$otherMsgVar.TestPart</to>
             </copy>
         </assign>
+
+        <assign name="assign2">
+            <copy>
+                <from><literal>1</literal></from>
+                <to variable="intVar"/>
+            </copy>
+            <copy>
+                <from><literal>1</literal></from>
+                <to variable="intVar"/>
+            </copy>
+            <copy>
+                <from>ode:process-property("dd:epr")/addr:EndpointReference/child::node()[position()=$intVar]</from>
+                <to variable="strVar"/>
+            </copy>
+            <copy>
+                <from>ode:process-property("dd:epr")/addr:EndpointReference</from>
+                <to>$eprVar</to>
+            </copy>
+            <copy>
+                <from>$eprVar/child::node()[$intVar]</from>
+                <to variable="strVar"/>
+            </copy>
+            <copy>
+                <from>concat($eprVar/text()[1], $ode:pid)</from>
+                <to variable="strVar"/>
+            </copy>
+        </assign>
+
         <reply name="end" partnerLink="TestAssignPartnerLink" portType="test:TestAssignPortType"
                operation="testAssign" variable="otherMsgVar"/>
     </sequence>
