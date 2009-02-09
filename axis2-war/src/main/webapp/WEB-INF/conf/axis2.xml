@@ -224,13 +224,13 @@
                      class="org.apache.axis2.dispatchers.RequestURIBasedDispatcher"/>
             <handler name="SOAPActionBasedDispatcher"
                      class="org.apache.axis2.dispatchers.SOAPActionBasedDispatcher"/>
-            <handler name="ODEAxisDispatcher"
-                     class="org.apache.ode.axis2.hooks.ODEAxisDispatcher"/>
+            <handler name="ODEAxisServiceDispatcher"
+                     class="org.apache.ode.axis2.hooks.ODEAxisServiceDispatcher"/>
         </phase>
         <phase name="Security"/>
         <phase name="Addressing">
-            <handler name="ODEAxisDispatcher"
-                     class="org.apache.ode.axis2.hooks.ODEAxisDispatcher"/>
+            <handler name="ODEAxisOperationDispatcher"
+                     class="org.apache.ode.axis2.hooks.ODEAxisOperationDispatcher"/>
             <handler name="AddressingBasedDispatcher"
                      class="org.apache.axis2.dispatchers.AddressingBasedDispatcher"/>
         </phase>
