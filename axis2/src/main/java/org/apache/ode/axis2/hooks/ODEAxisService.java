@@ -36,11 +36,8 @@ import javax.wsdl.Port;
 import javax.wsdl.Service;
 import javax.wsdl.extensions.soap.SOAPAddress;
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.deployment.ServiceBuilder;
 import org.apache.axis2.description.*;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.MessageReceiver;
@@ -287,7 +284,7 @@ public class ODEAxisService {
                 Part part = (Part) parts.iterator().next();
                 // Parts are types, it's rpc/enc, no mapping needs to be declared
                 if (part.getElementName() != null)
-                    ODEAxisDispatcher.addElmtToOpMapping(axisServiceName, wsdlOp.getName(), part.getElementName()
+                    ODEAxisOperationDispatcher.addElmtToOpMapping(axisServiceName, wsdlOp.getName(), part.getElementName()
                             .getLocalPart());
             }
         }

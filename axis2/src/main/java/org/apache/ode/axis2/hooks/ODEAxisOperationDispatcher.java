@@ -38,14 +38,13 @@ import javax.xml.namespace.QName;
 /**
  * Dispatches the service based on the information from the target endpoint URL.
  */
-public class ODEAxisDispatcher extends AbstractDispatcher {
-    private static final long serialVersionUID = 2809507126685915170L;
+public class ODEAxisOperationDispatcher extends AbstractDispatcher {
 
     private static MultiKeyMap _elmtToOperation = new MultiKeyMap();
 
     /** Field NAME */
-    public static final String NAME = "ODEAxisDispatcher";
-    private static final Log log = LogFactory.getLog(ODEAxisDispatcher.class);
+    public static final String NAME = "ODEAxisOperationDispatcher";
+    private static final Log log = LogFactory.getLog(ODEAxisOperationDispatcher.class);
     QName operationName = null;
 
     public AxisOperation findOperation(AxisService service, MessageContext messageContext)
@@ -107,53 +106,12 @@ public class ODEAxisDispatcher extends AbstractDispatcher {
      * @see org.apache.axis2.engine.AbstractDispatcher#findService(org.apache.axis2.context.MessageContext)
      */
     public AxisService findService(MessageContext messageContext) throws AxisFault {
-        EndpointReference toEPR = messageContext.getTo();
-
-        if (toEPR != null) {
-            log.debug("Checking for Service using target endpoint address : " + toEPR.getAddress());
-
-            // The only thing we understand if a service name that
-            // follows /processes/ in the request URL.
-            String path = parseRequestURLForService(toEPR.getAddress());
-            if (path != null) {
-                AxisConfiguration registry =
-                        messageContext.getConfigurationContext().getAxisConfiguration();
-                AxisService service = registry.getService(path);
-                log.debug("Found service in registry from name " + path + ": " + service);
-                return service;
-            }
-        }
-        log.warn("No service has been found!");
+        // #ODEAxisServiceDispatcher will do that
         return null;
     }
 
     public void initDispatcher() {
         init(new HandlerDescription(NAME));
-    }
-
-    /**
-     * Obtain the service name from the request URL. The request URL is
-     * expected to use the path "/processes/" under which all processes
-     * and their services are listed. Returns null if the path does not
-     * contain this part.
-     */
-    protected String parseRequestURLForService(String path) {
-        int index = path.indexOf("/processes/");
-        if (-1 != index) {
-            String service;
-
-            int serviceStart = index + "/processes/".length();
-            if (path.length() > serviceStart + 1) {
-                service = path.substring(serviceStart);
-                // Path may contain query string, not interesting for us.
-                int queryIndex = service.indexOf('?');
-                if (queryIndex > 0) {
-                    service = service.substring(0, queryIndex);
-                }
-                return service;
-            }
-        }
-        return null;
     }
 
     /**
@@ -168,4 +126,5 @@ public class ODEAxisDispatcher extends AbstractDispatcher {
         if (operationName.equals(elmtName)) return;
         _elmtToOperation.put(axisServiceName, elmtName, operationName);
     }
+
 }
