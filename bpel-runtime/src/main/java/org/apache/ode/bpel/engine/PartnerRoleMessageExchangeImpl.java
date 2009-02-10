@@ -34,7 +34,7 @@ import javax.wsdl.Operation;
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
 
-protected class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements PartnerRoleMessageExchange {
+public class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements PartnerRoleMessageExchange {
     private static final Log LOG = LogFactory.getLog(PartnerRoleMessageExchangeImpl.class);
 
     private PartnerRoleChannel _channel;
