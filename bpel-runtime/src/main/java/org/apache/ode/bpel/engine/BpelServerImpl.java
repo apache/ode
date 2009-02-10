@@ -91,7 +91,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     private Properties _configProperties;
     
     BpelEngineImpl _engine;
-    BpelDatabase _db;
+    protected BpelDatabase _db;
 
     /**
      * Management lock for synchronizing management operations and preventing
@@ -212,13 +212,18 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             _db = new BpelDatabase(_contexts.dao, _contexts.scheduler);
             _state = State.INIT;
             
-            _engine = new BpelEngineImpl(_contexts);
+            _engine = createBpelEngineImpl(_contexts);
 
         } finally {
             _mngmtLock.writeLock().unlock();
         }
     }
 
+    // enable extensibility
+    protected BpelEngineImpl createBpelEngineImpl(Contexts contexts) {
+    	return new BpelEngineImpl(contexts);
+    }
+    
     public void shutdown() throws BpelEngineException {
         _mngmtLock.writeLock().lock();
         try {
@@ -278,7 +283,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             __log.debug("Registering process " + conf.getProcessId() + " with server.");
 
-            BpelProcess process = new BpelProcess(conf);
+            BpelProcess process = createBpelProcess(conf);
 
             _engine.registerProcess(process);
             _registeredProcesses.add(process);
@@ -290,6 +295,11 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         }
     }
 
+    // enable extensibility
+    protected BpelProcess createBpelProcess(ProcessConf conf) {
+    	return new BpelProcess(conf);
+    }
+    
     public void unregister(QName pid) throws BpelEngineException {
         if (__log.isTraceEnabled())
             __log.trace("unregister: " + pid);

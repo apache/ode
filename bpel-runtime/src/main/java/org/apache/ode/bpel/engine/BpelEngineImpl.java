@@ -213,8 +213,7 @@ public class BpelEngineImpl implements BpelEngine {
                 PortType ptype = plink.partnerRolePortType;
                 Operation op = plink.getPartnerRoleOperation(mexdao.getOperation());
                 // TODO: recover Partner's EPR
-                mex = new PartnerRoleMessageExchangeImpl(this, mexdao, ptype, op, null, plink.hasMyRole() ? process
-                        .getInitialMyRoleEPR(plink) : null, process.getPartnerRoleChannel(plink));
+                mex = createPartnerRoleMessageExchangeImpl(mexdao, ptype, op, plink, process);
             }
             break;
         case MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE:
@@ -233,6 +232,13 @@ public class BpelEngineImpl implements BpelEngine {
         }
 
         return mex;
+    }
+    
+    // enable extensibility
+    protected PartnerRoleMessageExchangeImpl createPartnerRoleMessageExchangeImpl(
+    		MessageExchangeDAO mexdao, PortType ptype, Operation op, OPartnerLink plink, BpelProcess process) {
+    	return new PartnerRoleMessageExchangeImpl(this, mexdao, ptype, op, null, plink.hasMyRole() ? process
+                .getInitialMyRoleEPR(plink) : null, process.getPartnerRoleChannel(plink));
     }
 
     BpelProcess unregisterProcess(QName process) {
