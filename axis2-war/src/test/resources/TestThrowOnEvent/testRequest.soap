@@ -1,0 +1,8 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:sam="http://sample.bpel.org/bpel/sample">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <sam:OnEventCorrelationRequest>
+         <sam:input>101</sam:input>
+      </sam:OnEventCorrelationRequest>
+   </soapenv:Body>
+</soapenv:Envelope>
