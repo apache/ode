@@ -162,6 +162,14 @@ public class BpelProcess {
         BpelRuntimeContextImpl processInstance = createRuntimeContext(instanceDAO, null, null);
         processInstance.recoverActivity(channel, activityId, action, fault);
     }
+    
+    protected DebuggerSupport createDebuggerSupport() {
+    	return new DebuggerSupport(this);
+    }
+    
+    protected DebuggerSupport getDebuggerSupport() {
+    	return _debugger;
+    }
 
     static String generateMessageExchangeIdentifier(String partnerlinkName, String operationName) {
         StringBuffer sb = new StringBuffer(partnerlinkName);
@@ -481,7 +489,7 @@ public class BpelProcess {
         }
     }
 
-    ProcessDAO getProcessDAO() {
+    protected ProcessDAO getProcessDAO() {
         return _pconf.isTransient() ? _engine._contexts.inMemDao.getConnection().getProcess(_pid) : getEngine()._contexts.dao
                 .getConnection().getProcess(_pid);
     }
@@ -520,7 +528,7 @@ public class BpelProcess {
     void activate(BpelEngineImpl engine) {
         _engine = engine;
         _sharedEps = _engine.getSharedEndpoints();
-        _debugger = new DebuggerSupport(this);
+        _debugger = createDebuggerSupport();
 
         __log.debug("Activating " + _pid);
         // Activate all the my-role endpoints.
@@ -573,7 +581,7 @@ public class BpelProcess {
         return _pconf.isSharedService(endpoint.serviceName);
     }
 
-    EndpointReference getInitialPartnerRoleEPR(OPartnerLink link) {
+    protected EndpointReference getInitialPartnerRoleEPR(OPartnerLink link) {
         try {
             _hydrationLatch.latch(1);
             PartnerLinkPartnerRoleImpl prole = _partnerRoles.get(link);
@@ -585,7 +593,7 @@ public class BpelProcess {
         }
     }
 
-    Endpoint getInitialPartnerRoleEndpoint(OPartnerLink link) {
+    protected Endpoint getInitialPartnerRoleEndpoint(OPartnerLink link) {
         try {
             _hydrationLatch.latch(1);
             PartnerLinkPartnerRoleImpl prole = _partnerRoles.get(link);
@@ -597,7 +605,7 @@ public class BpelProcess {
         }
     }
 
-    EndpointReference getInitialMyRoleEPR(OPartnerLink link) {
+    protected EndpointReference getInitialMyRoleEPR(OPartnerLink link) {
         try {
             _hydrationLatch.latch(1);
             PartnerLinkMyRoleImpl myRole = _myRoles.get(link);
@@ -609,11 +617,11 @@ public class BpelProcess {
         }
     }
 
-    QName getPID() {
+    protected QName getPID() {
         return _pid;
     }
 
-    PartnerRoleChannel getPartnerRoleChannel(OPartnerLink partnerLink) {
+    protected PartnerRoleChannel getPartnerRoleChannel(OPartnerLink partnerLink) {
         try {
             _hydrationLatch.latch(1);
             PartnerLinkPartnerRoleImpl prole = _partnerRoles.get(partnerLink);
@@ -707,7 +715,7 @@ public class BpelProcess {
         }
     }
 
-    BpelEngineImpl getEngine() {
+    protected BpelEngineImpl getEngine() {
         return _engine;
     }
 
@@ -736,7 +744,7 @@ public class BpelProcess {
     }
 
     /** Create a version-appropriate runtime context. */
-    BpelRuntimeContextImpl createRuntimeContext(ProcessInstanceDAO dao, PROCESS template,
+    protected BpelRuntimeContextImpl createRuntimeContext(ProcessInstanceDAO dao, PROCESS template,
                                                 MyRoleMessageExchangeImpl instantiatingMessageExchange) {
         return new BpelRuntimeContextImpl(this, dao, template, instantiatingMessageExchange);
 

@@ -34,14 +34,14 @@ import javax.wsdl.Operation;
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
 
-class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements PartnerRoleMessageExchange {
+protected class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements PartnerRoleMessageExchange {
     private static final Log LOG = LogFactory.getLog(PartnerRoleMessageExchangeImpl.class);
 
     private PartnerRoleChannel _channel;
     private EndpointReference _myRoleEPR;
     private int responsesReceived;
     
-    PartnerRoleMessageExchangeImpl(BpelEngineImpl engine, MessageExchangeDAO dao, PortType portType,
+    protected PartnerRoleMessageExchangeImpl(BpelEngineImpl engine, MessageExchangeDAO dao, PortType portType,
             Operation operation, 
             EndpointReference epr,
             EndpointReference myRoleEPR,

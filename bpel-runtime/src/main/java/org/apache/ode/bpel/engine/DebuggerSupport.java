@@ -56,7 +56,7 @@ import java.util.Set;
  *
  * @todo Need to revisit the whole stepping/suspend/resume mechanism.
  */
-class DebuggerSupport {
+public class DebuggerSupport {
 
     private static final Log __log = LogFactory.getLog(DebuggerSupport.class);
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
@@ -78,7 +78,7 @@ class DebuggerSupport {
      * Constructor.
      * @param db BPEL process database
      */
-    DebuggerSupport(BpelProcess process) {
+    protected DebuggerSupport(BpelProcess process) {
         _process = process;
         _db = new BpelProcessDatabase(_process._engine._contexts.dao,
                 _process._engine._contexts.scheduler,
@@ -86,28 +86,28 @@ class DebuggerSupport {
 
     }
 
-    void enable(boolean enabled){
+    public void enable(boolean enabled){
         _enabled = enabled;
     }
 
-    Breakpoint[] getGlobalBreakpoints(){
+    public Breakpoint[] getGlobalBreakpoints(){
         return _globalBreakPoints;
     }
 
-    Breakpoint[] getBreakpoints(Long pid){
+    public Breakpoint[] getBreakpoints(Long pid){
         Breakpoint[] arr = _instanceBreakPoints.get(pid);
         return (arr == null)
                 ? EMPTY_BP
                 : arr;
     }
 
-    void addGlobalBreakpoint(Breakpoint breakpoint){
+    public void addGlobalBreakpoint(Breakpoint breakpoint){
         Collection<Breakpoint> c = CollectionUtils.makeCollection(ArrayList.class, _globalBreakPoints);
         c.add(breakpoint);
         _globalBreakPoints = c.toArray(new Breakpoint[c.size()]);
     }
 
-    void addBreakpoint(Long pid, Breakpoint breakpoint){
+    public void addBreakpoint(Long pid, Breakpoint breakpoint){
         Breakpoint[] bpArr = _instanceBreakPoints.get(pid);
         if(bpArr == null) {
             bpArr = new Breakpoint[]{breakpoint};
@@ -120,13 +120,13 @@ class DebuggerSupport {
         _instanceBreakPoints.put(pid, bpArr);
     }
 
-    void removeGlobalBreakpoint(Breakpoint breakpoint){
+    public void removeGlobalBreakpoint(Breakpoint breakpoint){
         Collection<Breakpoint> c = CollectionUtils.makeCollection(ArrayList.class, _globalBreakPoints);
         c.remove(breakpoint);
         _globalBreakPoints = c.toArray(new Breakpoint[c.size()]);
     }
 
-    void removeBreakpoint(Long pid, Breakpoint breakpoint){
+    public void removeBreakpoint(Long pid, Breakpoint breakpoint){
         Breakpoint[] bpArr = _instanceBreakPoints.get(pid);
         if(bpArr != null){
             Collection<Breakpoint> c = CollectionUtils.makeCollection(ArrayList.class, bpArr);

@@ -49,6 +49,7 @@ import org.apache.ode.bpel.evt.ProcessInstanceStateChangeEvent;
 import org.apache.ode.bpel.evt.ProcessMessageExchangeEvent;
 import org.apache.ode.bpel.evt.ProcessTerminationEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
+import org.apache.ode.bpel.iapi.BpelEngine;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
@@ -94,7 +95,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Document;
 
-class BpelRuntimeContextImpl implements BpelRuntimeContext {
+protected class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     private static final Log __log = LogFactory.getLog(BpelRuntimeContextImpl.class);
 
@@ -711,11 +712,11 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         // (for callback mechanism).
         EndpointReference myRoleEndpoint = partnerLink.partnerLink.hasMyRole() ? _bpelProcess
                 .getInitialMyRoleEPR(partnerLink.partnerLink) : null;
-        PartnerRoleMessageExchangeImpl mex = new PartnerRoleMessageExchangeImpl(_bpelProcess._engine, mexDao,
-                partnerLink.partnerLink.partnerRolePortType, operation, partnerEpr, myRoleEndpoint, _bpelProcess
-                .getPartnerRoleChannel(partnerLink.partnerLink));
-
+        PartnerRoleMessageExchangeImpl mex = 
+        	createPartnerRoleMessageExchangeImpl(mexDao, partnerLink,
+        			operation, partnerEpr, myRoleEndpoint);
         List<BpelProcess> p2pProcesses = null;
+        
         Endpoint partnerEndpoint = _bpelProcess.getInitialPartnerRoleEndpoint(partnerLink.partnerLink);
         if (partnerEndpoint != null)
             p2pProcesses = _bpelProcess.getEngine().route(partnerEndpoint.serviceName, mex.getRequest());
@@ -796,6 +797,19 @@ class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
 
         return mexDao.getMessageExchangeId();
+    }
+    
+    // enable extensibility
+    protected PartnerRoleMessageExchangeImpl createPartnerRoleMessageExchangeImpl(MessageExchangeDAO mexDao,
+        		PartnerLinkInstance partnerLink, Operation operation, EndpointReference partnerEpr, 
+        		EndpointReference myRoleEndpoint) {
+    	return new PartnerRoleMessageExchangeImpl(getBpelProcess().getEngine(), mexDao,
+                partnerLink.partnerLink.partnerRolePortType, operation, partnerEpr, myRoleEndpoint,
+                getBpelProcess().getPartnerRoleChannel(partnerLink.partnerLink));
+    }
+    
+    protected BpelProcess getBpelProcess() {
+    	return _bpelProcess;
     }
 
     private void scheduleInvokeCheck(PartnerRoleMessageExchangeImpl mex) {
