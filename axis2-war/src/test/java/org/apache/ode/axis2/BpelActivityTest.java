@@ -5,12 +5,8 @@ import static org.testng.Assert.fail;
 import org.apache.log4j.Logger;
 import org.testng.annotations.Test;
 
-public class BpelActivityTest extends Axis2TestBase implements ODEConfigDirAware {
-	public String getODEConfigDir() {
-		return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.hib-derby";
-	}
-
-//	@Test(dataProvider="configs")
+public class BpelActivityTest extends Axis2TestBase {
+	@Test(dataProvider="configs")
     public void testThrowOnEvent() throws Exception {
 		final String bundleName = "TestThrowOnEvent";
         // deploy the required service
