@@ -21,6 +21,7 @@ package org.apache.ode.bpel.engine;
 
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -119,12 +120,12 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
         if (!processInterceptors(this, InterceptorInvoker.__onBpelServerInvoked))
             return null;
 
-        List<BpelProcess> targets = _engine.route(getDAO().getCallee(), request);
+        BpelProcess target = _process;
 
         if (__log.isDebugEnabled())
-            __log.debug("invoke() EPR= " + _epr + " ==> " + targets);
+            __log.debug("invoke() EPR= " + _epr + " ==> " + target);
 
-        if (targets == null || targets.isEmpty()) {
+        if (target == null) {
             if (__log.isWarnEnabled())
                 __log.warn(__msgs.msgUnknownEPR("" + _epr));
 
@@ -132,29 +133,24 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
             setFailure(MessageExchange.FailureType.UNKNOWN_ENDPOINT, null, null);
             return null;
         } else {
-        	for (BpelProcess target : targets) {
-        		if (target.getPID().equals(_process.getPID())) {
-		            // Schedule a new job for invocation
-		            WorkEvent we = new WorkEvent();
-		            we.setType(WorkEvent.Type.INVOKE_INTERNAL);
-		            if (target.isInMemory()) we.setInMem(true);
-		            we.setProcessId(target.getPID());
-		            we.setMexId(getDAO().getMessageExchangeId());
-		
-		            if (getOperation().getOutput() != null) {
-		                ResponseCallback callback = new ResponseCallback();
-		                _waitingCallbacks.put(getClientId(), callback);
-		            }
-		
-		            setStatus(Status.ASYNC);
-		            if (target.isInMemory())
-		                _engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
-		            else
-		                _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
-		            return new ResponseFuture(getClientId());
-        		}
-        	}
-        	return null;
+            // Schedule a new job for invocation
+            WorkEvent we = new WorkEvent();
+            we.setType(WorkEvent.Type.INVOKE_INTERNAL);
+            if (target.isInMemory()) we.setInMem(true);
+            we.setProcessId(target.getPID());
+            we.setMexId(getDAO().getMessageExchangeId());
+
+            if (getOperation().getOutput() != null) {
+                ResponseCallback callback = new ResponseCallback();
+                _waitingCallbacks.put(getClientId(), callback);
+            }
+
+            setStatus(Status.ASYNC);
+            if (target.isInMemory())
+                _engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
+            else
+                _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+            return new ResponseFuture(getClientId());
         }
     }
 

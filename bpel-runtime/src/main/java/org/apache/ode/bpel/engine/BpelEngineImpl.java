@@ -173,7 +173,6 @@ public class BpelEngineImpl implements BpelEngine {
      * 
      * @param target
      * @param meps
-     * @param istyle
      * @return
      * @throws BpelEngineException
      */
@@ -247,44 +246,19 @@ public class BpelEngineImpl implements BpelEngine {
             if (__log.isDebugEnabled())
                 __log.debug("Deactivating process " + p.getPID());
 
-            Endpoint processEndpoint = null;
-//            	for (Endpoint endpoint : _serviceMap.keySet()) {
-//            		List<BpelProcess> processes = _serviceMap.get(endpoint);
-//            		for (BpelProcess candidate : processes) {
-//            			if (candidate.getPID().equals(process)) {
-//            				processes.remove(candidate);
-//            				processEndpoint = endpoint;
-//            			}
-//            		}
-//            	}
-	            Iterator<Map.Entry<Endpoint,List<BpelProcess>>> serviceIter = _serviceMap.entrySet().iterator();
-	            while (serviceIter.hasNext()) {
-	                Map.Entry<Endpoint,List<BpelProcess>> processEntry = serviceIter.next();
-	                List<BpelProcess> entryProcesses = processEntry.getValue();
-	                for (int i = 0; i < entryProcesses.size(); i++) {
-	                	BpelProcess entryProcess = entryProcesses.get(i);
-	                    if (entryProcess.getPID().equals(process)) {
-	                        processEndpoint = processEntry.getKey();
-	                    	entryProcesses.remove(entryProcess);
-	                    }
-	                }
-	            }
-
-            // Only deactivating if no other process (version) need that endpoint anymore
-            // We're only routing using an endpoint/process map for now which means that deploying
-            // several versions of the same process using the same endpoint (which is the common
-            // case) will override previous deployments endpoints. So checking the endpoint is not
-            // enough, we also have to check other versions of the same process.
-            // A bit clunky, the maps held here should be retought a bit.
-            boolean otherVersions = false;
-            for (BpelProcess bpelProcess : _activeProcesses.values()) {
-                if (bpelProcess.getProcessType().equals(p.getProcessType()))
-                    otherVersions = true;
+            Iterator<Map.Entry<Endpoint,List<BpelProcess>>> serviceIter = _serviceMap.entrySet().iterator();
+            while (serviceIter.hasNext()) {
+                Map.Entry<Endpoint,List<BpelProcess>> processEntry = serviceIter.next();
+                Iterator<BpelProcess> entryProcesses = processEntry.getValue().iterator();
+                while (entryProcesses.hasNext()) {
+                    BpelProcess entryProcess = entryProcesses.next();
+                    if (entryProcess.getPID().equals(process)) {
+                        entryProcesses.remove();
+                    }
+                }
             }
-            // Deactivate process anyway because it now checks for shared endpoints 
-//            if (_serviceMap.get(processEndpoint) == null && !otherVersions) {
-                p.deactivate();
-//            }
+
+            p.deactivate();
         }
         return p;
     }
@@ -307,13 +281,14 @@ public class BpelEngineImpl implements BpelEngine {
             	_serviceMap.put(e, processes);
             }
             // Remove any older version of the process from the list
-            for (int i = 0; i < processes.size(); i++) {
-            	BpelProcess cachedVersion = processes.get(i);
-            	__log.debug("cached version " + cachedVersion.getPID() + " vs registering version " + process.getPID());
-            	if (cachedVersion.getProcessType().equals(process.getProcessType())) {
-            		processes.remove(cachedVersion);
-            		cachedVersion.deactivate();
-            	}
+            Iterator<BpelProcess> processesIter = processes.iterator();
+            while (processesIter.hasNext()) {
+                BpelProcess cachedVersion = processesIter.next();
+                __log.debug("cached version " + cachedVersion.getPID() + " vs registering version " + process.getPID());
+                if (cachedVersion.getProcessType().equals(process.getProcessType())) {
+                    processesIter.remove();
+                    cachedVersion.deactivate();
+                }
             }
             processes.add(process);
         }
