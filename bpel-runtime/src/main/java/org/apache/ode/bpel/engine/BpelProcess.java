@@ -60,6 +60,7 @@ import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
 import org.apache.ode.bpel.runtime.PROCESS;
 import org.apache.ode.bpel.runtime.PropertyAliasEvaluationContext;
+import org.apache.ode.bpel.runtime.InvalidProcessException;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.jacob.soup.ReplacementMap;
 import org.apache.ode.utils.ObjectPrinter;
@@ -375,11 +376,9 @@ public class BpelProcess {
         try {
             _hydrationLatch.latch(1);
             markused();
-
             if (__log.isDebugEnabled()) {
                 __log.debug(ObjectPrinter.stringifyMethodEnter("handleWorkEvent", new Object[] { "jobData", jobData }));
             }
-
 
             WorkEvent we = new WorkEvent(jobData);
 
@@ -389,7 +388,26 @@ public class BpelProcess {
                     __log.debug("InvokeInternal event for mexid " + we.getMexId());
                 }
                 MyRoleMessageExchangeImpl mex = (MyRoleMessageExchangeImpl) _engine.getMessageExchange(we.getMexId());
-                invokeProcess(mex);
+                try {
+                    invokeProcess(mex);
+                } catch (InvalidProcessException e) {
+                    // we're invoking a target process, trying to see if we can retarget the message
+                    // to the current version (only applies when it's a new process creation)
+                    if (e.getCauseCode() == InvalidProcessException.RETIRED_CAUSE_CODE) {
+                        boolean found = false;
+                        for (BpelProcess process : getEngine()._activeProcesses.values()) {
+                            if (process.getConf().getState().equals(org.apache.ode.bpel.iapi.ProcessState.ACTIVE)
+                                    && process.getConf().getType().equals(getConf().getType())) {
+                                we.setProcessId(process._pid);
+                                mex._process = process;
+                                found = true;
+                                process.handleWorkEvent(jobData);
+                                break;
+                            }
+                        }
+                        if (!found) throw e;
+                    } else throw e;
+                }
             } else {
                 // Instance level events
                 ProcessInstanceDAO procInstance = getProcessDAO().getInstance(we.getIID());
