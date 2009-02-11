@@ -1000,6 +1000,38 @@ public class ODEProcess {
      * exists and matches the GUID.
      */
     private void bounceProcessDAO(BpelDAOConnection conn, final QName pid, final long version, final ProcessModel mprocess) {
+    	deleteProcessDAO(conn, pid, version, mprocess);
+    	createProcessDAO(conn, pid, version, mprocess);
+    }
+    
+    private void deleteProcessDAO(BpelDAOConnection conn, final QName pid, final long version, final ProcessModel mprocess) {
+        __log.debug("Creating process DAO for " + pid + " (guid=" + mprocess.getGuid() + ")");
+        try {
+            ProcessDAO old = conn.getProcess(pid);
+            if (old != null) {
+                __log.debug("Found ProcessDAO for " + pid + " with GUID " + old.getGuid());
+                if (mprocess.getGuid() == null) {
+                    // No guid, old version assume its good
+                } else {
+                    if (old.getGuid().equals(mprocess.getGuid())) {
+                        // Guids match, no need to create
+                    } else {
+                        // GUIDS dont match, delete and create new
+                        String errmsg = "ProcessDAO GUID " + old.getGuid() + " does not match " + mprocess.getGuid() + "; replacing.";
+                        __log.debug(errmsg);
+                        old.delete();
+                    }
+                }
+            }
+        } catch (BpelEngineException ex) {
+            throw ex;
+        } catch (Exception dce) {
+            __log.error("DbError", dce);
+            throw new BpelEngineException("DbError", dce);
+        }
+    }
+
+    private void createProcessDAO(BpelDAOConnection conn, final QName pid, final long version, final ProcessModel mprocess) {
         __log.debug("Creating process DAO for " + pid + " (guid=" + mprocess.getGuid() + ")");
         try {
             boolean create = true;
@@ -1017,7 +1049,6 @@ public class ODEProcess {
                         // GUIDS dont match, delete and create new
                         String errmsg = "ProcessDAO GUID " + old.getGuid() + " does not match " + mprocess.getGuid() + "; replacing.";
                         __log.debug(errmsg);
-                        old.delete();
                     }
                 }
             }
@@ -1035,7 +1066,7 @@ public class ODEProcess {
             throw new BpelEngineException("DbError", dce);
         }
     }
-
+    
     MessageExchangeDAO createMessageExchange(String mexId, final char dir) {
         if (isInMemory()) {
             return _inMemDao.getConnection().createMessageExchange(mexId, dir);
@@ -1259,7 +1290,13 @@ public class ODEProcess {
                 try {
                     _contexts.execTransaction(new Callable<Object>() {
                         public Object call() throws Exception {
-                            bounceProcessDAO(_contexts.dao.getConnection(), _pid, _pconf.getVersion(), _processModel);
+                            deleteProcessDAO(_contexts.dao.getConnection(), _pid, _pconf.getVersion(), _processModel);
+                            return null;
+                        }
+                    });
+                    _contexts.execTransaction(new Callable<Object>() {
+                        public Object call() throws Exception {
+                            createProcessDAO(_contexts.dao.getConnection(), _pid, _pconf.getVersion(), _processModel);
                             return null;
                         }
                     });
