@@ -782,12 +782,8 @@ public class BpelProcess {
             ProcessDAO old = conn.getProcess(pid);
             if (old != null) {
                 __log.debug("Found ProcessDAO for " + pid + " with GUID " + old.getGuid());
-                if (oprocess.guid == null) {
-                    // No guid, old version assume its good
-                } else {
-                    if (old.getGuid().equals(oprocess.guid)) {
-                        // Guids match, no need to create
-                    } else {
+                if (oprocess.guid != null) {
+                    if (!old.getGuid().equals(oprocess.guid)) {
                         // GUIDS dont match, delete and create new
                         String errmsg = "ProcessDAO GUID " + old.getGuid() + " does not match " + oprocess.guid + "; replacing.";
                         __log.debug(errmsg);
@@ -817,10 +813,6 @@ public class BpelProcess {
                     if (old.getGuid().equals(oprocess.guid)) {
                         // Guids match, no need to create
                         create = false;
-                    } else {
-                        // GUIDS dont match, delete and create new
-                        String errmsg = "ProcessDAO GUID " + old.getGuid() + " does not match " + oprocess.guid + "; replacing.";
-                        __log.debug(errmsg);
                     }
                 }
             }
