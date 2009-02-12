@@ -784,7 +784,6 @@ public class BpelProcess {
                 __log.debug("Found ProcessDAO for " + pid + " with GUID " + old.getGuid());
                 if (oprocess.guid == null) {
                     // No guid, old version assume its good
-                    create = false;
                 } else {
                     if (old.getGuid().equals(oprocess.guid)) {
                         // Guids match, no need to create
