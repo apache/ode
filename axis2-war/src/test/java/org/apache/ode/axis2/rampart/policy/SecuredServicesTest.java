@@ -79,4 +79,9 @@ public class SecuredServicesTest extends Axis2TestBase {
             server.undeployProcess(bundleName);
         }
     }
+
+    @Test
+    public void testPolicyInServiceXml() throws Exception {
+        executeProcess(testDir+"/process-sample04_policy_in_service.xml");
+    }
 }
