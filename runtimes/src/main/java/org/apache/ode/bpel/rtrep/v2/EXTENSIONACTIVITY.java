@@ -18,15 +18,12 @@
  */
 package org.apache.ode.bpel.rtrep.v2;
 
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.extension.ExtensionOperation;
-import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
 import org.apache.ode.bpel.rtrep.common.extension.ExtensibilityQNames;
-import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
 
 /**
  * JacobRunnable that delegates the work of the <code>extensionActivity</code> activity
@@ -38,25 +35,23 @@ public class EXTENSIONACTIVITY extends ACTIVITY {
     private static final long serialVersionUID = 1L;
     private static final Log __log = LogFactory.getLog(EXTENSIONACTIVITY.class);
 
-    private OExtensionActivity _oext;
-    
     public EXTENSIONACTIVITY(ActivityInfo self, ScopeFrame scopeFrame,
             LinkFrame linkFrame) {
         super(self, scopeFrame, linkFrame);
-        _oext = (OExtensionActivity) _self.o;
     }
 
     public final void run() {
         final ExtensionContext context = new ExtensionContextImpl(_self, _scopeFrame, getBpelRuntime());
-        final QName extensionId = DOMUtils.getElementQName(_oext.nestedElement.getElement());
+        final OExtensionActivity oea = (OExtensionActivity)_self.o;
+        
         try {
-            ExtensionOperation ea = getBpelRuntime().createExtensionActivityImplementation(extensionId);
+            ExtensionOperation ea = getBpelRuntime().createExtensionActivityImplementation(oea.extensionName);
             if (ea == null) {
-                for (OProcess.OExtension oe : _oext.getOwner().mustUnderstandExtensions) {
-                    if (extensionId.getNamespaceURI().equals(oe.namespaceURI)) {
-                        __log.warn("Lookup of extension activity " + extensionId + " failed.");
+                for (OProcess.OExtension oe : oea.getOwner().mustUnderstandExtensions) {
+                    if (oea.extensionName.getNamespaceURI().equals(oe.namespaceURI)) {
+                        __log.warn("Lookup of extension activity " + oea.extensionName + " failed.");
                         throw new FaultException(ExtensibilityQNames.UNKNOWN_EA_FAULT_NAME, "Lookup of extension activity " 
-                                + extensionId + " failed. No implementation found.");
+                                + oea.extensionName + " failed. No implementation found.");
                     }
                 }
                 // act like <empty> - do nothing
@@ -64,7 +59,7 @@ public class EXTENSIONACTIVITY extends ACTIVITY {
                 return;
             }
 
-            ea.run(context, _oext.nestedElement.getElement());
+            ea.run(context, oea.nestedElement.getElement());
         } catch (FaultException fault) {
             __log.error(fault);
             context.completeWithFault(fault);

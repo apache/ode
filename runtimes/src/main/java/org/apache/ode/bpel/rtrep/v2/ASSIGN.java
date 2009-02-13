@@ -622,14 +622,14 @@ class ASSIGN extends ACTIVITY {
 
     private void invokeExtensionAssignOperation(OAssign.ExtensionAssignOperation eao) throws FaultException {
         final ExtensionContext context = new ExtensionContextImpl(_self, _scopeFrame, getBpelRuntime());
-        final QName extensionId = DOMUtils.getElementQName(eao.nestedElement.getElement());
+
         try {
-            ExtensionOperation ea = getBpelRuntime().createExtensionActivityImplementation(extensionId);
+            ExtensionOperation ea = getBpelRuntime().createExtensionActivityImplementation(eao.extensionName);
             if (ea == null) {
                 for (OProcess.OExtension oe : eao.getOwner().mustUnderstandExtensions) {
-                    if (extensionId.getNamespaceURI().equals(oe.namespaceURI)) {
-                        __log.warn("Lookup of extension activity " + extensionId + " failed.");
-                        throw new FaultException(ExtensibilityQNames.UNKNOWN_EA_FAULT_NAME, "Lookup of extension activity " + extensionId + " failed. No implementation found.");
+                    if (eao.extensionName.getNamespaceURI().equals(oe.namespaceURI)) {
+                        __log.warn("Lookup of extension activity " + eao.extensionName + " failed.");
+                        throw new FaultException(ExtensibilityQNames.UNKNOWN_EA_FAULT_NAME, "Lookup of extension activity " + eao.extensionName + " failed. No implementation found.");
                     }
                 }
                 // act like <empty> - do nothing
