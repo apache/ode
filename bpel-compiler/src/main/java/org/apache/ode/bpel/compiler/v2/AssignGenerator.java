@@ -110,6 +110,7 @@ class AssignGenerator extends DefaultActivityGenerator {
         	        if (validator != null) {
         	        	validator.validate(_context, sop);
         	        }
+        	        oext.extensionName = DOMUtils.getElementQName(el);
         			oext.nestedElement = new SerializableElement(el);
             		oassign.operations.add(oext);
         		} catch (CompilationException ce) {

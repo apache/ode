@@ -53,6 +53,7 @@ class ExtensionActivtityGenerator extends DefaultActivityGenerator {
 	        if (validator != null) {
 	        	validator.validate(_context, src);
 	        }
+	        oactivity.extensionName = DOMUtils.getElementQName(child);
 			oactivity.nestedElement = new SerializableElement(child);
 	        compileChildren(oactivity, (ExtensionActivity) src);
 

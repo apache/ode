@@ -87,6 +87,7 @@ public class OAssign extends OActivity {
     public static class ExtensionAssignOperation extends OAssignOperation {
         private static final long serialVersionUID = 1L;
         public SerializableElement nestedElement;
+        public QName extensionName;
 
         public ExtensionAssignOperation(OProcess owner) {
             super(owner);
