@@ -25,10 +25,10 @@ public class MessageTranslationException extends Exception {
   private static final long serialVersionUID = 2253489719406683994L;
 
   public MessageTranslationException(String msg) {
-		super(msg);
-	}
+        super(msg);
+    }
 
-	public MessageTranslationException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
+    public MessageTranslationException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 }

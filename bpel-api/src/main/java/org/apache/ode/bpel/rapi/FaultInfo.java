@@ -6,14 +6,14 @@ import org.w3c.dom.Element;
 
 public interface FaultInfo {
 
-	QName getFaultName();
+    QName getFaultName();
 
-	String getExplanation();
+    String getExplanation();
 
-	int getFaultLineNo();
+    int getFaultLineNo();
 
-	int getActivityId();
+    int getActivityId();
 
-	Element getFaultMessage();
+    Element getFaultMessage();
 
 }

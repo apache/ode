@@ -26,8 +26,8 @@ import javax.xml.namespace.QName;
 public class ScopeFaultEvent
   extends ScopeEvent {
   
-	private static final long serialVersionUID = 1L;
-	private QName _faultType;
+    private static final long serialVersionUID = 1L;
+    private QName _faultType;
   private int _faultLineNo = -1;
   private String _explanation;
 
@@ -35,12 +35,12 @@ public class ScopeFaultEvent
     super();
   }
 
-	public int getFaultLineNo() {
-		return _faultLineNo;
-	}
-	public void setFaultLineNo(int faultLineNo) {
-		_faultLineNo = faultLineNo;
-	}
+    public int getFaultLineNo() {
+        return _faultLineNo;
+    }
+    public void setFaultLineNo(int faultLineNo) {
+        _faultLineNo = faultLineNo;
+    }
   public ScopeFaultEvent(QName faultType, int lineNo, String explanation) {
     _faultType = faultType;
     _faultLineNo = lineNo;
@@ -49,10 +49,10 @@ public class ScopeFaultEvent
 
 
   /**
-	 * Get the fault type.
-	 * @return the fault type
-	 */
-	public QName getFaultType() {
+     * Get the fault type.
+     * @return the fault type
+     */
+    public QName getFaultType() {
     return _faultType;
   }
 
@@ -60,11 +60,11 @@ public class ScopeFaultEvent
     _faultType = faultType;
   }
 
-	public String getExplanation() {
-		return _explanation;
-	}
+    public String getExplanation() {
+        return _explanation;
+    }
 
-	public void setExplanation(String explanation) {
-		_explanation = explanation;
-	}
+    public void setExplanation(String explanation) {
+        _explanation = explanation;
+    }
 }

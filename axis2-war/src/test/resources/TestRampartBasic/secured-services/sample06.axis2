@@ -18,9 +18,9 @@
 <service>
     
     <!--Signature and Encryption : Using the request's certificate-->
-	
-	<module ref="rampart" />
-	
+    
+    <module ref="rampart" />
+    
     <parameter name="OutflowSecurity">
       <action>
         <items>Timestamp Signature Encrypt</items>

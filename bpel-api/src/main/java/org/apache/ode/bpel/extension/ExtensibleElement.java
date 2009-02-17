@@ -26,7 +26,7 @@ import org.w3c.dom.Element;
  * @author Tammo van Lessen (University of Stuttgart)
  */
 public interface ExtensibleElement {
-	
-	Element getNestedElement();
-	
+    
+    Element getNestedElement();
+    
 }

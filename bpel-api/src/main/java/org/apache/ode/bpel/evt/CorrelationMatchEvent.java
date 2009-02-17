@@ -35,7 +35,7 @@ public class CorrelationMatchEvent extends ProcessMessageExchangeEvent {
     _correlationKey = correlationKey;
   }
 
-	public CorrelationKey getCorrelationKey() {
+    public CorrelationKey getCorrelationKey() {
     return _correlationKey;
   }
 

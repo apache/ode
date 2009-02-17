@@ -65,9 +65,9 @@ public class SessionOutHandler extends AbstractHandler {
             
             if (otargetSession != null && otargetSession instanceof MutableEndpoint) {
 
-            	WSAEndpoint targetEpr = EndpointFactory.convertToWSA((MutableEndpoint) otargetSession);
-            	
-            	OMElement to = factory.createSOAPHeaderBlock("To", wsAddrNS);
+                WSAEndpoint targetEpr = EndpointFactory.convertToWSA((MutableEndpoint) otargetSession);
+                
+                OMElement to = factory.createSOAPHeaderBlock("To", wsAddrNS);
                 header.addChild(to);
                 to.setText(targetEpr.getUrl());
 
@@ -79,9 +79,9 @@ public class SessionOutHandler extends AbstractHandler {
                 // we only set the ReplyTo and MessageID headers if doing Request-Response
                 org.apache.axis2.addressing.EndpointReference replyToEpr = messageContext.getReplyTo();
                 if (replyToEpr != null) {
-                	OMElement replyTo = factory.createSOAPHeaderBlock("ReplyTo", wsAddrNS);
-                	OMElement address = factory.createOMElement("Address", wsAddrNS);
-                	replyTo.addChild(address);
+                    OMElement replyTo = factory.createSOAPHeaderBlock("ReplyTo", wsAddrNS);
+                    OMElement address = factory.createOMElement("Address", wsAddrNS);
+                    replyTo.addChild(address);
                     header.addChild(replyTo);
                     address.setText(replyToEpr.getAddress());
                     
@@ -90,7 +90,7 @@ public class SessionOutHandler extends AbstractHandler {
                     header.addChild(messageIdElem);
                     messageIdElem.setText(messageId);                
                 }
-	            
+                
                 if (targetEpr.getSessionId() != null) {
                     OMElement session = factory.createSOAPHeaderBlock("session", odeSessNS);
                     header.addChild(session);

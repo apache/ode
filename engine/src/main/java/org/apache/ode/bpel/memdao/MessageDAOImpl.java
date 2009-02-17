@@ -26,37 +26,37 @@ import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 
 public class MessageDAOImpl extends DaoBaseImpl implements MessageDAO {
-	private QName type;
-	private Element data;
-	private Element header;
-	
-	public MessageDAOImpl() {
-	}
+    private QName type;
+    private Element data;
+    private Element header;
+    
+    public MessageDAOImpl() {
+    }
 
-	public void setType(QName type) {
-		this.type = type;
-	}
+    public void setType(QName type) {
+        this.type = type;
+    }
 
-	public QName getType() {
-		return type;
-	}
+    public QName getType() {
+        return type;
+    }
 
-	public void setData(Element value) {
-		this.data = value;
-	}
+    public void setData(Element value) {
+        this.data = value;
+    }
 
-	public Element getData() {
-		if ( data == null ) data = DOMUtils.newDocument().getDocumentElement();
-		return data;
-	}
+    public Element getData() {
+        if ( data == null ) data = DOMUtils.newDocument().getDocumentElement();
+        return data;
+    }
 
- 	public void setHeader(Element value) {
- 		this.header = value;
- 	}
+    public void setHeader(Element value) {
+        this.header = value;
+    }
 
- 	public Element getHeader() {
- 		if ( header == null ) header = DOMUtils.newDocument().getDocumentElement();
- 		return header;
- 	}
+    public Element getHeader() {
+        if ( header == null ) header = DOMUtils.newDocument().getDocumentElement();
+        return header;
+    }
 
 }

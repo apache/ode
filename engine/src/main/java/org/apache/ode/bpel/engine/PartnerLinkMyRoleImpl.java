@@ -246,18 +246,18 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 
     private void enforceUniqueConstraint(ProcessDAO processDAO, CorrelationKey[] uniqueKeys) {
         for (CorrelationKey uniqueKey : uniqueKeys) {
-        	// double-check that the correlation set is indeed unique
-        	if (uniqueKey.isUnique()) {
-        		Collection<ProcessInstanceDAO> instances = processDAO.findInstance(uniqueKey, false);
-        		if (instances.size() != 0) {
+            // double-check that the correlation set is indeed unique
+            if (uniqueKey.isUnique()) {
+                Collection<ProcessInstanceDAO> instances = processDAO.findInstance(uniqueKey, false);
+                if (instances.size() != 0) {
                     __log.debug("Not creating a new instance for process " + processDAO.getProcessId() + "; unique correlation constraint would be violated!");
                     throw new InvalidProcessException("Unique process constraint violated", InvalidProcessException.DUPLICATE_CAUSE_CODE);
-        		}
-        	}        	
+                }
+            }        	
         }
-	}
+    }
 
-	@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     private Operation getMyRoleOperation(String operationName) {
         return _plinkDef.getMyRoleOperation(operationName);
     }
@@ -337,17 +337,17 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         return key;
     }
 
-	public boolean isOneWayOnly() {
-		PortType portType = _plinkDef.getMyRolePortType();
-		if (portType == null) {
-			return false;
-		}
-        for (Operation operation : (List<Operation>) portType.getOperations()) {
-        	if (operation.getOutput() != null) {
-        		return false;
-        	}
+    public boolean isOneWayOnly() {
+        PortType portType = _plinkDef.getMyRolePortType();
+        if (portType == null) {
+            return false;
         }
-		return true;
-	}
+        for (Operation operation : (List<Operation>) portType.getOperations()) {
+            if (operation.getOutput() != null) {
+                return false;
+            }
+        }
+        return true;
+    }
 
 }

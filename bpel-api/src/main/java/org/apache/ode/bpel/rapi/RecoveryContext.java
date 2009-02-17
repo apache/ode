@@ -11,12 +11,12 @@ import org.w3c.dom.Element;
  *
  */
 public interface RecoveryContext {
-	
-	void registerActivityForRecovery(String channel, long activityId,
-			String reason, Date dateTime, Element details, String[] actions,
-			int retries);
+    
+    void registerActivityForRecovery(String channel, long activityId,
+            String reason, Date dateTime, Element details, String[] actions,
+            int retries);
 
-	void unregisterActivityForRecovery(String channel);
+    void unregisterActivityForRecovery(String channel);
 
 
 }

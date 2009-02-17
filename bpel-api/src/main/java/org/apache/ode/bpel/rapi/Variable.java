@@ -4,10 +4,10 @@ import javax.xml.namespace.QName;
 
 public interface Variable extends ScopedObject {
 
-	String getName();
+    String getName();
 
     String getExternalId();
 
     QName getElementType();
-	
+    
 }

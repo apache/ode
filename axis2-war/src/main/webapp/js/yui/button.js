@@ -397,18 +397,18 @@ version: 2.5.2
 
     YAHOO.widget.Button = function (p_oElement, p_oAttributes) {
     
-		if (!Overlay && YAHOO.widget.Overlay) {
-		
-			Overlay = YAHOO.widget.Overlay;
-		
-		}
+        if (!Overlay && YAHOO.widget.Overlay) {
+        
+            Overlay = YAHOO.widget.Overlay;
+        
+        }
 
 
-		if (!Menu && YAHOO.widget.Menu) {
-		
-			Menu = YAHOO.widget.Menu;
-		
-		}
+        if (!Menu && YAHOO.widget.Menu) {
+        
+            Menu = YAHOO.widget.Menu;
+        
+        }
 
 
         var fnSuperClass = YAHOO.widget.Button.superclass.constructor,
@@ -824,7 +824,7 @@ version: 2.5.2
             
             var sClass,
                 nGeckoVersion = UA.gecko;
-				
+                
             
             if (nGeckoVersion && nGeckoVersion < 1.9 && Dom.inDocument(this.get("element"))) {
             
@@ -1409,29 +1409,29 @@ version: 2.5.2
         */
         _isSplitButtonOptionKey: function (p_oEvent) {
 
-			var bShowMenu = (p_oEvent.ctrlKey && p_oEvent.shiftKey && 
-								Event.getCharCode(p_oEvent) == 77);
+            var bShowMenu = (p_oEvent.ctrlKey && p_oEvent.shiftKey && 
+                                Event.getCharCode(p_oEvent) == 77);
 
 
-			function onKeyPress(p_oEvent) {
+            function onKeyPress(p_oEvent) {
 
-				Event.preventDefault(p_oEvent);
+                Event.preventDefault(p_oEvent);
 
-				this.removeListener("keypress", onKeyPress);
-			
-			}
+                this.removeListener("keypress", onKeyPress);
+            
+            }
 
 
-			/*
-				It is necessary to add a "keypress" event listener to prevent Opera's default
-				browser context menu from appearing when the user presses Ctrl + Shift + M.
-			*/
+            /*
+                It is necessary to add a "keypress" event listener to prevent Opera's default
+                browser context menu from appearing when the user presses Ctrl + Shift + M.
+            */
 
-			if (bShowMenu && UA.opera) {
+            if (bShowMenu && UA.opera) {
 
-        		this.on("keypress", onKeyPress);
+                this.on("keypress", onKeyPress);
 
-			}
+            }
         
             return bShowMenu;
         
@@ -1606,11 +1606,11 @@ version: 2.5.2
                             oMenu.align("bl", "tl");
                         
                         }
-						else {
+                        else {
 
-							oMenu.align("tl", "bl");
+                            oMenu.align("tl", "bl");
 
-						}
+                        }
             
                     }
             
@@ -3574,17 +3574,17 @@ version: 2.5.2
         
         fireEvent: function (p_sType , p_aArgs) {
         
-			var sType = arguments[0];
-		
-			//  Disabled buttons should not respond to DOM events
-		
-			if (this.DOM_EVENTS[sType] && this.get("disabled")) {
-		
-				return;
-		
-			}
-		
-			return YAHOO.widget.Button.superclass.fireEvent.apply(this, arguments);
+            var sType = arguments[0];
+        
+            //  Disabled buttons should not respond to DOM events
+        
+            if (this.DOM_EVENTS[sType] && this.get("disabled")) {
+        
+                return;
+        
+            }
+        
+            return YAHOO.widget.Button.superclass.fireEvent.apply(this, arguments);
         
         },
         

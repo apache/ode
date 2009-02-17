@@ -123,11 +123,11 @@ public class SoapMessageConverter {
         _isRPC = style != null && style.equals("rpc");
 
         if (_soapBinding.getElementType().getNamespaceURI().equals(Constants.URI_WSDL11_SOAP)) {
-        	_soapFactory = OMAbstractFactory.getSOAP11Factory();
+            _soapFactory = OMAbstractFactory.getSOAP11Factory();
         } else if (_soapBinding.getElementType().getNamespaceURI().equals(Constants.URI_WSDL12_SOAP)) {
-        	_soapFactory = OMAbstractFactory.getSOAP12Factory();
+            _soapFactory = OMAbstractFactory.getSOAP12Factory();
         } else {
-        	throw new IllegalStateException("Unsupported SOAP binding: " + _soapBinding.getElementType());
+            throw new IllegalStateException("Unsupported SOAP binding: " + _soapBinding.getElementType());
         }
     }
 
@@ -208,7 +208,7 @@ public class SoapMessageConverter {
         for (Node headerNode : headers.values())
             if (headerNode.getNodeType() == Node.ELEMENT_NODE) {
                 if (soaphdr.getFirstChildWithName(new QName(headerNode.getNamespaceURI(), headerNode.getLocalName())) == null) {
-                	OMElement omHeaderNode = OMUtils.toOM((Element) headerNode, _soapFactory);
+                    OMElement omHeaderNode = OMUtils.toOM((Element) headerNode, _soapFactory);
                     SOAPHeaderBlock hb = soaphdr.addHeaderBlock(omHeaderNode.getLocalName(), omHeaderNode.getNamespace());
 
                     // add child elements

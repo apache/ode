@@ -17,8 +17,8 @@
  !-->
 <service>
 
-	<module ref="rampart" />
-	
+    <module ref="rampart" />
+    
     <parameter name="OutflowSecurity">
       <action>
         <items>Timestamp Encrypt Signature</items>

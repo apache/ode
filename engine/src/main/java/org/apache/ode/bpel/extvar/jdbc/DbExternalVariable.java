@@ -31,211 +31,211 @@ import org.w3c.dom.NodeList;
 class DbExternalVariable {
     private static final Log __log = LogFactory.getLog(DbExternalVariable.class);
 
-	private static final String XSI_NS = "http://www.w3.org/2001/XMLSchema-instance";
+    private static final String XSI_NS = "http://www.w3.org/2001/XMLSchema-instance";
 
-	EVarId evarId;
+    EVarId evarId;
 
-	DataSource dataSource;
+    DataSource dataSource;
 
-	final ArrayList<Column> _columns = new ArrayList<Column>();
+    final ArrayList<Column> _columns = new ArrayList<Column>();
 
-	private final HashMap<String, Column> _colmap = new HashMap<String, Column>();
+    private final HashMap<String, Column> _colmap = new HashMap<String, Column>();
 
-	final ArrayList<Column> _keycolumns = new ArrayList<Column>();
+    final ArrayList<Column> _keycolumns = new ArrayList<Column>();
 
-	final ArrayList<Column> _inscolumns = new ArrayList<Column>();
+    final ArrayList<Column> _inscolumns = new ArrayList<Column>();
 
-	final ArrayList<Column> _updcolumns = new ArrayList<Column>();
+    final ArrayList<Column> _updcolumns = new ArrayList<Column>();
 
-	InitType _initType = InitType.update_insert;
+    InitType _initType = InitType.update_insert;
 
-	public String[] _autoColNames;
+    public String[] _autoColNames;
 
-	String select;
+    String select;
 
-	String insert;
+    String insert;
 
-	String update;
+    String update;
 
-	String table;
+    String table;
 
     String schema; // table schema
 
-	/** Does the database support retrieval of generated keys? */
-	boolean generatedKeys;
+    /** Does the database support retrieval of generated keys? */
+    boolean generatedKeys;
 
-	DbExternalVariable(EVarId evar, DataSource ds) {
-		this.evarId = evar;
-		this.dataSource = ds;
-	}
+    DbExternalVariable(EVarId evar, DataSource ds) {
+        this.evarId = evar;
+        this.dataSource = ds;
+    }
 
-	Column getColumn(String key) {
-		return _colmap.get(key);
-	}
+    Column getColumn(String key) {
+        return _colmap.get(key);
+    }
 
-	void addColumn(Column c) {
-		c.idx = _columns.size();
-		_colmap.put(c.name, c);
-		_columns.add(c);
-		if (c.key) {
-			_keycolumns.add(c);
-			_autoColNames = new String[_keycolumns.size()];
-			for (int i = 0; i < _autoColNames.length; ++i)
-				_autoColNames[i] = _keycolumns.get(i).colname;
-		}
-		createSelect();
-		createInsert();
-		createUpdate();
-	}
+    void addColumn(Column c) {
+        c.idx = _columns.size();
+        _colmap.put(c.name, c);
+        _columns.add(c);
+        if (c.key) {
+            _keycolumns.add(c);
+            _autoColNames = new String[_keycolumns.size()];
+            for (int i = 0; i < _autoColNames.length; ++i)
+                _autoColNames[i] = _keycolumns.get(i).colname;
+        }
+        createSelect();
+        createInsert();
+        createUpdate();
+    }
 
-	public int numColumns() {
-		return _columns.size();
-	}
+    public int numColumns() {
+        return _columns.size();
+    }
 
-	/**
-	 * Create a key from a locator.
-	 */
-	RowKey keyFromLocator(Locator locator) throws ExternalVariableModuleException {
-		RowKey rc = new RowKey();
-		parseXmlRow(rc, locator.reference);
-		
+    /**
+     * Create a key from a locator.
+     */
+    RowKey keyFromLocator(Locator locator) throws ExternalVariableModuleException {
+        RowKey rc = new RowKey();
+        parseXmlRow(rc, locator.reference);
+        
         // Put in the static goodies such as pid/iid
-		for (Column c : rc._columns) {
-			switch (c.genType) {
-			case iid:
-			case pid:
+        for (Column c : rc._columns) {
+            switch (c.genType) {
+            case iid:
+            case pid:
                 rc.put(c.name, c.getValue(c.name, null, null, locator.iid));
-				break;
-			}
-		}
-		
-		return rc;
-	}
+                break;
+            }
+        }
+        
+        return rc;
+    }
 
-	private void createSelect() {
-		StringBuilder sb = new StringBuilder("select ");
-		boolean first = true;
-		for (Column c : _columns) {
-			if (!first) {
-				sb.append(',');
-			}
-			first = false;
+    private void createSelect() {
+        StringBuilder sb = new StringBuilder("select ");
+        boolean first = true;
+        for (Column c : _columns) {
+            if (!first) {
+                sb.append(',');
+            }
+            first = false;
 
-			sb.append(c.colname);
-		}
-		sb.append(" from " + table);
-		if (_keycolumns.size() > 0) {
-			sb.append(" where ");
-			first = true;
+            sb.append(c.colname);
+        }
+        sb.append(" from " + table);
+        if (_keycolumns.size() > 0) {
+            sb.append(" where ");
+            first = true;
 
-			for (Column kc : _keycolumns) {
-				if (!first) {
-					sb.append(" and ");
-				}
-				first = false;
+            for (Column kc : _keycolumns) {
+                if (!first) {
+                    sb.append(" and ");
+                }
+                first = false;
 
-				sb.append(kc.colname);
-				sb.append(" = ?");
-			}
-			select = sb.toString();
+                sb.append(kc.colname);
+                sb.append(" = ?");
+            }
+            select = sb.toString();
 
-		} else {
-			select = null;
-		}
-	}
+        } else {
+            select = null;
+        }
+    }
 
-	private void createUpdate() {
-		_updcolumns.clear();
-		StringBuilder sb = new StringBuilder("update ");
-		sb.append(table);
-		sb.append(" set ");
-		boolean first = true;
-		for (Column c : _columns) {
-			// Don't ever update keys or sequences or create time stamps
+    private void createUpdate() {
+        _updcolumns.clear();
+        StringBuilder sb = new StringBuilder("update ");
+        sb.append(table);
+        sb.append(" set ");
+        boolean first = true;
+        for (Column c : _columns) {
+            // Don't ever update keys or sequences or create time stamps
             if (c.genType == GenType.sequence || c.key || c.genType == GenType.ctimestamp)
-				continue;
+                continue;
 
-			if (!first)
-				sb.append(", ");
-			first = false;
+            if (!first)
+                sb.append(", ");
+            first = false;
 
-			sb.append(c.colname);
-			sb.append(" = ");
-			if (c.genType == GenType.expression)
-				sb.append(c.expression);
-			else {
-				sb.append(" ?");
-				_updcolumns.add(c);
-			}
-		}
+            sb.append(c.colname);
+            sb.append(" = ");
+            if (c.genType == GenType.expression)
+                sb.append(c.expression);
+            else {
+                sb.append(" ?");
+                _updcolumns.add(c);
+            }
+        }
 
-		if (_keycolumns.size() > 0) {
-			sb.append(" where ");
-			first = true;
+        if (_keycolumns.size() > 0) {
+            sb.append(" where ");
+            first = true;
 
-			for (Column kc : _keycolumns) {
-				if (!first) {
-					sb.append(" and ");
-				}
-				first = false;
+            for (Column kc : _keycolumns) {
+                if (!first) {
+                    sb.append(" and ");
+                }
+                first = false;
 
-				sb.append(kc.colname);
-				sb.append(" = ?");
-			}
-		}
+                sb.append(kc.colname);
+                sb.append(" = ?");
+            }
+        }
 
-		// If we have no key columns, we cannot do an update
-		if (_keycolumns.size() == 0)
-			update = null;
-		else
-			update = sb.toString();
-	}
+        // If we have no key columns, we cannot do an update
+        if (_keycolumns.size() == 0)
+            update = null;
+        else
+            update = sb.toString();
+    }
 
-	private void createInsert() {
-		_inscolumns.clear();
-		StringBuilder sb = new StringBuilder("insert into ");
-		sb.append(table);
-		sb.append(" ( ");
-		boolean first = true;
-		for (Column c : _columns) {
-			if (c.genType == GenType.sequence)
-				continue;
+    private void createInsert() {
+        _inscolumns.clear();
+        StringBuilder sb = new StringBuilder("insert into ");
+        sb.append(table);
+        sb.append(" ( ");
+        boolean first = true;
+        for (Column c : _columns) {
+            if (c.genType == GenType.sequence)
+                continue;
 
-			if (!first)
-				sb.append(',');
+            if (!first)
+                sb.append(',');
 
-			first = false;
-			sb.append(c.colname);
-		}
-		sb.append(" ) ");
+            first = false;
+            sb.append(c.colname);
+        }
+        sb.append(" ) ");
 
-		sb.append(" values ( ");
+        sb.append(" values ( ");
 
-		first = true;
-		for (Column c : _columns) {
-			if (c.genType == GenType.sequence)
-				continue;
-			if (!first)
-				sb.append(',');
-			first = false;
+        first = true;
+        for (Column c : _columns) {
+            if (c.genType == GenType.sequence)
+                continue;
+            if (!first)
+                sb.append(',');
+            first = false;
 
-			if (c.genType == GenType.expression)
-				sb.append(c.expression);
-			else {
-				sb.append(" ? ");
-				_inscolumns.add(c);
-			}
-		}
-		sb.append(" ) ");
+            if (c.genType == GenType.expression)
+                sb.append(c.expression);
+            else {
+                sb.append(" ? ");
+                _inscolumns.add(c);
+            }
+        }
+        sb.append(" ) ");
 
-		insert = sb.toString();
+        insert = sb.toString();
 
-	}
+    }
 
     <T extends RowSubset> Element renderXmlRow(Locator locator, QName varType, T value) throws ExternalVariableModuleException {
-		Document doc = DOMUtils.newDocument();
+        Document doc = DOMUtils.newDocument();
         Element el = doc.createElementNS(varType.getNamespaceURI(), varType.getLocalPart());
-		doc.appendChild(el);
+        doc.appendChild(el);
         if (value != null) {
             for (Column c : value._columns) {
                 Object data = value.get(c.idx);
@@ -249,8 +249,8 @@ class DbExternalVariable {
                 addElement(el, varType, c, data);
             }
         }
-		return el;
-	}
+        return el;
+    }
 
     private void addElement(Element parent, QName varType, Column c, Object data) {
         Document doc = parent.getOwnerDocument();
@@ -264,165 +264,165 @@ class DbExternalVariable {
         parent.appendChild(cel);
     }
 
-	<T extends RowSubset> T parseXmlRow(T ret, Node rowel)
-			throws ExternalVariableModuleException {
-		if (rowel == null)
-			return ret;
-		
-		NodeList nl = rowel.getChildNodes();
+    <T extends RowSubset> T parseXmlRow(T ret, Node rowel)
+            throws ExternalVariableModuleException {
+        if (rowel == null)
+            return ret;
+        
+        NodeList nl = rowel.getChildNodes();
         if (__log.isDebugEnabled()) __log.debug("parseXmlRow: element="+rowel.getLocalName());
-		for (int i = 0; i < nl.getLength(); ++i) {
-			Node n = nl.item(i);
-			if (n.getNodeType() != Node.ELEMENT_NODE)
-				continue;
-			String key = n.getLocalName();
-			String val = n.getTextContent();
+        for (int i = 0; i < nl.getLength(); ++i) {
+            Node n = nl.item(i);
+            if (n.getNodeType() != Node.ELEMENT_NODE)
+                continue;
+            String key = n.getLocalName();
+            String val = n.getTextContent();
             if (__log.isDebugEnabled()) __log.debug("Extvar key: "+key+" value: "+val);
 
-			Column column = ret.getColumn(key);
+            Column column = ret.getColumn(key);
             if (column == null) {
                 if (__log.isDebugEnabled()) __log.debug("No matching column for key '"+key+"'");
-				continue;
+                continue;
             }
 
-			String nil = ((Element) n).getAttributeNS(XSI_NS, "nil");
+            String nil = ((Element) n).getAttributeNS(XSI_NS, "nil");
             if (nil != null && "true".equalsIgnoreCase(nil) && (val == null || val.trim().length() == 0)) {
                 if (__log.isDebugEnabled()) __log.debug("Extvar key: "+key+" is null (xsi:nil)");
-				ret.put(key, null);
+                ret.put(key, null);
             } else {
-				ret.put(key, column.fromText(val));
+                ret.put(key, column.fromText(val));
             }
-		}
-		return ret;
-	}
+        }
+        return ret;
+    }
 
-	class Column {
+    class Column {
 
-		int idx;
+        int idx;
 
-		/** name of the column */
+        /** name of the column */
         final String name;
 
-		/** database name of the column (in case we need to override */
+        /** database name of the column (in case we need to override */
         final String colname;
 
-		/** Is this a key column? */
+        /** Is this a key column? */
         final boolean key;
 
-		/** Type of value generator to use for creating values for this column. */
+        /** Type of value generator to use for creating values for this column. */
         final GenType genType;
 
-		/** The (SQL) expression used to populate the column. */
+        /** The (SQL) expression used to populate the column. */
         final String expression;
 
-		/** The SQL data type of this column, one of java.sql.Types */
-		int dataType;
+        /** The SQL data type of this column, one of java.sql.Types */
+        int dataType;
 
-		/** Indicates NULL values are OK */
-		boolean nullok;
+        /** Indicates NULL values are OK */
+        boolean nullok;
 
         Column(String name, String colname, boolean key, GenType genType, String expression) {
-			this.name = name;
-			this.colname = colname == null ? name : colname;
-			this.key = key;
-			this.genType = genType;
-			this.expression = expression;
-		}
+            this.name = name;
+            this.colname = colname == null ? name : colname;
+            this.key = key;
+            this.genType = genType;
+            this.expression = expression;
+        }
 
         public Object getValue(String name, RowKey keys, RowVal values, Long iid) {
-			switch (genType) {
-			case ctimestamp:
-			case utimestamp:
-				return isTimeStamp() ? new Timestamp(new Date().getTime())
-						: new Date();
-			case uuid:
-				return new GUID().toString();
-			case pid:
-				return evarId.pid.toString();
-			case iid:
-				return iid;
-			case none:
-			default:
+            switch (genType) {
+            case ctimestamp:
+            case utimestamp:
+                return isTimeStamp() ? new Timestamp(new Date().getTime())
+                        : new Date();
+            case uuid:
+                return new GUID().toString();
+            case pid:
+                return evarId.pid.toString();
+            case iid:
+                return iid;
+            case none:
+            default:
                 if (key && keys.get(name) != null)
                     return keys.get(name);
                 else
                     return values.get(name);
-			}
-		}
+            }
+        }
 
         boolean supportsEmptyValue() {
             return (dataType == Types.VARCHAR || dataType == Types.LONGVARCHAR || dataType == Types.CLOB); 
         }
 
-		/**
-		 * Return <code>true</code> if column is a date-like type.
-		 */
-		boolean isDate() {
-			return dataType == Types.DATE;
-		}
+        /**
+         * Return <code>true</code> if column is a date-like type.
+         */
+        boolean isDate() {
+            return dataType == Types.DATE;
+        }
 
-		boolean isTimeStamp() {
-			return dataType == Types.TIMESTAMP;
-		}
+        boolean isTimeStamp() {
+            return dataType == Types.TIMESTAMP;
+        }
 
-		boolean isTime() {
-			return dataType == Types.TIME;
-		}
+        boolean isTime() {
+            return dataType == Types.TIME;
+        }
 
-		/**
-		 * Is this column best represented as an integer?
-		 */
-		boolean isInteger() {
-			switch (dataType) {
-			case Types.BIGINT:
-			case Types.INTEGER:
-			case Types.SMALLINT:
-			case Types.TINYINT:
-				return true;
-			default:
-				return false;
-			}
-		}
+        /**
+         * Is this column best represented as an integer?
+         */
+        boolean isInteger() {
+            switch (dataType) {
+            case Types.BIGINT:
+            case Types.INTEGER:
+            case Types.SMALLINT:
+            case Types.TINYINT:
+                return true;
+            default:
+                return false;
+            }
+        }
 
-		/**
-		 * Is this column best represented as a real number?
-		 */
-		boolean isReal() {
-			switch (dataType) {
-			case Types.DECIMAL:
-			case Types.REAL:
-			case Types.NUMERIC:
-				return true;
-			default:
-				return false;
-			}
+        /**
+         * Is this column best represented as a real number?
+         */
+        boolean isReal() {
+            switch (dataType) {
+            case Types.DECIMAL:
+            case Types.REAL:
+            case Types.NUMERIC:
+                return true;
+            default:
+                return false;
+            }
 
-		}
+        }
 
-		boolean isBoolean() {
-			switch (dataType) {
-			case Types.BIT:
-				return true;
-			default:
-				return false;
-			}
-		}
+        boolean isBoolean() {
+            switch (dataType) {
+            case Types.BIT:
+                return true;
+            default:
+                return false;
+            }
+        }
 
-		String toText(Object val) {
-			if (val == null)
-				return null;
+        String toText(Object val) {
+            if (val == null)
+                return null;
 
             Date date = null;
             if (val instanceof java.util.Date) {
                 // also applies to java.sql.Time, java.sql.Timestamp
                 date = (Date) val;
-				return ISO8601DateParser.format((Date) val);
+                return ISO8601DateParser.format((Date) val);
             }
             return val.toString();
-		}
+        }
 
-		Object fromText(String val) throws ExternalVariableModuleException {
-			try {
+        Object fromText(String val) throws ExternalVariableModuleException {
+            try {
                 if (val == null)
                     return null;
                 
@@ -430,12 +430,12 @@ class DbExternalVariable {
                     return null;
                 }
                 
-				// TODO: use xsd:date and xsd:time conversions
-				if (isDate())
+                // TODO: use xsd:date and xsd:time conversions
+                if (isDate())
                     return new java.sql.Date(ISO8601DateParser.parse(val).getTime());
-				else if (isTime())
+                else if (isTime())
                     return new java.sql.Time(ISO8601DateParser.parse(val).getTime());
-				else if (isTimeStamp())
+                else if (isTimeStamp())
                     return new java.sql.Timestamp(ISO8601DateParser.parse(val).getTime());
                 else if (isInteger()) {
                     String v = val.trim().toLowerCase();
@@ -443,25 +443,25 @@ class DbExternalVariable {
                         return 1;
                     if (v.equals("false"))
                         return 0;
-					return new java.math.BigDecimal(val).longValue();
+                    return new java.math.BigDecimal(val).longValue();
                 } else if (isReal())
-					return Double.valueOf(val);
+                    return Double.valueOf(val);
                 else if (isBoolean()) {
                     String v = val.trim();
                     if (v.equals("1"))
                         return true;
                     if (v.equals("0"))
                         return false;
-					return Boolean.valueOf(val);
+                    return Boolean.valueOf(val);
                 }
 
-				return val;
-			} catch (Exception ex) {
-				throw new ExternalVariableModuleException(
-						"Unable to convert value \"" + val + "\" for column \""
-								+ name + "\" !", ex);
-			}
-		}
+                return val;
+            } catch (Exception ex) {
+                throw new ExternalVariableModuleException(
+                        "Unable to convert value \"" + val + "\" for column \""
+                                + name + "\" !", ex);
+            }
+        }
 
         public boolean isGenerated() {
             return (genType != null && !genType.equals(GenType.none));
@@ -479,47 +479,47 @@ class DbExternalVariable {
                 +",genType="+genType
                 +")";
         }
-	}
+    }
 
-	/**
-	 * Key used to identify a row.
-	 */
-	class RowKey extends RowSubset {
-		private static final long serialVersionUID = 1L;
+    /**
+     * Key used to identify a row.
+     */
+    class RowKey extends RowSubset {
+        private static final long serialVersionUID = 1L;
 
-		/**
-		 * Create empty row key.
-		 */
-		RowKey() {
-			super(_keycolumns);
-		}
+        /**
+         * Create empty row key.
+         */
+        RowKey() {
+            super(_keycolumns);
+        }
 
-		/**
-		 * Write the key to a locator.
-		 */
+        /**
+         * Write the key to a locator.
+         */
         void write(QName varType, Locator locator) throws ExternalVariableModuleException {
             locator.reference = renderXmlRow(locator, varType, this);
-		}
+        }
 
-		public Set<String> getMissing() {
-			HashSet<String> missing = new HashSet<String>();
-			for (Column c : _keycolumns) {
+        public Set<String> getMissing() {
+            HashSet<String> missing = new HashSet<String>();
+            for (Column c : _keycolumns) {
                 if (get(c.idx) == null)
-					missing.add(c.name);
-			}
-			return missing;
-		}
-	}
+                    missing.add(c.name);
+            }
+            return missing;
+        }
+    }
 
-	/**
-	 * Row values.
-	 */
-	class RowVal extends RowSubset {
-		private static final long serialVersionUID = 1L;
+    /**
+     * Row values.
+     */
+    class RowVal extends RowSubset {
+        private static final long serialVersionUID = 1L;
 
-		RowVal() {
-			super(DbExternalVariable.this._columns);
-		}
-	}
+        RowVal() {
+            super(DbExternalVariable.this._columns);
+        }
+    }
 
 }

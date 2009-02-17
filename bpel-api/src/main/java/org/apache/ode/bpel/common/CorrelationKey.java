@@ -71,7 +71,7 @@ public class CorrelationKey implements Serializable {
     public CorrelationKey(String canonicalForm) {
         int firstTilde = -1;
         if (canonicalForm != null) {
-        	firstTilde = canonicalForm.indexOf('~') ;
+            firstTilde = canonicalForm.indexOf('~') ;
             _csetId = Integer.parseInt(canonicalForm.substring(0, firstTilde == -1 ? canonicalForm.length() : firstTilde));
         }
 
@@ -134,11 +134,11 @@ public class CorrelationKey implements Serializable {
      *         otherwise <code>false</code>
      */
     public boolean isUnique() {
-    	return unique;
+        return unique;
     }
     
     public void setUnique(boolean unique) {
-    	this.unique = unique;
+        this.unique = unique;
     }
     
     /**

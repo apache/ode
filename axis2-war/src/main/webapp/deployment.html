@@ -8,7 +8,7 @@
         <link rel="stylesheet" href="js/bubbling/assets/accordion.css" media="screen, projection"/>
         <link rel="stylesheet" type="text/css" href="js/yui/tab/skins/sam/tabview.css"/>
         <link rel="icon" href="favicon.ico" type="image/x-icon" />
-		<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+        <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
         <script type="text/javascript" src="js/WSRequest.js">
         </script>
         <script type="text/javascript" src="js/ProcessManagementAPI.js">
@@ -22,7 +22,7 @@
         <script type="text/javascript" src="js/yui/container.js"></script>
         <script type="text/javascript" src="js/yui/button.js">
         </script>
-		 <script type="text/javascript" src="js/yui/animation.js">
+         <script type="text/javascript" src="js/yui/animation.js">
         </script>
         <script type="text/javascript" src="js/bubbling/bubbling.js">
         </script>
@@ -33,12 +33,12 @@
         <script type="text/javascript" src="js/yui/tabview.js">
         </script>
         <script type="text/javascript">
-        	
+            
             function init(){
-				org.apache.ode.DeploymentHandling.populateDeployedPacks();
-				setInterval('org.apache.ode.DeploymentHandling.populateDeployedPacks()', 15000);
-				var myTabs = new YAHOO.widget.TabView("tabt");
-			}
+                org.apache.ode.DeploymentHandling.populateDeployedPacks();
+                setInterval('org.apache.ode.DeploymentHandling.populateDeployedPacks()', 15000);
+                var myTabs = new YAHOO.widget.TabView("tabt");
+            }
             
             YAHOO.util.Event.onDOMReady(init);
         </script>
@@ -69,10 +69,10 @@
                 padding: 5px 10px 5px 0px;
                 line-height: 20px;
             }
-			
-			.depn, .createn{
-				margin-top:30px;
-			}
+            
+            .depn, .createn{
+                margin-top:30px;
+            }
         </style>
     </head>
     <body>
@@ -105,24 +105,24 @@
             <dir id="insideW">
                 <div id="insideL">
                     <div id="content" class="yui-skin-sam">
-                    	
+                        
                         <h2>Deployed Packages</h2>
-						<div id="deployed" class="yui-skin-sam">
-                    		
-                    	</div>
-						
+                        <div id="deployed" class="yui-skin-sam">
+                            
+                        </div>
+                        
                         <h2 class="depn">Deploy New Process</h2>
                         <script type="text/javascript">
                         // Removes leading whitespaces
                         function LTrim( value ) {
-	                        var re = /\s*((\S+\s*)*)/;
-	                        return value.replace(re, "$1");
+                            var re = /\s*((\S+\s*)*)/;
+                            return value.replace(re, "$1");
                         }
 
                         // Removes ending whitespaces
                         function RTrim( value ) {
-		                    var re = /((\s*\S+)*)\s*/;
-	                        return value.replace(re, "$1");
+                            var re = /((\s*\S+)*)\s*/;
+                            return value.replace(re, "$1");
                         }
 
                         // Removes leading and ending whitespaces
@@ -181,11 +181,11 @@
                             </table>
                             <br>
                             <input type="button" id="doUpload" name="doUpload" value="OK" onclick="submitFormAsync('formdep');" />
-							
+                            
                         </form>
                         <div id="opstat" onload="clearOpstat();">
                         </div>
-					    <div>
+                        <div>
                             <script type="text/javascript">
                                 CodePress.run();
                             </script>

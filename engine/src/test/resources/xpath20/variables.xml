@@ -17,18 +17,18 @@
   ~ under the License.
   -->
 <variables>
-	<elementVar name="emptyVar"  xmlns:tns="http://foobar" >
-					<tns:ApplicationData>
-						<tns:empty/>
+    <elementVar name="emptyVar"  xmlns:tns="http://foobar" >
+                    <tns:ApplicationData>
+                        <tns:empty/>
                     </tns:ApplicationData>
-	</elementVar>
+    </elementVar>
 
    <elementVar name="reallyEmptyVar"  xmlns:tns="http://foobar" >
-					<tns:ApplicationData/>
-	</elementVar>
-	
-	<elementVar name="foo"  xmlns:tns="http://foobar" >
-					<tns:ApplicationData>
+                    <tns:ApplicationData/>
+    </elementVar>
+    
+    <elementVar name="foo"  xmlns:tns="http://foobar" >
+                    <tns:ApplicationData>
                              <tns:ApplicationInfo>
                                  <tns:senderId>string</tns:senderId>
                                  <tns:senderName>string</tns:senderName>
@@ -61,5 +61,5 @@
                              </tns:PaymentInfo>
                          </tns:ApplicationData>
 
-	</elementVar>
+    </elementVar>
 </variables>

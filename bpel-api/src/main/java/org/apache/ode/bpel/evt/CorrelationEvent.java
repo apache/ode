@@ -38,17 +38,17 @@ public class CorrelationEvent extends ProcessEvent {
   }
 
   /** Message exchange port type*/
-	public QName getPortType() {
+    public QName getPortType() {
     return _portType;
   }
 
-	/** Message exchange operation */
-	public String getOperation() {
+    /** Message exchange operation */
+    public String getOperation() {
     return _operation;
   }
 
   /** Message exchange id */
-	public String getMessageExchangeId() {
+    public String getMessageExchangeId() {
     return _mexId;
   }
 

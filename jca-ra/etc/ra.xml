@@ -44,7 +44,7 @@
                 <connectionfactory-interface>
                     org.apache.ode.ra.OdeConnectionFactory</connectionfactory-interface>
                 <connectionfactory-impl-class>
-					org.apache.ode.ra.OdeConnectionFactoryImpl </connectionfactory-impl-class>
+                    org.apache.ode.ra.OdeConnectionFactoryImpl </connectionfactory-impl-class>
                 <connection-interface> org.apache.ode.ra.OdeConnection </connection-interface>
                 <connection-impl-class> org.apache.ode.ra.OdeConnectionImpl </connection-impl-class>
             </connection-definition>

@@ -30,41 +30,41 @@ import javax.transaction.xa.XAResource;
  * Does nothing
  */
 public class DummyResourceAdapter implements ResourceAdapter {
-	/**
-	 * 
-	 */
-	public DummyResourceAdapter() {
-		super();
-	}
-	/**
-	 * @see javax.resource.spi.ResourceAdapter#start(javax.resource.spi.BootstrapContext)
-	 */
-	public void start(BootstrapContext arg0)
-			throws ResourceAdapterInternalException {
-	}
-	/**
-	 * @see javax.resource.spi.ResourceAdapter#stop()
-	 */
-	public void stop() {
-	}
-	/**
-	 * @see javax.resource.spi.ResourceAdapter#endpointActivation(javax.resource.spi.endpoint.MessageEndpointFactory, javax.resource.spi.ActivationSpec)
-	 */
-	public void endpointActivation(MessageEndpointFactory arg0,
-			ActivationSpec arg1) throws ResourceException {
-	}
-	/**
-	 * @see javax.resource.spi.ResourceAdapter#endpointDeactivation(javax.resource.spi.endpoint.MessageEndpointFactory, javax.resource.spi.ActivationSpec)
-	 */
-	public void endpointDeactivation(MessageEndpointFactory arg0,
-			ActivationSpec arg1) {
-	}
-	/**
-	 * @see javax.resource.spi.ResourceAdapter#getXAResources(javax.resource.spi.ActivationSpec[])
-	 */
-	public XAResource[] getXAResources(ActivationSpec[] arg0)
-			throws ResourceException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    /**
+     * 
+     */
+    public DummyResourceAdapter() {
+        super();
+    }
+    /**
+     * @see javax.resource.spi.ResourceAdapter#start(javax.resource.spi.BootstrapContext)
+     */
+    public void start(BootstrapContext arg0)
+            throws ResourceAdapterInternalException {
+    }
+    /**
+     * @see javax.resource.spi.ResourceAdapter#stop()
+     */
+    public void stop() {
+    }
+    /**
+     * @see javax.resource.spi.ResourceAdapter#endpointActivation(javax.resource.spi.endpoint.MessageEndpointFactory, javax.resource.spi.ActivationSpec)
+     */
+    public void endpointActivation(MessageEndpointFactory arg0,
+            ActivationSpec arg1) throws ResourceException {
+    }
+    /**
+     * @see javax.resource.spi.ResourceAdapter#endpointDeactivation(javax.resource.spi.endpoint.MessageEndpointFactory, javax.resource.spi.ActivationSpec)
+     */
+    public void endpointDeactivation(MessageEndpointFactory arg0,
+            ActivationSpec arg1) {
+    }
+    /**
+     * @see javax.resource.spi.ResourceAdapter#getXAResources(javax.resource.spi.ActivationSpec[])
+     */
+    public XAResource[] getXAResources(ActivationSpec[] arg0)
+            throws ResourceException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

@@ -7,17 +7,17 @@ import javax.xml.namespace.QName;
 
 public interface ProcessModel {
 
-	PartnerLinkModel getPartnerLink(String name);
-	
-	PartnerLinkModel getPartnerLink(int partnerLinkModelId);
+    PartnerLinkModel getPartnerLink(String name);
+    
+    PartnerLinkModel getPartnerLink(int partnerLinkModelId);
 
-	Collection<? extends PartnerLinkModel> getAllPartnerLinks();
+    Collection<? extends PartnerLinkModel> getAllPartnerLinks();
 
-	String getGuid();
+    String getGuid();
 
-	QName getQName();
+    QName getQName();
 
-	List<String> getCorrelators();
+    List<String> getCorrelators();
 
     ActivityModel getChild(final int id);
 

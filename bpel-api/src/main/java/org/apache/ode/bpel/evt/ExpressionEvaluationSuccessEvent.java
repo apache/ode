@@ -25,8 +25,8 @@ public class ExpressionEvaluationSuccessEvent extends ExpressionEvaluationEvent 
   private static final long serialVersionUID = 1L;
   private String _result;
 
-	/** result of expression, cast as a string */
-	public String getResult() {
+    /** result of expression, cast as a string */
+    public String getResult() {
     return _result;
   }
 

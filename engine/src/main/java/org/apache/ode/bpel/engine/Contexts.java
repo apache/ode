@@ -64,7 +64,7 @@ class Contexts {
     /** Global event listeners. Must be copy-on-write!!! */
     final List<BpelEventListener> eventListeners = new CopyOnWriteArrayList<BpelEventListener>();
 
-	/** Global extension bundle registry **/
+    /** Global extension bundle registry **/
     final Map<String, ExtensionBundleRuntime> extensionRegistry = new ConcurrentHashMap<String, ExtensionBundleRuntime>();
     
     /** Mapping from external variable engine identifier to the engine implementation. */
@@ -126,11 +126,11 @@ class Contexts {
     }
     
     public void setRollbackOnly() {
-    	try {
-	    	txManager.setRollbackOnly();
-    	} catch (SystemException se) {
+        try {
+            txManager.setRollbackOnly();
+        } catch (SystemException se) {
             __log.error("Transaction set rollback only failed.", se);
-    	}
+        }
     }
 
     public void registerCommitSynchronizer(final Runnable runnable) {

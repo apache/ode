@@ -128,11 +128,11 @@ public class WorkEvent {
     }
     
     public void setRetryCount(int retryCount) {
-    	_jobDetail.put("retryCount", String.valueOf(retryCount));
+        _jobDetail.put("retryCount", String.valueOf(retryCount));
     }
     
     public int getRetryCount() {
-    	return _jobDetail.get("retryCount") != null ? Integer.parseInt((String) _jobDetail.get("retryCount")) : 0;
+        return _jobDetail.get("retryCount") != null ? Integer.parseInt((String) _jobDetail.get("retryCount")) : 0;
     }
 }
 

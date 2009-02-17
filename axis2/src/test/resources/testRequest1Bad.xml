@@ -19,7 +19,7 @@
 <message>
    <wrongname>
       <getObjectId xmlns="http://documentum.com/ws/2005/services">
-      	  <someFooBar/>
+          <someFooBar/>
       </getObjectId>
    </wrongname>
 </message>

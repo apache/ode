@@ -26,9 +26,9 @@ import javax.xml.namespace.QName;
  * @author Matthieu Riou <mriou@apache.org>
  */
 public class SoapHeaderTest extends Axis2TestBase {
-	
-	public SoapHeaderTest(String name) {
-		super(name);
+    
+    public SoapHeaderTest(String name) {
+        super(name);
     }
 
 

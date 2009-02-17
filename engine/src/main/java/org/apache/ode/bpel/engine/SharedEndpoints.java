@@ -25,7 +25,7 @@ public class SharedEndpoints {
      * Creates a new SharedEndpoints object.
      */
     public SharedEndpoints() {
-    	init();
+        init();
     }
 
     /**

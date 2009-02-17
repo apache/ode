@@ -280,40 +280,40 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     }
 
     private void registerMBean() throws JBIException {
-    	ProcessAndInstanceManagementMBean pmapi = new ProcessAndInstanceManagementMBean(_ode._server,_ode._store);
+        ProcessAndInstanceManagementMBean pmapi = new ProcessAndInstanceManagementMBean(_ode._server,_ode._store);
         MBeanServer server = _ode.getContext().getMBeanServer();
         try {
-	        if (server != null) {
-	            _mbeanName = _ode.getContext().getMBeanNames().createCustomComponentMBeanName("Management");
-	            if (server.isRegistered(_mbeanName)) {
-	                server.unregisterMBean(_mbeanName);
-	            }
-	            server.registerMBean(pmapi, _mbeanName);
-	        }
+            if (server != null) {
+                _mbeanName = _ode.getContext().getMBeanNames().createCustomComponentMBeanName("Management");
+                if (server.isRegistered(_mbeanName)) {
+                    server.unregisterMBean(_mbeanName);
+                }
+                server.registerMBean(pmapi, _mbeanName);
+            }
         } catch (Exception e) {
-        	throw new JBIException(e);
+            throw new JBIException(e);
         }
     }
     
     private void unregisterMBean() throws JBIException {
-    	try {
-    		if (_mbeanName != null) {
-	            MBeanServer server = _ode.getContext().getMBeanServer();
-	            assert server != null;
-	            if (server.isRegistered(_mbeanName)) {
-	                server.unregisterMBean(_mbeanName);
-	            }
-	        }
-	    } catch (Exception e) {
-	    	throw new JBIException(e);
-	    }
+        try {
+            if (_mbeanName != null) {
+                MBeanServer server = _ode.getContext().getMBeanServer();
+                assert server != null;
+                if (server.isRegistered(_mbeanName)) {
+                    server.unregisterMBean(_mbeanName);
+                }
+            }
+        } catch (Exception e) {
+            throw new JBIException(e);
+        }
     }
     
     private void registerEventListeners() {
         String listenersStr = _ode._config.getEventListeners();
         if (listenersStr != null) {
             for (String listenerCN : listenersStr.split("\\s*(,|;)\\s*")) {
-            	try {
+                try {
                     _ode._server.registerBpelEventListener((BpelEventListener) Class.forName(listenerCN).newInstance());
                     __log.info(__msgs.msgBpelEventListenerRegistered(listenerCN));
                 } catch (Exception e) {
@@ -328,7 +328,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         String listenersStr = _ode._config.getMessageExchangeInterceptors();
         if (listenersStr != null) {
             for (String interceptorCN : listenersStr.split("\\s*(,|;)\\s*")) {
-            	try {
+                try {
                     _ode._server.registerMessageExchangeInterceptor((MessageExchangeInterceptor) Class.forName(interceptorCN).newInstance());
                     __log.info(__msgs.msgMessageExchangeInterceptorRegistered(interceptorCN));
                 } catch (Exception e) {

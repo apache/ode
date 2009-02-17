@@ -39,21 +39,21 @@ import org.w3c.dom.Node;
  */
 public interface OdeRTInstanceContext extends IOContext, ProcessControlContext, RecoveryContext, VariableContext {
 
-	Long getPid();
+    Long getPid();
 
-	/**
-	 * Sends the bpel event.
-	 * 
-	 * @param event
-	 */
-	void sendEvent(ProcessInstanceEvent event);
+    /**
+     * Sends the bpel event.
+     * 
+     * @param event
+     */
+    void sendEvent(ProcessInstanceEvent event);
 
-	/**
-	 * Generate a unique (and monotonic) ID in the context of this instance.
-	 * 
-	 * @return
-	 */
-	long genId();
+    /**
+     * Generate a unique (and monotonic) ID in the context of this instance.
+     * 
+     * @return
+     */
+    long genId();
 
     /**
      * @param mexId
@@ -61,17 +61,17 @@ public interface OdeRTInstanceContext extends IOContext, ProcessControlContext, 
      */
     void noreply(String mexId, FaultInfo optionalFaultData);
 
-	int getAtomicScopeRetryDelay();
+    int getAtomicScopeRetryDelay();
 
-	boolean isAtomicScopeFirstTry();
+    boolean isAtomicScopeFirstTry();
 
-	boolean isAtomicScopeRetryable();
+    boolean isAtomicScopeRetryable();
 
-	void setAtomicScopeRetriedOnce();
+    void setAtomicScopeRetriedOnce();
 
-	void setAtomicScopeRetriesDone();
+    void setAtomicScopeRetriesDone();
 
-	void setAtomicScope(boolean atomicScope);
+    void setAtomicScope(boolean atomicScope);
 
-	Node getProcessProperty(QName propertyName);
+    Node getProcessProperty(QName propertyName);
 }

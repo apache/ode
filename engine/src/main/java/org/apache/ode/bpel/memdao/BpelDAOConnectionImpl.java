@@ -248,13 +248,13 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
     }
 
     public void releaseMessageExchange(String mexid) {
-		synchronized (_mexStore) {
-			MessageExchangeDAO mexDao = _mexStore.remove(mexid);
-			if (mexDao != null) {
-				_mexList.remove(mexDao);
-			}
-		}
-	}
+        synchronized (_mexStore) {
+            MessageExchangeDAO mexDao = _mexStore.remove(mexid);
+            if (mexDao != null) {
+                _mexList.remove(mexDao);
+            }
+        }
+    }
 
     private int compareInstanceUsingKey(String key, ProcessInstanceDAO instanceDAO1, ProcessInstanceDAO instanceDAO2) {
         String s1 = null;

@@ -151,10 +151,10 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
         return (OXPath20ExpressionBPEL20)_compiler.compileLValue(exp);
     }
     public URI getBaseResourceURI() {
-    	return null;
+        return null;
     }
 
-	public Node getPropertyValue(QName propertyName) {
-		return null;
-	}
+    public Node getPropertyValue(QName propertyName) {
+        return null;
+    }
 }

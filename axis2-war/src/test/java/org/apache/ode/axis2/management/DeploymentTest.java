@@ -57,7 +57,7 @@ public class DeploymentTest extends Axis2TestBase {
         OMElement result = sendToPM(listRoot);
 
         // look for DynPartnerMain-xxx
-    	listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
+        listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
                 new String[] {"name="+_deployed.get(0).getLocalPart(), ""});
         result = sendToPM(listRoot);
         result = result.getFirstElement();
@@ -178,7 +178,7 @@ public class DeploymentTest extends Axis2TestBase {
         byte[] buffer = new byte[4096];
         int len;
         while((len = is.read(buffer)) >= 0) {
-        	outputStream.write(buffer, 0, len);
+            outputStream.write(buffer, 0, len);
         }
         String base64Enc = Base64.encode(outputStream.toByteArray());
         OMText zipContent = _factory.createOMText(base64Enc, "application/zip", true);
@@ -194,13 +194,13 @@ public class DeploymentTest extends Axis2TestBase {
         String pakage = null;
         Iterator iter = result.getChildElements();
         while (iter.hasNext()) {
-        	OMElement e = (OMElement) iter.next();
-        	if (e.getLocalName().equals("name")) {
+            OMElement e = (OMElement) iter.next();
+            if (e.getLocalName().equals("name")) {
                 pakage = e.getText();
-        	}
-        	if (e.getLocalName().equals("id")) {
-        		_deployed.add(e.getTextAsQName());
-        	}
+            }
+            if (e.getLocalName().equals("id")) {
+                _deployed.add(e.getTextAsQName());
+            }
         }
         return pakage;
     }
