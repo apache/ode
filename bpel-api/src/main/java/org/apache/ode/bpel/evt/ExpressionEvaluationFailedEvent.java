@@ -29,7 +29,7 @@ public class ExpressionEvaluationFailedEvent extends ExpressionEvaluationEvent {
   private QName _fault;
 
   /** fault qname */
-	public QName getFault() {
+    public QName getFault() {
     return _fault;
   }
 

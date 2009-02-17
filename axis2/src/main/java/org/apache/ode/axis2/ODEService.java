@@ -59,10 +59,10 @@ import org.w3c.dom.Element;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class ODEService {
-	private static final Log __log = LogFactory.getLog(ODEService.class);
+    private static final Log __log = LogFactory.getLog(ODEService.class);
 
     public static final String TARGET_SESSION_ENDPOINT = "targetSessionEndpoint";
-	public static final String CALLBACK_SESSION_ENDPOINT = "callbackSessionEndpoint";
+    public static final String CALLBACK_SESSION_ENDPOINT = "callbackSessionEndpoint";
 
     private AxisService _axisService;
     private BpelServer _server;
@@ -77,8 +77,8 @@ public class ODEService {
         _axisService = axisService;
         _server = server;
         _serviceName = serviceName;
-	_pconf = pconf;
-	_wsdlDef = pconf.getDefinitionForService(serviceName);
+    _pconf = pconf;
+    _wsdlDef = pconf.getDefinitionForService(serviceName);
         _portName = portName;
         _serviceRef = EndpointFactory.convertToWSA(createServiceRef(genEPRfromWSDL(_wsdlDef, serviceName, portName)));
         _converter = new SoapMessageConverter(_wsdlDef, serviceName, portName);

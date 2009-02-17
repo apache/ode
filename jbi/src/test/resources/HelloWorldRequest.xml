@@ -17,7 +17,7 @@
   ~ under the License.
   -->
   <message xmlns="http://java.sun.com/xml/ns/jbi/wsdl-11-wrapper"> 
-	  <part> 
+      <part> 
   <HelloRequest xmlns="urn:/HelloWorld2.wsdl">
     <text>hello</text>
   </HelloRequest>

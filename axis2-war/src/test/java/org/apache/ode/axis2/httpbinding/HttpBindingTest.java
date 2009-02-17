@@ -30,7 +30,7 @@ public class HttpBindingTest extends Axis2TestBase {
     protected JettyWrapper jettyWrapper;
 
     public HttpBindingTest(String name) {
-    	super(name);
+        super(name);
     }
 
   @BeforeMethod

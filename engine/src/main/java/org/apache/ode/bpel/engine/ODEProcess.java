@@ -183,7 +183,7 @@ public class ODEProcess {
      * @return URI - instance representing the absolute file path to the physical location of the process definition folder.
      */
     public URI getBaseResourceURI() {
-    	return this._pconf.getBaseURI();
+        return this._pconf.getBaseURI();
     }
     
     /**
@@ -198,7 +198,7 @@ public class ODEProcess {
     }
     
     public OdeConfigProperties getProperties() {
-    	return _server.getConfigProperties();
+        return _server.getConfigProperties();
     }
     
     public String toString() {
@@ -242,7 +242,7 @@ public class ODEProcess {
      */
     void invokeProcess(final MessageExchangeDAO mexdao) {
         InvocationStyle istyle = mexdao.getInvocationStyle();
-		ConstantsModel constants = null;
+        ConstantsModel constants = null;
 
         _hydrationLatch.latch(1);
         try {
@@ -330,28 +330,28 @@ public class ODEProcess {
                 ; // do nothing
             }
         } catch (InvalidProcessException ipe) {
-        	QName faultQName = null;
-        	if (constants != null) {
-        		Document document = DOMUtils.newDocument();
-        		Element faultElement = document.createElementNS(Namespaces.SOAP_ENV_NS, "Fault");
-        		Element faultDetail = document.createElementNS(Namespaces.ODE_EXTENSION_NS, "fault");
-        		faultElement.appendChild(faultDetail);
-	        	switch (ipe.getCauseCode()) {
-		        	case InvalidProcessException.DUPLICATE_CAUSE_CODE:
-		        		faultQName = constants.getDuplicateInstance();
-		        		faultDetail.setTextContent("Found a duplicate instance with the same message key");
-		        		break;
-		        	case InvalidProcessException.RETIRED_CAUSE_CODE:
-		        		faultQName = constants.getRetiredProcess();
-		        		faultDetail.setTextContent("The process you're trying to instantiate has been retired");
-		        		break;
-		        	case InvalidProcessException.DEFAULT_CAUSE_CODE:
-		        	default:
-		        		faultQName = constants.getUnknownFault();
-		        		break;
-	        	}
-	        	MexDaoUtil.setFaulted(mexdao, faultQName, faultElement);
-        	}
+            QName faultQName = null;
+            if (constants != null) {
+                Document document = DOMUtils.newDocument();
+                Element faultElement = document.createElementNS(Namespaces.SOAP_ENV_NS, "Fault");
+                Element faultDetail = document.createElementNS(Namespaces.ODE_EXTENSION_NS, "fault");
+                faultElement.appendChild(faultDetail);
+                switch (ipe.getCauseCode()) {
+                    case InvalidProcessException.DUPLICATE_CAUSE_CODE:
+                        faultQName = constants.getDuplicateInstance();
+                        faultDetail.setTextContent("Found a duplicate instance with the same message key");
+                        break;
+                    case InvalidProcessException.RETIRED_CAUSE_CODE:
+                        faultQName = constants.getRetiredProcess();
+                        faultDetail.setTextContent("The process you're trying to instantiate has been retired");
+                        break;
+                    case InvalidProcessException.DEFAULT_CAUSE_CODE:
+                    default:
+                        faultQName = constants.getUnknownFault();
+                        break;
+                }
+                MexDaoUtil.setFaulted(mexdao, faultQName, faultElement);
+            }
         } finally {
             _hydrationLatch.release(1);
 
@@ -670,10 +670,10 @@ public class ODEProcess {
             }
 
             if (pl.hasPartnerRole()) {
-            	Endpoint endpoint = _pconf.getInvokeEndpoints().get(pl.getName());
+                Endpoint endpoint = _pconf.getInvokeEndpoints().get(pl.getName());
                 if (endpoint == null)
                     throw new IllegalArgumentException(pl.getName() + " must be bound to an endpoint in deloy.xml");
-            	PartnerLinkPartnerRoleImpl partnerRole = new PartnerLinkPartnerRoleImpl(this, pl, endpoint);
+                PartnerLinkPartnerRoleImpl partnerRole = new PartnerLinkPartnerRoleImpl(this, pl, endpoint);
                 _partnerRoles.put(pl, partnerRole);
             }
         }
@@ -707,24 +707,24 @@ public class ODEProcess {
         __log.debug("Activating " + _pid);
         // Activate all the my-role endpoints.
         for (Map.Entry<String, Endpoint> entry : _pconf.getProvideEndpoints().entrySet()) {
-        	Endpoint endpoint = entry.getValue();
-        	EndpointReference initialEPR = null;
-        	if (isShareable(endpoint)) {
-	        	// Check if the EPR already exists for the given endpoint
-	        	initialEPR = _sharedEps.getEndpointReference(endpoint);
-	        	if (initialEPR == null) {
-	        		// Create an EPR by physically activating the endpoint
-	                initialEPR = _contexts.bindingContext.activateMyRoleEndpoint(_pid, entry.getValue());
-	                _sharedEps.addEndpoint(endpoint, initialEPR);
-	                __log.debug("Activated " + _pid + " myrole " + entry.getKey() + ": EPR is " + initialEPR);
-	        	}
-	            // Increment the reference count on the endpoint
-	            _sharedEps.incrementReferenceCount(endpoint);
-        	} else {
-        		// Create an EPR by physically activating the endpoint
+            Endpoint endpoint = entry.getValue();
+            EndpointReference initialEPR = null;
+            if (isShareable(endpoint)) {
+                // Check if the EPR already exists for the given endpoint
+                initialEPR = _sharedEps.getEndpointReference(endpoint);
+                if (initialEPR == null) {
+                    // Create an EPR by physically activating the endpoint
+                    initialEPR = _contexts.bindingContext.activateMyRoleEndpoint(_pid, entry.getValue());
+                    _sharedEps.addEndpoint(endpoint, initialEPR);
+                    __log.debug("Activated " + _pid + " myrole " + entry.getKey() + ": EPR is " + initialEPR);
+                }
+                // Increment the reference count on the endpoint
+                _sharedEps.incrementReferenceCount(endpoint);
+            } else {
+                // Create an EPR by physically activating the endpoint
                 initialEPR = _contexts.bindingContext.activateMyRoleEndpoint(_pid, entry.getValue());
                 __log.debug("Activated " + _pid + " myrole " + entry.getKey() + ": EPR is " + initialEPR);
-        	}
+            }
             _myEprs.put(endpoint, initialEPR);
         }
         __log.debug("Activated " + _pid);
@@ -735,24 +735,24 @@ public class ODEProcess {
     void deactivate() {
         // Deactivate all the my-role endpoints.
         for (Endpoint endpoint : _myEprs.keySet()) {
-        	// Deactivate the EPR only if there are no more references
-        	// to this endpoint from any (active) BPEL process.
-        	if (isShareable(endpoint)) {
-	        	__log.debug("deactivating shared endpoint " + endpoint);
-	        	if (!_sharedEps.decrementReferenceCount(endpoint)) {
-		            _contexts.bindingContext.deactivateMyRoleEndpoint(endpoint);
-		            _sharedEps.removeEndpoint(endpoint);
-	        	}
-        	} else {
-	        	__log.debug("deactivating non-shared endpoint " + endpoint);
-	            _contexts.bindingContext.deactivateMyRoleEndpoint(endpoint);
-        	}
+            // Deactivate the EPR only if there are no more references
+            // to this endpoint from any (active) BPEL process.
+            if (isShareable(endpoint)) {
+                __log.debug("deactivating shared endpoint " + endpoint);
+                if (!_sharedEps.decrementReferenceCount(endpoint)) {
+                    _contexts.bindingContext.deactivateMyRoleEndpoint(endpoint);
+                    _sharedEps.removeEndpoint(endpoint);
+                }
+            } else {
+                __log.debug("deactivating non-shared endpoint " + endpoint);
+                _contexts.bindingContext.deactivateMyRoleEndpoint(endpoint);
+            }
         }
         // TODO Deactivate all the partner-role channels
     }
 
     private boolean isShareable(Endpoint endpoint) {
-    	if (!_pconf.isSharedService(endpoint.serviceName)) return false;
+        if (!_pconf.isSharedService(endpoint.serviceName)) return false;
 
 //    	PartnerLinkMyRoleImpl partnerLink = _endpointToMyRoleMap.get(endpoint);
 //        return partnerLink != null && partnerLink.isOneWayOnly();
@@ -820,8 +820,8 @@ public class ODEProcess {
     public void saveEvent(ProcessInstanceEvent event, ProcessInstanceDAO instanceDao, List<String> scopeNames) {
         markused();
         if (_pconf.isEventEnabled(scopeNames, event.getType())) {
-	        // notify the listeners
-	        _server.fireEvent(event);
+            // notify the listeners
+            _server.fireEvent(event);
             if (instanceDao != null)
                 instanceDao.insertBpelEvent(event);
             else
@@ -1000,8 +1000,8 @@ public class ODEProcess {
      * exists and matches the GUID.
      */
     private void bounceProcessDAO(BpelDAOConnection conn, final QName pid, final long version, final ProcessModel mprocess) {
-    	deleteProcessDAO(conn, pid, version, mprocess);
-    	createProcessDAO(conn, pid, version, mprocess);
+        deleteProcessDAO(conn, pid, version, mprocess);
+        createProcessDAO(conn, pid, version, mprocess);
     }
     
     private void deleteProcessDAO(BpelDAOConnection conn, final QName pid, final long version, final ProcessModel mprocess) {
@@ -1079,11 +1079,11 @@ public class ODEProcess {
         return _inMemDao.getConnection().getMessageExchange(mexId);
     }
 
-	public void releaseMessageExchange(String mexId) {
-		if (isInMemory()) {
-			_inMemDao.getConnection().releaseMessageExchange(mexId);
-		}
-	}
+    public void releaseMessageExchange(String mexId) {
+        if (isInMemory()) {
+            _inMemDao.getConnection().releaseMessageExchange(mexId);
+        }
+    }
     /**
      * Schedule process-level work. This method defers to the server to do the scheduling and wraps the {@link Runnable} in a
      * try-finally block that ensures that the process is hydrated.
@@ -1248,7 +1248,7 @@ public class ODEProcess {
             _runtime.init(_pconf, _processModel);
 
             setRoles(_processModel);
-    		initExternalVariables();
+            initExternalVariables();
     
             if (!_hydratedOnce) {
                 for (PartnerLinkPartnerRoleImpl prole : _partnerRoles.values()) {
@@ -1393,10 +1393,10 @@ public class ODEProcess {
                     + " target=" + target);
         
         partnerRoleMex.setInvocationStyle(
-        		Boolean.parseBoolean(
-        				partnerRoleMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_TRANSACTED))
-        			? InvocationStyle.P2P_TRANSACTED 
-        			: InvocationStyle.P2P);
+                Boolean.parseBoolean(
+                        partnerRoleMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_TRANSACTED))
+                    ? InvocationStyle.P2P_TRANSACTED 
+                    : InvocationStyle.P2P);
 
         // Plumbing
         MessageExchangeDAO myRoleMex = target.createMessageExchange(new GUID().toString(),
@@ -1481,10 +1481,10 @@ public class ODEProcess {
     }
 
     public Node getProcessProperty(QName propertyName) {
-    	Map<QName, Node> properties = _pconf.getProcessProperties();
-    	if (properties != null) {
-    		return properties.get(propertyName);
-    	}
-    	return null;
+        Map<QName, Node> properties = _pconf.getProcessProperties();
+        if (properties != null) {
+            return properties.get(propertyName);
+        }
+        return null;
     }
 }

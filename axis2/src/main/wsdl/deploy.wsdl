@@ -28,32 +28,32 @@
 
     <types>
     <xsd:schema elementFormDefault="qualified"
-    	targetNamespace="http://www.apache.org/ode/deployapi">
-    	<xsd:import namespace="http://www.w3.org/2005/05/xmlmime"
-    		schemaLocation="xmlmime.xsd" />
-    	<xsd:complexType name="package">
-    		<xsd:all>
-    			<xsd:element name="zip" type="xmime:base64Binary"
-    				xmime:expectedContentType="application/zip" />
-    		</xsd:all>
-    	</xsd:complexType>
-    	<xsd:complexType name="packageNames">
-    		<xsd:all>
-    			<xsd:element name="name" type="xsd:string" />
-    		</xsd:all>
-    	</xsd:complexType>
-    	<xsd:complexType name="processIds">
-    		<xsd:all>
-    			<xsd:element name="id" type="xsd:QName" />
-    		</xsd:all>
-    	</xsd:complexType>
-    	<xsd:complexType name="deployUnit">
-    		<xsd:sequence>
-    			<xsd:element name="name" type="xsd:string" />
-    			<xsd:element name="id" type="xsd:QName"
-    				maxOccurs="unbounded" />
-    		</xsd:sequence>
-    	</xsd:complexType>
+        targetNamespace="http://www.apache.org/ode/deployapi">
+        <xsd:import namespace="http://www.w3.org/2005/05/xmlmime"
+            schemaLocation="xmlmime.xsd" />
+        <xsd:complexType name="package">
+            <xsd:all>
+                <xsd:element name="zip" type="xmime:base64Binary"
+                    xmime:expectedContentType="application/zip" />
+            </xsd:all>
+        </xsd:complexType>
+        <xsd:complexType name="packageNames">
+            <xsd:all>
+                <xsd:element name="name" type="xsd:string" />
+            </xsd:all>
+        </xsd:complexType>
+        <xsd:complexType name="processIds">
+            <xsd:all>
+                <xsd:element name="id" type="xsd:QName" />
+            </xsd:all>
+        </xsd:complexType>
+        <xsd:complexType name="deployUnit">
+            <xsd:sequence>
+                <xsd:element name="name" type="xsd:string" />
+                <xsd:element name="id" type="xsd:QName"
+                    maxOccurs="unbounded" />
+            </xsd:sequence>
+        </xsd:complexType>
     </xsd:schema>
     </types>
 

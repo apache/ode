@@ -16,8 +16,8 @@
  ! limitations under the License.
  !-->
 <service>
-	<module ref="rampart" />
-	
+    <module ref="rampart" />
+    
     <parameter name="OutflowSecurity">
       <action>
         <items>UsernameToken</items>
@@ -26,5 +26,5 @@
         <passwordType>PasswordText</passwordType>
       </action>
     </parameter>
-    	
+        
 </service>

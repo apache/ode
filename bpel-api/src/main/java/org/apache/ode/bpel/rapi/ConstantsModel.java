@@ -3,7 +3,7 @@ package org.apache.ode.bpel.rapi;
 import javax.xml.namespace.QName;
 
 public interface ConstantsModel {
-	
+    
     // standard fault names
     public QName getMissingRequest();
     public QName getMissingReply();

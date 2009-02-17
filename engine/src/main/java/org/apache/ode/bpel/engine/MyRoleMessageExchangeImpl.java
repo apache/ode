@@ -138,20 +138,20 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
      * @param message
      * @return
      */
-	protected Message cloneMessage(Message message) {
-		Message clone = createMessage(message.getType());
-		clone.setMessage((Element) message.getMessage().cloneNode(true));
-		Map<String, Node> headerParts = message.getHeaderParts();
-		for (String partName : headerParts.keySet()) {
-			clone.setHeaderPart(partName, (Element) headerParts.get(partName).cloneNode(true)); 
-		}
-		Map<String, Node> parts = message.getHeaderParts();
-		for (String partName : parts.keySet()) {
-			clone.setHeaderPart(partName, (Element) parts.get(partName).cloneNode(true)); 
-		}
-		return clone;
-	}
-	    
+    protected Message cloneMessage(Message message) {
+        Message clone = createMessage(message.getType());
+        clone.setMessage((Element) message.getMessage().cloneNode(true));
+        Map<String, Node> headerParts = message.getHeaderParts();
+        for (String partName : headerParts.keySet()) {
+            clone.setHeaderPart(partName, (Element) headerParts.get(partName).cloneNode(true)); 
+        }
+        Map<String, Node> parts = message.getHeaderParts();
+        for (String partName : parts.keySet()) {
+            clone.setHeaderPart(partName, (Element) parts.get(partName).cloneNode(true)); 
+        }
+        return clone;
+    }
+        
     protected abstract void onAsyncAck(MessageExchangeDAO mexdao);    
 
 }

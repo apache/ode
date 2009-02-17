@@ -60,7 +60,7 @@ public class BrokeredReliableMyRoleMessageExchangeImpl
      */
     @Override
     public Status getStatus() {
-    	return template.getStatus();
+        return template.getStatus();
     }
 
     /**

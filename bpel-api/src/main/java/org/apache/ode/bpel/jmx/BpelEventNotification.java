@@ -27,32 +27,32 @@ import javax.management.Notification;
  * to JMX {@link javax.management.NotificationListener}s.
  */
 public class BpelEventNotification extends Notification {
-	private static final long serialVersionUID = 5420803960639317141L;
+    private static final long serialVersionUID = 5420803960639317141L;
 
-	/**
-	 * Constructor. Creates a JMX notification with a type matching the
-	 * <em>class name</em> of the passed-in {@link BpelEvent} object.
-	 * 
-	 * @param source
-	 *            originating object/{@link javax.management.ObjectName}
-	 * @param sequence
-	 *            event sequence
-	 * @param bpelEvent
-	 *            {@link BpelEvent} payload
-	 */
-	public BpelEventNotification(Object source, long sequence,
-			BpelEvent bpelEvent) {
-		super(bpelEvent.getClass().getName(), source, sequence);
-		setUserData(bpelEvent);
-	}
+    /**
+     * Constructor. Creates a JMX notification with a type matching the
+     * <em>class name</em> of the passed-in {@link BpelEvent} object.
+     * 
+     * @param source
+     *            originating object/{@link javax.management.ObjectName}
+     * @param sequence
+     *            event sequence
+     * @param bpelEvent
+     *            {@link BpelEvent} payload
+     */
+    public BpelEventNotification(Object source, long sequence,
+            BpelEvent bpelEvent) {
+        super(bpelEvent.getClass().getName(), source, sequence);
+        setUserData(bpelEvent);
+    }
 
-	/**
-	 * Get the {@link BpelEvent} payload.
-	 * 
-	 * @return {@link BpelEvent} payload.
-	 */
-	public BpelEvent getBpelEvent() {
-		return (BpelEvent) getUserData();
-	}
+    /**
+     * Get the {@link BpelEvent} payload.
+     * 
+     * @return {@link BpelEvent} payload.
+     */
+    public BpelEvent getBpelEvent() {
+        return (BpelEvent) getUserData();
+    }
 
 }

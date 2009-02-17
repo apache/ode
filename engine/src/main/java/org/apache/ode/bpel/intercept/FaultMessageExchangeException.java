@@ -29,23 +29,23 @@ import org.w3c.dom.Element;
  * @author Maciej Szefler
  */
 public final class FaultMessageExchangeException extends AbortMessageExchangeException {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private QName _faultName;
-	private Element _faultData;
+    private QName _faultName;
+    private Element _faultData;
 
-	public FaultMessageExchangeException(String errmsg, QName faultName, Element faultData) {
-		super(errmsg);
-		
-		_faultName = faultName;
-		_faultData = faultData;
-	}
-	
-	public QName getFaultName() {
-		return _faultName;
-	}
-	
-	public Element getFaultData() {
-		return _faultData;
-	}
+    public FaultMessageExchangeException(String errmsg, QName faultName, Element faultData) {
+        super(errmsg);
+        
+        _faultName = faultName;
+        _faultData = faultData;
+    }
+    
+    public QName getFaultName() {
+        return _faultName;
+    }
+    
+    public Element getFaultData() {
+        return _faultData;
+    }
 }

@@ -47,7 +47,7 @@ public abstract class Axis2TestBase {
     }
     
     public Axis2TestBase() {
-    	this(null);
+        this(null);
     }
 
     public void startServer() throws Exception {

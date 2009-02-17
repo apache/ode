@@ -5155,9 +5155,9 @@ version: 2.5.2
                 oClose = this.close;
         
             function doHide(e, obj) {
-				obj.body.removeChild(obj.body.firstChild);
-				//obj.element.removeChild(obj);
-				obj.element.parentNode.removeChild(obj.element);
+                obj.body.removeChild(obj.body.firstChild);
+                //obj.element.removeChild(obj);
+                obj.element.parentNode.removeChild(obj.element);
                 obj.hide();
             }
         

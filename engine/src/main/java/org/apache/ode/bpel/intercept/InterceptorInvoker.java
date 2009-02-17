@@ -28,43 +28,43 @@ import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorEvent
  */
 public abstract class InterceptorInvoker {
 
-	private final String _name;
-	// Closures anyone? 
-	
-	/** Invoke {@link MessageExchangeInterceptor#onProcessInvoked(MyRoleMessageExchange, InterceptorEvent)} */
-	public static final InterceptorInvoker  __onProcessInvoked= new InterceptorInvoker("onProcessInvoked") {
-		public void invoke(MessageExchangeInterceptor i, InterceptorEvent ictx) 
-			throws FailMessageExchangeException, FaultMessageExchangeException {
-			i.onProcessInvoked(ictx);
-		}
-	};
+    private final String _name;
+    // Closures anyone? 
+    
+    /** Invoke {@link MessageExchangeInterceptor#onProcessInvoked(MyRoleMessageExchange, InterceptorEvent)} */
+    public static final InterceptorInvoker  __onProcessInvoked= new InterceptorInvoker("onProcessInvoked") {
+        public void invoke(MessageExchangeInterceptor i, InterceptorEvent ictx) 
+            throws FailMessageExchangeException, FaultMessageExchangeException {
+            i.onProcessInvoked(ictx);
+        }
+    };
 
 
-	/** Invoke {@link MessageExchangeInterceptor#onPartnerInvoked(PartnerRoleMessageExchange, InterceptorEvent)} */
-	public static final InterceptorInvoker __onPartnerInvoked = new InterceptorInvoker("onPartnerInvoked") {
-		public void invoke(MessageExchangeInterceptor i, InterceptorEvent ictx) 
-			throws FailMessageExchangeException, FaultMessageExchangeException {
-			i.onPartnerInvoked(ictx);
-		}
-	};
+    /** Invoke {@link MessageExchangeInterceptor#onPartnerInvoked(PartnerRoleMessageExchange, InterceptorEvent)} */
+    public static final InterceptorInvoker __onPartnerInvoked = new InterceptorInvoker("onPartnerInvoked") {
+        public void invoke(MessageExchangeInterceptor i, InterceptorEvent ictx) 
+            throws FailMessageExchangeException, FaultMessageExchangeException {
+            i.onPartnerInvoked(ictx);
+        }
+    };
 
-	/** Invoke {@link MessageExchangeInterceptor#onPartnerInvoked(PartnerRoleMessageExchange, InterceptorEvent)} */
-	public static final InterceptorInvoker __onNewInstanceInvoked = new InterceptorInvoker("onNewInstanceInvoked") {
-		public void invoke(MessageExchangeInterceptor i, InterceptorEvent ictx) 
-			throws FailMessageExchangeException, FaultMessageExchangeException {
-			i.onNewInstanceInvoked(ictx);
-		}
-	};
+    /** Invoke {@link MessageExchangeInterceptor#onPartnerInvoked(PartnerRoleMessageExchange, InterceptorEvent)} */
+    public static final InterceptorInvoker __onNewInstanceInvoked = new InterceptorInvoker("onNewInstanceInvoked") {
+        public void invoke(MessageExchangeInterceptor i, InterceptorEvent ictx) 
+            throws FailMessageExchangeException, FaultMessageExchangeException {
+            i.onNewInstanceInvoked(ictx);
+        }
+    };
 
 
-	private InterceptorInvoker(String name) {
-		_name = name;
-	}
-	
-	public abstract void invoke(MessageExchangeInterceptor i, InterceptorEvent ictx)
-		throws FailMessageExchangeException, FaultMessageExchangeException;
-	
-	public String toString() {
-		return InterceptorInvoker.class.getName() + "." + _name;
-	}
+    private InterceptorInvoker(String name) {
+        _name = name;
+    }
+    
+    public abstract void invoke(MessageExchangeInterceptor i, InterceptorEvent ictx)
+        throws FailMessageExchangeException, FaultMessageExchangeException;
+    
+    public String toString() {
+        return InterceptorInvoker.class.getName() + "." + _name;
+    }
 }

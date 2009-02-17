@@ -39,7 +39,7 @@ import javax.xml.namespace.QName;
  * context.
  */
 public class SessionInHandler extends AbstractHandler {
-	private static final long serialVersionUID = -806564877582696569L;
+    private static final long serialVersionUID = -806564877582696569L;
 
     private static final Log __log = LogFactory.getLog(SessionInHandler.class);
 
@@ -51,8 +51,8 @@ public class SessionInHandler extends AbstractHandler {
             // Checking if a session identifier has been provided for a stateful endpoint
             OMElement wsaToSession = header.getFirstChildWithName(new QName(Namespaces.ODE_SESSION_NS, "session"));
             if (wsaToSession == null) {
-            	// perhaps there is an old intalio header?
-            	wsaToSession = header.getFirstChildWithName(new QName(Namespaces.INTALIO_SESSION_NS, "session"));	
+                // perhaps there is an old intalio header?
+                wsaToSession = header.getFirstChildWithName(new QName(Namespaces.INTALIO_SESSION_NS, "session"));	
             }
             if (wsaToSession != null) {
                 // Building an endpoint supposed to target the right instance
@@ -80,11 +80,11 @@ public class SessionInHandler extends AbstractHandler {
             // Seeing if there's a callback, in case our client would be stateful as well
             OMElement callback = header.getFirstChildWithName(new QName(Namespaces.ODE_SESSION_NS, "callback"));
             if (callback == null) {
-            	// is there an old intalio header?
-            	callback = header.getFirstChildWithName(new QName(Namespaces.INTALIO_SESSION_NS, "callback"));
+                // is there an old intalio header?
+                callback = header.getFirstChildWithName(new QName(Namespaces.INTALIO_SESSION_NS, "callback"));
             }
             if (callback != null) {
-            	OMElement callbackSession = callback.getFirstChildWithName(new QName(callback.getNamespace().getNamespaceURI(), "session"));
+                OMElement callbackSession = callback.getFirstChildWithName(new QName(callback.getNamespace().getNamespaceURI(), "session"));
                 if (callbackSession != null) {
                     // Building an endpoint that represents our client (we're supposed to call him later on)
                     Document doc = DOMUtils.newDocument();

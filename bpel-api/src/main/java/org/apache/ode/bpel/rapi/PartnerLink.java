@@ -2,7 +2,7 @@ package org.apache.ode.bpel.rapi;
 
 public interface PartnerLink extends ScopedObject {
 
-	String getName();
+    String getName();
 
-	PartnerLinkModel getModel();
+    PartnerLinkModel getModel();
 }

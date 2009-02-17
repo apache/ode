@@ -812,7 +812,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         instances.setState(state);
         String queryStatus = InstanceFilter.StatusKeys.valueOf(state.toString()).toString().toLowerCase();
         final InstanceFilter instanceFilter = new InstanceFilter("status=" + queryStatus 
-        		+ " pid="+ pconf.getProcessId());
+                + " pid="+ pconf.getProcessId());
         
         int count = dbexec(new BpelDatabase.Callable<Integer>() {
 
@@ -827,7 +827,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         String queryStatus = InstanceFilter.StatusKeys.valueOf(TInstanceStatus.ACTIVE.toString()).toString()
                 .toLowerCase();
         final InstanceFilter instanceFilter = new InstanceFilter("status=" + queryStatus 
-        		+ " pid="+ pconf.getProcessId());
+                + " pid="+ pconf.getProcessId());
         dbexec(new BpelDatabase.Callable<Void>() {
 
             public Void run(BpelDAOConnection conn) throws Exception {

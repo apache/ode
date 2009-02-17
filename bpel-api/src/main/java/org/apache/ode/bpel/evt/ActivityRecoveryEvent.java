@@ -23,7 +23,7 @@ package org.apache.ode.bpel.evt;
  */
 public class ActivityRecoveryEvent extends ActivityEvent {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
   
   private String _action;
 
@@ -35,7 +35,7 @@ public class ActivityRecoveryEvent extends ActivityEvent {
     _action = action;
   }
 
-	public String getRecoveryAction() {
+    public String getRecoveryAction() {
     return _action;
   }
 

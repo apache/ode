@@ -131,7 +131,7 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
 
     private void invokePersisted(MessageExchangeDAO mexDao, EndpointReference partnerEpr, EndpointReference myRoleEpr,
             Operation operation, Set<InvocationStyle> supportedStyles) {
-    	boolean transactionalMex = Boolean.parseBoolean(mexDao.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_TRANSACTED));
+        boolean transactionalMex = Boolean.parseBoolean(mexDao.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_TRANSACTED));
         if (supportedStyles.contains(InvocationStyle.TRANSACTED) && transactionalMex) {
             mexDao.setInvocationStyle(InvocationStyle.TRANSACTED);
             invokeTransacted(mexDao, partnerEpr, myRoleEpr, operation);

@@ -8,12 +8,12 @@
                   xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
                   xmlns:xs="http://www.w3.org/2001/XMLSchema"
                   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-		  targetNamespace="http://sample04.policy.samples.rampart.apache.org">
+          targetNamespace="http://sample04.policy.samples.rampart.apache.org">
    <wsdl:types>
-	   <xs:schema xmlns:ns="http://sample04.policy.samples.rampart.apache.org"
+       <xs:schema xmlns:ns="http://sample04.policy.samples.rampart.apache.org"
                  attributeFormDefault="qualified"
                  elementFormDefault="qualified"
-		 targetNamespace="http://sample04.policy.samples.rampart.apache.org">
+         targetNamespace="http://sample04.policy.samples.rampart.apache.org">
          <xs:element name="echo">
             <xs:complexType>
                <xs:sequence>

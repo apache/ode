@@ -193,21 +193,21 @@ public class MockCompilerContext implements CompilerContext {
     public void recoveredFromError(SourceLocation location, CompilationException error) {
     }
     
-	public boolean isExtensionDeclared(String namespace) {
-		return false;
-	}
-	public ExtensionValidator getExtensionValidator(QName extensionElementName) {
-		return null;
-	}
+    public boolean isExtensionDeclared(String namespace) {
+        return false;
+    }
+    public ExtensionValidator getExtensionValidator(QName extensionElementName) {
+        return null;
+    }
 
      public OMessageVarType.Part resolveHeaderPart(OScope.Variable variable, String partname) throws CompilationException {
          return null;
      }
-	public Map<URI, Source> getSchemaSources() {
-		return null;
-	}
+    public Map<URI, Source> getSchemaSources() {
+        return null;
+    }
 
-	public URI getBaseResourceURI() {
-		return null;
-	}
+    public URI getBaseResourceURI() {
+        return null;
+    }
 }

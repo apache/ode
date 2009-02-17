@@ -140,11 +140,11 @@
 
     <xs:complexType name="tEnableSharing">
         <xs:complexContent>
-			<xs:restriction base="xs:anyType">
-			</xs:restriction>
-		</xs:complexContent>
+            <xs:restriction base="xs:anyType">
+            </xs:restriction>
+        </xs:complexContent>
     </xs:complexType>
-	
+    
     <xs:complexType name="tMexInterceptor" >
         <xs:annotation>
             <xs:documentation>

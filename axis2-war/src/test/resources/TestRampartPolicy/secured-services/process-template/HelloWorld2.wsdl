@@ -28,7 +28,7 @@
     xmlns:dummy="{sample.namespace}"
     xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
 
-	<wsdl:import namespace="{sample.namespace}" location="echo-service.wsdl"/>
+    <wsdl:import namespace="{sample.namespace}" location="echo-service.wsdl"/>
 
     <wsdl:message name="HelloMessage">
         <wsdl:part name="TestPart" type="xsd:string"/>
@@ -58,16 +58,16 @@
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="HelloService">
-		<wsdl:port name="HelloPort" binding="tns:HelloSoapBinding">
-     		<soap:address location="http://localhost:8080/ode/processes/helloWorld"/>
-		</wsdl:port>
+        <wsdl:port name="HelloPort" binding="tns:HelloSoapBinding">
+            <soap:address location="http://localhost:8080/ode/processes/helloWorld"/>
+        </wsdl:port>
     </wsdl:service>
     
    <plnk:partnerLinkType name="HelloPartnerLinkType">
        <plnk:role name="me" portType="tns:HelloPortType"/>
    </plnk:partnerLinkType>
     <plnk:partnerLinkType name="samplePartnerLinkType">
-	    <plnk:role name="you" portType="dummy:{sample.service.name}PortType"/>
+        <plnk:role name="you" portType="dummy:{sample.service.name}PortType"/>
     </plnk:partnerLinkType>
 </wsdl:definitions>
 

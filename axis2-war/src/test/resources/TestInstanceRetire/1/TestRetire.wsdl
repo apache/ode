@@ -58,9 +58,9 @@
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="TestRetireService">
-		<wsdl:port name="TestRetirePort" binding="tns:TestRetireSoapBinding">
-     		<soap:address location="http://localhost:8888/ode/processes/testretire"/>
-		</wsdl:port>
+        <wsdl:port name="TestRetirePort" binding="tns:TestRetireSoapBinding">
+            <soap:address location="http://localhost:8888/ode/processes/testretire"/>
+        </wsdl:port>
     </wsdl:service>
     
     <plnk:partnerLinkType name="TestRetirePartnerLinkType">

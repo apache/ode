@@ -25,14 +25,14 @@ package org.apache.ode.bpel.intercept;
  * @author Maciej Szefler
  */
 public final class FailMessageExchangeException extends AbortMessageExchangeException{
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	protected FailMessageExchangeException(String msg) {
-		super(msg);
-	}
-	
-	protected FailMessageExchangeException(String msg, Throwable cause) {
-		super(msg,cause);
-	}
-	
+    protected FailMessageExchangeException(String msg) {
+        super(msg);
+    }
+    
+    protected FailMessageExchangeException(String msg, Throwable cause) {
+        super(msg,cause);
+    }
+    
 }

@@ -17,10 +17,10 @@
  !-->
 <service>
 
-	<module ref="rampart" />
+    <module ref="rampart" />
 
-	<!-- sample-10 : MTOM optimize encrypted content -->
-	
+    <!-- sample-10 : MTOM optimize encrypted content -->
+    
     <parameter name="OutflowSecurity">
       <action>
         <items>Timestamp Signature Encrypt</items>

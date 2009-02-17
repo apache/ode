@@ -10,10 +10,10 @@ import org.testng.annotations.Test;
  * @author Matthieu Riou <mriou@apache.org>
  */
 public class ServiceFaultCatchTest extends Axis2TestBase {
-	public ServiceFaultCatchTest(String name) {
-		super(name);
-	}
-	
+    public ServiceFaultCatchTest(String name) {
+        super(name);
+    }
+    
     @Test
     public void testSimpleFaultCatch() throws Exception {
         String bundleName = "TestStructuredFault";

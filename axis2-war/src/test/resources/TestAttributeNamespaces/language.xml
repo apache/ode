@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <languages>
-	<language name="english">
-		Hello World
-	</language>
-	<language name="french">
-		Bonjour!!
-	</language>
-	<language name="spanish">
-		Hola!!
-	</language>
-	<language name="urban">
-		Yo!
-	</language>
+    <language name="english">
+        Hello World
+    </language>
+    <language name="french">
+        Bonjour!!
+    </language>
+    <language name="spanish">
+        Hola!!
+    </language>
+    <language name="urban">
+        Yo!
+    </language>
 </languages>

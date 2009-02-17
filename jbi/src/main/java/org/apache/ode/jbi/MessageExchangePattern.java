@@ -25,20 +25,20 @@ import java.net.URI;
  */
 public abstract class MessageExchangePattern {
 
-	public static final URI IN_OUT;
-	public static final URI IN_ONLY;
+    public static final URI IN_OUT;
+    public static final URI IN_ONLY;
 
-	static {
-		try {
-			IN_OUT = new URI("http://www.w3.org/2004/08/wsdl/in-out");
-			IN_ONLY = new URI("http://www.w3.org/2004/08/wsdl/in-only");
-		}
-		catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
-	}
+    static {
+        try {
+            IN_OUT = new URI("http://www.w3.org/2004/08/wsdl/in-out");
+            IN_ONLY = new URI("http://www.w3.org/2004/08/wsdl/in-only");
+        }
+        catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 
-	private MessageExchangePattern() {
-	}
+    private MessageExchangePattern() {
+    }
 
 }

@@ -5,30 +5,30 @@ import javax.wsdl.PortType;
 import java.util.Set;
 
 public interface PartnerLinkModel {
-	
-	int getId();
-	
-	String getName();
-	
-	boolean hasMyRole();
+    
+    int getId();
+    
+    String getName();
+    
+    boolean hasMyRole();
 
-	boolean hasPartnerRole();
+    boolean hasPartnerRole();
 
-	String getMyRoleName();
+    String getMyRoleName();
 
-	Operation getMyRoleOperation(String operation);
+    Operation getMyRoleOperation(String operation);
 
-	String getPartnerRoleName();
-	
-	Operation getPartnerRoleOperation(String operation);
+    String getPartnerRoleName();
+    
+    Operation getPartnerRoleOperation(String operation);
 
-	boolean isInitializePartnerRoleSet();
+    boolean isInitializePartnerRoleSet();
 
-	PortType getMyRolePortType();
+    PortType getMyRolePortType();
 
-	PortType getPartnerRolePortType();
+    PortType getPartnerRolePortType();
 
-	boolean isCreateInstanceOperation(Operation operation);
+    boolean isCreateInstanceOperation(Operation operation);
 
     Set<CorrelationSetModel> getCorrelationSetsForOperation(Operation operation);
 

@@ -139,11 +139,11 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
     }
     
     public int getRetryCount() {
-    	return _retryCount;
+        return _retryCount;
     }
     
     public  void setRetryCount(int retryCount) {
-    	_retryCount = retryCount;
+        _retryCount = retryCount;
     }
     
     public boolean isCorrelationInitialized(CorrelationSet correlationSet) {
@@ -436,16 +436,16 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
     }
 
     public void writeCorrelation(CorrelationSet cset, QName[] propNames, CorrelationKey correlation) throws FaultException {
-    	// enforce unique correlation set constraint
-    	ProcessDAO processDAO = _dao.getProcess();
-    	if (correlation.isUnique()) {
-    		Collection<ProcessInstanceDAO> instances = processDAO.findInstance(correlation, false);
-    		if (instances.size() != 0) {
+        // enforce unique correlation set constraint
+        ProcessDAO processDAO = _dao.getProcess();
+        if (correlation.isUnique()) {
+            Collection<ProcessInstanceDAO> instances = processDAO.findInstance(correlation, false);
+            if (instances.size() != 0) {
                 __log.debug("Not creating a new instance for process " + processDAO.getProcessId() + "; unique correlation constraint would be violated!");
                 throw new FaultException(cset.getOwner().getConstantsModel().getDuplicateInstance());
-    		}
-    	}        	
-    	
+            }
+        }        	
+        
         ScopeDAO scopeDAO = _dao.getScope(cset.getScopeId());
         CorrelationSetDAO cs = scopeDAO.getCorrelationSet(cset.getName());
         cs.setValue(propNames, correlation);
@@ -596,9 +596,9 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         _dao.setLastActiveTime(new Date());
         if (!ProcessState.isFinished(_dao.getState())) {
             if (_forceRollback) {
-            	rollbackState();
+                rollbackState();
             } else {
-            	saveState();            	
+                saveState();            	
             }
 
             if (ProcessState.canExecute(_dao.getState()) && canReduce) {
@@ -645,7 +645,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
     }
     
     private void rollbackState() {
-		_contexts.setRollbackOnly();    		
+        _contexts.setRollbackOnly();    		
         int newcount = _dao.getExecutionStateCounter();
         _dao.setExecutionStateCounter(newcount);
         _instanceWorker.setCachedState(newcount, null);
@@ -952,59 +952,59 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         _forceRollback = true;
     }
     
-	public Node readExtVar(Variable variable, Node reference) throws ExternalVariableModuleException {
-		Value val = _bpelProcess.getEVM().read(variable, reference, _iid);
-		return val.value;
-	}
+    public Node readExtVar(Variable variable, Node reference) throws ExternalVariableModuleException {
+        Value val = _bpelProcess.getEVM().read(variable, reference, _iid);
+        return val.value;
+    }
 
-	public ValueReferencePair writeExtVar(Variable variable, Node reference, Node value) throws ExternalVariableModuleException {
-		ValueReferencePair vrp = new ValueReferencePair();
-		
-		Value val = _bpelProcess.getEVM().write(variable, reference, value, _iid);
-		vrp.reference = val.locator.reference;
-		vrp.value = val.value;
-		
-		return vrp;
-	}
+    public ValueReferencePair writeExtVar(Variable variable, Node reference, Node value) throws ExternalVariableModuleException {
+        ValueReferencePair vrp = new ValueReferencePair();
+        
+        Value val = _bpelProcess.getEVM().write(variable, reference, value, _iid);
+        vrp.reference = val.locator.reference;
+        vrp.value = val.value;
+        
+        return vrp;
+    }
 
-	public URI getBaseResourceURI() {
-		return _bpelProcess.getBaseResourceURI();
-	}
-	
-	protected OdeConfigProperties getProperties() {
-		return _bpelProcess.getProperties();
-	}
-	
-	public int getAtomicScopeRetryDelay() {
-		return getProperties().getAtomicScopeRetryDelay();
-	}
-	
-	public boolean isAtomicScopeFirstTry() {
-		return _retryCount == 0;
-	}
+    public URI getBaseResourceURI() {
+        return _bpelProcess.getBaseResourceURI();
+    }
+    
+    protected OdeConfigProperties getProperties() {
+        return _bpelProcess.getProperties();
+    }
+    
+    public int getAtomicScopeRetryDelay() {
+        return getProperties().getAtomicScopeRetryDelay();
+    }
+    
+    public boolean isAtomicScopeFirstTry() {
+        return _retryCount == 0;
+    }
 
-	public boolean isAtomicScopeRetryable() {
-		return _retryCount < getProperties().getAtomicScopeRetryCount();
-	}
+    public boolean isAtomicScopeRetryable() {
+        return _retryCount < getProperties().getAtomicScopeRetryCount();
+    }
 
-	public void setAtomicScopeRetriedOnce() {
-		++_retryCount;
-	}
+    public void setAtomicScopeRetriedOnce() {
+        ++_retryCount;
+    }
 
-	public void setAtomicScopeRetriesDone() {
-		_retryCount = getProperties().getAtomicScopeRetryCount();
-	}
-	
-	public void setAtomicScope(boolean atomicScope) {
-		_atomicScope = atomicScope;
-		_bpelProcess._server.setTransacted(atomicScope);
-	}
-	
-	public boolean isAtomicScope() {
-		return _atomicScope;
-	}
+    public void setAtomicScopeRetriesDone() {
+        _retryCount = getProperties().getAtomicScopeRetryCount();
+    }
+    
+    public void setAtomicScope(boolean atomicScope) {
+        _atomicScope = atomicScope;
+        _bpelProcess._server.setTransacted(atomicScope);
+    }
+    
+    public boolean isAtomicScope() {
+        return _atomicScope;
+    }
 
-	public Node getProcessProperty(QName propertyName) {
-		return _bpelProcess.getProcessProperty(propertyName);
-	}	
+    public Node getProcessProperty(QName propertyName) {
+        return _bpelProcess.getProcessProperty(propertyName);
+    }	
 }

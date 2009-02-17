@@ -9,27 +9,27 @@ package org.apache.ode.bpel.rapi;
  */
 public interface ProcessControlContext {
 
-	void forceFlush();
+    void forceFlush();
 
-	void forceRollback();
-	
-	/**
-	 * Should be invoked by process template, signalling process completion with
-	 * no faults.
-	 * 
-	 */
-	void completedOk();
+    void forceRollback();
+    
+    /**
+     * Should be invoked by process template, signalling process completion with
+     * no faults.
+     * 
+     */
+    void completedOk();
 
-	/**
-	 * Should be invoked by process template, signalling process completion with
-	 * fault.
-	 */
-	void completedFault(FaultInfo faultData);
+    /**
+     * Should be invoked by process template, signalling process completion with
+     * fault.
+     */
+    void completedFault(FaultInfo faultData);
 
-	/**
-	 * Terminates the process / sets state flag to terminate and ceases all
-	 * processing for the instance.
-	 */
-	void terminate();
+    /**
+     * Terminates the process / sets state flag to terminate and ceases all
+     * processing for the instance.
+     */
+    void terminate();
 
 }
