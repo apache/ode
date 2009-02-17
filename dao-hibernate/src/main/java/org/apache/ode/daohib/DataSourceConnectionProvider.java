@@ -36,7 +36,7 @@ public class DataSourceConnectionProvider implements ConnectionProvider {
   
   public void configure(Properties props) throws HibernateException {
     _props = props;
-    _isolationLevel = Integer.parseInt(System.getProperty("ode.connection.isolation", "0"));
+    _isolationLevel = Integer.parseInt(System.getProperty("ode.connection.isolation", "2"));
   }
 
   public Connection getConnection() throws SQLException {
