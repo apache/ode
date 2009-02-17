@@ -198,7 +198,7 @@ public class DeploymentWebService {
                     Collection<String> packageNames = _store.getPackages();
                     OMElement response = factory.createOMElement("deployedPackages", null);
                     for (String name : packageNames) {
-                        OMElement nameElmt = factory.createOMElement("name", null);
+                        OMElement nameElmt = factory.createOMElement(new QName( "http://www.apache.org/ode/deployapi","name"));
                         nameElmt.setText(name);
                         response.addChild(nameElmt);
                     }
@@ -274,7 +274,7 @@ public class DeploymentWebService {
 
             OMElement responseOp = factory.createOMElement(op, _pmapi);
             responseOp.addChild(response);
-            envelope.getBody().addChild(response);
+            envelope.getBody().addChild(responseOp);
             AxisEngine.send(outMsgContext);
         }
     }
