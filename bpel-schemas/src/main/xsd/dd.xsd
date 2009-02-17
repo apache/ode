@@ -93,9 +93,9 @@
                             </xs:annotation>
                         </xs:element>
 
-           				<xs:element name="cleanup"
-           					minOccurs="0" maxOccurs="3"
-           					type="dd:tCleanup" />
+                        <xs:element name="cleanup"
+                            minOccurs="0" maxOccurs="3"
+                            type="dd:tCleanup" />
                     </xs:sequence>
 
                     <xs:attribute name="name" type="xs:QName" use="required"/>
@@ -116,7 +116,7 @@
     <xs:complexType name="tProvide">
         <xs:sequence>
             <xs:element name="service" minOccurs="1" maxOccurs="1" type="dd:tService"/>
-			<xs:element name="enableSharing" minOccurs="0" maxOccurs="1" type="dd:tEnableSharing"/>
+            <xs:element name="enableSharing" minOccurs="0" maxOccurs="1" type="dd:tEnableSharing"/>
         </xs:sequence>
         <xs:attribute name="partnerLink" type="xs:string" use="required"/>
     </xs:complexType>
@@ -143,9 +143,9 @@
 
     <xs:complexType name="tEnableSharing">
         <xs:complexContent>
-			<xs:restriction base="xs:anyType">
-			</xs:restriction>
-		</xs:complexContent>
+            <xs:restriction base="xs:anyType">
+            </xs:restriction>
+        </xs:complexContent>
     </xs:complexType>
 
     <xs:complexType name="tMexInterceptor" >
@@ -193,28 +193,28 @@
     </xs:complexType>
 
     <xs:complexType name="tCleanup">
-    	<xs:sequence>
-    		<xs:element name="category" default="all" minOccurs="0" maxOccurs="unbounded">
-    			<xs:simpleType>
-    				<xs:restriction base="xs:string">
-    					<xs:enumeration value="instance" />
-    					<xs:enumeration value="variables" />
-    					<xs:enumeration value="messages" />
-    					<xs:enumeration value="correlations" />
-    					<xs:enumeration value="events" />
-    					<xs:enumeration value="all" />
-    				</xs:restriction>
-    			</xs:simpleType>
-    		</xs:element>
-    	</xs:sequence>
-    	<xs:attribute name="on" use="required">
-    		<xs:simpleType>
-    			<xs:restriction base="xs:string">
-    				<xs:enumeration value="success" />
-    				<xs:enumeration value="failure" />
-    				<xs:enumeration value="always" />
-    			</xs:restriction>
-    		</xs:simpleType>
-    	</xs:attribute>
+        <xs:sequence>
+            <xs:element name="category" default="all" minOccurs="0" maxOccurs="unbounded">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="instance" />
+                        <xs:enumeration value="variables" />
+                        <xs:enumeration value="messages" />
+                        <xs:enumeration value="correlations" />
+                        <xs:enumeration value="events" />
+                        <xs:enumeration value="all" />
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="on" use="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="success" />
+                    <xs:enumeration value="failure" />
+                    <xs:enumeration value="always" />
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
     </xs:complexType>
 </xs:schema>

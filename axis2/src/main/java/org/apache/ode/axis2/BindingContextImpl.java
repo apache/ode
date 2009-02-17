@@ -52,10 +52,10 @@ public class BindingContextImpl implements BindingContext {
     public EndpointReference activateMyRoleEndpoint(QName processId, Endpoint myRoleEndpoint) {
         try {
             ProcessConf pconf = _store.getProcessConfiguration(processId);
-        	Definition wsdl = pconf.getDefinitionForService(myRoleEndpoint.serviceName);
-        	if (wsdl == null)
-        		throw new ContextException("Unable to access WSDL definition to activate MyRole endpoint for service " + myRoleEndpoint.serviceName
-        				+ " and port " + myRoleEndpoint.portName);
+            Definition wsdl = pconf.getDefinitionForService(myRoleEndpoint.serviceName);
+            if (wsdl == null)
+                throw new ContextException("Unable to access WSDL definition to activate MyRole endpoint for service " + myRoleEndpoint.serviceName
+                        + " and port " + myRoleEndpoint.portName);
             ODEService svc = _server.createService(pconf, myRoleEndpoint.serviceName, myRoleEndpoint.portName);
             return svc.getMyServiceRef();
         } catch (AxisFault axisFault) {

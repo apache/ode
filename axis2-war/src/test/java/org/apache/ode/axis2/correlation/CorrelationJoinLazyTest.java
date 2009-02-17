@@ -8,14 +8,14 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
 public class CorrelationJoinLazyTest extends Axis2TestBase implements ODEConfigDirAware {
-	/**
-	 * Tests a message being saved by no instance waiting for it. The saved message is picked up
-	 * when the third message arrives, and is consumed.
-	 * 
-	 * @throws Exception
-	 */
+    /**
+     * Tests a message being saved by no instance waiting for it. The saved message is picked up
+     * when the third message arrives, and is consumed.
+     * 
+     * @throws Exception
+     */
     @Test(dataProvider="configs")
-	public void testCorrelationJoin() throws Exception {
+    public void testCorrelationJoin() throws Exception {
         final String bundleName = "TestCorrelationJoinLazy";
         
         // deploy the required service
@@ -24,27 +24,27 @@ public class CorrelationJoinLazyTest extends Axis2TestBase implements ODEConfigD
         server.deployProcess(bundleName);
 
         new Thread() {
-        	public void run() {
-        		try {
-        			Thread.sleep(3000);
-        			server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
+            public void run() {
+                try {
+                    Thread.sleep(3000);
+                    server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                             bundleName, "testRequest2.soap");
-        		} catch( Exception e ) {
-        			fail(e.getMessage());
-        		}
-        	}
+                } catch( Exception e ) {
+                    fail(e.getMessage());
+                }
+            }
         }.start();
         
         new Thread() {
-        	public void run() {
-        		try {
-        			Thread.sleep(6000);
-        			server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
+            public void run() {
+                try {
+                    Thread.sleep(6000);
+                    server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                             bundleName, "testRequest3.soap");
-        		} catch( Exception e ) {
-        			fail(e.getMessage());
-        		}
-        	}
+                } catch( Exception e ) {
+                    fail(e.getMessage());
+                }
+            }
         }.start();
         
         try {
@@ -53,13 +53,13 @@ public class CorrelationJoinLazyTest extends Axis2TestBase implements ODEConfigD
             System.out.println("=>\n" + response);
             assertTrue(response.contains(">1;3;2;<"));
         } catch (Exception e) {
-        	fail(e.getMessage());
+            fail(e.getMessage());
         } finally {
             server.undeployProcess(bundleName);
         }
     }
 
     public String getODEConfigDir() {
-		return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby";	
+        return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby"; 
     }
 }

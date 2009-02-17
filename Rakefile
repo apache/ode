@@ -295,8 +295,8 @@ define "ode" do
   desc "ODE Simple Scheduler"
   define "scheduler-simple" do
     compile.with projects("bpel-api", "utils"), COMMONS.collections, COMMONS.logging, JAVAX.transaction
-	test.compile.with HSQLDB, GERONIMO.kernel, GERONIMO.transaction
-	test.with HSQLDB, JAVAX.transaction, JAVAX.resource, JAVAX.connector, LOG4J,
+    test.compile.with HSQLDB, GERONIMO.kernel, GERONIMO.transaction
+    test.with HSQLDB, JAVAX.transaction, JAVAX.resource, JAVAX.connector, LOG4J,
           GERONIMO.kernel, GERONIMO.transaction, BACKPORT, JAVAX.ejb
     package :jar
   end
@@ -330,7 +330,7 @@ define "ode" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-runtime",
       "bpel-store", "utils", "bpel-epr", "dao-jpa"),
       DERBY, Java::JUnit::JUNIT_REQUIRES, JAVAX.persistence, OPENJPA, WSDL4J, COMMONS.httpclient,
-	COMMONS.codec
+    COMMONS.codec
 
     test.with projects("bpel-obj", "jacob", "bpel-schemas",
       "bpel-scripts", "scheduler-simple"),
@@ -503,7 +503,7 @@ define "ode" do
   desc "ODE Utils"
   define "utils" do
     compile.with AXIOM, AXIS2_ALL, COMMONS.collections, COMMONS.logging, COMMONS.pool, COMMONS.httpclient, COMMONS.codec, LOG4J, XERCES, JAVAX.stream, WSDL4J
-	test.exclude "*TestResources"
+    test.exclude "*TestResources"
     package :jar
   end
 

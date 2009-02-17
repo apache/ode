@@ -348,11 +348,11 @@ public class HttpMethodConverterTest extends TestCase {
 
         }
 
-		public int getSubscriberCount() {
-			return 0;
-		}
+        public int getSubscriberCount() {
+            return 0;
+        }
 
-		public void setSubscriberCount(int subscriberCount) {
-		}
+        public void setSubscriberCount(int subscriberCount) {
+        }
     }
 }

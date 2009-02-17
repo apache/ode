@@ -17,8 +17,8 @@
  !-->
 <!-- services.xml of sample-10 : MTOM optimize encrypted content -->
 <service>
-	<module ref="rampart" />
-	
+    <module ref="rampart" />
+    
     <parameter name="InflowSecurity">
       <action>
         <items>Timestamp Signature Encrypt</items>

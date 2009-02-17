@@ -8,12 +8,12 @@
                   xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
                   xmlns:xs="http://www.w3.org/2001/XMLSchema"
                   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-		  targetNamespace="{sample.namespace}">
+          targetNamespace="{sample.namespace}">
    <wsdl:types>
-	   <xs:schema xmlns:ns="{sample.namespace}"
+       <xs:schema xmlns:ns="{sample.namespace}"
                  attributeFormDefault="qualified"
                  elementFormDefault="qualified"
-		 targetNamespace="{sample.namespace}">
+         targetNamespace="{sample.namespace}">
          <xs:element name="echo">
             <xs:complexType>
                <xs:sequence>

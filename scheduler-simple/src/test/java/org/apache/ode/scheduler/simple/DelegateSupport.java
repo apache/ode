@@ -53,7 +53,7 @@ public class DelegateSupport {
         Connection c = _ds.getConnection();
         try {
             c.createStatement().executeUpdate("CREATE ALIAS MOD FOR \"org.apache.ode.scheduler.simple.DelegateSupport.mod\";");
-        	String sql = "CREATE TABLE \"ODE_JOB\" (\"JOBID\" CHAR(64) NOT NULL, \"TS\" NUMERIC  NOT NULL, \"NODEID\" char(64)  NULL, \"SCHEDULED\" int  NOT NULL, \"TRANSACTED\" int  NOT NULL, \"DETAILS\" BINARY(4096)  NULL, PRIMARY KEY(\"JOBID\"));";
+            String sql = "CREATE TABLE \"ODE_JOB\" (\"JOBID\" CHAR(64) NOT NULL, \"TS\" NUMERIC  NOT NULL, \"NODEID\" char(64)  NULL, \"SCHEDULED\" int  NOT NULL, \"TRANSACTED\" int  NOT NULL, \"DETAILS\" BINARY(4096)  NULL, PRIMARY KEY(\"JOBID\"));";
             c.createStatement().executeUpdate(sql);
         } finally {
             c.close();
@@ -62,7 +62,7 @@ public class DelegateSupport {
     }
     
     public static long mod(long a, long b) {
-    	return a % b;
+        return a % b;
     }
 }
 

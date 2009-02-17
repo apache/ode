@@ -18,11 +18,11 @@ public class OptionalCorrelationKey extends CorrelationKey implements Serializab
     private static final long serialVersionUID = 1L;
 
     public OptionalCorrelationKey(String csetName, String[] keyValues) {
-    	super(csetName, keyValues);
+        super(csetName, keyValues);
     }
 
     public OptionalCorrelationKey(String canonicalForm) {
-    	super(canonicalForm);
+        super(canonicalForm);
     }
 
     /**

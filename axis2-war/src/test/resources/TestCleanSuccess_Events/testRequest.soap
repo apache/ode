@@ -22,7 +22,7 @@
   <!-- test soap message -->
   <SOAP-ENV:Body>
     <TimeRequest xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wsi-wsdl="http://www.intalio.com/BPMS/wsi/wsdl" xmlns:wsi-xf="http://www.intalio.com/BPMS/wsi/xforms" xmlns:xforms="http://www.w3.org/2002/xforms" xmlns:ns0="http://bpms.intalio.com/FirstProcess/Time" xmlns:xxforms="http://orbeon.org/oxf/xml/xforms" xmlns="http://bpms.intalio.com/FirstProcess/Time">                   
-    	<city>New York</city>                 
-	</TimeRequest>  
+        <city>New York</city>                 
+    </TimeRequest>  
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>

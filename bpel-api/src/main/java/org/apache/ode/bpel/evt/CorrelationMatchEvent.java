@@ -27,36 +27,36 @@ import javax.xml.namespace.QName;
  * Correlation matched a process instance on inbound message.
  */
 public class CorrelationMatchEvent extends ProcessMessageExchangeEvent {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	// left out for backward-compatibility
-	private CorrelationKey _correlationKey;
-	private CorrelationKeySet _correlationKeySet;
+    // left out for backward-compatibility
+    private CorrelationKey _correlationKey;
+    private CorrelationKeySet _correlationKeySet;
 
-	public CorrelationMatchEvent(QName processName, QName processId, Long processInstanceId, CorrelationKeySet correlationKeySet) {
-		super(PROCESS_INPUT, processName, processId, processInstanceId);
-		_correlationKeySet = correlationKeySet;
-	}
+    public CorrelationMatchEvent(QName processName, QName processId, Long processInstanceId, CorrelationKeySet correlationKeySet) {
+        super(PROCESS_INPUT, processName, processId, processInstanceId);
+        _correlationKeySet = correlationKeySet;
+    }
 
-	public CorrelationKeySet getCorrelationKeySet() {
-		// backward compatibility; add up
-		if (_correlationKey != null) {
-			if( _correlationKeySet == null ) {
-				_correlationKeySet = new CorrelationKeySet();
-			}
-			if(!_correlationKeySet.contains(_correlationKey)) {
-				_correlationKeySet.add(_correlationKey);
-			}
-		}
-		
-		return _correlationKeySet;
-	}
+    public CorrelationKeySet getCorrelationKeySet() {
+        // backward compatibility; add up
+        if (_correlationKey != null) {
+            if( _correlationKeySet == null ) {
+                _correlationKeySet = new CorrelationKeySet();
+            }
+            if(!_correlationKeySet.contains(_correlationKey)) {
+                _correlationKeySet.add(_correlationKey);
+            }
+        }
+        
+        return _correlationKeySet;
+    }
 
-	public void setCorrelationKey(CorrelationKeySet correlationKeySet) {
-		_correlationKeySet = correlationKeySet;
-	}
+    public void setCorrelationKey(CorrelationKeySet correlationKeySet) {
+        _correlationKeySet = correlationKeySet;
+    }
 
-	public TYPE getType() {
-		return TYPE.correlation;
-	}
+    public TYPE getType() {
+        return TYPE.correlation;
+    }
 }

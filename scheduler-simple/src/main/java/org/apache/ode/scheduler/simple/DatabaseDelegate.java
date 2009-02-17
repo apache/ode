@@ -71,9 +71,9 @@ public interface DatabaseDelegate {
      * group (of jobs that get the nodeId) is determined by the "x" parameter. Essentially the logic is:
      * <code>
      *  UPDATE jobs AS job
-     *  	WHERE job.scheduledTime before :maxtime 
-     *  		  AND job.nodeId is null
-     *  		  AND job.scheduledTime MOD :y == :x 
+     *      WHERE job.scheduledTime before :maxtime 
+     *            AND job.nodeId is null
+     *            AND job.scheduledTime MOD :y == :x 
      *      SET job.nodeId = :nodeId
      * </code> 
      * 

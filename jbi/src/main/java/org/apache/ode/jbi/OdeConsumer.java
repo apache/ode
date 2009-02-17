@@ -254,10 +254,10 @@ abstract class OdeConsumer extends ServiceBridge implements JbiMessageExchangePr
     }
 
     public void setResponseTimeout(long timeout) {
-    	_responseTimeout = timeout;
+        _responseTimeout = timeout;
     }
 
     public long getResponseTimeout() {
-    	return _responseTimeout;
+        return _responseTimeout;
     }
 }

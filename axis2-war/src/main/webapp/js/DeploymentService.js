@@ -17,9 +17,9 @@
 
 var baseURL;
 if (location.host.indexOf('/') == -1 && location.protocol.indexOf('/') == -1) {
-	baseURL = location.protocol + "//" + location.host + "/";
+    baseURL = location.protocol + "//" + location.host + "/";
 }else if(location.host.indexOf('/') != -1 && location.protocol.indexOf('/') == -1){
-	baseURL = location.protocol + "//" + location.host;
+    baseURL = location.protocol + "//" + location.host;
 }
 var address = baseURL + "ode/processes/DeploymentService";
 
@@ -400,7 +400,7 @@ function WebService(endpointName)
             }
             return resultXML;
         }
-    }				
+    }               
 }
 WebService.visible = false;
 

@@ -19,8 +19,8 @@
 <message>
    <parameters>
       <getObjectId foo="bar" xmlns="http://documentum.com/ws/2005/services">
-      	  <someFooBar/>
-      	  <barbaz xmlns="" />
+          <someFooBar/>
+          <barbaz xmlns="" />
       </getObjectId>
    </parameters>
    

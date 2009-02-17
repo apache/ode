@@ -53,10 +53,10 @@ import java.util.List;
  * Hibernate based {@link ProcessInstanceProfileDao} implementation
  */
 public class ProcessInstanceProfileDaoImpl extends ProcessProfileDaoImpl implements ProcessInstanceProfileDAO {
-	@SuppressWarnings("unused")
-	private static final Log __log = LogFactory.getLog(ProcessInstanceProfileDaoImpl.class);
-	
-	private ProcessInstanceDaoImpl instance;
+    @SuppressWarnings("unused")
+    private static final Log __log = LogFactory.getLog(ProcessInstanceProfileDaoImpl.class);
+    
+    private ProcessInstanceDaoImpl instance;
 
     public ProcessInstanceProfileDaoImpl(SessionManager sm, ProcessInstanceDaoImpl instance) {
         super(sm, (ProcessDaoImpl)instance.getProcess());
@@ -65,71 +65,71 @@ public class ProcessInstanceProfileDaoImpl extends ProcessProfileDaoImpl impleme
     }
     
     public SessionManager getSessionManager() {
-    	return _sm;
+        return _sm;
     }
     
     public ProcessDAO getProcess() {
-    	return process;
+        return process;
     }
     
-	public List<MessageExchangeDAO> findMessageExchangesByInstance() {
-		return findByInstance("from HMessageExchange as x where x.instance = :instance)", MessageExchangeDaoImpl.class, HMessageExchange.class);
-	}
+    public List<MessageExchangeDAO> findMessageExchangesByInstance() {
+        return findByInstance("from HMessageExchange as x where x.instance = :instance)", MessageExchangeDaoImpl.class, HMessageExchange.class);
+    }
 
-	public List<MessageRouteDAO> findMessageRoutesByInstance() {
-		return findByInstance("from HCorrelatorSelector as s where s.instance = :instance", MessageRouteDaoImpl.class, HCorrelatorSelector.class);
-	}
+    public List<MessageRouteDAO> findMessageRoutesByInstance() {
+        return findByInstance("from HCorrelatorSelector as s where s.instance = :instance", MessageRouteDaoImpl.class, HCorrelatorSelector.class);
+    }
 
-	public List<MessageDAO> findMessagesByInstance() {
-		return findByInstance("from HMessage as m where m.messageExchange.instance = :instance)", MessageDaoImpl.class, HMessage.class);
-	}
+    public List<MessageDAO> findMessagesByInstance() {
+        return findByInstance("from HMessage as m where m.messageExchange.instance = :instance)", MessageDaoImpl.class, HMessage.class);
+    }
 
-	public List<PartnerLinkDAO> findPartnerLinksByInstance() {
-		return findByInstance("from HPartnerLink as p where p.scope.instance = :instance)", PartnerLinkDAOImpl.class, HPartnerLink.class);
-	}
+    public List<PartnerLinkDAO> findPartnerLinksByInstance() {
+        return findByInstance("from HPartnerLink as p where p.scope.instance = :instance)", PartnerLinkDAOImpl.class, HPartnerLink.class);
+    }
 
-	public List<ScopeDAO> findScopesByInstance() {
-		return findByInstance("from HScope as s where s.instance = :instance)", ScopeDaoImpl.class, HScope.class);
-	}
+    public List<ScopeDAO> findScopesByInstance() {
+        return findByInstance("from HScope as s where s.instance = :instance)", ScopeDaoImpl.class, HScope.class);
+    }
 
-	public List<XmlDataDAO> findXmlDataByInstance() {
-		return findByInstance("from HXmlData as x where x.instance = :instance", XmlDataDaoImpl.class, HXmlData.class);
-	}
+    public List<XmlDataDAO> findXmlDataByInstance() {
+        return findByInstance("from HXmlData as x where x.instance = :instance", XmlDataDaoImpl.class, HXmlData.class);
+    }
 
     public List<ActivityRecoveryDAO> findActivityRecoveriesByInstance() {
-    	return findByInstance("from HActivityRecovery as a where a.instance = :instance", ActivityRecoveryDaoImpl.class, HActivityRecovery.class);
+        return findByInstance("from HActivityRecovery as a where a.instance = :instance", ActivityRecoveryDaoImpl.class, HActivityRecovery.class);
     }
 
     public List<CorrelationSetDAO> findCorrelationSetsByInstance() {
-    	return findByInstance("from HCorrelationSet as s where s.instance = :instance", CorrelationSetDaoImpl.class, HCorrelationSet.class);
+        return findByInstance("from HCorrelationSet as s where s.instance = :instance", CorrelationSetDaoImpl.class, HCorrelationSet.class);
     }
 
     public List<FaultDAO> findFaultsByInstance() {
-    	return findByInstance("from HFaultData as f where f in (select i.fault from HProcessInstance as i where i = :instance and i.fault is not null)", FaultDAOImpl.class, HFaultData.class);
+        return findByInstance("from HFaultData as f where f in (select i.fault from HProcessInstance as i where i = :instance and i.fault is not null)", FaultDAOImpl.class, HFaultData.class);
     }
 
     public int countEventsByInstance() {
-		Query query = getSession().createQuery("select count(id) from HBpelEvent as e where e.instance = :instance");
-		query.setParameter("instance", instance._hobj);
-		
-		return ((Long)query.uniqueResult()).intValue();
+        Query query = getSession().createQuery("select count(id) from HBpelEvent as e where e.instance = :instance");
+        query.setParameter("instance", instance._hobj);
+        
+        return ((Long)query.uniqueResult()).intValue();
     }
     
     @SuppressWarnings("unchecked")
     protected <D, H> List<D> findByInstance(String queryString, Class daoClass, Class hibClass) {
-		List<D> results = new ArrayList<D>();
+        List<D> results = new ArrayList<D>();
 
-		try {
-			Query query = getSession().createQuery(queryString);
-			query.setParameter("instance", instance._hobj);
-			for( H hibObj : (Collection<H>)query.list()) {
-				Constructor<D> c = daoClass.getConstructor(SessionManager.class, hibClass);
-				results.add( c.newInstance(_sm, hibObj) );
-			}
-		} catch( Exception e ) {
-			throw new RuntimeException(e);
-		}
+        try {
+            Query query = getSession().createQuery(queryString);
+            query.setParameter("instance", instance._hobj);
+            for( H hibObj : (Collection<H>)query.list()) {
+                Constructor<D> c = daoClass.getConstructor(SessionManager.class, hibClass);
+                results.add( c.newInstance(_sm, hibObj) );
+            }
+        } catch( Exception e ) {
+            throw new RuntimeException(e);
+        }
 
-		return results;
-	}
+        return results;
+    }
 }

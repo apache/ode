@@ -106,7 +106,7 @@
     <prop:property name="testCorrelationID1" type="xsd:string"/>
     <prop:propertyAlias propertyName="tns:testCorrelationID1" messageType="tns:HeaderTestMessage" part="TestPart">
         <prop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
-			correlationID1
+            correlationID1
         </prop:query>
     </prop:propertyAlias>
 

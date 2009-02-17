@@ -34,24 +34,24 @@ public class ScopeCompletionEvent extends ScopeEvent {
     _fault = fault;
   }
 
-	/**
-	 * @param fault The fault to set.
-	 */
-	public void setFault(QName fault) {
-		_fault = fault;
-	}
+    /**
+     * @param fault The fault to set.
+     */
+    public void setFault(QName fault) {
+        _fault = fault;
+    }
 
-	/**
-	 * @return Returns the fault.
-	 */
-	public QName getFault() {
-		return _fault;
-	}
+    /**
+     * @return Returns the fault.
+     */
+    public QName getFault() {
+        return _fault;
+    }
   
-	public boolean isSuccess() {
-		return _success;
-	}
-	public void setSuccess(boolean success) {
-		_success = success;
-	}
+    public boolean isSuccess() {
+        return _success;
+    }
+    public void setSuccess(boolean success) {
+        _success = success;
+    }
 }

@@ -26,10 +26,10 @@ package org.apache.ode.bpel.explang;
  */
 public class ConfigurationException extends Exception {
 
-	private static final long serialVersionUID = -4815181439145449891L;
+    private static final long serialVersionUID = -4815181439145449891L;
 
-	public ConfigurationException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
+    public ConfigurationException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 
 }

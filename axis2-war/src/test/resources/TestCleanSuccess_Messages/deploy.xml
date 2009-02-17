@@ -1,23 +1,23 @@
 ﻿<?xml version='1.0' encoding='UTF-8'?>
 <dd:deploy xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd">
-	<dd:process xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd"
-		xmlns:Client="http://example.com/FirstProcess/Client" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:diag="http://example.com/FirstProcess" xmlns:TimeService="http://ws.intalio.com/TimeService/"
-		xmlns:TimeServer="http://example.com/FirstProcess/TimeServer"
-		xmlns:ns="http://bpms.intalio.com/FirstProcess/Time" xmlns:xs="http://www.w3.org/2001/XMLSchema"
-		xmlns:this="http://example.com/FirstProcess/FirstProcess" name="this:FirstProcess"
-		fileName="FirstProcess-FirstProcess.bpel">
-		<dd:property name="PATH">FirstProcess</dd:property>
-		<dd:property name="SVG">FirstProcess.svg
-		</dd:property>
-		<dd:provide partnerLink="firstProcessAndClientPlkVar">
-			<dd:service name="this:CanonicServiceForClient" port="canonicPort"></dd:service>
-		</dd:provide>
-		<dd:invoke partnerLink="timeServerAndFirstProcessForPortTimeServiceSoapPlkVar">
-			<dd:service name="TimeService:TimeService" port="TimeServiceSoap"></dd:service>
-		</dd:invoke>		
-		<dd:cleanup on="always">
-			<dd:category>messages</dd:category>
-		</dd:cleanup>
-	</dd:process>
+    <dd:process xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd"
+        xmlns:Client="http://example.com/FirstProcess/Client" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:diag="http://example.com/FirstProcess" xmlns:TimeService="http://ws.intalio.com/TimeService/"
+        xmlns:TimeServer="http://example.com/FirstProcess/TimeServer"
+        xmlns:ns="http://bpms.intalio.com/FirstProcess/Time" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:this="http://example.com/FirstProcess/FirstProcess" name="this:FirstProcess"
+        fileName="FirstProcess-FirstProcess.bpel">
+        <dd:property name="PATH">FirstProcess</dd:property>
+        <dd:property name="SVG">FirstProcess.svg
+        </dd:property>
+        <dd:provide partnerLink="firstProcessAndClientPlkVar">
+            <dd:service name="this:CanonicServiceForClient" port="canonicPort"></dd:service>
+        </dd:provide>
+        <dd:invoke partnerLink="timeServerAndFirstProcessForPortTimeServiceSoapPlkVar">
+            <dd:service name="TimeService:TimeService" port="TimeServiceSoap"></dd:service>
+        </dd:invoke>        
+        <dd:cleanup on="always">
+            <dd:category>messages</dd:category>
+        </dd:cleanup>
+    </dd:process>
 </dd:deploy>

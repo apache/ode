@@ -27,7 +27,7 @@
         <servlet-name>AxisServlet</servlet-name>
         <display-name>Apache-Axis Servlet</display-name>
         <servlet-class>
-		org.apache.ode.axis2.hooks.ODEAxisServlet</servlet-class>
+        org.apache.ode.axis2.hooks.ODEAxisServlet</servlet-class>
         <!--<init-param>-->
         <!--<param-name>axis2.xml.path</param-name>-->
         <!--<param-value>/WEB-INF/conf/axis2.xml</param-value>-->
@@ -62,13 +62,13 @@
     </servlet-mapping>
     
     <servlet-mapping>
-	    <servlet-name>AxisServlet</servlet-name>
-	    <url-pattern>/processes/*</url-pattern>
+        <servlet-name>AxisServlet</servlet-name>
+        <url-pattern>/processes/*</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
-	    <servlet-name>AxisServlet</servlet-name>
-	    <url-pattern>/deployment/*</url-pattern>
+        <servlet-name>AxisServlet</servlet-name>
+        <url-pattern>/deployment/*</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

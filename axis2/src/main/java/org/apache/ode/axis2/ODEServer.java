@@ -334,7 +334,7 @@ public class ODEServer {
         // Since multiple processes may provide services at the same (JMS) endpoint, qualify
         // the (JMS) endpoint-specific NCName with a process-relative URI, if necessary.
         QName uniqueServiceName = new QName(
-        		ODEAxisService.extractServiceName(pconf, serviceName, portName));
+                ODEAxisService.extractServiceName(pconf, serviceName, portName));
 
         destroyService(uniqueServiceName, portName);
 

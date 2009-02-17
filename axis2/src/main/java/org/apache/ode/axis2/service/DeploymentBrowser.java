@@ -144,13 +144,13 @@ public class DeploymentBrowser {
                             }
                         });
                     } else if (segments.length > 2) {
-                    	List<QName> processes = _store.listProcesses(segments[1]);
+                        List<QName> processes = _store.listProcesses(segments[1]);
                         if (processes != null) {
                             List<File> files = _store.getProcessConfiguration(processes.get(0)).getFiles();
                             for (final File file : files) {
                                 String relativePath = requestURI.substring(deplUri + 12 + 9 + segments[1].length());
                                 if (file.getPath().endsWith(relativePath)) {
-                                	renderXml(response, new DocBody() {
+                                    renderXml(response, new DocBody() {
                                         public void render(Writer out) throws IOException {
                                             write(out, file.getPath());
                                         }
@@ -167,73 +167,73 @@ public class DeploymentBrowser {
                         }
                     }
                 } else if ("getBundleDocs".equals(segments[0])) {
-                	if (segments.length == 1) {
-                		renderXml(response, new DocBody() {
-                			public void render(Writer out) throws IOException {
-                				out.write("<getBundleDocsResponse>");
-                				out.write("<error>Not enough args..</error>");
-                				out.write("</getBundleDocsResponse>");
-                			}
-                		});
-                	} else if (segments.length == 2) {
-                		final String bundleName = segments[1];
-                		final List<QName> processes = _store.listProcesses(bundleName);
-                		if (processes != null) {
-                			renderXml(response, new DocBody() {
-                				public void render(Writer out) throws IOException {
-                					out.write("<getBundleDocsResponse><name>"+ bundleName +"</name>");
-                					//final List<File> files = _store.getProcessConfiguration(processes.get(0)).getFiles();
-                					//final String pid = _store.getProcessConfiguration(processes.get(0)).getProcessId().toString();
-                			
-                					for (final QName process: processes) {
-                						List<File> files = _store.getProcessConfiguration(process).getFiles();
-                						String pid = _store.getProcessConfiguration(process).getProcessId().toString();
-                						out.write("<process><pid>"+pid+"</pid>");
-                						for (final File file : files) {
-                							if (file.getPath().endsWith(".wsdl")) {
-                								String relativePath = file.getPath().substring(_store.getDeployDir().getCanonicalPath().length() + 1);
-                								out.write("<wsdl>"+ relativePath + "</wsdl>");                        				
-                							}
-                							if (file.getPath().endsWith(".bpel")) {	
-                								String relativePath = file.getPath().substring(_store.getDeployDir().getCanonicalPath().length() + 1);
-                								out.write("<bpel>"+ relativePath + "</bpel>");
-                							}
-                							
-                						}
-                						out.write("</process>");
-                					}                					
-                					out.write("</getBundleDocsResponse>");
-                				}
-                			});
-                			
-                		}
-                	}
+                    if (segments.length == 1) {
+                        renderXml(response, new DocBody() {
+                            public void render(Writer out) throws IOException {
+                                out.write("<getBundleDocsResponse>");
+                                out.write("<error>Not enough args..</error>");
+                                out.write("</getBundleDocsResponse>");
+                            }
+                        });
+                    } else if (segments.length == 2) {
+                        final String bundleName = segments[1];
+                        final List<QName> processes = _store.listProcesses(bundleName);
+                        if (processes != null) {
+                            renderXml(response, new DocBody() {
+                                public void render(Writer out) throws IOException {
+                                    out.write("<getBundleDocsResponse><name>"+ bundleName +"</name>");
+                                    //final List<File> files = _store.getProcessConfiguration(processes.get(0)).getFiles();
+                                    //final String pid = _store.getProcessConfiguration(processes.get(0)).getProcessId().toString();
+                            
+                                    for (final QName process: processes) {
+                                        List<File> files = _store.getProcessConfiguration(process).getFiles();
+                                        String pid = _store.getProcessConfiguration(process).getProcessId().toString();
+                                        out.write("<process><pid>"+pid+"</pid>");
+                                        for (final File file : files) {
+                                            if (file.getPath().endsWith(".wsdl")) {
+                                                String relativePath = file.getPath().substring(_store.getDeployDir().getCanonicalPath().length() + 1);
+                                                out.write("<wsdl>"+ relativePath + "</wsdl>");                                      
+                                            }
+                                            if (file.getPath().endsWith(".bpel")) { 
+                                                String relativePath = file.getPath().substring(_store.getDeployDir().getCanonicalPath().length() + 1);
+                                                out.write("<bpel>"+ relativePath + "</bpel>");
+                                            }
+                                            
+                                        }
+                                        out.write("</process>");
+                                    }                                   
+                                    out.write("</getBundleDocsResponse>");
+                                }
+                            });
+                            
+                        }
+                    }
                 } else if ("getProcessDefinition".equals(segments[0])) {
-                	if (segments.length == 1) {
-                		renderXml(response, new DocBody() {
-                			public void render(Writer out) throws IOException{
-                				out.write("<getProcessDefinitionResponse>");
-                				out.write("<error>Not enough args..</error>");
-                				out.write("</getProcessDefinitionResponse>");
-                			}
-                		});
-                	} else if (segments.length == 2) {
-                		String processName = segments[1]; 
-                		for (QName process :_store.getProcesses()) {
-                			String[] nameVer = process.getLocalPart().split("-");
-                			if(processName.equals(nameVer[0])) {
-                				final String url = root + bundleUrlFor(_store.getProcessConfiguration(process).getBpelDocument());
-                				renderXml(response, new DocBody() {
-                        			public void render(Writer out) throws IOException {
-                        				out.write("<getProcessDefinition>");
-                        				out.write("<url>"+ url +"</url>");
-                        				out.write("</getProcessDefinition>");
-                        			}
-                        		});
-                			}
-                		}
-                		
-                	}
+                    if (segments.length == 1) {
+                        renderXml(response, new DocBody() {
+                            public void render(Writer out) throws IOException{
+                                out.write("<getProcessDefinitionResponse>");
+                                out.write("<error>Not enough args..</error>");
+                                out.write("</getProcessDefinitionResponse>");
+                            }
+                        });
+                    } else if (segments.length == 2) {
+                        String processName = segments[1]; 
+                        for (QName process :_store.getProcesses()) {
+                            String[] nameVer = process.getLocalPart().split("-");
+                            if(processName.equals(nameVer[0])) {
+                                final String url = root + bundleUrlFor(_store.getProcessConfiguration(process).getBpelDocument());
+                                renderXml(response, new DocBody() {
+                                    public void render(Writer out) throws IOException {
+                                        out.write("<getProcessDefinition>");
+                                        out.write("<url>"+ url +"</url>");
+                                        out.write("</getProcessDefinition>");
+                                    }
+                                });
+                            }
+                        }
+                        
+                    }
                 }
             }
             return true;
@@ -254,7 +254,7 @@ public class DeploymentBrowser {
         out.write("</body></html>");
     }
     private void renderXml(HttpServletResponse response, DocBody docBody) throws IOException {
-    	response.setContentType("application/xml; charset=utf-8");  
+        response.setContentType("application/xml; charset=utf-8");  
         //response.setContentType("application/xml");
         //response.setCharacterEncoding("UTF-8");
 

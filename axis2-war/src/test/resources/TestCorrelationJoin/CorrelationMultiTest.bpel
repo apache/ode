@@ -26,93 +26,93 @@
     queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
     expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
 
-	<import location="CorrelationMultiTest.wsdl" namespace="http://ode/bpel/unit-test.wsdl" importType="http://schemas.xmlsoap.org/wsdl/" />
+    <import location="CorrelationMultiTest.wsdl" namespace="http://ode/bpel/unit-test.wsdl" importType="http://schemas.xmlsoap.org/wsdl/" />
 
-	<partnerLinks>
+    <partnerLinks>
       <partnerLink name="helloPartnerLink" 
          partnerLinkType="test:HeaderTestPartnerLinkType" myRole="me" />
       <partnerLink name="dummyPartnerLink"
          partnerLinkType="test:DummyPartnerLinkType" partnerRole="you" />
-	</partnerLinks>
+    </partnerLinks>
     
-	<variables>
+    <variables>
      <variable name="myInVar" messageType="test:HeaderTestMessage"/>
      <variable name="myOutVar" messageType="test:HeaderTestMessage"/>
      <variable name="input" messageType="dummy:longOperationRequest"/>
      <variable name="output" messageType="dummy:longOperationResponse"/>
-	</variables>
-	<correlationSets>
-		<correlationSet name="testCorr1" properties="test:testCorrelationID1"/>
-		<correlationSet name="testCorr2" properties="test:testCorrelationID2"/>
-		<correlationSet name="testCorr3" properties="test:testCorrelationID3"/>
-	</correlationSets>
-	<flow>
-		<links>
-			<link name="ready"/>
-			<link name="continue"/>
-		</links>
-   		<sequence>
-			<receive name="start1" partnerLink="helloPartnerLink" portType="test:HeaderTestPortType"
-	          operation="hello1" variable="myInVar" createInstance="yes">
-				<correlations>
-					<correlation set="testCorr1" initiate="join"/>
-				</correlations>
-			</receive>
-			<assign>
-	           <copy>
-	                <from>$myInVar.TestPart/requestText</from>
-	                <to>$myOutVar.TestPart</to>
-	           </copy>
-			</assign>
-			<sources>
-				<source linkName="ready"/>
-			</sources>
-		</sequence>
-		<sequence>
-			<targets>
-				<target linkName="ready"/>
-			</targets>
-			<receive name="start2" partnerLink="helloPartnerLink" portType="test:HeaderTestPortType"
-	          operation="hello2" variable="myInVar" createInstance="yes">
-				<correlations>
-					<correlation set="testCorr1" initiate="join"/>
-				</correlations>
-			</receive>
-			<assign>
-				<copy>
-					<from>
-						concat($myOutVar.TestPart, $myInVar.TestPart/requestText)
-					</from>
-					<to>$myOutVar.TestPart</to>
-				</copy>
-			</assign>
-			<sources>
-				<source linkName="continue"/>
-			</sources>
-		</sequence>
-		<sequence>
-			<targets>
-				<target linkName="continue"/>
-			</targets>
-			<receive name="receive3" partnerLink="helloPartnerLink" portType="test:HeaderTestPortType" 
-				operation="continue" variable="myInVar">
-				<correlations>
-					<correlation set="testCorr1" initiate="join"/>
-					<correlation set="testCorr2" initiate="join"/>
-					<correlation set="testCorr3" initiate="join"/>
-				</correlations>
-			</receive>
-			<assign>
-				<copy>
-					<from>
-						concat($myOutVar.TestPart, $myInVar.TestPart/requestText)
-					</from>
-					<to>$myOutVar.TestPart</to>
-				</copy>
-			</assign>
-	
-			<reply name="end" partnerLink="helloPartnerLink" portType="test:HeaderTestPortType"
-	              operation="hello1" variable="myOutVar"/>
-		</sequence>
+    </variables>
+    <correlationSets>
+        <correlationSet name="testCorr1" properties="test:testCorrelationID1"/>
+        <correlationSet name="testCorr2" properties="test:testCorrelationID2"/>
+        <correlationSet name="testCorr3" properties="test:testCorrelationID3"/>
+    </correlationSets>
+    <flow>
+        <links>
+            <link name="ready"/>
+            <link name="continue"/>
+        </links>
+        <sequence>
+            <receive name="start1" partnerLink="helloPartnerLink" portType="test:HeaderTestPortType"
+              operation="hello1" variable="myInVar" createInstance="yes">
+                <correlations>
+                    <correlation set="testCorr1" initiate="join"/>
+                </correlations>
+            </receive>
+            <assign>
+               <copy>
+                    <from>$myInVar.TestPart/requestText</from>
+                    <to>$myOutVar.TestPart</to>
+               </copy>
+            </assign>
+            <sources>
+                <source linkName="ready"/>
+            </sources>
+        </sequence>
+        <sequence>
+            <targets>
+                <target linkName="ready"/>
+            </targets>
+            <receive name="start2" partnerLink="helloPartnerLink" portType="test:HeaderTestPortType"
+              operation="hello2" variable="myInVar" createInstance="yes">
+                <correlations>
+                    <correlation set="testCorr1" initiate="join"/>
+                </correlations>
+            </receive>
+            <assign>
+                <copy>
+                    <from>
+                        concat($myOutVar.TestPart, $myInVar.TestPart/requestText)
+                    </from>
+                    <to>$myOutVar.TestPart</to>
+                </copy>
+            </assign>
+            <sources>
+                <source linkName="continue"/>
+            </sources>
+        </sequence>
+        <sequence>
+            <targets>
+                <target linkName="continue"/>
+            </targets>
+            <receive name="receive3" partnerLink="helloPartnerLink" portType="test:HeaderTestPortType" 
+                operation="continue" variable="myInVar">
+                <correlations>
+                    <correlation set="testCorr1" initiate="join"/>
+                    <correlation set="testCorr2" initiate="join"/>
+                    <correlation set="testCorr3" initiate="join"/>
+                </correlations>
+            </receive>
+            <assign>
+                <copy>
+                    <from>
+                        concat($myOutVar.TestPart, $myInVar.TestPart/requestText)
+                    </from>
+                    <to>$myOutVar.TestPart</to>
+                </copy>
+            </assign>
+    
+            <reply name="end" partnerLink="helloPartnerLink" portType="test:HeaderTestPortType"
+                  operation="hello1" variable="myOutVar"/>
+        </sequence>
    </flow>
 </process>

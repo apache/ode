@@ -21,71 +21,71 @@ YAHOO.util.Attribute = function(hash, owner) {
 };
 
 YAHOO.util.Attribute.prototype = {
-	/**
+    /**
      * The name of the attribute.
-	 * @property name
-	 * @type String
-	 */
+     * @property name
+     * @type String
+     */
     name: undefined,
     
-	/**
+    /**
      * The value of the attribute.
-	 * @property value
-	 * @type String
-	 */
+     * @property value
+     * @type String
+     */
     value: null,
     
-	/**
+    /**
      * The owner of the attribute.
-	 * @property owner
-	 * @type YAHOO.util.AttributeProvider
-	 */
+     * @property owner
+     * @type YAHOO.util.AttributeProvider
+     */
     owner: null,
     
-	/**
+    /**
      * Whether or not the attribute is read only.
-	 * @property readOnly
-	 * @type Boolean
-	 */
+     * @property readOnly
+     * @type Boolean
+     */
     readOnly: false,
     
-	/**
+    /**
      * Whether or not the attribute can only be written once.
-	 * @property writeOnce
-	 * @type Boolean
-	 */
+     * @property writeOnce
+     * @type Boolean
+     */
     writeOnce: false,
 
-	/**
+    /**
      * The attribute's initial configuration.
      * @private
-	 * @property _initialConfig
-	 * @type Object
-	 */
+     * @property _initialConfig
+     * @type Object
+     */
     _initialConfig: null,
     
-	/**
+    /**
      * Whether or not the attribute's value has been set.
      * @private
-	 * @property _written
-	 * @type Boolean
-	 */
+     * @property _written
+     * @type Boolean
+     */
     _written: false,
     
-	/**
+    /**
      * The method to use when setting the attribute's value.
      * The method recieves the new value as the only argument.
-	 * @property method
-	 * @type Function
-	 */
+     * @property method
+     * @type Function
+     */
     method: null,
     
-	/**
+    /**
      * The validator to use when setting the attribute's value.
-	 * @property validator
-	 * @type Function
+     * @property validator
+     * @type Function
      * @return Boolean
-	 */
+     */
     validator: null,
     
     /**

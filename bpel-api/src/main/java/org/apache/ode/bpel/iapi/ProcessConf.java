@@ -172,14 +172,14 @@ public interface ProcessConf {
     Set<CLEANUP_CATEGORY> getCleanupCategories(boolean instanceSucceeded);
 
     public enum CLEANUP_CATEGORY {
-		INSTANCE,
-		VARIABLES,
-		MESSAGES,
-		CORRELATIONS,
-		EVENTS;
-		
-		public static CLEANUP_CATEGORY fromString(String lowerCase) {
-			return valueOf(CLEANUP_CATEGORY.class, lowerCase.toUpperCase());
-		}
-	}
+        INSTANCE,
+        VARIABLES,
+        MESSAGES,
+        CORRELATIONS,
+        EVENTS;
+        
+        public static CLEANUP_CATEGORY fromString(String lowerCase) {
+            return valueOf(CLEANUP_CATEGORY.class, lowerCase.toUpperCase());
+        }
+    }
 }

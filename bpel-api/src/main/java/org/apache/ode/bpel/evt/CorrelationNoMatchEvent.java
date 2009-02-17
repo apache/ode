@@ -31,35 +31,35 @@ import org.apache.ode.bpel.common.CorrelationKeySet;
  * match
  */
 public class CorrelationNoMatchEvent extends CorrelationEvent {
-	private static final long serialVersionUID = 1L;
-	
-	// left out for backward-compatibility
-	private final Set<CorrelationKey> _keys = new HashSet<CorrelationKey>();
-	private CorrelationKeySet _keySet = null;
+    private static final long serialVersionUID = 1L;
+    
+    // left out for backward-compatibility
+    private final Set<CorrelationKey> _keys = new HashSet<CorrelationKey>();
+    private CorrelationKeySet _keySet = null;
 
-	public CorrelationNoMatchEvent(QName qName, String opName, String mexId,
-			CorrelationKeySet keySet) {
-		super(qName, opName, mexId);
+    public CorrelationNoMatchEvent(QName qName, String opName, String mexId,
+            CorrelationKeySet keySet) {
+        super(qName, opName, mexId);
 
-		_keySet = keySet;
-	}
+        _keySet = keySet;
+    }
 
-	public CorrelationKeySet getKeySet() {
-		// backward-compatibility; add up keys
-		if( _keys.size() > 0 && _keySet == null ) {
-			_keySet = new CorrelationKeySet();
-		}
-		for (CorrelationKey aKey : _keys) {
-			if (aKey != null && !_keySet.contains(aKey)) {
-				_keySet.add(aKey);
-			}
-		}
-		
-		return _keySet;
-	}
+    public CorrelationKeySet getKeySet() {
+        // backward-compatibility; add up keys
+        if( _keys.size() > 0 && _keySet == null ) {
+            _keySet = new CorrelationKeySet();
+        }
+        for (CorrelationKey aKey : _keys) {
+            if (aKey != null && !_keySet.contains(aKey)) {
+                _keySet.add(aKey);
+            }
+        }
+        
+        return _keySet;
+    }
 
-	public void setKeys(CorrelationKeySet keySet) {
-		_keySet = keySet;
-	}
+    public void setKeys(CorrelationKeySet keySet) {
+        _keySet = keySet;
+    }
 
 }

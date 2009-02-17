@@ -151,6 +151,6 @@ public class ManagementService {
         soapDetail.addDetailEntry(detail);
         return fault;
     }
-	}
+    }
 
 }

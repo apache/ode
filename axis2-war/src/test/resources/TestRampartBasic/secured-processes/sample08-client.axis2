@@ -17,10 +17,10 @@
  !-->
 <axisconfig name="AxisJava2.0">
 
-	<module ref="rampart" />
+    <module ref="rampart" />
 
-	<!-- sample-8 : Double Signature -->
-	<parameter name="OutflowSecurity">
+    <!-- sample-8 : Double Signature -->
+    <parameter name="OutflowSecurity">
 
         <action>
             <items>Timestamp Signature NoSerialization</items>
@@ -39,7 +39,7 @@
         </action>
 
     </parameter>
-	
+    
     <!-- ================================================= -->
     <!-- Parameters -->
     <!-- ================================================= -->

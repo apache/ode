@@ -7,8 +7,8 @@
     xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
     xmlns:test="http://ode/bpel/unit-test.wsdl"
     xmlns:tns="http://ode/bpel/unit-test" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-	xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
-	xmlns:myns="myns">
+    xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:myns="myns">
     <bpws:import importType="http://schemas.xmlsoap.org/wsdl/"
         location="HelloWorld2.wsdl" namespace="http://ode/bpel/unit-test.wsdl"/>
     <bpws:partnerLinks>
@@ -26,25 +26,25 @@
         <bpws:assign name="assign1" validate="yes">
             <bpws:copy>
                 <bpws:from variable="inVar" part="parameters">
-					<bpws:query>myns:in</bpws:query>
-				</bpws:from>
+                    <bpws:query>myns:in</bpws:query>
+                </bpws:from>
                 <bpws:to variable="tmpVar"/>
             </bpws:copy>
-			<bpws:copy>
-				<bpws:from>
-					<bpws:literal>
-						<myns:helloResponse>
-							<myns:out xmlns:foo="xsn:foo" myattr="foo:bar"/>
-						</myns:helloResponse>
-					</bpws:literal>
-				</bpws:from>
-				<bpws:to variable="outVar" part="parameters"/>
-			</bpws:copy>
+            <bpws:copy>
+                <bpws:from>
+                    <bpws:literal>
+                        <myns:helloResponse>
+                            <myns:out xmlns:foo="xsn:foo" myattr="foo:bar"/>
+                        </myns:helloResponse>
+                    </bpws:literal>
+                </bpws:from>
+                <bpws:to variable="outVar" part="parameters"/>
+            </bpws:copy>
             <bpws:copy>
                 <bpws:from>$tmpVar</bpws:from>
                 <bpws:to variable="outVar" part="parameters">
-					<bpws:query>myns:out</bpws:query>
-				</bpws:to>
+                    <bpws:query>myns:out</bpws:query>
+                </bpws:to>
             </bpws:copy>
         </bpws:assign>
         <bpws:reply name="end" operation="hello"

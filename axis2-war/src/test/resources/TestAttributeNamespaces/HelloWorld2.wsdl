@@ -26,78 +26,78 @@
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
     xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
-	xmlns:myns="myns"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	
+    xmlns:myns="myns"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    
     <wsdl:types>
-		<xsd:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="myns">	
+        <xsd:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="myns">   
 
-			<xsd:complexType name="MagicPixie">
-				<xsd:sequence>
-					<xsd:element name="value" type="xsd:string"/>
-				</xsd:sequence>
-			</xsd:complexType>
-			<xsd:complexType name="DustyMagicPixie">
-			  <xsd:complexContent>
-			    <xsd:extension base="myns:MagicPixie">
-			      <xsd:sequence>
-			        <xsd:element name="dust" type="xsd:string"/>
-			      </xsd:sequence>
-			    </xsd:extension>
-			  </xsd:complexContent>
-			</xsd:complexType>						
-			
-			<xsd:element name="hello">
-				<xsd:complexType>
+            <xsd:complexType name="MagicPixie">
+                <xsd:sequence>
+                    <xsd:element name="value" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:complexType>
+            <xsd:complexType name="DustyMagicPixie">
+              <xsd:complexContent>
+                <xsd:extension base="myns:MagicPixie">
+                  <xsd:sequence>
+                    <xsd:element name="dust" type="xsd:string"/>
+                  </xsd:sequence>
+                </xsd:extension>
+              </xsd:complexContent>
+            </xsd:complexType>                      
+            
+            <xsd:element name="hello">
+                <xsd:complexType>
                   <xsd:sequence>
                       <xsd:element name="in" type="myns:MagicPixie" nillable="false" minOccurs="1" maxOccurs="1"/>
                   </xsd:sequence>
-				</xsd:complexType>			
-			</xsd:element>
-			<xsd:element name="helloResponse">
-				<xsd:complexType>
+                </xsd:complexType>          
+            </xsd:element>
+            <xsd:element name="helloResponse">
+                <xsd:complexType>
                   <xsd:sequence>
                       <xsd:element name="out" type="myns:MagicPixie" nillable="false" minOccurs="1" maxOccurs="1"/>
                   </xsd:sequence>
-				</xsd:complexType>			
-			</xsd:element>
-		</xsd:schema>
-	</wsdl:types>
-	
+                </xsd:complexType>          
+            </xsd:element>
+        </xsd:schema>
+    </wsdl:types>
+    
     <wsdl:message name="helloRequest">
-		<wsdl:part name="parameters" element="myns:hello" />
+        <wsdl:part name="parameters" element="myns:hello" />
     </wsdl:message>
     <wsdl:message name="helloResponse">
-		<wsdl:part name="parameters" element="myns:helloResponse" />
+        <wsdl:part name="parameters" element="myns:helloResponse" />
     </wsdl:message>
-	
-	
-	<wsdl:portType name="HelloPortType">
+    
+    
+    <wsdl:portType name="HelloPortType">
       <wsdl:operation name="hello">
-		<wsdl:input message="tns:helloRequest" name="helloRequest" />
+        <wsdl:input message="tns:helloRequest" name="helloRequest" />
         <wsdl:output message="tns:helloResponse" name="helloResponse" />
-		</wsdl:operation>
-	</wsdl:portType>
-	
-	<wsdl:binding name="HelloSoapBinding" type="tns:HelloPortType">
-		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
-		<wsdl:operation name="hello">
-			<soap:operation soapAction=""/>
-			<wsdl:input name="helloRequest">
-				<soap:body use="literal"/>
-			</wsdl:input>
-			<wsdl:output name="helloResponse">
-				<soap:body use="literal"/>
-			</wsdl:output>
-		</wsdl:operation>
-	</wsdl:binding>	
+        </wsdl:operation>
+    </wsdl:portType>
+    
+    <wsdl:binding name="HelloSoapBinding" type="tns:HelloPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="hello">
+            <soap:operation soapAction=""/>
+            <wsdl:input name="helloRequest">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="helloResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding> 
    
-	<wsdl:service name="HelloService">
-		<wsdl:port name="HelloPort" binding="tns:HelloSoapBinding">
-			<soap:address location="http://localhost:8888/ode/processes/attrNSWorld"/>
-		</wsdl:port>
-	</wsdl:service>   
-	
+    <wsdl:service name="HelloService">
+        <wsdl:port name="HelloPort" binding="tns:HelloSoapBinding">
+            <soap:address location="http://localhost:8888/ode/processes/attrNSWorld"/>
+        </wsdl:port>
+    </wsdl:service>   
+    
    <plnk:partnerLinkType name="HelloPartnerLinkType">
        <plnk:role name="me" portType="tns:HelloPortType"/>
        <plnk:role name="you" portType="tns:HelloPortType"/>

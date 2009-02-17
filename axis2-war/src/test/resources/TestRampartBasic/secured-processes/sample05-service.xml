@@ -17,8 +17,8 @@
  !-->
 <!-- services.xml of sample-5 : Encryption only -->
 <service>
-	<module ref="rampart" />
-		
+    <module ref="rampart" />
+        
     <parameter name="InflowSecurity">
       <action>
         <items>Encrypt</items>
@@ -27,7 +27,7 @@
       </action>
     </parameter>
     
-	<parameter name="OutflowSecurity">
+    <parameter name="OutflowSecurity">
       <action>
         <items>Encrypt</items>
         <encryptionUser>client</encryptionUser>
@@ -36,5 +36,5 @@
     </parameter>
 
 
-	
+    
 </service>

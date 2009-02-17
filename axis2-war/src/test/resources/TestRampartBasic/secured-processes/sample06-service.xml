@@ -17,8 +17,8 @@
  !-->
 <!-- services.xml of sample-6 : Signature and Encryption : Using the request's certificate-->
 <service>
-	<module ref="rampart" />
-	
+    <module ref="rampart" />
+    
     <parameter name="InflowSecurity">
       <action>
         <items>Timestamp Signature Encrypt</items>

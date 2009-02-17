@@ -2,69 +2,69 @@
 <!-- edited with XMLSpy v2008 (http://www.altova.com) by none (none) -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://ode.apache.org/test/xsdref-test" targetNamespace="http://ode.apache.org/test/xsdref-test" elementFormDefault="qualified" attributeFormDefault="unqualified">
     <xs:include schemaLocation="ListeProduit.xsd"/>
-		<xs:element name="Listexreftst" type="ListexreftstType">
-		<xs:annotation>
-			<xs:documentation>Liste de matrice de prise en charge</xs:documentation>
-		</xs:annotation>
-	</xs:element>
-	<xs:complexType name="ListexreftstType">
-		<xs:sequence>
-			<xs:element ref="xreftst" minOccurs="0" maxOccurs="unbounded"/>
-		</xs:sequence>
-	</xs:complexType>
-	<xs:element name="xreftst" type="xreftstType">
-		<xs:annotation>
-			<xs:documentation>Matrice de prise en charge</xs:documentation>
-		</xs:annotation>
-	</xs:element>
-	<xs:complexType name="xreftstType">
-		<xs:sequence>
-			<xs:element ref="LigneMatrice" maxOccurs="unbounded"/>
-		</xs:sequence>
-	</xs:complexType>
-	<xs:element name="LigneMatrice" type="LigneMatriceType">
-		<xs:annotation>
-			<xs:documentation>Ligne de la matrice</xs:documentation>
-		</xs:annotation>
-	</xs:element>
-	<xs:complexType name="LigneMatriceType">
-		<xs:sequence>
-			<xs:element ref="Type"/>
-			<xs:element ref="Montant"/>
-			<xs:element ref="ProduitCouvrant"/>
-		</xs:sequence>
-	</xs:complexType>
-	<xs:element name="Type">
-		<xs:annotation>
-			<xs:documentation>Type
-			Exemples de valeur : Depense, Ticket moderateur, Depassement, Participation forfaitaire, Majoration de TM, PO de base)</xs:documentation>
-		</xs:annotation>
-		<xs:simpleType>
-			<xs:restriction base="xs:string">
-				<xs:enumeration value="Depense"/>
-				<xs:enumeration value="Ticket moderateur"/>
-				<xs:enumeration value="Depassement"/>
-				<xs:enumeration value="Participation forfaitaire"/>
-				<xs:enumeration value="Majoration de TM"/>
-				<xs:enumeration value="PO de base"/>
-			</xs:restriction>
-		</xs:simpleType>
-	</xs:element>
-	<xs:element name="Montant" type="xs:decimal">
-		<xs:annotation>
-			<xs:documentation>Montant</xs:documentation>
-		</xs:annotation>
-	</xs:element>
-	<xs:element name="ProduitCouvrant" type="ReferenceProduitType">
-		<xs:annotation>
-			<xs:documentation>produit couvrant</xs:documentation>
-		</xs:annotation>
-	</xs:element>
-	 <!-- 
-		<xs:simpleType name="ReferenceProduitType2">
-		<xs:restriction base="xs:string">
-			<xs:minLength value="1"/>
-		</xs:restriction>
-	</xs:simpleType>
-	-->
+        <xs:element name="Listexreftst" type="ListexreftstType">
+        <xs:annotation>
+            <xs:documentation>Liste de matrice de prise en charge</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:complexType name="ListexreftstType">
+        <xs:sequence>
+            <xs:element ref="xreftst" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="xreftst" type="xreftstType">
+        <xs:annotation>
+            <xs:documentation>Matrice de prise en charge</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:complexType name="xreftstType">
+        <xs:sequence>
+            <xs:element ref="LigneMatrice" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="LigneMatrice" type="LigneMatriceType">
+        <xs:annotation>
+            <xs:documentation>Ligne de la matrice</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:complexType name="LigneMatriceType">
+        <xs:sequence>
+            <xs:element ref="Type"/>
+            <xs:element ref="Montant"/>
+            <xs:element ref="ProduitCouvrant"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="Type">
+        <xs:annotation>
+            <xs:documentation>Type
+            Exemples de valeur : Depense, Ticket moderateur, Depassement, Participation forfaitaire, Majoration de TM, PO de base)</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+                <xs:enumeration value="Depense"/>
+                <xs:enumeration value="Ticket moderateur"/>
+                <xs:enumeration value="Depassement"/>
+                <xs:enumeration value="Participation forfaitaire"/>
+                <xs:enumeration value="Majoration de TM"/>
+                <xs:enumeration value="PO de base"/>
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:element>
+    <xs:element name="Montant" type="xs:decimal">
+        <xs:annotation>
+            <xs:documentation>Montant</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="ProduitCouvrant" type="ReferenceProduitType">
+        <xs:annotation>
+            <xs:documentation>produit couvrant</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+     <!-- 
+        <xs:simpleType name="ReferenceProduitType2">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+        </xs:restriction>
+    </xs:simpleType>
+    -->
 </xs:schema>

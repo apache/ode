@@ -6,38 +6,38 @@ import org.apache.log4j.Logger;
 import org.testng.annotations.Test;
 
 public class BpelActivityTest extends Axis2TestBase {
-	@Test(dataProvider="configs")
+    @Test(dataProvider="configs")
     public void testThrowOnEvent() throws Exception {
-		final String bundleName = "TestThrowOnEvent";
+        final String bundleName = "TestThrowOnEvent";
         // deploy the required service
         server.deployService(DummyService.class.getCanonicalName());
         if (server.isDeployed(bundleName)) server.undeployProcess(bundleName);
         server.deployProcess(bundleName);
 
         new Thread() {
-        	public void run() {
-        		try {
-        			Thread.sleep(2000);
-        			String response = server.sendRequestFile("http://localhost:8888/ode/processes/OnEventCorrelation/",
+            public void run() {
+                try {
+                    Thread.sleep(2000);
+                    String response = server.sendRequestFile("http://localhost:8888/ode/processes/OnEventCorrelation/",
                             bundleName, "testRequest.soap");
-        			Logger.getLogger(BpelActivityTest.class).debug("!!! : " + response);
-        		} catch( Exception e ) {
-        			fail(e.getMessage());
-        		}
-        	}
+                    Logger.getLogger(BpelActivityTest.class).debug("!!! : " + response);
+                } catch( Exception e ) {
+                    fail(e.getMessage());
+                }
+            }
         }.start();
 
 //        new Thread() {
-//        	public void run() {
-//        		try {
-//        			Thread.sleep(6000);
-//        			String response = server.sendRequestFile("http://localhost:8888/ode/processes/OnEventCorrelation/",
+//          public void run() {
+//              try {
+//                  Thread.sleep(6000);
+//                  String response = server.sendRequestFile("http://localhost:8888/ode/processes/OnEventCorrelation/",
 //                            bundleName, "testRequest.soap");
-//        			Logger.getLogger(BpelActivityTest.class).debug("!!!SEAN : " + response);
-//        		} catch( Exception e ) {
-//        			fail(e.getMessage());
-//        		}
-//        	}
+//                  Logger.getLogger(BpelActivityTest.class).debug("!!!SEAN : " + response);
+//              } catch( Exception e ) {
+//                  fail(e.getMessage());
+//              }
+//          }
 //        }.start();
 
         try {

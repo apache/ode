@@ -17,11 +17,11 @@
  !-->
 <axisconfig name="AxisJava2.0">
 
-	<module ref="rampart" />
+    <module ref="rampart" />
 
-	<module ref="rampart" />
-	
-	<parameter name="OutflowSecurity">
+    <module ref="rampart" />
+    
+    <parameter name="OutflowSecurity">
       <action>
         <items>Timestamp Signature</items>
         <user>client</user>

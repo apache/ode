@@ -23,7 +23,7 @@ package org.apache.ode.bpel.common;
  */
 public class ProcessState {
   
-	/** <em>NEW</em> state: instance has not been reduced. */
+    /** <em>NEW</em> state: instance has not been reduced. */
   public static final short STATE_NEW = 0;
 
   /**
@@ -102,7 +102,7 @@ public class ProcessState {
    * @return <code>true</code> if the process is finished.
    */
   public static boolean isFinished(short state){
-  	  return !(canExecute(state) || state == STATE_SUSPENDED);
+      return !(canExecute(state) || state == STATE_SUSPENDED);
   }
   /**
    * Change <code>short</code> state representation to human-readable form.

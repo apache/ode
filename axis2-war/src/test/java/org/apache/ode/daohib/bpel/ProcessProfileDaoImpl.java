@@ -57,10 +57,10 @@ import java.util.List;
  * Hibernate based {@link ProcessProfileDAO} implementation
  */
 public class ProcessProfileDaoImpl extends HibernateDao implements ProcessProfileDAO {
-	@SuppressWarnings("unused")
-	private static final Log __log = LogFactory.getLog(ProcessProfileDaoImpl.class);
-	
-	protected ProcessDaoImpl process;
+    @SuppressWarnings("unused")
+    private static final Log __log = LogFactory.getLog(ProcessProfileDaoImpl.class);
+    
+    protected ProcessDaoImpl process;
 
     public ProcessProfileDaoImpl(SessionManager sm, ProcessDaoImpl process) {
         super(sm, process._hobj);
@@ -69,88 +69,88 @@ public class ProcessProfileDaoImpl extends HibernateDao implements ProcessProfil
     }
     
     public SessionManager getSessionManager() {
-    	return _sm;
+        return _sm;
     }
     
     @SuppressWarnings("unchecked")
     public boolean doesProcessExist() {
-    	boolean exists = false;
-    	
-		Query query = getSession().createQuery("select count(id) from HProcess as p where p.guid = :guid");
-		query.setParameter("guid", ((HProcess)process._hobj).getGuid());
-		for( Long cnt : (List<Long>)query.list()) {
-			exists = cnt.intValue() > 0;
-		}
-		
-		return exists;
+        boolean exists = false;
+        
+        Query query = getSession().createQuery("select count(id) from HProcess as p where p.guid = :guid");
+        query.setParameter("guid", ((HProcess)process._hobj).getGuid());
+        for( Long cnt : (List<Long>)query.list()) {
+            exists = cnt.intValue() > 0;
+        }
+        
+        return exists;
     }
     
-	public List<ProcessInstanceDAO> findInstancesByProcess() {
-		return findByProcess("from HProcessInstance as i where i.process = :process)", ProcessInstanceDaoImpl.class, HProcessInstance.class);
-	}
+    public List<ProcessInstanceDAO> findInstancesByProcess() {
+        return findByProcess("from HProcessInstance as i where i.process = :process)", ProcessInstanceDaoImpl.class, HProcessInstance.class);
+    }
 
-	public List<MessageExchangeDAO> findMessageExchangesByProcess() {
-		return findByProcess("from HMessageExchange as x where x.instance.process = :process)", MessageExchangeDaoImpl.class, HMessageExchange.class);
-	}
+    public List<MessageExchangeDAO> findMessageExchangesByProcess() {
+        return findByProcess("from HMessageExchange as x where x.instance.process = :process)", MessageExchangeDaoImpl.class, HMessageExchange.class);
+    }
 
-	public List<MessageRouteDAO> findMessageRoutesByProcess() {
-		return findByProcess("from HCorrelatorSelector as s where s.instance.process = :process)", MessageRouteDaoImpl.class, HCorrelatorSelector.class);
-	}
+    public List<MessageRouteDAO> findMessageRoutesByProcess() {
+        return findByProcess("from HCorrelatorSelector as s where s.instance.process = :process)", MessageRouteDaoImpl.class, HCorrelatorSelector.class);
+    }
 
-	public List<MessageDAO> findMessagesByProcess() {
-		return findByProcess("from HMessage as m where m.messageExchange.process = :process)", MessageDaoImpl.class, HMessage.class);
-	}
+    public List<MessageDAO> findMessagesByProcess() {
+        return findByProcess("from HMessage as m where m.messageExchange.process = :process)", MessageDaoImpl.class, HMessage.class);
+    }
 
-	public List<PartnerLinkDAO> findPartnerLinksByProcess() {
-		return findByProcess("from HPartnerLink as p where p.process = :process)", PartnerLinkDAOImpl.class, HPartnerLink.class);
-	}
+    public List<PartnerLinkDAO> findPartnerLinksByProcess() {
+        return findByProcess("from HPartnerLink as p where p.process = :process)", PartnerLinkDAOImpl.class, HPartnerLink.class);
+    }
 
-	public List<ScopeDAO> findScopesByProcess() {
-		return findByProcess("from HScope as s where s.instance.process = :process", ScopeDaoImpl.class, HScope.class);
-	}
+    public List<ScopeDAO> findScopesByProcess() {
+        return findByProcess("from HScope as s where s.instance.process = :process", ScopeDaoImpl.class, HScope.class);
+    }
 
-	public List<XmlDataDAO> findXmlDataByProcess() {
-		return findByProcess("from HXmlData as x where x.instance.process = :process", XmlDataDaoImpl.class, HXmlData.class);
-	}
-	
+    public List<XmlDataDAO> findXmlDataByProcess() {
+        return findByProcess("from HXmlData as x where x.instance.process = :process", XmlDataDaoImpl.class, HXmlData.class);
+    }
+    
     public List<ActivityRecoveryDAO> findActivityRecoveriesByProcess() {
-    	return findByProcess("from HActivityRecovery as a where a.instance.process = :process", ActivityRecoveryDaoImpl.class, HActivityRecovery.class);
+        return findByProcess("from HActivityRecovery as a where a.instance.process = :process", ActivityRecoveryDaoImpl.class, HActivityRecovery.class);
     }
 
     public List<CorrelationSetDAO> findCorrelationSetsByProcess() {
-    	return findByProcess("from HCorrelationSet as s where s.process = :process", CorrelationSetDaoImpl.class, HCorrelationSet.class);
+        return findByProcess("from HCorrelationSet as s where s.process = :process", CorrelationSetDaoImpl.class, HCorrelationSet.class);
     }
 
     public List<CorrelatorDAO> findCorrelatorsByProcess() {
-    	return findByProcess("from HCorrelator as c where c.process = :process", CorrelatorDaoImpl.class, HCorrelator.class);
+        return findByProcess("from HCorrelator as c where c.process = :process", CorrelatorDaoImpl.class, HCorrelator.class);
     }
 
     public List<FaultDAO> findFaultsByProcess() {
-    	return findByProcess("from HFaultData as f where f in (select i.fault from HProcessInstance as i where i.process = :process and i.fault is not null)", FaultDAOImpl.class, HFaultData.class);
+        return findByProcess("from HFaultData as f where f in (select i.fault from HProcessInstance as i where i.process = :process and i.fault is not null)", FaultDAOImpl.class, HFaultData.class);
     }
 
     public int countEventsByProcess() {
-		Query query = getSession().createQuery("select count(id) from HBpelEvent as e where e.instance.process = :process");
-		query.setParameter("process", process._hobj);
+        Query query = getSession().createQuery("select count(id) from HBpelEvent as e where e.instance.process = :process");
+        query.setParameter("process", process._hobj);
 
-		return ((Long)query.uniqueResult()).intValue();
+        return ((Long)query.uniqueResult()).intValue();
     }
     
     @SuppressWarnings("unchecked")
-	protected <D, H> List<D> findByProcess(String queryString, Class daoClass, Class hibClass) {
-		List<D> results = new ArrayList<D>();
+    protected <D, H> List<D> findByProcess(String queryString, Class daoClass, Class hibClass) {
+        List<D> results = new ArrayList<D>();
 
-		try {
-			Query query = getSession().createQuery(queryString);
-			query.setParameter("process", process._hobj);
-			for( H hibObj : (Collection<H>)query.list()) {
-				Constructor<D> c = daoClass.getConstructor(SessionManager.class, hibClass);
-				results.add( c.newInstance(_sm, hibObj) );
-			}
-		} catch( Exception e ) {
-			throw new RuntimeException(e);
-		}
+        try {
+            Query query = getSession().createQuery(queryString);
+            query.setParameter("process", process._hobj);
+            for( H hibObj : (Collection<H>)query.list()) {
+                Constructor<D> c = daoClass.getConstructor(SessionManager.class, hibClass);
+                results.add( c.newInstance(_sm, hibObj) );
+            }
+        } catch( Exception e ) {
+            throw new RuntimeException(e);
+        }
 
-		return results;
-	}
+        return results;
+    }
 }

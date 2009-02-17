@@ -6,8 +6,8 @@ import org.testng.annotations.Test;
 import org.w3c.dom.Element;
 
 public class MessageStructureTest extends Axis2TestBase {
-	@Test(dataProvider="configs")
-	public void testAttrWithNsValue() throws Exception {
+    @Test(dataProvider="configs")
+    public void testAttrWithNsValue() throws Exception {
         String bundleName = "TestAttributeNamespaces";
         // deploy the required service
         server.deployService(DummyService.class.getCanonicalName());

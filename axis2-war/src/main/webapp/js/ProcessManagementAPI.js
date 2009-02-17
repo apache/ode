@@ -16,9 +16,9 @@
  */
 var baseURL;
 if (location.host.indexOf('/') == -1 && location.protocol.indexOf('/') == -1) {
-	baseURL = location.protocol + "//" + location.host + "/";
+    baseURL = location.protocol + "//" + location.host + "/";
 }else if(location.host.indexOf('/') != -1 && location.protocol.indexOf('/') == -1){
-	baseURL = location.protocol + "//" + location.host;
+    baseURL = location.protocol + "//" + location.host;
 }
 var address = baseURL + "ode/processes/ProcessManagement";
 
@@ -750,7 +750,7 @@ function WebServiceClient(endpointName)
         } else {
             try {
                 var resultContent = thisRequest.responseText;
-				ProcessManagementService.text = resultContent;
+                ProcessManagementService.text = resultContent;
                 if (resultContent == "") {
                     throw new WebServiceError("No response", "WebServiceClient._call() did not recieve a response to a synchronous request.");
                 }

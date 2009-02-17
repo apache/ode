@@ -25,13 +25,13 @@ import javax.xml.namespace.QName;
  * @author Matthieu Riou <mriou@apache.org>
  */
 public class SoapHeaderTest extends Axis2TestBase {
-	@Test(dataProvider="configs")
+    @Test(dataProvider="configs")
     public void testSimplePassing() throws Exception {
         server.deployService("TestSoapHeader", "dummy-service.wsdl",
                 new QName("http://axis2.ode.apache.org", "DummyService"), "DummyServiceSOAP11port_http", 
                 new MessageReceiver() {
             @SuppressWarnings("deprecation")
-			public void receive(MessageContext messageCtx) throws AxisFault {
+            public void receive(MessageContext messageCtx) throws AxisFault {
                 OMElement cidElmt = messageCtx.getEnvelope().getHeader().getFirstElement();
                 assertEquals("ConversationId", cidElmt.getLocalName());
                 assertEquals("ZZZXYZ", cidElmt.getText());

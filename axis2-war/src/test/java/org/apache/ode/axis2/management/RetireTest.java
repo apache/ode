@@ -11,7 +11,7 @@ import javax.xml.namespace.QName;
  */
 public class RetireTest extends Axis2TestBase {
 
-	@Test(dataProvider="configs")
+    @Test(dataProvider="configs")
     public void testRetiredInstance() throws Exception {
         String bundleName = "TestInstanceRetire";
         System.out.println("=> " + server.getODEServer().getProcessStore().getPackages());

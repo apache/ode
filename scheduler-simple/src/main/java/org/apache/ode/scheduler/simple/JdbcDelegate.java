@@ -64,7 +64,7 @@ public class JdbcDelegate implements DatabaseDelegate {
             + "and convert(int, ts) % ? = ? and ts < ?";
 
     private static final String UPGRADE_JOB_SYBASE12 = "update ODE_JOB set nodeid = ? where nodeid is null "
-        	+ "and -1 <> ? and -1 <> ? and ts < ?";
+            + "and -1 <> ? and -1 <> ? and ts < ?";
     
     private static final String SAVE_JOB = "insert into ODE_JOB "
             + " (jobid, nodeid, ts, scheduled, transacted, details) values(?, ?, ?, ?, ?, ?)";
@@ -220,15 +220,15 @@ public class JdbcDelegate implements DatabaseDelegate {
         try {
             con = getConnection();
             if (_dialect == Dialect.SQLSERVER) {
-            	ps = con.prepareStatement(UPGRADE_JOB_SQLSERVER);
+                ps = con.prepareStatement(UPGRADE_JOB_SQLSERVER);
             } else if (_dialect == Dialect.DB2) {
-            	ps = con.prepareStatement(UPGRADE_JOB_DB2);
+                ps = con.prepareStatement(UPGRADE_JOB_DB2);
             } else if (_dialect == Dialect.SYBASE) {
-            	ps = con.prepareStatement(UPGRADE_JOB_SYBASE);
+                ps = con.prepareStatement(UPGRADE_JOB_SYBASE);
             } else if (_dialect == Dialect.SYBASE12) {
                 ps = con.prepareStatement(UPGRADE_JOB_SYBASE12);
             } else {
-            	ps = con.prepareStatement(UPGRADE_JOB_DEFAULT);
+                ps = con.prepareStatement(UPGRADE_JOB_DEFAULT);
             }
             ps.setString(1, node);
             ps.setInt(2, numNodes);
@@ -300,7 +300,7 @@ public class JdbcDelegate implements DatabaseDelegate {
                 } else if (dbProductName.indexOf("Sybase") >= 0 || dbProductName.indexOf("Adaptive") >= 0) {
                     d = Dialect.SYBASE;
                     if( dbMajorVer == 12 ) {
-                    	d = Dialect.SYBASE12;
+                        d = Dialect.SYBASE12;
                     }
                 }
             }

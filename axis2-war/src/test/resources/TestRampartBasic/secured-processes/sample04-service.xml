@@ -17,7 +17,7 @@
  !-->
 <!-- services.xml of sample-4 : Signature only -->
 <service>
-	<module ref="rampart" />
+    <module ref="rampart" />
 
     <parameter name="InflowSecurity">
       <action>
@@ -25,8 +25,8 @@
         <signaturePropFile>service.properties</signaturePropFile>
       </action>
     </parameter>
-	
-	<parameter name="OutflowSecurity">
+    
+    <parameter name="OutflowSecurity">
       <action>
         <items>Timestamp Signature</items>
         <user>service</user>

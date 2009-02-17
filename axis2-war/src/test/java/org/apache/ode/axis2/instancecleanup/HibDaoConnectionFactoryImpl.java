@@ -30,56 +30,56 @@ public class HibDaoConnectionFactoryImpl extends BpelDAOConnectionFactoryImpl im
     private static SessionManager _staticSessionManager;
     private static ProcessInstanceDaoImpl instance;
     private static ProcessDaoImpl process;
-	
-	@Override
+    
+    @Override
     protected SessionManager createSessionManager(Properties properties, DataSource ds, TransactionManager tm) {
-		_staticSessionManager = new SessionManager(properties, ds, tm) {
-    		@Override
-    		public Configuration getDefaultConfiguration() throws MappingException {
-    			Configuration conf = super.getDefaultConfiguration();
-    			conf.setListener("post-insert", HibDaoConnectionFactoryImpl.this);
-    			return conf;
-    		}
-    	};
-    	
-    	return _staticSessionManager;
+        _staticSessionManager = new SessionManager(properties, ds, tm) {
+            @Override
+            public Configuration getDefaultConfiguration() throws MappingException {
+                Configuration conf = super.getDefaultConfiguration();
+                conf.setListener("post-insert", HibDaoConnectionFactoryImpl.this);
+                return conf;
+            }
+        };
+        
+        return _staticSessionManager;
     }
 
     public BpelDAOConnection getConnection() {
         return new ProfilingBpelDAOConnectionImpl(_sessionManager);
     }
-	
+    
     public static Session getSession() {
-		return _staticSessionManager.getSession();
-	}
-	
-	public static ProcessInstanceDAO getInstance() {
-		return instance;
-	}
-	
-	public static ProcessDaoImpl getProcess() {
-		return process;
-	}
+        return _staticSessionManager.getSession();
+    }
+    
+    public static ProcessInstanceDAO getInstance() {
+        return instance;
+    }
+    
+    public static ProcessDaoImpl getProcess() {
+        return process;
+    }
 
-	public void onPostInsert(PostInsertEvent e) {
-		if( HProcessInstance.class.equals( e.getEntity().getClass() ) ) {
-			instance = new ProcessInstanceDaoImpl(_sessionManager, (HProcessInstance)e.getEntity());
-		} else if( HProcess.class.equals( e.getEntity().getClass() ) ) {
-			process = new ProcessDaoImpl(_sessionManager, (HProcess)e.getEntity());
-		}
-	}
+    public void onPostInsert(PostInsertEvent e) {
+        if( HProcessInstance.class.equals( e.getEntity().getClass() ) ) {
+            instance = new ProcessInstanceDaoImpl(_sessionManager, (HProcessInstance)e.getEntity());
+        } else if( HProcess.class.equals( e.getEntity().getClass() ) ) {
+            process = new ProcessDaoImpl(_sessionManager, (HProcess)e.getEntity());
+        }
+    }
 
-	public static class ProfilingBpelDAOConnectionImpl extends BpelDAOConnectionImpl implements ProfilingBpelDAOConnection {
-		ProfilingBpelDAOConnectionImpl(SessionManager sm) {
-			super(sm);
-		}
-		
-	    public ProcessProfileDAO createProcessProfile(ProcessDAO process) {
-	    	return new ProcessProfileDaoImpl(_sm, (ProcessDaoImpl)process);
-	    }
+    public static class ProfilingBpelDAOConnectionImpl extends BpelDAOConnectionImpl implements ProfilingBpelDAOConnection {
+        ProfilingBpelDAOConnectionImpl(SessionManager sm) {
+            super(sm);
+        }
+        
+        public ProcessProfileDAO createProcessProfile(ProcessDAO process) {
+            return new ProcessProfileDaoImpl(_sm, (ProcessDaoImpl)process);
+        }
 
-	    public ProcessInstanceProfileDAO createProcessInstanceProfile(ProcessInstanceDAO instance) {
-	    	return new ProcessInstanceProfileDaoImpl(_sm, (ProcessInstanceDaoImpl)instance);
-	    }
-	}
+        public ProcessInstanceProfileDAO createProcessInstanceProfile(ProcessInstanceDAO instance) {
+            return new ProcessInstanceProfileDaoImpl(_sm, (ProcessInstanceDaoImpl)instance);
+        }
+    }
 }

@@ -19,9 +19,9 @@
 [Global Stylesheet]
 
 Version:        1.0
-Last change:	05/06/2008
-Assigned to:	Apache Software Foundation
-Primary use:	ODE Management Console
+Last change:    05/06/2008
+Assigned to:    Apache Software Foundation
+Primary use:    ODE Management Console
 -------------------------------------------------------------------*/
 
 /**
@@ -76,7 +76,7 @@ body {
 }
 
 /*-------------------------------------
- 	SiteNav
+    SiteNav
 ---------------------------------------*/
 
 #siteNav ul {
@@ -171,7 +171,7 @@ body {
 
 #siteNav li.current a:link, #siteNav li.current a:visited {
     background: #f0f5f8 url( ../images/tab-selected-mid.png ) bottom left repeat-x;
-    color: #37454e; /*border-bottom:			1px solid #d7e5ed;*/
+    color: #37454e; /*border-bottom:            1px solid #d7e5ed;*/
 }
 
 #siteNav li ul, #siteNav li.current ul {

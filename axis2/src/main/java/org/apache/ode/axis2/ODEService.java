@@ -262,20 +262,20 @@ public class ODEService {
      * headers) to stuff them into ODE mesage exchange.
      */
     private void readHeader(MessageContext msgContext, MyRoleMessageExchange odeMex) {
-    	String correlationId = (String) msgContext.getProperty(JMSConstants.JMS_COORELATION_ID);
-    	if (correlationId != null) {
+        String correlationId = (String) msgContext.getProperty(JMSConstants.JMS_COORELATION_ID);
+        if (correlationId != null) {
             odeMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, correlationId);
-    	} else {
+        } else {
             Object otse = msgContext.getProperty("targetSessionEndpoint");
-	        if (otse != null) {
-	            Element serviceEpr = (Element) otse;
-	            WSAEndpoint endpoint = new WSAEndpoint();
-	            endpoint.set(serviceEpr);
-	            // Extract the session ID for the local process.
-	            odeMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, endpoint.getSessionId());
-	        }
-    	}
-    	
+            if (otse != null) {
+                Element serviceEpr = (Element) otse;
+                WSAEndpoint endpoint = new WSAEndpoint();
+                endpoint.set(serviceEpr);
+                // Extract the session ID for the local process.
+                odeMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, endpoint.getSessionId());
+            }
+        }
+        
         Object ocse = msgContext.getProperty("callbackSessionEndpoint");
         if (ocse != null) {
             Element serviceEpr = (Element) ocse;
@@ -304,8 +304,8 @@ public class ODEService {
         // endpoint in this case, except that it is updated with session
         // information (if available).
         if (odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID) != null) {
-        	WSAEndpoint sessionAwareEndPoint = new WSAEndpoint(_serviceRef); 
-        	sessionAwareEndPoint.setSessionId(odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID));
+            WSAEndpoint sessionAwareEndPoint = new WSAEndpoint(_serviceRef); 
+            sessionAwareEndPoint.setSessionId(odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID));
             msgContext.setProperty("callbackSessionEndpoint", sessionAwareEndPoint);
         }
 

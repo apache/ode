@@ -9,7 +9,7 @@ import static org.testng.Assert.*;
 
 public class CorrelationMultiTest extends Axis2TestBase implements ODEConfigDirAware {
     @Test(dataProvider="configs")
-	public void testCorrelationMulti() throws Exception {
+    public void testCorrelationMulti() throws Exception {
         final String bundleName = "TestCorrelationMulti";
         
         // deploy the required service
@@ -18,15 +18,15 @@ public class CorrelationMultiTest extends Axis2TestBase implements ODEConfigDirA
         server.deployProcess(bundleName);
 
         new Thread() {
-        	public void run() {
-        		try {
-        			Thread.sleep(3000);
-        			server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
+            public void run() {
+                try {
+                    Thread.sleep(3000);
+                    server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                             bundleName, "testRequest2.soap");
-        		} catch( Exception e ) {
-        			fail(e.getMessage());
-        		}
-        	}
+                } catch( Exception e ) {
+                    fail(e.getMessage());
+                }
+            }
         }.start();
 
         try {
@@ -34,13 +34,13 @@ public class CorrelationMultiTest extends Axis2TestBase implements ODEConfigDirA
                     bundleName, "testRequest.soap");
             assertTrue(response.contains(">1;2;<"));
         } catch (Exception e) {
-        	fail(e.getMessage());
+            fail(e.getMessage());
         } finally {
             server.undeployProcess(bundleName);
         }
     }
 
-	public String getODEConfigDir() {
-		return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby";	
+    public String getODEConfigDir() {
+        return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby"; 
     }
 }

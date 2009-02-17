@@ -17,7 +17,7 @@
  !-->
 <axisconfig name="AxisJava2.0">
 
-	<module ref="rampart" />
+    <module ref="rampart" />
 
     <parameter name="OutflowSecurity">
         <action>

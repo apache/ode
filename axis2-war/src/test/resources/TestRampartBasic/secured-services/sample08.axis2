@@ -19,8 +19,8 @@
 
     <module ref="rampart" />
 
-	<!-- sample-8 : Double Signature -->
-	<parameter name="OutflowSecurity">
+    <!-- sample-8 : Double Signature -->
+    <parameter name="OutflowSecurity">
 
         <action>
             <items>Timestamp Signature NoSerialization</items>

@@ -8,35 +8,35 @@
         </script>
         <script type="text/javascript" src="js/ProcessManagementAPI.js">
         </script>
-		<script type="text/javascript" src="js/yui/utilities.js">
+        <script type="text/javascript" src="js/yui/utilities.js">
         </script>
-		<script type="text/javascript" src="js/yui/button.js"></script>
-		<script type="text/javascript" src="js/yui/container.js"></script>
+        <script type="text/javascript" src="js/yui/button.js"></script>
+        <script type="text/javascript" src="js/yui/container.js"></script>
         <script type="text/javascript" src="js/bubbling/bubbling.js">
         </script>
         <script type="text/javascript" src="js/bubbling/accordion.js">
         </script>
-		<script type="text/javascript" src="js/yui/tabview.js">
+        <script type="text/javascript" src="js/yui/tabview.js">
         </script>
-		<script type="text/javascript" src="js/yui/animation.js">
+        <script type="text/javascript" src="js/yui/animation.js">
         </script>
-	<script type="text/javascript" src="js/yui/json-min.js">
+    <script type="text/javascript" src="js/yui/json-min.js">
         </script>
-	<script type="text/javascript" src="js/yui/datasource-beta-min.js">
+    <script type="text/javascript" src="js/yui/datasource-beta-min.js">
         </script>
-	<script type="text/javascript" src="js/yui/charts-experimental-min.js">
+    <script type="text/javascript" src="js/yui/charts-experimental-min.js">
         </script>
-			
+            
         <script type="text/javascript" src="js/ODE.js">
         </script>
         <script type="text/javascript">
             YAHOO.widget.Chart.SWFURL = "js/yui/charts.swf";
             function populateStats(){
                 var stat = org.apache.ode.ProcessHandling.stats();
-				var html = '<table><tr><td class="bl">Total Number of Processes in the System: </td><td>'+
-					stat.numOfProcesses+ '</td><td class="bl">Total Number of Instances in the System:</td><td>'+
-					stat.totalInst+ '</td></tr></table>';
-				
+                var html = '<table><tr><td class="bl">Total Number of Processes in the System: </td><td>'+
+                    stat.numOfProcesses+ '</td><td class="bl">Total Number of Instances in the System:</td><td>'+
+                    stat.totalInst+ '</td></tr></table>';
+                
                 var statEle = document.getElementById('summary_tb');
                 statEle.innerHTML = html;
                 var chart_data = 
@@ -54,25 +54,25 @@
                 var chartPie = new YAHOO.widget.PieChart("summary_chart", ds,
                     {
                         dataField: "count",
-    	            	categoryField: "instances",
-	    	            style:
-		                {
-			                padding: 10,
-			                legend:
-			                {
-				                display: "right",
-				                padding: 10,
-				                spacing: 5,
-				                font:
-				                {
-					                family: "Arial",
-					                size: 13
-				                }
-			                }
+                        categoryField: "instances",
+                        style:
+                        {
+                            padding: 10,
+                            legend:
+                            {
+                                display: "right",
+                                padding: 10,
+                                spacing: 5,
+                                font:
+                                {
+                                    family: "Arial",
+                                    size: 13
+                                }
+                            }
                         }
                     });
             }
-			
+            
             function init(){
                 populateStats();
                 setInterval("populateStats()", 10000);
@@ -129,28 +129,28 @@
                 height:250px;
                 float:left;
             }
-			.sub_h{
-				font-family:Georgia;
-				border-top:#0099FF solid 1px;
-				border-bottom:#0099FF solid 1px;
-				line-height:25px;
-				font-style:normal;	
-				font-weight:normal;
-				color: 	#006699;			
-			}
-			#summary_tb{
-				text-align:left;
-				font-family:Georgia;
-				font-style:normal;	
-				font-weight:normal;
-				font-size:1.5em;
-			}
-			.bl{
-				color:#000;
-			}
+            .sub_h{
+                font-family:Georgia;
+                border-top:#0099FF solid 1px;
+                border-bottom:#0099FF solid 1px;
+                line-height:25px;
+                font-style:normal;  
+                font-weight:normal;
+                color:  #006699;            
+            }
+            #summary_tb{
+                text-align:left;
+                font-family:Georgia;
+                font-style:normal;  
+                font-weight:normal;
+                font-size:1.5em;
+            }
+            .bl{
+                color:#000;
+            }
         </style>
-		<script type="text/javascript">
-		</script>
+        <script type="text/javascript">
+        </script>
     </head>
     <body>
         <div id="header">
@@ -212,8 +212,8 @@
                                 </table>
                             </div>
                         </div>
-						<div id="events">
-						</div>
+                        <div id="events">
+                        </div>
                     </div>
                 </div>
             </dir>

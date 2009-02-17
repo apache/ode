@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions 
-	xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" 
-	xmlns:tns="http://sample.bpel.org/bpel/sampleArtifacts" 
-	xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" 
-	xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-	xmlns:bpel="http://sample.bpel.org/bpel/sample" 
-	name="OnEventCorrelationArtifacts" 
-	targetNamespace="http://sample.bpel.org/bpel/sampleArtifacts" 
-	xmlns="http://schemas.xmlsoap.org/wsdl/"
-	>
+    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" 
+    xmlns:tns="http://sample.bpel.org/bpel/sampleArtifacts" 
+    xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    xmlns:bpel="http://sample.bpel.org/bpel/sample" 
+    name="OnEventCorrelationArtifacts" 
+    targetNamespace="http://sample.bpel.org/bpel/sampleArtifacts" 
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    >
 <vprop:property name="input" type="xs:string"/>
 <vprop:propertyAlias messageType="bpel:OnEventCorrelationRequestMessage" part="payload" propertyName="tns:input">
 <vprop:query><![CDATA[bpel:input]]></vprop:query>

@@ -39,24 +39,24 @@
 boolean isMultipart = ServletFileUpload.isMultipartContent(request);
 if (!isMultipart) {
 } else {
-	FileItemFactory factory = new DiskFileItemFactory();
-	ServletFileUpload upload = new ServletFileUpload(factory);
+    FileItemFactory factory = new DiskFileItemFactory();
+    ServletFileUpload upload = new ServletFileUpload(factory);
     List items = null;
     String packageName = null;
-	try {
-		items = upload.parseRequest(request);
-	} catch (FileUploadException e) {
-		e.printStackTrace();
-	}
-	Iterator itr = items.iterator();
-	while (itr.hasNext()) {
-	    FileItem item = (FileItem) itr.next();
+    try {
+        items = upload.parseRequest(request);
+    } catch (FileUploadException e) {
+        e.printStackTrace();
+    }
+    Iterator itr = items.iterator();
+    while (itr.hasNext()) {
+        FileItem item = (FileItem) itr.next();
         if (item.isFormField()) {
             if(item.getFieldName().equals("fileName")){
                 packageName = item.getString();
             }
-	    } else {
-		    try {
+        } else {
+            try {
                 String itemName = item.getName();
                 String extension = itemName.toLowerCase();
                 if(extension.endsWith(".zip")){
@@ -127,9 +127,9 @@ if (!isMultipart) {
             } catch (Exception e) {
                 out.println(e);
                 out.println("Exception occuured while processing the file upload request!");
-		    }
-	    }
-	}
+            }
+        }
+    }
 }
 %>
 

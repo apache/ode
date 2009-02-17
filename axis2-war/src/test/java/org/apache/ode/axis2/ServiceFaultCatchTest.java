@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
  * @author Matthieu Riou <mriou@apache.org>
  */
 public class ServiceFaultCatchTest extends Axis2TestBase {
-	@Test(dataProvider="configs")
+    @Test(dataProvider="configs")
     public void testSimpleFaultCatch() throws Exception {
         String bundleName = "TestStructuredFault";
         // deploy the required service

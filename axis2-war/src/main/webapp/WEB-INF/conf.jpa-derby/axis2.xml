@@ -135,22 +135,22 @@
     
     <!--Uncomment this and configure as appropriate for JMS transport support, after setting up your JMS environment (e.g. ActiveMQ)
     <transportReceiver name="jms" class="org.apache.axis2.transport.jms.JMSListener">
-        <parameter name="myTopicConnectionFactory" locked="false">        	        	
-        	<parameter name="java.naming.factory.initial" locked="false">org.apache.activemq.jndi.ActiveMQInitialContextFactory</parameter>
-        	<parameter name="java.naming.provider.url" locked="false">tcp://localhost:61616</parameter>        	
-        	<parameter name="transport.jms.ConnectionFactoryJNDIName" locked="false">TopicConnectionFactory</parameter>
+        <parameter name="myTopicConnectionFactory" locked="false">                      
+            <parameter name="java.naming.factory.initial" locked="false">org.apache.activemq.jndi.ActiveMQInitialContextFactory</parameter>
+            <parameter name="java.naming.provider.url" locked="false">tcp://localhost:61616</parameter>         
+            <parameter name="transport.jms.ConnectionFactoryJNDIName" locked="false">TopicConnectionFactory</parameter>
         </parameter>
 
-        <parameter name="myQueueConnectionFactory" locked="false">        	        	
-        	<parameter name="java.naming.factory.initial" locked="false">org.apache.activemq.jndi.ActiveMQInitialContextFactory</parameter>
-        	<parameter name="java.naming.provider.url" locked="false">tcp://localhost:61616</parameter>        	
-        	<parameter name="transport.jms.ConnectionFactoryJNDIName" locked="false">QueueConnectionFactory</parameter>
+        <parameter name="myQueueConnectionFactory" locked="false">                      
+            <parameter name="java.naming.factory.initial" locked="false">org.apache.activemq.jndi.ActiveMQInitialContextFactory</parameter>
+            <parameter name="java.naming.provider.url" locked="false">tcp://localhost:61616</parameter>         
+            <parameter name="transport.jms.ConnectionFactoryJNDIName" locked="false">QueueConnectionFactory</parameter>
         </parameter>
 
-        <parameter name="default" locked="false">        	        	
-        	<parameter name="java.naming.factory.initial" locked="false">org.apache.activemq.jndi.ActiveMQInitialContextFactory</parameter>
-        	<parameter name="java.naming.provider.url" locked="false">tcp://localhost:61616</parameter>        	
-        	<parameter name="transport.jms.ConnectionFactoryJNDIName" locked="false">QueueConnectionFactory</parameter>
+        <parameter name="default" locked="false">                       
+            <parameter name="java.naming.factory.initial" locked="false">org.apache.activemq.jndi.ActiveMQInitialContextFactory</parameter>
+            <parameter name="java.naming.provider.url" locked="false">tcp://localhost:61616</parameter>         
+            <parameter name="transport.jms.ConnectionFactoryJNDIName" locked="false">QueueConnectionFactory</parameter>
         </parameter>
     </transportReceiver>-->
 
@@ -163,7 +163,7 @@
     <!--<parameter name="transport.mail.replyToAddress" locked="false">axis2@127.0.0.1</parameter>-->
     <!--</transportReceiver>-->
 
-	<!--Uncomment if you want to have TCP transport support-->
+    <!--Uncomment if you want to have TCP transport support-->
     <!--transportReceiver name="tcp"
                        class="org.apache.axis2.transport.tcp.TCPServer">
         <parameter name="port" locked="false">6060</parameter-->>
@@ -240,8 +240,8 @@
             <handler name="HTTPLocationBasedDispatcher"
                      class="org.apache.axis2.dispatchers.HTTPLocationBasedDispatcher"/>
 
-	        <handler name="ODEAxisDispatcher"
-		             class="org.apache.ode.axis2.hooks.ODEAxisDispatcher">
+            <handler name="ODEAxisDispatcher"
+                     class="org.apache.ode.axis2.hooks.ODEAxisDispatcher">
                 <order phase="Dispatch"/>
             </handler>
         </phase>
@@ -254,17 +254,17 @@
             </handler>
         </phase>
         <phase name="OperationInPhase"/>
-	<phase name="soapmonitorPhase"/>
+    <phase name="soapmonitorPhase"/>
     </phaseOrder>
     <phaseOrder type="OutFlow">
         <!--      user can add his own phases to this area  -->
-	<phase name="ProcessHeader">
-		<handler name="SessionOutHandler"
-			 class="org.apache.ode.axis2.hooks.SessionOutHandler">
-			<order phase="PreDispatch"/>
-		</handler>
-	</phase>
-	<phase name="soapmonitorPhase"/>
+    <phase name="ProcessHeader">
+        <handler name="SessionOutHandler"
+             class="org.apache.ode.axis2.hooks.SessionOutHandler">
+            <order phase="PreDispatch"/>
+        </handler>
+    </phase>
+    <phase name="soapmonitorPhase"/>
         <phase name="OperationOutPhase"/>
         <!--system predefined phase-->
         <!--these phase will run irrespective of the service-->
@@ -297,11 +297,11 @@
         </phase>
         <!--      user can add his own phases to this area  -->
         <phase name="OperationInFaultPhase"/>
-	<phase name="soapmonitorPhase"/>
+    <phase name="soapmonitorPhase"/>
     </phaseOrder>
     <phaseOrder type="OutFaultFlow">
         <!--      user can add his own phases to this area  -->
-	<phase name="soapmonitorPhase"/>
+    <phase name="soapmonitorPhase"/>
         <phase name="OperationOutFaultPhase"/>
         <phase name="PolicyDetermination"/>
         <phase name="MessageOut"/>

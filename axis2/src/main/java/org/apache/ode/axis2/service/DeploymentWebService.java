@@ -153,15 +153,15 @@ public class DeploymentWebService {
                         OMElement response = factory.createOMElement("response", null);
 
                         if (__log.isDebugEnabled()) __log.debug("Deployed package: "+dest.getName());
-                    	OMElement d = factory.createOMElement("name", null);
-                    	d.setText(dest.getName());
-                    	response.addChild(d);
+                        OMElement d = factory.createOMElement("name", null);
+                        d.setText(dest.getName());
+                        response.addChild(d);
 
-                    	for (QName pid : deployed) {
-                        	if (__log.isDebugEnabled()) __log.debug("Deployed PID: "+pid);
-                        	d = factory.createOMElement("id", null);
-                        	d.setText(pid);
-                        	response.addChild(d);
+                        for (QName pid : deployed) {
+                            if (__log.isDebugEnabled()) __log.debug("Deployed PID: "+pid);
+                            d = factory.createOMElement("id", null);
+                            d.setText(pid);
+                            response.addChild(d);
                         }
                         sendResponse(factory, messageContext, "deployResponse", response);
                     } finally {
@@ -217,7 +217,7 @@ public class DeploymentWebService {
                     OMElement qnamePart = messageContext.getEnvelope().getBody().getFirstElement().getFirstElement();
                     ProcessConf process = _store.getProcessConfiguration(OMUtils.getTextAsQName(qnamePart));
                     if (process == null) {
-                    	throw new OdeFault("Could not find process: " + qnamePart.getTextAsQName());
+                        throw new OdeFault("Could not find process: " + qnamePart.getTextAsQName());
                     }
                     String packageName = _store.getProcessConfiguration(OMUtils.getTextAsQName(qnamePart)).getPackage();
                     OMElement response = factory.createOMElement("packageName", null);

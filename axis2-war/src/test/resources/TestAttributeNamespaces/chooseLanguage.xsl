@@ -7,6 +7,6 @@
   <xsl:output omit-xml-declaration="yes"/>
 
   <xsl:template match="/">
-	<xsl:value-of select="document('language.xml')//languages/language [@name='french']/text()"/>	
+    <xsl:value-of select="document('language.xml')//languages/language [@name='french']/text()"/>   
   </xsl:template>  
 </xsl:stylesheet>

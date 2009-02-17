@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <dd:deploy xmlns:dd="http://www.apache.org/ode/schemas/dd/2007/03"
-	xmlns:bpel="http://sample.bpel.org/bpel/sample"
-	>
+    xmlns:bpel="http://sample.bpel.org/bpel/sample"
+    >
 
-	<dd:process
-		name="bpel:OnEventCorrelation" fileName="OnEventCorrelation.bpel">
-		<!--dd:process-events generate="none"/-->
-		<dd:provide partnerLink="client">
-			<dd:service name="bpel:OnEventCorrelation" port="OnEventCorrelation" />
-		</dd:provide>
-	</dd:process>
+    <dd:process
+        name="bpel:OnEventCorrelation" fileName="OnEventCorrelation.bpel">
+        <!--dd:process-events generate="none"/-->
+        <dd:provide partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelation" port="OnEventCorrelation" />
+        </dd:provide>
+    </dd:process>
 </dd:deploy>

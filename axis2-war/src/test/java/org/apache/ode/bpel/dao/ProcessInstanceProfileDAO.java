@@ -22,25 +22,25 @@ package org.apache.ode.bpel.dao;
 import java.util.List;
 
 public interface ProcessInstanceProfileDAO extends ProcessProfileDAO {
-	ProcessDAO getProcess();
-	
-	List<ActivityRecoveryDAO> findActivityRecoveriesByInstance();
+    ProcessDAO getProcess();
+    
+    List<ActivityRecoveryDAO> findActivityRecoveriesByInstance();
 
-	List<CorrelationSetDAO> findCorrelationSetsByInstance();
+    List<CorrelationSetDAO> findCorrelationSetsByInstance();
 
-	List<FaultDAO> findFaultsByInstance();
+    List<FaultDAO> findFaultsByInstance();
 
-	List<MessageDAO> findMessagesByInstance();
+    List<MessageDAO> findMessagesByInstance();
 
-	List<MessageExchangeDAO> findMessageExchangesByInstance();
+    List<MessageExchangeDAO> findMessageExchangesByInstance();
 
-	List<MessageRouteDAO> findMessageRoutesByInstance();
+    List<MessageRouteDAO> findMessageRoutesByInstance();
 
-	List<PartnerLinkDAO> findPartnerLinksByInstance();
+    List<PartnerLinkDAO> findPartnerLinksByInstance();
 
-	List<ScopeDAO> findScopesByInstance();
+    List<ScopeDAO> findScopesByInstance();
 
-	List<XmlDataDAO> findXmlDataByInstance();
-	
-	int countEventsByInstance();
+    List<XmlDataDAO> findXmlDataByInstance();
+    
+    int countEventsByInstance();
 }

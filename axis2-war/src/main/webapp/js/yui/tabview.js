@@ -34,7 +34,7 @@ version: 2.5.2
         if (!el && !attr.element) { // create if we dont have one
             el = _createTabViewElement.call(this, attr);
         }
-    	YAHOO.widget.TabView.superclass.constructor.call(this, el, attr); 
+        YAHOO.widget.TabView.superclass.constructor.call(this, el, attr); 
     };
 
     YAHOO.extend(YAHOO.widget.TabView, YAHOO.util.Element);
@@ -183,7 +183,7 @@ version: 2.5.2
      * @return YAHOO.widget.Tab
      */
     proto.getTab = function(index) {
-    	return this.get('tabs')[index];
+        return this.get('tabs')[index];
     };
     
     /**
@@ -195,7 +195,7 @@ version: 2.5.2
     proto.getTabIndex = function(tab) {
         var index = null;
         var tabs = this.get('tabs');
-    	for (var i = 0, len = tabs.length; i < len; ++i) {
+        for (var i = 0, len = tabs.length; i < len; ++i) {
             if (tab == tabs[i]) {
                 index = i;
                 break;
@@ -229,7 +229,7 @@ version: 2.5.2
         this._tabParent.removeChild( tab.get('element') );
         this._contentParent.removeChild( tab.get('contentEl') );
         this._configs.tabs.value.splice(index, 1);
-    	
+        
     };
     
     /**
@@ -797,7 +797,7 @@ version: 2.5.2
                 } else {
                     this.get('contentEl').style.display = 'none';
                 }
-				
+                
             },
             validator: YAHOO.lang.isBoolean
         });

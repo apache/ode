@@ -130,11 +130,11 @@ public class SoapMessageConverter {
         _isRPC = style != null && style.equals("rpc");
 
         if (_soapBinding.getElementType().getNamespaceURI().equals(Constants.URI_WSDL11_SOAP)) {
-        	_soapFactory = OMAbstractFactory.getSOAP11Factory();
+            _soapFactory = OMAbstractFactory.getSOAP11Factory();
         } else if (_soapBinding.getElementType().getNamespaceURI().equals(Constants.URI_WSDL12_SOAP)) {
-        	_soapFactory = OMAbstractFactory.getSOAP12Factory();
+            _soapFactory = OMAbstractFactory.getSOAP12Factory();
         } else {
-        	throw new IllegalStateException("Unsupported SOAP binding: " + _soapBinding.getElementType());
+            throw new IllegalStateException("Unsupported SOAP binding: " + _soapBinding.getElementType());
         }
     }
 

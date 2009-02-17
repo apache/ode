@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <wsdl:definitions
-	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
-	xmlns:tns="http://ws.intalio.com/TimeService/"
-	xmlns:s="http://www.w3.org/2001/XMLSchema"
-	xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
-	targetNamespace="http://ws.intalio.com/TimeService/"
-	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+    xmlns:tns="http://ws.intalio.com/TimeService/"
+    xmlns:s="http://www.w3.org/2001/XMLSchema"
+    xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+    targetNamespace="http://ws.intalio.com/TimeService/"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
   <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">A sample Time service</wsdl:documentation>
   <wsdl:types>
     <s:schema elementFormDefault="qualified" targetNamespace="http://ws.intalio.com/TimeService/">

@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
  *
  */
 public class EndpointConfigurationTest extends Axis2TestBase {
-	@Test
+    @Test
     public void testEndpointProperties() throws Exception {
         executeProcess();
     }

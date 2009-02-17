@@ -50,13 +50,13 @@ public class HttpBindingTest extends Axis2TestBase {
         latch.await();
     }
 
-  	@AfterMethod
+    @AfterMethod
     protected void tearDown() throws Exception {
         jettyWrapper.stop();
         super.tearDown();
     }
 
-  	@Test(dataProvider="configs")
+    @Test(dataProvider="configs")
     public void testHttpBinding() throws Exception {
         String bundleName = "TestHttpBinding";
         // deploy the required service
