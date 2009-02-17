@@ -118,11 +118,9 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
             }
         }
 
-        // Isolation levels override
-        if (System.getProperty("ode.connection.isolation") != null) {
-            String level = System.getProperty("ode.connection.isolation", "2");
-            properties.put(Environment.ISOLATION, level);
-        }
+        // Isolation levels override; when you use a ConnectionProvider, this has no effect
+        String level = System.getProperty("ode.connection.isolation", "2");
+        properties.put(Environment.ISOLATION, level);
 
         if (__log.isDebugEnabled()) {
             Enumeration names = properties.propertyNames();
