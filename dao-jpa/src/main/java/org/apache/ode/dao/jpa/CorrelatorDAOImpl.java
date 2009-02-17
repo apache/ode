@@ -101,8 +101,8 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
         	List<ProcessInstanceDAO> targets = new ArrayList<ProcessInstanceDAO>();
             for (int i = 0; i < routes.size(); i++) {
             	MessageRouteDAO route = routes.get(i);
-            	if ("all".equals(route.getRoute()) || 
-            			("one".equals(route.getRoute()) && !targets.contains(route.getTargetInstance()))) {
+            	if ("all".equals(route.getRoute()) ||
+            			(!"all".equals(route.getRoute()) && !targets.contains(route.getTargetInstance()))) {
             		targets.add(route.getTargetInstance());
             	} else {
             		routes.remove(i);
