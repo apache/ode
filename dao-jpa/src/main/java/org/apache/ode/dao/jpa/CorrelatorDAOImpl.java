@@ -104,8 +104,6 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
             	if ("all".equals(route.getRoute()) ||
             			(!"all".equals(route.getRoute()) && !targets.contains(route.getTargetInstance()))) {
             		targets.add(route.getTargetInstance());
-            	} else {
-            		routes.remove(i);
             	}
             }
             return routes;
