@@ -234,7 +234,7 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
                 callback.waitResponse(timeout);
                 _done = true;
                 if (callback._timedout)
-                    throw new TimeoutException("Message exchange " + this + " timed out when waiting for a response!");
+                    throw new TimeoutException("Message exchange " + this + " timed out(" + timeout + " ms) when waiting for a response!");
             }
             return null;
         }
