@@ -19,9 +19,6 @@
 
 package org.apache.ode.bpel.engine;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,7 +26,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import javax.wsdl.Operation;
@@ -92,9 +88,6 @@ public class BpelEngineImpl implements BpelEngine {
     }
 
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
-
-    /** Maximum number of tries for async jobs. */
-    private static final int MAX_RETRIES = 3;
 
     /** Active processes, keyed by process id. */
     final HashMap<QName, BpelProcess> _activeProcesses = new HashMap<QName, BpelProcess>();
@@ -330,7 +323,9 @@ public class BpelEngineImpl implements BpelEngine {
     public void onScheduledJob(Scheduler.JobInfo jobInfo) throws Scheduler.JobProcessorException {
         final WorkEvent we = new WorkEvent(jobInfo.jobDetail);
 
-        // We lock the instance to prevent concurrent transactions and prevent unnecessary rollbacks,
+    	if( __log.isTraceEnabled() ) __log.trace("[JOB] onScheduledJob " + jobInfo + "" + we.getIID());
+
+    	// We lock the instance to prevent concurrent transactions and prevent unnecessary rollbacks,
         // Note that we don't want to wait too long here to get our lock, since we are likely holding
         // on to scheduler's locks of various sorts.
         try {
