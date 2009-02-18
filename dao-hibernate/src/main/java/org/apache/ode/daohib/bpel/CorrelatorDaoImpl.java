@@ -30,6 +30,7 @@ import org.apache.ode.daohib.bpel.hobj.HCorrelator;
 import org.apache.ode.daohib.bpel.hobj.HCorrelatorMessage;
 import org.apache.ode.daohib.bpel.hobj.HCorrelatorSelector;
 import org.apache.ode.daohib.bpel.hobj.HMessageExchange;
+import org.apache.ode.daohib.bpel.hobj.HProcess;
 import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
 import org.hibernate.Hibernate;
 import org.hibernate.LockMode;
@@ -127,15 +128,18 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
 
             HCorrelatorSelector selector;
             try {
-            	List<HProcessInstance> targets = new ArrayList<HProcessInstance>();
+            	boolean routed = false;
             	Iterator selectors = q.iterate();
             	while (selectors.hasNext()) {
                     selector = (HCorrelatorSelector) selectors.next();
                     if (selector != null) {
-                    	if ("all".equals(selector.getRoute()) ||
-                    			(!"all".equals(selector.getRoute()) && !targets.contains(selector.getInstance()))) {
+                    	if ("all".equals(selector.getRoute())) {
                         	routes.add(new MessageRouteDaoImpl(_sm, selector));
-                        	targets.add(selector.getInstance());
+                    	} else {
+                    		if (!routed){
+                            	routes.add(new MessageRouteDaoImpl(_sm, selector));
+                    		}
+                    		routed = true;
                     	}
                     }
             	}

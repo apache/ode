@@ -73,13 +73,19 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
         if (__log.isDebugEnabled()) {
             __log.debug("findRoute: keySet=" + keySet);
         }
-        List<ProcessInstanceDAO> targets = new ArrayList<ProcessInstanceDAO>();
-        for (MessageRouteDaoImpl we : _routes) {
-            assert we._ckeySet != null;
-
-            if( !targets.contains(we.getTargetInstance()) && keySet.isRoutableTo(we._ckeySet, "all".equals(we.getRoute())) ) {
-                routes.add(we);
-                targets.add(we.getTargetInstance());
+        boolean routed = false;
+        for (MessageRouteDaoImpl route : _routes) {
+            assert route._ckeySet != null;
+            
+            if(keySet.isRoutableTo(route._ckeySet, "all".equals(route.getRoute()))) {
+            	if ("all".equals(route.getRoute()))  {
+            		routes.add(route);
+            	} else {
+            		if (!routed) {
+            			routes.add(route);
+            		}
+            		routed = true;
+            	}
             }
         }
 
