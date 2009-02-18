@@ -1238,7 +1238,12 @@ public class ODEProcess {
         private void doHydrate() {
             markused();
             try {
-                _processModel = deserializeCompiledProcess(_pconf.getCBPInputStream());
+                InputStream inputStream = _pconf.getCBPInputStream();
+                try {
+                    _processModel = deserializeCompiledProcess(inputStream);
+                } finally {
+                    inputStream.close();
+                }
             } catch (Exception e) {
                 String errmsg = "Error reloading compiled process " + _pconf.getProcessId() + "; the file appears to be corrupted.";
                 __log.error(errmsg);
