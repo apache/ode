@@ -662,7 +662,7 @@ public class ODEProcess {
         for (PartnerLinkModel pl : oprocess.getAllPartnerLinks()) {
             if (pl.hasMyRole()) {
                 Endpoint endpoint = myRoleEndpoints.get(pl);
-                if (endpoint == null && pl.isInitializePartnerRoleSet())
+                if (endpoint == null)
                     throw new IllegalArgumentException("No service name for myRole plink " + pl.getName());
                 PartnerLinkMyRoleImpl myRole = new PartnerLinkMyRoleImpl(this, pl, endpoint);
                 _myRoles.put(pl, myRole);
@@ -671,7 +671,7 @@ public class ODEProcess {
 
             if (pl.hasPartnerRole()) {
                 Endpoint endpoint = _pconf.getInvokeEndpoints().get(pl.getName());
-                if (endpoint == null)
+                if (endpoint == null && pl.isInitializePartnerRoleSet())
                     throw new IllegalArgumentException(pl.getName() + " must be bound to an endpoint in deloy.xml");
                 PartnerLinkPartnerRoleImpl partnerRole = new PartnerLinkPartnerRoleImpl(this, pl, endpoint);
                 _partnerRoles.put(pl, partnerRole);
