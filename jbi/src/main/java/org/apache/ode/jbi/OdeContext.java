@@ -18,6 +18,7 @@
  */
 package org.apache.ode.jbi;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -177,8 +178,14 @@ final public class OdeContext {
         OdeService service = new OdeService(this, endpoint);
         try {
             ProcessConf pc = _store.getProcessConfiguration(pid);
-            Serializer ofh = new Serializer(pc.getCBPInputStream());
-            OProcess compiledProcess = ofh.readOProcess();
+            InputStream is = pc.getCBPInputStream();
+            OProcess compiledProcess = null;
+            try {
+                Serializer ofh = new Serializer(is);
+                compiledProcess = ofh.readOProcess();
+            } finally {
+                is.close();            	
+            }
             QName portType = null;
             for (Map.Entry<String, Endpoint> provide : pc.getProvideEndpoints().entrySet()) {
                 if (provide.getValue().equals(endpoint)) {

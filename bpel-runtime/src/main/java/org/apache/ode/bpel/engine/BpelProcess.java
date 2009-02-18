@@ -859,7 +859,12 @@ public class BpelProcess {
             markused();
             __log.debug("Rehydrating process " + _pconf.getProcessId());
             try {
-                _oprocess = deserializeCompiledProcess(_pconf.getCBPInputStream());
+                InputStream inputStream = _pconf.getCBPInputStream();
+                try {
+                    _oprocess = deserializeCompiledProcess(inputStream);
+                } finally {
+                    inputStream.close();
+                }
             } catch (Exception e) {
                 String errmsg = "Error reloading compiled process " + _pid + "; the file appears to be corrupted.";
                 __log.error(errmsg);
