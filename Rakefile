@@ -382,13 +382,14 @@ define "ode" do
 
     runtime_sql = export[ properties_for[:derby], dao_hibernate, _("target/runtime.sql") ]
     store_sql = export[ properties_for[:derby], bpel_store, _("target/store.sql") ]
-    derby_sql = concat(_("target/derby.sql")=>[ predefined_for[:derby], runtime_sql, store_sql ])
+    common_sql = _("src/main/sql/common.sql")
+    derby_sql = concat(_("target/derby.sql")=>[ predefined_for[:derby], common_sql, runtime_sql, store_sql ])
     derby_db = Derby.create(_("target/derby/hibdb")=>derby_sql)
     build derby_db
 
     %w{ mysql firebird hsql postgres sqlserver oracle }.each do |db|
       partial = export[ properties_for[db], dao_hibernate, _("target/partial.#{db}.sql") ]
-      build concat(_("target/#{db}.sql")=>[ predefined_for[db], partial ])
+      build concat(_("target/#{db}.sql")=>[ common_sql, predefined_for[db], partial ])
     end
 
     NativeDB.create_dbs self, _("."), :hib
@@ -410,12 +411,13 @@ define "ode" do
     %w{ derby mysql oracle }.each do |db|
       db_xml = _("src/main/descriptors/persistence.#{db}.xml")
       scheduler_sql = _("src/main/scripts/simplesched-#{db}.sql")
+      common_sql = _("src/main/scripts/common.sql")
       partial_sql = file("target/partial.#{db}.sql"=>db_xml) do |task|
         mkpath _("target"), :verbose=>false
         Buildr::OpenJPA.mapping_tool :properties=>db_xml, :action=>"build", :sql=>task.name,
           :classpath=>projects("bpel-store", "dao-jpa", "bpel-api", "bpel-dao", "utils" )
       end
-      sql = concat(_("target/#{db}.sql")=>[_("src/main/scripts/license-header.sql"), partial_sql, scheduler_sql])
+      sql = concat(_("target/#{db}.sql")=>[_("src/main/scripts/license-header.sql"), common_sql, partial_sql, scheduler_sql])
       build sql
     end
     derby_db = Derby.create(_("target/derby/jpadb")=>_("target/derby.sql"))
