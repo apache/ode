@@ -47,6 +47,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 
+import net.sf.saxon.om.Name11Checker;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.utils.sax.LoggingErrorHandler;
@@ -67,6 +69,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.ProcessingInstruction;
 import org.w3c.dom.Text;
+import org.w3c.dom.TypeInfo;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -1070,13 +1073,17 @@ public class DOMUtils {
     public static Node cloneNode(Document document, Node node) {
     	Node clone = null;
     	String namespaceURI = node.getNamespaceURI();
-    	String localName = node.getLocalName();
+    	String nodeName = node.getLocalName();
     	switch (node.getNodeType()) {
     	case Node.ATTRIBUTE_NODE:
     		if (namespaceURI == null) {
-    			clone = document.createAttribute(localName);
+    			clone = document.createAttribute(nodeName);
     		} else {
-        		clone = document.createAttributeNS(namespaceURI, localName);
+    			String prefix = ((Attr) node).lookupPrefix(namespaceURI);
+    			if (prefix != null && !"".equals(prefix)) {
+        			nodeName = prefix + ":" + nodeName;
+    			}
+        		clone = document.createAttributeNS(namespaceURI, nodeName);
     		}
 			break;
     	case Node.CDATA_SECTION_NODE:
@@ -1093,23 +1100,27 @@ public class DOMUtils {
 			break;
     	case Node.ELEMENT_NODE:
     		if (namespaceURI == null) {
-	    		clone = document.createElement(localName);
+	    		clone = document.createElement(nodeName);
     		} else {
-    			clone = document.createElementNS(namespaceURI, localName);
+    			String prefix = ((Element) node).lookupPrefix(namespaceURI);
+    			if (prefix != null && !"".equals(prefix)) {
+        			nodeName = prefix + ":" + nodeName;
+    			}
+    			clone = document.createElementNS(namespaceURI, nodeName);
     		}
 			break;
     	case Node.ENTITY_NODE:
     		// TODO
 			break;
     	case Node.ENTITY_REFERENCE_NODE:
-    		clone = document.createEntityReference(localName);
+    		clone = document.createEntityReference(nodeName);
     		// TODO
 			break;
     	case Node.NOTATION_NODE:
     		// TODO
 			break;
     	case Node.PROCESSING_INSTRUCTION_NODE:
-    		clone = document.createProcessingInstruction(((ProcessingInstruction) node).getData(), localName);
+    		clone = document.createProcessingInstruction(((ProcessingInstruction) node).getData(), nodeName);
 			break;
     	case Node.TEXT_NODE:
     		clone = document.createTextNode(((Text) node ).getData());
@@ -1117,14 +1128,40 @@ public class DOMUtils {
 		default:
 			break;
     	}
-
+	    		
     	NodeList children = node.getChildNodes();
     	if (children != null) {
 	    	for (int i = 0; i < children.getLength(); i++) {
-	    		clone.appendChild(cloneNode(document, children.item(i)));
+	    		Node child = children.item(i);
+	    		Node cloneChild = cloneNode(document, child);
+	    		clone.appendChild(cloneChild);
+	    		if (cloneChild.getNodeType() == Node.TEXT_NODE || 
+	    				cloneChild.getNodeType() == Node.CDATA_SECTION_NODE) {
+	    			parseEmbeddedPrefixes(node, (Element) clone, ((Text) cloneChild).getNodeValue());	    			
+	    		}
 	    	}
     	}
-	    		
     	return clone;
+    }
+    
+    private static void parseEmbeddedPrefixes(Node node, Element element, String text) {
+		if (text != null && text.indexOf(":") > 0) {
+			Name11Checker nameChecker = Name11Checker.getInstance();
+			for (int colonIndex = text.indexOf(":"); colonIndex != -1 && colonIndex < text.length(); colonIndex = text.indexOf(":", colonIndex +  1)) {
+				StringBuffer prefixString = new StringBuffer();
+				for (int prefixIndex = colonIndex - 1; 
+						prefixIndex >= 0 && nameChecker.isNCNameChar(text.charAt(prefixIndex)); 
+						prefixIndex--) {
+					prefixString.append(text.charAt(prefixIndex));
+				}
+				prefixString.reverse();
+				if (prefixString.length() > 0) {
+					String uri = node.lookupNamespaceURI(prefixString.toString());
+					if (uri != null) {
+						element.setAttributeNS(NS_URI_XMLNS, "xmlns:" + prefixString, uri);
+					}
+				}
+			}
+		}
     }
 }
