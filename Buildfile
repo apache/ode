@@ -519,7 +519,7 @@ define "ode" do
         "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
         "jacob", "jacob-ap", "utils"),
         ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
-        COMMONS.primitives, JAXEN, JAVAX.connector, JAVAX.ejb, JAVAX.jms,
+        COMMONS.primitives, DERBY, JAXEN, JAVAX.connector, JAVAX.ejb, JAVAX.jms,
         JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA, SAXON, TRANQL,
         XALAN, XMLBEANS, XSTREAM, WSDL4J)
 
