@@ -82,7 +82,7 @@ module NativeDB
               end
             
               File.open("#{task.name}/drop-#{dbprops[:db]}.sql", "w") do |f2|
-                create_tables.gsub(/CREATE TABLE (.*?)\s.*?;/m) { |match|
+                create_tables.gsub(/CREATE TABLE (.*?)[\s\(].*?;/m) { |match|
                   f2.puts "DROP TABLE IF EXISTS " << $1 << ";\n"
                 }
               end
