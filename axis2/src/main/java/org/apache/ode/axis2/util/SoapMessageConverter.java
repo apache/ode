@@ -197,7 +197,7 @@ public class SoapMessageConverter {
         }
 
         if (message.getHeaderParts().size() > 0 || getSOAPHeaders(bo).size() > 0)
-            createSoapHeaders(soapEnv, getSOAPHeaders(bo), op.getInput().getMessage(), message.getHeaderParts());
+            createSoapHeaders(soapEnv, getSOAPHeaders(bo), op.getOutput().getMessage(), message.getHeaderParts());
 
         SOAPBody soapBody = getSOAPBody(bo);
         if (soapBody != null) {
