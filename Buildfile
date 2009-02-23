@@ -25,7 +25,7 @@ require "tasks/xmlbeans"
 
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "2.0-beta2-SNAPSHOT"
+VERSION_NUMBER = "2.0-beta2"
 NEXT_VERSION = "2.0-beta3"
 
 # finds one or artifacts by a regex in a set of artifacts
@@ -610,29 +610,24 @@ define "apache-ode" do
       end
 
       #Include extensions
-	  #(create a extensions folder, put extension folders in there, add README per extension if available, 
-	  # add README.extensions to extensions folder)
+	    #(create a extensions folder, put extension folders in there, add README per extension if available, 
+	    # add README.extensions to extensions folder)
       project("ode-extensions").projects.each do |p|
         p.packages.flatten.select{|pkg| pkg.type == :jar && !pkg.classifier}.each do |art|
           zip.include(art, :path=>"extensions/#{art.id}")
-		  if File.exist?(p.path_to("README"))
-		    zip.path("extensions/#{art.id}").include p.path_to("README")
-		  end
+		      if File.exist?(p.path_to("README"))
+		        zip.path("extensions/#{art.id}").include p.path_to("README")
+		      end
           p.compile.classpath.select{|pkg| pkg.group != project("ode").group}.each do |lib|
             zip.include(lib, :path=>"extensions/#{art.id}/lib")
           end
         end
       end
-	  zip.path("extensions").include project("ode-extensions").path_to("README.extensions")
+	    zip.path("extensions").include project("ode-extensions").path_to("README.extensions")
 
       # Including third party licenses
       Dir["#{project.path_to("license")}/*LICENSE"].each { |l| zip.include(l, :path=>"lib") }
       zip.include(project.path_to("target/LICENSE"))
-
-      # Include supported database schemas
-      Dir["#{project("ode:dao-jpa-db").path_to("target")}/*.sql"].each do |f|
-        zip.include(f, :path=>"sql") unless f =~ /partial/
-      end
 
       # Tools scripts (like bpelc and sendsoap)
       bins = file(project.path_to("target/bin")=>FileList[project.path_to("src/bin/*")]) do |task|
@@ -643,11 +638,18 @@ define "apache-ode" do
       zip.include(bins)
 
       yield zip
-      # For some reason this always fails on a clean build, commenting until I have time to inquire
-      # project.check zip, "should contain mysql.sql" do
-      #   it.should contain("sql/mysql.sql")
-      # end
+
+      project.package(:zip, :id=>id).enhance do
+        # Include supported database schemas
+        Dir["#{project("ode:dao-jpa-db").path_to("target")}/*.sql"].each do |f|
+          zip.include(f, :path=>"sql") unless f =~ /partial/
+        end
+        project.check zip, "should contain mysql.sql" do
+          it.should contain("sql/mysql.sql")
+        end
+      end
     end
+
   end
 
   desc "ODE Axis2 Based Distribution"
