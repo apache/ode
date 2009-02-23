@@ -70,9 +70,10 @@ public class ODEAxisService {
                     +" WSDL="+wsdlDefinition.getDocumentBaseURI()+" BPEL="+pconf.getBpelDocument());
         }
 
+        InputStream is = null;
         try {
             URI baseUri = pconf.getBaseURI().resolve(wsdlDefinition.getDocumentBaseURI());
-            InputStream is = baseUri.toURL().openStream();
+            is = baseUri.toURL().openStream();
             WSDL11ToAxisServiceBuilder serviceBuilder = new WSDL11ToAxisPatchedBuilder(is, wsdlServiceName, portName);
             serviceBuilder.setBaseUri(baseUri.toString());
             serviceBuilder.setCustomResolver(new Axis2UriResolver());
@@ -126,6 +127,12 @@ public class ODEAxisService {
             return axisService;
         } catch (Exception e) {
             throw AxisFault.makeFault(e);
+        } finally {
+            try {
+                if( is!=null) is.close();
+            } catch (IOException ioe) {
+                //Ignoring
+            }
         }
     }
 
