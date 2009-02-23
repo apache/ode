@@ -209,7 +209,7 @@ public class InstanceManagementTest extends Axis2TestBase {
 
         // Deploy
         OMElement res = sendToDeployment(root);
-        _deployedName = res.getFirstChildWithName(new QName(null, "name")).getText();
+        _deployedName = res.getFirstChildWithName(new QName(null, "response")).getFirstChildWithName(new QName("http://www.apache.org/ode/deployapi", "name")).getText();
 
         // Execute
         URL svcUrl = new URL("http://localhost:8888/processes/DynMainService");
