@@ -70,14 +70,16 @@ public class DeploymentWebService {
     private static final Log __log = LogFactory.getLog(DeploymentWebService.class);
 
     private final OMNamespace _pmapi;
+    private final OMNamespace _deployapi;
 
     private File _deployPath;
     private DeploymentPoller _poller;
     private ProcessStore _store;
-
-
+   
+    
     public DeploymentWebService() {
         _pmapi = OMAbstractFactory.getOMFactory().createOMNamespace("http://www.apache.org/ode/pmapi","pmapi");
+        _deployapi = OMAbstractFactory.getOMFactory().createOMNamespace("http://www.apache.org/ode/deployapi","deployapi");
     }
 
     public void enableService(AxisConfiguration axisConfig, BpelServer server, ProcessStore store,
@@ -153,13 +155,13 @@ public class DeploymentWebService {
                         OMElement response = factory.createOMElement("response", null);
 
                         if (__log.isDebugEnabled()) __log.debug("Deployed package: "+dest.getName());
-                        OMElement d = factory.createOMElement("name", null);
+                        OMElement d = factory.createOMElement("name", _deployapi);
                         d.setText(dest.getName());
                         response.addChild(d);
 
                         for (QName pid : deployed) {
                             if (__log.isDebugEnabled()) __log.debug("Deployed PID: "+pid);
-                            d = factory.createOMElement("id", null);
+                            d = factory.createOMElement("id", _deployapi);
                             d.setText(pid);
                             response.addChild(d);
                         }
@@ -198,7 +200,7 @@ public class DeploymentWebService {
                     Collection<String> packageNames = _store.getPackages();
                     OMElement response = factory.createOMElement("deployedPackages", null);
                     for (String name : packageNames) {
-                        OMElement nameElmt = factory.createOMElement(new QName( "http://www.apache.org/ode/deployapi","name"));
+                        OMElement nameElmt = factory.createOMElement("name", _deployapi);
                         nameElmt.setText(name);
                         response.addChild(nameElmt);
                     }
@@ -208,11 +210,11 @@ public class DeploymentWebService {
                     List<QName> processIds = _store.listProcesses(namePart.getText());
                     OMElement response = factory.createOMElement("processIds", null);
                     for (QName qname : processIds) {
-                        OMElement nameElmt = factory.createOMElement("id", null);
+                        OMElement nameElmt = factory.createOMElement("id", _deployapi);
                         nameElmt.setText(qname);
                         response.addChild(nameElmt);
                     }
-                    sendResponse(factory, messageContext, "listProcessResponse", response);
+                    sendResponse(factory, messageContext, "listProcessesResponse", response);
                 } else if (operation.equals("getProcessPackage")) {
                     OMElement qnamePart = messageContext.getEnvelope().getBody().getFirstElement().getFirstElement();
                     ProcessConf process = _store.getProcessConfiguration(OMUtils.getTextAsQName(qnamePart));
@@ -287,5 +289,7 @@ public class DeploymentWebService {
             out.write(buffer, 0, len);
         out.close();
     }
+
+	
 
 }

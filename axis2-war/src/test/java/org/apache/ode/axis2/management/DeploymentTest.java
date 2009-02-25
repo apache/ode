@@ -106,12 +106,12 @@ public class DeploymentTest extends Axis2TestBase {
         OMElement root = _client.buildMessage("getProcessPackage", new String[] {"processId"},
                 new Object[] { _deployed.get(0) } );
         OMElement result = sendToDeployment(root);
-        assertEquals(_package, result.getText());
+        assertEquals(_package, result.getFirstElement().getText());
 
         OMElement root2 = _client.buildMessage("getProcessPackage", new String[] {"processId"},
                 new Object[] { _deployed.get(1) } );
         OMElement result2 = sendToDeployment(root2);
-        assertEquals(_package, result2.getText());
+        assertEquals(_package, result2.getFirstElement().getText());
     }
 
   @Test
@@ -192,7 +192,7 @@ public class DeploymentTest extends Axis2TestBase {
 
         _deployed.clear();
         String pakage = null;
-        Iterator iter = result.getChildElements();
+        Iterator iter = result.getFirstElement().getChildElements();
         while (iter.hasNext()) {
             OMElement e = (OMElement) iter.next();
             if (e.getLocalName().equals("name")) {
