@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+  <SOAP-ENV:Body>
+    <pmapi:listAllProcesses xmlns:pmapi="http://www.apache.org/ode/pmapi/types/2006/08/02/"/>
+    <!--
+    <pmapi:listProcesses xmlns:pmapi="http://www.apache.org/ode/pmapi/types/2006/08/02/">
+      <filter>name=Hello*</filter>
+      <orderKeys></orderKeys>
+    </pmapi:listProcesses>
+    -->
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

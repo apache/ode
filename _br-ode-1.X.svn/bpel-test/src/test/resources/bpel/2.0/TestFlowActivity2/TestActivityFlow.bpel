@@ -1,0 +1,306 @@
+<!--
+	~ Licensed to the Apache Software Foundation (ASF) under one
+	~ or more contributor license agreements.  See the NOTICE file
+	~ distributed with this work for additional information
+	~ regarding copyright ownership.  The ASF licenses this file
+	~ to you under the Apache License, Version 2.0 (the
+	~ "License"); you may not use this file except in compliance
+	~ with the License.  You may obtain a copy of the License at
+	~
+	~    http://www.apache.org/licenses/LICENSE-2.0
+	~
+	~ Unless required by applicable law or agreed to in writing,
+	~ software distributed under the License is distributed on an
+	~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	~ KIND, either express or implied.  See the License for the
+	~ specific language governing permissions and limitations
+	~ under the License.
+-->
+
+<process xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://docs.oasis-open.org/wsbpel/2.0/process/executable ../../../../../../../bpel-schemas/src/main/resources/wsbpel_executable.xsd"
+	xmlns:tns="http://ode/bpel/unit-test/testFlowActivity2"
+	xmlns:wns="http://ode/bpel/unit-test/testFlowActivity2.wsdl"
+	xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
+ xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+	xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+ name="TestActivityFlow"
+	targetNamespace="http://ode/bpel/unit-test/testFlowActivity2"
+ suppressJoinFailure="yes">
+ 
+ <!-- Test Flow using XPath 10 -->
+ 
+	<import location="TestActivityFlow.wsdl"
+		namespace="http://ode/bpel/unit-test/testFlowActivity2.wsdl"
+		importType="http://schemas.xmlsoap.org/wsdl/" />
+	<import location="../ProbeService/probeService.wsdl"
+		namespace="http://ode/bpel/unit-test/ProbeService.wsdl"
+		importType="http://schemas.xmlsoap.org/wsdl/"/>
+		
+	<!-- test control flow elements -->
+	<!--	sequence 				-->
+	<!--	flow ( links ) 			-->
+	<!--	swith 					-->
+	<!--	while 					-->
+	<partnerLinks>
+		<partnerLink name="request" partnerLinkType="wns:testFlowActivityRequest" myRole="testFlowActivityService"/>
+		<partnerLink name="probe" partnerLinkType="wns:probeRequest" partnerRole="probeService" initializePartnerRole="yes"/>
+	</partnerLinks>
+	<variables>
+		<variable name="request" messageType="wns:requestMessage"/>
+		<variable name="probeInput" messageType="prb:probeMessage"/>
+		<variable name="reply" messageType="wns:replyMessage"/>
+		<variable name="internalState" messageType="wns:internalProcessData"/>
+	</variables>
+	<sequence>
+		<flow>
+			<links>
+				<link name="receive-to-assign1"/>
+				<link name="assign1-to-probe1"/>
+				<link name="assign1-to-probe2"/>
+				<link name="probe1-to-probe3"/>
+				<link name="probe2-to-probe3"/>
+			</links>
+			<receive name="receive1" partnerLink="request" portType="wns:testFlowActivityPT"
+				operation="request" variable="request" createInstance="yes">
+				<sources>
+					<source linkName="receive-to-assign1"/>
+				</sources>
+			</receive>
+			<!-- Copy input variables to internal accumulators -->
+			<!-- After the copy the process splits into two execution paths -->
+			<sequence>
+				<targets>
+					<target linkName="receive-to-assign1"/>
+				</targets>
+				<sources>
+					<source linkName="assign1-to-probe1"/>
+					<source linkName="assign1-to-probe2"/>
+				</sources>
+				<assign name="assign1">
+					<copy>
+						<from>$request.requestMessageData/requestID</from>
+						<to variable="probeInput" part="probeName"/>
+					</copy>
+					<copy>
+						<from variable="request" property="wns:testProbeData"/>
+						<to variable="probeInput" part="probeData"/>
+					</copy>
+				</assign>
+				<assign>
+					<copy>
+						<from>
+							<literal><![CDATA[root process splits into A and B]]></literal>
+						</from>
+						<to variable="probeInput" part="probeName"/>
+					</copy>
+				</assign>
+				<invoke name="probe2" partnerLink="probe" portType="prb:probeMessagePT"
+					operation="probe" inputVariable="probeInput" outputVariable="probeInput"
+				> </invoke>
+			</sequence>
+			<!-- probe1 outbound status is dependent on the request input testFlow1 -->
+			<sequence>
+				<targets>
+					<target linkName="assign1-to-probe1"/>
+				</targets>
+				<sources>
+					<source linkName="probe1-to-probe3">
+						<transitionCondition>bpws:getVariableProperty("request", "wns:testFlow1") =
+							'yes'</transitionCondition>
+					</source>
+				</sources>
+				<assign>
+					<copy>
+						<from>
+							<literal><![CDATA[process A completes]]></literal>
+						</from>
+						<to variable="probeInput" part="probeName"/>
+					</copy>
+				</assign>
+				<invoke name="probe3" partnerLink="probe" portType="prb:probeMessagePT"
+					operation="probe" inputVariable="probeInput" outputVariable="probeInput"
+				> </invoke>
+			</sequence>
+			<!-- probe2 outbound status is dependent on the request input testFlow2 -->
+			<sequence>
+				<targets>
+					<target linkName="assign1-to-probe2"/>
+				</targets>
+				<sources>
+					<source linkName="probe2-to-probe3">
+						<transitionCondition>$request.requestMessageData/flowIndicators/indicatorTwo =
+							'yes'</transitionCondition>
+					</source>
+				</sources>
+				<assign>
+					<copy>
+						<from>
+							<literal><![CDATA[process B completes]]></literal>
+						</from>
+						<to variable="probeInput" part="probeName"/>
+					</copy>
+				</assign>
+				<invoke name="probe4" partnerLink="probe" portType="prb:probeMessagePT"
+					operation="probe" inputVariable="probeInput" outputVariable="probeInput"
+				> </invoke>
+			</sequence>
+			<!-- The split execution path from assign1 joins on probe3 -->
+			<!-- Probe3 will only fire if the transition condition from probe1 and probe2 both evaluate to true -->
+			<sequence>
+				<targets>
+					<joinCondition>$probe1-to-probe3 and $probe2-to-probe3</joinCondition>
+					<target linkName="probe1-to-probe3"/>
+					<target linkName="probe2-to-probe3"/>
+				</targets>
+				<assign>
+					<copy>
+						<from>
+							<literal><![CDATA[processes A and B merge on process C]]></literal>
+						</from>
+						<to variable="probeInput" part="probeName"/>
+					</copy>
+				</assign>
+				<invoke name="probe5" partnerLink="probe" portType="prb:probeMessagePT"
+					operation="probe" inputVariable="probeInput" outputVariable="probeInput"
+				> </invoke>
+			</sequence>
+		</flow>
+		<assign>
+			<copy>
+				<from>
+					<literal><![CDATA[merge into root process]]></literal>
+				</from>
+				<to variable="probeInput" part="probeName"/>
+			</copy>
+		</assign>
+		<invoke name="probe6" partnerLink="probe" portType="prb:probeMessagePT" operation="probe"
+			inputVariable="probeInput" outputVariable="probeInput"> </invoke>
+		<!-- from the input data loopIndicator set the number of loop interations -->
+		<assign>
+			<copy>
+				<from>
+					<literal><![CDATA[test switch statement]]></literal>
+				</from>
+				<to variable="probeInput" part="probeName"/>
+			</copy>
+		</assign>
+		<invoke name="probe7" partnerLink="probe" portType="prb:probeMessagePT" operation="probe"
+			inputVariable="probeInput" outputVariable="probeInput"> </invoke>
+		<if>
+			<condition>bpws:getVariableProperty("request", "wns:loopInd") = 'min'</condition>
+            <sequence>
+                <assign name="flow1-min-assign">
+                    <copy>
+                        <from>5</from>
+                        <to variable="internalState" part="loop1"/>
+                    </copy>
+                    <copy>
+                        <from>
+                            <literal><![CDATA[case min: set loop iterations = 5]]></literal>
+                        </from>
+                        <to variable="probeInput" part="probeName"/>
+                    </copy>
+                </assign>
+                <invoke name="probe8" partnerLink="probe" portType="prb:probeMessagePT"
+                    operation="probe" inputVariable="probeInput" outputVariable="probeInput"
+                > </invoke>
+            </sequence>
+			<elseif>
+				<condition>$request.requestMessageData/loopIndicator = 'max'</condition>
+				<sequence>
+					<assign name="flow1-max-assign">
+						<copy>
+							<from>10</from>
+							<to variable="internalState" part="loop1"/>
+						</copy>
+						<copy>
+							<from>
+								<literal><![CDATA[case max: set loop iterations = 10]]></literal>
+							</from>
+							<to variable="probeInput" part="probeName"/>
+						</copy>
+					</assign>
+					<invoke name="probe9" partnerLink="probe" portType="prb:probeMessagePT"
+						operation="probe" inputVariable="probeInput" outputVariable="probeInput"
+						> </invoke>
+				</sequence>
+			</elseif>
+			<else>
+				<sequence>
+					<assign name="flow1-default-assign">
+						<copy>
+							<from>0</from>
+							<to variable="internalState" part="loop1"/>
+						</copy>
+						<copy>
+							<from>
+								<literal><![CDATA[otherwise: set loop iterations = 0]]></literal>
+							</from>
+							<to variable="probeInput" part="probeName"/>
+						</copy>
+					</assign>
+					<invoke name="probe10" partnerLink="probe" portType="prb:probeMessagePT"
+						operation="probe" inputVariable="probeInput" outputVariable="probeInput"
+					> </invoke>
+				</sequence>
+			</else>
+		</if>
+		
+		<assign name="while-increment-initialize">
+			<copy>
+				<from>0</from>
+				<to variable="internalState" part="loop1Counter"></to>
+			</copy>
+			<copy>
+				<from>
+					<literal><![CDATA[test loop iterations]]></literal>
+				</from>
+				<to variable="probeInput" part="probeName"/>
+			</copy>
+		</assign>
+		<invoke name="probe10" partnerLink="probe" portType="prb:probeMessagePT" operation="probe"
+			inputVariable="probeInput" outputVariable="probeInput"> </invoke>
+		<while>
+			<condition>$internalState.loop1Counter &lt; $internalState.loop1</condition>
+			<sequence>
+				<assign name="while-increment">
+					<copy>
+						<from>$internalState.loop1Counter + 1</from>
+						<to variable="internalState" part="loop1Counter"/>
+					</copy>
+					<copy>
+						<from>$internalState.loop1Counter + 1</from>
+						<to variable="probeInput" part="probeName"/>
+					</copy>
+				</assign>
+				<invoke name="probe11" partnerLink="probe" portType="prb:probeMessagePT"
+					operation="probe" inputVariable="probeInput" outputVariable="probeInput"/>
+
+			</sequence>
+		</while>
+		<!-- copy internal accumulators to the reply message -->
+		<assign>
+			<copy>
+				<from>
+					<literal><![CDATA[test1Process complete]]></literal>
+				</from>
+				<to variable="probeInput" part="probeName"/>
+			</copy>
+		</assign>
+		<invoke name="probe12" partnerLink="probe" portType="prb:probeMessagePT" operation="probe"
+			inputVariable="probeInput" outputVariable="probeInput"> </invoke>
+		<assign name="assign2">
+			<copy>
+				<from variable="probeInput" part="probeName"/>
+				<to variable="reply" part="replyID"/>
+			</copy>
+			<copy>
+				<from variable="probeInput" part="probeData"/>
+				<to variable="reply" part="replyText"/>
+			</copy>
+		</assign>
+		<reply name="reply" partnerLink="request" portType="wns:testFlowActivityPT" operation="request"
+			variable="reply"> </reply>
+	</sequence>
+</process>

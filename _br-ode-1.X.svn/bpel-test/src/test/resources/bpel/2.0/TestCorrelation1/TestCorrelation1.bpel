@@ -1,0 +1,86 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+-->
+
+<bpel:process xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://docs.oasis-open.org/wsbpel/2.0/process/executable ../../../../../../../bpel-schemas/src/main/resources/wsbpel_executable.xsd"
+  xmlns:tns="http://ode/bpel/unit-test/testCorrelation1"
+  targetNamespace="http://ode/bpel/unit-test/testCorrelation1"
+  xmlns:wns="http://ode/bpel/unit-test/testCorrelation1.wsdl"
+ xmlns:ns0="http://www.w3schools.com"
+ xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+ name="TestCorrelation1"
+  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+  expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+  suppressJoinFailure="yes">
+  
+  <bpel:import location="TestCorrelation1.wsdl"
+    namespace="http://ode/bpel/unit-test/testCorrelation1.wsdl"
+    importType="http://schemas.xmlsoap.org/wsdl/" />
+  
+  <bpel:partnerLinks>
+    <bpel:partnerLink name="testCorrelation1PL" partnerLinkType="wns:testCorrelation1Request" myRole="testCorrelation1Service"/>
+  </bpel:partnerLinks>
+  <bpel:scope name="scope1">
+    <bpel:variables>
+      <bpel:variable messageType="wns:operation1Request" name="input1"/>
+      <bpel:variable messageType="wns:operation2Request" name="input2"/>
+      <bpel:variable messageType="wns:operation3Request" name="input3"/>
+      <bpel:variable messageType="wns:operation3Response" name="output3"/>
+    </bpel:variables>
+    <bpel:correlationSets>
+      <bpel:correlationSet name="correlationSet1" properties="wns:testCorrelation1Variable1"/>
+    </bpel:correlationSets>
+    <bpel:flow>
+      <bpel:sequence>
+        <bpel:receive name="receive1" createInstance="yes" operation="operation1" partnerLink="testCorrelation1PL" portType="wns:testCorrelation1PT" variable="input1">
+          <bpel:correlations>
+            <bpel:correlation set="correlationSet1" initiate="yes"></bpel:correlation>
+          </bpel:correlations>
+        </bpel:receive>
+        <bpel:scope name="scope2">
+          <bpel:correlationSets>
+            <bpel:correlationSet name="correlationSet2" properties="wns:testCorrelation1Variable1"/>
+         </bpel:correlationSets>
+          <bpel:flow>
+            <bpel:sequence>
+              <bpel:receive name="receive2" createInstance="no" operation="operation2" partnerLink="testCorrelation1PL" portType="wns:testCorrelation1PT" variable="input2">
+                <bpel:correlations>
+                  <bpel:correlation set="correlationSet1" initiate="no"></bpel:correlation>
+                  <bpel:correlation initiate="yes" set="correlationSet2"/>
+                </bpel:correlations>
+              </bpel:receive>
+              <bpel:receive name="receive3" createInstance="no" operation="operation3" partnerLink="testCorrelation1PL" portType="wns:testCorrelation1PT" variable="input3">
+                <bpel:correlations>
+                  <bpel:correlation initiate="no" set="correlationSet2"/>
+                </bpel:correlations>
+              </bpel:receive>
+              <bpel:assign name="assign1">
+                <bpel:copy>
+                  <bpel:from>$input2.newParameter1/ns0:from</bpel:from>
+                  <bpel:to part="newParameter2" variable="output3"/>
+                </bpel:copy>
+              </bpel:assign>
+              <bpel:reply name="reply" operation="operation3" partnerLink="testCorrelation1PL" portType="wns:testCorrelation1PT" variable="output3"/>
+            </bpel:sequence>
+          </bpel:flow>
+        </bpel:scope>
+      </bpel:sequence>
+    </bpel:flow>
+  </bpel:scope>
+</bpel:process>

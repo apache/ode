@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<wsdl:definitions
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+        xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
+        xmlns:tns="http://ode/bpel/test/arithmetics"
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:odex="http://www.apache.org/ode/type/extension/http"
+        targetNamespace="http://ode/bpel/test/arithmetics">
+
+
+    <wsdl:types>
+        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://ode/bpel/test/arithmetics">
+            <xsd:complexType name="operandListType">
+                <xsd:sequence>
+                    <xsd:element name="operand" type="xsd:string" maxOccurs="unbounded" minOccurs="2"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:element name="operandList" type="tns:operandListType"/>
+
+            <xsd:complexType name="resultType">
+                <xsd:sequence>
+                    <xsd:element name="msg" type="xsd:string"/>
+                    <xsd:element name="resultIs" type="xsd:int"/>
+                </xsd:sequence>
+            </xsd:complexType>
+
+            <xsd:element name="theresult" type="xsd:int"/>
+        </xsd:schema>
+    </wsdl:types>
+
+
+    <wsdl:message name="twoOperandRequest">
+        <wsdl:part name="left" type="xsd:integer"/>
+        <wsdl:part name="right" type="xsd:integer"/>
+    </wsdl:message>
+    <wsdl:message name="resultResponse">
+        <wsdl:part name="result" type="xsd:integer"/>
+    </wsdl:message>
+    <wsdl:message name="additionRequest">
+        <wsdl:part name="operands" element="tns:operandList"/>
+    </wsdl:message>
+    <wsdl:message name="additionResponse">
+        <wsdl:part name="result" element="tns:theresult"/>
+    </wsdl:message>
+    <wsdl:message name="sumOfIntegersRequest">
+        <wsdl:part name="range" element="tns:operandList"/>
+    </wsdl:message>
+    <wsdl:message name="sumOfIntegersResponse">
+        <wsdl:part name="result" type="tns:resultType"/>
+    </wsdl:message>
+
+
+    <wsdl:portType name="OlaElMundoPortType">
+        <!-- will use with GET + urlReplacement + simple types (input/output)-->
+        <wsdl:operation name="plus">
+            <wsdl:input message="tns:twoOperandRequest"/>
+            <wsdl:output message="tns:resultResponse"/>
+        </wsdl:operation>
+        <!-- will use with GET + urlEncoded + simple types (input/output) -->
+        <wsdl:operation name="minus">
+            <wsdl:input message="tns:twoOperandRequest"/>
+            <wsdl:output message="tns:resultResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:portType name="SalutLaTerrePortType">
+        <!-- will use with POST + text/xml + elements (input/output) -->
+        <wsdl:operation name="addition">
+            <wsdl:input message="tns:additionRequest"/>
+            <wsdl:output message="tns:additionResponse"/>
+        </wsdl:operation>
+        <!-- will use with POST + text/xml + complex type (input/output) -->
+        <wsdl:operation name="sumOfIntegers">
+            <wsdl:input message="tns:sumOfIntegersRequest"/>
+            <wsdl:output message="tns:sumOfIntegersResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+
+    <wsdl:binding name="OlaElMundoHttpBinding-GET" type="tns:OlaElMundoPortType">
+        <!-- /!\ no http:binding element here, see operation binding -->
+        <!-- It's meant to test a wsdl extension defined for RESTful BPEL -->
+        <wsdl:operation name="plus">
+            <http:operation location="plus/(left):(right)"/>
+            <odex:binding verb="GET"/>
+            <wsdl:input>
+                <http:urlReplacement/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="result"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="minus">
+            <http:operation location="minus"/>
+            <odex:binding verb="GET"/>
+            <wsdl:input>
+                <http:urlEncoded/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="result"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:binding name="OlaElMundoHttpBinding-POST" type="tns:OlaElMundoPortType">
+        <!-- /!\ here the verb is GET and not POST -->
+        <!-- It's meant to test a verb overridding, see wsdl extensions for RESTful BPEL -->
+        <http:binding verb="GET"/>
+        <wsdl:operation name="plus">
+            <http:operation location="plus"/>
+            <odex:binding verb="POST"/>
+            <wsdl:input>
+                <mime:content type="application/x-www-form-urlencoded"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="result"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="minus">
+            <http:operation location="minus"/>
+            <odex:binding verb="POST"/>
+            <wsdl:input>
+                <http:urlEncoded/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="result"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+
+    <wsdl:binding name="OlaElMundoHttpBinding-PUT" type="tns:OlaElMundoPortType">
+        <http:binding verb="PUT"/>
+        <wsdl:operation name="plus">
+            <http:operation location="plus"/>
+            <wsdl:input>
+                <mime:content type="application/x-www-form-urlencoded"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="result"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="minus">
+            <http:operation location="minus"/>
+            <wsdl:input>
+                <http:urlEncoded/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="result"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+
+    <wsdl:binding name="OlaElMundoHttpBinding-DELETE" type="tns:OlaElMundoPortType">
+        <http:binding verb="DELETE"/>
+        <wsdl:operation name="plus">
+            <http:operation location="plus/(left):(right)"/>
+            <wsdl:input>
+                <http:urlReplacement/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="result"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="minus">
+            <http:operation location="minus"/>
+            <wsdl:input>
+                <http:urlEncoded/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="result"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+
+    <wsdl:binding name="SalutLaTerreHttpBinding" type="tns:SalutLaTerrePortType">
+        <http:binding verb="POST"/>
+        <wsdl:operation name="addition">
+            <http:operation location="addition"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="operands"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="result"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="sumOfIntegers">
+            <http:operation location="sumOfIntegers"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="range"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="result"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+
+    <!--
+        8 urls to handle:
+        (GET)       http://localhost:8888/HttpBindingTestService/OlaElMundo-GET/plus/(left):(right)
+        (GET)       http://         ........                    /OlaElMundo-GET/minus?left=&right=
+        (DELETE)    http://localhost:8888/HttpBindingTestService/OlaElMundo-DELETE/plus/(left):(right)
+        (DELETE)    http://         ........                    /OlaElMundo-DELETE/minus?left=&right=
+        (POST)      http://         ........                    /OlaElMundo-POST/plus
+        (POST)      http://         ........                    /OlaElMundo-POST/minus
+        (PUT)       http://         ........                    /OlaElMundo-PUT/plus
+        (PUT)       http://         ........                    /OlaElMundo-PUT/minus
+        (POST)      http://         ........                    /SalutLaTerre/addition
+        (POST)      http://         ........                    /SalutLaTerre/sumOfIntegers
+    -->
+    <wsdl:service name="ArithmeticsService">
+        <wsdl:port name="OlaElMundo-GET_httpport" binding="tns:OlaElMundoHttpBinding-GET">
+            <http:address location="http://localhost:7070/HttpBindingTest/ArithmeticsService/OlaElMundo-GET"/>
+        </wsdl:port>
+        <wsdl:port name="OlaElMundo-POST_httpport" binding="tns:OlaElMundoHttpBinding-POST">
+            <http:address location="http://localhost:7070/HttpBindingTest/ArithmeticsService/OlaElMundo-POST"/>
+        </wsdl:port>
+        <wsdl:port name="OlaElMundo-PUT_httpport" binding="tns:OlaElMundoHttpBinding-PUT">
+            <http:address location="http://localhost:7070/HttpBindingTest/ArithmeticsService/OlaElMundo-PUT"/>
+        </wsdl:port>
+        <wsdl:port name="OlaElMundo-DELETE_httpport" binding="tns:OlaElMundoHttpBinding-DELETE">
+            <http:address location="http://localhost:7070/HttpBindingTest/ArithmeticsService/OlaElMundo-DELETE"/>
+        </wsdl:port>
+        <wsdl:port name="SalutLaTerre_httpport" binding="tns:SalutLaTerreHttpBinding">
+            <http:address location="http://localhost:7070/HttpBindingTest/ArithmeticsService/SalutLaTerre"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
+

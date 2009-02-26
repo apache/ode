@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+        xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
+        xmlns:tns="http://ode/bpel/test/properties"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:odex="http://www.apache.org/ode/type/extension/http"
+        targetNamespace="http://ode/bpel/test/properties">
+
+    <wsdl:types>
+        <xsd:schema xmlns:ns="http://ode/bpel/test/properties" attributeFormDefault="qualified"
+                    elementFormDefault="unqualified" targetNamespace="http://ode/bpel/test/properties">
+
+            <xsd:element name="credentials">
+                <xsd:complexType>
+                    <xsd:attribute name="scheme" type="xsd:string" default="server-decide"/>
+                    <xsd:attribute name="username" type="xsd:string"/>
+                    <xsd:attribute name="password" type="xsd:string"/>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </wsdl:types>
+    <!--
+    The goal of this test is to make sure endpoint properties are properly passed around.
+    Endpoint properties might be set with property files matching *.endpoint.
+    These files might be located in 2 different places:
+      . the global BPMS config directory i.e. $BPMS_HOME/var/config             (A)
+      . the unit deployment directory i.e. $BPMS_HOME/var/processes/MyProcess   (B)
+    If a given property is defined in the deployment unit and in the global config directory, the latter takes precedence.
+    HTTP headers could be set this way, but also with a message part. This is a third options (C). A message part would have precedence over the 2 other ways, A & B.
+
+    The testcase would use various combinations of these solutions to set HTTP headers and make sure the expected value is properly assigned.
+
+     The EchoService is a basic service that send back the headers and body received in the request.
+    -->
+    <wsdl:message name="Message">
+        <wsdl:part name="header_A" type="xsd:string"/>
+        <wsdl:part name="header_B" type="xsd:string"/>
+        <wsdl:part name="header_C" type="xsd:string"/>
+        <wsdl:part name="header_ABC" type="xsd:string"/>
+        <wsdl:part name="header_AB" type="xsd:string"/>
+        <wsdl:part name="header_AC" type="xsd:string"/>
+        <wsdl:part name="header_BC" type="xsd:string"/>
+        <wsdl:part name="header_AA" type="xsd:string"/>
+        <wsdl:part name="header_BB" type="xsd:string"/>
+        <wsdl:part name="WWW-Authenticate" element="credentials"/>
+    </wsdl:message>
+
+
+    <wsdl:portType name="PropertiesPortType">
+        <wsdl:operation name="GET">
+            <wsdl:input message="tns:Message"/>
+            <wsdl:output message="tns:Message"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="binding" type="tns:PropertiesPortType">
+        <wsdl:operation name="GET">
+            <http:operation location=""/>
+            <odex:binding verb="GET"/>
+            <wsdl:input>
+                <http:urlReplacement/>
+                <odex:header name="header_A" part="header_A"/>
+                <odex:header name="header_B" part="header_B"/>
+                <odex:header name="header_C" part="header_C"/>
+                <odex:header name="header_ABC" part="header_ABC"/>
+                <odex:header name="header_AB" part="header_AB"/>
+                <odex:header name="header_AC" part="header_AC"/>
+                <odex:header name="header_BC" part="header_BC"/>
+                <odex:header name="header_AA" part="header_AA"/>
+                <odex:header name="header_BB" part="header_BB"/>
+            </wsdl:input>
+            <wsdl:output>
+                <odex:header name="header_A" part="header_A"/>
+                <odex:header name="header_B" part="header_B"/>
+                <odex:header name="header_C" part="header_C"/>
+                <odex:header name="header_ABC" part="header_ABC"/>
+                <odex:header name="header_AB" part="header_AB"/>
+                <odex:header name="header_AC" part="header_AC"/>
+                <odex:header name="header_BC" part="header_BC"/>
+                <odex:header name="header_AA" part="header_AA"/>
+                <odex:header name="header_BB" part="header_BB"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="PropertiesService">
+        <wsdl:port name="PropertiesPort" binding="tns:binding">
+            <http:address location="http://localhost:7070/EchoService/"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

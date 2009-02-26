@@ -1,0 +1,39 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<html>
+  <body>
+    <p>BPEL compiler (bpelc) classes and interfaces.
+    Taking as input the de-referenced BPEL object model
+    (see {@link org.apache.ode.bom.impl.nodes}), the BPEL compiler applies
+    static analysis rules to ensure compliance of the BPEL model.
+    Upon successful analysis, the compiler generates a 
+    &quot;compiled&quot; process description suitable for
+    consumption by the BPEL Service Provider?s
+    (see {@link com.fs.jlo.bpel.provider.BpelServiceProvider})
+    processing engine (also known as the virtual processing unit
+    or <b>VPU</b>).</p>
+    
+    <p>Failures in the static analysis phase are
+    reported in the same manner as parser errors and contain
+    detailed error descriptions and line number references to
+    the location of the errors in the original BPEL XML process
+    definition.</p>
+  </body>
+</html>

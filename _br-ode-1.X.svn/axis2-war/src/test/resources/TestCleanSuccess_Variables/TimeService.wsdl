@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+	xmlns:tns="http://ws.intalio.com/TimeService/"
+	xmlns:s="http://www.w3.org/2001/XMLSchema"
+	xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+	targetNamespace="http://ws.intalio.com/TimeService/"
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">A sample Time service</wsdl:documentation>
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://ws.intalio.com/TimeService/">
+      <s:element name="getUTCTime" type="s:string" />
+      <s:element name="getUTCTimeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="getUTCTimeResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="getCityTime">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="city" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="getCityTimeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="getCityTimeResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="getUTCTimeSoapIn">
+    <wsdl:part name="parameters" element="tns:getUTCTime" />
+  </wsdl:message>
+  <wsdl:message name="getUTCTimeSoapOut">
+    <wsdl:part name="parameters" element="tns:getUTCTimeResponse" />
+  </wsdl:message>
+  <wsdl:message name="getCityTimeSoapIn">
+    <wsdl:part name="parameters" element="tns:getCityTime" />
+  </wsdl:message>
+  <wsdl:message name="getCityTimeSoapOut">
+    <wsdl:part name="parameters" element="tns:getCityTimeResponse" />
+  </wsdl:message>
+  <wsdl:portType name="TimeServiceSoap">
+    <wsdl:operation name="getUTCTime">
+      <wsdl:input message="tns:getUTCTimeSoapIn" />
+      <wsdl:output message="tns:getUTCTimeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="getCityTime">
+      <wsdl:input message="tns:getCityTimeSoapIn" />
+      <wsdl:output message="tns:getCityTimeSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="TimeServiceSoap" type="tns:TimeServiceSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="getUTCTime">
+      <soap:operation soapAction="http://ws.intalio.com/TimeService/getUTCTime" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getCityTime">
+      <soap:operation soapAction="http://ws.intalio.com/TimeService/getCityTime" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="TimeService">
+    <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">A sample Time service</wsdl:documentation>
+    <wsdl:port name="TimeServiceSoap" binding="tns:TimeServiceSoap">
+      <soap:address location="http://ws.intalio.com/TimeService/" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

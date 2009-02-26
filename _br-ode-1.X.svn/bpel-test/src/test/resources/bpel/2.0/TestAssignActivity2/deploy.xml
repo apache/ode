@@ -1,0 +1,44 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
+  xmlns:pns="http://ode/bpel/unit-testAssign2"
+  xmlns:wns="http://ode/bpel/unit-testAssign2.wsdl">
+
+
+	<process name="pns:TestAssign">
+        <property name="punctuation">!</property>
+        <property name="epr">
+            <sref:service-ref 
+                xmlns:sref=" http://docs.oasis-open.org/wsbpel/2.0/serviceref"
+                xmlns:addr="http://example.com/addressing"
+                xmlns:as="http://example.com/auction/wsdl/auctionService/">
+                <addr:EndpointReference>
+                    <addr:Address>http://example.com/auction/RegistrationService/</addr:Address>
+                    <addr:ServiceName>as:RegistrationService</addr:ServiceName>
+                </addr:EndpointReference>
+            </sref:service-ref>
+        </property>
+		<active>true</active>
+		<provide partnerLink="TestAssignPartnerLink">
+			<service name="wns:TestAssignService" port="TestAssignPort"/>
+			<service name="wns:TestAssignService" port="TestAssignPort"/>
+		</provide>
+	</process>
+</deploy>

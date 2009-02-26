@@ -1,0 +1,8 @@
+﻿<?xml version='1.0' encoding='UTF-8'?>
+<dd:deploy xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd"><dd:process xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd" xmlns:diag="http://example.com/BugFromNodeDateTimeToWait" xmlns:tns="http://www.example.org/NewXMLSchema" xmlns:Pool0="http://example.com/BugFromNodeDateTimeToWait/Pool0" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:this="http://example.com/BugFromNodeDateTimeToWait/Pool" name="this:Pool" fileName="BugFromNodeDateTimeToWait-Pool.bpel">
+  <dd:property name="PATH">BugFromNodeDateTimeToWait</dd:property>
+  <dd:property name="SVG">BugFromNodeDateTimeToWait.svg</dd:property>
+  <dd:provide partnerLink="pool0AndPoolPlkVar">
+    <dd:service name="this:CanonicServiceForPool0" port="canonicPort" />
+  </dd:provide>
+</dd:process></dd:deploy>

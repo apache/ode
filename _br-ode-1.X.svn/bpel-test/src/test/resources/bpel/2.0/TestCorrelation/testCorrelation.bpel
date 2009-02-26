@@ -1,0 +1,118 @@
+<!--
+	~ Licensed to the Apache Software Foundation (ASF) under one
+	~ or more contributor license agreements.  See the NOTICE file
+	~ distributed with this work for additional information
+	~ regarding copyright ownership.  The ASF licenses this file
+	~ to you under the Apache License, Version 2.0 (the
+	~ "License"); you may not use this file except in compliance
+	~ with the License.  You may obtain a copy of the License at
+	~
+	~    http://www.apache.org/licenses/LICENSE-2.0
+	~
+	~ Unless required by applicable law or agreed to in writing,
+	~ software distributed under the License is distributed on an
+	~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	~ KIND, either express or implied.  See the License for the
+	~ specific language governing permissions and limitations
+	~ under the License.
+-->
+
+<process xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://docs.oasis-open.org/wsbpel/2.0/process/executable ../../../../../../../bpel-schemas/src/main/resources/wsbpel_executable.xsd"
+ xmlns:tns="http://ode/bpel/unit-test/testCorrelation"
+ xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
+ xmlns:wns="http://ode/bpel/unit-test/testCorrelation.wsdl"
+ xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+ name="TestCorrelationProcess"
+ targetNamespace="http://ode/bpel/unit-test/testCorrelation"
+ queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+ expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+ suppressJoinFailure="yes">
+	
+	<import location="testCorrelation.wsdl"
+		namespace="http://ode/bpel/unit-test/testCorrelation.wsdl"
+		importType="http://schemas.xmlsoap.org/wsdl/" />
+	<import location="../ProbeService/probeService.wsdl"
+		namespace="http://ode/bpel/unit-test/ProbeService.wsdl"
+		importType="http://schemas.xmlsoap.org/wsdl/"/>
+	
+	<!-- test correlated receive -->
+	<partnerLinks>
+		<partnerLink name="request" partnerLinkType="wns:testCorrelationRequest" myRole="testCorrelationService"/>
+		<partnerLink name="probe" partnerLinkType="wns:probeRequest" partnerRole="probeService" initializePartnerRole="yes"/>
+	</partnerLinks>
+	<variables>
+		<variable name="request" messageType="wns:requestMessage"/>
+		<variable name="probeInput" messageType="prb:probeMessage"/>
+		<variable name="reply" messageType="wns:replyMessage"/>
+	</variables>
+	<correlationSets>
+		<correlationSet name="testCorr1" properties="wns:testProbeID"/>
+	</correlationSets>
+	<sequence>
+		<receive name="receive1" partnerLink="request" portType="wns:testCorrelationPT" operation="request" variable="request" createInstance="yes">
+			<correlations>
+				<correlation set="testCorr1" initiate="yes"/>
+			</correlations>
+		</receive>
+		<!-- Copy input variables to internal accumulators -->
+		<assign name="assign1">
+			<copy>
+				<from variable="request" property="wns:testProbeID"/>
+				<to variable="probeInput" part="probeName"/>
+			</copy>
+			<copy>
+				<from variable="request" property="wns:testProbeData"/>
+				<to variable="probeInput" part="probeData"/>
+			</copy>
+		</assign>
+		<assign>
+			<copy>
+				<from>
+					<literal><![CDATA[loop on receive until message includes requestEnd = yes]]></literal>
+				</from>
+				<to variable="probeInput" part="probeName"/>
+			</copy>
+		</assign>
+		<invoke name="probe" partnerLink="probe" portType="prb:probeMessagePT" operation="probe" inputVariable="probeInput" outputVariable="probeInput"> </invoke>
+		<while>
+			<condition>$request.requestMessageData/requestEnd = 'no'</condition>
+			<sequence>
+				<receive name="receive2" partnerLink="request" portType="wns:testCorrelationPT" operation="continue" variable="request">
+					<correlations>
+						<correlation set="testCorr1"/>
+					</correlations>
+				</receive>
+				<assign>
+					<copy>
+						<from>
+							<literal><![CDATA[received message]]></literal>
+						</from>
+						<to variable="probeInput" part="probeName"/>
+					</copy>
+				</assign>
+				<invoke name="probe" partnerLink="probe" portType="prb:probeMessagePT" operation="probe" inputVariable="probeInput" outputVariable="probeInput"> </invoke>
+			</sequence>
+		</while>
+		<assign>
+			<copy>
+				<from>
+					<literal><![CDATA[process complete]]></literal>
+				</from>
+				<to variable="probeInput" part="probeName"/>
+			</copy>
+		</assign>
+		<invoke name="probe" partnerLink="probe" portType="prb:probeMessagePT" operation="probe" inputVariable="probeInput" outputVariable="probeInput"> </invoke>
+		<assign name="assign2">
+			<copy>
+				<from variable="probeInput" part="probeName"/>
+				<to variable="reply" part="replyID"/>
+			</copy>
+			<copy>
+				<from variable="probeInput" part="probeData"/>
+				<to variable="reply" part="replyText"/>
+			</copy>
+		</assign>
+		<reply name="reply" partnerLink="request" portType="wns:testCorrelationPT" operation="request" variable="reply"> </reply>
+	</sequence>
+</process>

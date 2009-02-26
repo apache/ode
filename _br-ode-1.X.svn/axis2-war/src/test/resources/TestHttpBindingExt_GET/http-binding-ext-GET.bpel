@@ -1,0 +1,407 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<process name="http-binding-ext-GET"
+         targetNamespace="http://ode/bpel/unit-test"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:tns="http://ode/bpel/unit-test"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:test="http://ode/bpel/unit-test.wsdl"
+         xmlns:dummy="http://ode/bpel/test/blog"
+         xmlns:fn="http://www.w3.org/2005/02/xpath-functions"
+         xmlns:ext="http://ode.apache.org/activityRecovery"
+         queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+         expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+
+    <import location="http-binding-ext-GET.wsdl"
+            namespace="http://ode/bpel/unit-test.wsdl"
+            importType="http://schemas.xmlsoap.org/wsdl/"/>
+
+    <partnerLinks>
+        <partnerLink name="helloPartnerLink"
+                     partnerLinkType="test:HelloPartnerLinkType" myRole="me"/>
+        <partnerLink name="blogPartnerLink"
+                     partnerLinkType="test:BlogLinkType" partnerRole="you"/>
+    </partnerLinks>
+
+    <variables>
+        <variable name="inputVar" messageType="test:HelloMessage"/>
+        <variable name="outputVar" messageType="test:HelloMessage"/>
+        <variable name="idMsg" messageType="dummy:IdMessage"/>
+        <variable name="articleMsg" messageType="dummy:ArticleMessage"/>
+        <variable name="generatedTimestamp" type="xsd:string"/>
+        <variable name="articleId" type="xsd:string"/>
+        <variable name="tmpVar" type="xsd:string"/>
+        <variable name="statusLine" type="xsd:anyType"/>
+    </variables>
+
+    <sequence>
+        <receive name="start" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                 operation="hello" variable="inputVar" createInstance="yes"/>
+
+        <!-- Initialize output var -->
+        <assign>
+            <copy>
+                <from>'What a success!'</from>
+                <to>$outputVar.TestPart</to>
+            </copy>
+        </assign>
+
+        <!-- Prepare the input message -->
+        <assign>
+            <copy>
+                <!-- generate a random number -->
+                <from>string(round(seconds-from-dateTime(current-dateTime())))</from>
+                <to>$generatedTimestamp</to>
+            </copy>
+            <copy>
+                <from>$generatedTimestamp</from>
+                <to>$idMsg.timestamp</to>
+            </copy>
+            <copy>
+                <from>'alexis@test.com'</from>
+                <to>$idMsg.from</to>
+            </copy>
+            <copy>
+                <!-- generate a random number -->
+                <from>string(round(seconds-from-dateTime(current-dateTime()))+100)</from>
+                <to>$articleId</to>
+            </copy>
+            <copy>
+                <from>$articleId</from>
+                <to>$idMsg.articleId</to>
+            </copy>
+        </assign>
+
+        <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                operation="doGET" inputVariable="idMsg" outputVariable="articleMsg"/>
+
+        <!-- Check the answer -->
+        <if>
+            <condition>$articleMsg.timestamp = $generatedTimestamp</condition>
+            <empty/>
+            <else>
+                <assign>
+                    <copy>
+                        <from>'Wrong Timestamp Header received. Check if the request header was properly set.'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+            </else>
+        </if>
+
+        <assign>
+            <copy>
+                <from variable="articleMsg" header="From"/>
+                <to variable="tmpVar"/>
+            </copy>
+        </assign>
+        <if>
+            <condition>compare($tmpVar, 'alexis@test.com') = 0</condition>
+            <empty/>
+            <else>
+                <assign>
+                    <copy>
+                        <from>concat('Wrong From Header received. Check if the request header was properly set. Received value is: ', $tmpVar)
+                        </from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+            </else>
+        </if>
+        <if>
+            <condition>$articleMsg.article/dummy:id = $articleId</condition>
+            <empty/>
+            <else>
+                <assign>
+                    <copy>
+                        <from>'Wrong Article Id received.'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+            </else>
+        </if>
+
+        <!-- ##################################################### -->
+        <!-- Check HTTP StatusLine information -->
+        <!-- ##################################################### -->
+        <!-- Every message must have a Status-Line element in headers -->
+        <assign>
+            <copy>
+                <from variable="articleMsg" header="Status-Line"/>
+                <to>$statusLine</to>
+            </copy>
+        </assign>
+        <if>
+            <condition>string-length($statusLine/original) > 0</condition>
+            <empty/>
+            <else>
+                <assign>
+                    <copy>
+                        <from>'Status-Line is missing'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+            </else>
+        </if>
+        <if>
+            <condition>string-length($statusLine/Status-Code) > 0</condition>
+            <empty/>
+            <else>
+                <assign>
+                    <copy>
+                        <from>'Status-Code is missing'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+            </else>
+        </if>
+        <if>
+            <condition>string-length($statusLine/HTTP-Version) > 0</condition>
+            <empty/>
+            <else>
+                <assign>
+                    <copy>
+                        <from>'HTTP-Version is missing'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+            </else>
+        </if>
+        <if>
+            <condition>string-length($statusLine/Reason-Phrase) > 0</condition>
+            <empty/>
+            <else>
+                <assign>
+                    <copy>
+                        <from>'Reason-Phrase is missing'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+            </else>
+        </if>
+
+
+        <!-- ############################################### -->
+        <!-- 200_malformed_body - failure expected  -->
+        <!-- ############################################### -->
+        <scope>
+            <ext:failureHandling>
+                <ext:faultOnFailure>true</ext:faultOnFailure>
+            </ext:failureHandling>
+            <faultHandlers>
+                <catch faultName="ext:activityFailure">
+                    <!-- expected result-->
+                    <!--
+                    Warning #1!! At this point what we know for sure is that a failure occured
+                    but we don't know which failure exactly.
+                    We would like to test if the the failure is really the one we triggered on purpose and not a TimeoutFailure for instance.
+                    -->
+                    <empty/>
+                </catch>
+            </faultHandlers>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'200_malformed_body'</from>
+                        <to variable="idMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doGET" inputVariable="idMsg" outputVariable="articleMsg"/>
+                <assign>
+                    <copy>
+                        <from>'200_malformed_body: A failure should have been thrown'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+                <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                       operation="hello" variable="outputVar"/>
+            </sequence>
+        </scope>
+
+        <!-- ############################################### -->
+        <!-- 200_missing_body - failure expected  -->
+        <!-- ############################################### -->
+        <scope>
+            <ext:failureHandling>
+                <ext:faultOnFailure>true</ext:faultOnFailure>
+            </ext:failureHandling>
+            <faultHandlers>
+                <catch faultName="ext:activityFailure">
+                    <!-- expected result-->
+                    <!--
+                    Warning #1!! At this point what we know for sure is that a failure occured
+                    but we don't know which failure exactly.
+                    We would like to test if the the failure is really the one we triggered on purpose and not a TimeoutFailure for instance.
+                    -->
+                    <empty/>
+                </catch>
+            </faultHandlers>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'200_missing_body'</from>
+                        <to variable="idMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doGET" inputVariable="idMsg" outputVariable="articleMsg"/>
+                <assign>
+                    <copy>
+                        <from>'200_missing_body: A failure should have been thrown'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+                <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                       operation="hello" variable="outputVar"/>
+            </sequence>
+        </scope>
+
+        <!-- ############################################### -->
+        <!-- 202_empty_body - Should pass -->
+        <!-- ############################################### -->
+        <!-- 202/Accepted status code explicitly states that there is no body,
+                so we should not fail even if a part is bound to the body response -->
+        <scope>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'202_empty_body'</from>
+                        <to variable="idMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doGET" inputVariable="idMsg" outputVariable="articleMsg"/>
+            </sequence>
+        </scope>
+
+        <!-- ############################################### -->
+        <!-- 204_empty_body - Should pass -->
+        <!-- ############################################### -->
+        <!-- 204/No Content status code explicitly states that there is no body, 
+                so we should not fail even if a part is bound to the body response -->
+        <scope>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'204_empty_body'</from>
+                        <to variable="idMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doGET" inputVariable="idMsg" outputVariable="articleMsg"/>
+            </sequence>
+        </scope>
+
+        <!-- ############################################### -->
+        <!-- 200_missing_part_in_header - should pass, missing or empty header are allowed -->
+        <!-- ############################################### -->
+        <scope>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'200_missing_part_in_header'</from>
+                        <to variable="idMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doGET" inputVariable="idMsg" outputVariable="articleMsg"/>
+             </sequence>
+        </scope>
+
+        <!-- ############################################### -->
+        <!-- 400_not_found - failure expected  -->
+        <!-- ############################################### -->
+        <scope>
+            <ext:failureHandling>
+                <ext:faultOnFailure>true</ext:faultOnFailure>
+            </ext:failureHandling>
+            <faultHandlers>
+                <catch faultName="ext:activityFailure">
+                    <!-- expected result-->
+                    <!--
+                    Warning #1!! At this point what we know for sure is that a failure occured
+                    but we don't know which failure exactly.
+                    We would like to test if the the failure is really the one we triggered on purpose and not a TimeoutFailure for instance.
+                    -->
+                    <empty/>
+                </catch>
+            </faultHandlers>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'400_not_found'</from>
+                        <to variable="idMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doGET" inputVariable="idMsg" outputVariable="articleMsg"/>
+                <assign>
+                    <copy>
+                        <from>'400_not_found: A failure should have been thrown'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+                <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                       operation="hello" variable="outputVar"/>
+            </sequence>
+        </scope>
+
+        <!-- ############################################### -->
+        <!-- 500_operation_with_no_fault_failed - failure expected  -->
+        <!-- ############################################### -->
+        <scope>
+            <ext:failureHandling>
+                <ext:faultOnFailure>true</ext:faultOnFailure>
+            </ext:failureHandling>
+            <faultHandlers>
+                <catch faultName="ext:activityFailure">
+                    <!-- expected result-->
+                    <!--
+                    Warning #1!! At this point what we know for sure is that a failure occured
+                    but we don't know which failure exactly.
+                    We would like to test if the the failure is really the one we triggered on purpose and not a TimeoutFailure for instance.
+                    -->
+                    <empty/>
+                </catch>
+            </faultHandlers>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'500_operation_with_no_fault_failed'</from>
+                        <to variable="idMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doGET" inputVariable="idMsg" outputVariable="articleMsg"/>
+                <assign>
+                    <copy>
+                        <from>'500_operation_with_no_fault_failed: A failure should have been thrown'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+                <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                       operation="hello" variable="outputVar"/>
+            </sequence>
+        </scope>
+        <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+               operation="hello" variable="outputVar"/>
+    </sequence>
+
+</process>

@@ -1,0 +1,25 @@
+﻿<?xml version='1.0' encoding='UTF-8'?><!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<dd:deploy xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd"><dd:process xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd" xmlns:Pool="http://example.com/ForEach/Pool" xmlns:diag="http://example.com/ForEach" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:foreach="http://www.example.org/jms" xmlns:this="http://example.com/ForEach/ForEach" name="this:ForEach" fileName="ForEach-ForEach.bpel">
+  <dd:property name="PATH">ForEach</dd:property>
+  <dd:property name="SVG">ForEach.svg</dd:property>
+  <dd:provide partnerLink="poolAndForEachPlkVar">
+    <dd:service name="this:CanonicServiceForPool" port="canonicPort" />
+  </dd:provide>
+</dd:process></dd:deploy>

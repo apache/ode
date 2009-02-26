@@ -1,0 +1,48 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+-->
+
+<bpel:process xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://docs.oasis-open.org/wsbpel/2.0/process/executable ../../../../../../../bpel-schemas/src/main/resources/wsbpel_executable.xsd"
+  xmlns:tns="http://ode/bpel/unit-test/testCorrelationOpaque" targetNamespace="http://ode/bpel/unit-test/testCorrelationOpaque" xmlns:wns="http://ode/bpel/unit-test/testCorrelationOpaque.wsdl"
+  xmlns:ns0="http://www.w3schools.com" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" name="TestCorrelationOpaque" queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+  expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" suppressJoinFailure="yes">
+
+  <bpel:import location="TestCorrelationOpaque.wsdl" namespace="http://ode/bpel/unit-test/testCorrelationOpaque.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+
+  <bpel:partnerLinks>
+    <bpel:partnerLink name="testCorrelationOpaquePL1" partnerLinkType="wns:testCorrelationOpaqueRequest1" myRole="testCorrelationOpaqueService1"/>
+    <bpel:partnerLink name="testCorrelationOpaquePL2" partnerLinkType="wns:testCorrelationOpaqueRequest2" myRole="testCorrelationOpaqueService2"/>
+  </bpel:partnerLinks>
+  <bpel:variables>
+    <bpel:variable messageType="wns:operation1Request" name="input1"/>
+    <bpel:variable messageType="wns:operation2Request" name="input2"/>
+    <bpel:variable messageType="wns:operation2Response" name="output"/>
+  </bpel:variables>
+  <bpel:sequence>
+    <bpel:receive name="receive1" createInstance="yes" operation="operation1" partnerLink="testCorrelationOpaquePL1" portType="wns:testCorrelationOpaquePT" variable="input1"/>
+    <bpel:assign>
+      <bpel:copy>
+        <bpel:from>$input1.newParameter1</bpel:from>
+        <bpel:to part="newParameter1" variable="output"/>
+      </bpel:copy>
+    </bpel:assign>
+    <bpel:receive name="receive2" createInstance="no" operation="operation2" partnerLink="testCorrelationOpaquePL2" portType="wns:testCorrelationOpaquePT" variable="input2"/>
+    <bpel:reply name="reply" operation="operation2" partnerLink="testCorrelationOpaquePL2" portType="wns:testCorrelationOpaquePT" variable="output"/>
+  </bpel:sequence>
+</bpel:process>

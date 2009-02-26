@@ -1,0 +1,189 @@
+
+<!--
+	~ Licensed to the Apache Software Foundation (ASF) under one
+	~ or more contributor license agreements.  See the NOTICE file
+	~ distributed with this work for additional information
+	~ regarding copyright ownership.  The ASF licenses this file
+	~ to you under the Apache License, Version 2.0 (the
+	~ "License"); you may not use this file except in compliance
+	~ with the License.  You may obtain a copy of the License at
+	~
+	~    http://www.apache.org/licenses/LICENSE-2.0
+	~
+	~ Unless required by applicable law or agreed to in writing,
+	~ software distributed under the License is distributed on an
+	~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	~ KIND, either express or implied.  See the License for the
+	~ specific language governing permissions and limitations
+	~ under the License.
+-->
+
+<process xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://docs.oasis-open.org/wsbpel/2.0/process/executable ../../../../../../../bpel-schemas/src/main/resources/wsbpel_executable.xsd"
+ xmlns:tns="http://ode/bpel/unit-test/TestFaultWithVariable"
+	targetNamespace="http://ode/bpel/unit-test/TestFaultWithVariable"
+ xmlns:wns="http://ode/bpel/unit-test/TestFaultWithVariable.wsdl"
+	xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
+	xmlns:flt="http://ode/bpel/unit-test/FaultService.wsdl"
+	xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+	name="TestFaultWithVariable"
+	queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+	expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+	suppressJoinFailure="yes">
+	
+	<!-- Unit test external fault handlers with variable input -->
+	<!--	throw 					-->
+	<!--	catch 					-->
+
+	<import location="TestFaultWithVariable.wsdl"
+		namespace="http://ode/bpel/unit-test/TestFaultWithVariable.wsdl"
+		importType="http://schemas.xmlsoap.org/wsdl/" />
+	<import location="../ProbeService/probeService.wsdl"
+		namespace="http://ode/bpel/unit-test/ProbeService.wsdl"
+		importType="http://schemas.xmlsoap.org/wsdl/"/>
+	<import location="../FaultService/faultService.wsdl"
+		namespace="http://ode/bpel/unit-test/FaultService.wsdl"
+		importType="http://schemas.xmlsoap.org/wsdl/"/>
+	
+
+	<partnerLinks>
+		<partnerLink name="request" partnerLinkType="wns:TestFaultWithVariableRequest" myRole="TestFaultWithVariableService"/>
+		<partnerLink name="probe" partnerLinkType="wns:probeRequest" partnerRole="probeService" initializePartnerRole="yes"/>
+		<partnerLink name="fault" partnerLinkType="wns:faultRequest" partnerRole="faultService" initializePartnerRole="yes"/>
+	</partnerLinks>
+	<variables>
+		<variable name="request" messageType="wns:requestMessage"/>
+		<variable name="probeInput" messageType="prb:probeMessage"/>
+		<variable name="reply" messageType="wns:replyMessage"/>
+		<variable name="fault" messageType="flt:faultMessage"/>
+		<variable name="faultResponse" messageType="flt:faultMessage"/>
+	</variables>
+	<faultHandlers>
+		<catchAll>
+			<sequence>
+				<assign>
+					<copy>
+						<from>
+							<literal><![CDATA[caught fault with catchAll]]></literal>
+						</from>
+						<to variable="probeInput" part="probeName"/>
+					</copy>
+				</assign>
+				<invoke name="allFaultProbe" partnerLink="probe" portType="prb:probeMessagePT" operation="probe" inputVariable="probeInput" outputVariable="probeInput"/>
+				<!-- copy internal accumulators to the reply message -->
+				<assign name="allFaultAssign">
+					<copy>
+						<from variable="probeInput" part="probeName"/>
+						<to variable="reply" part="replyID"/>
+					</copy>
+					<copy>
+						<from variable="probeInput" part="probeData"/>
+						<to variable="reply" part="replyText"/>
+					</copy>
+				</assign>
+				<reply name="allFaultReply" partnerLink="request" portType="wns:TestFaultWithVariablePT" operation="request" variable="reply"/>
+			</sequence>
+		</catchAll>
+	</faultHandlers>
+	<sequence>
+		<receive name="receive1" partnerLink="request" portType="wns:TestFaultWithVariablePT" operation="request" variable="request" createInstance="yes"/>
+		<!-- Copy input variables to internal accumulators -->
+		<assign name="assign1">
+			<copy>
+				<from variable="request" part="requestID"/>
+				<to variable="probeInput" part="probeName"/>
+			</copy>
+			<copy>
+				<from variable="request" part="requestText"/>
+				<to variable="probeInput" part="probeData"/>
+			</copy>
+		</assign>
+		<scope name="scopeOne">
+			<faultHandlers>
+				<catch faultName="flt:FaultMessage1" faultVariable="testError" faultMessageType="flt:errorMessage">
+					<sequence>
+						<assign>
+							<copy>
+								<from>
+									<literal><![CDATA[caught FaultMessage1]]></literal>
+								</from>
+								<to variable="probeInput" part="probeName"/>
+							</copy>
+						</assign>
+						<invoke name="testFaultProbe" partnerLink="probe" portType="prb:probeMessagePT" operation="probe" inputVariable="probeInput" outputVariable="probeInput"/>
+						<assign>
+							<copy>
+								<from variable="testError" part="errorText"/>
+								<to variable="probeInput" part="probeName"/>
+							</copy>
+						</assign>
+						<invoke name="faultMessageProbe" partnerLink="probe" portType="prb:probeMessagePT" operation="probe" inputVariable="probeInput" outputVariable="probeInput"/>
+					</sequence>
+				</catch>
+				<catch faultName="flt:FaultMessage2" faultVariable="testError" faultMessageType="flt:errorMessage">
+					<sequence>
+						<assign>
+							<copy>
+								<from>
+									<literal><![CDATA[caught FaultMessage2]]></literal>
+								</from>
+								<to variable="probeInput" part="probeName"/>
+							</copy>
+						</assign>
+						<invoke name="testFaultProbe" partnerLink="probe" portType="prb:probeMessagePT" operation="probe" inputVariable="probeInput" outputVariable="probeInput"/>
+						<assign>
+							<copy>
+								<from variable="testError" part="errorText"/>
+								<to variable="probeInput" part="probeName"/>
+							</copy>
+						</assign>
+						<invoke name="faultMessageProbe" partnerLink="probe" portType="prb:probeMessagePT" operation="probe" inputVariable="probeInput" outputVariable="probeInput"/>
+					</sequence>
+				</catch>
+			</faultHandlers>
+			<sequence>
+				<assign>
+					<copy>
+						<from>$request.requestID</from>
+						<to variable="fault" part="faultName"/>
+					</copy>
+					<copy>
+						<from>$request.requestText</from>
+						<to variable="fault" part="faultData"/>
+					</copy>
+					<copy>
+						<from>$request.faultIndicator1</from>
+						<to>$fault.faultIndicator1</to>
+					</copy>
+					<copy>
+						<from>$request.faultIndicator2</from>
+						<to>$fault.faultIndicator2</to>
+					</copy>
+				</assign>
+				<invoke name="throwTestFault" partnerLink="fault" portType="flt:faultMessagePT" operation="throwFault" inputVariable="fault" outputVariable="faultResponse"/>
+			</sequence>
+
+		</scope>
+		<assign>
+			<copy>
+				<from>
+					<literal><![CDATA[process complete]]></literal>
+				</from>
+				<to variable="probeInput" part="probeName"/>
+			</copy>
+		</assign>
+		<invoke name="probe2" partnerLink="probe" portType="prb:probeMessagePT" operation="probe" inputVariable="probeInput" outputVariable="probeInput"/>
+		<!-- copy internal accumulators to the reply message -->
+		<assign name="assign2">
+			<copy>
+				<from variable="probeInput" part="probeName"/>
+				<to variable="reply" part="replyID"/>
+			</copy>
+			<copy>
+				<from variable="probeInput" part="probeData"/>
+				<to variable="reply" part="replyText"/>
+			</copy>
+		</assign>
+		<reply name="reply" partnerLink="request" portType="wns:TestFaultWithVariablePT" operation="request" variable="reply"/>
+	</sequence>
+</process>

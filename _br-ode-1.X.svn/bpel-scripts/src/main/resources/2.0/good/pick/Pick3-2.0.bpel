@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<!--
+	Pick will be used to create process instance. Very basic test.
+-->
+<process name="pick3_CreateInstance"
+  targetNamespace="http://ode/bpel/unit-test"
+  xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+  xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+  xmlns:tns="http://ode/bpel/unit-test"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:test="http://ode/bpel/unit-test.wsdl"
+  suppressJoinFailure="yes">
+
+  <import namespace="http://ode/bpel/unit-test.wsdl"
+    importType="http://schemas.xmlsoap.org/wsdl/"
+    location="./Pick3-2.0.wsdl" />
+
+  <partnerLinks>
+    <partnerLink name="testPartnerLink"
+      partnerLinkType="test:TestPartnerLinkType"
+      myRole="me" />
+  </partnerLinks>
+
+  <variables>
+    <variable name="var1" messageType="test:PickMessage"/>
+  </variables>
+
+  <sequence>
+    <pick name="pick1" createInstance="yes">
+      <onMessage partnerLink="testPartnerLink"
+        portType="test:TestPortType"
+        operation="pickOp1"
+        variable="var1">
+        <assign>
+          <copy>
+            <from>'onMessage'</from>
+            <to>$var1/DataPart</to>
+          </copy>
+        </assign>
+      </onMessage>
+    </pick>
+    <reply name="endReply"
+      operation="pickOp1"
+      partnerLink="testPartnerLink"
+      portType="test:TestPortType"
+      variable="var1"/>
+  </sequence>
+</process>

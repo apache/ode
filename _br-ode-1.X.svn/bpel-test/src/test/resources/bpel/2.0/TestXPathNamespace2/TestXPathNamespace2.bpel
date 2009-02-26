@@ -1,0 +1,80 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+-->
+
+<bpel:process xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://docs.oasis-open.org/wsbpel/2.0/process/executable ../../../../../../../bpel-schemas/src/main/resources/wsbpel_executable.xsd"
+  xmlns:tns="http://ode/bpel/unit-test/TestXPathNamespace2"
+  xmlns:wns="http://ode/bpel/unit-test/TestXPathNamespace2.wsdl"
+ xmlns:ns0="http://www.company.org"
+ xmlns:ns1="http://www.person.org"
+ xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+ xmlns:ns2="http://www.product.org"
+  name="TestXPathNamespace2"
+  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+  expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+  targetNamespace="http://ode/bpel/unit-test/TestXPathNamespace2">
+ 
+ 
+  <bpel:import location="TestXPathNamespace2.wsdl"
+    namespace="http://ode/bpel/unit-test/TestXPathNamespace2.wsdl"
+    importType="http://schemas.xmlsoap.org/wsdl/" />
+ 
+  <bpel:partnerLinks>
+    <bpel:partnerLink name="request" partnerLinkType="wns:TestXPathNamespace2Request" myRole="TestXPathNamespace2Service"/>
+  </bpel:partnerLinks>
+  <bpel:scope name="ID1125327950242396">
+    <bpel:variables>
+      <bpel:variable messageType="wns:operation1Request" name="BP112532795028938"/>
+      <bpel:variable messageType="wns:operation1Response" name="BP11253284037450"/>
+      <bpel:variable name="newVariable1" element="ns0:Company"/>
+    </bpel:variables>
+    <bpel:flow>
+      <bpel:sequence>
+        <bpel:receive name="ID1125327950289399" createInstance="yes" operation="operation1" partnerLink="request" portType="wns:TestXPathNamespace2PT" variable="BP112532795028938"/>
+        <bpel:assign name="BP11253340188129">
+          <bpel:copy>
+            <bpel:from>$BP112532795028938.newParameter1</bpel:from>
+            <bpel:to>$newVariable1</bpel:to>
+          </bpel:copy>
+        </bpel:assign>
+        <bpel:assign name="BP112533401973410">
+          <bpel:copy>
+            <bpel:from> 
+              <bpel:literal>Foo Name</bpel:literal>
+            </bpel:from>
+            <bpel:to>$newVariable1/ns0:Person/ns1:Name</bpel:to>
+          </bpel:copy>
+        </bpel:assign>
+        <bpel:assign name="BP112533402114011">
+          <bpel:copy>
+            <bpel:from><bpel:literal>Foo Type</bpel:literal></bpel:from>
+            <bpel:to>$newVariable1/ns0:Product/ns2:Type</bpel:to>
+          </bpel:copy>
+        </bpel:assign>
+        <bpel:assign name="BP112533402345212">
+          <bpel:copy>
+            <bpel:from variable="newVariable1"/>
+            <bpel:to part="newParameter2" variable="BP11253284037450"/>
+          </bpel:copy>
+        </bpel:assign>
+        <bpel:reply name="ID11253284037292" operation="operation1" partnerLink="request" portType="wns:TestXPathNamespace2PT" variable="BP11253284037450"/>
+      </bpel:sequence>
+    </bpel:flow>
+  </bpel:scope>
+</bpel:process>

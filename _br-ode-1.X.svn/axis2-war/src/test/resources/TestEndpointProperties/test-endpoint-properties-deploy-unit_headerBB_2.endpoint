@@ -1,0 +1,4 @@
+
+alias.myns2=http://ode/bpel/test/properties
+
+myns2.PropertiesService.ode.http.default-headers.header_BB=from_deployment_unit#file2

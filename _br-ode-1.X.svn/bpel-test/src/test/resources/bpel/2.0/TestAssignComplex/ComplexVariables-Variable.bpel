@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<bpel:process xmlns:bpel="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+              xmlns:pnlk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/"
+              xmlns:xs="http://www.w3.org/2001/XMLSchema"
+              xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+              xmlns:Client="http://example.com/ComplexVariables/Client"
+              xmlns:this="http://example.com/ComplexVariables/Variable"
+              xmlns:diag="http://example.com/ComplexVariables"
+              xmlns:tns="http://www.example.org/Assignment"
+              xmlns:bpmn="http://www.intalio.com/bpms"
+              queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+              expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+              name="Variable" targetNamespace="http://example.com/ComplexVariables/Variable">
+
+    <bpel:import namespace="http://example.com/ComplexVariables" location="ComplexVariables.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <bpel:import namespace="http://example.com/ComplexVariables/Variable" location="ComplexVariables-Variable.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <bpel:import namespace="http://www.example.org/Assignment" location="Assignment.xsd" importType="http://www.w3.org/2001/XMLSchema"></bpel:import>
+    <bpel:partnerLinks>
+        <bpel:partnerLink name="clientAndVariablePlkVar" partnerLinkType="diag:ClientAndVariablePlk" myRole="Variable_for_Client"/>
+    </bpel:partnerLinks>
+    <bpel:variables>
+        <bpel:variable name="thisReceiveRequestMsg" messageType="this:receiveRequest"/>
+        <bpel:variable name="thisReceiveResponseMsg" messageType="this:receiveResponse"/>
+        <bpel:variable name="complex" type="tns:AssignTask"/>
+        <bpel:variable name="name" type="xs:string"/>
+    </bpel:variables>
+    <bpel:sequence>
+        <bpel:receive partnerLink="clientAndVariablePlkVar" portType="this:ForClient" operation="receive" variable="thisReceiveRequestMsg" createInstance="yes" bpmn:label="receive" bpmn:id="_VkMOkOjtEdujRdw0-l3_qw"></bpel:receive>
+        <bpel:assign name="init-variables-Variable">
+            <bpel:copy>
+                <bpel:from>
+                    <bpel:literal><this:receiveResponse/>
+                    </bpel:literal>
+                </bpel:from>
+                <bpel:to>$thisReceiveResponseMsg.body</bpel:to>
+            </bpel:copy>
+        </bpel:assign>
+        <bpel:assign bpmn:label="assignComplex" bpmn:id="_o1W14OjwEdujRdw0-l3_qw">
+            <bpel:copy>
+                <bpel:from>$thisReceiveRequestMsg.body</bpel:from>
+                <bpel:to>$complex</bpel:to>
+            </bpel:copy>
+        </bpel:assign>
+
+        <bpel:assign>
+            <!-- Shooting for an eventual selection failure -->
+            <bpel:copy>
+                <bpel:from>$thisReceiveRequestMsg.body/this:Name</bpel:from>
+                <bpel:to>$name</bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from variable="thisReceiveRequestMsg" part ="body">
+                    <bpel:query>this:Name</bpel:query>
+                </bpel:from>
+                <bpel:to>$name</bpel:to>
+            </bpel:copy>
+        </bpel:assign>
+
+        <bpel:assign bpmn:label="result" bpmn:id="_NSMGsOjuEdujRdw0-l3_qw">
+            <bpel:copy>
+                <bpel:from>$complex</bpel:from>
+                <bpel:to>$thisReceiveResponseMsg.body</bpel:to>
+            </bpel:copy>
+        </bpel:assign>
+        <bpel:reply partnerLink="clientAndVariablePlkVar" portType="this:ForClient" operation="receive" variable="thisReceiveResponseMsg" bpmn:label="result" bpmn:id="_NSMGsOjuEdujRdw0-l3_qw"></bpel:reply>
+    </bpel:sequence>
+</bpel:process>

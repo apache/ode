@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<bpel:process xmlns:bpel="http://schemas.xmlsoap.org/ws/2004/03/business-process/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:pnlk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/" xmlns:Pool0="http://example.com/BugFromNodeDateTimeToWait/Pool0" xmlns:tns="http://www.example.org/NewXMLSchema" xmlns:this="http://example.com/BugFromNodeDateTimeToWait/Pool" xmlns:diag="http://example.com/BugFromNodeDateTimeToWait" xmlns:bpmn="http://www.intalio.com/bpms" xmlns:atomic="http://ode.apache.org/atomicScope" queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" bpmn:label="Pool" bpmn:id="_Dn0p0Oc8EdyCLdedvglBCQ" name="Pool" targetNamespace="http://example.com/BugFromNodeDateTimeToWait/Pool">
+  <bpel:import namespace="http://example.com/BugFromNodeDateTimeToWait" location="BugFromNodeDateTimeToWait.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:import namespace="http://example.com/BugFromNodeDateTimeToWait/Pool" location="BugFromNodeDateTimeToWait-Pool.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:partnerLinks>
+    <bpel:partnerLink name="pool0AndPoolPlkVar" partnerLinkType="diag:Pool0AndPool" myRole="Pool_for_Pool0"/>
+  </bpel:partnerLinks>
+  <bpel:variables>
+    <bpel:variable name="thisTaskRequestMsg" messageType="this:TaskRequest"/>
+    <bpel:variable name="thisTaskResponseMsg" messageType="this:TaskResponse"/>
+  </bpel:variables>
+  <bpel:sequence>
+    <bpel:receive partnerLink="pool0AndPoolPlkVar" portType="this:ForPool0" operation="Task"
+                  variable="thisTaskRequestMsg" createInstance="yes"/>
+    <bpel:assign name="init-variables-Pool">
+      <bpel:copy bpmn:label="$thisTaskResponseMsg">
+        <bpel:from>$thisTaskRequestMsg.body</bpel:from>
+        <bpel:to>$thisTaskResponseMsg.body</bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+    <bpel:wait bpmn:label="EventIntermediateTimer" bpmn:id="_G71_UOc8EdyCLdedvglBCQ">
+      <bpel:until>$thisTaskRequestMsg.body</bpel:until>
+    </bpel:wait>
+    <bpel:reply partnerLink="pool0AndPoolPlkVar" portType="this:ForPool0" operation="Task" variable="thisTaskResponseMsg" bpmn:label="Task" bpmn:id="_HbE5AOc8EdyCLdedvglBCQ"></bpel:reply>
+  </bpel:sequence>
+</bpel:process>

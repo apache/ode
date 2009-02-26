@@ -1,0 +1,246 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<process name="HttpBindingTest"
+         targetNamespace="http://ode/bpel/unit-test"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:tns="http://ode/bpel/unit-test"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:test="http://ode/bpel/unit-test.wsdl"
+         xmlns:dummy="http://ode/bpel/test/arithmetics"
+         queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+         expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+
+    <import location="http-binding-test.wsdl"
+            namespace="http://ode/bpel/unit-test.wsdl"
+            importType="http://schemas.xmlsoap.org/wsdl/"/>
+
+    <partnerLinks>
+        <partnerLink name="helloPartnerLink"
+                     partnerLinkType="test:HelloPartnerLinkType" myRole="me"/>
+        <partnerLink name="salutPartnerLink"
+                     partnerLinkType="test:SalutLinkType" partnerRole="salut"/>
+        <partnerLink name="olaGetPartnerLink"
+                     partnerLinkType="test:OlaLinkType" partnerRole="ola"/>
+        <partnerLink name="olaPostPartnerLink"
+                     partnerLinkType="test:OlaLinkType" partnerRole="ola"/>
+        <partnerLink name="olaPutPartnerLink"
+                     partnerLinkType="test:OlaLinkType" partnerRole="ola"/>
+        <partnerLink name="olaDeletePartnerLink"
+                     partnerLinkType="test:OlaLinkType" partnerRole="ola"/>
+    </partnerLinks>
+
+    <variables>
+        <variable name="inputVar" messageType="test:HelloMessage"/>
+        <variable name="outputVar" messageType="test:HelloMessage"/>
+        <variable name="operands" messageType="dummy:twoOperandRequest"/>
+        <variable name="result" messageType="dummy:resultResponse"/>
+        <variable name="additionInput" messageType="dummy:additionRequest"/>
+        <variable name="additionOutput" messageType="dummy:additionResponse"/>
+        <variable name="sumOfIntegersInput" messageType="dummy:sumOfIntegersRequest"/>
+        <variable name="sumOfIntegersOutput" messageType="dummy:sumOfIntegersResponse"/>
+    </variables>
+
+    <!-- ###################################################### -->
+    <!-- ###################################################### -->
+    <!-- let N be the input number -->
+    <!-- This sequence will compute the Sum of the first (N + 5) positive integers -->
+    <!-- ###################################################### -->
+    <!-- ###################################################### -->
+    <sequence>
+        <receive name="start" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                 operation="hello" variable="inputVar" createInstance="yes"/>
+
+        <!-- Compute r = x + 1 -->
+        <assign>
+            <copy>
+                <from>$inputVar.TestPart</from>
+                <to>$operands.left</to>
+            </copy>
+            <copy>
+                <from>1</from>
+                <to>$operands.right</to>
+            </copy>
+        </assign>
+
+        <invoke partnerLink="olaGetPartnerLink" portType="dummy:OlaElMundoPortType"
+                operation="plus" inputVariable="operands" outputVariable="result"/>
+
+        <!-- Compute r = r - 2  (= x - 1)    -->
+        <assign>
+            <copy>
+                <from>$result.result</from>
+                <to>$operands.left</to>
+            </copy>
+            <copy>
+                <from>2</from>
+                <to>$operands.right</to>
+            </copy>
+        </assign>
+        <invoke partnerLink="olaGetPartnerLink" portType="dummy:OlaElMundoPortType"
+                operation="minus" inputVariable="operands" outputVariable="result"/>
+
+        <!-- Compute r = r + 3 (= x + 2) -->
+        <assign>
+            <copy>
+                <from>$result.result</from>
+                <to>$operands.left</to>
+            </copy>
+            <copy>
+                <from>3</from>
+                <to>$operands.right</to>
+            </copy>
+        </assign>
+        <invoke partnerLink="olaPostPartnerLink" portType="dummy:OlaElMundoPortType"
+                operation="plus" inputVariable="operands" outputVariable="result"/>
+
+        <!-- Compute r = r - 4 (= x - 2) -->
+        <assign>
+            <copy>
+                <from>$result.result</from>
+                <to>$operands.left</to>
+            </copy>
+            <copy>
+                <from>4</from>
+                <to>$operands.right</to>
+            </copy>
+        </assign>
+        <invoke partnerLink="olaPostPartnerLink" portType="dummy:OlaElMundoPortType"
+                operation="minus" inputVariable="operands" outputVariable="result"/>
+
+
+
+        <!-- Compute r = r + 5 (= x + 3) -->
+        <assign>
+            <copy>
+                <from>$result.result</from>
+                <to>$operands.left</to>
+            </copy>
+            <copy>
+                <from>5</from>
+                <to>$operands.right</to>
+            </copy>
+        </assign>
+        <invoke partnerLink="olaDeletePartnerLink" portType="dummy:OlaElMundoPortType"
+                operation="plus" inputVariable="operands" outputVariable="result"/>
+
+        <!-- Compute r = r - 6 (= x - 3) -->
+        <assign>
+            <copy>
+                <from>$result.result</from>
+                <to>$operands.left</to>
+            </copy>
+            <copy>
+                <from>6</from>
+                <to>$operands.right</to>
+            </copy>
+        </assign>
+        <invoke partnerLink="olaDeletePartnerLink" portType="dummy:OlaElMundoPortType"
+                operation="minus" inputVariable="operands" outputVariable="result"/>
+
+
+
+        <!-- Compute r = r + 7 (= x + 4) -->
+        <assign>
+            <copy>
+                <from>$result.result</from>
+                <to>$operands.left</to>
+            </copy>
+            <copy>
+                <from>7</from>
+                <to>$operands.right</to>
+            </copy>
+        </assign>
+        <invoke partnerLink="olaPutPartnerLink" portType="dummy:OlaElMundoPortType"
+                operation="plus" inputVariable="operands" outputVariable="result"/>
+
+        <!-- Compute r = r - 9 (= x - 5) -->
+        <assign>
+            <copy>
+                <from>$result.result</from>
+                <to>$operands.left</to>
+            </copy>
+            <copy>
+                <from>9</from>
+                <to>$operands.right</to>
+            </copy>
+        </assign>
+        <invoke partnerLink="olaPutPartnerLink" portType="dummy:OlaElMundoPortType"
+                operation="minus" inputVariable="operands" outputVariable="result"/>
+
+
+        <!-- Compute r = r + 10 (= x + 5) -->
+        <assign>
+            <!-- First, build the proper element -->
+            <copy>
+                <from>
+                    <literal>
+                        <dummy:operandList>
+                            <dummy:operand></dummy:operand>
+                            <dummy:operand>10</dummy:operand>
+                        </dummy:operandList>
+                    </literal>
+                </from>
+                <to>$additionInput.operands</to>
+            </copy>
+            <!-- then assign the value from the previous result -->
+            <copy>
+                <from>$result.result</from>
+                <to>$additionInput.operands/dummy:operand[1]</to>
+                <!--<to>$additionInput.operands//dummy:operandList/dummy:operand[1]</to>-->
+            </copy>
+        </assign>
+        <invoke partnerLink="salutPartnerLink" portType="dummy:SalutLaTerrePortType"
+                operation="addition" inputVariable="additionInput" outputVariable="additionOutput"/>
+
+
+        <assign>
+            <!-- First, build the proper element -->
+            <copy>
+                <from>
+                    <literal>
+                        <dummy:operandList>
+                            <dummy:operand>0</dummy:operand>
+                            <dummy:operand></dummy:operand>
+                        </dummy:operandList>
+                    </literal>
+                </from>
+                <to>$sumOfIntegersInput.range</to>
+            </copy>
+            <!-- then assign the value from the previous result -->
+            <copy>
+                <from>$additionOutput.result</from>
+                <to>$sumOfIntegersInput.range/dummy:operand[2]</to>
+                <!--<to>$additionInput.operands//dummy:operandList/dummy:operand[1]</to>-->
+            </copy>
+        </assign>
+        <invoke partnerLink="salutPartnerLink" portType="dummy:SalutLaTerrePortType"
+                operation="sumOfIntegers" inputVariable="sumOfIntegersInput" outputVariable="sumOfIntegersOutput"/>
+
+
+        <assign>
+            <copy>
+                <from>$sumOfIntegersOutput.result/dummy:resultIs</from>
+                <to>$outputVar.TestPart</to>
+            </copy>
+        </assign>
+        <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+               operation="hello" variable="outputVar"/>
+    </sequence>
+
+</process>

@@ -1,0 +1,647 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<wsdl:definitions targetNamespace="http://documentum.com/ws/2005/services" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://documentum.com/ws/2005/services" xmlns:intf="http://documentum.com/ws/2005/services" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+      <!--WSDL created by Apache Axis version: 1.2RC3 Built on Aug 24,2005 (03:08:13 PDT)-->
+
+            <wsdl:types>
+
+                  <schema elementFormDefault="qualified" targetNamespace="http://documentum.com/ws/2005/services" xmlns="http://www.w3.org/2001/XMLSchema">
+
+                        <element name="getObjectId">
+
+                              <complexType>
+
+                                    <sequence>
+
+                                          <element minOccurs="0" name="in0" nillable="true" type="xsd:string"/>
+
+                                          <element minOccurs="0" name="in1" nillable="true" type="xsd:string"/>
+
+                                    </sequence>
+
+                                    </complexType>
+
+               </element>
+
+               <element name="getObjectIdResponse">
+
+                    <complexType>
+
+                         <sequence>
+
+                              <element minOccurs="0" name="getObjectIdReturn" nillable="true" type="xsd:string"/>
+
+                         </sequence>
+
+                    </complexType>
+
+               </element>
+
+               <complexType name="WebServiceException">
+
+                    <sequence>
+
+                         <element minOccurs="0" name="message" nillable="true" type="xsd:string"/>
+
+                    </sequence>
+
+               </complexType>
+
+               <element name="fault" type="impl:WebServiceException"/>
+
+               <element name="getObjectName">
+
+                    <complexType>
+
+                         <sequence>
+
+                              <element minOccurs="0" name="in0" nillable="true" type="xsd:string"/>
+
+                              <element minOccurs="0" name="in1" nillable="true" type="xsd:string"/>
+
+                         </sequence>
+
+                    </complexType>
+
+               </element>
+
+               <element name="getObjectNameResponse">
+
+                    <complexType>
+
+                         <sequence>
+
+                              <element minOccurs="0" name="getObjectNameReturn" nillable="true" type="xsd:string"/>
+
+                         </sequence>
+
+                    </complexType>
+
+               </element>
+
+               <element name="exportObjectXferUcf">
+
+                    <complexType>
+
+                         <sequence>
+
+                              <element minOccurs="0" name="in0" nillable="true" type="xsd:string"/>
+
+                              <element minOccurs="0" name="in1" nillable="true" type="xsd:string"/>
+
+                         </sequence>
+
+                    </complexType>
+
+               </element>
+
+               <element name="exportObjectXferUcfResponse">
+
+                    <complexType>
+
+                         <sequence>
+
+                              <element minOccurs="0" name="exportObjectXferUcfReturn" nillable="true" type="xsd:string"/>
+
+                         </sequence>
+
+                    </complexType>
+
+               </element>
+
+               <element name="exportObjectXferBase64">
+
+                    <complexType>
+
+                         <sequence>
+
+                              <element minOccurs="0" name="in0" nillable="true" type="xsd:string"/>
+
+                              <element minOccurs="0" name="in1" nillable="true" type="xsd:string"/>
+
+                         </sequence>
+
+                    </complexType>
+
+               </element>
+
+               <element name="exportObjectXferBase64Response">
+
+                    <complexType>
+
+                         <sequence>
+
+                              <element minOccurs="0" name="exportObjectXferBase64Return" nillable="true" type="xsd:base64Binary"/>
+
+                         </sequence>
+
+                    </complexType>
+
+               </element>
+
+               <element name="importFileXferUcf">
+
+                    <complexType>
+
+                         <sequence>
+
+                              <element minOccurs="0" name="in0" nillable="true" type="xsd:string"/>
+
+                              <element minOccurs="0" name="in1" nillable="true" type="xsd:string"/>
+
+                              <element minOccurs="0" name="in2" nillable="true" type="xsd:string"/>
+
+                         </sequence>
+
+                    </complexType>
+
+               </element>
+
+               <element name="importFileXferUcfResponse">
+
+                    <complexType>
+
+                         <sequence>
+
+                              <element name="importFileXferUcfReturn" type="xsd:boolean"/>
+
+                         </sequence>
+
+                    </complexType>
+
+               </element>
+
+               <element name="importFileXferBase64">
+
+                    <complexType>
+
+                         <sequence>
+
+                              <element minOccurs="0" name="in0" nillable="true" type="xsd:base64Binary"/>
+
+                              <element minOccurs="0" name="in1" nillable="true" type="xsd:string"/>
+
+                              <element minOccurs="0" name="in2" nillable="true" type="xsd:string"/>
+
+                         </sequence>
+
+                    </complexType>
+
+               </element>
+
+               <element name="importFileXferBase64Response">
+
+                    <complexType>
+
+                         <sequence>
+
+                              <element name="importFileXferBase64Return" type="xsd:boolean"/>
+
+                         </sequence>
+
+                    </complexType>
+
+               </element>
+
+               <element name="initUCF">
+
+                    <complexType/>
+
+               </element>
+
+               <element name="initUCFResponse">
+
+                    <complexType>
+
+                        <sequence>
+
+                              <element minOccurs="0" name="initUCFReturn" nillable="true" type="xsd:string"/>
+
+                         </sequence>
+
+                    </complexType>
+
+               </element>
+
+               <element name="DocumentumSecurityToken">
+
+                    <complexType>
+
+                         <sequence>
+
+                              <element name="token" type="xsd:string"/>
+
+                         </sequence>
+
+                    </complexType>
+
+               </element>
+
+               <element name="UcfSession">
+
+                    <complexType>
+
+                         <sequence>
+
+                              <element name="uid" type="xsd:string"/>
+
+                         </sequence>
+
+                    </complexType>
+
+               </element>
+
+          </schema>
+
+     </wsdl:types>
+
+     <wsdl:message name="SecurityRequestHeader">
+
+          <wsdl:part element="impl:DocumentumSecurityToken" name="DocumentumRequestHeader"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="UcfRequestHeader">
+
+          <wsdl:part element="impl:UcfSession" name="DocumentumUcfRequestHeader"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="getObjectNameResponse">
+
+          <wsdl:part element="impl:getObjectNameResponse" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="getObjectNameRequest">
+
+          <wsdl:part element="impl:getObjectName" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="getObjectIdResponse">
+
+          <wsdl:part element="impl:getObjectIdResponse" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="importFileXferUcfRequest">
+
+          <wsdl:part element="impl:importFileXferUcf" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="importFileXferBase64Response">
+
+          <wsdl:part element="impl:importFileXferBase64Response" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="exportObjectXferUcfRequest">
+
+          <wsdl:part element="impl:exportObjectXferUcf" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="importFileXferUcfResponse">
+
+          <wsdl:part element="impl:importFileXferUcfResponse" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="getObjectIdRequest">
+
+          <wsdl:part element="impl:getObjectId" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="exportObjectXferUcfResponse">
+
+          <wsdl:part element="impl:exportObjectXferUcfResponse" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="exportObjectXferBase64Response">
+
+          <wsdl:part element="impl:exportObjectXferBase64Response" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="initUCFRequest">
+
+          <wsdl:part element="impl:initUCF" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="WebServiceException">
+
+          <wsdl:part element="impl:fault" name="fault"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="importFileXferBase64Request">
+
+          <wsdl:part element="impl:importFileXferBase64" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="exportObjectXferBase64Request">
+
+         <wsdl:part element="impl:exportObjectXferBase64" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:message name="initUCFResponse">
+
+          <wsdl:part element="impl:initUCFResponse" name="parameters"/>
+
+     </wsdl:message>
+
+     <wsdl:portType name="RepoAccessor">
+
+          <wsdl:operation name="getObjectId">
+
+               <wsdl:input message="impl:getObjectIdRequest" name="getObjectIdRequest"/>
+
+               <wsdl:output message="impl:getObjectIdResponse" name="getObjectIdResponse"/>
+
+               <wsdl:fault message="impl:WebServiceException" name="WebServiceException"/>
+
+          </wsdl:operation>
+
+          <wsdl:operation name="getObjectName">
+
+               <wsdl:input message="impl:getObjectNameRequest" name="getObjectNameRequest"/>
+
+               <wsdl:output message="impl:getObjectNameResponse" name="getObjectNameResponse"/>
+
+               <wsdl:fault message="impl:WebServiceException" name="WebServiceException"/>
+
+          </wsdl:operation>
+
+          <wsdl:operation name="exportObjectXferUcf">
+
+               <wsdl:input message="impl:exportObjectXferUcfRequest" name="exportObjectXferUcfRequest"/>
+
+               <wsdl:output message="impl:exportObjectXferUcfResponse" name="exportObjectXferUcfResponse"/>
+
+               <wsdl:fault message="impl:WebServiceException" name="WebServiceException"/>
+
+          </wsdl:operation>
+
+          <wsdl:operation name="exportObjectXferBase64">
+
+               <wsdl:input message="impl:exportObjectXferBase64Request" name="exportObjectXferBase64Request"/>
+
+               <wsdl:output message="impl:exportObjectXferBase64Response" name="exportObjectXferBase64Response"/>
+
+               <wsdl:fault message="impl:WebServiceException" name="WebServiceException"/>
+
+          </wsdl:operation>
+
+          <wsdl:operation name="importFileXferUcf">
+
+               <wsdl:input message="impl:importFileXferUcfRequest" name="importFileXferUcfRequest"/>
+
+               <wsdl:output message="impl:importFileXferUcfResponse" name="importFileXferUcfResponse"/>
+
+               <wsdl:fault message="impl:WebServiceException" name="WebServiceException"/>
+
+          </wsdl:operation>
+
+          <wsdl:operation name="importFileXferBase64">
+
+               <wsdl:input message="impl:importFileXferBase64Request" name="importFileXferBase64Request"/>
+
+               <wsdl:output message="impl:importFileXferBase64Response" name="importFileXferBase64Response"/>
+
+               <wsdl:fault message="impl:WebServiceException" name="WebServiceException"/>
+
+          </wsdl:operation>
+
+          <wsdl:operation name="initUCF">
+
+               <wsdl:input message="impl:initUCFRequest" name="initUCFRequest"/>
+
+               <wsdl:output message="impl:initUCFResponse" name="initUCFResponse"/>
+
+          </wsdl:operation>
+
+     </wsdl:portType>
+
+     <wsdl:binding name="RepoAccessorSoapBinding" type="impl:RepoAccessor">
+
+          <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+          <wsdl:operation name="getObjectId">
+
+               <wsdlsoap:operation soapAction="getObjectIdAction"/>
+
+               <wsdl:input name="getObjectIdRequest">
+
+                    <wsdlsoap:body use="literal"/>
+
+                    <wsdlsoap:header message="impl:SecurityRequestHeader" namespace="http://documentum.com/ws/2005/services" part="DocumentumRequestHeader" use="literal"/>
+
+               </wsdl:input>
+
+               <wsdl:output name="getObjectIdResponse">
+
+                    <wsdlsoap:body use="literal"/>
+
+               </wsdl:output>
+
+               <wsdl:fault name="WebServiceException">
+
+                    <wsdlsoap:fault name="WebServiceException" use="literal"/>
+
+               </wsdl:fault>
+
+          </wsdl:operation>
+
+          <wsdl:operation name="getObjectName">
+
+               <wsdlsoap:operation soapAction=""/>
+
+               <wsdl:input name="getObjectNameRequest">
+
+                    <wsdlsoap:body use="literal"/>
+
+                    <wsdlsoap:header message="impl:SecurityRequestHeader" namespace="http://documentum.com/ws/2005/services" part="DocumentumRequestHeader" use="literal"/>
+
+               </wsdl:input>
+
+               <wsdl:output name="getObjectNameResponse">
+
+                    <wsdlsoap:body use="literal"/>
+
+               </wsdl:output>
+
+               <wsdl:fault name="WebServiceException">
+
+                    <wsdlsoap:fault name="WebServiceException" use="literal"/>
+
+               </wsdl:fault>
+
+          </wsdl:operation>
+
+          <wsdl:operation name="exportObjectXferUcf">
+
+               <wsdlsoap:operation soapAction=""/>
+
+               <wsdl:input name="exportObjectXferUcfRequest">
+
+                    <wsdlsoap:body use="literal"/>
+
+                    <wsdlsoap:header message="impl:SecurityRequestHeader" namespace="http://documentum.com/ws/2005/services" part="DocumentumRequestHeader" use="literal"/>
+
+                    <wsdlsoap:header message="impl:UcfRequestHeader" namespace="http://documentum.com/ws/2005/services" part="DocumentumUcfRequestHeader" se="literal"/>
+
+               </wsdl:input>
+
+               <wsdl:output name="exportObjectXferUcfResponse">
+
+                    <wsdlsoap:body use="literal"/>
+
+               </wsdl:output>
+
+              <wsdl:fault name="WebServiceException">
+
+                    <wsdlsoap:fault name="WebServiceException" use="literal"/>
+
+               </wsdl:fault>
+
+          </wsdl:operation>
+
+          <wsdl:operation name="exportObjectXferBase64">
+
+               <wsdlsoap:operation soapAction=""/>
+
+               <wsdl:input name="exportObjectXferBase64Request">
+
+                    <wsdlsoap:body use="literal"/>
+
+                    <wsdlsoap:header message="impl:SecurityRequestHeader" namespace="http://documentum.com/ws/2005/services" part="DocumentumRequestHeader" use="literal"/>
+
+               </wsdl:input>
+
+               <wsdl:output name="exportObjectXferBase64Response">
+
+                    <wsdlsoap:body use="literal"/>
+
+               </wsdl:output>
+
+               <wsdl:fault name="WebServiceException">
+
+                    <wsdlsoap:fault name="WebServiceException" use="literal"/>
+
+               </wsdl:fault>
+
+          </wsdl:operation>
+
+          <wsdl:operation name="importFileXferUcf">
+
+               <wsdlsoap:operation soapAction=""/>
+
+               <wsdl:input name="importFileXferUcfRequest">
+
+                    <wsdlsoap:body use="literal"/>
+
+                    <wsdlsoap:header message="impl:SecurityRequestHeader" namespace="http://documentum.com/ws/2005/services" part="DocumentumRequestHeader" use="literal"/>
+
+                    <wsdlsoap:header message="impl:UcfRequestHeader" namespace="http://documentum.com/ws/2005/services" part="DocumentumUcfRequestHeader" se="literal"/>
+
+               </wsdl:input>
+
+               <wsdl:output name="importFileXferUcfResponse">
+
+                    <wsdlsoap:body use="literal"/>
+
+               </wsdl:output>
+
+               <wsdl:fault name="WebServiceException">
+
+                    <wsdlsoap:fault name="WebServiceException" use="literal"/>
+
+               </wsdl:fault>
+
+          </wsdl:operation>
+
+          <wsdl:operation name="importFileXferBase64">
+
+               <wsdlsoap:operation soapAction=""/>
+
+               <wsdl:input name="importFileXferBase64Request">
+
+                    <wsdlsoap:body use="literal"/>
+
+                    <wsdlsoap:header message="impl:SecurityRequestHeader" namespace="http://documentum.com/ws/2005/services" part="DocumentumRequestHeader" use="literal"/>
+
+               </wsdl:input>
+
+               <wsdl:output name="importFileXferBase64Response">
+
+                    <wsdlsoap:body use="literal"/>
+
+               </wsdl:output>
+
+               <wsdl:fault name="WebServiceException">
+
+                    <wsdlsoap:fault name="WebServiceException" use="literal"/>
+
+               </wsdl:fault>
+
+          </wsdl:operation>
+
+          <wsdl:operation name="initUCF">
+
+               <wsdlsoap:operation soapAction=""/>
+
+               <wsdl:input name="initUCFRequest">
+
+                    <wsdlsoap:body use="literal"/>
+
+                    <wsdlsoap:header message="impl:SecurityRequestHeader" namespace="http://documentum.com/ws/2005/services" part="DocumentumRequestHeader" use="literal"/>
+
+               </wsdl:input>
+
+               <wsdl:output name="initUCFResponse">
+
+                    <wsdlsoap:body use="literal"/>
+
+               </wsdl:output>
+
+          </wsdl:operation>
+
+     </wsdl:binding>
+
+     <wsdl:service name="RepoAccessorService">
+
+          <wsdl:port binding="impl:RepoAccessorSoapBinding" name="RepoAccessor">
+
+               <wsdlsoap:address location="http://bp1cstap306-v:8080/ws/services/RepoAccessor"/>
+
+          </wsdl:port>
+
+     </wsdl:service>
+
+            </wsdl:definitions>

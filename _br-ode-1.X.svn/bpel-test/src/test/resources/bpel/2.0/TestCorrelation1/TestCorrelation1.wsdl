@@ -1,0 +1,97 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+-->
+
+<wsdl:definitions targetNamespace="http://ode/bpel/unit-test/testCorrelation1.wsdl" xmlns:tns="http://ode/bpel/unit-test/testCorrelation1.wsdl" xmlns="http://ode/bpel/unit-test/testCorrelation1.wsdl"
+                  xmlns:ns0="http://www.w3schools.com" xmlns:ns1="http://ode/bpel/unit-test/testCorrelation1.wsdl.types" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:prop="http://docs.oasis-open.org/wsbpel/2.0/varprop">
+
+    <wsdl:types>
+        <xsd:schema targetNamespace="http://ode/bpel/unit-test/testCorrelation1.wsdl.types" xmlns="http://ode/bpel/unit-test/testCorrelation1.wsdl.types" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+            <xsd:element name="simpleString" type="xsd:string"/>
+        </xsd:schema>
+        <xs:schema elementFormDefault="qualified" targetNamespace="http://www.w3schools.com" xmlns="http://www.w3schools.com" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+            <xs:element name="note">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="to" type="xs:string"/>
+                        <xs:element name="from" type="xs:string"/>
+                        <xs:element name="heading" type="xs:string"/>
+                        <xs:element name="body" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="operation2Request">
+        <wsdl:part name="newParameter1" element="ns0:note"/>
+    </wsdl:message>
+    <wsdl:message name="operation3Request">
+        <wsdl:part name="newParameter1" element="ns1:simpleString"/>
+    </wsdl:message>
+    <wsdl:message name="operation1Request">
+        <wsdl:part name="newParameter1" type="xsd:string"/>
+    </wsdl:message>
+    <wsdl:message name="operation3Response">
+        <wsdl:part name="newParameter2" type="xsd:string"/>
+    </wsdl:message>
+    <wsdl:portType name="testCorrelation1PT">
+        <wsdl:operation name="operation3">
+            <wsdl:input name="operation3Input" message="tns:operation3Request"/>
+            <wsdl:output name="operation3Output" message="tns:operation3Response"/>
+        </wsdl:operation>
+        <wsdl:operation name="operation2">
+            <wsdl:input name="operation2Input" message="tns:operation2Request"/>
+        </wsdl:operation>
+        <wsdl:operation name="operation1">
+            <wsdl:input name="operation1Input" message="tns:operation1Request"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="testCorrelation1Binding" type="tns:testCorrelation1PT">
+        <wsdl:operation name="operation3">
+            <wsdl:input name="operation3Input"> </wsdl:input>
+            <wsdl:output name="operation3Output"> </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="operation2">
+            <wsdl:input name="operation2Input"> </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="operation1">
+            <wsdl:input name="operation1Input"> </wsdl:input>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="testCorrelation1Service">
+        <wsdl:port name="testCorrelation1Port" binding="tns:testCorrelation1Binding"> </wsdl:port>
+    </wsdl:service>
+
+    <plnk:partnerLinkType name="testCorrelation1Request">
+        <plnk:role name="testCorrelation1Service" portType="testCorrelation1PT"/>
+    </plnk:partnerLinkType>
+
+    <prop:property name="testCorrelation1Variable1" type="xsd:string"/>
+    <prop:propertyAlias messageType="tns:operation2Request" part="newParameter1" propertyName="tns:testCorrelation1Variable1">
+        <prop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">ns0:to</prop:query>
+    </prop:propertyAlias>
+    <prop:propertyAlias messageType="tns:operation3Request" part="newParameter1" propertyName="tns:testCorrelation1Variable1">
+    </prop:propertyAlias>
+    <prop:propertyAlias messageType="tns:operation1Request" part="newParameter1" propertyName="tns:testCorrelation1Variable1">
+    </prop:propertyAlias>
+</wsdl:definitions>
