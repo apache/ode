@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<bpel:process xmlns:bpel="http://schemas.xmlsoap.org/ws/2004/03/business-process/" xmlns:pnlk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:Client="http://example.com/helloworld/Client" xmlns:this="http://example.com/helloworld/Server" xmlns:tns="http://www.example.org/message" xmlns:diag="http://example.com/helloworld" xmlns:bpmn="http://www.intalio.com/bpms" queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" bpmn:label="Server" bpmn:id="_eAYxsEo7EdyemZotQ08t3A" name="Server" targetNamespace="http://example.com/helloworld/Server">
+  <bpel:import namespace="http://example.com/helloworld" location="helloworld.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:import namespace="http://example.com/helloworld/Server" location="helloworld-Server.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:import namespace="http://www.example.org/message" location="message.xsd" importType="http://www.w3.org/2001/XMLSchema"></bpel:import>
+  <bpel:partnerLinks>
+    <bpel:partnerLink name="serverAndClientPlkVar" partnerLinkType="diag:ServerAndClient" myRole="Server_for_Client"/>
+  </bpel:partnerLinks>
+  <bpel:variables>
+    <bpel:variable name="thisReceiveRequestMsg" messageType="this:receiveRequest"/>
+    <bpel:variable name="thisReceiveResponseMsg" messageType="this:receiveResponse"/>
+    <bpel:variable name="Data" type="tns:Data"/>
+  </bpel:variables>
+  <bpel:sequence>
+    <bpel:receive partnerLink="serverAndClientPlkVar" portType="this:ForClient" operation="receive" variable="thisReceiveRequestMsg" createInstance="yes" bpmn:label="receive" bpmn:id="_evn2QEo7EdyemZotQ08t3A"></bpel:receive>
+    <bpel:assign name="init-variables-Server">
+      <bpel:copy bpmn:label="$thisReceiveResponseMsg  out:_gfFowEo7EdyemZotQ08t3A">
+        <bpel:from>
+          <bpel:literal>
+<this:receiveResponse>
+</this:receiveResponse>
+          </bpel:literal>
+        </bpel:from>
+        <bpel:to>$thisReceiveResponseMsg.body</bpel:to>
+      </bpel:copy>
+      <bpel:copy bpmn:label="$Data">
+        <bpel:from>
+          <bpel:literal>
+          </bpel:literal>
+        </bpel:from>
+        <bpel:to>$Data</bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+    <bpel:assign bpmn:label="invoke" bpmn:id="_FrsFcEpAEdySiIWBetfiFA">
+      <bpel:copy>
+        <bpel:from>"test"</bpel:from>
+        <bpel:to>$Data/tns:Name</bpel:to>
+      </bpel:copy>
+      <bpel:copy>
+        <bpel:from>"world"</bpel:from>
+        <bpel:to>$Data/tns:Age</bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+    <bpel:assign bpmn:label="result" bpmn:id="_fz4IkEo7EdyemZotQ08t3A">
+      <bpel:copy>
+        <bpel:from>concat($Data/tns:Name, $Data/tns:Age)</bpel:from>
+        <bpel:to>$thisReceiveResponseMsg.body</bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+    <bpel:reply partnerLink="serverAndClientPlkVar" portType="this:ForClient" operation="receive" variable="thisReceiveResponseMsg" bpmn:label="result" bpmn:id="_fz4IkEo7EdyemZotQ08t3A"></bpel:reply>
+  </bpel:sequence>
+</bpel:process>

@@ -1,0 +1,101 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+-->
+
+<bpel:process xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://docs.oasis-open.org/wsbpel/2.0/process/executable ../../../../../../../bpel-schemas/src/main/resources/wsbpel_executable.xsd"
+  xmlns:tns="http://ode/bpel/unit-test/TestCatchFaultInFaultHandler"
+  xmlns:wns="http://ode/bpel/unit-test/TestCatchFaultInFaultHandler.wsdl"
+  xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+  name="TestCatchFaultInFaultHandler"
+  targetNamespace="http://ode/bpel/unit-test/TestCatchFaultInFaultHandler"
+  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+  expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+  suppressJoinFailure="yes">
+  
+  <bpel:import location="TestCatchFaultInFaultHandler.wsdl"
+    namespace="http://ode/bpel/unit-test/TestCatchFaultInFaultHandler.wsdl"
+    importType="http://schemas.xmlsoap.org/wsdl/" />
+  
+  <bpel:partnerLinks>
+    <bpel:partnerLink name="TestCatchFaultInFaultHandlerPL" partnerLinkType="wns:TestCatchFaultInFaultHandlerRequest" myRole="TestCatchFaultInFaultHandlerService"/>
+  </bpel:partnerLinks>
+  <bpel:scope name="ID1127336036600153">
+    <bpel:variables>
+      <bpel:variable messageType="wns:operation1Request" name="BP112733603660012"/>
+      <bpel:variable messageType="wns:operation1Response" name="BP112733616006913"/>
+    </bpel:variables>
+    <bpel:faultHandlers>
+      <bpel:catchAll>
+        <bpel:flow>
+          <bpel:sequence>
+            <bpel:assign name="ID1127336402868200-1">
+              <bpel:copy>
+                <bpel:from>'doesn&amp;apos;t work'</bpel:from>
+                <bpel:to>$BP112733616006913.output1</bpel:to>
+              </bpel:copy>
+            </bpel:assign>
+            <bpel:reply name="ID1127336407008201" operation="operation1" partnerLink="TestCatchFaultInFaultHandlerPL" portType="wns:TestCatchFaultInFaultHandlerPT" variable="BP112733616006913"/>
+          </bpel:sequence>
+        </bpel:flow>
+      </bpel:catchAll>
+    </bpel:faultHandlers>
+    <bpel:flow>
+      <bpel:sequence>
+        <bpel:receive name="ID1127336036600156" createInstance="yes" operation="operation1" partnerLink="TestCatchFaultInFaultHandlerPL" portType="wns:TestCatchFaultInFaultHandlerPT" variable="BP112733603660012"/>
+        <bpel:scope name="ID1127336181272165">
+          <bpel:faultHandlers>
+            <bpel:catch faultName="tns:Exception1">
+              <bpel:flow>
+                <bpel:sequence>
+                  <bpel:scope name="ID1127336251523176">
+                    <bpel:faultHandlers>
+                      <bpel:catch faultName="tns:Exception2">
+                        <bpel:flow>
+                          <bpel:sequence>
+                            <bpel:assign name="ID1127336307445194-1">
+                              <bpel:copy>
+                                <bpel:from>'works'</bpel:from>
+                                <bpel:to>$BP112733616006913.output1</bpel:to>
+                              </bpel:copy>
+                            </bpel:assign>
+                          </bpel:sequence>
+                        </bpel:flow>
+                      </bpel:catch>
+                    </bpel:faultHandlers>
+                    <bpel:flow>
+                      <bpel:sequence>
+                        <bpel:throw faultName="tns:Exception2"/>
+                      </bpel:sequence>
+                    </bpel:flow>
+                  </bpel:scope>
+                </bpel:sequence>
+              </bpel:flow>
+            </bpel:catch>
+          </bpel:faultHandlers>
+          <bpel:flow>
+            <bpel:sequence>
+              <bpel:throw faultName="tns:Exception1"/>
+            </bpel:sequence>
+          </bpel:flow>
+        </bpel:scope>
+        <bpel:reply name="ID1127336160069161" operation="operation1" partnerLink="TestCatchFaultInFaultHandlerPL" portType="wns:TestCatchFaultInFaultHandlerPT" variable="BP112733616006913"/>
+      </bpel:sequence>
+    </bpel:flow>
+  </bpel:scope>
+</bpel:process>

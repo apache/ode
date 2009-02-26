@@ -1,0 +1,11 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<wsdl:definitions xmlns:process="http://ode.apache.org/test4/process"
+                  xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+                  xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  targetNamespace="http://ode.apache.org/test4">
+    <wsdl:import namespace="http://ode.apache.org/test4/process" location="test4-process.wsdl"/>
+    <pnlk:partnerLinkType name="processAndPool">
+        <pnlk:role name="process_for_Pool" portType="process:ForPool"/>
+    </pnlk:partnerLinkType>
+</wsdl:definitions>

@@ -1,0 +1,66 @@
+<!--
+   ~ Licensed to the Apache Software Foundation (ASF) under one
+   ~ or more contributor license agreements.  See the NOTICE file
+   ~ distributed with this work for additional information
+   ~ regarding copyright ownership.  The ASF licenses this file
+   ~ to you under the Apache License, Version 2.0 (the
+   ~ "License"); you may not use this file except in compliance
+   ~ with the License.  You may obtain a copy of the License at
+   ~
+   ~    http://www.apache.org/licenses/LICENSE-2.0
+   ~
+   ~ Unless required by applicable law or agreed to in writing,
+   ~ software distributed under the License is distributed on an
+   ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+   ~ KIND, either express or implied.  See the License for the
+   ~ specific language governing permissions and limitations
+   ~ under the License.
+-->
+
+<wsdl:definitions 
+   targetNamespace="http://ode/bpel/unit-test/testFaultHandlers.wsdl"
+   xmlns:tns="http://ode/bpel/unit-test/testFaultHandlers.wsdl"
+   xmlns="http://ode/bpel/unit-test/testFaultHandlers.wsdl"
+   xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"      
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+   xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
+   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+
+   <wsdl:message name="requestMessage">
+     <wsdl:part name="requestID" type="xsd:string"/>
+     <wsdl:part name="requestText" type="xsd:string"/>
+     <wsdl:part name="faultIndicator1" type="xsd:string"/>
+     <wsdl:part name="faultIndicator2" type="xsd:string"/>
+   </wsdl:message>
+   
+   <wsdl:message name="replyMessage">
+      <wsdl:part name="replyID" type="xsd:string"/>
+      <wsdl:part name="replyText" type="xsd:string"/>
+   </wsdl:message>
+
+
+   <wsdl:portType name="testFaultHandlersPT">
+      <wsdl:operation name="request">
+         <wsdl:input message="requestMessage"/>
+         <wsdl:output message="replyMessage"/>
+      </wsdl:operation>
+   </wsdl:portType>
+   
+   <wsdl:binding name="testFaultHandlersBinding" type="tns:testFaultHandlersPT">
+      <wsdl:operation name="request">
+      </wsdl:operation>
+   </wsdl:binding>
+   <wsdl:service name="testFaultHandlersService">
+      <wsdl:port name="testFaultHandlersPort" binding="tns:testFaultHandlersBinding">
+      </wsdl:port>
+   </wsdl:service>
+
+   <plnk:partnerLinkType name="testFaultHandlersRequest">
+      <plnk:role name="testFaultHandlersService" portType="testFaultHandlersPT"/>
+   </plnk:partnerLinkType>
+
+   <plnk:partnerLinkType name="probeRequest">
+      <plnk:role name="probeService" portType="prb:probeMessagePT"/>
+   </plnk:partnerLinkType>
+
+</wsdl:definitions>

@@ -1,0 +1,239 @@
+<!--
+	~ Licensed to the Apache Software Foundation (ASF) under one
+	~ or more contributor license agreements.  See the NOTICE file
+	~ distributed with this work for additional information
+	~ regarding copyright ownership.  The ASF licenses this file
+	~ to you under the Apache License, Version 2.0 (the
+	~ "License"); you may not use this file except in compliance
+	~ with the License.  You may obtain a copy of the License at
+	~
+	~    http://www.apache.org/licenses/LICENSE-2.0
+	~
+	~ Unless required by applicable law or agreed to in writing,
+	~ software distributed under the License is distributed on an
+	~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	~ KIND, either express or implied.  See the License for the
+	~ specific language governing permissions and limitations
+	~ under the License.
+-->
+<process xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://docs.oasis-open.org/wsbpel/2.0/process/executable ../../../../../../../bpel-schemas/src/main/resources/wsbpel_executable.xsd"
+ xmlns:tns="http://ode/bpel/unit-test/TestSubTreeAssign"
+ xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
+ xmlns:types="http://ode/bpel/unit-test/TestSubTreeAssign.wsdl.types"
+ xmlns:foo="http://ode/bpel/unit-test/TestSubTreeAssign.wsdl.types"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:wns="http://ode/bpel/unit-test/TestSubTreeAssign.wsdl"
+ xmlns:ode="http://www.apache.org/ode/type/extension"
+ xmlns:fn="http://www.w3.org/2005/xpath-functions"
+ xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+ targetNamespace="http://ode/bpel/unit-test/TestSubTreeAssign"
+ name="TestSubTreeAssign"
+ queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+ expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+ suppressJoinFailure="yes">
+	
+	<import location="TestSubTreeAssign.wsdl"
+		namespace="http://ode/bpel/unit-test/TestSubTreeAssign.wsdl"
+		importType="http://schemas.xmlsoap.org/wsdl/" />
+	<import location="../ProbeService/probeService.wsdl"
+		namespace="http://ode/bpel/unit-test/ProbeService.wsdl"
+		importType="http://schemas.xmlsoap.org/wsdl/"/>
+ 	
+ 	<partnerLinks>
+ 		<partnerLink name="request" partnerLinkType="wns:TestSubTreeAssignRequest" myRole="TestSubTreeAssignService"/>
+ 	</partnerLinks>
+ 	<variables>
+ 		<variable name="request" messageType="wns:requestMessage"/>
+ 		<variable name="testType1" element="types:aTestMessage"/>
+ 		<variable name="testType2" element="types:aTestMessage"/>
+ 		<variable name="testType3" type="xsd:string"/>
+ 		<variable name="testType4" type="xsd:string"/>
+ 		<variable name="reply" messageType="wns:replyMessage"/>
+ 	</variables>
+ 	<sequence>
+ 		<receive name="receive1" partnerLink="request" portType="wns:TestSubTreeAssignPT" operation="request" variable="request" createInstance="yes"/>
+ 
+ 		<assign name="assign1">
+ 			<!-- copy a tree to a tree -->
+ 			<copy>
+ 				<from>$request.requestMessageData/typeIndicators/types:indicatorTwo</from>
+ 				<to variable="testType3"/>
+ 			</copy>
+ 			<copy>
+ 				<from variable="request" property="wns:testPath"/>
+ 				<to variable="testType4"/>
+ 			</copy>
+ 			<copy>
+ 				<from variable="request" part="requestMessageData"/>
+ 				<to variable="testType1"/>
+ 			</copy>
+ 			<copy>
+ 				<from variable="testType1"/>
+ 				<to variable="testType2"/>
+ 			</copy>
+ 			<!-- copy value into tree -->
+ 			<copy>
+ 				<from>
+ 					<literal><![CDATA[pass]]></literal>
+ 				</from>
+ 				<to>$testType1/typeIndicators/types:indicatorTwo</to>
+ 			</copy>		
+ 		</assign>
+ 	
+ 		<assign name="assign2">
+ 			<!-- copy subtree to tree -->
+ 			<copy>
+ 				<from>$testType1/typeIndicators</from>
+ 				<to>$testType2/typeIndicators</to>
+ 			</copy>
+ 		</assign>
+ 		
+ 		<assign name="assign3">			
+ 			<copy>
+ 				<from>$testType2/requestID</from>
+ 				<to variable="reply" part="replyID"/>
+ 			</copy>
+ 			<copy>
+ 				<from>$testType2/typeIndicators/types:indicatorTwo</from>
+ 				<to>$reply.replyText</to>
+ 			</copy>
+ 		</assign>
+ 
+ 		<!-- test update functions -->
+ 		<!-- delete and insert as last into -->
+ 		<assign name="assign4">			
+ 			<copy>
+ 				<from variable="request" part="requestMessageData"/>
+ 				<to variable="testType1"/>
+ 			</copy>
+ 			<copy>
+ 				<from variable="request" part="requestMessageData"/>
+ 				<to variable="testType2"/>
+ 			</copy>
+ 			<copy>
+ 				<from>ode:delete($testType1/typeIndicators, $testType1/typeIndicators/types:indicatorTwo)</from>
+ 				<to>$testType1/typeIndicators</to>
+ 			</copy>
+ 			<copy>
+ 				<from>ode:insert-as-last-into($testType1/typeIndicators, $testType2/typeIndicators/types:indicatorTwo)</from>
+ 				<to>$testType1/typeIndicators</to>
+ 			</copy>
+ 		</assign>
+ 		
+ 		<if>
+ 		    <condition>fn:not(fn:deep-equal($testType1, $testType2))</condition>
+ 			<throw faultName="selectionFailure"/>
+ 		</if>
+ 		
+ 		<!-- delete and insert as first into -->
+ 		<assign name="assign5">			
+ 			<copy>
+ 				<from variable="request" part="requestMessageData"/>
+ 				<to variable="testType1"/>
+ 			</copy>
+ 			<copy>
+ 				<from variable="request" part="requestMessageData"/>
+ 				<to variable="testType2"/>
+ 			</copy>
+ 			<copy>
+ 				<from>ode:delete($testType1/typeIndicators/types:indicatorOne)</from>
+ 				<to>$testType1/typeIndicators</to>
+ 			</copy>
+ 			<copy>
+ 				<from>ode:insert-as-first-into($testType1/typeIndicators, $testType2/typeIndicators/types:indicatorOne)</from>
+ 				<to>$testType1/typeIndicators</to>
+ 			</copy>
+ 		</assign>
+ 		
+ 		<if>
+ 		    <condition>fn:not(fn:deep-equal($testType1, $testType2))</condition>
+ 			<throw faultName="selectionFailure"/>
+ 		</if>
+ 		
+ 		<!-- delete and insert before -->
+ 		<assign name="assign6">			
+ 			<copy>
+ 				<from variable="request" part="requestMessageData"/>
+ 				<to variable="testType1"/>
+ 			</copy>
+ 			<copy>
+ 				<from variable="request" part="requestMessageData"/>
+ 				<to variable="testType2"/>
+ 			</copy>
+ 			<copy>
+ 				<from>ode:delete($testType1/typeIndicators/types:indicatorOne)</from>
+ 				<to>$testType1/typeIndicators</to>
+ 			</copy>
+ 			<copy>
+ 				<from>ode:insert-before($testType1/typeIndicators, $testType1/typeIndicators/types:indicatorTwo, $testType2/typeIndicators/types:indicatorOne)</from>
+ 				<to>$testType1/typeIndicators</to>
+ 			</copy>
+ 		</assign>
+ 		
+ 		<if>
+ 		    <condition>fn:not(fn:deep-equal($testType1, $testType2))</condition>
+ 			<throw faultName="selectionFailure"/>
+ 		</if>
+ 		
+ 		<!-- delete and insert after -->
+ 		<assign name="assign7">			
+ 			<copy>
+ 				<from variable="request" part="requestMessageData"/>
+ 				<to variable="testType1"/>
+ 			</copy>
+ 			<copy>
+ 				<from variable="request" part="requestMessageData"/>
+ 				<to variable="testType2"/>
+ 			</copy>
+ 			<copy>
+ 				<from>ode:delete($testType1/typeIndicators/types:indicatorTwo)</from>
+ 				<to>$testType1/typeIndicators</to>
+ 			</copy>
+ 			<copy>
+ 				<from>ode:insert-after($testType1/typeIndicators/types:indicatorOne, $testType2/typeIndicators/types:indicatorTwo)</from>
+ 				<to>$testType1/typeIndicators</to>
+ 			</copy>
+ 		</assign>
+ 		
+ 		<if>
+ 		    <condition>fn:not(fn:deep-equal($testType1, $testType2))</condition>
+ 			<throw faultName="selectionFailure"/>
+ 		</if>
+ 		
+ 		<!-- rename twice -->
+ 		<assign name="assign7">			
+ 			<copy>
+ 				<from variable="request" part="requestMessageData"/>
+ 				<to variable="testType1"/>
+ 			</copy>
+ 			<copy>
+ 				<from variable="request" part="requestMessageData"/>
+ 				<to variable="testType2"/>
+ 			</copy>
+ 			<copy>
+ 				<from>ode:rename($testType1/typeIndicators/types:indicatorTwo, "foo:indicatorOne")</from>
+ 				<to>$testType1/typeIndicators</to>
+ 			</copy>
+ 			<copy>
+ 				<from>ode:rename($testType1/typeIndicators/types:indicatorOne[2], "foo:indicatorTwo")</from>
+ 				<to>$testType1/typeIndicators</to>
+ 			</copy>
+ 			<copy>
+ 				<from>ode:rename($testType1/typeIndicators/types:indicatorTwo, QName("http://ode/bpel/unit-test/TestSubTreeAssign.wsdl.types", "foo:indicatorOne"))</from>
+ 				<to>$testType1/typeIndicators</to>
+ 			</copy>
+ 			<copy>
+ 				<from>ode:rename($testType1/typeIndicators/types:indicatorOne[2], $testType2/typeIndicators/types:indicatorTwo)</from>
+ 				<to>$testType1/typeIndicators</to>
+ 			</copy>
+ 		</assign>
+ 		
+ 		<if>
+ 		    <condition>fn:not(fn:deep-equal($testType1, $testType2))</condition>
+ 			<throw faultName="selectionFailure"/>
+ 		</if>
+ 		
+ 		<reply name="reply" partnerLink="request" portType="wns:TestSubTreeAssignPT" operation="request" variable="reply"/>
+ 	</sequence>
+ </process>

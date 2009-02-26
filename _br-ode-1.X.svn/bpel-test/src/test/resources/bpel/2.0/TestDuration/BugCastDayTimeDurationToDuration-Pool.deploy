@@ -1,0 +1,8 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<dd:process xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd" xmlns:tns="http://www.example.org/duration" xmlns:diag="http://example.com/BugCastDayTimeDurationToDuration" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:this="http://example.com/BugCastDayTimeDurationToDuration/Pool" xmlns:Pool0="http://example.com/BugCastDayTimeDurationToDuration/Pool0" name="this:Pool" fileName="BugCastDayTimeDurationToDuration-Pool.bpel">
+  <dd:property name="PATH">BugCastDayTimeDurationToDuration</dd:property>
+  <dd:property name="SVG">BugCastDayTimeDurationToDuration.svg</dd:property>
+  <dd:provide partnerLink="pool0AndPoolPlkVar">
+    <dd:service name="this:CanonicServiceForPool0" port="canonicPort"/>
+  </dd:provide>
+</dd:process>

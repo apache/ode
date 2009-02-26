@@ -1,0 +1,203 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Apache ODE | Deployment</title>
+        <link rel="stylesheet" href="css/style.css" type="text/css" media="screen, projection"/>
+        <link rel="stylesheet" href="js/yui/css/container.css" media="screen, projection"/>
+        <link rel="stylesheet" href="js/yui/css/button.css" media="screen, projection"/>
+        <link rel="stylesheet" href="js/bubbling/assets/accordion.css" media="screen, projection"/>
+        <link rel="stylesheet" type="text/css" href="js/yui/tab/skins/sam/tabview.css"/>
+        <link rel="stylesheet" type=="text/css" href="js/codepress/codepress.css"/>
+        <script type="text/javascript" src="js/WSRequest.js">
+        </script>
+        <script type="text/javascript" src="js/codepress/codepress.js">
+        </script>
+        <script type="text/javascript" src="js/ProcessManagementAPI.js">
+        </script>
+        <script type="text/javascript" src="js/InstanceManagementAPI.js">
+        </script>
+        <script type="text/javascript" src="js/DeploymentService.js">
+        </script>
+        <script type="text/javascript" src="js/yui/utilities.js">
+        </script>
+        <script type="text/javascript" src="js/yui/container.js"></script>
+        <script type="text/javascript" src="js/yui/button.js">
+        </script>
+		 <script type="text/javascript" src="js/yui/animation.js">
+        </script>
+        <script type="text/javascript" src="js/bubbling/bubbling.js">
+        </script>
+        <script type="text/javascript" src="js/bubbling/accordion.js">
+        </script>
+        <script type="text/javascript" src="js/ODE.js">
+        </script>
+        <script type="text/javascript" src="js/yui/tabview.js">
+        </script>
+        <script type="text/javascript">
+        	
+            function init(){
+				org.apache.ode.DeploymentHandling.populateDeployedPacks();
+				setInterval('org.apache.ode.DeploymentHandling.populateDeployedPacks()', 15000);
+				var myTabs = new YAHOO.widget.TabView("tabt");
+			}
+            
+            YAHOO.util.Event.onDOMReady(init);
+        </script>
+        <style type="text/css">
+            button {
+                background: transparent url(../button/assets/add.gif) no-repeat scroll 10% 50%;
+                padding-left: 2em;
+            }
+            
+            .link {
+                margin-left: 5px;
+                color: blue;
+            }
+            
+            .myAccordion .yui-cms-accordion .yui-cms-item {
+                margin-bottom: 10px;
+            }
+            
+            .bd {
+                background: #FFFFFF none repeat scroll 0 0;
+            }
+            
+            ul.deployed {
+                padding: 10px 0px;
+                list-style-image: url(images/process.png);
+                margin-left: 30px;
+            }
+            
+            ul.deployed li {
+                font-family: serif;
+                font-size: 1.2em;
+                font-weight: bold;
+                padding: 5px 10px 5px 0px;
+                line-height: 20px;
+            }
+			
+			.depn, .createn{
+				margin-top:30px;
+			}
+        </style>
+    </head>
+    <body>
+        <div id="header">
+            <div id="login">
+                <a href="http://apache.org">Apache</a>
+                |<a href="http://ode.apache.org">ODE</a>
+                |<a href="http://ode.apache.org/user-guide.html">User Guide</a>
+                |<a href="http://ode.apache.org/developer-guide.html">Developer Guide</a>
+            </div>
+            <h1><img src="images/logo.png" alt="Apache ODE"/></h1>
+        </div>
+        <div id="siteNav">
+            <ul>
+                <li>
+                    <a href="index.html">Home</a>
+                </li>
+                <li>
+                    <a href="processes.html">Processes</a>
+                </li>
+                <li>
+                    <a href="instances.html">Instances</a>
+                </li>
+                <li class="current">
+                    <a href="#">Deployment</a>
+                </li>
+            </ul>
+        </div>
+        <div id="wrapper">
+            <dir id="insideW">
+                <div id="insideL">
+                    <div id="content" class="yui-skin-sam">
+                    	
+                        <h2>Deployed Packages</h2>
+						<div id="deployed" class="yui-skin-sam">
+                    		
+                    	</div>
+						
+                        <h2 class="depn">Deploy New Process</h2>
+                        <script type="text/javascript">
+                        // Removes leading whitespaces
+                        function LTrim( value ) {
+	                        var re = /\s*((\S+\s*)*)/;
+	                        return value.replace(re, "$1");
+                        }
+
+                        // Removes ending whitespaces
+                        function RTrim( value ) {
+		                    var re = /((\s*\S+)*)\s*/;
+	                        return value.replace(re, "$1");
+                        }
+
+                        // Removes leading and ending whitespaces
+                        function trim( value ) {
+                            return LTrim(RTrim(value));
+                        }	
+
+                        function clearOpstat(){
+                            var opStatDiv = document.getElementById('opstat');
+                            opStatDiv.value = "";
+                        }
+
+                        function handleSuccess(o){
+                            document.getElementById('opstat').innerHTML = '<h2 style="color:red;border-bottom:0px;">'+ trim(o.responseText).replace(/\n/g, "") + '</h2>';
+                            org.apache.ode.DeploymentHandling.populateDeployedPacks();
+                        }
+                        function handleFailure(o){
+                            document.getElementById('opstat').innerHTML = trim(o.responseText).replace(/\n/g, "");
+                        }
+
+                        var callback = {
+                            success:handleSuccess,
+                            failure:handleFailure,
+                            upload:handleSuccess
+                        }
+
+                        function submitFormAsync(fomrID){
+                            clearOpstat();
+                            var form = document.getElementById(fomrID);
+                            if(document.getElementById('uploadfile').value == ""){
+                                alert('Please select a package to deploy!');
+                            }else{
+                                YAHOO.util.Connect.setForm(form, true, true);
+                                YAHOO.util.Connect.asyncRequest("POST", form.getAttribute("action"), callback, null);
+                            }
+                        }
+                        </script>
+                        <form id="formdep" name="form" method="post" enctype="multipart/form-data" action="fileupload.jsp" >
+                            <table>
+                                <tr>
+                                    <th align="left">
+                                        Name
+                                    </th>
+                                    <td>
+                                        <input type="text" id="fileName" name="fileName" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th align="left">
+                                        Upload File
+                                    </th>
+                                    <td>
+                                        <input type="file" id="uploadfile" name="uploadfile" />
+                                    </td>
+                                </tr>
+                            </table>
+                            <br>
+                            <input type="button" id="doUpload" name="doUpload" value="OK" onclick="submitFormAsync('formdep');" />
+							
+                        </form>
+                        <div id="opstat" onload="clearOpstat();">
+                        </div>
+					    <div>
+                            <script type="text/javascript">
+                                CodePress.run();
+                            </script>
+                        </div>
+                        </div>
+                        </dir>
+                    </div>
+                    </body>
+                </html>

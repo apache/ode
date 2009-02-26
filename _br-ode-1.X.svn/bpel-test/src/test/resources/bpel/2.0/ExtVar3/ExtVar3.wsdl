@@ -1,0 +1,7 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<wsdl:definitions xmlns:bpdm="http://www.intalio/designer/business-process-data-modeling" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:diag="http://example.com/process/ExtVar3" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://www.example.org/TestSchema" xmlns:external="http://example.com/process/ExtVar3/external" xmlns:bamtest="http://test.com/xvar/example" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:EmptyValues="http://example.com/process/ExtVar3/EmptyValues" targetNamespace="http://example.com/process/ExtVar3">
+    <wsdl:import namespace="http://example.com/process/ExtVar3/EmptyValues" location="ExtVar3-EmptyValues.wsdl"/>
+    <pnlk:partnerLinkType name="EmptyValuesAndExternal">
+        <pnlk:role name="EmptyValues_for_external" portType="EmptyValues:Forexternal"/>
+    </pnlk:partnerLinkType>
+</wsdl:definitions>

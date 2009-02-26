@@ -1,0 +1,313 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<process name="http-binding-ext-PUT"
+         targetNamespace="http://ode/bpel/unit-test"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:tns="http://ode/bpel/unit-test"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:test="http://ode/bpel/unit-test.wsdl"
+         xmlns:dummy="http://ode/bpel/test/blog"
+         xmlns:ext="http://ode.apache.org/activityRecovery"
+         queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+         expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+
+    <import location="http-binding-ext-PUT.wsdl"
+            namespace="http://ode/bpel/unit-test.wsdl"
+            importType="http://schemas.xmlsoap.org/wsdl/"/>
+
+    <partnerLinks>
+        <partnerLink name="helloPartnerLink"
+                     partnerLinkType="test:HelloPartnerLinkType" myRole="me"/>
+        <partnerLink name="blogPartnerLink"
+                     partnerLinkType="test:BlogLinkType" partnerRole="you"/>
+    </partnerLinks>
+
+    <variables>
+        <variable name="inputVar" messageType="test:HelloMessage"/>
+        <variable name="outputVar" messageType="test:HelloMessage"/>
+        <variable name="faultVar" messageType="dummy:UpdateFault"/>
+        <variable name="putMsg" messageType="dummy:PUTRequest"/>
+        <variable name="noPartMsg" messageType="dummy:NoPartMessage"/>
+    </variables>
+
+    <sequence>
+        <receive name="start" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                 operation="hello" variable="inputVar" createInstance="yes"/>
+
+        <!-- Initialize output var -->
+        <!-- Change this value to make the test fail. -->
+        <assign>
+            <copy>
+                <from>'What a success!'</from>
+                <to>$outputVar.TestPart</to>
+            </copy>
+        </assign>
+
+        <!-- Prepare the input message -->
+        <assign>
+            <copy>
+                <from>
+                    <literal>
+                        <dummy:article>
+                            <dummy:id></dummy:id>
+                            <dummy:title>Whatever could be a nice blog title</dummy:title>
+                        </dummy:article>
+                    </literal>
+                </from>
+                <to>$putMsg.article</to>
+            </copy>
+            <copy>
+                <from>string(round(seconds-from-dateTime(current-dateTime())))</from>
+                <to>$putMsg.articleId</to>
+            </copy>
+            <copy>
+                <from>$putMsg.articleId</from>
+                <to>$putMsg.article/dummy:id</to>
+            </copy>
+        </assign>
+
+
+        <!-- ############################################### -->
+        <!-- regular PUT -->
+        <!-- ############################################### -->
+        <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                operation="doPUT" inputVariable="putMsg" outputVariable="noPartMsg"/>
+        <!-- no real test to make here -->
+
+
+        <!-- ############################################### -->
+        <!-- 500_expected_xml_body - Fault expected  -->
+        <!-- ############################################### -->
+        <scope>
+            <faultHandlers>
+                <catch faultMessageType="dummy:UpdateFault" faultName="dummy:UpdateException" faultVariable="faultVar">
+                    <empty/>
+                </catch>
+            </faultHandlers>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'500_expected_xml_body'</from>
+                        <to variable="putMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doPUT" inputVariable="putMsg" outputVariable="noPartMsg"/>
+                <assign>
+                    <copy>
+                        <from>'500_expected_xml_body: A fault should have been thrown'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+                <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                       operation="hello" variable="outputVar"/>
+            </sequence>
+        </scope>
+
+
+        <!-- ############################################### -->
+        <!-- 500_no_body - failure expected  -->
+        <!-- ############################################### -->
+        <scope>
+            <ext:failureHandling>
+                <ext:faultOnFailure>true</ext:faultOnFailure>
+            </ext:failureHandling>
+            <faultHandlers>
+                <catch faultName="ext:activityFailure">
+                    <!-- expected result-->
+                    <!--
+                    Warning #1!! At this point what we know for sure is that a failure occured
+                    but we don't know which failure exactly.
+                    We would like to test if the the failure is really the one we triggered on purpose and not a TimeoutFailure for instance.
+                    -->
+                    <empty/>
+                </catch>
+            </faultHandlers>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'500_no_body'</from>
+                        <to variable="putMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doPUT" inputVariable="putMsg" outputVariable="noPartMsg">
+                </invoke>
+                <assign>
+                    <copy>
+                        <from>'500_no_body: A failure should have been thrown'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+                <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                       operation="hello" variable="outputVar"/>
+            </sequence>
+        </scope>
+
+        <!-- ############################################### -->
+        <!-- 500_text_body - failure expected  -->
+        <!-- ############################################### -->
+        <scope>
+            <ext:failureHandling>
+                <ext:faultOnFailure>true</ext:faultOnFailure>
+            </ext:failureHandling>
+            <faultHandlers>
+                <catch faultName="ext:activityFailure">
+                    <!-- expected result-->
+                    <!--
+                    Warning #1!! At this point what we know for sure is that a failure occured
+                    but we don't know which failure exactly.
+                    We would like to test if the the failure is really the one we triggered on purpose and not a TimeoutFailure for instance.
+                    -->
+                    <empty/>
+                </catch>
+            </faultHandlers>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'500_text_body'</from>
+                        <to variable="putMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doPUT" inputVariable="putMsg" outputVariable="noPartMsg"/>
+                <assign>
+                    <copy>
+                        <from>'500_text_body: A failure should have been thrown'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+                <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                       operation="hello" variable="outputVar"/>
+            </sequence>
+        </scope>
+
+        <!-- ############################################### -->
+        <!-- 500_unknown_xml_body - failure expected  -->
+        <!-- ############################################### -->
+        <scope>
+            <ext:failureHandling>
+                <ext:faultOnFailure>true</ext:faultOnFailure>
+            </ext:failureHandling>
+            <faultHandlers>
+                <catch faultName="ext:activityFailure">
+                    <!-- expected result-->
+                    <!--
+                    Warning #1!! At this point what we know for sure is that a failure occured
+                    but we don't know which failure exactly.
+                    We would like to test if the the failure is really the one we triggered on purpose and not a TimeoutFailure for instance.
+                    -->
+                    <empty/>
+                </catch>
+            </faultHandlers>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'500_unknown_xml_body'</from>
+                        <to variable="putMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doPUT" inputVariable="putMsg" outputVariable="noPartMsg">
+                </invoke>
+                <assign>
+                    <copy>
+                        <from>'500_unknown_xml_body: A failure should have been thrown'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+                <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                       operation="hello" variable="outputVar"/>
+            </sequence>
+        </scope>
+
+        <!-- ############################################### -->
+        <!-- 500_malformed_xml_body - failure expected  -->
+        <!-- ############################################### -->
+        <scope>
+            <ext:failureHandling>
+                <ext:faultOnFailure>true</ext:faultOnFailure>
+            </ext:failureHandling>
+            <faultHandlers>
+                <catch faultName="ext:activityFailure">
+                    <!-- expected result-->
+                    <!--
+                    Warning #1!! At this point what we know for sure is that a failure occured
+                    but we don't know which failure exactly.
+                    We would like to test if the the failure is really the one we triggered on purpose and not a TimeoutFailure for instance.
+                    -->
+                    <empty/>
+                </catch>
+            </faultHandlers>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'500_malformed_xml_body'</from>
+                        <to variable="putMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doPUT" inputVariable="putMsg" outputVariable="noPartMsg">
+                </invoke>
+                <assign>
+                    <copy>
+                        <from>'500_not-well-formed_xml_body: A failure should have been thrown'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+                <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                       operation="hello" variable="outputVar"/>
+            </sequence>
+        </scope>
+
+        <!-- ############################################### -->
+        <!-- 500_expected_xml_body - Fault expected  -->
+        <!-- ############################################### -->
+        <scope>
+            <faultHandlers>
+                <catch faultMessageType="dummy:UpdateFault" faultName="dummy:UpdateException" faultVariable="faultVar">
+                    <empty/>
+                </catch>
+            </faultHandlers>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'500_expected_xml_body'</from>
+                        <to variable="putMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doPUT" inputVariable="putMsg" outputVariable="noPartMsg"/>
+                <assign>
+                    <copy>
+                        <from>'500_expected_xml_body: A fault should have been thrown'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+                <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                       operation="hello" variable="outputVar"/>
+            </sequence>
+        </scope>
+
+
+        <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+               operation="hello" variable="outputVar"/>
+    </sequence>
+
+</process>

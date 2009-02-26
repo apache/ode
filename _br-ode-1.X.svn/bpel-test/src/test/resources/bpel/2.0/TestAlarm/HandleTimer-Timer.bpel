@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<bpel:process xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+              xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+              xmlns:xs="http://www.w3.org/2001/XMLSchema"
+              xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+              xmlns:Client="http://example.com/HandleTimer/Client"
+              xmlns:this="http://ode.apache.org/example"
+              queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+              expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+              name="Timer" targetNamespace="http://ode.apache.org/example">
+    <bpel:import namespace="http://example.com/HandleTimer" location="HandleTimer.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <bpel:import namespace="http://example.com/HandleTimer/Timer" location="HandleTimer-Timer.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <bpel:partnerLinks>
+        <bpel:partnerLink name="timerAndClientPlkVar" partnerLinkType="this:TimerAndClient" myRole="Timer_for_Client"/>
+    </bpel:partnerLinks>
+    <bpel:variables>
+        <bpel:variable name="msg" messageType="this:receiveRequest"/>
+        <bpel:variable name="msg1" messageType="this:receiveResponse"/>
+    </bpel:variables>
+    <bpel:sequence>
+        <bpel:receive partnerLink="timerAndClientPlkVar" portType="this:ForClient" operation="receive" variable="msg" createInstance="yes"></bpel:receive>
+        <bpel:assign name="init-variables-Timer">
+            <bpel:copy>
+                <bpel:from>
+                    <bpel:literal>
+                        <this:start>
+                        </this:start>
+                    </bpel:literal>
+                </bpel:from>
+                <bpel:to>$msg1.body</bpel:to>
+            </bpel:copy>
+        </bpel:assign>
+        <bpel:scope>
+            <bpel:faultHandlers>
+                <bpel:catchAll>
+                    <bpel:empty/>
+                </bpel:catchAll>
+            </bpel:faultHandlers>
+            <bpel:scope>
+                <bpel:eventHandlers>
+                    <bpel:onAlarm>
+                        <bpel:for>"PT1S"</bpel:for>
+                        <bpel:scope>
+                            <bpel:throw faultName="tns:goodFault"/>
+                        </bpel:scope>
+                    </bpel:onAlarm>
+                </bpel:eventHandlers>
+                <bpel:if>
+                    <bpel:condition>$msg/start=10</bpel:condition>
+                    <bpel:sequence>
+                        <bpel:empty/>
+                    </bpel:sequence>
+                    <bpel:else>
+                        <bpel:sequence>
+                            <bpel:empty/>
+                            <bpel:wait>
+                                <bpel:for>'PT15S'</bpel:for>
+                            </bpel:wait>
+                        </bpel:sequence>
+                    </bpel:else>
+                </bpel:if>
+            </bpel:scope>
+        </bpel:scope>
+        <bpel:reply partnerLink="timerAndClientPlkVar" portType="this:ForClient" operation="receive" variable="msg1"></bpel:reply>
+    </bpel:sequence>
+</bpel:process>

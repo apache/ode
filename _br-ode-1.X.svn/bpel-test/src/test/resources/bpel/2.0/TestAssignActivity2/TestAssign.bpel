@@ -1,0 +1,113 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<process name="TestAssign"
+    targetNamespace="http://ode/bpel/unit-testAssign2"
+         xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:ode="http://www.apache.org/ode/type/extension"
+         xmlns:tns="http://ode/bpel/unit-testAssign2"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:test="http://ode/bpel/unit-testAssign2.wsdl"
+         xmlns:sref=" http://docs.oasis-open.org/wsbpel/2.0/serviceref"
+         xmlns:addr="http://example.com/addressing"
+         xmlns:dd="http://www.apache.org/ode/schemas/dd/2007/03"
+         queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+         expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+
+    <import location="TestAssign.wsdl"
+        namespace="http://ode/bpel/unit-testAssign2.wsdl"
+            importType="http://schemas.xmlsoap.org/wsdl/" />
+
+    <partnerLinks>
+        <partnerLink name="TestAssignPartnerLink" partnerLinkType="test:TestAssignPartnerLinkType" myRole="me" />
+    </partnerLinks>
+
+    <variables>
+        <variable name="myVar" messageType="test:TestAssignMessage"/>
+        <variable name="otherMsgVar" messageType="test:TestAssignMessage"/>
+        <variable name="strVar" type="xsd:string"/>
+        <variable name="txtVar" type="xsd:string"/>
+        <variable name="eprVar" type="xsd:anyType"/>
+        <variable name="intVar" type="xsd:int"/>
+    </variables>
+
+    <sequence>
+        <receive name="start" partnerLink="TestAssignPartnerLink" portType="test:TestAssignPortType"
+                 operation="testAssign" variable="myVar" createInstance="yes"/>
+
+        <assign name="assign1">
+            <copy>
+                <from variable="myVar" part="TestPart"/>
+                <to variable="strVar"/>
+            </copy>
+            <copy>
+                <from>concat($strVar, " ")</from>
+                <to variable="strVar"/>
+            </copy>
+            <copy>
+                <from>concat($strVar, string(ode:process-property("dd:epr")/addr:EndpointReference/addr:ServiceName))</from>
+                <to variable="strVar"/>
+            </copy>
+            <copy>
+                <from>concat($strVar, string(ode:process-property("dd:punctuation")))</from>
+                <to variable="strVar"/>
+            </copy>
+            <copy>
+                <from>$strVar</from>
+                <to variable="myVar" part="TestPart"/>
+            </copy>
+            <copy>
+                <from variable="myVar" part="TestPart"/>
+                <!--to variable="otherMsgVar" part="TestPart"/-->
+                <to>$otherMsgVar.TestPart</to>
+            </copy>
+        </assign>
+
+        <assign name="assign2">
+            <copy>
+                <from><literal>1</literal></from>
+                <to variable="intVar"/>
+            </copy>
+            <copy>
+                <from><literal>1</literal></from>
+                <to variable="intVar"/>
+            </copy>
+            <copy>
+                <from>ode:process-property("dd:epr")/addr:EndpointReference/child::node()[position()=$intVar]</from>
+                <to variable="strVar"/>
+            </copy>
+            <copy>
+                <from>ode:process-property("dd:epr")/addr:EndpointReference</from>
+                <to>$eprVar</to>
+            </copy>
+            <copy>
+                <from>$eprVar/child::node()[$intVar]</from>
+                <to variable="strVar"/>
+            </copy>
+            <copy>
+                <from>concat($eprVar/text()[1], $ode:pid)</from>
+                <to variable="strVar"/>
+            </copy>
+        </assign>
+
+        <reply name="end" partnerLink="TestAssignPartnerLink" portType="test:TestAssignPortType"
+               operation="testAssign" variable="otherMsgVar"/>
+    </sequence>
+</process>

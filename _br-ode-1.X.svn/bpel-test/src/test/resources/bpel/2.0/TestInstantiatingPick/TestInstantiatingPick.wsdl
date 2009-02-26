@@ -1,0 +1,88 @@
+<!--
+   ~ Licensed to the Apache Software Foundation (ASF) under one
+   ~ or more contributor license agreements.  See the NOTICE file
+   ~ distributed with this work for additional information
+   ~ regarding copyright ownership.  The ASF licenses this file
+   ~ to you under the Apache License, Version 2.0 (the
+   ~ "License"); you may not use this file except in compliance
+   ~ with the License.  You may obtain a copy of the License at
+   ~
+   ~    http://www.apache.org/licenses/LICENSE-2.0
+   ~
+   ~ Unless required by applicable law or agreed to in writing,
+   ~ software distributed under the License is distributed on an
+   ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+   ~ KIND, either express or implied.  See the License for the
+   ~ specific language governing permissions and limitations
+   ~ under the License.
+-->
+
+<wsdl:definitions 
+   targetNamespace="http://ode/bpel/unit-test/TestInstantiatingPick.wsdl"
+   xmlns:tns="http://ode/bpel/unit-test/TestInstantiatingPick.wsdl"
+   xmlns="http://ode/bpel/unit-test/TestInstantiatingPick.wsdl"
+   xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
+   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+   xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"      
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+   xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+   xmlns:prop="http://docs.oasis-open.org/wsbpel/2.0/varprop">
+
+   <wsdl:message name="requestMessage">
+      <wsdl:part name="requestID" type="xsd:string"/>
+      <wsdl:part name="requestText" type="xsd:string"/>
+   </wsdl:message>
+   
+   <wsdl:message name="replyMessage">
+      <wsdl:part name="replyID" type="xsd:string"/>
+      <wsdl:part name="replyText" type="xsd:string"/>
+   </wsdl:message>
+
+   <wsdl:portType name="testInstPick1PT">
+      <wsdl:operation name="request">
+         <wsdl:input message="requestMessage"/>
+         <wsdl:output message="replyMessage"/>
+      </wsdl:operation>
+   </wsdl:portType>
+
+   <wsdl:portType name="testInstPick2PT">
+      <wsdl:operation name="request">
+         <wsdl:input message="requestMessage"/>
+         <wsdl:output message="replyMessage"/>
+      </wsdl:operation>
+   </wsdl:portType>
+
+   <wsdl:binding name="testInstPick1Binding" type="tns:testInstPick1PT">
+      <wsdl:operation name="request">
+      </wsdl:operation>
+   </wsdl:binding>
+   <wsdl:service name="testInstPick1Service">
+      <wsdl:port name="testInstPick1Port" binding="tns:testInstPick1Binding">
+      </wsdl:port>
+   </wsdl:service>
+   
+   <wsdl:binding name="testInstPick2Binding" type="tns:testInstPick2PT">
+      <wsdl:operation name="request">
+      </wsdl:operation>
+   </wsdl:binding>
+   <wsdl:service name="testInstPick2Service">
+      <wsdl:port name="testInstPick2Port" binding="tns:testInstPick2Binding">
+      </wsdl:port>
+   </wsdl:service>
+
+   <plnk:partnerLinkType name="testInstPick1Request">
+      <plnk:role name="testInstPick1Service" portType="testInstPick1PT"/>
+   </plnk:partnerLinkType>
+
+   <plnk:partnerLinkType name="testInstPick2Request">
+      <plnk:role name="testInstPick2Service" portType="testInstPick2PT"/>
+   </plnk:partnerLinkType>
+
+   <plnk:partnerLinkType name="probeRequest">
+      <plnk:role name="probeService" portType="prb:probeMessagePT"/>
+   </plnk:partnerLinkType>
+
+   <prop:property name="testProbeID" type="xsd:string"/>
+   <prop:propertyAlias propertyName="tns:testProbeID" messageType="tns:requestMessage" part="requestID"/>
+
+</wsdl:definitions>

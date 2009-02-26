@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<bpel:process xmlns:bpel="http://schemas.xmlsoap.org/ws/2004/03/business-process/" xmlns:pnlk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:diag="http://example.com/BugCastDayTimeDurationToDuration" xmlns:Pool0="http://example.com/BugCastDayTimeDurationToDuration/Pool0" xmlns:tns="http://www.example.org/duration" xmlns:this="http://example.com/BugCastDayTimeDurationToDuration/Pool" xmlns:bpmn="http://www.intalio.com/bpms" xmlns:atomic="http://ode.apache.org/atomicScope" queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" bpmn:label="Pool" bpmn:id="_S2O9UOskEdyAk8HLE80VlA" name="Pool" targetNamespace="http://example.com/BugCastDayTimeDurationToDuration/Pool">
+  <bpel:import namespace="http://example.com/BugCastDayTimeDurationToDuration" location="BugCastDayTimeDurationToDuration.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:import namespace="http://example.com/BugCastDayTimeDurationToDuration/Pool" location="BugCastDayTimeDurationToDuration-Pool.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:partnerLinks>
+    <bpel:partnerLink name="pool0AndPoolPlkVar" partnerLinkType="diag:Pool0AndPool" myRole="Pool_for_Pool0"/>
+  </bpel:partnerLinks>
+  <bpel:variables>
+    <bpel:variable name="thisTaskRequestMsg" messageType="this:TaskRequest"/>
+    <bpel:variable name="thisTaskResponseMsg" messageType="this:TaskResponse"/>
+  </bpel:variables>
+  <bpel:sequence>
+    <bpel:receive partnerLink="pool0AndPoolPlkVar" portType="this:ForPool0" operation="Task" variable="thisTaskRequestMsg" createInstance="yes"/>
+    <bpel:assign name="init-variables-Pool">
+      <bpel:copy bpmn:label="$thisTaskResponseMsg">
+        <bpel:from>
+          <bpel:literal><this:TaskResponse>OK</this:TaskResponse></bpel:literal>
+        </bpel:from>
+        <bpel:to>$thisTaskResponseMsg.body</bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+    <bpel:assign bpmn:label="Task" bpmn:id="_6_3QwOu1EdyUWbG-WWtMzg">
+      <bpel:copy>
+        <!--<bpel:from xmlns:xdt="http://www.w3.org/2003/11/xpath-datatypes">xdt:dayTimeDuration ("PT2S")</bpel:from>-->
+        <bpel:from>xs:dayTimeDuration ("PT2S")</bpel:from>
+        <bpel:to>$thisTaskRequestMsg.body/tns:duration</bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+    <bpel:wait>
+      <bpel:for>$thisTaskRequestMsg.body/tns:duration</bpel:for>
+    </bpel:wait>
+    <bpel:reply partnerLink="pool0AndPoolPlkVar" portType="this:ForPool0" operation="Task" variable="thisTaskResponseMsg"/>
+  </bpel:sequence>
+</bpel:process>

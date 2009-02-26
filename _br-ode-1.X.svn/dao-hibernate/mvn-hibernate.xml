@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<project name="mvn-hibernate" default="hibernate">
+    <import file="../build/ant-common.xml" />
+    <import file="../build/ant-library.xml" />
+    <import file="../build/ant-xdoclet.xml" />
+
+    <!-- This is required since basedir may get changed during an earlier build cycle. Not sure why. -->
+    <property name="src.databases" value="${basedir}/src/hibernate"/>
+    <property name="build.classes" value="${basedir}/target/classes"/>
+    <property name="build.ddl" value="${build.classes}/ddl"/>
+    <property name="hibernate.dir" value="${basedir}/../buildlib/hibernate-2.1"/>
+
+    <target name="hibernate">
+        <taskdef name="hibernatedoclet" classname="xdoclet.modules.hibernate.HibernateDocletTask" classpathref="xdoclet-cpath"/>
+        <hibernatedoclet destdir="${build.classes}" excludedtags="@version,@author,@todo" force="false" mergedir="${build.classes}" verbose="false">
+        <hibernate version="2.0"/>
+            <fileset dir="${src.java}" includes="${src.hibernate.mask}"/>
+        </hibernatedoclet>
+
+        <taskdef name="schemaexport" classname="net.sf.hibernate.tool.hbm2ddl.SchemaExportTask">
+            <classpath>
+                <fileset dir="${hibernate.dir}" includes="hibernate2.jar"/>
+                <fileset dir="${hibernate.dir}/lib" includes="*.jar"/>
+                <path refid="cpath"/>
+                <fileset dir="../buildlib/commons-logging-1.0.5" includes="commons-logging-1.0.5.jar"/>
+                <fileset dir="../buildlib/commons-collections-3.1" includes="*.jar"/>
+                <pathelement location="${lib.log4j}"/>
+                <pathelement location="${build.classes}"/>
+            </classpath>
+        </taskdef>
+        <mkdir dir="${build.ddl}"/>
+        <foreach list="${databases}" delimiter="," trim="true" param="db" target="export" inheritAll="yes"/>
+    </target>
+
+    <target name="export">
+        <schemaexport properties="${src.databases}/${db}.properties" quiet="yes" text="yes" delimiter=";" output="${build.ddl}/${db}.sql">
+            <fileset dir="${build.classes}"><include name="**/*.hbm.xml"/><exclude name="**/HMessageExchangeProperty.hbm.xml"/></fileset>
+        </schemaexport>
+    </target>
+</project>

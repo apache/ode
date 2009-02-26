@@ -1,0 +1,137 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<process name="http-binding-ext-DELETE"
+         targetNamespace="http://ode/bpel/unit-test"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:tns="http://ode/bpel/unit-test"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:test="http://ode/bpel/unit-test.wsdl"
+         xmlns:dummy="http://ode/bpel/test/blog"
+         queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+         expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+
+    <import location="http-binding-ext-DELETE.wsdl"
+            namespace="http://ode/bpel/unit-test.wsdl"
+            importType="http://schemas.xmlsoap.org/wsdl/"/>
+
+    <partnerLinks>
+        <partnerLink name="helloPartnerLink"
+                     partnerLinkType="test:HelloPartnerLinkType" myRole="me"/>
+        <partnerLink name="blogPartnerLink"
+                     partnerLinkType="test:BlogLinkType" partnerRole="you"/>
+    </partnerLinks>
+
+    <variables>
+        <variable name="inputVar" messageType="test:HelloMessage"/>
+        <variable name="outputVar" messageType="test:HelloMessage"/>
+        <variable name="idMsg" messageType="dummy:IdMessage"/>
+        <variable name="noPartMsg" messageType="dummy:NoPartMessage"/>
+        <variable name="noPartMsg2" messageType="dummy:NoPartMessage"/>
+        <variable name="generatedTimestamp" type="xsd:string"/>
+        <variable name="receivedTimestamp" type="xsd:string"/>
+        <variable name="receivedUserAgent" type="xsd:string"/>
+    </variables>
+
+    <sequence>
+        <receive name="start" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                 operation="hello" variable="inputVar" createInstance="yes"/>
+
+        <!-- Initialize output var -->
+        <assign>
+            <copy>
+                <from>'What a success!'</from>
+                <to>$outputVar.TestPart</to>
+            </copy>
+        </assign>
+
+        <!-- Prepare the input message -->
+        <assign>
+            <copy>
+                <from>string(round(seconds-from-dateTime(current-dateTime())))</from>
+                <to>$generatedTimestamp</to>
+            </copy>
+        </assign>
+        <assign>
+            <copy>
+                <from>$generatedTimestamp</from>
+                <to>$idMsg.timestamp</to>
+            </copy>
+            <copy>
+                <from>string(round(seconds-from-dateTime(current-dateTime()))+100)</from>
+                <to>$idMsg.articleId</to>
+            </copy>
+        </assign>
+
+        <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                operation="doDELETE" inputVariable="idMsg" outputVariable="noPartMsg"/>
+
+        <!-- Check the TimestampHeader -->
+        <assign>
+            <!-- here we take a chance to make sure the header assignment works fine,
+                so duplicate the header value to another temp header, if the value is passed around then we're good. -->
+            <copy>
+                <from variable="noPartMsg" header="TimestampHeader"/>
+                <to variable="noPartMsg2" header="TimestampHeader"/>
+            </copy>
+            <copy>
+                <from variable="noPartMsg2" header="TimestampHeader"/>
+                <to>$receivedTimestamp</to>
+            </copy>
+        </assign>
+
+        <if>
+            <condition>$receivedTimestamp = $generatedTimestamp</condition>
+            <empty/>
+            <else>
+                <assign>
+                    <copy>
+                        <from>'Wrong Timestamp Header received. Check if the request header was properly set.'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+            </else>
+        </if>
+
+        <!-- Check the User-Agent-->
+        <assign>
+            <copy>
+                <from variable="noPartMsg" header="User-Agent"/>
+                <to>$receivedUserAgent</to>
+            </copy>
+        </assign>
+
+        <if>
+            <!-- This value is specified in Blog.wsdl -->
+            <condition>$receivedUserAgent = 'MyKillerApp'</condition>
+            <empty/>
+            <else>
+                <assign>
+                    <copy>
+                        <from>'Wrong User-Agent. Check if the request header was properly set.'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+            </else>
+        </if>
+
+        <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+               operation="hello" variable="outputVar"/>
+    </sequence>
+
+</process>

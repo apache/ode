@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<process name="ExtVar2" targetNamespace="http://ode/bpel/unit-test" 
+    xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable" 
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable" 
+    xmlns:tns="http://ode/bpel/unit-test" 
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+    xmlns:test="http://ode/bpel/unit-test.wsdl" 
+    xmlns:foo="http://foo/extvar" 
+    xmlns:xvar="http://ode.apache.org/externalVariables" 
+    queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" 
+    expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+
+    <import namespace="http://foo/extvar" location="ExtVar2.xsd" importType="http://www.w3.org/2001/XMLSchema"/>
+
+    <import location="ExtVar2.wsdl" namespace="http://ode/bpel/unit-test.wsdl" importType="http://schemas.xmlsoap.org/wsdl/" />
+
+
+    <partnerLinks>
+        <partnerLink name="ExtVarPartnerLink" partnerLinkType="test:ExtVarPartnerLinkType" myRole="me" />
+    </partnerLinks>
+
+    <variables>
+        <variable name="myVar" messageType="test:ExtVarMessage"/>
+        <variable name="costPerCustomer-keys" element="foo:costPerCustomer-keys"/>
+        <variable name="costPerCustomer"      element="foo:costPerCustomer" 
+                  xvar:id="costPerCustomer"   xvar:relates-to="costPerCustomer-keys"/>
+    </variables>
+
+    <sequence>
+        <receive name="start" partnerLink="ExtVarPartnerLink" portType="test:ExtVarPortType" 
+            operation="extvar" variable="myVar" createInstance="yes"/>
+
+          
+        <!-- insert new row by assigning directly into the external variable -->
+        
+        <assign name="insertNewRow">
+            <copy>
+                <from>
+                    <literal>
+                        <foo:costPerCustomer>
+                            <foo:key1>k1</foo:key1>
+                            <foo:value0>v1</foo:value0>
+                        </foo:costPerCustomer>
+                    </literal>
+                </from>
+                <to>$costPerCustomer</to>
+            </copy>
+        </assign>
+
+        <if>
+            <condition>normalize-space($costPerCustomer-keys/foo:key1) = 'k1'</condition>
+            <empty/>
+            <else>
+                <throw faultName="foo:key1NotCreated"/>
+            </else>
+        </if>
+
+        <!-- assign into key just to confuse things -->
+
+        <assign name="changeKey1">
+            <copy>
+                <from>
+                    <literal>k2</literal>
+                </from>
+                <to>$costPerCustomer-keys/foo:key1</to>
+            </copy>
+        </assign>
+
+        <if>
+            <condition>$costPerCustomer-keys/foo:key1 = 'k2'</condition>
+            <empty/>
+            <else>
+                <throw faultName="foo:changeKey1"/>
+            </else>
+        </if>
+
+        <assign name="changeKey2">
+            <copy>
+                <from>
+                    <literal>k1</literal>
+                </from>
+                <to>$costPerCustomer-keys/foo:key1</to>
+            </copy>
+        </assign>
+
+        <if>
+            <condition>$costPerCustomer-keys/foo:key1 = 'k1'</condition>
+            <empty/>
+            <else>
+                <throw faultName="foo:changeKey1"/>
+            </else>
+        </if>
+
+        <!-- update row by assigning into extvar -->
+        
+        <assign name="updateRow">
+            <copy>
+                <from>
+                    <literal>v1-2</literal>
+                </from>
+                <to>$costPerCustomer/foo:value0</to>
+            </copy>
+        </assign>
+
+        <if>
+            <condition>$costPerCustomer/foo:value0 = 'v1-2'</condition>
+            <empty/>
+            <else>
+                <throw faultName="foo:rowNotUpdated"/>
+            </else>
+        </if>
+
+
+        <!-- update another row -->
+
+        <assign name="createAnotherRow">
+            <copy>
+                <from>
+                    <literal>k2</literal>
+                </from>
+                <to>$costPerCustomer-keys/foo:key1</to>
+            </copy>
+        </assign>
+
+        <assign name="updateRow">
+            <copy>
+                <from>
+                    <literal>v2-1</literal>
+                </from>
+                <to>$costPerCustomer/foo:value0</to>
+            </copy>
+        </assign>
+
+        
+        <!-- insert a new row -->
+
+        <assign name="insertRow">
+            <copy>
+                <from>
+                    <literal>k3</literal>
+                </from>
+                <to>$costPerCustomer-keys/foo:key1</to>
+            </copy>
+            <copy>
+                <from>
+                    <literal>v3</literal>
+                </from>
+                <to>$costPerCustomer/foo:value0</to>
+            </copy>
+        </assign>
+
+        <if>
+            <condition>$costPerCustomer/foo:key1 = 'k3'</condition>
+            <empty/>
+            <else>
+                <throw faultName="foo:insertKey"/>
+            </else>
+        </if>
+
+        <if>
+            <condition>$costPerCustomer/foo:value0 = 'v3'</condition>
+            <empty/>
+            <else>
+                <throw faultName="foo:insertValue"/>
+            </else>
+        </if>
+
+        
+        <!-- go back to first row -->
+
+        <assign name="goBack1">
+            <copy>
+                <from>
+                    <literal>k1</literal>
+                </from>
+                <to>$costPerCustomer-keys/foo:key1</to>
+            </copy>
+        </assign>
+
+        <if>
+            <condition>$costPerCustomer/foo:value0 = 'v1-2'</condition>
+            <empty/>
+            <else>
+                <throw faultName="foo:goBack1"/>
+            </else>
+        </if>
+
+        <!-- go back to 3rd row -->
+
+        <assign name="goBack3">
+            <copy>
+                <from>
+                    <literal>k3</literal>
+                </from>
+                <to>$costPerCustomer-keys/foo:key1</to>
+            </copy>
+        </assign>
+
+        <if>
+            <condition>$costPerCustomer/foo:value0 = 'v3'</condition>
+            <empty/>
+            <else>
+                <throw faultName="foo:goBack3"/>
+            </else>
+        </if>
+
+        <!-- go back to 2nd row -->
+
+        <assign name="goBack2">
+            <copy>
+                <from>
+                    <literal>k2</literal>
+                </from>
+                <to>$costPerCustomer-keys/foo:key1</to>
+            </copy>
+        </assign>
+
+        <if>
+            <condition>$costPerCustomer/foo:value0 = 'v2-1'</condition>
+            <empty/>
+            <else>
+                <throw faultName="foo:goBack2"/>
+            </else>
+        </if>
+
+
+        <!-- send back response -->
+
+        <assign name="assignResponse">
+            <copy>
+                <from>
+                    <literal>
+                        <foo:response>
+                            <foo:keys/>
+                            <foo:values/>
+                        </foo:response>
+                    </literal>
+                </from>
+                <to>$myVar.TestPart</to>
+            </copy>
+            <copy>
+                <from>$costPerCustomer-keys</from>
+                <to>$myVar.TestPart/foo:keys</to>
+            </copy>
+            <copy>
+                <from>$costPerCustomer</from>
+                <to>$myVar.TestPart/foo:values</to>
+            </copy>
+        </assign>
+
+        <reply name="end" partnerLink="ExtVarPartnerLink" portType="test:ExtVarPortType" operation="extvar" variable="myVar"/>
+    </sequence>
+</process>

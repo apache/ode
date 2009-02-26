@@ -1,0 +1,188 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<process name="test-endpoint-properties"
+         targetNamespace="http://ode/bpel/unit-test"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:tns="http://ode/bpel/unit-test"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:test="http://ode/bpel/unit-test.wsdl"
+         xmlns:dummy="http://ode/bpel/test/properties"
+         queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+         expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+
+    <import location="test-endpoint-properties.wsdl"
+            namespace="http://ode/bpel/unit-test.wsdl"
+            importType="http://schemas.xmlsoap.org/wsdl/"/>
+
+    <partnerLinks>
+        <partnerLink name="helloPartnerLink"
+                     partnerLinkType="test:HelloPartnerLinkType" myRole="me"/>
+        <partnerLink name="propertiesPartnerLink"
+                     partnerLinkType="test:PropertiesLinkType" partnerRole="you"/>
+    </partnerLinks>
+
+    <variables>
+        <variable name="inputVar" messageType="test:HelloMessage"/>
+        <variable name="reqMsg" messageType="dummy:Message"/>
+        <variable name="respMsg" messageType="dummy:Message"/>
+    </variables>
+
+    <sequence>
+        <receive name="start" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                 operation="hello" variable="inputVar" createInstance="yes"/>
+
+        <!--
+            A, B, C denote the 3 different way to assign a property (a header in that particular case):
+                A. value set in the global configuration directory
+                B. value set in the deployment unit directory
+                C. value set in the BPEL process with an assignment
+            This order is also order the precedence order. Meaning that B has precedence over A, C over B.
+        -->
+        <!--
+                <odex:header name="header_A"  part="header_A" />
+                <odex:header name="header_B"  part="header_B" />
+                <odex:header name="header_C"  part="header_C" />
+                <odex:header name="header_ABC" part="header_ABC"/>
+                <odex:header name="header_AB" part="header_AB"/>
+                <odex:header name="header_AC" part="header_AC"/>
+                <odex:header name="header_BC" part="header_BC"/>
+                <odex:header name="header_CC" part="header_AA"/>
+                <odex:header name="header_BB" part="header_BB"/>
+        -->
+
+        <!-- Assign all header parts -->
+        <assign>
+
+            <copy>
+                <from><literal><credentials username="superuser" password="topsecret"/></literal></from>
+                <to>$reqMsg.WWW-Authenticate</to>
+            </copy>
+            <!-- header_A will be set through a property file in the global config dir -->
+            <!-- header_B will be set through a property file in the deployment unit dir -->
+
+            <copy>
+                <from>$inputVar.TestPart</from>
+                <to>$reqMsg.header_C</to>
+            </copy>
+            <!-- header_ABC is set with the 3 ways, the expected value is the one from the BPEL assignment -->
+            <copy>
+                <from>'from_bpel_assignment_ABC'</from>
+                <to>$reqMsg.header_ABC</to>
+            </copy>
+            <!-- header_AC is set from a global property file and from the BPRL process, the expected value is the one from the BPEL assignment -->
+            <copy>
+                <from>'from_bpel_assignment_AC'</from>
+                <to>$reqMsg.header_AC</to>
+            </copy>
+            <!-- header_BC is set from a deploy-unit property file and from the BPRL process, the expected value is the one from the BPEL assignment -->
+            <copy>
+                <from>'from_bpel_assignment_BC'</from>
+                <to>$reqMsg.header_BC</to>
+            </copy>
+        </assign>
+
+
+        <invoke partnerLink="propertiesPartnerLink" portType="dummy:PropertiesPortType"
+                operation="GET" inputVariable="reqMsg" outputVariable="respMsg"/>
+
+
+        <if>
+            <condition>$respMsg.header_A = 'from_global_conf_directory_only'</condition>
+            <empty/>
+            <else>
+                <throw faultName="FAILED-from_global_conf_directory_only"/>
+            </else>
+        </if>
+
+        <if>
+            <condition>$respMsg.header_B = 'from_deployment_unit_directory_only'</condition>
+            <empty/>
+            <else>
+                <throw faultName="FAILED-from_deployment_unit_directory_only"/>
+            </else>
+        </if>
+
+        <if>
+            <condition>$respMsg.header_C = $inputVar.TestPart</condition>
+            <empty/>
+            <else>
+                <throw faultName="FAILED-from_bpel_process_only"/>
+            </else>
+        </if>
+
+
+        <if>
+            <condition>$respMsg.header_ABC = 'from_bpel_assignment_ABC'</condition>
+            <empty/>
+            <else>
+                <throw faultName="FAILED-from_bpel_assignment_ABC"/>
+            </else>
+        </if>
+
+        <if>
+            <condition>$respMsg.header_AB = 'from_deployment_unit_directory_AB'</condition>
+            <empty/>
+            <else>
+                <throw faultName="FAILED-from_deployment_unit_directory_AB"/>
+            </else>
+        </if>
+
+        <if>
+            <condition>$respMsg.header_AC = 'from_bpel_assignment_AC'</condition>
+            <empty/>
+            <else>
+                <throw faultName="FAILED-from_bpel_assignment_AC"/>
+            </else>
+        </if>
+
+        <if>
+            <condition>$respMsg.header_BC = 'from_bpel_assignment_BC'</condition>
+            <empty/>
+            <else>
+                <throw faultName="FAILED-from_bpel_assignment_BC"/>
+            </else>
+        </if>
+
+        <if>
+            <condition>$respMsg.header_AA = 'from_global_conf#file2'</condition>
+            <empty/>
+            <else>
+                <throw faultName="FAILED-from_global_conf#file2"/>
+            </else>
+        </if>
+
+        <if>
+            <condition>$respMsg.header_BB = 'from_deployment_unit#file2'</condition>
+            <empty/>
+            <else>
+                <throw faultName="FAILED-from_deployment_unit#file2"/>
+            </else>
+        </if>
+
+        <assign>
+            <copy>
+                <from>'OK!!!'</from>
+                <to>$inputVar.TestPart</to>
+            </copy>
+        </assign>
+        <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+               operation="hello" variable="inputVar"/>
+    </sequence>
+
+</process>

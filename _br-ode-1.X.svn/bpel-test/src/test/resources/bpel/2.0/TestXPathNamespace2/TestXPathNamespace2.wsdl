@@ -1,0 +1,91 @@
+<!--
+    ~ Licensed to the Apache Software Foundation (ASF) under one
+    ~ or more contributor license agreements.  See the NOTICE file
+    ~ distributed with this work for additional information
+    ~ regarding copyright ownership.  The ASF licenses this file
+    ~ to you under the Apache License, Version 2.0 (the
+    ~ "License"); you may not use this file except in compliance
+    ~ with the License.  You may obtain a copy of the License at
+    ~
+    ~    http://www.apache.org/licenses/LICENSE-2.0
+    ~
+    ~ Unless required by applicable law or agreed to in writing,
+    ~ software distributed under the License is distributed on an
+    ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    ~ KIND, either express or implied.  See the License for the
+    ~ specific language governing permissions and limitations
+    ~ under the License.
+-->
+
+<wsdl:definitions targetNamespace="http://ode/bpel/unit-test/TestXPathNamespace2.wsdl"
+    xmlns:tns="http://ode/bpel/unit-test/TestXPathNamespace2.wsdl"
+    xmlns:tns1="http://www.person.org"
+    xmlns:tns2="http://www.product.org"
+    xmlns:tns3="http://www.company.org"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"      
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable">
+    
+    <wsdl:types>
+        <xsd:schema elementFormDefault="unqualified" targetNamespace="http://www.person.org" xmlns="http://www.person.org" 
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+            <xsd:complexType name="PersonType">
+                <xsd:sequence>
+                    <xsd:element name="Name" type="xsd:string"/>
+                    <xsd:element name="SSN" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:complexType>
+        </xsd:schema>
+        <xsd:schema elementFormDefault="unqualified" targetNamespace="http://www.product.org" xmlns="http://www.product.org" 
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+            <xsd:complexType name="ProductType">
+                <xsd:sequence>
+                    <xsd:element name="Type" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:complexType>
+        </xsd:schema>
+        <xsd:schema elementFormDefault="unqualified" targetNamespace="http://www.company.org" xmlns="http://www.company.org" xmlns:per="http://www.person.org" xmlns:pro="http://www.product.org"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+            <xsd:import namespace="http://www.person.org"></xsd:import>
+            <xsd:import namespace="http://www.product.org"></xsd:import>
+            <xsd:element name="Company">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element maxOccurs="unbounded" name="Person" type="per:PersonType"/>
+                        <xsd:element maxOccurs="unbounded" name="Product" type="pro:ProductType"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </wsdl:types>
+    
+    <wsdl:message name="operation1Request">
+        <wsdl:part name="newParameter1" element="tns3:Company"/>
+    </wsdl:message>
+    <wsdl:message name="operation1Response">
+        <wsdl:part name="newParameter2" element="tns3:Company"/>
+    </wsdl:message>
+    <wsdl:portType name="TestXPathNamespace2PT">
+        <wsdl:operation name="operation1">
+            <wsdl:input name="operation1Request" message="tns:operation1Request"/>
+            <wsdl:output name="operation1Response" message="tns:operation1Response"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    
+    <wsdl:binding name="TestXPathNamespace2Binding" type="tns:TestXPathNamespace2PT">
+        <wsdl:operation name="operation1">
+            <wsdl:input name="operation1Request"/> 
+            <wsdl:output name="operation1Response"/> 
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="TestXPathNamespace2Service">
+        <wsdl:port name="TestXPathNamespace2Port" binding="tns:TestXPathNamespace2Binding">
+        </wsdl:port>
+    </wsdl:service>
+    
+    <plnk:partnerLinkType name="TestXPathNamespace2Request">
+        <plnk:role name="TestXPathNamespace2Service" portType="tns:TestXPathNamespace2PT"/>
+    </plnk:partnerLinkType>
+    
+</wsdl:definitions>

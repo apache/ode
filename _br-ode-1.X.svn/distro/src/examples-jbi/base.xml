@@ -1,0 +1,136 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<!-- ANT Build File used for building JBI examples. This file
+     is imported from each example directory, and should not
+     be used directly. -->
+
+<project name="base" >
+    <property environment="env"/>
+
+    <!-- Use ODE_HOME environment variable if available, otherwise assume $basedir/../.. -->
+    <condition property="ode.home" value="${env.ODE_HOME}" else="${basedir}/../../">
+        <isset property="env.ODE_HOME"/>
+    </condition>
+
+    <property file="${basedir}/../example.properties"/>
+  
+    <!-- pick up environmental ode.xxx properties -->
+    <property file="${ode.home}/etc/ode.properties"/>
+
+    <property name="lib.dir" location="${ode.home}/lib"/>
+    <property name="etc.dir" location="${ode.home}/etc" />
+
+    <property name="build.dir" location="${basedir}/build" />
+
+    <target name="clean" description="Clean intermediate artifacts.">
+        <delete dir="${build.dir}"/>
+    </target>
+
+
+    <target name="init-extensions">
+        <condition property="ode.script.extension" value=".bat">
+            <os family="windows"/>
+        </condition>
+        <condition property="ode.script.extension" value="">
+            <os family="unix"/>
+        </condition>
+        <condition property="ode.exe.extension" value=".exe">
+            <os family="windows"/>
+        </condition>
+        <condition property="ode.exe.extension" value="">
+            <os family="unix"/>
+        </condition>
+    </target>
+  
+  <!-- if example.properties has ode.java.home assigned it has highest priority
+       and overrides the system environment JAVA_HOME 
+
+       if ode.java.home not set in example.properties and system environment
+       JAVA_HOME is set then ode.java.home becomes JAVA_HOME -->
+
+    <target name="try-ENV-java-underscore-home" if="Env-JAVA_HOME" unless="ode.java.home">
+        <echo message="'ode.java.home' not set trying 'Env-JAVA_HOME'"/>
+        <property name="ode.java.home" value="${Env-JAVA_HOME}"/>
+    </target>
+
+    <target name="try-jdk-dot-home" if="jdk.home" unless="ode.java.home">
+        <echo message="'ode.java.home' not set trying 'jdk.home'"/>
+        <property name="ode.java.home" value="${jdk.home}"/>
+    </target>
+
+    <target name="try-java-dot-home" if="java.home" unless="ode.java.home">
+        <echo message="'ode.java.home' not set trying 'java.home'"/>
+        <property name="ode.java.home" value="${java.home}"/>
+    </target>
+
+    <target name="fail-no-ode-java-home" depends="try-ENV-java-underscore-home,try-jdk-dot-home,try-java-dot-home" unless="ode.java.home">
+        <fail message="property 'ode.java.home' is not set (try sys env JAVA_HOME or setting ode.java.home in example.properties)"/>
+    </target>
+
+    <target name="validate-ode-java-home" depends="init-extensions,fail-no-ode-java-home" if="ode.java.home">
+        <available file="${ode.java.home}/bin/java${ode.exe.extension}" property="ode.java.home.good"/>
+    </target>
+
+    <target name="fail-invalid-ode-java-home" depends="validate-ode-java-home" unless="ode.java.home.good">
+        <fail message="Java Home invalid: 'ode.java.home'=${ode.java.home}"/>
+    </target>
+
+    <target name="validate-ode-home">
+        <available file="${lib.dir}/ode-bpel-compiler.jar" property="ode.home.good"/>
+    </target>
+
+    <target name="fail-invalid-ode-home" depends="validate-ode-home" unless="ode.home.good">
+        <fail message="Invalid property 'ode.home'=${ode.home}"/>
+    </target>
+
+    <target name="init" depends="init-extensions,fail-invalid-ode-home,fail-invalid-ode-java-home">
+        <echo message="ode.home = ${ode.home}"/>
+        <echo message="ode.java.home = ${ode.java.home}"/>
+    
+        <!-- Ant Env Takes gets first crack at basic ode properties override -->
+        <!-- example.properties gets second crack at basic ode properties override -->
+        <!-- ode.properties is default authority  -->
+        <property file="${ode.home}/etc/ode.properties"/>
+    
+        <property name="ode.default.javaopts"
+                value=""/>
+
+        <path id="cpath.ode">
+            <fileset dir="${lib.dir}" includes="**/*.jar" />
+            <pathelement location="${ode.home}/etc" />
+        </path>
+
+        <taskdef classpathref="cpath.ode" resource="org/apache/ode/tools/anttasks.properties"
+                onerror="ignore" />
+
+        <mkdir dir="${build.dir}"/>
+    </target>
+
+    <target name="_sendsoap" depends="init">
+        <echo message="ode.sendsoap.url=${ode.sendsoap.url}"/>
+        <echo message="ode.sendsoap.filename=${ode.sendsoap.filename}"/>
+        <exec executable="${ode.home}/bin/sendsoap${ode.script.extension}" dir="${ode.home}">
+            <env key="JAVA_HOME" value="${ode.java.home}"/>
+            <arg value="${ode.sendsoap.url}"/>
+            <arg value="${ode.sendsoap.filename}"/>
+        </exec>
+    </target>
+
+</project>
