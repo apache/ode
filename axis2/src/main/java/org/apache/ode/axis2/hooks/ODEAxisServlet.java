@@ -54,6 +54,10 @@ public class ODEAxisServlet extends AxisServlet {
         _browser = new DeploymentBrowser(_odeServer.getProcessStore(), axisConfiguration, _odeServer.getAppRoot());
     }
 
+    // Prevents a stack overflow on WAS 6.1 due to the axis2 init delegation chain
+    public void init() throws ServletException {
+    }
+
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if (!_browser.doFilter(request, response)) super.doGet(request, response);
     }
