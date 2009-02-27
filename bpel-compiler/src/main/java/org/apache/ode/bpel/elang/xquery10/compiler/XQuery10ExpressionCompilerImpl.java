@@ -260,6 +260,12 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
                 exp.executeQuery();
             } catch (XQException xpee) { 
             	// swallow errors caused by uninitialized variables 
+            } finally {
+            	// reset the expression's user data, in order to avoid 
+            	// serializing the function resolver in the compiled bpel file.
+            	if (node != null) {
+            		node.setUserData(XQuery10BpelFunctions.USER_DATA_KEY_FUNCTION_RESOLVER, null, null);
+            	}
             }
         } catch (XQException xqe) {
             __log.debug(xqe);

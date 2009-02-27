@@ -46,6 +46,11 @@
     </variables>
             
     <sequence>   
+        <ext:failureHandling xmlns:ext="http://ode.apache.org/activityRecovery">
+          <ext:faultOnFailure>true</ext:faultOnFailure>
+          <ext:retryFor>5</ext:retryFor>
+          <ext:retryDelay>60</ext:retryDelay>
+        </ext:failureHandling>
         <receive 
             name="start"
             partnerLink="HelloXQueryPartnerLink"
