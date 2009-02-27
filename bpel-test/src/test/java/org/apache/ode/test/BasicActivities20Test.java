@@ -31,7 +31,7 @@ import java.util.Date;
 public class BasicActivities20Test extends BPELTestAbstract {
 	
 	@Test public void testHelloWorld2() throws Throwable {
-        go("/bpel/2.0/HelloWorld2");
+		go("/bpel/2.0/HelloWorld2");
     }
 
 	@Test public void testNegativeTargetNS1() throws Throwable {

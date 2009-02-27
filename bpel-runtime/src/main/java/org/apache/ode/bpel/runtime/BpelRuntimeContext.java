@@ -197,10 +197,20 @@ public interface BpelRuntimeContext {
                QName fault)
             throws FaultException;
 
-
-    String invoke(PartnerLinkInstance partnerLinkInstance,
-                  Operation operation,
-                  Element outboundMsg,
+    /**
+     * Called back when the process executes an invokation.
+     * 
+     * @param activityId The activity id in the process definition (id of OInvoke)
+     * @param partnerLinkInstance The partner link variable instance
+     * @param operation The wsdl operation.
+     * @param outboundMsg The message sent outside as a DOM
+     * @param invokeResponseChannel Object called back when the response is received.
+     * @return The instance id of the message exchange.
+     * @throws FaultException When the response is a fault or when the invoke could not be executed
+     * in which case it is one of the bpel standard fault.
+     */
+    String invoke(int activityId, PartnerLinkInstance partnerLinkInstance,
+                  Operation operation, Element outboundMsg,
                   InvokeResponseChannel invokeResponseChannel) throws FaultException;
 
 

@@ -39,6 +39,7 @@ import org.apache.ode.bpel.iapi.BpelEngine;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.BpelServer;
+import org.apache.ode.bpel.iapi.DebuggerContext;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.ProcessConf;
@@ -463,4 +464,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         _contexts.bindingContext = bc;
     }
 
+    public DebuggerContext getDebugger(QName pid) throws BpelEngineException {
+    	return _engine._activeProcesses.get(pid)._debugger;
+    }
 }

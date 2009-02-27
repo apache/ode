@@ -149,7 +149,7 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
             throws FaultException {
     }
 
-    public String invoke(PartnerLinkInstance partnerLinkInstance, Operation operation, Element outboundMsg,
+    public String invoke(int aid, PartnerLinkInstance partnerLinkInstance, Operation operation, Element outboundMsg,
             InvokeResponseChannel invokeResponseChannel) {
         return null;
     }

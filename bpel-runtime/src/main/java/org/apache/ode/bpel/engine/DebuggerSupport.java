@@ -20,6 +20,7 @@ package org.apache.ode.bpel.engine;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.iapi.DebuggerContext;
 import org.apache.ode.bpel.bdi.breaks.Breakpoint;
 import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
@@ -32,6 +33,7 @@ import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.evt.ProcessInstanceStateChangeEvent;
 import org.apache.ode.bpel.evt.ProcessTerminationEvent;
 import org.apache.ode.bpel.evt.ScopeCompletionEvent;
+import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.pmapi.BpelManagementFacade;
 import org.apache.ode.bpel.pmapi.InstanceNotFoundException;
 import org.apache.ode.bpel.pmapi.ManagementException;
@@ -56,7 +58,7 @@ import java.util.Set;
  *
  * @todo Need to revisit the whole stepping/suspend/resume mechanism.
  */
-public class DebuggerSupport {
+public class DebuggerSupport implements DebuggerContext {
 
     private static final Log __log = LogFactory.getLog(DebuggerSupport.class);
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
@@ -394,5 +396,15 @@ public class DebuggerSupport {
         }
 
 
+    }
+    
+    /**
+     * @return the process model. Currently an {@link OProcess}
+     * However it is not guaranteed that it will remain an OProcess
+     * in future versions of ODE or for different types
+     * of process lanaguage than BPEL.
+     */
+    public Object getProcessModel() {
+    	return _process.getOProcess();
     }
 }

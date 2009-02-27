@@ -118,5 +118,12 @@ public interface BpelServer {
     void unregister(QName pid) throws BpelEngineException;
 
     void cleanupProcess(QName pid) throws BpelEngineException;
+    
+    /**
+     * @param pid The process definition QName
+     * @return The debugger support.
+     * @throws BpelEngineException if we could not find the process
+     */
+    DebuggerContext getDebugger(QName pid) throws BpelEngineException;
 
 }

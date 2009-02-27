@@ -25,5 +25,5 @@ package org.apache.ode.store;
 public interface ConfStoreConnectionFactory {
 
 
-    ConfStoreConnection getConnection() ;
+    ConfStoreConnection getConnection();
 }

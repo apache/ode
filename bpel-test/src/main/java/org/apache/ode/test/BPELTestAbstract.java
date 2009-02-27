@@ -314,8 +314,6 @@ public abstract class BPELTestAbstract {
                 ex.printStackTrace();
                 failure(d, "DEPLOY: Wrong exception; expected " + d.expectedException + " but got " + ex.getClass(), ex);
             }
-
-
             return;
         }
 

@@ -648,7 +648,19 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _bpelProcess._engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
     }
 
-    public String invoke(PartnerLinkInstance partnerLink, Operation operation, Element outgoingMessage,
+    /**
+     * Called back when the process executes an invokation.
+     * 
+     * @param activityId The activity id in the process definition (id of OInvoke)
+     * @param partnerLinkInstance The partner link variable instance
+     * @param operation The wsdl operation.
+     * @param outboundMsg The message sent outside as a DOM
+     * @param invokeResponseChannel Object called back when the response is received.
+     * @return The instance id of the message exchange.
+     * @throws FaultException When the response is a fault or when the invoke could not be executed
+     * in which case it is one of the bpel standard fault.
+     */
+    public String invoke(int aid, PartnerLinkInstance partnerLink, Operation operation, Element outgoingMessage,
                          InvokeResponseChannel channel) throws FaultException {
 
         PartnerLinkDAO plinkDAO = fetchPartnerLinkDAO(partnerLink);
@@ -715,6 +727,8 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         PartnerRoleMessageExchangeImpl mex = 
         	createPartnerRoleMessageExchangeImpl(mexDao, partnerLink,
         			operation, partnerEpr, myRoleEndpoint);
+        mex.setProperty("activityId", ""+aid);
+        
         List<BpelProcess> p2pProcesses = null;
         
         Endpoint partnerEndpoint = _bpelProcess.getInitialPartnerRoleEndpoint(partnerLink.partnerLink);
