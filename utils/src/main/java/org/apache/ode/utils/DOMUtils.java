@@ -1070,81 +1070,142 @@ public class DOMUtils {
     	return (prefix == null || "".equals(prefix)) ? localPart : (prefix + ":" + localPart);
     }
     
-    public static Node cloneNode(Document document, Node node) {
-    	Node clone = null;
-    	String namespaceURI = node.getNamespaceURI();
-    	String nodeName = node.getLocalName();
-    	switch (node.getNodeType()) {
+    /**
+     * Deep clone, but don't fry, the given node in the context of the given document. 
+     * For all intents and purposes, the clone is the exact same copy of the node, 
+     * except that it might have a different owner document. 
+     * 
+     * This method is fool-proof, unlike the <code>adoptNode</code> or <code>adoptNode</code> methods,
+     * in that it doesn't assume that the given node has a parent.
+     * 
+     * @param document
+     * @param sourceNode
+     * @return a clone of node 
+     */
+    public static Node cloneNode(Document document, Node sourceNode) {
+    	Node clonedNode = null;
+
+    	// what is my name?
+    	String nodeName = sourceNode.getLocalName();
+    	// if the node is unqualified, don't assume that it inherits the WS-BPEL target namespace
+    	String namespaceURI = sourceNode.getNamespaceURI();
+    	if (Namespaces.WSBPEL2_0_FINAL_EXEC.equals(namespaceURI)) {
+    		namespaceURI = null;
+    	}
+    	
+    	switch (sourceNode.getNodeType()) {
     	case Node.ATTRIBUTE_NODE:
     		if (namespaceURI == null) {
-    			clone = document.createAttribute(nodeName);
+    			clonedNode = document.createAttribute(nodeName);
     		} else {
-    			String prefix = ((Attr) node).lookupPrefix(namespaceURI);
+    			String prefix = ((Attr) sourceNode).lookupPrefix(namespaceURI);
+    			// the prefix for the XML namespace can't be looked up, hence this...
+    			if (prefix == null && namespaceURI.equals(NS_URI_XMLNS)) {
+    				prefix = "xmlns";
+    			}
+    			// if a prefix exists, qualify the name with it
     			if (prefix != null && !"".equals(prefix)) {
         			nodeName = prefix + ":" + nodeName;
     			}
-        		clone = document.createAttributeNS(namespaceURI, nodeName);
+    			// create the appropriate type of attribute
+    			if (prefix != null) {
+	        		clonedNode = document.createAttributeNS(namespaceURI, nodeName);
+    			} else {
+    				clonedNode = document.createAttribute(nodeName);
+    			}
     		}
 			break;
     	case Node.CDATA_SECTION_NODE:
-    		clone = document.createCDATASection(((CDATASection) node).getData());
+    		clonedNode = document.createCDATASection(((CDATASection) sourceNode).getData());
 			break;
     	case Node.COMMENT_NODE:
-    		clone = document.createComment(((Comment) node).getData());
+    		clonedNode = document.createComment(((Comment) sourceNode).getData());
 			break;
     	case Node.DOCUMENT_FRAGMENT_NODE:
-    		clone = document.createDocumentFragment();
+    		clonedNode = document.createDocumentFragment();
 			break;
     	case Node.DOCUMENT_NODE:
-    		clone = document;
+    		clonedNode = document;
 			break;
     	case Node.ELEMENT_NODE:
+    		// create the appropriate type of element
     		if (namespaceURI == null) {
-	    		clone = document.createElement(nodeName);
+	    		clonedNode = document.createElement(nodeName);
     		} else {
-    			String prefix = ((Element) node).lookupPrefix(namespaceURI);
+    			String prefix = ((Element) sourceNode).lookupPrefix(namespaceURI);
     			if (prefix != null && !"".equals(prefix)) {
         			nodeName = prefix + ":" + nodeName;
     			}
-    			clone = document.createElementNS(namespaceURI, nodeName);
+    			clonedNode = document.createElementNS(namespaceURI, nodeName);
+    		}
+    		// attributes are not treated as child nodes, so copy them explicitly
+    		NamedNodeMap attributes = ((Element) sourceNode).getAttributes();
+    		for (int i = 0; i < attributes.getLength(); i++) {
+    			Attr attributeClone = (Attr) cloneNode(document, attributes.item(i));
+    			if (attributeClone.getNamespaceURI() == null) {
+    				((Element) clonedNode).setAttributeNode(attributeClone);
+    			} else {
+    				((Element) clonedNode).setAttributeNodeNS(attributeClone);
+    			}
     		}
 			break;
     	case Node.ENTITY_NODE:
     		// TODO
 			break;
     	case Node.ENTITY_REFERENCE_NODE:
-    		clone = document.createEntityReference(nodeName);
+    		clonedNode = document.createEntityReference(nodeName);
     		// TODO
 			break;
     	case Node.NOTATION_NODE:
     		// TODO
 			break;
     	case Node.PROCESSING_INSTRUCTION_NODE:
-    		clone = document.createProcessingInstruction(((ProcessingInstruction) node).getData(), nodeName);
+    		clonedNode = document.createProcessingInstruction(((ProcessingInstruction) sourceNode).getData(), nodeName);
 			break;
     	case Node.TEXT_NODE:
-    		clone = document.createTextNode(((Text) node ).getData());
+    		clonedNode = document.createTextNode(((Text) sourceNode ).getData());
 			break;
 		default:
 			break;
     	}
 	    		
-    	NodeList children = node.getChildNodes();
-    	if (children != null) {
-	    	for (int i = 0; i < children.getLength(); i++) {
-	    		Node child = children.item(i);
-	    		Node cloneChild = cloneNode(document, child);
-	    		clone.appendChild(cloneChild);
-	    		if (cloneChild.getNodeType() == Node.TEXT_NODE || 
-	    				cloneChild.getNodeType() == Node.CDATA_SECTION_NODE) {
-	    			parseEmbeddedPrefixes(node, (Element) clone, ((Text) cloneChild).getNodeValue());	    			
+    	// clone children of element and attribute nodes
+    	NodeList sourceChildren = sourceNode.getChildNodes();
+    	if (sourceChildren != null) {
+	    	for (int i = 0; i < sourceChildren.getLength(); i++) {
+	    		Node sourceChild = sourceChildren.item(i);
+	    		Node clonedChild = cloneNode(document, sourceChild);
+	    		clonedNode.appendChild(clonedChild);
+	    		// if the child has a textual value, parse it for any embedded prefixes
+	    		if (clonedChild.getNodeType() == Node.TEXT_NODE || 
+	    				clonedChild.getNodeType() == Node.CDATA_SECTION_NODE) {
+	    			parseEmbeddedPrefixes(sourceNode, clonedNode, clonedChild);
 	    		}
 	    	}
     	}
-    	return clone;
+    	return clonedNode;
     }
-    
-    private static void parseEmbeddedPrefixes(Node node, Element element, String text) {
+
+    /**
+     * Parse the text in the cloneChild for any embedded prefixes, and define it in it's parent element
+     *  
+     * @param sourceNode
+     * @param clonedNode
+     * @param clonedChild
+     */
+    private static void parseEmbeddedPrefixes(Node sourceNode, Node clonedNode, Node clonedChild) {
+    	Element clonedElement = null;
+		if (clonedNode instanceof Attr) {
+			clonedElement = ((Attr) clonedNode).getOwnerElement();
+		} else if (clonedNode instanceof Element) {
+			clonedElement = (Element) clonedNode;
+		}
+		if (clonedElement == null) {
+			// couldn't find an element to set prefixes on, so bail out
+			return;
+		}
+		
+		String text = ((Text) clonedChild).getNodeValue();
 		if (text != null && text.indexOf(":") > 0) {
 			Name11Checker nameChecker = Name11Checker.getInstance();
 			for (int colonIndex = text.indexOf(":"); colonIndex != -1 && colonIndex < text.length(); colonIndex = text.indexOf(":", colonIndex +  1)) {
@@ -1156,9 +1217,9 @@ public class DOMUtils {
 				}
 				prefixString.reverse();
 				if (prefixString.length() > 0) {
-					String uri = node.lookupNamespaceURI(prefixString.toString());
+					String uri = sourceNode.lookupNamespaceURI(prefixString.toString());
 					if (uri != null) {
-						element.setAttributeNS(NS_URI_XMLNS, "xmlns:" + prefixString, uri);
+						clonedElement.setAttributeNS(NS_URI_XMLNS, "xmlns:" + prefixString, uri);
 					}
 				}
 			}
