@@ -88,7 +88,7 @@ public interface EvaluationContext {
      *          the query expression
      * @return node returned by query
      */
-    Node evaluateQuery(Node root, OExpression expr) throws FaultException;
+    Node evaluateQuery(Node root, OExpression expr) throws FaultException, EvaluationException;
 
     /**
      * Reads the current process instance id.

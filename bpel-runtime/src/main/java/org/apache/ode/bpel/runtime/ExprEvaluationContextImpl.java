@@ -29,6 +29,7 @@ import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableReadEvent;
 import org.apache.ode.bpel.explang.EvaluationContext;
+import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OConstantVarType;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLink;
@@ -97,16 +98,12 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
 	}
 
 	public Node evaluateQuery(Node root, OExpression expr)
-			throws FaultException {
-		try {
-			return _native.getExpLangRuntime()
-					.evaluateNode(
-							expr,
-							new ExprEvaluationContextImpl(_scopeInstance,
-									_native, root));
-		} catch (org.apache.ode.bpel.explang.EvaluationException e) {
-			throw new InvalidProcessException("Expression Failed: " + expr, e);
-		}
+			throws FaultException, EvaluationException {
+		return _native.getExpLangRuntime()
+				.evaluateNode(
+						expr,
+						new ExprEvaluationContextImpl(_scopeInstance,
+								_native, root));
 	}
 
 	public String readMessageProperty(OScope.Variable variable,

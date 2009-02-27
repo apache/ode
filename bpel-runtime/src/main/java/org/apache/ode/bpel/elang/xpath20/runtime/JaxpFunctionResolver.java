@@ -51,6 +51,7 @@ import org.apache.ode.bpel.elang.xpath10.o.OXPath10ExpressionBPEL20;
 import org.apache.ode.bpel.elang.xpath20.compiler.Constants;
 import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
 import org.apache.ode.bpel.explang.EvaluationContext;
+import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
@@ -187,7 +188,10 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             } catch (FaultException e) {
                 __log.error("bpws:getVariableData(" + args + ") threw FaultException");
                 throw new XPathFunctionException(e);
-            }
+            } catch (EvaluationException e) {
+                __log.error("bpws:getVariableData(" + args + ") threw FaultException");
+                throw new XPathFunctionException(e);
+			}
         }
     }
 

@@ -116,6 +116,24 @@
            <condition>not($tempVar/wsa:EndpointReference/wsa:Metadata/Service/@EndpointName eq "MyEndpoint")</condition>
            <throw faultName="selectionFailure"/>
         </if>
+        <scope>
+            <faultHandlers>
+                <catch faultName="subLanguageExecutionFault">
+                    <empty/>
+                </catch>
+            </faultHandlers>
+            <assign>
+              <copy>
+    	        <from variable="myVar" part="TestPart">
+    	          <query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
+    	             let $j := 10 div 0
+    	             return concat("abc", $j)
+    	          </query>
+    	        </from>
+    	        <to variable="myVar" part="TestPart"/>
+    	      </copy>
+    	    </assign>
+        </scope>
         <reply name="end"  
                 partnerLink="HelloXQueryPartnerLink"
                 portType="test:HelloXQueryPortType" 

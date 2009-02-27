@@ -24,6 +24,7 @@ import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10ExpressionBPEL20;
 import org.apache.ode.bpel.explang.EvaluationContext;
+import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OProcess;
@@ -231,7 +232,14 @@ class JaxenContexts implements FunctionContext, VariableContext {
             } catch (FaultException e) {
                 __log.error("bpws:getVariableData(" + args + ") threw FaultException", e);
                 throw new WrappedFaultException.JaxenFunctionException(e);
-            }
+            } catch (EvaluationException e) {
+                __log.error("bpws:getVariableData(" + args + ") threw EvaluationException", e);
+                if (e.getCause() instanceof FaultException) {
+                    throw new WrappedFaultException.JaxenFunctionException((FaultException) e.getCause());
+                } else {
+                	throw new FunctionCallException("SubLanguageException: Unable to evaluate query expression", e);
+                }
+			}
         }
     }
 

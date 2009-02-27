@@ -616,7 +616,14 @@ class ASSIGN extends ACTIVITY {
 
         if (expression != null) {
             // Neat little trick....
-            data = ec.evaluateQuery(data, expression);
+            try {
+				data = ec.evaluateQuery(data, expression);
+			} catch (EvaluationException e) {
+                String msg = __msgs.msgEvalException(expression.toString(), e.getMessage());
+                if (__log.isDebugEnabled()) __log.debug(expression + ": " + msg);
+                if (e.getCause() instanceof FaultException) throw (FaultException)e.getCause();
+                throw new FaultException(getOAsssign().getOwner().constants.qnSubLanguageExecutionFault, msg);
+			}
         }
 
         return data;
