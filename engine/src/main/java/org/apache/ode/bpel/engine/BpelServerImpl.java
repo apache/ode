@@ -129,7 +129,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             String processMaxAge = System.getProperty("ode.process.maxage");
             if (processMaxAge != null && processMaxAge.length() > 0) {
                 __processMaxAge = Long.valueOf(processMaxAge);
-                __log.info("Process definition max age adjusted. Max age = " + __processMaxAge + "ms.");
+                __log.debug("Process definition max age adjusted. Max age = " + __processMaxAge + "ms.");
             }
         } catch (Throwable t) {
             if (__log.isDebugEnabled()) {
@@ -208,7 +208,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             
             _contexts.scheduler.start();
             _state = State.RUNNING;
-            __log.info(__msgs.msgServerStarted());
+            __log.debug(__msgs.msgServerStarted());
             if (_dehydrationPolicy != null)
                 new Thread(new ProcessDefReaper()).start();
         } finally {
@@ -277,7 +277,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             _contexts.scheduler.stop();
             _state = State.INIT;
-            __log.info(__msgs.msgServerStopped());
+            __log.debug(__msgs.msgServerStopped());
         } finally {
             _mngmtLock.writeLock().unlock();
         }
@@ -375,7 +375,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             _registeredProcesses.put(process.getPID(), process);
             if (_dehydrationPolicy == null) process.hydrate();
 
-            __log.info(__msgs.msgProcessRegistered(conf.getProcessId()));
+            __log.debug(__msgs.msgProcessRegistered(conf.getProcessId()));
         } finally {
             _mngmtLock.writeLock().unlock();
         }
@@ -408,7 +408,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             	processes.remove(p);
             }
 
-            __log.info(__msgs.msgProcessUnregistered(pid));
+            __log.debug(__msgs.msgProcessUnregistered(pid));
 
         } catch (Exception ex) {
             __log.error(__msgs.msgProcessUnregisterFailed(pid), ex);
@@ -503,7 +503,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                     public Void call() throws Exception {
                         _contexts.scheduler.jobCompleted(jobInfo.jobName);
                         Date future = new Date(System.currentTimeMillis() + (60 * 1000));
-                        __log.info(__msgs.msgReschedulingJobForInactiveProcess(we.getProcessId(), jobInfo.jobName, future));
+                        __log.debug(__msgs.msgReschedulingJobForInactiveProcess(we.getProcessId(), jobInfo.jobName, future));
                         _contexts.scheduler.schedulePersistedJob(we.getDetail(), future);            
                         return null;
                     }
@@ -902,7 +902,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                     }
                 }
             } catch (InterruptedException e) {
-                __log.info(e);
+                __log.debug(e);
             }
         }
     }
