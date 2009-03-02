@@ -124,7 +124,7 @@
     <xs:complexType name="tInvoke">
         <xs:choice>
             <xs:element name="service" minOccurs="1" maxOccurs="1" type="dd:tService"/>
-            <xs:element name="binding" minOccurs="1" maxOccurs="1">
+            <xs:element name="binding" minOccurs="0" maxOccurs="1">
                 <xs:complexType>
                     <xs:attribute name="name" type="xs:QName" use="required"/>
                 </xs:complexType>
