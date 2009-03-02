@@ -143,7 +143,8 @@ public class ODERESTProcess extends ODEProcess {
 
             // Scheduling a verification to see if the invoke has really been processed. Otherwise
             // we put it in activity recovery mode (case of a server crash during invocation).
-            scheduleInvokeCheck(mexdao);
+            // TODO the event needs a way to load a mex with getMessageExchange(), not available for now
+//            scheduleInvokeCheck(mexdao);
         } finally {
             if (mexdao.getStatus() != MessageExchange.Status.ACK)
                 mexdao.setStatus(MessageExchange.Status.ASYNC);
