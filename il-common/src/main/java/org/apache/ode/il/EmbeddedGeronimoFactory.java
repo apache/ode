@@ -33,7 +33,7 @@ public class EmbeddedGeronimoFactory {
     }
 
     public TransactionManager getTransactionManager() {
-        LOG.info("Using embedded Geronimo transaction manager");
+        LOG.debug("Using embedded Geronimo transaction manager");
         try {
             return new GeronimoTransactionManager();
         } catch (Exception except) {

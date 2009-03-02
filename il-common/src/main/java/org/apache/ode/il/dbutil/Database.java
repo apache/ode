@@ -157,7 +157,7 @@ public class Database {
     private void initExternalDb() throws DatabaseConfigException {
         try {
             _datasource = (DataSource) lookupInJndi(_odeConfig.getDbDataSource());
-            __log.info(__msgs.msgOdeUsingExternalDb(_odeConfig.getDbDataSource()));
+            __log.debug(__msgs.msgOdeUsingExternalDb(_odeConfig.getDbDataSource()));
         } catch (Exception ex) {
             String msg = __msgs.msgOdeInitExternalDbFailed(_odeConfig.getDbDataSource());
             __log.error(msg, ex);
@@ -166,7 +166,7 @@ public class Database {
     }
 
     private void initInternalDb() throws DatabaseConfigException {
-        __log.info(__msgs.msgOdeUsingInternalDb(_odeConfig.getDbIntenralJdbcUrl(), _odeConfig.getDbInternalJdbcDriverClass()));
+        __log.debug(__msgs.msgOdeUsingInternalDb(_odeConfig.getDbIntenralJdbcUrl(), _odeConfig.getDbInternalJdbcDriverClass()));
         initInternalDb(_odeConfig.getDbIntenralJdbcUrl(), _odeConfig.getDbInternalJdbcDriverClass(),
                 _odeConfig.getDbInternalUserName(), _odeConfig.getDbInternalPassword());
 
@@ -229,7 +229,7 @@ public class Database {
         String url = "jdbc:derby:" + _workRoot + "/" + db ;
         if (_odeConfig.isDbEmbeddedCreate())
             url += ";create=true";
-        __log.info("Using Embedded Derby: " + url);
+        __log.debug("Using Embedded Derby: " + url);
         _derbyUrl = url;
         initInternalDb(url, org.apache.derby.jdbc.EmbeddedDriver.class.getName(),"sa",null);
 
@@ -260,7 +260,7 @@ public class Database {
     public BpelDAOConnectionFactoryJDBC createDaoCF() throws DatabaseConfigException  {
         String pClassName = _odeConfig.getDAOConnectionFactory();
 
-        __log.info(__msgs.msgOdeUsingDAOImpl(pClassName));
+        __log.debug(__msgs.msgOdeUsingDAOImpl(pClassName));
 
         BpelDAOConnectionFactoryJDBC cf;
         try {
