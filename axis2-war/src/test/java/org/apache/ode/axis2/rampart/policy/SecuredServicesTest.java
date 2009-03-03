@@ -20,6 +20,9 @@
 package org.apache.ode.axis2.rampart.policy;
 
 import static org.testng.AssertJUnit.assertTrue;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -51,14 +54,13 @@ public class SecuredServicesTest extends Axis2TestBase {
         return bundles;
     }
 
-
-    @BeforeClass
+    @BeforeMethod
     protected void setUp() throws Exception {
         // mind the annotation above also
         startServer(testDir, "webapp/WEB-INF/conf/axis2.xml");
     }
 
-    @AfterClass
+    @AfterMethod
     protected void tearDown() throws Exception {
         // simply change the annotation, see above
         super.tearDown();
