@@ -247,11 +247,11 @@ public class OdeConfigProperties {
     }
 
 
-    protected String getProperty(String pname) {
+    public String getProperty(String pname) {
         return _props.getProperty(_prefix + pname);
     }
 
-    protected String getProperty(String key, String dflt) {
+    public String getProperty(String key, String dflt) {
         return _props.getProperty(_prefix + key, dflt);
     }
 

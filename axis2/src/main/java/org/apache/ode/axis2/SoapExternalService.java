@@ -32,9 +32,11 @@ import org.apache.axis2.description.OutInAxisOperation;
 import org.apache.axis2.description.OutOnlyAxisOperation;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.jms.JMSConstants;
+import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
 import org.apache.ode.axis2.util.SoapMessageConverter;
@@ -100,7 +102,7 @@ public class SoapExternalService implements ExternalService {
     private ProcessConf _pconf;
 
     public SoapExternalService(ProcessConf pconf, QName serviceName, String portName, ExecutorService executorService,
-                               AxisConfiguration axisConfig, Scheduler sched, BpelServer server) throws AxisFault {
+                               AxisConfiguration axisConfig, Scheduler sched, BpelServer server, MultiThreadedHttpConnectionManager connManager) throws AxisFault {
         _definition = pconf.getDefinitionForService(serviceName);
         _serviceName = serviceName;
         _portName = portName;
@@ -115,6 +117,9 @@ public class SoapExternalService implements ExternalService {
         _axisServiceWatchDog = WatchDog.watchFile(fileToWatch, new ServiceFileObserver(fileToWatch));
         _axisOptionsWatchDog = new WatchDog<Map, OptionsObserver>(new EndpointPropertiesMutable(), new OptionsObserver());
         _configContext = new ConfigurationContext(_axisConfig);
+        _configContext.setProperty(HTTPConstants.MUTTITHREAD_HTTP_CONNECTION_MANAGER, connManager);
+        // make sure the client is not shared, see also org.apache.ode.axis2.Properties.Axis2
+        _configContext.setProperty(HTTPConstants.REUSE_HTTP_CLIENT, "false");
 
         // initial endpoint reference
         Element eprElmt = ODEService.genEPRfromWSDL(_definition, serviceName, portName);
@@ -131,7 +136,7 @@ public class SoapExternalService implements ExternalService {
 
             // Override options are passed to the axis MessageContext so we can
             // retrieve them in our session out changeHandler.
-            MessageContext mctx = new MessageContext();
+            final MessageContext mctx = new MessageContext();
             /* make the given options the parent so it becomes the defaults of the MessageContexgt. That allows the user to override
             *  specific options on a given message context and not affect the overall options.
             */
@@ -175,7 +180,12 @@ public class SoapExternalService implements ExternalService {
                         _executorService.submit(new Callable<Object>() {
                             public Object call() throws Exception {
                                 try {
-                                    operationClient.execute(true);
+                                    try {
+                                        operationClient.execute(true);
+                                    } finally {
+                                        // make sure the HTTP connection is released to the pool!
+                                        mctx.getTransportOut().getSender().cleanup(mctx);
+                                    }
                                     MessageContext response = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE);
                                     MessageContext flt = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_FAULT_VALUE);
                                     if (response != null && __log.isDebugEnabled())

@@ -20,6 +20,7 @@
 package org.apache.ode.axis2;
 
 import org.apache.axis2.Constants;
+import org.apache.axis2.util.JavaUtils;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.transport.http.HttpTransportProperties;
@@ -201,6 +202,11 @@ public class Properties {
             if (headers != null && !headers.isEmpty()) options.setProperty(HTTPConstants.HTTP_HEADERS, headers);
             if (proxy != null) options.setProperty(HTTPConstants.PROXY, proxy);
 
+            // Set properties that canNOT be overridden
+            if(JavaUtils.isTrueExplicitly(options.getProperty(HTTPConstants.REUSE_HTTP_CLIENT))){
+                if (log.isWarnEnabled()) log.warn("This property cannot be overidden, and must always be false. "+ HTTPConstants.REUSE_HTTP_CLIENT);
+            }
+            options.setProperty(HTTPConstants.REUSE_HTTP_CLIENT, "false");
             return options;
         }
     }

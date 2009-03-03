@@ -26,6 +26,8 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.ode.axis2.deploy.DeploymentPoller;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.hooks.ODEMessageReceiver;
@@ -125,6 +127,8 @@ public class ODEServer {
 
     private ManagementService _mgtService;
 
+    private MultiThreadedHttpConnectionManager httpConnectionManager;
+
 
     public void init(ServletConfig config, AxisConfiguration axisConf) throws ServletException {
         init(config.getServletContext().getRealPath("/WEB-INF"), axisConf);
@@ -175,6 +179,8 @@ public class ODEServer {
             initProcessStore(eprContext);
             __log.debug("Initializing BPEL server.");
             initBpelServer(eprContext);
+            __log.debug("Initializing HTTP connection manager");
+            initHttpConnectionManager();
 
             // Register BPEL event listeners configured in axis2.properties file.
             registerEventListeners();
@@ -315,7 +321,14 @@ public class ODEServer {
                     __log.error("Unable to cleanup temp files.", t);
                 }
             }
-            
+            if(httpConnectionManager!=null){
+                __log.debug("shutting down HTTP connection manager.");
+                try {
+                    httpConnectionManager.shutdown();
+                } catch(Throwable t) {
+                    __log.error("Unable to shut down HTTP connection manager.", t);
+                }
+            }
             try {
                 __log.debug("cleaning up temporary files.");
                 TempFileManager.cleanup();
@@ -369,10 +382,10 @@ public class ODEServer {
         try {
             if (WsdlUtils.useHTTPBinding(def, serviceName, portName)) {
                 if(__log.isDebugEnabled())__log.debug("Creating HTTP-bound external service " + serviceName);
-                extService = new HttpExternalService(pconf, serviceName, portName, _executorService, _scheduler, _server);
+                extService = new HttpExternalService(pconf, serviceName, portName, _executorService, _scheduler, _server, httpConnectionManager);
             } else if (WsdlUtils.useSOAPBinding(def, serviceName, portName)) {
                 if(__log.isDebugEnabled())__log.debug("Creating SOAP-bound external service " + serviceName);
-                extService = new SoapExternalService(pconf, serviceName, portName, _executorService, _axisConfig, _scheduler, _server);
+                extService = new SoapExternalService(pconf, serviceName, portName, _executorService, _axisConfig, _scheduler, _server, httpConnectionManager);
             }
         } catch (Exception ex) {
             __log.error("Could not create external service.", ex);
@@ -528,6 +541,24 @@ public class ODEServer {
         }
         _server.setConfigProperties(_odeConfig.getProperties());
         _server.init();
+    }
+
+    private void initHttpConnectionManager() throws ServletException {
+        httpConnectionManager = new MultiThreadedHttpConnectionManager();
+        // settings may be overridden from ode-axis2.properties using the same properties as HttpClient 
+        int max_per_host = Integer.parseInt(_odeConfig.getProperty(HttpConnectionManagerParams.MAX_HOST_CONNECTIONS, "2"));
+        int max_total = Integer.parseInt(_odeConfig.getProperty(HttpConnectionManagerParams.MAX_TOTAL_CONNECTIONS, "20"));
+        if(__log.isDebugEnabled()) {
+            __log.debug(HttpConnectionManagerParams.MAX_HOST_CONNECTIONS+"="+max_per_host);
+            __log.debug(HttpConnectionManagerParams.MAX_TOTAL_CONNECTIONS+"="+max_total);
+        }
+        if(max_per_host<1 || max_total <1){
+            String errmsg = HttpConnectionManagerParams.MAX_HOST_CONNECTIONS+" and "+ HttpConnectionManagerParams.MAX_TOTAL_CONNECTIONS+" must be positive integers!";
+            __log.error(errmsg);
+            throw new ServletException(errmsg);
+        }
+        httpConnectionManager.getParams().setDefaultMaxConnectionsPerHost(max_per_host);
+        httpConnectionManager.getParams().setMaxTotalConnections(max_total);
     }
 
     public ProcessStoreImpl getProcessStore() {

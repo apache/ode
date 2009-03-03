@@ -83,7 +83,9 @@ public class HttpExternalService implements ExternalService {
 
     protected Binding portBinding;
 
-    public HttpExternalService(ProcessConf pconf, QName serviceName, String portName, ExecutorService executorService, Scheduler scheduler, BpelServer server) {
+    public HttpExternalService(ProcessConf pconf, QName serviceName, String portName,
+                               ExecutorService executorService, Scheduler scheduler, BpelServer server,
+                               MultiThreadedHttpConnectionManager connManager) {
         if (log.isDebugEnabled())
             log.debug("new HTTP External service, service name=[" + serviceName + "]; port name=[" + portName + "]");
         this.portName = portName;
@@ -117,7 +119,7 @@ public class HttpExternalService implements ExternalService {
         endpointReference = EndpointFactory.convertToWSA(ODEService.createServiceRef(eprElmt));
 
         httpMethodConverter = new HttpMethodConverter(definition, serviceName, portName);
-        connections = new MultiThreadedHttpConnectionManager();
+        connections = connManager;
     }
 
     public String getPortName() {
