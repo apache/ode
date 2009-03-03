@@ -8,3 +8,5 @@ derby.log
 *.ipr
 *.iws
 *.swp
+test-output
+

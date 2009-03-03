@@ -21,6 +21,7 @@ package org.apache.ode.axis2.soapbinding;
 
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.OperationClient;
 import org.apache.axis2.client.Options;
@@ -36,6 +37,7 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.neethi.PolicyEngine;
 import org.apache.neethi.Policy;
 import org.apache.ode.axis2.ExternalService;
@@ -97,7 +99,7 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
     private ProcessConf _pconf;
 
     public SoapExternalService(Definition definition, QName serviceName, String portName,
-                               AxisConfiguration axisConfig, ProcessConf pconf) throws AxisFault {
+                               AxisConfiguration axisConfig, ProcessConf pconf, MultiThreadedHttpConnectionManager connManager) throws AxisFault {
         _definition = definition;
         _serviceName = serviceName;
         _portName = portName;
@@ -109,6 +111,9 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
         _axisServiceWatchDog = WatchDog.watchFile(fileToWatch, new ServiceFileObserver(fileToWatch));
         _axisOptionsWatchDog = new WatchDog<Map, OptionsObserver>(new EndpointPropertiesMutable(), new OptionsObserver());
         _configContext = new ConfigurationContext(_axisConfig);
+        _configContext.setProperty(HTTPConstants.MUTTITHREAD_HTTP_CONNECTION_MANAGER, connManager);
+        // make sure the client is not shared, see also org.apache.ode.axis2.Properties.Axis2
+        _configContext.setProperty(HTTPConstants.REUSE_HTTP_CLIENT, "false");
 
         // initial endpoint reference
         Element eprElmt = ODEService.genEPRfromWSDL(_definition, serviceName, portName);
@@ -125,7 +130,7 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
 
             // Override options are passed to the axis MessageContext so we can
             // retrieve them in our session out changeHandler.
-            MessageContext mctx = new MessageContext();
+            final MessageContext mctx = new MessageContext();
             /* make the given options the parent so it becomes the defaults of the MessageContexgt. That allows the user to override
             *  specific options on a given message context and not affect the overall options.
             */
@@ -157,7 +162,11 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
                 final Operation operation = odeMex.getOperation();
 
                 try {
-                    operationClient.execute(true);
+                    try {
+                        operationClient.execute(true);
+                    } finally {
+                        mctx.getTransportOut().getSender().cleanup(mctx);
+                    }
                     MessageContext response = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE);
                     MessageContext flt = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_FAULT_VALUE);
                     if (response != null && __log.isDebugEnabled())
