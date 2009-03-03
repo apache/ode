@@ -11,7 +11,7 @@ public class ResourceRouteDAOImpl extends OpenJPADAO implements ResourceRouteDAO
     @Id @Column(name="ID")
 	@GeneratedValue(strategy= GenerationType.AUTO)
 	private Long _id;
-    @Basic @Column(name="URL", length=255, unique=true)
+    @Basic @Column(name="URL", length=255)
     private String _url;
     @Basic @Column(name="METHOD", length=8)
     private String _method;
