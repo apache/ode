@@ -695,8 +695,21 @@ public class DOMUtils {
         return true;
     }
 
-    public static QName getElementQName(Element el) {
-        return new QName(el.getNamespaceURI(),el.getLocalName());
+    public static QName getNodeQName(Node el) {
+    	String localName = el.getLocalName();
+    	String namespaceUri = el.getNamespaceURI();
+    	if (localName == null) {
+    		String nodeName = el.getNodeName();
+    		int colonIndex = nodeName.indexOf(":");
+    		if (colonIndex > 0) {
+    			localName = nodeName.substring(0, colonIndex);
+    			namespaceUri = nodeName.substring(colonIndex + 1);
+    		} else {
+    			localName = nodeName;
+    			namespaceUri = null;
+    		}
+    	}
+        return new QName(namespaceUri, localName);
     }
     
     public static QName getNodeQName(String qualifiedName) {
@@ -1076,7 +1089,7 @@ public class DOMUtils {
      * except that it might have a different owner document. 
      * 
      * This method is fool-proof, unlike the <code>adoptNode</code> or <code>adoptNode</code> methods,
-     * in that it doesn't assume that the given node has a parent.
+     * in that it doesn't assume that the given node has a parent or a owner document.
      * 
      * @param document
      * @param sourceNode
@@ -1086,9 +1099,11 @@ public class DOMUtils {
     	Node clonedNode = null;
 
     	// what is my name?
-    	String nodeName = sourceNode.getLocalName();
+    	QName sourceQName = getNodeQName(sourceNode);
+    	String nodeName = sourceQName.getLocalPart();
+    	String namespaceURI = sourceQName.getNamespaceURI();
+    	
     	// if the node is unqualified, don't assume that it inherits the WS-BPEL target namespace
-    	String namespaceURI = sourceNode.getNamespaceURI();
     	if (Namespaces.WSBPEL2_0_FINAL_EXEC.equals(namespaceURI)) {
     		namespaceURI = null;
     	}

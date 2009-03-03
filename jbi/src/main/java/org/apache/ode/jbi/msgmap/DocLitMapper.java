@@ -67,7 +67,7 @@ public class DocLitMapper extends BaseXmlMapper implements Mapper {
       return Recognized.FALSE;
     }
 
-    QName elName = DOMUtils.getElementQName(msg);
+    QName elName = DOMUtils.getNodeQName(msg);
 
     // If the message element matches the single part element, then
     // we are using doc-lit style messaging.
@@ -130,7 +130,7 @@ public class DocLitMapper extends BaseXmlMapper implements Mapper {
     assert partdef.getElementName() != null : "non-element part!";
     
     Element el = parse(nmsMsg.getContent());
-    if (!DOMUtils.getElementQName(el).equals(partdef.getElementName())) {
+    if (!DOMUtils.getNodeQName(el).equals(partdef.getElementName())) {
       String errmsg = "NMS message did not contain element "  + partdef.getElementName();
       __log.debug(errmsg);
       throw new MessageTranslationException(errmsg);

@@ -133,7 +133,7 @@ public class BpelExtensionSerializer implements ExtensionDeserializer, Extension
     Node n = el.getParentNode();
     if (n == null || n.getNodeType() != Node.ELEMENT_NODE) {
       WSDLException we = new WSDLException(WSDLException.OTHER_ERROR,
-          __msgs.msgCannotBeDocumentRootElement(DOMUtils.getElementQName(el).toString()));
+          __msgs.msgCannotBeDocumentRootElement(DOMUtils.getNodeQName(el).toString()));
       we.setLocation(XPathUtils.getXPathExprFromNode(el));
       throw we;
     }
@@ -142,7 +142,7 @@ public class BpelExtensionSerializer implements ExtensionDeserializer, Extension
       || !def.getLocalName().equals(DOMUtils.WSDL_ROOT_ELEMENT))
     {
       WSDLException we =  new WSDLException(WSDLException.OTHER_ERROR,
-          __msgs.msgMustBeChildOfDef(DOMUtils.getElementQName(el).toString()));
+          __msgs.msgMustBeChildOfDef(DOMUtils.getNodeQName(el).toString()));
       we.setLocation(XPathUtils.getXPathExprFromNode(el));
       throw we;
     }
