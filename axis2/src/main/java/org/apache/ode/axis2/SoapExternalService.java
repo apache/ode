@@ -180,26 +180,23 @@ public class SoapExternalService implements ExternalService {
                         _executorService.submit(new Callable<Object>() {
                             public Object call() throws Exception {
                                 try {
-                                    try {
-                                        operationClient.execute(true);
-                                    } finally {
-                                        // make sure the HTTP connection is released to the pool!
-                                        mctx.getTransportOut().getSender().cleanup(mctx);
-                                    }
+                                    operationClient.execute(true);
                                     MessageContext response = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE);
                                     MessageContext flt = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_FAULT_VALUE);
                                     if (response != null && __log.isDebugEnabled())
                                         __log.debug("Service response:\n" + response.getEnvelope().toString());
 
                                     if (flt != null) {
-                                        reply(mexId, operation, flt, true);
+                                        reply(mexId, operation, flt, true, mctx);
                                     } else {
-                                        reply(mexId, operation, response, response.isFault());
+                                        reply(mexId, operation, response, response.isFault(), mctx);
                                     }
                                 } catch (Throwable t) {
+                                    // release the HTTP connection, we don't need it anymore
+                                    mctx.getTransportOut().getSender().cleanup(mctx);
                                     String errmsg = "Error sending message (mex=" + odeMex + "): " + t.getMessage();
                                     __log.error(errmsg, t);
-                                    replyWithFailure(mexId, MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
+                                    replyWithFailure(mexId, MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg);
                                 }
                                 return null;
                             }
@@ -425,14 +422,13 @@ public class SoapExternalService implements ExternalService {
         return _serviceName;
     }
 
-    private void replyWithFailure(final String odeMexId, final FailureType error, final String errmsg,
-                                  final Element details) {
+    private void replyWithFailure(final String odeMexId, final FailureType error, final String errmsg) {
         // ODE MEX needs to be invoked in a TX.
         try {
             _sched.execIsolatedTransaction(new Callable<Void>() {
                 public Void call() throws Exception {
                     PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) _server.getEngine().getMessageExchange(odeMexId);
-                    odeMex.replyWithFailure(error, errmsg, details);
+                    odeMex.replyWithFailure(error, errmsg, null);
                     return null;
                 }
             });
@@ -445,7 +441,7 @@ public class SoapExternalService implements ExternalService {
 
     }
 
-    private void reply(final String odeMexId, final Operation operation, final MessageContext reply, final boolean isFault) {
+    private void reply(final String odeMexId, final Operation operation, final MessageContext reply, final boolean isFault, final MessageContext outMsgContext) {
         // ODE MEX needs to be invoked in a TX.
         try {
             _sched.execIsolatedTransaction(new Callable<Void>() {
@@ -487,6 +483,9 @@ public class SoapExternalService implements ExternalService {
                         String errmsg = "Unable to process response: " + ex.getMessage();
                         __log.error(errmsg, ex);
                         odeMex.replyWithFailure(FailureType.OTHER, errmsg, null);
+                    }finally{
+                        // make sure the HTTP connection is released to the pool!
+                        outMsgContext.getTransportOut().getSender().cleanup(outMsgContext);
                     }
                     return null;
                 }
