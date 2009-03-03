@@ -105,7 +105,7 @@ public class HttpHelper {
                         && !"digest".equalsIgnoreCase(scheme)) {
                     throw new IllegalArgumentException("Unknown Authentication scheme: [" + scheme + "] Accepted values are: Basic, Digest, Server-Decides");
                 } else {
-                    if(log.isDebugEnabled()) log.debug("credentials provided");
+                    if(log.isDebugEnabled()) log.debug("credentials provided: scheme="+scheme+" user="+username+" password=********");
                     client.getState().setCredentials(
                             new AuthScope(targetURI.getHost(), targetURI.getPort(), AuthScope.ANY_REALM, scheme),
                             new UsernamePasswordCredentials(username, password));
