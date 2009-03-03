@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.engine;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -33,6 +34,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.BpelEngine;
@@ -467,4 +469,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     public DebuggerContext getDebugger(QName pid) throws BpelEngineException {
     	return _engine._activeProcesses.get(pid)._debugger;
     }
+
+	public boolean hasActiveInstances(QName pid) {
+		BpelProcess process = _engine.getProcess(pid);
+		return process != null ? process.hasActiveInstances() : false;
+	}
+
 }

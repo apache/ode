@@ -235,6 +235,7 @@ public class BpelEngineImpl implements BpelEngine {
 
     BpelProcess unregisterProcess(QName process) {
         BpelProcess p = _activeProcesses.remove(process);
+        __log.debug("Unregister process: serviceId=" + process + ", process=" + p);
         if (p != null) {
             if (__log.isDebugEnabled())
                 __log.debug("Deactivating process " + p.getPID());
@@ -251,13 +252,20 @@ public class BpelEngineImpl implements BpelEngine {
                 }
             }
 
-            p.deactivate();
+            // unregister the services provided by the process
+            p.deactivate();            
+            // release the resources held by this process
+            p.dehydrate();
         }
         return p;
     }
 
     boolean isProcessRegistered(QName pid) {
         return _activeProcesses.containsKey(pid);
+    }
+    
+    BpelProcess getProcess(QName pid) {
+    	return _activeProcesses.get(pid);
     }
 
     /**

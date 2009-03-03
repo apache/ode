@@ -201,4 +201,19 @@ public class OProcess extends OBase {
         in.defaultReadObject();
         instanceCount++;
     }
+    
+    @Override
+    public void dehydrate() {
+    	super.dehydrate();
+    	procesScope.dehydrate();
+    	allPartnerLinks.clear();
+    	for (OBase obase : _children) {
+    		obase.dehydrate();
+    	}
+    	_children.clear();
+    	messageTypes.clear();
+    	elementTypes.clear();
+    	xsdTypes.clear();
+    	xslSheets.clear();
+    }
 }

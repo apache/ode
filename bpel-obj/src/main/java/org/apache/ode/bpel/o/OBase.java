@@ -71,4 +71,13 @@ public class OBase implements Serializable {
         buf.append(_id);
         return buf.toString();
     }
+    
+    public void dehydrate() {
+    	if (debugInfo != null) {
+    		debugInfo.description = null;
+    		debugInfo.extensibilityElements = null;
+    		debugInfo = null;
+    	}
+    	
+    }
 }

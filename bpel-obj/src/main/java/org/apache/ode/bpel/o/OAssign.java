@@ -62,6 +62,13 @@ public class OAssign extends OActivity {
         public String toString() {
             return "{OCopy " + to + "=" + from + "}";
         }
+        
+        @Override
+        public void dehydrate() {
+        	super.dehydrate();
+        	to = null;
+        	from = null;
+        }
     }
 
     public interface LValue {
@@ -252,5 +259,13 @@ public class OAssign extends OActivity {
           public String toString() {
               return "{PLinkRef " + partnerLink + "!" + isMyEndpointReference + "}";
           }
+    }
+    
+    @Override
+    public void dehydrate() {
+    	super.dehydrate();
+    	for (Copy copy : this.copy) {
+    		copy.dehydrate();
+    	}
     }
 }

@@ -22,7 +22,9 @@ package org.apache.ode.axis2;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,6 +38,7 @@ import org.apache.ode.axis2.service.ManagementService;
 import org.apache.ode.axis2.httpbinding.HttpExternalService;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.engine.BpelEngineImpl;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
 import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
@@ -75,6 +78,7 @@ import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
@@ -406,8 +410,24 @@ public class ODEServer {
         __log.debug("Destroying service " + serviceName + " port " + portName);
         ODEService service = (ODEService) _services.remove(serviceName, portName);
         if (service != null) {
+            // try to clean up the service after itself
             try {
-                _axisConfig.removeService(service.getAxisService().getName());
+                String axisServiceName = service.getAxisService().getName();
+            	AxisService axisService = _axisConfig.getService(axisServiceName);
+                // first, de-allocate its schemas
+            	axisService.releaseSchemaList();
+                // then, de-allocate its parameters
+                // the service's wsdl object model is stored as one of its parameters!
+                // can't stress strongly enough how important it is to clean this up.
+            	ArrayList<Parameter> parameters = (ArrayList<Parameter>) axisService.getParameters();
+            	for (Parameter parameter : parameters) {
+	            	axisService.removeParameter(parameter);
+            	}
+                // now, stop the service
+            	_axisConfig.stopService(axisServiceName);
+                // if only this method did a good job of cleaning up after itself
+                _axisConfig.removeService(axisServiceName);
+                _axisConfig.cleanup();
             } catch (AxisFault axisFault) {
                 __log.error("Couldn't destroy service " + serviceName);
             }
@@ -632,14 +652,37 @@ public class ODEServer {
 
     private void handleEvent(ProcessStoreEvent pse) {
         __log.debug("Process store event: " + pse);
+        ProcessConf pconf;
         switch (pse.type) {
             case ACTVIATED:
-            case RETIRED:
                 // bounce the process
                 _server.unregister(pse.pid);
-                ProcessConf pconf = _store.getProcessConfiguration(pse.pid);
-                if (pconf != null) _server.register(pconf);
-                else __log.debug("slighly odd: recevied event " + pse + " for process not in store!");
+                pconf = _store.getProcessConfiguration(pse.pid);
+                if (pconf != null) {
+                	_server.register(pconf);
+                } else {
+                	__log.debug("slighly odd: recevied event " + 
+                			pse + " for process not in store!");
+                }
+                break;
+            case RETIRED:
+            	// are there are instances of this process running? 
+            	boolean instantiated = _server.hasActiveInstances(pse.pid);
+            	// remove the process
+                _server.unregister(pse.pid);
+                // bounce the process if necessary  
+                if (instantiated) {
+	                pconf = _store.getProcessConfiguration(pse.pid);
+	                if (pconf != null) {
+	                	_server.register(pconf);
+	                } else {
+	                	__log.debug("slighly odd: recevied event " + 
+	                			pse + " for process not in store!");
+	                }
+                } else {
+                    // we may have potentially created a lot of garbage, so,
+                	// let's hope the garbage collector is configured properly.
+                }
                 break;
             case DISABLED:
             case UNDEPLOYED:
@@ -650,6 +693,7 @@ public class ODEServer {
                 __log.debug("Ignoring store event: " + pse);
         }
     }
+
 
     // Transactional debugging stuff, to track down all these little annoying bugs.
     private class DebugTxMgr implements TransactionManager {

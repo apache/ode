@@ -21,6 +21,7 @@ package org.apache.ode.bpel.engine;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -847,12 +848,39 @@ public class BpelProcess {
         }
 
         private void doDehydrate() {
-            _oprocess = null;
-            _partnerRoles = null;
-            _myRoles = null;
-            _endpointToMyRoleMap = null;
-            _replacementMap = null;
-            _expLangRuntimeRegistry = null;
+        	if (_oprocess != null) {
+	        	_oprocess.dehydrate();
+	            _oprocess = null;
+        	}
+        	if (_partnerRoles != null) {
+	            _partnerRoles.clear();
+	            _partnerRoles = null;
+        	}
+        	if (_myRoles != null) {
+	            _myRoles.clear();
+	            _myRoles = null;
+        	}
+        	if (_endpointToMyRoleMap != null) {
+	            _endpointToMyRoleMap.clear();
+	            _endpointToMyRoleMap = null;
+        	}
+        	if (_replacementMap != null) {
+	            _replacementMap = null;
+	            _expLangRuntimeRegistry = null;
+        	}
+            _myEprs = null;
+            if (_partnerChannels != null) {
+	            _partnerChannels.clear();
+	            _partnerChannels = null;
+            }
+            if (_partnerEprs != null) {
+	            _partnerEprs.clear();
+	            _partnerEprs = null;
+            }
+            if (_partnerRoles != null) {
+	            _partnerRoles.clear();
+	            _partnerRoles = null;
+            }
         }
 
         private void doHydrate() {
@@ -973,5 +1001,34 @@ public class BpelProcess {
     public ProcessConf getConf() {
         return _pconf;
     }
+
+	public boolean hasActiveInstances() {
+		try {
+			_hydrationLatch.latch(1);
+            if (isInMemory() || _engine._contexts.scheduler.isTransacted()) { 
+    			return hasActiveInstances(getProcessDAO());
+            } else {
+                // If we do not have a transaction we need to create one. 
+                try {
+                    return (Boolean) _engine._contexts.scheduler.execTransaction(new Callable<Object>() {
+                        public Object call() throws Exception {
+                			return hasActiveInstances(getProcessDAO());
+                        }
+                    });
+                } catch (Exception e) {
+                    String errmsg = "DbError";
+                    __log.error(errmsg, e);
+                    return false;
+                }
+            }
+		} finally {
+			_hydrationLatch.release(1);
+		}
+	}
+	
+	private boolean hasActiveInstances(ProcessDAO processDAO) {
+    	Collection<ProcessInstanceDAO> activeInstances = processDAO.getActiveInstances();
+		return (activeInstances != null && activeInstances.size() > 0);
+	}
 
 }
