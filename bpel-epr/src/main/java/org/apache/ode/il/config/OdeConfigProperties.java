@@ -80,6 +80,10 @@ public class OdeConfigProperties {
 
     public static final String PROP_PROCESS_DEHYDRATION = "process.dehydration";
 
+    public static final String PROP_PROCESS_DEHYDRATION_MAXIMUM_AGE = "process.dehydration.maximum.age";
+    
+    public static final String PROP_PROCESS_DEHYDRATION_MAXIMUM_COUNT = "process.dehydration.maximum.count";
+    
     public static final String PROP_DAOCF = "dao.factory";
 
     private File _cfgFile;
@@ -242,6 +246,14 @@ public class OdeConfigProperties {
         return Boolean.valueOf(getProperty(OdeConfigProperties.PROP_PROCESS_DEHYDRATION, "false"));
     }
 
+    public long getDehydrationMaximumAge() {     
+    	return Long.valueOf(getProperty(PROP_PROCESS_DEHYDRATION_MAXIMUM_AGE, ""+20*60*1000));
+    }
+    
+    public int getDehydrationMaximumCount() {
+        return Integer.valueOf(getProperty(PROP_PROCESS_DEHYDRATION_MAXIMUM_COUNT, ""+1000));
+    }
+    
     public boolean isDbLoggingEnabled() {
         return Boolean.valueOf(getProperty(OdeConfigProperties.PROP_DB_LOGGING, "false"));
     }

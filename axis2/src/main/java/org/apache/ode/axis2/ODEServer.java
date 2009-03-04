@@ -556,7 +556,8 @@ public class ODEServer {
         _server.setScheduler(_scheduler);
         if (_odeConfig.isDehydrationEnabled()) {
             CountLRUDehydrationPolicy dehy = new CountLRUDehydrationPolicy();
-            // dehy.setProcessMaxAge(10000);
+            dehy.setProcessMaxAge(_odeConfig.getDehydrationMaximumAge());
+            dehy.setProcessMaxCount(_odeConfig.getDehydrationMaximumCount());
             _server.setDehydrationPolicy(dehy);
         }
         _server.setConfigProperties(_odeConfig.getProperties());
