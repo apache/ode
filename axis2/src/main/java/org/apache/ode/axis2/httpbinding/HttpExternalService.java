@@ -66,7 +66,7 @@ import java.util.concurrent.ExecutorService;
  */
 public class HttpExternalService implements ExternalService {
 
-    private static final Log log = LogFactory.getLog(HttpExternalService.class);
+    private static final Log log = LogFactory.getLog(ExternalService.class);
     private static final Messages msgs = Messages.getMessages(Messages.class);
 
     private MultiThreadedHttpConnectionManager connections;

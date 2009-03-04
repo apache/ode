@@ -80,7 +80,7 @@ import java.util.concurrent.ExecutorService;
  */
 public class SoapExternalService implements ExternalService {
 
-    private static final Log __log = LogFactory.getLog(SoapExternalService.class);
+    private static final Log __log = LogFactory.getLog(ExternalService.class);
 
     private static final org.apache.ode.utils.wsdl.Messages msgs = Messages.getMessages(Messages.class);
 
