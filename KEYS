@@ -9,6 +9,44 @@ Developers:
              && gpg --armor --export <your name>) >> this file.
 
 
+pub   1024D/D3F71223 2009-03-04
+uid                  Matthieu Riou (CODE SIGNING KEY) <mriou@apache.org>
+sig 3        D3F71223 2009-03-04  Matthieu Riou (CODE SIGNING KEY) <mriou@apache.org>
+sub   2048g/896CAB14 2009-03-04
+sig          D3F71223 2009-03-04  Matthieu Riou (CODE SIGNING KEY) <mriou@apache.org>
+
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+mQGiBEmupL4RBACsbcGbEyf4VWzlAbO4U3fDX0wsx6/Gkdfrc5Twf/wAqEPorrAc
+LUn/FeQL7Z/if0GdAxGv574mqi8lG767jU46g8uMfDi6teZsILjkRYe/2Tkqi/UZ
+GJ7LhiWbKit8AvBWmrahR3DcMGigqEEfw4k1dv4tyD/6jxwcYipPG39HewCg4pRS
+RHAhE3pIdsqQFypwhFH/GyMD/1RvWdwi1sxyZG3fOATdtE4uGa+UV+3Dqq3FsDtV
+ufj2Z3qlL/7Y9BSiAR6yakrLjFPdFjoWK1ZVmBIKaXxrv13PPFMAv+wghKX2Pe+p
+G6S4N9mVMNo8nkstdKPaBxZ6TMh5c+KPdFOWMXHDCimoGTBvfCaW4N7Bph392R4X
+dO/5A/9wqOtY5DhYqu4tT7eKitn7RJBKNbaIfqw3MZ0khncUq67QZjIa8mQ7GFz2
+k+qedCiEi1E4wUQoZSAlM4UMl3QJS+F8rvPFEobfNfgaUYoRFsNqezW82B90SsIt
+PHGBxXzAvCKgM/H6ShjIIHj0040ORoOPXiGZEEJrJjqxPK8ln7QzTWF0dGhpZXUg
+UmlvdSAoQ09ERSBTSUdOSU5HIEtFWSkgPG1yaW91QGFwYWNoZS5vcmc+iGAEExEC
+ACAFAkmupL4CGwMGCwkIBwMCBBUCCAMEFgIDAQIeAQIXgAAKCRBwa+xk0/cSIwA7
+AJ9MpSzJqlRhd7njcFbTaGVDISTsfgCghbAHols0yH/Z43pTNghs3ZHvmKu5Ag0E
+Sa6kvhAIANKcTI+T4Y7InQ7+DnqTUAciacTp3Ao/6ET/hM4yoqG9LNMii7UabW4W
+PkB83LTLQHPeiIwVwkHMAjHSHwXEYK0nI+vYxe060pD5EK/hiGNepoPIgSLzUKIx
+mVdh6s+VWG/VNz++V5CLkFhIU3yoYq50qm0Vlwk8vt4EAPgndfdROso4SpvR+QbA
+pHpUOXS+WwBo8FhWZr+qDzTA3e0HbNLAtagfPIZrJsCVT/mcZ/COXnirGBYxsMFW
+88sGpVEiwOEMrIvaAqN1Our5KsKE9Z4jCmAbLQeI/C+qUVlbZhNrf6pgyFJbqQTO
+Qu2daLzwAR9rFdhjFPkqeCR3Mu6vugsAAwUH/RxoUmHQZBBjfWU9EWiLi/yi2Z4c
++WgrXZAThTaSaxgviLizxlzCvhK1vU+3woRa3U2No3BLejUv1Z0gssR/ds/uCG5l
+KALh6SNTWt6TdqxABwzmBUcIny4KQsQeu7i2+JEy59dPG9KgjNLwtQeMO31eT3Pw
+f5ad2BU+EV6PY3PzlDJeIW0ZZGvB32zyO6QX1lik4sZ7/aLgPVjtGf1ppiUKWbsm
+MBl0g3x7jCh7bsrxqf2FgVA6U/tAX5SVys3ab0FB2KFqI5JBGquE70h2p2jWt7g1
+33OI6bmfr2MGgBQgOe2mHbvyNxfFCvPr+lddbbG2u0fd2YutQu1MTZZ/xgyISQQY
+EQIACQUCSa6kvgIbDAAKCRBwa+xk0/cSIwdSAKCNhHa4WMtdf+kOAc+xvSaWtAns
+xQCg18T8rdKh6MU8JCsRpZTOEg+xVBI=
+=Yz2c
+-----END PGP PUBLIC KEY BLOCK-----
+
+
 pub   1024D/436DBE07 2008-05-15
 uid                  Matthieu Riou <mriou@apache.org>
 sig 3        436DBE07 2008-05-15  Matthieu Riou <mriou@apache.org>
