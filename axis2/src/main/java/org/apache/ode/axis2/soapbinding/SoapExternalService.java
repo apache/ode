@@ -29,10 +29,7 @@ import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.deployment.ServiceBuilder;
-import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.OutOnlyAxisOperation;
-import org.apache.axis2.description.OutInAxisOperation;
-import org.apache.axis2.description.AxisModule;
+import org.apache.axis2.description.*;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
@@ -131,42 +128,37 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
             // Override options are passed to the axis MessageContext so we can
             // retrieve them in our session out changeHandler.
             final MessageContext mctx = new MessageContext();
-            /* make the given options the parent so it becomes the defaults of the MessageContexgt. That allows the user to override
-            *  specific options on a given message context and not affect the overall options.
-            */
-            mctx.getOptions().setParent(client.getOptions());
-            writeHeader(mctx, odeMex);
+            try {
+                /* make the given options the parent so it becomes the defaults of the MessageContexgt. That allows the user to override
+                *  specific options on a given message context and not affect the overall options.
+                */
+                mctx.getOptions().setParent(client.getOptions());
+                writeHeader(mctx, odeMex);
 
-            _converter.createSoapRequest(mctx, odeMex.getRequest(), odeMex.getOperation());
+                _converter.createSoapRequest(mctx, odeMex.getRequest(), odeMex.getOperation());
 
-            SOAPEnvelope soapEnv = mctx.getEnvelope();
-            EndpointReference axisEPR = new EndpointReference(((MutableEndpoint) odeMex.getEndpointReference()).getUrl());
-            if (__log.isDebugEnabled()) {
-                __log.debug("Axis2 sending message to " + axisEPR.getAddress() + " using MEX " + odeMex);
-                __log.debug("Message: " + soapEnv);
-            }
+                SOAPEnvelope soapEnv = mctx.getEnvelope();
+                EndpointReference axisEPR = new EndpointReference(((MutableEndpoint) odeMex.getEndpointReference()).getUrl());
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Axis2 sending message to " + axisEPR.getAddress() + " using MEX " + odeMex);
+                    __log.debug("Message: " + soapEnv);
+                }
 
-            final OperationClient operationClient = client.createClient(isTwoWay ? ServiceClient.ANON_OUT_IN_OP
-                    : ServiceClient.ANON_OUT_ONLY_OP);
-            operationClient.addMessageContext(mctx);
-            // this Options can be alter without impacting the ServiceClient options (which is a requirement)
-            Options operationOptions = operationClient.getOptions();
+                final OperationClient operationClient = client.createClient(isTwoWay ? ServiceClient.ANON_OUT_IN_OP
+                        : ServiceClient.ANON_OUT_ONLY_OP);
+                operationClient.addMessageContext(mctx);
+                // this Options can be alter without impacting the ServiceClient options (which is a requirement)
+                Options operationOptions = operationClient.getOptions();
 
-            // provide HTTP credentials if any
-            AuthenticationHelper.setHttpAuthentication(odeMex, operationOptions);
-            
-            operationOptions.setAction(mctx.getSoapAction());
-            operationOptions.setTo(axisEPR);
+                // provide HTTP credentials if any
+                AuthenticationHelper.setHttpAuthentication(odeMex, operationOptions);
 
-            if (isTwoWay) {
-                final Operation operation = odeMex.getOperation();
+                operationOptions.setAction(mctx.getSoapAction());
+                operationOptions.setTo(axisEPR);
 
-                try {
-                    try {
-                        operationClient.execute(true);
-                    } finally {
-                        mctx.getTransportOut().getSender().cleanup(mctx);
-                    }
+                operationClient.execute(true);
+                if (isTwoWay) {
+                    final Operation operation = odeMex.getOperation();
                     MessageContext response = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_IN_VALUE);
                     MessageContext flt = operationClient.getMessageContext(WSDLConstants.MESSAGE_LABEL_FAULT_VALUE);
                     if (response != null && __log.isDebugEnabled())
@@ -174,19 +166,21 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
 
                     if (flt != null) reply(odeMex, operation, flt, true);
                     else reply(odeMex, operation, response, response.isFault());
-                } catch (Throwable t) {
-                    String errmsg = "Error sending message to Axis2 for ODE mex " + odeMex;
-                    __log.error(errmsg, t);
-                    replyWithFailure(odeMex, MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
+
+                } else {  /* one-way case */
+                    odeMex.replyOneWayOk();
                 }
-            } else /* one-way case */{
-                operationClient.execute(false);
-                odeMex.replyOneWayOk();
+            } finally {
+                 // make sure the HTTP connection is released to the pool!
+                TransportOutDescription out = mctx.getTransportOut();
+                if (out != null && out.getSender() != null) {
+                    out.getSender().cleanup(mctx);
+                }
             }
-        } catch (AxisFault axisFault) {
+        } catch (Throwable t) {
             String errmsg = "Error sending message to Axis2 for ODE mex " + odeMex;
-            __log.error(errmsg, axisFault);
-            odeMex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
+            __log.error(errmsg, t);
+            replyWithFailure(odeMex, MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg);
         }
     }
 
@@ -322,9 +316,9 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
         return _serviceName;
     }
 
-    private void replyWithFailure(final PartnerRoleMessageExchange odeMex, final FailureType error, final String errmsg, final Element details) {
+    private void replyWithFailure(final PartnerRoleMessageExchange odeMex, final FailureType error, final String errmsg) {
         try {
-            odeMex.replyWithFailure(error, errmsg, details);
+            odeMex.replyWithFailure(error, errmsg, null);
         } catch (Exception e) {
             String emsg = "Error executing replyWithFailure; reply will be lost.";
             __log.error(emsg, e);
