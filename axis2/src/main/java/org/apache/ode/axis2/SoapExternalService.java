@@ -30,6 +30,7 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.OutInAxisOperation;
 import org.apache.axis2.description.OutOnlyAxisOperation;
+import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.jms.JMSConstants;
 import org.apache.axis2.transport.http.HTTPConstants;
@@ -193,7 +194,10 @@ public class SoapExternalService implements ExternalService {
                                     }
                                 } catch (Throwable t) {
                                     // release the HTTP connection, we don't need it anymore
-                                    mctx.getTransportOut().getSender().cleanup(mctx);
+                                    TransportOutDescription out = mctx.getTransportOut();
+                                    if (out != null && out.getSender() != null) {
+                                        out.getSender().cleanup(mctx);
+                                    }
                                     String errmsg = "Error sending message (mex=" + odeMex + "): " + t.getMessage();
                                     __log.error(errmsg, t);
                                     replyWithFailure(mexId, MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg);
@@ -483,9 +487,12 @@ public class SoapExternalService implements ExternalService {
                         String errmsg = "Unable to process response: " + ex.getMessage();
                         __log.error(errmsg, ex);
                         odeMex.replyWithFailure(FailureType.OTHER, errmsg, null);
-                    }finally{
-                        // make sure the HTTP connection is released to the pool!
-                        outMsgContext.getTransportOut().getSender().cleanup(outMsgContext);
+                    } finally {
+                         // make sure the HTTP connection is released to the pool!
+                        TransportOutDescription out = outMsgContext.getTransportOut();
+                        if (out != null && out.getSender() != null) {
+                            out.getSender().cleanup(outMsgContext);
+                        }
                     }
                     return null;
                 }
