@@ -19,7 +19,6 @@
 package org.apache.ode.bpel.engine;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -34,7 +33,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.engine.migration.MigrationHandler;
+import org.apache.ode.bpel.evar.ExternalVariableModule;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.BpelEngine;
@@ -54,8 +54,6 @@ import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
-import org.apache.ode.bpel.evar.ExternalVariableModule;
-import org.apache.ode.bpel.engine.migration.MigrationHandler;
 
 /**
  * <p>
@@ -91,6 +89,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     private State _state = State.SHUTDOWN;
     private Contexts _contexts = new Contexts();
     private DehydrationPolicy _dehydrationPolicy;
+    private boolean _hydrationLazy;
     private Properties _configProperties;
     
     BpelEngineImpl _engine;
@@ -290,7 +289,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             _engine.registerProcess(process);
             _registeredProcesses.add(process);
-            if (_dehydrationPolicy == null) process.hydrate();
+            if (!_hydrationLazy) {
+            	process.hydrate();
+            }
 
             __log.info(__msgs.msgProcessRegistered(conf.getProcessId()));
         } finally {
@@ -473,6 +474,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 	public boolean hasActiveInstances(QName pid) {
 		BpelProcess process = _engine.getProcess(pid);
 		return process != null ? process.hasActiveInstances() : false;
+	}
+
+	public void setHydrationLazy(boolean hydrationLazy) {
+		this._hydrationLazy = hydrationLazy;
 	}
 
 }

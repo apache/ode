@@ -84,6 +84,8 @@ public class OdeConfigProperties {
     
     public static final String PROP_PROCESS_DEHYDRATION_MAXIMUM_COUNT = "process.dehydration.maximum.count";
     
+    public static final String PROP_PROCESS_HYDRATION = "process.hydration";
+    
     public static final String PROP_DAOCF = "dao.factory";
 
     private File _cfgFile;
@@ -252,6 +254,10 @@ public class OdeConfigProperties {
     
     public int getDehydrationMaximumCount() {
         return Integer.valueOf(getProperty(PROP_PROCESS_DEHYDRATION_MAXIMUM_COUNT, ""+1000));
+    }
+    
+    public boolean isHydrationLazy() {
+        return "lazy".equals(getProperty(OdeConfigProperties.PROP_PROCESS_HYDRATION, "eager"));
     }
     
     public boolean isDbLoggingEnabled() {

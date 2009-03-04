@@ -560,6 +560,7 @@ public class ODEServer {
             dehy.setProcessMaxCount(_odeConfig.getDehydrationMaximumCount());
             _server.setDehydrationPolicy(dehy);
         }
+        _server.setHydrationLazy(_odeConfig.isHydrationLazy());
         _server.setConfigProperties(_odeConfig.getProperties());
         _server.init();
     }
