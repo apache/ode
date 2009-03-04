@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -1147,11 +1148,14 @@ public class DOMUtils {
     		if (namespaceURI == null) {
 	    		clonedNode = document.createElement(nodeName);
     		} else {
-    			String prefix = ((Element) sourceNode).lookupPrefix(namespaceURI);
+    			String prefix = namespaceURI.equals(Namespaces.XMLNS_URI) ? 
+    					"xmlns" : ((Element) sourceNode).lookupPrefix(namespaceURI);
     			if (prefix != null && !"".equals(prefix)) {
         			nodeName = prefix + ":" + nodeName;
+        			clonedNode = document.createElementNS(namespaceURI, nodeName);
+    			} else {
+    	    		clonedNode = document.createElement(nodeName);
     			}
-    			clonedNode = document.createElementNS(namespaceURI, nodeName);
     		}
     		// attributes are not treated as child nodes, so copy them explicitly
     		NamedNodeMap attributes = ((Element) sourceNode).getAttributes();

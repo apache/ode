@@ -26,41 +26,45 @@ import javax.xml.namespace.QName;
  */
 public class Namespaces {
 
+    /** XML namespaces */	
+	public static final String XML_URI = "http://www.w3.org/XML/1998/namespace".intern();
+	public static final String XMLNS_URI = "http://www.w3.org/2000/xmlns/".intern();
+	
     /** BPEL 2.0 Final namespaces */
-    public static final String WSBPEL2_0_FINAL_ABSTRACT = "http://docs.oasis-open.org/wsbpel/2.0/process/abstract";
-    public static final String WSBPEL2_0_FINAL_EXEC = "http://docs.oasis-open.org/wsbpel/2.0/process/executable";
-    public static final String WSBPEL2_0_FINAL_PLINK = "http://docs.oasis-open.org/wsbpel/2.0/plnktype";
-    public static final String WSBPEL2_0_FINAL_SERVREF = "http://docs.oasis-open.org/wsbpel/2.0/serviceref";
-    public static final String WSBPEL2_0_FINAL_VARPROP = "http://docs.oasis-open.org/wsbpel/2.0/varprop";
+    public static final String WSBPEL2_0_FINAL_ABSTRACT = "http://docs.oasis-open.org/wsbpel/2.0/process/abstract".intern();
+    public static final String WSBPEL2_0_FINAL_EXEC = "http://docs.oasis-open.org/wsbpel/2.0/process/executable".intern();
+    public static final String WSBPEL2_0_FINAL_PLINK = "http://docs.oasis-open.org/wsbpel/2.0/plnktype".intern();
+    public static final String WSBPEL2_0_FINAL_SERVREF = "http://docs.oasis-open.org/wsbpel/2.0/serviceref".intern();
+    public static final String WSBPEL2_0_FINAL_VARPROP = "http://docs.oasis-open.org/wsbpel/2.0/varprop".intern();
 
     /** BPEL 2.0 draft */
-    public static final String WS_BPEL_20_NS = "http://schemas.xmlsoap.org/ws/2004/03/business-process/";
+    public static final String WS_BPEL_20_NS = "http://schemas.xmlsoap.org/ws/2004/03/business-process/".intern();
 
     /** BPEL 1.1 */
-    public static final String BPEL11_NS = "http://schemas.xmlsoap.org/ws/2003/03/business-process/";
+    public static final String BPEL11_NS = "http://schemas.xmlsoap.org/ws/2003/03/business-process/".intern();
 
     /** Diverse WS-* stuff */
-    public static final String WS_ADDRESSING_NS = "http://www.w3.org/2005/08/addressing";
-    public static final String WS_ADDRESSING_WSDL_NS = "http://www.w3.org/2006/05/addressing/wsdl";
-    public static final String WS_ADDRESSING_ANON_URI = "http://www.w3.org/2005/08/addressing/anonymous";
-    public static final String HTTP_NS = "http://schemas.xmlsoap.org/wsdl/http/";
-    public static final String SOAP_NS = "http://schemas.xmlsoap.org/wsdl/soap/";
-    public static final String SOAP_ENV_NS = "http://schemas.xmlsoap.org/soap/envelope/";
-    public static final String WSDL_11 = "http://schemas.xmlsoap.org/wsdl/";
-    public static final String WSDL_20 = "http://www.w3.org/2006/01/wsdl";
-    public static final String XML_SCHEMA = "http://www.w3.org/2001/XMLSchema";
-    public static final String XML_INSTANCE = "http://www.w3. org/2001/XMLSchema-instance";
-    public static final String XPATH_FUNCTIONS = "http://www.w3.org/2005/xpath-functions";
-    public static final String JBI_END_POINT_REFERENCE = "http://java.sun.com/jbi/end-point-reference";
+    public static final String WS_ADDRESSING_NS = "http://www.w3.org/2005/08/addressing".intern();
+    public static final String WS_ADDRESSING_WSDL_NS = "http://www.w3.org/2006/05/addressing/wsdl".intern();
+    public static final String WS_ADDRESSING_ANON_URI = "http://www.w3.org/2005/08/addressing/anonymous".intern();
+    public static final String HTTP_NS = "http://schemas.xmlsoap.org/wsdl/http/".intern();
+    public static final String SOAP_NS = "http://schemas.xmlsoap.org/wsdl/soap/".intern();
+    public static final String SOAP_ENV_NS = "http://schemas.xmlsoap.org/soap/envelope/".intern();
+    public static final String WSDL_11 = "http://schemas.xmlsoap.org/wsdl/".intern();
+    public static final String WSDL_20 = "http://www.w3.org/2006/01/wsdl".intern();
+    public static final String XML_SCHEMA = "http://www.w3.org/2001/XMLSchema".intern();
+    public static final String XML_INSTANCE = "http://www.w3. org/2001/XMLSchema-instance".intern();
+    public static final String XPATH_FUNCTIONS = "http://www.w3.org/2005/xpath-functions".intern();
+    public static final String JBI_END_POINT_REFERENCE = "http://java.sun.com/jbi/end-point-reference".intern();
     public static final QName WS_ADDRESSING_ENDPOINT = new QName(WS_ADDRESSING_NS, "EndpointReference");
     public static final QName WS_ADDRESSING_USINGADDRESSING = new QName(WS_ADDRESSING_WSDL_NS, "UsingAddressing");
 
     /** ODE stuff */
-    public static final String ODE_PMAPI = "http://www.apache.org/ode/pmapi/types/2006/08/02/";
-    public static final String ODE_EXTENSION_NS = "http://www.apache.org/ode/type/extension";
-    public static final String ODE_HTTP_EXTENSION_NS = "http://www.apache.org/ode/type/extension/http";
-    public static final String INTALIO_SESSION_NS = "http://www.intalio.com/type/session";
-    public static final String ODE_SESSION_NS = "http://www.apache.org/ode/type/session";
-    public static final String DEPRECATED_XDT_NS = "http://www.w3.org/2003/11/xpath-datatypes";
+    public static final String ODE_PMAPI = "http://www.apache.org/ode/pmapi/types/2006/08/02/".intern();
+    public static final String ODE_EXTENSION_NS = "http://www.apache.org/ode/type/extension".intern();
+    public static final String ODE_HTTP_EXTENSION_NS = "http://www.apache.org/ode/type/extension/http".intern();
+    public static final String INTALIO_SESSION_NS = "http://www.intalio.com/type/session".intern();
+    public static final String ODE_SESSION_NS = "http://www.apache.org/ode/type/session".intern();
+    public static final String DEPRECATED_XDT_NS = "http://www.w3.org/2003/11/xpath-datatypes".intern();
 
 }
