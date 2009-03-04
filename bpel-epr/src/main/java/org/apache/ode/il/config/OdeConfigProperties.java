@@ -86,6 +86,8 @@ public class OdeConfigProperties {
     
     public static final String PROP_PROCESS_HYDRATION = "process.hydration";
     
+    public static final String PROP_LOW_FREE_MEMORY_THRESHOLD = "low.free.memory.threshold";
+    
     public static final String PROP_DAOCF = "dao.factory";
 
     private File _cfgFile;
@@ -262,6 +264,10 @@ public class OdeConfigProperties {
     
     public boolean isDbLoggingEnabled() {
         return Boolean.valueOf(getProperty(OdeConfigProperties.PROP_DB_LOGGING, "false"));
+    }
+    
+    public int getLowFreeMemoryThreshold() {
+    	return Integer.valueOf(getProperty(PROP_LOW_FREE_MEMORY_THRESHOLD, "10"));
     }
 
 

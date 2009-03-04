@@ -90,6 +90,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     private Contexts _contexts = new Contexts();
     private DehydrationPolicy _dehydrationPolicy;
     private boolean _hydrationLazy;
+    private int _lowFreeMemoryThreshold;
     private Properties _configProperties;
     
     BpelEngineImpl _engine;
@@ -141,6 +142,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             _state = State.RUNNING;
             __log.info(__msgs.msgServerStarted());
             if (_dehydrationPolicy != null) new Thread(new ProcessDefReaper()).start();
+            if (_lowFreeMemoryThreshold != 0) new Thread(new FreeMemoryChecker()).start();
         } finally {
             _mngmtLock.writeLock().unlock();
         }
@@ -391,6 +393,37 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         getEngine().onScheduledJob(jobInfo);
     }
     
+    private class FreeMemoryChecker implements Runnable {
+    	Runtime runtime = Runtime.getRuntime();
+    	public void run() {
+            __log.debug("Starting free memory checker thread.");
+            long pollingTime = 60000;
+            try {
+                while (true) {
+                    Thread.sleep(pollingTime);
+                    double freeMemory = (double) runtime.freeMemory();
+                    double maxMemory = (double) runtime.maxMemory();
+                    if ((freeMemory / maxMemory) < (_lowFreeMemoryThreshold / 100)) {
+                		__log.info("You are running out of free memory!");
+                		__log.info("Please try to restart the server with a higher maximum Java heap size");
+                		__log.info("If you cannot increase the heap size, then please reduce your workload by:");
+                		__log.info("a) Waiting for active instances to complete before starting new ones");
+                		__log.info("b) Retiring low-priority processes that you don't plan on using");
+                    	if (_dehydrationPolicy == null) {
+                    		__log.info("Process dehydration is currently turned off");
+                    		__log.info("Restarting the server with process hydration turned on may help");
+                    	} else {
+                    		__log.info("Process dehydration is currently turned on");
+                    		__log.info("Configuring process hydration with a lower maximum age and count may help");
+                    	}
+                    }
+                }
+            } catch (InterruptedException e) {
+                __log.info(e);
+            }
+    	}
+    }
+    
     private class ProcessDefReaper implements Runnable {
         public void run() {
             __log.debug("Starting process definition reaper thread.");
@@ -477,7 +510,11 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 	}
 
 	public void setHydrationLazy(boolean hydrationLazy) {
-		this._hydrationLazy = hydrationLazy;
+		_hydrationLazy = hydrationLazy;
+	}
+
+	public void setLowFreeMemoryThreshold(int lowFreeMemoryThreshold) {
+		_lowFreeMemoryThreshold = lowFreeMemoryThreshold;
 	}
 
 }
