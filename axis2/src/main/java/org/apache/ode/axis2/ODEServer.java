@@ -561,7 +561,6 @@ public class ODEServer {
             _server.setDehydrationPolicy(dehy);
         }
         _server.setHydrationLazy(_odeConfig.isHydrationLazy());
-        _server.setLowFreeMemoryThreshold(_odeConfig.getLowFreeMemoryThreshold());
         _server.setConfigProperties(_odeConfig.getProperties());
         _server.init();
     }
