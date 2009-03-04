@@ -156,7 +156,7 @@ public class SoapMessageConverter {
             msgCtx.setEnvelope(soapEnv);
         }
 
-        createSoapHeaders(soapEnv, getSOAPHeaders(bi), op.getInput().getMessage(), message.getHeaderParts());
+        createSoapHeaders(soapEnv, getSOAPHeaders(bi), op.getInput().getMessage(), message);
 
         SOAPBody soapBody = getSOAPBody(bi);
         if (soapBody != null) {
@@ -190,7 +190,7 @@ public class SoapMessageConverter {
         }
 
         if (message.getHeaderParts().size() > 0 || getSOAPHeaders(bo).size() > 0)
-            createSoapHeaders(soapEnv, getSOAPHeaders(bo), op.getOutput().getMessage(), message.getHeaderParts());
+            createSoapHeaders(soapEnv, getSOAPHeaders(bo), op.getOutput().getMessage(), message);
 
         SOAPBody soapBody = getSOAPBody(bo);
         if (soapBody != null) {
@@ -199,13 +199,13 @@ public class SoapMessageConverter {
         }
     }
 
-    public void createSoapHeaders(SOAPEnvelope soapEnv, List<SOAPHeader> headerDefs, Message msgdef, Map<String,Node> headers) throws AxisFault {
-        for (SOAPHeader sh : headerDefs) handleSoapHeaderDef(soapEnv, sh, msgdef, headers);
+    public void createSoapHeaders(SOAPEnvelope soapEnv, List<SOAPHeader> headerDefs, Message msgdef, org.apache.ode.bpel.iapi.Message message) throws AxisFault {
+        for (SOAPHeader sh : headerDefs) handleSoapHeaderDef(soapEnv, sh, msgdef, message);
 
         org.apache.axiom.soap.SOAPHeader soaphdr = soapEnv.getHeader();
         if (soaphdr == null) soaphdr = _soapFactory.createSOAPHeader(soapEnv);
 
-        for (Node headerNode : headers.values())
+        for (Node headerNode : message.getHeaderParts().values())
             if (headerNode.getNodeType() == Node.ELEMENT_NODE) {
                 if (soaphdr.getFirstChildWithName(new QName(headerNode.getNamespaceURI(), headerNode.getLocalName())) == null) {
                     OMElement omHeaderNode = OMUtils.toOM((Element) headerNode, _soapFactory);
@@ -231,7 +231,8 @@ public class SoapMessageConverter {
     }
 
     @SuppressWarnings("unchecked")
-    private void handleSoapHeaderDef(SOAPEnvelope soapEnv, SOAPHeader headerdef, Message msgdef, Map<String, Node> headers) throws AxisFault {
+    private void handleSoapHeaderDef(SOAPEnvelope soapEnv, SOAPHeader headerdef, Message msgdef, org.apache.ode.bpel.iapi.Message message) throws AxisFault {
+        Map<String,Node> headers = message.getHeaderParts();
         boolean payloadMessageHeader = headerdef.getMessage() == null || headerdef.getMessage().equals(msgdef.getQName());
 
         if (headerdef.getPart() == null) return;
@@ -250,8 +251,13 @@ public class SoapMessageConverter {
 
         // We don't complain about missing header data unless they are part of the message payload. This is
         // because AXIS may be providing these headers.
-        if (srcPartEl == null && payloadMessageHeader)
-            throw new OdeFault(__msgs.msgOdeMessageMissingRequiredPart(headerdef.getPart()));
+        if (srcPartEl == null && payloadMessageHeader){
+            if(message.getPart(headerdef.getPart()) != null){
+                srcPartEl = (Element)message.getPart(headerdef.getPart());
+            }else{
+                throw new OdeFault(__msgs.msgOdeMessageMissingRequiredPart(headerdef.getPart()));
+            }
+        }
 
         if (srcPartEl == null) return;
 
