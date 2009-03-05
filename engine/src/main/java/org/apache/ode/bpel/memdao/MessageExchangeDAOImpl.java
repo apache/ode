@@ -19,10 +19,7 @@
 
 package org.apache.ode.bpel.memdao;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.Map.Entry;
 
 import javax.xml.namespace.QName;
@@ -61,7 +58,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 	ProcessInstanceDAO instance;
 	char direction;
 	QName callee;
-	Properties properties = new Properties();
+	HashMap<String,String> properties = new HashMap<String,String>();
     PartnerLinkDAOImpl _plink;
     InvocationStyle _istyle;
     String _pipedExchange;
@@ -244,11 +241,11 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 	}
 
 	public String getProperty(String key) {
-		return properties.getProperty(key);
+		return properties.get(key);
 	}
 
 	public void setProperty(String key, String value) {
-		properties.setProperty(key,value);
+		properties.put(key,value);
 	}
 
     public void setPartnerLink(PartnerLinkDAO plinkDAO) {
@@ -262,12 +259,15 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 
     public Set<String> getPropertyNames() {
         HashSet<String> retVal = new HashSet<String>();
-        for (Entry<Object,Object> e : properties.entrySet()) {
-            retVal.add((String)e.getKey());
+        for (Entry<String,String> e : properties.entrySet()) {
+            retVal.add(e.getKey());
         }
         return retVal;
     }
 
+    public Map<String, String> getProperties() {
+        return properties;
+    }
 
     public void release() {
         instance = null;

@@ -1,6 +1,7 @@
 package org.apache.ode.bpel.rapi;
 
 import java.util.Date;
+import java.util.Map;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -89,6 +90,8 @@ public interface IOContext {
      * @return
      */
     Element getMyRequest(String mexId);
+
+    public Map<String,String> getProperties(String mexId);
 
     void setInstantiatingMex(String mexId);
 

@@ -17,6 +17,7 @@ import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import java.net.URI;
 
 
@@ -72,6 +73,8 @@ public interface OdeInternalInstance {
     void initializePartnersSessionId(PartnerLinkInstance instance, String partnersSessionId);
 
     Element getMyRequest(String mexId);
+
+    Map<String,String> getProperties(String mexId);
 
     void setInstantiatingMex(String mexId);
 

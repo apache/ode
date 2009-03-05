@@ -99,14 +99,21 @@ class ScopeFrame implements Serializable {
         return new VariableInstance(scopeFrame.scopeInstanceId, variable);
     }
 
+    public VariableInstance resolveVariable(String variableName) {
+        OScope.Variable cset = oscope.getLocalVariable(variableName);
+        if (cset != null) return new VariableInstance(scopeInstanceId, cset);
+        else if (parent != null) return parent.resolveVariable(variableName);
+        else return null;
+    }
+
     public CorrelationSetInstance resolve(OScope.CorrelationSet cset) {
         return new CorrelationSetInstance(find(cset.declaringScope).scopeInstanceId, cset);
     }
 
-    public CorrelationSetInstance resolve(String correlationName) {
+    public CorrelationSetInstance resolveCorrelation(String correlationName) {
         OScope.CorrelationSet cset = oscope.getCorrelationSet(correlationName);
         if (cset != null) return new CorrelationSetInstance(scopeInstanceId, cset);
-        else if (parent != null) return parent.resolve(correlationName);
+        else if (parent != null) return parent.resolveCorrelation(correlationName);
         else return null;
     }
 

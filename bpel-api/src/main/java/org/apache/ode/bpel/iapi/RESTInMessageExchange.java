@@ -14,5 +14,14 @@ public interface RESTInMessageExchange extends MessageExchange {
 
     void setRequest(Message message);
 
+    /**
+     * Does that resource instantiates a new process?
+     * @return
+     */
     boolean isInstantiatingResource();
+
+    /**
+     * Sets a query parameter extracted from the requested URL
+     */
+    void setParameter(String name, String value);
 }

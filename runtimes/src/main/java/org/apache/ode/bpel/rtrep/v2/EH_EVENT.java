@@ -20,6 +20,7 @@ package org.apache.ode.bpel.rtrep.v2;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,10 +37,13 @@ import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
 import org.apache.ode.bpel.rapi.InvalidProcessException;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.Document;
 
 /**
  * Message event handler.
@@ -253,6 +257,29 @@ class EH_EVENT extends BpelJacobRunnable {
                                         throw new InvalidProcessException(ex);
                                     }
                                 }
+                            }
+
+                            if (_oevent.isRestful()) {
+                                // Retrieving the map of properties associated with a RESTful mex. Those are the query
+                                // parameters and are used to set implicit variables associated with these parameters
+                                // in the process.
+                                Map<String,String> props = getBpelRuntime().getProperties(mexId);
+                                for (Map.Entry<String, String> entry : props.entrySet()) {
+                                    VariableInstance vi = _scopeFrame.resolveVariable(entry.getKey());
+                                    if (vi != null) {
+                                        // Always expected to be a string
+                                        Document doc = DOMUtils.newDocument();
+                                        Node textNode = doc.createTextNode(entry.getValue());
+                                        try {
+                                            initializeVariable(vi, textNode);
+                                        } catch (ExternalVariableModuleException e) {
+                                            __log.error("Exception while initializing external variable", e);
+                                            _psc.failure(e.toString(), null);
+                                            return;
+                                        }
+                                    }
+                                }
+
                             }
 
                             try {

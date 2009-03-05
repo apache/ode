@@ -395,7 +395,7 @@ class ASSIGN extends ACTIVITY {
             } else if (ocopy.to.getVariable().type instanceof OPropertyVarType) {
                 // For poperty assignment, the property, the variable that points to it and the correlation set
                 // all have the same name
-                CorrelationSetInstance csetInstance = _scopeFrame.resolve(ocopy.to.getVariable().name);
+                CorrelationSetInstance csetInstance = _scopeFrame.resolveCorrelation(ocopy.to.getVariable().name);
                 CorrelationKey ckey = new CorrelationKey(csetInstance.declaration.getId(), new String[] { rvalue.getTextContent() });
                 if (__log.isDebugEnabled()) __log.debug("Writing correlation " + csetInstance.getName()
                         + " using value " + rvalue.getTextContent());

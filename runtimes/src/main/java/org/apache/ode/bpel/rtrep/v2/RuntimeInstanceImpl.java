@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import java.net.URI;
 
 import javax.wsdl.Operation;
@@ -370,6 +371,10 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
      */
     public Element getMyRequest(String mexId) {
         return _brc.getMyRequest(mexId);
+    }
+
+    public Map<String,String> getProperties(String mexId) {
+        return _brc.getProperties(mexId);
     }
 
     public void setInstantiatingMex(String mexId) {

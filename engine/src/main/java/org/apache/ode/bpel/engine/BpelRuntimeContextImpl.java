@@ -886,6 +886,11 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         return mergeHeaders(request);
     }
 
+    public Map<String,String> getProperties(String mexId) {
+        MessageExchangeDAO dao = getExistingMex(mexId);
+        return dao.getProperties();
+    }
+
     public void setInstantiatingMex(String mexId) {
         MessageExchangeDAO mex = getExistingMex(mexId);
         mex.setInstantiatingResource(true);

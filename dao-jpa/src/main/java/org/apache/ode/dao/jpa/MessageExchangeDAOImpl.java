@@ -19,12 +19,7 @@
 
 package org.apache.ode.dao.jpa;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -240,6 +235,14 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
         }
         return propNames;
 	}
+
+    public Map<String,String> getProperties() {
+        HashMap<String,String> res = new  HashMap<String, String>();
+        for (MexProperty prop : _props) {
+            res.put(prop.getPropertyKey(), prop.getPropertyValue());
+        }
+        return res;
+    }
 
 	public MessageDAO getRequest() {
 		return _request;

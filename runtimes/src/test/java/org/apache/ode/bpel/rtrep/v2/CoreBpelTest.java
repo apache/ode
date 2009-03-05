@@ -24,6 +24,7 @@ import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Collection;
+import java.util.Map;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -111,6 +112,10 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
     }
 
     public Long createScopeInstance(Long scopeInstanceId, OScope scopedef) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public Map<String, String> getProperties(String mexId) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 

@@ -22,6 +22,7 @@ package org.apache.ode.daohib.bpel;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
@@ -330,6 +331,10 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     public Set<String> getPropertyNames() {
         entering("MessageExchangeDaoImpl.getPropertyNames");
         return Collections.unmodifiableSet(_hself.getProperties().keySet());
+    }
+
+    public Map<String,String> getProperties() {
+        return _hself.getProperties();
     }
 
     public void release() {

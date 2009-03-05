@@ -21,6 +21,7 @@ package org.apache.ode.bpel.rtrep.v2;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
@@ -41,6 +42,7 @@ import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.Document;
 
 /**
  * Template for the BPEL <code>pick</code> activity.
@@ -216,6 +218,26 @@ class PICK extends ACTIVITY {
                     }
                 }
 
+            }
+        } else {
+            // Retrieving the map of properties associated with a RESTful mex. Those are the query
+            // parameters and are used to set implicit variables associated with these parameters
+            // in the process.
+            Map<String,String> props = getBpelRuntime().getProperties(mexId);
+            for (Map.Entry<String, String> entry : props.entrySet()) {
+                VariableInstance vi = _scopeFrame.resolveVariable(entry.getKey());
+                if (vi != null) {
+                    // Always expected to be a string
+                    Document doc = DOMUtils.newDocument();
+                    Node textNode = doc.createTextNode(entry.getValue());
+                    try {
+                        initializeVariable(vi, textNode);
+                    } catch (ExternalVariableModuleException e) {
+                        __log.error("Exception while initializing external variable", e);
+                        _self.parent.failure(e.toString(), null);
+                        return;
+                    }
+                }
             }
         }
 

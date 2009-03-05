@@ -31,6 +31,7 @@ public abstract class OVarType extends OBase {
     public static int SCHEMA_TYPE = 0;
     public static int NUMBER_TYPE = 1;
     public static int STRING_TYPE = 2;
+    public static int BOOLEAN_TYPE = 3;
 
     public int underlyingType = SCHEMA_TYPE;
     

@@ -20,6 +20,7 @@ package org.apache.ode.bpel.dao;
 
 import java.util.Date;
 import java.util.Set;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
@@ -252,6 +253,8 @@ public interface MessageExchangeDAO {
     void setProperty(String key, String value);
 
     Set<String> getPropertyNames();
+
+    Map<String,String> getProperties();
 
     void setPartnerLink(PartnerLinkDAO plinkDAO);
 

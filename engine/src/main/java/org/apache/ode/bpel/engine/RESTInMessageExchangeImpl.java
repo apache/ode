@@ -8,6 +8,7 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.xml.namespace.QName;
 import java.util.concurrent.*;
+import java.util.HashMap;
 
 public class RESTInMessageExchangeImpl extends MessageExchangeImpl implements RESTInMessageExchange {
 
@@ -67,6 +68,10 @@ public class RESTInMessageExchangeImpl extends MessageExchangeImpl implements RE
             }
         });
         return _future;
+    }
+
+    public void setParameter(String name, String value) {
+        setProperty(name, value);
     }
 
     protected MessageExchangeDAO doInvoke() {
