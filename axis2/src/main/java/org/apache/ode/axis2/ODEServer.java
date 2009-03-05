@@ -391,6 +391,7 @@ public class ODEServer {
         if (service != null) {
             try {
                 _axisConfig.removeService(service.getAxisService().getName());
+                _axisConfig.removeServiceGroup(service.getAxisService().getAxisServiceGroup().getServiceGroupName());
             } catch (AxisFault axisFault) {
                 __log.error("Couldn't destroy service " + serviceName);
             }
