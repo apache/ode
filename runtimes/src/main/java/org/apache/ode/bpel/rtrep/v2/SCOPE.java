@@ -123,6 +123,7 @@ class SCOPE extends ACTIVITY {
             try {
                 String url = getBpelRuntime().getExpLangRuntime().evaluateAsString(
                         resource.getSubpath(), getEvaluationContext());
+                if (url.endsWith("/")) url = url.substring(0, url.length() - 1);
                 url = getBpelRuntime().getInstantiatingUrl() + url;
 
                 getBpelRuntime().initializeResource(_scopeFrame.scopeInstanceId, resource, url);

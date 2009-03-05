@@ -121,4 +121,6 @@ public interface BpelDAOConnection {
 
     ResourceRouteDAO getResourceRoute(String url, String method);
 
+    void deleteResourceRoute(String url, String method);
+
 }

@@ -235,6 +235,10 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         return _resRouteStore.get(url+"~"+method);
     }
 
+    public void deleteResourceRoute(String url, String method) {
+        _resRouteStore.remove(url+"~"+method);
+    }
+
     public void addResourceRoute(ResourceRouteDAOImpl rroute) {
         _resRouteStore.put(rroute.getUrl()+"~"+rroute.getMethod(), rroute);
     }

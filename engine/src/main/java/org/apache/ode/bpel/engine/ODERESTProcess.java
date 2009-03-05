@@ -100,8 +100,8 @@ public class ODERESTProcess extends ODEProcess {
                 // TODO avoid reloading the resource routing, it's just been loaded by the server on mex creation
                 String[] urlMeth = mexdao.getResource().split("~");
                 ResourceRouteDAO rr = _contexts.dao.getConnection().getResourceRoute(urlMeth[0], urlMeth[1]);
-                // This really should have been caught by the server
                 if (rr == null) throw new BpelEngineException("NoSuchResource: " + mexdao.getResource());
+
                 mexdao.setInstance(rr.getInstance());
                 mexdao.setChannel(rr.getPickResponseChannel() + "&" + rr.getSelectorIdx());
 
@@ -122,7 +122,8 @@ public class ODERESTProcess extends ODEProcess {
 
                     scheduleWorkEvent(we, null);
                 }
-
+                // Cleaning up
+                _contexts.dao.getConnection().deleteResourceRoute(urlMeth[0], urlMeth[1]);
             }
         } finally {
             // If we did not get an ACK during this method, then mark this MEX as needing an ASYNC wake-up

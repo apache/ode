@@ -97,6 +97,11 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         }
     }
 
+    public void deleteResourceRoute(String url, String method) {
+        _session.createQuery("delete from HResourceRoute r where r.url = :url and r.method = :method")
+                .setString("url", url).setString("method", method).executeUpdate();
+    }
+
     public ProcessDAO createProcess(QName pid, QName type, String guid, long version) {
         HProcess process = new HProcess();
         process.setProcessId(pid.toString());

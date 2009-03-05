@@ -307,6 +307,11 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         return m;
     }
 
+    public void deleteResourceRoute(String url, String method) {
+        _em.createQuery("delete from ResourceRouteDAOImpl r where r._url = ?1 and r._method = ?2")
+            .setParameter(1, url).setParameter(2, method).executeUpdate();
+    }
+
     public EntityManager getEntityManager() {
         return _em;
     }
