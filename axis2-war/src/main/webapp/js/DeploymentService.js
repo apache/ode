@@ -21,7 +21,12 @@ if (location.host.indexOf('/') == -1 && location.protocol.indexOf('/') == -1) {
 }else if(location.host.indexOf('/') != -1 && location.protocol.indexOf('/') == -1){
     baseURL = location.protocol + "//" + location.host;
 }
-var address = baseURL + "ode/processes/DeploymentService";
+var baseDirectoryName = location.pathname.substring(0,location.pathname.indexOf('/',1));
+if(baseDirectoryName.indexOf('/') == 0){
+    baseDirectoryName = baseDirectoryName.substring(1);
+}
+var address = baseURL + baseDirectoryName + "/processes/DeploymentService";
+//var address = baseURL + "ode/processes/DeploymentService";
 
 var DeploymentService = new WebService("DeploymentPort");
 
