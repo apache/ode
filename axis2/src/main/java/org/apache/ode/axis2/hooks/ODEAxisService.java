@@ -207,9 +207,11 @@ public class ODEAxisService {
     
     public static String extractServiceName(ProcessConf pconf, QName wsdlServiceName, String portName)
             throws AxisFault {
-        String serviceName = parseURLForService(extractEndpointUri(pconf, wsdlServiceName, portName), deriveBaseServiceUri(pconf));
+        String endpointUri = extractEndpointUri(pconf, wsdlServiceName, portName);
+        String derivedUri = deriveBaseServiceUri(pconf);
+        String serviceName = parseURLForService(endpointUri, derivedUri);
         if (serviceName == null) {
-            throw new OdeFault("The soap:address used for service WSDL definition " + wsdlServiceName + " and port "
+            throw new OdeFault("The soap:address "+endpointUri+" used for service " + wsdlServiceName + " and port "
                     + portName + " should be of the form http://hostname:port/ode/processes/myProcessEndpointName");
         }
         return serviceName;
