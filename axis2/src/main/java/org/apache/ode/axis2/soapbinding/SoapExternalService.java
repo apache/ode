@@ -398,6 +398,10 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
 
             OutInAxisOperation outInOperation = new OutInAxisOperation(ServiceClient.ANON_OUT_IN_OP);
             anonymousService.addOperation(outInOperation);
+
+            // set a right default action *after* operations have been added to the service.
+            outOnlyOperation.setSoapAction("");
+            outInOperation.setSoapAction("");
         }
 
         public void onUpdate() {
