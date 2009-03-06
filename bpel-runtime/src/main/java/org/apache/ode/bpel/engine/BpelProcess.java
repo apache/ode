@@ -852,35 +852,26 @@ public class BpelProcess {
 	        	_oprocess.dehydrate();
 	            _oprocess = null;
         	}
-        	if (_partnerRoles != null) {
-	            _partnerRoles.clear();
-	            _partnerRoles = null;
-        	}
         	if (_myRoles != null) {
 	            _myRoles.clear();
-	            _myRoles = null;
         	}
         	if (_endpointToMyRoleMap != null) {
 	            _endpointToMyRoleMap.clear();
-	            _endpointToMyRoleMap = null;
         	}
-        	if (_replacementMap != null) {
-	            _replacementMap = null;
-	            _expLangRuntimeRegistry = null;
+        	if (_myEprs != null) {
+        		_myEprs.clear();
         	}
-            _myEprs = null;
             if (_partnerChannels != null) {
 	            _partnerChannels.clear();
-	            _partnerChannels = null;
             }
             if (_partnerEprs != null) {
 	            _partnerEprs.clear();
-	            _partnerEprs = null;
             }
             if (_partnerRoles != null) {
 	            _partnerRoles.clear();
-	            _partnerRoles = null;
             }
+            _replacementMap = null;
+            _expLangRuntimeRegistry = null;
         }
 
         private void doHydrate() {
@@ -899,6 +890,25 @@ public class BpelProcess {
                 throw new BpelEngineException(errmsg, e);
             }
 
+        	if (_partnerRoles == null) {
+                _partnerRoles = new HashMap<OPartnerLink, PartnerLinkPartnerRoleImpl>();
+        	}
+        	if (_myRoles == null) {
+                _myRoles = new HashMap<OPartnerLink, PartnerLinkMyRoleImpl>();
+        	}
+        	if (_endpointToMyRoleMap == null) {
+                _endpointToMyRoleMap = new HashMap<PartnerLinkMyRoleImpl, Endpoint>();
+        	}
+        	if (_myEprs == null) {
+        	    _myEprs = new HashMap<Endpoint, EndpointReference>();
+        	}
+            if (_partnerChannels == null) {
+        	    _partnerChannels = new HashMap<Endpoint, PartnerRoleChannel>();
+            }
+            if (_partnerEprs == null) {
+        	    _partnerEprs = new HashMap<Endpoint, EndpointReference>();
+            }
+            
             _replacementMap = new ReplacementMapImpl(_oprocess);
 
             // Create an expression language registry for this process
