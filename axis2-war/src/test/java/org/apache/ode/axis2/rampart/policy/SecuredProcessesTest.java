@@ -20,8 +20,8 @@
 package org.apache.ode.axis2.rampart.policy;
 
 import static org.testng.AssertJUnit.assertTrue;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.apache.axis2.context.ConfigurationContextFactory;
@@ -72,13 +72,13 @@ public class SecuredProcessesTest extends Axis2TestBase {
     }
 
 
-    @BeforeClass
+    @BeforeMethod
     protected void setUp() throws Exception {
         // mind the annotation above: start the server only once for all tests
         startServer(testDir, "webapp/WEB-INF/conf/axis2.xml");
     }
 
-    @AfterClass
+    @AfterMethod
     protected void tearDown() throws Exception {
         // mind the annotation above: start the server only once for all tests
         super.tearDown();

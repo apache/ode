@@ -22,9 +22,6 @@ package org.apache.ode.axis2.rampart.policy;
 import static org.testng.AssertJUnit.assertTrue;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.apache.ode.axis2.Axis2TestBase;
