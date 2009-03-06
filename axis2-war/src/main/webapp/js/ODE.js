@@ -14,6 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+var baseURL;
+if (location.host.indexOf('/') == -1 && location.protocol.indexOf('/') == -1) {
+	baseURL = location.protocol + "//" + location.host + "/";
+}else if(location.host.indexOf('/') != -1 && location.protocol.indexOf('/') == -1){
+	baseURL = location.protocol + "//" + location.host;
+}
+var baseDirectoryName = location.pathname.substring(0,location.pathname.indexOf('/',1));
+if(baseDirectoryName.indexOf('/') == 0){
+    baseDirectoryName = baseDirectoryName.substring(1);
+}
+var baseDirectoryURL = baseURL + baseDirectoryName;
+
 var org;
 if (!org) {
     org = {};
@@ -675,7 +688,9 @@ org.apache.ode.ProcessHandling = {};
         var processDefURL = '';
         var processN = processName.substring(0, (processName.indexOf('-')));
         
-        var urlRequestURL = 'http://localhost:8080/ode/deployment/getProcessDefinition/' + processN ;
+        //var urlRequestURL = 'http://localhost:8080/ode/deployment/getProcessDefinition/' + processN ;
+        var urlRequestURL = baseDirectoryURL + '/deployment/getProcessDefinition/' + processN ;
+
         try{
             var response = ProcessManagementService.getProcessInfo(processName, url, prefix);
             var processInfoEle = org.apache.ode.DOMHelper.getElementsByTagName(
@@ -846,11 +861,18 @@ org.apache.ode.InstanceHandling = {};
                 var pidEle = org.apache.ode.DOMHelper.getElementsByTagName('pid', instanceInfoNS, instanceInfoNSPrefix, scopeEle)[0];
                 var pid = org.apache.ode.DOMHelper.getText(pidEle);
                 
-                var rootScopeEle = org.apache.ode.DOMHelper.getElementsByTagName('root-scope', instanceInfoNS, instanceInfoNSPrefix, scopeEle)[0];
-                var siid = rootScopeEle.getAttribute('siid');
-                var statusR = rootScopeEle.getAttribute('status');
-                var nameR = rootScopeEle.getAttribute('name');
-                var modelID = rootScopeEle.getAttribute('modelId');
+                var rootScopeEle = null;          //this element is "minOccurs=0"
+                var siid = 'not defined';
+                var statusR = 'not defined';
+                var nameR = 'not defined';
+                var modelID = 'not defined';
+                rootScopeEle = org.apache.ode.DOMHelper.getElementsByTagName('root-scope', instanceInfoNS, instanceInfoNSPrefix, scopeEle)[0];
+                if(rootScopeEle != null){
+                    siid = rootScopeEle.getAttribute('siid');
+                    statusR = rootScopeEle.getAttribute('status');
+                    nameR = rootScopeEle.getAttribute('name');
+                    modelID = rootScopeEle.getAttribute('modelId');
+                }
                 
                 var statusIEle = org.apache.ode.DOMHelper.getElementsByTagName('status', instanceInfoNS, instanceInfoNSPrefix, scopeEle)[0];
                 var statusI = org.apache.ode.DOMHelper.getText(statusIEle);
@@ -1126,8 +1148,10 @@ if(org.apache.ode.DeploymentHandling){
 org.apache.ode.DeploymentHandling = {};
 
 (function(){
-    var bundleDataUrl = 'http://localhost:8080/ode/deployment/bundles/';
-    var packageDocsUrl = 'http://localhost:8080/ode/deployment/getBundleDocs/';
+    //var bundleDataUrl = 'http://localhost:8080/ode/deployment/bundles/';
+    //var packageDocsUrl = 'http://localhost:8080/ode/deployment/getBundleDocs/';
+    var bundleDataUrl = baseDirectoryURL + '/deployment/bundles/';
+	var packageDocsUrl = baseDirectoryURL + '/deployment/getBundleDocs/';
     
     function loadDeployedPackages(){
         try{
@@ -1145,7 +1169,8 @@ org.apache.ode.DeploymentHandling = {};
     function getDeployedPackages(){
         var packageNames = [];
         var response = loadDeployedPackages();
-        var names = response.getElementsByTagName('name');
+        var names = org.apache.ode.DOMHelper.getElementsByTagName('name',"http://www.apache.org/ode/deployapi","deployapi",response);
+        //var names = response.getElementsByTagName('name');
         if (names.length != 0) {
             for (var i = 0; i < names.length; i++) {
                 packageNames[i] = org.apache.ode.DOMHelper.getText(names[i]);
