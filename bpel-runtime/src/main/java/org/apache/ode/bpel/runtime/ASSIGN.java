@@ -483,11 +483,10 @@ class ASSIGN extends ACTIVITY {
             return (lval == ptr) ? replacement :  lval;
         }
 
-        QName ptrQName = DOMUtils.getNodeQName(ptr);
-        Element replacement = doc.createElementNS(ptrQName.getNamespaceURI(), ptrQName.getLocalPart());
+        Element replacement = doc.createElementNS(ptr.getNamespaceURI(), ptr.getLocalName());
         NodeList nl = src.getChildNodes();
         for (int i = 0; i < nl.getLength(); ++i)
-	        replacement.appendChild(DOMUtils.cloneNode(doc, nl.item(i)));
+            replacement.appendChild(doc.importNode(nl.item(i), true));
         NamedNodeMap attrs = src.getAttributes();
         for (int i = 0; i < attrs.getLength(); ++i) {
             Attr attr = (Attr)attrs.item(i);
