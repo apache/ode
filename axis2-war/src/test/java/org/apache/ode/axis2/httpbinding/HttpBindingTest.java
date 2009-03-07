@@ -35,20 +35,9 @@ public class HttpBindingTest extends Axis2TestBase {
     protected void setUp() throws Exception {
         super.setUp();
         final CountDownLatch latch = new CountDownLatch(1);
-        jettyWrapper = new JettyWrapper(7070);
-        new Thread("HttpBindingJetty") {
-            public void run() {
-                try {
-                    jettyWrapper.start();
-                    latch.countDown();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }.start();
-        // wait for jetty to be ready
-        latch.await();
-    }
+      jettyWrapper = new JettyWrapper(7070);
+      jettyWrapper.start();
+  }
 
     @AfterMethod
     protected void tearDown() throws Exception {
