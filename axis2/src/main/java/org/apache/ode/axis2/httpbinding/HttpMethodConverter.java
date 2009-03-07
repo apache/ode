@@ -334,6 +334,9 @@ public class HttpMethodConverter {
 
 
     protected Map<String, Element> extractPartElements(Message msgDef, Element message) {
+        if (msgDef.getParts().size() != 0 && message == null) {
+            throw new IllegalArgumentException(msgs.msgOdeMessageExpected());
+        }
         Map<String, Element> partValues = new HashMap<String, Element>();
         for (Iterator iterator = msgDef.getParts().values().iterator(); iterator.hasNext();) {
             Part part = (Part) iterator.next();
