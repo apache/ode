@@ -158,6 +158,10 @@ public class Messages extends MessageBundle {
         return new IllegalArgumentException(s);
     }
 
+    public Throwable msgOdeMessageExpected() {
+        String s = format("Message expected!");
+        return new IllegalArgumentException(s);
+    }
 
     public Throwable msgOdeMessageMissingRequiredPart(String partName) {
         String s = format("Message is missing required part: {0}", partName);
