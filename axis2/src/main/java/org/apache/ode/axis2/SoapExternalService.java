@@ -242,9 +242,9 @@ public class SoapExternalService implements ExternalService {
                 });
                 odeMex.replyOneWayOk();
             }
-        } catch (Exception ex) {
+        } catch (Throwable t) {
             String errmsg = "Error sending message to Axis2 for ODE mex " + odeMex;
-            __log.error(errmsg, ex);
+            __log.error(errmsg, t);
             odeMex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
         }
     }
