@@ -88,7 +88,9 @@
 
     <wsdl:service name="PropertiesService">
         <wsdl:port name="PropertiesPort" binding="tns:binding">
-            <http:address location="http://localhost:7070/EchoService/"/>
+            <!-- Intentionally invalid location.
+                  For test purpose, the location must be set from test-endpoint-properties_global_conf.endpoint -->
+            <http:address location="http://invalid.address"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

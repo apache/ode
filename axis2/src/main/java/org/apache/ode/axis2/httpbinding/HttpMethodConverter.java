@@ -30,7 +30,6 @@ import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.httpclient.params.HostParams;
 import org.apache.commons.httpclient.params.HttpParams;
-import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -91,16 +90,13 @@ public class HttpMethodConverter {
     }
 
 
-    public HttpMethod createHttpRequest(PartnerRoleMessageExchange odeMex, HttpParams params) throws UnsupportedEncodingException {
+    public HttpMethod createHttpRequest(PartnerRoleMessageExchange odeMex, HttpParams params, String baseUrl) throws UnsupportedEncodingException {
         Operation operation = odeMex.getOperation();
         BindingOperation bindingOperation = binding.getBindingOperation(operation.getName(), operation.getInput().getName(), operation.getOutput().getName());
 
         // message to be sent
         Element message = odeMex.getRequest().getMessage();
         Message msgDef = operation.getInput().getMessage();
-
-        // base url
-        String url = ((MutableEndpoint) odeMex.getEndpointReference()).getUrl();
 
         // extract part values into a map and check that all parts are assigned a value
         Map<String, Element> partElements = extractPartElements(msgDef, message);
@@ -110,7 +106,7 @@ public class HttpMethodConverter {
         String verb = WsdlUtils.resolveVerb(binding, bindingOperation);
 
         // build the http method itself
-        HttpMethod method = prepareHttpMethod(bindingOperation, verb, partElements, odeMex.getRequest().getHeaderParts(), url, params);
+        HttpMethod method = prepareHttpMethod(bindingOperation, verb, partElements, odeMex.getRequest().getHeaderParts(), baseUrl, params);
 
         return method;
     }

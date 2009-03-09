@@ -68,6 +68,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
+import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -101,6 +103,7 @@ public class SoapExternalService implements ExternalService {
     private Scheduler _sched;
     private BpelServer _server;
     private ProcessConf _pconf;
+    private URL endpointUrl;
 
     public SoapExternalService(ProcessConf pconf, QName serviceName, String portName, ExecutorService executorService,
                                AxisConfiguration axisConfig, Scheduler sched, BpelServer server, MultiThreadedHttpConnectionManager connManager) throws AxisFault {
@@ -127,6 +130,11 @@ public class SoapExternalService implements ExternalService {
         if (eprElmt == null)
             throw new IllegalArgumentException(msgs.msgPortDefinitionNotFound(serviceName, portName));
         endpointReference = EndpointFactory.convertToWSA(ODEService.createServiceRef(eprElmt));
+        try {
+            endpointUrl = new URL(endpointReference.getUrl());
+        } catch (MalformedURLException e) {
+            throw new OdeFault(e);
+        }
     }
 
     public void invoke(final PartnerRoleMessageExchange odeMex) {
@@ -147,8 +155,21 @@ public class SoapExternalService implements ExternalService {
             _converter.createSoapRequest(mctx, odeMex.getRequest(), odeMex.getOperation());
 
             SOAPEnvelope soapEnv = mctx.getEnvelope();
-            EndpointReference axisEPR = new EndpointReference(((MutableEndpoint) odeMex.getEndpointReference())
-                    .getUrl());
+            String mexEndpointUrl = ((MutableEndpoint) odeMex.getEndpointReference()).getUrl();
+
+            EndpointReference axisEPR = new EndpointReference(mexEndpointUrl);
+            // The endpoint URL might be overridden from the properties file(s)
+            // The order of precedence is (in descending order): process, property, wsdl.
+            if(endpointUrl.equals(new URL(mexEndpointUrl))){
+                String address = (String) client.getOptions().getProperty(Properties.PROP_ADDRESS);
+                if(address!=null) {
+                    if (__log.isDebugEnabled()) __log.debug("Endpoint URL overridden by property files. "+mexEndpointUrl+" => "+address);
+                    axisEPR.setAddress(address);
+                }
+            }else{
+                if (__log.isDebugEnabled()) __log.debug("Endpoint URL overridden by process. "+endpointUrl+" => "+mexEndpointUrl);                
+            }
+
             if (__log.isDebugEnabled()) {
                 __log.debug("Axis2 sending message to " + axisEPR.getAddress() + " using MEX " + odeMex);
                 __log.debug("Message: " + soapEnv);
@@ -221,9 +242,9 @@ public class SoapExternalService implements ExternalService {
                 });
                 odeMex.replyOneWayOk();
             }
-        } catch (AxisFault axisFault) {
+        } catch (Exception ex) {
             String errmsg = "Error sending message to Axis2 for ODE mex " + odeMex;
-            __log.error(errmsg, axisFault);
+            __log.error(errmsg, ex);
             odeMex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
         }
     }
