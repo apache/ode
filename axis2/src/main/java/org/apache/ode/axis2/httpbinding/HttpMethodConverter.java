@@ -90,6 +90,10 @@ public class HttpMethodConverter {
     }
 
 
+    public HttpMethod createHttpRequest(PartnerRoleMessageExchange odeMex, HttpParams params) throws UnsupportedEncodingException {
+        return createHttpRequest(odeMex, params, ((MutableEndpoint) odeMex.getEndpointReference()).getUrl());
+    }
+    
     public HttpMethod createHttpRequest(PartnerRoleMessageExchange odeMex, HttpParams params, String baseUrl) throws UnsupportedEncodingException {
         Operation operation = odeMex.getOperation();
         BindingOperation bindingOperation = binding.getBindingOperation(operation.getName(), operation.getInput().getName(), operation.getOutput().getName());
