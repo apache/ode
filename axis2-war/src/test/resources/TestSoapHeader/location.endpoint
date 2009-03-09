@@ -1,0 +1,3 @@
+
+alias.myns=http://axis2.ode.apache.org
+myns.DummyService.ode.address=http://localhost:8888/processes/DummyService

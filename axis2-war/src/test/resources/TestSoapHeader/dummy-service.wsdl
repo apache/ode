@@ -146,15 +146,21 @@
          </wsdl:output>
       </wsdl:operation>
    </wsdl:binding>
-   <wsdl:service name="DummyService">
-      <wsdl:port name="DummyServiceSOAP11port_http" binding="ns1:DummyServiceSOAP11Binding">
-         <soap:address location="http://localhost:8888/processes/DummyService"/>
-      </wsdl:port>
-      <wsdl:port name="DummyServiceSOAP12port_http" binding="ns1:DummyServiceSOAP12Binding">
-         <soap12:address location="http://localhost:8888/processes/DummyService"/>
-      </wsdl:port>
-      <wsdl:port name="DummyServiceHttpport" binding="ns1:DummyServiceHttpBinding">
-         <http:address location="http://localhost:8888/processes/DummyService"/>
-      </wsdl:port>
-   </wsdl:service>
+    <wsdl:service name="DummyService">
+        <wsdl:port name="DummyServiceSOAP11port_http" binding="ns1:DummyServiceSOAP11Binding">
+            <!-- Intentionally invalid location.
+                 For test purpose, the location must be set from config.endpoint -->
+            <soap:address location="http://invalid.address"/>
+        </wsdl:port>
+        <wsdl:port name="DummyServiceSOAP12port_http" binding="ns1:DummyServiceSOAP12Binding">
+            <!-- Intentionally invalid location.
+                 For test purpose, the location must be set from config.endpoint -->
+            <soap12:address location="http://invalid.address"/>
+        </wsdl:port>
+        <wsdl:port name="DummyServiceHttpport" binding="ns1:DummyServiceHttpBinding">
+            <!-- Intentionally invalid location.
+                 For test purpose, the location must be set from config.endpoint -->
+            <http:address location="http://invalid.address"/>
+        </wsdl:port>
+    </wsdl:service>
 </wsdl:definitions>

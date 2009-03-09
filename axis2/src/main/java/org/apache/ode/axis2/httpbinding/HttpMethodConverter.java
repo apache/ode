@@ -30,7 +30,6 @@ import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.httpclient.params.HostParams;
 import org.apache.commons.httpclient.params.HttpParams;
-import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,7 +37,6 @@ import org.apache.ode.axis2.Properties;
 import org.apache.ode.axis2.util.URLEncodedTransformer;
 import org.apache.ode.axis2.util.UrlReplacementTransformer;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.il.epr.MutableEndpoint;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.http.HttpUtils;
@@ -46,10 +44,10 @@ import static org.apache.ode.utils.http.HttpUtils.bodyAllowed;
 import static org.apache.ode.utils.http.StatusCode._202_ACCEPTED;
 import org.apache.ode.utils.wsdl.Messages;
 import org.apache.ode.utils.wsdl.WsdlUtils;
+import org.apache.ode.il.epr.MutableEndpoint;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
 import javax.wsdl.Binding;
 import javax.wsdl.BindingInput;
@@ -92,15 +90,16 @@ public class HttpMethodConverter {
 
 
     public HttpMethod createHttpRequest(PartnerRoleMessageExchange odeMex, HttpParams params) throws UnsupportedEncodingException {
+        return createHttpRequest(odeMex, params, ((MutableEndpoint) odeMex.getEndpointReference()).getUrl());
+    }
+    
+    public HttpMethod createHttpRequest(PartnerRoleMessageExchange odeMex, HttpParams params, String baseUrl) throws UnsupportedEncodingException {
         Operation operation = odeMex.getOperation();
         BindingOperation bindingOperation = binding.getBindingOperation(operation.getName(), operation.getInput().getName(), operation.getOutput().getName());
 
         // message to be sent
         Element message = odeMex.getRequest().getMessage();
         Message msgDef = operation.getInput().getMessage();
-
-        // base url
-        String url = ((MutableEndpoint) odeMex.getEndpointReference()).getUrl();
 
         // extract part values into a map and check that all parts are assigned a value
         Map<String, Element> partElements = extractPartElements(msgDef, message);
@@ -110,7 +109,7 @@ public class HttpMethodConverter {
         String verb = WsdlUtils.resolveVerb(binding, bindingOperation);
 
         // build the http method itself
-        HttpMethod method = prepareHttpMethod(bindingOperation, verb, partElements, odeMex.getRequest().getHeaderParts(), url, params);
+        HttpMethod method = prepareHttpMethod(bindingOperation, verb, partElements, odeMex.getRequest().getHeaderParts(), baseUrl, params);
 
         return method;
     }

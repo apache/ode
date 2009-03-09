@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.ExternalService;
 import org.apache.ode.axis2.ODEService;
 import org.apache.ode.axis2.Properties;
+import org.apache.ode.axis2.OdeFault;
 import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
@@ -40,8 +41,8 @@ import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.il.epr.EndpointFactory;
 import org.apache.ode.il.epr.WSAEndpoint;
+import org.apache.ode.il.epr.MutableEndpoint;
 import org.apache.ode.utils.DOMUtils;
-import static org.apache.ode.utils.http.StatusCode.*;
 import org.apache.ode.utils.wsdl.Messages;
 import org.apache.ode.utils.wsdl.WsdlUtils;
 import org.w3c.dom.Element;
@@ -57,6 +58,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.Collections;
 import java.util.concurrent.Callable;
+import java.net.URL;
+import java.net.MalformedURLException;
 
 
 /**
@@ -78,8 +81,9 @@ public class HttpExternalService implements ExternalService {
     protected WSAEndpoint endpointReference;
 
     protected Binding portBinding;
+    private URL endpointUrl;
 
-    public HttpExternalService(ProcessConf pconf, QName serviceName, String portName, BpelServer server, MultiThreadedHttpConnectionManager connManager) {
+    public HttpExternalService(ProcessConf pconf, QName serviceName, String portName, BpelServer server, MultiThreadedHttpConnectionManager connManager) throws OdeFault {
         if (log.isDebugEnabled())
             log.debug("new HTTP External service, service name=[" + serviceName + "]; port name=[" + portName + "]");
         this.portName = portName;
@@ -110,6 +114,11 @@ public class HttpExternalService implements ExternalService {
         if (eprElmt == null)
             throw new IllegalArgumentException(msgs.msgPortDefinitionNotFound(serviceName, portName));
         endpointReference = EndpointFactory.convertToWSA(ODEService.createServiceRef(eprElmt));
+        try {
+            endpointUrl = new URL(endpointReference.getUrl());
+        } catch (MalformedURLException e) {
+            throw new OdeFault(e);
+        }
 
         httpMethodConverter = new HttpMethodConverter(definition, serviceName, portName);
         connections = connManager;
@@ -138,8 +147,23 @@ public class HttpExternalService implements ExternalService {
             final Map<String, String> properties = pconf.getEndpointProperties(endpointReference);
             final HttpParams params = Properties.HttpClient.translate(properties);
 
+            // base baseUrl
+            String mexEndpointUrl = ((MutableEndpoint) odeMex.getEndpointReference()).getUrl();
+            String baseUrl = mexEndpointUrl;
+            // The endpoint URL might be overridden from the properties file(s)
+            // The order of precedence is (in descending order): process, property, wsdl.
+            if(endpointUrl.equals(new URL(mexEndpointUrl))){
+                String address = (String) params.getParameter(Properties.PROP_ADDRESS);
+                if(address!=null) {
+                    if (log.isDebugEnabled()) log.debug("Endpoint URL overridden by property files. "+mexEndpointUrl+" => "+address);
+                    baseUrl = address;
+                }
+            }else{
+                if (log.isDebugEnabled()) log.debug("Endpoint URL overridden by process. "+endpointUrl+" => "+mexEndpointUrl);
+            }
+
             // build the http method
-            final HttpMethod method = httpMethodConverter.createHttpRequest(odeMex, params);
+            final HttpMethod method = httpMethodConverter.createHttpRequest(odeMex, params, baseUrl);
 
             // create a client
             HttpClient client = new HttpClient(connections);

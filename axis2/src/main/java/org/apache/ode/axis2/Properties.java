@@ -70,6 +70,11 @@ public class Properties {
      */
     public static final String PROP_HTTP_PROTOCOL_ENCODING = "http.protocol.encoding";
 
+    /**
+     * Property to override the location set in soap:address or http:address
+     */
+    public static final String PROP_ADDRESS = "address";
+
     // Httpclient specific
     public static final String PROP_HTTP_MAX_REDIRECTS = HttpClientParams.MAX_REDIRECTS;
 

@@ -40,6 +40,7 @@ import org.apache.neethi.Policy;
 import org.apache.ode.axis2.ExternalService;
 import org.apache.ode.axis2.ODEService;
 import org.apache.ode.axis2.Properties;
+import org.apache.ode.axis2.OdeFault;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
@@ -67,6 +68,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
+import java.net.MalformedURLException;
 import java.util.Map;
 
 /**
@@ -94,6 +97,7 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
     private AxisConfiguration _axisConfig;
     private SoapMessageConverter _converter;
     private ProcessConf _pconf;
+    private URL endpointUrl;
 
     public SoapExternalService(Definition definition, QName serviceName, String portName,
                                AxisConfiguration axisConfig, ProcessConf pconf, MultiThreadedHttpConnectionManager connManager) throws AxisFault {
@@ -108,7 +112,7 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
         _axisServiceWatchDog = WatchDog.watchFile(fileToWatch, new ServiceFileObserver(fileToWatch));
         _axisOptionsWatchDog = new WatchDog<Map, OptionsObserver>(new EndpointPropertiesMutable(), new OptionsObserver());
         _configContext = new ConfigurationContext(_axisConfig);
-        _configContext.setProperty(HTTPConstants.MUTTITHREAD_HTTP_CONNECTION_MANAGER, connManager);
+        _configContext.setProperty(HTTPConstants.MULTITHREAD_HTTP_CONNECTION_MANAGER, connManager);
         // make sure the client is not shared, see also org.apache.ode.axis2.Properties.Axis2
         _configContext.setProperty(HTTPConstants.REUSE_HTTP_CLIENT, "false");
 
@@ -117,6 +121,11 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
         if (eprElmt == null)
             throw new IllegalArgumentException(msgs.msgPortDefinitionNotFound(serviceName, portName));
         endpointReference = EndpointFactory.convertToWSA(ODEService.createServiceRef(eprElmt));
+        try {
+            endpointUrl = new URL(endpointReference.getUrl());
+        } catch (MalformedURLException e) {
+            throw new OdeFault(e);
+        }
     }
 
     public void invoke(final PartnerRoleMessageExchange odeMex) {
@@ -138,7 +147,22 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
                 _converter.createSoapRequest(mctx, odeMex.getRequest(), odeMex.getOperation());
 
                 SOAPEnvelope soapEnv = mctx.getEnvelope();
-                EndpointReference axisEPR = new EndpointReference(((MutableEndpoint) odeMex.getEndpointReference()).getUrl());
+                String mexEndpointUrl = ((MutableEndpoint) odeMex.getEndpointReference()).getUrl();
+
+                EndpointReference axisEPR = new EndpointReference(mexEndpointUrl);
+                // The endpoint URL might be overridden from the properties file(s)
+                // The order of precedence is (in descending order): process, property, wsdl.
+                if (endpointUrl.equals(new URL(mexEndpointUrl))) {
+                    String address = (String) client.getOptions().getProperty(Properties.PROP_ADDRESS);
+                    if (address != null) {
+                        if (__log.isDebugEnabled())
+                            __log.debug("Endpoint URL overridden by property files. " + mexEndpointUrl + " => " + address);
+                        axisEPR.setAddress(address);
+                    }
+                } else {
+                    if (__log.isDebugEnabled())
+                        __log.debug("Endpoint URL overridden by process. " + endpointUrl + " => " + mexEndpointUrl);
+                }
                 if (__log.isDebugEnabled()) {
                     __log.debug("Axis2 sending message to " + axisEPR.getAddress() + " using MEX " + odeMex);
                     __log.debug("Message: " + soapEnv);
