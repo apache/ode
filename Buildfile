@@ -261,29 +261,30 @@ define "ode" do
     
     test.using :testng
     test.with(projects("tools"), libs, AXIS2_MODULES.mods, AXIS2_ALL, HTTPCORE, JAVAX.servlet, Buildr::Jetty::REQUIRES, file(_("target/test"))).using(:fork => :each)
+    webapp_dir = "#{test.compile.target}/webapp"
     test.setup task(:prepare_webapp) do |task|
-      cp_r _("src/main/webapp"), _("target/test")
-      cp Dir[_("src/main/webapp/WEB-INF/classes/*")], _("target/test")
-      cp Dir[project("axis2").path_to("src/main/wsdl/*")], _("target/test/webapp/WEB-INF")
-      cp project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd"), _("target/test/webapp/WEB-INF")
-      mkdir_p _("target/test/webapp/WEB-INF/processes")
-      rm_rf Dir[_("target/test/webapp") + "/**/.svn"]
-      mkdir _("target/test/webapp/WEB-INF/processes") unless File.exist?(_("target/test/webapp/WEB-INF/processes"))
-      mkdir _("target/test/webapp/WEB-INF/modules") unless File.exist?(_("target/test/webapp/WEB-INF/modules"))
+      cp_r _("src/main/webapp"), test.compile.target.to_s
+      cp Dir[_("src/main/webapp/WEB-INF/classes/*")], test.compile.target.to_s
+      cp Dir[project("axis2").path_to("src/main/wsdl/*")], "#{webapp_dir}/WEB-INF"
+      cp project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd"), "#{webapp_dir}/WEB-INF"
+      mkdir_p _("#{webapp_dir}/WEB-INF/processes")
+      rm_rf Dir[_("#{webapp_dir}") + "/**/.svn"]
+      mkdir _("#{webapp_dir}/WEB-INF/processes") unless File.exist?("#{webapp_dir}/WEB-INF/processes")
+      mkdir _("#{webapp_dir}/WEB-INF/modules") unless File.exist?("#{webapp_dir}/WEB-INF/modules")
       # move around some property files for test purpose
-      mv Dir[_("target/test-classes/TestEndpointProperties/*_global_conf*.endpoint")], _("target/test/webapp/WEB-INF/conf")
+      mv Dir[_("target/test-classes/TestEndpointProperties/*_global_conf*.endpoint")], "#{webapp_dir}/WEB-INF/conf"
       artifacts(AXIS2_MODULES.mods).map {|a| a.invoke }
-      cp AXIS2_MODULES.mods.map {|a| repositories.locate(a)} , _("target/test/webapp/WEB-INF/modules")
+      cp AXIS2_MODULES.mods.map {|a| repositories.locate(a)} , "#{webapp_dir}/WEB-INF/modules"
     end
-    test.setup unzip(_("target/test/webapp/WEB-INF")=>project("dao-jpa-db").package(:zip))
-    test.setup unzip(_("target/test/webapp/WEB-INF")=>project("dao-hibernate-db").package(:zip))
+    test.setup unzip("#{webapp_dir}/WEB-INF"=>project("dao-jpa-db").package(:zip))
+    test.setup unzip("#{webapp_dir}/WEB-INF"=>project("dao-hibernate-db").package(:zip))
     test.exclude('*') unless Buildr.environment != 'test'
 
-    test.setup prepare_secured_services_tests(_("target/test/resources/TestRampartBasic/secured-services"), "sample*.axis2")
-    test.setup prepare_secured_services_tests(_("target/test/resources/TestRampartPolicy/secured-services"), "sample*-policy.xml")
+    test.setup prepare_secured_services_tests("#{test.resources.target}/TestRampartBasic/secured-services", "sample*.axis2")
+    test.setup prepare_secured_services_tests("#{test.resources.target}/TestRampartPolicy/secured-services", "sample*-policy.xml")
  
-    test.setup prepare_secured_processes_tests(_("target/test/resources/TestRampartBasic/secured-processes"))
-    test.setup prepare_secured_processes_tests(_("target/test/resources/TestRampartPolicy/secured-processes"))
+    test.setup prepare_secured_processes_tests("#{test.resources.target}/TestRampartBasic/secured-processes")
+    test.setup prepare_secured_processes_tests("#{test.resources.target}/TestRampartPolicy/secured-processes")
 
   end
 
