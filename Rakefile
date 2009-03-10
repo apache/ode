@@ -197,29 +197,29 @@ define "ode" do
     test.using :testng, :properties=>{ "log4j.debug" => true,  "log4j.configuration"=>"test-log4j.properties" }
     test.with projects("tools"), libs, AXIS2_TEST, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, DOM4J
     test.setup task(:prepare_webapp) do |task|
-      webapp_dir = "target/test-classes/webapp"
-      cp_r _("src/main/webapp"), _("target/test-classes")
-      cp Dir[_("src/main/webapp/WEB-INF/classes/*")], _("target/test-classes")
+      webapp_dir = "#{test.compile.target}/webapp"
+      cp_r _("src/main/webapp"), _(test.compile.target)
+      cp Dir[_("src/main/webapp/WEB-INF/classes/*")], _(test.compile.target)
       cp Dir[project("axis2").path_to("src/main/wsdl/*")], _("#{webapp_dir}/WEB-INF")
       cp project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd"), _("#{webapp_dir}/WEB-INF")
       rm_rf Dir[_(webapp_dir) + "/**/.svn"]
       mkdir _("#{webapp_dir}/WEB-INF/processes") unless File.exist?(_("#{webapp_dir}/WEB-INF/processes"))
       mkdir _("#{webapp_dir}/WEB-INF/modules") unless File.exist?(_("#{webapp_dir}/WEB-INF/modules"))
       # move around some property files for test purpose
-      mv Dir[_("target/test-classes/TestEndpointProperties/*_global_conf*.endpoint")], _("#{webapp_dir}/WEB-INF/conf")
+      mv Dir[_("#{test.compile.target}/TestEndpointProperties/*_global_conf*.endpoint")], _("#{webapp_dir}/WEB-INF/conf")
       artifacts(AXIS2_MODULES.mods).map {|a| a.invoke }
       cp AXIS2_MODULES.mods.map {|a| repositories.locate(a)} , _("#{webapp_dir}/WEB-INF/modules")
     end
-    test.setup unzip(_("target/test-classes/webapp/WEB-INF")=>project("dao-jpa-ojpa-derby").package(:zip))
-    test.setup unzip(_("target/test-classes/webapp/WEB-INF")=>project("dao-hibernate-db").package(:zip))
+    test.setup unzip(_("#{test.compile.target}/webapp/WEB-INF")=>project("dao-jpa-ojpa-derby").package(:zip))
+    test.setup unzip(_("#{test.compile.target}/webapp/WEB-INF")=>project("dao-hibernate-db").package(:zip))
     
     NativeDB.prepare_configs test, _(".")
 
-    test.setup prepare_secured_services_tests(_("target/test-classes/TestRampartBasic/secured-services"), "sample*.axis2")
-    test.setup prepare_secured_services_tests(_("target/test-classes/TestRampartPolicy/secured-services"), "sample*-policy.xml")
+    test.setup prepare_secured_services_tests(_("#{test.compile.target}/TestRampartBasic/secured-services"), "sample*.axis2")
+    test.setup prepare_secured_services_tests(_("#{test.compile.target}/TestRampartPolicy/secured-services"), "sample*-policy.xml")
 
-    test.setup prepare_secured_processes_tests(_("target/test-classes/TestRampartBasic/secured-processes"))
-    test.setup prepare_secured_processes_tests(_("target/test-classes/TestRampartPolicy/secured-processes"))
+    test.setup prepare_secured_processes_tests(_("#{test.compile.target}/TestRampartBasic/secured-processes"))
+    test.setup prepare_secured_processes_tests(_("#{test.compile.target}/TestRampartPolicy/secured-processes"))
   end
 
   desc "ODE APIs"
