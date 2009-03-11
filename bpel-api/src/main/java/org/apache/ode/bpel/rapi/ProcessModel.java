@@ -24,6 +24,4 @@ public interface ProcessModel {
     int getModelVersion();
     
     ConstantsModel getConstantsModel();
-    
-    ScopeModel getProcessScope();
 }
