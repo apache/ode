@@ -19,19 +19,12 @@
 
 package org.apache.ode.dao.jpa;
 
-import org.apache.ode.bpel.common.ProcessState;
-import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.CorrelationSetDAO;
-import org.apache.ode.bpel.dao.CorrelatorDAO;
-import org.apache.ode.bpel.dao.FaultDAO;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ScopeDAO;
-import org.apache.ode.bpel.dao.ScopeStateEnum;
-import org.apache.ode.bpel.dao.XmlDataDAO;
-import org.apache.ode.bpel.evt.ProcessInstanceEvent;
-import org.w3c.dom.Element;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -47,22 +40,45 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.Query;
 import javax.persistence.Table;
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.common.ProcessState;
+import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.CorrelationSetDAO;
+import org.apache.ode.bpel.dao.CorrelatorDAO;
+import org.apache.ode.bpel.dao.FaultDAO;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.ScopeDAO;
+import org.apache.ode.bpel.dao.ScopeStateEnum;
+import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.bpel.evt.ProcessInstanceEvent;
+import org.w3c.dom.Element;
 
 @Entity
 @Table(name="ODE_PROCESS_INSTANCE")
 @NamedQueries({
-    @NamedQuery(name="ScopeById", query="SELECT s FROM ScopeDAOImpl as s WHERE s._scopeInstanceId = :sid and s._processInstance = :instance")
-        })
+    @NamedQuery(name="ScopeById", query="SELECT s FROM ScopeDAOImpl as s WHERE s._scopeInstanceId = :sid and s._processInstance = :instance"),
+ 	@NamedQuery(name=ProcessInstanceDAOImpl.DELETE_INSTANCES_BY_PROCESS, query="delete from ProcessInstanceDAOImpl as i where i._process = :process"),
+ 	@NamedQuery(name=ProcessInstanceDAOImpl.SELECT_INSTANCE_IDS_BY_PROCESS, query="select i._instanceId from ProcessInstanceDAOImpl as i where i._process = :process"),
+ 	@NamedQuery(name=ProcessInstanceDAOImpl.SELECT_FAULT_IDS_BY_PROCESS, query="select i._faultId from ProcessInstanceDAOImpl as i where i._process = :process and i._faultId is not null"),
+	@NamedQuery(name=ProcessInstanceDAOImpl.COUNT_FAILED_INSTANCES_BY_STATUS_AND_PROCESS_ID, 
+			query="select count(i._instanceId), max(i._lastRecovery) from ProcessInstanceDAOImpl as i where i._process._processId = :processId and i._state in(:states) and exists(select r from ActivityRecoveryDAOImpl r where i = r._instance)")
+})
+
 public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanceDAO {
+	private static final Log __log = LogFactory.getLog(ProcessInstanceDAOImpl.class);
+	
+	public final static String DELETE_INSTANCES_BY_PROCESS = "DELETE_INSTANCES_BY_PROCESS";
+ 	public final static String SELECT_INSTANCE_IDS_BY_PROCESS = "SELECT_INSTANCE_IDS_BY_PROCESS";
+
+ 	public final static String SELECT_FAULT_IDS_BY_PROCESS = "SELECT_FAULT_IDS_BY_PROCESS";
+
+	public final static String COUNT_FAILED_INSTANCES_BY_STATUS_AND_PROCESS_ID = "COUNT_FAILED_INSTANCES_BY_STATUS_AND_PROCESS_ID";
 
     @Id @Column(name="ID")
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -98,6 +114,8 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="INSTANTIATING_CORRELATOR_ID")
 	private CorrelatorDAOImpl _instantiatingCorrelator;
 	
+	private transient int _activityFailureCount = -1;
+	
 	public ProcessInstanceDAOImpl() {}
 	public ProcessInstanceDAOImpl(CorrelatorDAOImpl correlator, ProcessDAOImpl process) {
 		_instantiatingCorrelator = correlator;
@@ -124,6 +142,11 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 		return ret;
 	}
 
+    @SuppressWarnings("unchecked")
+    public Collection<CorrelationSetDAO> selectCorrelationSets(Collection<ProcessInstanceDAO> instances) {
+	    return getEM().createNamedQuery(CorrelationSetDAOImpl.SELECT_CORRELATION_SETS_BY_INSTANCES).setParameter("instances", instances).getResultList();
+	}
+    
 	public void delete() {
 		if (getEM() != null ) {
 			getEM().remove(this);
@@ -157,7 +180,15 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 	}
 
 	public int getActivityFailureCount() {
-		return _recoveries.size();
+		if( _activityFailureCount == -1 ) {
+			_activityFailureCount = _recoveries.size();
+		}
+		
+		return _activityFailureCount;
+	}
+	
+	public void setActivityFailureCount(int activityFailureCount) {
+		_activityFailureCount = activityFailureCount;
 	}
 
 	public Date getActivityFailureDateTime() {

@@ -19,9 +19,10 @@
 
 package org.apache.ode.dao.jpa;
 
-import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.dao.CorrelationSetDAO;
-import org.apache.ode.bpel.dao.ScopeDAO;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -32,17 +33,23 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+
+import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.dao.CorrelationSetDAO;
+import org.apache.ode.bpel.dao.ScopeDAO;
 
 @Entity
 @Table(name="ODE_CORRELATION_SET")
+@NamedQueries({
+    @NamedQuery(name=CorrelationSetDAOImpl.SELECT_CORRELATION_SETS_BY_INSTANCES, query="select c from CorrelationSetDAOImpl as c left join fetch c._scope left join fetch c._props where c._scope._processInstance._instanceId in (:instances)")	
+})
 public class CorrelationSetDAOImpl implements CorrelationSetDAO {
+    public final static String SELECT_CORRELATION_SETS_BY_INSTANCES = "SELECT_CORRELATION_SETS_BY_INSTANCES";
 
 	@Id @Column(name="CORRELATION_SET_ID") 
 	@GeneratedValue(strategy=GenerationType.AUTO)

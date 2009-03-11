@@ -25,8 +25,11 @@ import java.util.Collection;
  * Hibernate table representing correlation set values.
  * 
  * @hibernate.class table="BPEL_CORRELATION_SET"
+ * @hibernate.query name="SELECT_CORSETS_BY_INSTANCES" query="from HCorrelationSet as c left join fetch c.properties where c.instance.id in (:instances)"
  */
 public class HCorrelationSet extends HObject {
+	public static final String SELECT_CORSETS_BY_INSTANCES = "SELECT_CORSETS_BY_INSTANCES";
+	  
     private HProcess _process;
     private HProcessInstance _instance;
     private Collection<HCorrelationProperty> _properties = new HashSet<HCorrelationProperty>();
