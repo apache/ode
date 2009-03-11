@@ -41,6 +41,7 @@ import org.apache.ode.bpel.common.Filter;
 import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.bpel.common.ProcessFilter;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
@@ -406,4 +407,21 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         }
     }
     
+    public Map<Long, Collection<CorrelationSetDAO>> getCorrelationSets(Collection<ProcessInstanceDAO> instances) {
+        Map<Long, Collection<CorrelationSetDAO>> map = new HashMap<Long, Collection<CorrelationSetDAO>>();
+        for (ProcessInstanceDAO instance: instances) {
+            Long id = instance.getInstanceId();
+            Collection<CorrelationSetDAO> existing = map.get(id);
+            if (existing == null) {
+                existing = new ArrayList<CorrelationSetDAO>();
+                map.put(id, existing);
+            }
+            existing.addAll(instance.getCorrelationSets());
+        }
+        return map;
+    }
+
+    public ProcessManagementDaoImpl getProcessManagement() {
+        return new ProcessManagementDaoImpl();
+    }
 }

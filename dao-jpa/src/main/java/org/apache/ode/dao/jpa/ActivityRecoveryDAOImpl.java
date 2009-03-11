@@ -20,9 +20,7 @@
 package org.apache.ode.dao.jpa;
 
 
-import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
-import org.apache.ode.utils.DOMUtils;
-import org.w3c.dom.Element;
+import java.util.Date;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -34,13 +32,26 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import java.util.Date;
+
+import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
+import org.apache.ode.utils.DOMUtils;
+import org.w3c.dom.Element;
 
 
 @Entity
 @Table(name="ODE_ACTIVITY_RECOVERY")
+@NamedQueries({
+ 	@NamedQuery(name=ActivityRecoveryDAOImpl.DELETE_ACTIVITY_RECOVERIES_BY_IDS, query="delete from ActivityRecoveryDAOImpl as a where a._instanceId in(:ids)"),
+	@NamedQuery(name=ActivityRecoveryDAOImpl.COUNT_ACTIVITY_RECOVERIES_BY_INSTANCES,
+			query="select r._instanceId, count(r._id) from ActivityRecoveryDAOImpl r where r._instance in(:instances) group by r._instanceId")
+})
 public class ActivityRecoveryDAOImpl implements ActivityRecoveryDAO {
+ 	public final static String DELETE_ACTIVITY_RECOVERIES_BY_IDS = "DELETE_ACTIVITY_RECOVERIES_BY_IDS";
+
+	public final static String COUNT_ACTIVITY_RECOVERIES_BY_INSTANCES = "COUNT_ACTIVITY_RECOVERIES_BY_INSTANCES";
 
     @Id @Column(name="ID")
     @GeneratedValue(strategy= GenerationType.AUTO)

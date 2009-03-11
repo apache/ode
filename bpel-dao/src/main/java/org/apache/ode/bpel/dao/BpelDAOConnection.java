@@ -18,14 +18,16 @@
  */
 package org.apache.ode.bpel.dao;
 
+import java.util.Date;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.bpel.evt.BpelEvent;
-
-import javax.xml.namespace.QName;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
 
 /**
  * Represents the physical resource for connecting to the bpel state store.
@@ -105,6 +107,8 @@ public interface BpelDAOConnection {
 
     Collection<ProcessInstanceDAO> instanceQuery(String expression);
 
+    Map<Long, Collection<CorrelationSetDAO>> getCorrelationSets(Collection<ProcessInstanceDAO> instances);
+
     ProcessDAO createProcess(QName pid, QName type, String guid, long version);
 
     /**
@@ -121,4 +125,10 @@ public interface BpelDAOConnection {
     
     void releaseMessageExchange(String mexid);
 
+    /**
+     * Returns an interface for process and instance management.
+     * 
+     * @return a ProcessManagement DAO
+     */
+    ProcessManagementDAO getProcessManagement();
 }

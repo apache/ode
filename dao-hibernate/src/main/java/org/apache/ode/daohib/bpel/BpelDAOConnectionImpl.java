@@ -256,4 +256,32 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         return result;
     }
 
+    @SuppressWarnings("unchecked")
+    public Map<Long, Collection<CorrelationSetDAO>> getCorrelationSets(Collection<ProcessInstanceDAO> instances) {
+        if (instances.size() == 0) {
+            return new HashMap<Long, Collection<CorrelationSetDAO>>();
+        }
+        Long[] iids = new Long[instances.size()];
+        int i=0;
+        for (ProcessInstanceDAO dao: instances) {
+            iids[i] = dao.getInstanceId();
+            i++;
+        }
+        Collection<HCorrelationSet> csets = _session.getNamedQuery(HCorrelationSet.SELECT_CORSETS_BY_INSTANCES).setParameterList("instances", iids).list();        
+        Map<Long, Collection<CorrelationSetDAO>> map = new HashMap<Long, Collection<CorrelationSetDAO>>();
+        for (HCorrelationSet cset: csets) {
+            Long id = cset.getInstance().getId();
+            Collection<CorrelationSetDAO> existing = map.get(id);
+            if (existing == null) {
+                existing = new ArrayList<CorrelationSetDAO>();
+                map.put(id, existing);
+            }
+            existing.add(new CorrelationSetDaoImpl(_sm, cset));
+        }
+        return map;
+    }
+
+    public ProcessManagementDAO getProcessManagement() {
+        return new ProcessManagementDaoImpl(_sm);
+    }
 }
