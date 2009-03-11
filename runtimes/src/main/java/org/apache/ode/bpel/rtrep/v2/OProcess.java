@@ -23,6 +23,7 @@ import org.apache.ode.bpel.rapi.ProcessModel;
 import org.apache.ode.bpel.rapi.PartnerLinkModel;
 import org.apache.ode.bpel.rapi.PropertyAliasModel;
 import org.apache.ode.bpel.rapi.ActivityModel;
+import org.apache.ode.bpel.rapi.ScopeModel;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -316,4 +317,8 @@ public class OProcess extends OBase implements ProcessModel {
 			}
     	};
     }
+
+	public ScopeModel getProcessScope() {
+		return processScope;
+	}
 }

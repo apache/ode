@@ -18,14 +18,17 @@
  */
 package org.apache.ode.bpel.rtrep.v1;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.ode.bpel.rapi.ActivityModel;
+import org.apache.ode.bpel.rapi.SequenceModel;
 
 
 /**
  * Compiled representation of the BPEL <code>&lt;sequence&gt;</code> activity.
  */
-public class OSequence extends OActivity {
+public class OSequence extends OActivity implements SequenceModel {
     static final long serialVersionUID = -1L  ;
 
     public final List<OActivity> sequence = new ArrayList<OActivity>();
@@ -33,4 +36,12 @@ public class OSequence extends OActivity {
     public OSequence(OProcess owner, OActivity parent) {
         super(owner, parent);
     }
+
+	public List<ActivityModel> getSequence() {
+		List<ActivityModel> sequence = new ArrayList<ActivityModel>();
+		for (ActivityModel activity : this.sequence) {
+			sequence.add(activity);
+		}
+		return sequence;
+	}
 }
