@@ -81,10 +81,12 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         Iterator mcors = qry.iterate();
         try {
             if (!mcors.hasNext()) {
-                __log.debug(hdr + "did not find a MESSAGE entry.");
+                if (__log.isDebugEnabled())
+                    __log.debug(hdr + "did not find a MESSAGE entry.");
             } else {
 	            HCorrelatorMessage mcor = (HCorrelatorMessage) mcors.next();
-	            __log.debug(hdr + "found MESSAGE entry " + mcor.getMessageExchange());
+                if (__log.isDebugEnabled())
+	                __log.debug(hdr + "found MESSAGE entry " + mcor.getMessageExchange());
 	            mex = new MessageExchangeDaoImpl(_sm, mcor.getMessageExchange());
             }
         } finally {
@@ -152,7 +154,8 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
                 Hibernate.close(i);
             }
     
-            __log.debug(hdr + "found " + routes);
+            if (__log.isDebugEnabled())
+                __log.debug(hdr + "found " + routes);
             return routes;
         } 
         
@@ -223,7 +226,8 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         String hdr = "addRoute(" + routeGroupId + ", iid=" + target.getInstanceId() + ", idx=" + idx + ", ckeySet="
                 + correlationKeySet + "): ";
 
-        __log.debug(hdr);
+        if (__log.isDebugEnabled())
+            __log.debug(hdr);
         HCorrelatorSelector hsel = new HCorrelatorSelector();
         hsel.setGroupId(routeGroupId);
         hsel.setIndex(idx);
@@ -236,7 +240,8 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         hsel.setRoute(routePolicy);
         getSession().save(hsel);
 
-        __log.debug(hdr + "saved " + hsel);
+        if (__log.isDebugEnabled())
+            __log.debug(hdr + "saved " + hsel);
     }
 
     public boolean checkRoute(CorrelationKey ckey) {
@@ -265,7 +270,8 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         q.setString(0, routeGroupId); // groupId
         q.setEntity(1, ((ProcessInstanceDaoImpl) target).getHibernateObj()); // instance
         int updates = q.executeUpdate();
-        __log.debug(hdr + "deleted " + updates + " rows");
+        if (__log.isDebugEnabled())
+            __log.debug(hdr + "deleted " + updates + " rows");
     }
 
      public Collection<CorrelatorMessageDAO> getAllMessages() {
