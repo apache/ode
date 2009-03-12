@@ -169,16 +169,14 @@ class AssignGenerator extends DefaultActivityGenerator {
                 vref.variable = _context.resolveVariable(vv.getVariable());
                 if (vv.getPart() != null) {
                     vref.part = _context.resolvePart(vref.variable, vv.getPart());
-                    if (vv.getLocation() != null && vv.getLocation().getExpression() != null)
-                        vref.location = _context.compileExpr(vv.getLocation());
                 }
                 if (vv.getHeader() != null) {
                     vref.headerPart = _context.resolveHeaderPart(vref.variable, vv.getHeader());
                     if (vref.headerPart == null)
                         vref.headerPart = new OMessageVarType.Part(_context.getOProcess(), vv.getHeader(), null);
-                    if (vv.getLocation() != null && vv.getLocation().getExpression() != null)
-                        vref.location = _context.compileExpr(vv.getLocation());
                 }
+                if (vv.getLocation() != null && vv.getLocation().getExpression() != null)
+                    vref.location = _context.compileExpr(vv.getLocation());
                 return vref;
             } else if (from.isPartnerLinkVal()) {
                 PartnerLinkVal plv = from.getAsPartnerLinkVal();
