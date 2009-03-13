@@ -93,11 +93,8 @@ public class ProcessConfImpl implements ProcessConf {
     // cache the inMemory flag because XMLBeans objects are heavily synchronized (guarded by a coarse-grained lock)
     private volatile boolean _inMemory = false;
 
-    // provide the IL properties
-    private HierarchicalProperties ilProperties;
     // monitor the IL property file and reload it if necessary
     private WatchDog<Map<File, Long>, PropertiesObserver> propertiesWatchDog;
-    private final ReadWriteLock ilPropertiesLock = new ReentrantReadWriteLock();
 
     private EndpointReferenceContext eprContext;
 
@@ -425,17 +422,7 @@ public class ProcessConfImpl implements ProcessConf {
         // update properties if necessary
         // do it manually to save resources (instead of using a thread)
         propertiesWatchDog.check();
-        if (ilProperties == null) {
-            return Collections.EMPTY_MAP;
-        } else {
-            // take a lock so we can have a consistent snapshot of the properties
-            ilPropertiesLock.readLock().lock();
-            try {
-                return ilProperties.getProperties(service, port);
-            } finally {
-                ilPropertiesLock.readLock().unlock();
-            }
-        }
+        return propertiesWatchDog.getObserver().get().getProperties(service, port);
     }
 
     private class PropertiesMutable implements WatchDog.Mutable<Map<File, Long>> {
@@ -456,43 +443,26 @@ public class ProcessConfImpl implements ProcessConf {
         }
     }
 
-    private class PropertiesObserver implements WatchDog.Observer {
+    private class PropertiesObserver extends WatchDog.DefaultObserver<HierarchicalProperties> {
 
         public void init() {
-            ilPropertiesLock.writeLock().lock();
             try {
-                try {
-                    // do not hold a reference on the file list, so that changes are handled
-                    // and always create a new instance of the HierarchicalProperties
-                    ilProperties = new HierarchicalProperties(collectEndpointConfigFiles());
-                } catch (IOException e) {
-                    throw new ContextException("Integration-Layer Properties cannot be loaded!", e);
-                }
-            } finally {
-                ilPropertiesLock.writeLock().unlock();
+                // do not hold a reference on the file list, so that changes are handled
+                // and always create a new instance of the HierarchicalProperties
+                object = new HierarchicalProperties(collectEndpointConfigFiles());
+            } catch (IOException e) {
+                throw new ContextException("Integration-Layer Properties cannot be loaded!", e);
             }
-        }
-
-        public boolean isInitialized() {
-            return ilProperties != null;
         }
 
         public void onUpdate() {
-            ilPropertiesLock.writeLock().lock();
-            try {
-                init();
-                try {
-                    ilProperties.loadFiles();
-                } catch (IOException e) {
-                    throw new ContextException("Integration-Layer Properties cannot be loaded!", e);
-                }
-            } finally {
-                ilPropertiesLock.writeLock().unlock();
-            }
-        }
-
-        public void onDelete() {
             init();
+            try {
+                object.loadFiles();
+            } catch (IOException e) {
+                throw new ContextException("Integration-Layer Properties cannot be loaded!", e);
+            }
+
         }
     }
 

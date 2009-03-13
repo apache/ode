@@ -27,6 +27,9 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * This class is based on {@link org.apache.log4j.helpers.FileWatchdog}.<p/>
@@ -112,36 +115,47 @@ public class WatchDog<T, C extends WatchDog.Observer> implements Runnable {
     public final void check() {
         long now = System.currentTimeMillis();
         if (expire <= now) {
+            /* get a lock on the observer right now
+             It would be overkilled to lock before testing the dates.
+             By locking after the comparaison the worst scenario is that 2 threads get in the "if",
+             thread A gets the lock, thread B waits for it. Once the lock is released, thread B acquires it and do the checks on the mutable.
+             So this scenario is *harmless*.
+             */
+            observer.getLock().lock();
             expire = now + delay;
-            if (log.isDebugEnabled()) log.debug("["+mutable+"]"+ " check for changes");
-            if (mutable.exists()) {
-                existedBefore = true;
-                if (lastModif == null || mutable.hasChangedSince(lastModif)) {
-                    lastModif = mutable.lastModified();
-                    observer.onUpdate();
-                    if (log.isInfoEnabled()) log.info("["+mutable+"]"+" updated");
-                    warnedAlready = false;
-                }else{
-                    if (log.isDebugEnabled()) log.debug("["+mutable+"]"+" has not changed");
+            try {
+                if (log.isDebugEnabled()) log.debug("[" + mutable + "]" + " check for changes");
+                if (mutable.exists()) {
+                    existedBefore = true;
+                    if (lastModif == null || mutable.hasChangedSince(lastModif)) {
+                        lastModif = mutable.lastModified();
+                        observer.onUpdate();
+                        if (log.isInfoEnabled()) log.info("[" + mutable + "]" + " updated");
+                        warnedAlready = false;
+                    } else {
+                        if (log.isDebugEnabled()) log.debug("[" + mutable + "]" + " has not changed");
+                    }
+                } else if (!observer.isInitialized()) {
+                    // no resource and first time
+                    observer.init();
+                    if (log.isInfoEnabled()) log.info("[" + mutable + "]" + " initialized");
+                } else {
+                    if (existedBefore) {
+                        existedBefore = false;
+                        lastModif = null;
+                        observer.onDelete();
+                        if (log.isInfoEnabled()) log.info("[" + mutable + "]" + " deleted");
+                    }
+                    if (!warnedAlready) {
+                        warnedAlready = true;
+                        if (log.isInfoEnabled()) log.info("[" + mutable + "]" + " does not exist.");
+                    }
                 }
-            } else if (!observer.isInitialized()) {
-                // no resource and first time
-                observer.init();
-                if (log.isInfoEnabled()) log.info("["+mutable+"]"+ " initialized");
-            } else {
-                if (existedBefore) {
-                    existedBefore = false;
-                    lastModif = null;
-                    observer.onDelete();
-                    if (log.isInfoEnabled()) log.info("["+mutable+"]"+ " deleted");
-                }
-                if (!warnedAlready) {
-                    warnedAlready = true;
-                    if (log.isInfoEnabled()) log.info("["+mutable+"]"+" does not exist.");
-                }
+            } finally {
+                observer.getLock().unlock();
             }
-        }else{
-            if (log.isTraceEnabled()) log.trace("["+mutable+"]"+" wait period is not over");
+        } else {
+            if (log.isTraceEnabled()) log.trace("[" + mutable + "]" + " wait period is not over");
         }
     }
 
@@ -218,10 +232,9 @@ public class WatchDog<T, C extends WatchDog.Observer> implements Runnable {
         }
     }
 
-    public interface Observer {
+    public interface Observer<A> {
 
         boolean isInitialized();
-
 
         /**
          * Called by {@link WatchDog#check()} if the underlying object is not {@link #isInitialized initialized} and the {@link WatchDog.Mutable#exists()}  resource does not exist}.
@@ -247,19 +260,26 @@ public class WatchDog<T, C extends WatchDog.Observer> implements Runnable {
          */
         void onUpdate();
 
+        Lock getLock();
+
+        A get();
+
     }
 
     /**
      * A default implementation of #ChangeHandler. Delete and Update will both invoke the #init method which satifies most use cases.
      * So subclasses may simply override the #init method to fit their own needs.
      */
-    public static class DefaultObserver implements Observer {
+    public static class DefaultObserver<A> implements Observer<A> {
+
+        protected final ReadWriteLock lock = new ReentrantReadWriteLock();
+        protected A object;
 
         /**
-         * @return true
+         * @return true if the wrapped if not null
          */
         public boolean isInitialized() {
-            return true;
+            return object != null;
         }
 
         /**
@@ -282,5 +302,17 @@ public class WatchDog<T, C extends WatchDog.Observer> implements Runnable {
             init();
         }
 
+        public Lock getLock() {
+            return lock.writeLock();
+        }
+
+        public A get() {
+            lock.readLock().lock();
+            try {
+                return object;
+            } finally {
+                lock.readLock().unlock();
+            }
+        }
     }
 }
