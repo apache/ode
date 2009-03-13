@@ -110,7 +110,6 @@ public class ODEServer {
     protected Database _db;
     private DeploymentPoller _poller;
     private MultiKeyMap _services = new MultiKeyMap();
-    private MultiKeyMap _externalServices = new MultiKeyMap();
     private BpelServerConnector _connector;
     private ManagementService _mgtService;
     private MultiThreadedHttpConnectionManager httpConnectionManager;
@@ -359,10 +358,7 @@ public class ODEServer {
     }
 
     public ExternalService createExternalService(ProcessConf pconf, QName serviceName, String portName) throws ContextException {
-        ExternalService extService = (ExternalService) _externalServices.get(serviceName);
-        if (extService != null)
-            return extService;
-
+        ExternalService extService = null; 
     Definition def = pconf.getDefinitionForService(serviceName);
         try {
              if (WsdlUtils.useHTTPBinding(def, serviceName, portName)) {
@@ -380,7 +376,6 @@ public class ODEServer {
          // if not SOAP nor HTTP binding
          if (extService == null) throw new ContextException("Only SOAP and HTTP binding supported!");
 
-        _externalServices.put(serviceName, portName, extService);
         __log.debug("Created external service " + serviceName);
         return extService;
     }
@@ -414,10 +409,6 @@ public class ODEServer {
                 return service;
         }
         return null;
-    }
-
-    public ExternalService getExternalService(QName serviceName, String portName) {
-        return (ExternalService) _externalServices.get(serviceName, portName);
     }
 
     private void initTxMgr() throws ServletException {
