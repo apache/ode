@@ -364,6 +364,11 @@ public class ProcessConfImpl implements ProcessConf {
         } catch (Exception e) {
             return Collections.emptyList();
         }
+
+        @Override
+        public String toString() {
+            return "Endpoint files for "+_du.toString();
+        }
     }
 
     public Map<String, String> getEndpointProperties(EndpointReference epr) {
