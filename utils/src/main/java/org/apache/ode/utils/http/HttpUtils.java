@@ -26,8 +26,8 @@ import java.util.regex.Pattern;
  *
  */
 public class HttpUtils {
-    public static final String XML_MIME_TYPE_REGEX = "(text/xml)|(application/xml)|((.*)\\+xml)";
-    public static final String TEXT_MIME_TYPE_REGEX = "text/(?!xml$).*";
+    public static final String XML_MIME_TYPE_REGEX = "((text/xml)|(application/xml)|((.*)\\+xml))(;.*)*";
+    public static final String TEXT_MIME_TYPE_REGEX = "text/(?!xml(;(.*)*))(.*)";
     public static final Pattern XML_MIME_TYPE_PATTERN = Pattern.compile(XML_MIME_TYPE_REGEX);
     public static final Pattern TEXT_MIME_TYPE_PATTERN = Pattern.compile(TEXT_MIME_TYPE_REGEX);
 
