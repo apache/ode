@@ -224,9 +224,9 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
             serviceClient = new ServiceClient(_configContext, null);
             _cachedClients.set(serviceClient);
         }
-        AxisService anonymousService = _axisServiceWatchDog.getObserver().anonymousService;
+        AxisService anonymousService = _axisServiceWatchDog.getObserver().get();
         serviceClient.setAxisService(anonymousService);
-        serviceClient.setOptions(_axisOptionsWatchDog.getObserver().options);
+        serviceClient.setOptions(_axisOptionsWatchDog.getObserver().get());
 
         applySecuritySettings(serviceClient);
 
@@ -397,31 +397,26 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
      * The {@link org.apache.axis2.client.ServiceClient} instance is created from the main Axis2 config instance and
      * this service-specific config file.
      */
-    private class ServiceFileObserver extends WatchDog.DefaultObserver {
-        String serviceName = "anonymous_service_" + new GUID().toString();
-        AxisService anonymousService;
+    private class ServiceFileObserver extends WatchDog.DefaultObserver<AxisService> {
+        String serviceName = "axis_service_for_" + _serviceName + "#" + _portName + "_" + new GUID().toString();
         File file;
 
         private ServiceFileObserver(File file) {
             this.file = file;
         }
 
-        public boolean isInitialized() {
-            return anonymousService != null;
-        }
-
         public void init() {
-            // create an anonymous axis service that will be used by the ServiceClient
+// create an anonymous axis service that will be used by the ServiceClient
             // this service will be added to the AxisConfig so do not reuse the name of the external service
             // as it could blow up if the service is deployed in the same axis2 instance
-            anonymousService = new AxisService(serviceName);
-            anonymousService.setParent(_axisConfig);
+            object = new AxisService(serviceName);
+            object.setParent(_axisConfig);
 
             OutOnlyAxisOperation outOnlyOperation = new OutOnlyAxisOperation(ServiceClient.ANON_OUT_ONLY_OP);
-            anonymousService.addOperation(outOnlyOperation);
+            object.addOperation(outOnlyOperation);
 
             OutInAxisOperation outInOperation = new OutInAxisOperation(ServiceClient.ANON_OUT_IN_OP);
-            anonymousService.addOperation(outInOperation);
+            object.addOperation(outInOperation);
 
             // set a right default action *after* operations have been added to the service.
             outOnlyOperation.setSoapAction("");
@@ -434,9 +429,9 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
             // and load the new config.
             init(); // create a new ServiceClient instance
             try {
-                 AxisUtils.configureService(_configContext, anonymousService, file.toURI().toURL());
+                 AxisUtils.configureService(_configContext, object, file.toURI().toURL());
                  // do not allow the service.xml file to change the service name
-                 anonymousService.setName(serviceName);
+                 object.setName(serviceName);
             } catch (Exception e) {
                 if (__log.isWarnEnabled()) __log.warn("Exception while configuring service: " + _serviceName, e);
                 throw new RuntimeException("Exception while configuring service: " + _serviceName, e);
@@ -444,23 +439,17 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
         }
     }
 
-    private class OptionsObserver extends WatchDog.DefaultObserver {
-
-        Options options;
-
-        public boolean isInitialized() {
-            return options != null;
-        }
+    private class OptionsObserver extends WatchDog.DefaultObserver<Options> {
 
         public void init() {
-            options = new Options();
+            object = new Options();
             // set defaults values
-            options.setExceptionToBeThrownOnSOAPFault(false);
+            object.setExceptionToBeThrownOnSOAPFault(false);
 
             // this value does NOT override Properties.PROP_HTTP_CONNECTION_TIMEOUT
             // nor Properties.PROP_HTTP_SOCKET_TIMEOUT.
             // it will be applied only if the laters are not set.
-            options.setTimeOutInMilliSeconds(60000);
+            object.setTimeOutInMilliSeconds(60000);
         }
 
         public void onUpdate() {
@@ -468,7 +457,7 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
 
             // note: don't make this map an instance attribute, so we always get the latest version
             final Map<String, String> properties = _pconf.getEndpointProperties(endpointReference);
-            Properties.Axis2.translate(properties, options);
+            Properties.Axis2.translate(properties, object);
         }
     }
 
@@ -490,7 +479,7 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
         }
 
         public String toString() {
-            return "Properties for Endpoint: " + endpointReference;
+            return "Properties for Endpoint: " + _serviceName + "#" + _portName;
         }
     }
 
