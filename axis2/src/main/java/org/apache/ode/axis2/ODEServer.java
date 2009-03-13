@@ -447,10 +447,6 @@ public class ODEServer {
         return null;
     }
 
-    public ExternalService getExternalService(QName serviceName, String portName) {
-        return (ExternalService) _externalServices.get(serviceName, portName);
-    }
-
     private void initTxMgr() throws ServletException {
         String txFactoryName = _odeConfig.getTxFactoryClass();
         __log.debug("Initializing transaction manager using " + txFactoryName);
