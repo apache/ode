@@ -441,6 +441,11 @@ public class ProcessConfImpl implements ProcessConf {
             for (File f : files) m.put(f, Long.valueOf(f.lastModified()));
             return m;
         }
+
+        @Override
+        public String toString() {
+            return "Endpoint files for "+_du.toString();
+        }
     }
 
     private class PropertiesObserver extends WatchDog.DefaultObserver<HierarchicalProperties> {
@@ -462,7 +467,6 @@ public class ProcessConfImpl implements ProcessConf {
             } catch (IOException e) {
                 throw new ContextException("Integration-Layer Properties cannot be loaded!", e);
             }
-
         }
     }
 
