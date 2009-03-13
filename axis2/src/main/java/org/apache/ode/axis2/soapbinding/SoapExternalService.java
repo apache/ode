@@ -128,6 +128,7 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
         }
     }
 
+
     public void invoke(final PartnerRoleMessageExchange odeMex) {
         boolean isTwoWay = odeMex.getMessageExchangePattern() == org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern.REQUEST_RESPONSE;
         try {
@@ -218,19 +219,29 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
             throw AxisFault.makeFault(e.getCause() != null ? e.getCause() : e);
         }
 
-        // apply the options to the service client
-        ServiceClient serviceClient = _cachedClients.get();
-        if (serviceClient == null) {
-            serviceClient = new ServiceClient(_configContext, null);
-            _cachedClients.set(serviceClient);
-        }
         AxisService anonymousService = _axisServiceWatchDog.getObserver().get();
-        serviceClient.setAxisService(anonymousService);
-        serviceClient.setOptions(_axisOptionsWatchDog.getObserver().get());
+        ServiceClient client = _cachedClients.get();
+        if (client == null || !client.getAxisService().getName().equals(anonymousService.getName())) {
+            // avoid race conditions in AxisConfiguration
+            synchronized (_axisConfig) {
+                // if the service has changed, discard the client and create a new one
+                if (client != null) {
+                    if(__log.isDebugEnabled()) __log.debug("Clean up and discard ServiceClient");
+                    client.cleanup();
+                }
+                if(__log.isDebugEnabled()) __log.debug("Create a new ServiceClient for "+anonymousService.getName());
+                client = new ServiceClient(_configContext, null);
+                client.setAxisService(anonymousService);
+            }
+            _cachedClients.set(client);
+        }
 
-        applySecuritySettings(serviceClient);
+        // apply the options to the service client
+        client.setOptions(_axisOptionsWatchDog.getObserver().get());
 
-        return serviceClient;
+        applySecuritySettings(client);
+
+        return client;
     }
     private void applySecuritySettings(ServiceClient serviceClient) throws AxisFault {
         Options options = serviceClient.getOptions();
@@ -398,7 +409,6 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
      * this service-specific config file.
      */
     private class ServiceFileObserver extends WatchDog.DefaultObserver<AxisService> {
-        String serviceName = "axis_service_for_" + _serviceName + "#" + _portName + "_" + new GUID().toString();
         File file;
 
         private ServiceFileObserver(File file) {
@@ -406,9 +416,10 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
         }
 
         public void init() {
-// create an anonymous axis service that will be used by the ServiceClient
+            // create an anonymous axis service that will be used by the ServiceClient
             // this service will be added to the AxisConfig so do not reuse the name of the external service
             // as it could blow up if the service is deployed in the same axis2 instance
+            String serviceName = "axis_service_for_" + _serviceName + "#" + _portName + "_" + new GUID().toString();
             object = new AxisService(serviceName);
             object.setParent(_axisConfig);
 
@@ -429,9 +440,10 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
             // and load the new config.
             init(); // create a new ServiceClient instance
             try {
+                String name = object.getName();
                  AxisUtils.configureService(_configContext, object, file.toURI().toURL());
                  // do not allow the service.xml file to change the service name
-                 object.setName(serviceName);
+                 object.setName(name);
             } catch (Exception e) {
                 if (__log.isWarnEnabled()) __log.warn("Exception while configuring service: " + _serviceName, e);
                 throw new RuntimeException("Exception while configuring service: " + _serviceName, e);
