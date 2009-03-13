@@ -125,8 +125,6 @@ public class ODEServer {
 
     private MultiKeyMap _services = new MultiKeyMap();
 
-    private MultiKeyMap _externalServices = new MultiKeyMap();
-
     private BpelServerConnector _connector;
 
     private ManagementService _mgtService;
@@ -378,9 +376,7 @@ public class ODEServer {
     }
 
     public ExternalService createExternalService(ProcessConf pconf, QName serviceName, String portName) throws ContextException {
-        ExternalService extService = (ExternalService) _externalServices.get(serviceName);
-        if (extService != null)
-            return extService;
+        ExternalService extService = null;
 
         Definition def = pconf.getDefinitionForService(serviceName);
         try {
@@ -401,7 +397,6 @@ public class ODEServer {
             throw new ContextException("Only SOAP and HTTP binding supported!");
         }
 
-        _externalServices.put(serviceName, portName, extService);
         __log.debug("Created external service " + serviceName);
         return extService;
     }
