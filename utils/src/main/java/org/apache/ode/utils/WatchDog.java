@@ -113,31 +113,35 @@ public class WatchDog<T, C extends WatchDog.Observer> implements Runnable {
         long now = System.currentTimeMillis();
         if (expire <= now) {
             expire = now + delay;
-            if (log.isDebugEnabled()) log.debug("Check for changes: " + mutable);
+            if (log.isDebugEnabled()) log.debug("["+mutable+"]"+ " check for changes");
             if (mutable.exists()) {
                 existedBefore = true;
                 if (lastModif == null || mutable.hasChangedSince(lastModif)) {
                     lastModif = mutable.lastModified();
                     observer.onUpdate();
-                    if (log.isInfoEnabled()) log.info(mutable + " updated");
+                    if (log.isInfoEnabled()) log.info("["+mutable+"]"+" updated");
                     warnedAlready = false;
+                }else{
+                    if (log.isDebugEnabled()) log.debug("["+mutable+"]"+" has not changed");
                 }
             } else if (!observer.isInitialized()) {
                 // no resource and first time
                 observer.init();
-                if (log.isInfoEnabled()) log.info(mutable + " initialized");
+                if (log.isInfoEnabled()) log.info("["+mutable+"]"+ " initialized");
             } else {
                 if (existedBefore) {
                     existedBefore = false;
                     lastModif = null;
                     observer.onDelete();
-                    if (log.isInfoEnabled()) log.info(mutable + " deleted");
+                    if (log.isInfoEnabled()) log.info("["+mutable+"]"+ " deleted");
                 }
                 if (!warnedAlready) {
                     warnedAlready = true;
-                    if (log.isInfoEnabled()) log.info(mutable + " does not exist.");
+                    if (log.isInfoEnabled()) log.info("["+mutable+"]"+" does not exist.");
                 }
             }
+        }else{
+            if (log.isTraceEnabled()) log.trace("["+mutable+"]"+" wait period is not over");
         }
     }
 
