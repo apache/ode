@@ -364,11 +364,6 @@ public class ProcessConfImpl implements ProcessConf {
         } catch (Exception e) {
             return Collections.emptyList();
         }
-
-        @Override
-        public String toString() {
-            return "Endpoint files for "+_du.toString();
-        }
     }
 
     public Map<String, String> getEndpointProperties(EndpointReference epr) {
@@ -384,43 +379,46 @@ public class ProcessConfImpl implements ProcessConf {
 
     private class PropertiesMutable implements WatchDog.Mutable<Map<File, Long>> {
 
-            public boolean exists() {
-                return true;
-            }
+        public boolean exists() {
+            return true;
+        }
 
-            public boolean hasChangedSince(Map<File, Long> since) {
-                return !CollectionUtils.equals(lastModified(), since);
-            }
+        public boolean hasChangedSince(Map<File, Long> since) {
+            return !CollectionUtils.equals(lastModified(), since);
+        }
 
-            public Map<File, Long> lastModified() {
-                List<File> files = collectEndpointConfigFiles();
-                Map<File, Long> m = new HashMap<File, Long>(files.size() * 15 / 10);
-                for (File f : files) m.put(f, Long.valueOf(f.lastModified()));
-                return m;
+        public Map<File, Long> lastModified() {
+            List<File> files = collectEndpointConfigFiles();
+            Map<File, Long> m = new HashMap<File, Long>(files.size() * 15 / 10);
+            for (File f : files) m.put(f, Long.valueOf(f.lastModified()));
+            return m;
+        }
+
+        @Override
+        public String toString() {
+            return "Endpoint files for " + _du.toString();
+        }
+    }
+
+    private class PropertiesObserver extends WatchDog.DefaultObserver<HierarchicalProperties> {
+
+        public void init() {
+            try {
+                // do not hold a reference on the file list, so that changes are handled
+                // and always create a new instance of the HierarchicalProperties
+                object = new HierarchicalProperties(collectEndpointConfigFiles());
+            } catch (IOException e) {
+                throw new ContextException("Integration-Layer Properties cannot be loaded!", e);
             }
         }
 
-        private class PropertiesObserver extends WatchDog.DefaultObserver<HierarchicalProperties> {
-
-            public void init() {
-                    try {
-                        // do not hold a reference on the file list, so that changes are handled
-                        // and always create a new instance of the HierarchicalProperties
-                        object = new HierarchicalProperties(collectEndpointConfigFiles());
-                    } catch (IOException e) {
-                        throw new ContextException("Integration-Layer Properties cannot be loaded!", e);
-                    }
-            }
-
-            public void onUpdate() {
-                    init();
-                    try {
-                        object.loadFiles();
-                    } catch (IOException e) {
-                        throw new ContextException("Integration-Layer Properties cannot be loaded!", e);
-                    }
+        public void onUpdate() {
+            init();
+            try {
+                object.loadFiles();
+            } catch (IOException e) {
+                throw new ContextException("Integration-Layer Properties cannot be loaded!", e);
             }
         }
-
-
+    }
 }
