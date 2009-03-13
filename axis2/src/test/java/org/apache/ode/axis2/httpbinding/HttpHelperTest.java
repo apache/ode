@@ -28,22 +28,23 @@ import org.apache.ode.utils.http.HttpUtils;
  */
 public class HttpHelperTest extends TestCase {
     private static final String[] IS_XML = new String[]{
-            "application/atom+xml"
-            , "text/xml"
+            "application/atom+xml; param1=value1; param2=value2"
+            , "text/xml; charset=ISO-8859-4"
             , "application/xml"
-            , "application/xhtml+xml"
+            , "application/xhtml+xml; charset=ISO-8859-4; parameter=value"
             , "image/foo+xml"
     };
     private static final String[] IS_TEXT = new String[]{
             "text/xml-external-parsed-entity"
-            , "text/plain"
-            , "text/css"
+            , "text/xml-external-parsed-entity; charset=ISO-8859-4"
+            , "text/plain; charset=ISO-8859-4"
+            , "text/css; param1=value1; param2=value2"
             , "text/csv"
     };
     private static final String[] IS_IMAGE = new String[]{
             "image/jpeg"
             , "image/png"
-            , "image/gif"
+            , "image/gif; param1=value1; param2=value2"
     };
 
 
