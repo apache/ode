@@ -176,7 +176,6 @@ public class SoapExternalService implements ExternalService {
                 __log.debug("Message: " + soapEnv);
             }
 
-            client.sendReceiveNonBlocking();
             final OperationClient operationClient = client.createClient(isTwoWay ? ServiceClient.ANON_OUT_IN_OP
                     : ServiceClient.ANON_OUT_ONLY_OP);
             operationClient.addMessageContext(mctx);
