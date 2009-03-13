@@ -176,6 +176,7 @@ public class SoapExternalService implements ExternalService {
                 __log.debug("Message: " + soapEnv);
             }
 
+            client.sendReceiveNonBlocking();
             final OperationClient operationClient = client.createClient(isTwoWay ? ServiceClient.ANON_OUT_IN_OP
                     : ServiceClient.ANON_OUT_ONLY_OP);
             operationClient.addMessageContext(mctx);
@@ -237,7 +238,18 @@ public class SoapExternalService implements ExternalService {
             } else { /** one-way case * */
                 _executorService.submit(new Callable<Object>() {
                     public Object call() throws Exception {
-                        operationClient.execute(false);
+                        try {
+                            operationClient.execute(true);
+                        } catch (Throwable t) {
+                            String errmsg = "Error sending message (mex=" + odeMex + "): " + t.getMessage();
+                            __log.error(errmsg, t);
+                        } finally {
+                            // release the HTTP connection, we don't need it anymore
+                            TransportOutDescription out = mctx.getTransportOut();
+                            if (out != null && out.getSender() != null) {
+                                out.getSender().cleanup(mctx);
+                            }
+                        }
                         return null;
                     }
                 });
