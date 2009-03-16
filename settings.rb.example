@@ -1,8 +1,9 @@
 MYSQL               = "mysql:mysql-connector-java:jar:5.0.4",
 SYBASE              = "sybase:jconnect:jar:4.3",
 DB2                 = "db2:jcc:jar:9.5"
+SQLSERVER2008       = "microsoft:sqljdbc:jar:2008"
 
-REQUIRES = [MYSQL, SYBASE, DB2]
+REQUIRES = [MYSQL, SYBASE, DB2, SQLSERVER2008]
 
 def settings
   jpa_derby = {
@@ -55,6 +56,17 @@ def settings
     :url=>"jdbc:sybase:Tds:<host>:6000/<instance>?SELECT_OPENS_CURSOR=true",
     :userid=>"<userid>",
     :password=>"<password>",
+    :autocommit=>"on",
+    :dao=>"org.apache.ode.axis2.instancecleanup.HibDaoConnectionFactoryImpl"
+  }
+
+  hib_sqlserver = {
+    :integr_branch=>"5.2.x",
+    :db=>"sqlserver",
+    :driver=>"com.microsoft.sqlserver.jdbc.SQLServerDriver",
+    :url=>"jdbc:sqlserver://<host>:1433;database=<instance>",
+    :userid=>"sa",
+    :password=>"sa",
     :autocommit=>"on",
     :dao=>"org.apache.ode.axis2.instancecleanup.HibDaoConnectionFactoryImpl"
   }

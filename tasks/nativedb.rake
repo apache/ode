@@ -48,9 +48,11 @@ module NativeDB
           rm_rf task.name if File.exist?(task.name)
           Dir.mkdir(task.name)
           Buildr.ant(name) do |ant|
+            create_tables_sql = "#{task.name}/ode_tables.sql"
+            drop_tables_sql = "#{task.name}/drop_ode_tables.sql"
             ant.get :src=>"http://git.intalio.com/?p=integr.git;a=blob_plain;f=descriptors/package/#{dbprops[:db]}/ode_tables.sql;hb=#{dbprops[:integr_branch]}",
-                    :dest=>"#{task.name}/ode_tables.sql"
-            sqls = ["#{task.name}/ode_tables.sql"]
+                    :dest=> create_tables_sql
+            sqls = prepare_sqls(ant, [], :hib, dbprops[:db], drop_tables_sql, create_tables_sql)
             
             # Apply the sql scripts to the database
             ant.sql :driver=>dbprops[:driver], :url=>dbprops[:url], :userid=>dbprops[:userid], :password=>dbprops[:password], :autocommit=>dbprops[:autocommit] do
@@ -71,28 +73,10 @@ module NativeDB
           rm_rf task.name if File.exist?(task.name)
           Dir.mkdir(task.name)
           Buildr.ant(name) do |ant|
-            sqls = []
-            if dbprops[:db] == "mysql"
-              # create the drop table sql file from the create table sql
-              create_tables = ""
-              File.open("#{base}/target/#{dbprops[:db]}.sql", "r") do |f1|  
-                while line = f1.gets
-                  create_tables <<= line
-                end
-              end
-            
-              File.open("#{task.name}/drop-#{dbprops[:db]}.sql", "w") do |f2|
-                create_tables.gsub(/CREATE TABLE (.*?)[\s\(].*?;/m) { |match|
-                  f2.puts "DROP TABLE IF EXISTS " << $1 << ";\n"
-                }
-              end
-              
-              sqls |= ["#{task.name}/drop-#{dbprops[:db]}.sql"]
-            end
-            
-            ant.copy :file=>"#{base}/target/#{dbprops[:db]}.sql", :todir=>task.name
-            sqls |= ["#{task.name}/#{dbprops[:db]}.sql"]
-            
+            create_tables_sql = "#{base}/target/#{dbprops[:db]}.sql"
+            drop_tables_sql = "#{task.name}/drop-#{dbprops[:db]}.sql"
+            sqls = prepare_sqls(ant, [], :jpa, dbprops[:db], drop_tables_sql, create_tables_sql)
+                        
             # Apply the sql scripts to the database
             ant.sql :driver=>dbprops[:driver], :url=>dbprops[:url], :userid=>dbprops[:userid], :password=>dbprops[:password], :autocommit=>dbprops[:autocommit] do
               sqls.each { |sql| ant.transaction :src=>sql }
@@ -146,6 +130,47 @@ module NativeDB
         
         puts "Created config directory: #{db}."
       end
+    end
+    
+    def prepare_sqls(ant, sql_files, orm, db, drop_tables_sql, create_tables_sql)
+      # read the create table sql into a string
+      create_tables = ""
+      File.open(create_tables_sql, "r") do |f1|  
+        while line = f1.gets
+          create_tables <<= line
+        end
+      end
+    
+      # create the drop table sql file from the create table sql
+      if orm == :hib and db == "sqlserver"
+        File.open(drop_tables_sql, "w") do |f2|
+          create_tables.gsub(/CREATE TABLE (.*?)[\s\(].*?;/mi) { |match|
+            f2.puts "IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE' AND TABLE_NAME='" << $1 << "') DROP TABLE " << $1 << ";\n"
+          }
+          # remove the 'go's in the sql
+          f2.puts create_tables.gsub(/\ngo[\n$]/mi, "\n")
+        end
+        # add in the drop table sql file
+        sql_files |= [drop_tables_sql]
+      elsif orm == :jpa and db == "mysql"
+        File.open(drop_tables_sql, "w") do |f2|
+          create_tables.gsub(/CREATE TABLE (.*?)[\s\(].*?;/m) { |match|
+            f2.puts "DROP TABLE IF EXISTS " << $1 << ";\n"
+          }
+        end
+        # add in the drop table sql file
+        sql_files |= [drop_tables_sql]
+      end
+      
+      # add in the create table sql file
+      if orm == :hib and db != "sqlserver"
+        sql_files |= [create_tables_sql]
+      elsif orm == :jpa
+        ant.copy :file=>create_tables_sql, :todir=>task.name
+        sql_files |= ["#{task.name}/#{db}.sql"]
+      end
+      
+      sql_files
     end
     
   protected
