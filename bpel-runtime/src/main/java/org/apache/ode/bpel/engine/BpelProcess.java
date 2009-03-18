@@ -858,18 +858,19 @@ public class BpelProcess {
         	if (_endpointToMyRoleMap != null) {
 	            _endpointToMyRoleMap.clear();
         	}
-        	if (_myEprs != null) {
-        		_myEprs.clear();
-        	}
-            if (_partnerChannels != null) {
-	            _partnerChannels.clear();
-            }
-            if (_partnerEprs != null) {
-	            _partnerEprs.clear();
-            }
             if (_partnerRoles != null) {
 	            _partnerRoles.clear();
             }
+            // Don't clear stuff you can't re-populate
+//        	if (_myEprs != null) {
+//        		_myEprs.clear();
+//        	}
+//            if (_partnerChannels != null) {
+//	            _partnerChannels.clear();
+//            }
+//            if (_partnerEprs != null) {
+//	            _partnerEprs.clear();
+//            }
             _replacementMap = null;
             _expLangRuntimeRegistry = null;
         }
