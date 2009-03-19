@@ -30,4 +30,8 @@ public class ForEachGeneratorMessages extends CompilationMessageBundle {
             "variable named {0}, just like the forEach counterName.");
     }
 
+    public CompilationMessage errMissingScopeinForeach() {
+        return this.formatCompilationMessage("The <scope> activity requires a child scope");
+    }
+
 }
