@@ -467,7 +467,8 @@ public class ODEProcess {
         BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, mexdao.getInstance(), rti);
         // Canceling invoke check
         String jobId = mexdao.getProperty("invokeCheckJobId");
-        _contexts.scheduler.cancelJob(jobId);        
+        if (jobId != null) 
+            _contexts.scheduler.cancelJob(jobId);        
 
         brc.injectPartnerResponse(mexdao.getMessageExchangeId(), mexdao.getChannel());
         brc.execute();
