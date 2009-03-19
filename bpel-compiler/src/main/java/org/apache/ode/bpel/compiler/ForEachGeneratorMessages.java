@@ -31,7 +31,7 @@ public class ForEachGeneratorMessages extends CompilationMessageBundle {
     }
 
     public CompilationMessage errMissingScopeinForeach() {
-        return this.formatCompilationMessage("The <scope> activity requires a child scope");
+        return this.formatCompilationMessage("<forEach> activity requires a child <scope>");
     }
 
 }
