@@ -1262,7 +1262,8 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         // Canceling invocation check job
         String jobId = dao.getProperty("invokeCheckJobId");
-        _bpelProcess._engine._contexts.scheduler.cancelJob(jobId);
+        if (jobId != null)
+            _bpelProcess._engine._contexts.scheduler.cancelJob(jobId);
     }
 
 
