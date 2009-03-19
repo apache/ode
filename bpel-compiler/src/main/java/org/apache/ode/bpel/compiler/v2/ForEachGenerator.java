@@ -63,6 +63,10 @@ public class ForEachGenerator extends DefaultActivityGenerator {
 
         // ForEach 'adds' a counter variable in inner scope
         if (__log.isDebugEnabled()) __log.debug("Adding the forEach counter variable to inner scope.");
+        if (forEach.getChild() == null) {
+            throw new CompilationException(__cmsgs.errMissingScopeinForeach().setSource(forEach));
+        }
+        
         Scope s = forEach.getChild().getScope();
         // Checking if a variable using the same name as our counter is already defined.
         // The spec requires a static analysis error to be thrown in that case.
