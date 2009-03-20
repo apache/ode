@@ -87,6 +87,7 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.ObjectPrinter;
+import org.apache.ode.utils.Properties;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -1379,7 +1380,10 @@ public class ODEProcess {
             event.setMexId(mex.getMessageExchangeId());
             event.setProcessId(getPID());
             event.setType(WorkEvent.Type.INVOKE_CHECK);
-            Date future = new Date(System.currentTimeMillis() + (180 * 1000));
+            // use a greater timeout to make sure the check job does not get executed while the service invocation is still waiting for a response
+            PartnerLinkModel model = _processModel.getPartnerLink(mex.getPartnerLinkModelId());
+            long timeout = (long) (getTimeout(model)*1.5);
+            Date future = new Date(System.currentTimeMillis() + timeout);
             String jobId = scheduleWorkEvent(event, future);
             mex.setProperty("invokeCheckJobId", jobId);
         }
@@ -1492,5 +1496,21 @@ public class ODEProcess {
             return properties.get(propertyName);
         }
         return null;
+    }
+
+    public long getTimeout(PartnerLinkModel partnerLink) {
+        // OPartnerLink, PartnerLinkPartnerRoleImpl
+        final PartnerLinkPartnerRoleImpl linkPartnerRole = _partnerRoles.get(partnerLink);
+        long timeout = Properties.DEFAULT_MEX_TIMEOUT;
+        String timeout_property = _pconf.getEndpointProperties(linkPartnerRole._initialEPR).get(Properties.PROP_MEX_TIMEOUT);
+        if (timeout_property != null) {
+            try {
+                timeout = Long.parseLong(timeout_property);
+            } catch (NumberFormatException e) {
+                if (__log.isWarnEnabled())
+                    __log.warn("Mal-formatted Property: [" + Properties.PROP_MEX_TIMEOUT + "=" + timeout_property + "] Default value (" + timeout + ") will be used");
+            }
+        }
+        return timeout;
     }
 }
