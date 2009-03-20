@@ -46,10 +46,7 @@ import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessConf;
-import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.GUID;
-import org.apache.ode.utils.AxisUtils;
-import org.apache.ode.utils.Namespaces;
+import org.apache.ode.utils.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
