@@ -28,7 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.ExternalService;
 import org.apache.ode.axis2.ODEService;
-import org.apache.ode.axis2.Properties;
+import org.apache.ode.utils.Properties;
 import org.apache.ode.axis2.OdeFault;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.WSAEndpoint;

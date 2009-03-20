@@ -20,9 +20,7 @@
 package org.apache.ode.axis2.httpbinding;
 
 import org.apache.axis2.transport.http.HttpTransportProperties;
-import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.StatusLine;
@@ -38,15 +36,13 @@ import org.apache.commons.httpclient.params.HostParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.lang.StringUtils;
-import org.apache.ode.axis2.Properties;
+import org.apache.ode.utils.Properties;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.http.HttpUtils;
 import static org.apache.ode.utils.http.StatusCode.*;
-import org.apache.ode.bpel.iapi.Message;
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 
-import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

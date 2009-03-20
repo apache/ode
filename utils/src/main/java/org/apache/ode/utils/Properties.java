@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.axis2;
+package org.apache.ode.utils;
 
 import org.apache.axis2.Constants;
 import org.apache.axis2.util.JavaUtils;

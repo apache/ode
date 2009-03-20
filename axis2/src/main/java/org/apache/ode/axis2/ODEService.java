@@ -41,9 +41,9 @@ import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
+import org.apache.ode.utils.Properties;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
 import javax.transaction.TransactionManager;
 import javax.wsdl.Definition;
@@ -54,8 +54,6 @@ import javax.wsdl.extensions.http.HTTPAddress;
 import javax.wsdl.extensions.soap.SOAPAddress;
 import javax.xml.namespace.QName;
 
-import java.io.IOException;
-import java.io.StringBufferInputStream;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 

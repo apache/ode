@@ -27,7 +27,6 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.MessageContext;
-import org.apache.axis2.context.ServiceGroupContext;
 import org.apache.axis2.description.*;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.jms.JMSConstants;
@@ -71,8 +70,6 @@ import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Acts as a service not provided by ODE. Used mainly for invocation as a way to maintain the WSDL description of used
@@ -306,6 +303,7 @@ public class SoapExternalService implements ExternalService {
             } else {
                 policyUri = new File(policy).toURI();
             }
+            if(__log.isDebugEnabled()) __log.debug("Applying security policy: "+policyUri);
             try {
                 InputStream policyStream = policyUri.toURL().openStream();
                 try {
