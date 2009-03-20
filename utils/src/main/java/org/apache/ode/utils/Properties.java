@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.axis2;
+package org.apache.ode.utils;
 
 import org.apache.axis2.Constants;
 import org.apache.axis2.util.JavaUtils;
@@ -39,7 +39,6 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.List;
 import java.util.Collection;
 
 /**

@@ -28,7 +28,7 @@ import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.params.HttpParams;
-import org.apache.ode.axis2.Properties;
+import org.apache.ode.utils.Properties;
 
 
 /**
