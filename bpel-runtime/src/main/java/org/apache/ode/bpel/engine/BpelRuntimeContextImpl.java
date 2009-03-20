@@ -774,7 +774,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 mexDao.setEPR(partnerEpr.toXML().getDocumentElement());
                 mex.setStatus(MessageExchange.Status.REQUEST);
                 // Assuming an unreliable protocol, we schedule a task to check if recovery mode will be needed
-                scheduleInvokeCheck(mex);
+                scheduleInvokeCheck(mex, partnerLink.partnerLink);
                 _bpelProcess._engine._contexts.mexContext.invokePartner(mex);
             } else {
                 __log.error("Couldn't find endpoint for partner EPR " + DOMUtils.domToString(partnerEPR));
@@ -826,17 +826,19 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
     	return _bpelProcess;
     }
 
-    private void scheduleInvokeCheck(PartnerRoleMessageExchangeImpl mex) {
+    private void scheduleInvokeCheck(PartnerRoleMessageExchangeImpl mex, OPartnerLink partnerLink) {
         boolean isTwoWay = mex.getMessageExchangePattern() ==
                 org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern.REQUEST_RESPONSE;
         if (!_bpelProcess.isInMemory() && isTwoWay) {
-            if (__log.isDebugEnabled()) __log.debug("Creating invocation check event for mexid " + mex.getMessageExchangeId());
             WorkEvent event = new WorkEvent();
             event.setMexId(mex.getMessageExchangeId());
             event.setProcessId(_bpelProcess.getPID());
             event.setInMem(false);
             event.setType(WorkEvent.Type.INVOKE_CHECK);
-            Date future = new Date(System.currentTimeMillis() + (180 * 1000));
+            // use a greater timeout to make sure the check job does not get executed while the service invocation is still waiting for a response
+            final long timeout = (long) (getBpelProcess().getTimeout(partnerLink)*1.5);
+            if (__log.isDebugEnabled()) __log.debug("Creating invocation check event in "+timeout+"ms for mexid " + mex.getMessageExchangeId());
+            Date future = new Date(System.currentTimeMillis() + timeout);
             String jobId = _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(event.getDetail(), future);
             mex.setProperty("invokeCheckJobId", jobId);
         }

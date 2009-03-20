@@ -65,6 +65,7 @@ import org.apache.ode.bpel.runtime.InvalidProcessException;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.jacob.soup.ReplacementMap;
 import org.apache.ode.utils.ObjectPrinter;
+import org.apache.ode.utils.Properties;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -1042,4 +1043,20 @@ public class BpelProcess {
 		return (activeInstances != null && activeInstances.size() > 0);
 	}
 
+    public long getTimeout(OPartnerLink partnerLink) {
+        // OPartnerLink, PartnerLinkPartnerRoleImpl
+        final PartnerLinkPartnerRoleImpl linkPartnerRole = _partnerRoles.get(partnerLink);
+        long timeout = Properties.DEFAULT_MEX_TIMEOUT;
+        String timeout_property = _pconf.getEndpointProperties(linkPartnerRole._initialEPR).get(Properties.PROP_MEX_TIMEOUT);
+        if (timeout_property != null) {
+            try {
+                timeout = Long.parseLong(timeout_property);
+            } catch (NumberFormatException e) {
+                if (__log.isWarnEnabled())
+                    __log.warn("Mal-formatted Property: [" + Properties.PROP_MEX_TIMEOUT + "=" + timeout_property + "] Default value (" + timeout + ") will be used");
+            }
+        }
+
+        return timeout;
+    }
 }
