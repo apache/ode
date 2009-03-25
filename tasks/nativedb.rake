@@ -50,7 +50,7 @@ module NativeDB
           Buildr.ant(name) do |ant|
             create_tables_sql = "#{task.name}/ode_tables.sql"
             drop_tables_sql = "#{task.name}/drop_ode_tables.sql"
-            ant.get :src=>"http://git.intalio.com/?p=integr.git;a=blob_plain;f=descriptors/package/#{dbprops[:db]}/ode_tables.sql;hb=#{dbprops[:integr_branch]}",
+            ant.get :src=>"http://release.intalio.com/m2repo/ci-resources/ode-schema-5.2.x/package/#{dbprops[:db]}/ode_tables.sql",
                     :dest=> create_tables_sql
             sqls = prepare_sqls(task, ant, [], :hib, dbprops[:db], drop_tables_sql, create_tables_sql)
             
