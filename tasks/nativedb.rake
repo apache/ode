@@ -52,7 +52,7 @@ module NativeDB
             drop_tables_sql = "#{task.name}/drop_ode_tables.sql"
             ant.get :src=>"http://git.intalio.com/?p=integr.git;a=blob_plain;f=descriptors/package/#{dbprops[:db]}/ode_tables.sql;hb=#{dbprops[:integr_branch]}",
                     :dest=> create_tables_sql
-            sqls = prepare_sqls(taks, ant, [], :hib, dbprops[:db], drop_tables_sql, create_tables_sql)
+            sqls = prepare_sqls(task, ant, [], :hib, dbprops[:db], drop_tables_sql, create_tables_sql)
             
             # Apply the sql scripts to the database
             ant.sql :driver=>dbprops[:driver], :url=>dbprops[:url], :userid=>dbprops[:userid], :password=>dbprops[:password], :autocommit=>dbprops[:autocommit] do
@@ -164,11 +164,11 @@ module NativeDB
       
       # add in the create table sql file
       if orm == :hib and db != "sqlserver"
-        ant.copy :file=>create_tables_sql, :todir=>task.name
-        sql_files |= ["#{task.name}/#{create_tables_sql}"]
+        ant.copy :file=>create_tables_sql, :tofile=>"#{task.name}/#{db}.sql"
+        sql_files |= ["#{task.name}/#{db}.sql"]
       elsif orm == :jpa
-        ant.copy :file=>create_tables_sql, :todir=>task.name
-        sql_files |= ["#{task.name}/#{create_tables_sql}"]
+        ant.copy :file=>create_tables_sql, :tofile=>"#{task.name}/#{db}.sql"
+        sql_files |= ["#{task.name}/#{db}.sql"]
       end
       
       sql_files
