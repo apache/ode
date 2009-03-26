@@ -123,4 +123,8 @@ public interface BpelDAOConnection {
 
     void deleteResourceRoute(String url, String method);
 
+    /**
+     * Potentially loads a lot of (small) records, handle with care.
+     */
+    List<ResourceRouteDAO> getAllResourceRoutes();
 }

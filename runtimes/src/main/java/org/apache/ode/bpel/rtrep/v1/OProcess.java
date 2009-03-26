@@ -217,4 +217,8 @@ public class OProcess extends OBase implements ProcessModel {
     public Collection<? extends ResourceModel> getProvidedResources() {
         return null;
     }
+
+    public byte[] getGlobalState() {
+        return null;
+    }
 }

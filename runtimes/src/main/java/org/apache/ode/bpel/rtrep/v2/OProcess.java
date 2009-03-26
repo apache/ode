@@ -242,4 +242,8 @@ public class OProcess extends OBase implements ProcessModel {
     public int getModelVersion() {
         return 2;
     }
+
+    public byte[] getGlobalState() {
+        return globalState;
+    }
 }

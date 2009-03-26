@@ -12,6 +12,7 @@ import org.apache.ode.bpel.evt.NewProcessInstanceEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Callable;
 
@@ -28,7 +29,7 @@ public class ODERESTProcess extends ODEProcess {
         _runtime.init(_pconf, _processModel);
     }
 
-    public Collection<String> getInitialResourceUrls() {
+    public Collection<String> initResources() {
         if (_staticResources.size() > 0 ) return _staticResources.values();
 
         // Caching instantiating resource urls as those can be expressions
@@ -49,6 +50,26 @@ public class ODERESTProcess extends ODEProcess {
 
     void activate() {
         bounceProcessDAO();
+        // Resources to activate are the instantiating ones plus the waiting routes.
+
+        List<ResourceRouteDAO> rrDaos;
+        try {
+            rrDaos = _contexts.execTransaction(new Callable<List<ResourceRouteDAO>>() {
+                public List<ResourceRouteDAO> call() throws Exception {
+                    return _contexts.dao.getConnection().getAllResourceRoutes();
+                }
+            });
+        } catch (Exception ex) {
+            String errmsg = "DbError";
+            __log.error(errmsg, ex);
+            throw new BpelEngineException(errmsg, ex);
+        }
+
+        for (ResourceRouteDAO rrDao : rrDaos) {
+            Resource resource = new Resource(rrDao.getUrl(), "application/xml", rrDao.getMethod());
+            _contexts.bindingContext.activateProvidedResource(resource);
+            _instantiatingResources.add(resource);
+        }
 
         // Activating instantiating resources
         for (ResourceModel resourceModel : _staticResources.keySet()) {

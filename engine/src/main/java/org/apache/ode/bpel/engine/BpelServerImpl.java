@@ -343,7 +343,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             ODEProcess process;
             if (conf.isRestful()) {
                 ODERESTProcess restProcess = new ODERESTProcess(this, conf, null, _incomingMexCache);
-                for (String resUrl : restProcess.getInitialResourceUrls()) {
+                for (String resUrl : restProcess.initResources()) {
                     _restServiceMap.put(resUrl, restProcess);
                 }
                 process = restProcess;

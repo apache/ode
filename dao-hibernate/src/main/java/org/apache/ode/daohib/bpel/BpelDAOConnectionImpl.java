@@ -102,6 +102,14 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
                 .setString("url", url).setString("method", method).executeUpdate();
     }
 
+    public List<ResourceRouteDAO> getAllResourceRoutes() {
+        List<HResourceRoute> hrr = _session.createCriteria(HResourceRoute.class).list();
+        ArrayList<ResourceRouteDAO> rr = new ArrayList<ResourceRouteDAO>(hrr.size());
+        for (HResourceRoute hroute : hrr)
+            rr.add(new ResourceRouteDaoImpl(_sm, hroute));
+        return rr;
+    }
+
     public ProcessDAO createProcess(QName pid, QName type, String guid, long version) {
         HProcess process = new HProcess();
         process.setProcessId(pid.toString());
