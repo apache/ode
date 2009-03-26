@@ -18,6 +18,8 @@
  */
 package org.apache.ode.daohib;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.daohib.bpel.hobj.*;
 import org.apache.ode.utils.uuid.UUID;
 import org.hibernate.HibernateException;
@@ -41,7 +43,9 @@ import java.util.Properties;
  * managing sessions.
  */
 public class SessionManager {
-  private static final String PROP_GUID = "ode.hibernate.guid";
+	private static final Log __log = LogFactory.getLog(SessionManager.class);
+	
+	public static final String PROP_GUID = "ode.hibernate.guid";
   
   private static final Map<String, TransactionManager> _txManagers =
     Collections.synchronizedMap(new HashMap<String, TransactionManager>());
@@ -71,6 +75,10 @@ public class SessionManager {
     return _txManager;
   }
 
+  public static void registerTransactionManager(String uuid, TransactionManager txm) {
+	_txManagers.put(uuid, txm);
+  }
+	  
   /**
    * Get the current Hibernate Session.
    */

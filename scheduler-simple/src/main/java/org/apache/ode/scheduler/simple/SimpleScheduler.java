@@ -111,9 +111,6 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     /** Time for next upgrade. */
     private AtomicLong _nextUpgrade = new AtomicLong();
 
-    /** Time for next job load */
-    private AtomicLong _nextScheduleImmediate = new AtomicLong();
-
     private Random _random = new Random();
 
     public SimpleScheduler(String nodeId, DatabaseDelegate del, Properties conf) {

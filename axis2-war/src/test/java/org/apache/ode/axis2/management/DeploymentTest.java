@@ -210,7 +210,7 @@ public class DeploymentTest extends Axis2TestBase {
     }
 
     private void undeploy(String pakage) throws Exception {
-        // Prepare undeploy message
+    	// Prepare undeploy message
         OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_PMAPI, "deployapi");
         OMElement root = _factory.createOMElement("undeploy", depns);
         OMElement part = _factory.createOMElement("packageName", null);

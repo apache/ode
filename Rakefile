@@ -315,8 +315,8 @@ define "ode" do
   desc "ODE Process Store"
   define "bpel-store" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-obj", "bpel-schemas", "bpel-epr",
-      "dao-hibernate", "utils"),
-      COMMONS.logging, JAVAX.persistence, JAVAX.stream, HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J
+      "dao-hibernate", "dao-jpa", "utils"),
+      COMMONS.logging, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J, OPENJPA
     compile { open_jpa_enhance }
     resources hibernate_doclet(:package=>"org.apache.ode.store.hib", :excludedtags=>"@version,@author,@todo")
 

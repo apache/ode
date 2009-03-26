@@ -26,7 +26,6 @@ import org.apache.ode.store.ProcessConfDAO;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 import javax.xml.namespace.QName;
 import java.util.Collection;
@@ -41,7 +40,6 @@ public class ConfStoreConnectionHib implements ConfStoreConnection {
 
     private static final Log __log = LogFactory.getLog(ConfStoreConnectionHib.class);
     private Session _session;
-    private Transaction _tx;
 
     static final ThreadLocal<Session> _current = new ThreadLocal<Session>();
 
@@ -105,17 +103,4 @@ public class ConfStoreConnectionHib implements ConfStoreConnection {
     public void close() {
         _session.close();
     }
-
-    public void begin() {
-        _tx=_session.beginTransaction();
-    }
-
-    public void commit() {
-        _tx.commit();
-    }
-
-    public void rollback() {
-        _tx.rollback();
-    }
-
 }

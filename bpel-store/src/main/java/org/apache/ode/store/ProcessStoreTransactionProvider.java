@@ -18,10 +18,8 @@
  */
 package org.apache.ode.store;
 
-/**
- * Connection factory for DB store. 
- * @author mszefler
-  */
-public interface ConfStoreConnectionFactory extends ProcessStoreTransactionProvider {
-    ConfStoreConnection getConnection();
+public interface ProcessStoreTransactionProvider {
+    void beginTransaction();
+    void commitTransaction();
+    void rollbackTransaction();
 }

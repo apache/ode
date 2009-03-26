@@ -24,10 +24,6 @@ import java.util.Collection;
 /**
  */
 public interface ConfStoreConnection {
-    void begin();
-    void commit();
-    void rollback();
-    
     DeploymentUnitDAO createDeploymentUnit(String name);
 
     DeploymentUnitDAO getDeploymentUnit(String name);
@@ -39,5 +35,4 @@ public interface ConfStoreConnection {
     long getNextVersion();
 
     void setVersion(long version);
-    
 }

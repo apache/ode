@@ -35,7 +35,6 @@ import java.util.Properties;
  * @author mszefler
  */
 public class OdeConfigProperties {
-
     private static final long serialVersionUID = 1L;
 
     private static final Log __log = LogFactory.getLog(OdeConfigProperties.class);
@@ -87,6 +86,8 @@ public class OdeConfigProperties {
     public static final String PROP_PROCESS_HYDRATION = "process.hydration";
     
     public static final String PROP_DAOCF = "dao.factory";
+    
+    public static final String DEFAULT_TX_FACTORY_CLASS_NAME = "org.apache.ode.il.EmbeddedGeronimoFactory";
 
     private File _cfgFile;
 
@@ -229,7 +230,7 @@ public class OdeConfigProperties {
     }
 
     public String getTxFactoryClass() {
-        return getProperty(OdeConfigProperties.PROP_TX_FACTORY_CLASS, "org.apache.ode.il.EmbeddedGeronimoFactory");
+        return getProperty(OdeConfigProperties.PROP_TX_FACTORY_CLASS, DEFAULT_TX_FACTORY_CLASS_NAME);
     }
 
     public String getEventListeners() {

@@ -51,7 +51,6 @@ import org.apache.ode.daohib.bpel.hobj.HBpelEvent;
 import org.apache.ode.daohib.bpel.hobj.HCorrelationSet;
 import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HMessageExchange;
-import org.apache.ode.daohib.bpel.hobj.HObject;
 import org.apache.ode.daohib.bpel.hobj.HProcess;
 import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
 import org.apache.ode.daohib.bpel.hobj.HScope;
@@ -74,27 +73,27 @@ import org.hibernate.criterion.Projections;
  * Hibernate-based {@link BpelDAOConnection} implementation.
  */
 public class BpelDAOConnectionImpl implements BpelDAOConnection {
-
     private static final Log __log = LogFactory.getLog(BpelDAOConnectionImpl.class);
-
-    private Session _session;
 
     protected SessionManager _sm;
 
     public BpelDAOConnectionImpl(SessionManager sm) {
         _sm = sm;
-        _session = _sm.getSession();
+    }
+
+    protected Session getSession(){
+    	return _sm.getSession();
     }
 
     public MessageExchangeDAO createMessageExchange(char dir) {
         HMessageExchange mex = new HMessageExchange();
         mex.setDirection(dir);
-        _session.save(mex);
+        getSession().save(mex);
         return new MessageExchangeDaoImpl(_sm, mex);
     }
 
     public MessageExchangeDAO getMessageExchange(String mexid) {
-        HMessageExchange mex = (HMessageExchange) _session.get(HMessageExchange.class, new Long(mexid));
+        HMessageExchange mex = (HMessageExchange) getSession().get(HMessageExchange.class, new Long(mexid));
         return mex == null ? null : new MessageExchangeDaoImpl(_sm, mex);
     }
 
@@ -106,14 +105,14 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection {
         process.setDeployDate(new Date());
         process.setGuid(guid);
         process.setVersion(version);
-        _session.save(process);
+        getSession().save(process);
         return new ProcessDaoImpl(_sm, process);
     }
 
     public ProcessDAO getProcess(QName processId) {
 
         try {
-            Criteria criteria = _session.createCriteria(HProcess.class);
+            Criteria criteria = getSession().createCriteria(HProcess.class);
             criteria.add(Expression.eq("processId", processId.toString()));
             // For the moment we are expecting only one result.
             HProcess hprocess = (HProcess) criteria.uniqueResult();
@@ -132,11 +131,11 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection {
      * @see org.apache.ode.bpel.dao.ProcessDAO#getInstance(java.lang.Long)
      */
     public ProcessInstanceDAO getInstance(Long instanceId) {
-        return _getInstance(_sm, _session, instanceId);
+        return _getInstance(_sm, getSession(), instanceId);
     }
 
     public ScopeDAO getScope(Long siidl) {
-        return _getScope(_sm, _session, siidl);
+        return _getScope(_sm, getSession(), siidl);
     }
 
     public Collection<ProcessInstanceDAO> instanceQuery(InstanceFilter criteria) {
@@ -145,7 +144,7 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection {
         }
         List<ProcessInstanceDAO> daos = new ArrayList<ProcessInstanceDAO>();
 
-        Iterator<HProcessInstance> iter = _instanceQuery(_session, false, criteria);
+        Iterator<HProcessInstance> iter = _instanceQuery(getSession(), false, criteria);
         while (iter.hasNext()) {
             daos.add(new ProcessInstanceDaoImpl(_sm, iter.next()));
         }
@@ -213,7 +212,7 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection {
     @SuppressWarnings( { "unchecked", "deprecation" })
     public List<Date> bpelEventTimelineQuery(InstanceFilter ifilter, BpelEventFilter efilter) {
         CriteriaBuilder cb = new CriteriaBuilder();
-        Criteria crit = _session.createCriteria(HBpelEvent.class);
+        Criteria crit = getSession().createCriteria(HBpelEvent.class);
         if (ifilter != null)
             cb.buildCriteria(crit, efilter);
         if (ifilter != null)
@@ -226,7 +225,7 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection {
     @SuppressWarnings("unchecked")
     public List<BpelEvent> bpelEventQuery(InstanceFilter ifilter, BpelEventFilter efilter) {
         CriteriaBuilder cb = new CriteriaBuilder();
-        Criteria crit = _session.createCriteria(HBpelEvent.class);
+        Criteria crit = getSession().createCriteria(HBpelEvent.class);
         if (efilter != null)
             cb.buildCriteria(crit, efilter);
         if (ifilter != null)
@@ -259,7 +258,7 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection {
         HibernateInstancesQueryCompiler compiler = new HibernateInstancesQueryCompiler();
 
         CommandEvaluator<List, Session> eval = compiler.compile((Query) rootNode);
-        List<HProcessInstance> instancesList = (List<HProcessInstance>) eval.evaluate(_session);
+        List<HProcessInstance> instancesList = (List<HProcessInstance>) eval.evaluate(getSession());
 
         Collection<ProcessInstanceDAO> result = new ArrayList<ProcessInstanceDAO>(instancesList.size());
         for (HProcessInstance instance : instancesList) {
@@ -279,7 +278,7 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection {
             iids[i] = dao.getInstanceId();
             i++;
         }
-        Collection<HCorrelationSet> csets = _session.getNamedQuery(HCorrelationSet.SELECT_CORSETS_BY_INSTANCES).setParameterList("instances", iids).list();
+        Collection<HCorrelationSet> csets = getSession().getNamedQuery(HCorrelationSet.SELECT_CORSETS_BY_INSTANCES).setParameterList("instances", iids).list();
         Map<Long, Collection<CorrelationSetDAO>> map = new HashMap<Long, Collection<CorrelationSetDAO>>();
         for (HCorrelationSet cset: csets) {
             Long id = cset.getInstance().getId();
@@ -293,9 +292,10 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection {
         return map;
     }
 
-    public Collection<CorrelationSetDAO> getActiveCorrelationSets() {
+    @SuppressWarnings("unchecked")
+	public Collection<CorrelationSetDAO> getActiveCorrelationSets() {
         ArrayList<CorrelationSetDAO> csetDaos = new ArrayList<CorrelationSetDAO>();
-        Collection<HCorrelationSet> csets = _session.getNamedQuery(HCorrelationSet.SELECT_ACTIVE_CORSETS).setParameter("state", ProcessState.STATE_ACTIVE).list();
+        Collection<HCorrelationSet> csets = getSession().getNamedQuery(HCorrelationSet.SELECT_ACTIVE_CORSETS).setParameter("state", ProcessState.STATE_ACTIVE).list();
         for (HCorrelationSet cset : csets)
             csetDaos.add(new CorrelationSetDaoImpl(_sm, cset));
         return csetDaos;

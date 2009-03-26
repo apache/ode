@@ -25,7 +25,6 @@ import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HActivityRecovery;
 import org.apache.ode.daohib.bpel.hobj.HBpelEvent;
@@ -33,7 +32,6 @@ import org.apache.ode.daohib.bpel.hobj.HCorrelationProperty;
 import org.apache.ode.daohib.bpel.hobj.HCorrelationSet;
 import org.apache.ode.daohib.bpel.hobj.HCorrelator;
 import org.apache.ode.daohib.bpel.hobj.HCorrelatorMessage;
-import org.apache.ode.daohib.bpel.hobj.HCorrelatorMessageKey;
 import org.apache.ode.daohib.bpel.hobj.HFaultData;
 import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HMessage;
@@ -86,8 +84,8 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
         return instance;
     }
 
-
-    public CorrelatorDAO getCorrelator(String  corrId) {
+    @SuppressWarnings("unchecked")
+	public CorrelatorDAO getCorrelator(String  corrId) {
         entering("ProcessDaoImpl.getCorrelator");
         Iterator results;
         Query q = getSession().createFilter(_process.getCorrelators(),
@@ -154,6 +152,10 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
 		deleteProcessInstances();
 
 		getSession().delete(_process); // this deletes HCorrelator -> HCorrelatorSelector
+		
+		// after this delete, we have a use case that creates the process with the same procid.
+		// for hibernate to work without the database deferred constraint check, let's just flush the session.
+		getSession().flush();
     }
 
     private void deleteProcessInstances() {
@@ -219,7 +221,8 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
         return new CorrelatorDaoImpl(_sm, correlator);
     }
 
-    public Collection<ProcessInstanceDAO> getActiveInstances() {
+    @SuppressWarnings("unchecked")
+	public Collection<ProcessInstanceDAO> getActiveInstances() {
         ArrayList<ProcessInstanceDAO> instDaos = new ArrayList<ProcessInstanceDAO>();
         Collection<HProcessInstance> insts = getSession().getNamedQuery(HProcessInstance.SELECT_ACTIVE_INSTANCES)
                 .setParameter("processId", _process.getId()).setParameter("state", ProcessState.STATE_ACTIVE).list();

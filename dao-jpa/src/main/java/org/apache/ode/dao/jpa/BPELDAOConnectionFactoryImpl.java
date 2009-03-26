@@ -96,7 +96,7 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
         propMap.put("openjpa.Log", "log4j");
 //        propMap.put("openjpa.jdbc.DBDictionary", "org.apache.openjpa.jdbc.sql.DerbyDictionary");
 
-        propMap.put("openjpa.ManagedRuntime", new TxMgrProvider());
+        propMap.put("openjpa.ManagedRuntime", new JpaTxMgrProvider(_tm));
         propMap.put("openjpa.ConnectionFactory", _ds);
         propMap.put("openjpa.ConnectionFactoryMode", "managed");
         propMap.put("openjpa.FlushBeforeQueries", "false");
@@ -140,60 +140,5 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
 
     public DataSource getDataSource() {
         return _ds;
-    }
-
-    private class TxMgrProvider implements ManagedRuntime {
-        public TxMgrProvider() {
-        }
-        
-        public TransactionManager getTransactionManager() throws Exception {
-            return _tm;
-        }
-        
-        public void setRollbackOnly(Throwable cause) throws Exception {
-            // there is no generic support for setting the rollback cause
-            getTransactionManager().getTransaction().setRollbackOnly();
-        }
-        
-        public Throwable getRollbackCause() throws Exception {
-            // there is no generic support for setting the rollback cause
-            return null;
-        }
-        
-        public Object getTransactionKey() throws Exception, SystemException {
-            return _tm.getTransaction();
-        }
-        
-        public void doNonTransactionalWork(java.lang.Runnable runnable) throws NotSupportedException {
-            TransactionManager tm = null;
-            Transaction transaction = null;
-            
-            try { 
-                tm = getTransactionManager(); 
-                transaction = tm.suspend();
-            } catch (Exception e) {
-                NotSupportedException nse =
-                    new NotSupportedException(e.getMessage());
-                nse.initCause(e);
-                throw nse;
-            }
-            
-            runnable.run();
-            
-            try {
-                tm.resume(transaction);
-            } catch (Exception e) {
-                try {
-                    transaction.setRollbackOnly();
-                }
-                catch(SystemException se2) {
-                    throw new GeneralException(se2);
-                }
-                NotSupportedException nse =
-                    new NotSupportedException(e.getMessage());
-                nse.initCause(e);
-                throw nse;
-            } 
-        }
     }
 }

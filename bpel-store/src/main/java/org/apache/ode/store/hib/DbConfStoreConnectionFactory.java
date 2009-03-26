@@ -21,6 +21,8 @@ package org.apache.ode.store.hib;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.daohib.HibernateTransactionManagerLookup;
+import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.store.ConfStoreConnectionFactory;
 import org.apache.ode.store.Messages;
 import org.apache.ode.utils.GUID;
@@ -35,6 +37,8 @@ import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.DialectFactory;
 
 import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -74,11 +78,13 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
         HIBERNATE_DIALECTS.put("Apache Derby", new DialectFactory.VersionInsensitiveMapper(DEFAULT_HIBERNATE_DIALECT));
     }
 
+    private TransactionManager _txMgr;
+
     private final DataSource _ds;
 
     final SessionFactory _sessionFactory;
 
-    public DbConfStoreConnectionFactory(DataSource ds, Properties initialProps, boolean createDatamodel) {
+    public DbConfStoreConnectionFactory(DataSource ds, Properties initialProps, boolean createDatamodel, String txFactoryClassName) {
         _ds = ds;
 
         // Don't want to pollute original properties
@@ -89,8 +95,6 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
 
         __log.debug("using data source: " + ds);
         _dataSources.put(_guid, ds);
-        properties.put("guid", _guid);
-        properties.put(Environment.CONNECTION_PROVIDER, DataSourceConnectionProvider.class.getName());
 
         if (properties.get(Environment.DIALECT) == null) {
             try {
@@ -106,13 +110,45 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
             properties.put(Environment.HBM2DDL_AUTO, "create-drop");
         }
 
-        _sessionFactory = getDefaultConfiguration().setProperties(properties).buildSessionFactory();
+        
+        // Note that we don't allow the following properties to be overriden by the client.
+        if (properties.containsKey(Environment.CONNECTION_PROVIDER))
+            __log.warn("Ignoring user-specified Hibernate property: " + Environment.CONNECTION_PROVIDER);
+        if (properties.containsKey(Environment.TRANSACTION_MANAGER_STRATEGY))
+            __log.warn("Ignoring user-specified Hibernate property: " + Environment.TRANSACTION_MANAGER_STRATEGY);
+        if (properties.containsKey(Environment.SESSION_FACTORY_NAME))
+            __log.warn("Ignoring user-specified Hibernate property: " + Environment.SESSION_FACTORY_NAME);
 
+        properties.put(SessionManager.PROP_GUID, _guid);
+        properties.put(Environment.CONNECTION_PROVIDER, DataSourceConnectionProvider.class.getName());
+        properties.put(Environment.TRANSACTION_MANAGER_STRATEGY, HibernateTransactionManagerLookup.class.getName());
+        properties.put(Environment.TRANSACTION_STRATEGY, "org.hibernate.transaction.JTATransactionFactory");
+        properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "jta");
+
+        if(__log.isDebugEnabled()) __log.debug("Store connection properties: " + properties );
+
+        initTxMgr(txFactoryClassName);
+        SessionManager.registerTransactionManager(_guid, _txMgr);
+
+        _sessionFactory = getDefaultConfiguration().setProperties(properties).buildSessionFactory();
     }
 
     public ConfStoreConnectionHib getConnection() {
-        return new ConfStoreConnectionHib(_sessionFactory.openSession());
+        return new ConfStoreConnectionHib(_sessionFactory.getCurrentSession());
     }
+
+	@SuppressWarnings("unchecked")
+	private void initTxMgr(String txFactoryClassName) {
+		__log.info("ProcessStore initializing transaction manager using " + txFactoryClassName);
+		try {
+			Class txFactClass = getClass().getClassLoader().loadClass(txFactoryClassName);
+			Object txFact = txFactClass.newInstance();
+			_txMgr = (TransactionManager) txFactClass.getMethod("getTransactionManager", (Class[]) null).invoke(txFact);
+		} catch (Exception e) {
+			__log.fatal("Couldn't initialize a transaction manager with factory: " + txFactoryClassName, e);
+			throw new RuntimeException("Couldn't initialize a transaction manager with factory: " + txFactoryClassName, e);
+		}
+	}
 
     private String guessDialect(DataSource dataSource) throws Exception {
 
@@ -149,6 +185,30 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
 
     }
 
+    public void beginTransaction() {
+		try {
+			_txMgr.begin();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public void commitTransaction() {
+		try {
+			_txMgr.commit();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public void rollbackTransaction() {
+		try {
+			_txMgr.rollback();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
     static Configuration getDefaultConfiguration() throws MappingException {
         return new Configuration().addClass(ProcessConfDaoImpl.class).addClass(DeploymentUnitDaoImpl.class)
                 .addClass(VersionTrackerDAOImpl.class);
@@ -161,7 +221,7 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
         }
 
         public void configure(Properties props) throws HibernateException {
-            _guid = props.getProperty("guid");
+        	_guid = props.getProperty(SessionManager.PROP_GUID);
         }
 
         public Connection getConnection() throws SQLException {

@@ -19,6 +19,8 @@
 
 package org.apache.ode.store.jpa;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.store.ConfStoreConnection;
 import org.apache.ode.store.DeploymentUnitDAO;
 
@@ -31,7 +33,8 @@ import java.util.List;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class ConfStoreConnectionJpa implements ConfStoreConnection {
-
+	private static Log LOG = LogFactory.getLog(ConfStoreConnectionJpa.class);
+	
     private EntityManager _em;
     static final ThreadLocal<EntityManager> _current = new ThreadLocal<EntityManager>();
 
@@ -41,15 +44,7 @@ public class ConfStoreConnectionJpa implements ConfStoreConnection {
         _current.set(em);
     }
 
-    public void begin() {
-        _em.getTransaction().begin();
-    }
-
     public void close() {
-    }
-
-    public void commit() {
-        _em.getTransaction().commit();
     }
 
     public DeploymentUnitDAO createDeploymentUnit(String name) {
@@ -66,10 +61,6 @@ public class ConfStoreConnectionJpa implements ConfStoreConnection {
 
     public Collection<DeploymentUnitDAO> getDeploymentUnits() {
         return _em.createQuery("SELECT du from org.apache.ode.store.jpa.DeploymentUnitDaoImpl du").getResultList();
-    }
-
-    public void rollback() {
-        _em.getTransaction().rollback();
     }
 
     public long getNextVersion() {

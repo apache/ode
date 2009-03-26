@@ -41,7 +41,7 @@ public class DataSourceConnectionProvider implements ConnectionProvider {
 
   public Connection getConnection() throws SQLException {
     Connection c = SessionManager.getConnection(_props);
-    if (_isolationLevel != 0) {
+    if (_isolationLevel != 0 && c.getTransactionIsolation() != _isolationLevel) {
         c.setTransactionIsolation(_isolationLevel);
     }
     return c;
