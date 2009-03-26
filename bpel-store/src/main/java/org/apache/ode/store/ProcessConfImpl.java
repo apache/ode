@@ -25,15 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileFilter;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Arrays;
+import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -422,7 +414,21 @@ public class ProcessConfImpl implements ProcessConf {
         // update properties if necessary
         // do it manually to save resources (instead of using a thread)
         propertiesWatchDog.check();
-        return propertiesWatchDog.getObserver().get().getProperties(service, port);
+        final Map prop = propertiesWatchDog.getObserver().get().getProperties(service, port);
+        if(!map.isEmpty() && __log.isDebugEnabled()) {
+            StringBuilder msg = new StringBuilder("Properties for ");
+            if(service!=null) msg.append("service ").append(service);
+            if(port!=null) msg.append(", port ").append(port);
+            msg.append(": {");
+            for (Iterator it = prop.entrySet().iterator(); it.hasNext();) {
+                Map.Entry e = (Map.Entry) it.next();
+                msg.append(e.getKey()).append("=>").append(e.getValue());
+                if(it.hasNext()) msg.append(", ");
+            }
+            msg.append("}");
+            __log.debug(msg);
+        }
+        return prop;
     }
 
     private class PropertiesMutable implements WatchDog.Mutable<Map<File, Long>> {
