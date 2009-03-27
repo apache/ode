@@ -90,9 +90,10 @@ class MockBpelServer {
             _server.setInMemDaoConnectionFactory(new BpelDAOConnectionFactoryImpl(_scheduler));
             if (_scheduler == null)
                 throw new RuntimeException("No scheduler");
+            createEndpointReferenceContext();
             _store = new ProcessStoreImpl(_eprContext, _dataSource,"jpa", new OdeConfigProperties(new Properties(), ""), true);
             _server.setScheduler(_scheduler);
-            _server.setEndpointReferenceContext(createEndpointReferenceContext());
+            _server.setEndpointReferenceContext(_eprContext);
             _server.setMessageExchangeContext(createMessageExchangeContext());
             _server.setBindingContext(createBindingContext());
             _server.init();
