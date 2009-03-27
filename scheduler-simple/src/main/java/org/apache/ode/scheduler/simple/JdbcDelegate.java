@@ -33,6 +33,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.ode.utils.DbIsolation;                                                                                                                                 
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.utils.StreamUtils;
@@ -250,9 +252,11 @@ public class JdbcDelegate implements DatabaseDelegate {
         }
     }
 
-    private Connection getConnection() throws SQLException {
-        return _ds.getConnection();
-    }
+    private Connection getConnection() throws SQLException {                                                                                                             
+        Connection c = _ds.getConnection();                                                                                                                              
+        DbIsolation.setIsolationLevel(c);                                                                                                                                
+        return c;                                                                                                                                                        
+    }                                                                                                                                                                    
 
     private int asInteger(boolean value) {
         return (value ? 1 : 0);
