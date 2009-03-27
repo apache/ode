@@ -482,8 +482,6 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         int retry = job.detail.get("retry") != null ? (((Integer)job.detail.get("retry")) + 1) : 0;
         job.detail.put("retry", retry);
         long delay = (long)(Math.pow(5, retry));
-        // Don't want to go further than a day
-        if (delay > 24*60*60) delay = 24*60*60;
         Job jobRetry = new Job(System.currentTimeMillis() + delay*1000, true, job.detail);
         _db.insertJob(jobRetry, _nodeId, false);
         return delay;
