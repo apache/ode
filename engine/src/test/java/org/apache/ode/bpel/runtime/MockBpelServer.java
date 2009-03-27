@@ -92,6 +92,7 @@ class MockBpelServer {
             createDataSource();
             createDAOConnection();
             createScheduler();
+            createEndpointReferenceContext();
             if (_daoCF == null)
                 throw new RuntimeException("No DAO");
             _server.setDaoConnectionFactory(_daoCF);
@@ -100,7 +101,7 @@ class MockBpelServer {
             _store = new ProcessStoreImpl(_eprContext, _dataSource,"jpa", new OdeConfigProperties(new Properties(), ""), true);
             _server.setTransactionManager(_txManager);
             _server.setScheduler(_scheduler);
-            _server.setEndpointReferenceContext(createEndpointReferenceContext());
+            _server.setEndpointReferenceContext(_eprContext);
             _server.setMessageExchangeContext(createMessageExchangeContext());
             _server.setBindingContext(createBindingContext());
             _server.init();
