@@ -465,15 +465,6 @@ public class ProcessConfImpl implements ProcessConf {
                 throw new ContextException("Integration-Layer Properties cannot be loaded!", e);
             }
         }
-
-        public void onUpdate() {
-            init();
-            try {
-                object.loadFiles();
-            } catch (IOException e) {
-                throw new ContextException("Integration-Layer Properties cannot be loaded!", e);
-            }
-        }
     }
 
     public boolean isCleanupCategoryEnabled(boolean instanceSucceeded, CLEANUP_CATEGORY category) {
