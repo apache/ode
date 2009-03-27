@@ -23,27 +23,26 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import org.apache.ode.utils.DbIsolation;
+
 import org.hibernate.HibernateException;
 import org.hibernate.connection.ConnectionProvider;
+
 
 public class DataSourceConnectionProvider implements ConnectionProvider {
 
   private Properties _props;
-  private int _isolationLevel;
   
   public DataSourceConnectionProvider() {
   }
   
   public void configure(Properties props) throws HibernateException {
     _props = props;
-    _isolationLevel = Integer.parseInt(System.getProperty("ode.connection.isolation", "2"));
   }
 
   public Connection getConnection() throws SQLException {
     Connection c = SessionManager.getConnection(_props);
-    if (_isolationLevel != 0 && c.getTransactionIsolation() != _isolationLevel) {
-        c.setTransactionIsolation(_isolationLevel);
-    }
+    DbIsolation.setIsolationLevel(c);
     return c;
   }
 
