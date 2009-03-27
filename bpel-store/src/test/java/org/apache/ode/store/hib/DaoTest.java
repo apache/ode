@@ -48,17 +48,16 @@ public class DaoTest extends TestCase {
     }
 
     public void testEmpty() {
-        ConfStoreConnection conn = cf.getConnection();
         cf.beginTransaction();
+        ConfStoreConnection conn = cf.getConnection();
         assertEquals(0, conn.getDeploymentUnits().size());
         assertNull(conn.getDeploymentUnit("foobar"));
         cf.commitTransaction();
-        conn.close();
     }
 
     public void testCreateDU() {
-        ConfStoreConnection conn = cf.getConnection();
         cf.beginTransaction();
+        ConfStoreConnection conn = cf.getConnection();
         try {
             DeploymentUnitDAO du = conn.createDeploymentUnit("foo");
             assertNotNull(du);
@@ -66,11 +65,10 @@ public class DaoTest extends TestCase {
             assertNotNull(du.getDeployDate());
         } finally {
             cf.commitTransaction();
-            conn.close();
         }
 
-        conn = cf.getConnection();
         cf.beginTransaction();
+        conn = cf.getConnection();
         try {
             DeploymentUnitDAO du = conn.getDeploymentUnit("foo");
             assertNotNull(du);
@@ -82,8 +80,8 @@ public class DaoTest extends TestCase {
     }
 
     public void testRollback() {
-        ConfStoreConnection conn = cf.getConnection();
         cf.beginTransaction();
+        ConfStoreConnection conn = cf.getConnection();
         try {
             DeploymentUnitDAO du = conn.createDeploymentUnit("foo");
             assertNotNull(du);
@@ -91,23 +89,21 @@ public class DaoTest extends TestCase {
             assertNotNull(du.getDeployDate());
         } finally {
             cf.rollbackTransaction();
-            conn.close();
         }
 
-        conn = cf.getConnection();
         cf.beginTransaction();
+        conn = cf.getConnection();
         try {
             DeploymentUnitDAO du = conn.getDeploymentUnit("foo");
             assertNull(du);
         } finally {
             cf.commitTransaction();
         }
-
     }
     
     public void testGetDeploymentUnits() {
-        ConfStoreConnection conn = cf.getConnection();
         cf.beginTransaction();
+        ConfStoreConnection conn = cf.getConnection();
         try {
             conn.createDeploymentUnit("foo1");
             conn.createDeploymentUnit("foo2");
@@ -115,10 +111,10 @@ public class DaoTest extends TestCase {
             conn.createDeploymentUnit("foo4");
         } finally {
             cf.commitTransaction();
-            conn.close();
         }
-        conn = cf.getConnection();
+
         cf.beginTransaction();
+        conn = cf.getConnection();
         try {
             assertNotNull(conn.getDeploymentUnit("foo1"));
             assertNotNull(conn.getDeploymentUnit("foo2"));
@@ -130,11 +126,10 @@ public class DaoTest extends TestCase {
         }
     }
     
-    
     public void testCreateProcess() {
         QName foobar = new QName("foo","bar");
-        ConfStoreConnection conn = cf.getConnection();
         cf.beginTransaction();
+        ConfStoreConnection conn = cf.getConnection();
         try {
             DeploymentUnitDAO du = conn.createDeploymentUnit("foo1");
             ProcessConfDAO p = du.createProcess(foobar,foobar,1);
@@ -144,11 +139,10 @@ public class DaoTest extends TestCase {
             assertEquals("foo1", p.getDeploymentUnit().getName());
         } finally {
             cf.commitTransaction();
-            conn.close();
         }
         
-        conn = cf.getConnection();
         cf.beginTransaction();
+        conn = cf.getConnection();
         try {
             DeploymentUnitDAO du = conn.getDeploymentUnit("foo1");
             ProcessConfDAO p = du.getProcess(foobar);
@@ -157,29 +151,25 @@ public class DaoTest extends TestCase {
             
             assertEquals(foobar,p.getPID());
             assertEquals(foobar,p.getType());
-
         } finally {
             cf.commitTransaction();
-            conn.close();
         }
-        
     }
     
     public void testProcessProperties() {
         QName foobar = new QName("foo","bar");
-        ConfStoreConnection conn = cf.getConnection();
         cf.beginTransaction();
+        ConfStoreConnection conn = cf.getConnection();
         try {
             DeploymentUnitDAO du = conn.createDeploymentUnit("foo1");
             ProcessConfDAO p = du.createProcess(foobar,foobar,1);
             p.setProperty(foobar,"baz");
         } finally {
             cf.commitTransaction();
-            conn.close();
         }
         
-        conn = cf.getConnection();
         cf.beginTransaction();
+        conn = cf.getConnection();
         try {
             DeploymentUnitDAO du = conn.getDeploymentUnit("foo1");
             ProcessConfDAO p = du.getProcess(foobar);
@@ -189,10 +179,6 @@ public class DaoTest extends TestCase {
             assertTrue(p.getPropertyNames().contains(foobar));
         } finally {
             cf.commitTransaction();
-            conn.close();
         }
-        
-        
-    }
-    
+    }    
 }

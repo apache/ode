@@ -321,7 +321,7 @@ define "ode" do
     resources hibernate_doclet(:package=>"org.apache.ode.store.hib", :excludedtags=>"@version,@author,@todo")
 
     test.with COMMONS.collections, COMMONS.lang, JAVAX.connector, JAVAX.transaction, DOM4J, LOG4J,
-      XERCES, XALAN, JAXEN, SAXON, OPENJPA
+      XERCES, XALAN, JAXEN, SAXON, OPENJPA, GERONIMO.transaction
     package :jar
   end
 
