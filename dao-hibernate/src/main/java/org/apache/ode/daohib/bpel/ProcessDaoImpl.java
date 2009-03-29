@@ -59,10 +59,10 @@ import java.util.ArrayList;
  * Hibernate-based {@link ProcessDAO} implementation.
  */
 public class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
-	@SuppressWarnings("unused")
-	private static final Log __log = LogFactory.getLog(ProcessDaoImpl.class);
-	
-	private static final String QRY_CORRELATOR = "where this.correlatorId = ?";
+    @SuppressWarnings("unused")
+    private static final Log __log = LogFactory.getLog(ProcessDaoImpl.class);
+
+    private static final String QRY_CORRELATOR = "where this.correlatorId = ?";
 
     private HProcess _process;
 
@@ -85,7 +85,7 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
     }
 
     @SuppressWarnings("unchecked")
-	public CorrelatorDAO getCorrelator(String  corrId) {
+    public CorrelatorDAO getCorrelator(String  corrId) {
         entering("ProcessDaoImpl.getCorrelator");
         Iterator results;
         Query q = getSession().createFilter(_process.getCorrelators(),
@@ -147,61 +147,61 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
 
         deleteEvents();
         deleteCorrelations();
-		deleteMessages();
-		deleteVariables();
-		deleteProcessInstances();
+        deleteMessages();
+        deleteVariables();
+        deleteProcessInstances();
 
-		getSession().delete(_process); // this deletes HCorrelator -> HCorrelatorSelector
-		
-		// after this delete, we have a use case that creates the process with the same procid.
-		// for hibernate to work without the database deferred constraint check, let's just flush the session.
-		getSession().flush();
+        getSession().delete(_process); // this deletes HCorrelator -> HCorrelatorSelector
+
+        // after this delete, we have a use case that creates the process with the same procid.
+        // for hibernate to work without the database deferred constraint check, let's just flush the session.
+        getSession().flush();
     }
 
     private void deleteProcessInstances() {
-  		getSession().getNamedQuery(HLargeData.DELETE_ACTIVITY_RECOVERY_LDATA_BY_PROCESS).setParameter ("process", _process).executeUpdate();
-  		getSession().getNamedQuery(HActivityRecovery.DELETE_ACTIVITY_RECOVERIES_BY_PROCESS).setParameter ("process", _process).executeUpdate();
-  		getSession().getNamedQuery(HLargeData.DELETE_FAULT_LDATA_BY_PROCESS).setParameter("process", _process).executeUpdate();
+        getSession().getNamedQuery(HLargeData.DELETE_ACTIVITY_RECOVERY_LDATA_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+        getSession().getNamedQuery(HActivityRecovery.DELETE_ACTIVITY_RECOVERIES_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+        getSession().getNamedQuery(HLargeData.DELETE_FAULT_LDATA_BY_PROCESS).setParameter("process", _process).executeUpdate();
         getSession().getNamedQuery(HFaultData.DELETE_FAULTS_BY_PROCESS).setParameter("process", _process).executeUpdate();
         getSession().getNamedQuery(HLargeData.DELETE_JACOB_LDATA_BY_PROCESS).setParameter("process", _process).executeUpdate();
         getSession().getNamedQuery(HProcessInstance.DELETE_INSTANCES_BY_PROCESS).setParameter("process", _process).executeUpdate();
     }
 
     private void deleteVariables() {
-  		getSession().getNamedQuery(HCorrelationProperty.DELETE_CORPROPS_BY_PROCESS).setParameter ("process", _process).executeUpdate();
-  		getSession().getNamedQuery(HCorrelationSet.DELETE_CORSETS_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+        getSession().getNamedQuery(HCorrelationProperty.DELETE_CORPROPS_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+        getSession().getNamedQuery(HCorrelationSet.DELETE_CORSETS_BY_PROCESS).setParameter ("process", _process).executeUpdate();
 
-  		getSession().getNamedQuery(HVariableProperty.DELETE_VARIABLE_PROPERITES_BY_PROCESS).setParameter ("process", _process).executeUpdate();
-  		getSession().getNamedQuery(HLargeData.DELETE_XMLDATA_LDATA_BY_PROCESS).setParameter ("process", _process).executeUpdate();
-  		getSession().getNamedQuery(HXmlData.DELETE_XMLDATA_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+        getSession().getNamedQuery(HVariableProperty.DELETE_VARIABLE_PROPERITES_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+        getSession().getNamedQuery(HLargeData.DELETE_XMLDATA_LDATA_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+        getSession().getNamedQuery(HXmlData.DELETE_XMLDATA_BY_PROCESS).setParameter ("process", _process).executeUpdate();
 
-  		getSession().getNamedQuery(HLargeData.DELETE_PARTNER_LINK_LDATA_BY_PROCESS).setParameter ("process", _process).setParameter ("process2", _process).executeUpdate();
-  		getSession().getNamedQuery(HPartnerLink.DELETE_PARTNER_LINKS_BY_PROCESS).setParameter ("process", _process).executeUpdate();
-  		getSession().getNamedQuery(HScope.DELETE_SCOPES_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+        getSession().getNamedQuery(HLargeData.DELETE_PARTNER_LINK_LDATA_BY_PROCESS).setParameter ("process", _process).setParameter ("process2", _process).executeUpdate();
+        getSession().getNamedQuery(HPartnerLink.DELETE_PARTNER_LINKS_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+        getSession().getNamedQuery(HScope.DELETE_SCOPES_BY_PROCESS).setParameter ("process", _process).executeUpdate();
     }
 
     private void deleteMessages() {
-  		getSession().getNamedQuery(HCorrelatorMessage.DELETE_CORMESSAGES_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+        getSession().getNamedQuery(HCorrelatorMessage.DELETE_CORMESSAGES_BY_PROCESS).setParameter ("process", _process).executeUpdate();
 
-  		getSession().getNamedQuery(HLargeData.DELETE_MESSAGE_LDATA_BY_PROCESS).setParameter("process", _process).setParameter ("process2", _process).executeUpdate();
-  		getSession().getNamedQuery(HMessage.DELETE_MESSAGES_BY_PROCESS).setParameter("process", _process).executeUpdate();
-  		getSession().getNamedQuery(HMessageExchangeProperty.DELETE_MEX_PROPS_BY_PROCESS).setParameter("process", _process).executeUpdate();
-  		getSession().getNamedQuery(HLargeData.DELETE_MEX_LDATA_BY_PROCESS).setParameter("process", _process).setParameter("process2", _process).executeUpdate();
-  		getSession().getNamedQuery(HMessageExchange.DELETE_MEX_BY_PROCESS).setParameter("process", _process).executeUpdate();
-  		getSession().getNamedQuery(HCorrelator.DELETE_CORRELATORS_BY_PROCESS).setParameter("process", _process).executeUpdate();
+        getSession().getNamedQuery(HLargeData.DELETE_MESSAGE_LDATA_BY_PROCESS).setParameter("process", _process).setParameter ("process2", _process).executeUpdate();
+        getSession().getNamedQuery(HMessage.DELETE_MESSAGES_BY_PROCESS).setParameter("process", _process).executeUpdate();
+        getSession().getNamedQuery(HMessageExchangeProperty.DELETE_MEX_PROPS_BY_PROCESS).setParameter("process", _process).executeUpdate();
+        getSession().getNamedQuery(HLargeData.DELETE_MEX_LDATA_BY_PROCESS).setParameter("process", _process).setParameter("process2", _process).executeUpdate();
+        getSession().getNamedQuery(HMessageExchange.DELETE_MEX_BY_PROCESS).setParameter("process", _process).executeUpdate();
+        getSession().getNamedQuery(HCorrelator.DELETE_CORRELATORS_BY_PROCESS).setParameter("process", _process).executeUpdate();
     }
 
     private void deleteCorrelations() {
-  		getSession().getNamedQuery(HCorrelationProperty.DELETE_CORPROPS_BY_PROCESS).setParameter ("process", _process).executeUpdate();
-  		getSession().getNamedQuery(HCorrelationSet.DELETE_CORSETS_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+        getSession().getNamedQuery(HCorrelationProperty.DELETE_CORPROPS_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+        getSession().getNamedQuery(HCorrelationSet.DELETE_CORSETS_BY_PROCESS).setParameter ("process", _process).executeUpdate();
     }
 
     private void deleteEvents() {
-  		getSession().getNamedQuery(HLargeData.DELETE_EVENT_LDATA_BY_PROCESS).setParameter("process", _process).executeUpdate();
-  		getSession().getNamedQuery(HBpelEvent.DELETE_EVENTS_BY_PROCESS).setParameter("process", _process).executeUpdate();
-  	}
+        getSession().getNamedQuery(HLargeData.DELETE_EVENT_LDATA_BY_PROCESS).setParameter("process", _process).executeUpdate();
+        getSession().getNamedQuery(HBpelEvent.DELETE_EVENTS_BY_PROCESS).setParameter("process", _process).executeUpdate();
+    }
 
-  	public QName getType() {
+    public QName getType() {
         return new QName(_process.getTypeNamespace(), _process.getTypeName());
     }
 
@@ -222,7 +222,7 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
     }
 
     @SuppressWarnings("unchecked")
-	public Collection<ProcessInstanceDAO> getActiveInstances() {
+    public Collection<ProcessInstanceDAO> getActiveInstances() {
         ArrayList<ProcessInstanceDAO> instDaos = new ArrayList<ProcessInstanceDAO>();
         Collection<HProcessInstance> insts = getSession().getNamedQuery(HProcessInstance.SELECT_ACTIVE_INSTANCES)
                 .setParameter("processId", _process.getId()).setParameter("state", ProcessState.STATE_ACTIVE).list();
@@ -235,8 +235,8 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
         entering("ProcessDaoImpl.getNumInstances");
         // this should be efficient if the relation is tagged as extra-lazy.
         // If the collection is not initialized yet, Hibernate will do a count(*) and the whole collection will not be fetched.
-		return _process.getInstances().size();
-	}
+        return _process.getInstances().size();
+    }
 
     public String getGuid() {
         return _process.getGuid();

@@ -36,15 +36,15 @@ import java.util.HashMap;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory {
-	private static final Log __log = LogFactory.getLog(DbConfStoreConnectionFactory.class);
-	
+    private static final Log __log = LogFactory.getLog(DbConfStoreConnectionFactory.class);
+
     private DataSource _ds;
     private EntityManagerFactory _emf;
 
     private TransactionManager _txMgr;
-    
+
     @SuppressWarnings("unchecked")
-	public DbConfStoreConnectionFactory(DataSource ds, boolean createDatamodel, String txFactoryClassName) {
+    public DbConfStoreConnectionFactory(DataSource ds, boolean createDatamodel, String txFactoryClassName) {
         _ds = ds;
         initTxMgr(txFactoryClassName);
 
@@ -63,49 +63,49 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
     }
 
     @SuppressWarnings("unchecked")
-	public ConfStoreConnection getConnection() {
-    	HashMap propMap2 = new HashMap();
-    	propMap2.put("openjpa.TransactionMode", "managed");
+    public ConfStoreConnection getConnection() {
+        HashMap propMap2 = new HashMap();
+        propMap2.put("openjpa.TransactionMode", "managed");
         return new ConfStoreConnectionJpa(_emf.createEntityManager(propMap2));
     }
 
     public void beginTransaction() {
-		try {
-			if(__log.isDebugEnabled()) __log.debug("begin transaction on " + _txMgr);
-			_txMgr.begin();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+        try {
+            if(__log.isDebugEnabled()) __log.debug("begin transaction on " + _txMgr);
+            _txMgr.begin();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-	public void commitTransaction() {
-		try {
-			if(__log.isDebugEnabled()) __log.debug("commit transaction on " + _txMgr);
-			_txMgr.commit();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+    public void commitTransaction() {
+        try {
+            if(__log.isDebugEnabled()) __log.debug("commit transaction on " + _txMgr);
+            _txMgr.commit();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-	public void rollbackTransaction() {
-		try {
-			if(__log.isDebugEnabled()) __log.debug("rollback transaction on " + _txMgr);
-			_txMgr.rollback();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+    public void rollbackTransaction() {
+        try {
+            if(__log.isDebugEnabled()) __log.debug("rollback transaction on " + _txMgr);
+            _txMgr.rollback();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-	@SuppressWarnings("unchecked")
-	private void initTxMgr(String txFactoryClassName) {
-		__log.info("ProcessStore initializing transaction manager using " + txFactoryClassName);
-		try {
-			Class txFactClass = getClass().getClassLoader().loadClass(txFactoryClassName);
-			Object txFact = txFactClass.newInstance();
-			_txMgr = (TransactionManager) txFactClass.getMethod("getTransactionManager", (Class[]) null).invoke(txFact);
-		} catch (Exception e) {
-			__log.fatal("Couldn't initialize a transaction manager with factory: " + txFactoryClassName, e);
-			throw new RuntimeException("Couldn't initialize a transaction manager with factory: " + txFactoryClassName, e);
-		}
-	}	
+    @SuppressWarnings("unchecked")
+    private void initTxMgr(String txFactoryClassName) {
+        __log.info("ProcessStore initializing transaction manager using " + txFactoryClassName);
+        try {
+            Class txFactClass = getClass().getClassLoader().loadClass(txFactoryClassName);
+            Object txFact = txFactClass.newInstance();
+            _txMgr = (TransactionManager) txFactClass.getMethod("getTransactionManager", (Class[]) null).invoke(txFact);
+        } catch (Exception e) {
+            __log.fatal("Couldn't initialize a transaction manager with factory: " + txFactoryClassName, e);
+            throw new RuntimeException("Couldn't initialize a transaction manager with factory: " + txFactoryClassName, e);
+        }
+    }
 }

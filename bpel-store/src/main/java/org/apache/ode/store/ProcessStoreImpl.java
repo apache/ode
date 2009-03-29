@@ -114,24 +114,24 @@ public class ProcessStoreImpl implements ProcessStore {
     public ProcessStoreImpl(EndpointReferenceContext eprContext, DataSource ds, String persistenceType, OdeConfigProperties props, boolean createDatamodel) {
         this.eprContext = eprContext;
         if (ds != null) {
-			// ugly hack
-			if (persistenceType.toLowerCase().indexOf("hib") != -1) {
-				_cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(ds, props.getProperties(), createDatamodel, props.getTxFactoryClass());
-			} else {
-				_cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(ds, createDatamodel, props.getTxFactoryClass());
-			}
-		} else {
-			// If the datasource is not provided, then we create a HSQL-based
-			// in-memory database. Makes testing a bit simpler.
-			DataSource hsqlds = createInternalDS(new GUID().toString());
-			if ("hibernate".equalsIgnoreCase(persistenceType)) {
-				_cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(hsqlds, props.getProperties(), createDatamodel, props.getTxFactoryClass());
-			} else {
-				_cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(hsqlds, createDatamodel, props.getTxFactoryClass());
-			}
-			_inMemDs = hsqlds;
-		}
-	}
+            // ugly hack
+            if (persistenceType.toLowerCase().indexOf("hib") != -1) {
+                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(ds, props.getProperties(), createDatamodel, props.getTxFactoryClass());
+            } else {
+                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(ds, createDatamodel, props.getTxFactoryClass());
+            }
+         } else {
+            // If the datasource is not provided, then we create a HSQL-based
+            // in-memory database. Makes testing a bit simpler.
+            DataSource hsqlds = createInternalDS(new GUID().toString());
+            if ("hibernate".equalsIgnoreCase(persistenceType)) {
+                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(hsqlds, props.getProperties(), createDatamodel, props.getTxFactoryClass());
+            } else {
+                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(hsqlds, createDatamodel, props.getTxFactoryClass());
+            }
+            _inMemDs = hsqlds;
+        }
+    }
 
     /**
      * Constructor that hardwires OpenJPA on a new in-memory database. Suitable for tests.
@@ -716,7 +716,7 @@ public class ProcessStoreImpl implements ProcessStore {
             } finally {
                 if (!success)
                     try {
-			            _cf.rollbackTransaction();
+                        _cf.rollbackTransaction();
                     } catch (Exception ex) {
                         __log.error("DbError", ex);
                     }

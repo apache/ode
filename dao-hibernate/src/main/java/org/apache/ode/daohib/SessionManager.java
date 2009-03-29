@@ -43,9 +43,9 @@ import java.util.Properties;
  * managing sessions.
  */
 public class SessionManager {
-	private static final Log __log = LogFactory.getLog(SessionManager.class);
-	
-	public static final String PROP_GUID = "ode.hibernate.guid";
+  private static final Log __log = LogFactory.getLog(SessionManager.class);
+
+  public static final String PROP_GUID = "ode.hibernate.guid";
   
   private static final Map<String, TransactionManager> _txManagers =
     Collections.synchronizedMap(new HashMap<String, TransactionManager>());
@@ -78,7 +78,7 @@ public class SessionManager {
   public static void registerTransactionManager(String uuid, TransactionManager txm) {
 	_txManagers.put(uuid, txm);
   }
-	  
+
   /**
    * Get the current Hibernate Session.
    */

@@ -98,68 +98,47 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
 
     @SuppressWarnings("unchecked")
     public List<MessageRouteDAO> findRoute(CorrelationKeySet keySet) {
-    	List<MessageRouteDAO> routes = new ArrayList<MessageRouteDAO>();
-    	
+        List<MessageRouteDAO> routes = new ArrayList<MessageRouteDAO>();
+
         entering("CorrelatorDaoImpl.findRoute");
         String hdr = "findRoute(keySet=" + keySet + "): ";
-        if (__log.isDebugEnabled())
-            __log.debug(hdr);
+        if (__log.isDebugEnabled()) __log.debug(hdr);
 
-        // Make sure we obtain a lock for the selector we want to find. Note that a SELECT FOR UPDATE
-        // will not necessarily work, as different DB vendors attach a different meaning to this syntax.
-        // In particular it is not clear how long the lock should be held, for the lifetime of the 
-        // resulting cursor, or for the lifetime of the transaction. So really, an UPDATE of the row
-        // is a much safer alternative.
         String processType = new QName(_hobj.getProcess().getTypeNamespace(), _hobj.getProcess().getTypeName()).toString();
-    	List<CorrelationKeySet> subSets = keySet.findSubSets();
-        Query lockQry = getSession().createQuery(generateSelectorQuery(LOCK_SELECTORS, subSets));
-        lockQry.setString("processType", processType);
-    	for( int i = 0; i < subSets.size(); i++ ) {
-    		lockQry.setString("s" + i, subSets.get(i).toCanonicalString());
-    	}
-        if (lockQry.executeUpdate() > 0) {
-            Query q = getSession().createQuery(generateSelectorQuery(FLTR_SELECTORS, subSets));
-            
-            q.setString("processType", processType);
-            q.setString("correlatorId", _hobj.getCorrelatorId());
-
-        	for( int i = 0; i < subSets.size(); i++ ) {
-        		q.setString("s" + i, subSets.get(i).toCanonicalString());
-        	}
-            q.setLockMode("hs", LockMode.UPGRADE);
-
-            HCorrelatorSelector selector;
-            try {
-            	boolean routed = false;
-            	Iterator selectors = q.iterate();
-            	while (selectors.hasNext()) {
-                    selector = (HCorrelatorSelector) selectors.next();
-                    if (selector != null) {
-                    	if ("all".equals(selector.getRoute())) {
-                        	routes.add(new MessageRouteDaoImpl(_sm, selector));
-                    	} else {
-                    		if (!routed){
-                            	routes.add(new MessageRouteDaoImpl(_sm, selector));
-                    		}
-                    		routed = true;
-                    	}
-                    }
-            	}
-            } catch (Exception ex) {
-                __log.debug("Strange, could not get a unique result for findRoute, trying to iterate instead.");
-
-                Iterator i = q.iterate();
-                if (i.hasNext()) selector = (HCorrelatorSelector) i.next();
-                else selector = null;
-                Hibernate.close(i);
-            }
-    
-            if (__log.isDebugEnabled())
-                __log.debug(hdr + "found " + routes);
-            return routes;
-        } 
+        List<CorrelationKeySet> subSets = keySet.findSubSets();
         
-        return null;
+        Query q = getSession().createQuery(generateSelectorQuery(FLTR_SELECTORS, subSets));
+        q.setString("processType", processType);
+        q.setString("correlatorId", _hobj.getCorrelatorId());
+
+        for( int i = 0; i < subSets.size(); i++ ) {
+            q.setString("s" + i, subSets.get(i).toCanonicalString());
+        }
+        // Make sure we obtain a lock for the selector we want to find.
+        q.setLockMode("hs", LockMode.UPGRADE);
+
+        HCorrelatorSelector selector;
+        Iterator selectors = null;
+        try {
+            List<HProcessInstance> targets = new ArrayList<HProcessInstance>();
+            selectors = q.iterate();
+            while (selectors.hasNext()) {
+                selector = (HCorrelatorSelector) selectors.next();
+                if (selector != null) {
+                    if ("all".equals(selector.getRoute()) ||
+                            ("one".equals(selector.getRoute()) && !targets.contains(selector.getInstance()))) {
+                        routes.add(new MessageRouteDaoImpl(_sm, selector));
+                        targets.add(selector.getInstance());
+                    }
+                }
+            }
+        } finally {
+            if (selectors != null) Hibernate.close(selectors);
+        }
+
+        if(__log.isDebugEnabled()) __log.debug(hdr + "found " + routes);
+        
+        return routes;
     }
 
     private String generateUnmatchedQuery(List<CorrelationKeySet> subSets) {

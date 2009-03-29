@@ -43,40 +43,40 @@ public abstract class HibernateDao {
     protected final HObject _hobj;
 
 	protected HibernateDao(SessionManager sessionManager, HObject hobj) {
-    _sm = sessionManager;
-		_hobj = hobj;
-	}
+        _sm = sessionManager;
+        _hobj = hobj;
+    }
 
     void entering(String msg){
         // add a prefix to be parser friendly 
         if(logDao.isDebugEnabled()) logDao.debug("entering "+msg);
     }
 
-	/**
-	 * @see org.apache.ode.utils.dao.DAO#getDHandle()
-	 */
-	public Serializable getDHandle() {
-    return new HibernateHandle(getClass(), _hobj.getClass(), getSession().getIdentifier(_hobj));
-	}
+    /**
+     * @see org.apache.ode.utils.dao.DAO#getDHandle()
+     */
+    public Serializable getDHandle() {
+        return new HibernateHandle(getClass(), _hobj.getClass(), getSession().getIdentifier(_hobj));
+    }
   
-  protected Session getSession(){
-  	return _sm.getSession();
-  }
-  
-  public HObject getHibernateObj(){
-  	return _hobj;
-  }
-  
-  public boolean equals(Object obj){
-  	assert obj instanceof HibernateDao;
-    return _hobj.getId().equals(((HibernateDao)obj)._hobj.getId());
-  }
-  
-  public int hashCode(){
-  	return _hobj.getId().hashCode();
-  }
-  
-  protected void update() {
-    _sm.getSession().update(_hobj);
-  }
+    protected Session getSession() {
+        return _sm.getSession();
+    }
+
+    public HObject getHibernateObj() {
+        return _hobj;
+    }
+
+    public boolean equals(Object obj) {
+        assert obj instanceof HibernateDao;
+        return _hobj.getId().equals(((HibernateDao) obj)._hobj.getId());
+    }
+
+    public int hashCode() {
+        return _hobj.getId().hashCode();
+    }
+
+    protected void update() {
+        _sm.getSession().update(_hobj);
+    }
 }
