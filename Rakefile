@@ -335,7 +335,7 @@ define "ode" do
     test.with projects("bpel-obj", "jacob", "bpel-schemas",
       "bpel-scripts", "scheduler-simple"),
       COMMONS.collections, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector,
-      JAVAX.stream, JAVAX.transaction, JAXEN, HSQLDB, LOG4J, SAXON, XERCES, XMLBEANS, XALAN
+      JAVAX.stream, JAVAX.transaction, JAXEN, HSQLDB, LOG4J, SAXON, XERCES, XMLBEANS, XALAN, GERONIMO.transaction
 
     package :jar
   end
