@@ -106,9 +106,9 @@ public class FileUtils {
     /**
      * Recursively collect all Files in the given directory and all its
      * subdirectories, applying the given FileFilter. The FileFilter is also applied to the given rootDirectory.
-     * As a result the rootDirectory might be contained in the returned list.
+     * As a result the rootDirectory might be in the returned list.
      * <p>
-     * Returned files are sorted lexicographically but for each directory, files come before its sudirectories.
+     * Returned files are ordered lexicographically but for each directory, files come before its sudirectories.
      * For instance:<br/>
      * test<br/>
      * test/alpha.txt<br/>
@@ -126,7 +126,7 @@ public class FileUtils {
      * test/z<br/>
      * test/z/zulu.txt<br/>
      * test/zulu.txt<br/>
-     *   lexicographically
+     *
      * @param rootDirectory
      *          the top level directory used for the search
      * @param filter

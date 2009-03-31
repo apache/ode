@@ -213,13 +213,13 @@ class DeploymentUnitDir {
 
     /**
      *
-     * @return the list of endpoint configuration files. the list is built on each call to handle changes. 
+     * The list of endpoint configuration files contained in the deployment directory and its subdirectories.
+     * Files are ordered lexicographically but for each directory, files come before its sudirectories.
+     * <p>The list is built on each call to handle changes.
+     * @see org.apache.ode.utils.fs.FileUtils#directoryEntriesInPath(java.io.File)
      */
-    public TreeSet<File> getEndpointConfigFiles() {
-        File[] files = getDeployDir().listFiles(_endpointFilter);
-        TreeSet<File> set = new TreeSet<File>();
-        if(files!=null) set.addAll(Arrays.asList(files));
-        return set;
+    public List<File> getEndpointConfigFiles() {
+        return FileUtils.directoryEntriesInPath(getDeployDir(),_endpointFilter);
     }
 
     public DeployDocument getDeploymentDescriptor() {
