@@ -1,6 +1,6 @@
 
 
 alias.sample-ns={sample.namespace}
-sample-ns.{sample.service.name}.ode.security.policy={sample.service.name}.xml
+sample-ns.{sample.service.name}.ode.security.policy.file={sample.service.name}.xml
 
 
