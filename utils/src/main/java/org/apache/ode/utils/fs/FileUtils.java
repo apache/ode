@@ -159,18 +159,4 @@ public class FileUtils {
     public static String encodePath(String path) {
         return path.replaceAll(" ", "%20");
     }
-
-    public static ArrayList<File> listFilesRecursively(File root, FileFilter filter) {
-        ArrayList<File> result = new ArrayList<File>();
-        // Filtering the files we're interested in in the current directory
-        File[] select = root.listFiles(filter);
-        result.addAll(Arrays.asList(select));
-        // Then we can check the directories
-        File[] all = root.listFiles();
-        for (File file : all)
-            if (file.isDirectory())
-                result.addAll(listFilesRecursively(file, filter));
-        return result;
-    }
-
 }

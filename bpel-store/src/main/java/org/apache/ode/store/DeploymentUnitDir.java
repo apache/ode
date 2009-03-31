@@ -129,7 +129,7 @@ class DeploymentUnitDir {
      * starts compilation.
      */
     void compile() {
-        ArrayList<File> bpels = FileUtils.listFilesRecursively(_duDirectory, DeploymentUnitDir._bpelFilter);
+        List<File> bpels = FileUtils.directoryEntriesInPath(_duDirectory, DeploymentUnitDir._bpelFilter);
         if (bpels.size() == 0)
             throw new IllegalArgumentException("Directory " + _duDirectory.getName() + " does not contain any process!");
         for (File bpel : bpels) {
@@ -139,7 +139,7 @@ class DeploymentUnitDir {
 
     void scan() {
         HashMap<QName, CBPInfo> processes = new HashMap<QName, CBPInfo>();
-        ArrayList<File> cbps = FileUtils.listFilesRecursively(_duDirectory, DeploymentUnitDir._cbpFilter);
+        List<File> cbps = FileUtils.directoryEntriesInPath(_duDirectory, DeploymentUnitDir._cbpFilter);
         for (File file : cbps) {
             CBPInfo cbpinfo = loadCBPInfo(file);
             processes.put(cbpinfo.processName, cbpinfo);
@@ -250,7 +250,7 @@ class DeploymentUnitDir {
             WSDLReader r = wsdlFactory.newWSDLReader();
             DefaultResourceFinder rf = new DefaultResourceFinder(_duDirectory, _duDirectory);
             URI basedir = _duDirectory.toURI();
-            ArrayList<File> wsdls = FileUtils.listFilesRecursively(_duDirectory, DeploymentUnitDir._wsdlFilter);
+            List<File> wsdls = FileUtils.directoryEntriesInPath(_duDirectory, DeploymentUnitDir._wsdlFilter);
             for (File file : wsdls) {
                 URI uri = basedir.relativize(file.toURI());
                 try {

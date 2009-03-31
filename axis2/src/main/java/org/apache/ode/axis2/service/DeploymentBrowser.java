@@ -271,7 +271,7 @@ public class DeploymentBrowser {
 
     private String bundleUrlFor(String docFile) {
         if (docFile.indexOf("processes") >= 0) docFile = docFile.substring(docFile.indexOf("processes")+10);
-        List<File> files = FileUtils.listFilesRecursively(_store.getDeployDir(), null);
+        List<File> files = FileUtils.directoryEntriesInPath(_store.getDeployDir(), null);
         for (final File bundleFile : files) {
             if (bundleFile.getPath().replaceAll("\\\\", "/").endsWith(docFile))
                 return "/deployment/bundles/" + bundleFile.getPath()
