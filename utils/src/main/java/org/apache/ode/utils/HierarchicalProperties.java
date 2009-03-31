@@ -23,6 +23,7 @@ import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.commons.collections.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.utils.fs.FileUtils;
 
 import javax.xml.namespace.QName;
 import java.io.File;
@@ -74,8 +75,12 @@ import java.util.List;
  * getProperty("http://foo.com", "port-of-amsterdam", "timeout")                                     => 40000
  * </pre>
  * <p/>
+ * <p>
  * Values may contain some environment variables. For instance, message=You're using ${java.version}.
  * <p/>
+ * <p>
+ * If a property name ends with ".file" or ".path", the assumption is made that the associated value is a path and as such is resolved against the path of the file it was loaded from.
+ * </p>
  * This class is not thread-safe.
  *
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
@@ -226,11 +231,18 @@ public class HierarchicalProperties {
                 hierarchicalMap.put(qname, port, p);
             }
 
+            if(targetedProperty.endsWith(".file") || targetedProperty.endsWith(".path")){
+                String absolutePath = file.toURI().resolve(value).getPath();
+                if(log.isDebugEnabled()) log.debug("path: "+value+" resolved into: "+absolutePath);
+                value = absolutePath;
+            }
+
             // save the key/value in its chained map
             if(log.isDebugEnabled()) log.debug("New property: "+targetedProperty+" -> "+value);
             p.put(targetedProperty, value);
         }
     }
+
 
     /**
      * Clear all content. If {@link #loadFiles()} is not invoked later, all returned values will be null.
@@ -362,7 +374,7 @@ public class HierarchicalProperties {
      * That's the main reason to not used the {@link java.util.Properties} class (which offers access to child keys only).
      * <p/>The child has an immutable view of the parent map. Methods {@link #clear()} and {@link #remove(Object)}
      * throw {@link UnsupportedOperationException}. Methods {@link #put(Object, Object)} and  {@link #putAll(java.util.Map)} impacts only the child map.
-     * <br/>Methods  {@link #clearLocally(Object)}
+     * <br/>Methods  {@link #clearLocally()}
      * <p/>
      * This class does NOT implement the {@link java.util.Map} interface because methods {@link java.util.Map#entrySet()} },
      * {@link java.util.Map#values()} and {@link java.util.Map#keySet()} would NOT be backed by the Map itself.
