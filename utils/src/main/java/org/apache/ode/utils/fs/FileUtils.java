@@ -145,12 +145,12 @@ public class FileUtils {
             for (int numFiles = files.length, i = 0; i < numFiles; i++) {
                 File currentFile = files[i];
 
-                if ((filter == null) || ((filter != null) && (filter.accept(currentFile)))) {
-                    collectedFiles.add(currentFile);
-                }
-
                 if (currentFile.isDirectory()) {
                     FileUtils.directoryEntriesInPath(collectedFiles, currentFile, filter);
+                } else {
+                    if ((filter == null) || ((filter != null) && (filter.accept(currentFile)))) {
+                        collectedFiles.add(currentFile);
+                    }
                 }
             }
         }
@@ -158,5 +158,10 @@ public class FileUtils {
 
     public static String encodePath(String path) {
         return path.replaceAll(" ", "%20");
+    }
+
+    public static void main(String[] args) {
+        List<File> l = directoryEntriesInPath(new File("/tmp/test"));
+        for(File f : l) System.out.println(f);
     }
 }
