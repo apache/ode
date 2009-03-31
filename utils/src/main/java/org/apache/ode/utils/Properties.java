@@ -81,7 +81,7 @@ public class Properties {
     public static final String PROP_HTTP_REQUEST_CHUNK = "http.request.chunk";
     public static final String PROP_HTTP_REQUEST_GZIP = "http.request.gzip";
     public static final String PROP_HTTP_ACCEPT_GZIP = "http.accept.gzip";
-    public static final String PROP_SECURITY_POLICY = "security.policy";
+    public static final String PROP_SECURITY_POLICY = "security.policy.file";
     public static final String PROP_JMS_REPLY_DESTINATION = "jms.reply.destination";
     public static final String PROP_JMS_REPLY_TIMEOUT = "jms.reply.timeout";
 

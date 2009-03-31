@@ -32,6 +32,7 @@ import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.dd.TDeployment.Process;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.rapi.Serializer;
+import org.apache.ode.utils.fs.FileUtils;
 import org.apache.xmlbeans.XmlOptions;
 import org.w3c.dom.Node;
 
@@ -127,7 +128,7 @@ class DeploymentUnitDir {
      * starts compilation.
      */
     void compile() {
-        ArrayList<File> bpels = listFilesRecursively(_duDirectory, DeploymentUnitDir._bpelFilter);
+        List<File> bpels = FileUtils.directoryEntriesInPath(_duDirectory, DeploymentUnitDir._bpelFilter);
         if (bpels.size() == 0)
             throw new IllegalArgumentException("Directory " + _duDirectory.getName() + " does not contain any process!");
         for (File bpel : bpels) {
@@ -137,7 +138,7 @@ class DeploymentUnitDir {
 
     void scan() {
         HashMap<QName, CBPInfo> processes = new HashMap<QName, CBPInfo>();
-        ArrayList<File> cbps = listFilesRecursively(_duDirectory, DeploymentUnitDir._cbpFilter);
+        List<File> cbps = FileUtils.directoryEntriesInPath(_duDirectory, DeploymentUnitDir._cbpFilter);
         for (File file : cbps) {
             CBPInfo cbpinfo = loadCBPInfo(file);
             processes.put(cbpinfo.processName, cbpinfo);
@@ -211,15 +212,16 @@ class DeploymentUnitDir {
     }
 
     /**
+     * The list of endpoint configuration files contained in the deployment directory and its subdirectories.
+     * Files are ordered lexicographically but for each directory, files come before its sudirectories.
+     * <p>The list is built on each call to handle changes.
      *
-     * @return the list of endpoint configuration files. the list is built on each call to handle changes. 
+     * @see org.apache.ode.utils.fs.FileUtils#directoryEntriesInPath(java.io.File)
      */
-    public TreeSet<File> getEndpointConfigFiles() {
-        File[] files = getDeployDir().listFiles(_endpointFilter);
-        TreeSet<File> set = new TreeSet<File>();
-        set.addAll(Arrays.asList(files));
-        return set;
+    public List<File> getEndpointConfigFiles() {
+        return FileUtils.directoryEntriesInPath(getDeployDir(), _endpointFilter);
     }
+
 
     public DeployDocument getDeploymentDescriptor() {
         if (_dd == null) {
@@ -249,7 +251,7 @@ class DeploymentUnitDir {
             WSDLReader r = wsdlFactory.newWSDLReader();
             DefaultResourceFinder rf = new DefaultResourceFinder(_duDirectory, _duDirectory);
             URI basedir = _duDirectory.toURI();
-            ArrayList<File> wsdls = listFilesRecursively(_duDirectory, DeploymentUnitDir._wsdlFilter);
+            List<File> wsdls = FileUtils.directoryEntriesInPath(_duDirectory, DeploymentUnitDir._wsdlFilter);
             for (File file : wsdls) {
                 URI uri = basedir.relativize(file.toURI());
                 try {
@@ -310,23 +312,6 @@ class DeploymentUnitDir {
         }
         return result;
     }
-
-    private ArrayList<File> listFilesRecursively(File root, FileFilter filter) {
-        ArrayList<File> result = new ArrayList<File>();
-        // Filtering the files we're interested in in the current directory
-        File[] select = root.listFiles(filter);
-        for (File file : select) {
-            result.add(file);
-        }
-        // Then we can check the directories
-        File[] all = root.listFiles();
-        for (File file : all) {
-            if (file.isDirectory())
-                result.addAll(listFilesRecursively(file, filter));
-        }
-        return result;
-    }
-
 
     public final class CBPInfo {
         final QName processName;

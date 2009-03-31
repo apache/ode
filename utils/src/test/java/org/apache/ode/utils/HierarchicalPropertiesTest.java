@@ -27,6 +27,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ode.utils.fs.FileUtils;
+
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
@@ -67,6 +69,13 @@ public class HierarchicalPropertiesTest extends TestCase {
         assertSame("Snapshot maps should be cached!", hp.getProperties("foo", "film-service"), hp.getProperties("foo", "film-service"));
         assertSame("Snapshot maps should be cached!", hp.getProperties("foo", "film-service", "port-of-cannes"), hp.getProperties("foo", "film-service", "port-of-cannes"));
         assertSame("Snapshot maps should be cached!", hp.getProperties("bla", "unknown-service"), hp.getProperties("bla", "unknown-service"));
+    }
+
+    public void testPathHandling(){
+        assertTrue("If the property name ends with '.file' or '.path' its value might be resolved against the file path", FileUtils.isAbsolute(hp.getProperty("http://foo.com", "film-service", "port-of-cannes", "p1.file")));
+        assertTrue("If the property name ends with '.file' or '.path' its value might be resolved against the file path", FileUtils.isAbsolute(hp.getProperty("http://foo.com", "film-service", "port-of-cannes", "p1.path")));
+        assertEquals("An absolute path should not be altered", "/home/ode/hello.txt", hp.getProperty("http://foo.com", "film-service", "port-of-cannes", "p2.path"));
+
     }
 
     public void testWithNoFile() throws IOException {

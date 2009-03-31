@@ -245,13 +245,7 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
         Options options = serviceClient.getOptions();
         if (options.getProperty(Properties.PROP_SECURITY_POLICY) != null) {
             String policy = (String) options.getProperty(Properties.PROP_SECURITY_POLICY);
-            // if the policy path is relative, the full uri is resolved against the process conf directory
-            URI policyUri;
-            if (FileUtils.isRelative(policy)) {
-                policyUri = _pconf.getBaseURI().resolve(policy);
-            } else {
-                policyUri = new File(policy).toURI();
-            }
+            URI policyUri = new File(policy).toURI();
             try {
                 InputStream policyStream = policyUri.toURL().openStream();
                 try {

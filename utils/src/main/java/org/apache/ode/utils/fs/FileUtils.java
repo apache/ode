@@ -23,6 +23,7 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -105,7 +106,27 @@ public class FileUtils {
 
     /**
      * Recursively collect all Files in the given directory and all its
-     * subdirectories, applying the given FileFilter.
+     * subdirectories, applying the given FileFilter. The FileFilter is also applied to the given rootDirectory.
+     * As a result the rootDirectory might be in the returned list.
+     * <p>
+     * Returned files are ordered lexicographically but for each directory, files come before its sudirectories.
+     * For instance:<br/>
+     * test<br/>
+     * test/alpha.txt<br/>
+     * test/zulu.txt<br/>
+     * test/a<br/>
+     * test/a/alpha.txt<br/>
+     * test/z<br/>
+     * test/z/zulu.txt<br/>
+     * <p>
+     * instead of:<br/>
+     * test<br/>
+     * test/a<br/>
+     * test/a/alpha.txt<br/>
+     * test/alpha.txt<br/>
+     * test/z<br/>
+     * test/z/zulu.txt<br/>
+     * test/zulu.txt<br/>
      *
      * @param rootDirectory
      *          the top level directory used for the search
@@ -140,18 +161,22 @@ public class FileUtils {
             collectedFiles.add(parentDir);
         }
 
-        File[] files = parentDir.listFiles();
-        if (files != null) {
-            for (int numFiles = files.length, i = 0; i < numFiles; i++) {
-                File currentFile = files[i];
-
-                if ((filter == null) || ((filter != null) && (filter.accept(currentFile)))) {
-                    collectedFiles.add(currentFile);
+        File[] allFiles = parentDir.listFiles();
+        if (allFiles != null) {
+            TreeSet<File> dirs = new TreeSet<File>();
+                TreeSet<File> acceptedFiles = new TreeSet<File>();
+            for (File f : allFiles) {
+                if (f.isDirectory()) {
+                    dirs.add(f);
+                } else {
+                    if ((filter == null) || ((filter != null) && (filter.accept(f)))) {
+                        acceptedFiles.add(f);
+                    }
                 }
-
-                if (currentFile.isDirectory()) {
-                    FileUtils.directoryEntriesInPath(collectedFiles, currentFile, filter);
-                }
+            }
+            collectedFiles.addAll(acceptedFiles);
+            for (File currentFile : dirs) {
+                FileUtils.directoryEntriesInPath(collectedFiles, currentFile, filter);
             }
         }
     }
@@ -160,17 +185,11 @@ public class FileUtils {
         return path.replaceAll(" ", "%20");
     }
 
-    public static ArrayList<File> listFilesRecursively(File root, FileFilter filter) {
-        ArrayList<File> result = new ArrayList<File>();
-        // Filtering the files we're interested in in the current directory
-        File[] select = root.listFiles(filter);
-        result.addAll(Arrays.asList(select));
-        // Then we can check the directories
-        File[] all = root.listFiles();
-        for (File file : all)
-            if (file.isDirectory())
-                result.addAll(listFilesRecursively(file, filter));
-        return result;
+    public static void main(String[] args) {
+        List<File> l = directoryEntriesInPath(new File("/tmp/test"));
+        for(File f : l) System.out.println(f);
+        System.out.println("########");
+     TreeSet<File> s= new TreeSet(l);
+        for(File f : s) System.out.println(f);
     }
-
 }
