@@ -61,8 +61,7 @@ public class ODEAxisService {
 
     private static final Log LOG = LogFactory.getLog(ODEAxisService.class);
 
-    public static AxisService createService(AxisConfiguration axisConfig, ProcessConf pconf, QName wsdlServiceName,
-                                            String portName, String axisServiceName) throws AxisFault {
+    public static AxisService createService(AxisConfiguration axisConfig, ProcessConf pconf, QName wsdlServiceName, String portName) throws AxisFault {
         Definition wsdlDefinition = pconf.getDefinitionForService(wsdlServiceName);
 
         if (LOG.isDebugEnabled()) {
@@ -78,6 +77,8 @@ public class ODEAxisService {
             serviceBuilder.setCustomResolver(new Axis2UriResolver());
             serviceBuilder.setCustomWSLD4JResolver(new Axis2WSDLLocator(baseUri));
             serviceBuilder.setServerSide(true);
+
+            String axisServiceName = ODEAxisService.extractServiceName(pconf, wsdlServiceName, portName);
 
             AxisService axisService = serviceBuilder.populateService();
             axisService.setParent(axisConfig);
@@ -148,22 +149,22 @@ public class ODEAxisService {
 
     /**
      * Extract the JMS destination name that is embedded in the Axis service name.
-     * @param serviceName the name of the axis service
+     * @param axisServiceName the name of the axis service
      * @return the corresponding JMS destination name
      */
-    private static String extractJMSDestinationName(String serviceName, String baseUri) {
+    private static String extractJMSDestinationName(String axisServiceName, String baseUri) {
         String destinationPrefix = "dynamicQueues/";
-        int index = serviceName.indexOf(destinationPrefix);
+        int index = axisServiceName.indexOf(destinationPrefix);
         if (index == -1) {
             destinationPrefix = "dynamicTopics/";
-            index = serviceName.indexOf(destinationPrefix);
+            index = axisServiceName.indexOf(destinationPrefix);
         }
         if (index == -1) {
             destinationPrefix = baseUri + "/";
-            index = serviceName.indexOf(destinationPrefix);
-            return (index != -1) ? serviceName.substring(destinationPrefix.length()) : serviceName;
+            index = axisServiceName.indexOf(destinationPrefix);
+            return (index != -1) ? axisServiceName.substring(destinationPrefix.length()) : axisServiceName;
         } else {
-            return serviceName.substring(index);
+            return axisServiceName.substring(index);
         }
     }
 
@@ -197,7 +198,7 @@ public class ODEAxisService {
         return url.startsWith("jms:");
     }
     
-    public static String extractServiceName(ProcessConf pconf, QName wsdlServiceName, String portName)
+    private static String extractServiceName(ProcessConf pconf, QName wsdlServiceName, String portName)
         throws AxisFault {
         String endpointUri = extractEndpointUri(pconf, wsdlServiceName, portName);
         String derivedUri = deriveBaseServiceUri(pconf);
@@ -233,6 +234,8 @@ public class ODEAxisService {
                     service = service.substring(0, queryIndex);
                 }
                 // Qualify shared JMS names with unique baseUri
+                // Since multiple processes may provide services at the same (JMS) endpoint, qualify
+                // the (JMS) endpoint-specific NCName with a process-relative URI, if necessary.
                 if (path.startsWith("jms")) {
                     boolean slashPresent = baseUri.endsWith("/") || service.startsWith("/");
                     service = baseUri + (slashPresent ? "" : "/") + service;		        
