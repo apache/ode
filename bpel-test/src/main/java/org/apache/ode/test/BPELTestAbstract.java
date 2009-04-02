@@ -23,10 +23,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;
@@ -39,11 +36,7 @@ import javax.xml.namespace.QName;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
-import org.apache.ode.bpel.iapi.InvocationStyle;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.ProcessStore;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
@@ -121,7 +114,20 @@ public abstract class BPELTestAbstract {
         _server.setMessageExchangeContext(mexContext);
         _server.setTransactionManager(_txm);
         scheduler.setJobProcessor(_server);
-        store = new ProcessStoreImpl(null, null, "jpa", new OdeConfigProperties(new Properties(), ""), true);
+        final EndpointReferenceContext eprContext = new EndpointReferenceContext() {
+            public EndpointReference resolveEndpointReference(Element epr) {
+                return null;
+            }
+
+            public EndpointReference convertEndpoint(QName targetType, Element sourceEndpoint) {
+                return null;
+            }
+
+            public Map getConfigLookup(EndpointReference epr) {
+                return Collections.EMPTY_MAP;
+            }
+        };
+        store = new ProcessStoreImpl(eprContext, null, "jpa", new OdeConfigProperties(new Properties(), ""), true);
         // not needed: we do eclipcitly in doDeployment
 //        store.registerListener(new ProcessStoreListener() {
 //            public void onProcessStoreEvent(ProcessStoreEvent event) {
