@@ -332,10 +332,9 @@ public class ODEServer {
         AxisService axisService = ODEAxisService.createService(_axisConfig, pconf, serviceName, portName);
         ODEService odeService = new ODEService(axisService, pconf, serviceName, portName, _server);
 
-        QName uniqueServiceName = new QName(axisService.getName());
-        destroyService(uniqueServiceName, portName);
+        destroyService(serviceName, portName);
 
-        _services.put(uniqueServiceName, portName, odeService);
+        _services.put(serviceName, portName, odeService);
 
         // Setting our new service on the ODE receiver
         Iterator operationIterator = axisService.getOperations();
