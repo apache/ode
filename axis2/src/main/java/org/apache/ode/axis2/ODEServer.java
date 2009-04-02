@@ -346,17 +346,11 @@ public class ODEServer {
     }
 
     public ODEService createService(ProcessConf pconf, QName serviceName, String portName) throws AxisFault {
-        // Since multiple processes may provide services at the same (JMS) endpoint, qualify
-        // the (JMS) endpoint-specific NCName with a process-relative URI, if necessary.
-        QName uniqueServiceName = new QName(
-                ODEAxisService.extractServiceName(pconf, serviceName, portName));
-
-        destroyService(uniqueServiceName, portName);
-
-        AxisService axisService = ODEAxisService.createService(
-                _axisConfig, pconf, serviceName, portName, uniqueServiceName.getLocalPart());
+        AxisService axisService = ODEAxisService.createService(_axisConfig, pconf, serviceName, portName);
         ODEService odeService = new ODEService(axisService, pconf, serviceName, portName, _server, _txMgr);
 
+        QName uniqueServiceName = new QName(axisService.getName());
+        destroyService(uniqueServiceName, portName);
         _services.put(uniqueServiceName, portName, odeService);
 
         // Setting our new service on the ODE receiver
