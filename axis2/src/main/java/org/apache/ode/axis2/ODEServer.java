@@ -20,30 +20,20 @@
 package org.apache.ode.axis2;
 
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.description.AxisOperation;
-import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.axis2.wsdl.WSDLConstants;
-import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.ode.axis2.deploy.DeploymentPoller;
-import org.apache.ode.axis2.hooks.ODEAxisService;
-import org.apache.ode.axis2.hooks.ODEMessageReceiver;
 import org.apache.ode.axis2.service.DeploymentWebService;
 import org.apache.ode.axis2.service.ManagementService;
-import org.apache.ode.axis2.httpbinding.HttpExternalService;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
-import org.apache.ode.bpel.engine.BpelEngineImpl;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
 import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
 import org.apache.ode.bpel.iapi.BpelEventListener;
-import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.iapi.ProcessStoreListener;
@@ -58,7 +48,6 @@ import org.apache.ode.scheduler.simple.JdbcDelegate;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.GUID;
-import org.apache.ode.utils.wsdl.WsdlUtils;
 import org.apache.ode.utils.fs.TempFileManager;
 
 import javax.servlet.ServletConfig;
@@ -74,13 +63,10 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.xa.XAResource;
-import javax.wsdl.Definition;
-import javax.xml.namespace.QName;
+import javax.wsdl.WSDLException;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.StringTokenizer;
-import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -103,7 +89,7 @@ public class ODEServer {
 
     protected File _configRoot;
 
-    protected BpelServerImpl _server;
+    protected BpelServerImpl _bpelServer;
 
     protected ProcessStoreImpl _store;
 
@@ -123,13 +109,11 @@ public class ODEServer {
 
     private DeploymentPoller _poller;
 
-    private MultiKeyMap _services = new MultiKeyMap();
-
     private BpelServerConnector _connector;
 
     private ManagementService _mgtService;
 
-    private MultiThreadedHttpConnectionManager httpConnectionManager;
+    protected MultiThreadedHttpConnectionManager httpConnectionManager;
 
 
     public void init(ServletConfig config, AxisConfiguration axisConf) throws ServletException {
@@ -137,97 +121,90 @@ public class ODEServer {
     }
 
     public void init(String contextPath, AxisConfiguration axisConf) throws ServletException {
-        boolean success = false;
+        _axisConfig = axisConf;
+        String rootDir = System.getProperty("org.apache.ode.rootDir");
+        if (rootDir != null) _appRoot = new File(rootDir);
+        else _appRoot = new File(contextPath);
+
+        if (!_appRoot.isDirectory())
+            throw new IllegalArgumentException(_appRoot + " does not exist or is not a directory");
+        TempFileManager.setWorkingDirectory(_appRoot);
+
+        __log.debug("Loading properties");
+        String confDir = System.getProperty("org.apache.ode.configDir");
+        _configRoot = confDir == null ? new File(_appRoot, "conf") : new File(confDir);
+        if (!_configRoot.isDirectory())
+            throw new IllegalArgumentException(_configRoot + " does not exist or is not a directory");
+
+        _odeConfig = new ODEConfigProperties(_configRoot);
+
         try {
-            _axisConfig = axisConf;
-            String rootDir = System.getProperty("org.apache.ode.rootDir");
-            if (rootDir != null) _appRoot = new File(rootDir);
-            else _appRoot = new File(contextPath);
-
-            if(!_appRoot.isDirectory()) throw new IllegalArgumentException(_appRoot+" does not exist or is not a directory");
-            TempFileManager.setWorkingDirectory(_appRoot);
-
-            __log.debug("Loading properties");
-            String confDir = System.getProperty("org.apache.ode.configDir");
-            _configRoot = confDir == null ? new File(_appRoot, "conf") : new File(confDir);
-            if(!_configRoot.isDirectory()) throw new IllegalArgumentException(_configRoot+" does not exist or is not a directory");
-
-            _odeConfig = new ODEConfigProperties(_configRoot);
-
-            try {
-                _odeConfig.load();
-            } catch (FileNotFoundException fnf) {
-                String errmsg = __msgs.msgOdeInstallErrorCfgNotFound(_odeConfig.getFile());
-                __log.warn(errmsg);
-            } catch (Exception ex) {
-                String errmsg = __msgs.msgOdeInstallErrorCfgReadError(_odeConfig.getFile());
-                __log.error(errmsg, ex);
-                throw new ServletException(errmsg, ex);
-            }
-
-            String wdir = _odeConfig.getWorkingDir();
-            if (wdir == null) _workRoot = _appRoot;
-            else _workRoot = new File(wdir.trim());
-            if(!_workRoot.isDirectory()) throw new IllegalArgumentException(_workRoot+" does not exist or is not a directory");
-
-            __log.debug("Initializing transaction manager");
-            initTxMgr();
-            __log.debug("Creating data source.");
-            initDataSource();
-            __log.debug("Starting DAO.");
-            initDAO();
-            EndpointReferenceContextImpl eprContext = new EndpointReferenceContextImpl(this);            
-            __log.debug("Initializing BPEL process store.");
-            initProcessStore(eprContext);
-            __log.debug("Initializing BPEL server.");
-            initBpelServer(eprContext);
-            __log.debug("Initializing HTTP connection manager");
-            initHttpConnectionManager();
-
-            // Register BPEL event listeners configured in axis2.properties file.
-            registerEventListeners();
-            registerMexInterceptors();
-
-            registerExternalVariableModules();
-
-            _store.loadAll();
-
-            try {
-                _server.start();
-            } catch (Exception ex) {
-                String errmsg = __msgs.msgOdeBpelServerStartFailure();
-                __log.error(errmsg, ex);
-                throw new ServletException(errmsg, ex);
-            }
-
-            _poller = new DeploymentPoller(_store.getDeployDir(), this);
-
-            _mgtService = new ManagementService();
-            _mgtService.enableService(_axisConfig, _server, _store, _appRoot.getAbsolutePath());
-
-            new DeploymentWebService().enableService(_axisConfig, _server, _store, _poller, _appRoot.getAbsolutePath(), _workRoot
-                    .getAbsolutePath());
-
-            __log.debug("Starting scheduler");
-            _scheduler.start();
-
-            __log.debug("Initializing JCA adapter.");
-            initConnector();
-
-            _poller.start();
-            __log.info(__msgs.msgPollingStarted(_store.getDeployDir().getAbsolutePath()));
-            __log.info(__msgs.msgOdeStarted());
-            success = true;
-        } finally {
-            if (!success)
-                try {
-                    // shutDown();
-                } catch (Exception ex) {
-                    // Problem rolling back start(). Not so important
-                    __log.debug("Error rolling back incomplete shutdown.", ex);
-                }
+            _odeConfig.load();
+        } catch (FileNotFoundException fnf) {
+            String errmsg = __msgs.msgOdeInstallErrorCfgNotFound(_odeConfig.getFile());
+            __log.warn(errmsg);
+        } catch (Exception ex) {
+            String errmsg = __msgs.msgOdeInstallErrorCfgReadError(_odeConfig.getFile());
+            __log.error(errmsg, ex);
+            throw new ServletException(errmsg, ex);
         }
 
+        String wdir = _odeConfig.getWorkingDir();
+        if (wdir == null) _workRoot = _appRoot;
+        else _workRoot = new File(wdir.trim());
+        if (!_workRoot.isDirectory())
+            throw new IllegalArgumentException(_workRoot + " does not exist or is not a directory");
+
+        __log.debug("Initializing transaction manager");
+        initTxMgr();
+        __log.debug("Creating data source.");
+        initDataSource();
+        __log.debug("Starting DAO.");
+        initDAO();
+        EndpointReferenceContextImpl eprContext = new EndpointReferenceContextImpl(this);
+        __log.debug("Initializing BPEL process store.");
+        initProcessStore(eprContext);
+        __log.debug("Initializing BPEL server.");
+        initBpelServer(eprContext);
+        __log.debug("Initializing HTTP connection manager");
+        initHttpConnectionManager();
+
+        // Register BPEL event listeners configured in axis2.properties file.
+        registerEventListeners();
+        registerMexInterceptors();
+        registerExternalVariableModules();
+
+        _store.loadAll();
+
+        try {
+            _bpelServer.start();
+        } catch (Exception ex) {
+            String errmsg = __msgs.msgOdeBpelServerStartFailure();
+            __log.error(errmsg, ex);
+            throw new ServletException(errmsg, ex);
+        }
+
+        _poller = new DeploymentPoller(_store.getDeployDir(), this);
+
+        _mgtService = new ManagementService();
+        _mgtService.enableService(_axisConfig, _bpelServer, _store, _appRoot.getAbsolutePath());
+
+        try {
+            __log.debug("Initializing Deployment Web Service");
+            new DeploymentWebService().enableService(_axisConfig, _store, _poller, _appRoot.getAbsolutePath(), _workRoot.getAbsolutePath());
+        } catch (Exception e) {
+            throw new ServletException(e);
+        }
+
+        __log.debug("Starting scheduler");
+        _scheduler.start();
+
+        __log.debug("Initializing JCA adapter.");
+        initConnector();
+
+        _poller.start();
+        __log.info(__msgs.msgPollingStarted(_store.getDeployDir().getAbsolutePath()));
+        __log.info(__msgs.msgOdeStarted());
     }
 
     private void initDataSource() throws ServletException {
@@ -265,18 +242,18 @@ public class ODEServer {
                     __log.debug("Error stopping poller.", t);
                 }
 
-            if (_server != null)
+            if (_bpelServer != null)
                 try {
                     __log.debug("shutting down ODE server.");
-                    _server.shutdown();
-                    _server = null;
+                    _bpelServer.shutdown();
+                    _bpelServer = null;
                 } catch (Throwable ex) {
                     __log.debug("Error stopping services.", ex);
                 }
 
             if (_scheduler != null)
                 try {
-                    __log.debug("shutting down quartz scheduler.");
+                    __log.debug("shutting down scheduler.");
                     _scheduler.shutdown();
                     _scheduler = null;
                 } catch (Exception ex) {
@@ -345,101 +322,6 @@ public class ODEServer {
         }
     }
 
-    public ODEService createService(ProcessConf pconf, QName serviceName, String portName) throws AxisFault {
-        AxisService axisService = ODEAxisService.createService(_axisConfig, pconf, serviceName, portName);
-        ODEService odeService = new ODEService(axisService, pconf, serviceName, portName, _server, _txMgr);
-
-        destroyService(serviceName, portName);
-        _services.put(serviceName, portName, odeService);
-
-        // Setting our new service on the ODE receiver
-        Iterator operationIterator = axisService.getOperations();
-        while(operationIterator.hasNext()){
-            AxisOperation op = (AxisOperation) operationIterator.next();
-            if(op.getMessageReceiver() instanceof ODEMessageReceiver){
-                ((ODEMessageReceiver) op.getMessageReceiver()).setService(odeService);
-                break;
-            }
-        }
-
-        // We're public!
-        _axisConfig.addService(axisService);
-        __log.debug("Created Axis2 service " + serviceName);
-        return odeService;
-    }
-
-    public ExternalService createExternalService(ProcessConf pconf, QName serviceName, String portName) throws ContextException {
-        ExternalService extService = null;
-
-        Definition def = pconf.getDefinitionForService(serviceName);
-        try {
-            if (WsdlUtils.useHTTPBinding(def, serviceName, portName)) {
-                if(__log.isDebugEnabled())__log.debug("Creating HTTP-bound external service " + serviceName);
-                extService = new HttpExternalService(pconf, serviceName, portName, _executorService, _scheduler, _server, httpConnectionManager);
-            } else if (WsdlUtils.useSOAPBinding(def, serviceName, portName)) {
-                if(__log.isDebugEnabled())__log.debug("Creating SOAP-bound external service " + serviceName);
-                extService = new SoapExternalService(pconf, serviceName, portName, _executorService, _axisConfig, _scheduler, _server, httpConnectionManager);
-            }
-        } catch (Exception ex) {
-            __log.error("Could not create external service.", ex);
-            throw new ContextException("Error creating external service! name:"+serviceName+", port:"+portName, ex);
-        }
-
-        // if not SOAP nor HTTP binding
-        if(extService==null){
-            throw new ContextException("Only SOAP and HTTP binding supported!");
-        }
-
-        __log.debug("Created external service " + serviceName);
-        return extService;
-    }
-
-    public void destroyService(QName serviceName, String portName) {
-        __log.debug("Destroying service " + serviceName + " port " + portName);
-        ODEService service = (ODEService) _services.remove(serviceName, portName);
-        if (service != null) {
-            // try to clean up the service after itself
-            try {
-                String axisServiceName = service.getAxisService().getName();
-            	AxisService axisService = _axisConfig.getService(axisServiceName);
-                // first, de-allocate its schemas
-            	axisService.releaseSchemaList();
-                // then, de-allocate its parameters
-                // the service's wsdl object model is stored as one of its parameters!
-                // can't stress strongly enough how important it is to clean this up.
-            	ArrayList<Parameter> parameters = (ArrayList<Parameter>) axisService.getParameters();
-            	for (Parameter parameter : parameters) {
-	            	axisService.removeParameter(parameter);
-            	}
-                // now, stop the service
-            	_axisConfig.stopService(axisServiceName);
-                // if only this method did a good job of cleaning up after itself
-                _axisConfig.removeService(axisServiceName);
-                _axisConfig.cleanup();
-            } catch (AxisFault axisFault) {
-                __log.error("Couldn't destroy service " + serviceName);
-            }
-        } else {
-            __log.debug("Couldn't find service " + serviceName + " port " + portName + " to destroy.");
-        }
-    }
-
-    public ODEService getService(QName serviceName, String portName) {
-        return (ODEService) _services.get(serviceName, portName);
-    }
-
-    public ODEService getService(QName serviceName, QName portTypeName) {
-        // TODO Normally this lookup should't exist as there could be more one
-        // than port
-        // TODO for a portType. See MessageExchangeContextImpl.
-        for (Object o : _services.values()) {
-            ODEService service = (ODEService) o;
-            if (service.respondsTo(serviceName, portTypeName))
-                return service;
-        }
-        return null;
-    }
-
     private void initTxMgr() throws ServletException {
         String txFactoryName = _odeConfig.getTxFactoryClass();
         __log.debug("Initializing transaction manager using " + txFactoryName);
@@ -461,7 +343,7 @@ public class ODEServer {
             __log.info("Skipping connector initialization.");
         } else {
             _connector = new BpelServerConnector();
-            _connector.setBpelServer(_server);
+            _connector.setBpelServer(_bpelServer);
             _connector.setProcessStore(_store);
             _connector.setPort(_odeConfig.getConnectorPort());
             _connector.setId("jcaServer");
@@ -528,25 +410,25 @@ public class ODEServer {
         else
             _executorService = Executors.newFixedThreadPool(_odeConfig.getThreadPoolMaxSize(), threadFactory);
 
-        _server = new BpelServerImpl();
+        _bpelServer = new BpelServerImpl();
         _scheduler = createScheduler();
-        _scheduler.setJobProcessor(_server);
+        _scheduler.setJobProcessor(_bpelServer);
 
-        _server.setDaoConnectionFactory(_daoCF);
-        _server.setInMemDaoConnectionFactory(new BpelDAOConnectionFactoryImpl(_scheduler, _odeConfig.getInMemMexTtl()));
-        _server.setEndpointReferenceContext(eprContext);
-        _server.setMessageExchangeContext(new MessageExchangeContextImpl(this));
-        _server.setBindingContext(new BindingContextImpl(this, _store));
-        _server.setScheduler(_scheduler);
+        _bpelServer.setDaoConnectionFactory(_daoCF);
+        _bpelServer.setInMemDaoConnectionFactory(new BpelDAOConnectionFactoryImpl(_scheduler, _odeConfig.getInMemMexTtl()));
+        _bpelServer.setEndpointReferenceContext(eprContext);
+        _bpelServer.setMessageExchangeContext(new MessageExchangeContextImpl(this));
+        _bpelServer.setBindingContext(new BindingContextImpl(this));
+        _bpelServer.setScheduler(_scheduler);
         if (_odeConfig.isDehydrationEnabled()) {
             CountLRUDehydrationPolicy dehy = new CountLRUDehydrationPolicy();
             dehy.setProcessMaxAge(_odeConfig.getDehydrationMaximumAge());
             dehy.setProcessMaxCount(_odeConfig.getDehydrationMaximumCount());
-            _server.setDehydrationPolicy(dehy);
+            _bpelServer.setDehydrationPolicy(dehy);
         }
-        _server.setHydrationLazy(_odeConfig.isHydrationLazy());
-        _server.setConfigProperties(_odeConfig.getProperties());
-        _server.init();
+        _bpelServer.setHydrationLazy(_odeConfig.isHydrationLazy());
+        _bpelServer.setConfigProperties(_odeConfig.getProperties());
+        _bpelServer.init();
     }
 
     private void initHttpConnectionManager() throws ServletException {
@@ -572,7 +454,7 @@ public class ODEServer {
     }
 
     public BpelServerImpl getBpelServer() {
-        return _server;
+        return _bpelServer;
     }
 
     public InstanceManagement getInstanceManagement() {
@@ -593,7 +475,7 @@ public class ODEServer {
             for (StringTokenizer tokenizer = new StringTokenizer(listenersStr, ",;"); tokenizer.hasMoreTokens();) {
                 String listenerCN = tokenizer.nextToken();
                 try {
-                    _server.registerBpelEventListener((BpelEventListener) Class.forName(listenerCN).newInstance());
+                    _bpelServer.registerBpelEventListener((BpelEventListener) Class.forName(listenerCN).newInstance());
                     __log.info(__msgs.msgBpelEventListenerRegistered(listenerCN));
                 } catch (Exception e) {
                     __log.warn("Couldn't register the event listener " + listenerCN + ", the class couldn't be "
@@ -610,7 +492,7 @@ public class ODEServer {
             for (StringTokenizer tokenizer = new StringTokenizer(listenersStr, ",;"); tokenizer.hasMoreTokens();) {
                 String interceptorCN = tokenizer.nextToken();
                 try {
-                    _server.registerMessageExchangeInterceptor((MessageExchangeInterceptor) Class.forName(interceptorCN).newInstance());
+                    _bpelServer.registerMessageExchangeInterceptor((MessageExchangeInterceptor) Class.forName(interceptorCN).newInstance());
                     __log.info(__msgs.msgMessageExchangeInterceptorRegistered(interceptorCN));
                 } catch (Exception e) {
                     __log.warn("Couldn't register the event listener " + interceptorCN + ", the class couldn't be "
@@ -624,7 +506,7 @@ public class ODEServer {
         JdbcExternalVariableModule jdbcext;
         jdbcext = new JdbcExternalVariableModule();
         jdbcext.registerDataSource("ode", _db.getDataSource());
-        _server.registerExternalVariableEngine(jdbcext);
+        _bpelServer.registerExternalVariableEngine(jdbcext);
 
     }
 
@@ -642,10 +524,10 @@ public class ODEServer {
         switch (pse.type) {
             case ACTVIATED:
                 // bounce the process
-                _server.unregister(pse.pid);
+                _bpelServer.unregister(pse.pid);
                 pconf = _store.getProcessConfiguration(pse.pid);
                 if (pconf != null) {
-                	_server.register(pconf);
+                	_bpelServer.register(pconf);
                 } else {
                 	__log.debug("slighly odd: recevied event " + 
                 			pse + " for process not in store!");
@@ -653,14 +535,14 @@ public class ODEServer {
                 break;
             case RETIRED:
             	// are there are instances of this process running? 
-            	boolean instantiated = _server.hasActiveInstances(pse.pid);
+            	boolean instantiated = _bpelServer.hasActiveInstances(pse.pid);
             	// remove the process
-                _server.unregister(pse.pid);
+                _bpelServer.unregister(pse.pid);
                 // bounce the process if necessary  
                 if (instantiated) {
 	                pconf = _store.getProcessConfiguration(pse.pid);
 	                if (pconf != null) {
-	                	_server.register(pconf);
+	                	_bpelServer.register(pconf);
 	                } else {
 	                	__log.debug("slighly odd: recevied event " + 
 	                			pse + " for process not in store!");
@@ -672,8 +554,8 @@ public class ODEServer {
                 break;
             case DISABLED:
             case UNDEPLOYED:
-                _server.unregister(pse.pid);
-                _server.cleanupProcess(pse.pid);
+                _bpelServer.unregister(pse.pid);
+                _bpelServer.cleanupProcess(pse.pid);
                 break;
             default:
                 __log.debug("Ignoring store event: " + pse);
