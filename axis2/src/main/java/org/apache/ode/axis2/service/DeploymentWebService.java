@@ -82,28 +82,22 @@ public class DeploymentWebService {
         _deployapi = OMAbstractFactory.getOMFactory().createOMNamespace("http://www.apache.org/ode/deployapi","deployapi");
     }
 
-    public void enableService(AxisConfiguration axisConfig, BpelServer server, ProcessStore store,
-                              DeploymentPoller poller, String rootpath, String workPath) {
+    public void enableService(AxisConfiguration axisConfig, ProcessStore store,
+                              DeploymentPoller poller, String rootpath, String workPath) throws AxisFault, WSDLException {
         _deployPath = new File(workPath, "processes");
         _store = store;
+        _poller = poller;
 
         Definition def;
-        try {
-            WSDLReader wsdlReader = WSDLFactory.newInstance().newWSDLReader();
-            wsdlReader.setFeature("javax.wsdl.verbose", false);
+        WSDLReader wsdlReader = WSDLFactory.newInstance().newWSDLReader();
+        wsdlReader.setFeature("javax.wsdl.verbose", false);
 
-            File wsdlFile = new File(rootpath + "/deploy.wsdl");
-            def = wsdlReader.readWSDL(wsdlFile.toURI().toString());
-            AxisService deployService = ODEAxisService.createService(
-                    axisConfig, new QName("http://www.apache.org/ode/deployapi", "DeploymentService"),
-                    "DeploymentPort", "DeploymentService", def, new DeploymentMessageReceiver());
-            axisConfig.addService(deployService);
-            _poller = poller;
-        } catch (WSDLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        File wsdlFile = new File(rootpath + "/deploy.wsdl");
+        def = wsdlReader.readWSDL(wsdlFile.toURI().toString());
+        AxisService deployService = ODEAxisService.createService(
+                axisConfig, new QName("http://www.apache.org/ode/deployapi", "DeploymentService"),
+                "DeploymentPort", "DeploymentService", def, new DeploymentMessageReceiver());
+        axisConfig.addService(deployService);
     }
 
     class DeploymentMessageReceiver extends AbstractMessageReceiver {
@@ -178,9 +172,8 @@ public class DeploymentWebService {
                         throw new OdeFault("Couldn't find deployment package " + pkg + " in directory " + _deployPath);
 
                     try {
-                        // We're going to create a directory under the deployment root and put
-                        // files in there. The poller shouldn't pick them up so we're asking
-                        // it to hold on for a while.
+                        // We're going to delete files & directories under the deployment root.
+                        // Put the poller on hold to avoid undesired side effects
                         _poller.hold();
 
                         Collection<QName> undeployed = _store.undeploy(deploymentDir);

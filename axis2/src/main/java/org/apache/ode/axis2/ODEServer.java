@@ -100,7 +100,7 @@ public class ODEServer {
     protected File _appRoot;
     protected File _configRoot;
     protected File _workRoot;
-    protected BpelServerImpl _server;
+    protected BpelServerImpl _bpelServer;
     protected ProcessStoreImpl _store;
     protected ODEConfigProperties _odeConfig;
     protected AxisConfiguration _axisConfig;
@@ -112,8 +112,8 @@ public class ODEServer {
     private MultiKeyMap _services = new MultiKeyMap();
     private BpelServerConnector _connector;
     private ManagementService _mgtService;
-    private MultiThreadedHttpConnectionManager httpConnectionManager;
-    
+    protected MultiThreadedHttpConnectionManager httpConnectionManager;
+
     public void init(ServletConfig config, AxisConfiguration axisConf) throws ServletException {
         init(config.getServletContext().getRealPath("/WEB-INF"), axisConf);
     }
@@ -176,7 +176,7 @@ public class ODEServer {
             registerExternalVariableModules();
 
             try {
-                _server.start();
+                _bpelServer.start();
             } catch (Exception ex) {
                 String errmsg = __msgs.msgOdeBpelServerStartFailure();
                 __log.error(errmsg, ex);
@@ -187,11 +187,15 @@ public class ODEServer {
             _poller = new DeploymentPoller(deploymentDir, this);
 
             _mgtService = new ManagementService();
-            _mgtService.enableService(_axisConfig, _server, _store, _appRoot.getAbsolutePath());
+            _mgtService.enableService(_axisConfig, _bpelServer, _store, _appRoot.getAbsolutePath());
 
-            new DeploymentWebService().enableService(_axisConfig, _server, _store, _poller, _appRoot.getAbsolutePath(), _workRoot
-                    .getAbsolutePath());
-
+            try {
+                __log.debug("Initializing Deployment Web Service");
+                new DeploymentWebService().enableService(_axisConfig, _store, _poller, _appRoot.getAbsolutePath(), _workRoot
+                        .getAbsolutePath());
+            } catch (Exception e) {
+                throw new ServletException(e);
+            }
             _store.loadAll();
 
             __log.debug("Initializing JCA adapter.");
@@ -248,11 +252,11 @@ public class ODEServer {
                     __log.debug("Error stopping poller.", t);
                 }
 
-            if (_server != null)
+            if (_bpelServer != null)
                 try {
                     __log.debug("shutting down ODE server.");
-                    _server.shutdown();
-                    _server = null;
+                    _bpelServer.shutdown();
+                    _bpelServer = null;
                 } catch (Throwable ex) {
                     __log.debug("Error stopping services.", ex);
                 }
@@ -330,7 +334,7 @@ public class ODEServer {
 
     public ODEService createService(ProcessConf pconf, QName serviceName, String portName) throws AxisFault {
         AxisService axisService = ODEAxisService.createService(_axisConfig, pconf, serviceName, portName);
-        ODEService odeService = new ODEService(axisService, pconf, serviceName, portName, _server);
+        ODEService odeService = new ODEService(axisService, pconf, serviceName, portName, _bpelServer);
 
         destroyService(serviceName, portName);
 
@@ -358,7 +362,7 @@ public class ODEServer {
         try {
              if (WsdlUtils.useHTTPBinding(def, serviceName, portName)) {
                  if(__log.isDebugEnabled())__log.debug("Creating HTTP-bound external service " + serviceName);
-                 extService = new HttpExternalService(pconf, serviceName, portName, _server, httpConnectionManager);
+                 extService = new HttpExternalService(pconf, serviceName, portName, _bpelServer, httpConnectionManager);
              } else if (WsdlUtils.useSOAPBinding(def, serviceName, portName)) {
                  if(__log.isDebugEnabled())__log.debug("Creating SOAP-bound external service " + serviceName);
                  extService = new SoapExternalService(def, serviceName, portName, _axisConfig, pconf, httpConnectionManager);
@@ -428,7 +432,7 @@ public class ODEServer {
             __log.info("Skipping connector initialization.");
         } else {
             _connector = new BpelServerConnector();
-            _connector.setBpelServer(_server);
+            _connector.setBpelServer(_bpelServer);
             _connector.setProcessStore(_store);
             _connector.setPort(_odeConfig.getConnectorPort());
             _connector.setId(_odeConfig.getConnectorName());
@@ -480,23 +484,23 @@ public class ODEServer {
             __log.debug("ODE initializing");
         }
 
-        _server = new BpelServerImpl();
+        _bpelServer = new BpelServerImpl();
         _scheduler = createScheduler();
-        _scheduler.setJobProcessor(_server);
+        _scheduler.setJobProcessor(_bpelServer);
 
-        _server.setDaoConnectionFactory(_daoCF);
-        _server.setEndpointReferenceContext(eprContext);
-        _server.setMessageExchangeContext(new MessageExchangeContextImpl(this));
-        _server.setBindingContext(new BindingContextImpl(this, _store));
-        _server.setScheduler(_scheduler);
-        _server.setTransactionManager(_txMgr);
+        _bpelServer.setDaoConnectionFactory(_daoCF);
+        _bpelServer.setEndpointReferenceContext(eprContext);
+        _bpelServer.setMessageExchangeContext(new MessageExchangeContextImpl(this));
+        _bpelServer.setBindingContext(new BindingContextImpl(this));
+        _bpelServer.setScheduler(_scheduler);
+        _bpelServer.setTransactionManager(_txMgr);
         if (_odeConfig.isDehydrationEnabled()) {
             CountLRUDehydrationPolicy dehy = new CountLRUDehydrationPolicy();
             // dehy.setProcessMaxAge(10000);
-            _server.setDehydrationPolicy(dehy);
+            _bpelServer.setDehydrationPolicy(dehy);
         }
-        _server.setConfigProperties(_odeConfig);
-        _server.init();
+        _bpelServer.setConfigProperties(_odeConfig);
+        _bpelServer.init();
     }
 
     private void initHttpConnectionManager() throws ServletException {
@@ -522,7 +526,7 @@ public class ODEServer {
     }
 
     public BpelServerImpl getBpelServer() {
-        return _server;
+        return _bpelServer;
     }
 
     public InstanceManagement getInstanceManagement() {
@@ -544,7 +548,7 @@ public class ODEServer {
     private void registerEventListeners() {
 
         // let's always register the debugging listener....
-        _server.registerBpelEventListener(new DebugBpelEventListener());
+        _bpelServer.registerBpelEventListener(new DebugBpelEventListener());
 
         // then, whatever else they want.
         String listenersStr = _odeConfig.getEventListeners();
@@ -552,7 +556,7 @@ public class ODEServer {
             for (StringTokenizer tokenizer = new StringTokenizer(listenersStr, ",;"); tokenizer.hasMoreTokens();) {
                 String listenerCN = tokenizer.nextToken();
                 try {
-                    _server.registerBpelEventListener((BpelEventListener) Class.forName(listenerCN).newInstance());
+                    _bpelServer.registerBpelEventListener((BpelEventListener) Class.forName(listenerCN).newInstance());
                     __log.info(__msgs.msgBpelEventListenerRegistered(listenerCN));
                 } catch (Exception e) {
                     __log.warn("Couldn't register the event listener " + listenerCN + ", the class couldn't be "
@@ -569,7 +573,7 @@ public class ODEServer {
             for (StringTokenizer tokenizer = new StringTokenizer(listenersStr, ",;"); tokenizer.hasMoreTokens();) {
                 String interceptorCN = tokenizer.nextToken();
                 try {
-                    _server.registerMessageExchangeInterceptor((MessageExchangeInterceptor) Class.forName(interceptorCN).newInstance());
+                    _bpelServer.registerMessageExchangeInterceptor((MessageExchangeInterceptor) Class.forName(interceptorCN).newInstance());
                     __log.info(__msgs.msgMessageExchangeInterceptorRegistered(interceptorCN));
                 } catch (Exception e) {
                     __log.warn("Couldn't register the event listener " + interceptorCN + ", the class couldn't be "
@@ -590,7 +594,7 @@ public class ODEServer {
                     // instantiate bundle
                     ExtensionBundleRuntime bundleRT = (ExtensionBundleRuntime) Class.forName(bundleCN).newInstance();
                     // register extension bundle (BPEL server)
-                    _server.registerExtensionBundle(bundleRT);
+                    _bpelServer.registerExtensionBundle(bundleRT);
                 } catch (Exception e) {
                     __log.warn("Couldn't register the extension bundle runtime " + bundleCN + ", the class couldn't be " +
                             "loaded properly.");
@@ -620,7 +624,7 @@ public class ODEServer {
         JdbcExternalVariableModule jdbcext;
         jdbcext = new JdbcExternalVariableModule();
         jdbcext.registerDataSource("ode", _db.getDataSource());
-        _server.registerExternalVariableEngine(jdbcext);
+        _bpelServer.registerExternalVariableEngine(jdbcext);
 
     }
 
@@ -638,14 +642,14 @@ public class ODEServer {
             case ACTIVATED:
             case RETIRED:
                 // bounce the process
-                _server.unregister(pse.pid);
+                _bpelServer.unregister(pse.pid);
                 ProcessConf pconf = _store.getProcessConfiguration(pse.pid);
-                if (pconf != null) _server.register(pconf);
+                if (pconf != null) _bpelServer.register(pconf);
                 else __log.debug("slighly odd: recevied event " + pse + " for process not in store!");
                 break;
             case DISABLED:
             case UNDEPLOYED:
-                _server.unregister(pse.pid);
+                _bpelServer.unregister(pse.pid);
                 break;
             default:
                 __log.debug("Ignoring store event: " + pse);
