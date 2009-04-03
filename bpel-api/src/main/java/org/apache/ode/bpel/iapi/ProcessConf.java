@@ -73,6 +73,12 @@ public interface ProcessConf {
     InputStream getCBPInputStream();
    
     /**
+     * Get the CBP file size. 
+     * @return size of the CBP file.
+     */
+    long getCBPFileSize();
+    
+    /**
      * Get the path of the BPEL document, relative to its deployment unit 
      * @return Relative path of BPEL document
      */

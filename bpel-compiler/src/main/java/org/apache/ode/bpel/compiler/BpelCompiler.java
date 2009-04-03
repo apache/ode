@@ -111,15 +111,16 @@ import org.apache.ode.bpel.o.OXsdTypeVarType;
 import org.apache.ode.bpel.o.OXslSheet;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.NSContext;
+import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.StreamUtils;
 import org.apache.ode.utils.fs.FileUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 import org.apache.ode.utils.stl.UnaryFunction;
+import org.apache.ode.utils.xsd.SchemaModel;
 import org.apache.ode.utils.xsd.XSUtils;
 import org.apache.ode.utils.xsd.XsdException;
-import org.apache.ode.utils.xsd.SchemaModel;
 import org.apache.xerces.xni.parser.XMLEntityResolver;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -767,7 +768,17 @@ abstract class BpelCompiler implements CompilerContext {
         constants.qnForEachCounterError = new QName(getBpwsNamespace(), "forEachCounterError");
         constants.qnInvalidBranchCondition = new QName(getBpwsNamespace(), "invalidBranchCondition");
         constants.qnInvalidExpressionValue = new QName(getBpwsNamespace(), "invalidExpressionValue");
+
+        constants.qnRetiredProcess = new QName(getOdeNamespace(), "retiredProcess");
+        constants.qnTooManyInstances = new QName(getOdeNamespace(), "tooManyInstances");
+        constants.qnUnknownFault = new QName(getOdeNamespace(), "unknownFault");
+        constants.qnTooManyProcesses = new QName(getOdeNamespace(), "tooManyProcesses");
+        constants.qnTooHugeProcesses = new QName(getOdeNamespace(), "tooHugeProcesses");
         return constants;
+    }
+    
+    private String getOdeNamespace() {
+    	return Namespaces.ODE_EXTENSION_NS;
     }
 
     // TODO unused?

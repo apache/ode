@@ -114,38 +114,40 @@ public class DeploymentPoller {
         File[] files = _deployDir.listFiles(_fileFilter);
 
         // Checking for new deployment directories
-        for (File file : files) {
-            File deployXml = new File(file, "deploy.xml");
-            File deployedMarker = new File(_deployDir, file.getName() + ".deployed");
-
-            if (!deployXml.exists()) {
-                // Skip if deploy.xml is abset
-                __log.debug("Not deploying " + file + " (missing deploy.xml)");
-            }
-
-            if (deployedMarker.exists()) {
-                continue;
-            }
-
-            try {
-                deployedMarker.createNewFile();
-            } catch (IOException e1) {
-                __log.error("Error creating deployed marker file, " + file + " will not be deployed");
-                continue;
-            }
-
-            try {
-                _odeServer.getProcessStore().undeploy(file);
-            } catch (Exception ex) {
-                __log.error("Error undeploying " + file.getName());
-            }
-
-            try {
-                Collection<QName> deployed = _odeServer.getProcessStore().deploy(file);
-                __log.info("Deployment of artifact " + file.getName() + " successful: " + deployed );
-            } catch (Exception e) {
-                __log.error("Deployment of " + file.getName() + " failed, aborting for now.", e);
-            }
+        if (files != null) {
+	        for (File file : files) {
+	            File deployXml = new File(file, "deploy.xml");
+	            File deployedMarker = new File(_deployDir, file.getName() + ".deployed");
+	
+	            if (!deployXml.exists()) {
+	                // Skip if deploy.xml is abset
+	                __log.debug("Not deploying " + file + " (missing deploy.xml)");
+	            }
+	
+	            if (deployedMarker.exists()) {
+	                continue;
+	            }
+	
+	            try {
+	                deployedMarker.createNewFile();
+	            } catch (IOException e1) {
+	                __log.error("Error creating deployed marker file, " + file + " will not be deployed");
+	                continue;
+	            }
+	
+	            try {
+	                _odeServer.getProcessStore().undeploy(file);
+	            } catch (Exception ex) {
+	                __log.error("Error undeploying " + file.getName());
+	            }
+	
+	            try {
+	                Collection<QName> deployed = _odeServer.getProcessStore().deploy(file);
+	                __log.info("Deployment of artifact " + file.getName() + " successful: " + deployed );
+	            } catch (Exception e) {
+	                __log.error("Deployment of " + file.getName() + " failed, aborting for now.", e);
+	            }
+	        }
         }
 
         // Removing deployments that disappeared

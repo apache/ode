@@ -73,4 +73,8 @@ public class BindingContextImpl implements BindingContext {
 		return new PartnerRoleChannelImpl();
 	}
 
+	public long calculateSizeofService(EndpointReference epr) {
+		return 0;
+	}
+
 }

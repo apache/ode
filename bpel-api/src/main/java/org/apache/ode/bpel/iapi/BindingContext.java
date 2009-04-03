@@ -82,6 +82,12 @@ public interface BindingContext {
     PartnerRoleChannel createPartnerRoleChannel(QName processId, PortType portType,
             Endpoint initialPartnerEndpoint);
     
+    /**
+     * Calculate the size of the service that this endpoint references.
+     * @param epr the endpoint reference for the service
+     * @returns the size of the service
+     */
+    long calculateSizeofService(EndpointReference epr);
     
     
 }

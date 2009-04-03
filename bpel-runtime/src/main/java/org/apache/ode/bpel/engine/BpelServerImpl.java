@@ -88,9 +88,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
     private State _state = State.SHUTDOWN;
     private Contexts _contexts = new Contexts();
+    private Properties _configProperties;
     private DehydrationPolicy _dehydrationPolicy;
     private boolean _hydrationLazy;
-    private Properties _configProperties;
+	private int _hydrationLazyMinimumSize;
     
     BpelEngineImpl _engine;
     protected BpelDatabase _db;
@@ -289,14 +290,26 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             _engine.registerProcess(process);
             _registeredProcesses.add(process);
-            if (!_hydrationLazy) {
+            if (!isLazyHydratable(process)) {
             	process.hydrate();
+            } else {
+            	_engine.setProcessSize(process.getPID(), false);
             }
 
             __log.info(__msgs.msgProcessRegistered(conf.getProcessId()));
         } finally {
             _mngmtLock.writeLock().unlock();
         }
+    }
+        
+    private boolean isLazyHydratable(BpelProcess process) {
+    	if (process.isHydrationLazySet()) {
+    		return process.isHydrationLazy();
+    	}
+    	if (!_hydrationLazy) {
+    		return false;
+    	}
+    	return process.getEstimatedHydratedSize() < _hydrationLazyMinimumSize;
     }
 
     // enable extensibility
@@ -343,7 +356,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
      */
     public void registerMessageExchangeInterceptor(MessageExchangeInterceptor interceptor) {
         // NOTE: do not synchronize, globalInterceptors is copy-on-write.
-        _contexts.globalIntereceptors.add(interceptor);
+        _contexts.globalInterceptors.add(interceptor);
     }
 
     /**
@@ -352,7 +365,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
      */
     public void unregisterMessageExchangeInterceptor(MessageExchangeInterceptor interceptor) {
         // NOTE: do not synchronize, globalInterceptors is copy-on-write.
-        _contexts.globalIntereceptors.remove(interceptor);
+        _contexts.globalInterceptors.remove(interceptor);
     }
 
     /**
@@ -480,4 +493,22 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 		this._hydrationLazy = hydrationLazy;
 	}
 
+	public void setProcessThrottledMaximumSize(
+			long hydrationThrottledMaximumSize) {
+		_engine.setProcessThrottledMaximumSize(hydrationThrottledMaximumSize);
+	}
+	
+	public void setProcessThrottledMaximumCount(
+			int hydrationThrottledMaximumCount) {
+		_engine.setProcessThrottledMaximumCount(hydrationThrottledMaximumCount);
+	}
+
+	public void setHydrationLazyMinimumSize(int hydrationLazyMinimumSize) {
+		this._hydrationLazyMinimumSize = hydrationLazyMinimumSize;
+	}
+
+	public void setInstanceThrottledMaximumCount(
+			int instanceThrottledMaximumCount) {
+		_engine.setInstanceThrottledMaximumCount(instanceThrottledMaximumCount);
+	}
 }

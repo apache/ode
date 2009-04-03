@@ -19,6 +19,7 @@
 
 package org.apache.ode.bpel.engine;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
@@ -79,7 +80,7 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
      */
     private boolean processInterceptors(MyRoleMessageExchangeImpl mex, InterceptorInvoker invoker) {
         InterceptorContextImpl ictx = new InterceptorContextImpl(_engine._contexts.dao.getConnection(), 
-                mex._dao.getProcess(), null);
+                mex._dao.getProcess(), null, _engine, _process);
 
         for (MessageExchangeInterceptor i : _engine.getGlobalInterceptors())
             if (!processInterceptor(i, mex, ictx, invoker))
@@ -184,7 +185,9 @@ class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMes
 
     public void release(boolean instanceSucceeded) {
         if(__log.isDebugEnabled()) __log.debug("Releasing mex " + getMessageExchangeId());
-        _dao.release(_process.isCleanupCategoryEnabled(instanceSucceeded, CLEANUP_CATEGORY.MESSAGES));
+        if (_process != null) {
+	        _dao.release(_process.isCleanupCategoryEnabled(instanceSucceeded, CLEANUP_CATEGORY.MESSAGES));
+        }
         _dao = null;
     }
     

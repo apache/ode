@@ -41,6 +41,8 @@ public interface BpelEngine extends Scheduler.JobProcessor {
      *            the service id of the process being called, if known
      * @param operation
      *            name of the operation
+     * @param style
+     * 			  style of the operation
      * 
      * @return {@link MyRoleMessageExchange} the newly created message exchange
      */
@@ -55,5 +57,15 @@ public interface BpelEngine extends Scheduler.JobProcessor {
      * @return associated message exchange
      */
     MessageExchange getMessageExchange(String mexId);
+
+	int getProcessThrottledMaximumCount();
+	
+	long getProcessThrottledMaximumSize();
+	
+	int getHydratedProcessCount(QName processName);
+
+	long getHydratedProcessSize(QName processName);
+
+	boolean dehydrateLastUnusedProcess();
 
 }

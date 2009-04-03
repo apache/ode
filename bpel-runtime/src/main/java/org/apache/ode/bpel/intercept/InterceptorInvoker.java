@@ -50,6 +50,14 @@ public abstract class InterceptorInvoker {
 		}
 	};
 
+	/** Invoke {@link MessageExchangeInterceptor#onBpelServerInvoked(MyRoleMessageExchange, InterceptorContext)} */
+	public static final InterceptorInvoker __onJobScheduled = new InterceptorInvoker("onJobScheduled") {
+		public void invoke(MessageExchangeInterceptor i, MessageExchange mex, InterceptorContext ictx) 
+			throws FailMessageExchangeException, FaultMessageExchangeException {
+			i.onJobScheduled((MyRoleMessageExchange) mex, ictx);
+		}
+	};
+	
 	/** Invoke {@link MessageExchangeInterceptor#onPartnerInvoked(PartnerRoleMessageExchange, InterceptorContext)} */
 	public static final InterceptorInvoker __onPartnerInvoked = new InterceptorInvoker("onPartnerInvoked") {
 		public void invoke(MessageExchangeInterceptor i, MessageExchange mex, InterceptorContext ictx) 

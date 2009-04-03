@@ -19,6 +19,7 @@
 
 package org.apache.ode.bpel.epr;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
@@ -123,5 +124,4 @@ public class EndpointFactory {
         
         return new WSAEndpoint(source.toMap());
     }
-
 }

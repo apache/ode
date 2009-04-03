@@ -84,7 +84,12 @@ public class JettyWrapper {
     }
 
     public void start() throws Exception {
-        server.start();
+        try {
+        	server.start();
+        } catch (Exception e) {
+        	server.stop();
+        	server.start();
+        }
     }
 
     public void stop() throws Exception {

@@ -39,10 +39,12 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.agents.memory.SizingAgent;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.ProcessAndInstanceManagementImpl;
 import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
@@ -115,6 +117,8 @@ final public class OdeContext {
 
     /** Mapping of Endpoint to OdeService */
     private Map<Endpoint, OdeService> _activeOdeServices = new ConcurrentHashMap<Endpoint, OdeService>();
+    private Map<OdeService, EndpointReference> _serviceEprMap = new HashMap<OdeService, EndpointReference>();
+
 
     /**
      * Gets the delivery channel.
@@ -214,6 +218,7 @@ final public class OdeContext {
         MyEndpointReference myepr = new MyEndpointReference(service);
         service.activate();
         _activeOdeServices.put(endpoint, service);
+        _serviceEprMap.put(service, myepr);
         return myepr;
 
     }
@@ -222,6 +227,7 @@ final public class OdeContext {
         OdeService svc = _activeOdeServices.remove(endpoint);
 
         if (svc != null) {
+            _serviceEprMap.remove(svc);
             svc.deactivate();
         }
     }
@@ -302,5 +308,17 @@ final public class OdeContext {
                 __log.error("Error deactivating InstanceManagement service", e);
             }
         }
+    }
+    
+    public long calculateSizeOfService(EndpointReference epr) {
+    	if (epr != null) {
+	    	for (OdeService odeService : _serviceEprMap.keySet()) {
+	    		EndpointReference serviceEpr = _serviceEprMap.get(odeService);
+	    		if (serviceEpr != null && epr.equals(serviceEpr)) {
+					return SizingAgent.deepSizeOf(odeService);
+	    		}
+	    	}
+    	}
+    	return 0;
     }
 }

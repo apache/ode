@@ -155,6 +155,8 @@ abstract class MessageExchangeImpl implements MessageExchange {
         setStatus(Status.FAULT);
         getDAO().setFault(faultType);
         getDAO().setResponse(((MessageImpl)outputFaultMessage)._dao);
+        
+        responseReceived();
     }
 
     void setFaultExplanation(String explanation) {

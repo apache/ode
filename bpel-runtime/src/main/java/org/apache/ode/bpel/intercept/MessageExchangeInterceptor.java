@@ -20,6 +20,8 @@ package org.apache.ode.bpel.intercept;
 
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.engine.BpelProcess;
+import org.apache.ode.bpel.iapi.BpelEngine;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessConf;
@@ -33,6 +35,16 @@ import org.apache.ode.bpel.iapi.ProcessConf;
  */
 public interface MessageExchangeInterceptor {
 
+    /**
+     * Called when the message is scheduled, before any attempt to
+     * invoke the BPEL server is made.
+     * 
+     * @param mex
+     *            message exchange
+     */
+    void onJobScheduled(MyRoleMessageExchange mex, InterceptorContext ic)
+        throws FailMessageExchangeException, FaultMessageExchangeException;
+    
     /**
      * Called when the BPEL server is invoked, before any attempt to route the
      * message exchange to a process.
@@ -82,6 +94,10 @@ public interface MessageExchangeInterceptor {
         ProcessDAO getProcessDAO();
 
         ProcessConf getProcessConf();
+        
+        BpelEngine getBpelEngine();
+
+		BpelProcess getBpelProcess();
 
     }
 }

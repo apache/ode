@@ -31,6 +31,11 @@ import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
  */
 public class NoOpInterceptor implements MessageExchangeInterceptor {
 
+	public void onJobScheduled(MyRoleMessageExchange mex,
+			InterceptorContext ic) throws FailMessageExchangeException,
+			FaultMessageExchangeException {
+	}
+	
 	public void onBpelServerInvoked(MyRoleMessageExchange mex,
 			InterceptorContext ic) throws FailMessageExchangeException,
 			FaultMessageExchangeException {

@@ -263,6 +263,10 @@ class MockBpelServer {
                     public void close() { };
                 };
             }
+
+			public long calculateSizeofService(EndpointReference epr) {
+				return 0;
+			}
         };
         return _bindContext;
     }

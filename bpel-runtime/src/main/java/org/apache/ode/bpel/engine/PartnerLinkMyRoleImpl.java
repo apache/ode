@@ -184,7 +184,7 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 
         if (!_process.processInterceptors(mex, InterceptorInvoker.__onNewInstanceInvoked)) {
             __log.debug("Not creating a new instance for mex " + mex + "; interceptor prevented!");
-            return;
+            throw new InvalidProcessException("Cannot instantiate process '" + _process.getPID() + "' any more.", InvalidProcessException.TOO_MANY_INSTANCES_CAUSE_CODE);
         }
 
         ProcessInstanceDAO newInstance = processDAO.createInstance(routing.correlator);

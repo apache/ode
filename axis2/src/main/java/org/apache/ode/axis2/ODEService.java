@@ -19,12 +19,25 @@
 
 package org.apache.ode.axis2;
 
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import javax.transaction.TransactionManager;
+import javax.wsdl.Definition;
+import javax.wsdl.Port;
+import javax.wsdl.Service;
+import javax.wsdl.extensions.UnknownExtensibilityElement;
+import javax.wsdl.extensions.http.HTTPAddress;
+import javax.wsdl.extensions.soap.SOAPAddress;
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axiom.soap.SOAPFault;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.TwoChannelAxisOperation;
 import org.apache.axis2.transport.jms.JMSConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,18 +57,6 @@ import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.Properties;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.transaction.TransactionManager;
-import javax.wsdl.Definition;
-import javax.wsdl.Port;
-import javax.wsdl.Service;
-import javax.wsdl.extensions.UnknownExtensibilityElement;
-import javax.wsdl.extensions.http.HTTPAddress;
-import javax.wsdl.extensions.soap.SOAPAddress;
-import javax.xml.namespace.QName;
-
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A running service, encapsulates the Axis service, its receivers and our
@@ -88,7 +89,11 @@ public class ODEService {
         _converter = new SoapMessageConverter(_wsdlDef, serviceName, portName);
 
     }
-
+    
+    public String getName() {
+    	return _axisService.getName();
+    }
+    
     public void onAxisMessageExchange(MessageContext msgContext, MessageContext outMsgContext, SOAPFactory soapFactory)
             throws AxisFault {
         boolean success = true;
@@ -103,7 +108,7 @@ public class ODEService {
             odeMex = _server.getEngine().createMessageExchange("" + messageId, _serviceName,
                     msgContext.getAxisOperation().getName().getLocalPart());
             __log.debug("ODE routed to operation " + odeMex.getOperation() + " from service " + _serviceName);
-            
+            odeMex.setProperty("isTwoWay", Boolean.toString(msgContext.getAxisOperation() instanceof TwoChannelAxisOperation));
             if (odeMex.getOperation() != null) {
                 // Preparing message to send to ODE
                 Message odeRequest = odeMex.createMessage(odeMex.getOperation().getInput().getMessage().getQName());
@@ -132,7 +137,11 @@ public class ODEService {
         } catch (Exception e) {
             __log.error("Exception occured while invoking ODE", e);
             success = false;
-            throw new OdeFault("An exception occured while invoking ODE.", e);
+            String message = e.getMessage();
+            if (message == null) {
+            	message = "An exception occured while invoking ODE.";
+            }
+            throw new OdeFault(message, e);
         } finally {
             if (!success) {
                 if (odeMex != null) odeMex.release(success);

@@ -19,15 +19,15 @@
 
 package org.apache.ode.il.config;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.utils.SystemUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.utils.SystemUtils;
 
 /**
  * Configuration object used for configuring the intergration layer. The propereties are those likely to be common to all layers.
@@ -83,7 +83,15 @@ public class OdeConfigProperties {
     
     public static final String PROP_PROCESS_DEHYDRATION_MAXIMUM_COUNT = "process.dehydration.maximum.count";
     
-    public static final String PROP_PROCESS_HYDRATION = "process.hydration";
+    public static final String PROP_PROCESS_HYDRATION_LAZY = "process.hydration.lazy";
+    
+    public static final String PROP_PROCESS_HYDRATION_LAZY_MINIMUM_SIZE = "process.hydration.lazy.minimum.size";
+    
+    public static final String PROP_PROCESS_HYDRATION_THROTTLED_MAXIMUM_COUNT = "process.hydration.throttled.maximum.count";
+    
+    public static final String PROP_PROCESS_HYDRATION_THROTTLED_MAXIMUM_SIZE = "process.hydration.throttled.maximum.size";
+    
+    public static final String PROP_PROCESS_INSTANCE_THROTTLED_MAXIMUM_COUNT = "process.instance.throttled.maximum.count";
     
     public static final String PROP_DAOCF = "dao.factory";
     
@@ -258,7 +266,27 @@ public class OdeConfigProperties {
     }
     
     public boolean isHydrationLazy() {
-        return "lazy".equals(getProperty(OdeConfigProperties.PROP_PROCESS_HYDRATION, "eager"));
+        return Boolean.valueOf(getProperty(OdeConfigProperties.PROP_PROCESS_HYDRATION_LAZY, "true"));
+    }
+    
+    public int getHydrationLazyMinimumSize() {
+        return Integer.valueOf(getProperty(OdeConfigProperties.PROP_PROCESS_HYDRATION_LAZY_MINIMUM_SIZE, String.valueOf(0)));
+    }
+    
+    public int getProcessThrottledMaximumCount() {
+        return Integer.valueOf(getProperty(OdeConfigProperties.PROP_PROCESS_HYDRATION_THROTTLED_MAXIMUM_COUNT, String.valueOf(Integer.MAX_VALUE)));
+    }
+    
+    public int getInstanceThrottledMaximumCount() {
+        return Integer.valueOf(getProperty(OdeConfigProperties.PROP_PROCESS_INSTANCE_THROTTLED_MAXIMUM_COUNT, String.valueOf(Integer.MAX_VALUE)));
+    }
+    
+    public long getProcessThrottledMaximumSize() {
+        return Long.valueOf(getProperty(OdeConfigProperties.PROP_PROCESS_HYDRATION_THROTTLED_MAXIMUM_SIZE, String.valueOf(Long.MAX_VALUE)));
+    }
+    
+    public boolean isProcessSizeThrottled() {
+        return getProcessThrottledMaximumSize() == Long.MAX_VALUE;
     }
     
     public boolean isDbLoggingEnabled() {

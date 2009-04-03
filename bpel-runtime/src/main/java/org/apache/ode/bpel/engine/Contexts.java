@@ -52,7 +52,7 @@ public class Contexts {
     BpelDAOConnectionFactory inMemDao;
 
     /** Global Message-Exchange interceptors. Must be copy-on-write!!! */ 
-    final List<MessageExchangeInterceptor >globalIntereceptors = new CopyOnWriteArrayList<MessageExchangeInterceptor>();
+    final List<MessageExchangeInterceptor >globalInterceptors = new CopyOnWriteArrayList<MessageExchangeInterceptor>();
 
     /** Global event listeners. Must be copy-on-write!!! */
     final List<BpelEventListener> eventListeners = new CopyOnWriteArrayList<BpelEventListener>();

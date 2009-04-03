@@ -18,15 +18,15 @@
  */
 package org.apache.ode.test;
 
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.MessageExchange;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import javax.xml.namespace.QName;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.MessageExchange;
+import org.junit.Test;
 
 public class BasicActivities20Test extends BPELTestAbstract {
 	

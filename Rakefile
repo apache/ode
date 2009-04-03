@@ -146,7 +146,7 @@ define "ode" do
   desc "ODE Axis Integration Layer"
   define "axis2" do
     compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "bpel-epr", "bpel-runtime",
-      "scheduler-simple", "bpel-schemas", "bpel-store", "utils"),
+      "scheduler-simple", "bpel-schemas", "bpel-store", "utils", "agents"),
       AXIOM, AXIS2_ALL, COMMONS.lang, COMMONS.logging, COMMONS.collections, COMMONS.httpclient, COMMONS.lang, 
       DERBY, GERONIMO.kernel, GERONIMO.transaction, JAVAX.activation, JAVAX.servlet, JAVAX.stream, 
       JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS, XMLBEANS, AXIS2_MODULES.libs
@@ -280,8 +280,8 @@ define "ode" do
   desc "ODE Runtime Engine"
   define "bpel-runtime" do
     compile.from apt
-    compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-obj", "bpel-schemas",
-      "bpel-store", "jacob", "jacob-ap", "utils"),
+    compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-epr", "bpel-obj", "bpel-schemas",
+      "bpel-store", "jacob", "jacob-ap", "utils", "agents"),
       COMMONS.logging, COMMONS.collections, COMMONS.httpclient, JAXEN, JAVAX.persistence, JAVAX.stream, SAXON, WSDL4J, XMLBEANS
 
     test.with projects("scheduler-simple", "dao-jpa", "dao-hibernate", "bpel-epr"),
@@ -328,7 +328,7 @@ define "ode" do
   desc "ODE BPEL Tests"
   define "bpel-test" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-runtime",
-      "bpel-store", "utils", "bpel-epr", "dao-jpa"),
+      "bpel-store", "utils", "bpel-epr", "dao-jpa", "agents"),
       DERBY, Java::JUnit::JUNIT_REQUIRES, JAVAX.persistence, OPENJPA, WSDL4J, COMMONS.httpclient,
     COMMONS.codec
 
@@ -451,7 +451,7 @@ define "ode" do
   desc "ODE JBI Integration Layer"
   define "jbi" do
     compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "bpel-epr", "bpel-obj",
-      "bpel-runtime", "scheduler-simple", "bpel-schemas", "bpel-store", "utils"),
+      "bpel-runtime", "scheduler-simple", "bpel-schemas", "bpel-store", "utils", "agents"),
       AXIOM, COMMONS.logging, COMMONS.pool, JAVAX.transaction, JBI, LOG4J, WSDL4J, XERCES
 
     package(:jar)
@@ -507,6 +507,12 @@ define "ode" do
     compile.with AXIOM, AXIS2_ALL, COMMONS.collections, COMMONS.logging, COMMONS.pool, COMMONS.httpclient, COMMONS.codec, LOG4J, XERCES, JAVAX.stream, WSDL4J, SAXON
     test.exclude "*TestResources"
     package :jar
+  end
+  
+  desc "ODE Agents"
+  define "agents" do
+     compile
+     package (:jar, :manifest=>_("target/classes/META-INF/MANIFEST.MF"))
   end
 
 end
@@ -580,7 +586,7 @@ define "apache-ode" do
 
   package(:zip, :id=>"#{id}-sources").path("#{id}-sources-#{version}").tap do |zip|
     if File.exist?(".svn")
-      `svn status -v`.reject { |l| l[0] == ?? || l[0] == ?D }.
+      `svn status -v`.reject { |l| l[0] == ?? || l[0] == ?D || l.strip.empty? || l[0...3] == "---"}.
         map { |l| l.split.last }.reject { |f| File.directory?(f) }.
         each { |f| zip.include f, :as=>f }
     else

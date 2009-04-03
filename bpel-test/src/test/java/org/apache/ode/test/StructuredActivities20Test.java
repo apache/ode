@@ -18,7 +18,6 @@
  */
 package org.apache.ode.test;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class StructuredActivities20Test extends BPELTestAbstract {

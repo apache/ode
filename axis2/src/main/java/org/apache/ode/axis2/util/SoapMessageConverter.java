@@ -273,6 +273,9 @@ public class SoapMessageConverter {
     private OMElement buildSoapDetail(Element message, QName faultName, Operation op) throws AxisFault {
         if (faultName.getNamespaceURI() == null)
             return toFaultDetail(faultName, message);
+        if (op == null) {
+            return toFaultDetail(faultName, message);
+        }
         Fault f = op.getFault(faultName.getLocalPart());
         if (f == null)
             return toFaultDetail(faultName, message);

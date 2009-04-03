@@ -38,19 +38,20 @@
 
 package org.apache.ode.test;
 
+import java.io.IOException;
+
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-
-import javax.xml.namespace.QName;
-import java.io.IOException;
 
 /**
  * This is a simple MessageExchangeContext implementation

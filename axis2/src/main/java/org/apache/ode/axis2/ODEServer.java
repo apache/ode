@@ -19,36 +19,12 @@
 
 package org.apache.ode.axis2;
 
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
-import org.apache.ode.axis2.deploy.DeploymentPoller;
-import org.apache.ode.axis2.service.DeploymentWebService;
-import org.apache.ode.axis2.service.ManagementService;
-import org.apache.ode.bpel.connector.BpelServerConnector;
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
-import org.apache.ode.bpel.engine.BpelServerImpl;
-import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
-import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
-import org.apache.ode.bpel.iapi.BpelEventListener;
-import org.apache.ode.bpel.iapi.ProcessConf;
-import org.apache.ode.bpel.iapi.ProcessStoreEvent;
-import org.apache.ode.bpel.iapi.ProcessStoreListener;
-import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.iapi.EndpointReferenceContext;
-import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
-import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
-import org.apache.ode.bpel.pmapi.InstanceManagement;
-import org.apache.ode.bpel.pmapi.ProcessManagement;
-import org.apache.ode.il.dbutil.Database;
-import org.apache.ode.scheduler.simple.JdbcDelegate;
-import org.apache.ode.scheduler.simple.SimpleScheduler;
-import org.apache.ode.store.ProcessStoreImpl;
-import org.apache.ode.utils.GUID;
-import org.apache.ode.utils.fs.TempFileManager;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.StringTokenizer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -63,13 +39,37 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.xa.XAResource;
-import javax.wsdl.WSDLException;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.StringTokenizer;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
+
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.axis2.deploy.DeploymentPoller;
+import org.apache.ode.axis2.service.DeploymentWebService;
+import org.apache.ode.axis2.service.ManagementService;
+import org.apache.ode.bpel.connector.BpelServerConnector;
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
+import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
+import org.apache.ode.bpel.iapi.BpelEventListener;
+import org.apache.ode.bpel.iapi.EndpointReferenceContext;
+import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.iapi.ProcessStoreEvent;
+import org.apache.ode.bpel.iapi.ProcessStoreListener;
+import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
+import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
+import org.apache.ode.bpel.pmapi.InstanceManagement;
+import org.apache.ode.bpel.pmapi.ProcessManagement;
+import org.apache.ode.il.dbutil.Database;
+import org.apache.ode.scheduler.simple.JdbcDelegate;
+import org.apache.ode.scheduler.simple.SimpleScheduler;
+import org.apache.ode.store.ProcessStoreImpl;
+import org.apache.ode.utils.GUID;
+import org.apache.ode.utils.fs.TempFileManager;
 
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle management.
@@ -121,72 +121,72 @@ public class ODEServer {
     }
 
     public void init(String contextPath, AxisConfiguration axisConf) throws ServletException {
-        _axisConfig = axisConf;
-        String rootDir = System.getProperty("org.apache.ode.rootDir");
-        if (rootDir != null) _appRoot = new File(rootDir);
-        else _appRoot = new File(contextPath);
+            _axisConfig = axisConf;
+            String rootDir = System.getProperty("org.apache.ode.rootDir");
+            if (rootDir != null) _appRoot = new File(rootDir);
+            else _appRoot = new File(contextPath);
 
         if (!_appRoot.isDirectory())
             throw new IllegalArgumentException(_appRoot + " does not exist or is not a directory");
-        TempFileManager.setWorkingDirectory(_appRoot);
+            TempFileManager.setWorkingDirectory(_appRoot);
 
-        __log.debug("Loading properties");
-        String confDir = System.getProperty("org.apache.ode.configDir");
-        _configRoot = confDir == null ? new File(_appRoot, "conf") : new File(confDir);
+            __log.debug("Loading properties");
+            String confDir = System.getProperty("org.apache.ode.configDir");
+            _configRoot = confDir == null ? new File(_appRoot, "conf") : new File(confDir);
         if (!_configRoot.isDirectory())
             throw new IllegalArgumentException(_configRoot + " does not exist or is not a directory");
 
-        _odeConfig = new ODEConfigProperties(_configRoot);
+            _odeConfig = new ODEConfigProperties(_configRoot);
 
-        try {
-            _odeConfig.load();
-        } catch (FileNotFoundException fnf) {
-            String errmsg = __msgs.msgOdeInstallErrorCfgNotFound(_odeConfig.getFile());
-            __log.warn(errmsg);
-        } catch (Exception ex) {
-            String errmsg = __msgs.msgOdeInstallErrorCfgReadError(_odeConfig.getFile());
-            __log.error(errmsg, ex);
-            throw new ServletException(errmsg, ex);
-        }
+            try {
+                _odeConfig.load();
+            } catch (FileNotFoundException fnf) {
+                String errmsg = __msgs.msgOdeInstallErrorCfgNotFound(_odeConfig.getFile());
+                __log.warn(errmsg);
+            } catch (Exception ex) {
+                String errmsg = __msgs.msgOdeInstallErrorCfgReadError(_odeConfig.getFile());
+                __log.error(errmsg, ex);
+                throw new ServletException(errmsg, ex);
+            }
 
-        String wdir = _odeConfig.getWorkingDir();
-        if (wdir == null) _workRoot = _appRoot;
-        else _workRoot = new File(wdir.trim());
+            String wdir = _odeConfig.getWorkingDir();
+            if (wdir == null) _workRoot = _appRoot;
+            else _workRoot = new File(wdir.trim());
         if (!_workRoot.isDirectory())
             throw new IllegalArgumentException(_workRoot + " does not exist or is not a directory");
 
-        __log.debug("Initializing transaction manager");
-        initTxMgr();
-        __log.debug("Creating data source.");
-        initDataSource();
-        __log.debug("Starting DAO.");
-        initDAO();
-        EndpointReferenceContextImpl eprContext = new EndpointReferenceContextImpl(this);
-        __log.debug("Initializing BPEL process store.");
-        initProcessStore(eprContext);
-        __log.debug("Initializing BPEL server.");
-        initBpelServer(eprContext);
-        __log.debug("Initializing HTTP connection manager");
-        initHttpConnectionManager();
+            __log.debug("Initializing transaction manager");
+            initTxMgr();
+            __log.debug("Creating data source.");
+            initDataSource();
+            __log.debug("Starting DAO.");
+            initDAO();
+            EndpointReferenceContextImpl eprContext = new EndpointReferenceContextImpl(this);            
+            __log.debug("Initializing BPEL process store.");
+            initProcessStore(eprContext);
+            __log.debug("Initializing BPEL server.");
+            initBpelServer(eprContext);
+            __log.debug("Initializing HTTP connection manager");
+            initHttpConnectionManager();
 
-        // Register BPEL event listeners configured in axis2.properties file.
-        registerEventListeners();
-        registerMexInterceptors();
-        registerExternalVariableModules();
+            // Register BPEL event listeners configured in axis2.properties file.
+            registerEventListeners();
+            registerMexInterceptors();
+            registerExternalVariableModules();
 
-        _store.loadAll();
+            _store.loadAll();
 
-        try {
+            try {
             _bpelServer.start();
-        } catch (Exception ex) {
-            String errmsg = __msgs.msgOdeBpelServerStartFailure();
-            __log.error(errmsg, ex);
-            throw new ServletException(errmsg, ex);
-        }
+            } catch (Exception ex) {
+                String errmsg = __msgs.msgOdeBpelServerStartFailure();
+                __log.error(errmsg, ex);
+                throw new ServletException(errmsg, ex);
+            }
 
-        _poller = new DeploymentPoller(_store.getDeployDir(), this);
+            _poller = new DeploymentPoller(_store.getDeployDir(), this);
 
-        _mgtService = new ManagementService();
+            _mgtService = new ManagementService();
         _mgtService.enableService(_axisConfig, _bpelServer, _store, _appRoot.getAbsolutePath());
 
         try {
@@ -196,16 +196,16 @@ public class ODEServer {
             throw new ServletException(e);
         }
 
-        __log.debug("Starting scheduler");
-        _scheduler.start();
+            __log.debug("Starting scheduler");
+            _scheduler.start();
 
-        __log.debug("Initializing JCA adapter.");
-        initConnector();
+            __log.debug("Initializing JCA adapter.");
+            initConnector();
 
-        _poller.start();
-        __log.info(__msgs.msgPollingStarted(_store.getDeployDir().getAbsolutePath()));
-        __log.info(__msgs.msgOdeStarted());
-    }
+            _poller.start();
+            __log.info(__msgs.msgPollingStarted(_store.getDeployDir().getAbsolutePath()));
+            __log.info(__msgs.msgOdeStarted());
+                }
 
     private void initDataSource() throws ServletException {
         _db = new Database(_odeConfig);
@@ -426,9 +426,13 @@ public class ODEServer {
             dehy.setProcessMaxCount(_odeConfig.getDehydrationMaximumCount());
             _bpelServer.setDehydrationPolicy(dehy);
         }
-        _bpelServer.setHydrationLazy(_odeConfig.isHydrationLazy());
         _bpelServer.setConfigProperties(_odeConfig.getProperties());
         _bpelServer.init();
+        _bpelServer.setInstanceThrottledMaximumCount(_odeConfig.getInstanceThrottledMaximumCount());
+        _bpelServer.setProcessThrottledMaximumCount(_odeConfig.getProcessThrottledMaximumCount());
+        _bpelServer.setProcessThrottledMaximumSize(_odeConfig.getProcessThrottledMaximumSize());
+        _bpelServer.setHydrationLazy(_odeConfig.isHydrationLazy());
+        _bpelServer.setHydrationLazyMinimumSize(_odeConfig.getHydrationLazyMinimumSize());
     }
 
     private void initHttpConnectionManager() throws ServletException {
@@ -660,5 +664,4 @@ public class ODEServer {
             _tx.setRollbackOnly();
         }
     }
-
 }

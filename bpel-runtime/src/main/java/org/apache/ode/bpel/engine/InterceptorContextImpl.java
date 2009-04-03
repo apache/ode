@@ -20,6 +20,7 @@ package org.apache.ode.bpel.engine;
 
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.iapi.BpelEngine;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext;
 
@@ -33,11 +34,15 @@ public class InterceptorContextImpl implements InterceptorContext{
     private ProcessDAO _processDao;
     private BpelDAOConnection _connection;
     private ProcessConf _pconf;
+    private BpelEngine _bpelEngine;
+    private BpelProcess _bpelProcess;
 
-    public InterceptorContextImpl(BpelDAOConnection connection, ProcessDAO processDAO, ProcessConf pconf) {
+    public InterceptorContextImpl(BpelDAOConnection connection, ProcessDAO processDAO, ProcessConf pconf, BpelEngine bpelEngine, BpelProcess bpelProcess) {
         _connection = connection;
         _processDao = processDAO;
         _pconf = pconf;
+        _bpelEngine = bpelEngine;
+        _bpelProcess = bpelProcess;
     }
 
     public BpelDAOConnection getConnection() {
@@ -50,6 +55,14 @@ public class InterceptorContextImpl implements InterceptorContext{
 
     public ProcessConf getProcessConf() {
         return _pconf;
+    }
+    
+    public BpelEngine getBpelEngine() {
+    	return _bpelEngine;
+    }
+    
+    public BpelProcess getBpelProcess() {
+    	return _bpelProcess;
     }
 
 }

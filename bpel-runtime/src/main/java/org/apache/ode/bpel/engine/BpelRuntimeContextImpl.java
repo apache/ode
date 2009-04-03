@@ -24,6 +24,7 @@ import java.net.URI;
 import java.util.*;
 
 import javax.wsdl.Operation;
+import javax.wsdl.OperationType;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;

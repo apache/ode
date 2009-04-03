@@ -43,6 +43,12 @@ public class OConstants extends OBase {
     public QName qnInvalidBranchCondition;
     public QName qnInvalidExpressionValue;
 
+    // non-standard fault names
+    public QName qnRetiredProcess;
+    public QName qnTooManyInstances;
+    public QName qnTooManyProcesses;
+    public QName qnTooHugeProcesses;
+    public QName qnUnknownFault;
 
     public OConstants(OProcess owner) {
         super(owner);

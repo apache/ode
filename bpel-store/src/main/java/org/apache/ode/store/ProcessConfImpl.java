@@ -227,6 +227,13 @@ public class ProcessConfImpl implements ProcessConf {
         }
     }
 
+    public long getCBPFileSize() {
+        CBPInfo cbpInfo = _du.getCBPInfo(getType());
+        if (cbpInfo == null)
+            throw new ContextException("CBP record not found for type " + getType());
+        return cbpInfo.cbp.length();
+    }
+    
     public String getBpelDocument() {
         CBPInfo cbpInfo = _du.getCBPInfo(getType());
         if (cbpInfo == null)

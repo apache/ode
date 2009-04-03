@@ -54,8 +54,6 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
 
     @Basic @Column(name="PROCESS_ID")
     private String _processId;
-	@Transient
-    private int _numInstances;
 	@Basic @Column(name="PROCESS_TYPE")
     private String _processType;
 	@Basic @Column(name="GUID")
@@ -94,7 +92,6 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
 			CorrelatorDAO instantiatingCorrelator) {
 		ProcessInstanceDAOImpl inst = new ProcessInstanceDAOImpl((CorrelatorDAOImpl)instantiatingCorrelator, this);
 		getEM().persist(inst);
-		_numInstances++;
 		return inst;
 	}
 
@@ -102,7 +99,6 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
 			CorrelatorDAO instantiatingCorrelator, MessageExchangeDAO mex) {
 		ProcessInstanceDAOImpl inst = new ProcessInstanceDAOImpl((CorrelatorDAOImpl)instantiatingCorrelator, this);
 		getEM().persist(inst);
-		_numInstances++;
 		return inst;
 	}
 
@@ -183,7 +179,8 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
   	}
 
     public int getNumInstances() {
-        return _numInstances;
+  		Long instanceCount = (Long) getSingleResult(getEM().createNamedQuery(ProcessInstanceDAOImpl.COUNT_INSTANCE_IDS_BY_PROCESS).setParameter("process", this));
+  		return (instanceCount == null ? 0 : instanceCount.intValue());
     }
 
     public long getVersion() {
