@@ -31,6 +31,7 @@ import java.util.Set;
  * @hibernate.query name="COUNT_INSTANCES_BY_STATUS_AND_PROCESS_ID" query="select count(i.id) as cnt, max(i.activityFailureDateTime) as lastFailureDt from HProcessInstance as i where i.process.processId = :processId and i.state in(:states) and i.activityFailureCount > 0"
  * @hibernate.query name="COUNT_FAILED_INSTANCES_BY_STATUS_AND_PROCESS_ID" query="select count(i.id) as cnt, max(i.activityFailureDateTime) as lastFailureDt from HProcessInstance as i where i.process.processId = :processId and i.state in(:states) and i.activityFailureCount > 0"
  * @hibernate.query name="SELECT_ACTIVE_INSTANCES" query="from HProcessInstance as i where i.process.id = :processId and i.state = :state"
+ * @hibernate.query name="DELETE_INSTANCES_BY_PROCESS" query="delete from HProcessInstance as p where p.process = :process"
  */
 public class HProcessInstance extends HObject {
 	public static final String SELECT_ACTIVE_INSTANCES="SELECT_ACTIVE_INSTANCES";
@@ -84,7 +85,7 @@ public class HProcessInstance extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="INSTANTIATING_CORRELATOR"
+     * @hibernate.many-to-one column="INSTANTIATING_CORRELATOR" foreign-key="none"
      */
     public HCorrelator getInstantiatingCorrelator() {
         return _instantiatingCorrelator;
@@ -95,7 +96,7 @@ public class HProcessInstance extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="FAULT" cascade="delete" column="FAULT"
+     * @hibernate.many-to-one column="FAULT" column="FAULT" foreign-key="none"
      */
     public HFaultData getFault() {
         return _fault;
@@ -106,7 +107,7 @@ public class HProcessInstance extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="JACOB_STATE" cascade="delete"
+     * @hibernate.many-to-one column="JACOB_STATE" foreign-key="none"
      */
     public HLargeData getJacobState() {
         return _jacobState;
@@ -117,8 +118,8 @@ public class HProcessInstance extends HObject {
     }
 
     /**
-     * @hibernate.bag lazy="true" inverse="true" cascade="delete"
-     * @hibernate.collection-key column="IID"
+     * @hibernate.bag lazy="true" inverse="true"
+     * @hibernate.collection-key column="IID" foreign-key="none"
      * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HBpelEvent"
      */
     public Collection<HBpelEvent> getEvents() {
@@ -130,8 +131,8 @@ public class HProcessInstance extends HObject {
     }
 
     /**
-     * @hibernate.set lazy="true" inverse="true" cascade="delete"
-     * @hibernate.collection-key column="PIID"
+     * @hibernate.set lazy="true" inverse="true"
+     * @hibernate.collection-key column="PIID" foreign-key="none"
      * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HCorrelatorSelector"
      */
     public Set<HCorrelatorSelector> getCorrelatorSelectors() {
@@ -147,8 +148,8 @@ public class HProcessInstance extends HObject {
     }
 
     /**
-     * @hibernate.set lazy="true" inverse="true" cascade="delete"
-     * @hibernate.collection-key column="PIID"
+     * @hibernate.set lazy="true" inverse="true"
+     * @hibernate.collection-key column="PIID" foreign-key="none"
      * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HMessageExchange"
      */
     public Set<HMessageExchange> getMessageExchanges() {
@@ -172,7 +173,7 @@ public class HProcessInstance extends HObject {
 
     /**
      *
-     * @hibernate.many-to-one column="PROCESS_ID" lazy="false" outer-join="true"
+     * @hibernate.many-to-one column="PROCESS_ID" lazy="false" outer-join="true" foreign-key="none"
      */
     public HProcess getProcess() {
         return _process;
@@ -183,8 +184,8 @@ public class HProcessInstance extends HObject {
     }
 
     /**
-     * @hibernate.bag lazy="true" inverse="true" cascade="delete"
-     * @hibernate.collection-key column="PIID"
+     * @hibernate.bag lazy="true" inverse="true"
+     * @hibernate.collection-key column="PIID" foreign-key="none"
      * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HScope"
      */
     public Collection<HScope> getScopes() {
@@ -196,8 +197,8 @@ public class HProcessInstance extends HObject {
     }
 
     /**
-     * @hibernate.bag lazy="true" inverse="true" cascade="delete"
-     * @hibernate.collection-key column="PIID"
+     * @hibernate.bag lazy="true" inverse="true"
+     * @hibernate.collection-key column="PIID" foreign-key="none"
      * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HCorrelationSet"
      */
     public Collection<HCorrelationSet> getCorrelationSets() {
@@ -243,7 +244,7 @@ public class HProcessInstance extends HObject {
 
     /**
      * @hibernate.bag lazy="true" inverse="true" cascade="delete"
-     * @hibernate.collection-key column="PIID"
+     * @hibernate.collection-key column="PIID" foreign-key="none"
      * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HActivityRecovery"
      */
     public Collection<HActivityRecovery> getActivityRecoveries() {

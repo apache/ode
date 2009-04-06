@@ -51,15 +51,14 @@ import java.util.*;
 /**
  * Hibernate-based {@link BpelDAOConnection} implementation.
  */
-class BpelDAOConnectionImpl implements BpelDAOConnection {
-
+public class BpelDAOConnectionImpl implements BpelDAOConnection {
     private static final Log __log = LogFactory.getLog(BpelDAOConnectionImpl.class);
 
     private Session _session;
 
-    private SessionManager _sm;
+    protected SessionManager _sm;
 
-    BpelDAOConnectionImpl(SessionManager sm) {
+    public BpelDAOConnectionImpl(SessionManager sm) {
         _sm = sm;
         _session = _sm.getSession();
     }
@@ -85,7 +84,10 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
     }
 	
     public void releaseMessageExchange(String mexid) {
-		// TODO Auto-generated method stub
+        MessageExchangeDAO mexDao = getMessageExchange(mexid);
+        if(mexDao != null ) {
+            mexDao.release(true);
+        }
 	}
 
 	public ProcessDAO createProcess(QName pid, QName type, String guid, long version) {

@@ -24,8 +24,12 @@ package org.apache.ode.daohib.bpel.hobj;
  *
  * @hibernate.class
  *  table="BPEL_MESSAGE"
+ * @hibernate.query name="DELETE_REQUEST_MESSAGES_BY_PROCESS" query="delete from HMessage as m WHERE m IN(select request from HMessageExchange e where e.process = :process)"
+ * @hibernate.query name="DELETE_RESPONSE_MESSAGES_BY_PROCESS" query="delete from HMessage as m WHERE m IN(select response from HMessageExchange e where e.process = :process)"
  */
 public class HMessage extends HObject {
+    public final static String DELETE_REQUEST_MESSAGES_BY_PROCESS = "DELETE_REQUEST_MESSAGES_BY_PROCESS";
+    public final static String DELETE_RESPONSE_MESSAGES_BY_PROCESS = "DELETE_RESPONSE_MESSAGES_BY_PROCESS";
 
     private String _type;
     private HLargeData _data;
@@ -40,7 +44,7 @@ public class HMessage extends HObject {
         return _type;
     }
 
-    /** @hibernate.many-to-one column="DATA" lazy="false" outer-join="true" */
+    /** @hibernate.many-to-one column="DATA" lazy="false" outer-join="true" foreign-key="none" */
     public HLargeData getMessageData() {
         return _data;
     }
@@ -49,7 +53,7 @@ public class HMessage extends HObject {
         _data = data;
     }
 
-    /** @hibernate.many-to-one column="HEADER" */
+    /** @hibernate.many-to-one column="HEADER" foreign-key="none" */
     public HLargeData getHeader() {
         return _header;
     }

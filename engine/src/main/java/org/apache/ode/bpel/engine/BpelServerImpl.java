@@ -425,6 +425,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         }
     }
 
+    public void cleanupProcess(QName pid) throws BpelEngineException {
+        deleteProcessDAO(pid);
+    }
+
     /**
      * Register a global message exchange interceptor.
      * 

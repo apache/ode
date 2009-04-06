@@ -115,5 +115,5 @@ public interface MyRoleMessageExchange extends MessageExchange {
      */
     QName getServiceName();
 
-
+    void release(boolean instanceSucceeded);
 }

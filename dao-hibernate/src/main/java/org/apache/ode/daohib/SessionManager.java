@@ -83,7 +83,7 @@ public class SessionManager {
    * @return
    * @throws MappingException
    */
-  public static final Configuration getDefaultConfiguration() throws MappingException {
+  public Configuration getDefaultConfiguration() throws MappingException {
     return new Configuration()
             .addClass(HProcess.class)
             .addClass(HProcessInstance.class)

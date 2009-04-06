@@ -15,6 +15,7 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.rapi.PartnerLinkModel;
+import org.w3c.dom.Element;
 
 /**
  * For invoking the engine using UNRELIABLE style.
@@ -23,6 +24,7 @@ import org.apache.ode.bpel.rapi.PartnerLinkModel;
  * 
  */
 public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl {
+    @SuppressWarnings("unused")
     private static final Log __log = LogFactory.getLog(ReliableMyRoleMessageExchangeImpl.class);
 
     boolean _done = false;
@@ -118,7 +120,7 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
     }
 
     @Override
-    protected void onAsyncAck(MessageExchangeDAO mexdao) {
+    protected void onAsyncAck(final MessageExchangeDAO mexdao) {
         final MemBackedMessageImpl response;
         final QName fault = mexdao.getFault();
         final FailureType failureType = mexdao.getFailureType();
@@ -134,9 +136,10 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
             response = null;
         }
 
-        final UnreliableMyRoleMessageExchangeImpl self = this;
-        final ResponseFuture f = _future;
-        // Lets be careful, the TX can still rollback!
+        Element eprdao = mexdao.getEPR();
+        _epr = eprdao == null ? null : _contexts.eprContext.resolveEndpointReference(mexdao.getEPR());
+        
+        // Lets be careful, the TX can still roll-back!
         _process.scheduleRunnable(new Runnable() {
             public void run() {
                 _response = response;
@@ -146,10 +149,7 @@ public class UnreliableMyRoleMessageExchangeImpl extends MyRoleMessageExchangeIm
 
                 ack(ackType);
                 _future.done(Status.ACK);
-
             }
-
         });
     }
-
 }

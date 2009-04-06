@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +77,7 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.bpel.iapi.ProcessStore;
+import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.pmapi.ActivityExtInfoListDocument;
 import org.apache.ode.bpel.pmapi.ActivityInfoDocument;
 import org.apache.ode.bpel.pmapi.EventInfoListDocument;
@@ -457,7 +459,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                 public Object run(BpelDAOConnection conn) {
                     Collection<ProcessInstanceDAO> instances = conn.instanceQuery(instanceFilter);
                     for (ProcessInstanceDAO instance : instances) {
-                        instance.delete();
+                        instance.delete(EnumSet.allOf(CLEANUP_CATEGORY.class));
                         ret.add(instance.getInstanceId());
                     }
                     return null;

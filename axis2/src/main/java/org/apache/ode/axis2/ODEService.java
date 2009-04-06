@@ -111,9 +111,10 @@ public class ODEService {
             odeMex.setRequest(odeRequest);
             odeMex.setTimeout(resolveTimeout());
             try {
+                if(__log.isDebugEnabled()) __log.debug("Blocking invoke with mex " + odeMex.getMessageExchangeId() + ".");
                 odeMex.invokeBlocking();
             } catch (java.util.concurrent.TimeoutException te) {
-                String errmsg = "Call to " + _serviceName + "." + odeMex.getOperationName() + " timed out.";
+                String errmsg = "Call to " + _serviceName + "." + odeMex.getOperationName() + " timed out(" + resolveTimeout() + " ms).";
                 __log.error(errmsg, te);
                 throw new OdeFault(errmsg);         
             }
@@ -131,12 +132,7 @@ public class ODEService {
             __log.error(errmsg, e);
             throw new OdeFault(errmsg, e);         
         } finally {
-            if (odeMex != null)
-                try {
-                    odeMex.release();
-                } catch (Exception ex) {
-                    __log.error("Error releasing message exchange: " + odeMex.getMessageExchangeId());
-                }
+        	// we cannot release ode mex here since it's outside of the transaction
         }
     }
 

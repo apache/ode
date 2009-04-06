@@ -34,12 +34,16 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.namespace.QName;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
@@ -56,7 +60,15 @@ import org.w3c.dom.Element;
 
 @Entity
 @Table(name="ODE_MESSAGE_EXCHANGE")
-public class MessageExchangeDAOImpl implements MessageExchangeDAO {
+@NamedQueries({
+    @NamedQuery(name=MessageExchangeDAOImpl.DELETE_MEXS_BY_PROCESS, query="delete from MessageExchangeDAOImpl as m where m._process = :process"),
+    @NamedQuery(name=MessageExchangeDAOImpl.SELECT_MEX_IDS_BY_PROCESS, query="select m._id from MessageExchangeDAOImpl as m where m._process = :process")
+})
+public class MessageExchangeDAOImpl extends OpenJPADAO implements MessageExchangeDAO {
+    private static final Log __log = LogFactory.getLog(MessageExchangeDAOImpl.class);
+    
+    public final static String DELETE_MEXS_BY_PROCESS = "DELETE_MEXS_BY_PROCESS";
+    public final static String SELECT_MEX_IDS_BY_PROCESS = "SELECT_MEX_IDS_BY_PROCESS";
 
 	@Id @Column(name="MESSAGE_EXCHANGE_ID") 
 	private String _id;
@@ -100,7 +112,7 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
     @Basic @Column(name="ACK_TYPE")
     private String _ackType;
 
-    @OneToMany(targetEntity=MexProperty.class,mappedBy="_mex",fetch=FetchType.EAGER,cascade={CascadeType.ALL})
+    @OneToMany(targetEntity=MexProperty.class,mappedBy="_mex",fetch=FetchType.EAGER,cascade={CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Collection<MexProperty> _props = new ArrayList<MexProperty>();
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="INSTANCE")
 	private ProcessInstanceDAOImpl _processInst;
@@ -108,9 +120,9 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
 	private PartnerLinkDAOImpl _partnerLink;
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROCESS")
 	private ProcessDAOImpl _process;
-	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="REQUEST")
+	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}) @Column(name="REQUEST")
 	private MessageDAOImpl _request;
-    @OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="RESPONSE")
+    @OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}) @Column(name="RESPONSE")
 	private MessageDAOImpl _response;
 
     @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="CORRELATOR")
@@ -351,8 +363,20 @@ public class MessageExchangeDAOImpl implements MessageExchangeDAO {
     }
 
 
-    public void release() {
-        // no-op for now, could be used to do some cleanup
+    public void release(boolean doClean) {
+        if( __log.isDebugEnabled() ) __log.debug("INSTANCE CLEANUP(MEX, doClean=" + doClean + ")");
+        if( doClean ) {
+            deleteMessages();
+        }
+    }
+
+    public void deleteMessages() {
+        if( __log.isDebugEnabled() ) __log.debug("INSTANCE CLEANUP(MEX:" + _id + "(request:" + _request + ", response:" + _response);
+        
+        getEM().remove(_request);
+        getEM().remove(_response);
+        getEM().createNamedQuery(MexProperty.DELETE_MEX_PROPERTIES_BY_MEX_ID).setParameter("mexId", _id).executeUpdate();
+        getEM().remove(this); // This deletes MexProperty, REQUEST MessageDAO, RESPONSE MessageDAO
     }
 
     public CorrelatorDAOImpl getCorrelator() {

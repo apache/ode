@@ -36,6 +36,7 @@ import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.daohib.SessionManager;
+import org.apache.ode.daohib.bpel.hobj.HCorrelatorMessage;
 import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HMessage;
 import org.apache.ode.daohib.bpel.hobj.HMessageExchange;
@@ -333,8 +334,18 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
         return Collections.unmodifiableSet(_hself.getProperties().keySet());
     }
 
-    public void release() {
-        // no-op for now, could be used to do some cleanup
+    public void release(boolean doClean) {
+        if( doClean ) {
+            deleteMessages();
+        }
+    }
+
+    public void deleteMessages() {
+        getSession().getNamedQuery(HLargeData.DELETE_MESSAGE_LDATA_BY_MEX).setParameter("mex", _hself).executeUpdate();
+        getSession().getNamedQuery(HCorrelatorMessage.DELETE_CORMESSAGES_BY_MEX).setParameter("mex", _hself).executeUpdate();
+        
+        getSession().delete(_hself);
+        // This deletes endpoint LData, callbackEndpoint LData, request HMessage, response HMessage, HMessageExchangeProperty 
     }
 
     public InvocationStyle getInvocationStyle() {

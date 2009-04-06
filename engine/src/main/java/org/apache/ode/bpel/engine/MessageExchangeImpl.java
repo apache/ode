@@ -146,6 +146,10 @@ abstract class MessageExchangeImpl implements MessageExchange {
     }
     
     void load(MessageExchangeDAO dao) {
+        if(__log.isDebugEnabled()) __log.debug("INMEM MessageExchange loading.");
+        
+        _epr = _contexts.eprContext.resolveEndpointReference(dao.getEPR());
+        
         _timeout = dao.getTimeout();
         _iid = dao.getInstance() != null ? dao.getInstance().getInstanceId() : null;
         _ackType = dao.getAckType();
@@ -300,7 +304,9 @@ abstract class MessageExchangeImpl implements MessageExchange {
         return _epr = doInTX(new InDbAction<EndpointReference>() {
 
             public EndpointReference call(MessageExchangeDAO mexdao) {
-                Element eprdao = mexdao.getEPR();
+                Element eprdao = null;
+                // mexdao is already release for non-callback myrole
+                if( mexdao != null ) eprdao = mexdao.getEPR();
                 return _epr = eprdao == null ? null : _contexts.eprContext.resolveEndpointReference(mexdao.getEPR());
             }
 
@@ -351,6 +357,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
     public void release() {
         __log.debug("Releasing mex " + getMessageExchangeId());
         _changes.add(Change.RELEASE);
+        // for a one-way, message exchanges are always deleted
         _process.releaseMessageExchange(getMessageExchangeId());
     }
 

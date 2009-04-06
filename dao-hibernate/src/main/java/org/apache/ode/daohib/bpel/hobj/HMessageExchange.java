@@ -22,14 +22,20 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.ode.bpel.iapi.MessageExchange.AckType;
-
 /**
  * Hibernate-managed table for keeping track of message exchanges.
  * 
  * @hibernate.class table="BPEL_MESSAGE_EXCHANGE" dynamic-update="true"
+ * @hibernate.query name="DELETE_MEX_BY_INSTANCE" query="delete from HMessageExchange as m where m.instance = :instance"
+ * @hibernate.query name="SELECT_UNMATCHED_MEX_BY_INSTANCE" query="from HMessageExchange as m where m in(select cm.messageExchange from HCorrelatorMessage as cm where cm.messageExchange.instance = :instance)"
+ * @hibernate.query name="DELETE_UNMATCHED_MEX" query="delete from HMessageExchange as m where m in(:mex)"
+ * @hibernate.query name="DELETE_MEX_BY_PROCESS" query="delete from HMessageExchange as m where m.process = :process"
  */
 public class HMessageExchange extends HObject {
+    public final static String DELETE_MEX_BY_INSTANCE = "DELETE_MEX_BY_INSTANCE";
+    public final static String SELECT_UNMATCHED_MEX_BY_INSTANCE = "SELECT_UNMATCHED_MEX_BY_INSTANCE";
+    public final static String DELETE_UNMATCHED_MEX = "DELETE_UNMATCHED_MEX";
+    public final static String DELETE_MEX_BY_PROCESS = "DELETE_MEX_BY_PROCESS";
 
     private String _channelName;
 
@@ -142,7 +148,7 @@ public class HMessageExchange extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="LDATA_EPR_ID" cascade="delete"
+     * @hibernate.many-to-one column="LDATA_EPR_ID" cascade="delete" foreign-key="none"
      */
     public HLargeData getEndpoint() {
         return _endpoint;
@@ -153,7 +159,7 @@ public class HMessageExchange extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="LDATA_CEPR_ID" cascade="delete"
+     * @hibernate.many-to-one column="LDATA_CEPR_ID" cascade="delete" foreign-key="none"
      */
     public HLargeData getCallbackEndpoint() {
         return _callbackEndpoint;
@@ -164,7 +170,7 @@ public class HMessageExchange extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="REQUEST" cascade="delete"
+     * @hibernate.many-to-one column="REQUEST" cascade="delete" foreign-key="none"
      */
     public HMessage getRequest() {
         return _request;
@@ -175,7 +181,7 @@ public class HMessageExchange extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="RESPONSE" cascade="delete"
+     * @hibernate.many-to-one column="RESPONSE" cascade="delete" foreign-key="none"
      */
     public HMessage getResponse() {
         return _response;
@@ -219,7 +225,7 @@ public class HMessageExchange extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="PROCESS"
+     * @hibernate.many-to-one column="PROCESS" foreign-key="none"
      */
     public HProcess getProcess() {
         return _process;
@@ -230,7 +236,7 @@ public class HMessageExchange extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="PIID"
+     * @hibernate.many-to-one column="PIID" foreign-key="none"
      */
     public HProcessInstance getInstance() {
         return _instance;
@@ -327,7 +333,7 @@ public class HMessageExchange extends HObject {
 
     /**
      * @hibernate.map name="properties" table="BPEL_MEX_PROPS" lazy="true" cascade="delete"
-     * @hibernate.collection-key column="MEX"
+     * @hibernate.collection-key name="mex" column="MEX" foreign-key="none"
      * @hibernate.collection-index column="NAME" type="string"
      * @hibernate.collection-element column="VALUE" type="string" length="8000"
      */
@@ -344,7 +350,7 @@ public class HMessageExchange extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="PARTNERLINK"
+     * @hibernate.many-to-one column="PARTNERLINK" foreign-key="none"
      */
     public HPartnerLink getPartnerLink() {
         return _partnerLink;

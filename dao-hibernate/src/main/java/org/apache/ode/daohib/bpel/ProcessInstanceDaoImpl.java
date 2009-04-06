@@ -18,9 +18,12 @@
  */
 package org.apache.ode.daohib.bpel;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
+import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.*;
 import org.apache.ode.utils.DOMUtils;
@@ -40,7 +43,9 @@ import java.util.*;
 /**
  * Hibernate-based {@link ProcessInstanceDAO} implementation.
  */
-class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO {
+public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO {
+    private static final Log __log = LogFactory.getLog(ProcessInstanceDaoImpl.class);
+
     /** Query for removing selectors. */
     private static final String QRY_DELSELECTORS = "delete from " + HCorrelatorSelector.class.getName() + " where instance = ?";
 
@@ -314,9 +319,87 @@ class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO 
         this.getProcess().instanceCompleted(this);
     }
 
-    public void delete() {
+    public boolean delete(Set<CLEANUP_CATEGORY> cleanupCategories) {
         entering("ProcessInstanceDaoImpl.delete");
-        _sm.getSession().delete(_instance);
+        boolean instanceDeleted = false;
+        
+        if(__log.isDebugEnabled()) __log.debug("Cleaning up instance data with categories = " + cleanupCategories);
+        
+        if( _instance.getJacobState() != null ) {
+            getSession().delete(_instance.getJacobState());
+            _instance.setJacobState(null);
+        }
+        
+        if( cleanupCategories.contains(CLEANUP_CATEGORY.EVENTS) ) {
+            deleteEvents();
+        }
+        
+        if( cleanupCategories.contains(CLEANUP_CATEGORY.CORRELATIONS) ) {
+            deleteCorrelations();
+        }
+        
+        if( cleanupCategories.contains(CLEANUP_CATEGORY.MESSAGES) ) {
+            deleteMessages();
+        }
+        
+        if( cleanupCategories.contains(CLEANUP_CATEGORY.VARIABLES) ) {
+            deleteVariables();
+        }
+        
+        if( cleanupCategories.contains(CLEANUP_CATEGORY.INSTANCE) ) {
+            deleteInstance();
+            instanceDeleted = true;
+        }
+
+        getSession().flush();
+        
+        if(__log.isDebugEnabled()) __log.debug("Instance data cleaned up and flushed.");
+        
+        return instanceDeleted;
+    }
+    
+    private void deleteInstance() {
+        getSession().getNamedQuery(HLargeData.DELETE_FAULT_LDATA_BY_INSTANCE_ID).setParameter ("instanceId", _instance.getId()).executeUpdate();
+        getSession().getNamedQuery(HFaultData.DELETE_FAULTS_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+
+        getSession().delete(_instance); // this deletes JcobState, HActivityRecovery -> ActivityRecovery-LData
+    }
+     
+    private void deleteVariables() {
+        getSession().getNamedQuery(HCorrelationProperty.DELETE_CORPROPS_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+        getSession().getNamedQuery(HCorrelationSet.DELETE_CORSETS_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+
+        getSession().getNamedQuery(HVariableProperty.DELETE_VARIABLE_PROPERITES_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+        getSession().getNamedQuery(HLargeData.DELETE_XMLDATA_LDATA_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+        getSession().getNamedQuery(HXmlData.DELETE_XMLDATA_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+
+        getSession().getNamedQuery(HLargeData.DELETE_PARTNER_LINK_LDATA_BY_INSTANCE).setParameter ("instance", _instance).setParameter ("instance2", _instance).executeUpdate();
+        getSession().getNamedQuery(HPartnerLink.DELETE_PARTNER_LINKS_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+
+        getSession().getNamedQuery(HScope.DELETE_SCOPES_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void deleteMessages() {
+        // there are chances that some unmatched messages are still there
+        getSession().getNamedQuery(HLargeData.DELETE_UNMATCHED_MESSAGE_LDATA_BY_INSTANCE).setParameter("instance", _instance).executeUpdate();
+        Collection unmatchedMex = getSession().getNamedQuery(HMessageExchange.SELECT_UNMATCHED_MEX_BY_INSTANCE).setParameter("instance", _instance).list();
+        if( !unmatchedMex.isEmpty() ) {
+            getSession().getNamedQuery(HMessageExchange.DELETE_UNMATCHED_MEX).setParameter("mex", unmatchedMex).executeUpdate();
+        }
+        getSession().getNamedQuery(HCorrelatorMessage.DELETE_CORMESSAGES_BY_INSTANCE).setParameter("instance", _instance).executeUpdate();
+
+        getSession().getNamedQuery(HCorrelatorSelector.DELETE_MESSAGE_ROUTES_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+    }
+    
+    private void deleteCorrelations() {
+        getSession().getNamedQuery(HCorrelationProperty.DELETE_CORPROPS_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+        getSession().getNamedQuery(HCorrelationSet.DELETE_CORSETS_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+    }
+
+    private void deleteEvents() {
+        getSession().getNamedQuery(HLargeData.DELETE_EVENT_LDATA_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+        getSession().getNamedQuery(HBpelEvent.DELETE_EVENTS_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();      
     }
 
     public void insertBpelEvent(ProcessInstanceEvent event) {

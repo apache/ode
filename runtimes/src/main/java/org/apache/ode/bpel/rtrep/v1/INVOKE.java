@@ -158,7 +158,7 @@ public class INVOKE extends ACTIVITY {
                         // TODO update output variable with data from non-initiate correlation sets
 
                         _self.parent.completed(fault, CompensationHandler.emptySet());
-                        getBpelRuntime().releasePartnerMex(mexId);
+                        getBpelRuntime().releasePartnerMex(mexId, fault == null);
                     }
 
                     public void onFault() {
@@ -168,7 +168,7 @@ public class INVOKE extends ACTIVITY {
                         FaultData fault = createFault(faultName, msg,
                             _oinvoke.getOwner().messageTypes.get(msgType), _self.o);
                         _self.parent.completed(fault, CompensationHandler.emptySet());
-                        getBpelRuntime().releasePartnerMex(mexId);
+                        getBpelRuntime().releasePartnerMex(mexId, false);
                     }
 
                     public void onFailure() {
@@ -184,7 +184,7 @@ public class INVOKE extends ACTIVITY {
                         } catch (Exception e) {
                             _self.parent.failure(reason, null);
                         }
-                        getBpelRuntime().releasePartnerMex(mexId);
+                        getBpelRuntime().releasePartnerMex(mexId, false);
                     }
 
                 }.or(new TerminationChannelListener(_self.self) {

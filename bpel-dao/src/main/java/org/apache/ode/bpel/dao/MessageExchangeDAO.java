@@ -261,7 +261,7 @@ public interface MessageExchangeDAO {
     
     void setPipedMessageExchangeId(String pipedMexId);
     
-    void release();
+    void release(boolean doClean);
 
     void setFailureType(FailureType failureType);
 

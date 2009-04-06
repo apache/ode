@@ -14,6 +14,7 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.rapi.PartnerLinkModel;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -110,7 +111,13 @@ abstract class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements 
 
     }
 
-  
+    public void release(boolean instanceSucceeded) {
+        if( _process.isCleanupCategoryEnabled(instanceSucceeded, CLEANUP_CATEGORY.MESSAGES) ) {
+            if(__log.isDebugEnabled()) __log.debug("Releasing mex " + getMessageExchangeId());
+            _process.releaseMessageExchange(getMessageExchangeId());
+        }
+    }
+ 
     protected MessageExchangeDAO doInvoke() {
         if (getStatus() != Status.NEW) throw new IllegalStateException("Invalid state: " + getStatus());
         request();

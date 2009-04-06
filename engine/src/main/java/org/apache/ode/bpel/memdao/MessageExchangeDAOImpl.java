@@ -259,7 +259,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
     }
 
 
-    public void release() {
+    public void release(boolean doClean) {
         instance = null;
         process = null;
         _plink = null;

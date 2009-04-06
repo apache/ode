@@ -19,6 +19,8 @@
 
 package org.apache.ode.utils.wsdl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.w3c.dom.Element;
@@ -54,7 +56,9 @@ import java.util.List;
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
 public class WsdlUtils {
-
+    @SuppressWarnings("unused")
+    private final static Log __log = LogFactory.getLog(WsdlUtils.class);
+    
     private static final Messages msgs = Messages.getMessages(Messages.class);
 
     /**
@@ -141,6 +145,7 @@ public class WsdlUtils {
      * @return an instance of {@link SOAPBinding} or {@link HTTPBinding} or null
      * @throws IllegalArgumentException if multiple bindings found.
      */
+    @SuppressWarnings("unchecked")
     public static ExtensibilityElement getBindingExtension(Binding binding) {
         Collection bindings = new ArrayList();
         CollectionsX.filter(bindings, binding.getExtensibilityElements(), HTTPBinding.class);
@@ -176,6 +181,7 @@ public class WsdlUtils {
      * @return an instance of {@link javax.wsdl.extensions.http.HTTPOperation} or {@link javax.wsdl.extensions.soap.SOAPOperation}
      * @throws IllegalArgumentException if not exactly 1 element is found.
      */
+    @SuppressWarnings("unchecked")
     public static ExtensibilityElement getOperationExtension(BindingOperation bindingOperation) {
         Collection operations = new ArrayList();
         CollectionsX.filter(operations, bindingOperation.getExtensibilityElements(), HTTPOperation.class);
@@ -224,6 +230,7 @@ public class WsdlUtils {
      *         contained in the extensibility element list. Or null if none.
      * @throws IllegalArgumentException if more than 1 MIMEContent is found.
      */
+    @SuppressWarnings("unchecked")
     public static MIMEContent getMimeContent(List extensibilityElements) {
         Collection<MIMEContent> coll = CollectionsX.filter(extensibilityElements, MIMEContent.class);
         if (coll.size() == 0) {
@@ -245,6 +252,7 @@ public class WsdlUtils {
      * @return an instance of {@link javax.wsdl.extensions.http.HTTPAddress} or {@link javax.wsdl.extensions.soap.SOAPAddress}
      * @throws IllegalArgumentException if not exactly 1 element is found.
      */
+    @SuppressWarnings("unchecked")
     public static ExtensibilityElement getAddressExtension(Port port) {
         Collection operations = new ArrayList();
         CollectionsX.filter(operations, port.getExtensibilityElements(), HTTPAddress.class);
@@ -305,6 +313,7 @@ public class WsdlUtils {
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     public static Collection<UnknownExtensibilityElement> getHttpHeaders(List extensibilityElements) {
         final Collection<UnknownExtensibilityElement> unknownExtElements = CollectionsX.filter(extensibilityElements, UnknownExtensibilityElement.class);
         for (UnknownExtensibilityElement extensibilityElement : unknownExtElements) {
@@ -335,6 +344,7 @@ public class WsdlUtils {
             if (p.getElementName() == null) continue;
             if (p.getElementName().equals(elName)) return f;
         }
+        
         return null;
     }
 

@@ -31,8 +31,10 @@ import java.util.Set;
  * matched up to a pcik/receive.
  * 
  * @hibernate.class table="BPEL_CORRELATOR"
+ * @hibernate.query name="DELETE_CORRELATORS_BY_PROCESS" query="delete from HCorrelator as c where c.process = :process"
  */
 public class HCorrelator extends HObject {
+    public final static String DELETE_CORRELATORS_BY_PROCESS = "DELETE_CORRELATORS_BY_PROCESS";
 
     private HProcess _process;
 
@@ -54,7 +56,7 @@ public class HCorrelator extends HObject {
      * messages that need matching to a selector (i.e. pick/receive).
      * 
      * @hibernate.set lazy="true" inverse="true" cascade="delete"
-     * @hibernate.collection-key column="CORRELATOR"
+     * @hibernate.collection-key column="CORRELATOR" foreign-key="none"
      * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HCorrelatorMessage"
      */
     public Set<HCorrelatorMessage> getMessageCorrelations() {
@@ -80,7 +82,7 @@ public class HCorrelator extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="PROCESS_ID"
+     * @hibernate.many-to-one column="PROCESS_ID" foreign-key="none"
      */
     public HProcess getProcess() {
         return _process;
@@ -96,7 +98,7 @@ public class HCorrelator extends HObject {
      * selectors (i.e. pick/receive) that need matching to an input message.
      * 
      * @hibernate.set lazy="true" inverse="true" cascade="delete"
-     * @hibernate.collection-key column="CORRELATOR"
+     * @hibernate.collection-key column="CORRELATOR" foreign-key="none"
      * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HCorrelatorSelector"
      */
     public Set<HCorrelatorSelector> getSelectors() {

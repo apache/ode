@@ -37,6 +37,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -48,10 +50,19 @@ import java.util.Collection;
  */
 @Entity
 @Table(name="ODE_XML_DATA")
+@NamedQueries({
+    @NamedQuery(name=XmlDataDAOImpl.SELECT_XMLDATA_IDS_BY_PROCESS, query="select distinct x._id from XmlDataDAOImpl as x where x._scope._processInstance._process = :process"),
+    @NamedQuery(name=XmlDataDAOImpl.SELECT_XMLDATA_IDS_BY_INSTANCE, query="select distinct x._id from XmlDataDAOImpl as x where x._scope._processInstance = :instance"),
+    @NamedQuery(name=XmlDataDAOImpl.DELETE_XMLDATA_BY_SCOPE_IDS, query="delete from XmlDataDAOImpl as x where x._scopeId in(:scopeIds)")
+})
 public class XmlDataDAOImpl implements XmlDataDAO {
+    public final static String SELECT_XMLDATA_IDS_BY_PROCESS = "SELECT_XMLDATA_IDS_BY_PROCESS";
+    public final static String SELECT_XMLDATA_IDS_BY_INSTANCE = "SELECT_XMLDATA_IDS_BY_INSTANCE";
+    public final static String DELETE_XMLDATA_BY_SCOPE_IDS = "DELETE_XMLDATA_BY_SCOPE_IDS";
 	
-	@Id @Column(name="XML_DATA_ID") 
+    @Id @Column(name="XML_DATA_ID") 
 	@GeneratedValue(strategy=GenerationType.AUTO)
+    @SuppressWarnings("unused")
 	private Long _id;
 	@Lob @Column(name="DATA")
     private String _data;
@@ -65,6 +76,9 @@ public class XmlDataDAOImpl implements XmlDataDAO {
     @OneToMany(targetEntity=XmlDataProperty.class,mappedBy="_xmlData",fetch=FetchType.EAGER,cascade={CascadeType.ALL})
     private Collection<XmlDataProperty> _props = new ArrayList<XmlDataProperty>();
 
+    @Basic @Column(name="SCOPE_ID", nullable=true, insertable=false, updatable=false)
+    @SuppressWarnings("unused")
+    private Long _scopeId;
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="SCOPE_ID")
 	private ScopeDAOImpl _scope;
 	

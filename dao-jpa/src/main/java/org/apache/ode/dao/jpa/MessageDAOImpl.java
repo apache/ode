@@ -19,7 +19,6 @@
 
 package org.apache.ode.dao.jpa;
 
-
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,6 +26,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.namespace.QName;
@@ -35,14 +36,22 @@ import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 
-
 @Entity
 @Table(name="ODE_MESSAGE")
+@NamedQueries({
+    @NamedQuery(name=MessageDAOImpl.SELECT_REQUEST_MESSAGE_IDS_BY_PROCESS, query="select x._request._id from MessageExchangeDAOImpl as x where x._process = :process"),
+    @NamedQuery(name=MessageDAOImpl.SELECT_RESPONSE_MESSAGE_IDS_BY_PROCESS, query="select x._response._id from MessageExchangeDAOImpl as x where x._process = :process"),
+    @NamedQuery(name=MessageDAOImpl.DELETE_MESSAGES_BY_IDS, query="delete from MessageDAOImpl as m where m._id in (:ids)")
+})
 public class MessageDAOImpl implements MessageDAO {
+    public final static String SELECT_REQUEST_MESSAGE_IDS_BY_PROCESS = "SELECT_REQUEST_MESSAGE_IDS_BY_PROCESS";
+    public final static String SELECT_RESPONSE_MESSAGE_IDS_BY_PROCESS = "SELECT_RESPONSE_MESSAGE_IDS_BY_PROCESS";
+    public final static String DELETE_MESSAGES_BY_IDS = "DELETE_MESSAGES_BY_IDS";
 
     @Id @Column(name="MESSAGE_ID")
     @GeneratedValue(strategy=GenerationType.AUTO)
-    private Long _id;
+    @SuppressWarnings("unused")
+    Long _id;
     @Basic @Column(name="TYPE")
     private String _type;
     @Lob @Column(name="DATA")
@@ -55,8 +64,8 @@ public class MessageDAOImpl implements MessageDAO {
     private Element _headerElement;
 
     public MessageDAOImpl() {
-
     }
+
     public MessageDAOImpl(QName type, MessageExchangeDAOImpl me) {
         _type = type.toString();
     }

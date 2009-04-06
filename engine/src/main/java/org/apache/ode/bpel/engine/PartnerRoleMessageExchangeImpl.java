@@ -175,8 +175,6 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
     }
 
     public void replyWithFailure(FailureType type, String description, Element details) throws BpelEngineException {
-        if (__log.isDebugEnabled()) __log.debug("replyWithFailure mex=" + getMessageExchangeId());
-
         _accessLock.lock();
         try {
             checkReplyContextOk();

@@ -79,11 +79,6 @@ public class LoggingInterceptor<T> implements InvocationHandler {
         	// JDBC Connection
         	if ("prepareStatement".equals(method.getName())) {
         		print("prepareStmt: " + args[0]);
-                if (((String)args[0]).indexOf("ODE_SCOPE") > 0) {
-                    for (StackTraceElement traceElement : Thread.currentThread().getStackTrace()) {
-                        print(traceElement.toString());
-                    }
-                }
         	} else if ("prepareCall".equals(method.getName())) {
         		print("prepareCall: " + args[0]);
         	} else if ("close".equals(method.getName())) {

@@ -86,7 +86,7 @@ public interface IOContext {
      */
     Element getMyRequest(String mexId);
 
-    void releasePartnerMex(String mexId);
+    void releasePartnerMex(String mexId, boolean instanceSucceeded);
 
     Element getSourceEPR(String mexId);
 

@@ -61,6 +61,7 @@ import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
 import org.apache.ode.bpel.rapi.CorrelationSet;
 import org.apache.ode.bpel.rapi.FaultInfo;
@@ -115,6 +116,12 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
 
     /** Five second maximum for continuous execution. */
     private long _maxReductionTimeMs = 2000000;
+    
+    /**
+     * This flag tells if the instance associated with the contextImpl instance is cleaned up by the 
+     * instance cleanup process
+     */
+    private boolean _instanceCleanedUp = false;
 
     public BpelRuntimeContextImpl(BpelInstanceWorker instanceWorker, ProcessInstanceDAO instanceDAO, OdeRTInstance rti) {
         _instanceWorker = instanceWorker;
@@ -190,6 +197,8 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
 
         sendEvent(new ProcessCompletionEvent(faultData.getFaultName()));
         _dao.finishCompletion();
+
+        _instanceCleanedUp = _dao.delete(_bpelProcess.getCleanupCategories(false));
     }
 
     public void completedOk() {
@@ -206,6 +215,8 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
 
         sendEvent(new ProcessCompletionEvent(null));
         _dao.finishCompletion();
+        
+        _instanceCleanedUp = _dao.delete(_bpelProcess.getCleanupCategories(true));
     }
 
     public Long createScopeInstance(Long parentScopeId, String name, int modelId) {
@@ -431,7 +442,13 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         Status previousStatus = myrolemex.getStatus();
         myrolemex.setStatus(Status.ACK);
         myrolemex.setAckType(ackType);
-        _bpelProcess.onMyRoleMexAck(myrolemex, previousStatus);
+        try {
+            _bpelProcess.onMyRoleMexAck(myrolemex, previousStatus);
+        } finally {
+            if (myrolemex.getPipedMessageExchangeId() != null) {
+                myrolemex.release(_bpelProcess.isCleanupCategoryEnabled(myrolemex.getAckType() == MessageExchange.AckType.RESPONSE, CLEANUP_CATEGORY.MESSAGES));
+            }
+        }
         sendEvent(evt);
     }
 
@@ -541,6 +558,12 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         }
         _bpelProcess.invokePartner(mexDao);
 
+        if (mexDao.getPattern().equals(MessageExchangePattern.REQUEST_ONLY)) {
+            mexDao.setStatus(MessageExchange.Status.ASYNC);
+            // This mex can now be released
+            boolean succeeded = mexDao.getAckType() != MessageExchange.AckType.FAILURE && mexDao.getAckType() != MessageExchange.AckType.FAULT; 
+            mexDao.release(_bpelProcess.isCleanupCategoryEnabled(succeeded, CLEANUP_CATEGORY.MESSAGES));
+        }
         // In case a response/fault was available right away, which will happen for BLOCKING/TRANSACTED invocations,
         // we need to inject a message on the response channel, so that the process continues.
         switch (mexDao.getStatus()) {
@@ -593,12 +616,14 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
             canReduce = _rti.execute();
         }
         
-        _dao.setLastActiveTime(new Date());
+        if( !_instanceCleanedUp ) {
+            _dao.setLastActiveTime(new Date());
+        }
         if (!ProcessState.isFinished(_dao.getState())) {
             if (_forceRollback) {
                 rollbackState();
             } else {
-                saveState();            	
+                saveState();
             }
 
             if (ProcessState.canExecute(_dao.getState()) && canReduce) {
@@ -880,9 +905,9 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         return response;
     }
 
-    public void releasePartnerMex(String mexId) {
+    public void releasePartnerMex(String mexId, boolean instanceSucceeded) {
         MessageExchangeDAO dao = _dao.getConnection().getMessageExchange(mexId);
-        dao.release();
+        dao.release(_bpelProcess.isCleanupCategoryEnabled(instanceSucceeded, CLEANUP_CATEGORY.MESSAGES) );
     }
 
 

@@ -22,7 +22,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 public class MessageRouting20Test extends BPELTestAbstract {
-
 	@Test public void testCorrelation() throws Throwable {
 		go("/bpel/2.0/TestCorrelation");
 	}

@@ -29,6 +29,7 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.XmlDataDAO;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
+import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.utils.QNameUtils;
 import org.w3c.dom.Element;
 
@@ -296,8 +297,9 @@ public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstan
         this.getProcess().instanceCompleted(this);
     }
 
-    public void delete() {
+    public boolean delete(Set<CLEANUP_CATEGORY> cleanupCategories) {
         _processDao._instances.remove(_instanceId);
+        return true;
     }
 
     public Collection<ScopeDAO> getScopes() {

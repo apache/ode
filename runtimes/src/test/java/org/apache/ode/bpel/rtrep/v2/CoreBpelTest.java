@@ -413,7 +413,7 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
       return null;
     }
 
-    public void releasePartnerMex(String mexId) {
+    public void releasePartnerMex(String mexId, boolean instanceSucceeded) {
         // TODO Auto-generated method stub
         
     }

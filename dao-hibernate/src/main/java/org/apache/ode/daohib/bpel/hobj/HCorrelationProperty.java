@@ -26,8 +26,13 @@ import javax.xml.namespace.QName;
  * correlation set.
  * 
  * @hibernate.class table="BPEL_CORRELATION_PROP"
+ * @hibernate.query name="DELETE_CORPROPS_BY_PROCESS" query="delete from HCorrelationProperty as p where p.correlationSet in(select s from HCorrelationSet as s where s.process = :process)"
+ * @hibernate.query name="DELETE_CORPROPS_BY_INSTANCE" query="delete from HCorrelationProperty as p where p.correlationSet in(select s from HCorrelationSet as s where s.instance = :instance)"
  */
 public class HCorrelationProperty extends HObject {
+    public final static String DELETE_CORPROPS_BY_PROCESS = "DELETE_CORPROPS_BY_PROCESS";
+    public final static String DELETE_CORPROPS_BY_INSTANCE = "DELETE_CORPROPS_BY_INSTANCE";
+
     private String _name;
     private String _namespace;
     private String _value;
@@ -89,7 +94,7 @@ public class HCorrelationProperty extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="CORR_SET_ID"
+     * @hibernate.many-to-one column="CORR_SET_ID" foreign-key="none"
      */
     public HCorrelationSet getCorrelationSet() {
         return _correlationSet;

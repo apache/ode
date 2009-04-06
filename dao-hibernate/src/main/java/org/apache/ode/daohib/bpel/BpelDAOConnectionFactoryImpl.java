@@ -45,7 +45,7 @@ import java.util.Enumeration;
 public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDBC {
     private static final Log __log = LogFactory.getLog(BpelDAOConnectionFactoryImpl.class);
 
-    private SessionManager _sessionManager;
+    protected SessionManager _sessionManager;
 
     private DataSource _ds;
 
@@ -131,8 +131,12 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
                 __log.debug(name + "=" + properties.getProperty(name));
             }
         }
-        SessionManager sm = new SessionManager(properties, _ds, _tm);
+        SessionManager sm = createSessionManager(properties, _ds, _tm);
         _sessionManager = sm;
+    }
+
+    protected SessionManager createSessionManager(Properties properties, DataSource ds, TransactionManager tm) {
+        return new SessionManager(properties, ds, tm);
     }
 
     private static final String DEFAULT_HIBERNATE_DIALECT = "org.hibernate.dialect.DerbyDialect";

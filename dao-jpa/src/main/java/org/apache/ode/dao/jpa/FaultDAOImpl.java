@@ -30,13 +30,18 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.xml.namespace.QName;
 
-
 @Entity
 @Table(name="ODE_FAULT")
+@NamedQueries({
+    @NamedQuery(name=FaultDAOImpl.DELETE_FAULTS_BY_IDS, query="delete from FaultDAOImpl as f where f._id in(:ids)")
+})
 public class FaultDAOImpl implements FaultDAO {
+    public final static String DELETE_FAULTS_BY_IDS = "DELETE_FAULTS_BY_IDS";
 
 	@Id @Column(name="FAULT_ID") 
 	@GeneratedValue(strategy=GenerationType.AUTO)

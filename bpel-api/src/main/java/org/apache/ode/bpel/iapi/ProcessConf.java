@@ -24,6 +24,7 @@ import java.net.URI;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
@@ -153,4 +154,19 @@ public interface ProcessConf {
      */
     public Map<String, String> getEndpointProperties(EndpointReference epr);
 
+    boolean isCleanupCategoryEnabled(boolean instanceSucceeded, CLEANUP_CATEGORY category);
+    
+    Set<CLEANUP_CATEGORY> getCleanupCategories(boolean instanceSucceeded);
+
+    public enum CLEANUP_CATEGORY {
+        INSTANCE,
+        VARIABLES,
+        MESSAGES,
+        CORRELATIONS,
+        EVENTS;
+        
+        public static CLEANUP_CATEGORY fromString(String lowerCase) {
+            return valueOf(CLEANUP_CATEGORY.class, lowerCase.toUpperCase());
+        }
+    }
 }

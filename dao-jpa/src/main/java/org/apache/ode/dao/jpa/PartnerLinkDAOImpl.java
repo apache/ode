@@ -34,16 +34,23 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.namespace.QName;
 
 @Entity
 @Table(name="ODE_PARTNER_LINK")
+@NamedQueries({
+    @NamedQuery(name=PartnerLinkDAOImpl.DELETE_PARTNER_LINKS_BY_SCOPE_IDS, query="delete from PartnerLinkDAOImpl as l where l._scopeId in (:scopeIds)")
+})
 public class PartnerLinkDAOImpl implements PartnerLinkDAO {
+    public final static String DELETE_PARTNER_LINKS_BY_SCOPE_IDS = "DELETE_PARTNER_LINKS_BY_SCOPE_IDS";
 
 	@Id @Column(name="PARTNER_LINK_ID") 
 	@GeneratedValue(strategy=GenerationType.AUTO)
+    @SuppressWarnings("unused")
 	private Long _id;
 	@Lob @Column(name="MY_EPR")
     private String _myEPR;
@@ -68,7 +75,11 @@ public class PartnerLinkDAOImpl implements PartnerLinkDAO {
 	@Basic @Column(name="PARTNER_SESSION_ID")
     private String _partnerSessionId;
 
+    @Basic @Column(name="SCOPE_ID", nullable=true, insertable=false, updatable=false)
+    @SuppressWarnings("unused")
+    private Long _scopeId;
     @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="SCOPE_ID")
+    @SuppressWarnings("unused")
     private ScopeDAOImpl _scope;
 
     public PartnerLinkDAOImpl() {}

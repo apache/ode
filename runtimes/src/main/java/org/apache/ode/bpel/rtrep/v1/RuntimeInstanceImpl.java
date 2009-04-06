@@ -406,8 +406,8 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
     /**
      * Proxy to {@link org.apache.ode.bpel.rapi.IOContext#releasePartnerMex(String) }.
      */
-    public void releasePartnerMex(String mexId) {
-        _brc.releasePartnerMex(mexId);
+    public void releasePartnerMex(String mexId, boolean instanceSucceeded) {
+        _brc.releasePartnerMex(mexId, instanceSucceeded);
     }
 
     /**

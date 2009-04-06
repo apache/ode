@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
+import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.w3c.dom.Element;
 
 import javax.persistence.*;
@@ -72,13 +73,17 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
     @Basic @Column(name="EXEC_STATE_COUNTER")
     private int _execStateCounter;
 	
-	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL}) @Column(name="ROOT_SCOPE_ID")
-	private ScopeDAOImpl _rootScope;
-	@OneToMany(targetEntity=ScopeDAOImpl.class,mappedBy="_processInstance",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
-	private Collection<ScopeDAO> _scopes = new ArrayList<ScopeDAO>();
+    @OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}) @Column(name="ROOT_SCOPE_ID")
+    private ScopeDAOImpl _rootScope;
+    @OneToMany(targetEntity=ScopeDAOImpl.class,mappedBy="_processInstance",fetch=FetchType.LAZY,cascade={CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    private Collection<ScopeDAO> _scopes = new ArrayList<ScopeDAO>();
 	@OneToMany(targetEntity=ActivityRecoveryDAOImpl.class,mappedBy="_instance",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
     private Collection<ActivityRecoveryDAO> _recoveries = new ArrayList<ActivityRecoveryDAO>();
-	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.ALL}) @Column(name="FAULT_ID")
+
+    @Basic @Column(name="FAULT_ID", insertable=false, updatable=false, nullable=true)
+    @SuppressWarnings("unused")
+    private long _faultId;
+	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}) @Column(name="FAULT_ID")
 	private FaultDAOImpl _fault;
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROCESS_ID")
 	private ProcessDAOImpl _process;
@@ -118,13 +123,78 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 	    return getEM().createNamedQuery(CorrelationSetDAOImpl.SELECT_CORRELATION_SETS_BY_INSTANCES).setParameter("instances", instances).getResultList();
 	}
     
-	public void delete() {
-		if (getEM() != null ) {
-			getEM().remove(this);
-		}
-	}
+    public boolean delete(Set<CLEANUP_CATEGORY> cleanupCategories) {
+        if(__log.isDebugEnabled()) __log.debug("Cleaning up instance Data with " + cleanupCategories);
+        
+        boolean instanceDeleted = false;
+        
+        // remove jacob state
+        setExecutionState(null);
+        if (getEM() != null) {
+            if( !cleanupCategories.isEmpty() ) {
+                // by default, we do not flush before select; flush it, so we can delete no matter if an entity is loaded up
+                // or not; more importantly, OpenJPA will secretly load from the entire table if some entities reside only
+                // in memory
+                getEM().flush();
+            }
+            
+            if (cleanupCategories.contains(CLEANUP_CATEGORY.EVENTS)) {
+                deleteEvents();
+            }
+            if (cleanupCategories.contains(CLEANUP_CATEGORY.CORRELATIONS)) {
+                deleteCorrelations();
+            }
+            if( cleanupCategories.contains(CLEANUP_CATEGORY.MESSAGES) ) {
+                deleteMessageRoutes();
+            }
+            if (cleanupCategories.contains(CLEANUP_CATEGORY.VARIABLES)) {
+                deleteVariables();
+            }
+            if (cleanupCategories.contains(CLEANUP_CATEGORY.INSTANCE)) {
+                deleteInstance();
+                instanceDeleted = true;
+            }
 
-	public void deleteActivityRecovery(String channel) {
+            getEM().flush();
+        }
+        
+        return instanceDeleted;
+    }
+    
+    private void deleteInstance() {
+        if( _fault != null ) {
+            getEM().remove(_fault);
+        }
+        getEM().remove(this); // This deletes ActivityRecoveryDAO 
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void deleteVariables() {
+        Collection xmlDataIds = getEM().createNamedQuery(XmlDataDAOImpl.SELECT_XMLDATA_IDS_BY_INSTANCE).setParameter("instance", this).getResultList();
+        batchUpdateByIds(xmlDataIds.iterator(), getEM().createNamedQuery(XmlDataProperty.DELETE_XML_DATA_PROPERTIES_BY_XML_DATA_IDS), "xmlDataIds");
+        Collection scopeIds = getEM().createNamedQuery(ScopeDAOImpl.SELECT_SCOPE_IDS_BY_INSTANCE).setParameter("instance", this).getResultList();
+        batchUpdateByIds(scopeIds.iterator(), getEM().createNamedQuery(XmlDataDAOImpl.DELETE_XMLDATA_BY_SCOPE_IDS), "scopeIds");
+
+        batchUpdateByIds(scopeIds.iterator(), getEM().createNamedQuery(PartnerLinkDAOImpl.DELETE_PARTNER_LINKS_BY_SCOPE_IDS), "scopeIds");
+        batchUpdateByIds(scopeIds.iterator(), getEM().createNamedQuery(ScopeDAOImpl.DELETE_SCOPES_BY_SCOPE_IDS), "ids");
+    }
+
+    private void deleteMessageRoutes() {
+        getEM().createNamedQuery(MessageRouteDAOImpl.DELETE_MESSAGE_ROUTES_BY_INSTANCE).setParameter ("instance", this).executeUpdate();
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void deleteCorrelations() {
+        Collection corrSetIds = getEM().createNamedQuery(CorrelationSetDAOImpl.SELECT_CORRELATION_SET_IDS_BY_INSTANCE).setParameter("instance", this).getResultList();
+        batchUpdateByIds(corrSetIds.iterator(), getEM().createNamedQuery(CorrSetProperty.DELETE_CORSET_PROPERTIES_BY_PROPERTY_IDS), "corrSetIds");
+        batchUpdateByIds(corrSetIds.iterator(), getEM().createNamedQuery(CorrelationSetDAOImpl.DELETE_CORRELATION_SETS_BY_IDS), "ids");
+    }
+
+    private void deleteEvents() {
+        getEM().createNamedQuery(EventDAOImpl.DELETE_EVENTS_BY_INSTANCE).setParameter ("instance", this).executeUpdate();
+    }
+    
+    public void deleteActivityRecovery(String channel) {
         ActivityRecoveryDAOImpl toRemove = null;
         for (ActivityRecoveryDAO _recovery : _recoveries) {
             ActivityRecoveryDAOImpl arElement = (ActivityRecoveryDAOImpl) _recovery;

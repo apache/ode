@@ -153,7 +153,7 @@ JBI                 = "org.apache.servicemix:servicemix-jbi:jar:3.1.1-incubating
 JENCKS              = "org.jencks:jencks:jar:all:1.3"
 JIBX                = findArtifacts(AXIS2_DEPS, "jibx:jibx-run") #"jibx:jibx-run:jar:1.1-beta3"
 LOG4J               = findArtifacts(AXIS2_DEPS, "log4j:log4j") #"log4j:log4j:jar:1.2.15"
-OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.1.0",
+OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.3.0-SNAPSHOT",
                        "net.sourceforge.serp:serp:jar:1.13.1"]
 
 SAXON               = group("saxon", "saxon-xpath", "saxon-dom", "saxon-xqj", :under=>"net.sf.saxon", :version=>"9.x")
@@ -260,7 +260,7 @@ define "ode" do
     end
     
     test.using :testng
-    test.with(projects("tools"), libs, AXIS2_MODULES.mods, AXIS2_ALL, HTTPCORE, JAVAX.servlet, Buildr::Jetty::REQUIRES, file(_("target/test"))).using(:fork => :each)
+    test.with(projects("tools"), libs, AXIS2_MODULES.mods, AXIS2_ALL, HTTPCORE, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, file(_("target/test"))).using(:fork => :each)
     webapp_dir = "#{test.compile.target}/webapp"
     test.setup task(:prepare_webapp) do |task|
       cp_r _("src/main/webapp"), test.compile.target.to_s
@@ -440,8 +440,10 @@ define "ode" do
         hibernate_schemaexport target do |task, ant|
           ant.schemaexport(:properties=>properties.to_s, :quiet=>"yes", :text=>"yes", :delimiter=>";",
                            :drop=>"no", :create=>"yes", :output=>target) do
-            ant.fileset(:dir=>source.to_s) { ant.include :name=>"**/*.hbm.xml" }
-                           end
+            ant.fileset(:dir=>source.to_s) {
+              ant.include :name=>"**/*.hbm.xml"
+              ant.exclude :name=>"**/HMessageExchangeProperty.hbm.xml"}
+          end
         end
       end
     end

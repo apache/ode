@@ -28,8 +28,12 @@ import java.util.Set;
  * configuration).
  * 
  * @hibernate.class table="BPEL_PLINK_VAL"
+ * @hibernate.query name="DELETE_PARTNER_LINKS_BY_INSTANCE" query="delete from HPartnerLink as l where l.scope in (select s from HScope as s where s.instance = :instance)"
+ * @hibernate.query name="DELETE_PARTNER_LINKS_BY_PROCESS" query="delete from HPartnerLink as l where l.scope in (select s.id from HScope as s where s.instance.process = :process)"
  */
 public class HPartnerLink extends HObject {
+    public final static String DELETE_PARTNER_LINKS_BY_INSTANCE = "DELETE_PARTNER_LINKS_BY_INSTANCE";
+    public final static String DELETE_PARTNER_LINKS_BY_PROCESS = "DELETE_PARTNER_LINKS_BY_PROCESS";
 
     private String _linkName;
 
@@ -82,7 +86,7 @@ public class HPartnerLink extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="MYROLE_EPR" cascade="delete"
+     * @hibernate.many-to-one column="MYROLE_EPR" cascade="delete" foreign-key="none"
      */
     public HLargeData getMyEPR() {
         return _myEPR;
@@ -93,7 +97,7 @@ public class HPartnerLink extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="PARTNERROLE_EPR" cascade="delete"
+     * @hibernate.many-to-one column="PARTNERROLE_EPR" cascade="delete" foreign-key="none"
      */
     public HLargeData getPartnerEPR() {
         return _partnerEPR;
@@ -104,7 +108,7 @@ public class HPartnerLink extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="PROCESS"
+     * @hibernate.many-to-one column="PROCESS" foreign-key="none"
      */
     public HProcess getProcess() {
         return _process;
@@ -115,7 +119,7 @@ public class HPartnerLink extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="SCOPE"
+     * @hibernate.many-to-one column="SCOPE" foreign-key="none"
      */
     public HScope getScope() {
         return _scope;
@@ -187,7 +191,7 @@ public class HPartnerLink extends HObject {
      *    inverse="true"
      *    cascade="delete"
      * @hibernate.collection-key
-     *    column="PARTNERLINK"
+     *    column="PARTNERLINK" foreign-key="none"
      * @hibernate.collection-one-to-many
      *    class="org.apache.ode.daohib.bpel.hobj.HMessageExchange"
      */

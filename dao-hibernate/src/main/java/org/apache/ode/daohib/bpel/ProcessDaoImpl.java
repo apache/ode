@@ -23,10 +23,23 @@ import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.daohib.SessionManager;
+import org.apache.ode.daohib.bpel.hobj.HActivityRecovery;
+import org.apache.ode.daohib.bpel.hobj.HBpelEvent;
+import org.apache.ode.daohib.bpel.hobj.HCorrelationProperty;
 import org.apache.ode.daohib.bpel.hobj.HCorrelationSet;
 import org.apache.ode.daohib.bpel.hobj.HCorrelator;
+import org.apache.ode.daohib.bpel.hobj.HCorrelatorMessage;
+import org.apache.ode.daohib.bpel.hobj.HFaultData;
+import org.apache.ode.daohib.bpel.hobj.HLargeData;
+import org.apache.ode.daohib.bpel.hobj.HMessage;
+import org.apache.ode.daohib.bpel.hobj.HMessageExchange;
+import org.apache.ode.daohib.bpel.hobj.HMessageExchangeProperty;
+import org.apache.ode.daohib.bpel.hobj.HPartnerLink;
 import org.apache.ode.daohib.bpel.hobj.HProcess;
 import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
+import org.apache.ode.daohib.bpel.hobj.HScope;
+import org.apache.ode.daohib.bpel.hobj.HVariableProperty;
+import org.apache.ode.daohib.bpel.hobj.HXmlData;
 import org.hibernate.Criteria;
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
@@ -45,7 +58,7 @@ import java.util.Iterator;
 /**
  * Hibernate-based {@link ProcessDAO} implementation.
  */
-class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
+public class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
 
     private static final String QRY_CORRELATOR = "where this.correlatorId = ?";
 
@@ -69,7 +82,7 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
         return instance;
     }
 
-
+    @SuppressWarnings("unchecked")
     public CorrelatorDAO getCorrelator(String  corrId) {
         entering("ProcessDaoImpl.getCorrelator");
         Iterator results;
@@ -142,7 +155,62 @@ class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
 
     public void delete() {
         entering("ProcessDaoImpl.delete");
-        getSession().delete(_process);
+
+        deleteEvents();
+        deleteCorrelations();
+        deleteMessages();
+        deleteVariables();
+        deleteProcessInstances();
+
+        getSession().delete(_process); // this deletes HCorrelator -> HCorrelatorSelector
+
+        // after this delete, we have a use case that creates the process with the same procid.
+        // for hibernate to work without the database deferred constraint check, let's just flush the session.
+        getSession().flush();
+    }
+
+    private void deleteProcessInstances() {
+        getSession().getNamedQuery(HLargeData.DELETE_ACTIVITY_RECOVERY_LDATA_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+        getSession().getNamedQuery(HActivityRecovery.DELETE_ACTIVITY_RECOVERIES_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+        getSession().getNamedQuery(HLargeData.DELETE_FAULT_LDATA_BY_PROCESS).setParameter("process", _process).executeUpdate();
+        getSession().getNamedQuery(HFaultData.DELETE_FAULTS_BY_PROCESS).setParameter("process", _process).executeUpdate();
+        getSession().getNamedQuery(HLargeData.DELETE_JACOB_LDATA_BY_PROCESS).setParameter("process", _process).executeUpdate();
+        getSession().getNamedQuery(HProcessInstance.DELETE_INSTANCES_BY_PROCESS).setParameter("process", _process).executeUpdate();
+    }
+
+    private void deleteVariables() {
+        getSession().getNamedQuery(HCorrelationProperty.DELETE_CORPROPS_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+        getSession().getNamedQuery(HCorrelationSet.DELETE_CORSETS_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+
+        getSession().getNamedQuery(HVariableProperty.DELETE_VARIABLE_PROPERITES_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+        getSession().getNamedQuery(HLargeData.DELETE_XMLDATA_LDATA_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+        getSession().getNamedQuery(HXmlData.DELETE_XMLDATA_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+
+        getSession().getNamedQuery(HLargeData.DELETE_PARTNER_LINK_LDATA_BY_PROCESS).setParameter ("process", _process).setParameter ("process2", _process).executeUpdate();
+        getSession().getNamedQuery(HPartnerLink.DELETE_PARTNER_LINKS_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+        getSession().getNamedQuery(HScope.DELETE_SCOPES_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+    }
+
+    private void deleteMessages() {
+        getSession().getNamedQuery(HCorrelatorMessage.DELETE_CORMESSAGES_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+
+        getSession().getNamedQuery(HLargeData.DELETE_MESSAGE_LDATA_BY_PROCESS).setParameter("process", _process).setParameter ("process2", _process).executeUpdate();
+        getSession().getNamedQuery(HMessage.DELETE_REQUEST_MESSAGES_BY_PROCESS).setParameter("process", _process).executeUpdate();
+        getSession().getNamedQuery(HMessage.DELETE_RESPONSE_MESSAGES_BY_PROCESS).setParameter("process", _process).executeUpdate();
+        getSession().getNamedQuery(HMessageExchangeProperty.DELETE_MEX_PROPS_BY_PROCESS).setParameter("process", _process).executeUpdate();
+        getSession().getNamedQuery(HLargeData.DELETE_MEX_LDATA_BY_PROCESS).setParameter("process", _process).setParameter("process2", _process).executeUpdate();
+        getSession().getNamedQuery(HMessageExchange.DELETE_MEX_BY_PROCESS).setParameter("process", _process).executeUpdate();
+        getSession().getNamedQuery(HCorrelator.DELETE_CORRELATORS_BY_PROCESS).setParameter("process", _process).executeUpdate();
+    }
+
+    private void deleteCorrelations() {
+        getSession().getNamedQuery(HCorrelationProperty.DELETE_CORPROPS_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+        getSession().getNamedQuery(HCorrelationSet.DELETE_CORSETS_BY_PROCESS).setParameter ("process", _process).executeUpdate();
+    }
+
+    private void deleteEvents() {
+        getSession().getNamedQuery(HLargeData.DELETE_EVENT_LDATA_BY_PROCESS).setParameter("process", _process).executeUpdate();
+        getSession().getNamedQuery(HBpelEvent.DELETE_EVENTS_BY_PROCESS).setParameter("process", _process).executeUpdate();
     }
 
     public QName getType() {

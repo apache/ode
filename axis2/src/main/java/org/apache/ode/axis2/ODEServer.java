@@ -650,6 +650,7 @@ public class ODEServer {
             case DISABLED:
             case UNDEPLOYED:
                 _bpelServer.unregister(pse.pid);
+                _bpelServer.cleanupProcess(pse.pid);
                 break;
             default:
                 __log.debug("Ignoring store event: " + pse);

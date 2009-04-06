@@ -48,9 +48,15 @@ import java.util.List;
 @Entity
 @Table(name="ODE_SCOPE")
 @NamedQueries({
-    @NamedQuery(name="ScopeEvents", query="SELECT se FROM EventDAOImpl as se WHERE se._scopeId = :sid")
-        })
+    @NamedQuery(name="ScopeEvents", query="SELECT se FROM EventDAOImpl as se WHERE se._scopeId = :sid"),
+    @NamedQuery(name=ScopeDAOImpl.SELECT_SCOPE_IDS_BY_PROCESS, query="select s._scopeInstanceId from ScopeDAOImpl as s where s._processInstance._process = :process"),
+    @NamedQuery(name=ScopeDAOImpl.SELECT_SCOPE_IDS_BY_INSTANCE, query="select s._scopeInstanceId from ScopeDAOImpl as s where s._processInstance = :instance"),
+    @NamedQuery(name=ScopeDAOImpl.DELETE_SCOPES_BY_SCOPE_IDS, query="delete from ScopeDAOImpl as s where s._scopeInstanceId in(:ids)")
+})
 public class ScopeDAOImpl extends OpenJPADAO implements ScopeDAO {
+    public final static String SELECT_SCOPE_IDS_BY_PROCESS = "SELECT_SCOPE_IDS_BY_PROCESS";
+    public final static String SELECT_SCOPE_IDS_BY_INSTANCE = "SELECT_SCOPE_IDS_BY_INSTANCE";
+    public final static String DELETE_SCOPES_BY_SCOPE_IDS = "DELETE_SCOPES_BY_SCOPE_IDS";
 
     @Id @Column(name="SCOPE_ID")
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -67,14 +73,14 @@ public class ScopeDAOImpl extends OpenJPADAO implements ScopeDAO {
 	@Column(name="PARENT_SCOPE_ID")
 	private ScopeDAOImpl _parentScope;
 	
-	@OneToMany(targetEntity=ScopeDAOImpl.class,mappedBy="_parentScope",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
+	@OneToMany(targetEntity=ScopeDAOImpl.class,mappedBy="_parentScope",fetch=FetchType.LAZY,cascade={CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
 	private Collection<ScopeDAO> _childScopes = new ArrayList<ScopeDAO>();
 	@OneToMany(targetEntity=CorrelationSetDAOImpl.class,mappedBy="_scope",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
 	private Collection<CorrelationSetDAO> _correlationSets = new ArrayList<CorrelationSetDAO>();
-	@OneToMany(targetEntity=PartnerLinkDAOImpl.class,mappedBy="_scope",fetch= FetchType.LAZY,cascade={CascadeType.ALL})
+    @OneToMany(targetEntity=PartnerLinkDAOImpl.class,mappedBy="_scope",fetch= FetchType.LAZY,cascade={CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
     private Collection<PartnerLinkDAO> _partnerLinks = new ArrayList<PartnerLinkDAO>();
-	@OneToMany(targetEntity=XmlDataDAOImpl.class,mappedBy="_scope",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
-	private Collection<XmlDataDAO> _variables = new ArrayList<XmlDataDAO>();
+    @OneToMany(targetEntity=XmlDataDAOImpl.class,mappedBy="_scope",fetch=FetchType.LAZY,cascade={CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
+    private Collection<XmlDataDAO> _variables = new ArrayList<XmlDataDAO>();
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROCESS_INSTANCE_ID")
 	private ProcessInstanceDAOImpl _processInstance;
 

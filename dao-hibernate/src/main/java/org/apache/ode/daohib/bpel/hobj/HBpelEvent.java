@@ -25,8 +25,13 @@ import java.sql.Timestamp;
  * Row representation of a BPEL event.
  * 
  * @hibernate.class table="BPEL_EVENT"
+ * @hibernate.query name="DELETE_EVENTS_BY_PROCESS" query="delete from HBpelEvent as e where e.process = :process"
+ * @hibernate.query name="DELETE_EVENTS_BY_INSTANCE" query="delete from HBpelEvent as e where e.instance = :instance"
  */
 public class HBpelEvent extends HObject {
+    public final static String DELETE_EVENTS_BY_PROCESS = "DELETE_EVENTS_BY_PROCESS";
+    public static final String DELETE_EVENTS_BY_INSTANCE = "DELETE_EVENTS_BY_INSTANCE";
+
     private Timestamp _tstamp;
     private String _type;
     private String _detail;
@@ -39,7 +44,7 @@ public class HBpelEvent extends HObject {
     private Long _scopeId;
 
     /**
-     * @hibernate.many-to-one column="IID"
+     * @hibernate.many-to-one column="IID" foreign-key="none"
      */
     public HProcessInstance getInstance() {
         return _instance;
@@ -50,7 +55,7 @@ public class HBpelEvent extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="PID"
+     * @hibernate.many-to-one column="PID" foreign-key="none"
      */
     public HProcess getProcess() {
         return _process;
@@ -97,7 +102,7 @@ public class HBpelEvent extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="LDATA_ID" cascade="delete"
+     * @hibernate.many-to-one column="LDATA_ID" cascade="delete" foreign-key="none"
      */
     public HLargeData getData() {
         return _data;

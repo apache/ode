@@ -46,10 +46,18 @@ import org.apache.ode.bpel.dao.ScopeDAO;
 @Entity
 @Table(name="ODE_CORRELATION_SET")
 @NamedQueries({
-    @NamedQuery(name=CorrelationSetDAOImpl.SELECT_CORRELATION_SETS_BY_INSTANCES, query="select c from CorrelationSetDAOImpl as c left join fetch c._scope left join fetch c._props where c._scope._processInstance._instanceId in (:instances)")	
+    @NamedQuery(name=CorrelationSetDAOImpl.DELETE_CORRELATION_SETS_BY_IDS, query="delete from CorrelationSetDAOImpl as c where c._correlationSetId in (:ids)"),
+    @NamedQuery(name=CorrelationSetDAOImpl.SELECT_CORRELATION_SETS_BY_INSTANCES, query="select c from CorrelationSetDAOImpl as c left join fetch c._scope left join fetch c._props where c._scope._processInstance._instanceId in (:instances)"),    
+    @NamedQuery(name=CorrelationSetDAOImpl.SELECT_CORRELATION_SET_IDS_BY_PROCESS, query="select c._correlationSetId from CorrelationSetDAOImpl as c where c._scope._processInstance._process = :process"),
+    @NamedQuery(name=CorrelationSetDAOImpl.SELECT_CORRELATION_SET_IDS_BY_INSTANCE, query="select c._correlationSetId from CorrelationSetDAOImpl as c where c._scope._processInstance = :instance"),
+    @NamedQuery(name=CorrelationSetDAOImpl.SELECT_ACTIVE_SETS, query="select c from CorrelationSetDAOImpl as c left join fetch c._scope where c._scope._processInstance._state = (:state)")
 })
 public class CorrelationSetDAOImpl implements CorrelationSetDAO {
+    public final static String DELETE_CORRELATION_SETS_BY_IDS = "DELETE_CORRELATION_SETS_BY_IDS";
     public final static String SELECT_CORRELATION_SETS_BY_INSTANCES = "SELECT_CORRELATION_SETS_BY_INSTANCES";
+    public final static String SELECT_CORRELATION_SET_IDS_BY_PROCESS = "SELECT_CORRELATION_SET_IDS_BY_PROCESS";
+    public final static String SELECT_CORRELATION_SET_IDS_BY_INSTANCE = "SELECT_CORRELATION_SET_IDS_BY_INSTANCE";
+    public final static String SELECT_ACTIVE_SETS = "SELECT_ACTIVE_SETS";
 
 	@Id @Column(name="CORRELATION_SET_ID") 
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -59,7 +67,7 @@ public class CorrelationSetDAOImpl implements CorrelationSetDAO {
 	@Basic @Column(name="CORRELATION_KEY")
     private String _correlationKey;
 
-    @OneToMany(targetEntity=CorrSetProperty.class,mappedBy="_corrSet",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
+    @OneToMany(targetEntity=CorrSetProperty.class,mappedBy="_corrSet",fetch=FetchType.LAZY,cascade={CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Collection<CorrSetProperty> _props = new ArrayList<CorrSetProperty>();
     @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="SCOPE_ID")
     private ScopeDAOImpl _scope;

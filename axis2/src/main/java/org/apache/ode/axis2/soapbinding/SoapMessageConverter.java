@@ -549,8 +549,9 @@ public class SoapMessageConverter {
     }
 
     private Fault inferFault(Operation operation, SOAPFault flt) {
-        if (flt.getDetail() == null)
+        if (flt.getDetail() == null) {
             return null;
+        }
 
         // The detail is a dummy <detail> node containing the interesting fault element
         QName elName = flt.getDetail().getFirstElement().getQName();

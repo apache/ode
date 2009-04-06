@@ -55,7 +55,7 @@ public class HCorrelatorMessageKey extends HObject {
     /**
      * The message with which this correlation key value is associated.
      * 
-     * @hibernate.many-to-one column="CORRELATOR_MESSAGE_ID"
+     * @hibernate.many-to-one column="CORRELATOR_MESSAGE_ID" foreign-key="none"
      */
     public HCorrelatorMessage getOwner() {
         return _owner;

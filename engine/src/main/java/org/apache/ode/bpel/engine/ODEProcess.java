@@ -64,6 +64,7 @@ import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
+import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
 import org.apache.ode.bpel.intercept.FailMessageExchangeException;
@@ -377,6 +378,9 @@ public class ODEProcess {
     void executeContinueInstanceMyRoleRequestReceived(MessageExchangeDAO mexdao) {
         assert _hydrationLatch.isLatched(1);
 
+        assert mexdao != null;
+        assert mexdao.getInstance() != null;
+        
         BpelInstanceWorker worker = _instanceWorkerCache.get(mexdao.getInstance().getInstanceId());
         assert worker.isWorkerThread();
 
@@ -449,6 +453,8 @@ public class ODEProcess {
             BpelRuntimeContextImpl brc = new BpelRuntimeContextImpl(worker, instanceDao, rti);
             brc.injectMyRoleMessageExchange(mroute.getGroupId(), mroute.getIndex(), mexdao);
             brc.execute();
+            
+            mexdao.release(true);
         } else {
             __log.debug("MatcherEvent handling: nothing to do, no matching message in DB");
 
@@ -609,6 +615,8 @@ public class ODEProcess {
         switch (we.getType()) {
         case MYROLE_INVOKE:
             executeContinueInstanceMyRoleRequestReceived(mexDao);
+            if(__log.isDebugEnabled()) __log.debug("handleWorkEvent: releasing myrole mex dao: " + mexDao);
+            mexDao.release(true);
             break;
         case TIMER:
             executeContinueInstanceTimerReceived(instanceDAO, we.getChannel());
@@ -1081,9 +1089,25 @@ public class ODEProcess {
         return _inMemDao.getConnection().getMessageExchange(mexId);
     }
 
-    public void releaseMessageExchange(String mexId) {
+    public void releaseMessageExchange(final String mexId) {
         if (isInMemory()) {
             _inMemDao.getConnection().releaseMessageExchange(mexId);
+        } else {
+            if( _contexts.isTransacted() ) {
+                _contexts.dao.getConnection().releaseMessageExchange(mexId);
+            } else {
+                // ATT-MRIOU; what's the right way without creating its own transaction for releasing my role mex?
+                try {
+                    _contexts.execTransaction(new Callable<Object>() {
+                        public Object call() throws Exception {
+                            _contexts.dao.getConnection().releaseMessageExchange(mexId);
+                            return null;
+                        }
+                    });
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
     }
     /**
@@ -1488,6 +1512,14 @@ public class ODEProcess {
         } catch (Exception ex) {
             throw new BpelEngineException(ex);
         }
+    }
+
+    public boolean isCleanupCategoryEnabled(boolean instanceSucceeded, CLEANUP_CATEGORY category) {
+        return _pconf.isCleanupCategoryEnabled(instanceSucceeded, category);
+    }
+
+    public Set<CLEANUP_CATEGORY> getCleanupCategories(boolean instanceSucceeded) {
+        return _pconf.getCleanupCategories(instanceSucceeded);
     }
 
     public Node getProcessProperty(QName propertyName) {

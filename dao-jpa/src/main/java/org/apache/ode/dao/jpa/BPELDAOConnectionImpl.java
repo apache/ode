@@ -27,6 +27,7 @@ import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
+import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.openjpa.persistence.OpenJPAPersistence;
 import org.apache.openjpa.persistence.OpenJPAQuery;
@@ -42,10 +43,9 @@ import java.util.*;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class BPELDAOConnectionImpl implements BpelDAOConnection {
-	
 	static final Log __log = LogFactory.getLog(BPELDAOConnectionImpl.class);
 	
-	EntityManager _em;
+	protected EntityManager _em;
 
     public BPELDAOConnectionImpl(EntityManager em) {
         _em = em;
@@ -79,8 +79,9 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
     }
 
     public void releaseMessageExchange(String mexid) {
-		// TODO Auto-generated method stub
-	}
+        MessageExchangeDAO dao = getMessageExchange(mexid);
+        dao.release(true);
+ 	}
     
     public ProcessDAO createProcess(QName pid, QName type, String guid, long version) {
         ProcessDAOImpl ret = new ProcessDAOImpl(pid,type,guid,version);

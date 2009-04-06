@@ -19,6 +19,8 @@
 
 package org.apache.ode.dao.jpa;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
@@ -45,6 +47,7 @@ import java.util.List;
             " WHERE c._correlatorKey = :ckey AND c._process = :process")
 })
 public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
+    private static final Log __log = LogFactory.getLog(ProcessDAOImpl.class);
 
     @Id @Column(name="ID")
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -119,7 +122,64 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
 	}
 
     public void delete() {
-        getEM().remove(this);
+        if(__log.isDebugEnabled()) __log.debug("Cleaning up process data.");
+
+        getEM().flush();
+        deleteEvents();
+        deleteCorrelations();
+        deleteMessages();
+        deleteVariables();
+        deleteProcessInstances();
+        getEM().remove(this); // This deletes CorrelatorDAO
+        getEM().flush();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void deleteProcessInstances() {
+        Collection faultIds = getEM().createNamedQuery(ProcessInstanceDAOImpl.SELECT_FAULT_IDS_BY_PROCESS).setParameter("process", this).getResultList();
+        batchUpdateByIds(faultIds.iterator(), getEM().createNamedQuery(FaultDAOImpl.DELETE_FAULTS_BY_IDS), "ids");
+        Collection instanceIds = getEM().createNamedQuery(ProcessInstanceDAOImpl.SELECT_INSTANCE_IDS_BY_PROCESS).setParameter("process", this).getResultList();
+        batchUpdateByIds(instanceIds.iterator(), getEM().createNamedQuery(ActivityRecoveryDAOImpl.DELETE_ACTIVITY_RECOVERIES_BY_IDS), "ids");
+        getEM().createNamedQuery(ProcessInstanceDAOImpl.DELETE_INSTANCES_BY_PROCESS).setParameter("process", this).executeUpdate();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void deleteVariables() {
+        Collection xmlDataIds = getEM().createNamedQuery(XmlDataDAOImpl.SELECT_XMLDATA_IDS_BY_PROCESS).setParameter("process", this).getResultList();
+        batchUpdateByIds(xmlDataIds.iterator(), getEM().createNamedQuery(XmlDataProperty.DELETE_XML_DATA_PROPERTIES_BY_XML_DATA_IDS), "xmlDataIds");
+        Collection scopeIds = getEM().createNamedQuery(ScopeDAOImpl.SELECT_SCOPE_IDS_BY_PROCESS).setParameter("process", this).getResultList();
+        batchUpdateByIds(scopeIds.iterator(), getEM().createNamedQuery(XmlDataDAOImpl.DELETE_XMLDATA_BY_SCOPE_IDS), "scopeIds");
+
+//          Collection scopeIds = getEM().createNamedQuery(ScopeDAOImpl.SELECT_SCOPE_IDS_BY_PROCESS).setParameter("process", this).getResultList();
+        batchUpdateByIds(scopeIds.iterator(), getEM().createNamedQuery(PartnerLinkDAOImpl.DELETE_PARTNER_LINKS_BY_SCOPE_IDS), "scopeIds");
+        batchUpdateByIds(scopeIds.iterator(), getEM().createNamedQuery(ScopeDAOImpl.DELETE_SCOPES_BY_SCOPE_IDS), "ids");
+    }
+
+    @SuppressWarnings("unchecked")
+    private void deleteMessages() {
+        Collection eventIds = getEM().createNamedQuery(MessageDAOImpl.SELECT_REQUEST_MESSAGE_IDS_BY_PROCESS).setParameter("process", this).getResultList();
+        batchUpdateByIds(eventIds.iterator(), getEM().createNamedQuery(MessageDAOImpl.DELETE_MESSAGES_BY_IDS), "ids");
+        eventIds = getEM().createNamedQuery(MessageDAOImpl.SELECT_RESPONSE_MESSAGE_IDS_BY_PROCESS).setParameter("process", this).getResultList();
+        batchUpdateByIds(eventIds.iterator(), getEM().createNamedQuery(MessageDAOImpl.DELETE_MESSAGES_BY_IDS), "ids");
+        Collection mexIds = getEM().createNamedQuery(MessageExchangeDAOImpl.SELECT_MEX_IDS_BY_PROCESS).setParameter("process", this).getResultList();
+        batchUpdateByIds(mexIds.iterator(), getEM().createNamedQuery(MexProperty.DELETE_MEX_PROPERTIES_BY_MEX_IDS), "mexIds");
+        getEM().createNamedQuery(MessageExchangeDAOImpl.DELETE_MEXS_BY_PROCESS).setParameter("process", this).executeUpdate();
+        Collection instanceIds = getEM().createNamedQuery(ProcessInstanceDAOImpl.SELECT_INSTANCE_IDS_BY_PROCESS).setParameter("process", this).getResultList();
+        batchUpdateByIds(instanceIds.iterator(), getEM().createNamedQuery(MessageRouteDAOImpl.DELETE_MESSAGE_ROUTES_BY_INSTANCE_IDS), "instanceIds");
+        getEM().createNamedQuery(CorrelatorDAOImpl.DELETE_CORRELATORS_BY_PROCESS).setParameter("process", this).executeUpdate();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void deleteCorrelations() {
+        Collection corrSetIds = getEM().createNamedQuery(CorrelationSetDAOImpl.SELECT_CORRELATION_SET_IDS_BY_PROCESS).setParameter("process", this).getResultList();
+        batchUpdateByIds(corrSetIds.iterator(), getEM().createNamedQuery(CorrSetProperty.DELETE_CORSET_PROPERTIES_BY_PROPERTY_IDS), "corrSetIds");
+        batchUpdateByIds(corrSetIds.iterator(), getEM().createNamedQuery(CorrelationSetDAOImpl.DELETE_CORRELATION_SETS_BY_IDS), "ids");
+    }
+
+    @SuppressWarnings("unchecked")
+    private void deleteEvents() {
+        Collection eventIds = getEM().createNamedQuery(EventDAOImpl.SELECT_EVENT_IDS_BY_PROCESS).setParameter("process", this).getResultList();
+        batchUpdateByIds(eventIds.iterator(), getEM().createNamedQuery(EventDAOImpl.DELETE_EVENTS_BY_IDS), "ids");
     }
 
     public int getNumInstances() {

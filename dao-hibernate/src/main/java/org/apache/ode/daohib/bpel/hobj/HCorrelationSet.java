@@ -26,9 +26,15 @@ import java.util.Collection;
  * 
  * @hibernate.class table="BPEL_CORRELATION_SET"
  * @hibernate.query name="SELECT_CORSETS_BY_INSTANCES" query="from HCorrelationSet as c left join fetch c.properties where c.instance.id in (:instances)"
+ * @hibernate.query name="SELECT_ACTIVE_CORSETS" query="from HCorrelationSet as c left join fetch c.process left join fetch c.instance where c.instance.state = (:state)"
+ * @hibernate.query name="DELETE_CORSETS_BY_INSTANCE" query="delete from HCorrelationSet as c where c.instance = :instance"
+ * @hibernate.query name="DELETE_CORSETS_BY_PROCESS" query="delete from HCorrelationSet as c where c.process = :process"
  */
 public class HCorrelationSet extends HObject {
-	public static final String SELECT_CORSETS_BY_INSTANCES = "SELECT_CORSETS_BY_INSTANCES";
+    public static final String DELETE_CORSETS_BY_INSTANCE = "DELETE_CORSETS_BY_INSTANCE";
+    public static final String DELETE_CORSETS_BY_PROCESS = "DELETE_CORSETS_BY_PROCESS";
+    public static final String SELECT_CORSETS_BY_INSTANCES = "SELECT_CORSETS_BY_INSTANCES";
+    public static final String SELECT_ACTIVE_CORSETS = "SELECT_ACTIVE_CORSETS";
 	  
     private HProcess _process;
     private HProcessInstance _instance;
@@ -76,14 +82,14 @@ public class HCorrelationSet extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="SCOPE_ID"
+     * @hibernate.many-to-one column="SCOPE_ID" foreign-key="none"
      */
     public HScope getScope() {
         return _scope;
     }
 
     /**
-     * @hibernate.many-to-one column="PIID"
+     * @hibernate.many-to-one column="PIID" foreign-key="none"
      */
     public HProcessInstance getInstance() {
         return _instance;
@@ -94,7 +100,7 @@ public class HCorrelationSet extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="PROCESS_ID"
+     * @hibernate.many-to-one column="PROCESS_ID" foreign-key="none"
      */
     public HProcess getProcess() {
         return _process;
@@ -106,9 +112,8 @@ public class HCorrelationSet extends HObject {
 
     /**
      * @hibernate.set lazy="true" inverse="true" cascade="delete"
-     * @hibernate.collection-key column="CORR_SET_ID"
-     * @hibernate.collection-one-to-many 
-     *                                   class="org.apache.ode.daohib.bpel.hobj.HCorrelationProperty"
+     * @hibernate.collection-key column="CORR_SET_ID" foreign-key="none"
+     * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HCorrelationProperty"
      */
     public Collection<HCorrelationProperty> getProperties() {
         return _properties;

@@ -52,7 +52,7 @@ public interface OdeInternalInstance {
 
     void writeEndpointReference(PartnerLinkInstance plval, Element element);
 
-    void releasePartnerMex(String mexId);
+    void releasePartnerMex(String mexId, boolean instanceSucceeded);
 
     QName getPartnerFault(String mexId);
 

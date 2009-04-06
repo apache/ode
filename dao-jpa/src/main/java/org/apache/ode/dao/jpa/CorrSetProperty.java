@@ -27,6 +27,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 /**
@@ -34,15 +36,24 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="ODE_CORSET_PROP")
+@NamedQueries({
+    @NamedQuery(name=CorrSetProperty.DELETE_CORSET_PROPERTIES_BY_PROPERTY_IDS, query="delete from CorrSetProperty as p where p.corrSetId in(:corrSetIds)")
+})
 public class CorrSetProperty {
+    public final static String DELETE_CORSET_PROPERTIES_BY_PROPERTY_IDS = "DELETE_CORSET_PROPERTIES_BY_PROPERTY_IDS";
 
     @Id @Column(name="ID")
     @GeneratedValue(strategy=GenerationType.AUTO)
+    @SuppressWarnings("unused")
     private Long _id;
     @Basic @Column(name="PROP_KEY")
     private String propertyKey;
     @Basic @Column(name="PROP_VALUE")
     private String propertyValue;
+
+    @SuppressWarnings("unused")
+    @Basic @Column(name="CORRSET_ID", insertable=false, updatable=false, nullable=true)
+    private Long corrSetId;
 
     @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="CORRSET_ID")
     private CorrelationSetDAOImpl _corrSet;
