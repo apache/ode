@@ -19,45 +19,16 @@
 
 package org.apache.ode.dao.jpa;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.ProcessState;
-import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.CorrelationSetDAO;
-import org.apache.ode.bpel.dao.CorrelatorDAO;
-import org.apache.ode.bpel.dao.FaultDAO;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ScopeDAO;
-import org.apache.ode.bpel.dao.ScopeStateEnum;
-import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.w3c.dom.Element;
+
+import javax.persistence.*;
+import javax.xml.namespace.QName;
+import java.util.*;
 
 @Entity
 @Table(name="ODE_PROCESS_INSTANCE")
@@ -222,7 +193,19 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 	}
 
 	public EventsFirstLastCountTuple getEventsFirstLastCount() {
-		// TODO Auto-generated method stub
+        Query eventQ = getEM().createQuery("SELECT MAX(e._tstamp), MIN(e._tstamp), COUNT(e._tstamp) FROM EventDAOImpl e WHERE e._instance = :instanceId");
+        eventQ.setParameter("instanceId", this);
+        List results  = eventQ.getResultList();
+
+        if(!results.isEmpty()){
+            EventsFirstLastCountTuple flc = new EventsFirstLastCountTuple();
+            Object[] res = (Object[]) results.get(0);
+            flc.first = (Date)res[1];
+            flc.last = (Date)res[0];
+            flc.count = ((Long)res[2]).intValue();
+
+            return flc;
+        }
 		return null;
 	}
 

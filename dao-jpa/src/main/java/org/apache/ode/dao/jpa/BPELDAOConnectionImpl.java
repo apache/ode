@@ -19,37 +19,24 @@
 
 package org.apache.ode.dao.jpa;
 
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.Filter;
 import org.apache.ode.bpel.common.InstanceFilter;
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.CorrelationSetDAO;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ProcessManagementDAO;
-import org.apache.ode.bpel.dao.ScopeDAO;
+import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.openjpa.persistence.OpenJPAPersistence;
 import org.apache.openjpa.persistence.OpenJPAQuery;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import javax.xml.namespace.QName;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.util.*;
 
 /**
  * @author Matthieu Riou <mriou at apache dot org>
@@ -77,8 +64,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
     }
 	
 	public ProcessInstanceDAO getInstance(Long iid) {
-        ProcessInstanceDAOImpl instance = _em.find(ProcessInstanceDAOImpl.class, iid);
-        return instance;
+        return _em.find(ProcessInstanceDAOImpl.class, iid);
     }
 
     public void close() {
@@ -106,8 +92,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         List l = _em.createQuery("select x from ProcessDAOImpl x where x._processId = ?1")
                 .setParameter(1, processId.toString()).getResultList();
         if (l.size() == 0) return null;
-        ProcessDAOImpl p = (ProcessDAOImpl) l.get(0);
-        return p;
+        return (ProcessDAOImpl) l.get(0);
     }
 
     public ScopeDAO getScope(Long siidl) {
@@ -133,11 +118,12 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
     private static String dateFilter(String filter) {
         String date = Filter.getDateWithoutOp(filter);
         String op = filter.substring(0,filter.indexOf(date));
-        Date dt = null;
+        Date dt;
         try {
             dt = ISO8601DateParser.parse(date);
         } catch (ParseException e) {
-            e.printStackTrace();
+            __log.error("Error parsing date.", e);
+            return "";
         }
         Timestamp ts = new Timestamp(dt.getTime());
         return op + " '" + ts.toString() + "'";
@@ -178,7 +164,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
             if (criteria.getNameFilter() != null) {
                 String val = criteria.getNameFilter();
                 if (val.endsWith("*")) {
-                    val = val.substring(0, val.length()-1) + "%";
+                    val = (val.substring(0, val.length()-1).equals("*")? "":val.substring(0, val.length()-1)) + "%";
                 }
                 //process type string begins with name space
                 //this could possibly match more than you want
@@ -191,8 +177,8 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
                 //process type string begins with name space
                 //this could possibly match more than you want
                 //because the name space and name are stored together
-                clauses.add(" pi._process._processType like '{" + 
-                        criteria.getNamespaceFilter() + "%'");
+                clauses.add(" pi._process._processType like '{" +
+                        (criteria.getNamespaceFilter().equals("*")? "" : criteria.getNamespaceFilter()) + "%'");
             }
             
             // started filter
@@ -291,15 +277,14 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         Query pq = _em.createQuery(query.toString());
         OpenJPAQuery kq = OpenJPAPersistence.cast(pq);
         kq.getFetchPlan().setFetchBatchSize(criteria.getLimit());       
-        List<ProcessInstanceDAO> ql = pq.getResultList();
+        List<ProcessInstanceDAO> ql = kq.getResultList();
        
         Collection<ProcessInstanceDAO> list = new ArrayList<ProcessInstanceDAO>();
-        int num = 0;       
-        for (Iterator iterator = ql.iterator(); iterator.hasNext();) {
-            if(num++ > criteria.getLimit()) break;
-            ProcessInstanceDAO processInstanceDAO = (ProcessInstanceDAO) iterator
-                    .next();
-            list.add(processInstanceDAO);            
+        int num = 0;
+        for (Object piDAO : ql) {
+            if (num++ > criteria.getLimit()) break;
+            ProcessInstanceDAO processInstanceDAO = (ProcessInstanceDAO) piDAO;
+            list.add(processInstanceDAO);
         }     
         
         return list;
@@ -318,8 +303,8 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         List l = _em.createQuery("select x from MessageExchangeDAOImpl x where x._id = ?1")
         .setParameter(1, mexid).getResultList();
         if (l.size() == 0) return null;
-        MessageExchangeDAOImpl m = (MessageExchangeDAOImpl) l.get(0);
-        return m;
+
+        return (MessageExchangeDAOImpl) l.get(0);
     }
 
     public EntityManager getEntityManager() {
