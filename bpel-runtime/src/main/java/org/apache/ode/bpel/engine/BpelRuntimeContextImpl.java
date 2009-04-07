@@ -1390,8 +1390,10 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             for (String groupId : groupIds) {
 	            correlator.removeRoutes(groupId, _dao);
             }
-            
-            mexdao.release(true);
+
+            // Do not release yet if the process is suspended, the mex will be used again
+            if (_dao.getState() != ProcessState.STATE_SUSPENDED)
+                mexdao.release(true);
         } else {
             __log.debug("MatcherEvent handling: nothing to do, no matching message in DB");
 
