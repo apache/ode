@@ -880,8 +880,8 @@ public class BpelProcess {
                     inputStream.close();
                 }
             } catch (Exception e) {
-                String errmsg = "Error reloading compiled process " + _pid + "; the file appears to be corrupted.";
-                __log.error(errmsg);
+                String errmsg = "The process " + _pid + " is no longer available.";
+                __log.error(errmsg, e);
                 throw new BpelEngineException(errmsg, e);
             }
             
