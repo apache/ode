@@ -714,13 +714,18 @@ public class BpelProcess {
                 try {
                     // We're asked for an older version of this process, fetching it
                     OProcess oprocess = _engine.getOProcess(processName);
+                    if (oprocess == null) {
+                        String errmsg = "The process " + _pid + " is not available anymore.";
+                        __log.error(errmsg);
+                        throw new BpelEngineException(errmsg);
+                    }
                     // Older versions may ventually need more expression languages
                     registerExprLang(oprocess);
 
                     return new ReplacementMapImpl(oprocess);
                 } catch (Exception e) {
-                    String errmsg = "Error reloading compiled process " + _pid + "; the file appears to be corrupted.";
-                    __log.error(errmsg);
+                    String errmsg = "The process " + _pid + " is not available anymore.";
+                    __log.error(errmsg, e);
                     throw new BpelEngineException(errmsg, e);
                 }
         } finally {
