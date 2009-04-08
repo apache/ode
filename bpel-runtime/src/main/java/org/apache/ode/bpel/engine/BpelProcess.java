@@ -60,6 +60,7 @@ import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
+import org.apache.ode.bpel.runtime.InvalidProcessException;
 import org.apache.ode.bpel.runtime.PROCESS;
 import org.apache.ode.bpel.runtime.PropertyAliasEvaluationContext;
 import org.apache.ode.bpel.runtime.channels.FaultData;
@@ -717,7 +718,7 @@ public class BpelProcess {
                     if (oprocess == null) {
                         String errmsg = "The process " + _pid + " is not available anymore.";
                         __log.error(errmsg);
-                        throw new BpelEngineException(errmsg);
+                        throw new InvalidProcessException(errmsg, InvalidProcessException.RETIRED_CAUSE_CODE);
                     }
                     // Older versions may ventually need more expression languages
                     registerExprLang(oprocess);
@@ -726,7 +727,7 @@ public class BpelProcess {
                 } catch (Exception e) {
                     String errmsg = "The process " + _pid + " is not available anymore.";
                     __log.error(errmsg, e);
-                    throw new BpelEngineException(errmsg, e);
+                    throw new InvalidProcessException(errmsg, InvalidProcessException.RETIRED_CAUSE_CODE);
                 }
         } finally {
             _hydrationLatch.release(1);
