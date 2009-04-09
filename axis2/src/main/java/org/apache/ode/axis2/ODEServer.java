@@ -437,9 +437,10 @@ public class ODEServer {
 
     private void initHttpConnectionManager() throws ServletException {
         httpConnectionManager = new MultiThreadedHttpConnectionManager();
-        // settings may be overridden from ode-axis2.properties using the same properties as HttpClient 
-        int max_per_host = Integer.parseInt(_odeConfig.getProperty(HttpConnectionManagerParams.MAX_HOST_CONNECTIONS, "2"));
-        int max_total = Integer.parseInt(_odeConfig.getProperty(HttpConnectionManagerParams.MAX_TOTAL_CONNECTIONS, "20"));
+        // settings may be overridden from ode-axis2.properties using the same properties as HttpClient
+        // /!\ If the size of the conn pool is smaller than the size of the thread pool, the thread pool might get starved.
+        int max_per_host = Integer.parseInt(_odeConfig.getProperty(HttpConnectionManagerParams.MAX_HOST_CONNECTIONS, ""+_odeConfig.getPoolMaxSize()));
+        int max_total = Integer.parseInt(_odeConfig.getProperty(HttpConnectionManagerParams.MAX_TOTAL_CONNECTIONS, ""+_odeConfig.getPoolMaxSize()));
         if(__log.isDebugEnabled()) {
             __log.debug(HttpConnectionManagerParams.MAX_HOST_CONNECTIONS+"="+max_per_host);
             __log.debug(HttpConnectionManagerParams.MAX_TOTAL_CONNECTIONS+"="+max_total);
