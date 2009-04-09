@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
  */
 public class FailureInvokeTest extends Axis2TestBase {
 
-  @Test(enabled = true)
+  @Test(enabled = false)
     public void testSimpleFaultCatch() throws Exception {
         String bundleName = "TestFailureInInvoke";
         // deploy the required service
