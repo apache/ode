@@ -1,0 +1,4 @@
+
+alias.myns=http://ode/bpel/unit-test.wsdl
+myns.HelloService.ode.security.policy.file=sample01-policy-for-service.xml
+

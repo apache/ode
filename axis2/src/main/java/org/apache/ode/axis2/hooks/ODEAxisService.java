@@ -38,6 +38,7 @@ import javax.wsdl.extensions.soap.SOAPAddress;
 import javax.xml.namespace.QName;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.Options;
 import org.apache.axis2.description.*;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.MessageReceiver;
@@ -49,6 +50,8 @@ import org.apache.ode.axis2.util.Axis2UriResolver;
 import org.apache.ode.axis2.util.Axis2WSDLLocator;
 import org.apache.ode.axis2.util.AxisUtils;
 import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.epr.WSDL11Endpoint;
+import org.apache.ode.utils.Properties;
 import org.apache.ws.commons.schema.XmlSchema;
 import org.apache.ws.commons.schema.XmlSchemaCollection;
 import org.w3c.dom.Element;
@@ -104,6 +107,13 @@ public class ODEAxisService {
                 LOG.debug("Axis2 service configuration not found: " + service_file);
             } catch (IOException except) {
                 LOG.warn("Exception while configuring service: " + service_file, except);
+            }
+
+
+            final WSDL11Endpoint endpoint = new WSDL11Endpoint(wsdlServiceName, portName);
+            Options options = Properties.Axis2.translate(pconf.getEndpointProperties(endpoint));
+            if(options.getProperty(Properties.PROP_SECURITY_POLICY)!=null){
+                AxisUtils.applySecurityPolicy(axisService, (String) options.getProperty(Properties.PROP_SECURITY_POLICY));
             }
 
             // In doc/lit we need to declare a mapping between operations and message element names

@@ -39,6 +39,32 @@ public class WSDL11Endpoint implements MutableEndpoint {
   public WSDL11Endpoint() {
   }
 
+    public WSDL11Endpoint(QName serviceQName, String portName, String location) {
+        Document doc = DOMUtils.newDocument();
+        Element serviceRef = doc.createElementNS(SERVICE_REF_QNAME.getNamespaceURI(), SERVICE_REF_QNAME.getLocalPart());
+        doc.appendChild(serviceRef);
+        _serviceElmt = doc.createElementNS(Namespaces.WSDL_11, "service");
+        serviceRef.appendChild(_serviceElmt);
+        if (serviceQName != null) {
+            _serviceElmt.setAttribute("name", serviceQName.getLocalPart());
+            _serviceElmt.setAttribute("targetNamespace", serviceQName.getNamespaceURI());
+        }
+        Element port = doc.createElementNS(Namespaces.WSDL_11, "port");
+        if (portName != null) {
+            port.setAttribute("name", portName);
+        }
+        port.setAttribute("binding", "");
+        Element address = doc.createElementNS(Namespaces.SOAP_NS, "address");
+        if (location != null) address.setAttribute("location", location);
+
+        _serviceElmt.appendChild(port);
+        port.appendChild(address);
+    }
+
+    public WSDL11Endpoint(QName serviceName, String portName) {
+        this(serviceName, portName, null);
+    }
+
     public String getUrl() {
         Element port = (Element) _serviceElmt.getElementsByTagNameNS(Namespaces.WSDL_11, "port").item(0);
         // get soap:address

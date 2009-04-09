@@ -51,6 +51,7 @@ import java.io.FileFilter;
 public class SecuredProcessesTest extends Axis2TestBase {
 
     private String testDir = "TestRampartPolicy/secured-processes";
+    private String clientRepo = getClass().getClassLoader().getResource(testDir).getFile();
 
 
     @DataProvider(name = "secured-processes-bundles")
@@ -61,7 +62,6 @@ public class SecuredProcessesTest extends Axis2TestBase {
             }
         });
         Object[][] bundles = new Object[samples.length][];
-        String clientRepo = getClass().getClassLoader().getResource(testDir).getFile();
         for (int i = 0; i < samples.length; i++) {
             String sampleIndex = samples[i].getName().replace("process-", "");
             String policyFile = clientRepo + "/" + sampleIndex + "-policy.xml";
@@ -112,6 +112,11 @@ public class SecuredProcessesTest extends Axis2TestBase {
         } finally {
             server.undeployProcess(bundleName);
         }
+    }
+
+    @Test
+    public void standAlonePolicy() throws Exception {
+        invokeSecuredProcesses(testDir+"/process-sample01_standalone_policy", clientRepo, clientRepo+"/sample02-policy.xml");
     }
 
     private static Policy loadPolicy(String xmlPath) throws Exception {
