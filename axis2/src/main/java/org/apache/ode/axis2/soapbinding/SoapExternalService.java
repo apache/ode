@@ -40,6 +40,7 @@ import org.apache.ode.axis2.ExternalService;
 import org.apache.ode.axis2.ODEService;
 import org.apache.ode.utils.Properties;
 import org.apache.ode.axis2.OdeFault;
+import org.apache.ode.axis2.util.AxisUtils;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
@@ -51,7 +52,6 @@ import org.apache.ode.il.epr.EndpointFactory;
 import org.apache.ode.il.epr.MutableEndpoint;
 import org.apache.ode.il.epr.WSAEndpoint;
 import org.apache.ode.utils.*;
-import org.apache.ode.utils.fs.FileUtils;
 import org.apache.ode.utils.uuid.UUID;
 import org.apache.ode.utils.wsdl.Messages;
 import org.apache.rampart.RampartMessageData;
@@ -216,7 +216,6 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
         } catch (RuntimeException e) {
             throw AxisFault.makeFault(e.getCause() != null ? e.getCause() : e);
         }
-
         AxisService anonymousService = _axisServiceWatchDog.getObserver().get();
         ServiceClient client = _cachedClients.get();
         if (client == null || !client.getAxisService().getName().equals(anonymousService.getName())) {
@@ -224,10 +223,11 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
             synchronized (_axisConfig) {
                 // if the service has changed, discard the client and create a new one
                 if (client != null) {
-                    if(__log.isDebugEnabled()) __log.debug("Clean up and discard ServiceClient");
+                    if (__log.isDebugEnabled()) __log.debug("Clean up and discard ServiceClient");
                     client.cleanup();
                 }
-                if(__log.isDebugEnabled()) __log.debug("Create a new ServiceClient for "+anonymousService.getName());
+                if (__log.isDebugEnabled())
+                    __log.debug("Create a new ServiceClient for " + anonymousService.getName());
                 client = new ServiceClient(_configContext, null);
                 client.setAxisService(anonymousService);
             }
@@ -236,37 +236,14 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
 
         // apply the options to the service client
         client.setOptions(_axisOptionsWatchDog.getObserver().get());
-
-        applySecuritySettings(client);
-
         return client;
     }
-    private void applySecuritySettings(ServiceClient serviceClient) throws AxisFault {
-        Options options = serviceClient.getOptions();
-        if (options.getProperty(Properties.PROP_SECURITY_POLICY) != null) {
-            String policy = (String) options.getProperty(Properties.PROP_SECURITY_POLICY);
-            URI policyUri = new File(policy).toURI();
-            try {
-                InputStream policyStream = policyUri.toURL().openStream();
-                try {
-                    Policy policyDoc = PolicyEngine.getPolicy(policyStream);
-                    options.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policyDoc);
 
-                    // make sure the proper modules are engaged
-                    if (!serviceClient.getAxisService().getAxisConfiguration().isEngaged("rampart")
-                            && !serviceClient.getAxisService().isEngaged("rampart")) {
-                        serviceClient.engageModule("rampart");
-                    }
-                    if (!serviceClient.getAxisService().getAxisConfiguration().isEngaged("metadataExchange")
-                            && !serviceClient.getAxisService().isEngaged("metadataExchange")) {
-                        serviceClient.engageModule("metadataExchange");
-                    }
-                } finally {
-                    policyStream.close();
-                }
-            } catch (IOException e) {
-                throw new IllegalArgumentException("Exception while parsing policy: " + policyUri, e);
-            }
+    private void applySecurityPolicy(Options options) {
+        if (options != null && options.getProperty(Properties.PROP_SECURITY_POLICY) != null) {
+            String policy = (String) options.getProperty(Properties.PROP_SECURITY_POLICY);
+            AxisService service = _axisServiceWatchDog.getObserver().get();
+            AxisUtils.applySecurityPolicy(service, policy);
         }
     }
 
@@ -440,6 +417,8 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
                 if (__log.isWarnEnabled()) __log.warn("Exception while configuring service: " + _serviceName, e);
                 throw new RuntimeException("Exception while configuring service: " + _serviceName, e);
             }
+            Options options = _axisOptionsWatchDog.getObserver().get();
+            applySecurityPolicy(options);
         }
     }
 
@@ -462,6 +441,8 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
             // note: don't make this map an instance attribute, so we always get the latest version
             final Map<String, String> properties = _pconf.getEndpointProperties(endpointReference);
             Properties.Axis2.translate(properties, object);
+
+            applySecurityPolicy(object);
         }
     }
 
