@@ -1,4 +1,4 @@
-package org.apache.ode.utils;
+package org.apache.ode.axis2.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -6,12 +6,21 @@ import org.apache.axis2.deployment.ServiceBuilder;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.AxisModule;
+import org.apache.axis2.description.PolicyInclude;
+import org.apache.axis2.description.AxisDescription;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.Options;
+import org.apache.axis2.client.ServiceClient;
+import org.apache.neethi.PolicyEngine;
+import org.apache.neethi.Policy;
+import org.apache.rampart.RampartMessageData;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.File;
 import java.net.URL;
+import java.net.URI;
 
 /**
  *
@@ -58,6 +67,36 @@ public class AxisUtils {
                 } else {
                     throw new AxisFault("Unable to engage module: " + moduleRef);
                 }
+            }
+        }
+    }
+
+    public static void applySecurityPolicy(AxisService service, String policy_file) {
+        URI policyUri = new File(policy_file).toURI();
+        if (log.isDebugEnabled()) log.debug("Applying security policy: " + policyUri);
+        try {
+            InputStream policyStream = policyUri.toURL().openStream();
+            try {
+                Policy policyDoc = PolicyEngine.getPolicy(policyStream);
+                service.getPolicyInclude().addPolicyElement(PolicyInclude.AXIS_SERVICE_POLICY, policyDoc);
+                // make sure the proper modules are engaged, if they are available
+                engageModules(service, "rampart", "rahas");
+            } finally {
+                policyStream.close();
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Exception while parsing policy: " + policyUri, e);
+        }
+    }
+
+    public static void engageModules(AxisDescription description, String... modules) throws AxisFault {
+        for (String m : modules) {
+            if (description.getAxisConfiguration().getModule(m) != null) {
+                if (!description.getAxisConfiguration().isEngaged(m) && !description.isEngaged(m)) {
+                    description.engageModule(description.getAxisConfiguration().getModule(m));
+                }
+            } else {
+                if (log.isDebugEnabled()) log.debug("Module " + m + " is not available.");
             }
         }
     }
