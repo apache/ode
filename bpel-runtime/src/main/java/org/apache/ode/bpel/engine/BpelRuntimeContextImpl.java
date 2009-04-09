@@ -1422,4 +1422,8 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 	public Node getProcessProperty(QName propertyName) {
 		return _bpelProcess.getProcessProperty(propertyName);
 	}
+
+	public QName getProcessQName() {
+		return _bpelProcess.getProcessType();
+	}
 }

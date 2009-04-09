@@ -294,4 +294,6 @@ public interface BpelRuntimeContext {
 	 */
 	Node getProcessProperty(QName propertyName);
 
+	QName getProcessQName();
+
 }

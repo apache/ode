@@ -453,4 +453,9 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 		return null;
 	}
 
+	public QName getProcessQName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -355,9 +355,9 @@ class JaxenContexts implements FunctionContext, VariableContext {
             DOMSource source = new DOMSource(varDoc);
             Object result;
             XslRuntimeUriResolver resolver = new XslRuntimeUriResolver(_oxpath, _xpathEvalCtx.getBaseResourceURI());
-            XslTransformHandler.getInstance().cacheXSLSheet(_xpathEvalCtx.getBaseResourceURI(), xslUri, xslSheet.sheetBody, resolver);
+            XslTransformHandler.getInstance().cacheXSLSheet(_xpathEvalCtx.getProcessQName(), xslUri, xslSheet.sheetBody, resolver);
             try {
-            	result = XslTransformHandler.getInstance().transform(_xpathEvalCtx.getBaseResourceURI(), xslUri, source, parametersMap, resolver);
+            	result = XslTransformHandler.getInstance().transform(_xpathEvalCtx.getProcessQName(), xslUri, source, parametersMap, resolver);
             } catch (Exception e) {
                 throw new WrappedFaultException.JaxenFunctionException(
                         new FaultException(_oxpath.getOwner().constants.qnSubLanguageExecutionFault,

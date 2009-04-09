@@ -162,4 +162,8 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
 	public Node getPropertyValue(QName propertyName) {
 		return null;
 	}
+
+	public QName getProcessQName() {
+		return null;
+	}
 }

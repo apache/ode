@@ -97,6 +97,12 @@ public interface EvaluationContext {
     Long getProcessId();
 
     /**
+     * Reads the current process's name.
+     * @return process name
+     */
+    QName getProcessQName();
+    
+    /**
      * Indicates whether simple types should be narrowed to a Java type when
      * using this evaluation context.
      */

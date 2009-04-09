@@ -150,4 +150,8 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
 		return _native.getProcessProperty(propertyName);
 	}
 
+	public QName getProcessQName() {
+		return _native.getProcessQName();
+	}
+
 }

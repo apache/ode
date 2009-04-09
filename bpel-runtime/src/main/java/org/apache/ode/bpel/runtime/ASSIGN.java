@@ -712,6 +712,10 @@ class ASSIGN extends ACTIVITY {
 		public Node getPropertyValue(QName propertyName) {
 			return _ctx.getPropertyValue(propertyName);
 		}
+
+		public QName getProcessQName() {
+			return _ctx.getProcessQName();
+		}
     }
 
 }

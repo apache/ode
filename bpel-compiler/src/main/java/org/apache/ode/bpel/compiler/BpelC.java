@@ -18,6 +18,17 @@
  */
 package org.apache.ode.bpel.compiler;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URI;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
@@ -30,18 +41,9 @@ import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.utils.StreamUtils;
 import org.apache.ode.utils.msg.MessageBundle;
+import org.apache.ode.utils.xsl.XslTransformHandler;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
-
-import javax.xml.namespace.QName;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URI;
-import java.util.Map;
 
 /**
  * <p>
@@ -83,6 +85,7 @@ public class BpelC {
         this.setResourceFinder(null);
         this.setCompileListener(null);
         this.setOutputStream(null);
+        XslTransformHandler.getInstance().setErrorListener(null);
     }
 
     /**

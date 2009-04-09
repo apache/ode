@@ -300,9 +300,9 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             DOMSource source = new DOMSource(varDoc);
             Object result;
             XslRuntimeUriResolver resolver = new XslRuntimeUriResolver(_oxpath, _ectx.getBaseResourceURI());
-            XslTransformHandler.getInstance().cacheXSLSheet(_ectx.getBaseResourceURI(), xslUri, xslSheet.sheetBody, resolver);
+            XslTransformHandler.getInstance().cacheXSLSheet(_ectx.getProcessQName(), xslUri, xslSheet.sheetBody, resolver);
             try {
-                result = XslTransformHandler.getInstance().transform(_ectx.getBaseResourceURI(), xslUri, source, parametersMap, resolver);
+                result = XslTransformHandler.getInstance().transform(_ectx.getProcessQName(), xslUri, source, parametersMap, resolver);
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new XPathFunctionException(

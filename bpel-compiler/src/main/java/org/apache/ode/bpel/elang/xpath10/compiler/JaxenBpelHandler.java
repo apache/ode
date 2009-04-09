@@ -226,7 +226,7 @@ class JaxenBpelHandler extends JaxenHandler {
     String xslUri = getLiteralFromExpression((Expr)params.get(0));
     OXslSheet xslSheet = _cctx.compileXslt(xslUri);
     try {
-      XslTransformHandler.getInstance().parseXSLSheet(_cctx.getBaseResourceURI(), xslSheet.uri, xslSheet.sheetBody,
+      XslTransformHandler.getInstance().parseXSLSheet(_cctx.getOProcess().getQName(), xslSheet.uri, xslSheet.sheetBody,
                       new XslCompileUriResolver(_cctx, _out));
     } catch (Exception e) {
       throw new CompilationException(
