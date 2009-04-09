@@ -78,7 +78,7 @@ public class AxisUtils {
             InputStream policyStream = policyUri.toURL().openStream();
             try {
                 Policy policyDoc = PolicyEngine.getPolicy(policyStream);
-                service.getPolicyInclude().addPolicyElement(PolicyInclude.AXIS_SERVICE_POLICY, policyDoc);
+                service.getPolicySubject().attachPolicy(policyDoc);
                 // make sure the proper modules are engaged, if they are available
                 engageModules(service, "rampart", "rahas");
             } finally {
