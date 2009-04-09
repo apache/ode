@@ -116,7 +116,7 @@ public class SecuredProcessesTest extends Axis2TestBase {
 
     @Test
     public void standAlonePolicy() throws Exception {
-        invokeSecuredProcesses(testDir+"/process-sample01_standalone_policy", clientRepo, clientRepo+"/sample02-policy.xml");
+        invokeSecuredProcesses(testDir+"/process-sample02_standalone_policy", clientRepo, clientRepo+"/sample02-policy.xml");
     }
 
     private static Policy loadPolicy(String xmlPath) throws Exception {
