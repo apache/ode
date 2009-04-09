@@ -28,6 +28,7 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.wsdl.Definition;
 import javax.wsdl.Operation;
@@ -110,9 +111,9 @@ public class ODEAxisService {
 
 
             final WSDL11Endpoint endpoint = new WSDL11Endpoint(wsdlServiceName, portName);
-            Options options = Properties.Axis2.translate(pconf.getEndpointProperties(endpoint));
-            if(options.getProperty(Properties.PROP_SECURITY_POLICY)!=null){
-                AxisUtils.applySecurityPolicy(axisService, (String) options.getProperty(Properties.PROP_SECURITY_POLICY));
+            final Map<String, String> properties = pconf.getEndpointProperties(endpoint);
+            if(properties.get(Properties.PROP_SECURITY_POLICY)!=null){
+              AxisUtils.applySecurityPolicy(axisService, properties.get(Properties.PROP_SECURITY_POLICY));
             }
 
             // In doc/lit we need to declare a mapping between operations and message element names
