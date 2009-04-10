@@ -618,8 +618,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                             return processDao.getProcessId();
                         }
                     });
-                    for (ODERESTProcess odeRestProcess : _restServiceMap.values()) {
-                        if (odeRestProcess._pid.equals(processId)) target = odeRestProcess;
+                    for (ODEProcess odeRestProcess : _registeredProcesses.values()) {
+                        if (odeRestProcess._pid.equals(processId)) target = (ODERESTProcess)odeRestProcess;
                     }
                 } catch (Exception e) {
                     throw new BpelEngineException(e);
