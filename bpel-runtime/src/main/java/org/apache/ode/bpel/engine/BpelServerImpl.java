@@ -142,7 +142,12 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             _state = State.RUNNING;
             __log.info(__msgs.msgServerStarted());
-            if (_dehydrationPolicy != null) new Thread(new ProcessDefReaper()).start();
+            if (_dehydrationPolicy != null) {
+            	Thread thread = new Thread(new ProcessDefReaper(), "Dehydrator");
+            	thread.setDaemon(true);
+            	thread.start();
+            	
+            }
         } finally {
             _mngmtLock.writeLock().unlock();
         }
