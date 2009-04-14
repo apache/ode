@@ -24,13 +24,13 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -63,14 +63,12 @@ import org.w3c.dom.CDATASection;
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
-import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.ProcessingInstruction;
 import org.w3c.dom.Text;
-import org.w3c.dom.TypeInfo;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -1070,7 +1068,7 @@ public class DOMUtils {
         if (nl instanceof List) return (List<Node>) nl;
 
         NodeList cnl = (NodeList) nl;
-        LinkedList<Node> ll = new LinkedList<Node>();
+        List<Node> ll = new ArrayList<Node>();
         for (int m = 0; m < cnl.getLength(); m++) ll.add(cnl.item(m));
         return ll;
     }

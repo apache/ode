@@ -18,6 +18,24 @@
  */
 package org.apache.ode.store;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.wsdl.Definition;
+import javax.wsdl.WSDLException;
+import javax.wsdl.xml.WSDLReader;
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.BpelC;
@@ -31,28 +49,11 @@ import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.dd.TDeployment.Process;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.o.Serializer;
+import org.apache.ode.utils.InternPool;
+import org.apache.ode.utils.InternPool.InternableBlock;
 import org.apache.ode.utils.fs.FileUtils;
 import org.apache.xmlbeans.XmlOptions;
 import org.w3c.dom.Node;
-
-import javax.wsdl.Definition;
-import javax.wsdl.WSDLException;
-import javax.wsdl.xml.WSDLReader;
-import javax.xml.namespace.QName;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Container providing various functions on the deployment directory.
@@ -158,8 +159,8 @@ class DeploymentUnitDir {
         return !_duDirectory.exists();
     }
 
-    private void compile(File bpelFile) {
-        BpelC bpelc = BpelC.newBpelCompiler();
+    private void compile(final File bpelFile) {
+        final BpelC bpelc = BpelC.newBpelCompiler();
 
         // BPEL 1.1 does not suport the <import> element, so "global" WSDL needs to be configured explicitly.
         File bpel11wsdl = findBpel11Wsdl(bpelFile);
@@ -168,11 +169,16 @@ class DeploymentUnitDir {
 
         bpelc.setCompileProperties(prepareCompileProperties(bpelFile));
         bpelc.setBaseDirectory(_duDirectory);
-        try {
-            bpelc.compile(bpelFile);
-        } catch (IOException e) {
-            __log.error("Compile error in " + bpelFile, e);
-        }
+        // Create process such that immutable objects are intern'ed.
+        InternPool.runBlock(new InternableBlock() {
+        	public void run() {
+                try {
+                    bpelc.compile(bpelFile);
+                } catch (IOException e) {
+                    __log.error("Compile error in " + bpelFile, e);
+                }
+        	}
+        });
     }
 
     /**

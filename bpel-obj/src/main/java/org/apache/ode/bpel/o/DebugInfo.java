@@ -18,10 +18,14 @@
  */
 package org.apache.ode.bpel.o;
 
-import javax.xml.namespace.QName;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.io.ObjectInputStream.GetField;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.xml.namespace.QName;
 
 /**
  * Information about the source that was used to create a compiled object.
@@ -30,13 +34,13 @@ public class DebugInfo implements Serializable {
     static final long serialVersionUID = -1L  ;
 
     /** Source file / resource name. */
-    public final String sourceURI;
+    public String sourceURI;
 
     /** Source line number (start). */
-    public final int startLine;
+    public int startLine;
 
     /** Source line number (end). */
-    public final int endLine;
+    public int endLine;
 
     public String description;
 
@@ -53,6 +57,21 @@ public class DebugInfo implements Serializable {
 
     public DebugInfo(String sourceURI, int line, Map<QName, Object> extElmt) {
         this(sourceURI, line, line, extElmt);
+    }
+
+    /**
+     * Do not load the description and extensibilityElements fields,
+     * as they may be big and are not really required at run-time.
+     * 
+     * @param ois
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+    	GetField getField = ois.readFields();
+    	sourceURI = (String) getField.get("sourceURI", null);
+    	startLine = (Integer) getField.get("startLine", 0);
+    	endLine = (Integer) getField.get("endLine", 0);
     }
 
 }
