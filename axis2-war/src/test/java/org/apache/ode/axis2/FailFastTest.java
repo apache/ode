@@ -22,8 +22,10 @@ public class FailFastTest extends Axis2TestBase {
             String response = server.sendRequestFile("http://localhost:8888/processes/helloWorld",
                     bundleName, "testRequest.soap");
             System.out.println(response);
-            String badBadMessage = "java.util.concurrent.TimeoutException: Message exchange org.apache.ode.bpel.engine.MyRoleMessageExchangeImpl$ResponseFuture";
-            assertFalse("Client should NOT time out! It should receive the true failure", response.contains(badBadMessage));
+            String badMessage = "java.util.concurrent.TimeoutException: Message exchange org.apache.ode.bpel.engine.MyRoleMessageExchangeImpl$ResponseFuture";
+            String rightMessage = "The service cannot be found for the endpoint reference (EPR) 127.0.0.1/processes/DummyService";
+            assertFalse("Client should NOT time out! It should receive the true failure", response.contains(badMessage));
+            assertTrue("Client did not receive the right error message!", response.contains(rightMessage));
         } finally {
             server.undeployProcess(bundleName);
         }

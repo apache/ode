@@ -28,6 +28,7 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.utils.msg.MessageBundle;
+import org.apache.ode.utils.Namespaces;
 import org.w3c.dom.Element;
 
 import javax.wsdl.Operation;
@@ -175,9 +176,14 @@ abstract class MessageExchangeImpl implements MessageExchange {
     }
 
     void setFailure(FailureType type, String reason, Element details) throws BpelEngineException {
-        // TODO not using FailureType, nor details
+        // TODO not using FailureType
         setStatus(Status.FAILURE);
         getDAO().setFaultExplanation(reason);
+        if (details != null) {
+            Message message = createMessage(new QName(Namespaces.ODE_EXTENSION_NS, "failureMessage"));
+            message.setMessage(details);
+            getDAO().setResponse(((MessageImpl) message)._dao);
+        }
         responseReceived();        
     }
 

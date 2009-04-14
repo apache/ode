@@ -39,9 +39,8 @@
     
    <variables>
      <variable name="myVar" messageType="test:HelloMessage"/>
-     <variable name="faultInput" messageType="dummy:helloRequest"/>
-     <variable name="faultOutput" messageType="dummy:helloResponse"/>
-     <variable name="faultVar" messageType="dummy:DummyExceptionType"/>
+     <variable name="opInput" messageType="dummy:helloRequest"/>
+     <variable name="opOutput" messageType="dummy:helloResponse"/>
      <variable name="tmpVar" type="xsd:string"/>
    </variables>
 
@@ -51,14 +50,12 @@
 
        <assign>
            <copy>
-                <from><literal><dummy:faultTest><dummy:in>Hello</dummy:in></dummy:faultTest></literal></from>
-                <to>$faultInput.parameters</to>
+                <from><literal><dummy:hello>Hello</dummy:hello></literal></from>
+                <to>$opInput.parameters</to>
            </copy>
        </assign>
-
        <invoke partnerLink="dummyPartnerLink" portType="test:DummyServicePortType"
-               operation="hello" inputVariable="faultInput" outputVariable="faultOutput"/>
-
+               operation="hello" inputVariable="opInput" outputVariable="opOutput"/>
        <assign>
            <copy>
                <from><literal>foo</literal></from>

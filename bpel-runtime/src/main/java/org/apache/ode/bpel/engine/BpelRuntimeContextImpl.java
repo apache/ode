@@ -50,7 +50,6 @@ import org.apache.ode.bpel.evt.ProcessInstanceStateChangeEvent;
 import org.apache.ode.bpel.evt.ProcessMessageExchangeEvent;
 import org.apache.ode.bpel.evt.ProcessTerminationEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
-import org.apache.ode.bpel.iapi.BpelEngine;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
@@ -1240,6 +1239,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         MessageExchange.Status status = MessageExchange.Status.valueOf(dao.getStatus());
         switch (status) {
             case FAULT:
+            case FAILURE:
             case RESPONSE:
                 response = dao.getResponse();
                 if (response == null) {
@@ -1299,6 +1299,18 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         __log.info("ActivityRecovery: Registering activity " + activityId + ", failure reason: " + reason +
                 " on channel " + channel.export());
         _dao.createActivityRecovery(channel.export(), (int) activityId, reason, dateTime, details, actions, retries);
+        // Release and fail any outstanding request
+        String[] mexRefs = _outstandingRequests.releaseAll();
+        if(mexRefs!=null){
+            for(String mexRef:mexRefs){
+                MessageExchangeDAO mexDao = _dao.getConnection().getMessageExchange(mexRef);
+                if (mexDao !=null) {
+                    MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess, _bpelProcess._engine, mexDao);
+                    _bpelProcess.initMyRoleMex(mex);
+                    mex.setFailure(FailureType.OTHER, reason, details);
+                }
+            }
+        }
     }
 
     public void unregisterActivityForRecovery(ActivityRecoveryChannel channel) {

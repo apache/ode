@@ -22,6 +22,7 @@ package org.apache.ode.axis2;
 import javax.xml.namespace.QName;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axiom.om.OMElement;
 
 /**
  * User-friendly version of AxisFault
@@ -46,4 +47,7 @@ public class OdeFault extends AxisFault {
         super(new QName("java:"+cause.getClass().getPackage(), cause.getClass().getName(), "java"), message, cause);
     }
 
+    public OdeFault(String message, OMElement faultDetail) {
+        super(FAULT, message, null, null, faultDetail);
+    }
 }
