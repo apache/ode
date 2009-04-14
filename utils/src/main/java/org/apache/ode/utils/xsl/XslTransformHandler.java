@@ -164,7 +164,9 @@ public class XslTransformHandler {
   }
   
   public void clearXSLSheets(QName processQName) {
-	  _templateCache.removeAll(processQName);
+	synchronized (_templateCache) {
+		  _templateCache.removeAll(processQName);
+	}
   }
 
 }

@@ -121,6 +121,7 @@ import org.apache.ode.utils.stl.UnaryFunction;
 import org.apache.ode.utils.xsd.SchemaModel;
 import org.apache.ode.utils.xsd.XSUtils;
 import org.apache.ode.utils.xsd.XsdException;
+import org.apache.ode.utils.xsl.XslTransformHandler;
 import org.apache.xerces.xni.parser.XMLEntityResolver;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -744,6 +745,8 @@ abstract class BpelCompiler implements CompilerContext {
                 sb.append('\n');
             }
         }
+        
+        XslTransformHandler.getInstance().clearXSLSheets(_oprocess.getQName());
 
         if (hasErrors) {
             throw new CompilationException(__cmsgs.errCompilationErrors(_errors.size(), sb.toString()));

@@ -85,7 +85,7 @@ public class BpelC {
         this.setResourceFinder(null);
         this.setCompileListener(null);
         this.setOutputStream(null);
-        XslTransformHandler.getInstance().setErrorListener(null);
+        XslTransformHandler.getInstance().setErrorListener( new net.sf.saxon.StandardErrorListener() );
     }
 
     /**
