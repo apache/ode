@@ -24,7 +24,8 @@
     xmlns:test="http://ode/bpel/unit-test.wsdl"
     xmlns:dummy="http://axis2.ode.apache.org"
     queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
-    expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+    expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+        xmlns:ext="http://ode.apache.org/activityRecovery">
 
   <import location="HelloWorld2.wsdl"
      namespace="http://ode/bpel/unit-test.wsdl"
@@ -41,7 +42,6 @@
      <variable name="myVar" messageType="test:HelloMessage"/>
      <variable name="opInput" messageType="dummy:helloRequest"/>
      <variable name="opOutput" messageType="dummy:helloResponse"/>
-     <variable name="tmpVar" type="xsd:string"/>
    </variables>
 
    <sequence>
@@ -54,8 +54,14 @@
                 <to>$opInput.parameters</to>
            </copy>
        </assign>
-       <invoke partnerLink="dummyPartnerLink" portType="test:DummyServicePortType"
-               operation="hello" inputVariable="opInput" outputVariable="opOutput"/>
+       <!-- Invoke a non-available service but catch the failure as a fault -->
+       <scope>
+           <ext:failureHandling>
+               <ext:faultOnFailure>true</ext:faultOnFailure>
+           </ext:failureHandling>
+           <invoke partnerLink="dummyPartnerLink" portType="test:DummyServicePortType"
+                   operation="hello" inputVariable="opInput" outputVariable="opOutput"/>
+       </scope>
        <assign>
            <copy>
                <from><literal>foo</literal></from>

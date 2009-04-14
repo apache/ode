@@ -2,6 +2,9 @@ package org.apache.ode.axis2;
 
 import static org.testng.AssertJUnit.*;
 import org.testng.annotations.Test;
+import org.testng.annotations.DataProvider;
+
+import java.util.regex.Pattern;
 
 /**
  * Tests that when a process is called and some error happens during processing, the error is communicated asap back to the client.<br/>
@@ -11,21 +14,27 @@ import org.testng.annotations.Test;
  * The client should get that failure back and not a TimeoutException. 
  */
 public class FailFastTest extends Axis2TestBase {
-    @Test(dataProvider="configs")
-    public void gimmeTheDamnFailure() throws Exception {
-        String bundleName = "TestFailFast";
-        // Intentionnally NOT deploy the required service, to make the invocation fail
-//        server.deployService(DummyService.class.getCanonicalName());
+
+
+    @DataProvider(name = "input")
+    private Object[][] bundleLIst(){
+        return new Object[][]{
+                {"TestFailFast/invoke", ".*Message exchange failure due to: The service cannot be found for the endpoint reference .*"},
+                {"TestFailFast/faultOnFailure", ".*xmlns:axis2ns\\d=\"http://ode.apache.org/activityRecovery\">axis2ns\\d:activityFailure.*"},
+                {"TestFailFast/selectionFailure", ".*xmlns:axis2ns\\d=\"http://docs.oasis-open.org/wsbpel/2.0/process/executable\">axis2ns\\d:selectionFailure.*"}
+        };
+    }
+
+    @Test(dataProvider="input")
+    public void shouldNotTimeout(String bundleName, String expectedMsgPattern) throws Exception {
         if (server.isDeployed(bundleName)) server.undeployProcess(bundleName);
         server.deployProcess(bundleName);
         try {
-            String response = server.sendRequestFile("http://localhost:8888/processes/helloWorld",
-                    bundleName, "testRequest.soap");
+            String response = server.sendRequestFile("http://localhost:8888/processes/helloWorld", bundleName, "testRequest.soap");
             System.out.println(response);
-            String badMessage = "java.util.concurrent.TimeoutException: Message exchange org.apache.ode.bpel.engine.MyRoleMessageExchangeImpl$ResponseFuture";
-            String rightMessage = "The service cannot be found for the endpoint reference (EPR) 127.0.0.1/processes/DummyService";
+            String badMessage = "java.util.concurrent.TimeoutException: Message exchange";
             assertFalse("Client should NOT time out! It should receive the true failure", response.contains(badMessage));
-            assertTrue("Client did not receive the right error message!", response.contains(rightMessage));
+            assertTrue("Client did not receive the right error message!", Pattern.compile(expectedMsgPattern, Pattern.DOTALL).matcher(response).matches());
         } finally {
             server.undeployProcess(bundleName);
         }
