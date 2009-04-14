@@ -487,8 +487,8 @@ public class SoapExternalService implements ExternalService {
                             } else {
                                 if (__log.isWarnEnabled())
                                     __log.warn("Fault response: faultType=(unkown)\n" + reply.getEnvelope().toString());
-                                odeMex.replyWithFailure(FailureType.OTHER, reply.getEnvelope().getBody()
-                                        .getFault().getText(), OMUtils.toDOM(reply.getEnvelope().getBody()));
+                                odeMex.replyWithFailure(FailureType.OTHER, reply.getEnvelope().getBody().getFault().getReason().getText(),
+                                        OMUtils.toDOM(reply.getEnvelope().getBody()));
                             }
                         } else {
                             Message response = odeMex.createMessage(odeMex.getOperation().getOutput().getMessage().getQName());
