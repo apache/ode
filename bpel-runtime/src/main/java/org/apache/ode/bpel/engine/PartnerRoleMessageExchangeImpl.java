@@ -28,6 +28,7 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 
 import javax.wsdl.Operation;
@@ -101,8 +102,12 @@ public class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implemen
 
     public void replyWithFailure(FailureType type, String description, Element details) throws BpelEngineException {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("replyWithFailure mex=" + getMessageExchangeId() + " failureType="+type+" description="+description
-                      +" details="+details);
+            String msg = new StringBuilder("replyWithFailure mex=").append(getMessageExchangeId())
+                    .append(" failureType=").append(type)
+                    .append(" description=").append(description)
+                    .append(" details=").append(details==null?null:DOMUtils.domToString(details))
+                    .toString();
+            LOG.debug(msg);
         }
         boolean isAsync = isAsync();
         setFailure(type, description, details);
