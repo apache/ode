@@ -23,6 +23,7 @@ import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 import javax.xml.namespace.QName;
 import java.io.IOException;
@@ -79,47 +80,37 @@ public class OAssign extends OActivity {
 
     public static class Literal extends OBase implements RValue {
         private static final long serialVersionUID = 1L;
-        public transient Document xmlLiteral;
+        public transient String stringLiteral;
 
         public Literal(OProcess owner, Document xmlLiteral) {
             super(owner);
             if (xmlLiteral == null)
                 throw new IllegalArgumentException("null xmlLiteral!");
-            this.xmlLiteral = xmlLiteral;
+            this.stringLiteral = DOMUtils.domToString(xmlLiteral);
         }
 
         public String toString() {
-            return "{Literal " + DOMUtils.domToString(xmlLiteral) + "}";
+            return "{Literal " + stringLiteral + "}";
         }
 
         private void writeObject(java.io.ObjectOutputStream out)
                 throws IOException
         {
-            out.writeObject(DOMUtils.domToString(xmlLiteral));
+            out.writeObject(stringLiteral);
         }
 
         private void readObject(java.io.ObjectInputStream in)
                 throws IOException
         {
-            String domStr = null;
             try {
-                domStr = (String) in.readObject();
+                stringLiteral = (String) in.readObject();
             } catch (ClassNotFoundException e) {
                 throw (IOException)(new IOException("XML de-serialization error.")).initCause(e);
             }
-            try {
-                xmlLiteral = DOMUtils.stringToDOM(domStr).getOwnerDocument();
-            } catch (Exception ex) {
-                throw (IOException)(new IOException("XML de-serialization error.")).initCause(ex);
-            }
         }
 
-        public Document getXmlLiteral() {
-            Element literalRoot = xmlLiteral.getDocumentElement();
-            Document copyDoc = DOMUtils.newDocument();
-            Node copyElmt = copyDoc.importNode(literalRoot, true);
-            copyDoc.appendChild(copyElmt);
-            return copyDoc;
+        public Document getXmlLiteral() throws SAXException, IOException {
+            return DOMUtils.stringToDOM(stringLiteral).getOwnerDocument();
         }
     }
 

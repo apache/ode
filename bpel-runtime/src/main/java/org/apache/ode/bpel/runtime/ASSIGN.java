@@ -51,8 +51,11 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
+import org.xml.sax.SAXException;
 
 import javax.xml.namespace.QName;
+
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
@@ -223,7 +226,15 @@ class ASSIGN extends ACTIVITY {
             }
             retVal = (Node) l.get(0);
         } else if (from instanceof OAssign.Literal) {
-            Element literalRoot = ((OAssign.Literal) from).getXmlLiteral().getDocumentElement();
+            Element literalRoot;
+			try {
+				literalRoot = ((OAssign.Literal) from).getXmlLiteral().getDocumentElement();
+			} catch (Exception e) {
+                String msg = __msgs.msgEvalException(from.toString(), e.getMessage());
+                if (__log.isDebugEnabled()) __log.debug(from + ": " + msg);
+                if (e.getCause() instanceof FaultException) throw (FaultException)e.getCause();
+                throw new FaultException(getOAsssign().getOwner().constants.qnSelectionFailure, msg);
+			}
             assert literalRoot.getLocalName().equals("literal");
             // We'd like a single text node...
 
