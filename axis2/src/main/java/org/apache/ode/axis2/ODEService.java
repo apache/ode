@@ -56,7 +56,6 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.Properties;
-import org.apache.ode.il.OMUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -265,7 +264,16 @@ public class ODEService {
             case FAILURE:
                 if (__log.isDebugEnabled())
                     __log.debug("Failure response message: " + mex.getFault());
-                OdeFault odeFault = _converter.createOdeFault(mex.getFaultExplanation(), mex.getFaultResponse());
+                OdeFault odeFault;
+                String beVerbose = _pconf.getEndpointProperties(_serviceRef).get(Properties.PROP_MEX_FAILURE_VERBOSE);
+                // default is true
+                if (beVerbose == null || Boolean.valueOf(beVerbose)) {
+                    odeFault = _converter.createOdeFault(mex.getFaultExplanation(), mex.getFaultResponse());
+                } else {
+                    odeFault = new OdeFault("Message exchange failure.");
+                    odeFault.setDetail(null);
+                    odeFault.setStackTrace(new StackTraceElement[]{});
+                }
                 throw odeFault;
             default:
                 throw new OdeFault("Received ODE message exchange in unexpected state: " + mex.getStatus());
