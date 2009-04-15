@@ -208,19 +208,20 @@ public class SoapExternalService implements ExternalService {
                                         __log.debug("Service response:\n" + response.getEnvelope().toString());
 
                                     if (flt != null) {
-                                        reply(mexId, operation, flt, true, mctx);
+                                        reply(mexId, operation, flt, true);
                                     } else {
-                                        reply(mexId, operation, response, response.isFault(), mctx);
+                                        reply(mexId, operation, response, response.isFault());
                                     }
                                 } catch (Throwable t) {
+                                    String errmsg = "Error sending message (mex=" + odeMex + "): " + t.getMessage();
+                                    __log.error(errmsg, t);
+                                    replyWithFailure(mexId, MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg);
+                                } finally {
                                     // release the HTTP connection, we don't need it anymore
                                     TransportOutDescription out = mctx.getTransportOut();
                                     if (out != null && out.getSender() != null) {
                                         out.getSender().cleanup(mctx);
                                     }
-                                    String errmsg = "Error sending message (mex=" + odeMex + "): " + t.getMessage();
-                                    __log.error(errmsg, t);
-                                    replyWithFailure(mexId, MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg);
                                 }
                                 return null;
                             }
@@ -445,7 +446,7 @@ public class SoapExternalService implements ExternalService {
     private void replyWithFailure(final String odeMexId, final FailureType error, final String errmsg) {
         // ODE MEX needs to be invoked in a TX.
         try {
-            _sched.execIsolatedTransaction(new Callable<Void>() {
+            _sched.execTransaction(new Callable<Void>() {
                 public Void call() throws Exception {
                     PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) _server.getEngine().getMessageExchange(odeMexId);
                     odeMex.replyWithFailure(error, errmsg, null);
@@ -456,15 +457,13 @@ public class SoapExternalService implements ExternalService {
         } catch (Exception e) {
             String emsg = "Error executing replyWithFailure transaction; reply will be lost.";
             __log.error(emsg, e);
-
         }
-
     }
 
-    private void reply(final String odeMexId, final Operation operation, final MessageContext reply, final boolean isFault, final MessageContext outMsgContext) {
+    private void reply(final String odeMexId, final Operation operation, final MessageContext reply, final boolean isFault) {
         // ODE MEX needs to be invoked in a TX.
         try {
-            _sched.execIsolatedTransaction(new Callable<Void>() {
+            _sched.execTransaction(new Callable<Void>() {
                 public Void call() throws Exception {
                     PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) _server.getEngine().getMessageExchange(odeMexId);
                     // Setting the response
@@ -506,12 +505,6 @@ public class SoapExternalService implements ExternalService {
                         String errmsg = "Unable to process response: " + ex.getMessage();
                         __log.error(errmsg, ex);
                         odeMex.replyWithFailure(FailureType.OTHER, errmsg, null);
-                    } finally {
-                         // make sure the HTTP connection is released to the pool!
-                        TransportOutDescription out = outMsgContext.getTransportOut();
-                        if (out != null && out.getSender() != null) {
-                            out.getSender().cleanup(outMsgContext);
-                        }
                     }
                     return null;
                 }
@@ -521,7 +514,6 @@ public class SoapExternalService implements ExternalService {
             String errmsg = "Error executing reply transaction; reply will be lost.";
             __log.error(errmsg, e);
         }
-
     }
 
 

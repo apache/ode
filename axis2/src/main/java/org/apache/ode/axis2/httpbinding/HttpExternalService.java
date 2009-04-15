@@ -253,7 +253,7 @@ public class HttpExternalService implements ExternalService {
             } catch (final IOException e) {
                 // ODE MEX needs to be invoked in a TX.
                 try {
-                    scheduler.execIsolatedTransaction(new Callable<Void>() {
+                    scheduler.execTransaction(new Callable<Void>() {
                         public Void call() throws Exception {
                             PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) server.getEngine().getMessageExchange(mexId);
                             String errmsg = "Unable to execute http request : " + e.getMessage();
@@ -297,7 +297,7 @@ public class HttpExternalService implements ExternalService {
         public void processResponse(final int statusCode) {
             // ODE MEX needs to be invoked in a TX.
             try {
-                scheduler.execIsolatedTransaction(new Callable<Void>() {
+                scheduler.execTransaction(new Callable<Void>() {
                     public Void call() throws Exception {
                         try {
                             if (statusCode >= 200 && statusCode < 300) {
