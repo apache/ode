@@ -1186,6 +1186,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     private Element mergeHeaders(MessageDAO msg) {
+        if(msg==null) return null;
         // Merging header data, it's all stored in the same variable
         Element data = msg.getData();
         if (msg.getHeader() != null) {
@@ -1239,7 +1240,6 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         MessageExchange.Status status = MessageExchange.Status.valueOf(dao.getStatus());
         switch (status) {
             case FAULT:
-            case FAILURE:
             case RESPONSE:
                 response = dao.getResponse();
                 if (response == null) {
@@ -1248,6 +1248,9 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
                     __log.fatal(msg);
                     throw new BpelEngineException(msg);
                 }
+                break;
+            case FAILURE:
+                response = dao.getResponse();
                 break;
             default:
                 // We should not be in any other state when requesting this.
