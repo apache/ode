@@ -1,0 +1,10 @@
+
+
+# timeout in milliseconds until the ODE will wait for answer.
+mex.timeout=2000
+
+# timeout in milliseconds until a connection is established
+#http.connection.timeout=480000
+
+# timeout in milliseconds for waiting for data
+#http.socket.timeout=1000
