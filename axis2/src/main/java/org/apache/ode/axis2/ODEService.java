@@ -110,14 +110,9 @@ public class ODEService {
 
             odeMex.setRequest(odeRequest);
             odeMex.setTimeout(resolveTimeout());
-            try {
                 if(__log.isDebugEnabled()) __log.debug("Blocking invoke with mex " + odeMex.getMessageExchangeId() + ".");
                 odeMex.invokeBlocking();
-            } catch (java.util.concurrent.TimeoutException te) {
-                String errmsg = "Call to " + _serviceName + "." + odeMex.getOperationName() + " timed out(" + resolveTimeout() + " ms).";
-                __log.error(errmsg, te);
-                throw new OdeFault(errmsg);         
-            }
+
             
             if (odeMex.getOperation().getOutput() != null && outMsgContext != null) {
                 SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
@@ -127,6 +122,10 @@ public class ODEService {
                 __log.debug("Handling response for MEX " + odeMex);
                 onResponse(odeMex, outMsgContext);
             }
+        } catch (java.util.concurrent.TimeoutException te) {
+            String errmsg = "Call to " + _serviceName + "." + odeMex.getOperationName() + " timed out(" + resolveTimeout() + " ms).";
+            __log.error(errmsg, te);
+            throw new OdeFault(errmsg);
         } catch (Exception e) {
             String errmsg = "Call to " + _serviceName + "." + odeMex.getOperationName() + " caused an exception.";
             __log.error(errmsg, e);
