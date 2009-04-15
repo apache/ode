@@ -40,7 +40,6 @@ public class MessageImpl implements Message {
     MessageDAO _dao;
 
     public MessageImpl(MessageDAO message) {
-        if (message == null) throw new NullPointerException("null message!");
         _dao = message;
     }
 
