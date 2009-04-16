@@ -73,16 +73,17 @@ public class ODEAxisServiceDispatcher extends AbstractDispatcher {
                 AxisConfiguration registry =
                         messageContext.getConfigurationContext().getAxisConfiguration();
                 AxisService service = registry.getService(path);
-                if (log.isDebugEnabled()) log.debug("Found service in registry from name " + path + ": " + service);
+                if (service != null) {
+                    if (log.isDebugEnabled()) log.debug("Found service in registry from name " + path + ": " + service);
 
-                // Axis2 >1.3 is less clever than 1.3. See ODE-509
-                // We have to do additional work for him.
-                Policy policy = PolicyUtil.getMergedPolicy(new ArrayList(service.getPolicySubject().getAttachedPolicyComponents()), service);
-                if (policy != null) {
-                    if (log.isDebugEnabled()) log.debug("Apply policy: " + policy.getName());
-                    messageContext.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
+                    // Axis2 >1.3 is less clever than 1.3. See ODE-509
+                    // We have to do additional work for him.
+                    Policy policy = PolicyUtil.getMergedPolicy(new ArrayList(service.getPolicySubject().getAttachedPolicyComponents()), service);
+                    if (policy != null) {
+                        if (log.isDebugEnabled()) log.debug("Apply policy: " + policy.getName());
+                        messageContext.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
+                    }
                 }
-
                 return service;
             }
         }
