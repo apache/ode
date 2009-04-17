@@ -161,7 +161,7 @@
 
     <service name="DeploymentService">
         <port name="DeploymentPort" binding="tns:DeploymentBinding">
-            <soap:address location="http://localhost:8080/ode/processes/deploy"/>
+            <soap:address location="http://localhost:8080/ode/processes/DeploymentService"/>
         </port>
     </service>
 
