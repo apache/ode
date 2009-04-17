@@ -132,8 +132,10 @@ public class BindingContextImpl implements BindingContext {
                 }
                 // now, stop the service
                 _server._axisConfig.stopService(axisServiceName);
-                // if only this method did a good job of cleaning up after itself
-                _server._axisConfig.removeService(axisServiceName);
+                // calling removeServiceGroup() is workaround to AXIS2-4314.
+                //  It happens that Axis2 creates one group per service you add with AxisConfiguration.addService(). See this.createService()
+                // Once this issue is fixed (hopully in Axis2-1.5), we can use removeService() again.
+                _server._axisConfig.removeServiceGroup(axisServiceName);
                 _server._axisConfig.cleanup();
             } catch (AxisFault axisFault) {
                 __log.error("Couldn't destroy service " + serviceName);
