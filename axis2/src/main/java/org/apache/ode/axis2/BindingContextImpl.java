@@ -20,6 +20,7 @@
 
 package org.apache.ode.axis2;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -157,7 +158,8 @@ public class BindingContextImpl implements BindingContext {
                 // now, stop the service
                 _server._axisConfig.stopService(axisServiceName);
                 // if only this method did a good job of cleaning up after itself
-                _server._axisConfig.removeService(axisServiceName);
+                _server._axisConfig.removeService(service.getName());
+                completeCleanup(axisService);
                 _server._axisConfig.cleanup();
             } catch (AxisFault axisFault) {
                 __log.error("Couldn't destroy service " + serviceName);
@@ -166,6 +168,33 @@ public class BindingContextImpl implements BindingContext {
             __log.debug("Couldn't find service " + serviceName + " port " + portName + " to destroy.");
         }
         return service;
+    }
+
+    /**
+     * /!\ Monkey patching to remove references to the service:
+     * Manually & externally & really really horribly fix for ODE-580/AXIS2-3870
+     * The exception handling is for locked down environment where reflection would not be allowed...
+     *
+     * This patch is needed for Axis2 1.3 and 1.4.1
+     * @param service
+     * @throws AxisFault
+     */
+    private void completeCleanup(AxisService service) {
+        try {
+            Field field= _server._axisConfig.getClass().getDeclaredField("allEndpoints");
+            field.setAccessible(true);
+            synchronized (_server._axisConfig) {
+                //removes the endpoints to this service
+                Map allEndpoints = (Map) field.get(_server._axisConfig);
+
+                //removes the service endpoints
+                for (Iterator<String> iter = service.getEndpoints().keySet().iterator(); iter.hasNext();) {
+                    allEndpoints.remove(service.getName() + "." + iter.next());
+                }
+            }
+        } catch(Exception e) {
+            __log.error("Workaround for ODE-580/AXIS2-3870 failed. AxisConfig clean up might be incomplete.",  e);
+        }
     }
 
     protected ExternalService createExternalService(ProcessConf pconf, QName serviceName, String portName) throws ContextException {
