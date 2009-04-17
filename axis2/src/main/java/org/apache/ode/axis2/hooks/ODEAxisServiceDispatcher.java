@@ -68,8 +68,10 @@ public class ODEAxisServiceDispatcher extends AbstractDispatcher {
                 AxisConfiguration registry =
                         messageContext.getConfigurationContext().getAxisConfiguration();
                 AxisService service = registry.getService(path);
-                log.debug("Found service in registry from name " + path + ": " + service);
-                return service;
+                if (service!=null) {
+                    log.debug("Found service in registry from name " + path + ": " + service);
+                    return service;
+                }
             }
         }
         log.warn("No service has been found!");
