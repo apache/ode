@@ -199,9 +199,13 @@ define "ode" do
     webapp_dir = "#{test.compile.target}/webapp"
     test.setup task(:prepare_webapp) do |task|
       cp_r _("src/main/webapp"), _(test.compile.target)
+      cp_r _("src/test/webapp"), _(test.compile.target)
       cp Dir[_("src/main/webapp/WEB-INF/classes/*")], _(test.compile.target)
       cp Dir[project("axis2").path_to("src/main/wsdl/*")], "#{webapp_dir}/WEB-INF"
       cp project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd"), "#{webapp_dir}/WEB-INF"
+      cp project.path_to("src/main/webapp/WEB-INF/conf/axis2.xml"), "#{webapp_dir}/WEB-INF/conf.hib-derby"
+      cp project.path_to("src/main/webapp/WEB-INF/conf/axis2.xml"), "#{webapp_dir}/WEB-INF/conf.jpa-derby"
+      cp project.path_to("src/main/webapp/WEB-INF/conf/axis2.xml"), "#{webapp_dir}/WEB-INF/conf.template"
       rm_rf Dir[_(webapp_dir) + "/**/.svn"]
       mkdir _("#{webapp_dir}/WEB-INF/processes") unless File.exist?("#{webapp_dir}/WEB-INF/processes")
       mkdir _("#{webapp_dir}/WEB-INF/modules") unless File.exist?("#{webapp_dir}/WEB-INF/modules")
