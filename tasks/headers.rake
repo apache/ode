@@ -85,7 +85,7 @@ EOF
     # This also tells us which files to look at.
     extensions = licenses.keys.join(",")
     count = FileList["**/*{#{extensions}}"].inject(0) do |count, filename|
-      if File.readlines(filename)[0..3].join !~ /Licensed to the Apache Software Foundation/
+      if File.file?(filename) and  File.readlines(filename)[0..3].join !~ /Licensed to the Apache Software Foundation/
         when_writing "Missing header in #{filename}" do
           # Figure the license from the file, inject it into the file and rewrite it.
           license = licenses[filename.pathmap("%x")]
