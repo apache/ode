@@ -199,13 +199,11 @@ define "ode" do
     webapp_dir = "#{test.compile.target}/webapp"
     test.setup task(:prepare_webapp) do |task|
       cp_r _("src/main/webapp"), _(test.compile.target)
+      rm_rf Dir[_(webapp_dir) + "/**/.svn"]
       cp_r _("src/test/webapp"), _(test.compile.target)
       cp Dir[_("src/main/webapp/WEB-INF/classes/*")], _(test.compile.target)
       cp Dir[project("axis2").path_to("src/main/wsdl/*")], "#{webapp_dir}/WEB-INF"
       cp project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd"), "#{webapp_dir}/WEB-INF"
-      cp project.path_to("src/main/webapp/WEB-INF/conf/axis2.xml"), "#{webapp_dir}/WEB-INF/conf.hib-derby"
-      cp project.path_to("src/main/webapp/WEB-INF/conf/axis2.xml"), "#{webapp_dir}/WEB-INF/conf.jpa-derby"
-      cp project.path_to("src/main/webapp/WEB-INF/conf/axis2.xml"), "#{webapp_dir}/WEB-INF/conf.template"
       rm_rf Dir[_(webapp_dir) + "/**/.svn"]
       mkdir _("#{webapp_dir}/WEB-INF/processes") unless File.exist?("#{webapp_dir}/WEB-INF/processes")
       mkdir _("#{webapp_dir}/WEB-INF/modules") unless File.exist?("#{webapp_dir}/WEB-INF/modules")
@@ -350,6 +348,16 @@ define "ode" do
       COMMONS.lang, COMMONS.logging, JAVAX.transaction, HIBERNATE, DOM4J
     resources hibernate_doclet(:package=>"org.apache.ode.daohib.bpel.hobj", :excludedtags=>"@version,@author,@todo")
 
+    # doclet does not support not-found="ignore"
+    build {
+      process_instance_hbm_file = project.path_to("target/classes/org/apache/ode/daohib/bpel/hobj/HProcessInstance.hbm.xml") 
+      process_instance_hbm = File.read(process_instance_hbm_file)
+      if !process_instance_hbm.include? "not-found=\"ignore\""
+        process_instance_hbm.insert(process_instance_hbm.index("class=\"org.apache.ode.daohib.bpel.hobj.HProcess\"") - 1, "not-found=\"ignore\" ")
+        File.open(process_instance_hbm_file, "w") { |f| f << process_instance_hbm }
+      end
+    }
+
     test.with project("bpel-epr"), BACKPORT, COMMONS.collections, COMMONS.lang, HSQLDB,
       GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, SPRING
 
@@ -366,13 +374,15 @@ define "ode" do
 
     Buildr::Hibernate::REQUIRES[:xdoclet] =  Buildr.group("xdoclet", "xdoclet-xdoclet-module", "xdoclet-hibernate-module",
       :under=>"xdoclet", :version=>"1.2.3") + ["xdoclet:xjavadoc:jar:1.1-j5"]
+
     export = lambda do |properties, source, target|
       file(target=>[properties, source]) do |task|
         mkpath File.dirname(target), :verbose=>false
         # Protection against a buildr bug until the fix is released, avoids build failure
+
         class << task ; attr_accessor :ant ; end
         task.enhance { |task| task.ant = Buildr::Hibernate.schemaexport }
-        
+       
         hibernate_schemaexport target do |task, ant|
           ant.schemaexport(:properties=>properties.to_s, :quiet=>"yes", :text=>"yes", :delimiter=>";",
                            :drop=>"no", :create=>"yes", :output=>target) do
