@@ -17,7 +17,7 @@
   ~ under the License.
   -->
 
-﻿<bpel:process
+<bpel:process
 	xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
 	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
