@@ -67,6 +67,13 @@ public abstract class HibernateDao {
         return _hobj;
     }
 
+    public Serializable getId() {
+    	if( _hobj != null ) {
+    		return _hobj.getId();
+    	}
+    	return null;
+    }
+    
     public boolean equals(Object obj) {
         assert obj instanceof HibernateDao;
         return _hobj.getId().equals(((HibernateDao) obj)._hobj.getId());

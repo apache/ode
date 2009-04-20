@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.memdao;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -73,6 +74,10 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
         _version = version;
     }
 
+    public Serializable getId() {
+        return _guid;
+    }
+    
     public QName getProcessId() {
         return _processId;
     }
@@ -162,10 +167,10 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
         }
     }
 
-    public void delete() {
+    public void deleteProcessAndRoutes() {
         _store.remove(_processId);
     }
-
+    
     public long getVersion() {
         return _version;
     }

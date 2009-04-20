@@ -21,12 +21,15 @@ package org.apache.ode.bpel.engine;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.xml.namespace.QName;
 
@@ -36,6 +39,7 @@ import org.apache.ode.agents.memory.SizingAgent;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.DeferredProcessInstanceCleanable;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableConf;
@@ -49,6 +53,7 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.intercept.InstanceCountThrottler;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
@@ -124,14 +129,14 @@ public class BpelProcess {
 
     private ExternalVariableManager _evm;
 
-	public static final QName PROP_PATH = new QName("PATH"); 
-	public static final QName PROP_SVG = new QName("SVG"); 
-	public static final QName PROP_LAZY_HYDRATE = new QName("process.hydration.lazy");
+    public static final QName PROP_PATH = new QName("PATH"); 
+    public static final QName PROP_SVG = new QName("SVG"); 
+    public static final QName PROP_LAZY_HYDRATE = new QName("process.hydration.lazy");
     public static final QName PROP_MAX_INSTANCES = new QName("process.instance.throttled.maximum.count");
     
     // The ratio of in-memory vs serialized size of compiled bpel object.
     private static final int PROCESS_MEMORY_TO_SERIALIZED_SIZE_RATIO = 5;
-	
+    
     public BpelProcess(ProcessConf conf) {
         _pid = conf.getProcessId();
         _pconf = conf;
@@ -177,11 +182,11 @@ public class BpelProcess {
     }
     
     protected DebuggerSupport createDebuggerSupport() {
-    	return new DebuggerSupport(this);
+        return new DebuggerSupport(this);
     }
     
     protected DebuggerSupport getDebuggerSupport() {
-    	return _debugger;
+        return _debugger;
     }
 
     static String generateMessageExchangeIdentifier(String partnerlinkName, String operationName) {
@@ -437,9 +442,9 @@ public class BpelProcess {
                             __log.debug("Matcher event for iid " + we.getIID());
                         }
                         if( procInstance.getState() == ProcessState.STATE_COMPLETED_OK 
-                        		|| procInstance.getState() == ProcessState.STATE_COMPLETED_WITH_FAULT ) {
-                        	__log.debug("A matcher event was aborted. The process is already completed.");
-                        	return;
+                                || procInstance.getState() == ProcessState.STATE_COMPLETED_WITH_FAULT ) {
+                            __log.debug("A matcher event was aborted. The process is already completed.");
+                            return;
                         }
                         processInstance.matcherEvent(we.getCorrelatorId(), we.getCorrelationKeySet());
                 }
@@ -541,9 +546,9 @@ public class BpelProcess {
         _sharedEps = _engine.getSharedEndpoints();
         _debugger = createDebuggerSupport();
 
-    	if (getInstanceMaximumCount() < Integer.MAX_VALUE)
+        if (getInstanceMaximumCount() < Integer.MAX_VALUE)
             registerMessageExchangeInterceptor(new InstanceCountThrottler());
-    	
+        
         __log.debug("Activating " + _pid);
         // Activate all the my-role endpoints.
         for (Map.Entry<String, Endpoint> entry : _pconf.getProvideEndpoints().entrySet()) {
@@ -769,69 +774,6 @@ public class BpelProcess {
 
     }
 
-    private void bounceProcessDAO(BpelDAOConnection conn, final QName pid, final long version, final OProcess oprocess) {
-    	deleteProcessDAO(conn, pid, version, oprocess);
-    	createProcessDAO(conn, pid, version, oprocess);
-    }
-    /**
-     * If necessary, create an object in the data store to represent the process. We'll re-use an existing object if it already
-     * exists and matches the GUID.
-     */
-    private void deleteProcessDAO(BpelDAOConnection conn, final QName pid, final long version, final OProcess oprocess) {
-        __log.debug("Creating process DAO for " + pid + " (guid=" + oprocess.guid + ")");
-        try {
-            ProcessDAO old = conn.getProcess(pid);
-            if (old != null) {
-                __log.debug("Found ProcessDAO for " + pid + " with GUID " + old.getGuid());
-                if (oprocess.guid != null) {
-                    if (!old.getGuid().equals(oprocess.guid)) {
-                        // GUIDS dont match, delete and create new
-                        String errmsg = "ProcessDAO GUID " + old.getGuid() + " does not match " + oprocess.guid + "; replacing.";
-                        __log.debug(errmsg);
-                        old.delete();
-                    }
-                }
-            }
-        } catch (BpelEngineException ex) {
-            throw ex;
-        } catch (Exception dce) {
-            __log.error("DbError", dce);
-            throw new BpelEngineException("DbError", dce);
-        }
-    }
-
-    private void createProcessDAO(BpelDAOConnection conn, final QName pid, final long version, final OProcess oprocess) {
-        __log.debug("Creating process DAO for " + pid + " (guid=" + oprocess.guid + ")");
-        try {
-            boolean create = true;
-            ProcessDAO old = conn.getProcess(pid);
-            if (old != null) {
-                __log.debug("Found ProcessDAO for " + pid + " with GUID " + old.getGuid());
-                if (oprocess.guid == null) {
-                    // No guid, old version assume its good
-                    create = false;
-                } else {
-                    if (old.getGuid().equals(oprocess.guid)) {
-                        // Guids match, no need to create
-                        create = false;
-                    }
-                }
-            }
-
-            if (create) {
-                ProcessDAO newDao = conn.createProcess(pid, oprocess.getQName(), oprocess.guid, (int) version);
-                for (String correlator : oprocess.getCorrelators()) {
-                    newDao.addCorrelator(correlator);
-                }
-            }
-        } catch (BpelEngineException ex) {
-            throw ex;
-        } catch (Exception dce) {
-            __log.error("DbError", dce);
-            throw new BpelEngineException("DbError", dce);
-        }
-    }
-    
     private class HydrationLatch extends NStateLatch {
         HydrationLatch() {
             super(new Runnable[2]);
@@ -848,28 +790,28 @@ public class BpelProcess {
         }
 
         private void doDehydrate() {
-        	if (_oprocess != null) {
-	        	_oprocess.dehydrate();
-	            _oprocess = null;
-        	}
-        	if (_myRoles != null) {
-	            _myRoles.clear();
-        	}
-        	if (_endpointToMyRoleMap != null) {
-	            _endpointToMyRoleMap.clear();
-        	}
+            if (_oprocess != null) {
+                _oprocess.dehydrate();
+                _oprocess = null;
+            }
+            if (_myRoles != null) {
+                _myRoles.clear();
+            }
+            if (_endpointToMyRoleMap != null) {
+                _endpointToMyRoleMap.clear();
+            }
             if (_partnerRoles != null) {
-	            _partnerRoles.clear();
+                _partnerRoles.clear();
             }
             // Don't clear stuff you can't re-populate
-//        	if (_myEprs != null) {
-//        		_myEprs.clear();
-//        	}
+//            if (_myEprs != null) {
+//                _myEprs.clear();
+//            }
 //            if (_partnerChannels != null) {
-//	            _partnerChannels.clear();
+//                _partnerChannels.clear();
 //            }
 //            if (_partnerEprs != null) {
-//	            _partnerEprs.clear();
+//                _partnerEprs.clear();
 //            }
             _replacementMap = null;
             _expLangRuntimeRegistry = null;
@@ -891,23 +833,23 @@ public class BpelProcess {
                 throw new BpelEngineException(errmsg, e);
             }
             
-        	if (_partnerRoles == null) {
+            if (_partnerRoles == null) {
                 _partnerRoles = new HashMap<OPartnerLink, PartnerLinkPartnerRoleImpl>();
-        	}
-        	if (_myRoles == null) {
+            }
+            if (_myRoles == null) {
                 _myRoles = new HashMap<OPartnerLink, PartnerLinkMyRoleImpl>();
-        	}
-        	if (_endpointToMyRoleMap == null) {
+            }
+            if (_endpointToMyRoleMap == null) {
                 _endpointToMyRoleMap = new HashMap<PartnerLinkMyRoleImpl, Endpoint>();
-        	}
-        	if (_myEprs == null) {
-        	    _myEprs = new HashMap<Endpoint, EndpointReference>();
-        	}
+            }
+            if (_myEprs == null) {
+                _myEprs = new HashMap<Endpoint, EndpointReference>();
+            }
             if (_partnerChannels == null) {
-        	    _partnerChannels = new HashMap<Endpoint, PartnerRoleChannel>();
+                _partnerChannels = new HashMap<Endpoint, PartnerRoleChannel>();
             }
             if (_partnerEprs == null) {
-        	    _partnerEprs = new HashMap<Endpoint, EndpointReference>();
+                _partnerEprs = new HashMap<Endpoint, EndpointReference>();
             }
             
             _replacementMap = new ReplacementMapImpl(_oprocess);
@@ -951,40 +893,134 @@ public class BpelProcess {
                 }
             }
 
-
+            /*
+             * If necessary, create an object in the data store to represent the process. We'll re-use an existing object if it already
+             * exists and matches the GUID.
+             */
             if (isInMemory()) {
-                bounceProcessDAO(_engine._contexts.inMemDao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
+                bounceProcessDAOInMemory(_engine._contexts.inMemDao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
             } else if (_engine._contexts.scheduler.isTransacted()) {
-                // If we have a transaction, we do this in the current transaction.
-                bounceProcessDAO(_engine._contexts.dao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
+                // If we have a transaction, we do this in the current transaction
+                bounceProcessDAOInDB(_engine._contexts.dao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
             } else {
-                // If we do not have a transaction we need to create one. 
                 try {
                     _engine._contexts.scheduler.execTransaction(new Callable<Object>() {
                         public Object call() throws Exception {
-                            deleteProcessDAO(_engine._contexts.dao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
+                            bounceProcessDAOInDB(_engine._contexts.dao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
                             return null;
                         }
                     });
-                    _engine._contexts.scheduler.execTransaction(new Callable<Object>() {
-                        public Object call() throws Exception {
-                            createProcessDAO(_engine._contexts.dao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
-                            return null;
-                        }
-                    });
-                } catch (Exception ex) {
-                    String errmsg = "DbError";
-                    __log.error(errmsg, ex);
-                    ex.printStackTrace();
-                    throw new BpelEngineException(errmsg, ex);
+                } catch( RuntimeException re ) {
+                    throw re;
+                } catch(Exception e) {
+                    throw new RuntimeException(e);
                 }
             }
         }
-
     }
     
+    private void bounceProcessDAOInMemory(BpelDAOConnection conn, final QName pid, final long version, final OProcess oprocess) {
+        ProcessDAO oldProcess = findOldProcessToDelete(conn, pid, version, oprocess);
+        if( oldProcess != null ) {
+            if(__log.isDebugEnabled()) __log.debug("Deleting old process DAO[mem] for " + pid + " (guid=" + oldProcess.getGuid() + ")");
+
+            oldProcess.deleteProcessAndRoutes();
+            
+            if(__log.isInfoEnabled()) __log.info("Deleted old process DAO[mem] for " + pid + " (guid=" + oldProcess.getGuid() + ").");
+        }
+        if(__log.isInfoEnabled()) __log.info("Creating new process DAO[mem] for " + pid + " (guid=" + oprocess.guid + ").");
+        createProcessDAO(conn, pid, version, oprocess);
+    }
+
+    private void bounceProcessDAOInDB(final BpelDAOConnection conn, final QName pid, final long version, final OProcess oprocess) {
+        final ProcessDAO oldProcess = findOldProcessToDelete(conn, pid, version, oprocess);
+        if( oldProcess != null ) {
+            // delete routes
+            if(__log.isDebugEnabled()) __log.debug("Deleting only the process " + pid + "...");
+            oldProcess.deleteProcessAndRoutes();
+            if(__log.isInfoEnabled()) __log.info("Deleted only the process " + pid + ".");
+            
+            // we do deferred instance cleanup only for hibernate, for now
+            if( oldProcess instanceof DeferredProcessInstanceCleanable ) {
+                // schedule deletion of process runtime data
+                _engine._contexts.scheduler.scheduleMapSerializableRunnable(
+                    new ProcessCleanUpRunnable(((DeferredProcessInstanceCleanable)oldProcess).getId()), new Date());
+            }
+        }
+        // create a new process
+        if(__log.isDebugEnabled()) __log.debug("Creating new process DAO for " + pid + " (guid=" + oprocess.guid + ")...");
+        createProcessDAO(conn, pid, version, oprocess);
+        if(__log.isInfoEnabled()) __log.info("Created new process DAO for " + pid + " (guid=" + oprocess.guid + ").");
+    }
+
+    private ProcessDAO findOldProcessToDelete(final BpelDAOConnection conn, final QName pid, final long version, final OProcess oprocess) {
+        Scheduler scheduler = _engine._contexts.scheduler;
+
+        try {
+            ProcessDAO old = null;
+            if( scheduler.isTransacted() ) {
+                old = conn.getProcess(pid);
+            } else {
+                old = scheduler.execTransaction(new Callable<ProcessDAO>() {
+                    public ProcessDAO call() throws Exception {
+                        return conn.getProcess(pid);
+                    }
+                });
+            }
+            // no process found
+            if( old == null ) return null;
+            
+            __log.debug("Found ProcessDAO for " + pid + " with GUID " + old.getGuid());
+            if( oprocess.guid != null && !old.getGuid().equals(oprocess.guid) ) {
+                // guids are different
+                return old;
+            }
+        } catch (RuntimeException ex) {
+            throw ex;
+        } catch (Exception dce) {
+            __log.error("DbError", dce);
+            throw new BpelEngineException("DbError", dce);
+        }
+
+        return null;
+    }
+
     public int getInstanceInUseCount() {
-    	return hintIsHydrated() ? _hydrationLatch.getDepth(1) : 0;
+        return hintIsHydrated() ? _hydrationLatch.getDepth(1) : 0;
+    }
+
+    private void createProcessDAO(BpelDAOConnection conn, final QName pid, final long version, final OProcess oprocess) {
+        try {
+            boolean create = true;
+            ProcessDAO old = conn.getProcess(pid);
+            if (old != null) {
+                __log.debug("Found ProcessDAO for " + pid + " with GUID " + old.getGuid());
+                if (oprocess.guid == null) {
+                    // No guid, old version assume its good
+                    create = false;
+                } else {
+                    if (old.getGuid().equals(oprocess.guid)) {
+                        // Guids match, no need to create
+                        create = false;
+                    }
+                }
+            }
+
+            if (create) {
+                if(__log.isDebugEnabled()) __log.debug("Creating process DAO for " + pid + " (guid=" + oprocess.guid + ")");
+
+                ProcessDAO newDao = conn.createProcess(pid, oprocess.getQName(), oprocess.guid, (int) version);
+                for (String correlator : oprocess.getCorrelators()) {
+                    newDao.addCorrelator(correlator);
+                }
+                if(__log.isInfoEnabled()) __log.info("Created new process DAO for " + pid + " (guid=" + oprocess.guid + ")");
+            }
+        } catch (BpelEngineException ex) {
+            throw ex;
+        } catch (Exception dce) {
+            __log.error("DbError", dce);
+            throw new BpelEngineException("DbError", dce);
+        }
     }
 
     private void registerExprLang(OProcess oprocess) {
@@ -1019,17 +1055,17 @@ public class BpelProcess {
         return _pconf;
     }
 
-	public boolean hasActiveInstances() {
-		try {
-			_hydrationLatch.latch(1);
+    public boolean hasActiveInstances() {
+        try {
+            _hydrationLatch.latch(1);
             if (isInMemory() || _engine._contexts.scheduler.isTransacted()) { 
-    			return hasActiveInstances(getProcessDAO());
+                return hasActiveInstances(getProcessDAO());
             } else {
                 // If we do not have a transaction we need to create one. 
                 try {
                     return (Boolean) _engine._contexts.scheduler.execTransaction(new Callable<Object>() {
                         public Object call() throws Exception {
-                			return hasActiveInstances(getProcessDAO());
+                            return hasActiveInstances(getProcessDAO());
                         }
                     });
                 } catch (Exception e) {
@@ -1038,66 +1074,66 @@ public class BpelProcess {
                     return false;
                 }
             }
-		} finally {
-			_hydrationLatch.release(1);
-		}
-	}
-	
-	private boolean hasActiveInstances(ProcessDAO processDAO) {
-		// Select count of instances instead of all active instances 
-    	// Collection<ProcessInstanceDAO> activeInstances = processDAO.getActiveInstances();
-		// return (activeInstances != null && activeInstances.size() > 0);
-		return processDAO.getNumInstances() > 0;
-	}
+        } finally {
+            _hydrationLatch.release(1);
+        }
+    }
+    
+    private boolean hasActiveInstances(ProcessDAO processDAO) {
+        // Select count of instances instead of all active instances 
+        // Collection<ProcessInstanceDAO> activeInstances = processDAO.getActiveInstances();
+        // return (activeInstances != null && activeInstances.size() > 0);
+        return processDAO.getNumInstances() > 0;
+    }
 
     public void registerMessageExchangeInterceptor(MessageExchangeInterceptor interceptor) {
-    	_mexInterceptors.add(interceptor);
+        _mexInterceptors.add(interceptor);
     }
     
     public void unregisterMessageExchangeInterceptor(MessageExchangeInterceptor interceptor) {
-    	_mexInterceptors.remove(interceptor);
+        _mexInterceptors.remove(interceptor);
     }
     
-	public long sizeOf() {
-		// try to get actual size from sizing agent, if enabled
-		long footprint = SizingAgent.deepSizeOf(this);
-		// if unsuccessful, estimate size (this is a inaccurate guess)
-		if (footprint == 0) {
-			footprint = getEstimatedHydratedSize();
-		}
-		// add the sizes of all the services this process provides
-		for (EndpointReference myEpr : _myEprs.values()) {
-			footprint += _engine._contexts.bindingContext.calculateSizeofService(myEpr);
-		}
-		// return the total footprint
-		return footprint;
-	}
-	
-	public String getProcessProperty(QName property, String defaultValue) {
-		Text text = (Text) getProcessProperty(property);
-		if (text == null) {
-			return defaultValue;
-		}
-		String value = text.getWholeText();
-		return (value == null) ?  defaultValue : value;
-	}
+    public long sizeOf() {
+        // try to get actual size from sizing agent, if enabled
+        long footprint = SizingAgent.deepSizeOf(this);
+        // if unsuccessful, estimate size (this is a inaccurate guess)
+        if (footprint == 0) {
+            footprint = getEstimatedHydratedSize();
+        }
+        // add the sizes of all the services this process provides
+        for (EndpointReference myEpr : _myEprs.values()) {
+            footprint += _engine._contexts.bindingContext.calculateSizeofService(myEpr);
+        }
+        // return the total footprint
+        return footprint;
+    }
+    
+    public String getProcessProperty(QName property, String defaultValue) {
+        Text text = (Text) getProcessProperty(property);
+        if (text == null) {
+            return defaultValue;
+        }
+        String value = text.getWholeText();
+        return (value == null) ?  defaultValue : value;
+    }
 
-	public boolean isHydrationLazy() {
-		return Boolean.valueOf(getProcessProperty(PROP_LAZY_HYDRATE, "true"));
-	}
-	
-	public boolean isHydrationLazySet() {
-		return getProcessProperty(PROP_LAZY_HYDRATE) != null;
-	}
+    public boolean isHydrationLazy() {
+        return Boolean.valueOf(getProcessProperty(PROP_LAZY_HYDRATE, "true"));
+    }
+    
+    public boolean isHydrationLazySet() {
+        return getProcessProperty(PROP_LAZY_HYDRATE) != null;
+    }
 
-	public int getInstanceMaximumCount() {
-		return Integer.valueOf(getProcessProperty(PROP_MAX_INSTANCES, Integer.toString(_engine.getInstanceThrottledMaximumCount())));
-	}
+    public int getInstanceMaximumCount() {
+        return Integer.valueOf(getProcessProperty(PROP_MAX_INSTANCES, Integer.toString(_engine.getInstanceThrottledMaximumCount())));
+    }
 
-	public long getEstimatedHydratedSize() {
+    public long getEstimatedHydratedSize() {
         return _pconf.getCBPFileSize() * 
-        			PROCESS_MEMORY_TO_SERIALIZED_SIZE_RATIO;
-	}
+                    PROCESS_MEMORY_TO_SERIALIZED_SIZE_RATIO;
+    }
 
     public long getTimeout(OPartnerLink partnerLink) {
         // OPartnerLink, PartnerLinkPartnerRoleImpl

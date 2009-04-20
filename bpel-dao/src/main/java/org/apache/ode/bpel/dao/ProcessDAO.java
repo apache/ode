@@ -21,6 +21,7 @@ package org.apache.ode.bpel.dao;
 import org.apache.ode.bpel.common.CorrelationKey;
 
 import javax.xml.namespace.QName;
+
 import java.util.Collection;
 
 /**
@@ -102,10 +103,11 @@ public interface ProcessDAO {
     void instanceCompleted(ProcessInstanceDAO instance);
 
     /**
-     * Remove the process from the database (along with any instance, variable data, etc...).
+     * Deletes only the process and routes without instances. This also deletes any static data to 
+     * the process: correlators.
      */
-    void delete();
-
+    void deleteProcessAndRoutes();
+    
     CorrelatorDAO addCorrelator(String correlator);
 
     String getGuid();

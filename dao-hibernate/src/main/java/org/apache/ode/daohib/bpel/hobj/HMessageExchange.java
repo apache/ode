@@ -27,16 +27,12 @@ import java.util.Map;
  * Hibernate-managed table for keeping track of message exchanges.
  * 
  * @hibernate.class table="BPEL_MESSAGE_EXCHANGE" dynamic-update="true"
- * @hibernate.query name="DELETE_MEX_BY_INSTANCE" query="delete from HMessageExchange as m where m.instance = :instance"
- * @hibernate.query name="SELECT_UNMATCHED_MEX_BY_INSTANCE" query="from HMessageExchange as m where m in(select cm.messageExchange from HCorrelatorMessage as cm where cm.messageExchange.instance = :instance)"
- * @hibernate.query name="DELETE_UNMATCHED_MEX" query="delete from HMessageExchange as m where m in(:mex)"
- * @hibernate.query name="DELETE_MEX_BY_PROCESS" query="delete from HMessageExchange as m where m.process = :process"
+ * @hibernate.query name="DELETE_MEX_BY_INSTANCES" query="delete from HMessageExchange as m where m.instance in (:instances)"
+ * @hibernate.query name="SELECT_UNMATCHED_MEX_BY_INSTANCES" query="from HMessageExchange as m where m in(select cm.messageExchange from HCorrelatorMessage as cm where cm.messageExchange.instance in (:instances))"
  */
 public class HMessageExchange extends HObject {
-	public final static String DELETE_MEX_BY_INSTANCE = "DELETE_MEX_BY_INSTANCE";
-	public final static String SELECT_UNMATCHED_MEX_BY_INSTANCE = "SELECT_UNMATCHED_MEX_BY_INSTANCE";
-	public final static String DELETE_UNMATCHED_MEX = "DELETE_UNMATCHED_MEX";
-	public final static String DELETE_MEX_BY_PROCESS = "DELETE_MEX_BY_PROCESS";
+    public final static String DELETE_MEX_BY_INSTANCES = "DELETE_MEX_BY_INSTANCES";
+    public final static String SELECT_UNMATCHED_MEX_BY_INSTANCES = "SELECT_UNMATCHED_MEX_BY_INSTANCES";
 
     private String _channelName;
 

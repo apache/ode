@@ -44,7 +44,7 @@ import java.util.*;
  * Hibernate-based {@link ProcessInstanceDAO} implementation.
  */
 public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO {
-	private static final Log __log = LogFactory.getLog(ProcessInstanceDaoImpl.class);
+  private static final Log __log = LogFactory.getLog(ProcessInstanceDaoImpl.class);
 
   /** Query for removing selectors. */
   private static final String QRY_DELSELECTORS = "delete from "  + 
@@ -60,18 +60,18 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
 
   private ScopeDAO _root;
   
-	public ProcessInstanceDaoImpl(SessionManager sm, HProcessInstance instance) {
+  public ProcessInstanceDaoImpl(SessionManager sm, HProcessInstance instance) {
     super(sm, instance);
-        entering("ProcessInstanceDaoImpl.ProcessInstanceDaoImpl");
-		_instance = instance;
-	}
+    entering("ProcessInstanceDaoImpl.ProcessInstanceDaoImpl");
+    _instance = instance;
+  }
 
   /**
-	 * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getCreateTime()
-	 */
-	public Date getCreateTime() {
-		return _instance.getCreated();
-	}
+   * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getCreateTime()
+   */
+  public Date getCreateTime() {
+    return _instance.getCreated();
+  }
   
   public void setFault(FaultDAO fault) {
       entering("ProcessInstanceDaoImpl.setFault");
@@ -113,18 +113,19 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
     else return new FaultDAOImpl(_sm, _instance.getFault());
   }
 
-	/**
-	 * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getExecutionState()
-	 */
-	public byte[] getExecutionState() {
+  /**
+   * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getExecutionState()
+   */
+  public byte[] getExecutionState() {
         entering("ProcessInstanceDaoImpl.getExecutionState");
     if (_instance.getJacobState() == null) return null;
     return _instance.getJacobState().getBinary();
-	}
-	/**
-	 * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#setExecutionState(byte[])
-	 */
-	public void setExecutionState(byte[] bytes) {
+  }
+	
+  /**
+   * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#setExecutionState(byte[])
+   */
+  public void setExecutionState(byte[] bytes) {
         entering("ProcessInstanceDaoImpl.setExecutionState");
     if (_instance.getJacobState() != null)
       getSession().delete(_instance.getJacobState());
@@ -135,19 +136,19 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
     }
     getSession().update(_instance);
   }
-	
-	/**
-	 * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getProcess()
-	 */
-	public ProcessDAO getProcess() {
-        entering("ProcessInstanceDaoImpl.getProcess");
-		return new ProcessDaoImpl(_sm, _instance.getProcess());
-	}
+
+  /**
+   * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getProcess()
+   */
+  public ProcessDAO getProcess() {
+    entering("ProcessInstanceDaoImpl.getProcess");
+    return new ProcessDaoImpl(_sm, _instance.getProcess());
+  }
   
-	/**
-	 * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getRootScope()
-	 */
-	public ScopeDAO getRootScope() {
+  /**
+   * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getRootScope()
+   */
+  public ScopeDAO getRootScope() {
         entering("ProcessInstanceDaoImpl.getRootScope");
     if (_root != null) 
       return _root;
@@ -156,12 +157,12 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
     HScope hroot = (HScope)rootQry.uniqueResult();
     if (hroot == null)
       return null;
-		return _root = new ScopeDaoImpl(_sm, hroot);
-	}
-	/**
-	 * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#setState(short)
-	 */
-	public void setState(short state) {
+    return _root = new ScopeDaoImpl(_sm, hroot);
+  }
+  /**
+   * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#setState(short)
+   */
+  public void setState(short state) {
         entering("ProcessInstanceDaoImpl.setState");
         _instance.setPreviousState(_instance.getState());
     _instance.setState(state);
@@ -170,23 +171,25 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
     }
     getSession().update(_instance);
   }
-	/**
-	 * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getState()
-	 */
-	public short getState() {
-		return _instance.getState();
-	}
-	/**
-	 * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getPreviousState()
-	 */
-	public short getPreviousState() {
-		return _instance.getPreviousState();
-	}
+
+  /**
+   * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getState()
+   */
+  public short getState() {
+    return _instance.getState();
+  }
+	
+  /**
+   * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getPreviousState()
+   */
+  public short getPreviousState() {
+    return _instance.getPreviousState();
+  }
 
   
-	public ScopeDAO createScope(ScopeDAO parentScope, String name, int scopeModelId) {
-        entering("ProcessInstanceDaoImpl.createScope");
-		HScope scope = new HScope();
+  public ScopeDAO createScope(ScopeDAO parentScope, String name, int scopeModelId) {
+    entering("ProcessInstanceDaoImpl.createScope");
+    HScope scope = new HScope();
     scope.setParentScope(parentScope != null
         ? (HScope)((ScopeDaoImpl)parentScope).getHibernateObj()
         : null);
@@ -198,15 +201,15 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
 //    _instance.addScope(scope);
     getSession().save(scope);
 
-		return new ScopeDaoImpl(_sm, scope);
-	}
+    return new ScopeDaoImpl(_sm, scope);
+  }
 
-	/**
-	 * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getInstanceId()
-	 */
-	public Long getInstanceId() {
-		return _instance.getId();
-	}
+  /**
+   * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getInstanceId()
+   */
+  public Long getInstanceId() {
+    return _instance.getId();
+  }
 
   public ScopeDAO getScope(Long scopeInstanceId) {
       entering("ProcessInstanceDaoImpl.getScope");
@@ -217,10 +220,10 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
             : null;
   }
   
-	/**
-	 * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getScopes(java.lang.String)
-	 */
-	@SuppressWarnings("unchecked")
+  /**
+   * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getScopes(java.lang.String)
+   */
+  @SuppressWarnings("unchecked")
   public Collection<ScopeDAO> getScopes(String scopeName) {
         entering("ProcessInstanceDaoImpl.getScopes");
     Collection<HScope> hscopes;
@@ -238,33 +241,34 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
       }
      });
     return ret;
-	}
+  }
 
   public Collection<ScopeDAO> getScopes() {
     return getScopes(null);
   }
   
-	/**
-	 * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getInstantiatingCorrelator()
-	 */
-	public CorrelatorDAO getInstantiatingCorrelator() {
-        entering("ProcessInstanceDaoImpl.getInstantiatingCorrelator");
-		return new CorrelatorDaoImpl(_sm, _instance.getInstantiatingCorrelator());
-	}
+  /**
+   * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getInstantiatingCorrelator()
+   */
+  public CorrelatorDAO getInstantiatingCorrelator() {
+    entering("ProcessInstanceDaoImpl.getInstantiatingCorrelator");
+    return new CorrelatorDaoImpl(_sm, _instance.getInstantiatingCorrelator());
+  }
 
   /**
-	 * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getLastActiveTime()
-	 */
-	public Date getLastActiveTime() {
-		return _instance.getLastActiveTime();
-	}
-	/**
-	 * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#setLastActiveTime(java.util.Date)
-	 */
-	public void setLastActiveTime(Date dt) {
-        entering("ProcessInstanceDaoImpl.setLastActiveTime");
-		_instance.setLastActiveTime(dt);
-	}
+   * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getLastActiveTime()
+   */
+  public Date getLastActiveTime() {
+    return _instance.getLastActiveTime();
+  }
+  
+  /**
+   * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#setLastActiveTime(java.util.Date)
+   */
+  public void setLastActiveTime(Date dt) {
+    entering("ProcessInstanceDaoImpl.setLastActiveTime");
+    _instance.setLastActiveTime(dt);
+  }
 
   public Set<CorrelationSetDAO> getCorrelationSets() {
       entering("ProcessInstanceDaoImpl.getCorrelationSets");
@@ -286,13 +290,13 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
     return null;
   }
 
-    /**
-     * TODO this is never used, except by test cases - should be removed
-     * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getVariables(java.lang.String, int)
-     */
-    @SuppressWarnings("unchecked")
-	public XmlDataDAO[] getVariables(String variableName, int scopeModelId) {
-        entering("ProcessInstanceDaoImpl.getVariables");
+  /**
+   * TODO this is never used, except by test cases - should be removed
+   * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getVariables(java.lang.String, int)
+   */
+  @SuppressWarnings("unchecked")
+  public XmlDataDAO[] getVariables(String variableName, int scopeModelId) {
+    entering("ProcessInstanceDaoImpl.getVariables");
     List<XmlDataDAO> results = new ArrayList<XmlDataDAO>();
 
     Iterator iter;
@@ -303,12 +307,12 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
     iter = qry.iterate();
 
     while(iter.hasNext()) {
-    	results.add(new XmlDataDaoImpl(_sm, (HXmlData)iter.next()));
+      results.add(new XmlDataDaoImpl(_sm, (HXmlData)iter.next()));
     }
     Hibernate.close(iter);
 
     return results.toArray(new XmlDataDAO[results.size()]);
-	}
+  }
 
   /**
    * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#finishCompletion()
@@ -322,82 +326,85 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
   }
 
   public void delete(Set<CLEANUP_CATEGORY> cleanupCategories) {
-      entering("ProcessInstanceDaoImpl.delete");
-	  if(__log.isDebugEnabled()) __log.debug("Cleaning up instance data with categories = " + cleanupCategories);
+    entering("ProcessInstanceDaoImpl.delete");
+    if(__log.isDebugEnabled()) __log.debug("Cleaning up instance data with categories = " + cleanupCategories);
       
-	  if( _instance.getJacobState() != null ) {
-		  getSession().delete(_instance.getJacobState());
-		  _instance.setJacobState(null);
-	  }
-	  
-      if( cleanupCategories.contains(CLEANUP_CATEGORY.EVENTS) ) {
-    	  deleteEvents();
-      }
-      
-      if( cleanupCategories.contains(CLEANUP_CATEGORY.CORRELATIONS) ) {
-    	  deleteCorrelations();
-      }
-      
-      if( cleanupCategories.contains(CLEANUP_CATEGORY.MESSAGES) ) {
-    	  deleteMessages();
-      }
-      
-      if( cleanupCategories.contains(CLEANUP_CATEGORY.VARIABLES) ) {
-    	  deleteVariables();
-      }
-      
-      if( cleanupCategories.contains(CLEANUP_CATEGORY.INSTANCE) ) {
-    	  deleteInstance();
-      }
+    if( _instance.getJacobState() != null ) {
+      getSession().delete(_instance.getJacobState());
+      _instance.setJacobState(null);
+    }
 
-      getSession().flush();
+    HProcessInstance[] instances = new HProcessInstance[] {_instance};
+    
+    if( cleanupCategories.contains(CLEANUP_CATEGORY.EVENTS) ) {
+      deleteEvents(instances);
+    }
       
-	  if(__log.isDebugEnabled()) __log.debug("Instance data cleaned up and flushed.");
+    if( cleanupCategories.contains(CLEANUP_CATEGORY.CORRELATIONS) ) {
+      deleteCorrelations(instances);
+    }
+
+    if( cleanupCategories.contains(CLEANUP_CATEGORY.MESSAGES) ) {
+      deleteMessages(instances);
+    }
+      
+    if( cleanupCategories.contains(CLEANUP_CATEGORY.VARIABLES) ) {
+      deleteVariables(instances);
+    }
+      
+    if( cleanupCategories.contains(CLEANUP_CATEGORY.INSTANCE) ) {
+      deleteInstances(instances);
+    }
+
+    getSession().flush();
+      
+    if(__log.isDebugEnabled()) __log.debug("Instance data cleaned up and flushed.");
   }
   
-  	private void deleteInstance() {
-  		getSession().getNamedQuery(HLargeData.DELETE_FAULT_LDATA_BY_INSTANCE_ID).setParameter ("instanceId", _instance.getId()).executeUpdate();
-		getSession().getNamedQuery(HFaultData.DELETE_FAULTS_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+  private void deleteInstances(HProcessInstance[] instances) {
+    getSession().getNamedQuery(HLargeData.DELETE_FAULT_LDATA_BY_INSTANCE_IDS).setParameterList("instanceIds", HObject.toIdArray(instances)).executeUpdate();
+    getSession().getNamedQuery(HFaultData.DELETE_FAULTS_BY_INSTANCES).setParameterList("instances", instances).executeUpdate();
 
-		getSession().delete(_instance); // this deletes JcobState, HActivityRecovery -> ActivityRecovery-LData
-  	}
-  	
-  	private void deleteVariables() {
-		getSession().getNamedQuery(HCorrelationProperty.DELETE_CORPROPS_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
-		getSession().getNamedQuery(HCorrelationSet.DELETE_CORSETS_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+    getSession().delete(_instance); // this deletes JcobState, HActivityRecovery -> ActivityRecovery-LData
+  }
 
-  		getSession().getNamedQuery(HVariableProperty.DELETE_VARIABLE_PROPERITES_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
-		getSession().getNamedQuery(HLargeData.DELETE_XMLDATA_LDATA_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
-		getSession().getNamedQuery(HXmlData.DELETE_XMLDATA_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+  private void deleteVariables(HProcessInstance[] instances) {
+    getSession().getNamedQuery(HCorrelationProperty.DELETE_CORPROPS_BY_INSTANCES).setParameterList("instances", instances).executeUpdate();
+    getSession().getNamedQuery(HCorrelationSet.DELETE_CORSETS_BY_INSTANCES).setParameterList("instances", instances).executeUpdate();
 
-		getSession().getNamedQuery(HLargeData.DELETE_PARTNER_LINK_LDATA_BY_INSTANCE).setParameter ("instance", _instance).setParameter ("instance2", _instance).executeUpdate();
-		getSession().getNamedQuery(HPartnerLink.DELETE_PARTNER_LINKS_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
+    getSession().getNamedQuery(HVariableProperty.DELETE_VARIABLE_PROPERITES_BY_INSTANCES).setParameterList("instances", instances).executeUpdate();
+    getSession().getNamedQuery(HLargeData.DELETE_XMLDATA_LDATA_BY_INSTANCES).setParameterList("instances", instances).executeUpdate();
+    getSession().getNamedQuery(HXmlData.DELETE_XMLDATA_BY_INSTANCES).setParameterList("instances", instances).executeUpdate();
 
-		getSession().getNamedQuery(HScope.DELETE_SCOPES_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
-  	}
+    getSession().getNamedQuery(HLargeData.DELETE_PARTNER_LINK_LDATA_BY_INSTANCES).setParameterList("instances", instances).executeUpdate();
+    getSession().getNamedQuery(HPartnerLink.DELETE_PARTNER_LINKS_BY_INSTANCES).setParameterList("instances", instances).executeUpdate();
 
-  	@SuppressWarnings("unchecked")
-    private void deleteMessages() {
-    	// there are chances that some unmatched messages are still there
-  		getSession().getNamedQuery(HLargeData.DELETE_UNMATCHED_MESSAGE_LDATA_BY_INSTANCE).setParameter("instance", _instance).setParameter("instance2", _instance).executeUpdate();
-  		Collection unmatchedMex = getSession().getNamedQuery(HMessageExchange.SELECT_UNMATCHED_MEX_BY_INSTANCE).setParameter("instance", _instance).list();
-  		if( !unmatchedMex.isEmpty() ) {
-  			getSession().getNamedQuery(HMessageExchange.DELETE_UNMATCHED_MEX).setParameter("mex", unmatchedMex).executeUpdate();
-  		}
-  		getSession().getNamedQuery(HCorrelatorMessage.DELETE_CORMESSAGES_BY_INSTANCE).setParameter("instance", _instance).executeUpdate();
+    getSession().getNamedQuery(HScope.DELETE_SCOPES_BY_INSTANCES).setParameterList("instances", instances).executeUpdate();
+  }
 
-  		getSession().getNamedQuery(HCorrelatorSelector.DELETE_MESSAGE_ROUTES_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
-  	}
+  @SuppressWarnings("unchecked")
+  private void deleteMessages(HProcessInstance[] instances) {
+    // there are chances that some unmatched messages are still there
+    getSession().getNamedQuery(HLargeData.DELETE_UNMATCHED_MESSAGE_LDATA_BY_INSTANCES).setParameterList("instances", instances).executeUpdate();
+    Collection unmatchedMex = getSession().getNamedQuery(HMessageExchange.SELECT_UNMATCHED_MEX_BY_INSTANCES).setParameterList("instances", instances).list();
+    if( !unmatchedMex.isEmpty() ) {
+      getSession().delete(unmatchedMex);
+//    getSession().getNamedQuery(HMessageExchange.DELETE_UNMATCHED_MEX).setParameter("mex", unmatchedMex).executeUpdate();
+    }
+    getSession().getNamedQuery(HCorrelatorMessage.DELETE_CORMESSAGES_BY_INSTANCES).setParameterList("instances", instances).executeUpdate();
+
+    getSession().getNamedQuery(HCorrelatorSelector.DELETE_MESSAGE_ROUTES_BY_INSTANCES).setParameterList("instances", instances).executeUpdate();
+  }
   
-  	private void deleteCorrelations() {
-		getSession().getNamedQuery(HCorrelationProperty.DELETE_CORPROPS_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
-		getSession().getNamedQuery(HCorrelationSet.DELETE_CORSETS_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
-  	}
+  private void deleteCorrelations(HProcessInstance[] instances) {
+    getSession().getNamedQuery(HCorrelationProperty.DELETE_CORPROPS_BY_INSTANCES).setParameterList("instances", instances).executeUpdate();
+    getSession().getNamedQuery(HCorrelationSet.DELETE_CORSETS_BY_INSTANCES).setParameterList("instances", instances).executeUpdate();
+  }
 
-  	private void deleteEvents() {
-		getSession().getNamedQuery(HLargeData.DELETE_EVENT_LDATA_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();
-		getSession().getNamedQuery(HBpelEvent.DELETE_EVENTS_BY_INSTANCE).setParameter ("instance", _instance).executeUpdate();		
-	}
+  private void deleteEvents(HProcessInstance[] instances) {
+    getSession().getNamedQuery(HLargeData.DELETE_EVENT_LDATA_BY_INSTANCES).setParameterList("instances", instances).executeUpdate();
+    getSession().getNamedQuery(HBpelEvent.DELETE_EVENTS_BY_INSTANCES).setParameterList("instances", instances).executeUpdate();		
+  }
 
   public void insertBpelEvent(ProcessInstanceEvent event) {
       entering("ProcessInstanceDaoImpl.insertBpelEvent");
@@ -423,13 +430,13 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
   }
 
   public Collection<MessageExchangeDAO> getMessageExchanges() {
-	  Collection<MessageExchangeDAO> exchanges = new ArrayList<MessageExchangeDAO>();
-	  
-	  for( HMessageExchange exchange : _instance.getMessageExchanges() ) {
-		  exchanges.add(new MessageExchangeDaoImpl(_sm, exchange));
-	  }
-	  
-	  return exchanges;
+    Collection<MessageExchangeDAO> exchanges = new ArrayList<MessageExchangeDAO>();
+  
+    for( HMessageExchange exchange : _instance.getMessageExchanges() ) {
+      exchanges.add(new MessageExchangeDaoImpl(_sm, exchange));
+    }
+
+    return exchanges;
   }
   
   public long genMonotonic() {

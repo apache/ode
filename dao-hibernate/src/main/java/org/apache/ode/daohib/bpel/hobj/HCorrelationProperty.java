@@ -26,83 +26,81 @@ import javax.xml.namespace.QName;
  * Hibernate table-mapped class representing one valued property in
  * a correlation set.
  * @hibernate.class table="BPEL_CORRELATION_PROP"
- * @hibernate.query name="DELETE_CORPROPS_BY_PROCESS" query="delete from HCorrelationProperty as p where p.correlationSet in(select s from HCorrelationSet as s where s.process = :process)"
- * @hibernate.query name="DELETE_CORPROPS_BY_INSTANCE" query="delete from HCorrelationProperty as p where p.correlationSet in(select s from HCorrelationSet as s where s.instance = :instance)"
+ * @hibernate.query name="DELETE_CORPROPS_BY_INSTANCES" query="delete from HCorrelationProperty as p where p.correlationSet in(select s from HCorrelationSet as s where s.instance in (:instances))"
  */
 public class HCorrelationProperty extends HObject {
-	public final static String DELETE_CORPROPS_BY_PROCESS = "DELETE_CORPROPS_BY_PROCESS";
-	public final static String DELETE_CORPROPS_BY_INSTANCE = "DELETE_CORPROPS_BY_INSTANCE";
-	
-  private String _name;
-  private String _namespace;
-  private String _value;
-  private HCorrelationSet _correlationSet;
+    public final static String DELETE_CORPROPS_BY_INSTANCES = "DELETE_CORPROPS_BY_INSTANCES";
 
-  public HCorrelationProperty() {
-    super();
-  }
+    private String _name;
+    private String _namespace;
+    private String _value;
+    private HCorrelationSet _correlationSet;
 
-  public HCorrelationProperty(String name, String namespace, String value, HCorrelationSet correlationSet) {
-    super();
-    _name = name;
-    _namespace = namespace;
-    _value = value;
-    _correlationSet = correlationSet;
-  }
+    public HCorrelationProperty() {
+        super();
+    }
 
-  public HCorrelationProperty(QName qname, String value, HCorrelationSet correlationSet) {
-    super();
-    _name = qname.getLocalPart();
-    _namespace = qname.getNamespaceURI();
-    _value = value;
-    _correlationSet = correlationSet;
-  }
+    public HCorrelationProperty(String name, String namespace, String value, HCorrelationSet correlationSet) {
+        super();
+        _name = name;
+        _namespace = namespace;
+        _value = value;
+        _correlationSet = correlationSet;
+    }
 
-  /**
-   * @hibernate.property column="NAME"
-   */
-  public String getName() {
-    return _name;
-  }
+    public HCorrelationProperty(QName qname, String value, HCorrelationSet correlationSet) {
+        super();
+        _name = qname.getLocalPart();
+        _namespace = qname.getNamespaceURI();
+        _value = value;
+        _correlationSet = correlationSet;
+    }
 
-  public void setName(String name) {
-    _name = name;
-  }
+    /**
+     * @hibernate.property column="NAME"
+     */
+    public String getName() {
+        return _name;
+    }
 
-  /**
-   * @hibernate.property column="NAMESPACE"
-   */
-  public String getNamespace() {
-    return _namespace;
-  }
+    public void setName(String name) {
+        _name = name;
+    }
 
-  public void setNamespace(String namespace) {
-    _namespace = namespace;
-  }
+    /**
+     * @hibernate.property column="NAMESPACE"
+     */
+    public String getNamespace() {
+        return _namespace;
+    }
 
-  /**
-   * @hibernate.property column="VALUE"
-   */
-  public String getValue() {
-    return _value;
-  }
+    public void setNamespace(String namespace) {
+        _namespace = namespace;
+    }
 
-  public void setValue(String value) {
-    _value = value;
-  }
+    /**
+     * @hibernate.property column="VALUE"
+     */
+    public String getValue() {
+        return _value;
+    }
 
-  /**
-   * @hibernate.many-to-one column="CORR_SET_ID" foreign-key="none"
-   */
-  public HCorrelationSet getCorrelationSet() {
-    return _correlationSet;
-  }
+    public void setValue(String value) {
+        _value = value;
+    }
 
-  public void setCorrelationSet(HCorrelationSet correlationSet) {
-    _correlationSet = correlationSet;
-  }
+    /**
+     * @hibernate.many-to-one column="CORR_SET_ID" foreign-key="none"
+     */
+    public HCorrelationSet getCorrelationSet() {
+        return _correlationSet;
+    }
 
-  public QName getQName() {
-    return new QName(getNamespace(), getName());
-  }
+    public void setCorrelationSet(HCorrelationSet correlationSet) {
+        _correlationSet = correlationSet;
+    }
+
+    public QName getQName() {
+        return new QName(getNamespace(), getName());
+    }
 }

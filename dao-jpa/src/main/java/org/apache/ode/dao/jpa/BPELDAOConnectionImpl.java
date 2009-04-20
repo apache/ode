@@ -19,6 +19,7 @@
 
 package org.apache.ode.dao.jpa;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -56,7 +57,6 @@ import org.apache.openjpa.persistence.OpenJPAQuery;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class BPELDAOConnectionImpl implements BpelDAOConnection {
-
     static final Log __log = LogFactory.getLog(BPELDAOConnectionImpl.class);
 
     protected EntityManager _em;
@@ -95,6 +95,13 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
     public ProcessDAO createProcess(QName pid, QName type, String guid, long version) {
         ProcessDAOImpl ret = new ProcessDAOImpl(pid,type,guid,version);
         _em.persist(ret);
+        return ret;
+    }
+    
+    public ProcessDAO createTransientProcess(Serializable id) {
+        ProcessDAOImpl ret = new ProcessDAOImpl(null, null, null, 0);
+        ret.setId((Long)id);
+        
         return ret;
     }
 
@@ -345,10 +352,10 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         return map;
     }
 
+    @SuppressWarnings("unchecked")
     public Collection<CorrelationSetDAO> getActiveCorrelationSets() {
         return _em.createNamedQuery(CorrelationSetDAOImpl.SELECT_ACTIVE_SETS).setParameter("state", ProcessState.STATE_ACTIVE).getResultList();
     }
-
 
     public ProcessManagementDAO getProcessManagement() {
         return new ProcessManagementDAOImpl(_em);

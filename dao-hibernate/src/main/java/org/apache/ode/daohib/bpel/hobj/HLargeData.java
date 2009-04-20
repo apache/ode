@@ -24,73 +24,62 @@ package org.apache.ode.daohib.bpel.hobj;
  * instance needs to store as part of its state large binary or text
  * data, a reference to an instance of this class must be created.
  * @hibernate.class table="LARGE_DATA"
- * @hibernate.query name="DELETE_EVENT_LDATA_BY_PROCESS" query="delete from HLargeData as d where d in(select e.data from HBpelEvent as e where e.process = :process)"
- * @hibernate.query name="DELETE_XMLDATA_LDATA_BY_PROCESS" query="delete from HLargeData as d where d in(select x.data from HXmlData as x where x.instance.process = :process)"
- * @hibernate.query name="DELETE_ACTIVITY_RECOVERY_LDATA_BY_PROCESS" query="delete from HLargeData as d where d in(select a.details from HActivityRecovery as a where a.instance.process = :process)"
- * @hibernate.query name="DELETE_FAULT_LDATA_BY_PROCESS" query="delete from HLargeData as d where d in(select f.data from HFaultData as f, HProcessInstance as i where f.id = i.fault and i.process = :process)"
- * @hibernate.query name="DELETE_JACOB_LDATA_BY_PROCESS" query="delete from HLargeData as d where d in(select i.jacobState from HProcessInstance as i where i.process = :process)"
- * @hibernate.query name="DELETE_PARTNER_LINK_LDATA_BY_PROCESS" query="delete from HLargeData as d where d in(select l.myEPR from HPartnerLink as l where l.scope.instance.process = :process) or d IN(select l.partnerEPR from HPartnerLink as l where l.scope.instance.process = :process2)"
- * @hibernate.query name="DELETE_MESSAGE_LDATA_BY_PROCESS" query="delete from HLargeData as d where d in(select m.messageData from HMessage m where m.messageExchange.process = :process) or d IN(select m.header from HMessage m where m.messageExchange.process = :process2)"
- * @hibernate.query name="DELETE_MEX_LDATA_BY_PROCESS" query="delete from HLargeData as d where d in(select e.endpoint from HMessageExchange as e where e.process = :process) or d IN(select e.callbackEndpoint from HMessageExchange as e where e.process = :process2)"
- * 
- * @hibernate.query name="DELETE_EVENT_LDATA_BY_INSTANCE" query="delete from HLargeData as d where d in(select e.data from HBpelEvent as e where e.instance = :instance)"
- * @hibernate.query name="DELETE_MESSAGE_LDATA_BY_MEX" query="delete from HLargeData as d where d in(select m.messageData from HMessage m where m.messageExchange = :mex) or d IN(select m.header from HMessage m where m.messageExchange = :mex2)"
- * @hibernate.query name="DELETE_UNMATCHED_MESSAGE_LDATA_BY_INSTANCE" query="delete from HLargeData as d where d in(select m.messageData from HMessage m, HCorrelatorMessage cm where m.messageExchange = cm.messageExchange and m.messageExchange.instance = :instance) or d IN(select m.header from HMessage m, HCorrelatorMessage cm where m.messageExchange = cm.messageExchange and m.messageExchange.instance = :instance2)"
- * @hibernate.query name="DELETE_XMLDATA_LDATA_BY_INSTANCE" query="delete from HLargeData as d where d in(select x.data from HXmlData as x where x.instance = :instance)"
- * @hibernate.query name="DELETE_PARTNER_LINK_LDATA_BY_INSTANCE" query="delete from HLargeData as d where d in(select l.myEPR from HPartnerLink as l where l.scope.instance = :instance) or d IN(select l.partnerEPR from HPartnerLink as l where l.scope.instance = :instance2)"
- * @hibernate.query name="DELETE_FAULT_LDATA_BY_INSTANCE_ID" query="delete from HLargeData as d where d in(select f.data from HFaultData as f, HProcessInstance as i where f.id = i.fault and i.id = :instanceId)"
+ * @hibernate.query name="DELETE_ACTIVITY_RECOVERY_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select a.details from HActivityRecovery as a where a.instance in (:instances))"
+ * @hibernate.query name="DELETE_JACOB_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select i.jacobState from HProcessInstance as i where i in (:instances))"
+ * @hibernate.query name="DELETE_MESSAGE_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select m.messageData from HMessage m where m.messageExchange.instance in (:instances)) or d IN(select m.header from HMessage m where m.messageExchange.instance in (:instances))"
+ * @hibernate.query name="DELETE_MEX_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select e.endpoint from HMessageExchange as e where e.instance in (:instances)) or d IN(select e.callbackEndpoint from HMessageExchange as e where e.instance in (:instances))"
+ *
+ * @hibernate.query name="DELETE_EVENT_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select e.data from HBpelEvent as e where e.instance in (:instances))"
+ * @hibernate.query name="DELETE_UNMATCHED_MESSAGE_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select m.messageData from HMessage m, HCorrelatorMessage cm where m.messageExchange = cm.messageExchange and m.messageExchange.instance in (:instances)) or d in(select m.header from HMessage m, HCorrelatorMessage cm where m.messageExchange = cm.messageExchange and m.messageExchange.instance in (:instances))"
+ * @hibernate.query name="DELETE_XMLDATA_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select x.data from HXmlData as x where x.instance in (:instances))"
+ * @hibernate.query name="DELETE_PARTNER_LINK_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select l.myEPR from HPartnerLink as l where l.scope.instance in (:instances)) or d IN(select l.partnerEPR from HPartnerLink as l where l.scope.instance in (:instances))"
+ * @hibernate.query name="DELETE_FAULT_LDATA_BY_INSTANCE_IDS" query="delete from HLargeData as d where d in(select f.data from HFaultData as f, HProcessInstance as i where f.id = i.fault and i.id in (:instanceIds))"
+
+ * @hibernate.query name="DELETE_MESSAGE_LDATA_BY_MEX" query="delete from HLargeData as d where d in(select m.messageData from HMessage m where m.messageExchange = :mex) or d in(select m.header from HMessage m where m.messageExchange = :mex)"
  */
 public class HLargeData extends HObject {
-	public final static String DELETE_EVENT_LDATA_BY_PROCESS = "DELETE_EVENT_LDATA_BY_PROCESS";
-	public final static String DELETE_XMLDATA_LDATA_BY_PROCESS = "DELETE_XMLDATA_LDATA_BY_PROCESS";
-	public final static String DELETE_ACTIVITY_RECOVERY_LDATA_BY_PROCESS = "DELETE_ACTIVITY_RECOVERY_LDATA_BY_PROCESS";
-	public final static String DELETE_FAULT_LDATA_BY_PROCESS = "DELETE_FAULT_LDATA_BY_PROCESS";
-	public final static String DELETE_JACOB_LDATA_BY_PROCESS = "DELETE_JACOB_LDATA_BY_PROCESS";
-	public final static String DELETE_PARTNER_LINK_LDATA_BY_PROCESS = "DELETE_PARTNER_LINK_LDATA_BY_PROCESS";
-	public final static String DELETE_MESSAGE_LDATA_BY_PROCESS = "DELETE_MESSAGE_LDATA_BY_PROCESS";
-	public final static String DELETE_MEX_LDATA_BY_PROCESS = "DELETE_MEX_LDATA_BY_PROCESS";
+    public final static String DELETE_ACTIVITY_RECOVERY_LDATA_BY_INSTANCES = "DELETE_ACTIVITY_RECOVERY_LDATA_BY_INSTANCES";
+    public final static String DELETE_JACOB_LDATA_BY_INSTANCES = "DELETE_JACOB_LDATA_BY_INSTANCES";
+    public final static String DELETE_MESSAGE_LDATA_BY_INSTANCES = "DELETE_MESSAGE_LDATA_BY_INSTANCES";
+    public final static String DELETE_MEX_LDATA_BY_INSTANCES = "DELETE_MEX_LDATA_BY_INSTANCES";
 
-	public final static String DELETE_EVENT_LDATA_BY_INSTANCE = "DELETE_EVENT_LDATA_BY_INSTANCE";
-	public final static String DELETE_MESSAGE_LDATA_BY_MEX = "DELETE_MESSAGE_LDATA_BY_MEX";
-	public final static String DELETE_UNMATCHED_MESSAGE_LDATA_BY_INSTANCE = "DELETE_UNMATCHED_MESSAGE_LDATA_BY_INSTANCE";
-	public final static String DELETE_XMLDATA_LDATA_BY_INSTANCE = "DELETE_XMLDATA_LDATA_BY_INSTANCE";
-	public final static String DELETE_PARTNER_LINK_LDATA_BY_INSTANCE = "DELETE_PARTNER_LINK_LDATA_BY_INSTANCE";
-	public final static String DELETE_FAULT_LDATA_BY_INSTANCE_ID = "DELETE_FAULT_LDATA_BY_INSTANCE_ID";
+    public final static String DELETE_EVENT_LDATA_BY_INSTANCES = "DELETE_EVENT_LDATA_BY_INSTANCES";
+    public final static String DELETE_MESSAGE_LDATA_BY_MEX = "DELETE_MESSAGE_LDATA_BY_MEX";
+    public final static String DELETE_UNMATCHED_MESSAGE_LDATA_BY_INSTANCES = "DELETE_UNMATCHED_MESSAGE_LDATA_BY_INSTANCES";
+    public final static String DELETE_XMLDATA_LDATA_BY_INSTANCES = "DELETE_XMLDATA_LDATA_BY_INSTANCES";
+    public final static String DELETE_PARTNER_LINK_LDATA_BY_INSTANCES = "DELETE_PARTNER_LINK_LDATA_BY_INSTANCES";
+    public final static String DELETE_FAULT_LDATA_BY_INSTANCE_IDS = "DELETE_FAULT_LDATA_BY_INSTANCE_IDS";
 	
-  private byte[] binary = null;
+    private byte[] binary = null;
 
-  public HLargeData() {
-    super();
-  }
+    public HLargeData() {
+        super();
+    }
 
-  public HLargeData(byte[] binary) {
-    super();
-    this.binary = binary;
-  }
+    public HLargeData(byte[] binary) {
+        super();
+        this.binary = binary;
+    }
 
-  public HLargeData(String text) {
-    super();
-    this.binary = text.getBytes();
-  }
+    public HLargeData(String text) {
+        super();
+        this.binary = text.getBytes();
+    }
 
-  /**
-   * @hibernate.property
-   *    type="binary"
-   *     length="2G"
-   *
-   * @hibernate.column
-   *    name="BIN_DATA"
-   *    sql-type="blob(2G)"
-   */
-  public byte[] getBinary() {
-    return binary;
-  }
-                                  
-  public void setBinary(byte[] binary) {
-    this.binary = binary;
-  }
+    /**
+     * @hibernate.property type="binary" length="2G"
+     *
+     * @hibernate.column name="BIN_DATA" sql-type="blob(2G)"
+     */
+    public byte[] getBinary() {
+        return binary;
+    }
+                                                                    
+    public void setBinary(byte[] binary) {
+        this.binary = binary;
+    }
 
-  public String getText() {
-    return new String(binary);
-  }
+    public String getText() {
+        return new String(binary);
+    }
 }

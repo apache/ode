@@ -20,6 +20,7 @@ package org.apache.ode.daohib.bpel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -109,8 +110,14 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection {
         return new ProcessDaoImpl(_sm, process);
     }
 
-    public ProcessDAO getProcess(QName processId) {
+    public ProcessDAO createTransientProcess(Serializable id) {
+        HProcess process = new HProcess();
+        process.setId((Long)id);
 
+        return new ProcessDaoImpl(_sm, process);
+    }
+    
+    public ProcessDAO getProcess(QName processId) {
         try {
             Criteria criteria = getSession().createCriteria(HProcess.class);
             criteria.add(Expression.eq("processId", processId.toString()));
@@ -295,7 +302,7 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection {
     @SuppressWarnings("unchecked")
 	public Collection<CorrelationSetDAO> getActiveCorrelationSets() {
         ArrayList<CorrelationSetDAO> csetDaos = new ArrayList<CorrelationSetDAO>();
-        Collection<HCorrelationSet> csets = getSession().getNamedQuery(HCorrelationSet.SELECT_ACTIVE_CORSETS).setParameter("state", ProcessState.STATE_ACTIVE).list();
+        Collection<HCorrelationSet> csets = getSession().getNamedQuery(HCorrelationSet.SELECT_CORSETS_BY_PROCESS_STATES).setParameter("states", ProcessState.STATE_ACTIVE).list();
         for (HCorrelationSet cset : csets)
             csetDaos.add(new CorrelationSetDaoImpl(_sm, cset));
         return csetDaos;

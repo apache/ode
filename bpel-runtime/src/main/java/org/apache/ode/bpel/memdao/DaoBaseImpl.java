@@ -23,11 +23,11 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.Date;
 
-
 /**
  * Base-class for in-memory data-access objects.
  */
 class DaoBaseImpl {
+    @SuppressWarnings("unused")
     private static final Log __logger = LogFactory.getLog(DaoBaseImpl.class);
 
     Date _createTime = new Date();

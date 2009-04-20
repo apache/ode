@@ -103,6 +103,8 @@ public class ODEServer {
 
     protected ExecutorService _executorService;
 
+    protected ExecutorService _polledRunnableExecutorService;
+
     protected Scheduler _scheduler;
 
     protected Database _db;
@@ -322,7 +324,8 @@ public class ODEServer {
         }
     }
 
-    private void initTxMgr() throws ServletException {
+    @SuppressWarnings("unchecked")
+     private void initTxMgr() throws ServletException {
         String txFactoryName = _odeConfig.getTxFactoryClass();
         __log.debug("Initializing transaction manager using " + txFactoryName);
         try {
@@ -409,10 +412,26 @@ public class ODEServer {
             _executorService = Executors.newCachedThreadPool(threadFactory);
         else
             _executorService = Executors.newFixedThreadPool(_odeConfig.getThreadPoolMaxSize(), threadFactory);
+        
+        // executor service for long running bulk transactions
+        _polledRunnableExecutorService = Executors.newCachedThreadPool(new ThreadFactory() {
+            int threadNumber = 0;
+            public Thread newThread(Runnable r) {
+                threadNumber += 1;
+                Thread t = new Thread(r, "PolledRunnable-"+threadNumber);
+                t.setDaemon(true);
+                return t;
+            }
+        });
 
         _bpelServer = new BpelServerImpl();
         _scheduler = createScheduler();
         _scheduler.setJobProcessor(_bpelServer);
+        
+        BpelServerImpl.PolledRunnableProcessor polledRunnableProcessor = new BpelServerImpl.PolledRunnableProcessor();
+        polledRunnableProcessor.setPolledRunnableExecutorService(_polledRunnableExecutorService);
+        polledRunnableProcessor.setContexts(_bpelServer.getContexts());
+        _scheduler.setPolledRunnableProcesser(polledRunnableProcessor);
 
         _bpelServer.setDaoConnectionFactory(_daoCF);
         _bpelServer.setInMemDaoConnectionFactory(new BpelDAOConnectionFactoryImpl(_scheduler, _odeConfig.getInMemMexTtl()));
@@ -532,29 +551,29 @@ public class ODEServer {
                 _bpelServer.unregister(pse.pid);
                 pconf = _store.getProcessConfiguration(pse.pid);
                 if (pconf != null) {
-                	_bpelServer.register(pconf);
+                    _bpelServer.register(pconf);
                 } else {
-                	__log.debug("slighly odd: recevied event " + 
-                			pse + " for process not in store!");
+                    __log.debug("slighly odd: recevied event " + 
+                            pse + " for process not in store!");
                 }
                 break;
             case RETIRED:
-            	// are there are instances of this process running? 
-            	boolean instantiated = _bpelServer.hasActiveInstances(pse.pid);
-            	// remove the process
+                // are there are instances of this process running? 
+                boolean instantiated = _bpelServer.hasActiveInstances(pse.pid);
+                // remove the process
                 _bpelServer.unregister(pse.pid);
                 // bounce the process if necessary  
                 if (instantiated) {
-	                pconf = _store.getProcessConfiguration(pse.pid);
-	                if (pconf != null) {
-	                	_bpelServer.register(pconf);
-	                } else {
-	                	__log.debug("slighly odd: recevied event " + 
-	                			pse + " for process not in store!");
-	                }
+                    pconf = _store.getProcessConfiguration(pse.pid);
+                    if (pconf != null) {
+                        _bpelServer.register(pconf);
+                    } else {
+                        __log.debug("slighly odd: recevied event " + 
+                                pse + " for process not in store!");
+                    }
                 } else {
                     // we may have potentially created a lot of garbage, so,
-                	// let's hope the garbage collector is configured properly.
+                    // let's hope the garbage collector is configured properly.
                 }
                 break;
             case DISABLED:

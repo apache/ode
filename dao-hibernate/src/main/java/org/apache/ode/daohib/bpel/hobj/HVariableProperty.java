@@ -25,65 +25,65 @@ package org.apache.ode.daohib.bpel.hobj;
  * on indexed lookup of property values.
  * 
  * @hibernate.class table="VAR_PROPERTY"
- * @hibernate.query name="DELETE_VARIABLE_PROPERITES_BY_PROCESS" query="delete from HVariableProperty as p where p.xmlData in(select x.id from HXmlData x where x.instance.process = :process)"
- * @hibernate.query name="DELETE_VARIABLE_PROPERITES_BY_INSTANCE" query="delete from HVariableProperty as p where p.xmlData in(select x.id from HXmlData x where x.instance = :instance)"
+ * @hibernate.query name="DELETE_VARIABLE_PROPERITES_BY_INSTANCES" query="delete from HVariableProperty as p where p.xmlData in(select x.id from HXmlData x where x.instance in (:instances))"
  */
 public class HVariableProperty extends HObject{
-  public final static String DELETE_VARIABLE_PROPERITES_BY_PROCESS = "DELETE_VARIABLE_PROPERITES_BY_PROCESS";
-  public final static String DELETE_VARIABLE_PROPERITES_BY_INSTANCE = "DELETE_VARIABLE_PROPERITES_BY_INSTANCE";
-	
-  private String _propertyValue;
-  private String _propertyName;
-  private HXmlData _variable;
-  
-  /**
-   * 
-   */
-  public HVariableProperty() {
-    super();
-  }
-  
-  public HVariableProperty(HXmlData var, String name, String value){
-  	_variable = var;
-    _propertyName = name;
-    _propertyValue = value;
-  }
-  /**
-   * @hibernate.many-to-one
-   *  column="XML_DATA_ID" foreign-key="none"
-   */
-  public HXmlData getXmlData(){
-  	return _variable;
-  }
-  
-  public void setXmlData(HXmlData xmldata){
-  	_variable = xmldata;
-  }
-  
-  /**
-   * @hibernate.property
-   *  column="PROP_VALUE"
-   *  index="PROP_VALUE_IDX"
-   */
-  public String getValue() {
-    return _propertyValue;
-  }
-  public void setValue(String value) {
-    _propertyValue = value;
-  }
-  /**
-   * @hibernate.property
-   *  column="PROP_NAME"
-   *  type="string"
-   *  length="255"
-   *  not-null="true"
-   *  index="PROP_NAME_IDX"
-   */
-  public String getName() {
-    return _propertyName;
-  }
-  public void setName(String name) {
-    _propertyName = name;
-  }
-  
+    public final static String DELETE_VARIABLE_PROPERITES_BY_INSTANCES = "DELETE_VARIABLE_PROPERITES_BY_INSTANCES";
+
+    private String _propertyValue;
+    private String _propertyName;
+    private HXmlData _variable;
+    
+    /**
+     * Default constructor
+     */
+    public HVariableProperty() {
+        super();
+    }
+    
+    public HVariableProperty(HXmlData var, String name, String value){
+        _variable = var;
+        _propertyName = name;
+        _propertyValue = value;
+    }
+    
+    /**
+     * @hibernate.many-to-one
+     *    column="XML_DATA_ID" foreign-key="none"
+     */
+    public HXmlData getXmlData(){
+        return _variable;
+    }
+    
+    public void setXmlData(HXmlData xmldata){
+        _variable = xmldata;
+    }
+    
+    /**
+     * @hibernate.property
+     *    column="PROP_VALUE"
+     *    index="PROP_VALUE_IDX"
+     */
+    public String getValue() {
+        return _propertyValue;
+    }
+    
+    public void setValue(String value) {
+        _propertyValue = value;
+    }
+    /**
+     * @hibernate.property
+     *    column="PROP_NAME"
+     *    type="string"
+     *    length="255"
+     *    not-null="true"
+     *    index="PROP_NAME_IDX"
+     */
+    public String getName() {
+        return _propertyName;
+    }
+    
+    public void setName(String name) {
+        _propertyName = name;
+    }
 }

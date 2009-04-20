@@ -23,53 +23,53 @@ package org.apache.ode.daohib.bpel.hobj;
  *
  * @hibernate.class table="BPEL_MESSAGE"
  * @hibernate.query name="DELETE_MESSAGES_BY_MEX" query="delete from HMessage as m WHERE m.messageExchange = :messageExchange"
- * @hibernate.query name="DELETE_MESSAGES_BY_PROCESS" query="delete from HMessage as m WHERE m.messageExchange IN(select e from HMessageExchange e where e.process = :process)"
+ * @hibernate.query name="DELETE_MESSAGES_BY_INSTANCES" query="delete from HMessage as m WHERE m.messageExchange IN(select e from HMessageExchange e where e.instance in (:instances))"
  */
 public class HMessage extends HObject {
-	public final static String DELETE_MESSAGES_BY_MEX = "DELETE_MESSAGES_BY_MEX";
-	public final static String DELETE_MESSAGES_BY_PROCESS = "DELETE_MESSAGES_BY_PROCESS";
+    public final static String DELETE_MESSAGES_BY_MEX = "DELETE_MESSAGES_BY_MEX";
+    public final static String DELETE_MESSAGES_BY_INSTANCES = "DELETE_MESSAGES_BY_INSTANCES";
 
-  private HMessageExchange _mex;
-  private String _type;
-  private HLargeData _data;
-  private HLargeData _header;
-  
-  public void setMessageExchange(HMessageExchange mex) {
-    _mex = mex;
-  }
-  
-  /** @hibernate.many-to-one column="MEX" foreign-key="none"*/
-  public HMessageExchange getMessageExchange() {
-    return _mex;
-  }
+    private HMessageExchange _mex;
+    private String _type;
+    private HLargeData _data;
+    private HLargeData _header;
+    
+    public void setMessageExchange(HMessageExchange mex) {
+        _mex = mex;
+    }
+    
+    /** @hibernate.many-to-one column="MEX" foreign-key="none"*/
+    public HMessageExchange getMessageExchange() {
+        return _mex;
+    }
 
-  public void setType(String type) {
-    _type = type;
-  }
+    public void setType(String type) {
+        _type = type;
+    }
 
-  /** @hibernate.property column="TYPE" */
-  public String getType() {
-    return _type;
-  }
+    /** @hibernate.property column="TYPE" */
+    public String getType() {
+        return _type;
+    }
 
-  /**
-   * @hibernate.many-to-one column="DATA" lazy="false" outer-join="true" foreign-key="none"
-   * */
-  public HLargeData getMessageData() {
-    return _data;
-  }
+    /**
+     * @hibernate.many-to-one column="DATA" lazy="false" outer-join="true" foreign-key="none"
+     * */
+    public HLargeData getMessageData() {
+        return _data;
+    }
 
-  public void setMessageData(HLargeData data) {
-    _data = data;
-  }
+    public void setMessageData(HLargeData data) {
+        _data = data;
+    }
 
-  /** @hibernate.many-to-one column="HEADER"  lazy="false" outer-join="true" foreign-key="none" */
-  public HLargeData getHeader() {
-    return _header;
-  }
+    /** @hibernate.many-to-one column="HEADER"    lazy="false" outer-join="true" foreign-key="none" */
+    public HLargeData getHeader() {
+        return _header;
+    }
 
-  public void setHeader(HLargeData header) {
-    _header = header;
-  }
+    public void setHeader(HLargeData header) {
+        _header = header;
+    }
 
 }

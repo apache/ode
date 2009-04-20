@@ -21,15 +21,13 @@ package org.apache.ode.daohib.bpel.hobj;
 
 /**
  * @hibernate.class table="BPEL_UNMATCHED" lazy="true"
- * @hibernate.query name="DELETE_CORMESSAGES_BY_PROCESS" query="delete from HCorrelatorMessage as m where m.correlator in(select c from HCorrelator as c where c.process = :process)"
- * @hibernate.query name="DELETE_CORMESSAGES_BY_INSTANCE" query="delete from HCorrelatorMessage as m where m.messageExchange in(select mex from HMessageExchange as mex where mex.instance = :instance)"
+ * @hibernate.query name="DELETE_CORMESSAGES_BY_INSTANCES" query="delete from HCorrelatorMessage as m where m.messageExchange in(select mex from HMessageExchange as mex where mex.instance in (:instances))"
  * @hibernate.query name="DELETE_CORMESSAGES_BY_MEX" query="delete from HCorrelatorMessage as m where m.messageExchange = :mex"
  */
 public class HCorrelatorMessage extends HObject {
-	public final static String DELETE_CORMESSAGES_BY_PROCESS = "DELETE_CORMESSAGES_BY_PROCESS";
-	public final static String DELETE_CORMESSAGES_BY_MEX = "DELETE_CORMESSAGES_BY_MEX";
-	public final static String DELETE_CORMESSAGES_BY_INSTANCE = "DELETE_CORMESSAGES_BY_INSTANCE";
-	
+    public final static String DELETE_CORMESSAGES_BY_MEX = "DELETE_CORMESSAGES_BY_MEX";
+    public final static String DELETE_CORMESSAGES_BY_INSTANCES = "DELETE_CORMESSAGES_BY_INSTANCES";
+
     private HMessageExchange _messageExchange;
     private HCorrelator _correlator;
     private String _correlationKey;

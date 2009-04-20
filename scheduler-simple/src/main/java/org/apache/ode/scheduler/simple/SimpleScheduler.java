@@ -96,6 +96,8 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     /** The object that actually handles the jobs. */
     volatile JobProcessor _jobProcessor;
 
+    volatile JobProcessor _polledRunnableProcessor;
+    
     private SchedulerThread _todo;
 
     private DatabaseDelegate _db;
@@ -168,6 +170,10 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         _exec = executorService;
     }
 
+    public void setPolledRunnableProcesser(JobProcessor polledRunnableProcessor) {
+        _polledRunnableProcessor = polledRunnableProcessor;
+    }
+
     public void cancelJob(String jobId) throws ContextException {
         _todo.dequeue(new Job(0, jobId, false, null));
         try {
@@ -200,6 +206,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
             String errmsg = "Internal Error, could not begin transaction.";
             throw new ContextException(errmsg, ex);
         }
+        
         boolean success = false;
         try {
             T retval = transaction.call();
@@ -209,10 +216,10 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
             throw ex;
         } finally {
             if (success) {
-                if (__log.isDebugEnabled()) __log.debug("Commiting...");
+                if (__log.isDebugEnabled()) __log.debug("Commiting on " + _txm + "...");
                 _txm.commit();
             } else {
-                if (__log.isDebugEnabled()) __log.debug("Rollbacking...");
+                if (__log.isDebugEnabled()) __log.debug("Rollbacking on " + _txm + "...");
                 _txm.rollback();
             }
         }
@@ -248,11 +255,27 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         if (__log.isDebugEnabled())
             __log.debug("scheduling " + jobDetail + " for " + when);
 
+        return schedulePersistedJob(new Job(when.getTime(), true, jobDetail), when, ctime);
+    }
+
+    public String scheduleMapSerializableRunnable(MapSerializableRunnable runnable, Date when) throws ContextException {
+        long ctime = System.currentTimeMillis();
+        if (when == null)
+            when = new Date(ctime);
+
+        Map<String, Object> jobDetails = new HashMap<String, Object>();
+        jobDetails.put("runnable", runnable);
+        runnable.storeToDetailsMap(jobDetails);
+        
+        if (__log.isDebugEnabled())
+            __log.debug("scheduling " + jobDetails + " for " + when);
+
+        return schedulePersistedJob(new Job(when.getTime(), true, jobDetails), when, ctime);
+    }
+
+    private String schedulePersistedJob(Job job, Date when, long ctime) throws ContextException {
         boolean immediate = when.getTime() <= ctime + _immediateInterval;
         boolean nearfuture = !immediate && when.getTime() <= ctime + _nearFutureInterval;
-
-        Job job = new Job(when.getTime(), true, jobDetail);
-
         try {
             if (immediate) {
                 // Immediate scheduling means we put it in the DB for safe keeping
@@ -362,8 +385,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     /**
      * Run a job in the current thread.
      *
-     * @param job
-     *            job to run.
+     * @param job job to run.
      */
     protected void runJob(final Job job) {
         final Scheduler.JobInfo jobInfo = new Scheduler.JobInfo(job.jobId, job.detail,
@@ -414,9 +436,79 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         });
     }
 
+    /**
+     * Run a job from a polled runnable thread. The runnable is not persistent,
+     * however, the poller is persistent and wakes up every given interval to
+     * check the status of the runnable.
+     * <ul>
+     * <li>1. The runnable is being scheduled; the poller persistent job dispatches
+     * the runnable to a runnable delegate thread and schedules itself to a later time.</li>
+     * <li>2. The runnable is running; the poller job re-schedules itself every time it
+     * sees the runnable is not completed.</li>
+     * <li>3. The runnable failed; the poller job passes the exception thrown on the runnable
+     * down, and the standard scheduler retries happen.</li>
+     * <li>4. The runnable completes; the poller persistent does not re-schedule itself.</li>
+     * <li>5. System powered off and restarts; the poller job does not know what the status
+     * of the runnable. This is handled just like the case #1.</li>
+     * </ul>
+     * 
+     * There is at least one re-scheduling of the poller job. Since, the runnable's state is
+     * not persisted, and the same runnable may be tried again after system failure,
+     * the runnable that's used with this polling should be repeatable.
+     *
+     * @param job job to run.
+     */
+    protected void runPolledRunnable(final Job job) {
+        final Scheduler.JobInfo jobInfo = new Scheduler.JobInfo(job.jobId, job.detail,
+                (Integer)(job.detail.get("retry") != null ? job.detail.get("retry") : 0));
+
+        _exec.submit(new Callable<Void>() {
+            public Void call() throws Exception {
+                try {
+                    execTransaction(new Callable<Void>() {
+                        public Void call() throws Exception {
+                            if (!_db.deleteJob(job.jobId, _nodeId))
+                                throw new JobNoLongerInDbException(job.jobId,_nodeId);
+                            
+                            try {
+                                _polledRunnableProcessor.onScheduledJob(jobInfo);
+                                if( !"COMPLETED".equals(String.valueOf(jobInfo.jobDetail.get("runnable_status"))) ) {
+                                    // the runnable is still in progress, schedule checker to 10 mins later
+                                    job.schedDate = System.currentTimeMillis() + 10 * 60 * 1000;
+                                    _db.insertJob(job, _nodeId, false);
+                                }
+                            } catch (JobProcessorException jpe) {
+                                if (jpe.retry) {
+                                    int retry = job.detail.get("retry") != null ? (((Integer)job.detail.get("retry")) + 1) : 0;
+                                    if (retry <= 10) {
+                                        long delay = doRetry(job);
+                                        __log.error("Error while processing transaction, retrying in " + delay + "s");
+                                    } else {
+                                        __log.error("Error while processing transaction after 10 retries, no more retries:"+job);
+                                    }
+                                } else {
+                                    __log.error("Error while processing transaction, no retry.", jpe);
+                                }
+                                // Let execTransaction know that shit happened.
+                                throw jpe;
+                            }
+                            return null;
+                        }
+                    });
+                } catch (JobNoLongerInDbException jde) {
+                    // This may happen if two node try to do the same job... we try to avoid
+                    // it the synchronization is a best-effort but not perfect.
+                    __log.debug("job no longer in db forced rollback.");
+                } catch (Exception ex) {
+                    __log.error("Error while executing transaction", ex);
+                }
+                return null;
+            }
+        });
+    }
+    
     private void addTodoOnCommit(final Job job) {
         registerSynchronizer(new Synchronizer() {
-
             public void afterCompletion(boolean success) {
                 if (success) {
                     _todo.enqueue(job);
@@ -425,7 +517,6 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
 
             public void beforeCompletion() {
             }
-
         });
     }
 
@@ -439,9 +530,14 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     }
 
     public void runTask(Task task) {
-        if (task instanceof Job)
-            runJob((Job) task);
-        if (task instanceof SchedulerTask)
+        if (task instanceof Job) {
+            Job job = (Job)task;
+            if( job.detail.get("runnable") != null ) {
+                runPolledRunnable(job);
+            } else {
+                runJob((Job) task);
+            }
+        } else if (task instanceof SchedulerTask)
             ((SchedulerTask) task).run();
     }
 
@@ -530,11 +626,9 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         __log.debug("recovering stale node " + nodeId);
         try {
             int numrows = execTransaction(new Callable<Integer>() {
-
                 public Integer call() throws Exception {
                     return _db.updateReassign(nodeId, _nodeId);
                 }
-
             });
 
             __log.debug("reassigned " + numrows + " jobs to self. ");
@@ -571,7 +665,6 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     }
 
     private class LoadImmediateTask extends SchedulerTask {
-
         LoadImmediateTask(long schedDate) {
             super(schedDate);
         }
@@ -596,7 +689,6 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
      *
      */
     private class UpgradeJobsTask extends SchedulerTask {
-
         UpgradeJobsTask(long schedDate) {
             super(schedDate);
         }
@@ -624,14 +716,12 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
                 __log.debug("UPGRADE completed, success = " + success + "; next time in " + (future - ctime) + "ms");
             }
         }
-
     }
 
     /**
      * Check if any of the nodes in our cluster are stale.
      */
     private class CheckStaleNodes extends SchedulerTask {
-
         CheckStaleNodes(long schedDate) {
             super(schedDate);
         }
@@ -648,9 +738,5 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
                 }
             }
         }
-
-
     }
-
-
 }

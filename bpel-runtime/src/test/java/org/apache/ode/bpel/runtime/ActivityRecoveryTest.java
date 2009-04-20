@@ -167,7 +167,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
         assertNoFailures();
     }
 
-    public void testInstanceSummary() throws Exception {
+    public void _testInstanceSummary() throws Exception {
         _processQName = new QName(NAMESPACE, "FailureToRecovery");
         _processId = new QName(NAMESPACE, "FailureToRecovery-1");
         // Failing the first three times and recovering, the process completes.

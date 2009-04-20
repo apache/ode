@@ -109,20 +109,20 @@ public abstract class BPELTestAbstract {
             _server.setDaoConnectionFactory(_cf);
             scheduler = new MockScheduler() {
                 @Override
-                public void begin() {
-                    super.begin();
+                public void beginTransaction() {
+                    super.beginTransaction();
                     em.getTransaction().begin();
                 }
 
                 @Override
-                public void commit() {
-                    super.commit();
+                public void commitTransaction() {
+                    super.commitTransaction();
                     em.getTransaction().commit();
                 }
 
                 @Override
-                public void rollback() {
-                    super.rollback();
+                public void rollbackTransaction() {
+                    super.rollbackTransaction();
                     em.getTransaction().rollback();
                 }
 
@@ -555,7 +555,7 @@ public abstract class BPELTestAbstract {
             } catch (Exception ex) {
             }
 
-            scheduler.begin();
+            scheduler.beginTransaction();
             try {
                 mex = _server.getEngine().createMessageExchange(new GUID().toString(), _invocation.target, _invocation.operation);
                 mexContext.clearCurrentResponse();
@@ -581,7 +581,7 @@ public abstract class BPELTestAbstract {
 
                 return;
             } finally {
-                scheduler.commit();
+                scheduler.commitTransaction();
             }
 
             if (isFailed())
@@ -606,7 +606,7 @@ public abstract class BPELTestAbstract {
                 return;
 
             if (_invocation.expectedResponsePattern != null) {
-                scheduler.begin();
+                scheduler.beginTransaction();
                 try {
                     Status finalstat = mex.getStatus();
                     if (_invocation.expectedFinalStatus != null && !_invocation.expectedFinalStatus.equals(finalstat))
@@ -630,7 +630,7 @@ public abstract class BPELTestAbstract {
                     if (!matcher.matches())
                         failure(_invocation, "Response does not match expected pattern", _invocation.expectedResponsePattern, responseStr);
                 } finally {
-                    scheduler.commit();
+                    scheduler.commitTransaction();
                 }
             }
         }

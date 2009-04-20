@@ -21,6 +21,7 @@ package org.apache.ode.il;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -44,7 +45,6 @@ import org.apache.ode.bpel.iapi.Scheduler;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class MockScheduler implements Scheduler {
-
     private static final Log __log = LogFactory.getLog(MockScheduler.class);
 
     private JobProcessor _processor;
@@ -75,6 +75,7 @@ public class MockScheduler implements Scheduler {
                 public void afterCompletion(boolean success) {
                     if (!success) return;
                     _timer.schedule(new TimerTask() {
+                        @SuppressWarnings("unchecked")
                         public void run() {
                             try {
                                 execIsolatedTransaction(new Callable() {
@@ -100,6 +101,7 @@ public class MockScheduler implements Scheduler {
 
     public String scheduleVolatileJob(final boolean transacted, final Map<String, Object> detail) throws ContextException {
         registerSynchronizer(new Synchronizer() {
+            @SuppressWarnings("unchecked")
             public void afterCompletion(boolean success) {
                 if (!success) return;
                 try {
@@ -124,19 +126,37 @@ public class MockScheduler implements Scheduler {
         return null;
     }
 
+    public String scheduleMapSerializableRunnable(final MapSerializableRunnable runnable, final Date when) throws ContextException {
+        if (when != null) {
+            registerSynchronizer(new Synchronizer() {
+                public void afterCompletion(boolean success) {
+                    if (!success) return;
+                    _timer.schedule(new TimerTask() {
+                        public void run() {
+                            runnable.run();
+                        }
+                    }, when);
+                }
+                public void beforeCompletion() { }
+            });
+            return null;
+        } else {
+            return scheduleVolatileJob(true, new HashMap<String, Object>());
+        }
+    }
+    
     public void cancelJob(String arg0) throws ContextException {
-
     }
 
     public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
-        begin();
+        beginTransaction();
         try {
             T retval = transaction.call();
-            commit();
+            commitTransaction();
             return retval;
         } catch (Throwable t) {
             __log.error("Caught an exception during transaction", t);
-            rollback();
+            rollbackTransaction();
             throw new ContextException("Error in tx", t);
         }
     }
@@ -194,7 +214,7 @@ public class MockScheduler implements Scheduler {
         }
     }
 
-    public void begin() {
+    public void beginTransaction() {
         if (_txm != null) {
             try {
                 _txm.begin();
@@ -208,7 +228,7 @@ public class MockScheduler implements Scheduler {
         _transacted.set(Boolean.TRUE);
     }
 
-    public void commit() {
+    public void commitTransaction() {
         if (_txm != null) {
             try {
                 _txm.commit();
@@ -233,7 +253,7 @@ public class MockScheduler implements Scheduler {
         _transacted.set(Boolean.FALSE);
     }
 
-    public void rollback() {
+    public void rollbackTransaction() {
         if (_txm != null) {
             try {
                 _txm.rollback();
@@ -274,5 +294,8 @@ public class MockScheduler implements Scheduler {
 
     public void setExecutorSvc(ExecutorService executorSvc) {
         _executorSvc = executorSvc;
+    }
+
+    public void setPolledRunnableProcesser(JobProcessor delegatedRunnableProcessor) {
     }
 }

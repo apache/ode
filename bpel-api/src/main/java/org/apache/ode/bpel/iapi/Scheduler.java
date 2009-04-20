@@ -30,9 +30,10 @@ import java.util.concurrent.Future;
  * The BPEL scheduler.
  */
 public interface Scheduler {
-
     void setJobProcessor(JobProcessor processor) throws ContextException;
-
+    
+    void setPolledRunnableProcesser(JobProcessor polledRunnableProcessor);
+    
     /**
      * Schedule a persisted job. Persisted jobs MUST survive system failure.
      * They also must not be scheduled unless the transaction associated with
@@ -44,6 +45,15 @@ public interface Scheduler {
     String schedulePersistedJob(Map<String,Object>jobDetail,Date when)
             throws ContextException ;
 
+
+    /**
+     * Schedule a Runnable that will be executed on a dedicated thread pool.
+     * @param runnable
+     * @param when
+     * @return
+     * @throws ContextException
+     */
+    String scheduleMapSerializableRunnable(MapSerializableRunnable runnable, Date when) throws ContextException;
 
     /**
      * Schedule a volatile (non-persisted) job. Volatile jobs should not be
@@ -118,7 +128,6 @@ public interface Scheduler {
          * Called before the transaction is completed.
          */
         void beforeCompletion();
-
     }
 
     /**
@@ -126,6 +135,11 @@ public interface Scheduler {
      * @author mszefler
      */
     public interface JobProcessor {
+         /**
+          * Implements execution of the job.
+          * @param jobInfo the job information
+          * @throws JobProcessorException
+          */
         void onScheduledJob(JobInfo jobInfo) throws JobProcessorException;
     }
 
@@ -170,5 +184,8 @@ public interface Scheduler {
         }
     }
 
-
+    public interface MapSerializableRunnable extends Runnable, Serializable {
+        void storeToDetailsMap(Map<String, Object> details);
+        void restoreFromDetailsMap(Map<String, Object> details);
+    }
 }

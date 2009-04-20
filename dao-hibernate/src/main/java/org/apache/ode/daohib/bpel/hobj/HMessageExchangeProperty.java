@@ -25,72 +25,72 @@ import java.io.Serializable;
  * is excluded from schema export.
  * 
  * @hibernate.class table="BPEL_MEX_PROPS" lazy="true"
- * @hibernate.query name="DELETE_MEX_PROPS_BY_PROCESS" query="delete from HMessageExchangeProperty as p where p.mex in(select e from HMessageExchange e where e.process = :process)"
+ * @hibernate.query name="DELETE_MEX_PROPS_BY_INSTANCES" query="delete from HMessageExchangeProperty as p where p.mex in(select e from HMessageExchange e where e.instance in (:instances))"
  */
 @SuppressWarnings("serial")
 public class HMessageExchangeProperty implements Serializable {
-	public final static String DELETE_MEX_PROPS_BY_PROCESS = "DELETE_MEX_PROPS_BY_PROCESS";
+    public final static String DELETE_MEX_PROPS_BY_INSTANCES = "DELETE_MEX_PROPS_BY_INSTANCES";
 
-	private HMessageExchange _mex;
-	private String _name;
-	private String _value;
+    private HMessageExchange _mex;
+    private String _name;
+    private String _value;
 
-	public HMessageExchangeProperty() {
-	}
+    public HMessageExchangeProperty() {
+    }
 
-	/**
-	 * @hibernate.id
-	 * @return
-	 */
-	public HMessageExchangeProperty getKey() {
-		return null;
-	}
+    /**
+     * @hibernate.id
+     * @return
+     */
+    public HMessageExchangeProperty getKey() {
+        return null;
+    }
 
-	public void setKey(HMessageExchangeProperty property) {
-	}
-	
+    public void setKey(HMessageExchangeProperty property) {
+    }
+    
     /**
      * @hibernate.many-to-one column="MEX" insert="false" update="false"
      */
-	public HMessageExchange getMex() {
-		return _mex;
-	}
+    public HMessageExchange getMex() {
+        return _mex;
+    }
 
-	public void setMex(HMessageExchange mex) {
-		_mex = mex;
-	}
+    public void setMex(HMessageExchange mex) {
+        _mex = mex;
+    }
 
-	/**
-	 * @hibernate.property column="NAME" type="string" length="8000" insert="false" update="false"
-	 */
-	public String getName() {
-		return _name;
-	}
-	
-	public void setName(String name) {
-		_name = name;
-	}
+    /**
+     * @hibernate.property column="NAME" type="string" length="8000" insert="false" update="false"
+     */
+    public String getName() {
+        return _name;
+    }
+    
+    public void setName(String name) {
+        _name = name;
+    }
 
-	/**
-	 * @hibernate.property column="VALUE" type="string"  insert="false" update="false"
-	 */
-	public String getValue() {
-		return _value;
-	}
+    /**
+     * @hibernate.property column="VALUE" type="string"  insert="false" update="false"
+     */
+    public String getValue() {
+        return _value;
+    }
 
-	public void setValue(String value) {
-		_value = value;
-	}
+    public void setValue(String value) {
+        _value = value;
+    }
 
-	public boolean equals(Object another) {
-		// fake implementation to suppress hibernate warning on key not hash-searchable; 
-		// actually HMessageExchangePropery is never retrieved by the id 
-		return super.equals(another);
-	}
-	
-	public int hashCode() {
-		// fake implementation to suppress hibernate warning on key not hash-searchable
-		// actually HMessageExchangePropery is never retrieved by the id 
-		return _mex.hashCode() * 29 + _name.hashCode() * 13;
-	}
+    public boolean equals(Object another) {
+        // fake implementation to suppress hibernate warning on key not hash-searchable; 
+        // actually HMessageExchangePropery is never retrieved by the id 
+        return super.equals(another);
+    }
+    
+    public int hashCode() {
+        // fake implementation to suppress hibernate warning on key not hash-searchable
+        // actually HMessageExchangePropery is never retrieved by the id 
+        return _mex.hashCode() * 29 + _name.hashCode() * 13;
+    }
 }

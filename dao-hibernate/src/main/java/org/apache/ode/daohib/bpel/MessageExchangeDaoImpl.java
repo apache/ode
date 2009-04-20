@@ -362,7 +362,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements
 	}
 	
 	public void deleteMessages() {
-  		getSession().getNamedQuery(HLargeData.DELETE_MESSAGE_LDATA_BY_MEX).setParameter("mex", _hself).setParameter("mex2", _hself).executeUpdate();
+  		getSession().getNamedQuery(HLargeData.DELETE_MESSAGE_LDATA_BY_MEX).setParameter("mex", _hself).executeUpdate();
   		getSession().getNamedQuery(HCorrelatorMessage.DELETE_CORMESSAGES_BY_MEX).setParameter("mex", _hself).executeUpdate();
   		
 		getSession().delete(_hself);

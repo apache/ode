@@ -37,6 +37,8 @@ import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.UnaryFunction;
 
 import javax.xml.namespace.QName;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -76,6 +78,12 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         return _store.get(processId);
     }
 
+    public ProcessDAO createTransientProcess(Serializable id) {
+        ProcessDaoImpl process = new ProcessDaoImpl(this, _store, null, null, (String)id, 0);
+
+        return process;
+    }
+    
     public ProcessDAO createProcess(QName pid, QName type, String guid, long version) {
         ProcessDaoImpl process = new ProcessDaoImpl(this,_store,pid,type, guid,version);
         _store.put(pid,process);

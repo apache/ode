@@ -32,6 +32,7 @@ import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.Scheduler.MapSerializableRunnable;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
 import org.apache.ode.il.EmbeddedGeronimoFactory;
@@ -74,7 +75,8 @@ class MockBpelServer {
     EndpointReferenceContext  _eprContext;
     MessageExchangeContext    _mexContext;
     BindingContext            _bindContext;
-    HashMap<String, QName>    _activated = new HashMap();
+    HashMap<String, QName>    _activated = new HashMap<String, QName>();
+    @SuppressWarnings("unchecked")
     HashMap                   _endpoints = new HashMap();
 
     public MockBpelServer() {
@@ -212,6 +214,7 @@ class MockBpelServer {
             }
             public EndpointReference convertEndpoint(QName qName, Element element) { return null; }
 
+            @SuppressWarnings("unchecked")
             public Map getConfigLookup(EndpointReference epr) {
                 return Collections.EMPTY_MAP;
             }
@@ -245,6 +248,7 @@ class MockBpelServer {
                 _activated.remove(myRoleEndpoint);
             }
 
+            @SuppressWarnings("unchecked")
             public PartnerRoleChannel createPartnerRoleChannel(QName processId, PortType portType,
                                                                final Endpoint initialPartnerEndpoint) {
                 final EndpointReference epr = new EndpointReference() {
@@ -264,9 +268,9 @@ class MockBpelServer {
                 };
             }
 
-			public long calculateSizeofService(EndpointReference epr) {
-				return 0;
-			}
+            public long calculateSizeofService(EndpointReference epr) {
+                return 0;
+            }
         };
         return _bindContext;
     }
@@ -292,6 +296,11 @@ class MockBpelServer {
             return jobId;
         }
 
+        public String scheduleMapSerializableRunnable(MapSerializableRunnable runnable, Date when) throws ContextException {
+            runnable.run();
+            return new GUID().toString();
+        }
+        
         public String scheduleVolatileJob(boolean transacted, Map<String,Object> jobDetail) throws ContextException {
             String jobId = _scheduler.scheduleVolatileJob(transacted, jobDetail);
             _nextSchedule = System.currentTimeMillis();
@@ -304,6 +313,18 @@ class MockBpelServer {
 
         public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
             return _scheduler.execTransaction(transaction);
+        }
+
+        public void beginTransaction() throws Exception {
+            _scheduler.beginTransaction();
+        }
+
+        public void commitTransaction() throws Exception {
+            _scheduler.commitTransaction();
+        }
+
+        public void rollbackTransaction() throws Exception {
+            _scheduler.rollbackTransaction();
         }
 
         public void setRollbackOnly() throws Exception {
@@ -330,6 +351,8 @@ class MockBpelServer {
             _scheduler.setJobProcessor(processor);
 
         }
-    }
 
+        public void setPolledRunnableProcesser(JobProcessor delegatedRunnableProcessor) {
+        }
+    }
 }

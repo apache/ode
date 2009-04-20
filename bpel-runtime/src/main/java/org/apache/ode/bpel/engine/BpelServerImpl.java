@@ -19,10 +19,14 @@
 package org.apache.ode.bpel.engine;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -32,6 +36,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.dao.DeferredProcessInstanceCleanable;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.engine.migration.MigrationHandler;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
@@ -48,6 +53,7 @@ import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
+import org.apache.ode.bpel.iapi.Scheduler.MapSerializableRunnable;
 import org.apache.ode.bpel.iapi.Scheduler.Synchronizer;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.o.OProcess;
@@ -74,13 +80,19 @@ import org.apache.ode.utils.xsl.XslTransformHandler;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
-
     private static final Log __log = LogFactory.getLog(BpelServerImpl.class);
+
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
     /** Maximum age of a process before it is quiesced */
     private static Long __processMaxAge;
 
+    public final static String DEFERRED_PROCESS_INSTANCE_CLEANUP_DISABLED_NAME =
+        "org.apache.ode.disable.deferredProcessInstanceCleanup";
+    
+    private static boolean DEFERRED_PROCESS_INSTANCE_CLEANUP_DISABLED = 
+        Boolean.getBoolean(DEFERRED_PROCESS_INSTANCE_CLEANUP_DISABLED_NAME);
+    
     /** 
      * Set of processes that are registered with the server. Includes hydrated and dehydrated processes.
      * Guarded by _mngmtLock.writeLock(). 
@@ -88,15 +100,15 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     private final Set<BpelProcess> _registeredProcesses = new HashSet<BpelProcess>();
 
     private State _state = State.SHUTDOWN;
-    private Contexts _contexts = new Contexts();
+    private final Contexts _contexts = new Contexts();
     private Properties _configProperties;
     private DehydrationPolicy _dehydrationPolicy;
     private boolean _hydrationLazy;
-	private int _hydrationLazyMinimumSize;
+    private int _hydrationLazyMinimumSize;
     
     BpelEngineImpl _engine;
     protected BpelDatabase _db;
-
+    
     /**
      * Management lock for synchronizing management operations and preventing
      * processing (transactions) from occuring while management operations are
@@ -127,6 +139,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
     public BpelServerImpl() {
     }
+
+    public Contexts getContexts() {
+        return _contexts;
+    }
     
     public void start() {
         _mngmtLock.writeLock().lock();
@@ -153,7 +169,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         }
     }
     
-    
     public void registerExternalVariableEngine(ExternalVariableModule eve) {
         _contexts.externalVariableEngines.put(eve.getName(), eve);
     }
@@ -165,8 +180,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
      */
     public void registerBpelEventListener(BpelEventListener listener) {
         // Do not synchronize, eventListeners is copy-on-write array.
-    	listener.startup(_configProperties);
-    	_contexts.eventListeners.add(listener);
+        listener.startup(_configProperties);
+        _contexts.eventListeners.add(listener);
     }
 
     /**
@@ -176,19 +191,19 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
      */
     public void unregisterBpelEventListener(BpelEventListener listener) {
         // Do not synchronize, eventListeners is copy-on-write array.
-    	try {
-    		listener.shutdown();
-    	} catch (Exception e) {
-    		__log.warn("Stopping BPEL event listener " + listener.getClass().getName() + " failed, nevertheless it has been unregistered.", e);
-    	} finally {
-    		_contexts.eventListeners.remove(listener);
-    	}
+        try {
+            listener.shutdown();
+        } catch (Exception e) {
+            __log.warn("Stopping BPEL event listener " + listener.getClass().getName() + " failed, nevertheless it has been unregistered.", e);
+        } finally {
+            _contexts.eventListeners.remove(listener);
+        }
     }
     
     private void unregisterBpelEventListeners() {
-    	for (BpelEventListener l : _contexts.eventListeners) {
-    		unregisterBpelEventListener(l);
-    	}
+        for (BpelEventListener l : _contexts.eventListeners) {
+            unregisterBpelEventListener(l);
+        }
     }
 
     public void stop() {
@@ -222,7 +237,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             _state = State.INIT;
             
             _engine = createBpelEngineImpl(_contexts);
-
         } finally {
             _mngmtLock.writeLock().unlock();
         }
@@ -230,7 +244,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
     // enable extensibility
     protected BpelEngineImpl createBpelEngineImpl(Contexts contexts) {
-    	return new BpelEngineImpl(contexts);
+        return new BpelEngineImpl(contexts);
     }
     
     public void shutdown() throws BpelEngineException {
@@ -297,9 +311,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             _engine.registerProcess(process);
             _registeredProcesses.add(process);
             if (!isLazyHydratable(process)) {
-            	process.hydrate();
+                process.hydrate();
             } else {
-            	_engine.setProcessSize(process.getPID(), false);
+                _engine.setProcessSize(process.getPID(), false);
             }
 
             __log.info(__msgs.msgProcessRegistered(conf.getProcessId()));
@@ -307,20 +321,20 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             _mngmtLock.writeLock().unlock();
         }
     }
-        
+    
     private boolean isLazyHydratable(BpelProcess process) {
-    	if (process.isHydrationLazySet()) {
-    		return process.isHydrationLazy();
-    	}
-    	if (!_hydrationLazy) {
-    		return false;
-    	}
-    	return process.getEstimatedHydratedSize() < _hydrationLazyMinimumSize;
+        if (process.isHydrationLazySet()) {
+            return process.isHydrationLazy();
+        }
+        if (!_hydrationLazy) {
+            return false;
+        }
+        return process.getEstimatedHydratedSize() < _hydrationLazyMinimumSize;
     }
 
     // enable extensibility
     protected BpelProcess createBpelProcess(ProcessConf conf) {
-    	return new BpelProcess(conf);
+        return new BpelProcess(conf);
     }
     
     public void unregister(QName pid) throws BpelEngineException {
@@ -340,9 +354,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 p = _engine.unregisterProcess(pid);
                 if (p != null)
                 {
-                	_registeredProcesses.remove(p);
+                    _registeredProcesses.remove(p);
                     XslTransformHandler.getInstance().clearXSLSheets(p.getProcessType());
-                	__log.info(__msgs.msgProcessUnregistered(pid));
+                    __log.info(__msgs.msgProcessUnregistered(pid));
                 }
             }
         } catch (Exception ex) {
@@ -387,23 +401,34 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     }
 
     /* TODO: We need to have a method of cleaning up old deployment data. */
-    private boolean deleteProcessDAO(final QName pid) {
+    protected boolean deleteProcessDAO(final QName pid) {
         try {
-            // Delete it from the database.
             return _db.exec(new BpelDatabase.Callable<Boolean>() {
                 public Boolean run(BpelDAOConnection conn) throws Exception {
-                    ProcessDAO proc = conn.getProcess(pid);
+                    final ProcessDAO proc = conn.getProcess(pid);
                     if (proc != null) {
-                        proc.delete();
+                        // delete routes
+                        if(__log.isDebugEnabled()) __log.debug("Deleting only the process " + pid + "...");
+                        proc.deleteProcessAndRoutes();
+                        if(__log.isInfoEnabled()) __log.info("Deleted only the process " + pid + ".");
+                         // we do deferred instance cleanup only for hibernate, for now
+                        if( proc instanceof DeferredProcessInstanceCleanable &&
+                            !DEFERRED_PROCESS_INSTANCE_CLEANUP_DISABLED ) {
+                            // schedule deletion of process runtime data
+                            _engine._contexts.scheduler.scheduleMapSerializableRunnable(
+                                new ProcessCleanUpRunnable(((DeferredProcessInstanceCleanable)proc).getId()), new Date());
+                        } else if( proc instanceof DeferredProcessInstanceCleanable ) {
+                            ((DeferredProcessInstanceCleanable)proc).deleteInstances(Integer.MAX_VALUE);
+                        }
                         return true;
                     }
                     return false;
                 }
             });
-        } catch (Exception ex) {
-            String errmsg = "DbError";
-            __log.error(errmsg, ex);
-            throw new BpelEngineException(errmsg, ex);
+        } catch (RuntimeException re) {
+            throw re;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -453,7 +478,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     }
 
     public void setConfigProperties(Properties configProperties) {
-    	_configProperties = configProperties;
+        _configProperties = configProperties;
     }
     
     public void setMessageExchangeContext(MessageExchangeContext mexContext) throws BpelEngineException {
@@ -488,34 +513,137 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     }
 
     public DebuggerContext getDebugger(QName pid) throws BpelEngineException {
-    	return _engine._activeProcesses.get(pid)._debugger;
+        return _engine._activeProcesses.get(pid)._debugger;
     }
 
-	public boolean hasActiveInstances(QName pid) {
-		BpelProcess process = _engine.getProcess(pid);
-		return process != null ? process.hasActiveInstances() : false;
-	}
+    public boolean hasActiveInstances(QName pid) {
+        BpelProcess process = _engine.getProcess(pid);
+        return process != null ? process.hasActiveInstances() : false;
+    }
 
-	public void setHydrationLazy(boolean hydrationLazy) {
-		this._hydrationLazy = hydrationLazy;
-	}
+    public void setHydrationLazy(boolean hydrationLazy) {
+        this._hydrationLazy = hydrationLazy;
+    }
 
-	public void setProcessThrottledMaximumSize(
-			long hydrationThrottledMaximumSize) {
-		_engine.setProcessThrottledMaximumSize(hydrationThrottledMaximumSize);
-	}
-	
-	public void setProcessThrottledMaximumCount(
-			int hydrationThrottledMaximumCount) {
-		_engine.setProcessThrottledMaximumCount(hydrationThrottledMaximumCount);
-	}
+    public void setProcessThrottledMaximumSize(
+            long hydrationThrottledMaximumSize) {
+        _engine.setProcessThrottledMaximumSize(hydrationThrottledMaximumSize);
+    }
+    
+    public void setProcessThrottledMaximumCount(
+            int hydrationThrottledMaximumCount) {
+        _engine.setProcessThrottledMaximumCount(hydrationThrottledMaximumCount);
+    }
 
-	public void setHydrationLazyMinimumSize(int hydrationLazyMinimumSize) {
-		this._hydrationLazyMinimumSize = hydrationLazyMinimumSize;
-	}
+    public void setHydrationLazyMinimumSize(int hydrationLazyMinimumSize) {
+        this._hydrationLazyMinimumSize = hydrationLazyMinimumSize;
+    }
 
-	public void setInstanceThrottledMaximumCount(
-			int instanceThrottledMaximumCount) {
-		_engine.setInstanceThrottledMaximumCount(instanceThrottledMaximumCount);
-	}
+    public void setInstanceThrottledMaximumCount(
+            int instanceThrottledMaximumCount) {
+        _engine.setInstanceThrottledMaximumCount(instanceThrottledMaximumCount);
+    }
+
+    /**
+     * A polled runnable instance that implements this interface will be set 
+     * with the contexts before the run() method is called.
+     * 
+     * @author sean
+     *
+     */
+    public interface ContextsAware {
+        void setContexts(Contexts contexts);
+    }
+
+    /**
+     * This wraps up the executor service for polled runnables.
+     * 
+     * @author sean
+     *
+     */
+    public static class PolledRunnableProcessor implements Scheduler.JobProcessor {
+        private ExecutorService _polledRunnableExec;
+        private Contexts _contexts;
+        
+        // this map contains all polled runnable results that are not completed.
+        // keep an eye on this one, since if we re-use this polled runnable and
+        // generate too many entries in this map, this becomes a memory leak(
+        // long-running memory occupation)
+        private final Map<String, PolledRunnableResults> resultsByJobId = new HashMap<String, PolledRunnableResults>();
+
+        public void setContexts(Contexts contexts) {
+            _contexts = contexts;
+        }
+        
+        public void setPolledRunnableExecutorService(ExecutorService polledRunnableExecutorService) {
+            _polledRunnableExec = polledRunnableExecutorService;
+        }
+
+        public void onScheduledJob(final Scheduler.JobInfo jobInfo) throws Scheduler.JobProcessorException {
+            JOB_STATUS statusOfPriorTry = JOB_STATUS.PENDING;
+            Exception exceptionThrownOnPriorTry = null;
+            boolean toRetry = false;
+            
+            synchronized( resultsByJobId ) {
+                PolledRunnableResults results = resultsByJobId.get(jobInfo.jobName);        
+                if( results != null ) {
+                    statusOfPriorTry = results._status;
+                    exceptionThrownOnPriorTry = results._exception;
+                }
+                if( statusOfPriorTry == JOB_STATUS.COMPLETED ) {
+                    resultsByJobId.remove(jobInfo.jobName);
+                    jobInfo.jobDetail.put("runnable_status", JOB_STATUS.COMPLETED);
+                    return;
+                }
+                if( statusOfPriorTry == JOB_STATUS.PENDING || statusOfPriorTry == JOB_STATUS.FAILED ) {
+                    resultsByJobId.put(jobInfo.jobName, new PolledRunnableResults(JOB_STATUS.IN_PROGRESS, null));
+                    toRetry = true;
+                }
+            }
+            
+            if( toRetry ) {
+                // re-try
+                _polledRunnableExec.submit(new Runnable() {
+                    public void run() {
+                        try {
+                            MapSerializableRunnable runnable = (MapSerializableRunnable)jobInfo.jobDetail.get("runnable");
+                            runnable.restoreFromDetailsMap(jobInfo.jobDetail);
+                            if( runnable instanceof ContextsAware ) {
+                                ((ContextsAware)runnable).setContexts(_contexts);
+                            }
+                            runnable.run();
+                            synchronized( resultsByJobId ) {
+                                resultsByJobId.put(jobInfo.jobName, new PolledRunnableResults(JOB_STATUS.COMPLETED, null));
+                            }
+                        } catch( Exception e) {
+                            __log.error("", e);
+                            synchronized( resultsByJobId ) {
+                                resultsByJobId.put(jobInfo.jobName, new PolledRunnableResults(JOB_STATUS.FAILED, e));
+                            }
+                        } finally {
+                        }
+                    }
+                });
+            }
+            
+            jobInfo.jobDetail.put("runnable_status", JOB_STATUS.IN_PROGRESS);
+            if( exceptionThrownOnPriorTry != null ) {
+                throw new Scheduler.JobProcessorException(exceptionThrownOnPriorTry, true);
+            }
+        }
+        
+        private static enum JOB_STATUS {
+            PENDING, IN_PROGRESS, FAILED, COMPLETED
+        }
+        
+        private class PolledRunnableResults {
+            private JOB_STATUS _status = JOB_STATUS.PENDING;
+            private Exception _exception;
+            
+            public PolledRunnableResults(JOB_STATUS status, Exception exception) {
+                _status = status;
+                _exception = exception;
+            }
+        }
+    }
 }
