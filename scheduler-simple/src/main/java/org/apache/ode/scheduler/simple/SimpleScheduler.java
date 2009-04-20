@@ -115,6 +115,8 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
 
     private Random _random = new Random();
 
+    private long _pollIntervalForPolledRunnable = Long.getLong("org.apache.ode.polledRunnable.pollInterval", 10 * 60 * 1000);
+    
     public SimpleScheduler(String nodeId, DatabaseDelegate del, Properties conf) {
         _nodeId = nodeId;
         _db = del;
@@ -124,6 +126,10 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         _staleInterval = getLongProperty(conf, "ode.scheduler.staleInterval", _staleInterval);
         _tps = getIntProperty(conf, "ode.scheduler.transactionsPerSecond", _tps);
         _todo = new SchedulerThread(this);
+    }
+    
+    public void setPollIntervalForPolledRunnable(long pollIntervalForPolledRunnable) {
+        _pollIntervalForPolledRunnable = pollIntervalForPolledRunnable;
     }
 
     private int getIntProperty(Properties props, String propName, int defaultValue) {
@@ -474,7 +480,11 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
                                 _polledRunnableProcessor.onScheduledJob(jobInfo);
                                 if( !"COMPLETED".equals(String.valueOf(jobInfo.jobDetail.get("runnable_status"))) ) {
                                     // the runnable is still in progress, schedule checker to 10 mins later
-                                    job.schedDate = System.currentTimeMillis() + 10 * 60 * 1000;
+                                    if( _pollIntervalForPolledRunnable < 0 ) {
+                                        if(__log.isWarnEnabled()) __log.warn("The poll interval for polled runnables is negative; setting it to 1000ms");
+                                        _pollIntervalForPolledRunnable = 1000;
+                                    }
+                                    job.schedDate = System.currentTimeMillis() + _pollIntervalForPolledRunnable;
                                     _db.insertJob(job, _nodeId, false);
                                 }
                             } catch (JobProcessorException jpe) {
