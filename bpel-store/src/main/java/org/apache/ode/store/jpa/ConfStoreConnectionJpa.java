@@ -65,7 +65,7 @@ public class ConfStoreConnectionJpa implements ConfStoreConnection {
     }
 
     public Collection<DeploymentUnitDAO> getDeploymentUnits() {
-        return _em.createQuery("SELECT du from org.apache.ode.store.jpa.DeploymentUnitDaoImpl du").getResultList();
+        return _em.createQuery("SELECT du from DeploymentUnitDaoImpl du").getResultList();
     }
 
     public void rollback() {
