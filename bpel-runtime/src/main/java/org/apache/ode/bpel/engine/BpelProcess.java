@@ -898,10 +898,12 @@ public class BpelProcess {
              * exists and matches the GUID.
              */
             if (isInMemory()) {
-                bounceProcessDAOInMemory(_engine._contexts.inMemDao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
+            	createProcessDAO(_engine._contexts.inMemDao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
             } else if (_engine._contexts.scheduler.isTransacted()) {
                 // If we have a transaction, we do this in the current transaction
-                bounceProcessDAOInDB(_engine._contexts.dao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
+                if(__log.isDebugEnabled()) __log.debug("Creating new process DAO for " + _pid + " (guid=" + _oprocess.guid + ")...");
+                createProcessDAO(_engine._contexts.dao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
+                if(__log.isInfoEnabled()) __log.info("Created new process DAO for " + _pid + " (guid=" + _oprocess.guid + ").");
             } else {
                 try {
                     _engine._contexts.scheduler.execTransaction(new Callable<Object>() {
@@ -920,69 +922,14 @@ public class BpelProcess {
     }
     
     private void bounceProcessDAOInMemory(BpelDAOConnection conn, final QName pid, final long version, final OProcess oprocess) {
-        ProcessDAO oldProcess = findOldProcessToDelete(conn, pid, version, oprocess);
-        if( oldProcess != null ) {
-            if(__log.isDebugEnabled()) __log.debug("Deleting old process DAO[mem] for " + pid + " (guid=" + oldProcess.getGuid() + ")");
-
-            oldProcess.deleteProcessAndRoutes();
-            
-            if(__log.isInfoEnabled()) __log.info("Deleted old process DAO[mem] for " + pid + " (guid=" + oldProcess.getGuid() + ").");
-        }
         if(__log.isInfoEnabled()) __log.info("Creating new process DAO[mem] for " + pid + " (guid=" + oprocess.guid + ").");
         createProcessDAO(conn, pid, version, oprocess);
     }
 
     private void bounceProcessDAOInDB(final BpelDAOConnection conn, final QName pid, final long version, final OProcess oprocess) {
-        final ProcessDAO oldProcess = findOldProcessToDelete(conn, pid, version, oprocess);
-        if( oldProcess != null ) {
-            // delete routes
-            if(__log.isDebugEnabled()) __log.debug("Deleting only the process " + pid + "...");
-            oldProcess.deleteProcessAndRoutes();
-            if(__log.isInfoEnabled()) __log.info("Deleted only the process " + pid + ".");
-            
-            // we do deferred instance cleanup only for hibernate, for now
-            if( oldProcess instanceof DeferredProcessInstanceCleanable ) {
-                // schedule deletion of process runtime data
-                _engine._contexts.scheduler.scheduleMapSerializableRunnable(
-                    new ProcessCleanUpRunnable(((DeferredProcessInstanceCleanable)oldProcess).getId()), new Date());
-            }
-        }
-        // create a new process
         if(__log.isDebugEnabled()) __log.debug("Creating new process DAO for " + pid + " (guid=" + oprocess.guid + ")...");
         createProcessDAO(conn, pid, version, oprocess);
         if(__log.isInfoEnabled()) __log.info("Created new process DAO for " + pid + " (guid=" + oprocess.guid + ").");
-    }
-
-    private ProcessDAO findOldProcessToDelete(final BpelDAOConnection conn, final QName pid, final long version, final OProcess oprocess) {
-        Scheduler scheduler = _engine._contexts.scheduler;
-
-        try {
-            ProcessDAO old = null;
-            if( scheduler.isTransacted() ) {
-                old = conn.getProcess(pid);
-            } else {
-                old = scheduler.execTransaction(new Callable<ProcessDAO>() {
-                    public ProcessDAO call() throws Exception {
-                        return conn.getProcess(pid);
-                    }
-                });
-            }
-            // no process found
-            if( old == null ) return null;
-            
-            __log.debug("Found ProcessDAO for " + pid + " with GUID " + old.getGuid());
-            if( oprocess.guid != null && !old.getGuid().equals(oprocess.guid) ) {
-                // guids are different
-                return old;
-            }
-        } catch (RuntimeException ex) {
-            throw ex;
-        } catch (Exception dce) {
-            __log.error("DbError", dce);
-            throw new BpelEngineException("DbError", dce);
-        }
-
-        return null;
     }
 
     public int getInstanceInUseCount() {
