@@ -110,7 +110,7 @@ public class DeploymentWebService {
             try {
                 if (operation.equals("deploy")) {
                     OMElement namePart = messageContext.getEnvelope().getBody().getFirstElement().getFirstElement();
-                    OMElement zipPart = (OMElement) namePart.getNextOMSibling();
+                    OMElement zipPart = namePart.getFirstElement();
                     OMElement zip = (zipPart == null) ? null : zipPart.getFirstElement();
                     if (zip == null || !zipPart.getQName().getLocalPart().equals("package") 
                             || !zip.getQName().getLocalPart().equals("zip"))
