@@ -109,11 +109,11 @@ public class DeploymentWebService {
 
             try {
                 if (operation.equals("deploy")) {
-                    OMElement namePart = messageContext.getEnvelope().getBody().getFirstElement().getFirstElement();
-                    OMElement zipPart = namePart.getFirstElement();
-                    OMElement zip = (zipPart == null) ? null : zipPart.getFirstElement();
-                    if (zip == null || !zipPart.getQName().getLocalPart().equals("package") 
-                            || !zip.getQName().getLocalPart().equals("zip"))
+                    OMElement deployElement = messageContext.getEnvelope().getBody().getFirstElement();
+                    OMElement namePart = deployElement.getFirstElement();
+                    OMElement packagePart = deployElement.getFirstChildWithName(new QName("http://www.apache.org/ode/pmapi/types/2006/08/02/", "package"));
+                    OMElement zip = (packagePart == null) ? null : packagePart.getFirstChildWithName(new QName("http://www.apache.org/ode/pmapi/types/2006/08/02/", "zip"));
+                    if (zip == null || packagePart == null)
                         throw new OdeFault("Your message should contain an element named 'package' with a 'zip' element"); 
 
                     OMText binaryNode = (OMText) zip.getFirstOMChild();
