@@ -325,7 +325,6 @@ public class ProcessStoreImpl implements ProcessStore {
             du = _deploymentUnits.remove(dir.getName());
             if (du != null) {
                 undeployed = toPids(du.getProcessNames(), du.getVersion());
-                _processes.keySet().removeAll(undeployed);
             }
         } finally {
             _rw.writeLock().unlock();
@@ -334,6 +333,13 @@ public class ProcessStoreImpl implements ProcessStore {
         for (QName pn : undeployed) {
             fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.UNDEPLOYED, pn, du.getName()));
             __log.info(__msgs.msgProcessUndeployed(pn));
+        }
+        
+        _rw.writeLock().lock();
+        try {
+            _processes.keySet().removeAll(undeployed);
+        } finally {
+            _rw.writeLock().unlock();
         }
 
         return undeployed;

@@ -544,12 +544,11 @@ public class ODEServer {
 
     private void handleEvent(ProcessStoreEvent pse) {
         __log.debug("Process store event: " + pse);
-        ProcessConf pconf;
+        ProcessConf pconf = _store.getProcessConfiguration(pse.pid);
         switch (pse.type) {
             case ACTVIATED:
                 // bounce the process
                 _bpelServer.unregister(pse.pid);
-                pconf = _store.getProcessConfiguration(pse.pid);
                 if (pconf != null) {
                     _bpelServer.register(pconf);
                 } else {
@@ -564,7 +563,6 @@ public class ODEServer {
                 _bpelServer.unregister(pse.pid);
                 // bounce the process if necessary  
                 if (instantiated) {
-                    pconf = _store.getProcessConfiguration(pse.pid);
                     if (pconf != null) {
                         _bpelServer.register(pconf);
                     } else {
@@ -574,12 +572,17 @@ public class ODEServer {
                 } else {
                     // we may have potentially created a lot of garbage, so,
                     // let's hope the garbage collector is configured properly.
+                	if (pconf != null) {
+	                	_bpelServer.cleanupProcess(pconf);
+                	}
                 }
                 break;
             case DISABLED:
             case UNDEPLOYED:
                 _bpelServer.unregister(pse.pid);
-                _bpelServer.cleanupProcess(pse.pid);
+            	if (pconf != null) {
+                	_bpelServer.cleanupProcess(pconf);
+            	}
                 break;
             default:
                 __log.debug("Ignoring store event: " + pse);

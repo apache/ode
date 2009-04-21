@@ -367,10 +367,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         }
     }
 
-    public void cleanupProcess(QName pid) throws BpelEngineException {
-        deleteProcessDAO(pid);
-    }
-
     /**
      * Register a global message exchange interceptor.
      * @param interceptor message-exchange interceptor
@@ -401,35 +397,44 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     }
 
     /* TODO: We need to have a method of cleaning up old deployment data. */
-    protected boolean deleteProcessDAO(final QName pid) {
+    protected boolean deleteProcessDAO(final QName pid, boolean isInMemory) {
         try {
-            return _db.exec(new BpelDatabase.Callable<Boolean>() {
-                public Boolean run(BpelDAOConnection conn) throws Exception {
-                    final ProcessDAO proc = conn.getProcess(pid);
-                    if (proc != null) {
-                        // delete routes
-                        if(__log.isDebugEnabled()) __log.debug("Deleting only the process " + pid + "...");
-                        proc.deleteProcessAndRoutes();
-                        if(__log.isInfoEnabled()) __log.info("Deleted only the process " + pid + ".");
-                         // we do deferred instance cleanup only for hibernate, for now
-                        if( proc instanceof DeferredProcessInstanceCleanable &&
-                            !DEFERRED_PROCESS_INSTANCE_CLEANUP_DISABLED ) {
-                            // schedule deletion of process runtime data
-                            _engine._contexts.scheduler.scheduleMapSerializableRunnable(
-                                new ProcessCleanUpRunnable(((DeferredProcessInstanceCleanable)proc).getId()), new Date());
-                        } else if( proc instanceof DeferredProcessInstanceCleanable ) {
-                            ((DeferredProcessInstanceCleanable)proc).deleteInstances(Integer.MAX_VALUE);
-                        }
-                        return true;
-                    }
-                    return false;
-                }
-            });
+        	if (isInMemory) {
+            	return deleteProcessDAO(_contexts.inMemDao.getConnection(), pid);
+        	} else {
+	            return _db.exec(new BpelDatabase.Callable<Boolean>() {
+	                public Boolean run(BpelDAOConnection conn) throws Exception {
+	                	return deleteProcessDAO(conn, pid);
+	                }
+	            });
+        	}
         } catch (RuntimeException re) {
             throw re;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    private boolean deleteProcessDAO(BpelDAOConnection conn, QName pid) {
+        final ProcessDAO proc = conn.getProcess(pid);
+        if (proc != null) {
+            // delete routes
+            if(__log.isDebugEnabled()) __log.debug("Deleting only the process " + pid + "...");
+            proc.deleteProcessAndRoutes();
+            if(__log.isInfoEnabled()) __log.info("Deleted only the process " + pid + ".");
+             // we do deferred instance cleanup only for hibernate, for now
+            if( proc instanceof DeferredProcessInstanceCleanable &&
+                !DEFERRED_PROCESS_INSTANCE_CLEANUP_DISABLED ) {
+                // schedule deletion of process runtime data
+                _engine._contexts.scheduler.scheduleMapSerializableRunnable(
+                    new ProcessCleanUpRunnable(((DeferredProcessInstanceCleanable)proc).getId()), new Date());
+            } else if( proc instanceof DeferredProcessInstanceCleanable ) {
+                ((DeferredProcessInstanceCleanable)proc).deleteInstances(Integer.MAX_VALUE);
+            }
+            return true;
+        }
+        return false;
+    	
     }
 
     public void onScheduledJob(JobInfo jobInfo) throws JobProcessorException {
@@ -646,4 +651,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             }
         }
     }
+
+	public void cleanupProcess(ProcessConf pconf) throws BpelEngineException {
+		if (pconf != null) {
+			deleteProcessDAO(pconf.getProcessId(), pconf.isTransient());
+		}
+	}
 }
