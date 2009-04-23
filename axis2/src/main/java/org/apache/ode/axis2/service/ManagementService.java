@@ -143,7 +143,7 @@ public class ManagementService {
         reason.setText(e.toString());
 
             OMElement detail = soapFactory
-                    .createOMElement(new QName(Namespaces.ODE_PMAPI, e.getClass().getSimpleName()));
+                    .createOMElement(new QName(Namespaces.ODE_PMAPI_NS, e.getClass().getSimpleName()));
         StringWriter stack = new StringWriter();
         e.printStackTrace(new PrintWriter(stack));
         detail.setText(stack.toString());
