@@ -52,6 +52,18 @@ import org.xml.sax.InputSource;
  */
 public class OMUtils {
 
+    public static OMElement getFirstChildWithName(OMElement parent, String name) {
+        if (parent == null)
+            throw new IllegalArgumentException("null parent");
+        if (name == null)
+            throw new IllegalArgumentException("null name");
+        for (Iterator it = parent.getChildElements(); it.hasNext();) {
+            OMElement e = (OMElement) it.next();
+            if (name.equals(e.getQName().getLocalPart())) return e;
+        }
+        return null;
+    }
+
     public static Element toDOM(OMElement element) {
         return toDOM(element, DOMUtils.newDocument());
     }

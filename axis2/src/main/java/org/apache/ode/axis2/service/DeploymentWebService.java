@@ -47,6 +47,7 @@ import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.receivers.AbstractMessageReceiver;
@@ -61,6 +62,7 @@ import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.il.OMUtils;
 import org.apache.ode.utils.fs.FileUtils;
+import org.apache.ode.utils.Namespaces;
 
 /**
  * Axis wrapper for process deployment.
@@ -110,9 +112,30 @@ public class DeploymentWebService {
             try {
                 if (operation.equals("deploy")) {
                     OMElement deployElement = messageContext.getEnvelope().getBody().getFirstElement();
-                    OMElement namePart = deployElement.getFirstElement();
-                    OMElement packagePart = deployElement.getFirstChildWithName(new QName("http://www.apache.org/ode/pmapi/types/2006/08/02/", "package"));
-                    OMElement zip = (packagePart == null) ? null : packagePart.getFirstChildWithName(new QName("http://www.apache.org/ode/pmapi/types/2006/08/02/", "zip"));
+                    OMElement namePart = deployElement.getFirstChildWithName(new QName(null, "name"));
+                    OMElement packagePart = deployElement.getFirstChildWithName(new QName(null, "package"));
+
+                    // "be liberal in what you accept from others"
+                    if (packagePart == null) {
+                        packagePart = OMUtils.getFirstChildWithName(deployElement, "package");
+                        if (packagePart != null && __log.isWarnEnabled()) {
+                            __log.warn("Invalid incoming request detected for operation " + messageContext.getAxisOperation().getName() + ". Package part should have no namespace but has " + packagePart.getQName().getNamespaceURI());
+                        }
+                    }
+
+                    OMElement zip = null;
+                    if (packagePart != null) {
+                        zip = packagePart.getFirstChildWithName(new QName(Namespaces.ODE_DEPLOYAPI_NS, "zip"));
+                        // "be liberal in what you accept from others"
+                        if (zip == null) {
+                            zip = OMUtils.getFirstChildWithName(packagePart, "zip");
+                            if (zip != null && __log.isWarnEnabled()) {
+                                String ns = zip.getQName().getNamespaceURI() == null || zip.getQName().getNamespaceURI().length() == 0 ? "empty" : zip.getQName().getNamespaceURI();
+                                __log.warn("Invalid incoming request detected for operation " + messageContext.getAxisOperation().getName() + ". <zip/> element namespace should be " + Namespaces.ODE_DEPLOYAPI_NS + " but was " + ns);
+                            }
+                        }
+                    }
+
                     if (zip == null || packagePart == null)
                         throw new OdeFault("Your message should contain an element named 'package' with a 'zip' element"); 
 
