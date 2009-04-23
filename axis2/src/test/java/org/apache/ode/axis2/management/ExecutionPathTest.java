@@ -89,7 +89,7 @@ public class ExecutionPathTest extends TestCase {
         _client = new ServiceClientUtil();
 
         // Use the factory to create three elements
-        OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_PMAPI_NS, "deployapi");
+        OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_DEPLOYAPI_NS, "deployapi");
         OMElement root = _factory.createOMElement("deploy", depns);
         OMElement namePart = _factory.createOMElement("name", null);
         namePart.setText("DynPartner");
@@ -122,7 +122,7 @@ public class ExecutionPathTest extends TestCase {
 
     protected void tearDown() throws Exception {
         // Prepare undeploy message
-        OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_PMAPI_NS, "deployapi");
+        OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_DEPLOYAPI_NS, "deployapi");
         OMElement root = _factory.createOMElement("undeploy", depns);
         OMElement part = _factory.createOMElement("packageName", null);
         part.setText("DynPartner");

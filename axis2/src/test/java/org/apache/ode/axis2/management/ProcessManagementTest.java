@@ -71,10 +71,10 @@ public class ProcessManagementTest extends TestCase {
                 new String[] {"name=DynPartnerMain", ""});
         OMElement result = sendToPM(listRoot);
         ArrayList<String> filenames = new ArrayList<String>();
-        Iterator docs = result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "documents")).getChildElements();
+        Iterator docs = result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "documents")).getChildElements();
         while (docs.hasNext()) {
             OMElement docElmt = (OMElement) docs.next();
-            filenames.add(docElmt.getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "name")).getText());
+            filenames.add(docElmt.getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "name")).getText());
         }
         // Checking that all necessary files are really there
         assertTrue(filenames.contains("DynPartnerMain.bpel"));
