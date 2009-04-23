@@ -59,8 +59,14 @@ public class Namespaces {
     public static final QName WS_ADDRESSING_ENDPOINT = new QName(WS_ADDRESSING_NS, "EndpointReference");
     public static final QName WS_ADDRESSING_USINGADDRESSING = new QName(WS_ADDRESSING_WSDL_NS, "UsingAddressing");
 
-    /** ODE stuff */
+    /* ODE stuff */
+    /**
+     * @deprecated use #ODE_PMAPI_TYPES_NS 
+     */
     public static final String ODE_PMAPI = "http://www.apache.org/ode/pmapi/types/2006/08/02/".intern();
+    public static final String ODE_PMAPI_TYPES_NS = "http://www.apache.org/ode/pmapi/types/2006/08/02/".intern();
+    public static final String ODE_PMAPI_NS = "http://www.apache.org/ode/pmapi".intern();
+    public static final String ODE_DEPLOYAPI_NS = "http://www.apache.org/ode/deployapi".intern();
     public static final String ODE_EXTENSION_NS = "http://www.apache.org/ode/type/extension".intern();
     public static final String ODE_HTTP_EXTENSION_NS = "http://www.apache.org/ode/type/extension/http".intern();
     public static final String INTALIO_SESSION_NS = "http://www.intalio.com/type/session".intern();
