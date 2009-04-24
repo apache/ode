@@ -528,7 +528,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
                 PartnerRoleMessageExchange mex = (PartnerRoleMessageExchange) getMessageExchange(we.getMexId());
                 if (mex.getStatus() == MessageExchange.Status.ASYNC || mex.getStatus() == MessageExchange.Status.ACK) {
-                    String msg = "Dangling invocation (mexId=" + we.getMexId() + "), forcing it into a failed state.";
+                    String msg = "No response received for invoke (mexId=" + we.getMexId() + "), forcing it into a failed state.";
                     if (__log.isDebugEnabled()) __log.debug(msg);
                     mex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, msg, null);
                 }
