@@ -15,6 +15,7 @@
 #    limitations under the License.
 #
 
+gem "buildr", "~>1.3"
 require "buildr"
 require "buildr/openjpa"
 require "buildr/javacc"
