@@ -712,6 +712,7 @@ public class ODEProcess {
 
     void activate(Contexts contexts) {
         _contexts = contexts;
+        _sharedEps = _server.getSharedEndpoints();
         _debugger = new DebuggerSupport(this);
 
         __log.debug("Activating " + _pid);
