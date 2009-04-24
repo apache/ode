@@ -98,13 +98,12 @@ public class InstanceManagementTest extends Axis2TestBase {
         assert(count == 1);
     }
 
-    // ODE-385 please fix me
-    @Test(enabled = false)
-    public void ode_385_testGetInstanceInfo() throws Exception {
+    @Test
+    public void testGetInstanceInfo() throws Exception {
         OMElement root = _client.buildMessage("listAllInstances", new String[] {}, new String[] {});
         OMElement result = sendToIM(root);
-        String iid = result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_NS, "instance-info"))
-                .getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_NS, "iid")).getText();
+        String iid = result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "instance-info"))
+                .getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "iid")).getText();
         root = _client.buildMessage("getInstanceInfo", new String[] {"iid"}, new String[] {iid});
         result = sendToIM(root);
         assert(result.toString().split("instance-info").length == 3);
