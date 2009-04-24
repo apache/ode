@@ -719,7 +719,7 @@ public class BpelEngineImpl implements BpelEngine {
         MessageExchange mex = (MessageExchange) getMessageExchange(we.getMexId());
 		if (mex instanceof PartnerRoleMessageExchange) {
 	        if (mex.getStatus() == MessageExchange.Status.ASYNC || mex.getStatus() == MessageExchange.Status.REQUEST) {
-	            String msg = "Dangling invocation (mexId=" + we.getMexId() + "), forcing it into a failed state.";
+	            String msg = "No response received for invoke (mexId=" + we.getMexId() + "), forcing it into a failed state.";
 	            if (__log.isDebugEnabled()) __log.debug(msg);
 				MexDaoUtil.setFailure((PartnerRoleMessageExchangeImpl) mex, failureType, msg, null);
 	        }
