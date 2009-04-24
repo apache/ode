@@ -84,7 +84,7 @@ public class ServiceClientUtil {
      */
     public OMElement buildMessage(String operation, String[] params, Object[] values) {
         OMFactory _factory = OMAbstractFactory.getOMFactory();
-        OMNamespace pmns = _factory.createOMNamespace(Namespaces.ODE_PMAPI, "pmapi");
+        OMNamespace pmns = _factory.createOMNamespace(Namespaces.ODE_PMAPI_NS, "pmapi");
         OMElement root = _factory.createOMElement(operation, pmns);
         for (int m = 0; m < params.length; m++) {
             OMElement omelmt = _factory.createOMElement(params[m], null);

@@ -165,11 +165,11 @@ public class DeploymentTest extends Axis2TestBase {
 
     private String deploy(String packageName) throws Exception {
         // Use the factory to create three elements
-        OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_PMAPI, "deployapi");
-        OMElement root = _factory.createOMElement("deploy", null);
-        OMElement namePart = _factory.createOMElement("name", depns);
+        OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_DEPLOYAPI_NS, "deployapi");
+        OMElement root = _factory.createOMElement("deploy", depns);
+        OMElement namePart = _factory.createOMElement("name", null);
         namePart.setText(packageName);
-        OMElement zipPart = _factory.createOMElement("package", depns);
+        OMElement zipPart = _factory.createOMElement("package", null);
         OMElement zipElmt = _factory.createOMElement("zip", depns);
 
         // Add the zip to deploy
@@ -211,7 +211,7 @@ public class DeploymentTest extends Axis2TestBase {
 
     private void undeploy(String pakage) throws Exception {
         // Prepare undeploy message
-        OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_PMAPI, "deployapi");
+        OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_DEPLOYAPI_NS, "deployapi");
         OMElement root = _factory.createOMElement("undeploy", depns);
         OMElement part = _factory.createOMElement("packageName", null);
         part.setText(pakage);

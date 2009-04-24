@@ -101,8 +101,8 @@ public class InstanceManagementTest extends Axis2TestBase {
     public void testGetInstanceInfo() throws Exception {
         OMElement root = _client.buildMessage("listAllInstances", new String[] {}, new String[] {});
         OMElement result = sendToIM(root);
-        String iid = result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "instance-info"))
-                .getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "iid")).getText();
+        String iid = result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "instance-info"))
+                .getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "iid")).getText();
         root = _client.buildMessage("getInstanceInfo", new String[] {"iid"}, new String[] {iid});
         result = sendToIM(root);
         assert(result.toString().split("instance-info").length == 3);
@@ -125,8 +125,8 @@ public class InstanceManagementTest extends Axis2TestBase {
       OMElement root = _client.buildMessage("listInstances", new String[] {"filter", "order", "limit"},
               new String[] {"name=DynPartnerMain", "", "10"});
         OMElement result = sendToIM(root);
-        String siid = result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "instance-info"))
-                .getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "root-scope"))
+        String siid = result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "instance-info"))
+                .getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "root-scope"))
                 .getAttributeValue(new QName(null, "siid"));
         root = _client.buildMessage("getScopeInfoWithActivity", new String[] {"siid", "activityInfo"},
                 new String[] {siid, "true"});
@@ -140,8 +140,8 @@ public class InstanceManagementTest extends Axis2TestBase {
         OMElement root = _client.buildMessage("listInstances", new String[] {"filter", "order", "limit"},
                 new String[] {"name=DynPartnerMain", "", "10"});
         OMElement result = sendToIM(root);
-        String siid = result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "instance-info"))
-                .getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "root-scope"))
+        String siid = result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "instance-info"))
+                .getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "root-scope"))
                 .getAttributeValue(new QName(null, "siid"));
         root = _client.buildMessage("getVariableInfo", new String[] {"sid", "varName"}, new String[] {siid, "dummy"});
         result = sendToIM(root);
@@ -183,11 +183,11 @@ public class InstanceManagementTest extends Axis2TestBase {
         _client = new ServiceClientUtil();
 
         // Use the factory to create three elements
-        OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_PMAPI, "deployapi");
-        OMElement root = _factory.createOMElement("deploy", null);
-        OMElement namePart = _factory.createOMElement("name", depns);
+        OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_DEPLOYAPI_NS, "deployapi");
+        OMElement root = _factory.createOMElement("deploy", depns);
+        OMElement namePart = _factory.createOMElement("name", null);
         namePart.setText("DynPartner");
-        OMElement zipPart = _factory.createOMElement("package", depns);
+        OMElement zipPart = _factory.createOMElement("package", null);
         OMElement zipElmt = _factory.createOMElement("zip", depns);
 
         // Add the zip to deploy
@@ -218,7 +218,7 @@ public class InstanceManagementTest extends Axis2TestBase {
   @AfterMethod
     protected void tearDown() throws Exception {
         // Prepare undeploy message
-        OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_PMAPI, "deployapi");
+        OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_DEPLOYAPI_NS, "deployapi");
         OMElement root = _factory.createOMElement("undeploy", depns);
         OMElement part = _factory.createOMElement("package", null);
         part.setText(_deployedName);
