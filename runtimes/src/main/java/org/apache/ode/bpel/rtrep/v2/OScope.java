@@ -29,6 +29,7 @@ import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -59,8 +60,13 @@ public class OScope extends OActivity implements ScopeModel {
     /** ScopeLikeConstructImpl's event handler. */
     public OEventHandler eventHandler;
 
+    /* madars.vitolins _at gmail.com 2009.04.11 Inline variable initialization
+     * We need LinkedHashMap because order of variables are significant!
+     * So that next variable can be initialized from previous (if previous is inline initialized)
+     * LinkedHashMap acts like HashMap but it keeps the order
+     */
     /** Variables declared within the scope. */
-    public final HashMap<String,Variable> variables = new HashMap<String,Variable>();
+    public final Map<String,Variable> variables = new LinkedHashMap<String,Variable>();
 
     /** OCorrelation sets declared within the scope. */
     public final Map<String,CorrelationSet> correlationSets = new HashMap<String, CorrelationSet>();
@@ -210,10 +216,13 @@ public class OScope extends OActivity implements ScopeModel {
         public String name;
         public OScope declaringScope;
         public OVarType type;
-
+        //madars.vitolins _at gmail.com 2009.03.25
+        //Inline variable initialization
+        /** Handler of from-spec */
+        public OAssign.RValue from;
+        
         /** If not-null indicates that this variable has an external representation. */
         public OExtVar extVar;
-        
         
         public Variable(OProcess owner, OVarType type) {
             super(owner);

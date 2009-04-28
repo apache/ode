@@ -30,10 +30,13 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.ScopeFaultEvent;
 import org.apache.ode.bpel.evt.ScopeStartEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.rapi.InvalidProcessException;
+import org.apache.ode.bpel.rtrep.v2.OScope.Variable;
 import org.apache.ode.bpel.rtrep.v2.channels.CompensationChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.EventHandlerControlChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
@@ -43,7 +46,10 @@ import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.utils.DOMUtils;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * An active scope.
@@ -62,6 +68,20 @@ class SCOPE extends ACTIVITY {
         super(self, frame, linkFrame);
         _oscope = (OScope) self.o;
         assert _oscope.activity != null;
+		
+		// madars.vitolins _at gmail.com 2009.03.29
+		// inline variable initialization
+		// Initialize variables at scope creation
+		try{
+			initVars();
+		} catch (ExternalVariableModuleException e) {
+			__log.error("Exception while doing inline external variable initialization", e);
+			_self.parent.failure(e.toString(), null);
+			return;
+		} catch (FaultException e){
+			__log.error("Exception while doing inline variable initialization", e);
+			_self.parent.failure(e.toString(), null);
+		}	
     }
 
     public void run() {        
@@ -452,5 +472,21 @@ class SCOPE extends ACTIVITY {
             this.tc = tc;
         }
     }
+	/**
+	 * Initialize variables (at inline)
+	 * It processes all scope's variables
+	 * @author madars.vitolins _at gmail.com, 2009.03.28
+	 */
+	private void initVars() throws FaultException,
+			ExternalVariableModuleException {
+		AssignHelper assignHelper = new AssignHelper(_self, _scopeFrame, _linkFrame);
+		for (OScope.Variable var : _oscope.variables.values()) {
 
+			if (var != null && var.from != null) {
+				assignHelper.initVar(var);
+			}// if var..
+		}// for (OScope
+	}
+
+	
 }

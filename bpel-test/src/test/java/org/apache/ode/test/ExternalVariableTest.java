@@ -82,4 +82,14 @@ public class ExternalVariableTest extends BPELTestAbstract {
     public void testExtVarKeyGen() throws Throwable {
         go("/bpel/2.0/ExtVar-GenKey");
     }
+    
+    /**
+     * Test inline variable initialization for external variables
+     * @author madars.vitolins _at gmail.com, 2009.04.11
+     * @throws Throwable
+     */
+    @Test
+    public void testExtVarInlineInit() throws Throwable {
+        go("/bpel/2.0/ExtVarInlineInit");
+    }
 }

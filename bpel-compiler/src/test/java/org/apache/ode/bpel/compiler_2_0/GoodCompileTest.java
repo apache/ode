@@ -77,6 +77,8 @@ public class GoodCompileTest extends TestCase {
         suite.addTest(new GoodCompileTCase("/2.0/good/xpath20-func/GetVariableProperty1-xp2.0.bpel"));
         suite.addTest(new GoodCompileTCase("/2.0/good/xsd-import/helloworld-Server.bpel"));
         suite.addTest(new GoodCompileTCase("/2.0/good/extensionActivity/ExtensionActivity1-2.0.bpel"));
+        //madars.vitolins _at gmail.com 2009.04.05 Inline variable initalization test
+        suite.addTest(new GoodCompileTCase("/2.0/good/inlineinit/inlineinit1-2.0.bpel"));
         return suite;
     }
 

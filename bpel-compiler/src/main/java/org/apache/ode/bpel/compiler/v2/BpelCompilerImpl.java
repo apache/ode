@@ -82,6 +82,7 @@ import org.apache.ode.bpel.compiler.bom.TerminationHandler;
 import org.apache.ode.bpel.compiler.bom.Variable;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
+import org.apache.ode.bpel.compiler.bom.From;
 import org.apache.ode.bpel.compiler.*;
 import org.apache.ode.bpel.rtrep.v2.DebugInfo;
 import org.apache.ode.bpel.rtrep.v2.OActivity;
@@ -1117,6 +1118,17 @@ abstract class BpelCompilerImpl extends BaseCompiler implements CompilerContext,
         try {
             compile(oscope, src, new Runnable() {
                 public void run() {
+                	
+                	//madars.vitolins _at gmail.com 2009.04.13 - moved before variables, because
+                	//inline variable initialization may depend on partner links
+                	for (PartnerLink plink : src.getPartnerLinks()) {
+                        try {
+                            compile(plink);
+                        } catch (CompilationException ce) {
+                            recoveredFromError(plink, ce);
+                        }
+                    }
+                	
                     for (Variable var : src.getVariables()) {
                         try {
                             compile(var);
@@ -1132,15 +1144,7 @@ abstract class BpelCompilerImpl extends BaseCompiler implements CompilerContext,
                             recoveredFromError(cset, ce);
                         }
                     }
-
-                    for (PartnerLink plink : src.getPartnerLinks()) {
-                        try {
-                            compile(plink);
-                        } catch (CompilationException ce) {
-                            recoveredFromError(plink, ce);
-                        }
-                    }
-
+                    
                     if (!src.getEvents().isEmpty() || !src.getAlarms().isEmpty()) {
                         oscope.eventHandler = new OEventHandler(_oprocess);
                         oscope.eventHandler.debugInfo = createDebugInfo(src, "Event Handler for " + src);
@@ -1369,10 +1373,18 @@ abstract class BpelCompilerImpl extends BaseCompiler implements CompilerContext,
         }
 
         OScope.Variable ovar = new OScope.Variable(_oprocess, varType);
+	//madars.vitolins _at gmail.com 2009.03.25 Inline variable initialization
+	//reusing 'compileFrom()' from AssignGenerator
+        AssignGenerator agen = new AssignGenerator();
+        agen.setContext(this);
         ovar.name = src.getName();
         ovar.declaringScope = oscope;
         ovar.debugInfo = createDebugInfo(src, null);
-        
+        From varfromSpec=src.getFrom();
+        if (varfromSpec!=null)
+        	ovar.from=agen.compileFrom(varfromSpec);
+        else
+        	ovar.from=null;
         ovar.extVar = compileExtVar(src);
 
         oscope.addLocalVariable(ovar);

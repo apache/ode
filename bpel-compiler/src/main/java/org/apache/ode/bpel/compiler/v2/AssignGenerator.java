@@ -183,7 +183,13 @@ class AssignGenerator extends DefaultActivityGenerator {
         __log.debug("Copy verified OK: " + ocopy);
     }
 
-    private OAssign.RValue compileFrom(From from) {
+    /**
+     * Create RValue interface object of 'from-spec'
+     * (madars.vitolins _at gmail.com - 2009.03.26 
+     * Made public to reuse directly from compiler)
+     * @param from 
+     */
+    public OAssign.RValue compileFrom(From from) {
         assert from != null;
         try {
             if (from.isExtensionVal()) {

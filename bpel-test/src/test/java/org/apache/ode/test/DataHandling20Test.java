@@ -83,4 +83,9 @@ public class DataHandling20Test extends BPELTestAbstract {
     @Test public void testXQueryExpression() throws Throwable {
         go("/bpel/2.0/TestXQueryExpression");
     }
+    //madars.vitolins _at gmail.com  2009.04.11
+    //Inline variable initialization test
+    @Test public void testInlineVarInit() throws Throwable {
+        go("/bpel/2.0/TestInlineVarInit");
+    }
 }
