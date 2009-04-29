@@ -142,6 +142,17 @@ public class DeploymentTest extends Axis2TestBase {
         }
     }
 
+    @Test
+    public void undeployBlankPackage(){
+        try {
+            undeploy(null);
+            fail("Undeploying a null or empty package must fail");
+        } catch (Exception e) {
+            String expectedMsg = "Empty package name received!";
+            assertTrue("Unexpected exception received", e.getMessage().contains("operation undeploy") && e.getMessage().contains(expectedMsg));
+        }
+    }
+
   @BeforeMethod
     protected void setUp() throws Exception {
         super.setUp();

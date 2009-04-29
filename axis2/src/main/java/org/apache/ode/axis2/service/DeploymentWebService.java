@@ -54,6 +54,7 @@ import org.apache.axis2.receivers.AbstractMessageReceiver;
 import org.apache.axis2.util.Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
 import org.apache.ode.axis2.OdeFault;
 import org.apache.ode.axis2.deploy.DeploymentPoller;
 import org.apache.ode.axis2.hooks.ODEAxisService;
@@ -190,6 +191,9 @@ public class DeploymentWebService {
                     OMElement part = messageContext.getEnvelope().getBody().getFirstElement().getFirstElement();
 
                     String pkg = part.getText();
+                    if(StringUtils.isBlank(pkg)){
+                        throw new OdeFault("Empty package name received!");
+                    }
                     File deploymentDir = new File(_deployPath, pkg);
                     if (!deploymentDir.exists())
                         throw new OdeFault("Couldn't find deployment package " + pkg + " in directory " + _deployPath);
@@ -201,9 +205,9 @@ public class DeploymentWebService {
 
                         Collection<QName> undeployed = _store.undeploy(deploymentDir);
 
-                        File deployedMarker = new File(_deployPath, pkg + ".deployed");
+                        File deployedMarker = new File(deploymentDir + ".deployed");
                         deployedMarker.delete();
-                        FileUtils.deepDelete(new File(_deployPath, pkg));
+                        FileUtils.deepDelete(deploymentDir);
 
                         OMElement response = factory.createOMElement("response", null);
                         response.setText("" + (undeployed.size() > 0));
