@@ -1119,9 +1119,9 @@ abstract class BpelCompilerImpl extends BaseCompiler implements CompilerContext,
             compile(oscope, src, new Runnable() {
                 public void run() {
                 	
-                	//madars.vitolins _at gmail.com 2009.04.13 - moved before variables, because
-                	//inline variable initialization may depend on partner links
-                	for (PartnerLink plink : src.getPartnerLinks()) {
+                //madars.vitolins _at gmail.com 2009.04.13 - moved before variables, because
+                //inline variable initialization may depend on partner links
+                for (PartnerLink plink : src.getPartnerLinks()) {
                         try {
                             compile(plink);
                         } catch (CompilationException ce) {
@@ -1373,18 +1373,19 @@ abstract class BpelCompilerImpl extends BaseCompiler implements CompilerContext,
         }
 
         OScope.Variable ovar = new OScope.Variable(_oprocess, varType);
-	//madars.vitolins _at gmail.com 2009.03.25 Inline variable initialization
-	//reusing 'compileFrom()' from AssignGenerator
-        AssignGenerator agen = new AssignGenerator();
-        agen.setContext(this);
         ovar.name = src.getName();
         ovar.declaringScope = oscope;
         ovar.debugInfo = createDebugInfo(src, null);
         From varfromSpec=src.getFrom();
-        if (varfromSpec!=null)
-        	ovar.from=agen.compileFrom(varfromSpec);
-        else
-        	ovar.from=null;
+        if (varfromSpec!=null){
+                //madars.vitolins _at gmail.com 2009.03.25 Inline variable initialization
+                //reusing 'compileFrom()' from AssignGenerator
+                AssignGenerator agen = new AssignGenerator();
+                agen.setContext(this);
+                ovar.from=agen.compileFrom(varfromSpec);
+        }else{
+                ovar.from=null;
+        }
         ovar.extVar = compileExtVar(src);
 
         oscope.addLocalVariable(ovar);
