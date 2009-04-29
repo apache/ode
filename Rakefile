@@ -198,10 +198,10 @@ define "ode" do
     test.with projects("tools"), libs, AXIS2_TEST, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, DOM4J
     webapp_dir = "#{test.compile.target}/webapp"
     test.setup task(:prepare_webapp) do |task|
-      cp_r _("src/main/webapp"), _(test.compile.target)
+      cp_r _("src/main/webapp"), test.compile.target.to_s
       rm_rf Dir[_(webapp_dir) + "/**/.svn"]
-      cp_r _("src/test/webapp"), _(test.compile.target)
-      cp Dir[_("src/main/webapp/WEB-INF/classes/*")], _(test.compile.target)
+      cp_r _("src/test/webapp"), test.compile.target.to_s
+      cp Dir[_("src/main/webapp/WEB-INF/classes/*")], test.compile.target.to_s
       cp Dir[project("axis2").path_to("src/main/wsdl/*")], "#{webapp_dir}/WEB-INF"
       cp project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd"), "#{webapp_dir}/WEB-INF"
       rm_rf Dir[_(webapp_dir) + "/**/.svn"]
@@ -217,11 +217,11 @@ define "ode" do
     
     NativeDB.prepare_configs test, _(".")
 
-    test.setup prepare_secured_services_tests("#{test.compile.target}/TestRampartBasic/secured-services", "sample*.axis2")
-    test.setup prepare_secured_services_tests("#{test.compile.target}/TestRampartPolicy/secured-services", "sample*-policy.xml")
+    test.setup prepare_secured_services_tests("#{test.resources.target}/TestRampartBasic/secured-services", "sample*.axis2")
+    test.setup prepare_secured_services_tests("#{test.resources.target}/TestRampartPolicy/secured-services", "sample*-policy.xml")
 
-    test.setup prepare_secured_processes_tests("#{test.compile.target}/TestRampartBasic/secured-processes")
-    test.setup prepare_secured_processes_tests("#{test.compile.target}/TestRampartPolicy/secured-processes")
+    test.setup prepare_secured_processes_tests("#{test.resources.target}/TestRampartBasic/secured-processes")
+    test.setup prepare_secured_processes_tests("#{test.resources.target}/TestRampartPolicy/secured-processes")
   end
 
   desc "ODE APIs"
