@@ -357,6 +357,11 @@ public class MessageExchangeDaoImpl extends HibernateDao implements
 		}
 	}
 
+	public void releasePremieMessages() {
+  		getSession().getNamedQuery(HLargeData.DELETE_MESSAGE_LDATA_BY_MEX).setParameter("mex", _hself).executeUpdate();
+		getSession().getNamedQuery(HCorrelatorMessage.DELETE_CORMESSAGES_BY_MEX).setParameter("mex", _hself).executeUpdate();
+	}
+
 	public void incrementSubscriberCount() {
 		_hself.incrementSubscriberCount();
 	}

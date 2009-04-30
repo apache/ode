@@ -246,4 +246,8 @@ public interface MessageExchangeDAO {
 
     void release(boolean doClean);
 
+    /**
+     * Deletes messages that arrived before the route is setup
+     */
+    void releasePremieMessages();
 }

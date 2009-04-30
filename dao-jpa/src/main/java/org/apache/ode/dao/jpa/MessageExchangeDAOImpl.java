@@ -343,7 +343,11 @@ public class MessageExchangeDAOImpl extends OpenJPADAO implements MessageExchang
 		}
 	}
 
-	public void deleteMessages() {
+    public void releasePremieMessages() {
+    	// do nothing; early messages are deleted during CorrelatorDaoImpl().dequeueMessage()
+    }
+
+    public void deleteMessages() {
 		if( __log.isDebugEnabled() ) __log.debug("Deleting message on MEX release.");
 		
 		getEM().remove(this); // This deletes MexProperty, REQUEST MessageDAO, RESPONSE MessageDAO
@@ -372,5 +376,4 @@ public class MessageExchangeDAOImpl extends OpenJPADAO implements MessageExchang
     public void release() {
         // no-op for now, could be used to do some cleanup
     }
-
 }

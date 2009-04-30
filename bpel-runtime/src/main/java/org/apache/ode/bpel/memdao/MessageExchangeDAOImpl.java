@@ -293,6 +293,10 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
         BpelDAOConnectionImpl.removeMessageExchange(getMessageExchangeId());
     }
 
+    public void releasePremieMessages() {
+    	// do nothing; early messages are deleted during CorrelatorDaoImpl().dequeueMessage()
+    }
+    
     public String toString() {
         return "mem.mex(direction=" + direction + " id=" + messageExchangeId + ")";
     }

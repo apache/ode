@@ -1386,6 +1386,10 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (mexdao != null) {
             __log.debug("MatcherEvent handling: found matching message in DB (i.e. message arrived before <receive>)");
 
+            if( MessageExchangePattern.REQUEST_RESPONSE.toString().equals(mexdao.getPattern())) {
+                __log.warn("A message arrived before a receive is ready for a request/response pattern. This may be processed to success. However, you should consider revising your process since this may cause performance degradataion");
+            }
+            
             Set<String> groupIds = new HashSet<String>();
             for (MessageRouteDAO mroute : mroutes) {
 	            // We have a match, so we can get rid of the routing entries.
@@ -1408,7 +1412,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
             // Do not release yet if the process is suspended, the mex will be used again
             if (_dao.getState() != ProcessState.STATE_SUSPENDED)
-                mexdao.release(true);
+            	mexdao.releasePremieMessages();
         } else {
             __log.debug("MatcherEvent handling: nothing to do, no matching message in DB");
 
