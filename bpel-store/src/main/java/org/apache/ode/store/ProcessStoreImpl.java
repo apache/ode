@@ -166,12 +166,23 @@ public class ProcessStoreImpl implements ProcessStore {
      * Deploys a process.
      */
     public Collection<QName> deploy(final File deploymentUnitDirectory) {
+    	return deploy(deploymentUnitDirectory, true, null);
+    }
+
+    /**
+     * Deploys a process.
+     */
+    public Collection<QName> deploy(final File deploymentUnitDirectory, boolean activate, String duName) {
         __log.info(__msgs.msgDeployStarting(deploymentUnitDirectory));
 
         final Date deployDate = new Date();
 
         // Create the DU and compile/scan it before acquiring lock.
         final DeploymentUnitDir du = new DeploymentUnitDir(deploymentUnitDirectory);
+        if( duName != null ) {
+        	// Override the package name if given from the parameter
+        	du.setName(duName);
+        }
         try {
             du.compile();
         } catch (CompilationException ce) {
@@ -305,24 +316,28 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     public Collection<QName> undeploy(final File dir) {
+    	return undeploy(dir.getName());
+    }
+
+   	public Collection<QName> undeploy(final String duName) {
         try {
             exec(new Callable<Collection<QName>>() {
                 public Collection<QName> call(ConfStoreConnection conn) {
-                    DeploymentUnitDAO dudao = conn.getDeploymentUnit(dir.getName());
+                    DeploymentUnitDAO dudao = conn.getDeploymentUnit(duName);
                     if (dudao != null)
                         dudao.delete();
                     return null;
                 }
             });
         } catch (Exception ex) {
-            __log.error("Error synchronizing with data store; " + dir.getName() + " may be reappear after restart!");
+            __log.error("Error synchronizing with data store; " + duName + " may be reappear after restart!");
         }
 
         Collection<QName> undeployed = Collections.emptyList();
         DeploymentUnitDir du;
         _rw.writeLock().lock();
         try {
-            du = _deploymentUnits.remove(dir.getName());
+            du = _deploymentUnits.remove(duName);
             if (du != null) {
                 undeployed = toPids(du.getProcessNames(), du.getVersion());
             }
@@ -613,7 +628,6 @@ public class ProcessStoreImpl implements ProcessStore {
      * @param dudao
      */
     protected List<ProcessConfImpl> load(DeploymentUnitDAO dudao) {
-
         __log.debug("Loading deployment unit record from db: " + dudao.getName());
 
         File dudir = findDeployDir(dudao);
@@ -621,6 +635,8 @@ public class ProcessStoreImpl implements ProcessStore {
         if (dudir == null || !dudir.exists())
             throw new ContextException("Deployed directory " + (dudir == null ? "(unknown)" : dudir) + " no longer there!");
         DeploymentUnitDir dud = new DeploymentUnitDir(dudir);
+        // set the name with the one from database
+        dud.setName(dudao.getName());
         dud.scan();
 
         ArrayList<ProcessConfImpl> loaded = new ArrayList<ProcessConfImpl>();

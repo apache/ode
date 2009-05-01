@@ -21,6 +21,9 @@ package org.apache.ode.axis2;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -123,30 +126,30 @@ public class ODEServer {
     }
 
     public void init(String contextPath, AxisConfiguration axisConf) throws ServletException {
-            _axisConfig = axisConf;
-            String rootDir = System.getProperty("org.apache.ode.rootDir");
-            if (rootDir != null) _appRoot = new File(rootDir);
-            else _appRoot = new File(contextPath);
+    	_axisConfig = axisConf;
+        String rootDir = System.getProperty("org.apache.ode.rootDir");
+        if (rootDir != null) _appRoot = new File(rootDir);
+        else _appRoot = new File(contextPath);
 
         if (!_appRoot.isDirectory())
             throw new IllegalArgumentException(_appRoot + " does not exist or is not a directory");
-            TempFileManager.setWorkingDirectory(_appRoot);
+        TempFileManager.setWorkingDirectory(_appRoot);
 
-            __log.debug("Loading properties");
-            String confDir = System.getProperty("org.apache.ode.configDir");
-            _configRoot = confDir == null ? new File(_appRoot, "conf") : new File(confDir);
+        __log.debug("Loading properties");
+        String confDir = System.getProperty("org.apache.ode.configDir");
+        _configRoot = confDir == null ? new File(_appRoot, "conf") : new File(confDir);
         if (!_configRoot.isDirectory())
             throw new IllegalArgumentException(_configRoot + " does not exist or is not a directory");
 
-            _odeConfig = new ODEConfigProperties(_configRoot);
+        _odeConfig = new ODEConfigProperties(_configRoot);
 
-            try {
-                _odeConfig.load();
-            } catch (FileNotFoundException fnf) {
-                String errmsg = __msgs.msgOdeInstallErrorCfgNotFound(_odeConfig.getFile());
-                __log.warn(errmsg);
-            } catch (Exception ex) {
-                String errmsg = __msgs.msgOdeInstallErrorCfgReadError(_odeConfig.getFile());
+        try {
+        	_odeConfig.load();
+        } catch (FileNotFoundException fnf) {
+        	String errmsg = __msgs.msgOdeInstallErrorCfgNotFound(_odeConfig.getFile());
+        	__log.warn(errmsg);
+        } catch (Exception ex) {
+        	String errmsg = __msgs.msgOdeInstallErrorCfgReadError(_odeConfig.getFile());
                 __log.error(errmsg, ex);
                 throw new ServletException(errmsg, ex);
             }
@@ -157,38 +160,41 @@ public class ODEServer {
         if (!_workRoot.isDirectory())
             throw new IllegalArgumentException(_workRoot + " does not exist or is not a directory");
 
-            __log.debug("Initializing transaction manager");
-            initTxMgr();
-            __log.debug("Creating data source.");
-            initDataSource();
-            __log.debug("Starting DAO.");
-            initDAO();
-            EndpointReferenceContextImpl eprContext = new EndpointReferenceContextImpl(this);            
-            __log.debug("Initializing BPEL process store.");
-            initProcessStore(eprContext);
-            __log.debug("Initializing BPEL server.");
-            initBpelServer(eprContext);
-            __log.debug("Initializing HTTP connection manager");
-            initHttpConnectionManager();
+        __log.debug("Initializing transaction manager");
+        initTxMgr();
+        __log.debug("Creating data source.");
+        initDataSource();
+        __log.debug("Starting DAO.");
+        initDAO();
+        EndpointReferenceContextImpl eprContext = new EndpointReferenceContextImpl(this);            
+        __log.debug("Initializing BPEL process store.");
+        initProcessStore(eprContext);
+        __log.debug("Initializing BPEL server.");
+        initBpelServer(eprContext);
+        __log.debug("Initializing HTTP connection manager");
+        initHttpConnectionManager();
 
-            // Register BPEL event listeners configured in axis2.properties file.
-            registerEventListeners();
-            registerMexInterceptors();
-            registerExternalVariableModules();
+        // Register BPEL event listeners configured in axis2.properties file.
+        registerEventListeners();
+        registerMexInterceptors();
+        registerExternalVariableModules();
 
-            _store.loadAll();
+        _store.loadAll();
 
-            try {
-            _bpelServer.start();
-            } catch (Exception ex) {
-                String errmsg = __msgs.msgOdeBpelServerStartFailure();
-                __log.error(errmsg, ex);
-                throw new ServletException(errmsg, ex);
-            }
+        try {
+        	_bpelServer.start();
+        } catch (Exception ex) {
+        	String errmsg = __msgs.msgOdeBpelServerStartFailure();
+        	__log.error(errmsg, ex);
+        	throw new ServletException(errmsg, ex);
+        }
 
-            _poller = new DeploymentPoller(_store.getDeployDir(), this);
+        _poller = getDeploymentPollerExt();
+        if( _poller == null ) {
+        	_poller = new DeploymentPoller(_store.getDeployDir(), this);
+        }
 
-            _mgtService = new ManagementService();
+        _mgtService = new ManagementService();
         _mgtService.enableService(_axisConfig, _bpelServer, _store, _appRoot.getAbsolutePath());
 
         try {
@@ -198,17 +204,52 @@ public class ODEServer {
             throw new ServletException(e);
         }
 
-            __log.debug("Starting scheduler");
-            _scheduler.start();
+        __log.debug("Starting scheduler");
+        _scheduler.start();
 
-            __log.debug("Initializing JCA adapter.");
-            initConnector();
+        __log.debug("Initializing JCA adapter.");
+        initConnector();
 
-            _poller.start();
-            __log.info(__msgs.msgPollingStarted(_store.getDeployDir().getAbsolutePath()));
-            __log.info(__msgs.msgOdeStarted());
-                }
+        _poller.start();
+        __log.info(__msgs.msgPollingStarted(_store.getDeployDir().getAbsolutePath()));
+        __log.info(__msgs.msgOdeStarted());
+    }
 
+    @SuppressWarnings("unchecked")
+	private DeploymentPoller getDeploymentPollerExt() {
+    	DeploymentPoller poller = null;
+    	
+    	InputStream is = null;
+    	try {
+	        is = ODEServer.class.getResourceAsStream("/deploy-ext.properties");
+	        if( is != null ) {
+	        	__log.info("A deploy-ext.properties found; will use the provided class if applicable.");
+	        	try {
+	                Properties props = new Properties();
+			        props.load(is);
+			        String deploymentPollerClass = props.getProperty("deploymentPoller.class");
+			        if( deploymentPollerClass == null ) {
+			        	__log.warn("deploy-ext.properties found in the class path; however, the file does not have 'deploymentPoller.class' as one of the properties!!");
+			        } else {
+			    		Class pollerClass = Class.forName(deploymentPollerClass);
+			    		poller = (DeploymentPoller)pollerClass.getConstructor(File.class, ODEServer.class).newInstance(_store.getDeployDir(), this);
+			        	__log.info("A custom deployment poller: " + deploymentPollerClass + " has been plugged in.");
+			        }
+	        	} catch( Exception e ) {
+	        		__log.warn("Deployment poller extension class is not loadable, falling back to the default DeploymentPoller.", e);
+	        	}
+	        } else if( __log.isDebugEnabled() ) __log.debug("No deploy-ext.properties found.");
+    	} finally {
+    		try {
+    			if(is != null) is.close();
+    		} catch( IOException ie ) {
+    			// ignore
+    		}
+    	}
+
+        return poller;
+    }
+    
     private void initDataSource() throws ServletException {
         _db = new Database(_odeConfig);
         _db.setTransactionManager(_txMgr);

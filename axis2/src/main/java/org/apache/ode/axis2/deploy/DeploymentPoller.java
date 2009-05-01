@@ -63,7 +63,7 @@ public class DeploymentPoller {
 
     private PollingThread _poller;
 
-    private ODEServer _odeServer;
+    protected ODEServer _odeServer;
 
     private boolean _onHold = false;
 
@@ -106,6 +106,10 @@ public class DeploymentPoller {
         _poller = null;
     }
 
+    protected boolean isDeploymentFromODEFileSystemAllowed() {
+    	return true;
+    }
+
     /**
      * Scan the directory for new (or removed) files (called mainly from {@link PollingThread}) and calls whoever is in charge of
      * the actual deployment (or undeployment).
@@ -114,7 +118,7 @@ public class DeploymentPoller {
         File[] files = _deployDir.listFiles(_fileFilter);
 
         // Checking for new deployment directories
-        if (files != null) {
+        if (isDeploymentFromODEFileSystemAllowed() && files != null) {
 	        for (File file : files) {
 	            File deployXml = new File(file, "deploy.xml");
 	            File deployedMarker = new File(_deployDir, file.getName() + ".deployed");

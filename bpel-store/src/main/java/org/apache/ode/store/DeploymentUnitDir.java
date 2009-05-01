@@ -120,6 +120,11 @@ class DeploymentUnitDir {
         return _duDirectory.getName();
     }
 
+    void setName(String name) {
+    	// supports extensibility
+    	_name = name;
+    }
+
     CBPInfo getCBPInfo(QName typeName) {
         return _processes.get(typeName);
     }
