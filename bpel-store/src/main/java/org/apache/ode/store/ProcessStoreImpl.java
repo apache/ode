@@ -750,8 +750,15 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     public void setDeployDir(File depDir) {
-        if (depDir != null && !depDir.isDirectory())
-            throw new IllegalArgumentException("Deploy directory is not a directory or does not exist:  " + depDir);
+        if (depDir != null) {
+        	if( !depDir.exists() ) {
+        		depDir.mkdirs();
+        		__log.warn("Deploy directory: " + depDir.getAbsolutePath() + " does not exist; created it.");
+        	} else if(!depDir.isDirectory()) {
+                throw new IllegalArgumentException("Deploy directory is not a directory:  " + depDir);
+        	}
+        }
+        
         _deployDir = depDir;
     }
 
