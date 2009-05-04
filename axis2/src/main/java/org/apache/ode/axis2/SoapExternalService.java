@@ -101,7 +101,7 @@ public class SoapExternalService implements ExternalService {
     private Scheduler _sched;
     private BpelServer _server;
     private ProcessConf _pconf;
-    private URL endpointUrl;
+    private String endpointUrl;
 
     public SoapExternalService(ProcessConf pconf, QName serviceName, String portName, ExecutorService executorService,
                                AxisConfiguration axisConfig, Scheduler sched, BpelServer server, MultiThreadedHttpConnectionManager connManager) throws AxisFault {
@@ -128,11 +128,7 @@ public class SoapExternalService implements ExternalService {
         if (eprElmt == null)
             throw new IllegalArgumentException(msgs.msgPortDefinitionNotFound(serviceName, portName));
         endpointReference = EndpointFactory.convertToWSA(ODEService.createServiceRef(eprElmt));
-        try {
-            endpointUrl = new URL(endpointReference.getUrl());
-        } catch (MalformedURLException e) {
-            throw new OdeFault(e);
-        }
+        endpointUrl = endpointReference.getUrl();
     }
 
 
@@ -159,7 +155,7 @@ public class SoapExternalService implements ExternalService {
             EndpointReference axisEPR = new EndpointReference(mexEndpointUrl);
             // The endpoint URL might be overridden from the properties file(s)
             // The order of precedence is (in descending order): process, property, wsdl.
-            if(endpointUrl.equals(new URL(mexEndpointUrl))){
+            if(endpointUrl.equals(mexEndpointUrl)) {
                 String address = (String) client.getOptions().getProperty(Properties.PROP_ADDRESS);
                 if(address!=null) {
                     if (__log.isDebugEnabled()) __log.debug("Endpoint URL overridden by property files. "+mexEndpointUrl+" => "+address);
