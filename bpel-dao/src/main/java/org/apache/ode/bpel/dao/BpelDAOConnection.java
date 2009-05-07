@@ -69,6 +69,8 @@ public interface BpelDAOConnection {
 
     Collection<ProcessInstanceDAO> instanceQuery(String expression);
 
+    int getNumInstances(QName processId);
+
     /**
      * Insert a BPEL event into the database.
      * @param event a BPEL event

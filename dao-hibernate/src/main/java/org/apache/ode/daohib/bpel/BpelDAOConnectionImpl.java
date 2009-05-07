@@ -141,6 +141,13 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection {
         return _getInstance(_sm, getSession(), instanceId);
     }
 
+    public int getNumInstances(QName processId) {
+        ProcessDAO process = getProcess(processId);
+        if (process != null)
+            return process.getNumInstances();
+        else return -1;
+    }
+
     public ScopeDAO getScope(Long siidl) {
         return _getScope(_sm, getSession(), siidl);
     }

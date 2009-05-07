@@ -99,6 +99,13 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         return null;
     }
 
+    public int getNumInstances(QName processId) {
+        ProcessDAO process = getProcess(processId);
+        if (process != null)
+            return process.getNumInstances();
+        else return -1;
+    }
+
     @SuppressWarnings("unchecked")
     public Collection<ProcessInstanceDAO> instanceQuery(InstanceFilter filter) {
         if(filter.getLimit()==0) {

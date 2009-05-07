@@ -396,7 +396,6 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         return false;
     }
 
-    /* TODO: We need to have a method of cleaning up old deployment data. */
     protected boolean deleteProcessDAO(final QName pid, boolean isInMemory) {
         try {
         	if (isInMemory) {
@@ -521,9 +520,18 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         return _engine._activeProcesses.get(pid)._debugger;
     }
 
-    public boolean hasActiveInstances(QName pid) {
-        BpelProcess process = _engine.getProcess(pid);
-        return process != null ? process.hasActiveInstances() : false;
+    public boolean hasActiveInstances(final QName pid) {
+        try {
+            return _db.exec(new BpelDatabase.Callable<Boolean>() {
+                public Boolean run(BpelDAOConnection conn) throws Exception {
+                    return conn.getNumInstances(pid) > 0;
+                }
+            });
+        } catch (RuntimeException re) {
+            throw re;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void setHydrationLazy(boolean hydrationLazy) {
