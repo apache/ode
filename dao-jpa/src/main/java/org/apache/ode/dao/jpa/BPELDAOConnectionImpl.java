@@ -168,7 +168,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
                 StringBuffer filters = new StringBuffer();
                 List<String> iids = criteria.getIidFilter();
                 for (int m = 0; m < iids.size(); m++) {
-                    filters.append(" pi._instanceId = '").append(iids.get(m)).append("'");
+                    filters.append(" pi._instanceId = ").append(iids.get(m));
                     if (m < iids.size() - 1) filters.append(" or");
                 }
                 clauses.add(" (" + filters + ")");
