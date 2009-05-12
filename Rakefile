@@ -474,7 +474,7 @@ define "ode" do
         projects("bpel-api", "bpel-api-jca", "bpel-compiler", "bpel-connector", "bpel-dao",
         "bpel-epr", "jca-ra", "jca-server", "bpel-obj", "bpel-ql", "bpel-runtime",
         "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
-        "jacob", "jacob-ap", "utils"),
+        "jacob", "jacob-ap", "utils", "agents"),
         ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
         COMMONS.primitives, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector, 
         JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA, 
