@@ -308,6 +308,23 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         return (MessageExchangeDAOImpl) l.get(0);
     }
 
+    public ResourceRouteDAO getResourceRoute(String url, String method) {
+        List l = _em.createQuery("select r from ResourceRouteDAOImpl r where r._url = ?1 and r._method = ?2")
+            .setParameter(1, url).setParameter(2, method).getResultList();
+        if (l.size() == 0) return null;
+        ResourceRouteDAOImpl m = (ResourceRouteDAOImpl) l.get(0);
+        return m;
+    }
+
+    public List<ResourceRouteDAO> getAllResourceRoutes() {
+        return _em.createQuery("select r from ResourceRouteDAOImpl r").getResultList();
+    }
+
+    public void deleteResourceRoute(String url, String method) {
+        _em.createQuery("delete from ResourceRouteDAOImpl r where r._url = ?1 and r._method = ?2")
+            .setParameter(1, url).setParameter(2, method).executeUpdate();
+    }
+
     public EntityManager getEntityManager() {
         return _em;
     }

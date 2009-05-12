@@ -171,4 +171,11 @@ public class BindingContextImpl implements BindingContext {
         return extService;
     }
 
+    public void activateProvidedResource(Resource resource) {
+        throw new UnsupportedOperationException("RESTful resources not supported in Axis2 integration layer.");
+    }
+
+    public void deactivateProvidedResource(Resource resource) {
+        throw new UnsupportedOperationException("RESTful resources not supported in Axis2 integration layer.");
+    }
 }

@@ -39,7 +39,8 @@ import org.w3c.dom.Node;
  */
 public interface OdeRTInstanceContext extends IOContext, ProcessControlContext, RecoveryContext, VariableContext {
 
-    Long getPid();
+
+	Long getInstanceId();
 
     /**
      * Sends the bpel event.

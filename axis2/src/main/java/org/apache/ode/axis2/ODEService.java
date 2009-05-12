@@ -39,14 +39,11 @@ import org.apache.ode.axis2.soapbinding.SoapMessageConverter;
 import org.apache.ode.il.epr.EndpointFactory;
 import org.apache.ode.il.epr.MutableEndpoint;
 import org.apache.ode.il.epr.WSAEndpoint;
-import org.apache.ode.bpel.iapi.BpelServer;
-import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.iapi.InvocationStyle;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.utils.*;
+import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.GUID;
+import org.apache.ode.utils.Namespaces;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -194,7 +191,7 @@ public class ODEService {
             WSAEndpoint endpoint = new WSAEndpoint();
             endpoint.set(serviceEpr);
             // Extract the session ID for the local process.
-            odeMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, endpoint.getSessionId());
+            odeMex.setProperty(WSMessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, endpoint.getSessionId());
         }
         if (ocse != null) {
             Element serviceEpr = (Element) ocse;
@@ -204,8 +201,8 @@ public class ODEService {
             // Save the session id of the remote process. Also, magically
             // initialize the EPR
             // of the partner to the EPR provided.
-            odeMex.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, endpoint.getSessionId());
-            odeMex.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_EPR, DOMUtils.domToString(serviceEpr));
+            odeMex.setProperty(WSMessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, endpoint.getSessionId());
+            odeMex.setProperty(WSMessageExchange.PROPERTY_SEP_PARTNERROLE_EPR, DOMUtils.domToString(serviceEpr));
         }
     }
 

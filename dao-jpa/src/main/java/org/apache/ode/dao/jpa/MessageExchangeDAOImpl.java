@@ -19,12 +19,7 @@
 
 package org.apache.ode.dao.jpa;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -86,6 +81,8 @@ public class MessageExchangeDAOImpl extends OpenJPADAO implements MessageExchang
     private char _direction;
 	@Lob   @Column(name="EPR")
     private String _epr;
+	@Basic   @Column(name="RESOURCE", length=255)
+    private String _resource;
 	@Transient private
     Element _eprElement;
 	@Basic @Column(name="FAULT")
@@ -139,6 +136,9 @@ public class MessageExchangeDAOImpl extends OpenJPADAO implements MessageExchang
     
     @Basic @Column(name="PIPED_PID")
     private String _pipedPid;
+
+    @Basic @Column(name="INST_RES")
+    private boolean _instantiatingResource;
 
     public MessageExchangeDAOImpl() {}
     
@@ -247,6 +247,14 @@ public class MessageExchangeDAOImpl extends OpenJPADAO implements MessageExchang
         }
         return propNames;
 	}
+
+    public Map<String,String> getProperties() {
+        HashMap<String,String> res = new  HashMap<String, String>();
+        for (MexProperty prop : _props) {
+            res.put(prop.getPropertyKey(), prop.getPropertyValue());
+        }
+        return res;
+    }
 
 	public MessageDAO getRequest() {
 		return _request;
@@ -426,5 +434,21 @@ public class MessageExchangeDAOImpl extends OpenJPADAO implements MessageExchang
 
     public void setPipedPID(QName pipedPid) {
         _pipedPid = pipedPid == null ? null : pipedPid.toString();
+    }
+
+    public String getResource() {
+        return _resource;
+    }
+
+    public void setResource(String resourceStr) {
+        _resource = resourceStr;
+    }
+
+    public boolean isInstantiatingResource() {
+        return _instantiatingResource;
+    }
+
+    public void setInstantiatingResource(boolean inst) {
+        _instantiatingResource = inst;
     }
 }

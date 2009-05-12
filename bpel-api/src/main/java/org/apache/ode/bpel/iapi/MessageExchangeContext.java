@@ -89,6 +89,8 @@ public interface MessageExchangeContext {
     
     void invokePartnerTransacted(PartnerRoleMessageExchange mex) throws ContextException;
 
+    void invokeRestful(RESTOutMessageExchange mex) throws ContextException;
+
     /**
      * Cancel an async/reliable partner-role message exchange. 
      * @param mex message exchange that should be cancelled. 

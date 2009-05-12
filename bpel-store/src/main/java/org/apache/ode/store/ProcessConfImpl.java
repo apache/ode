@@ -46,6 +46,7 @@ import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.rapi.ProcessModel;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.HierarchicalProperties;
@@ -220,6 +221,10 @@ public class ProcessConfImpl implements ProcessConf {
         }
     }
 
+    public ProcessModel getProcessModel() {
+        throw new UnsupportedOperationException();
+    }
+
     public String getBpelDocument() {
         CBPInfo cbpInfo = _du.getCBPInfo(getType());
         if (cbpInfo == null)
@@ -275,6 +280,10 @@ public class ProcessConfImpl implements ProcessConf {
 
     public boolean isTransient() {
         return _inMemory;
+    }
+
+    public boolean isRestful() {
+        return getProvideEndpoints().size() == 0;
     }
 
     public void setTransient(boolean t) {

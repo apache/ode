@@ -37,6 +37,7 @@ public class ProcessMessageExchangeEvent extends ProcessInstanceEvent {
     
     private QName _portType;
     private String _operation;
+    private String _resource;
     private String _mexId;
     private short _aspect;
 
@@ -84,5 +85,13 @@ public class ProcessMessageExchangeEvent extends ProcessInstanceEvent {
 
     public void setPortType(QName portType) {
         _portType = portType;
+    }
+
+    public String getResource() {
+        return _resource;
+    }
+
+    public void setResource(String resource) {
+        this._resource = resource;
     }
 }

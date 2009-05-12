@@ -69,7 +69,10 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
     private long _sequence;
 	@Basic @Column(name="DATE_CREATED")
     private Date _dateCreated = new Date();
-    
+
+	@Basic @Column(name="INSTANTIATE_URL", length=255)
+    private String _instantiatingUrl;
+
     @Basic @Column(name="EXEC_STATE_COUNTER")
     private int _execStateCounter;
 	
@@ -79,12 +82,13 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
     private Collection<ScopeDAO> _scopes = new ArrayList<ScopeDAO>();
 	@OneToMany(targetEntity=ActivityRecoveryDAOImpl.class,mappedBy="_instance",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
     private Collection<ActivityRecoveryDAO> _recoveries = new ArrayList<ActivityRecoveryDAO>();
-
     @Basic @Column(name="FAULT_ID", insertable=false, updatable=false, nullable=true)
     @SuppressWarnings("unused")
     private long _faultId;
 	@OneToOne(fetch=FetchType.LAZY,cascade={CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}) @Column(name="FAULT_ID")
 	private FaultDAOImpl _fault;
+    @OneToMany(targetEntity=ResourceRouteDAOImpl.class,mappedBy="_instance",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
+    private Collection<ResourceRouteDAO> _resourceRoutes = new ArrayList<ResourceRouteDAO>();
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROCESS_ID")
 	private ProcessDAOImpl _process;
 	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="INSTANTIATING_CORRELATOR_ID")
@@ -210,7 +214,29 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
 
     }
 
-	public void finishCompletion() {
+    public String getInstantiatingUrl() {
+        return _instantiatingUrl;
+    }
+
+    public void setInstantiatingUrl(String url) {
+        _instantiatingUrl = url;
+    }
+
+    public void createResourceRoute(String url, String method, String pickResponseChannel, int selectorIdx) {
+        ResourceRouteDAOImpl rr = new ResourceRouteDAOImpl(url, method, pickResponseChannel, selectorIdx, this);
+        rr.setInstance(this);
+        _resourceRoutes.add(rr);
+    }
+
+    public Set<String> getAllResourceRoutes() {
+        HashSet<String> rs = new HashSet<String>();
+        for (ResourceRouteDAO resourceRoute : _resourceRoutes) {
+            rs.add(resourceRoute.getUrl() + "~" + resourceRoute.getMethod());
+        }
+        return rs;
+    }
+
+    public void finishCompletion() {
 	    // make sure we have completed.
 	    assert (ProcessState.isFinished(this.getState()));
 	    // let our process know that we've done our work.

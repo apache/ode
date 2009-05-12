@@ -165,9 +165,6 @@ public interface ProcessInstanceDAO {
 
     /**
      * Returns all the scopes belonging to this isntance.
-     * 
-     * @param scopeName
-     * @return
      */
     Collection<ScopeDAO> getScopes();
 
@@ -177,6 +174,14 @@ public interface ProcessInstanceDAO {
      * @return
      */
     CorrelatorDAO getInstantiatingCorrelator();
+
+    /**
+     * Returns the URL this instance has been instantiated under.
+     * @return
+     */
+    String getInstantiatingUrl();
+    
+    void setInstantiatingUrl(String url);
 
     /**
      * Returns all variable instances matching the variable name for a specified scope.
@@ -252,8 +257,11 @@ public interface ProcessInstanceDAO {
      * Create an activity recovery object for a given activity instance. Specify the reason and optional data associated with the
      * failure. Date/time failure occurred, and the recovery channel and available recovery actions.
      */
-    void createActivityRecovery(String channel, long activityId, String reason, Date dateTime, Element data, String[] actions,
-            int retries);
+    void createActivityRecovery(String channel, long activityId, String reason, Date dateTime,
+                                Element data, String[] actions, int retries);
+
+
+    void createResourceRoute(String url, String method, String pickResponseChannel, int selectorIdx);
 
     /**
      * Delete previously registered activity recovery.
@@ -263,6 +271,8 @@ public interface ProcessInstanceDAO {
     public int getExecutionStateCounter();
 
     public void setExecutionStateCounter(int stateCounter);
+
+    Set<String> getAllResourceRoutes();
 
     /**
      * Transport object holding the date of the first and last instance event along with the number events.

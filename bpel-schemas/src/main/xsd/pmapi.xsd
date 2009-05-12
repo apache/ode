@@ -595,7 +595,6 @@
                 </annotation>
             </element>
             <element name="failures" type="pmapi:tFailuresInfo" minOccurs="0"/>
-            <element name="myElement" type="string"/>
         </sequence>
     </complexType>
     <complexType name="tScopeRef">

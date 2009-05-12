@@ -49,7 +49,7 @@ public class OEventHandler extends OAgent {
         }
     }
     
-    public static class OEvent extends OScope {
+    public static class OEvent extends OScope implements OComm {
         static final long serialVersionUID = -1L  ;
         
         /** Correlations to initialize. */
@@ -58,13 +58,13 @@ public class OEventHandler extends OAgent {
         /** Correlation set to match on. */
         public OScope.CorrelationSet matchCorrelation;
 
+        public OResource resource;
         public OPartnerLink partnerLink;
         public Operation operation;
         public OScope.Variable variable;
 
         /** OASIS addition for disambiguating receives (optional). */
         public String messageExchangeId = "";
-
 
         public String getCorrelatorId() {
             return partnerLink.getId() + "." + operation.getName();
@@ -73,5 +73,22 @@ public class OEventHandler extends OAgent {
         public OEvent(OProcess owner, OActivity parent) {
             super(owner, parent);
         }
+
+        public Operation getOperation() {
+            return operation;
+        }
+
+        public OPartnerLink getPartnerLink() {
+            return partnerLink;
+        }
+
+        public OResource getResource() {
+            return resource;
+        }
+
+        public boolean isRestful() {
+            return partnerLink == null && resource != null;
+        }
+
     }
 }

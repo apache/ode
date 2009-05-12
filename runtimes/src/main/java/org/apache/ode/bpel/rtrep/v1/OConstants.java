@@ -18,13 +18,15 @@
  */
 package org.apache.ode.bpel.rtrep.v1;
 
+import org.apache.ode.bpel.rapi.ConstantsModel;
+
 import javax.xml.namespace.QName;
 
 /**
  * Compiled BPEL constants. Mostly the qualified names of the standard
  * faults.
  */
-public class OConstants extends OBase {
+public class OConstants extends OBase implements ConstantsModel {
 
     private static final long serialVersionUID = 1L;
 
@@ -53,6 +55,78 @@ public class OConstants extends OBase {
 
     public OConstants(OProcess owner) {
         super(owner);
+    }
+
+    public QName getConflictingReceive() {
+        return qnConflictingReceive;
+    }
+
+    public QName getCorrelationViolation() {
+        return qnCorrelationViolation;
+    }
+
+    public QName getDuplicateInstance() {
+        return null;
+    }
+
+    public QName getForEachCounterError() {
+        return qnForEachCounterError;
+    }
+
+    public QName getForcedTermination() {
+        return qnForcedTermination;
+    }
+
+    public QName getInvalidBranchCondition() {
+        return qnInvalidBranchCondition;
+    }
+
+    public QName getInvalidExpressionValue() {
+        return qnInvalidExpressionValue;
+    }
+
+    public QName getJoinFailure() {
+        return qnJoinFailure;
+    }
+
+    public QName getMismatchedAssignmentFailure() {
+        return qnMismatchedAssignmentFailure;
+    }
+
+    public QName getMissingReply() {
+        return qnMissingReply;
+    }
+
+    public QName getMissingRequest() {
+        return qnMissingRequest;
+    }
+
+    public QName getRetiredProcess() {
+        return null;
+    }
+
+    public QName getSelectionFailure() {
+        return qnSelectionFailure;
+    }
+
+    public QName getSubLanguageExecutionFault() {
+        return qnSubLanguageExecutionFault;
+    }
+
+    public QName getUninitializedPartnerRole() {
+        return qnUninitializedPartnerRole;
+    }
+
+    public QName getUninitializedVariable() {
+        return qnUninitializedVariable;
+    }
+
+    public QName getUnknownFault() {
+        return null;
+    }
+
+    public QName getXsltInvalidSource() {
+        return qnXsltInvalidSource;
     }
 
 }

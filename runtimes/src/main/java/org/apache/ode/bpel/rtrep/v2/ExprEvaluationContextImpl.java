@@ -74,7 +74,7 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
         if (variable.type instanceof OConstantVarType) {
             ret = ((OConstantVarType) variable.type).getValue();
         } else if (variable.type instanceof OPropertyVarType) {
-            CorrelationSetInstance set = _scopeInstance.resolve(variable.name);
+            CorrelationSetInstance set = _scopeInstance.resolveCorrelation(variable.name);
             CorrelationKey key = _native.readCorrelation(set);
             if (key == null) return null;
             String keyValue = key.getValues()[0];
@@ -118,7 +118,7 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
 	}
 
 	public Long getProcessId() {
-		return _native.getPid();
+		return _native.getInstanceId();
 	}
 
 	public boolean narrowTypes() {

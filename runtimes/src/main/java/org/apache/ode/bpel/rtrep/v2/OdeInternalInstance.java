@@ -17,6 +17,7 @@ import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import java.net.URI;
 
 
@@ -37,7 +38,16 @@ public interface OdeInternalInstance {
 
     void initializePartnerLinks(Long parentScopeId, Collection<OPartnerLink> partnerLinks);
 
+    void initializeResource(Long parentScopeId, OResource resource, String url);
+
+    void initializeInstantiatingUrl(String url);
+
+    String getInstantiatingUrl();
+
     String invoke(String invokeId, PartnerLinkInstance instance, Operation operation, Element outboundMsg, Object object)
+            throws FaultException;
+
+    String invoke(String requestId, org.apache.ode.bpel.iapi.Resource resource, Element outgoingMessage)
             throws FaultException;
 
     Node getPartData(Element message, OMessageVarType.Part part);
@@ -64,6 +74,10 @@ public interface OdeInternalInstance {
 
     Element getMyRequest(String mexId);
 
+    Map<String,String> getProperties(String mexId);
+
+    void setInstantiatingMex(String mexId);
+
     void registerTimer(TimerResponseChannel timerChannel, Date future);
 
     void registerActivityForRecovery(ActivityRecoveryChannel recoveryChannel, long id, String reason, Date dateTime,
@@ -75,6 +89,9 @@ public interface OdeInternalInstance {
 
     void select(PickResponseChannel pickResponseChannel, Date timeout, boolean createInstance, Selector[] selectors)
             throws FaultException;
+
+    void checkResourceRoute(ResourceInstance resourceInstance, String mexRef,
+                            PickResponseChannel pickResponseChannel, int selectorIdx);
 
     CorrelationKey readCorrelation(CorrelationSetInstance cset);
 
@@ -99,7 +116,7 @@ public interface OdeInternalInstance {
 
     void sendEvent(ProcessInstanceStartedEvent evt);
 
-    Long getPid();
+    Long getInstanceId();
 
     URI getBaseResourceURI();
 
@@ -119,9 +136,6 @@ public interface OdeInternalInstance {
 
     void forceRollback();
     
-    void reply(PartnerLinkInstance plink, String opName, String bpelmex, Element element, QName fault)
-            throws FaultException;
-
 	int getRetryDelay();
 	
 	boolean isFirstTry();
@@ -140,4 +154,13 @@ public interface OdeInternalInstance {
 	 * @return propertyValue - the value corresponding to the process property name.
 	 */
 	Node getProcessProperty(QName propertyName);
+    void associateEvent(PartnerLinkInstance plinkInstance, String opName, String mexRef, String scopeIid);
+
+    void associateEvent(ResourceInstance resourceInstance, String mexRef, String scopeIid);
+
+    void reply(PartnerLinkInstance plink, String opName, String bpelmex, Element element, QName fault)
+            throws FaultException;
+
+    void reply(ResourceInstance resource, String bpelmex, Element element, QName fault) throws FaultException;
+
 }

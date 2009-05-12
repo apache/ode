@@ -63,7 +63,7 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
         InvocationStyle istyle = mexdao.getInvocationStyle();
         PartnerRoleMessageExchangeImpl mex;
         Operation op = _plinkDef.getPartnerRoleOperation(mexdao.getOperation());
-        EndpointReference myroleEPR = _plinkDef.hasMyRole() ? _process.getInitialMyRoleEPR(_plinkDef) : null;
+        EndpointReference myroleEPR = _plinkDef.hasMyRole() ? ((ODEWSProcess)_process).getInitialMyRoleEPR(_plinkDef) : null;
         switch (istyle) {
         case UNRELIABLE:
             mex = new UnreliablePartnerRoleMessageExchangeImpl(_process, mexdao.getInstance().getInstanceId(), mexdao
@@ -110,7 +110,7 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
         }
 
         EndpointReference myRoleEpr = null;
-        if (_plinkDef.hasMyRole()) myRoleEpr = _process.getInitialMyRoleEPR(_plinkDef);
+        if (_plinkDef.hasMyRole()) myRoleEpr = ((ODEWSProcess)_process).getInitialMyRoleEPR(_plinkDef);
         _process.setStatefulEPRs(mexDao);
         Operation operation = _plinkDef.getPartnerRoleOperation(mexDao.getOperation());
         Set<InvocationStyle> supportedStyles = _contexts.mexContext.getSupportedInvocationStyle(_channel, partnerEpr);
@@ -316,19 +316,8 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
 
         UnreliablePartnerRoleMessageExchangeImpl _unreliableMex;
 
-        BpelInstanceWorker _iworker;
-
-        /** Keep a copy of the last BpelRuntimeContextImpl; this is used to optimize away a DB read. */
-        BpelRuntimeContextImpl _lastBRC;
-
         /**
-         * 
-         * @param blockingMex
-         *            the MEX we're invoking on the partner
-         * @param iworker
-         *            instance worker (for scheduling continuation)
-         * @param lastBpelRuntimeContextImpl
-         *            the BRC that initiated this invoke
+         * @param blockingMex the MEX we're invoking on the partner
          */
         public UnreliableInvoker(UnreliablePartnerRoleMessageExchangeImpl blockingMex) {
             _unreliableMex = blockingMex;

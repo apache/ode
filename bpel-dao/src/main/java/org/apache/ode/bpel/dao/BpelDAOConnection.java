@@ -131,4 +131,13 @@ public interface BpelDAOConnection {
      * @return a ProcessManagement DAO
      */
     ProcessManagementDAO getProcessManagement();
+
+    ResourceRouteDAO getResourceRoute(String url, String method);
+
+    void deleteResourceRoute(String url, String method);
+
+    /**
+     * Potentially loads a lot of (small) records, handle with care.
+     */
+    List<ResourceRouteDAO> getAllResourceRoutes();
 }

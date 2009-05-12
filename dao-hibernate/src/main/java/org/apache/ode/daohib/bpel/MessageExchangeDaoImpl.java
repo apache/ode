@@ -22,6 +22,7 @@ package org.apache.ode.daohib.bpel;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
@@ -48,7 +49,6 @@ import org.w3c.dom.Element;
 public class MessageExchangeDaoImpl extends HibernateDao implements MessageExchangeDAO {
 
     private HMessageExchange _hself;
-    
 
     // Used when provided process and instance aren't hibernate implementations. The relation
     // therefore can't be persisted. Used for in-mem DAOs so that doesn't matter much. 
@@ -152,7 +152,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     }
 
     public void setOperation(String opname) {
-      entering("MessageExchangeDaoImpl.setOperation");
+        entering("MessageExchangeDaoImpl.setOperation");
         _hself.setOperationName(opname);
         update();
     }
@@ -348,6 +348,10 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
         // This deletes endpoint LData, callbackEndpoint LData, request HMessage, response HMessage, HMessageExchangeProperty 
     }
 
+    public Map<String,String> getProperties() {
+        return _hself.getProperties();
+    }
+    
     public InvocationStyle getInvocationStyle() {
         return _hself.getInvocationStyle() == null ? null : InvocationStyle.valueOf(_hself.getInvocationStyle());
     }
@@ -397,5 +401,21 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
     public void setPipedPID(QName pipedPid) {
         _hself.setPipedPID(pipedPid == null ? null : pipedPid.toString());
         
+    }
+
+    public void setResource(String resource) {
+        _hself.setResource(resource);
+    }
+
+    public String getResource() {
+        return _hself.getResource();
+    }
+
+    public boolean isInstantiatingResource() {
+        return _hself.isInstantiatingResource();
+    }
+
+    public void setInstantiatingResource(boolean inst) {
+        _hself.setInstantiatingResource(inst);
     }
 }

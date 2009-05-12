@@ -81,12 +81,10 @@ class Contexts {
     public void execTransaction(final Runnable transaction) {
         try {
             execTransaction(new Callable<Void>() {
-
                 public Void call() throws Exception {
                     transaction.run();
                     return null;
                 }
-
             });
         } catch (Exception e) {
             throw new BpelEngineException(e);

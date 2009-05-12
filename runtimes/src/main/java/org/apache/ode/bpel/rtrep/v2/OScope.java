@@ -68,6 +68,9 @@ public class OScope extends OActivity implements ScopeModel {
     /** Variables declared within the scope. */
     public final Map<String,Variable> variables = new LinkedHashMap<String,Variable>();
 
+    /** Resources declared within the scope. */
+    public final HashMap<String,OResource> resource = new HashMap<String,OResource>();
+
     /** OCorrelation sets declared within the scope. */
     public final Map<String,CorrelationSet> correlationSets = new HashMap<String, CorrelationSet>();
 
@@ -234,7 +237,7 @@ public class OScope extends OActivity implements ScopeModel {
         }
 
         public String getDescription() {
-            StringBuffer buf = new StringBuffer(declaringScope.name);
+            StringBuffer buf = new StringBuffer(declaringScope.name != null ? declaringScope.name : "");
             buf.append('.');
             buf.append(name);
             return buf.toString();

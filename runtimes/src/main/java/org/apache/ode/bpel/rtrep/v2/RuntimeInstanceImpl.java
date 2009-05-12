@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import java.net.URI;
 
 import javax.wsdl.Operation;
@@ -107,6 +108,18 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
         _brc.initializePartnerLinks(parentScopeId, partnerLinks);
     }
 
+    public void initializeResource(Long scopeInstanceId, OResource resource, String url) {        
+        _brc.initializeResource(scopeInstanceId, resource, url);
+    }
+
+    public void initializeInstantiatingUrl(String url) {
+        _brc.initializeInstantiatingUrl(url);
+    }
+
+    public String getInstantiatingUrl() {
+        return _brc.getInstantiatingUrl();
+    }
+
     public void cancelOutstandingRequests(String channelId) {
         getORM().cancel(channelId);
     }
@@ -123,6 +136,13 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
         getORM().register(pickResponseChannelStr, selectors);
 
         _brc.select(pickResponseChannelStr, timeout, selectors);
+    }
+
+    public void checkResourceRoute(ResourceInstance resourceInstance, String mexRef,
+                                   PickResponseChannel pickResponseChannel, int selectorIdx) {
+        final String pickResponseChannelStr = pickResponseChannel.export();
+        getORM().register(pickResponseChannelStr, resourceInstance, resourceInstance.getModel().getMethod(), mexRef);
+        _brc.checkResourceRoute(resourceInstance, pickResponseChannelStr, selectorIdx);
     }
 
     public CorrelationKey readCorrelation(CorrelationSetInstance cset) {
@@ -356,6 +376,14 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
         return _brc.getMyRequest(mexId);
     }
 
+    public Map<String,String> getProperties(String mexId) {
+        return _brc.getProperties(mexId);
+    }
+
+    public void setInstantiatingMex(String mexId) {
+        _brc.setInstantiatingMex(mexId);
+    }
+
     /**
      * Proxy to {@link BpelRuntimeContext# }.
      */
@@ -391,8 +419,8 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
     /**
      * Proxy to {@link ProcessControlContext# }.
      */
-    public Long getPid() {
-        return _brc.getPid();
+    public Long getInstanceId() {
+        return _brc.getInstanceId();
     }
 
     /**
@@ -437,9 +465,14 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
         _brc.sendEvent(evt);
     }
 
-    /**
-     * Proxy to {@link IOContext#reply(PartnerLink, String, String, Element, QName) }.
-     */
+    public void associateEvent(PartnerLinkInstance plinkInstance, String opName, String mexRef, String scopeIid) {
+        getORM().associateEvent(plinkInstance, opName, mexRef, scopeIid);
+    }
+
+    public void associateEvent(ResourceInstance resourceInstance, String mexRef, String scopeIid) {
+        getORM().associateEvent(resourceInstance, resourceInstance.getModel().getMethod(), mexRef, scopeIid);
+    }
+
     public void reply(PartnerLinkInstance plink, String opName, String bpelmex, Element element, QName fault) throws FaultException {
         String mexid = getORM().release(plink, opName, bpelmex);
         if (mexid == null)
@@ -451,6 +484,20 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
             // reply to operation that is either not defined or one-way. Perhaps this should be detected at compile time?
             throw new FaultException(_runtime._oprocess.constants.qnMissingRequest,
                     "Undefined two-way operation \"" + opName + "\".");
+        }
+    }
+
+    public void reply(ResourceInstance resource, String bpelmex, Element element, QName fault) throws FaultException {
+        String mexid = getORM().release(resource, resource.getModel().getMethod(), bpelmex);
+        if (mexid == null)
+            throw new FaultException(_runtime._oprocess.constants.qnMissingRequest);
+
+        try {
+            _brc.reply(mexid, resource, element, fault);
+        } catch (NoSuchOperationException e) {
+            // reply to operation that is either not defined or one-way. Perhaps this should be detected at compile time?
+            throw new FaultException(_runtime._oprocess.constants.qnMissingRequest,
+                    "Undefined two-way operation \"" + resource + "\".");
         }
     }
 
@@ -551,8 +598,7 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
         // borrowed from ASSIGN.evalQuery()
         Node ret = DOMUtils.findChildByName(message, new QName(null, part.name));
         if (part.type instanceof OElementVarType) {
-            QName elName = ((OElementVarType) part.type).elementType;
-            ret = DOMUtils.findChildByName((Element) ret, elName);
+            ret = DOMUtils.getFirstChildElement((Element) ret);
         } else if (part.type == null) {
             // Special case of header parts never referenced in the WSDL def
             if (ret != null && ret.getNodeType() == Node.ELEMENT_NODE
@@ -583,6 +629,11 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
         } catch (UninitializedPartnerEPR e) {
             throw new FaultException(_runtime._oprocess.constants.qnUninitializedPartnerRole);
         }
+    }
+
+    public String invoke(String requestId, org.apache.ode.bpel.iapi.Resource resource, Element outgoingMessage)
+            throws FaultException {
+        return _brc.invoke(requestId, resource, outgoingMessage);
     }
 
     /**

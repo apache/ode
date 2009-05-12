@@ -90,7 +90,33 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection {
         }
 	}
 
-	public ProcessDAO createProcess(QName pid, QName type, String guid, long version) {
+    public ResourceRouteDAO getResourceRoute(String url, String method) {
+        try {
+            Criteria criteria = _session.createCriteria(HResourceRoute.class);
+            criteria.add(Expression.eq("url", url));
+            criteria.add(Expression.eq("method", method));
+            HResourceRoute hrr = (HResourceRoute) criteria.uniqueResult();
+            return hrr == null ? null : new ResourceRouteDaoImpl(_sm, hrr);
+        } catch (HibernateException e) {
+            __log.error("DbError", e);
+            throw e;
+        }
+    }
+
+    public void deleteResourceRoute(String url, String method) {
+        _session.createQuery("delete from HResourceRoute r where r.url = :url and r.method = :method")
+                .setString("url", url).setString("method", method).executeUpdate();
+    }
+
+    public List<ResourceRouteDAO> getAllResourceRoutes() {
+        List<HResourceRoute> hrr = _session.createCriteria(HResourceRoute.class).list();
+        ArrayList<ResourceRouteDAO> rr = new ArrayList<ResourceRouteDAO>(hrr.size());
+        for (HResourceRoute hroute : hrr)
+            rr.add(new ResourceRouteDaoImpl(_sm, hroute));
+        return rr;
+    }
+
+    public ProcessDAO createProcess(QName pid, QName type, String guid, long version) {
         HProcess process = new HProcess();
         process.setProcessId(pid.toString());
         process.setTypeName(type.getLocalPart());

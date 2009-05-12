@@ -26,13 +26,14 @@ import javax.wsdl.Operation;
 /**
  * Compiled rerpresentation of the BPEL <code>&lt;invoke&gt;</code> activity.
  */
-public class OInvoke extends OActivity {
+public class OInvoke extends OActivity implements OComm {
   
     static final long serialVersionUID = -1L  ;
     public OPartnerLink partnerLink;
     public OScope.Variable inputVar;
     public OScope.Variable outputVar;
     public Operation operation;
+    public OResource resource;
 
     /** Correlation sets initialized on the input message. */
     public final List<OScope.CorrelationSet> initCorrelationsInput = new ArrayList<OScope.CorrelationSet>();
@@ -49,4 +50,21 @@ public class OInvoke extends OActivity {
     public OInvoke(OProcess owner, OActivity parent) {
         super(owner, parent);
     }
+
+    public OPartnerLink getPartnerLink() {
+        return partnerLink;
+    }
+
+    public Operation getOperation() {
+        return operation;
+    }
+
+    public OResource getResource() {
+        return resource;
+    }
+    
+    public boolean isRestful() {
+        return resource != null;
+    }
+
 }

@@ -20,6 +20,7 @@ package org.apache.ode.bpel.rtrep.v2;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,10 +37,13 @@ import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
 import org.apache.ode.bpel.rapi.InvalidProcessException;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.Document;
 
 /**
  * Message event handler.
@@ -68,9 +72,7 @@ class EH_EVENT extends BpelJacobRunnable {
 
     /** Has a termination of this handler been requested. */
     private boolean _terminated;
-
     private boolean _childrenTerminated;
-
 
     EH_EVENT(ParentScopeChannel psc,TerminationChannel tc, EventHandlerControlChannel ehc, OEventHandler.OEvent o, ScopeFrame scopeFrame) {
         _scopeFrame = scopeFrame;
@@ -80,9 +82,8 @@ class EH_EVENT extends BpelJacobRunnable {
         _ehc = ehc;
     }
 
-
     public void run() {
-        instance(new SELECT(_scopeFrame));
+        instance(new SELECT(_scopeFrame, 0));
     }
 
     /**
@@ -96,6 +97,7 @@ class EH_EVENT extends BpelJacobRunnable {
             _childrenTerminated = true;
         }
     }
+
     /**
      * Template that does the actual selection interaction with the runtime system, and
      * then waits on the pick response channel.
@@ -104,8 +106,11 @@ class EH_EVENT extends BpelJacobRunnable {
 
         private static final long serialVersionUID = 1L;
 
-        public SELECT(ScopeFrame scopeFrame) {
+        private int _counter;
+
+        public SELECT(ScopeFrame scopeFrame, int counter) {
             _scopeFrame = scopeFrame;
+            _counter = counter;
         }
 
         /**
@@ -115,30 +120,36 @@ class EH_EVENT extends BpelJacobRunnable {
             Selector selector;
             try {
                 PickResponseChannel pickResponseChannel = newChannel(PickResponseChannel.class);
-                CorrelationKey key;
-                PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(_oevent.partnerLink);
-                if (_oevent.matchCorrelation == null) {
-                    // Adding a route for opaque correlation. In this case correlation is done on "out-of-band" session id.
-                    String sessionId = getBpelRuntime().fetchMySessionId(pLinkInstance);
-                    key = new CorrelationKey(-1, new String[] {sessionId});
+                if (_oevent.isRestful()) {
+                    getBpelRuntime().checkResourceRoute(_scopeFrame.resolve(_oevent.resource),
+                            _oevent.messageExchangeId+_counter, pickResponseChannel, 0);
                 } else {
-                    if (!getBpelRuntime().isCorrelationInitialized(_scopeFrame.resolve(_oevent.matchCorrelation))) {
-                        throw new FaultException(_oevent.getOwner().constants.qnCorrelationViolation,"Correlation not initialized.");
+                    CorrelationKey key;
+                    PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(_oevent.partnerLink);
+                    if (_oevent.matchCorrelation == null) {
+                        // Adding a route for opaque correlation. In this case correlation is done on "out-of-band" session id.
+                        String sessionId = getBpelRuntime().fetchMySessionId(pLinkInstance);
+                        key = new CorrelationKey(-1, new String[] {sessionId});
+                    } else {
+                        if (!getBpelRuntime().isCorrelationInitialized(_scopeFrame.resolve(_oevent.matchCorrelation))) {
+                            throw new FaultException(_oevent.getOwner().constants.qnCorrelationViolation,"Correlation not initialized.");
+                        }
+                        key = getBpelRuntime().readCorrelation(_scopeFrame.resolve(_oevent.matchCorrelation));
+                        assert key != null;
                     }
-                    key = getBpelRuntime().readCorrelation(_scopeFrame.resolve(_oevent.matchCorrelation));
-                    assert key != null;
-                }
 
-                selector =  new Selector(0,pLinkInstance,_oevent.operation.getName(), _oevent.operation.getOutput() == null, _oevent.messageExchangeId, key);
-                getBpelRuntime().select(pickResponseChannel, null, false, new Selector[] { selector} );
-                instance(new WAITING(pickResponseChannel, _scopeFrame));
+                    selector =  new Selector(0,pLinkInstance,_oevent.operation.getName(),
+                            _oevent.operation.getOutput() == null, _oevent.messageExchangeId+_counter, key);
+                    getBpelRuntime().select(pickResponseChannel, null, false, new Selector[] { selector} );
+                }
+                instance(new WAITING(pickResponseChannel, _scopeFrame, _counter));
             } catch(FaultException e){
                 __log.error(e);
                 if (_fault == null) {
                     _fault = createFault(e.getQName(), _oevent);
                 }
                 terminateActive();
-                instance(new WAITING(null, _scopeFrame));
+                instance(new WAITING(null, _scopeFrame, _counter));
             }
         }
     }
@@ -149,10 +160,12 @@ class EH_EVENT extends BpelJacobRunnable {
     private class WAITING extends BpelJacobRunnable {
         private static final long serialVersionUID = 1L;
         private PickResponseChannel _pickResponseChannel;
+        private int _counter;
 
-        private WAITING(PickResponseChannel pickResponseChannel, ScopeFrame scopeFrame) {
+        private WAITING(PickResponseChannel pickResponseChannel, ScopeFrame scopeFrame, int counter) {
             _pickResponseChannel = pickResponseChannel;
             _scopeFrame = scopeFrame;
+            _counter = counter;
         }
 
         public void run() {
@@ -163,7 +176,6 @@ class EH_EVENT extends BpelJacobRunnable {
                 if (!_terminated) {
                     mlset.add(new TerminationChannelListener(_tc) {
                         private static final long serialVersionUID = 7666910462948788042L;
-
                         public void terminate() {
                             terminateActive();
                             _terminated = true;
@@ -172,13 +184,11 @@ class EH_EVENT extends BpelJacobRunnable {
                             instance(WAITING.this);
                         }
                     });
-
                 }
 
                 if (!_stopped) {
                     mlset.add(new EventHandlerControlChannelListener(_ehc) {
                         private static final long serialVersionUID = -1050788954724647970L;
-
                         public void stop() {
                             _stopped = true;
                             if (_pickResponseChannel != null)
@@ -186,18 +196,15 @@ class EH_EVENT extends BpelJacobRunnable {
                             instance(WAITING.this);
                         }
                     });
-
                 }
 
                 for (final ActivityInfo ai : _active) {
                     mlset.add(new ParentScopeChannelListener(ai.parent) {
                         private static final long serialVersionUID = 5341207762415360982L;
-
                         public void compensate(OScope scope, SynchChannel ret) {
                             _psc.compensate(scope, ret);
                             instance(WAITING.this);
                         }
-
                         public void completed(FaultData faultData, Set<CompensationHandler> compensations) {
                             _active.remove(ai);
                             _comps.addAll(compensations);
@@ -208,7 +215,6 @@ class EH_EVENT extends BpelJacobRunnable {
                             } else
                                 instance(WAITING.this);
                         }
-
                         public void cancelled() { completed(null, CompensationHandler.emptySet()); }
                         public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
                     });
@@ -218,14 +224,19 @@ class EH_EVENT extends BpelJacobRunnable {
                     mlset.add(new PickResponseChannelListener(_pickResponseChannel) {
                         private static final long serialVersionUID = -4929999153478677288L;
 
-
                         public void onRequestRcvd(int selectorIdx, String mexId) {
                             // The receipt of the message causes a new scope to be created:
                             ScopeFrame ehScopeFrame = new ScopeFrame(_oevent,
                                     getBpelRuntime().createScopeInstance(_scopeFrame.scopeInstanceId, _oevent),
-                                    _scopeFrame,
-                                    _comps,
-                                    _fault);
+                                    _scopeFrame, _comps, _fault);
+                            ehScopeFrame.eventScope = true;
+                            if (_oevent.isRestful()) {
+                                getBpelRuntime().associateEvent(_scopeFrame.resolve(_oevent.resource),
+                                        _oevent.messageExchangeId+_counter, _oevent.messageExchangeId+ehScopeFrame.scopeInstanceId);
+                            } else {
+                                getBpelRuntime().associateEvent(_scopeFrame.resolve(_oevent.partnerLink), _oevent.operation.getName(),
+                                        _oevent.messageExchangeId+_counter, _oevent.messageExchangeId+ehScopeFrame.scopeInstanceId);
+                            }
 
                             if (_oevent.variable != null) {
                                 Element msgEl = getBpelRuntime().getMyRequest(mexId);
@@ -248,13 +259,35 @@ class EH_EVENT extends BpelJacobRunnable {
                                 }
                             }
 
+                            if (_oevent.isRestful()) {
+                                // Retrieving the map of properties associated with a RESTful mex. Those are the query
+                                // parameters and are used to set implicit variables associated with these parameters
+                                // in the process.
+                                Map<String,String> props = getBpelRuntime().getProperties(mexId);
+                                for (Map.Entry<String, String> entry : props.entrySet()) {
+                                    VariableInstance vi = _scopeFrame.resolveVariable(entry.getKey());
+                                    if (vi != null) {
+                                        // Always expected to be a string
+                                        Document doc = DOMUtils.newDocument();
+                                        Node textNode = doc.createTextNode(entry.getValue());
+                                        try {
+                                            initializeVariable(vi, textNode);
+                                        } catch (ExternalVariableModuleException e) {
+                                            __log.error("Exception while initializing external variable", e);
+                                            _psc.failure(e.toString(), null);
+                                            return;
+                                        }
+                                    }
+                                }
+
+                            }
 
                             try {
                                 for (OScope.CorrelationSet cset : _oevent.initCorrelations) {
                                     initializeCorrelation(ehScopeFrame.resolve(cset), ehScopeFrame.resolve(_oevent.variable));
                                 }
 
-                                if (_oevent.partnerLink.hasPartnerRole()) {
+                                if (_oevent.partnerLink != null && _oevent.partnerLink.hasPartnerRole()) {
                                     // Trying to initialize partner epr based on a message-provided epr/session.
                                     if (!getBpelRuntime().isPartnerRoleEndpointInitialized(ehScopeFrame
                                             .resolve(_oevent.partnerLink)) || !_oevent.partnerLink.initializePartnerRole) {
@@ -271,27 +304,20 @@ class EH_EVENT extends BpelJacobRunnable {
                                                 partnersSessionId);
                                 }
 
-
-
-
                             } catch (FaultException e) {
                                 __log.error(e);
                                 if (_fault == null) {
                                     _fault = createFault(e.getQName(), _oevent);
                                     terminateActive();
                                 }
-                                instance(new WAITING(null, _scopeFrame));
+                                instance(new WAITING(null, _scopeFrame, _counter));
                                 return;
                             }
 
-
-
                             // load 'onMessage' activity; we'll do this even if a stop/terminate has been
                             // requested becasue we cannot undo the receipt of the message at this point.
-                            ActivityInfo child = new ActivityInfo(genMonotonic(),
-                                    _oevent.activity,
+                            ActivityInfo child = new ActivityInfo(genMonotonic(), _oevent.activity,
                                     newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
-
 
                             _active.add(child);
 
@@ -301,23 +327,20 @@ class EH_EVENT extends BpelJacobRunnable {
 
                             // If we previously terminated the other activiites, then we do the same
                             // here; this is easier then undoing the receive.
-                            if (_childrenTerminated)
-                                replication(child.self).terminate();
-
+                            if (_childrenTerminated) replication(child.self).terminate();
 
                             if (_terminated || _stopped || _fault != null)
-                                instance(new WAITING(null, _scopeFrame));
+                                instance(new WAITING(null, _scopeFrame, _counter));
                             else
-                                instance(new SELECT(_scopeFrame));
+                                instance(new SELECT(_scopeFrame, _counter+1));
                         }
 
-
                         public void onTimeout() {
-                            instance(new WAITING(null, _scopeFrame));
+                            instance(new WAITING(null, _scopeFrame, _counter));
                         }
 
                         public void onCancel() {
-                            instance(new WAITING(null, _scopeFrame));
+                            instance(new WAITING(null, _scopeFrame, _counter));
                         }
                     });
 

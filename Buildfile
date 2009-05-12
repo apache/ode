@@ -186,18 +186,6 @@ repositories.remote << "http://download.java.net/maven/2"
 repositories.remote << "http://ws.zones.apache.org/repository2"
 repositories.release_to[:url] ||= "sftp://guest@localhost/home/guest"
 
-# Changing releases tag names
-class Release
-  class << self
-    def tag_with_apache_ode(version)
-      tag_without_apache_ode("APACHE_ODE_#{version.upcase}")
-    end
-    #alias :tag_without_apache_ode :tag
-    alias :tag :tag_with_apache_ode 
-  end
-end
-
-
 desc "Apache ODE"
 #define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 define "ode" do

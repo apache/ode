@@ -24,6 +24,7 @@ import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Collection;
+import java.util.Map;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -40,6 +41,8 @@ import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.rapi.*;
 import org.apache.ode.bpel.rtrep.v2.channels.*;
 import org.apache.ode.bpel.extension.ExtensionOperation;
+import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.Resource;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.junit.Assert;
@@ -72,7 +75,7 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
         _pid = (long) 19355;
     }
 
-    public Long getPid() {
+    public Long getInstanceId() {
         return _pid;
     }
 
@@ -112,6 +115,38 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    public Map<String, String> getProperties(String mexId) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void initializeResource(Long parentScopeId, OResource resource, String url) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void checkResourceRoute(ResourceInstance resourceInstance, String mexRef, PickResponseChannel pickResponseChannel, int selectorIdx) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void initializeInstantiatingUrl(String url) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public String getInstantiatingUrl() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void associateEvent(PartnerLinkInstance plinkInstance, String opName, String mexRef, String scopeIid) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void associateEvent(ResourceInstance resourceInstance, String mexRef, String scopeIid) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void reply(ResourceInstance resource, String bpelmex, Element element, QName fault) throws FaultException {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public void initializePartnerLinks(Long parentScopeId, Collection<OPartnerLink> partnerLinks) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
@@ -123,11 +158,19 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    public String invoke(String requestId, Resource resource, Element outgoingMessage) throws FaultException {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public void registerTimer(TimerResponseChannel timerChannel, Date future) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public void select(PickResponseChannel pickResponseChannel, Date timeout, boolean createInstance, Selector[] selectors) throws FaultException {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void checkResourceRoute(String url, String method, String mexRef, PickResponseChannel pickResponseChannel, int selectorIdx) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
@@ -337,6 +380,9 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
     public Element getMyRequest(String mexId) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    public void setInstantiatingMex(String mexId) {
     }
 
     public QName getPartnerFault(String mexId) {

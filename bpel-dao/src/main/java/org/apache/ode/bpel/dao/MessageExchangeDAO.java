@@ -20,10 +20,12 @@ package org.apache.ode.bpel.dao;
 
 import java.util.Date;
 import java.util.Set;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.iapi.InvocationStyle;
+import org.apache.ode.bpel.iapi.Resource;
 import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
@@ -176,6 +178,10 @@ public interface MessageExchangeDAO {
 
     Element getEPR();
 
+    String getResource();
+
+    void setResource(String resourceStr);
+
     MessageExchangePattern getPattern();
 
     /**
@@ -248,6 +254,8 @@ public interface MessageExchangeDAO {
 
     Set<String> getPropertyNames();
 
+    Map<String,String> getProperties();
+
     void setPartnerLink(PartnerLinkDAO plinkDAO);
 
     PartnerLinkDAO getPartnerLink();
@@ -279,4 +287,7 @@ public interface MessageExchangeDAO {
     
     void setPipedPID(QName pipedPid);
 
+    boolean isInstantiatingResource();
+
+    void setInstantiatingResource(boolean inst);
  }

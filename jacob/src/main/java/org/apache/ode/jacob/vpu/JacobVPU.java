@@ -278,10 +278,9 @@ public final class JacobVPU {
     }
 
     private class JacobThreadImpl implements Runnable, JacobThread {
+
         private final JacobObject _methodBody;
-
         private final Object[] _args;
-
         private final Method _method;
 
         /** Text string identifying the left side of the reduction (for debug). */

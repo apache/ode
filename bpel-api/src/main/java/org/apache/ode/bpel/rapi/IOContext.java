@@ -1,6 +1,7 @@
 package org.apache.ode.bpel.rapi;
 
 import java.util.Date;
+import java.util.Map;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -44,6 +45,8 @@ public interface IOContext {
      */
     void reply(String mexId, PartnerLink plink, String opName, Element msg, QName fault) throws NoSuchOperationException;
 
+    void reply(String mexId, Resource resource, Element msg, QName fault) throws NoSuchOperationException;
+
     /**
      * Invoke a partner.
      * 
@@ -57,6 +60,8 @@ public interface IOContext {
      */
     String /* MexId */invoke(String invokeId, PartnerLink partnerLinkInstance, Operation operation, Element outboundMsg)
             throws UninitializedPartnerEPR;
+
+    String invoke(String requestId, org.apache.ode.bpel.iapi.Resource resource, Element outgoingMessage);
 
     /**
      * Get partner's response to an invoke.
@@ -86,7 +91,12 @@ public interface IOContext {
      */
     Element getMyRequest(String mexId);
 
+
     void releasePartnerMex(String mexId, boolean instanceSucceeded);
+
+    public Map<String,String> getProperties(String mexId);
+
+    void setInstantiatingMex(String mexId);
 
     Element getSourceEPR(String mexId);
 

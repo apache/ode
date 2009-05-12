@@ -49,6 +49,9 @@ class OutstandingRequestManager implements Serializable {
     private final Map<RequestIdTuple, Entry> _byRid = new HashMap<RequestIdTuple, Entry>();
     private final Map<String, Entry> _byChannel = new HashMap<String, Entry>();
 
+    private final Map<RequestResTuple, RestEntry> _byRestRid = new HashMap<RequestResTuple, RestEntry>();
+    private final Map<String, RestEntry> _byRestChannel = new HashMap<String, RestEntry>();
+
     int findConflict(Selector selectors[]) {
         if (__log.isTraceEnabled()) {
             __log.trace(ObjectPrinter.stringifyMethodEnter("findConflict", new Object[] { "selectors", selectors}) );
@@ -75,12 +78,9 @@ class OutstandingRequestManager implements Serializable {
      * @param selectors selectors for this receive/pick
      */
     void register(String pickResponseChannel, Selector selectors[]) {
-        if (__log.isTraceEnabled()) {
+        if (__log.isTraceEnabled())
             __log.trace(ObjectPrinter.stringifyMethodEnter("register", new Object[] {
-                    "pickResponseChannel", pickResponseChannel,
-                    "selectors", selectors
-            }) );
-        }
+                    "pickResponseChannel", pickResponseChannel, "selectors", selectors }) );
 
         if (_byChannel.containsKey(pickResponseChannel)) {
             String errmsg = "INTERNAL ERROR: Duplicate ENTRY for RESPONSE CHANNEL " + pickResponseChannel;
@@ -106,6 +106,28 @@ class OutstandingRequestManager implements Serializable {
         _byChannel.put(pickResponseChannel, entry);
     }
 
+    void register(String pickResponseChannel, ResourceInstance resource, String method, String mexRef) {
+        if (__log.isTraceEnabled())
+            __log.trace(ObjectPrinter.stringifyMethodEnter("register", new Object[] {
+                    "pickResponseChannel", pickResponseChannel}) );
+
+        if (_byRestChannel.containsKey(pickResponseChannel)) {
+            String errmsg = "INTERNAL ERROR: Duplicate ENTRY for RESPONSE CHANNEL " + pickResponseChannel;
+            __log.fatal(errmsg);
+            throw new IllegalArgumentException(errmsg);
+        }
+
+        final RequestResTuple rid = new RequestResTuple(resource, method, mexRef);
+        if (_byRestRid.containsKey(rid)) {
+            String errmsg = "INTERNAL ERROR: Duplicate ENTRY for RID " + rid;
+            __log.fatal(errmsg);
+            throw new IllegalStateException(errmsg);
+        }
+        RestEntry entry = new RestEntry(pickResponseChannel);
+        _byRestRid.put(rid,  entry);
+        _byRestChannel.put(pickResponseChannel, entry);
+    }
+
     /**
      * Cancel a previous registration.
      * @see #register(String, Selector[])
@@ -114,13 +136,15 @@ class OutstandingRequestManager implements Serializable {
     void cancel(String pickResponseChannel) {
         if (__log.isTraceEnabled())
             __log.trace(ObjectPrinter.stringifyMethodEnter("cancel", new Object[] {
-                    "pickResponseChannel", pickResponseChannel
-            }) );
+                    "pickResponseChannel", pickResponseChannel }) );
 
         Entry entry = _byChannel.remove(pickResponseChannel);
-        if (entry != null) {
+        if (entry != null)
             while(_byRid.values().remove(entry));
-        }
+
+        RestEntry restEntry = _byRestChannel.remove(pickResponseChannel);
+        if (restEntry != null)
+            while(_byRestRid.values().remove(restEntry));
     }
 
     /**
@@ -138,18 +162,41 @@ class OutstandingRequestManager implements Serializable {
 
         Entry entry = _byChannel.get(pickResponseChannel);
         if (entry == null) {
-            String errmsg = "INTERNAL ERROR: No ENTRY for RESPONSE CHANNEL " + pickResponseChannel;
-            __log.fatal(errmsg);
-            throw new IllegalArgumentException(errmsg);
+            RestEntry restEntry = _byRestChannel.get(pickResponseChannel);
+            if (restEntry == null) {
+                String errmsg = "INTERNAL ERROR: No ENTRY for RESPONSE CHANNEL " + pickResponseChannel;
+                __log.fatal(errmsg);
+                throw new IllegalArgumentException(errmsg);
+            } else {
+                if (restEntry.mexRef != null) {
+                    String errmsg = "INTERNAL ERROR: Duplicate ASSOCIATION for CHANEL " + pickResponseChannel;
+                    __log.fatal(errmsg);
+                    throw new IllegalStateException(errmsg);
+                }
+                restEntry.mexRef = mexRef;
+            }
+        } else {
+            if (entry.mexRef != null) {
+                String errmsg = "INTERNAL ERROR: Duplicate ASSOCIATION for CHANEL " + pickResponseChannel;
+                __log.fatal(errmsg);
+                throw new IllegalStateException(errmsg);
+            }
+            entry.mexRef = mexRef;
         }
+    }
 
-        if (entry.mexRef != null) {
-            String errmsg = "INTERNAL ERROR: Duplicate ASSOCIATION for CHANEL " + pickResponseChannel;
-            __log.fatal(errmsg);
-            throw new IllegalStateException(errmsg);
-        }
+    public void associateEvent(PartnerLinkInstance plinkInstance, String opName, String mexRef, String scopeIid) {
+        RequestIdTuple rid = new RequestIdTuple(plinkInstance, opName, mexRef);
+        Entry entry = _byRid.remove(rid);
+        rid.mexId = scopeIid;
+        _byRid.put(rid, entry);
+    }
 
-        entry.mexRef = mexRef;
+    public void associateEvent(ResourceInstance resourceInstance, String method, String mexRef, String scopeIid) {
+        RequestResTuple rid = new RequestResTuple(resourceInstance, method, mexRef);
+        RestEntry entry = _byRestRid.remove(rid);
+        rid.mexId = scopeIid;
+        _byRestRid.put(rid, entry);
     }
 
     /**
@@ -178,6 +225,24 @@ class OutstandingRequestManager implements Serializable {
         }
         while(_byChannel.values().remove(entry));
         while(_byRid.values().remove(entry));
+        return entry.mexRef;
+    }
+
+    public String release(ResourceInstance resourceInstance, String method, String mexId) {
+        if (__log.isTraceEnabled())
+            __log.trace(ObjectPrinter.stringifyMethodEnter("release", new Object[] {
+                    "resource", resourceInstance, "method", method, "mexId", mexId }) );
+
+        final RequestResTuple rid = new RequestResTuple(resourceInstance, method, mexId);
+        RestEntry entry = _byRestRid.get(rid);
+        if (entry == null) {
+            if (__log.isDebugEnabled()) {
+                __log.debug("==release: RID " + rid + " not found in " + _byRestRid);
+            }
+            return null;
+        }
+        while(_byRestChannel.values().remove(entry));
+        while(_byRestRid.values().remove(entry));
         return entry.mexRef;
     }
 
@@ -248,6 +313,36 @@ class OutstandingRequestManager implements Serializable {
         }
     }
 
+    private class RequestResTuple  implements Serializable {
+        private static final long serialVersionUID = -1059359612839777482L;
+        /** Name of the operation. */
+        ResourceInstance resource;
+        /** Message exchange identifier. */
+        String method;
+        /** Message exchange identifier. */
+        String mexId;
+
+        /** Constructor. */
+        private RequestResTuple(ResourceInstance resource, String method, String mexId) {
+            this.resource = resource;
+            this.method = method;
+            this.mexId = mexId;
+        }
+
+        public int hashCode() {
+            return this.resource.hashCode() ^ this.method.hashCode() ^ this.mexId.hashCode();
+        }
+
+        public boolean equals(Object obj) {
+            RequestResTuple other = (RequestResTuple) obj;
+            return other.resource.equals(resource) && other.method.equals(method) && other.mexId.equals(mexId);
+        }
+
+        public String toString() {
+            return ObjectPrinter.toString(this, new Object[] {"url", resource, "method", method, "mexId", mexId});
+        }
+    }
+
     private class Entry implements Serializable {
         private static final long serialVersionUID = -583743124656582887L;
         final String pickResponseChannel;
@@ -263,6 +358,23 @@ class OutstandingRequestManager implements Serializable {
             return ObjectPrinter.toString(this, new Object[] {
                     "pickResponseChannel", pickResponseChannel,
                     "selectors", selectors,
+                    "mexRef", mexRef
+            });
+        }
+    }
+
+    private class RestEntry implements Serializable {
+        private static final long serialVersionUID = -583733124656582887L;
+        final String pickResponseChannel;
+        String mexRef;
+
+        private RestEntry(String pickResponseChannel) {
+            this.pickResponseChannel = pickResponseChannel;
+        }
+
+        public String toString() {
+            return ObjectPrinter.toString(this, new Object[] {
+                    "pickResponseChannel", pickResponseChannel,
                     "mexRef", mexRef
             });
         }

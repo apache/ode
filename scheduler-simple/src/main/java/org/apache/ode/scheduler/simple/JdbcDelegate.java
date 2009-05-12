@@ -317,7 +317,7 @@ public class JdbcDelegate implements DatabaseDelegate {
         } finally {
             close(con);
         }
-        __log.info("Using database dialect: " + d);
+        __log.debug("Using database dialect: " + d);
         return d;
     }
 

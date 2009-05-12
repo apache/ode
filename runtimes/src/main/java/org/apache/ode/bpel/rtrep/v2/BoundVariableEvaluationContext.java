@@ -58,7 +58,7 @@ public class BoundVariableEvaluationContext implements EvaluationContext {
     }
 
     public Long getProcessId() {
-        throw new InvalidProcessException("Process id not available in this context.");
+        return null;
     }
 
     public boolean narrowTypes() {

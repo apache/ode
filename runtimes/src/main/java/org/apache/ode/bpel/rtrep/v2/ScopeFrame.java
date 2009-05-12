@@ -50,6 +50,8 @@ class ScopeFrame implements Serializable {
     
     final InstanceGlobals globals;
 
+    boolean eventScope = false;
+
     /** Constructor used to create "fault" scopes. */
     ScopeFrame( OScope scopeDef,
                 Long scopeInstanceId,
@@ -85,21 +87,38 @@ class ScopeFrame implements Serializable {
         return (parent != null) ? parent.find(scope) : null;
     }
 
+    public ScopeFrame findEventScope() {
+        if (eventScope) return this;
+        else if (parent == null) return null;
+        else return parent.findEventScope();
+    }
+
     public VariableInstance resolve(OScope.Variable variable) {
         ScopeFrame scopeFrame = find(variable.declaringScope);
         if (scopeFrame == null) return null;
         return new VariableInstance(scopeFrame.scopeInstanceId, variable);
     }
 
+    public VariableInstance resolveVariable(String variableName) {
+        OScope.Variable cset = oscope.getLocalVariable(variableName);
+        if (cset != null) return new VariableInstance(scopeInstanceId, cset);
+        else if (parent != null) return parent.resolveVariable(variableName);
+        else return null;
+    }
+
     public CorrelationSetInstance resolve(OScope.CorrelationSet cset) {
         return new CorrelationSetInstance(find(cset.declaringScope).scopeInstanceId, cset);
     }
 
-    public CorrelationSetInstance resolve(String correlationName) {
+    public CorrelationSetInstance resolveCorrelation(String correlationName) {
         OScope.CorrelationSet cset = oscope.getCorrelationSet(correlationName);
         if (cset != null) return new CorrelationSetInstance(scopeInstanceId, cset);
-        else if (parent != null) return parent.resolve(correlationName);
+        else if (parent != null) return parent.resolveCorrelation(correlationName);
         else return null;
+    }
+
+    public ResourceInstance resolve(OResource resource) {
+        return new ResourceInstance(find(resource.getDeclaringScope()).scopeInstanceId, resource);
     }
 
     public PartnerLinkInstance resolve(OPartnerLink partnerLink) {

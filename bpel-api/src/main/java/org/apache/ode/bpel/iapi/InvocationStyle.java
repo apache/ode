@@ -12,7 +12,6 @@ public enum InvocationStyle {
      */
     RELIABLE,
     
-    
     /**
      * Transacted style -- the IL/engine will enroll the operation with the current transaction. The IL/engine will
      * block until the operation completes. 

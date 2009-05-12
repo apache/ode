@@ -26,8 +26,6 @@ import java.util.Set;
 /**
  * A representation of a communication (message-exchange) between the BPEL 
  * BPEL engine and an  external "partner".
- * 
- * @author mszefler
  */
 public interface MessageExchange {
 
@@ -103,8 +101,7 @@ public interface MessageExchange {
      * time.
      * @return unique message exchange identifier
      */
-    String getMessageExchangeId()
-            throws BpelEngineException;
+    String getMessageExchangeId() throws BpelEngineException;
 
 
     /**
@@ -130,16 +127,14 @@ public interface MessageExchange {
      *
      * @return name of the operation (WSDL 1.1) /message exchange (WSDL 1.2?).
      */
-    String getOperationName()
-            throws BpelEngineException;
+    String getOperationName() throws BpelEngineException;
 
 
     /**
      * Get a reference to the end-point targeted by this message exchange.
      * @return end-point reference for this message exchange
      */
-    EndpointReference getEndpointReference()
-            throws BpelEngineException;
+    EndpointReference getEndpointReference() throws BpelEngineException;
 
 
     AckType getAckType();
@@ -187,36 +182,6 @@ public interface MessageExchange {
     Message getResponse();
 
     /**
-     * Get the fault type.
-     * @return fault type, or <code>null</code> if not available/applicable.
-     */
-    QName getFault();
-
-    String getFaultExplanation();
-
-    /**
-     * Get the fault resposne message.
-     * @return fault response, or <code>null</code> if not available/applicable.
-     */
-    Message getFaultResponse();
-
-    /**
-     * Get the operation description for this message exchange.
-     * It is possible that the description cannot be resolved, for example if
-     * the EPR is unknown or if the operation does not exist.
-     * @return WSDL operation description or <code>null</code> if not availble
-     */
-    Operation getOperation();
-
-    /**
-     * Get the port type description for this message exchange.
-     * It is possible that the description cannot be resolved, for example if
-     * the EPR is unknown or if the operation does not exist.
-     * @return WSDL port type description or <code>null</code> if not available.
-     */
-    PortType getPortType();
-
-    /**
      * Set a message exchange property. Message exchange properties are not
      * interpreted by the engine--they exist to enable the integration layer
      * to persist information about the exchange.
@@ -239,13 +204,6 @@ public interface MessageExchange {
      */
     public Set<String> getPropertyNames();
 
-    /**
-     * Report whether the operation is "safe" in the sense of the WSDL1.2 meaning of the term. That is,
-     * is the operation side-effect free?
-     * @return <code>true</code> if the operation is safe, <code>false</code> otherwise. 
-     */
-    public boolean isSafe();
-    
     /**
      * Should be called by the external partner when it's done with the
      * message exchange. Ncessary for a better resource management and

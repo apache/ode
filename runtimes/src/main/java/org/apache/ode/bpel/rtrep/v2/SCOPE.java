@@ -19,12 +19,7 @@
 package org.apache.ode.bpel.rtrep.v2;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.xml.namespace.QName;
 
@@ -44,8 +39,11 @@ import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.ParentScopeChannelListener;
 import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
+import org.apache.ode.bpel.rapi.InvalidProcessException;
+import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -86,8 +84,7 @@ class SCOPE extends ACTIVITY {
 
     public void run() {        
         // Start the child activity.
-        _child = new ActivityInfo(genMonotonic(),
-            _oscope.activity,
+        _child = new ActivityInfo(genMonotonic(), _oscope.activity,
             newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
         instance(createChild(_child, _scopeFrame, _linkFrame));
 
@@ -114,8 +111,47 @@ class SCOPE extends ACTIVITY {
         getBpelRuntime().initializePartnerLinks(_scopeFrame.scopeInstanceId,
             _oscope.partnerLinks.values());
 
+        initializeResources();
+
         sendEvent(new ScopeStartEvent());
         instance(new ACTIVE());
+    }
+
+    private void initializeResources() {
+        // Filter instantiating resource to handle it first
+        ArrayList<OResource> resources = new ArrayList<OResource>();
+        OResource instantiating = null;
+        for (OResource resource : _oscope.resource.values()) {
+            if (resource.isInstantiateResource()) instantiating = resource;
+            else resources.add(resource);
+        }
+
+        if (instantiating != null) {
+            try {
+                String url = getBpelRuntime().getExpLangRuntime().evaluateAsString(
+                        instantiating.getSubpath(), getEvaluationContext());
+                url = url + "/" + getBpelRuntime().getInstanceId();
+                getBpelRuntime().initializeInstantiatingUrl(url);
+                getBpelRuntime().initializeResource(_scopeFrame.scopeInstanceId, instantiating, url);
+            } catch (FaultException e) {
+                _self.parent.completed(new FaultData(e.getQName(), instantiating,
+                        "Error in resource evaluation: " + e.toString()), CompensationHandler.emptySet());
+            }
+        }
+
+        for (OResource resource : resources) {
+            try {
+                String url = getBpelRuntime().getExpLangRuntime().evaluateAsString(
+                        resource.getSubpath(), getEvaluationContext());
+                if (url.endsWith("/")) url = url.substring(0, url.length() - 1);
+                url = getBpelRuntime().getInstantiatingUrl() + url;
+
+                getBpelRuntime().initializeResource(_scopeFrame.scopeInstanceId, resource, url);
+            } catch (FaultException e) {
+                _self.parent.completed(new FaultData(e.getQName(), resource,
+                        "Error in resource evaluation: " + e.toString()), CompensationHandler.emptySet());
+            }
+        }
     }
 
     private List<CompensationHandler> findCompensationData(OScope scope) {

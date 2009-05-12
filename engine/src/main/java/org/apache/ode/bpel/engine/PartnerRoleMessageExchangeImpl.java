@@ -102,6 +102,7 @@ abstract class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implem
                 MessageDAO responseDao = dao.createMessage(_response.getType());
                 responseDao.setData(_response.getMessage());
                 responseDao.setHeader(_response.getHeader());
+                responseDao.setType(_response.getType());
                 dao.setResponse(responseDao);
             }
         }

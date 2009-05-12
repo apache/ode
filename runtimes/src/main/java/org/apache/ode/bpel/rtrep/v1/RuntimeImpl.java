@@ -125,6 +125,10 @@ public class RuntimeImpl implements OdeRuntime {
         return null;
     }
 
+    public String extractAddress(ResourceModel resource) {
+        return null;
+    }
+
     public void clear() {
         _pconf = null;
         _oprocess = null;

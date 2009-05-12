@@ -52,7 +52,7 @@ public class OPickReceive extends OActivity{
         }
     }
     
-    public static class OnMessage extends OBase {
+    public static class OnMessage extends OBase implements OComm {
       
         static final long serialVersionUID = -1L  ;
         
@@ -62,6 +62,7 @@ public class OPickReceive extends OActivity{
         /** Correlation set to match on. */
         public OScope.CorrelationSet matchCorrelation;
 
+        public OResource resource;
         public OPartnerLink partnerLink;
         public Operation operation;
         public OScope.Variable variable;
@@ -76,6 +77,22 @@ public class OPickReceive extends OActivity{
 
         public String getCorrelatorId() {
             return partnerLink.getId() + "." + operation.getName();
+        }
+
+        public boolean isRestful() {
+            return partnerLink == null && resource != null;
+        }
+
+        public OPartnerLink getPartnerLink() {
+            return partnerLink;
+        }
+
+        public Operation getOperation() {
+            return operation;
+        }
+
+        public OResource getResource() {
+            return resource;
         }
     }
 }

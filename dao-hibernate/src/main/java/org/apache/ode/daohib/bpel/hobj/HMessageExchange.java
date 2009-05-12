@@ -57,6 +57,8 @@ public class HMessageExchange extends HObject {
 
     private HPartnerLink _partnerLink;
 
+    private String _resource;
+
     private String _clientKey;
 
     private HProcessInstance _instance;
@@ -92,6 +94,8 @@ public class HMessageExchange extends HObject {
     private String _ackType;
 
     private String _pipedPid;
+
+    private boolean _instantiatingResource;
 
     /**
      * 
@@ -426,4 +430,27 @@ public class HMessageExchange extends HObject {
     public void setPipedPID(String ppid) {
         _pipedPid = ppid;
     }
+
+    /**
+     * @hibernate.property column="RESOURCE" length="255"
+     */
+    public String getResource() {
+        return _resource;
+    }
+
+    public void setResource(String resource) {
+        this._resource = resource;
+    }
+
+    /**
+     * @hibernate.property column="INST_RES"
+     */
+    public boolean isInstantiatingResource() {
+        return _instantiatingResource;
+    }
+
+    public void setInstantiatingResource(boolean inst) {
+        _instantiatingResource = inst;
+    }
+
 }

@@ -15,6 +15,8 @@ public interface ProcessModel {
 
     String getGuid();
 
+    Collection<? extends ResourceModel> getProvidedResources();
+
     QName getQName();
 
     List<String> getCorrelators();
@@ -22,8 +24,10 @@ public interface ProcessModel {
     ActivityModel getChild(final int id);
 
     int getModelVersion();
-    
+
     ConstantsModel getConstantsModel();
     
     ScopeModel getProcessScope();
+
+    byte[] getGlobalState();
 }

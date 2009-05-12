@@ -45,6 +45,8 @@ public class HProcessInstance extends HObject {
     /** Foreign key to the instantiating {@link HCorrelator}. */
     private HCorrelator _instantiatingCorrelator;
 
+    private String _instantiatingUrl;
+
     /** Scope instances belonging to this process instnace. */
     private Collection<HScope> _scopes = new HashSet<HScope>();
 
@@ -56,6 +58,8 @@ public class HProcessInstance extends HObject {
     private Set<HCorrelatorSelector> _correlatorSelectors = new HashSet<HCorrelatorSelector>();
 
     private Set<HMessageExchange> _messageExchanges = new HashSet<HMessageExchange>();
+
+    private Set<HResourceRoute> _resourceRoutes = new HashSet<HResourceRoute>();
 
     private HFaultData _fault;
 
@@ -158,6 +162,19 @@ public class HProcessInstance extends HObject {
 
     public void setMessageExchanges(Set<HMessageExchange> exchanges) {
         _messageExchanges = exchanges;
+    }
+
+    /**
+     * @hibernate.set lazy="true" inverse="true" cascade="delete"
+     * @hibernate.collection-key column="PIID"
+     * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HResourceRoute"
+     */
+    public Set<HResourceRoute> getResourceRoutes() {
+        return _resourceRoutes;
+    }
+
+    public void setResourceRoutes(Set<HResourceRoute> rroutes) {
+        _resourceRoutes = rroutes;
     }
 
     /**
@@ -290,4 +307,15 @@ public class HProcessInstance extends HObject {
         
     }
 
+    /**
+     * @hibernate.property column="INSTANTIATE_URL" size=255
+     * @return
+     */
+    public String getInstantiatingUrl() {
+        return _instantiatingUrl;
+    }
+
+    public void setInstantiatingUrl(String instantiatingUrl) {
+        _instantiatingUrl = instantiatingUrl;
+    }
 }

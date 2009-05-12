@@ -19,10 +19,7 @@
 
 package org.apache.ode.bpel.memdao;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.Map.Entry;
 
 import javax.xml.namespace.QName;
@@ -53,6 +50,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
     MessageExchangePattern pattern;
     Element ePR;
     String channel;
+    String resource;
     QName fault;
     String faultExplanation;
     String correlationStatus;
@@ -68,6 +66,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
     long _timeout;
     AckType _ackType;
     QName _pipedPID;
+    boolean _instantiatingResource;
 
     public MessageExchangeDAOImpl(char direction, String messageEchangeId){
         this.direction = direction;
@@ -148,7 +147,14 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 
     public void setPattern(MessageExchangePattern pattern) {
         this.pattern = pattern;
+    }
 
+    public String getResource() {
+        return resource;
+    }
+
+    public void setResource(String resource) {
+        this.resource = resource;
     }
 
     public void setOperation(String opname) {
@@ -258,6 +264,13 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
         return retVal;
     }
 
+    public Map<String, String> getProperties() {
+        HashMap m = new HashMap(properties.size());
+        for (Entry<Object, Object> entry : properties.entrySet()) {
+            m.put(entry.getKey(), entry.getValue());
+        }
+        return m;
+    }
 
     public void release(boolean doClean) {
         instance = null;
@@ -320,5 +333,13 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
     public void setPipedPID(QName pipedPid) {
         _pipedPID = pipedPid;
         
+    }
+
+    public boolean isInstantiatingResource() {
+        return _instantiatingResource;
+    }
+
+    public void setInstantiatingResource(boolean inst) {
+        _instantiatingResource = inst;
     }
 }

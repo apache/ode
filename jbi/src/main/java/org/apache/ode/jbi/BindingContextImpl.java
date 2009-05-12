@@ -70,7 +70,14 @@ class BindingContextImpl implements BindingContext {
         }
     }
 
-    
+    public void activateProvidedResource(Resource resource) {
+        throw new UnsupportedOperationException("RESTful resources not supported in JBI integration layer.");
+    }
+
+    public void deactivateProvidedResource(Resource resource) {
+        throw new UnsupportedOperationException("RESTful resources not supported in JBI integration layer.");
+    }
+
     private class PartnerRoleChannelImpl implements PartnerRoleChannel {
         
         private final JbiEndpointReference _initialEPR;

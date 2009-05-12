@@ -198,7 +198,7 @@ class ASSIGN extends ACTIVITY {
             } else if (ocopy.to.getVariable().type instanceof OPropertyVarType) {
                 // For poperty assignment, the property, the variable that points to it and the correlation set
                 // all have the same name
-                CorrelationSetInstance csetInstance = _scopeFrame.resolve(ocopy.to.getVariable().name);
+                CorrelationSetInstance csetInstance = _scopeFrame.resolveCorrelation(ocopy.to.getVariable().name);
                 CorrelationKey ckey = new CorrelationKey(csetInstance.declaration.getId(), new String[] { rvalue.getTextContent() });
                 if (__log.isDebugEnabled()) __log.debug("Writing correlation " + csetInstance.getName()
                         + " using value " + rvalue.getTextContent());
@@ -290,8 +290,9 @@ class ASSIGN extends ACTIVITY {
             QName partName = new QName(null, part.name);
             Node qualLVal = DOMUtils.findChildByName((Element) data, partName);
             if (part.type instanceof OElementVarType) {
-                QName elName = ((OElementVarType) part.type).elementType;
-                qualLVal = DOMUtils.findChildByName((Element) qualLVal, elName);
+//                QName elName = ((OElementVarType) part.type).elementType;
+//                qualLVal = DOMUtils.findChildByName((Element) qualLVal, elName);
+                qualLVal = DOMUtils.getFirstChildElement((Element) qualLVal);
             } else if (part.type == null) {
                 // Special case of header parts never referenced in the WSDL def
                 if (qualLVal != null && qualLVal.getNodeType() == Node.ELEMENT_NODE

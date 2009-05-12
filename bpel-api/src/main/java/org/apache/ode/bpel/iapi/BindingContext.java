@@ -69,7 +69,20 @@ public interface BindingContext {
      * @param myRoleEndpoint
      */
     void deactivateMyRoleEndpoint(Endpoint myRoleEndpoint);
-    
+
+    /**
+     * Activates a resource the engine has to provide. The resource url may contain patterns such as
+     * http://example.com/order/{orderId}/
+     * @param resource
+     */
+    void activateProvidedResource(Resource resource);
+
+    /**
+     * Deactivates a resource provided by the engine.
+     * @param resource
+     */
+    void deactivateProvidedResource(Resource resource);
+
     /**
      * Create a communication channel for communicating with a partner. A default or
      * initial value for the partner endpoint may be given. 

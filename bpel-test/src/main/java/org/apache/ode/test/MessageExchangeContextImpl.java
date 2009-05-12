@@ -25,15 +25,7 @@ import java.util.Set;
 
 import javax.xml.namespace.QName;
 
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.iapi.InvocationStyle;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchangeContext;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -150,13 +142,14 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 
     public void invokePartnerReliable(PartnerRoleMessageExchange mex) throws ContextException {
         // TODO Auto-generated method stub
-        
     }
 
     public void invokePartnerTransacted(PartnerRoleMessageExchange mex) throws ContextException {
         // TODO Auto-generated method stub
-        
     }
 
+    public void invokeRestful(RESTOutMessageExchange mex) throws ContextException {
+        throw new UnsupportedOperationException("No support for RESTful invocations");
+    }
 
 }
