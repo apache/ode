@@ -147,8 +147,9 @@ abstract class MessageExchangeImpl implements MessageExchange {
     
     void load(MessageExchangeDAO dao) {
         if(__log.isDebugEnabled()) __log.debug("INMEM MessageExchange loading.");
-        
-        _epr = _contexts.eprContext.resolveEndpointReference(dao.getEPR());
+       
+        if (_contexts.eprContext != null)
+            _epr = _contexts.eprContext.resolveEndpointReference(dao.getEPR());
         
         _timeout = dao.getTimeout();
         _iid = dao.getInstance() != null ? dao.getInstance().getInstanceId() : null;
