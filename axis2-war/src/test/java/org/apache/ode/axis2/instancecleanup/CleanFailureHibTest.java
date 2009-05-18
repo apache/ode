@@ -26,7 +26,7 @@ import org.hibernate.Query;
 public class CleanFailureHibTest extends CleanFailureTest {
     @Override
     public String getODEConfigDir() {
-        return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.hib-derby";
+        return HIB_DERBY_CONF_DIR;
     }
 
     @Override

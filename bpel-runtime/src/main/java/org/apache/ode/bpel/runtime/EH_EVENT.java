@@ -208,6 +208,9 @@ class EH_EVENT extends BpelJacobRunnable {
                             if (faultData != null && _fault == null) {
                                 _fault = faultData;
                                 terminateActive();
+                                // ODE-511; needs to clean up the route
+                                if (_pickResponseChannel != null)
+                                    getBpelRuntimeContext().cancel(_pickResponseChannel);
                                 _psc.completed(_fault, _comps);
                             } else
                                 instance(WAITING.this);

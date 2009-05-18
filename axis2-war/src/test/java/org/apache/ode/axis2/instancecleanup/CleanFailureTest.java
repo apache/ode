@@ -43,7 +43,7 @@ public class CleanFailureTest extends CleanTestBase {
     }
 
     public String getODEConfigDir() {
-        return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby";
+        return JPA_DERBY_CONF_DIR;
     }
     
     protected ProcessInstanceDAO getInstance() {
