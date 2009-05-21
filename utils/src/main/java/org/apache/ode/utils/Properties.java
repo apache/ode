@@ -86,6 +86,7 @@ public class Properties {
     public static final String PROP_SECURITY_POLICY = "security.policy.file";
     public static final String PROP_JMS_REPLY_DESTINATION = "jms.reply.destination";
     public static final String PROP_JMS_REPLY_TIMEOUT = "jms.reply.timeout";
+    public static final String PROP_JMS_DESTINATION_TYPE = "jms.destination.type";
     public static final String PROP_SEND_WS_ADDRESSING_HEADERS = "ws-addressing.headers";
 
 
@@ -195,6 +196,15 @@ public class Properties {
                 } catch (NumberFormatException e) {
                     if (log.isWarnEnabled())
                         log.warn("Mal-formatted Property: [" + Properties.PROP_JMS_REPLY_TIMEOUT + "=" + value + "]. Long expected. Property will be skipped.");
+                }
+            }
+            if (properties.containsKey(PROP_JMS_DESTINATION_TYPE)) {
+                String value = properties.get(PROP_JMS_DESTINATION_TYPE);
+                try {
+                    options.setProperty(JMSConstants.DEST_TYPE_PARAM, Long.valueOf(value));
+                } catch (NumberFormatException e) {
+                    if (log.isWarnEnabled())
+                        log.warn("Mal-formatted Property: [" + Properties.PROP_JMS_DESTINATION_TYPE + "=" + value + "]. Long expected. Property will be skipped.");
                 }
             }
             if(properties.containsKey(PROP_SEND_WS_ADDRESSING_HEADERS)){
