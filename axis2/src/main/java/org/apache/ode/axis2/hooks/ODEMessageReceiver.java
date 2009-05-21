@@ -24,7 +24,7 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.receivers.AbstractMessageReceiver;
-import org.apache.axis2.util.Utils;
+import org.apache.axis2.util.MessageContextBuilder;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,7 +45,9 @@ public class ODEMessageReceiver extends AbstractMessageReceiver {
                 __log.debug("Received request message for " + msgContext.getAxisService().getName() + "."
                         + msgContext.getAxisOperation().getName());
             // Client is expecting a response, running in the same thread
-            MessageContext outMsgContext = Utils.createOutMessageContext(msgContext);
+            MessageContext outMsgContext = MessageContextBuilder.createOutMessageContext(msgContext);
+            // pass on the endpoint properties for output context
+            outMsgContext.getOptions().setParent(_service.getOptions());
             outMsgContext.getOperationContext().addMessageContext(outMsgContext);
             invokeBusinessLogic(msgContext, outMsgContext);
             if (__log.isDebugEnabled()) {

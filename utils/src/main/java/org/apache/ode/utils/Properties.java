@@ -20,6 +20,7 @@
 package org.apache.ode.utils;
 
 import org.apache.axis2.Constants;
+import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.transport.http.HTTPConstants;
@@ -85,7 +86,7 @@ public class Properties {
     public static final String PROP_SECURITY_POLICY = "security.policy.file";
     public static final String PROP_JMS_REPLY_DESTINATION = "jms.reply.destination";
     public static final String PROP_JMS_REPLY_TIMEOUT = "jms.reply.timeout";
-    public static final String PROP_SEND_WS_ADDRESSING_HEADERS = "ws-adddressing.headers";
+    public static final String PROP_SEND_WS_ADDRESSING_HEADERS = "ws-addressing.headers";
 
 
     protected static final Log log = LogFactory.getLog(Properties.class);
@@ -198,7 +199,12 @@ public class Properties {
             }
             if(properties.containsKey(PROP_SEND_WS_ADDRESSING_HEADERS)){
                 String value = properties.get(PROP_SEND_WS_ADDRESSING_HEADERS);
-                options.setProperty(PROP_SEND_WS_ADDRESSING_HEADERS, Boolean.parseBoolean(value));
+                options.setProperty(AddressingConstants.DISABLE_ADDRESSING_FOR_OUT_MESSAGES, !Boolean.parseBoolean(value));
+            }
+            if (properties.containsKey("ws-adddressing.headers")) {
+                if(log.isWarnEnabled())log.warn("Deprecated property: ws-adddressing.headers (Mind the 3 d's). Use ws-addressing.headers");                
+                String value = properties.get("ws-adddressing.headers");
+                options.setProperty(AddressingConstants.DISABLE_ADDRESSING_FOR_OUT_MESSAGES, !Boolean.parseBoolean(value));
             }
 
             // iterate through the properties to get Headers & Proxy information

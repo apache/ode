@@ -24,6 +24,7 @@ import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.commons.logging.Log;
@@ -47,9 +48,8 @@ public class SessionOutHandler extends AbstractHandler {
 
     public InvocationResponse invoke(MessageContext messageContext) throws AxisFault {
         // Skip this handler if ask to do so
-        Boolean shouldSendWSAddrHeaders = ((Boolean)messageContext.getProperty(Properties.PROP_SEND_WS_ADDRESSING_HEADERS));
-        if(shouldSendWSAddrHeaders!=null && !shouldSendWSAddrHeaders.booleanValue()){
-            if(__log.isDebugEnabled()) __log.debug("WS-Adressing Headers skipped");
+        if(messageContext.isPropertyTrue(AddressingConstants.DISABLE_ADDRESSING_FOR_OUT_MESSAGES)){
+            if(__log.isDebugEnabled()) __log.debug("Skipped WS-Adressing Headers for sessions");
             return InvocationResponse.CONTINUE;
         }
 

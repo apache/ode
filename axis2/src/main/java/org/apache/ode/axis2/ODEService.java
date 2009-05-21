@@ -21,6 +21,7 @@ package org.apache.ode.axis2;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.Map;
 
 import javax.transaction.TransactionManager;
 import javax.wsdl.Definition;
@@ -36,6 +37,7 @@ import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axiom.soap.SOAPFault;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.Options;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.TwoChannelAxisOperation;
@@ -241,6 +243,15 @@ public class ODEService {
             }
         }
         return Properties.DEFAULT_MEX_TIMEOUT;
+    }
+
+    /**
+     *
+     * @return an Option instance containing the properties for this endpoint
+     * @see org.apache.ode.bpel.iapi.ProcessConf#getEndpointProperties(org.apache.ode.bpel.iapi.EndpointReference)
+     */
+    public Options getOptions(){
+        return Properties.Axis2.translate(_pconf.getEndpointProperties(_serviceRef));
     }
 
     private void onResponse(MyRoleMessageExchange mex, MessageContext msgContext) throws AxisFault {
