@@ -16,7 +16,7 @@ public class HResourceRoute extends HObject {
     }
 
     /**
-     * @hibernate.property column="URL" not-null="true" size="255" unique="true"
+     * @hibernate.property column="URL" not-null="true" size="255"
      */
     public String getUrl() {
         return _url;

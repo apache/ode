@@ -114,7 +114,7 @@ public class HScope extends HObject {
     /**
      * Get the type (i.e. the name) of the scope.
      * 
-     * @hibernate.property column="NAME" not-null="true"
+     * @hibernate.property column="NAME"
      */
     public String getName() {
         return _name;
