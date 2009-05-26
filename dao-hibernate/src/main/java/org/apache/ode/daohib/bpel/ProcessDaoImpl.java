@@ -111,7 +111,8 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
     public ProcessInstanceDAO createInstance(CorrelatorDAO correlator) {
         entering("ProcessDaoImpl.createInstance");
         HProcessInstance instance = new HProcessInstance();
-        instance.setInstantiatingCorrelator((HCorrelator)((CorrelatorDaoImpl)correlator).getHibernateObj());
+        if (correlator != null)
+            instance.setInstantiatingCorrelator((HCorrelator)((CorrelatorDaoImpl)correlator).getHibernateObj());
         instance.setProcess(_process);
         instance.setCreated(new Date());
         getSession().save(instance);
@@ -194,10 +195,10 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO {
     private void deleteMessages() {
         getSession().getNamedQuery(HCorrelatorMessage.DELETE_CORMESSAGES_BY_PROCESS).setParameter ("process", _process).executeUpdate();
 
-        getSession().getNamedQuery(HLargeData.DELETE_MESSAGE_LDATA_BY_PROCESS).setParameter("process", _process).setParameter ("process2", _process).executeUpdate();
+//        getSession().getNamedQuery(HLargeData.DELETE_MESSAGE_LDATA_BY_PROCESS).setParameter("process", _process).setParameter ("process2", _process).executeUpdate();
         getSession().getNamedQuery(HMessage.DELETE_REQUEST_MESSAGES_BY_PROCESS).setParameter("process", _process).executeUpdate();
         getSession().getNamedQuery(HMessage.DELETE_RESPONSE_MESSAGES_BY_PROCESS).setParameter("process", _process).executeUpdate();
-        getSession().getNamedQuery(HMessageExchangeProperty.DELETE_MEX_PROPS_BY_PROCESS).setParameter("process", _process).executeUpdate();
+//        getSession().getNamedQuery(HMessageExchangeProperty.DELETE_MEX_PROPS_BY_PROCESS).setParameter("process", _process).executeUpdate();
         getSession().getNamedQuery(HLargeData.DELETE_MEX_LDATA_BY_PROCESS).setParameter("process", _process).setParameter("process2", _process).executeUpdate();
         getSession().getNamedQuery(HMessageExchange.DELETE_MEX_BY_PROCESS).setParameter("process", _process).executeUpdate();
         getSession().getNamedQuery(HCorrelator.DELETE_CORRELATORS_BY_PROCESS).setParameter("process", _process).executeUpdate();

@@ -382,7 +382,7 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
     @SuppressWarnings("unchecked")
     private void deleteMessages() {
         // there are chances that some unmatched messages are still there
-        getSession().getNamedQuery(HLargeData.DELETE_UNMATCHED_MESSAGE_LDATA_BY_INSTANCE).setParameter("instance", _instance).executeUpdate();
+//        getSession().getNamedQuery(HLargeData.DELETE_UNMATCHED_MESSAGE_LDATA_BY_INSTANCE).setParameter("instance", _instance).executeUpdate();
         Collection unmatchedMex = getSession().getNamedQuery(HMessageExchange.SELECT_UNMATCHED_MEX_BY_INSTANCE).setParameter("instance", _instance).list();
         if( !unmatchedMex.isEmpty() ) {
             getSession().getNamedQuery(HMessageExchange.DELETE_UNMATCHED_MEX).setParameter("mex", unmatchedMex).executeUpdate();
