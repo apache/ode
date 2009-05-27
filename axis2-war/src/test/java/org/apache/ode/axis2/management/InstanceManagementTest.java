@@ -30,6 +30,9 @@ import org.apache.ode.axis2.Axis2TestBase;
 import org.apache.ode.axis2.service.ServiceClientUtil;
 import org.apache.ode.tools.sendsoap.cline.HttpSoapSender;
 import org.apache.ode.utils.Namespaces;
+import org.apache.ode.il.OMUtils;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.IteratorUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -40,8 +43,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Iterator;
+import java.util.*;
+
+import static org.testng.AssertJUnit.assertTrue;
 
 public class InstanceManagementTest extends Axis2TestBase {
 
@@ -50,13 +54,26 @@ public class InstanceManagementTest extends Axis2TestBase {
     private ServiceClientUtil _client;
     private String _deployedName;
 
+    private static int instanceNb(OMElement response){
+        return instances(response).size();
+    }
+
+    private static List<OMElement> instances(OMElement response){
+        return IteratorUtils.toList(OMUtils.getFirstChildWithName(response, "instance-info-list").getChildrenWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "instance-info")));
+    }
+
+    private static OMElement instance(OMElement response){
+        Iterator it = response.getChildrenWithName(new QName("", "instance-info"));
+        return it.hasNext()? (OMElement) it.next(): null;
+    }
+
+
   @Test
     public void testListInstances() throws Exception {
         OMElement listRoot = _client.buildMessage("listInstances", new String[] {"filter", "order", "limit"},
                 new String[] {"name=DynPartnerMain", "", "10"});
         OMElement result = sendToIM(listRoot);
-        // Ensures that there's only 2 process-info string (ending and closing tags) and hence only one process
-        assert(result.toString().split("instance-info").length == 3);
+        assertTrue("Ensures that there's only one process instance", instanceNb(result) ==1);
 
         // Another query with more options
         Calendar notSoLongAgo = Calendar.getInstance();
@@ -66,18 +83,18 @@ public class InstanceManagementTest extends Axis2TestBase {
                 new String[] {"name=DynPartnerResponder namespace=http://ode/bpel/responder " +
                         "started>=" + notSoLongAgoStr, "", "10"});
         result = sendToIM(listRoot);
-        assert(result.toString().split("instance-info").length == 5);
+        assertTrue(instanceNb(result) == 0);
     }
 
-    // ODE-385 please fix me
     @Test
     public void testListAllInstances() throws Exception {
         OMElement root = _client.buildMessage("listAllInstancesWithLimit", new String[] {"limit"}, new String[] {"1"});
         OMElement result = sendToIM(root);
-        // We shold have only one instance (so 2 opening/closing elmts)
-        assert(result.toString().split("instance-info").length == 3);
+
+        // We should have only one instance (so 2 opening/closing elmts)
+        assertTrue("Must contain exactly 1 instance-info element", instanceNb(result) == 1);
         // And one of our executed instances are there
-        assert(result.toString().indexOf("DynPartnerMain") >= 0 ||
+        assertTrue(result.toString().indexOf("DynPartnerMain") >= 0 ||
                 result.toString().indexOf("DynPartnerResponder") >= 0);
     }
 
@@ -95,18 +112,17 @@ public class InstanceManagementTest extends Axis2TestBase {
             OMElement omelmt = (OMElement) iter.next();
             count += Integer.parseInt(omelmt.getAttributeValue(new QName(null, "count")));
         }
-        assert(count == 1);
+        assertTrue(count == 1);
     }
 
     @Test
     public void testGetInstanceInfo() throws Exception {
         OMElement root = _client.buildMessage("listAllInstances", new String[] {}, new String[] {});
         OMElement result = sendToIM(root);
-        String iid = result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "instance-info"))
-                .getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "iid")).getText();
+        String iid = instances(result).get(0).getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "iid")).getText();
         root = _client.buildMessage("getInstanceInfo", new String[] {"iid"}, new String[] {iid});
         result = sendToIM(root);
-        assert(result.toString().split("instance-info").length == 3);
+        assertTrue("Must return one <instance-info> element", instance(result)!=null);
     }
 
   @Test
@@ -117,24 +133,23 @@ public class InstanceManagementTest extends Axis2TestBase {
             @SuppressWarnings("unused")
             OMElement result = sendToIM(root);
         } catch (AxisFault axisFault) {
-            assert(axisFault.getCause().toString().indexOf("InstanceNotFoundException") > 0);
+            assertTrue("Should contain InstanceNotFoundException", axisFault.getMessage().contains("InstanceNotFoundException"));
         }
     }
 
-    // ODE-385 please fix me
     @Test
     public void testGetScopeInfo() throws Exception {
         OMElement root = _client.buildMessage("listInstances", new String[] {"filter", "order", "limit"},
                 new String[] {"name=DynPartnerMain", "", "10"});
         OMElement result = sendToIM(root);
-        String siid = result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "instance-info"))
+        String siid = instances(result).get(0)
                 .getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "root-scope"))
                 .getAttributeValue(new QName(null, "siid"));
         root = _client.buildMessage("getScopeInfoWithActivity", new String[] {"siid", "activityInfo"},
                 new String[] {siid, "true"});
         result = sendToIM(root);
-        assert(result.toString().split("scope-info").length == 3);
-        assert(result.toString().indexOf("activity-info") >= 0);
+        assertTrue(result.toString().split("scope-info").length == 3);
+        assertTrue(result.toString().indexOf("activity-info") >= 0);
     }
 
   @Test
@@ -142,39 +157,41 @@ public class InstanceManagementTest extends Axis2TestBase {
         OMElement root = _client.buildMessage("listInstances", new String[] {"filter", "order", "limit"},
                 new String[] {"name=DynPartnerMain", "", "10"});
         OMElement result = sendToIM(root);
-        String siid = result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "instance-info"))
+        String siid = instances(result).get(0)
                 .getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "root-scope"))
                 .getAttributeValue(new QName(null, "siid"));
         root = _client.buildMessage("getVariableInfo", new String[] {"sid", "varName"}, new String[] {siid, "dummy"});
         result = sendToIM(root);
-        assert(result.toString().indexOf("fire!") >= 0);
+        assertTrue(result.toString().indexOf("fire!") >= 0);
     }
 
 
-//    TODO uncomment when events querying is fixes on OpenJPA
+    //    TODO uncomment when events querying is fixes on OpenJPA
+    @Test(enabled = false)
+    public void testListEvents() throws Exception {
+        OMElement root = _client.buildMessage("listEvents", new String[]{"instanceFilter", "eventFilter", "maxCount"},
+                new String[]{"", "", "0"});
+        OMElement result = sendToIM(root);
+        assertTrue(result.toString().split("event-info").length > 10);
+    }
 
-//    public void testListEvents() throws Exception {
-//        OMElement root = _client.buildMessage("listEvents", new String[] {"instanceFilter", "eventFilter", "maxCount"},
-//                new String[] {"", "", "0"});
-//        OMElement result = sendToIM(root);
-//        assert(result.toString().split("event-info").length > 10);
-//    }
-//
-//    public void testGetEventTimeline() throws Exception {
-//        OMElement root = _client.buildMessage("getEventTimeline", new String[] {"instanceFilter", "eventFilter"},
-//                new String[] {"", ""});
-//        OMElement result = sendToIM(root);
-//        assert(result.toString().split("element").length > 10);
-//    }
+    @Test(enabled = false)
+    public void testGetEventTimeline() throws Exception {
+        OMElement root = _client.buildMessage("getEventTimeline", new String[]{"instanceFilter", "eventFilter"},
+                new String[]{"", ""});
+        OMElement result = sendToIM(root);
+        assertTrue(result.toString().split("element").length > 10);
+    }
 
-    // ODE-385 please fix me
-    @Test
+    // disable while ODE-613 is not fixed
+    @Test(enabled = false)
     public void testDeleteInstances() throws Exception {
         OMElement root = _client.buildMessage("listAllInstancesWithLimit", new String[] {"limit"}, new String[] {"1"});
         OMElement result = sendToIM(root);
         String iid = result.getFirstElement().getFirstElement().getText();
         System.out.println("=> " + result.getFirstElement().getFirstElement().getText());
-        _client.buildMessage("delete", new String[] {"piid"}, new String[] {iid});
+        OMElement response = _client.buildMessage("delete", new String[]{"piid"}, new String[]{iid});
+        assertTrue(response.toString().indexOf("deleteResponse") >= 0 && response.toString().indexOf("iids") >= 0);        
     }
 
   @BeforeMethod
@@ -233,7 +250,7 @@ public class InstanceManagementTest extends Axis2TestBase {
         OMElement listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
                 new String[] {"name=DynPartnerMain", ""});
         OMElement result = sendToPM(listRoot);
-        assert(result.toString().indexOf("process-info") < 0);
+        assertTrue("No process expected", result.toString().matches(".*<process-info-list\\s*/>.*"));
 
         super.tearDown();
     }
