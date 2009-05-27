@@ -41,11 +41,6 @@
                     <xsd:element name="element" type="xsd:string"/>
                 </xsd:all>
             </xsd:complexType>
-            <xsd:complexType name="iidsType">
-                <xsd:all>
-                    <xsd:element name="iid" type="xsd:long"/>
-                </xsd:all>
-            </xsd:complexType>
             <xsd:element name="ManagementFault" type="xsd:string"/>
         </xsd:schema>
     </types>
@@ -212,7 +207,7 @@
         <part name="filter" type="xsd:string"/>
     </message>
     <message name="deleteOutput">
-        <part name="iids" type="tns:iidsType"/>
+        <part name="list" type="tns:listType"/>
     </message>
     <message name="recoverActivityInput">
         <part name="iid" type="xsd:long"/>

@@ -673,7 +673,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                 ProcessInstanceDAO instance = conn.getInstance(iid);
 
                 if (instance == null)
-                    throw new InstanceNotFoundException("" + iid);
+                    throw new InstanceNotFoundException("InstanceNotFoundException " + iid);
                 // TODO: deal with "ERROR" state information.
                 fillInstanceInfo(ii, instance);
                 return null;

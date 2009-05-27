@@ -30,6 +30,9 @@ import org.apache.ode.axis2.Axis2TestBase;
 import org.apache.ode.axis2.service.ServiceClientUtil;
 import org.apache.ode.tools.sendsoap.cline.HttpSoapSender;
 import org.apache.ode.utils.Namespaces;
+import org.apache.ode.il.OMUtils;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.IteratorUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -40,8 +43,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Iterator;
+import java.util.*;
+
+import static org.testng.AssertJUnit.assertTrue;
 
 public class InstanceManagementTest extends Axis2TestBase {
 
@@ -50,13 +54,26 @@ public class InstanceManagementTest extends Axis2TestBase {
     private ServiceClientUtil _client;
     private String _deployedName;
 
+    private static int instanceNb(OMElement response){
+        return instances(response).size();
+    }
+
+    private static List<OMElement> instances(OMElement response){
+        return IteratorUtils.toList(OMUtils.getFirstChildWithName(response, "instance-info-list").getChildrenWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "instance-info")));
+    }
+
+    private static OMElement instance(OMElement response){
+        Iterator it = response.getChildrenWithName(new QName("", "instance-info"));
+        return it.hasNext()? (OMElement) it.next(): null;
+    }
+
+
   @Test
     public void testListInstances() throws Exception {
         OMElement listRoot = _client.buildMessage("listInstances", new String[] {"filter", "order", "limit"},
                 new String[] {"name=DynPartnerMain", "", "10"});
         OMElement result = sendToIM(listRoot);
-        // Ensures that there's only 2 process-info string (ending and closing tags) and hence only one process
-        assert(result.toString().split("instance-info").length == 3);
+        assertTrue("Ensures that there's only one process instance", instanceNb(result) ==1);
 
         // Another query with more options
         Calendar notSoLongAgo = Calendar.getInstance();
@@ -230,7 +247,7 @@ public class InstanceManagementTest extends Axis2TestBase {
         OMElement listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
                 new String[] {"name=DynPartnerMain", ""});
         OMElement result = sendToPM(listRoot);
-        assert(result.toString().indexOf("process-info") < 0);
+        assertTrue("No process expected", result.toString().matches(".*<process-info-list\\s*/>.*"));
 
         super.tearDown();
     }
