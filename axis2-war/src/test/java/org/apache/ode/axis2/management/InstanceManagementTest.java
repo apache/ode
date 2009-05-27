@@ -183,15 +183,18 @@ public class InstanceManagementTest extends Axis2TestBase {
         assertTrue(result.toString().split("element").length > 10);
     }
 
-    // disable while ODE-613 is not fixed
-    @Test(enabled = false)
+    @Test
     public void testDeleteInstances() throws Exception {
         OMElement root = _client.buildMessage("listAllInstancesWithLimit", new String[] {"limit"}, new String[] {"1"});
         OMElement result = sendToIM(root);
-        String iid = result.getFirstElement().getFirstElement().getText();
-        System.out.println("=> " + result.getFirstElement().getFirstElement().getText());
-        OMElement response = _client.buildMessage("delete", new String[]{"piid"}, new String[]{iid});
-        assertTrue(response.toString().indexOf("deleteResponse") >= 0 && response.toString().indexOf("iids") >= 0);        
+        String iid = instances(result).get(0).getFirstElement().getText();
+        System.out.println("=> " + iid);
+        OMElement msg= _client.buildMessage("delete", new String[]{"filter"}, new String[]{"iid="+iid});
+        OMElement response = sendToIM(msg);
+        System.out.println(response);
+                List<OMElement> elements = IteratorUtils.toList(response.getFirstElement().getChildrenWithName(new QName("", "element")));
+        assertTrue("Must delete only one instance", elements.size()==1);
+        assertTrue(iid.equals(elements.get(0).getText()));
     }
 
   @BeforeMethod
