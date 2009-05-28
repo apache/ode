@@ -145,12 +145,10 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
 
     static {
         // Hibernate has a nice table that resolves the dialect from the
-        // database
-        // product name,
-        // but doesn't include all the drivers. So this is supplementary, and
-        // some
-        // day in the
-        // future they'll add more drivers and we can get rid of this.
+        // database product name, but doesn't include all the drivers. So 
+        // this is supplementary, and some day in the future they'll add 
+        // more drivers and we can get rid of this. 
+        //
         // Drivers already recognized by Hibernate:
         // HSQL Database Engine
         // DB2/NT
@@ -162,6 +160,8 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
         // Oracle 8 and Oracle >8
         HIBERNATE_DIALECTS.put("Apache Derby", new DialectFactory.VersionInsensitiveMapper(
                 "org.hibernate.dialect.DerbyDialect"));
+        HIBERNATE_DIALECTS.put("H2", new DialectFactory.VersionInsensitiveMapper(
+                "org.hibernate.dialect.H2Dialect"));
     }
 
     public void shutdown() {
