@@ -49,7 +49,7 @@ public class HResourceRoute extends HObject {
     }
 
     /**
-     * @hibernate.property column="INDEX" not-null="true"
+     * @hibernate.property column="CHAN_INDEX" not-null="true"
      */
     public int getIndex() {
         return _index;
