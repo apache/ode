@@ -306,7 +306,7 @@ public class ProcessStoreImpl implements ProcessStore {
             }
         } catch (Exception e) {
             // A problem at that point means that engine deployment failed, we don't want the store to keep the du
-            __log.warn("Deployment failed within the engine, store undeploying process.");
+            __log.warn("Deployment failed within the engine, store undeploying process.", e);
             undeploy(deploymentUnitDirectory);
             if (e instanceof ContextException) throw (ContextException) e;
             else throw new ContextException("Deployment failed within the engine.", e);
@@ -828,6 +828,12 @@ public class ProcessStoreImpl implements ProcessStore {
             Thread t = new Thread(r, "ProcessStoreImpl-"+threadNumber);
             t.setDaemon(true);
             return t;
+        }
+    }
+
+    public void refreshSchedules(String packageName) {
+        for( QName pid : listProcesses(packageName) ) {
+            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.SCHEDULE_SETTINGS_CHANGED, pid, packageName));
         }
     }
 }

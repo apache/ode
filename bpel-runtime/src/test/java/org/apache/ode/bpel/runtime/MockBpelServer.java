@@ -354,5 +354,9 @@ class MockBpelServer {
 
         public void setPolledRunnableProcesser(JobProcessor delegatedRunnableProcessor) {
         }
+
+		public boolean amICoordinator() {
+			return true;
+		}
     }
 }

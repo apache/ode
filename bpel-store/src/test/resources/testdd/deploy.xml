@@ -20,7 +20,6 @@
 	xmlns:pns="http://ode/bpel/unit-test" 
 	xmlns:wns="http://ode/bpel/unit-test.wsdl">
 
-
 	<process name="pns:HelloWorld2">
 		<active>true</active>
 		<provide partnerLink="helloPartnerLink">
@@ -33,5 +32,29 @@
 			<category>messages</category>
 			<category>events</category>
 		</cleanup>
+        <schedule when="* * * * * ?">
+            <cleanup>
+                <filter><![CDATA[lastActiveDate<-1w state=completed_ok]]></filter>
+                <category>events</category>
+            </cleanup>
+            <cleanup>
+                <filter><![CDATA[lastActiveDate<-1m state=completed_with_fault]]></filter>
+            </cleanup>
+            <cleanup>
+                <filter><![CDATA[lastActiveDate<-1m state=terminated]]></filter>
+            </cleanup>
+        </schedule>
+        <schedule when="* * * * * ?">
+            <cleanup>
+                <filter><![CDATA[lastActiveDate<-1w state=completed_ok]]></filter>
+                <category>events</category>
+            </cleanup>
+            <cleanup>
+                <filter><![CDATA[lastActiveDate<-1m state=completed_with_fault]]></filter>
+            </cleanup>
+            <cleanup>
+                <filter><![CDATA[lastActiveDate<-1m state=terminated]]></filter>
+            </cleanup>
+        </schedule>
 	</process>
 </deploy>

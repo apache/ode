@@ -25,20 +25,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileFilter;
 import java.net.URI;
+import java.text.ParseException;
 import java.util.*;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.dd.TCleanup;
 import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.dd.TInvoke;
 import org.apache.ode.bpel.dd.TMexInterceptor;
 import org.apache.ode.bpel.dd.TProcessEvents;
 import org.apache.ode.bpel.dd.TProvide;
+import org.apache.ode.bpel.dd.TSchedule;
 import org.apache.ode.bpel.dd.TScopeEvents;
 import org.apache.ode.bpel.dd.TService;
 import org.apache.ode.bpel.evt.BpelEvent;
@@ -49,6 +50,7 @@ import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
+import org.apache.ode.utils.CronExpression;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.HierarchicalProperties;
 import org.apache.ode.utils.WatchDog;
@@ -113,6 +115,8 @@ public class ProcessConfImpl implements ProcessConf {
         initEventList();
 
         processCleanupConfImpl = new ProcessCleanupConfImpl(pinfo);
+        
+        initSchedules();
     }
 
     private List<File> collectEndpointConfigFiles() {
@@ -287,6 +291,7 @@ public class ProcessConfImpl implements ProcessConf {
         return _sharedServices.contains(serviceName);
     }
 
+    @SuppressWarnings("unused")
     private void handleEndpoints() {
         // for (TProvide provide : _pinfo.getProvideList()) {
         // OPartnerLink pLink = _oprocess.getPartnerLink(provide.getPartnerLink());
@@ -413,6 +418,7 @@ public class ProcessConfImpl implements ProcessConf {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public Map<String, String> getEndpointProperties(EndpointReference epr) {
         final Map map = eprContext.getConfigLookup(epr);
         final QName service = (QName) map.get("service");
@@ -480,5 +486,41 @@ public class ProcessConfImpl implements ProcessConf {
 
     public Set<CLEANUP_CATEGORY> getCleanupCategories(boolean instanceSucceeded) {
         return processCleanupConfImpl.getCleanupCategories(instanceSucceeded);
+    }
+    
+    private void initSchedules() {
+        for(TSchedule schedule : _pinfo.getScheduleList()) {
+            for(TCleanup cleanup : schedule.getCleanupList()) {
+                assert !cleanup.getFilterList().isEmpty();
+            }
+        }
+    }
+    
+    public List<CronJob> getCronJobs() {
+        List<CronJob> jobs = new ArrayList<CronJob>();
+        
+        for(TSchedule schedule : _pinfo.getScheduleList()) {
+            CronJob job = new CronJob();
+            try {
+                job.setCronExpression(new CronExpression(schedule.getWhen()));
+                for(final TCleanup aCleanup : schedule.getCleanupList()) {
+                    CleanupInfo cleanupInfo = new CleanupInfo();
+                    assert !aCleanup.getFilterList().isEmpty();
+                    cleanupInfo.setFilters(aCleanup.getFilterList());
+                    ProcessCleanupConfImpl.processACleanup(cleanupInfo.getCategories(), aCleanup.getCategoryList());
+                    
+                    Map<String, Object> runnableDetails = new HashMap<String, Object>();
+                    runnableDetails.put("cleanupInfo", cleanupInfo);
+                    runnableDetails.put("pid", _pid);
+                    runnableDetails.put("transactionSize", 10);
+                    job.getRunnableDetailList().add(runnableDetails);
+                }
+                jobs.add(job);
+            } catch( ParseException pe ) {
+                __log.error("Exception during parsing the schedule cron expression: " + schedule.getWhen() + ", skipped the scheduled job.", pe);
+            }
+        }
+        
+        return jobs;
     }
 }

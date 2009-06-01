@@ -23,6 +23,7 @@ import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.Filter;
 import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.utils.ISO8601DateParser;
+import org.apache.ode.utils.RelativeDateParser;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Property;
@@ -38,12 +39,12 @@ import java.util.Map;
  * {@link org.hibernate.Criteria} objects.
  */
 class CriteriaBuilder {
-
   /**
    * Build a Hibernate {@link Criteria} from an instance filter.
    * @param crit target (destination) criteria
    * @param filter filter
    */
+  @SuppressWarnings("unchecked")
   void buildCriteria(Criteria crit, InstanceFilter filter) {
     Criteria processCrit = crit.createCriteria("process");
 
@@ -52,7 +53,11 @@ class CriteriaBuilder {
     if (pids != null && pids.size() > 0) {
         Disjunction disj = Restrictions.disjunction();
         for (String pid: pids) {
-          disj.add(Restrictions.eq("processId", pid));
+            if( !filter.arePidsNegative() ) {
+                disj.add(Restrictions.eq("processId", pid));
+            } else {
+                disj.add(Restrictions.ne("processId", pid));
+            }
         }
         processCrit.add(disj);
     }
@@ -178,13 +183,21 @@ class CriteriaBuilder {
   static void addFilterOnPrefixedDate(Criteria crit, String prefixedDate, String dateAttribute) {
     Date realDate = null;
     try {
-      realDate = ISO8601DateParser.parse(getDateWithoutOp(prefixedDate));
+      realDate = parseDateExpression(getDateWithoutOp(prefixedDate));
     } catch (ParseException e) {
       // Never occurs, the deploy date format is pre-validated by the filter
     }
     addFilterOnPrefixedDate(crit,prefixedDate,realDate,dateAttribute);
   }
   
+  private static Date parseDateExpression(String date) throws ParseException {
+      if( date.toLowerCase().startsWith("-") && date.length() > 1 ) {
+          return RelativeDateParser.parseRelativeDate(date.substring(1));
+      } else {
+          return ISO8601DateParser.parse(date);
+      }
+  }
+
   static void addFilterOnPrefixedDate(Criteria crit, String op, Date date, String dateAttribute) {
     if (op.startsWith("=")) {
       crit.add(Restrictions.eq(dateAttribute, date));

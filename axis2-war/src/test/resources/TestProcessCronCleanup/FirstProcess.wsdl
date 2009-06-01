@@ -1,0 +1,29 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<wsdl:definitions xmlns:bpdm="http://www.intalio/designer/business-process-data-modeling" xmlns:FirstProcess="http://example.com/FirstProcess/FirstProcess" xmlns:Client="http://example.com/FirstProcess/Client" xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" xmlns:TimeService="http://ws.intalio.com/TimeService/" xmlns:diag="http://example.com/FirstProcess" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:ns="http://bpms.intalio.com/FirstProcess/Time" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://example.com/FirstProcess">
+    <wsdl:import namespace="http://example.com/FirstProcess/FirstProcess" location="FirstProcess-FirstProcess.wsdl"/>
+    <wsdl:import namespace="http://ws.intalio.com/TimeService/" location="TimeService.wsdl"/>
+    <pnlk:partnerLinkType name="TimeServerAndFirstProcessForPortTimeServiceSoapPlk">
+        <pnlk:role name="TimeServer_for_FirstProcess" portType="TimeService:TimeServiceSoap"/>
+    </pnlk:partnerLinkType>
+    <pnlk:partnerLinkType name="FirstProcessAndClient">
+        <pnlk:role name="FirstProcess_for_Client" portType="FirstProcess:ForClient"/>
+    </pnlk:partnerLinkType>
+</wsdl:definitions>

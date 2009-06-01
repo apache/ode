@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.namespace.QName;
 
@@ -40,6 +41,7 @@ import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
+import org.apache.ode.bpel.dao.FilteredInstanceDeletable;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
@@ -47,6 +49,7 @@ import org.apache.ode.bpel.dao.ProcessManagementDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
+import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HBpelEvent;
 import org.apache.ode.daohib.bpel.hobj.HCorrelationSet;
@@ -73,7 +76,7 @@ import org.hibernate.criterion.Projections;
 /**
  * Hibernate-based {@link BpelDAOConnection} implementation.
  */
-public class BpelDAOConnectionImpl implements BpelDAOConnection {
+public class BpelDAOConnectionImpl implements BpelDAOConnection, FilteredInstanceDeletable {
     private static final Log __log = LogFactory.getLog(BpelDAOConnectionImpl.class);
 
     protected SessionManager _sm;
@@ -166,13 +169,35 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection {
         return daos;
     }
 
-    @SuppressWarnings("unchecked")
+    public int deleteInstances(InstanceFilter criteria, Set<CLEANUP_CATEGORY> categories) {
+        if (criteria.getLimit() == 0) {
+            return 0;
+        }
+
+        List<HProcessInstance> instances = _instanceQueryForList(getSession(), false, criteria);
+        if( __log.isDebugEnabled() ) __log.debug("Collected " + instances.size() + " instances to delete.");
+        
+        if( !instances.isEmpty() ) {
+            ProcessDaoImpl process = (ProcessDaoImpl)createTransientProcess(instances.get(0).getProcessId());
+            return process.deleteInstances(instances, categories);
+        }
+        
+        return 0;
+    }
+
     static Iterator<HProcessInstance> _instanceQuery(Session session, boolean countOnly, InstanceFilter filter) {
+        return _instanceQueryForList(session, countOnly, filter).iterator();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<HProcessInstance> _instanceQueryForList(Session session, boolean countOnly, InstanceFilter filter) {
         Criteria crit = session.createCriteria(HProcessInstance.class);
         CriteriaBuilder cb = new CriteriaBuilder();
         cb.buildCriteria(crit, filter);
+        
         crit.setFetchMode("fault", FetchMode.JOIN);
-        return crit.list().iterator();
+
+        return crit.list();
     }
 
     static ProcessInstanceDAO _getInstance(SessionManager sm, Session session, Long iid) {

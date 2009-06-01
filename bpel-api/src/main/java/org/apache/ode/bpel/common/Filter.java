@@ -44,10 +44,13 @@ public abstract class Filter<FKEY extends Enum> implements Serializable {
 
   /**
    *  Pattern that matches anything like 'abcde <  fgh' or 'ijklm  =nop' using 
-   *  supported comparators 
+   *  supported comparators
+   *  <p>
+   *  The not-equal op, '<>' works only with pids.
+   *  </p>
    */
   private static final Pattern __comparatorPattern = 
-    Pattern.compile("([^=<> ]*) *(<=|>=|<|>|=) *([^=<> ]*)");
+    Pattern.compile("([^=<> ]*) *(<>|<=|>=|<|>|=) *([^=<> ]*)");
 
   protected Map<FKEY, Restriction<String>> _criteria = new HashMap<FKEY,Restriction<String>>();
 

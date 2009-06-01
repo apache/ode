@@ -298,4 +298,8 @@ public class MockScheduler implements Scheduler {
 
     public void setPolledRunnableProcesser(JobProcessor delegatedRunnableProcessor) {
     }
+
+    public boolean amICoordinator() {
+        return true;
+    }
 }

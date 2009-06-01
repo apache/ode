@@ -21,16 +21,18 @@ package org.apache.ode.bpel.iapi;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.evt.BpelEvent;
+import org.apache.ode.utils.CronExpression;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -177,6 +179,8 @@ public interface ProcessConf {
     
     Set<CLEANUP_CATEGORY> getCleanupCategories(boolean instanceSucceeded);
 
+    List<CronJob> getCronJobs();
+    
     public enum CLEANUP_CATEGORY {
         INSTANCE,
         VARIABLES,
@@ -186,6 +190,64 @@ public interface ProcessConf {
         
         public static CLEANUP_CATEGORY fromString(String lowerCase) {
             return valueOf(CLEANUP_CATEGORY.class, lowerCase.toUpperCase());
+        }
+    }
+    
+    public class CronJob {
+        private CronExpression _cronExpression;
+        
+        private final List<Map<String,Object>> runnableDetailList = new ArrayList<Map<String,Object>>();
+        
+        public void setCronExpression(CronExpression _cronExpression) {
+            this._cronExpression = _cronExpression;
+        }
+        
+        public CronExpression getCronExpression() {
+            return _cronExpression;
+        }
+        
+        public List<Map<String,Object>> getRunnableDetailList() {
+            return runnableDetailList;
+        }
+        
+        public String toString() {
+            StringBuffer buf = new StringBuffer();
+            
+            buf.append("Cron[");
+            buf.append(_cronExpression);
+            buf.append("] ");
+            buf.append(runnableDetailList);
+            
+            return buf.toString();
+        }
+    }
+    
+    public class CleanupInfo {
+        private List<String> _filters = new ArrayList<String>();
+        
+        private final Set<CLEANUP_CATEGORY> _categories = EnumSet.noneOf(CLEANUP_CATEGORY.class);
+        
+        public void setFilters(List<String> filters) {
+            _filters = filters;
+        }
+        
+        public List<String> getFilters() {
+            return _filters;
+        }
+        
+        public Set<CLEANUP_CATEGORY> getCategories() {
+            return _categories;
+        }
+        
+        public String toString() {
+            StringBuffer buf = new StringBuffer();
+            
+            buf.append("CleanupInfo: filters=");
+            buf.append(_filters);
+            buf.append(", categories=");
+            buf.append(_categories);
+            
+            return buf.toString();
         }
     }
 }

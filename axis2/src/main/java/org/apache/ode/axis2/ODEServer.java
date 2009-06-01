@@ -56,6 +56,7 @@ import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
+import org.apache.ode.bpel.engine.cron.CronScheduler;
 import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
@@ -106,9 +107,9 @@ public class ODEServer {
 
     protected ExecutorService _executorService;
 
-    protected ExecutorService _polledRunnableExecutorService;
-
     protected Scheduler _scheduler;
+    
+    protected CronScheduler _cronScheduler;
 
     protected Database _db;
 
@@ -119,14 +120,13 @@ public class ODEServer {
     private ManagementService _mgtService;
 
     protected MultiThreadedHttpConnectionManager httpConnectionManager;
-
-
+    
     public void init(ServletConfig config, AxisConfiguration axisConf) throws ServletException {
         init(config.getServletContext().getRealPath("/WEB-INF"), axisConf);
     }
 
     public void init(String contextPath, AxisConfiguration axisConf) throws ServletException {
-    	_axisConfig = axisConf;
+        _axisConfig = axisConf;
         String rootDir = System.getProperty("org.apache.ode.rootDir");
         if (rootDir != null) _appRoot = new File(rootDir);
         else _appRoot = new File(contextPath);
@@ -144,12 +144,12 @@ public class ODEServer {
         _odeConfig = new ODEConfigProperties(_configRoot);
 
         try {
-        	_odeConfig.load();
+            _odeConfig.load();
         } catch (FileNotFoundException fnf) {
-        	String errmsg = __msgs.msgOdeInstallErrorCfgNotFound(_odeConfig.getFile());
-        	__log.warn(errmsg);
+            String errmsg = __msgs.msgOdeInstallErrorCfgNotFound(_odeConfig.getFile());
+            __log.warn(errmsg);
         } catch (Exception ex) {
-        	String errmsg = __msgs.msgOdeInstallErrorCfgReadError(_odeConfig.getFile());
+            String errmsg = __msgs.msgOdeInstallErrorCfgReadError(_odeConfig.getFile());
                 __log.error(errmsg, ex);
                 throw new ServletException(errmsg, ex);
             }
@@ -182,16 +182,16 @@ public class ODEServer {
         _store.loadAll();
 
         try {
-        	_bpelServer.start();
+            _bpelServer.start();
         } catch (Exception ex) {
-        	String errmsg = __msgs.msgOdeBpelServerStartFailure();
-        	__log.error(errmsg, ex);
-        	throw new ServletException(errmsg, ex);
+            String errmsg = __msgs.msgOdeBpelServerStartFailure();
+            __log.error(errmsg, ex);
+            throw new ServletException(errmsg, ex);
         }
 
         _poller = getDeploymentPollerExt();
         if( _poller == null ) {
-        	_poller = new DeploymentPoller(_store.getDeployDir(), this);
+            _poller = new DeploymentPoller(_store.getDeployDir(), this);
         }
 
         _mgtService = new ManagementService();
@@ -216,36 +216,36 @@ public class ODEServer {
     }
 
     @SuppressWarnings("unchecked")
-	private DeploymentPoller getDeploymentPollerExt() {
-    	DeploymentPoller poller = null;
-    	
-    	InputStream is = null;
-    	try {
-	        is = ODEServer.class.getResourceAsStream("/deploy-ext.properties");
-	        if( is != null ) {
-	        	__log.info("A deploy-ext.properties found; will use the provided class if applicable.");
-	        	try {
-	                Properties props = new Properties();
-			        props.load(is);
-			        String deploymentPollerClass = props.getProperty("deploymentPoller.class");
-			        if( deploymentPollerClass == null ) {
-			        	__log.warn("deploy-ext.properties found in the class path; however, the file does not have 'deploymentPoller.class' as one of the properties!!");
-			        } else {
-			    		Class pollerClass = Class.forName(deploymentPollerClass);
-			    		poller = (DeploymentPoller)pollerClass.getConstructor(File.class, ODEServer.class).newInstance(_store.getDeployDir(), this);
-			        	__log.info("A custom deployment poller: " + deploymentPollerClass + " has been plugged in.");
-			        }
-	        	} catch( Exception e ) {
-	        		__log.warn("Deployment poller extension class is not loadable, falling back to the default DeploymentPoller.", e);
-	        	}
-	        } else if( __log.isDebugEnabled() ) __log.debug("No deploy-ext.properties found.");
-    	} finally {
-    		try {
-    			if(is != null) is.close();
-    		} catch( IOException ie ) {
-    			// ignore
-    		}
-    	}
+    private DeploymentPoller getDeploymentPollerExt() {
+        DeploymentPoller poller = null;
+        
+        InputStream is = null;
+        try {
+            is = ODEServer.class.getResourceAsStream("/deploy-ext.properties");
+            if( is != null ) {
+                __log.info("A deploy-ext.properties found; will use the provided class if applicable.");
+                try {
+                    Properties props = new Properties();
+                    props.load(is);
+                    String deploymentPollerClass = props.getProperty("deploymentPoller.class");
+                    if( deploymentPollerClass == null ) {
+                        __log.warn("deploy-ext.properties found in the class path; however, the file does not have 'deploymentPoller.class' as one of the properties!!");
+                    } else {
+                        Class pollerClass = Class.forName(deploymentPollerClass);
+                        poller = (DeploymentPoller)pollerClass.getConstructor(File.class, ODEServer.class).newInstance(_store.getDeployDir(), this);
+                        __log.info("A custom deployment poller: " + deploymentPollerClass + " has been plugged in.");
+                    }
+                } catch( Exception e ) {
+                    __log.warn("Deployment poller extension class is not loadable, falling back to the default DeploymentPoller.", e);
+                }
+            } else if( __log.isDebugEnabled() ) __log.debug("No deploy-ext.properties found.");
+        } finally {
+            try {
+                if(is != null) is.close();
+            } catch( IOException ie ) {
+                // ignore
+            }
+        }
 
         return poller;
     }
@@ -294,6 +294,16 @@ public class ODEServer {
                     __log.debug("Error stopping services.", ex);
                 }
 
+            if( _cronScheduler != null ) {
+                try {
+                    __log.debug("shutting down cron scheduler.");
+                    _cronScheduler.shutdown();
+                    _cronScheduler = null;
+                } catch (Exception ex) {
+                    __log.debug("Cron scheduler couldn't be shutdown.", ex);
+                }
+            }
+            
             if (_scheduler != null)
                 try {
                     __log.debug("shutting down scheduler.");
@@ -454,25 +464,19 @@ public class ODEServer {
         else
             _executorService = Executors.newFixedThreadPool(_odeConfig.getThreadPoolMaxSize(), threadFactory);
         
-        // executor service for long running bulk transactions
-        _polledRunnableExecutorService = Executors.newCachedThreadPool(new ThreadFactory() {
-            int threadNumber = 0;
-            public Thread newThread(Runnable r) {
-                threadNumber += 1;
-                Thread t = new Thread(r, "PolledRunnable-"+threadNumber);
-                t.setDaemon(true);
-                return t;
-            }
-        });
-
         _bpelServer = new BpelServerImpl();
         _scheduler = createScheduler();
         _scheduler.setJobProcessor(_bpelServer);
         
         BpelServerImpl.PolledRunnableProcessor polledRunnableProcessor = new BpelServerImpl.PolledRunnableProcessor();
-        polledRunnableProcessor.setPolledRunnableExecutorService(_polledRunnableExecutorService);
+        polledRunnableProcessor.setPolledRunnableExecutorService(_executorService);
         polledRunnableProcessor.setContexts(_bpelServer.getContexts());
         _scheduler.setPolledRunnableProcesser(polledRunnableProcessor);
+        
+        _cronScheduler = new CronScheduler();
+        _cronScheduler.setScheduledTaskExec(_executorService);
+        _cronScheduler.setContexts(_bpelServer.getContexts());
+        _bpelServer.setCronScheduler(_cronScheduler);
 
         _bpelServer.setDaoConnectionFactory(_daoCF);
         _bpelServer.setInMemDaoConnectionFactory(new BpelDAOConnectionFactoryImpl(_scheduler, _odeConfig.getInMemMexTtl()));
@@ -534,6 +538,10 @@ public class ODEServer {
         return _appRoot;
     }
 
+    public File getConfigRoot() {
+        return _configRoot;
+    }
+    
     private void registerEventListeners() {
         String listenersStr = _odeConfig.getEventListeners();
         if (listenersStr != null) {
@@ -613,24 +621,36 @@ public class ODEServer {
                 } else {
                     // we may have potentially created a lot of garbage, so,
                     // let's hope the garbage collector is configured properly.
-                	if (pconf != null) {
-	                	_bpelServer.cleanupProcess(pconf);
-                	}
+                    if (pconf != null) {
+                        _bpelServer.cleanupProcess(pconf);
+                    }
                 }
                 break;
             case DISABLED:
             case UNDEPLOYED:
                 _bpelServer.unregister(pse.pid);
-            	if (pconf != null) {
-                	_bpelServer.cleanupProcess(pconf);
-            	}
+                if (pconf != null) {
+                    _bpelServer.cleanupProcess(pconf);
+                }
                 break;
             default:
                 __log.debug("Ignoring store event: " + pse);
         }
+        
+        if( pconf != null ) {
+            if( pse.type == ProcessStoreEvent.Type.UNDEPLOYED) {
+                __log.debug("Cancelling all cron scheduled jobs on store event: " + pse);
+                _bpelServer.getContexts().cronScheduler.cancelProcessCronJobs(pse.pid, true);
+            }
+
+            // Except for undeploy event, we need to re-schedule process dependent jobs
+            __log.debug("(Re)scheduling cron scheduled jobs on store event: " + pse);
+            if( pse.type != ProcessStoreEvent.Type.UNDEPLOYED) {
+                _bpelServer.getContexts().cronScheduler.scheduleProcessCronJobs(pse.pid, pconf);
+            }
+        }
     }
-
-
+    
     // Transactional debugging stuff, to track down all these little annoying bugs.
     private class DebugTxMgr implements TransactionManager {
         private TransactionManager _tm;

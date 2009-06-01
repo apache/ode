@@ -26,6 +26,7 @@ import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.DeferredProcessInstanceCleanable;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HActivityRecovery;
 import org.apache.ode.daohib.bpel.hobj.HBpelEvent;
@@ -58,6 +59,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Hibernate-based {@link ProcessDAO} implementation.
@@ -159,7 +161,7 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO, Deferred
     }
     
     @SuppressWarnings("unchecked")
-	public int deleteInstances(int transactionSize) {
+    public int deleteInstances(int transactionSize) {
         entering("ProcessDaoImpl.delete");
 
         if( transactionSize < 1 ) {
@@ -169,11 +171,35 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO, Deferred
 
         Collection<HProcessInstance> instances = getSession().getNamedQuery(HProcessInstance.SELECT_INSTANCES_BY_PROCESS).setParameter("process", _process).setMaxResults(transactionSize).list();
         if( !instances.isEmpty() ) {
-	        deleteEvents(instances);
-	        deleteCorrelations(instances);
-	        deleteMessages(instances);
-	        deleteVariables(instances);
-	        deleteProcessInstances(instances);
+            deleteEvents(instances);
+            deleteCorrelations(instances);
+            deleteMessages(instances);
+            deleteVariables(instances);
+            deleteProcessInstances(instances);
+        }
+
+        return instances.size();
+    }
+
+    public int deleteInstances(Collection<HProcessInstance> instances, Set<CLEANUP_CATEGORY> categories) {
+        entering("ProcessDaoImpl.deleteInstances");
+
+        if( !instances.isEmpty() ) {
+            if( categories.contains(CLEANUP_CATEGORY.EVENTS)) {
+                deleteEvents(instances);
+            }
+            if( categories.contains(CLEANUP_CATEGORY.CORRELATIONS)) {
+                deleteCorrelations(instances);
+            }
+            if( categories.contains(CLEANUP_CATEGORY.MESSAGES)) {
+                deleteMessages(instances);
+            }
+            if( categories.contains(CLEANUP_CATEGORY.VARIABLES)) {
+                deleteVariables(instances);
+            }
+            if( categories.contains(CLEANUP_CATEGORY.INSTANCE)) {
+                deleteProcessInstances(instances);
+            }
         }
 
         return instances.size();

@@ -103,5 +103,9 @@ public class ProcessStoreTest extends TestCase {
         assertTrue(pconf.isCleanupCategoryEnabled(false, CLEANUP_CATEGORY.MESSAGES));
         assertFalse(pconf.isCleanupCategoryEnabled(false, CLEANUP_CATEGORY.CORRELATIONS));
         assertTrue(pconf.isCleanupCategoryEnabled(false, CLEANUP_CATEGORY.EVENTS));
+        
+        assertEquals(2, pconf.getCronJobs().size());
+        assertNotNull(pconf.getCronJobs().get(0).getCronExpression());
+        assertEquals(3, pconf.getCronJobs().get(0).getRunnableDetailList().size());
     } 
 }

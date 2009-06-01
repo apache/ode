@@ -1,0 +1,55 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<wsdl:definitions xmlns:Client="http://example.com/FirstProcess/Client" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" xmlns:TimeService="http://ws.intalio.com/TimeService/" xmlns:TimeServer="http://example.com/FirstProcess/TimeServer" xmlns:GetTime="http://bpms.intalio.com/FirstProcess/Time" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:diag="http://example.com/FirstProcess" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:ns="http://bpms.intalio.com/FirstProcess/Time" xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:this="http://example.com/FirstProcess/FirstProcess" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://example.com/FirstProcess/FirstProcess">
+    <wsdl:types>
+        <xs:schema targetNamespace="http://bpms.intalio.com/FirstProcess/Time">
+            <xs:include schemaLocation="GetTime.xsd"/>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="EventStartMessageRequest">
+        <wsdl:part name="body" element="ns:TimeRequest"/>
+    </wsdl:message>
+    <wsdl:message name="EventStartMessageResponse">
+        <wsdl:part name="body" element="ns:TimeResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="ForClient">
+        <wsdl:operation name="EventStartMessage">
+            <wsdl:input message="this:EventStartMessageRequest" name="EventStartMessage"/>
+            <wsdl:output message="this:EventStartMessageResponse" name="EventStartMessageResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="CanonicBindingForClient" type="this:ForClient">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="EventStartMessage">
+            <soap:operation style="document" soapAction="http://example.com/FirstProcess/FirstProcess/ForClient/EventStartMessage"/>
+            <wsdl:input name="EventStartMessage">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="EventStartMessageResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="CanonicServiceForClient">
+        <wsdl:port name="canonicPort" binding="this:CanonicBindingForClient">
+            <soap:address location="http://localhost:8080/ode/processes/FirstProcess/FirstProcess/FirstProcess/Client"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

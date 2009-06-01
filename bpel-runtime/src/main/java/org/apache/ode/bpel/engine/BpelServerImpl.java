@@ -38,6 +38,7 @@ import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.dao.DeferredProcessInstanceCleanable;
 import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.engine.cron.CronScheduler;
 import org.apache.ode.bpel.engine.migration.MigrationHandler;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
 import org.apache.ode.bpel.evt.BpelEvent;
@@ -491,6 +492,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
     public void setScheduler(Scheduler scheduler) throws BpelEngineException {
         _contexts.scheduler = scheduler;
+    }
+
+    public void setCronScheduler(CronScheduler cronScheduler) throws BpelEngineException {
+        _contexts.cronScheduler = cronScheduler;
     }
 
     public void setEndpointReferenceContext(EndpointReferenceContext eprContext) throws BpelEngineException {

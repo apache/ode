@@ -26,6 +26,7 @@ import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
+import org.apache.ode.bpel.engine.cron.CronScheduler;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
 
 import java.util.HashMap;
@@ -39,10 +40,11 @@ import javax.xml.namespace.QName;
  * integration layer.
  */
 public class Contexts {
-
     MessageExchangeContext mexContext;
 
     public Scheduler scheduler;
+
+    public CronScheduler cronScheduler;
 
     EndpointReferenceContext eprContext;
 
