@@ -55,11 +55,11 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
 
     @Basic @Column(name="PROCESS_ID")
     private String _processId;
-	@Basic @Column(name="PROCESS_TYPE")
+    @Basic @Column(name="PROCESS_TYPE")
     private String _processType;
-	@Basic @Column(name="GUID")
+    @Basic @Column(name="GUID")
     private String _guid;
-	@Basic @Column(name="VERSION")
+    @Basic @Column(name="VERSION")
     private long _version;
 
     @OneToMany(targetEntity=CorrelatorDAOImpl.class,mappedBy="_process",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
@@ -74,11 +74,11 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
     }
 
     public Serializable getId() {
-    	return _id; 
+        return _id; 
     }
     
     public void setId(Long id) {
-    	_id = id;
+        _id = id;
     }
 
     public CorrelatorDAO addCorrelator(String correlator) {
@@ -87,7 +87,7 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
         return corr;
     }
 
-	@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     public CorrelatorDAO getCorrelator(String correlatorId) {
         Query qry = getEM().createNamedQuery("CorrelatorByKey");
         qry.setParameter("ckey", correlatorId);
@@ -101,13 +101,13 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
         ProcessInstanceDAOImpl inst = new ProcessInstanceDAOImpl((CorrelatorDAOImpl)instantiatingCorrelator, this);
         getEM().persist(inst);
         return inst;
-	}
+    }
 
     public ProcessInstanceDAO createInstance(CorrelatorDAO instantiatingCorrelator, MessageExchangeDAO mex) {
         ProcessInstanceDAOImpl inst = new ProcessInstanceDAOImpl((CorrelatorDAOImpl)instantiatingCorrelator, this);
         getEM().persist(inst);
         return inst;
-	}
+    }
 
     @SuppressWarnings("unchecked")
     public Collection<ProcessInstanceDAO> findInstance(CorrelationKey ckey) {
