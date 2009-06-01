@@ -160,10 +160,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             _state = State.RUNNING;
             __log.info(__msgs.msgServerStarted());
             if (_dehydrationPolicy != null) {
-            	Thread thread = new Thread(new ProcessDefReaper(), "Dehydrator");
-            	thread.setDaemon(true);
-            	thread.start();
-            	
+                Thread thread = new Thread(new ProcessDefReaper(), "Dehydrator");
+                thread.setDaemon(true);
+                thread.start();
+                
             }
         } finally {
             _mngmtLock.writeLock().unlock();
@@ -399,15 +399,15 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
     protected boolean deleteProcessDAO(final QName pid, boolean isInMemory) {
         try {
-        	if (isInMemory) {
-            	return deleteProcessDAO(_contexts.inMemDao.getConnection(), pid);
-        	} else {
-	            return _db.exec(new BpelDatabase.Callable<Boolean>() {
-	                public Boolean run(BpelDAOConnection conn) throws Exception {
-	                	return deleteProcessDAO(conn, pid);
-	                }
-	            });
-        	}
+            if (isInMemory) {
+                return deleteProcessDAO(_contexts.inMemDao.getConnection(), pid);
+            } else {
+                return _db.exec(new BpelDatabase.Callable<Boolean>() {
+                    public Boolean run(BpelDAOConnection conn) throws Exception {
+                        return deleteProcessDAO(conn, pid);
+                    }
+                });
+            }
         } catch (RuntimeException re) {
             throw re;
         } catch (Exception e) {
@@ -434,7 +434,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             return true;
         }
         return false;
-    	
+        
     }
 
     public void onScheduledJob(JobInfo jobInfo) throws JobProcessorException {
