@@ -42,7 +42,7 @@ public abstract class HibernateDao {
     protected final SessionManager _sm;
     protected final HObject _hobj;
 
-	protected HibernateDao(SessionManager sessionManager, HObject hobj) {
+    protected HibernateDao(SessionManager sessionManager, HObject hobj) {
         _sm = sessionManager;
         _hobj = hobj;
     }
@@ -68,10 +68,10 @@ public abstract class HibernateDao {
     }
 
     public Serializable getId() {
-    	if( _hobj != null ) {
-    		return _hobj.getId();
-    	}
-    	return null;
+        if( _hobj != null ) {
+            return _hobj.getId();
+        }
+        return null;
     }
     
     public boolean equals(Object obj) {
