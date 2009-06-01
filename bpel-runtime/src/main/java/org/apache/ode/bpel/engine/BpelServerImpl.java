@@ -665,9 +665,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         }
     }
 
-	public void cleanupProcess(ProcessConf pconf) throws BpelEngineException {
-		if (pconf != null) {
-			deleteProcessDAO(pconf.getProcessId(), pconf.isTransient());
-		}
-	}
+    public void cleanupProcess(ProcessConf pconf) throws BpelEngineException {
+        if (pconf != null) {
+            deleteProcessDAO(pconf.getProcessId(), pconf.isTransient());
+        }
+    }
 }
