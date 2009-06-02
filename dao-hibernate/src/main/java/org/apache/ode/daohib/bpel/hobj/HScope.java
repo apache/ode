@@ -25,12 +25,10 @@ import java.util.Set;
  * Hibernate table representing a BPEL scope instance.
  * 
  * @hibernate.class table="BPEL_SCOPE"
- * @hibernate.query name="DELETE_SCOPES_BY_INSTANCE" query="delete from HScope as s where s.instance = :instance"
- * @hibernate.query name="DELETE_SCOPES_BY_PROCESS" query="delete from HScope as s where s.instance in (select i from HProcessInstance as i where i.process = :process)"
+ * @hibernate.query name="DELETE_SCOPES_BY_INSTANCES" query="delete from HScope as s where s.instance in (:instances)"
  */
 public class HScope extends HObject {
-    public final static String DELETE_SCOPES_BY_INSTANCE = "DELETE_SCOPES_BY_INSTANCE";
-    public final static String DELETE_SCOPES_BY_PROCESS = "DELETE_SCOPES_BY_PROCESS";
+    public final static String DELETE_SCOPES_BY_INSTANCES = "DELETE_SCOPES_BY_INSTANCES";
 
     /** Process instance to which this scope belongs. */
     private HProcessInstance _instance;

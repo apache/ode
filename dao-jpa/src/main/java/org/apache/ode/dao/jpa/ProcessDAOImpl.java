@@ -28,6 +28,8 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 
 import javax.persistence.*;
 import javax.xml.namespace.QName;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -55,29 +57,37 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
 
     @Basic @Column(name="PROCESS_ID")
     private String _processId;
-	@Transient
+    @Transient
     private int _numInstances;
-	@Basic @Column(name="PROCESS_TYPE")
+    @Basic @Column(name="PROCESS_TYPE")
     private String _processType;
-	@Basic @Column(name="GUID")
+    @Basic @Column(name="GUID")
     private String _guid;
-	@Basic @Column(name="VERSION")
+    @Basic @Column(name="VERSION")
     private long _version;
 
-	@OneToMany(targetEntity=CorrelatorDAOImpl.class,mappedBy="_process",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
+    @OneToMany(targetEntity=CorrelatorDAOImpl.class,mappedBy="_process",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
     private Collection<CorrelatorDAOImpl> _correlators = new ArrayList<CorrelatorDAOImpl>();
 
-	public ProcessDAOImpl() {}
-	public ProcessDAOImpl(QName pid, QName type, String guid, long version) {
+    public ProcessDAOImpl() {}
+    public ProcessDAOImpl(QName pid, QName type, String guid, long version) {
         _processId = pid.toString();
-		_processType = type.toString();
-		_guid = guid;
+        _processType = type.toString();
+        _guid = guid;
         _version = version;
     }
-	
-	public CorrelatorDAO addCorrelator(String correlator) {
-		CorrelatorDAOImpl corr = new CorrelatorDAOImpl(correlator, this);
-		_correlators.add(corr);
+    
+    public Serializable getId() {
+        return _id; 
+    }
+    
+    public void setId(Long id) {
+        _id = id;
+    }
+
+    public CorrelatorDAO addCorrelator(String correlator) {
+        CorrelatorDAOImpl corr = new CorrelatorDAOImpl(correlator, this);
+        _correlators.add(corr);
         return corr;
     }
 
@@ -91,47 +101,60 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
     }
 
     public ProcessInstanceDAO createInstance(
-			CorrelatorDAO instantiatingCorrelator) {
-		ProcessInstanceDAOImpl inst = new ProcessInstanceDAOImpl((CorrelatorDAOImpl)instantiatingCorrelator, this);
-		getEM().persist(inst);
-		_numInstances++;
-		return inst;
-	}
+            CorrelatorDAO instantiatingCorrelator) {
+        ProcessInstanceDAOImpl inst = new ProcessInstanceDAOImpl((CorrelatorDAOImpl)instantiatingCorrelator, this);
+        getEM().persist(inst);
+        _numInstances++;
+        return inst;
+    }
 
     public Collection<ProcessInstanceDAO> findInstance(CorrelationKey key) {
-    	return findInstance(key, true);
+        return findInstance(key, true);
     }
     
-	@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     public Collection<ProcessInstanceDAO> findInstance(CorrelationKey ckey, boolean wait) {
-		Query qry = getEM().createNamedQuery("InstanceByCKey");
+        Query qry = getEM().createNamedQuery("InstanceByCKey");
         qry.setParameter("ckey", ckey.toCanonicalString());
         return qry.getResultList();
-	}
+    }
 
-	public ProcessInstanceDAO getInstance(Long iid) {
-		return getEM().find(ProcessInstanceDAOImpl.class, iid);
-	}
+    public ProcessInstanceDAO getInstance(Long iid) {
+        return getEM().find(ProcessInstanceDAOImpl.class, iid);
+    }
 
-	public QName getProcessId() {
-		return QName.valueOf(_processId);
-	}
+    public QName getProcessId() {
+        return QName.valueOf(_processId);
+    }
 
-	public QName getType() {
-		return QName.valueOf(_processType);
-	}
+    public QName getType() {
+        return QName.valueOf(_processType);
+    }
 
-    public void delete() {
+    @SuppressWarnings("unchecked")
+    public void deleteProcessAndRoutes() {
+        // delete routes
+        Collection instanceIds = getEM().createNamedQuery(ProcessInstanceDAOImpl.SELECT_INSTANCE_IDS_BY_PROCESS).setParameter("process", this).getResultList();
+        batchUpdateByIds(instanceIds.iterator(), getEM().createNamedQuery(MessageRouteDAOImpl.DELETE_MESSAGE_ROUTES_BY_INSTANCE_IDS), "instanceIds");
+        getEM().createNamedQuery(CorrelatorDAOImpl.DELETE_CORRELATORS_BY_PROCESS).setParameter("process", this).executeUpdate();
+
+        deleteInstances(Integer.MAX_VALUE);
+        
+        // delete process dao
+        getEM().remove(this); // This deletes CorrelatorDAO
+        getEM().flush();
+    }
+    
+    private int deleteInstances(int transactionSize) {
         if(__log.isDebugEnabled()) __log.debug("Cleaning up process data.");
 
-        getEM().flush();
         deleteEvents();
         deleteCorrelations();
         deleteMessages();
         deleteVariables();
         deleteProcessInstances();
-        getEM().remove(this); // This deletes CorrelatorDAO
-        getEM().flush();
+        
+        return 0;
     }
 
     @SuppressWarnings("unchecked")

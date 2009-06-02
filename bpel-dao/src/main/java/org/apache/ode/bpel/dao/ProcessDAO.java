@@ -104,8 +104,11 @@ public interface ProcessDAO {
 
     /**
      * Remove the process from the database (along with any instance, variable data, etc...).
+     * A ProcessDAO implementation that implements the DeferredProcessInstanceCleanable can opt to removed only
+     * the process and its routes on this call. The framework will call the deleteInstances() on 
+     * the DeferredProcessInstanceCleanable interface in another thread later.
      */
-    void delete();
+    void deleteProcessAndRoutes();
 
     CorrelatorDAO addCorrelator(String correlator);
 

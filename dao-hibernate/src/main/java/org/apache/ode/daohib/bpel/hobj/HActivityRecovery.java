@@ -25,10 +25,10 @@ import java.util.Date;
  * Persistent representation of activity recovery information.
  * 
  * @hibernate.class table="BPEL_ACTIVITY_RECOVERY"
- * @hibernate.query name="DELETE_ACTIVITY_RECOVERIES_BY_PROCESS" query="delete from HActivityRecovery as a where a.instance in(select i from HProcessInstance as i where i.process = :process)"
+ * @hibernate.query name="DELETE_ACTIVITY_RECOVERIES_BY_INSTANCES" query="delete from HActivityRecovery as a where a.instance in (:instances)" 
  */
 public class HActivityRecovery extends HObject {
-    public final static String DELETE_ACTIVITY_RECOVERIES_BY_PROCESS = "DELETE_ACTIVITY_RECOVERIES_BY_PROCESS";
+    public final static String DELETE_ACTIVITY_RECOVERIES_BY_INSTANCES = "DELETE_ACTIVITY_RECOVERIES_BY_INSTANCES";
 
     /** Process instance to which this scope belongs. */
     private HProcessInstance _instance;

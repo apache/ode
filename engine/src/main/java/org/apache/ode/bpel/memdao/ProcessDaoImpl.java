@@ -172,7 +172,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
         }
     }
 
-    public void delete() {
+    public void deleteProcessAndRoutes() {
         _store.remove(_processId);
     }
 

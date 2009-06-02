@@ -18,6 +18,7 @@
  */
 package org.apache.ode.daohib.bpel.hobj;
 
+import java.util.Collection;
 import java.util.Date;
 
 /**
@@ -73,6 +74,28 @@ public class HObject {
 
     public void setLock(int lock) {
         _lock = lock;
+    }
+
+    public static <T extends HObject> Object[] toIdArray(T[] objects) {
+        Object[] ids = new Object[objects.length];
+
+        int index = 0;
+        for( HObject object : objects ) {
+            ids[index++] = object.getId();
+        }
+
+        return ids;
+    }
+
+    public static Object[] toIdArray(Collection<? extends HObject> objects) {
+        Object[] ids = new Object[objects.size()];
+
+        int index = 0;
+        for( HObject object : objects ) {
+            ids[index++] = object.getId();
+        }
+
+        return ids;
     }
 
     public String toString() {

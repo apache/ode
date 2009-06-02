@@ -23,7 +23,8 @@
            xmlns:dd="http://www.apache.org/ode/schemas/dd/2007/03"
            elementFormDefault="qualified">
 
-    <xs:element name="deploy" id="deploy" type="dd:tDeployment"/>
+    <xs:element name="deploy" id="deploy" type="dd:tDeployment">
+    </xs:element>
 
     <xs:complexType name="tDeployment">
         <xs:sequence>
@@ -93,9 +94,9 @@
                             </xs:annotation>
                         </xs:element>
 
-                        <xs:element name="cleanup"
-                            minOccurs="0" maxOccurs="3"
-                            type="dd:tCleanup" />
+                        <xs:element name="cleanup" minOccurs="0" maxOccurs="3" type="dd:tCleanup" />
+                        <xs:element name="schedule" minOccurs="0" maxOccurs="unbounded" type="dd:tSchedule">
+                        </xs:element>
                     </xs:sequence>
 
                     <xs:attribute name="name" type="xs:QName" use="required"/>
@@ -147,7 +148,7 @@
             </xs:restriction>
         </xs:complexContent>
     </xs:complexType>
-    
+
     <xs:complexType name="tMexInterceptor" >
         <xs:annotation>
             <xs:documentation>
@@ -206,8 +207,9 @@
                     </xs:restriction>
                 </xs:simpleType>
             </xs:element>
+            <xs:element name="filter" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
-        <xs:attribute name="on" use="required">
+        <xs:attribute name="on" use="optional">
             <xs:simpleType>
                 <xs:restriction base="xs:string">
                     <xs:enumeration value="success" />
@@ -216,5 +218,13 @@
                 </xs:restriction>
             </xs:simpleType>
         </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="tSchedule">
+        <xs:sequence>
+            <xs:element name="cleanup" type="dd:tCleanup" minOccurs="0" maxOccurs="unbounded">
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="when" type="xs:string" use="required"></xs:attribute>
     </xs:complexType>
 </xs:schema>

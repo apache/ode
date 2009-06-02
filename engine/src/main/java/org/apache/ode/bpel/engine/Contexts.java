@@ -42,21 +42,23 @@ import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
+import org.apache.ode.bpel.engine.cron.CronScheduler;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
 import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 
 /**
  * Aggregation of all the contexts provided to the BPEL engine by the integration layer.
  */
-class Contexts {
+public class Contexts {
     private static final Log __log = LogFactory.getLog(Contexts.class);
     
     TransactionManager txManager;
     MessageExchangeContext mexContext;
-    Scheduler scheduler;
+    public Scheduler scheduler;
+    public CronScheduler cronScheduler;
     EndpointReferenceContext eprContext;
     BindingContext bindingContext;
-    BpelDAOConnectionFactory dao;
+    public BpelDAOConnectionFactory dao;
 
     /** Global Message-Exchange interceptors. Must be copy-on-write!!! */
     final List<MessageExchangeInterceptor> globalIntereceptors = new CopyOnWriteArrayList<MessageExchangeInterceptor>();

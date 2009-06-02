@@ -44,6 +44,14 @@ public interface Scheduler {
     String schedulePersistedJob(Map<String,Object>jobDetail,Date when)
             throws ContextException ;
 
+    /**
+     * Schedule a Runnable that will be executed on a dedicated thread pool.
+     * @param runnable
+     * @param when
+     * @return
+     * @throws ContextException
+     */
+    String scheduleMapSerializableRunnable(MapSerializableRunnable runnable, Date when) throws ContextException;
 
     void jobCompleted(String jobId);
 
@@ -110,6 +118,8 @@ public interface Scheduler {
 
     }
 
-
-
+    public interface MapSerializableRunnable extends Runnable, Serializable {
+        void storeToDetailsMap(Map<String, Object> details);
+        void restoreFromDetailsMap(Map<String, Object> details);
+    }
 }

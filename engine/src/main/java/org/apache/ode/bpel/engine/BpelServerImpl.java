@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -46,6 +47,7 @@ import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
+import org.apache.ode.bpel.iapi.Scheduler.MapSerializableRunnable;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.rapi.ProcessModel;
 import org.apache.ode.il.config.OdeConfigProperties;
@@ -79,6 +81,12 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
     /** Maximum age of a process before it is quiesced */
     private static Long __processMaxAge;
+
+    public final static String DEFERRED_PROCESS_INSTANCE_CLEANUP_DISABLED_NAME =
+        "org.apache.ode.disable.deferredProcessInstanceCleanup";
+    
+    private static boolean DEFERRED_PROCESS_INSTANCE_CLEANUP_DISABLED = 
+        Boolean.getBoolean(DEFERRED_PROCESS_INSTANCE_CLEANUP_DISABLED_NAME);
 
     /** RNG, for delays */
     private Random _random = new Random(System.currentTimeMillis());
@@ -473,25 +481,40 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         return false;
     }
 
-    /* TODO: We need to have a method of cleaning up old deployment data. */
-    private boolean deleteProcessDAO(final QName pid) {
+    protected boolean deleteProcessDAO(final QName pid) {
         try {
-            // Delete it from the database.
             return _db.exec(new BpelDatabase.Callable<Boolean>() {
                 public Boolean run(BpelDAOConnection conn) throws Exception {
-                    ProcessDAO proc = conn.getProcess(pid);
-                    if (proc != null) {
-                        proc.delete();
-                        return true;
-                    }
-                    return false;
+                    return deleteProcessDAO(conn, pid);
                 }
             });
-        } catch (Exception ex) {
-            String errmsg = "DbError";
-            __log.error(errmsg, ex);
-            throw new BpelEngineException(errmsg, ex);
+        } catch (RuntimeException re) {
+            throw re;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
+    }
+    
+    private boolean deleteProcessDAO(BpelDAOConnection conn, QName pid) {
+        final ProcessDAO proc = conn.getProcess(pid);
+        if (proc != null) {
+            // delete routes
+            if(__log.isDebugEnabled()) __log.debug("Deleting only the process " + pid + "...");
+            proc.deleteProcessAndRoutes();
+            if(__log.isInfoEnabled()) __log.info("Deleted only the process " + pid + ".");
+             // we do deferred instance cleanup only for hibernate, for now
+            if( proc instanceof DeferredProcessInstanceCleanable &&
+                !DEFERRED_PROCESS_INSTANCE_CLEANUP_DISABLED ) {
+                // schedule deletion of process runtime data
+                _contexts.scheduler.scheduleMapSerializableRunnable(
+                    new ProcessCleanUpRunnable(((DeferredProcessInstanceCleanable)proc).getId()), new Date());
+            } else if( proc instanceof DeferredProcessInstanceCleanable ) {
+                ((DeferredProcessInstanceCleanable)proc).deleteInstances(Integer.MAX_VALUE);
+            }
+            return true;
+        }
+        return false;
+        
     }
 
     public void onScheduledJob(final JobInfo jobInfo) throws JobProcessorException {
@@ -1007,5 +1030,114 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     }
     
     public void setTransacted(boolean atomicScope) {
+    }
+
+    /**
+     * A polled runnable instance that implements this interface will be set 
+     * with the contexts before the run() method is called.
+     * 
+     * @author sean
+     *
+     */
+    public interface ContextsAware {
+        void setContexts(Contexts contexts);
+    }
+
+    /**
+     * This wraps up the executor service for polled runnables.
+     * 
+     * @author sean
+     *
+     */
+    public static class PolledRunnableProcessor implements Scheduler.JobProcessor {
+        private ExecutorService _polledRunnableExec;
+        private Contexts _contexts;
+        
+        // this map contains all polled runnable results that are not completed.
+        // keep an eye on this one, since if we re-use this polled runnable and
+        // generate too many entries in this map, this becomes a memory leak(
+        // long-running memory occupation)
+        private final Map<String, PolledRunnableResults> resultsByJobId = new HashMap<String, PolledRunnableResults>();
+
+        public void setContexts(Contexts contexts) {
+            _contexts = contexts;
+        }
+        
+        public void setPolledRunnableExecutorService(ExecutorService polledRunnableExecutorService) {
+            _polledRunnableExec = polledRunnableExecutorService;
+        }
+
+        public void onScheduledJob(final Scheduler.JobInfo jobInfo) throws Scheduler.JobProcessorException {
+            JOB_STATUS statusOfPriorTry = JOB_STATUS.PENDING;
+            Exception exceptionThrownOnPriorTry = null;
+            boolean toRetry = false;
+            
+            synchronized( resultsByJobId ) {
+                PolledRunnableResults results = resultsByJobId.get(jobInfo.jobName);        
+                if( results != null ) {
+                    statusOfPriorTry = results._status;
+                    exceptionThrownOnPriorTry = results._exception;
+                }
+                if( statusOfPriorTry == JOB_STATUS.COMPLETED ) {
+                    resultsByJobId.remove(jobInfo.jobName);
+                    jobInfo.jobDetail.put("runnable_status", JOB_STATUS.COMPLETED);
+                    return;
+                }
+                if( statusOfPriorTry == JOB_STATUS.PENDING || statusOfPriorTry == JOB_STATUS.FAILED ) {
+                    resultsByJobId.put(jobInfo.jobName, new PolledRunnableResults(JOB_STATUS.IN_PROGRESS, null));
+                    toRetry = true;
+                }
+            }
+            
+            if( toRetry ) {
+                // re-try
+                _polledRunnableExec.submit(new Runnable() {
+                    public void run() {
+                        try {
+                            MapSerializableRunnable runnable = (MapSerializableRunnable)jobInfo.jobDetail.get("runnable");
+                            runnable.restoreFromDetailsMap(jobInfo.jobDetail);
+                            if( runnable instanceof ContextsAware ) {
+                                ((ContextsAware)runnable).setContexts(_contexts);
+                            }
+                            runnable.run();
+                            synchronized( resultsByJobId ) {
+                                resultsByJobId.put(jobInfo.jobName, new PolledRunnableResults(JOB_STATUS.COMPLETED, null));
+                            }
+                        } catch( Exception e) {
+                            __log.error("", e);
+                            synchronized( resultsByJobId ) {
+                                resultsByJobId.put(jobInfo.jobName, new PolledRunnableResults(JOB_STATUS.FAILED, e));
+                            }
+                        } finally {
+                        }
+                    }
+                });
+            }
+            
+            jobInfo.jobDetail.put("runnable_status", JOB_STATUS.IN_PROGRESS);
+            if( exceptionThrownOnPriorTry != null ) {
+                throw new Scheduler.JobProcessorException(exceptionThrownOnPriorTry, true);
+            }
+        }
+        
+        private static enum JOB_STATUS {
+            PENDING, IN_PROGRESS, FAILED, COMPLETED
+        }
+        
+        private class PolledRunnableResults {
+            private JOB_STATUS _status = JOB_STATUS.PENDING;
+            private Exception _exception;
+            
+            public PolledRunnableResults(JOB_STATUS status, Exception exception) {
+                _status = status;
+                _exception = exception;
+            }
+        }
+    }
+
+    public void cleanupProcess(ProcessConf pconf) throws BpelEngineException {
+        if (pconf != null) {
+            deleteProcessDAO(pconf.getProcessId());
+        }
     }
 }

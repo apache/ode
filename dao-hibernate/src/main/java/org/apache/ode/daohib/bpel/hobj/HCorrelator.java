@@ -55,7 +55,7 @@ public class HCorrelator extends HObject {
      * Get the set of {@link HCorrelatorMessage} objects representing the
      * messages that need matching to a selector (i.e. pick/receive).
      * 
-     * @hibernate.set lazy="true" inverse="true" cascade="delete"
+     * @hibernate.set lazy="true" inverse="true"
      * @hibernate.collection-key column="CORRELATOR" foreign-key="none"
      * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HCorrelatorMessage"
      */
@@ -97,7 +97,7 @@ public class HCorrelator extends HObject {
      * Get the set of {@link HCorrelatorSelector} objects representing the
      * selectors (i.e. pick/receive) that need matching to an input message.
      * 
-     * @hibernate.set lazy="true" inverse="true" cascade="delete"
+     * @hibernate.set lazy="true" inverse="true"
      * @hibernate.collection-key column="CORRELATOR" foreign-key="none"
      * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HCorrelatorSelector"
      */

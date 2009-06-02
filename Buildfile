@@ -249,7 +249,7 @@ define "ode" do
     end
     
     test.using :testng
-    test.with(projects("tools"), libs, AXIS2_MODULES.mods, AXIS2_ALL, HTTPCORE, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, file(_("target/test"))).using(:fork => :each)
+    test.with(projects("tools"), libs, AXIS2_MODULES.mods, AXIS2_ALL, HTTPCORE, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, DOM4J, file(_("target/test"))).using(:fork => :each)
     webapp_dir = "#{test.compile.target}/webapp"
     test.setup task(:prepare_webapp) do |task|
       cp_r _("src/main/webapp"), test.compile.target.to_s
@@ -402,6 +402,16 @@ define "ode" do
     compile.with projects("bpel-api", "bpel-dao", "bpel-ql", "utils"),
       COMMONS.lang, COMMONS.logging, JAVAX.transaction, HIBERNATE, DOM4J
     resources hibernate_doclet(:package=>"org.apache.ode.daohib.bpel.hobj", :excludedtags=>"@version,@author,@todo")
+
+    # doclet does not support not-found="ignore"
+    build {
+      process_instance_hbm_file = project.path_to("target/classes/org/apache/ode/daohib/bpel/hobj/HProcessInstance.hbm.xml")
+      process_instance_hbm = File.read(process_instance_hbm_file)
+      if !process_instance_hbm.include? "not-found=\"ignore\""
+        process_instance_hbm.insert(process_instance_hbm.index("class=\"org.apache.ode.daohib.bpel.hobj.HProcess\"") - 1, "not-found=\"ignore\" ")
+        File.open(process_instance_hbm_file, "w") { |f| f << process_instance_hbm }
+      end
+    }
 
     test.exclude "org.apache.ode.daohib.bpel.BaseTestDAO"
     test.with project("il-common"), BACKPORT, COMMONS.collections, COMMONS.lang, HSQLDB,

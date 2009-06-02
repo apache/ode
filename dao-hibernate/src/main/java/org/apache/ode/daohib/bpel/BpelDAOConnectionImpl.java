@@ -45,6 +45,7 @@ import org.hibernate.criterion.Projections;
 import javax.xml.namespace.QName;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -125,6 +126,13 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection {
         process.setGuid(guid);
         process.setVersion(version);
         _session.save(process);
+        return new ProcessDaoImpl(_sm, process);
+    }
+
+    public ProcessDAO createTransientProcess(Serializable id) {
+        HProcess process = new HProcess();
+        process.setId((Long)id);
+
         return new ProcessDaoImpl(_sm, process);
     }
 

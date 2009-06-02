@@ -25,12 +25,10 @@ import java.sql.Timestamp;
  * Row representation of a BPEL event.
  * 
  * @hibernate.class table="BPEL_EVENT"
- * @hibernate.query name="DELETE_EVENTS_BY_PROCESS" query="delete from HBpelEvent as e where e.process = :process"
- * @hibernate.query name="DELETE_EVENTS_BY_INSTANCE" query="delete from HBpelEvent as e where e.instance = :instance"
+ * @hibernate.query name="DELETE_EVENTS_BY_INSTANCES" query="delete from HBpelEvent as e where e.instance in (:instances)"
  */
 public class HBpelEvent extends HObject {
-    public final static String DELETE_EVENTS_BY_PROCESS = "DELETE_EVENTS_BY_PROCESS";
-    public static final String DELETE_EVENTS_BY_INSTANCE = "DELETE_EVENTS_BY_INSTANCE";
+    public static final String DELETE_EVENTS_BY_INSTANCES = "DELETE_EVENTS_BY_INSTANCES";
 
     private Timestamp _tstamp;
     private String _type;

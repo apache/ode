@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.memdao;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -68,6 +69,12 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         return _store.get(processId);
     }
 
+    public ProcessDAO createTransientProcess(Serializable id) {
+        ProcessDaoImpl process = new ProcessDaoImpl(this, _store, null, null, (String)id, 0);
+
+        return process;
+    }
+
     public ProcessDAO createProcess(QName pid, QName type, String guid, long version) {
         ProcessDaoImpl process = new ProcessDaoImpl(this, _store, pid, type, guid, version);
         _store.put(pid, process);
@@ -83,6 +90,7 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     public Collection<ProcessInstanceDAO> instanceQuery(InstanceFilter filter) {
         if (filter.getLimit() == 0) {
             return Collections.EMPTY_LIST;

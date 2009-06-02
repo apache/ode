@@ -24,12 +24,12 @@ package org.apache.ode.daohib.bpel.hobj;
  *
  * @hibernate.class
  *  table="BPEL_MESSAGE"
- * @hibernate.query name="DELETE_REQUEST_MESSAGES_BY_PROCESS" query="delete from HMessage as m WHERE m IN(select request from HMessageExchange e where e.process = :process)"
- * @hibernate.query name="DELETE_RESPONSE_MESSAGES_BY_PROCESS" query="delete from HMessage as m WHERE m IN(select response from HMessageExchange e where e.process = :process)"
+ * @hibernate.query name="DELETE_MESSAGES_BY_MEX" query="delete from HMessage as m where m in(select request from HMessageExchange e where e = :messageExchange) or m in(select response from HMessageExchange e where e = :messageExchange)"
+ * @hibernate.query name="DELETE_MESSAGES_BY_INSTANCES" query="delete from HMessage as m where m in(select request from HMessageExchange e where e.instance in (:instances)) or m in(select response from HMessageExchange e where e.instance in (:instances))"
  */
 public class HMessage extends HObject {
-    public final static String DELETE_REQUEST_MESSAGES_BY_PROCESS = "DELETE_REQUEST_MESSAGES_BY_PROCESS";
-    public final static String DELETE_RESPONSE_MESSAGES_BY_PROCESS = "DELETE_RESPONSE_MESSAGES_BY_PROCESS";
+    public final static String DELETE_MESSAGES_BY_MEX = "DELETE_MESSAGES_BY_MEX";
+    public final static String DELETE_MESSAGES_BY_INSTANCES = "DELETE_MESSAGES_BY_INSTANCES";
 
     private String _type;
     private HLargeData _data;
@@ -61,5 +61,4 @@ public class HMessage extends HObject {
     public void setHeader(HLargeData header) {
         _header = header;
     }
-
 }

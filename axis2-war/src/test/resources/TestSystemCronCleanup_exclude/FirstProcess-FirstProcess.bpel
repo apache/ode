@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<bpel:process xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:Client="http://example.com/FirstProcess/Client" xmlns:this="http://example.com/FirstProcess/FirstProcess" xmlns:TimeServer="http://example.com/FirstProcess/TimeServer" xmlns:TimeService="http://ws.intalio.com/TimeService/" xmlns:diag="http://example.com/FirstProcess" xmlns:ns="http://bpms.intalio.com/FirstProcess/Time" xmlns:bpmn="http://www.intalio.com/bpms" xmlns:atomic="http://ode.apache.org/atomicScope" queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" bpmn:label="FirstProcess" bpmn:id="_MmE9YDEVEdyJMOclT3liPQ" name="FirstProcess" targetNamespace="http://example.com/FirstProcess/FirstProcess">
+  <bpel:import namespace="http://example.com/FirstProcess" location="FirstProcess.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:import namespace="http://example.com/FirstProcess/FirstProcess" location="FirstProcess-FirstProcess.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:import namespace="http://ws.intalio.com/TimeService/" location="TimeService.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:partnerLinks>
+    <bpel:partnerLink name="firstProcessAndClientPlkVar" partnerLinkType="diag:FirstProcessAndClient" myRole="FirstProcess_for_Client"/>
+    <bpel:partnerLink name="timeServerAndFirstProcessForPortTimeServiceSoapPlkVar" partnerLinkType="diag:TimeServerAndFirstProcessForPortTimeServiceSoapPlk" initializePartnerRole="true" partnerRole="TimeServer_for_FirstProcess"/>
+  </bpel:partnerLinks>
+  <bpel:variables>
+    <bpel:variable name="timeServiceGetCityTimeResponseMsg" messageType="TimeService:getCityTimeSoapOut"/>
+    <bpel:variable name="timeServiceGetCityTimeRequestMsg" messageType="TimeService:getCityTimeSoapIn"/>
+    <bpel:variable name="timeServiceGetUTCTimeResponseMsg" messageType="TimeService:getUTCTimeSoapOut"/>
+    <bpel:variable name="timeServiceGetUTCTimeRequestMsg" messageType="TimeService:getUTCTimeSoapIn"/>
+    <bpel:variable name="thisEventStartMessageRequest" messageType="this:EventStartMessageRequest"/>
+    <bpel:variable name="thisEventStartMessageResponse" messageType="this:EventStartMessageResponse"/>
+  </bpel:variables>
+  <bpel:sequence>
+    <bpel:receive partnerLink="firstProcessAndClientPlkVar" portType="this:ForClient" operation="EventStartMessage" variable="thisEventStartMessageRequest" createInstance="yes" bpmn:label="EventStartMessage" bpmn:id="_PodJQDEVEdyJMOclT3liPQ"></bpel:receive>
+    <bpel:assign name="init-variables-FirstProcess">
+      <bpel:copy bpmn:label="$timeServiceGetCityTimeRequestMsg">
+        <bpel:from>
+          <bpel:literal>
+<TimeService:getCityTime>
+  <TimeService:city></TimeService:city>
+</TimeService:getCityTime></bpel:literal>
+        </bpel:from>
+        <bpel:to>$timeServiceGetCityTimeRequestMsg.parameters</bpel:to>
+      </bpel:copy>
+      <bpel:copy bpmn:label="$timeServiceGetUTCTimeRequestMsg">
+        <bpel:from>
+          <bpel:literal>
+<TimeService:getUTCTime></TimeService:getUTCTime></bpel:literal>
+        </bpel:from>
+        <bpel:to>$timeServiceGetUTCTimeRequestMsg.parameters</bpel:to>
+      </bpel:copy>
+      <bpel:copy bpmn:label="$thisEventStartMessageResponse">
+        <bpel:from>
+          <bpel:literal>
+<ns:TimeResponse>
+  <ns:UTCTime></ns:UTCTime>
+  <ns:cityTime></ns:cityTime>
+</ns:TimeResponse></bpel:literal>
+        </bpel:from>
+        <bpel:to>$thisEventStartMessageResponse.body</bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+    <bpel:invoke partnerLink="timeServerAndFirstProcessForPortTimeServiceSoapPlkVar" portType="TimeService:TimeServiceSoap" operation="getUTCTime" inputVariable="timeServiceGetUTCTimeRequestMsg" outputVariable="timeServiceGetUTCTimeResponseMsg" bpmn:label="getUTCTime" bpmn:id="_dyOQkDEmEdyJMOclT3liPQ"></bpel:invoke>
+    <bpel:assign bpmn:label="getCityTime" bpmn:id="_SsKx4DEVEdyJMOclT3liPQ">
+      <bpel:copy>
+        <bpel:from>$thisEventStartMessageRequest.body/ns:city</bpel:from>
+        <bpel:to>$timeServiceGetCityTimeRequestMsg.parameters/TimeService:city</bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+    <bpel:invoke partnerLink="timeServerAndFirstProcessForPortTimeServiceSoapPlkVar" portType="TimeService:TimeServiceSoap" operation="getCityTime" inputVariable="timeServiceGetCityTimeRequestMsg" outputVariable="timeServiceGetCityTimeResponseMsg" bpmn:label="getCityTime" bpmn:id="_SsKx4DEVEdyJMOclT3liPQ"></bpel:invoke>
+    <bpel:assign bpmn:label="EventEndMessage" bpmn:id="_UAjK4DEVEdyJMOclT3liPQ">
+      <bpel:copy>
+        <bpel:from>$timeServiceGetCityTimeResponseMsg.parameters/TimeService:getCityTimeResult</bpel:from>
+        <bpel:to>$thisEventStartMessageResponse.body/ns:cityTime</bpel:to>
+      </bpel:copy>
+      <bpel:copy>
+        <bpel:from>$timeServiceGetUTCTimeResponseMsg.parameters/TimeService:getUTCTimeResult</bpel:from>
+        <bpel:to>$thisEventStartMessageResponse.body/ns:UTCTime</bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+    <bpel:reply partnerLink="firstProcessAndClientPlkVar" portType="this:ForClient" operation="EventStartMessage" variable="thisEventStartMessageResponse" bpmn:label="EventEndMessage" bpmn:id="_UAjK4DEVEdyJMOclT3liPQ"></bpel:reply>
+  </bpel:sequence>
+</bpel:process>

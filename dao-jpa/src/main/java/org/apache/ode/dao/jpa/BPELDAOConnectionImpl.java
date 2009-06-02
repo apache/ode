@@ -35,6 +35,8 @@ import org.apache.openjpa.persistence.OpenJPAQuery;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.xml.namespace.QName;
+
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.*;
@@ -86,6 +88,13 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
     public ProcessDAO createProcess(QName pid, QName type, String guid, long version) {
         ProcessDAOImpl ret = new ProcessDAOImpl(pid,type,guid,version);
         _em.persist(ret);
+        return ret;
+    }
+
+    public ProcessDAO createTransientProcess(Serializable id) {
+        ProcessDAOImpl ret = new ProcessDAOImpl(null, null, null, 0);
+        ret.setId((Long)id);
+        
         return ret;
     }
 

@@ -175,11 +175,27 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         if (__log.isDebugEnabled())
             __log.debug("scheduling " + jobDetail + " for " + when);
 
+        return schedulePersistedJob(new Job(when.getTime(), true, jobDetail), when, ctime);
+    }
+
+    public String scheduleMapSerializableRunnable(MapSerializableRunnable runnable, Date when) throws ContextException {
+        long ctime = System.currentTimeMillis();
+        if (when == null)
+            when = new Date(ctime);
+
+        Map<String, Object> jobDetails = new HashMap<String, Object>();
+        jobDetails.put("runnable", runnable);
+        runnable.storeToDetailsMap(jobDetails);
+        
+        if (__log.isDebugEnabled())
+            __log.debug("scheduling " + jobDetails + " for " + when);
+
+        return schedulePersistedJob(new Job(when.getTime(), true, jobDetails), when, ctime);
+    }
+
+    public String schedulePersistedJob(Job job, Date when, long ctime) throws ContextException {
         boolean immediate = when.getTime() <= ctime + _immediateInterval;
         boolean nearfuture = !immediate && when.getTime() <= ctime + _nearFutureInterval;
-
-        Job job = new Job(when.getTime(), true, jobDetail);
-
         try {
             if (immediate) {
                 // If we have too many jobs in the queue, we don't allow any new ones

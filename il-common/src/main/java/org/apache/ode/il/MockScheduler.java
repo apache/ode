@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -86,6 +87,21 @@ public class MockScheduler implements Scheduler {
             }
         });
         return new GUID().toString();
+    }
+
+    public String scheduleMapSerializableRunnable(final MapSerializableRunnable runnable, final Date when) throws ContextException {
+        registerSynchronizer(new Synchronization() {
+            public void afterCompletion(int status) {
+                _timer.schedule(new TimerTask() {
+                    public void run() {
+                        runnable.run();
+                    }
+                }, when != null ? when : new Date());
+            }
+            public void beforeCompletion() { }
+        });
+
+        return null;
     }
 
     public void cancelJob(String arg0) throws ContextException {

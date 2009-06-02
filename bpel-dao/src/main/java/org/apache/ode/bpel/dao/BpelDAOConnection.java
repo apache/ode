@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.dao;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Collection;
 import java.util.List;
@@ -109,6 +110,15 @@ public interface BpelDAOConnection {
 
     Map<Long, Collection<CorrelationSetDAO>> getCorrelationSets(Collection<ProcessInstanceDAO> instances);
 
+    /**
+     * Creates a ProcessDAO that is not attached to the JPA session. This object is used in JPA queries
+     * when the process itself is already removed from the table.
+     * 
+     * @param id the primary key id for the process
+     * @return the ProcessDAO
+     */
+    ProcessDAO createTransientProcess(Serializable id);
+    
     ProcessDAO createProcess(QName pid, QName type, String guid, long version);
 
     /**

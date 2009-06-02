@@ -28,12 +28,10 @@ import java.util.Set;
  * configuration).
  * 
  * @hibernate.class table="BPEL_PLINK_VAL"
- * @hibernate.query name="DELETE_PARTNER_LINKS_BY_INSTANCE" query="delete from HPartnerLink as l where l.scope in (select s from HScope as s where s.instance = :instance)"
- * @hibernate.query name="DELETE_PARTNER_LINKS_BY_PROCESS" query="delete from HPartnerLink as l where l.scope in (select s.id from HScope as s where s.instance.process = :process)"
+ * @hibernate.query name="DELETE_PARTNER_LINKS_BY_INSTANCES" query="delete from HPartnerLink as l where l.scope in (select s from HScope as s where s.instance in (:instances))"
  */
 public class HPartnerLink extends HObject {
-    public final static String DELETE_PARTNER_LINKS_BY_INSTANCE = "DELETE_PARTNER_LINKS_BY_INSTANCE";
-    public final static String DELETE_PARTNER_LINKS_BY_PROCESS = "DELETE_PARTNER_LINKS_BY_PROCESS";
+    public final static String DELETE_PARTNER_LINKS_BY_INSTANCES = "DELETE_PARTNER_LINKS_BY_INSTANCES";
 
     private String _linkName;
 

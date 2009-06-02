@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * Base class for our DAO objects.
@@ -56,27 +57,45 @@ public abstract class HibernateDao {
 	 * @see org.apache.ode.utils.dao.DAO#getDHandle()
 	 */
 	public Serializable getDHandle() {
-    return new HibernateHandle(getClass(), _hobj.getClass(), getSession().getIdentifier(_hobj));
+        return new HibernateHandle(getClass(), _hobj.getClass(), getSession().getIdentifier(_hobj));
 	}
   
-  protected Session getSession(){
-  	return _sm.getSession();
-  }
+    protected Session getSession(){
+  	    return _sm.getSession();
+    }
   
-  public HObject getHibernateObj(){
-  	return _hobj;
-  }
+    public HObject getHibernateObj(){
+  	    return _hobj;
+    }
   
-  public boolean equals(Object obj){
-  	assert obj instanceof HibernateDao;
-    return _hobj.getId().equals(((HibernateDao)obj)._hobj.getId());
-  }
+    public Serializable getId() {
+        if( _hobj != null ) {
+            return _hobj.getId();
+        }
+        return null;
+    }
+
+    public boolean equals(Object obj){
+  	    assert obj instanceof HibernateDao;
+        return _hobj.getId().equals(((HibernateDao)obj)._hobj.getId());
+    }
   
-  public int hashCode(){
-  	return _hobj.getId().hashCode();
-  }
+    public int hashCode(){
+  	    return _hobj.getId().hashCode();
+    }
   
-  protected void update() {
-    _sm.getSession().update(_hobj);
-  }
+    protected void update() {
+        _sm.getSession().update(_hobj);
+    }
+
+    public static Object[] toIdArray(Collection<? extends HibernateDao> daos) {
+        Object[] ids = new Object[daos.size()];
+
+        int index = 0;
+        for(  HibernateDao dao : daos ) {
+            ids[index++] = dao.getId();
+        }
+
+        return ids;
+    }
 }

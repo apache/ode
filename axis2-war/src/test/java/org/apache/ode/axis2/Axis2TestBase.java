@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.util.Axis2UriResolver;
 import org.apache.ode.axis2.util.Axis2WSDLLocator;
+import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.tools.sendsoap.cline.HttpSoapSender;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -52,6 +53,11 @@ public abstract class Axis2TestBase {
     private static String originalOdePersistence = System.getProperty("ode.persistence");
     private static String originalOdeConfigDir = System.getProperty("org.apache.ode.configDir");
     
+    static {
+        // disable deferred process instance cleanup for faster testing
+        System.setProperty(BpelServerImpl.DEFERRED_PROCESS_INSTANCE_CLEANUP_DISABLED_NAME, "true");
+    }
+
     @DataProvider(name = "configs")
     protected Iterator<Object[]> createConfigData() {
         List<String> configDirList = new ArrayList<String>();

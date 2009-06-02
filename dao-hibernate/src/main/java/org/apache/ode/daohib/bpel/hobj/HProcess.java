@@ -74,7 +74,6 @@ public class HProcess extends HObject{
      * @hibernate.set
      *  lazy="true"
      *  inverse="true"
-     *  cascade="delete"
      * @hibernate.collection-key
      *  column="PROCESS" foreign-key="none"
      * @hibernate.collection-one-to-many

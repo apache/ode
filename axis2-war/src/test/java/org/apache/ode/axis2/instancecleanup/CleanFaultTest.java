@@ -9,20 +9,20 @@ import org.apache.ode.bpel.iapi.ContextException;
 import org.testng.annotations.Test;
 
 public class CleanFaultTest extends CleanTestBase {
-//   	@Test(dataProvider="configs")
+       @Test(dataProvider="configs")
     public void testCleanNone() throws Exception {
-    	go("TestCleanFault_None", 1, 0, 0, 1, 1, 0, 2, 2, 3, 2, 41, 47);
+        go("TestCleanFault_None", 1, 0, 0, 1, 2, 0, 3, 2, 3, 2, 41, 49);
     }
 
-//  	@Test(dataProvider="configs")
-	public void testCleanInstance() throws Exception {
-    	try {
-    		go("TestCleanSuccess_Instance", 0, 0, 0, 0, 3, 0, 6, 2, 3, 6, 41, 70);
-    		fail("Shoud throw a runtime exception: you cannot use the instance category without the variables and correlations categories.");
-    	} catch(ContextException re) {}
+      @Test(dataProvider="configs")
+    public void testCleanInstance() throws Exception {
+        try {
+            go("TestCleanSuccess_Instance", 0, 0, 0, 0, 3, 0, 6, 2, 3, 6, 41, 70);
+            fail("Shoud throw a runtime exception: you cannot use the instance category without the variables and correlations categories.");
+        } catch(ContextException re) {}
     }
 
-//    @Test(dataProvider="configs")
+    @Test(dataProvider="configs")
     public void testCleanVariables() throws Exception {
         go("TestCleanFault_Variables", 1, 0, 0, 1, 1, 0, 2, 0, 0, 0, 41, 45);
     }
@@ -59,8 +59,8 @@ public class CleanFaultTest extends CleanTestBase {
         server.deployProcess(bundleName);
         ProcessDAO process = null;
         try {
-        	initialLargeDataCount = getLargeDataCount(0);
-        	
+            initialLargeDataCount = getLargeDataCount(0);
+            
             server.sendRequestFile("http://localhost:8888/processes/helloWorld", bundleName, "testRequest.soap");
             assertInstanceCleanup(instances, activityRecoveries, correlationSets, faults, exchanges, routes, messsages, partnerLinks, scopes, variables, events, largeData);
             process = assertInstanceCleanup(instances, activityRecoveries, correlationSets, faults, exchanges, routes, messsages, partnerLinks, scopes, variables, events, largeData);
@@ -70,17 +70,17 @@ public class CleanFaultTest extends CleanTestBase {
         }
     }
 
-	public String getODEConfigDir() {
-		return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby";	
-	}
+    public String getODEConfigDir() {
+        return JPA_DERBY_CONF_DIR;
+    }
 
-	@Override
-	protected ProcessInstanceDAO getInstance() {
+    @Override
+    protected ProcessInstanceDAO getInstance() {
         return JpaDaoConnectionFactoryImpl.getInstance();
-	}
+    }
 
-	@Override
-	protected int getLargeDataCount(int echoCount) throws Exception {
-		return echoCount;
-	}
+    @Override
+    protected int getLargeDataCount(int echoCount) throws Exception {
+        return echoCount;
+    }
 }

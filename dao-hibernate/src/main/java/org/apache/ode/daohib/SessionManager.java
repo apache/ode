@@ -102,7 +102,8 @@ public class SessionManager {
 	        .addClass(HFaultData.class)
 	        .addClass(HActivityRecovery.class)
 	        .addClass(HResourceRoute.class)
-            .addClass(HLargeData.class);
+            .addClass(HLargeData.class)
+            .addClass(HMessageExchangeProperty.class);
   }
 
   public static TransactionManager getTransactionManager(Properties props) {

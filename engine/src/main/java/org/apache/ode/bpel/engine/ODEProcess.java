@@ -566,7 +566,8 @@ public abstract class ODEProcess {
      * exists and matches the GUID.
      */
     private void doBounce(BpelDAOConnection conn, final QName pid, final long version, final ProcessModel mprocess) {
-        deleteProcessDAO(conn, pid, version, mprocess);
+        // SEAN; I do not think we need this one anymore -- needs to confirm
+        // deleteProcessDAO(conn, pid, version, mprocess);
         createProcessDAO(conn, pid, version, mprocess);
     }
     
@@ -585,7 +586,7 @@ public abstract class ODEProcess {
                         // GUIDS dont match, delete and create new
                         String errmsg = "ProcessDAO GUID " + old.getGuid() + " does not match " + mprocess.getGuid() + "; replacing.";
                         __log.debug(errmsg);
-                        old.delete();
+                        old.deleteProcessAndRoutes();
                     }
                 }
             }

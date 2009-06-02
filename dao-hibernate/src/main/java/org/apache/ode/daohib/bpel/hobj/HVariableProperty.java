@@ -23,12 +23,10 @@ package org.apache.ode.daohib.bpel.hobj;
  * of process instances based on indexed lookup of property values.
  * 
  * @hibernate.class table="VAR_PROPERTY"
- * @hibernate.query name="DELETE_VARIABLE_PROPERITES_BY_PROCESS" query="delete from HVariableProperty as p where p.xmlData in(select x.id from HXmlData x where x.instance.process = :process)"
- * @hibernate.query name="DELETE_VARIABLE_PROPERITES_BY_INSTANCE" query="delete from HVariableProperty as p where p.xmlData in(select x.id from HXmlData x where x.instance = :instance)"
+ * @hibernate.query name="DELETE_VARIABLE_PROPERITES_BY_INSTANCES" query="delete from HVariableProperty as p where p.xmlData in(select x.id from HXmlData x where x.instance in (:instances))"
  */
 public class HVariableProperty extends HObject {
-    public final static String DELETE_VARIABLE_PROPERITES_BY_PROCESS = "DELETE_VARIABLE_PROPERITES_BY_PROCESS";
-    public final static String DELETE_VARIABLE_PROPERITES_BY_INSTANCE = "DELETE_VARIABLE_PROPERITES_BY_INSTANCE";
+    public final static String DELETE_VARIABLE_PROPERITES_BY_INSTANCES = "DELETE_VARIABLE_PROPERITES_BY_INSTANCES";
 
     private String _propertyValue;
     private String _propertyName;
