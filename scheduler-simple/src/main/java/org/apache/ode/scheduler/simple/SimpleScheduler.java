@@ -80,6 +80,8 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     /** The object that actually handles the jobs. */
     volatile JobProcessor _jobProcessor;
 
+    volatile JobProcessor _polledRunnableProcessor;
+
     private SchedulerThread _todo;
 
     private DatabaseDelegate _db;
@@ -129,6 +131,10 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
 
     public void setDatabaseDelegate(DatabaseDelegate dbd) {
         _db = dbd;
+    }
+
+    public void setPolledRunnableProcesser(JobProcessor polledRunnableProcessor) {
+        _polledRunnableProcessor = polledRunnableProcessor;
     }
 
     public void cancelJob(String jobId) throws ContextException {

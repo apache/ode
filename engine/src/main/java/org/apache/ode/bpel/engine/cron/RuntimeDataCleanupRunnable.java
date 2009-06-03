@@ -50,12 +50,18 @@ public class RuntimeDataCleanupRunnable implements MapSerializableRunnable, Cont
     
     public void run() {
         _log.info("CleanInstances.run().");
-        for( String filter : _cleanupInfo.getFilters() ) {
-            _log.info("CleanInstances.run(" + filter + ")");
-            long numberOfDeletedInstances = 0;
-            do {
-                numberOfDeletedInstances = cleanInstances(filter, _cleanupInfo.getCategories(), _transactionSize);
-            } while( numberOfDeletedInstances == _transactionSize );
+        try {
+            for( String filter : _cleanupInfo.getFilters() ) {
+                _log.info("CleanInstances.run(" + filter + ")");
+                long numberOfDeletedInstances = 0;
+                do {
+                    numberOfDeletedInstances = cleanInstances(filter, _cleanupInfo.getCategories(), _transactionSize);
+                } while( numberOfDeletedInstances == _transactionSize );
+            }
+        } catch( RuntimeException re ) {
+            throw re;
+        } catch( Exception e ) {
+            throw new RuntimeException("", e);
         }
     }
     

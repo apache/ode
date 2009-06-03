@@ -23,15 +23,14 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 
 /**
  * The BPEL scheduler.
  */
 public interface Scheduler {
-
     void setJobProcessor(JobProcessor processor) throws ContextException;
+
+    void setPolledRunnableProcesser(JobProcessor polledRunnableProcessor);
 
     /**
      * Schedule a persisted job. Persisted jobs MUST survive system failure.

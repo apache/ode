@@ -49,7 +49,10 @@ public class ProcessStoreEvent implements Serializable {
         DISABLED,
         
         /** A process property was changed. */
-        PROPERTY_CHANGED
+        PROPERTY_CHANGED,
+
+        /** Cron schedule settings have been changed for the process */
+        SCHEDULE_SETTINGS_CHANGED
     }
 
     /**

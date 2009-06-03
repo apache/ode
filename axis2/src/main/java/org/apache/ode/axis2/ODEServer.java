@@ -25,6 +25,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.StringTokenizer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -65,6 +68,7 @@ import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
+import org.apache.ode.bpel.engine.cron.CronScheduler;
 import org.apache.ode.bpel.evtproc.DebugBpelEventListener;
 import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
 import org.apache.ode.bpel.iapi.BpelEventListener;
@@ -107,6 +111,10 @@ public class ODEServer {
     protected TransactionManager _txMgr;
     protected BpelDAOConnectionFactory _daoCF;
     protected Scheduler _scheduler;
+
+    protected ExecutorService _executorService;
+    protected CronScheduler _cronScheduler;
+
     protected Database _db;
     private DeploymentPoller _poller;
     private MultiKeyMap _services = new MultiKeyMap();
@@ -484,10 +492,34 @@ public class ODEServer {
             __log.debug("ODE initializing");
         }
 
+        ThreadFactory threadFactory = new ThreadFactory() {
+            int threadNumber = 0;
+            public Thread newThread(Runnable r) {
+                threadNumber += 1;
+                Thread t = new Thread(r, "BULK-"+threadNumber);
+                t.setDaemon(true);
+                return t;
+            }
+        };
+
+        if (_odeConfig.getThreadPoolMaxSize() == 0)
+            _executorService = Executors.newCachedThreadPool(threadFactory);
+        else
+            _executorService = Executors.newFixedThreadPool(_odeConfig.getThreadPoolMaxSize(), threadFactory);
+
         _bpelServer = new BpelServerImpl();
         _scheduler = createScheduler();
         _scheduler.setJobProcessor(_bpelServer);
 
+        _cronScheduler = new CronScheduler();
+        _cronScheduler.setScheduledTaskExec(_executorService);
+        _cronScheduler.setContexts(_bpelServer.getContexts());
+        _bpelServer.setCronScheduler(_cronScheduler);
+        BpelServerImpl.PolledRunnableProcessor polledRunnableProcessor = new BpelServerImpl.PolledRunnableProcessor();
+        polledRunnableProcessor.setPolledRunnableExecutorService(_executorService);
+        polledRunnableProcessor.setContexts(_bpelServer.getContexts());
+        _scheduler.setPolledRunnableProcesser(polledRunnableProcessor);
+        
         _bpelServer.setDaoConnectionFactory(_daoCF);
         _bpelServer.setEndpointReferenceContext(eprContext);
         _bpelServer.setMessageExchangeContext(new MessageExchangeContextImpl(this));
@@ -539,6 +571,10 @@ public class ODEServer {
 
     public File getAppRoot() {
         return _appRoot;
+    }
+
+    public File getConfigRoot() {
+        return _configRoot;
     }
 
     /**
@@ -654,6 +690,20 @@ public class ODEServer {
                 break;
             default:
                 __log.debug("Ignoring store event: " + pse);
+        }
+
+        ProcessConf pconf = _store.getProcessConfiguration(pse.pid);
+        if( pconf != null ) {
+            if( pse.type == ProcessStoreEvent.Type.UNDEPLOYED) {
+                __log.debug("Cancelling all cron scheduled jobs on store event: " + pse);
+                _bpelServer.getContexts().cronScheduler.cancelProcessCronJobs(pse.pid, true);
+            }
+
+            // Except for undeploy event, we need to re-schedule process dependent jobs
+            __log.debug("(Re)scheduling cron scheduled jobs on store event: " + pse);
+            if( pse.type != ProcessStoreEvent.Type.UNDEPLOYED) {
+                _bpelServer.getContexts().cronScheduler.scheduleProcessCronJobs(pse.pid, pconf);
+            }
         }
     }
 

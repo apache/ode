@@ -145,4 +145,7 @@ public class MockScheduler implements Scheduler {
     public void jobCompleted(String jobId) {
 
     }
+
+    public void setPolledRunnableProcesser(JobProcessor delegatedRunnableProcessor) {
+    }
 }

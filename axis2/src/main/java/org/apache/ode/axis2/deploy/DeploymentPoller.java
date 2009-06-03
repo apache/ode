@@ -41,6 +41,9 @@ package org.apache.ode.axis2.deploy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.ODEServer;
+import org.apache.ode.bpel.engine.cron.CronScheduler;
+import org.apache.ode.bpel.engine.cron.SystemSchedulesConfig;
+import org.apache.ode.utils.WatchDog;
 
 import javax.xml.namespace.QName;
 import java.io.File;
@@ -48,6 +51,8 @@ import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Polls a directory for the deployment of a new deployment unit.
@@ -66,6 +71,13 @@ public class DeploymentPoller {
     private ODEServer _odeServer;
 
     private boolean _onHold = false;
+
+    private SystemSchedulesConfig _systemSchedulesConf;
+
+    @SuppressWarnings("unchecked")
+    private Map<String, WatchDog> dDWatchDogsByPath = new HashMap<String, WatchDog>();
+    @SuppressWarnings("unchecked")
+    private WatchDog _systemCronConfigWatchDog;
 
     /** Filter accepting directories containing a .odedd file. */
     private static final FileFilter _fileFilter = new FileFilter() {
@@ -93,6 +105,8 @@ public class DeploymentPoller {
         _deployDir = deployDir;
         if (!_deployDir.exists())
             _deployDir.mkdir();
+        _systemSchedulesConf = createSystemSchedulesConfig(odeServer.getConfigRoot());
+        _systemCronConfigWatchDog = createSystemCronConfigWatchDog(odeServer.getBpelServer().getContexts().cronScheduler);
     }
 
     public void start() {
@@ -110,6 +124,7 @@ public class DeploymentPoller {
      * Scan the directory for new (or removed) files (called mainly from {@link PollingThread}) and calls whoever is in charge of
      * the actual deployment (or undeployment).
      */
+    @SuppressWarnings("unchecked")
     private void check() {
         File[] files = _deployDir.listFiles(_fileFilter);
 
@@ -123,7 +138,10 @@ public class DeploymentPoller {
                 __log.debug("Not deploying " + file + " (missing deploy.xml)");
             }
 
+            WatchDog ddWatchDog = ensureDeployXmlWatchDog(file, deployXml);
+
             if (deployedMarker.exists()) {
+                checkDeployXmlWatchDog(ddWatchDog);
                 continue;
             }
 
@@ -160,6 +178,47 @@ public class DeploymentPoller {
                     __log.info("Successfully undeployed " + pkg);
             }
         }
+
+        checkSystemCronConfigWatchDog(_systemCronConfigWatchDog);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected WatchDog ensureDeployXmlWatchDog(File deployFolder, File deployXml) {
+        WatchDog ddWatchDog = dDWatchDogsByPath.get(deployXml.getAbsolutePath());
+        if( ddWatchDog == null ) {
+            ddWatchDog = WatchDog.watchFile(deployXml, new DDWatchDogObserver(deployFolder.getName()));
+            dDWatchDogsByPath.put(deployXml.getAbsolutePath(), ddWatchDog);
+        }
+        
+        return ddWatchDog;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void checkDeployXmlWatchDog(WatchDog ddWatchDog) {
+        ddWatchDog.check();
+    }
+
+    protected void disposeDeployXmlWatchDog(File deployDir) {
+        dDWatchDogsByPath.remove(new File(deployDir, "deploy.xml").getAbsolutePath());
+    }
+
+    protected SystemSchedulesConfig createSystemSchedulesConfig(File configRoot) {
+        return new SystemSchedulesConfig(configRoot);
+    }
+    
+    @SuppressWarnings("unchecked")
+    protected WatchDog createSystemCronConfigWatchDog(final CronScheduler cronScheduler) {
+        return WatchDog.watchFile(_systemSchedulesConf.getSchedulesFile(), 
+            new WatchDog.DefaultObserver() {
+                public void init() {
+                    cronScheduler.refreshSystemCronJobs(_systemSchedulesConf);
+                }
+            });
+    }
+    
+    @SuppressWarnings("unchecked")
+    protected void checkSystemCronConfigWatchDog(WatchDog ddWatchDog) {
+        ddWatchDog.check();
     }
 
     /**
@@ -219,5 +278,18 @@ public class DeploymentPoller {
     public void markAsUndeployed(File file) {
         File deployedMarker = new File(_deployDir, file.getName() + ".deployed");
         deployedMarker.delete();
+    }
+
+    @SuppressWarnings("unchecked")
+    protected class DDWatchDogObserver extends WatchDog.DefaultObserver {
+        private String deploymentPakage;
+        
+        public DDWatchDogObserver(String deploymentPakage) {
+            this.deploymentPakage = deploymentPakage;
+        }
+        
+        public void init() {
+            _odeServer.getProcessStore().refreshSchedules(deploymentPakage);
+        }
     }
 }

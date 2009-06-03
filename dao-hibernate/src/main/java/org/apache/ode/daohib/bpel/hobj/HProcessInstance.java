@@ -38,9 +38,11 @@ public class HProcessInstance extends HObject {
     public static final String SELECT_INSTANCES_BY_PROCESS="SELECT_INSTANCES_BY_PROCESS";
     public static final String SELECT_INSTANCES_BY_PROCESSES_AND_STATES="SELECT_INSTANCES_BY_PROCESSES_AND_STATES";
     public static final String DELETE_INSTANCES="DELETE_INSTANCES";
-	
+
     /** Foreign key to owner {@link HProcess}. */
     private HProcess _process;
+
+    private Long _processId;
 
     /** Foreign key to the instantiating {@link HCorrelator}. */
     private HCorrelator _instantiatingCorrelator;
@@ -198,6 +200,17 @@ public class HProcessInstance extends HObject {
 
     public void setProcess(HProcess process) {
         _process = process;
+    }
+
+    /**
+     * @hibernate.property column="PROCESS_ID" insert="false" update="false"
+     */
+    public Long getProcessId() {
+        return _processId;
+    }
+
+    public void setProcessId(Long processId) {
+        _processId = processId;
     }
 
     /**

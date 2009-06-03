@@ -41,6 +41,7 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.*;
+import org.apache.ode.bpel.engine.cron.CronScheduler;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
@@ -55,8 +56,6 @@ import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
-import org.apache.ode.bpel.rapi.ProcessModel;
-import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 
 /**
  * <p>
@@ -74,7 +73,6 @@ import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
-
     private static final Log __log = LogFactory.getLog(BpelServerImpl.class);
 
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
@@ -157,6 +155,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     public BpelServerImpl() {
     }
 
+    public Contexts getContexts() {
+        return _contexts;
+    }
+    
     protected void waitForQuiessence() {
         do{
         _mngmtLock.writeLock().lock();
@@ -581,6 +583,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
     public void setScheduler(Scheduler scheduler) throws BpelEngineException {
         _contexts.scheduler = scheduler;
+    }
+
+    public void setCronScheduler(CronScheduler cronScheduler) throws BpelEngineException {
+        _contexts.cronScheduler = cronScheduler;
     }
 
     public void setEndpointReferenceContext(EndpointReferenceContext eprContext) throws BpelEngineException {
