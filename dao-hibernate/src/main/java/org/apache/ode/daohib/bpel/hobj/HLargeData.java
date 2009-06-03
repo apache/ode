@@ -36,7 +36,7 @@ package org.apache.ode.daohib.bpel.hobj;
  * @hibernate.query name="DELETE_PARTNER_LINK_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select l.myEPR from HPartnerLink as l where l.scope.instance in (:instances)) or d IN(select l.partnerEPR from HPartnerLink as l where l.scope.instance in (:instances))"
  * @hibernate.query name="DELETE_FAULT_LDATA_BY_INSTANCE_IDS" query="delete from HLargeData as d where d in(select f.data from HFaultData as f, HProcessInstance as i where f.id = i.fault and i.id in (:instanceIds))"
  * 
- * Transitive reference of objects in select does not work for Derby; use two nested sub-selects
+ * use two nested sub-selects
  * @hibernate.query name="DELETE_MESSAGE_LDATA_BY_MEX" query="delete from HLargeData as d where d in(select m.messageData from HMessage m where m in(select x.request from HMessageExchange x where x = :mex) or m in(select x.response from HMessageExchange x where x = :mex)) or d in(select m.header from HMessage m where m in(select x.request from HMessageExchange x where x = :mex) or m in(select x.response from HMessageExchange x where x = :mex))"
  */
 public class HLargeData extends HObject {
