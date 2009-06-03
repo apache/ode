@@ -172,23 +172,25 @@ public class HierarchicalProperties {
         // gather all aliases
         Map<String, String> nsByAlias = new HashMap<String, String>();
 
+        // replace env variable by their values and collect namespace aliases
         for (Iterator it = props.entrySet().iterator(); it.hasNext();) {
             Map.Entry e = (Map.Entry) it.next();
             String key = (String) e.getKey();
-            String namespace = (String) e.getValue();
+            String value = (String) e.getValue();
 
 
             // replace any env variables by its value
-            namespace = SystemUtils.replaceSystemProperties(namespace);
-            props.put(key, namespace);
+            value = SystemUtils.replaceSystemProperties(value);
+            props.put(key, value);
 
             if (key.startsWith("alias.")) {
+                // we found an namespace alias
                 final String alias = key.substring("alias.".length(), key.length());
-                if (log.isDebugEnabled()) log.debug("Alias found: " + alias + " -> " + namespace);
-                if (nsByAlias.containsKey(alias) && namespace.equals(nsByAlias.get(alias)))
+                if (log.isDebugEnabled()) log.debug("Alias found: " + alias + " -> " + value);
+                if (nsByAlias.containsKey(alias) && value.equals(nsByAlias.get(alias)))
                     throw new RuntimeException("Same alias used twice for 2 different namespaces! file=" + file + ", alias=" + alias);
-                nsByAlias.put(alias, namespace);
-                // remove the pair
+                nsByAlias.put(alias, value);
+                // remove the pair from the Properties
                 it.remove();
             }
         }
