@@ -43,7 +43,7 @@ public class EndpointConfigurationTest extends Axis2TestBase {
     }
 
     protected void executeProcess(ContextHandler handler) throws Exception {
-        JettyWrapper jettyWrapper = new JettyWrapper(handler);
+        JettyWrapper jettyWrapper = new JettyWrapper(getTestPort(1), handler);
         jettyWrapper.start();
 
         try {

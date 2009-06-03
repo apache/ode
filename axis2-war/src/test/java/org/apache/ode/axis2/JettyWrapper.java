@@ -56,8 +56,8 @@ public class JettyWrapper {
     }
 
 
-    public JettyWrapper(ContextHandler handler) {
-        server = new Server(7070);
+    public JettyWrapper(int port, ContextHandler handler) {
+        server = new Server(port);
         if(handler!=null) server.addHandler(handler);
         else addDefaultHandlers();
     }

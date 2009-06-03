@@ -231,9 +231,7 @@ public class InstanceManagementTest extends Axis2TestBase {
         _deployedName = res.getFirstChildWithName(new QName(null, "response")).getFirstChildWithName(new QName("http://www.apache.org/ode/deployapi", "name")).getText();
 
         // Execute
-        URL svcUrl = new URL("http://localhost:8888/processes/DynMainService");
-        InputStream sis = this.getClass().getClassLoader().getResourceAsStream("testDynPartnerRequest.soap");
-        System.out.println(HttpSoapSender.doSend(svcUrl, sis, null, 0, null, null, null));
+      System.out.println(server.sendRequestFile("http://localhost:8888/processes/DynMainService", "testDynPartnerRequest.soap"));
         // Just making sure the instance starts
         Thread.sleep(1000);
     }
@@ -259,15 +257,15 @@ public class InstanceManagementTest extends Axis2TestBase {
     }
 
     private OMElement sendToPM(OMElement msg) throws AxisFault {
-        return _client.send(msg, "http://localhost:8888/processes/ProcessManagement");
+        return _client.send(msg, "http://localhost:"+getTestPort(0)+"/processes/ProcessManagement");
     }
 
     private OMElement sendToIM(OMElement msg) throws AxisFault {
-        return _client.send(msg, "http://localhost:8888/processes/InstanceManagement");
+        return _client.send(msg, "http://localhost:"+getTestPort(0)+"/processes/InstanceManagement");
     }
 
     private OMElement sendToDeployment(OMElement msg) throws AxisFault {
-        return _client.send(msg, "http://localhost:8888/processes/DeploymentService");
+        return _client.send(msg, "http://localhost:"+getTestPort(0)+"/processes/DeploymentService");
     }
 
 }

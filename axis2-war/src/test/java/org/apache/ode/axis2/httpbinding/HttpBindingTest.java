@@ -53,8 +53,7 @@ public class HttpBindingTest extends Axis2TestBase {
   @BeforeMethod
     protected void setUp() throws Exception {
         super.setUp();
-        final CountDownLatch latch = new CountDownLatch(1);
-      jettyWrapper = new JettyWrapper(7070);
+      jettyWrapper = new JettyWrapper(getTestPort(1));
       jettyWrapper.start();
   }
 

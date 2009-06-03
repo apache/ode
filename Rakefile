@@ -194,27 +194,27 @@ define "ode" do
       end
     end
     
-    test.using :testng, :properties=>{ "log4j.debug" => true,  "log4j.configuration"=>"test-log4j.properties" }
+    test.using :testng, :properties=>{ "log4j.debug" => true,  "log4j.configuration"=>"test-log4j.properties", "test.ports" => ENV['TEST_PORTS'] }
     test.with projects("tools"), libs, AXIS2_TEST, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, DOM4J
     webapp_dir = "#{test.compile.target}/webapp"
     test.setup task(:prepare_webapp) do |task|
       cp_r _("src/main/webapp"), test.compile.target.to_s
-      rm_rf Dir[_(webapp_dir) + "/**/.svn"]
       cp_r _("src/test/webapp"), test.compile.target.to_s
       cp Dir[_("src/main/webapp/WEB-INF/classes/*")], test.compile.target.to_s
       cp Dir[project("axis2").path_to("src/main/wsdl/*")], "#{webapp_dir}/WEB-INF"
       cp project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd"), "#{webapp_dir}/WEB-INF"
       rm_rf Dir[_(webapp_dir) + "/**/.svn"]
-      mkdir _("#{webapp_dir}/WEB-INF/processes") unless File.exist?("#{webapp_dir}/WEB-INF/processes")
-      mkdir _("#{webapp_dir}/WEB-INF/modules") unless File.exist?("#{webapp_dir}/WEB-INF/modules")
-      # move around some property files for test purpose
-      mv Dir[_("#{test.compile.target}/TestEndpointProperties/*_global_conf*.endpoint")], "#{webapp_dir}/WEB-INF/conf"
-      artifacts(AXIS2_MODULES.mods).map {|a| a.invoke }
+      mkdir "#{webapp_dir}/WEB-INF/processes" unless File.exist?("#{webapp_dir}/WEB-INF/processes")
+      mkdir "#{webapp_dir}/WEB-INF/modules" unless File.exist?("#{webapp_dir}/WEB-INF/modules")
+      # move around some property files for test purposes
+      mv Dir["#{test.compile.target}/TestEndpointProperties/*_global_conf*.endpoint"], "#{webapp_dir}/WEB-INF/conf"
+      Dir["#{webapp_dir}/WEB-INF/conf.*"].each {|d| cp "#{webapp_dir}/WEB-INF/conf/global-config.endpoint",d}
+      artifacts(AXIS2_MODULES.mods).each(&:invoke)
       cp AXIS2_MODULES.mods.map {|a| repositories.locate(a)} , "#{webapp_dir}/WEB-INF/modules"
     end
     test.setup unzip("#{webapp_dir}/WEB-INF"=>project("dao-jpa-ojpa-derby").package(:zip))
     test.setup unzip("#{webapp_dir}/WEB-INF"=>project("dao-hibernate-db").package(:zip))
-    
+   
     NativeDB.prepare_configs test, _(".")
 
     test.setup WSSecurity.prepare_secure_services_tests("#{test.resources.target}/TestRampartBasic/secured-services", "sample*.axis2", AXIS2_MODULES.mods)

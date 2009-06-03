@@ -96,7 +96,7 @@ public class SecuredProcessesTest extends Axis2TestBase {
             Options options = new Options();
             // Rampart SymetricBinding (sample04) blows up if not provided with a soap action
             options.setAction("");
-            options.setTo(new EndpointReference("http://localhost:8888/processes/helloWorld"));
+            options.setTo(new EndpointReference("http://localhost:"+getTestPort(0)+"/processes/helloWorld"));
             options.setProperty(RampartMessageData.KEY_RAMPART_POLICY, loadPolicy(policyFile));
             client.setOptions(options);
 

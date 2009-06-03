@@ -29,6 +29,7 @@ import org.apache.axis2.engine.AxisServer;
 import org.apache.axis2.engine.MessageReceiver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.util.Axis2UriResolver;
 import org.apache.ode.axis2.util.Axis2WSDLLocator;
@@ -60,7 +61,9 @@ import java.util.List;
  * @author Matthieu Riou <mriou@apache.org>
  */
 public abstract class Axis2TestBase {
-    public static final int DEFAULT_TEST_PORT = 8888;
+    private static final int DEFAULT_TEST_PORT_0 = 8888;
+    private static final int DEFAULT_TEST_PORT_1 = 7070;
+    private static final String DEFAULT_TEST_PORTS = DEFAULT_TEST_PORT_0+","+DEFAULT_TEST_PORT_1;
 
     private static final Log log = LogFactory.getLog(Axis2TestBase.class);
 
@@ -76,8 +79,25 @@ public abstract class Axis2TestBase {
     static {
         // disable deferred process instance cleanup for faster testing
         System.setProperty(BpelServerImpl.DEFERRED_PROCESS_INSTANCE_CLEANUP_DISABLED_NAME, "true");
+        /*
+         The property "test.ports" receives a coma-separated list of available ports.
+         Base on this list, a set of properties is created:
+            test.port.0, test.port.1, test.port.2, ...
+         These properties might then be used by test cases using #getTestPort(int) or from endpoint property files using ${test.port.0} for instance.
+          */
+        if(StringUtils.isBlank(System.getProperty("test.ports"))) System.setProperty("test.ports", DEFAULT_TEST_PORTS);
+        log.info("test.ports="+System.getProperty("test.ports"));
+        String[] ports = System.getProperty("test.ports").split(",");
+        for (int i = 0; i < ports.length; i++) {
+            String port = ports[i].trim();
+            System.setProperty("test.port."+i, port);
+        }
     }
-    
+
+    public int getTestPort(int index){
+        return Integer.parseInt(System.getProperty("test.port."+index));
+    }
+
     @DataProvider(name = "configs")
     protected Iterator<Object[]> createConfigData() {
         List<String> configDirList = new ArrayList<String>();
@@ -216,8 +236,8 @@ public abstract class Axis2TestBase {
             }
 
             configContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem(axis2RepoDir, axis2ConfLocation);
-            // do not use 8080 for tests
-            configContext.getAxisConfiguration().getTransportIn("http").addParameter(new Parameter("port", ""+DEFAULT_TEST_PORT));
+            // do not use 8080 for tests, and make sure to pass a string, not an int
+            configContext.getAxisConfiguration().getTransportIn("http").addParameter(new Parameter("port", ""+getTestPort(0)));
         }
 
         protected void start() throws AxisFault {
@@ -236,11 +256,11 @@ public abstract class Axis2TestBase {
         }
 
         public Collection<QName> deployProcess(String bundleName) {
-            return _ode.getProcessStore().deploy(new File(getBundleDir(bundleName)));
+            return _ode.getProcessStore().deploy(new File(getResource(bundleName)));
         }
 
         public void undeployProcess(String bundleName) {
-            _ode.getProcessStore().undeploy(new File(getBundleDir(bundleName)));
+            _ode.getProcessStore().undeploy(new File(getResource(bundleName)));
         }
 
         public boolean isDeployed(String bundleName) {
@@ -253,7 +273,7 @@ public abstract class Axis2TestBase {
          */
         protected void deployService(String bundleName, String defFile, QName serviceName, String port,
                                      MessageReceiver receiver) throws WSDLException, IOException, URISyntaxException {
-            URI wsdlUri = new File(getBundleDir(bundleName) + "/" + defFile).toURI();
+            URI wsdlUri = new File(getResource(bundleName) + "/" + defFile).toURI();
 
             InputStream is = wsdlUri.toURL().openStream();
             WSDL11ToAxisServiceBuilder serviceBuilder = new ODEAxisService.WSDL11ToAxisPatchedBuilder(is, serviceName, port);
@@ -279,15 +299,24 @@ public abstract class Axis2TestBase {
         }
 
         public String sendRequestFile(String endpoint, String bundleName, String filename) {
+            return sendRequestFile(endpoint, bundleName + "/" + filename);
+        }
+        
+        public String sendRequestFile(String endpoint, String filename) {
             try {
-                return HttpSoapSender.doSend(new URL(endpoint),
-                        new FileInputStream(getBundleDir(bundleName) + "/" + filename), null, 0, null, null, null);
+                URL url = new URL(endpoint);
+                // override the port if necessary but only if the given port is the default one
+                if(url.getPort()==DEFAULT_TEST_PORT_0 && url.getPort()!=getTestPort(0)){
+                    url=  new URL(url.getProtocol()+"://"+url.getHost()+":"+getTestPort(0)+url.getPath()+(url.getQuery()!=null?"?"+url.getQuery():""));
+                }
+                return HttpSoapSender.doSend(url,
+                        new FileInputStream(getResource(filename)), null, 0, null, null, null);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        protected String getBundleDir(String bundleName) {
+        protected String getResource(String bundleName) {
             return getClass().getClassLoader().getResource(bundleName).getFile();
         }
 
