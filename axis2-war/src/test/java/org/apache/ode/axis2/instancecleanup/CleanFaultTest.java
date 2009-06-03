@@ -32,22 +32,22 @@ public class CleanFaultTest extends CleanTestBase {
         go("TestCleanFault_Messages", 1, 0, 0, 1, 0, 0, 0, 2, 3, 2, 41, 41);
     }
 
-//    @Test(dataProvider="configs")
+    @Test(dataProvider="configs")
     public void testCleanCorrelations() throws Exception {
         go("TestCleanFault_Correlations", 1, 0, 0, 1, 1, 0, 2, 2, 3, 2, 41, 47);
     }
 
-//    @Test(dataProvider="configs")
+    @Test(dataProvider="configs")
     public void testCleanEvents() throws Exception {
         go("TestCleanFault_Events", 1, 0, 0, 1, 1, 0, 2, 2, 3, 2, 0, 9);
     }
 
-//    @Test(dataProvider="configs")
+    @Test(dataProvider="configs")
     public void testCleanMessageCorrEvents() throws Exception {
         go("TestCleanFault_MessageCorrEvents", 1, 0, 0, 1, 0, 0, 0, 2, 3, 2, 0, 3);
     }
 
-//    @Test(dataProvider="configs")
+    @Test(dataProvider="configs")
     public void testCleanAll() throws Exception {
         go("TestCleanFault_All", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
