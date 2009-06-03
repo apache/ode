@@ -41,6 +41,8 @@ import org.apache.ode.il.epr.MutableEndpoint;
 import org.apache.ode.il.epr.WSAEndpoint;
 import org.apache.ode.utils.*;
 import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.MessageExchange.AckType;
+import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
@@ -112,12 +114,17 @@ public class ODEService {
 
             
             if (odeMex.getOperation().getOutput() != null && outMsgContext != null) {
-                SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
-                outMsgContext.setEnvelope(envelope);
-
-                // Hopefully we have a response
-                __log.debug("Handling response for MEX " + odeMex);
-                onResponse(odeMex, outMsgContext);
+                try {
+                    SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
+                    outMsgContext.setEnvelope(envelope);
+    
+                    // Hopefully we have a response
+                    __log.debug("Handling response for MEX " + odeMex);
+                    onResponse(odeMex, outMsgContext);
+                } finally {
+                    boolean instanceSucceeded = odeMex.getAckType() == AckType.ONEWAY || odeMex.getAckType() == AckType.RESPONSE;
+                    odeMex.release(_pconf.isCleanupCategoryEnabled(instanceSucceeded, CLEANUP_CATEGORY.MESSAGES));
+                }
             }
         } catch (java.util.concurrent.TimeoutException te) {
             String errmsg = "Call to " + _serviceName + "." + odeMex.getOperationName() + " timed out(" + resolveTimeout() + " ms).";
@@ -128,7 +135,7 @@ public class ODEService {
             __log.error(errmsg, e);
             throw new OdeFault(errmsg, e);         
         } finally {
-        	// we cannot release ode mex here since it's outside of the transaction
+            // we cannot release ode mex here since it's outside of the transaction
         }
     }
 

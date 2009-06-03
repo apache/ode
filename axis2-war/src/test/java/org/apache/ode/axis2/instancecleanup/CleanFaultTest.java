@@ -27,7 +27,7 @@ public class CleanFaultTest extends CleanTestBase {
         go("TestCleanFault_Variables", 1, 0, 0, 1, 1, 0, 2, 0, 0, 0, 41, 45);
     }
 
-//    @Test(dataProvider="configs")
+    @Test(dataProvider="configs")
     public void testCleanMessages() throws Exception {
         go("TestCleanFault_Messages", 1, 0, 0, 1, 0, 0, 0, 2, 3, 2, 41, 41);
     }

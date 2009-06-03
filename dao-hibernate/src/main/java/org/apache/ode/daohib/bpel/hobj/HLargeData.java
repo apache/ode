@@ -27,7 +27,7 @@ package org.apache.ode.daohib.bpel.hobj;
  * @hibernate.class table="LARGE_DATA"
  * @hibernate.query name="DELETE_ACTIVITY_RECOVERY_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select a.details from HActivityRecovery as a where a.instance in (:instances))"
  * @hibernate.query name="DELETE_JACOB_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select i.jacobState from HProcessInstance as i where i in (:instances))"
- * @hibernate.query name="DELETE_MESSAGE_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select x.request.messageData from HMessageExchange x where x.instance in(:instances)) or d in(select x.response.messageData from HMessageExchange x where x.instance in(:instances)) or d in(select x.request.header from HMessageExchange x where x.instance in (:instances)) or d in(select x.response.header from HMessageExchange x where x.instance in (:instances))"
+ * @hibernate.query name="DELETE_MESSAGE_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select x.request.messageData.id from HMessageExchange x where x.instance in(:instances)) or d.id in(select x.response.messageData.id from HMessageExchange x where x.instance in(:instances)) or d.id in(select x.request.header.id from HMessageExchange x where x.instance in (:instances)) or d.id in(select x.response.header.id from HMessageExchange x where x.instance in (:instances))"
  * @hibernate.query name="DELETE_MEX_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select e.endpoint from HMessageExchange as e where e.instance in (:instances)) or d IN(select e.callbackEndpoint from HMessageExchange as e where e.instance in (:instances))"
  *
  * @hibernate.query name="DELETE_EVENT_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select e.data from HBpelEvent as e where e.instance in (:instances))"
@@ -35,11 +35,11 @@ package org.apache.ode.daohib.bpel.hobj;
  * @hibernate.query name="DELETE_XMLDATA_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select x.data from HXmlData as x where x.instance in (:instances))"
  * @hibernate.query name="DELETE_PARTNER_LINK_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select l.myEPR from HPartnerLink as l where l.scope.instance in (:instances)) or d IN(select l.partnerEPR from HPartnerLink as l where l.scope.instance in (:instances))"
  * @hibernate.query name="DELETE_FAULT_LDATA_BY_INSTANCE_IDS" query="delete from HLargeData as d where d in(select f.data from HFaultData as f, HProcessInstance as i where f.id = i.fault and i.id in (:instanceIds))"
-
- * @hibernate.query name="DELETE_MESSAGE_LDATA_BY_MEX" query="delete from HLargeData as d where d in(select m.messageData from HMessage m, HMessageExchange x where (m = x.request or m = x.response) and x = :mex) or d in(select m.header from HMessage m, HMessageExchange x where (m = x.request or m = x.response) and x = :mex)"
+ * 
+ * Transitive reference of objects in select does not work for Derby; use two nested sub-selects
+ * @hibernate.query name="DELETE_MESSAGE_LDATA_BY_MEX" query="delete from HLargeData as d where d in(select m.messageData from HMessage m where m in(select x.request from HMessageExchange x where x = :mex) or m in(select x.response from HMessageExchange x where x = :mex)) or d in(select m.header from HMessage m where m in(select x.request from HMessageExchange x where x = :mex) or m in(select x.response from HMessageExchange x where x = :mex))"
  */
 public class HLargeData extends HObject {
-//@hibernate.query name="DELETE_MESSAGE_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select m.messageData from HMessage m, HMessageExchange x where (m = x.request or m = x.response) and x.instance in(:instances)) or d in(select m.header from HMessage m, HMessageExchange x where (m = x.request or m = x.response) and x.instance in (:instances))"
     
     public final static String DELETE_ACTIVITY_RECOVERY_LDATA_BY_INSTANCES = "DELETE_ACTIVITY_RECOVERY_LDATA_BY_INSTANCES";
     public final static String DELETE_JACOB_LDATA_BY_INSTANCES = "DELETE_JACOB_LDATA_BY_INSTANCES";

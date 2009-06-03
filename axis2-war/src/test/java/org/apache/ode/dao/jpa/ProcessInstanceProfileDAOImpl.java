@@ -59,9 +59,9 @@ public class ProcessInstanceProfileDAOImpl extends ProcessProfileDAOImpl impleme
     
     public List<MessageExchangeDAO> findMessageExchangesByInstance() {
         List<MessageExchangeDAO> results = findByInstance("select x from MessageExchangeDAOImpl as x where x._processInst = :instance");
-//        if( !results.isEmpty() ) {
-//            LogFactory.getLog(ProcessInstanceProfileDAOImpl.class).debug("MESSAGE_EXCHANGE left over: " + ((MessageExchangeDAOImpl)results.get(0)).getMessageExchangeId());
-//        }
+        if( !results.isEmpty() ) {
+            LogFactory.getLog(ProcessInstanceProfileDAOImpl.class).debug("MESSAGE_EXCHANGE left over: " + ((MessageExchangeDAOImpl)results.get(0)).getMessageExchangeId());
+        }
         
         return results;
     }
