@@ -486,7 +486,7 @@ class ASSIGN extends ACTIVITY {
             return (lval == ptr) ? replacement :  lval;
         }
 
-        Element replacement = doc.createElementNS(ptr.getNamespaceURI(), ptr.getLocalName());
+        Element replacement = doc.createElementNS(ptr.getNamespaceURI(), ptr.getTagName());
         NodeList nl = src.getChildNodes();
         for (int i = 0; i < nl.getLength(); ++i)
             replacement.appendChild(doc.importNode(nl.item(i), true));
