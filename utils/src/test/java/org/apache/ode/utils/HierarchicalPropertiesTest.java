@@ -35,10 +35,20 @@ public class HierarchicalPropertiesTest extends TestCase {
     protected HierarchicalProperties hp;
 
     protected void setUp() throws Exception {
+        // one config step happens in setUp()
+        System.setProperty("TestSystemProperty", "42");
         File[] files = new File[]{new File(getClass().getResource("/hierarchical-2.properties").toURI()),
                 new File(getClass().getResource("/hierarchical-1.properties").toURI())};
         hp = new HierarchicalProperties(files);
     }
+
+    private void checkEnv() {
+        // Java does not let us set ENV variables. The test avriable must be set by the process running this test.
+        if (System.getenv("TEST_DUMMY_ENV_VAR") == null) {
+            fail("Test configuration issue: for testing purposes, the environment variable TEST_DUMMY_ENV_VAR must be set to 42");
+        }
+    }
+
 
     public void testGetProperty() {
         String msg = "Returned value does not match expected value for this property!";
@@ -54,9 +64,7 @@ public class HierarchicalPropertiesTest extends TestCase {
     }
 
     public void testGetProperties() {
-        final List keys = Arrays.asList("timeout", "max-redirects", "ode.a.property.beginning.with.the.prefix.but.no.service");
         Map map = hp.getProperties("http://foo.com", "film-service");
-        assertEquals("Number of properties is wrong", keys.size(), map.size());
         assertEquals("40000", map.get("timeout"));
         assertEquals("30", map.get("max-redirects"));
         assertEquals("so green or red?", map.get("ode.a.property.beginning.with.the.prefix.but.no.service"));
@@ -69,7 +77,7 @@ public class HierarchicalPropertiesTest extends TestCase {
         assertSame("Snapshot maps should be cached!", hp.getProperties("bla", "unknown-service"), hp.getProperties("bla", "unknown-service"));
     }
 
-    public void testPathHandling(){
+    public void testPathHandling() {
         assertTrue("If the property name ends with '.file' or '.path' its value might be resolved against the file path", FileUtils.isAbsolute(hp.getProperty("http://foo.com", "film-service", "port-of-cannes", "p1.file")));
         assertTrue("If the property name ends with '.file' or '.path' its value might be resolved against the file path", FileUtils.isAbsolute(hp.getProperty("http://foo.com", "film-service", "port-of-cannes", "p1.path")));
         assertEquals("An absolute path should not be altered", "/home/ode/hello.txt", hp.getProperty("http://foo.com", "film-service", "port-of-cannes", "p2.path"));
@@ -86,6 +94,29 @@ public class HierarchicalPropertiesTest extends TestCase {
             assertTrue(s, e.getMessage().contains("system.foo"));
             assertTrue(s, e.getMessage().contains("env.BAR"));
         }
+    }
+
+    public void testReplaceSystemProperty() {
+        // one config step happens in setUp()
+        assertEquals("${system.*} must be replaced by the corresponding system property.", System.getProperty("TestSystemProperty"), hp.getProperty("http://bar.com", "brel-service", "sys.property"));
+    }
+
+    public void testReplaceEnvVariable() {
+        checkEnv();
+        assertEquals("${env.*} must be replaced by the corresponding environment variable.", System.getenv("TEST_DUMMY_ENV_VAR"), hp.getProperty("http://bar.com", "brel-service", "environment.property"));
+    }
+
+    public void test_placeholder() {
+        assertEquals("A placeholder must be replaced by its value", "placeholder1-value", hp.getProperty("test.placeholder1"));
+    }
+
+    public void test_placeholder_that_uses_sys_prop_and_env_var() {
+        checkEnv();
+        assertEquals("A placeholder can use system properties and/or environment variables", System.getProperty("TestSystemProperty") + "#" + System.getenv("TEST_DUMMY_ENV_VAR"), hp.getProperty("test.placeholder2"));
+    }
+
+    public void test_placeholder_defined_in_2_files() {
+        assertEquals("Last loaded placeholder value must overridden any previous values", "placeholder3-value", hp.getProperty("http://foo.com", "film-service", "port-of-cannes","test.placeholder3"));
     }
 
     public void testWithNoFile() throws IOException {
