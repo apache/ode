@@ -23,21 +23,15 @@ import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.commons.collections.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
 import org.apache.ode.utils.fs.FileUtils;
 
 import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.Properties;
-import java.util.Set;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * This class load a list of regular property files (order matters). The main feature is that property can
@@ -81,7 +75,7 @@ import java.util.List;
  * <p>
  * If a property name ends with ".file" or ".path", the assumption is made that the associated value is a path and as such is resolved against the path of the file it was loaded from.
  * </p>
- * This class is not thread-safe.
+ * Assigned properties must not start with 'system.' or 'env.'. These prefix are reserved to access system properties and environment variables.
  *
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
@@ -154,7 +148,7 @@ public class HierarchicalProperties {
         for (File file : files) loadFile(file);
     }
 
-    public void loadFile(File file) throws IOException {
+    private void loadFile(File file) throws IOException {
         if (!file.exists()) {
             if (log.isDebugEnabled()) log.debug("File does not exist [" + file + "]");
             return;
@@ -169,6 +163,8 @@ public class HierarchicalProperties {
             fis.close();
         }
 
+        validatePropertyNames(props, file);
+
         // gather all aliases
         Map<String, String> nsByAlias = new HashMap<String, String>();
 
@@ -177,7 +173,6 @@ public class HierarchicalProperties {
             Map.Entry e = (Map.Entry) it.next();
             String key = (String) e.getKey();
             String value = (String) e.getValue();
-
 
             // replace any env variables by its value
             value = SystemUtils.replaceSystemProperties(value);
@@ -242,6 +237,17 @@ public class HierarchicalProperties {
             // save the key/value in its chained map
             if(log.isDebugEnabled()) log.debug("New property: "+targetedProperty+" -> "+value);
             p.put(targetedProperty, value);
+        }
+    }
+
+    private void validatePropertyNames(Properties props, File file) {
+        List invalids = new ArrayList();
+        for (Iterator<Object> it = props.keySet().iterator(); it.hasNext();) {
+            String name = (String) it.next();
+            if(name.startsWith("system.") || name.startsWith("env.")) invalids.add(name);
+        }
+        if(!invalids.isEmpty()){
+            throw new IllegalArgumentException("Property files cannot define properties starting with 'system.' nor 'env.' File="+file+". Invalid names="+StringUtils.join(invalids, ","));
         }
     }
 

@@ -23,9 +23,8 @@ import junit.framework.TestCase;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.net.URISyntaxException;
 
 import org.apache.ode.utils.fs.FileUtils;
 
@@ -75,6 +74,18 @@ public class HierarchicalPropertiesTest extends TestCase {
         assertTrue("If the property name ends with '.file' or '.path' its value might be resolved against the file path", FileUtils.isAbsolute(hp.getProperty("http://foo.com", "film-service", "port-of-cannes", "p1.path")));
         assertEquals("An absolute path should not be altered", "/home/ode/hello.txt", hp.getProperty("http://foo.com", "film-service", "port-of-cannes", "p2.path"));
 
+    }
+
+    public void testReservedNames() {
+        String s = "Property files cannot define properties starting with ";
+        try {
+            HierarchicalProperties f = new HierarchicalProperties(new File(getClass().getResource("/hierarchical-bad.properties").toURI()));
+            fail(s);
+        } catch (Exception e) {
+            assertTrue(s, e.getMessage().contains(s));
+            assertTrue(s, e.getMessage().contains("system.foo"));
+            assertTrue(s, e.getMessage().contains("env.BAR"));
+        }
     }
 
     public void testWithNoFile() throws IOException {
