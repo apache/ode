@@ -1,5 +1,5 @@
 
 
 alias.sample-ns=http://sample04.policy.samples.rampart.apache.org
-sample-ns.sample04-policy.ode.address=http://localhost:${test.port.0}/axis2/processes/sample04-policy
+sample-ns.sample04-policy.ode.address=http://localhost:${system.test.port.0}/axis2/processes/sample04-policy
 

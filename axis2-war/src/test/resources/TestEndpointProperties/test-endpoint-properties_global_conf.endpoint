@@ -6,4 +6,4 @@ myns1.PropertiesService.ode.http.default-headers.header_ABC=from_global_conf_dir
 myns.PropertiesService.ode.http.default-headers.header_AB=from_global_conf_directory_AB
 myns1.PropertiesService.ode.http.default-headers.header_AC=from_global_conf_directory_AC
 
-myns1.PropertiesService.ode.address=http://localhost:${test.port.1}/EchoService/
+myns1.PropertiesService.ode.address=http://localhost:${system.test.port.1}/EchoService/

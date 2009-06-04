@@ -1,3 +1,3 @@
 
 alias.myns=http://axis2.ode.apache.org
-myns.DummyService.ode.address=http://localhost:${test.port.0}/processes/DummyService
+myns.DummyService.ode.address=http://localhost:${system.test.port.0}/processes/DummyService

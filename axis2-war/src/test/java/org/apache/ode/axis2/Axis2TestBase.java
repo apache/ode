@@ -83,7 +83,7 @@ public abstract class Axis2TestBase {
          The property "test.ports" receives a coma-separated list of available ports.
          Base on this list, a set of properties is created:
             test.port.0, test.port.1, test.port.2, ...
-         These properties might then be used by test cases using #getTestPort(int) or from endpoint property files using ${test.port.0} for instance.
+         These properties might then be used by test cases using #getTestPort(int) or from endpoint property files using ${system.test.port.0} for instance.
           */
         if(StringUtils.isBlank(System.getProperty("test.ports"))) System.setProperty("test.ports", DEFAULT_TEST_PORTS);
         log.info("test.ports="+System.getProperty("test.ports"));
