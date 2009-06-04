@@ -128,6 +128,11 @@ class ASSIGN extends ACTIVITY {
         Node lval = null;
         if (!(to instanceof OAssign.PartnerLinkRef)) {
             VariableInstance lvar = _scopeFrame.resolve(to.getVariable());
+            if (lvar == null) {
+                String msg = __msgs.msgEvalException(to.toString(), "Could not resolve variable in current scope");
+                if (__log.isDebugEnabled()) __log.debug(to + ": " + msg);
+                throw new FaultException(getOAsssign().getOwner().constants.qnSelectionFailure, msg);
+            }
             if (!napi.isVariableInitialized(lvar)) {
                 Document doc = DOMUtils.newDocument();
                 Node val = to.getVariable().type.newInstance(doc);

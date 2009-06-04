@@ -185,6 +185,9 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
      * @see BpelRuntimeContext#isVariableInitialized(org.apache.ode.bpel.runtime.VariableInstance)
      */
     public boolean isVariableInitialized(VariableInstance var) {
+		if (var == null) {
+			return false;
+		}
         ScopeDAO scopeDAO = _dao.getScope(var.scopeInstance);
         XmlDataDAO dataDAO = scopeDAO.getVariable(var.declaration.name);
         return !dataDAO.isNull();

@@ -303,7 +303,12 @@ class EH_EVENT extends BpelJacobRunnable {
 
                             LinkFrame lf = new LinkFrame(null);
 
-                            instance(new SCOPE(child,ehScopeFrame, lf));
+                            ScopeFrame innerScopeFrame = new ScopeFrame((OScope) _oevent.activity,
+                                    getBpelRuntimeContext().createScopeInstance(_scopeFrame.scopeInstanceId, (OScope) _oevent.activity),
+                                    ehScopeFrame,
+                                    _comps,
+                                    _fault);
+                            instance(new SCOPE(child, innerScopeFrame, lf));
 
                             // If we previously terminated the other activiites, then we do the same
                             // here; this is easier then undoing the receive.
