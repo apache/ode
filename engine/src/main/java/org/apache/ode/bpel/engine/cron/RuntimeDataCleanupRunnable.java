@@ -52,11 +52,13 @@ public class RuntimeDataCleanupRunnable implements MapSerializableRunnable, Cont
         _log.info("CleanInstances.run().");
         try {
             for( String filter : _cleanupInfo.getFilters() ) {
-                _log.info("CleanInstances.run(" + filter + ")");
-                long numberOfDeletedInstances = 0;
-                do {
-                    numberOfDeletedInstances = cleanInstances(filter, _cleanupInfo.getCategories(), _transactionSize);
-                } while( numberOfDeletedInstances == _transactionSize );
+                if( filter != null && filter.trim().length() > 0 ) {
+                    _log.info("CleanInstances.run(" + filter + ")");
+                    long numberOfDeletedInstances = 0;
+                    do {
+                        numberOfDeletedInstances = cleanInstances(filter, _cleanupInfo.getCategories(), _transactionSize);
+                    } while( numberOfDeletedInstances == _transactionSize );
+                }
             }
         } catch( RuntimeException re ) {
             throw re;
