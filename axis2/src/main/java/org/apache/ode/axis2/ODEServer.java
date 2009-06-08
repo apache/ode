@@ -247,7 +247,6 @@ public class ODEServer {
      * @throws AxisFault if the engine is unable to shut down.
      */
     public void shutDown() throws AxisFault {
-
         ClassLoader old = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
         try {
@@ -258,7 +257,7 @@ public class ODEServer {
                     _poller = null;
                 } catch (Throwable t) {
                     __log.debug("Error stopping poller.", t);
-                }
+            }
 
             if (_bpelServer != null)
                 try {
@@ -267,7 +266,17 @@ public class ODEServer {
                     _bpelServer = null;
                 } catch (Throwable ex) {
                     __log.debug("Error stopping services.", ex);
+            }
+
+            if( _cronScheduler != null ) {
+                try {
+                    __log.debug("shutting down cron scheduler.");
+                    _cronScheduler.shutdown();
+                    _cronScheduler = null;
+                } catch (Exception ex) {
+                    __log.debug("Cron scheduler couldn't be shutdown.", ex);
                 }
+            }
 
             if (_scheduler != null)
                 try {
@@ -340,6 +349,7 @@ public class ODEServer {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public ODEService createService(ProcessConf pconf, QName serviceName, String portName) throws AxisFault {
         AxisService axisService = ODEAxisService.createService(_axisConfig, pconf, serviceName, portName);
         ODEService odeService = new ODEService(axisService, pconf, serviceName, portName, _bpelServer);
@@ -418,6 +428,7 @@ public class ODEServer {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     private void initTxMgr() throws ServletException {
         String txFactoryName = _odeConfig.getTxFactoryClass();
         __log.debug("Initializing transaction manager using " + txFactoryName);
