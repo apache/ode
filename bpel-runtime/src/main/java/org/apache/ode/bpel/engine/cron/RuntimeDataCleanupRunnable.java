@@ -49,13 +49,15 @@ public class RuntimeDataCleanupRunnable implements MapSerializableRunnable, Cont
     }
     
     public void run() {
-        _log.info("CleanInstances.run().");
+        _log.info("CRON CLEAN.run().");
         for( String filter : _cleanupInfo.getFilters() ) {
-            _log.info("CleanInstances.run(" + filter + ")");
-            long numberOfDeletedInstances = 0;
-            do {
-                numberOfDeletedInstances = cleanInstances(filter, _cleanupInfo.getCategories(), _transactionSize);
-            } while( numberOfDeletedInstances == _transactionSize );
+            if( filter != null && filter.trim().length() > 0 ) {
+                _log.info("CRON CLEAN.run(" + filter + ")");
+                long numberOfDeletedInstances = 0;
+                do {
+                    numberOfDeletedInstances = cleanInstances(filter, _cleanupInfo.getCategories(), _transactionSize);
+                } while( numberOfDeletedInstances == _transactionSize );
+            }
         }
     }
     
@@ -73,7 +75,7 @@ public class RuntimeDataCleanupRunnable implements MapSerializableRunnable, Cont
             filter += " pid<>" + pids.toString();
         }
         
-        _log.debug("CleanInstances using filter: " + filter + ", limit: " + limit);
+        _log.debug("CRON CLEAN using filter: " + filter + ", limit: " + limit);
         
         final InstanceFilter instanceFilter = new InstanceFilter(filter, "", limit);
         try {
