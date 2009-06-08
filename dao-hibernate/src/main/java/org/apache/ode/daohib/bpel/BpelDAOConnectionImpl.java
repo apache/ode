@@ -111,6 +111,7 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection, FilteredInstanc
                 .setString("url", url).setString("method", method).executeUpdate();
     }
 
+    @SuppressWarnings("unchecked")
     public List<ResourceRouteDAO> getAllResourceRoutes() {
         List<HResourceRoute> hrr = getSession().createCriteria(HResourceRoute.class).list();
         ArrayList<ResourceRouteDAO> rr = new ArrayList<ResourceRouteDAO>(hrr.size());

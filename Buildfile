@@ -134,8 +134,8 @@ GERONIMO            = struct(
   :transaction      =>"org.apache.geronimo.components:geronimo-transaction:jar:2.0.1",
   :connector        =>"org.apache.geronimo.components:geronimo-connector:jar:2.0.1"
 )
-HIBERNATE           = [ "org.hibernate:hibernate:jar:3.2.5.ga", "asm:asm:jar:1.5.3",
-                        "antlr:antlr:jar:2.7.6", "cglib:cglib:jar:2.1_3", "net.sf.ehcache:ehcache:jar:1.2.3" ]
+HIBERNATE           = [ "org.hibernate:hibernate-core:jar:3.3.1.GA", "javassist:javassist:jar:3.4.GA",
+                        "antlr:antlr:jar:2.7.6" ]
 HSQLDB              = "hsqldb:hsqldb:jar:1.8.0.7"
 JAVAX               = struct(
   :activation       => findArtifacts(AXIS2_DEPS, "org.apache.geronimo.specs:geronimo-activation_1.1_spec"),   #"javax.activation:activation:jar:1.1", # TODO: do we use Sun's or Geronimo's?
@@ -160,6 +160,7 @@ OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.3.0-SNAPSHOT",
 SAXON               = group("saxon", "saxon-xpath", "saxon-dom", "saxon-xqj", :under=>"net.sf.saxon", :version=>"9.x")
 SERVICEMIX          = group("servicemix-core", "servicemix-shared", "servicemix-services",
                         :under=>"org.apache.servicemix", :version=>"3.1-incubating")
+SLF4J = group(%w{ slf4j-api slf4j-log4j12 jcl104-over-slf4j }, :under=>"org.slf4j", :version=>"1.4.3")
 SPRING              = group("spring-beans", "spring-context", "spring-core", "spring-jmx",
                         :under=>"org.springframework", :version=>"2.0.1")
 TRANQL              = [ "tranql:tranql-connector:jar:1.1", "axion:axion:jar:1.0-M3-dev", COMMONS.primitives ]
@@ -184,6 +185,7 @@ repositories.remote << "http://repo1.maven.org/maven2"
 repositories.remote << "http://people.apache.org/repo/m2-snapshot-repository"
 repositories.remote << "http://download.java.net/maven/2"
 repositories.remote << "http://ws.zones.apache.org/repository2"
+repositories.remote << "http://repository.jboss.org/maven2"
 repositories.release_to[:url] ||= "sftp://guest@localhost/home/guest"
 
 desc "Apache ODE"
@@ -381,7 +383,7 @@ define "ode" do
     resources hibernate_doclet(:package=>"org.apache.ode.store.hib", :excludedtags=>"@version,@author,@todo")
 
     test.with COMMONS.collections, COMMONS.lang, JAVAX.connector, JAVAX.transaction, DOM4J, LOG4J,
-      XERCES, XALAN, JAXEN, SAXON, OPENJPA
+      XERCES, XALAN, JAXEN, SAXON, OPENJPA, SLF4J
     package :jar
   end
 
@@ -417,7 +419,7 @@ define "ode" do
 
     test.exclude "org.apache.ode.daohib.bpel.BaseTestDAO"
     test.with project("il-common"), BACKPORT, COMMONS.collections, COMMONS.lang, HSQLDB,
-      GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, SPRING
+      GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, SPRING, SLF4J, LOG4J
     package :jar
   end
 

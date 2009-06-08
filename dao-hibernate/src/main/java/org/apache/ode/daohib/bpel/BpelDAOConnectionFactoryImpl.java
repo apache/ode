@@ -69,6 +69,7 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
     /**
      * @see org.apache.ode.bpel.dao.BpelDAOConnectionFactory#init(java.util.Properties)
      */
+    @SuppressWarnings("unchecked")
     public void init(Properties initialProps) {
         if (_ds == null) {
             String errmsg = "setDataSource() not called!";
@@ -100,7 +101,13 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
 
         properties.put(Environment.CONNECTION_PROVIDER, DataSourceConnectionProvider.class.getName());
         properties.put(Environment.TRANSACTION_MANAGER_STRATEGY, HibernateTransactionManagerLookup.class.getName());
-        properties.put(Environment.TRANSACTION_STRATEGY, "org.hibernate.transaction.JTATransactionFactory");
+        /*
+         * Since Hibernate 3.2.6, Hibernate JTATransaction requires User Transaction bound on JNDI. Let's work around
+         * by implementing Hibernate JTATransactionFactory that hooks up to the JTATransactionManager(ODE uses geronimo
+         * by default).
+         */
+        // properties.put(Environment.TRANSACTION_STRATEGY, "org.hibernate.transaction.JTATransactionFactory");
+        properties.put(Environment.TRANSACTION_STRATEGY, "org.apache.ode.daohib.JotmTransactionFactory");
         properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "jta");
 
         // Guess Hibernate dialect if not specified in hibernate.properties
