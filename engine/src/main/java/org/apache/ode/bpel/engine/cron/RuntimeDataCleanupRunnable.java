@@ -49,11 +49,25 @@ public class RuntimeDataCleanupRunnable implements MapSerializableRunnable, Cont
     }
     
     public void run() {
-        _log.info("CleanInstances.run().");
+        _log.info("CRON CLEAN.run().");
         try {
             for( String filter : _cleanupInfo.getFilters() ) {
-                if( filter != null && filter.trim().length() > 0 ) {
-                    _log.info("CleanInstances.run(" + filter + ")");
+                _log.info("CRON CLEAN.run(" + filter + ")");
+
+                if( _pid != null ) {
+                    filter += " pid=" + _pid;
+                } else if( _pidsToExclude != null ) {
+                    StringBuffer pids = new StringBuffer();
+                    for( QName pid : _pidsToExclude ) {
+                        if( pids.length() > 0 ) {
+                            pids.append("|");
+                        }
+                        pids.append(pid);
+                    }
+                    filter += " pid<>" + pids.toString();
+                }
+
+                if( filter.trim().length() > 0 ) {
                     long numberOfDeletedInstances = 0;
                     do {
                         numberOfDeletedInstances = cleanInstances(filter, _cleanupInfo.getCategories(), _transactionSize);
@@ -68,19 +82,6 @@ public class RuntimeDataCleanupRunnable implements MapSerializableRunnable, Cont
     }
     
     int cleanInstances(String filter, final Set<CLEANUP_CATEGORY> categories, int limit) {
-        if( _pid != null ) {
-            filter += " pid=" + _pid;
-        } else if( _pidsToExclude != null ) {
-            StringBuffer pids = new StringBuffer();
-            for( QName pid : _pidsToExclude ) {
-                if( pids.length() > 0 ) {
-                    pids.append("|");
-                }
-                pids.append(pid);
-            }
-            filter += " pid<>" + pids.toString();
-        }
-        
         _log.debug("CleanInstances using filter: " + filter + ", limit: " + limit);
         
         final InstanceFilter instanceFilter = new InstanceFilter(filter, "", limit);
