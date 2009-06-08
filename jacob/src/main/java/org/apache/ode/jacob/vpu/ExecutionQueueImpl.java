@@ -140,6 +140,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         _reactions.add(continuation);
     }
 
+    @SuppressWarnings("unchecked")
     public Continuation dequeueReaction() {
         if (__log.isTraceEnabled()) {
             __log.trace(ObjectPrinter.stringifyMethodEnter("dequeueReaction", CollectionUtils.EMPTY_OBJECT_ARRAY));
@@ -154,6 +155,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         return continuation;
     }
 
+    @SuppressWarnings("unchecked")
     public void add(CommGroup group) {
         if (__log.isTraceEnabled())
             __log.trace(ObjectPrinter.stringifyMethodEnter("add", new Object[] { "group", group }));
@@ -299,9 +301,15 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         vals.add(object);
     }
 
+    @SuppressWarnings("unchecked")
     public void write(OutputStream oos) throws IOException {
         flush();
 
+        if( oos == null && __log.isWarnEnabled() ) {
+            __log.warn("OutputStream for soup is null; skipping serialization.");
+            return;
+        }
+        
         ExecutionQueueOutputStream sos = new ExecutionQueueOutputStream(oos);
 //        XQXMLOutputStream sos = createObjectOutputStream(new OutputStreamWriter(oos));
 
@@ -374,6 +382,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     public void dumpState(PrintStream ps) {
         ps.print(this.toString());
         ps.println(" state dump:");
@@ -436,6 +445,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         so.setId(id);
     }
 
+    @SuppressWarnings("unchecked")
     private void removeCommGroup(CommGroupFrame groupFrame) {
         // Add all channels reference in the group to the GC candidate set.
         for (Iterator i = groupFrame.commFrames.iterator(); i.hasNext();) {
@@ -460,6 +470,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
     }
 
     private static class ChannelFrame implements Externalizable {
+        @SuppressWarnings("unchecked")
         Class type;
 
         int id;
@@ -480,6 +491,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         public ChannelFrame() {
         }
 
+        @SuppressWarnings("unchecked")
         public ChannelFrame(Class type, int id, String name, String description) {
             this.type = type;
             this.id = id;
@@ -490,6 +502,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
             return Integer.valueOf(id);
         }
 
+        @SuppressWarnings("unchecked")
         public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
             type = (Class) in.readObject();
             id = in.readInt();
@@ -548,6 +561,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         }
     }
 
+    @SuppressWarnings("serial")
     private static class CommGroupFrame implements Serializable {
         boolean replicated;
 
@@ -586,17 +600,20 @@ public class ExecutionQueueImpl implements ExecutionQueue {
     private static class ObjectFrame extends CommFrame implements Externalizable {
         private static final long serialVersionUID = -7212430608484116919L;
         
+        @SuppressWarnings("unchecked")
         ChannelListener _continuation;
 
         public ObjectFrame() {
             super();
         }
 
+        @SuppressWarnings("unchecked")
         public ObjectFrame(CommGroupFrame commGroupFrame, ChannelFrame channelFrame, ChannelListener continuation) {
             super(commGroupFrame, channelFrame);
             this._continuation = continuation;
         }
 
+        @SuppressWarnings("unchecked")
         public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
             super.readExternal(in);
             _continuation = (ChannelListener) in.readObject();
@@ -774,10 +791,12 @@ public class ExecutionQueueImpl implements ExecutionQueue {
     }
 
     private static final class ChannelRef implements Externalizable {
+        @SuppressWarnings("unchecked")
         private Class _type;
 
         private Integer _id;
 
+        @SuppressWarnings("unchecked")
         private ChannelRef(Class type, Integer id) {
             _type = type;
             _id = id;
@@ -799,6 +818,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
             out.writeInt(_id.intValue());
         }
 
+        @SuppressWarnings("unchecked")
         public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
             _type = (Class) in.readObject();
             _id = Integer.valueOf(in.readInt());
