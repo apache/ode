@@ -5,6 +5,8 @@ import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.engine.cron.SystemSchedulesConfig;
 import org.hibernate.Query;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class SystemCronCleanupTest extends CleanTestBase {
@@ -23,6 +25,17 @@ public class SystemCronCleanupTest extends CleanTestBase {
         go("TestSystemCronCleanup_exclude", 1, 0, 0, 0, 3, 0, 6, 2, 3, 6, 59, 76);
     }
 
+    @BeforeClass
+    public void setCustomCronSchedules() {
+        String customSchedulesFilePath = SystemCronCleanupTest.class.getClassLoader().getResource("webapp").getFile() + "/WEB-INF/test-schedules.xml";
+        System.setProperty(SystemSchedulesConfig.SCHEDULE_CONFIG_FILE_PROP_KEY, customSchedulesFilePath);
+    }
+    
+    @AfterClass
+    public void resetCustomCronSchedules() {
+        System.getProperties().remove(SystemSchedulesConfig.SCHEDULE_CONFIG_FILE_PROP_KEY);
+    }
+    
     protected void go(String bundleName, int instances, int activityRecoveries, int correlationSets, int faults, int exchanges, int routes, int messsages, int partnerLinks, int scopes, int variables, int events, int largeData) throws Exception {
         if (server.isDeployed(bundleName)) server.undeployProcess(bundleName);
         server.deployProcess(bundleName);
