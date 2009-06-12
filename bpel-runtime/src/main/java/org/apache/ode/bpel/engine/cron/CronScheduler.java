@@ -54,6 +54,18 @@ public class CronScheduler {
     public void shutdown() {
         _shuttingDown = true;
         _schedulerTimer.cancel();
+
+        for( TerminationListener listener : _systemTerminationListeners ) {
+            listener.terminate();
+        }
+        _systemTerminationListeners.clear();
+
+        for( Collection<TerminationListener> listeners : _terminationListenersByPid.values() ) {
+            for( TerminationListener listener : listeners ) {
+                listener.terminate();
+            }
+        }
+        _terminationListenersByPid.clear();
     }
     
     public void cancelProcessCronJobs(QName pid, boolean undeployed) {
@@ -66,6 +78,7 @@ public class CronScheduler {
             Collection<TerminationListener> listeners = _terminationListenersByPid.get(pid);
             if( listeners != null ) {
                 listenersToTerminate.addAll(listeners);
+                listeners.clear();
             }
             if( undeployed ) {
                 _terminationListenersByPid.remove(pid);
