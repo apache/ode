@@ -118,8 +118,7 @@ public class DataHandling20Test extends BPELTestAbstract {
 
     @Test
     public void testXQueryExpression() throws Throwable {
-        deploy("/bpel/2.0/TestXQueryExpression");
-        go();
+        go("/bpel/2.0/TestXQueryExpression");
     }
 
     @Test

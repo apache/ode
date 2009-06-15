@@ -18,6 +18,9 @@
  */
 package org.apache.ode.bpel.elang.xquery10.runtime;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -527,6 +530,26 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
             xqType = xqconn.createAtomicType(XQItemType.XQBASETYPE_LONG);
         } else if (value instanceof String) {
             xqType = xqconn.createAtomicType(XQItemType.XQBASETYPE_STRING);
+        } else if (value instanceof Boolean) {
+        	xqType = xqconn.createAtomicType(XQItemType.XQBASETYPE_BOOLEAN);
+        } else if (value instanceof Date) {
+        	xqType = xqconn.createAtomicType(XQItemType.XQBASETYPE_DATETIME);
+        } else if (value instanceof BigDecimal) {
+        	xqType = xqconn.createAtomicType(XQItemType.XQBASETYPE_DECIMAL);
+        } else if (value instanceof Float) {
+        	xqType = xqconn.createAtomicType(XQItemType.XQBASETYPE_FLOAT);
+        } else if (value instanceof URI) {
+        	xqType = xqconn.createAtomicType(XQItemType.XQBASETYPE_ANYURI);
+        } else if (value instanceof QName) {
+        	xqType = xqconn.createAtomicType(XQItemType.XQBASETYPE_QNAME);
+        } else if (value instanceof BigInteger) {
+        	xqType = xqconn.createAtomicType(XQItemType.XQBASETYPE_INT);
+        } else if (value instanceof Integer) {
+        	xqType = xqconn.createAtomicType(XQItemType.XQBASETYPE_INTEGER);
+        } else if (value instanceof Double) {
+        	xqType = xqconn.createAtomicType(XQItemType.XQBASETYPE_DOUBLE);
+        } else if (value instanceof Byte) {
+        	xqType = xqconn.createAtomicType(XQItemType.XQBASETYPE_BYTE);
         } else if (value instanceof Node) {
         	xqType = xqconn.createNodeType();
         } else if (value instanceof NodeList || value instanceof XQSequence) {

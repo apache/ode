@@ -43,6 +43,9 @@
         <variable name="myVar" messageType="test:HelloXQueryMessage"/>
         <variable name="otherVar" type="xsd:string"/>
         <variable name="tempVar" element="test:content"/>
+        <variable name="stringVar" type="xsd:string"/>
+        <variable name="boolVar" type="xsd:boolean"/>
+        <variable name="i" type="xsd:int"/>
     </variables>
             
     <sequence>   
@@ -121,6 +124,76 @@
            <condition>not($tempVar/wsa:EndpointReference/wsa:Metadata/Service/@EndpointName eq "MyEndpoint")</condition>
            <throw faultName="selectionFailure"/>
         </if>
+        <assign>
+            <copy>
+                <from>0</from>
+                <to variable="i"/>
+            </copy>
+        </assign>
+        <while>
+            <condition>$i &lt; 2</condition>
+            <sequence>
+                <if>
+                    <condition>$i = 0</condition>
+                    <assign>
+                        <copy>
+                            <from>"false"</from>
+                            <to variable="stringVar"/>
+                        </copy>
+                        <copy>
+                            <from>false()</from>
+                            <to variable="boolVar"/>
+                        </copy>
+                    </assign>
+                    <else>
+                        <assign>
+                            <copy>
+                                <from>"true"</from>
+                                <to variable="stringVar"/>
+                            </copy>
+                            <copy>
+                                <from>true()</from>
+                                <to variable="boolVar"/>
+                            </copy>
+                        </assign>
+                    </else>
+                </if>
+				<!--
+                <assign>
+                    <copy>
+                        <from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
+        						if (boolean($stringVar)) then "trueValue" else "falseValue"
+        				</from>
+                        <to variable="otherVar"/>
+                    </copy>
+                </assign>
+	           <if>
+                    <condition>not($otherVar = concat($stringVar, "Value"))</condition>
+                    <throw faultName="selectionFailure"/>
+                </if>
+    			-->
+     
+          	    <assign>
+                    <copy>
+                        <from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
+        						if ($boolVar) then "trueValue" else "falseValue"
+        				</from>
+                        <to variable="otherVar"/>
+                    </copy>
+                </assign>
+                <if>
+                    <condition>not($otherVar = concat($stringVar, "Value"))</condition>
+                    <throw faultName="selectionFailure"/>
+                </if>
+    
+                <assign>
+                    <copy>
+                        <from>$i + 1</from>
+                        <to variable="i"/>
+                    </copy>
+                </assign>
+            </sequence>
+        </while>
         <scope>
             <faultHandlers>
                 <catch faultName="subLanguageExecutionFault">
