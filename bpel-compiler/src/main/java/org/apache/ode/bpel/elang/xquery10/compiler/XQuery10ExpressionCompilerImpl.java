@@ -29,7 +29,6 @@ import java.util.Set;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xquery.XQConnection;
 import javax.xml.xquery.XQConstants;
 import javax.xml.xquery.XQDataSource;
@@ -147,7 +146,7 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
         String xqueryStr;
         Node node = source.getExpression();
         if (node == null) {
-            throw new IllegalStateException("XQuery string and xpath node are both null");
+            throw new CompilationException(__msgs.errExpressionEmpty(source.getURI(), new QName(source.getElement().getNamespaceURI(), source.getElement().getNodeName())));
         }
         if (node.getNodeType() != Node.TEXT_NODE && 
         		node.getNodeType() != Node.ELEMENT_NODE && 

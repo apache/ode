@@ -22,6 +22,9 @@ package org.apache.ode.bpel.elang.xpath10.compiler;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompilationMessageBundle;
 
+import javax.xml.namespace.QName;
+import java.net.URI;
+
 /**
  * Compilation messages related to XPath 1.0 expressions.
  * @author mriou <mriou at apache dot org>
@@ -106,6 +109,10 @@ public class XPathMessages extends CompilationMessageBundle {
     public CompilationMessage errExpressionMessageNoPart(String message) {
         return super.formatCompilationMessage("Attempt to use the messageType variable {0} in an expression " +
                 " even though the associated message is undefined or has no part.", message);
+    }
+    /** Empty query */
+    public CompilationMessage errExpressionEmpty(URI docUri, QName elementName) {
+        return super.formatCompilationMessage("XPath elementName and xpath node are both empty in file: {0}, element: {1}", docUri, elementName.toString());
     }
 
 }

@@ -126,7 +126,7 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
         String xpathStr;
         Node node = source.getExpression();
         if (node == null) {
-            throw new IllegalStateException("XPath string and xpath node are both null");
+            throw new CompilationException(__msgs.errExpressionEmpty(source.getURI(), new QName(source.getElement().getNamespaceURI(), source.getElement().getNodeName())));
         }
         if (node.getNodeType() != Node.TEXT_NODE) {
             throw new CompilationException(__msgs.errUnexpectedNodeTypeForXPath(DOMUtils.domToString(node)));
