@@ -111,7 +111,7 @@ public class XPathMessages extends CompilationMessageBundle {
                 " even though the associated message is undefined or has no part.", message);
     }
     /** Empty query */
-    public CompilationMessage errExpressionEmpty(URI docUri, QName elementName) {
+    public CompilationMessage errEmptyExpression(URI docUri, QName elementName) {
         return super.formatCompilationMessage("XPath elementName and xpath node are both empty in file: {0}, element: {1}", docUri, elementName.toString());
     }
 

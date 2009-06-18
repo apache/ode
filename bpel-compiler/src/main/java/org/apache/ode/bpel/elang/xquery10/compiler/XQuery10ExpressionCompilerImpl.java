@@ -146,7 +146,7 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
         String xqueryStr;
         Node node = source.getExpression();
         if (node == null) {
-            throw new CompilationException(__msgs.errExpressionEmpty(source.getURI(), new QName(source.getElement().getNamespaceURI(), source.getElement().getNodeName())));
+            throw new CompilationException(__msgs.errEmptyExpression(source.getURI(), new QName(source.getElement().getNamespaceURI(), source.getElement().getNodeName())));
         }
         if (node.getNodeType() != Node.TEXT_NODE && 
         		node.getNodeType() != Node.ELEMENT_NODE && 
