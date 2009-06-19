@@ -577,8 +577,10 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
 
             while (result.next()) {
                 Object itemValue = getItemValue(result.getItem());
-                if (itemValue instanceof Node) {
-                	itemValue = DOMUtils.cloneNode(document, (Node) itemValue); 
+                if (itemValue instanceof Document) {
+                	itemValue = DOMUtils.cloneNode(document, ((Document) itemValue).getDocumentElement());
+                } else if (itemValue instanceof Node) {
+                	itemValue = DOMUtils.cloneNode(document, (Node) itemValue);
                 }
 
                 if (itemValue != null) {
