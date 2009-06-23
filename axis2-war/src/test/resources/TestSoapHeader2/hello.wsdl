@@ -1,0 +1,11 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<wsdl:definitions xmlns:process="http://example.com/hello/process" xmlns:tns="http://ode/bpel/unit-test.wsdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:diag="http://example.com/hello" xmlns:client="http://example.com/hello/client" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" xmlns:bpdm="http://www.intalio/designer/business-process-data-modeling" targetNamespace="http://example.com/hello">
+    <wsdl:import namespace="http://ode/bpel/unit-test.wsdl" location="HelloWorld2.wsdl"/>
+    <wsdl:import namespace="http://example.com/hello/process" location="hello-process.wsdl"/>
+    <pnlk:partnerLinkType name="serviceAndProcessForHelloPortPlk">
+        <pnlk:role name="service_for_process" portType="tns:HelloPortType"/>
+    </pnlk:partnerLinkType>
+    <pnlk:partnerLinkType name="processAndClient">
+        <pnlk:role name="process_for_client" portType="process:Forclient"/>
+    </pnlk:partnerLinkType>
+</wsdl:definitions>

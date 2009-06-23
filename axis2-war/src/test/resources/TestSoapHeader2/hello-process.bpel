@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<bpel:process xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ode="http://www.apache.org/ode/type/extension" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:this="http://example.com/hello/process" xmlns:client="http://example.com/hello/client" xmlns:tns="http://ode/bpel/unit-test.wsdl" xmlns:diag="http://example.com/hello" xmlns:service="http://example.com/hello/service" xmlns:bpmn="http://www.intalio.com/bpms" xmlns:atomic="http://ode.apache.org/atomicScope" queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" bpmn:label="process" name="process" bpmn:id="_Ue3NkBenEd6EIOjxNvjNWw" targetNamespace="http://example.com/hello/process">
+  <bpel:import namespace="http://ode/bpel/unit-test.wsdl" location="HelloWorld2.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:import namespace="http://example.com/hello" location="hello.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:import namespace="http://example.com/hello/process" location="hello-process.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:partnerLinks>
+    <bpel:partnerLink name="processAndClientPlkVar" partnerLinkType="diag:processAndClient" myRole="process_for_client"/>
+    <bpel:partnerLink name="serviceAndProcessForHelloPortPlkVar" partnerLinkType="diag:serviceAndProcessForHelloPortPlk" initializePartnerRole="yes" partnerRole="service_for_process"/>
+  </bpel:partnerLinks>
+  <bpel:variables>
+    <bpel:variable name="thisEventStartMessageRequest" messageType="this:EventStartMessageRequest"/>
+    <bpel:variable name="thisEventStartMessageResponse" messageType="this:EventStartMessageResponse"/>
+    <bpel:variable name="tnsTestInMsg" messageType="tns:HelloMessage"/>
+    <bpel:variable name="tnsTestOutMsg" messageType="tns:HelloMessage"/>
+  </bpel:variables>
+  <bpel:sequence>
+    <bpel:receive partnerLink="processAndClientPlkVar" portType="this:Forclient" operation="EventStartMessage" variable="thisEventStartMessageRequest" createInstance="yes" bpmn:label="Message_Start_Event" name="Message_Start_Event" bpmn:id="_bJfSgBenEd6EIOjxNvjNWw"></bpel:receive>
+    <bpel:assign name="init-variables-process" bpmn:id="_bJfSgBenEd6EIOjxNvjNWw">
+      <bpel:copy bpmn:label="$thisEventStartMessageResponse">
+        <bpel:from>
+          <bpel:literal>
+<this:EventStartMessageResponse></this:EventStartMessageResponse></bpel:literal>
+        </bpel:from>
+        <bpel:to>$thisEventStartMessageResponse.body</bpel:to>
+      </bpel:copy>
+      <bpel:copy bpmn:label="$tnsTestInMsg">
+        <bpel:from>
+          <bpel:literal>
+<tns:header1>
+  <tns:header1-field1></tns:header1-field1>
+</tns:header1></bpel:literal>
+        </bpel:from>
+        <bpel:to variable="tnsTestInMsg" header="h1"></bpel:to>
+      </bpel:copy>
+      <bpel:copy bpmn:label="$tnsTestInMsg">
+        <bpel:from>
+          <bpel:literal>
+<tns:header2>
+  <tns:header2-field1></tns:header2-field1>
+</tns:header2></bpel:literal>
+        </bpel:from>
+        <bpel:to variable="tnsTestInMsg" header="h2"></bpel:to>
+      </bpel:copy>
+      <bpel:copy bpmn:label="$tnsTestInMsg">
+        <bpel:from>
+          <bpel:literal>
+<tns:body>
+  <tns:message></tns:message>
+</tns:body></bpel:literal>
+        </bpel:from>
+        <bpel:to>$tnsTestInMsg.TestPart</bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+    <bpel:assign bpmn:label="Task" name="Task" bpmn:id="_bvx2cBenEd6EIOjxNvjNWw">
+      <bpel:copy>
+        <bpel:from>$thisEventStartMessageRequest.body/tns:message</bpel:from>
+        <bpel:to variable="tnsTestInMsg" header="h2">
+          <bpel:query>tns:header2-field1</bpel:query>
+        </bpel:to>
+      </bpel:copy>
+      <bpel:copy>
+        <bpel:from>$thisEventStartMessageRequest.body/tns:message</bpel:from>
+        <bpel:to>$tnsTestInMsg.TestPart/tns:message</bpel:to>
+      </bpel:copy>
+      <bpel:copy>
+        <bpel:from>$thisEventStartMessageRequest.body/tns:message</bpel:from>
+        <bpel:to variable="tnsTestInMsg" header="h1">
+          <bpel:query>tns:header1-field1</bpel:query>
+        </bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+    <bpel:invoke partnerLink="serviceAndProcessForHelloPortPlkVar" portType="tns:HelloPortType" operation="hello" inputVariable="tnsTestInMsg" outputVariable="tnsTestOutMsg" bpmn:label="Task" name="Task-1" bpmn:id="_bvx2cBenEd6EIOjxNvjNWw"></bpel:invoke>
+    <bpel:assign bpmn:label="Message_End_Event" name="Message_End_Event" bpmn:id="_cYnYEBenEd6EIOjxNvjNWw">
+      <bpel:copy>
+        <bpel:from>$tnsTestOutMsg.TestPart</bpel:from>
+        <bpel:to>$thisEventStartMessageResponse.body</bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+    <bpel:reply partnerLink="processAndClientPlkVar" portType="this:Forclient" operation="EventStartMessage" variable="thisEventStartMessageResponse" bpmn:label="Message_End_Event" name="Message_End_Event-1" bpmn:id="_cYnYEBenEd6EIOjxNvjNWw"></bpel:reply>
+  </bpel:sequence>
+</bpel:process>

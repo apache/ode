@@ -1,0 +1,40 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<wsdl:definitions xmlns:tns="http://ode/bpel/unit-test.wsdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:hello="http://ode/bpel/unit-test.wsdl" xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:client="http://example.com/hello/client" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:service="http://example.com/hello/service" xmlns:diag="http://example.com/hello" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:this="http://example.com/hello/process" targetNamespace="http://example.com/hello/process">
+    <wsdl:types>
+        <xs:schema targetNamespace="http://ode/bpel/unit-test.wsdl">
+            <xs:include schemaLocation="hello.xsd"/>
+        </xs:schema>
+        <xs:schema elementFormDefault="qualified" targetNamespace="http://example.com/hello/process">
+            <xs:element name="EventStartMessageResponse" type="xs:string"/>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="EventStartMessageRequest">
+        <wsdl:part name="body" element="tns:body"/>
+    </wsdl:message>
+    <wsdl:message name="EventStartMessageResponse">
+        <wsdl:part name="body" element="this:EventStartMessageResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="Forclient">
+        <wsdl:operation name="EventStartMessage">
+            <wsdl:input message="this:EventStartMessageRequest" name="EventStartMessage"/>
+            <wsdl:output message="this:EventStartMessageResponse" name="EventStartMessageResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="CanonicBindingForclient" type="this:Forclient">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="EventStartMessage">
+            <soap:operation style="document" soapAction="http://example.com/hello/process/Forclient/EventStartMessage"/>
+            <wsdl:input name="EventStartMessage">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="EventStartMessageResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="CanonicServiceForclient">
+        <wsdl:port name="canonicPort" binding="this:CanonicBindingForclient">
+            <soap:address location="http://localhost:8080/ode/processes/hello/hello/process/client"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
