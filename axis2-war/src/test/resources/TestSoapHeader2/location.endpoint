@@ -1,3 +1,6 @@
 
 alias.myns=http://ode/bpel/unit-test.wsdl
 myns.HelloService.ode.address=http://localhost:${system.test.port.1}/TestSoapHeader2/
+
+mex.timeout=150000
+
