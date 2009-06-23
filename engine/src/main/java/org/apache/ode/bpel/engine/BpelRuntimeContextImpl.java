@@ -729,7 +729,9 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
             Element part = (Element) parts.item(m);
             if (part.getAttribute("headerPart") != null && part.getAttribute("headerPart").length() > 0) {
                 header.appendChild(doc.importNode(part, true));
+                // remove the element from the list AND decrement the index to avoid skipping the next element!!
                 outgoingElmt.removeChild(part);
+                m--;
             }
         }
         message.setData(outgoingElmt);

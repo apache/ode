@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://ode/bpel/unit-test.wsdl"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    attributeFormDefault="qualified" elementFormDefault="qualified">
+
+    <xsd:element name="header1">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="header1-field1" type="xsd:string" />
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="header2">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="header2-field1" type="xsd:string" />
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="body">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="message" type="xsd:string" />
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+</xsd:schema>
