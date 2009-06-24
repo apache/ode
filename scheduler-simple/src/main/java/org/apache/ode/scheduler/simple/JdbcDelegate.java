@@ -229,7 +229,7 @@ public class JdbcDelegate implements DatabaseDelegate {
 
     public int updateAssignToNode(String node, int i, int numNodes, long maxtime) throws DatabaseException {
         if (__log.isDebugEnabled())
-            __log.debug("updateAsssignToNode node=" + node + " " + i + "/" + numNodes + " maxtime=" + maxtime);
+            __log.debug("updateAssignToNode node=" + node + " " + i + "/" + numNodes + " maxtime=" + maxtime);
         Connection con = null;
         PreparedStatement ps = null;
         try {

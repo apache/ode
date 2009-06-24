@@ -59,7 +59,7 @@ class ASSIGN extends ACTIVITY {
     }
 
     public void run() {
-        OAssign oassign = getOAsssign();
+        OAssign oassign = getOAssign();
 
         FaultData faultData = null;
 
@@ -73,13 +73,13 @@ class ASSIGN extends ACTIVITY {
             } catch (FaultException fault) {
             	if (operation instanceof OAssign.Copy) {
             		if (((OAssign.Copy) operation).ignoreMissingFromData) {
-            			if (fault.getQName().equals(getOAsssign().getOwner().constants.qnSelectionFailure) &&
+            			if (fault.getQName().equals(getOAssign().getOwner().constants.qnSelectionFailure) &&
             					(fault.getCause() != null && "ignoreMissingFromData".equals(fault.getCause().getMessage()))) {
             				continue;
     					}
             		}
             		if (((OAssign.Copy) operation).ignoreUninitializedFromVariable) {
-            			if (fault.getQName().equals(getOAsssign().getOwner().constants.qnUninitializedVariable) &&
+            			if (fault.getQName().equals(getOAssign().getOwner().constants.qnUninitializedVariable) &&
             					(fault.getCause() == null || !"throwUninitializedToVariable".equals(fault.getCause().getMessage()))) {
             				continue;
             			}
@@ -109,7 +109,7 @@ class ASSIGN extends ACTIVITY {
         return __log;
     }
 
-    private OAssign getOAsssign() {
+    private OAssign getOAssign() {
         return (OAssign) _self.o;
     }
 
@@ -252,7 +252,7 @@ class ASSIGN extends ACTIVITY {
 
     private void replaceEndpointRefence(PartnerLinkInstance plval, Node rvalue) throws FaultException {
         if (rvalue.getNodeType() == Node.ATTRIBUTE_NODE)
-            throw new FaultException(getOAsssign().getOwner().constants.qnMismatchedAssignmentFailure,
+            throw new FaultException(getOAssign().getOwner().constants.qnMismatchedAssignmentFailure,
                     "Can't assign an attribute to an endpoint, you probably want to select the attribute text.");
 
         // Eventually wrapping with service-ref element if we've been directly assigned some

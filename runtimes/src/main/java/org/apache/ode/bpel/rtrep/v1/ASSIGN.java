@@ -65,7 +65,7 @@ class ASSIGN extends ACTIVITY {
     }
 
     public void run() {
-        OAssign oassign = getOAsssign();
+        OAssign oassign = getOAssign();
 
         FaultData faultData = null;
 
@@ -74,13 +74,13 @@ class ASSIGN extends ACTIVITY {
                 copy(aCopy);
             } catch (FaultException fault) {
             	if (aCopy.ignoreMissingFromData) {
-	            	if (fault.getQName().equals(getOAsssign().getOwner().constants.qnSelectionFailure) &&
+	            	if (fault.getQName().equals(getOAssign().getOwner().constants.qnSelectionFailure) &&
 	            			(fault.getCause() != null && "ignoreMissingFromData".equals(fault.getCause().getMessage()))) {
 	            	continue;
 	            	}
             	}
             	if (aCopy.ignoreUninitializedFromVariable) {
-	            	if (fault.getQName().equals(getOAsssign().getOwner().constants.qnUninitializedVariable) &&
+	            	if (fault.getQName().equals(getOAssign().getOwner().constants.qnUninitializedVariable) &&
 	            			(fault.getCause() == null || !"throwUninitializedToVariable".equals(fault.getCause().getMessage()))) {
 	            	continue;
 	            	}
@@ -109,7 +109,7 @@ class ASSIGN extends ACTIVITY {
         return __log;
     }
 
-    private OAssign getOAsssign() {
+    private OAssign getOAssign() {
         return (OAssign) _self.o;
     }
 
@@ -200,11 +200,11 @@ class ASSIGN extends ACTIVITY {
             if (l.size() == 0) {
                 String msg = __msgs.msgRValueNoNodesSelected(expr.toString());
                 if (__log.isDebugEnabled()) __log.debug(from + ": " + msg);
-                throw new FaultException(getOAsssign().getOwner().constants.qnSelectionFailure, msg, new Throwable("ignoreMissingFromData"));
+                throw new FaultException(getOAssign().getOwner().constants.qnSelectionFailure, msg, new Throwable("ignoreMissingFromData"));
             } else if (l.size() > 1) {
                 String msg = __msgs.msgRValueMultipleNodesSelected(expr.toString());
                 if (__log.isDebugEnabled()) __log.debug(from + ": " + msg);
-                throw new FaultException(getOAsssign().getOwner().constants.qnSelectionFailure, msg);
+                throw new FaultException(getOAssign().getOwner().constants.qnSelectionFailure, msg);
             }
             retVal = (Node) l.get(0);
         } else if (from instanceof OAssign.Literal) {
@@ -234,7 +234,7 @@ class ASSIGN extends ACTIVITY {
                         if (__log.isDebugEnabled())
                             __log.debug(from + ": " + msg);
                         throw new FaultException(
-                                getOAsssign().getOwner().constants.qnSelectionFailure,
+                                getOAssign().getOwner().constants.qnSelectionFailure,
                                 msg);
 
                     }
@@ -249,7 +249,7 @@ class ASSIGN extends ACTIVITY {
                         if (__log.isDebugEnabled())
                             __log.debug(from + ": " + msg);
                         throw new FaultException(
-                                getOAsssign().getOwner().constants.qnSelectionFailure,
+                                getOAssign().getOwner().constants.qnSelectionFailure,
                                 msg);
 
                     }
@@ -263,7 +263,7 @@ class ASSIGN extends ACTIVITY {
                 if (__log.isDebugEnabled())
                     __log.debug(from + ": " + msg);
                 throw new FaultException(
-                        getOAsssign().getOwner().constants.qnSelectionFailure,
+                        getOAssign().getOwner().constants.qnSelectionFailure,
                         msg);
             }
         } else {
@@ -272,7 +272,7 @@ class ASSIGN extends ACTIVITY {
             if (__log.isErrorEnabled())
                 __log.error(from + ": " + msg);
             throw new FaultException(
-                    getOAsssign().getOwner().constants.qnSelectionFailure, msg);
+                    getOAssign().getOwner().constants.qnSelectionFailure, msg);
         }
 
         // Now verify we got something.
@@ -281,7 +281,7 @@ class ASSIGN extends ACTIVITY {
             if (__log.isDebugEnabled())
                 __log.debug(from + ": " + msg);
             throw new FaultException(
-                    getOAsssign().getOwner().constants.qnSelectionFailure, msg);
+                    getOAssign().getOwner().constants.qnSelectionFailure, msg);
         }
 
         // Now check that we got the right thing.
@@ -297,7 +297,7 @@ class ASSIGN extends ACTIVITY {
                     __log.debug(from + ": " + msg);
 
                 throw new FaultException(
-                        getOAsssign().getOwner().constants.qnSelectionFailure, msg);
+                        getOAssign().getOwner().constants.qnSelectionFailure, msg);
 
         }
 
@@ -562,7 +562,7 @@ class ASSIGN extends ACTIVITY {
                 if (__log.isDebugEnabled())
                     __log.debug(lvaluePtr + ": " + msg);
                 throw new FaultException(
-                        getOAsssign().getOwner().constants.qnSelectionFailure, msg);
+                        getOAssign().getOwner().constants.qnSelectionFailure, msg);
         }
 
         return lvalue;
