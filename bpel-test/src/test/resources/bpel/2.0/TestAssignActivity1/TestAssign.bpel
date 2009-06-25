@@ -63,6 +63,10 @@
                 <to>$strVar</to>
             </copy>
             <copy>
+                <from>$ode:processQName</from>
+                <to variable="strVar"/>
+            </copy>
+            <copy>
                 <from>$ode:pid</from>
                 <to variable="strVar"/>
             </copy>

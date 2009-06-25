@@ -69,6 +69,8 @@ public class JaxpVariableResolver implements XPathVariableResolver {
         if (variableName.getNamespaceURI().equals(Namespaces.ODE_EXTENSION_NS)) {
             if ("pid".equals(variableName.getLocalPart())) {
                 return _ectx.getProcessId();
+            } else if ("processQName".equals(variableName.getLocalPart())) {
+                return _ectx.getProcessQName();
             }
         }
 

@@ -60,7 +60,8 @@ public class JaxpVariableResolver implements XPathVariableResolver {
         // Custom variables
         if ("ode".equals(variableName.getPrefix())
                 || Namespaces.ODE_EXTENSION_NS.equals(variableName.getNamespaceURI())) {
-            if ("pid".equals(variableName.getLocalPart())) return "";
+            if ("pid".equals(variableName.getLocalPart()) || "processQName".equals(variableName.getLocalPart()))
+                return "";
         }
 
         try {
