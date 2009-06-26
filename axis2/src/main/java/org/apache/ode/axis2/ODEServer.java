@@ -595,6 +595,17 @@ public class ODEServer {
         __log.debug("Process store event: " + pse);
         ProcessConf pconf = _store.getProcessConfiguration(pse.pid);
         switch (pse.type) {
+            case DEPLOYED:
+                if (pconf != null) {
+                    /*
+                     * If and only if an old process exists with the same pid, the old process is cleaned up.
+                     * The following line is IMPORTANT and used for the case when the deployment and store 
+                     * do not have the process while the process itself exists in the BPEL_PROCESS table.
+                     * Notice that the new process is actually created on the 'ACTIVATED' event.
+                     */
+                    _bpelServer.cleanupProcess(pconf);
+                }
+                break;
             case ACTVIATED:
                 // bounce the process
                 _bpelServer.unregister(pse.pid);
