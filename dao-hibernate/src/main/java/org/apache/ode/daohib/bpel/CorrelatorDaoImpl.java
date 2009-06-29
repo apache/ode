@@ -118,26 +118,22 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         q.setLockMode("hs", LockMode.UPGRADE);
 
         HCorrelatorSelector selector;
-        Iterator selectors = null;
-        try {
-            List<HProcessInstance> targets = new ArrayList<HProcessInstance>();
-            selectors = q.iterate();
-            while (selectors.hasNext()) {
-                selector = (HCorrelatorSelector) selectors.next();
-                if (selector != null) {
-                    if ("all".equals(selector.getRoute()) ||
-                            ("one".equals(selector.getRoute()) && !targets.contains(selector.getInstance()))) {
-                        routes.add(new MessageRouteDaoImpl(_sm, selector));
-                        targets.add(selector.getInstance());
-                    }
+        List selectors;
+        List<HProcessInstance> targets = new ArrayList<HProcessInstance>();
+        selectors = q.list();
+        for (Object selo : selectors) {
+            selector = (HCorrelatorSelector) selo;
+            if (selector != null) {
+                if ("all".equals(selector.getRoute()) ||
+                        ("one".equals(selector.getRoute()) && !targets.contains(selector.getInstance()))) {
+                    routes.add(new MessageRouteDaoImpl(_sm, selector));
+                    targets.add(selector.getInstance());
                 }
             }
-        } finally {
-            if (selectors != null) Hibernate.close(selectors);
         }
 
         if(__log.isDebugEnabled()) __log.debug(hdr + "found " + routes);
-        
+
         return routes;
     }
 

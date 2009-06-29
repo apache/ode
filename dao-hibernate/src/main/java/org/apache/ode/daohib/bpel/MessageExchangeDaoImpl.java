@@ -352,9 +352,10 @@ public class MessageExchangeDaoImpl extends HibernateDao implements
 	}
 	
 	public void release(boolean doClean) {
-		if( doClean ) {
-			deleteMessages();
-		}
+// TODO the cleanup queries as they are right now thend to be very deadlocky
+// 		if( doClean ) {
+// 			deleteMessages();
+// 		}
 	}
 
 	public void releasePremieMessages() {
