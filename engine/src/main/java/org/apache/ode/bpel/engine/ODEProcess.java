@@ -355,7 +355,7 @@ public abstract class ODEProcess {
             __log.debug(ObjectPrinter.stringifyMethodEnter("handleWorkEvent", new Object[] { "jobInfo", jobInfo }));
         }
 
-        enqueueInstanceTransaction(we.getIID(), new Runnable() {
+        enqueueInstanceTransaction(we.getInstanceId(), new Runnable() {
             public void run() {
                 _contexts.scheduler.jobCompleted(jobInfo.jobName);
                 execInstanceEvent(we);
@@ -402,21 +402,21 @@ public abstract class ODEProcess {
     }
 
     private void execInstanceEvent(WorkEvent we) {
-        BpelInstanceWorker worker = _instanceWorkerCache.get(we.getIID());
+        BpelInstanceWorker worker = _instanceWorkerCache.get(we.getInstanceId());
         assert worker.isWorkerThread();
 
-        ProcessInstanceDAO instanceDAO = getProcessDAO().getInstance(we.getIID());
+        ProcessInstanceDAO instanceDAO = getProcessDAO().getInstance(we.getInstanceId());
         MessageExchangeDAO mexDao = we.getMexId() == null ? null : loadMexDao(we.getMexId());
 
         if (instanceDAO == null) {
             if (__log.isDebugEnabled()) {
-                __log.debug("handleWorkEvent: no ProcessInstance found with iid " + we.getIID() + "; ignoring.");
+                __log.debug("handleWorkEvent: no ProcessInstance found with iid " + we.getInstanceId() + "; ignoring.");
             }
             return;
         }
 
         if (__log.isDebugEnabled()) {
-            __log.debug("handleWorkEvent: " + we.getType() + " event for process instance " + we.getIID());
+            __log.debug("handleWorkEvent: " + we.getType() + " event for process instance " + we.getInstanceId());
         }
 
         switch (we.getType()) {
@@ -470,7 +470,7 @@ public abstract class ODEProcess {
     protected boolean isShareable(Endpoint endpoint) {
         if (!_pconf.isSharedService(endpoint.serviceName)) return false;
 
-//    	PartnerLinkMyRoleImpl partnerLink = _endpointToMyRoleMap.get(endpoint);
+//      PartnerLinkMyRoleImpl partnerLink = _endpointToMyRoleMap.get(endpoint);
 //        return partnerLink != null && partnerLink.isOneWayOnly();
         return false;
     }
@@ -765,7 +765,7 @@ public abstract class ODEProcess {
         // if (isInMemory())
         // throw new InvalidProcessException("In-mem process execution resulted in event scheduling.");
 
-        return _contexts.scheduler.schedulePersistedJob(we.getDetail(), timeToFire);
+        return _contexts.scheduler.schedulePersistedJob(we.getDetails(), timeToFire);
     }
 
     protected OdeRuntime buildRuntime(int modelVersion) {

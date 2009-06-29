@@ -11,7 +11,18 @@ CREATE TABLE ODE_JOB (
   nodeid char(64)  NULL,
   scheduled int  NOT NULL DEFAULT 0,
   transacted int  NOT NULL DEFAULT 0,
-  details blob(4096)  NULL,
+
+  instanceId BIGINT,
+  mexId varchar(255),
+  processId varchar(255),
+  type varchar(255),
+  channel varchar(255),
+  correlatorId varchar(255),
+  correlationKey varchar(255),
+  retryCount int,
+  inMem int,
+  detailsExt blob(4096),
+
   PRIMARY KEY(jobid),
   INDEX IDX_ODE_JOB_TS(ts),
   INDEX IDX_ODE_JOB_NODEID(nodeid)

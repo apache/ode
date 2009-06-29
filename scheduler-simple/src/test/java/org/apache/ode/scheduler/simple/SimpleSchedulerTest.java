@@ -26,6 +26,7 @@ import javax.transaction.TransactionManager;
 import junit.framework.TestCase;
 
 import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
+import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessor;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
@@ -196,7 +197,7 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
 
         assertTrue(_jobs.size() <= 1);
         if (_jobs.size() == 1)
-            assertEquals("far", _jobs.get(0).jobDetail.get("foo"));
+            assertEquals("far", _jobs.get(0).jobDetail.getDetailsExt().get("foo"));
     }
 
     public void onScheduledJob(final JobInfo jobInfo) throws JobProcessorException {
@@ -205,10 +206,10 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
         }
     }
 
-    Map<String, Object> newDetail(String x) {
-        HashMap<String, Object> det = new HashMap<String, Object>();
-        det.put("foo", x);
-        return det;
+    Scheduler.JobDetails newDetail(String x) {
+        Scheduler.JobDetails jd = new Scheduler.JobDetailsImpl();
+        jd.getDetailsExt().put("foo", x);
+        return jd;
     }
 
     private SimpleScheduler newScheduler(String nodeId) {

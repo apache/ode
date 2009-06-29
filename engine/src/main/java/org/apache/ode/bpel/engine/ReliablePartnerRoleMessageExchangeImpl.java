@@ -7,6 +7,7 @@ import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
+import org.apache.ode.bpel.iapi.Scheduler.JobType;
 import org.apache.ode.bpel.rapi.PartnerLinkModel;
 
 public class ReliablePartnerRoleMessageExchangeImpl extends PartnerRoleMessageExchangeImpl {
@@ -49,7 +50,7 @@ public class ReliablePartnerRoleMessageExchangeImpl extends PartnerRoleMessageEx
         MessageExchangeDAO mexdao = getDAO();
         final WorkEvent we = generatePartnerResponseWorkEvent(mexdao);
         save(mexdao);
-        _contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+        _contexts.scheduler.schedulePersistedJob(we.getDetails(), null);
     }
 
 
@@ -62,9 +63,9 @@ public class ReliablePartnerRoleMessageExchangeImpl extends PartnerRoleMessageEx
         WorkEvent we = new WorkEvent();
         we.setProcessId(_process.getPID());
         we.setChannel(mexdao.getChannel());
-        we.setIID(_iid);
+        we.setInstanceId(_iid);
         we.setMexId(_mexId);
-        we.setType(WorkEvent.Type.PARTNER_RESPONSE);
+        we.setType(JobType.PARTNER_RESPONSE);
         return we;
     }
 

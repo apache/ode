@@ -4,11 +4,14 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.DeferredProcessInstanceCleanable;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.engine.BpelServerImpl.ContextsAware;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.MapSerializableRunnable;
 
 public class ProcessCleanUpRunnable implements MapSerializableRunnable, ContextsAware {
@@ -28,12 +31,12 @@ public class ProcessCleanUpRunnable implements MapSerializableRunnable, Contexts
         _pid = pid;
     }
 
-    public void storeToDetailsMap(Map<String, Object> details) {
-        details.put("pid", _pid);
+    public void storeToDetails(JobDetails details) {
+        details.getDetailsExt().put("pid", _pid);
     }
     
-    public void restoreFromDetailsMap(Map<String, Object> details) {
-        _pid = (Serializable)details.get("pid");
+    public void restoreFromDetails(JobDetails details) {
+        _pid = (Serializable) details.getDetailsExt().get("pid");
     }
 
     public void setContexts(Contexts contexts) {

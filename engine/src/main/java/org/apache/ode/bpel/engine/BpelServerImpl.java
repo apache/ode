@@ -533,7 +533,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                         _contexts.scheduler.jobCompleted(jobInfo.jobName);
                         Date future = new Date(System.currentTimeMillis() + (60 * 1000));
                         __log.debug(__msgs.msgReschedulingJobForInactiveProcess(we.getProcessId(), jobInfo.jobName, future));
-                        _contexts.scheduler.schedulePersistedJob(we.getDetail(), future);            
+                        _contexts.scheduler.schedulePersistedJob(we.getDetails(), future);            
                         return null;
                     }
                     
@@ -541,7 +541,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 return;
             }
             
-            if (we.getType().equals(WorkEvent.Type.INVOKE_CHECK)) {
+            if (we.getType().equals(Scheduler.JobType.INVOKE_CHECK)) {
                 if (__log.isDebugEnabled()) __log.debug("handleWorkEvent: InvokeCheck event for mexid " + we.getMexId());
 
                 PartnerRoleMessageExchange mex = (PartnerRoleMessageExchange) getMessageExchange(we.getMexId());
@@ -555,7 +555,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             process.handleWorkEvent(jobInfo);
         } catch (Exception ex) {
-            throw new JobProcessorException(ex, jobInfo.jobDetail.get("inmem") == null);
+            throw new JobProcessorException(ex, jobInfo.jobDetail.getInMem() == false);
         } finally {
             _mngmtLock.readLock().unlock();
         }
@@ -637,7 +637,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 for (ODEProcess target : targets) {
                     meps.add(createNewMyRoleMex(target, istyle, targetService, operation, clientKey));
                 }
-                return createNewMyRoleMex(targets.get(0), meps, istyle);	
+                return createNewMyRoleMex(targets.get(0), meps, istyle);    
             }
         } finally {
             _mngmtLock.readLock().unlock();
@@ -691,7 +691,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         else
             assertNoTransaction();
     
-	    return ((ODEWSProcess)process).createNewMyRoleMex(istyle, targetService, operation);
+        return ((ODEWSProcess)process).createNewMyRoleMex(istyle, targetService, operation);
     }
     
     /**
@@ -1086,7 +1086,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 }
                 if( statusOfPriorTry == JOB_STATUS.COMPLETED ) {
                     resultsByJobId.remove(jobInfo.jobName);
-                    jobInfo.jobDetail.put("runnable_status", JOB_STATUS.COMPLETED);
+                    jobInfo.jobDetail.getDetailsExt().put("runnable_status", JOB_STATUS.COMPLETED);
                     return;
                 }
                 if( statusOfPriorTry == JOB_STATUS.PENDING || statusOfPriorTry == JOB_STATUS.FAILED ) {
@@ -1100,8 +1100,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 _polledRunnableExec.submit(new Runnable() {
                     public void run() {
                         try {
-                            MapSerializableRunnable runnable = (MapSerializableRunnable)jobInfo.jobDetail.get("runnable");
-                            runnable.restoreFromDetailsMap(jobInfo.jobDetail);
+                            MapSerializableRunnable runnable = (MapSerializableRunnable)jobInfo.jobDetail.getDetailsExt().get("runnable");
+                            runnable.restoreFromDetails(jobInfo.jobDetail);
                             if( runnable instanceof ContextsAware ) {
                                 ((ContextsAware)runnable).setContexts(_contexts);
                             }
@@ -1120,7 +1120,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 });
             }
             
-            jobInfo.jobDetail.put("runnable_status", JOB_STATUS.IN_PROGRESS);
+            jobInfo.jobDetail.getDetailsExt().put("runnable_status", JOB_STATUS.IN_PROGRESS);
             if( exceptionThrownOnPriorTry != null ) {
                 throw new Scheduler.JobProcessorException(exceptionThrownOnPriorTry, true);
             }

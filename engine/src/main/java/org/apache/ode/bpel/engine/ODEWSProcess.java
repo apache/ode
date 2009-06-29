@@ -5,6 +5,7 @@ import org.apache.ode.bpel.rapi.ProcessModel;
 import org.apache.ode.bpel.rapi.ConstantsModel;
 import org.apache.ode.bpel.rapi.InvalidProcessException;
 import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.Scheduler.JobType;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
@@ -230,10 +231,10 @@ public class ODEWSProcess extends ODEProcess {
             }
 
             if (pl.hasPartnerRole()) {
-            	Endpoint endpoint = _pconf.getInvokeEndpoints().get(pl.getName());
+                Endpoint endpoint = _pconf.getInvokeEndpoints().get(pl.getName());
                 if (endpoint == null)
                     throw new IllegalArgumentException(pl.getName() + " must be bound to an endpoint in deloy.xml");
-            	PartnerLinkPartnerRoleImpl partnerRole = new PartnerLinkPartnerRoleImpl(this, pl, endpoint);
+                PartnerLinkPartnerRoleImpl partnerRole = new PartnerLinkPartnerRoleImpl(this, pl, endpoint);
                 _partnerRoles.put(pl, partnerRole);
             }
         }
@@ -408,8 +409,8 @@ public class ODEWSProcess extends ODEProcess {
                     executeContinueInstanceMyRoleRequestReceived(mexdao);
                 } else /* non-transacted style */{
                     WorkEvent we = new WorkEvent();
-                    we.setType(WorkEvent.Type.MYROLE_INVOKE);
-                    we.setIID(mexdao.getInstance().getInstanceId());
+                    we.setType(JobType.MYROLE_INVOKE);
+                    we.setInstanceId(mexdao.getInstance().getInstanceId());
                     we.setMexId(mexdao.getMessageExchangeId());
                     // Could be different to this pid when routing to an older version
                     we.setProcessId(mexdao.getInstance().getProcess().getProcessId());
@@ -673,7 +674,7 @@ public class ODEWSProcess extends ODEProcess {
             WorkEvent event = new WorkEvent();
             event.setMexId(mex.getMessageExchangeId());
             event.setProcessId(getPID());
-            event.setType(WorkEvent.Type.INVOKE_CHECK);
+            event.setType(JobType.INVOKE_CHECK);
             // use a greater timeout to make sure the check job does not get executed while the service invocation is still waiting for a response
             PartnerLinkModel model = _processModel.getPartnerLink(mex.getPartnerLinkModelId());
             long timeout = (long) (getTimeout(model)*1.5);

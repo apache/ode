@@ -69,7 +69,7 @@ public class MockScheduler implements Scheduler {
         }
     };
 
-    public String schedulePersistedJob(final Map<String, Object> detail, Date dt) throws ContextException {
+    public String schedulePersistedJob(final JobDetails detail, Date dt) throws ContextException {
         final Date date = dt == null ? new Date() : dt;
         registerSynchronizer(new Synchronization() {
             public void afterCompletion(int status) {

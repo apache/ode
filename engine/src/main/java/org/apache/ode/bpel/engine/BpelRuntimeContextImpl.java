@@ -55,6 +55,7 @@ import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
 import org.apache.ode.bpel.rapi.CorrelationSet;
 import org.apache.ode.bpel.rapi.FaultInfo;
@@ -556,7 +557,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
                 __log.debug("Not creating a new instance for process " + processDAO.getProcessId() + "; unique correlation constraint would be violated!");
                 throw new FaultException(cset.getOwner().getConstantsModel().getDuplicateInstance());
             }
-        }        	
+        }           
         
         ScopeDAO scopeDAO = _dao.getScope(cset.getScopeId());
         CorrelationSetDAO cs = scopeDAO.getCorrelationSet(cset.getName());
@@ -581,18 +582,18 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
 
     public void registerTimer(String timerChannelId, Date timeToFire) {
         WorkEvent we = new WorkEvent();
-        we.setIID(_dao.getInstanceId());
+        we.setInstanceId(_dao.getInstanceId());
         we.setProcessId(_bpelProcess.getPID());
         we.setChannel(timerChannelId);
-        we.setType(WorkEvent.Type.TIMER);
+        we.setType(Scheduler.JobType.TIMER);
         _bpelProcess.scheduleWorkEvent(we, timeToFire);
     }
 
     private void scheduleCorrelatorMatcher(String correlatorId, CorrelationKey key) {
         WorkEvent we = new WorkEvent();
-        we.setIID(_dao.getInstanceId());
+        we.setInstanceId(_dao.getInstanceId());
         we.setProcessId(_bpelProcess.getPID());
-        we.setType(WorkEvent.Type.MATCHER);
+        we.setType(Scheduler.JobType.MATCHER);
         we.setCorrelatorId(correlatorId);
         we.setCorrelationKey(key);
         _bpelProcess.scheduleWorkEvent(we, null);
@@ -774,11 +775,11 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
 
                 try {
                     WorkEvent we = new WorkEvent();
-                    we.setIID(_iid);
+                    we.setInstanceId(_iid);
                     we.setRetryCount(_retryCount);
                     we.setProcessId(_bpelProcess.getPID());
-                    we.setType(WorkEvent.Type.RESUME);
-                    _contexts.scheduler.schedulePersistedJob(we.getDetail(), new Date());
+                    we.setType(Scheduler.JobType.RESUME);
+                    _contexts.scheduler.schedulePersistedJob(we.getDetails(), new Date());
                 } catch (ContextException e) {
                     __log.error("Failed to schedule resume task.", e);
                     throw new BpelEngineException(e);
@@ -811,7 +812,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
     }
     
     private void rollbackState() {
-        _contexts.setRollbackOnly();    		
+        _contexts.setRollbackOnly();            
         int newcount = _dao.getExecutionStateCounter();
         _dao.setExecutionStateCounter(newcount);
         _instanceWorker.setCachedState(newcount, null);
@@ -1170,7 +1171,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
 
     public Node getProcessProperty(QName propertyName) {
         return _bpelProcess.getProcessProperty(propertyName);
-    }	
+    }   
 
     private MessageExchangeDAO getExistingMex(String mexId) {
         MessageExchangeDAO dao = _dao.getConnection().getMessageExchange(mexId);

@@ -32,6 +32,9 @@ import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.evt.ProcessInstanceStateChangeEvent;
 import org.apache.ode.bpel.evt.ProcessTerminationEvent;
 import org.apache.ode.bpel.evt.ScopeCompletionEvent;
+import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
+import org.apache.ode.bpel.iapi.Scheduler.JobType;
 import org.apache.ode.bpel.pmapi.BpelManagementFacade;
 import org.apache.ode.bpel.pmapi.InstanceNotFoundException;
 import org.apache.ode.bpel.pmapi.ManagementException;
@@ -170,10 +173,10 @@ class DebuggerSupport {
                         _step.add(iid);
 
                         WorkEvent we = new WorkEvent();
-                        we.setIID(iid);
+                        we.setInstanceId(iid);
                         we.setProcessId(_process.getPID());
-                        we.setType(WorkEvent.Type.RESUME);
-                        _process._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+                        we.setType(Scheduler.JobType.RESUME);
+                        _process._contexts.scheduler.schedulePersistedJob(we.getDetails(), null);
 
                         return true;
                     }
@@ -294,10 +297,10 @@ class DebuggerSupport {
                         onEvent(evt);
 
                         WorkEvent we = new WorkEvent();
-                        we.setType(WorkEvent.Type.RESUME);
+                        we.setType(JobType.RESUME);
                         we.setProcessId(_process.getPID());
-                        we.setIID(iid);
-                        _process._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+                        we.setInstanceId(iid);
+                        _process._contexts.scheduler.schedulePersistedJob(we.getDetails(), null);
 
                         return true;
                     }

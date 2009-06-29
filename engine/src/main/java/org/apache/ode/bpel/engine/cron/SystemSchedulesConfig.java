@@ -15,6 +15,8 @@ import org.apache.ode.bpel.dd.TCleanup;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.ProcessConf.CleanupInfo;
 import org.apache.ode.bpel.iapi.ProcessConf.CronJob;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetailsImpl;
 import org.apache.ode.store.ProcessCleanupConfImpl;
 import org.apache.ode.utils.CronExpression;
 import org.apache.xmlbeans.XmlOptions;
@@ -64,9 +66,10 @@ public class SystemSchedulesConfig {
                         cleanupInfo.setFilters(aCleanup.getFilterList());
                         ProcessCleanupConfImpl.processACleanup(cleanupInfo.getCategories(), aCleanup.getCategoryList());
                         
-                        Map<String, Object> runnableDetails = new HashMap<String, Object>();
-                        runnableDetails.put("cleanupInfo", cleanupInfo);
-                        runnableDetails.put("transactionSize", 10);
+                        JobDetails runnableDetails = new JobDetailsImpl();
+                        
+                        runnableDetails.getDetailsExt().put("cleanupInfo", cleanupInfo);
+                        runnableDetails.getDetailsExt().put("transactionSize", 10);
                         job.getRunnableDetailList().add(runnableDetails);
                         __log.info("SYSTEM CRON configuration added a runtime data cleanup: " + runnableDetails);
                     }

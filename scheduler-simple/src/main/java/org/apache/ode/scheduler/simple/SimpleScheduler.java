@@ -29,11 +29,14 @@ import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
+import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.Scheduler.JobType;
 
 /**
  * A reliable and relatively simple scheduler that uses a database to persist information about scheduled tasks.
@@ -173,7 +176,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         }
     }
 
-    public String schedulePersistedJob(final Map<String, Object> jobDetail, Date when) throws ContextException {
+    public String schedulePersistedJob(final JobDetails jobDetail, Date when) throws ContextException {
         long ctime = System.currentTimeMillis();
         if (when == null)
             when = new Date(ctime);
@@ -189,9 +192,9 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         if (when == null)
             when = new Date(ctime);
 
-        Map<String, Object> jobDetails = new HashMap<String, Object>();
-        jobDetails.put("runnable", runnable);
-        runnable.storeToDetailsMap(jobDetails);
+        JobDetails jobDetails = new JobDetailsImpl();
+        jobDetails.getDetailsExt().put("runnable", runnable);
+        runnable.storeToDetails(jobDetails);
         
         if (__log.isDebugEnabled())
             __log.debug("scheduling " + jobDetails + " for " + when);
@@ -235,7 +238,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
 
     }
 
-    public String scheduleVolatileJob(boolean transacted, Map<String, Object> jobDetail) throws ContextException {
+    public String scheduleVolatileJob(boolean transacted, JobDetails jobDetail) throws ContextException {
         Job job = new Job(System.currentTimeMillis(), transacted, jobDetail);
         job.persisted = false;
         addTodoOnCommit(job);
@@ -334,8 +337,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
      *            job to run.
      */
     protected void runJob(final Job job) {
-        final Scheduler.JobInfo jobInfo = new Scheduler.JobInfo(job.jobId, job.detail,
-                (Integer)(job.detail.get("retry") != null ? job.detail.get("retry") : 0));
+        final Scheduler.JobInfo jobInfo = new Scheduler.JobInfo(job.jobId, job.detail, job.detail.getRetryCount());
 
         try {
             try {
@@ -501,9 +503,9 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     }
 
     private long doRetry(Job job) throws DatabaseException {
-        int retry = job.detail.get("retry") != null ? (((Integer)job.detail.get("retry")) + 1) : 0;
-        job.detail.put("retry", retry);
-        long delay = (long)(Math.pow(5, retry));
+        int retry = job.detail.getRetryCount() + 1;
+        job.detail.setRetryCount(retry);
+        long delay = (long)(Math.pow(5, retry - 1));
         Job jobRetry = new Job(System.currentTimeMillis() + delay*1000, true, job.detail);
         _db.insertJob(jobRetry, _nodeId, false);
         return delay;

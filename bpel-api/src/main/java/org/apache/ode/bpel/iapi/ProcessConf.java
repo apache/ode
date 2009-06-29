@@ -32,6 +32,7 @@ import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.evt.BpelEvent;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.rapi.ProcessModel;
 import org.apache.ode.utils.CronExpression;
 import org.w3c.dom.Element;
@@ -190,7 +191,7 @@ public interface ProcessConf {
     public class CronJob {
         private CronExpression _cronExpression;
         
-        private final List<Map<String,Object>> runnableDetailList = new ArrayList<Map<String,Object>>();
+        private final List<JobDetails> runnableDetailList = new ArrayList<JobDetails>();
         
         public void setCronExpression(CronExpression _cronExpression) {
             this._cronExpression = _cronExpression;
@@ -200,7 +201,7 @@ public interface ProcessConf {
             return _cronExpression;
         }
         
-        public List<Map<String,Object>> getRunnableDetailList() {
+        public List<JobDetails> getRunnableDetailList() {
             return runnableDetailList;
         }
         
@@ -216,7 +217,7 @@ public interface ProcessConf {
         }
     }
     
-    public class CleanupInfo {
+    public class CleanupInfo implements java.io.Serializable {
         private List<String> _filters = new ArrayList<String>();
         
         private final Set<CLEANUP_CATEGORY> _categories = EnumSet.noneOf(CLEANUP_CATEGORY.class);

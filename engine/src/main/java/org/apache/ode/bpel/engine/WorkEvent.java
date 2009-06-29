@@ -20,6 +20,9 @@
 package org.apache.ode.bpel.engine;
 
 import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetailsImpl;
+import org.apache.ode.bpel.iapi.Scheduler.JobType;
 
 import javax.xml.namespace.QName;
 import java.util.HashMap;
@@ -31,108 +34,104 @@ import java.util.Map;
  */
 public class WorkEvent {
 
-    private Map<String, Object> _jobDetail;
+    private JobDetails _jobDetail;
 
-    WorkEvent(Map<String, Object> jobDetail) {
+    WorkEvent(JobDetails jobDetail) {
         _jobDetail = jobDetail;
     }
 
     WorkEvent() {
-        _jobDetail = new HashMap<String, Object>();
+        _jobDetail = new JobDetailsImpl();
     }
 
-    Long getIID() {
-        return (Long) _jobDetail.get("iid");
-    }
-
-    Type getType() {
-        return Type.valueOf((String) _jobDetail.get("type"));
-    }
-
-    void setType(Type timer) {
-
-        _jobDetail.put("type", timer.toString());
-
-    }
-
-    Map<String, Object> getDetail() {
+    JobDetails getDetails() {
         return _jobDetail;
     }
 
     public String toString() {
         return "WorkEvent" + _jobDetail;
     }
-    
-    public enum Type {
-        TIMER, 
-        
-        RESUME, 
-        
-        /** Response from partner (i.e. the result of a partner-role invoke) has been received. */
-        PARTNER_RESPONSE, 
-        
-        MATCHER, 
-        
-        /** Invoke a "my role" operation (i.e. implemented by the process). */
-        MYROLE_INVOKE, 
-        
-        MYROLE_INVOKE_ASYNC_RESPONSE,
-
-        INVOKE_CHECK
-    }
 
     public String getChannel() {
-        return (String) _jobDetail.get("channel");
+        return _jobDetail.getChannel();
     }
 
-    public void setIID(Long instanceId) {
-        _jobDetail.put("iid", instanceId);
-    }
-
-    public void setChannel(String channel) {
-
-        _jobDetail.put("channel", channel);
-
-    }
-
-    public String getMexId() {
-        return (String) _jobDetail.get("mexid");
-    }
-
-    public void setMexId(String mexId) {
-        _jobDetail.put("mexid", mexId);
+    public CorrelationKey getCorrelationKey() {
+        return _jobDetail.getCorrelationKey();
     }
 
     public String getCorrelatorId() {
-        return (String)_jobDetail.get("correlatorId");
+        return _jobDetail.getCorrelatorId();
     }
 
-    public void setCorrelatorId(String correlatorId) {
-        _jobDetail.put("correlatorId", correlatorId);
-    }
-    
-    public CorrelationKey getCorrelationKey() {
-        return new CorrelationKey((String) _jobDetail.get("ckey"));
-    }
-    
-    public void setCorrelationKey(CorrelationKey ckey) {
-        _jobDetail.put("ckey", ckey == null ? null : ckey.toCanonicalString());
+    public Map<String, Object> getDetailsExt() {
+        return _jobDetail.getDetailsExt();
     }
 
-    public void setProcessId(QName pid) {
-        _jobDetail.put("pid", pid.toString());
+    public Boolean getInMem() {
+        return _jobDetail.getInMem();
+    }
+
+    public Long getInstanceId() {
+        return _jobDetail.getInstanceId();
+    }
+
+    public String getMexId() {
+        return _jobDetail.getMexId();
     }
 
     public QName getProcessId() {
-        return _jobDetail.get("pid") != null? QName.valueOf((String) _jobDetail.get("pid")) : null;
+        return _jobDetail.getProcessId();
+    }
+
+    public Integer getRetryCount() {
+        return _jobDetail.getRetryCount();
+    }
+
+    public JobType getType() {
+        return _jobDetail.getType();
+    }
+
+    public void setChannel(String channel) {
+        _jobDetail.setChannel(channel);
+    }
+
+    public void setCorrelationKey(CorrelationKey correlationKey) {
+        _jobDetail.setCorrelationKey(correlationKey);
+    }
+
+    public void setCorrelatorId(String correlatorId) {
+        _jobDetail.setCorrelatorId(correlatorId);
+    }
+
+    public void setDetailsExt(Map<String, Object> detailsExt) {
+        _jobDetail.setDetailsExt(detailsExt);
+    }
+
+    public void setInMem(Boolean inMem) {
+        _jobDetail.setInMem(inMem);
+    }
+
+    public void setInstanceId(Long iid) {
+        _jobDetail.setInstanceId(iid);
+    }
+
+    public void setMexId(String mexId) {
+        _jobDetail.setMexId(mexId);
+    }
+
+    public void setProcessId(QName processId) {
+        _jobDetail.setProcessId(processId);
+    }
+
+    public void setRetryCount(Integer retryCount) {
+        _jobDetail.setRetryCount(retryCount);
+    }
+
+    public void setType(JobType type) {
+        _jobDetail.setType(type);
     }
     
-    public void setRetryCount(int retryCount) {
-        _jobDetail.put("retryCount", String.valueOf(retryCount));
-    }
     
-    public int getRetryCount() {
-        return _jobDetail.get("retryCount") != null ? Integer.parseInt((String) _jobDetail.get("retryCount")) : 0;
-    }
 }
 

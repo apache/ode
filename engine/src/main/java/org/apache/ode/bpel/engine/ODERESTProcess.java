@@ -136,8 +136,8 @@ public class ODERESTProcess extends ODEProcess {
                     });
                 } else /* non-transacted style */ {
                     WorkEvent we = new WorkEvent();
-                    we.setType(WorkEvent.Type.MYROLE_INVOKE);
-                    we.setIID(mexdao.getInstance().getInstanceId());
+                    we.setType(Scheduler.JobType.MYROLE_INVOKE);
+                    we.setInstanceId(mexdao.getInstance().getInstanceId());
                     we.setMexId(mexdao.getMessageExchangeId());
                     // Could be different to this pid when routing to an older version
                     we.setProcessId(mexdao.getInstance().getProcess().getProcessId());

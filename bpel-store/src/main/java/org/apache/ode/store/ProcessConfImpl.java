@@ -49,6 +49,8 @@ import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetailsImpl;
 import org.apache.ode.bpel.rapi.ProcessModel;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
 import org.apache.ode.utils.CronExpression;
@@ -277,7 +279,7 @@ public class ProcessConfImpl implements ProcessConf {
     }
     
     public boolean isSharedService(QName serviceName) {
-    	return _sharedServices.contains(serviceName);
+        return _sharedServices.contains(serviceName);
     }
 
     DeploymentUnitDir getDeploymentUnit() {
@@ -466,10 +468,10 @@ public class ProcessConfImpl implements ProcessConf {
                     cleanupInfo.setFilters(aCleanup.getFilterList());
                     ProcessCleanupConfImpl.processACleanup(cleanupInfo.getCategories(), aCleanup.getCategoryList());
                     
-                    Map<String, Object> runnableDetails = new HashMap<String, Object>();
-                    runnableDetails.put("cleanupInfo", cleanupInfo);
-                    runnableDetails.put("pid", _pid);
-                    runnableDetails.put("transactionSize", 10);
+                    JobDetails runnableDetails = new JobDetailsImpl();
+                    runnableDetails.getDetailsExt().put("cleanupInfo", cleanupInfo);
+                    runnableDetails.getDetailsExt().put("pid", _pid);
+                    runnableDetails.getDetailsExt().put("transactionSize", 10);
                     job.getRunnableDetailList().add(runnableDetails);
                 }
                 jobs.add(job);
