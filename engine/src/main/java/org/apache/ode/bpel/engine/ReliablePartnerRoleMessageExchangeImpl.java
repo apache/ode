@@ -7,6 +7,7 @@ import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.InvocationStyle;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.JobType;
 import org.apache.ode.bpel.rapi.PartnerLinkModel;
 
@@ -48,9 +49,9 @@ public class ReliablePartnerRoleMessageExchangeImpl extends PartnerRoleMessageEx
         assert !_process.isInMemory() : "resumeInstance() for reliable in-mem processes makes no sense.";
 
         MessageExchangeDAO mexdao = getDAO();
-        final WorkEvent we = generatePartnerResponseWorkEvent(mexdao);
+        final JobDetails j = generatePartnerResponseJob(mexdao);
         save(mexdao);
-        _contexts.scheduler.schedulePersistedJob(we.getDetails(), null);
+        _contexts.scheduler.schedulePersistedJob(j, null);
     }
 
 
@@ -59,14 +60,14 @@ public class ReliablePartnerRoleMessageExchangeImpl extends PartnerRoleMessageEx
         return InvocationStyle.RELIABLE;
     }
 
-    private WorkEvent generatePartnerResponseWorkEvent(MessageExchangeDAO mexdao) {
-        WorkEvent we = new WorkEvent();
-        we.setProcessId(_process.getPID());
-        we.setChannel(mexdao.getChannel());
-        we.setInstanceId(_iid);
-        we.setMexId(_mexId);
-        we.setType(JobType.PARTNER_RESPONSE);
-        return we;
+    private JobDetails generatePartnerResponseJob(MessageExchangeDAO mexdao) {
+        JobDetails j = new JobDetails();
+        j.setProcessId(_process.getPID());
+        j.setChannel(mexdao.getChannel());
+        j.setInstanceId(_iid);
+        j.setMexId(_mexId);
+        j.setType(JobType.PARTNER_RESPONSE);
+        return j;
     }
 
 }

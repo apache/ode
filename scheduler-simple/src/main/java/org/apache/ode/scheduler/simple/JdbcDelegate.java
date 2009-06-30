@@ -34,9 +34,10 @@ import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
+import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.iapi.Scheduler.JobDetailsImpl;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.utils.DbIsolation;                                                                                                                                 
 
 import org.apache.commons.logging.Log;
@@ -188,7 +189,7 @@ public class JdbcDelegate implements DatabaseDelegate {
             ps.setInt(i++, asInteger(loaded));
             ps.setInt(i++, asInteger(job.transacted));
             
-            JobDetailsImpl details = (JobDetailsImpl) job.detail;
+            JobDetails details = job.detail;
             ps.setObject(i++, details.instanceId, Types.BIGINT);
             ps.setObject(i++, details.mexId, Types.VARCHAR);
             ps.setObject(i++, details.processId, Types.VARCHAR);
@@ -235,7 +236,7 @@ public class JdbcDelegate implements DatabaseDelegate {
             
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                Scheduler.JobDetailsImpl details = new Scheduler.JobDetailsImpl();
+                Scheduler.JobDetails details = new Scheduler.JobDetails();
                 details.instanceId = (Long) rs.getObject("instanceId");
                 details.mexId = (String) rs.getObject("mexId");
                 details.processId = (String) rs.getObject("processId");
@@ -252,6 +253,41 @@ public class JdbcDelegate implements DatabaseDelegate {
                         is.close();
                     } catch (Exception e) {
                         throw new DatabaseException("Error deserializing job detailsExt", e);
+                    }
+                }
+                
+                {
+                    //For compatibility reasons, we check whether there are entries inside
+                    //jobDetailsExt blob, which correspond to extracted entries. If so, we
+                    //use them.
+
+                    Map<String, Object> detailsExt = details.getDetailsExt();
+                    if (detailsExt.get("type") != null) {
+                        details.type = (String) detailsExt.get("type");
+                    }
+                    if (detailsExt.get("iid") != null) {
+                        details.instanceId = (Long) detailsExt.get("iid");
+                    }
+                    if (detailsExt.get("pid") != null) {
+                        details.processId = (String) detailsExt.get("pid");
+                    }
+                    if (detailsExt.get("inmem") != null) {
+                        details.inMem = (Boolean) detailsExt.get("inmem");
+                    }
+                    if (detailsExt.get("ckey") != null) {
+                        details.correlationKey = (String) detailsExt.get("ckey");
+                    }
+                    if (detailsExt.get("channel") != null) {
+                        details.channel = (String) detailsExt.get("channel");
+                    }
+                    if (detailsExt.get("mexid") != null) {
+                        details.mexId = (String) detailsExt.get("mexid");
+                    }
+                    if (detailsExt.get("correlatorId") != null) {
+                        details.correlatorId = (String) detailsExt.get("correlatorId");
+                    }
+                    if (detailsExt.get("retryCount") != null) {
+                        details.retryCount = Integer.parseInt((String) detailsExt.get("retryCount"));
                     }
                 }
                 

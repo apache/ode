@@ -581,22 +581,22 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
     }
 
     public void registerTimer(String timerChannelId, Date timeToFire) {
-        WorkEvent we = new WorkEvent();
-        we.setInstanceId(_dao.getInstanceId());
-        we.setProcessId(_bpelProcess.getPID());
-        we.setChannel(timerChannelId);
-        we.setType(Scheduler.JobType.TIMER);
-        _bpelProcess.scheduleWorkEvent(we, timeToFire);
+        JobDetails j = new JobDetails();
+        j.setInstanceId(_dao.getInstanceId());
+        j.setProcessId(_bpelProcess.getPID());
+        j.setChannel(timerChannelId);
+        j.setType(Scheduler.JobType.TIMER);
+        _bpelProcess.scheduleJob(j, timeToFire);
     }
 
     private void scheduleCorrelatorMatcher(String correlatorId, CorrelationKey key) {
-        WorkEvent we = new WorkEvent();
-        we.setInstanceId(_dao.getInstanceId());
-        we.setProcessId(_bpelProcess.getPID());
-        we.setType(Scheduler.JobType.MATCHER);
-        we.setCorrelatorId(correlatorId);
-        we.setCorrelationKey(key);
-        _bpelProcess.scheduleWorkEvent(we, null);
+        JobDetails j = new JobDetails();
+        j.setInstanceId(_dao.getInstanceId());
+        j.setProcessId(_bpelProcess.getPID());
+        j.setType(Scheduler.JobType.MATCHER);
+        j.setCorrelatorId(correlatorId);
+        j.setCorrelationKey(key);
+        _bpelProcess.scheduleJob(j, null);
     }
 
     public String invoke(String requestId, PartnerLink partnerLink, Operation operation, Element outgoingMessage)
@@ -774,12 +774,12 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
                     __log.debug("MaxTime exceeded for instance # " + _iid);
 
                 try {
-                    WorkEvent we = new WorkEvent();
-                    we.setInstanceId(_iid);
-                    we.setRetryCount(_retryCount);
-                    we.setProcessId(_bpelProcess.getPID());
-                    we.setType(Scheduler.JobType.RESUME);
-                    _contexts.scheduler.schedulePersistedJob(we.getDetails(), new Date());
+                    JobDetails j = new JobDetails();
+                    j.setInstanceId(_iid);
+                    j.setRetryCount(_retryCount);
+                    j.setProcessId(_bpelProcess.getPID());
+                    j.setType(Scheduler.JobType.RESUME);
+                    _contexts.scheduler.schedulePersistedJob(j, new Date());
                 } catch (ContextException e) {
                     __log.error("Failed to schedule resume task.", e);
                     throw new BpelEngineException(e);

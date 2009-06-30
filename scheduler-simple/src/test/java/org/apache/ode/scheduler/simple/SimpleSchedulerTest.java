@@ -207,7 +207,7 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
     }
 
     Scheduler.JobDetails newDetail(String x) {
-        Scheduler.JobDetails jd = new Scheduler.JobDetailsImpl();
+        Scheduler.JobDetails jd = new Scheduler.JobDetails();
         jd.getDetailsExt().put("foo", x);
         return jd;
     }

@@ -1,6 +1,7 @@
 package org.apache.ode.bpel.engine;
 
 import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.rapi.ResourceModel;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
@@ -135,14 +136,14 @@ public class ODERESTProcess extends ODEProcess {
                         }
                     });
                 } else /* non-transacted style */ {
-                    WorkEvent we = new WorkEvent();
-                    we.setType(Scheduler.JobType.MYROLE_INVOKE);
-                    we.setInstanceId(mexdao.getInstance().getInstanceId());
-                    we.setMexId(mexdao.getMessageExchangeId());
+                    JobDetails j = new JobDetails();
+                    j.setType(Scheduler.JobType.MYROLE_INVOKE);
+                    j.setInstanceId(mexdao.getInstance().getInstanceId());
+                    j.setMexId(mexdao.getMessageExchangeId());
                     // Could be different to this pid when routing to an older version
-                    we.setProcessId(mexdao.getInstance().getProcess().getProcessId());
+                    j.setProcessId(mexdao.getInstance().getProcess().getProcessId());
 
-                    scheduleWorkEvent(we, null);
+                    scheduleJob(j, null);
                 }
                 // Cleaning up
                 _contexts.dao.getConnection().deleteResourceRoute(urlMeth[0], urlMeth[1]);

@@ -5,6 +5,7 @@ import org.apache.ode.bpel.rapi.ProcessModel;
 import org.apache.ode.bpel.rapi.ConstantsModel;
 import org.apache.ode.bpel.rapi.InvalidProcessException;
 import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.JobType;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.MessageDAO;
@@ -408,14 +409,14 @@ public class ODEWSProcess extends ODEProcess {
                 } else if (istyle == InvocationStyle.P2P_TRANSACTED) /* transact p2p invoke in the same thread */ {
                     executeContinueInstanceMyRoleRequestReceived(mexdao);
                 } else /* non-transacted style */{
-                    WorkEvent we = new WorkEvent();
-                    we.setType(JobType.MYROLE_INVOKE);
-                    we.setInstanceId(mexdao.getInstance().getInstanceId());
-                    we.setMexId(mexdao.getMessageExchangeId());
+                    JobDetails j = new JobDetails();
+                    j.setType(JobType.MYROLE_INVOKE);
+                    j.setInstanceId(mexdao.getInstance().getInstanceId());
+                    j.setMexId(mexdao.getMessageExchangeId());
                     // Could be different to this pid when routing to an older version
-                    we.setProcessId(mexdao.getInstance().getProcess().getProcessId());
+                    j.setProcessId(mexdao.getInstance().getProcess().getProcessId());
 
-                    scheduleWorkEvent(we, null);
+                    scheduleJob(j, null);
                 }
             } else if (cstatus == MyRoleMessageExchange.CorrelationStatus.QUEUED) {
                 ; // do nothing
@@ -671,15 +672,15 @@ public class ODEWSProcess extends ODEProcess {
                 org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern.REQUEST_RESPONSE;
         if (!isInMemory() && isTwoWay) {
             if (__log.isDebugEnabled()) __log.debug("Creating invocation check event for mexid " + mex.getMessageExchangeId());
-            WorkEvent event = new WorkEvent();
-            event.setMexId(mex.getMessageExchangeId());
-            event.setProcessId(getPID());
-            event.setType(JobType.INVOKE_CHECK);
+            JobDetails job = new JobDetails();
+            job.setMexId(mex.getMessageExchangeId());
+            job.setProcessId(getPID());
+            job.setType(JobType.INVOKE_CHECK);
             // use a greater timeout to make sure the check job does not get executed while the service invocation is still waiting for a response
             PartnerLinkModel model = _processModel.getPartnerLink(mex.getPartnerLinkModelId());
             long timeout = (long) (getTimeout(model)*1.5);
             Date future = new Date(System.currentTimeMillis() + timeout);
-            String jobId = scheduleWorkEvent(event, future);
+            String jobId = scheduleJob(job, future);
             mex.setProperty("invokeCheckJobId", jobId);
         }
     }

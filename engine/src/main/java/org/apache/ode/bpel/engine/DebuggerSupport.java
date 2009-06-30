@@ -172,11 +172,11 @@ class DebuggerSupport {
                         __log.debug("step(" + iid + ") adding step indicator to table.");
                         _step.add(iid);
 
-                        WorkEvent we = new WorkEvent();
-                        we.setInstanceId(iid);
-                        we.setProcessId(_process.getPID());
-                        we.setType(Scheduler.JobType.RESUME);
-                        _process._contexts.scheduler.schedulePersistedJob(we.getDetails(), null);
+                        JobDetails j = new JobDetails();
+                        j.setInstanceId(iid);
+                        j.setProcessId(_process.getPID());
+                        j.setType(Scheduler.JobType.RESUME);
+                        _process._contexts.scheduler.schedulePersistedJob(j, null);
 
                         return true;
                     }
@@ -296,11 +296,11 @@ class DebuggerSupport {
                         _process.saveEvent(evt, instance);
                         onEvent(evt);
 
-                        WorkEvent we = new WorkEvent();
-                        we.setType(JobType.RESUME);
-                        we.setProcessId(_process.getPID());
-                        we.setInstanceId(iid);
-                        _process._contexts.scheduler.schedulePersistedJob(we.getDetails(), null);
+                        JobDetails j = new JobDetails();
+                        j.setType(JobType.RESUME);
+                        j.setProcessId(_process.getPID());
+                        j.setInstanceId(iid);
+                        _process._contexts.scheduler.schedulePersistedJob(j, null);
 
                         return true;
                     }

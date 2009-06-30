@@ -192,7 +192,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         if (when == null)
             when = new Date(ctime);
 
-        JobDetails jobDetails = new JobDetailsImpl();
+        JobDetails jobDetails = new JobDetails();
         jobDetails.getDetailsExt().put("runnable", runnable);
         runnable.storeToDetails(jobDetails);
         

@@ -97,30 +97,7 @@ public interface Scheduler {
         INVOKE_CHECK
     }
     
-    public interface JobDetails {
-        public Long getInstanceId();
-        public void setInstanceId(Long iid);
-        public String getMexId();
-        public void setMexId(String mexId);
-        public QName getProcessId();
-        public void setProcessId(QName processId);
-        public JobType getType();
-        public void setType(JobType type);
-        public String getChannel();
-        public void setChannel(String channel);
-        public String getCorrelatorId();
-        public void setCorrelatorId(String correlatorId);
-        public CorrelationKey getCorrelationKey();
-        public void setCorrelationKey(CorrelationKey correlationKey);
-        public Integer getRetryCount();
-        public void setRetryCount(Integer retryCount);
-        public Boolean getInMem();
-        public void setInMem(Boolean inMem);
-        public Map<String, Object> getDetailsExt();
-        public void setDetailsExt(Map<String, Object> detailsExt);
-    }
-
-    public static class JobDetailsImpl implements Scheduler.JobDetails {
+    public static class JobDetails {
         public Long instanceId;
         public String mexId;
         public String processId;
@@ -195,7 +172,7 @@ public interface Scheduler {
         
         @Override
         public String toString() {
-            return "JobDetailsImpl("
+            return "JobDetails("
             + " instanceId: " + instanceId
             + " mexId: " + mexId
             + " processId: " + processId

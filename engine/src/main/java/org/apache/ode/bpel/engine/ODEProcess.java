@@ -42,6 +42,7 @@ import org.apache.ode.bpel.engine.extvar.ExternalVariableConf;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableManager;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.intercept.FailMessageExchangeException;
 import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
@@ -350,15 +351,15 @@ public abstract class ODEProcess {
 
         markused();
 
-        final WorkEvent we = new WorkEvent(jobInfo.jobDetail);
+        final JobDetails j = jobInfo.jobDetail;
         if (__log.isDebugEnabled()) {
             __log.debug(ObjectPrinter.stringifyMethodEnter("handleWorkEvent", new Object[] { "jobInfo", jobInfo }));
         }
 
-        enqueueInstanceTransaction(we.getInstanceId(), new Runnable() {
+        enqueueInstanceTransaction(j.getInstanceId(), new Runnable() {
             public void run() {
                 _contexts.scheduler.jobCompleted(jobInfo.jobName);
-                execInstanceEvent(we);
+                execInstanceEvent(j);
             }
         });
 
@@ -401,41 +402,41 @@ public abstract class ODEProcess {
         return state;
     }
 
-    private void execInstanceEvent(WorkEvent we) {
-        BpelInstanceWorker worker = _instanceWorkerCache.get(we.getInstanceId());
+    private void execInstanceEvent(JobDetails j) {
+        BpelInstanceWorker worker = _instanceWorkerCache.get(j.getInstanceId());
         assert worker.isWorkerThread();
 
-        ProcessInstanceDAO instanceDAO = getProcessDAO().getInstance(we.getInstanceId());
-        MessageExchangeDAO mexDao = we.getMexId() == null ? null : loadMexDao(we.getMexId());
+        ProcessInstanceDAO instanceDAO = getProcessDAO().getInstance(j.getInstanceId());
+        MessageExchangeDAO mexDao = j.getMexId() == null ? null : loadMexDao(j.getMexId());
 
         if (instanceDAO == null) {
             if (__log.isDebugEnabled()) {
-                __log.debug("handleWorkEvent: no ProcessInstance found with iid " + we.getInstanceId() + "; ignoring.");
+                __log.debug("handleWorkEvent: no ProcessInstance found with iid " + j.getInstanceId() + "; ignoring.");
             }
             return;
         }
 
         if (__log.isDebugEnabled()) {
-            __log.debug("handleWorkEvent: " + we.getType() + " event for process instance " + we.getInstanceId());
+            __log.debug("handleWorkEvent: " + j.getType() + " event for process instance " + j.getInstanceId());
         }
 
-        switch (we.getType()) {
+        switch (j.getType()) {
         case MYROLE_INVOKE:
             executeContinueInstanceMyRoleRequestReceived(mexDao);
             if(__log.isDebugEnabled()) __log.debug("handleWorkEvent: releasing myrole mex dao: " + mexDao);
             mexDao.release(true);
             break;
         case TIMER:
-            executeContinueInstanceTimerReceived(instanceDAO, we.getChannel());
+            executeContinueInstanceTimerReceived(instanceDAO, j.getChannel());
             break;
         case RESUME:
-            executeContinueInstanceResume(instanceDAO, we.getRetryCount());
+            executeContinueInstanceResume(instanceDAO, j.getRetryCount());
             break;
         case PARTNER_RESPONSE:
             executeContinueInstancePartnerRoleResponseReceived(mexDao);
             break;
         case MATCHER:
-            executeContinueInstanceMatcherEvent(instanceDAO, we.getCorrelatorId(), we.getCorrelationKey());
+            executeContinueInstanceMatcherEvent(instanceDAO, j.getCorrelatorId(), j.getCorrelationKey());
             break;
         }
     }
@@ -761,11 +762,11 @@ public abstract class ODEProcess {
         }
     }
 
-    public String scheduleWorkEvent(WorkEvent we, Date timeToFire) {
+    public String scheduleJob(JobDetails jd, Date timeToFire) {
         // if (isInMemory())
         // throw new InvalidProcessException("In-mem process execution resulted in event scheduling.");
 
-        return _contexts.scheduler.schedulePersistedJob(we.getDetails(), timeToFire);
+        return _contexts.scheduler.schedulePersistedJob(jd, timeToFire);
     }
 
     protected OdeRuntime buildRuntime(int modelVersion) {

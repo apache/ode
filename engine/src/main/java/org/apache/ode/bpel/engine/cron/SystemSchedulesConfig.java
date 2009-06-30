@@ -16,7 +16,6 @@ import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.ProcessConf.CleanupInfo;
 import org.apache.ode.bpel.iapi.ProcessConf.CronJob;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
-import org.apache.ode.bpel.iapi.Scheduler.JobDetailsImpl;
 import org.apache.ode.store.ProcessCleanupConfImpl;
 import org.apache.ode.utils.CronExpression;
 import org.apache.xmlbeans.XmlOptions;
@@ -66,7 +65,7 @@ public class SystemSchedulesConfig {
                         cleanupInfo.setFilters(aCleanup.getFilterList());
                         ProcessCleanupConfImpl.processACleanup(cleanupInfo.getCategories(), aCleanup.getCategoryList());
                         
-                        JobDetails runnableDetails = new JobDetailsImpl();
+                        JobDetails runnableDetails = new JobDetails();
                         
                         runnableDetails.getDetailsExt().put("cleanupInfo", cleanupInfo);
                         runnableDetails.getDetailsExt().put("transactionSize", 10);

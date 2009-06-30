@@ -46,6 +46,7 @@ import org.apache.ode.bpel.evar.ExternalVariableModule;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
 import org.apache.ode.bpel.iapi.Scheduler.MapSerializableRunnable;
@@ -522,8 +523,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     public void onScheduledJob(final JobInfo jobInfo) throws JobProcessorException {
         _mngmtLock.readLock().lock();
         try {
-            final WorkEvent we = new WorkEvent(jobInfo.jobDetail);
-            ODEProcess process = _registeredProcesses.get(we.getProcessId());
+            final JobDetails j = jobInfo.jobDetail;
+            ODEProcess process = _registeredProcesses.get(j.getProcessId());
             if (process == null) {
                 // If the process is not active, it means that we should not be
                 // doing any work on its behalf, therefore we will reschedule the
@@ -532,8 +533,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                     public Void call() throws Exception {
                         _contexts.scheduler.jobCompleted(jobInfo.jobName);
                         Date future = new Date(System.currentTimeMillis() + (60 * 1000));
-                        __log.debug(__msgs.msgReschedulingJobForInactiveProcess(we.getProcessId(), jobInfo.jobName, future));
-                        _contexts.scheduler.schedulePersistedJob(we.getDetails(), future);            
+                        __log.debug(__msgs.msgReschedulingJobForInactiveProcess(j.getProcessId(), jobInfo.jobName, future));
+                        _contexts.scheduler.schedulePersistedJob(j, future);            
                         return null;
                     }
                     
@@ -541,12 +542,12 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 return;
             }
             
-            if (we.getType().equals(Scheduler.JobType.INVOKE_CHECK)) {
-                if (__log.isDebugEnabled()) __log.debug("handleWorkEvent: InvokeCheck event for mexid " + we.getMexId());
+            if (j.getType().equals(Scheduler.JobType.INVOKE_CHECK)) {
+                if (__log.isDebugEnabled()) __log.debug("handleWorkEvent: InvokeCheck event for mexid " + j.getMexId());
 
-                PartnerRoleMessageExchange mex = (PartnerRoleMessageExchange) getMessageExchange(we.getMexId());
+                PartnerRoleMessageExchange mex = (PartnerRoleMessageExchange) getMessageExchange(j.getMexId());
                 if (mex.getStatus() == MessageExchange.Status.ASYNC || mex.getStatus() == MessageExchange.Status.ACK) {
-                    String msg = "No response received for invoke (mexId=" + we.getMexId() + "), forcing it into a failed state.";
+                    String msg = "No response received for invoke (mexId=" + j.getMexId() + "), forcing it into a failed state.";
                     if (__log.isDebugEnabled()) __log.debug(msg);
                     mex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, msg, null);
                 }

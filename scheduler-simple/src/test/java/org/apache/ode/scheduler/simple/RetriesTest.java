@@ -65,7 +65,7 @@ public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
     }
 
     Scheduler.JobDetails newDetail(String x) {
-        Scheduler.JobDetails jd = new Scheduler.JobDetailsImpl();
+        Scheduler.JobDetails jd = new Scheduler.JobDetails();
         jd.getDetailsExt().put("foo", x);
         return jd;
     }
