@@ -71,6 +71,7 @@ import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.lang.reflect.Field;
 
 /**
  * Acts as a service not provided by ODE. Used mainly for invocation as a way to maintain the WSDL description of used
@@ -277,8 +278,7 @@ public class SoapExternalService implements ExternalService {
                 }
                 if (__log.isDebugEnabled())
                     __log.debug("Create a new ServiceClient for " + anonymousService.getName());
-                client = new ServiceClient(_configContext, null);
-                client.setAxisService(anonymousService);
+                client = new ServiceClient(_configContext, anonymousService);
             }
             _cachedClients.set(client);
         }
