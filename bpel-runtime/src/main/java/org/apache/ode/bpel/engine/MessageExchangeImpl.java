@@ -95,7 +95,10 @@ abstract class MessageExchangeImpl implements MessageExchange {
     }
 
     public Message getResponse() {
-        return new MessageImpl(getDAO().getResponse());
+        if (getDAO().getResponse() != null)
+            return new MessageImpl(getDAO().getResponse());
+        else
+            return null;
     }
 
     public QName getFault() {
