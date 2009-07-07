@@ -22,12 +22,12 @@ package org.apache.ode.daohib.bpel.hobj;
  * Hibernate-managed table for keeping track of messages.
  *
  * @hibernate.class table="BPEL_MESSAGE"
- * @hibernate.query name="DELETE_MESSAGES_BY_MEX" query="delete from HMessage as m WHERE m.messageExchange = :messageExchange"
- * @hibernate.query name="DELETE_MESSAGES_BY_INSTANCES" query="delete from HMessage as m WHERE m.messageExchange IN(select e from HMessageExchange e where e.instance in (:instances))"
+ * @hibernate.query name="SELECT_MESSAGE_IDS_BY_MEX" query="select id from HMessage as m WHERE m.messageExchange = :messageExchange"
+ * @hibernate.query name="SELECT_MESSAGE_IDS_BY_INSTANCES" query="select id from HMessage as m WHERE m.messageExchange IN(select e from HMessageExchange e where e.instance in (:instances))"
  */
 public class HMessage extends HObject {
-    public final static String DELETE_MESSAGES_BY_MEX = "DELETE_MESSAGES_BY_MEX";
-    public final static String DELETE_MESSAGES_BY_INSTANCES = "DELETE_MESSAGES_BY_INSTANCES";
+    public final static String SELECT_MESSAGE_IDS_BY_MEX = "SELECT_MESSAGE_IDS_BY_MEX";
+    public final static String SELECT_MESSAGE_IDS_BY_INSTANCES = "SELECT_MESSAGE_IDS_BY_INSTANCES";
 
     private HMessageExchange _mex;
     private String _type;

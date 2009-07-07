@@ -25,10 +25,10 @@ package org.apache.ode.daohib.bpel.hobj;
  * on indexed lookup of property values.
  * 
  * @hibernate.class table="VAR_PROPERTY"
- * @hibernate.query name="DELETE_VARIABLE_PROPERITES_BY_INSTANCES" query="delete from HVariableProperty as p where p.xmlData in(select x.id from HXmlData x where x.instance in (:instances))"
+ * @hibernate.query name="SELECT_VARIABLE_PROPERTY_IDS_BY_INSTANCES" query="select id from HVariableProperty as p where p.xmlData in(select x.id from HXmlData x where x.instance in (:instances))"
  */
 public class HVariableProperty extends HObject{
-    public final static String DELETE_VARIABLE_PROPERITES_BY_INSTANCES = "DELETE_VARIABLE_PROPERITES_BY_INSTANCES";
+    public final static String SELECT_VARIABLE_PROPERTY_IDS_BY_INSTANCES = "SELECT_VARIABLE_PROPERTY_IDS_BY_INSTANCES";
 
     private String _propertyValue;
     private String _propertyName;

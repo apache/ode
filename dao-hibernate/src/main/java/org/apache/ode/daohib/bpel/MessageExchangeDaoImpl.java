@@ -42,11 +42,11 @@ import java.util.Date;
 import java.util.Set;
 
 public class MessageExchangeDaoImpl extends HibernateDao implements
-		MessageExchangeDAO {
-	@SuppressWarnings("unused")
-	private static final Log __log = LogFactory.getLog(MessageExchangeDaoImpl.class);
-	
-	private HMessageExchange _hself;
+        MessageExchangeDAO {
+    @SuppressWarnings("unused")
+    private static final Log __log = LogFactory.getLog(MessageExchangeDaoImpl.class);
+    
+    private HMessageExchange _hself;
 
     // Used when provided process and instance aren't hibernate implementations. The relation
     // therefore can't be persisted. Used for in-mem DAOs so that doesn't matter much. 
@@ -343,35 +343,36 @@ public class MessageExchangeDaoImpl extends HibernateDao implements
         _hself.setPipedMessageExchangeId(mexId);
     }
 
-	public int getSubscriberCount() {
-		return _hself.getSubscriberCount();
-	}
-	
-	public void setSubscriberCount(int subscriberCount) {
-		_hself.setSubscriberCount(subscriberCount);		
-	}
-	
-	public void release(boolean doClean) {
-// TODO the cleanup queries as they are right now thend to be very deadlocky
-// 		if( doClean ) {
-// 			deleteMessages();
-// 		}
-	}
+    public int getSubscriberCount() {
+        return _hself.getSubscriberCount();
+    }
+    
+    public void setSubscriberCount(int subscriberCount) {
+        _hself.setSubscriberCount(subscriberCount);        
+    }
+    
+    public void release(boolean doClean) {
+        if( doClean ) {
+            deleteMessages();
+        }
+    }
 
-	public void releasePremieMessages() {
-  		getSession().getNamedQuery(HLargeData.DELETE_MESSAGE_LDATA_BY_MEX).setParameter("mex", _hself).executeUpdate();
-		getSession().getNamedQuery(HCorrelatorMessage.DELETE_CORMESSAGES_BY_MEX).setParameter("mex", _hself).executeUpdate();
-	}
+    @SuppressWarnings("unchecked")
+    public void releasePremieMessages() {
+        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_MEX).setParameter("mex", _hself).list());
+        deleteByIds(HCorrelatorMessage.class, getSession().getNamedQuery(HCorrelatorMessage.SELECT_CORMESSAGE_IDS_BY_MEX).setParameter("mex", _hself).list());
+    }
 
-	public void incrementSubscriberCount() {
-		_hself.incrementSubscriberCount();
-	}
-	
-	public void deleteMessages() {
-  		getSession().getNamedQuery(HLargeData.DELETE_MESSAGE_LDATA_BY_MEX).setParameter("mex", _hself).executeUpdate();
-  		getSession().getNamedQuery(HCorrelatorMessage.DELETE_CORMESSAGES_BY_MEX).setParameter("mex", _hself).executeUpdate();
-  		
-		getSession().delete(_hself);
-		// This deletes endpoint LData, callbackEndpoint LData, request HMessage, response HMessage, HMessageExchangeProperty 
-	}
+    public void incrementSubscriberCount() {
+        _hself.incrementSubscriberCount();
+    }
+    
+    @SuppressWarnings("unchecked")
+    public void deleteMessages() {
+        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_MEX).setParameter("mex", _hself).list());
+        deleteByIds(HCorrelatorMessage.class, getSession().getNamedQuery(HCorrelatorMessage.SELECT_CORMESSAGE_IDS_BY_MEX).setParameter("mex", _hself).list());
+          
+        getSession().delete(_hself);
+        // This deletes endpoint LData, callbackEndpoint LData, request HMessage, response HMessage, HMessageExchangeProperty 
+    }
 }

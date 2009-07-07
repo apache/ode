@@ -22,9 +22,11 @@ import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Query;
 import org.hibernate.Session;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Base class for our DAO objects.
@@ -86,4 +88,18 @@ public abstract class HibernateDao {
     protected void update() {
         _sm.getSession().update(_hobj);
     }
+
+    @SuppressWarnings("unchecked")
+    protected void deleteByIds(Class entity, List<Long> ids) {
+        if( ids != null && ids.size() > 0 ) {
+            StringBuffer buf = new StringBuffer();
+            buf.append("delete from ");
+            buf.append(entity.getName());
+            buf.append(" as e where e.id in(:ids)");
+            
+            Query query = getSession().createQuery(buf.toString());
+            query.setParameterList("ids", ids);
+            query.executeUpdate();
+        }
+    }    
 }
