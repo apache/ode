@@ -36,6 +36,7 @@ import javax.xml.namespace.QName;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Collection;
 
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
@@ -211,5 +212,13 @@ public class WsdlUtilsTest extends TestCase {
         mimeContent = WsdlUtils.getMimeContent(operation.getBindingInput().getExtensibilityElements());
         assertNull("No content-type expected here!", mimeContent);
 
+    }
+
+     public void testGetHeaders() {
+        Binding binding = definition.getBinding(new QName("http://axis2.ode.apache.org", "DummyServiceHttpBinding"));
+        BindingOperation operation = binding.getBindingOperation("hello", null, null);
+        Collection headers = WsdlUtils.getHttpHeaders(operation.getBindingOutput().getExtensibilityElements());
+        assertNotNull("A header is expected!", headers);
+        assertTrue("A header is expected!", headers.size()==1);
     }
 }

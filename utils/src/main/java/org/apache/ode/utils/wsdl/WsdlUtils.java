@@ -51,6 +51,7 @@ import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Iterator;
 
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
@@ -316,12 +317,12 @@ public class WsdlUtils {
     @SuppressWarnings("unchecked")
     public static Collection<UnknownExtensibilityElement> getHttpHeaders(List extensibilityElements) {
         final Collection<UnknownExtensibilityElement> unknownExtElements = CollectionsX.filter(extensibilityElements, UnknownExtensibilityElement.class);
-        for (UnknownExtensibilityElement extensibilityElement : unknownExtElements) {
-            final Element e = extensibilityElement.getElement();
+        for (Iterator<UnknownExtensibilityElement> iterator = unknownExtElements.iterator(); iterator.hasNext();) {
+            Element e = iterator.next().getElement();
             // keep only the header elements
             if (!Namespaces.ODE_HTTP_EXTENSION_NS.equalsIgnoreCase(e.getNamespaceURI())
-                    || !"header".equals(extensibilityElement.getElement().getLocalName())) {
-                unknownExtElements.remove(extensibilityElement);
+                    || !"header".equals(e.getLocalName())) {
+                iterator.remove();
             }
         }
         return unknownExtElements;
