@@ -26,6 +26,7 @@
                   xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
                   xmlns:xs="http://www.w3.org/2001/XMLSchema"
                   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:odex="http://www.apache.org/ode/type/extension/http"
                   targetNamespace="http://axis2.ode.apache.org">
     <wsdl:message name="helloRequest">
         <wsdl:part name="TestPart" type="xs:string"/>
@@ -60,6 +61,9 @@
             </wsdl:input>
             <wsdl:output>
                 <mime:content type="text/xml" part="hello"/>
+                <!-- dummy headers to test getHeaders() -->
+                <odex:header name="Age" part="age_part"/>                
+                <odex:foo name="Age" part="age_part"/>                
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
