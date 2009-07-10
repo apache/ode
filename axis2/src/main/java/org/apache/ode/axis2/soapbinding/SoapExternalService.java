@@ -220,8 +220,7 @@ public class SoapExternalService implements ExternalService, PartnerRoleChannel 
                 }
                 if (__log.isDebugEnabled())
                     __log.debug("Create a new ServiceClient for " + anonymousService.getName());
-                client = new ServiceClient(_configContext, null);
-                client.setAxisService(anonymousService);
+                client = new ServiceClient(_configContext, anonymousService);
             }
             _cachedClients.set(client);
         }
