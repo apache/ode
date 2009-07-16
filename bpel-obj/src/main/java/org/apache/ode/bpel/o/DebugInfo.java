@@ -72,6 +72,7 @@ public class DebugInfo implements Serializable {
     	sourceURI = (String) getField.get("sourceURI", null);
     	startLine = (Integer) getField.get("startLine", 0);
     	endLine = (Integer) getField.get("endLine", 0);
+    	extensibilityElements = (HashMap<QName, Object>) getField.get("extensibilityElements", null);
     }
 
 }
