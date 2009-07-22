@@ -62,8 +62,8 @@ public class OdeConfigProperties extends org.apache.ode.il.config.OdeConfigPrope
      * 
      * @return
      */
-    public String getMessageMapper() {
-        return getProperty(PROP_MSGMAPPER, JbiWsdl11WrapperMapper.class.getName());
+    public String[] getMessageMappers() {
+        return getProperty(PROP_MSGMAPPER, JbiWsdl11WrapperMapper.class.getName()).split("[ ,]");
     }
 
  }

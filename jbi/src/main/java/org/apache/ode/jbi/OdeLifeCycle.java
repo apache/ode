@@ -143,24 +143,27 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 
     @SuppressWarnings("unchecked")
     private void initMappers() throws JBIException {
+        String[] mappers = _ode._config.getMessageMappers();
         Class<Mapper> mapperClass;
-        try {
-            mapperClass = (Class<Mapper>) Class.forName(_ode._config.getMessageMapper());
-        } catch (ClassNotFoundException e) {
-            String errmsg = __msgs.msgOdeInitMapperClassNotFound(_ode._config.getMessageMapper());
-            __log.error(errmsg);
-            throw new JBIException(errmsg, e);
-        } catch (Throwable t) {
-            String errmsg = __msgs.msgOdeInitMapperClassLoadFailed(_ode._config.getMessageMapper());
-            __log.error(errmsg);
-            throw new JBIException(errmsg, t);
-        }
-        try {
-            _ode.registerMapper((Mapper) mapperClass.newInstance());
-        } catch (Throwable t) {
-            String errmsg = __msgs.msgOdeInitMapperInstantiationFailed(_ode._config.getMessageMapper());
-            __log.error(errmsg);
-            throw new JBIException(errmsg, t);
+        for (String className : mappers) {
+            try {
+                mapperClass = (Class<Mapper>) Class.forName(className);
+            } catch (ClassNotFoundException e) {
+                String errmsg = __msgs.msgOdeInitMapperClassNotFound(className);
+                __log.error(errmsg);
+                throw new JBIException(errmsg, e);
+            } catch (Throwable t) {
+                String errmsg = __msgs.msgOdeInitMapperClassLoadFailed(className);
+                __log.error(errmsg);
+                throw new JBIException(errmsg, t);
+            }
+            try {
+                _ode.registerMapper((Mapper) mapperClass.newInstance());
+            } catch (Throwable t) {
+                String errmsg = __msgs.msgOdeInitMapperInstantiationFailed(className);
+                __log.error(errmsg);
+                throw new JBIException(errmsg, t);
+            }
         }
     }
 
