@@ -279,8 +279,8 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO, Deferred
     @SuppressWarnings("unchecked")
     public Collection<ProcessInstanceDAO> getActiveInstances() {
         ArrayList<ProcessInstanceDAO> instDaos = new ArrayList<ProcessInstanceDAO>();
-        Collection<HProcessInstance> insts = getSession().getNamedQuery(HProcessInstance.SELECT_INSTANCES_BY_PROCESSES_AND_STATES)
-                .setParameterList("processIds", new Object[] {_process.getId()}).setParameterList("states", new Object[] {ProcessState.STATE_ACTIVE}).list();
+        Collection<HProcessInstance> insts = getSession().getNamedQuery(HProcessInstance.SELECT_INSTANCES_BY_PROCESS_AND_STATES)
+                .setParameter("process", _process).setParameterList("states", new Object[] {ProcessState.STATE_ACTIVE}).list();
         for (HProcessInstance inst : insts)
             instDaos.add(new ProcessInstanceDaoImpl(_sm, inst));
         return instDaos;
