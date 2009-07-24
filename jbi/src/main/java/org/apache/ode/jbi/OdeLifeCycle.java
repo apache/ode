@@ -49,6 +49,7 @@ import org.apache.ode.bpel.evtproc.DebugBpelEventListener;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.rtrep.common.extension.AbstractExtensionBundle;
+import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.il.dbutil.DatabaseConfigException;
 import org.apache.ode.jbi.msgmap.Mapper;
@@ -230,6 +231,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 
         _ode._store = new ProcessStoreImpl(_ode._eprContext, _ode._dataSource,
                 _ode._config.getDAOConnectionFactory(), _ode._config, false);
+        registerExternalVariableModules();
         _ode._store.loadAll();
 
         _ode._server.setDaoConnectionFactory(_ode._daocf);
@@ -242,6 +244,14 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         _ode._server.registerBpelEventListener(new DebugBpelEventListener());
 
         _ode._server.init();
+
+    }
+
+    private void registerExternalVariableModules() {
+        JdbcExternalVariableModule jdbcext;
+        jdbcext = new JdbcExternalVariableModule();
+        jdbcext.registerDataSource("ode", _db.getDataSource());
+        _ode._server.registerExternalVariableEngine(jdbcext);
 
     }
 
