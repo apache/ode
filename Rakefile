@@ -86,7 +86,7 @@ JAVAX               = struct(
   :resource         =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec:jar:1.0"
 )
 JAXEN               = "jaxen:jaxen:jar:1.1.1"
-JBI                 = "org.apache.servicemix:servicemix-jbi:jar:3.1.1-incubating"
+JBI                 = group("org.apache.servicemix.specs.jbi-api-1.0", :under=>"org.apache.servicemix.specs", :version=>"1.1.0")
 JENCKS              = "org.jencks:jencks:jar:all:1.3"
 JIBX                = "jibx:jibx-run:jar:1.1-beta3"
 LOG4J               = "log4j:log4j:jar:1.2.13"
@@ -94,10 +94,32 @@ OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.3.0-SNAPSHOT",
                        "net.sourceforge.serp:serp:jar:1.13.1"]
 
 SAXON               = group("saxon", "saxon-xpath", "saxon-dom", "saxon-xqj", :under=>"net.sf.saxon", :version=>"9.x")
-SERVICEMIX          = group("servicemix-core", "servicemix-shared", "servicemix-services",
-                        :under=>"org.apache.servicemix", :version=>"3.1-incubating")
-SPRING              = group("spring-beans", "spring-context", "spring-core", "spring-jmx",
-                        :under=>"org.springframework", :version=>"2.0.1")
+SERVICEMIX          = [
+                        group("servicemix-core", 
+                            :under=>"org.apache.servicemix", :version=>"3.3"), 
+                        group("servicemix-soap", "servicemix-common", "servicemix-shared", "servicemix-http", "servicemix-eip",
+                            :under=>"org.apache.servicemix", :version=>"2008.01"), 
+                        group("servicemix-utils", 
+                            :under=>"org.apache.servicemix", :version=>"1.0.0"),
+                        "commons-httpclient:commons-httpclient:jar:3.0", 
+                        "org.mortbay.jetty:jetty:jar:6.1.12rc1",
+                        "org.mortbay.jetty:jetty-client:jar:6.1.12rc1",
+                        "org.mortbay.jetty:jetty-sslengine:jar:6.1.12rc1",
+                        "org.mortbay.jetty:servlet-api-2.5:jar:6.1.12rc1",
+                        "org.mortbay.jetty:jetty-util:jar:6.1.12rc1",
+                        "org.codehaus.woodstox:wstx-asl:jar:3.2.2",
+                        "org.apache.geronimo.specs:geronimo-activation_1.1_spec:jar:1.0.1",
+                        "org.apache.geronimo.specs:geronimo-annotation_1.0_spec:jar:1.1",
+                        "org.apache.geronimo.specs:geronimo-javamail_1.4_spec:jar:1.2",
+                        "org.apache.geronimo.specs:geronimo-stax-api_1.0_spec:jar:1.0.1",
+                        "org.apache.geronimo.specs:geronimo-jms_1.1_spec:jar:1.1",
+                        "org.jencks:jencks:jar:2.1",
+                        "org.objectweb.howl:howl:jar:1.0.1-1",
+                        "org.apache.activemq:activemq-core:jar:4.1.1",
+                        "org.apache.activemq:activemq-ra:jar:4.1.1",
+                        "commons-beanutils:commons-beanutils:jar:1.7.0"
+                        ]
+SPRING              = ["org.springframework:spring:jar:2.5.6"]
 TRANQL              = [ "tranql:tranql-connector:jar:1.1", "axion:axion:jar:1.0-M3-dev", COMMONS.primitives ]
 WOODSTOX            = "woodstox:wstx-asl:jar:3.2.1"
 WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.1"
@@ -109,8 +131,12 @@ WS_COMMONS          = struct(
   :neethi           =>"org.apache.neethi:neethi:jar:2.0.2",
   :xml_schema       =>"org.apache.ws.commons.schema:XmlSchema:jar:1.3.2"
 )
-XBEAN               = group("xbean-classloader", "xbean-kernel", "xbean-server", "xbean-spring",
-                        :under=>"org.apache.xbean", :version=>"2.8")
+XBEAN               = [
+  "org.apache.xbean:xbean-kernel:jar:3.3",
+  "org.apache.xbean:xbean-server:jar:3.3",
+  "org.apache.xbean:xbean-spring:jar:3.4.3",
+  "org.apache.xbean:xbean-classloader:jar:3.4.3"
+]
 XMLBEANS            = "org.apache.xmlbeans:xmlbeans:jar:2.3.0"
 
 repositories.remote << "http://www.intalio.org/public/maven2"
@@ -490,14 +516,21 @@ define "ode" do
       jbi.include path_to("src/main/jbi/ode-jbi.properties")
     end
 
-    test.with projects("dao-jpa", "bpel-compiler", "bpel-api-jca", "jca-ra",
+    test.with projects("dao-jpa", "dao-hibernate", "bpel-compiler", "bpel-api-jca", "jca-ra",
       "jca-server", "jacob"),
       BACKPORT, COMMONS.lang, COMMONS.collections, DERBY, GERONIMO.connector, GERONIMO.kernel,
       GERONIMO.transaction, JAVAX.connector, JAVAX.ejb, JAVAX.persistence, JAVAX.stream,
       JAVAX.transaction, JAXEN, JBI, OPENJPA, SAXON, SERVICEMIX, SPRING, TRANQL,
-      XALAN, XBEAN, XMLBEANS, XSTREAM
-    test.using :properties=>{ "jbi.install"=>_("target/smixInstallDir"),  "jbi.examples"=>_("../distro/src/examples-jbi/") }
-    test.setup unzip(_("target/smixInstallDir/install/ODE")=>project("dao-jpa-ojpa-derby").package(:zip))
+      XALAN, XBEAN, XMLBEANS, XSTREAM,
+      LOG4J
+
+      test.setup unzip(_("target/test/smx/ode")=>project("dao-jpa-ojpa-derby").package(:zip))
+      test.setup unzip(_("target/test/smx/ode")=>project("dao-hibernate-db").package(:zip))
+      test.setup task(:prepare_jbi_tests) do |task|
+      cp _("src/main/jbi/ode-jbi.properties"), _("target/test/smx/ode")
+      cp _("src/main/jbi/hibernate.properties"), _("target/test/smx/ode")
+      cp_r _("src/test/resources"), _("target/test/resources")
+    end
   end
 
   desc "ODE JCA Resource Archive"

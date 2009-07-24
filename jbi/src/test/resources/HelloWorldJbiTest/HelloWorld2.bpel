@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpws:process exitOnStandardFault="yes" name="HelloWorld2"
+    targetNamespace="urn:/HeaderTest.bpel"
+    xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:hello="urn:/HelloWorld2.wsdl" xmlns:tns="urn:/HeaderTest.bpel" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <bpws:import importType="http://schemas.xmlsoap.org/wsdl/"
+        location="HelloWorld2.wsdl" namespace="urn:/HelloWorld2.wsdl"/>
+    <bpws:partnerLinks>
+        <bpws:partnerLink myRole="Provider" name="helloPartnerLink" partnerLinkType="hello:HelloPartnerLinkType"/>
+    </bpws:partnerLinks>
+    <bpws:variables>
+        <bpws:variable messageType="hello:HelloRequest" name="request"/>
+        <bpws:variable messageType="hello:HelloResponse" name="response"/>
+        <bpws:variable name="text" type="xsd:string"/>
+    </bpws:variables>
+    <bpws:sequence>
+        <bpws:receive createInstance="yes" name="start"
+            operation="Hello" partnerLink="helloPartnerLink"
+            portType="hello:HelloPortType" variable="request"/>
+        <bpws:assign name="assign1" validate="no">
+            <bpws:copy>
+                <bpws:from><![CDATA[$request.body/hello:text]]></bpws:from>
+                <bpws:to variable="text"/>
+            </bpws:copy>
+            <bpws:copy>
+                <bpws:from>
+                    <bpws:literal>
+                        <hello:HelloResponse xmlns:hello="urn:/HelloWorld2.wsdl">
+                            <hello:text/>
+                        </hello:HelloResponse>
+                    </bpws:literal>
+                </bpws:from>
+                <bpws:to><![CDATA[$response.body]]></bpws:to>
+            </bpws:copy>
+            <bpws:copy>
+                <bpws:from><![CDATA[concat($text,' World')]]></bpws:from>
+                <bpws:to><![CDATA[$response.body/hello:text]]></bpws:to>
+            </bpws:copy>
+        </bpws:assign>
+        <bpws:reply name="end" operation="Hello"
+            partnerLink="helloPartnerLink"
+            portType="hello:HelloPortType" variable="response"/>
+    </bpws:sequence>
+</bpws:process>
