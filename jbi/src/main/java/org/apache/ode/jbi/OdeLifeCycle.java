@@ -40,6 +40,7 @@ import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.ProcessAndInstanceManagementMBean;
 import org.apache.ode.bpel.engine.ProcessAndInstanceManagementImpl;
+import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
 
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
@@ -223,6 +224,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         _ode._scheduler.setTransactionManager((TransactionManager) _ode.getContext().getTransactionManager());
 
         _ode._store = new ProcessStoreImpl(_ode._eprContext , _ode._dataSource, _ode._config.getDAOConnectionFactory(), _ode._config, false);
+        registerExternalVariableModules();
         _ode._store.loadAll();
 
         _ode._server.setInMemDaoConnectionFactory(new org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl(
@@ -235,6 +237,14 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     _ode._server.setConfigProperties(_ode._config.getProperties());
 
         _ode._server.init();
+    }
+
+    private void registerExternalVariableModules() {
+        JdbcExternalVariableModule jdbcext;
+        jdbcext = new JdbcExternalVariableModule();
+        jdbcext.registerDataSource("ode", _db.getDataSource());
+        _ode._server.registerExternalVariableEngine(jdbcext);
+
     }
 
     /**
