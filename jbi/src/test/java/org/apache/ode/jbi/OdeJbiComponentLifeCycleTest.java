@@ -37,23 +37,18 @@ import java.io.File;
 public class OdeJbiComponentLifeCycleTest extends TestCase {
 
     JBIContainer container;
-    File rootDir, installDir, odeDir;
+    File rootDir, odeDir;
     TransactionManager txm;
     private OdeComponent component;
+    private static String helloWorldDir = "target/test/resources/HelloWorldJbiTest";
 
     protected void setUp() throws Exception {
-        rootDir = new File(System.getProperty("jbi.install"));
-        rootDir.mkdir();
-        installDir = new File(rootDir, "install");
-        installDir.mkdir();
+        rootDir = new File("target/test/smx");
+        odeDir = new File(rootDir, "ode");
         txm = new EmbeddedGeronimoFactory().getTransactionManager();
-        odeDir = new File(installDir, "ODE");
-        odeDir.mkdir();
 
         container = new JBIContainer();
         container.setUseMBeanServer(false);
-        container.setInstallationDirPath(installDir.getAbsolutePath());
-        container.setDeploymentDirPath(odeDir.getAbsolutePath());
         container.setRootDir(rootDir.getAbsolutePath());
         container.setCreateMBeanServer(false);
         container.setEmbedded(true);
@@ -63,6 +58,7 @@ public class OdeJbiComponentLifeCycleTest extends TestCase {
         container.start();
 
         component = new OdeComponent();
+        
     }
 
     protected void tearDown() throws Exception {
@@ -90,40 +86,35 @@ public class OdeJbiComponentLifeCycleTest extends TestCase {
         activateComponent();
         container.start();
 
-        String examples = System.getProperty("jbi.examples");
-        // For lack of a better way of doing this:
-        component.getServiceUnitManager().deploy("HelloWorld", examples + "/HelloWorld2/HelloWorld2-process");
-        component.getServiceUnitManager().init("HelloWorld", examples + "/HelloWorld2/HelloWorld2-process");
+        component.getServiceUnitManager().deploy("HelloWorld", helloWorldDir);
+        component.getServiceUnitManager().init("HelloWorld", helloWorldDir);
         component.getServiceUnitManager().start("HelloWorld");
         component.getServiceUnitManager().stop("HelloWorld");
-        component.getServiceUnitManager().undeploy("HelloWorld", examples + "/HelloWorld2/HelloWorld2-process");
+        component.getServiceUnitManager().undeploy("HelloWorld", helloWorldDir);
 
         container.deactivateComponent("ODE");
 
         container.stop();
     }
 
-//    TODO fix me
-//    public void testHelloWorld() throws Exception {
-//        activateComponent();
-//        container.start();
-//
-//        String examples = System.getProperty("jbi.examples");
-//        // For lack of a better way of doing this:
-//        component.getServiceUnitManager().deploy("HelloWorld", examples + "/HelloWorld2/HelloWorld2-process/");
-//        component.getServiceUnitManager().init("HelloWorld", examples + "/HelloWorld2/HelloWorld2-process/");
-//        component.getServiceUnitManager().start("HelloWorld");
-//        DefaultServiceMixClient client = new DefaultServiceMixClient(container);
-//        InOut io = client.createInOutExchange();
-//        io.setService(new QName("urn:/HelloWorld2.wsdl", "HelloService"));
-//        io.setOperation(new QName("urn:/HelloWorld2.wsdl", "Hello"));
-//        io.getInMessage().setContent(new StreamSource(getClass().getResourceAsStream("/HelloWorldRequest.xml")));
-//        client.sendSync(io,20000);
-//        assertEquals(ExchangeStatus.ACTIVE,io.getStatus());
-//        assertNotNull(io.getOutMessage());
-//        assertNotNull(io.getOutMessage().getContent());
-//
-//    }
+    public void testHelloWorld() throws Exception {
+        activateComponent();
+        container.start();
+
+        component.getServiceUnitManager().deploy("HelloWorld", helloWorldDir);
+        component.getServiceUnitManager().init("HelloWorld", helloWorldDir);
+        component.getServiceUnitManager().start("HelloWorld");
+        DefaultServiceMixClient client = new DefaultServiceMixClient(container);
+        InOut io = client.createInOutExchange();
+        io.setService(new QName("urn:/HelloWorld2.wsdl", "HelloService"));
+        io.setOperation(new QName("urn:/HelloWorld2.wsdl", "Hello"));
+        io.getInMessage().setContent(new StreamSource(getClass().getResourceAsStream("/HelloWorldRequest.xml")));
+        client.sendSync(io,20000);
+        assertEquals(ExchangeStatus.ACTIVE,io.getStatus());
+        assertNotNull(io.getOutMessage());
+        assertNotNull(io.getOutMessage().getContent());
+
+    }
 
     private void activateComponent() throws Exception {
         ComponentContextImpl cc = new ComponentContextImpl(container, new ComponentNameSpace(container.getName(), "ODE"));
