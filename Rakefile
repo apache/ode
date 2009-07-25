@@ -563,7 +563,7 @@ define "ode" do
   desc "ODE Agents"
   define "agents" do
      compile
-     package (:jar, :manifest=>_("target/classes/META-INF/MANIFEST.MF"))
+     package(:jar, :manifest=>_("target/classes/META-INF/MANIFEST.MF"))
   end
 
 end
@@ -573,40 +573,43 @@ define "apache-ode" do
 
   def distro(project, postfix)
     id = project.parent.id + postfix
-    project.package(:zip, :id=>id).path("#{id}-#{version}").tap do |zip|
-      zip.include meta_inf + ["RELEASE_NOTES", "README"].map { |f| path_to(f) }
-      zip.path("examples").include project.path_to("src/examples"+postfix), :as=>"."
+    # distros require all packages in project("ode") to be built first
+    project.package(:zip, :id=>id).enhance(project("ode").projects.map(&:packages).flatten) do |pkg|
+      pkg.path("#{id}-#{version}").tap do |zip|
+        zip.include meta_inf + ["RELEASE_NOTES", "README"].map { |f| path_to(f) }
+        zip.path("examples").include project.path_to("src/examples"+postfix), :as=>"."
 
-      # Libraries
-      zip.path("lib").include artifacts(COMMONS.logging, COMMONS.codec, COMMONS.httpclient,
-        COMMONS.pool, COMMONS.collections, JAXEN, SAXON, LOG4J, WSDL4J, XALAN, XERCES)
-      project("ode").projects("utils", "tools", "bpel-compiler", "bpel-api", "bpel-obj", "bpel-schemas").
-        map(&:packages).flatten.each do |pkg|
-        zip.include(pkg.to_s, :as=>"#{pkg.id}.#{pkg.type}", :path=>"lib")
+        # Libraries
+        zip.path("lib").include artifacts(COMMONS.logging, COMMONS.codec, COMMONS.httpclient,
+          COMMONS.pool, COMMONS.collections, JAXEN, SAXON, LOG4J, WSDL4J, XALAN, XERCES)
+        project("ode").projects("utils", "tools", "bpel-compiler", "bpel-api", "bpel-obj", "bpel-schemas").
+          map(&:packages).flatten.each do |pkg|
+          zip.include(pkg.to_s, :as=>"#{pkg.id}.#{pkg.type}", :path=>"lib")
+        end
+
+        # Including third party licenses
+        Dir["#{project.path_to("license")}/*LICENSE"].each { |l| zip.include(l, :path=>"lib") }
+        zip.include(project.path_to("target/LICENSE"))
+
+        # Include supported database schemas
+        Dir["#{project("ode:dao-jpa-ojpa-derby").path_to("target")}/*.sql"].each do |f|
+          zip.include(f, :path=>"sql") unless f =~ /partial/
+        end
+
+        # Tools scripts (like bpelc and sendsoap)
+        mkdir_p project.path_to("target/bin")
+        bins = file(project.path_to("target/bin")=>FileList[project.path_to("src/bin/*")]) do |task|
+          mkpath task.name
+          cp task.prerequisites, task.name
+          chmod 0755, FileList[task.name + "/*"], :verbose=>false
+        end
+        zip.include(bins)
+
+        yield zip
+        project.check zip, "should contain mysql.sql" do
+          it.should contain("sql/mysql.sql")
+        end
       end
-
-      # Including third party licenses
-      Dir["#{project.path_to("license")}/*LICENSE"].each { |l| zip.include(l, :path=>"lib") }
-      zip.include(project.path_to("target/LICENSE"))
-
-      # Include supported database schemas
-      Dir["#{project("ode:dao-jpa-ojpa-derby").path_to("target")}/*.sql"].each do |f|
-        zip.include(f, :path=>"sql") unless f =~ /partial/
-      end
-
-      # Tools scripts (like bpelc and sendsoap)
-      bins = file(project.path_to("target/bin")=>FileList[project.path_to("src/bin/*")]) do |task|
-        mkpath task.name
-        cp task.prerequisites, task.name
-        chmod 0755, FileList[task.name + "/*"], :verbose=>false
-      end
-      zip.include(bins)
-
-      yield zip
-      # For some reason this always fails on a clean build, commenting until I have time to inquire
-      # project.check zip, "should contain mysql.sql" do
-      #   it.should contain("sql/mysql.sql")
-      # end
     end
   end
 
