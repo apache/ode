@@ -383,8 +383,8 @@ define "ode" do
   desc "ODE Simple Scheduler"
   define "scheduler-simple" do
     compile.with projects("bpel-api", "utils"), COMMONS.collections, COMMONS.logging, JAVAX.transaction
-	test.compile.with HSQLDB, GERONIMO.kernel, GERONIMO.transaction
-	test.with HSQLDB, JAVAX.transaction, JAVAX.connector, LOG4J,
+  test.compile.with HSQLDB, GERONIMO.kernel, GERONIMO.transaction
+  test.with HSQLDB, JAVAX.transaction, JAVAX.connector, LOG4J,
           GERONIMO.kernel, GERONIMO.transaction, BACKPORT, JAVAX.ejb
     package :jar
   end
@@ -601,7 +601,7 @@ define "ode" do
   desc "ODE Utils"
   define "utils" do
     compile.with AXIOM, AXIS2_ALL, COMMONS.collections, COMMONS.logging, COMMONS.pool, COMMONS.httpclient, COMMONS.codec, LOG4J, XERCES, JAVAX.stream, WSDL4J
-	test.exclude "*TestResources"
+  test.exclude "*TestResources"
     package :jar
   end
 
@@ -636,59 +636,62 @@ define "apache-ode" do
 
   def distro(project, postfix)
     id = project.parent.id + postfix
-    project.package(:zip, :id=>id).path("#{id}-#{version}").tap do |zip|
-      zip.include meta_inf + ["RELEASE_NOTES", "README"].map { |f| path_to(f) }
-      zip.path("examples").include project.path_to("src/examples"+postfix), :as=>"."
+    # distros require all packages in project("ode") to be built first
+    deps = (["ode", "ode-extensions"].map {|p| project(p).projects}).flatten.map(&:packages).flatten
+    project.package(:zip, :id=>id).enhance(deps) do |pkg|
+      pkg.path("#{id}-#{version}").tap do |zip|
+        zip.include meta_inf + ["RELEASE_NOTES", "README"].map { |f| path_to(f) }
+        zip.path("examples").include project.path_to("src/examples"+postfix), :as=>"."
 
-      # Libraries
-      zip.path("lib").include artifacts(COMMONS.logging, COMMONS.codec, COMMONS.httpclient,
-        COMMONS.pool, COMMONS.collections, JAXEN, SAXON, LOG4J, WSDL4J, XALAN, XERCES)
-      project("ode").projects("utils", "tools", "bpel-compiler", "bpel-api", "runtimes", "bpel-schemas").
-        map(&:packages).flatten.each do |pkg|
-        zip.include(pkg.to_s, :as=>"#{pkg.id}.#{pkg.type}", :path=>"lib")
-      end
+        # Libraries
+        zip.path("lib").include artifacts(COMMONS.logging, COMMONS.codec, COMMONS.httpclient,
+          COMMONS.pool, COMMONS.collections, JAXEN, SAXON, LOG4J, WSDL4J, XALAN, XERCES)
+        project("ode").projects("utils", "tools", "bpel-compiler", "bpel-api", "runtimes", "bpel-schemas").
+          map(&:packages).flatten.each do |pkg|
+          zip.include(pkg.to_s, :as=>"#{pkg.id}.#{pkg.type}", :path=>"lib")
+        end
 
-      #Include extensions
-	    #(create a extensions folder, put extension folders in there, add README per extension if available, 
-	    # add README.extensions to extensions folder)
-      project("ode-extensions").projects.each do |p|
-        p.packages.flatten.select{|pkg| pkg.type == :jar && !pkg.classifier}.each do |art|
-          zip.include(art, :path=>"extensions/#{art.id}")
-		      if File.exist?(p.path_to("README"))
-		        zip.path("extensions/#{art.id}").include p.path_to("README")
-		      end
-          p.compile.classpath.select{|pkg| pkg.group != project("ode").group}.each do |lib|
-            zip.include(lib, :path=>"extensions/#{art.id}/lib")
+        #Include extensions
+        #  (create a extensions folder, put extension folders in there, add README per extension if available, 
+        #   add README.extensions to extensions folder)
+        project("ode-extensions").projects.each do |p|
+          p.packages.flatten.select{|pkg| pkg.type == :jar && !pkg.classifier}.each do |art|
+            zip.include(art, :path=>"extensions/#{art.id}")
+            if File.exist?(p.path_to("README"))
+              zip.path("extensions/#{art.id}").include p.path_to("README")
+            end
+            p.compile.classpath.select{|pkg| pkg.group != project("ode").group}.each do |lib|
+              zip.include(lib, :path=>"extensions/#{art.id}/lib")
+            end
           end
         end
-      end
-	    zip.path("extensions").include project("ode-extensions").path_to("README.extensions")
+        zip.path("extensions").include project("ode-extensions").path_to("README.extensions")
 
-      # Including third party licenses
-      Dir["#{project.path_to("license")}/*LICENSE"].each { |l| zip.include(l, :path=>"lib") }
-      zip.include(project.path_to("target/LICENSE"))
+        # Including third party licenses
+        Dir["#{project.path_to("license")}/*LICENSE"].each { |l| zip.include(l, :path=>"lib") }
+        zip.include(project.path_to("target/LICENSE"))
 
-      # Tools scripts (like bpelc and sendsoap)
-      bins = file(project.path_to("target/bin")=>FileList[project.path_to("src/bin/*")]) do |task|
-        mkpath task.name
-        cp task.prerequisites, task.name
-        chmod 0755, FileList[task.name + "/*"], :verbose=>false
-      end
-      zip.include(bins)
+        # Tools scripts (like bpelc and sendsoap)
+        mkdir_p project.path_to("target/bin")
+        bins = file(project.path_to("target/bin")=>FileList[project.path_to("src/bin/*")]) do |task|
+          mkpath task.name
+          cp task.prerequisites, task.name
+          chmod 0755, FileList[task.name + "/*"], :verbose=>false
+        end
+        zip.include(bins)
 
-      yield zip
-
-      project.package(:zip, :id=>id).enhance do
         # Include supported database schemas
         Dir["#{project("ode:dao-jpa-db").path_to("target")}/*.sql"].each do |f|
           zip.include(f, :path=>"sql") unless f =~ /partial/
         end
+        
+        yield zip
+
         project.check zip, "should contain mysql.sql" do
           it.should contain("sql/mysql.sql")
         end
       end
     end
-
   end
 
   desc "ODE Axis2 Based Distribution"
