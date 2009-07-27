@@ -231,7 +231,7 @@ public class Database {
         __log.info("Using Embedded Derby: " + url);
         _derbyUrl = url;
         initInternalDb(url, org.apache.derby.jdbc.EmbeddedDriver.class.getName(),"sa",null);
-
+        _needDerbyShutdown = true;
     }
 
     @SuppressWarnings("unchecked")
