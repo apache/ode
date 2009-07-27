@@ -16,6 +16,7 @@
  */
 package org.apache.ode.jbi;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -26,23 +27,31 @@ import java.net.URLConnection;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+import javax.jbi.messaging.ExchangeStatus;
+import javax.jbi.messaging.InOut;
+import javax.xml.namespace.QName;
+import javax.xml.transform.stream.StreamSource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.servicemix.components.util.EchoComponent;
-import org.apache.servicemix.http.HttpComponent;
+import org.apache.servicemix.client.DefaultServiceMixClient;
 import org.apache.servicemix.jbi.container.ActivationSpec;
 import org.apache.servicemix.jbi.container.JBIContainer;
 import org.apache.servicemix.jbi.framework.ComponentContextImpl;
 import org.apache.servicemix.jbi.framework.ComponentNameSpace;
+import org.apache.servicemix.jbi.jaxp.SourceTransformer;
 import org.apache.servicemix.jbi.util.FileUtil;
 import org.apache.servicemix.tck.SpringTestSupport;
 import org.apache.xbean.spring.context.ClassPathXmlApplicationContext;
+import org.junit.Ignore;
 import org.springframework.context.support.AbstractXmlApplicationContext;
 
+@Ignore
 public class JbiTestBase extends SpringTestSupport {
     private static Log log = LogFactory.getLog(JbiTestBase.class);
 
-    private OdeComponent odeComponent;
+    protected OdeComponent odeComponent;
+    protected JBIContainer jbiContainer;
     
     protected Properties testProperties;
     
@@ -55,9 +64,9 @@ public class JbiTestBase extends SpringTestSupport {
     protected void setUp() throws Exception {
         super.setUp();
 
-        JBIContainer jbiContainer = ((JBIContainer) getBean("jbi"));
+        jbiContainer = ((JBIContainer) getBean("jbi"));
         odeComponent = new OdeComponent();
-        
+
         ComponentContextImpl cc = new ComponentContextImpl(jbiContainer, new ComponentNameSpace(jbiContainer.getName(), "ODE"));
         ActivationSpec activationSpec = new ActivationSpec();
         activationSpec.setComponent(odeComponent);
@@ -96,27 +105,43 @@ public class JbiTestBase extends SpringTestSupport {
 
         String request = testProperties.getProperty("request");
         String expectedResponse = testProperties.getProperty("response");
-        String httpUrl = testProperties.getProperty("http.url", "");
-        if (!httpUrl.equals("")) {
-            log.debug(getTestName() + " sending http request to " + httpUrl + " request: " + request);
-            URLConnection connection = new URL(httpUrl).openConnection();
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
-            //Send request
-            OutputStream os = connection.getOutputStream();
-            PrintWriter wt = new PrintWriter(os);
-            wt.print(request);
-            wt.flush();
-            wt.close();
-            // Read the response.
-            InputStream is = connection.getInputStream();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            FileUtil.copyInputStream(is, baos);
-            String result = baos.toString();
-            log.debug(getTestName() + " have result: " + result);
-            matchResponse(expectedResponse, result);
+        {
+	        String httpUrl = testProperties.getProperty("http.url");
+	        if (httpUrl != null) {
+	            log.debug(getTestName() + " sending http request to " + httpUrl + " request: " + request);
+	            URLConnection connection = new URL(httpUrl).openConnection();
+	            connection.setDoOutput(true);
+	            connection.setDoInput(true);
+	            //Send request
+	            OutputStream os = connection.getOutputStream();
+	            PrintWriter wt = new PrintWriter(os);
+	            wt.print(request);
+	            wt.flush();
+	            wt.close();
+	            // Read the response.
+	            InputStream is = connection.getInputStream();
+	            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	            FileUtil.copyInputStream(is, baos);
+	            String result = baos.toString();
+	            log.debug(getTestName() + " have result: " + result);
+	            matchResponse(expectedResponse, result);
+	        }
         }
-        
+        {
+	        if (testProperties.getProperty("nmr.service") != null) {
+	            DefaultServiceMixClient client = new DefaultServiceMixClient(jbiContainer);
+	            InOut io = client.createInOutExchange();
+	            io.setService(QName.valueOf(testProperties.getProperty("nmr.service")));
+	            io.setOperation(QName.valueOf(testProperties.getProperty("nmr.operation")));
+	            io.getInMessage().setContent(new StreamSource(new ByteArrayInputStream(request.getBytes())));
+	            client.sendSync(io,20000);
+	            assertEquals(ExchangeStatus.ACTIVE,io.getStatus());
+	            assertNotNull(io.getOutMessage());
+	            String result = new SourceTransformer().contentToString(io.getOutMessage());
+	            matchResponse(expectedResponse, result);
+	            client.done(io);
+	        }
+        }	
         
         enableProcess(getTestName(), false);
     }

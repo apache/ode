@@ -27,7 +27,7 @@
 	
 	<sm:container 
 		id="jbi" 
-		embedded="false" 
+		embedded="true" 
 		rootDir="target/test/smx"
 		transactionManager="#transactionManager"
 		>
