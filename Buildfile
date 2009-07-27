@@ -181,7 +181,8 @@ SERVICEMIX          = [
                         "org.objectweb.howl:howl:jar:1.0.1-1",
                         "org.apache.activemq:activemq-core:jar:4.1.1",
                         "org.apache.activemq:activemq-ra:jar:4.1.1",
-                        "commons-beanutils:commons-beanutils:jar:1.7.0"
+                        "commons-beanutils:commons-beanutils:jar:1.7.0",
+                        "tranql:tranql-connector-derby-common:jar:1.1"
                       ]
 SLF4J = group(%w{ slf4j-api slf4j-log4j12 jcl104-over-slf4j }, :under=>"org.slf4j", :version=>"1.4.3")
 SPRING              = ["org.springframework:spring:jar:2.5.6"]
@@ -563,6 +564,7 @@ define "ode" do
       jbi.include path_to("src/main/jbi/ode-jbi.properties")
     end
 
+    test.using :properties=>{ "java.naming.factory.initial" => "org.apache.xbean.spring.jndi.SpringInitialContextFactory"}
     test.with projects("dao-jpa", "dao-hibernate", "bpel-compiler", "bpel-api-jca", "jca-ra",
       "jca-server", "jacob"),
       BACKPORT, COMMONS.lang, COMMONS.collections, DERBY, GERONIMO.connector, GERONIMO.kernel,
