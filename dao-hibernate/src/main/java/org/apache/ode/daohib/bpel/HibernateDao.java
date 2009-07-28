@@ -54,6 +54,10 @@ public abstract class HibernateDao {
         if(logDao.isDebugEnabled()) logDao.debug("entering "+msg);
     }
 
+    void leaving(String msg){
+        if(logDao.isDebugEnabled()) logDao.debug("leaving "+msg);
+    }
+
     /**
      * @see org.apache.ode.utils.dao.DAO#getDHandle()
      */
