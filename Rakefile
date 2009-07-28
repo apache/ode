@@ -531,6 +531,7 @@ define "ode" do
       test.setup task(:prepare_jbi_tests) do |task|
       cp _("src/main/jbi/ode-jbi.properties"), _("target/test/smx/ode")
       cp _("src/main/jbi/hibernate.properties"), _("target/test/smx/ode")
+      rm_rf Dir["target/test/resources"]
       cp_r _("src/test/resources"), _("target/test/resources")
     end
   end
