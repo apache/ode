@@ -18,36 +18,49 @@
 
 -->
 <beans xmlns:sm="http://servicemix.apache.org/config/1.0"
-	   xmlns:http="http://servicemix.apache.org/http/1.0"
-	   xmlns:eip="http://servicemix.apache.org/eip/1.0"
-	   xmlns:hello="urn:/HelloWorld2.wsdl"
-	   >
+       xmlns:http="http://servicemix.apache.org/http/1.0"
+       xmlns:eip="http://servicemix.apache.org/eip/1.0"
+       xmlns:hello="urn:/HelloWorld2.wsdl"
+       xmlns:util="http://www.springframework.org/schema/util"
+       >
 
-	<bean id="transactionManager" class="org.apache.geronimo.transaction.manager.GeronimoTransactionManager"/>
-	
-	<sm:container 
-		id="jbi" 
-		embedded="true" 
-		rootDir="target/test/smx"
-		transactionManager="#transactionManager"
-		>
-		<sm:activationSpecs>
-			<sm:activationSpec id="hello-http">
-				<sm:component>
-					<http:component>
-						<http:endpoints>
-							<http:endpoint 
-								service="hello:HelloService"
-								endpoint="http" 
-								defaultOperation="Hello"
-								role="consumer" 
-								locationURI="http://localhost:8192/HelloHttp/"
-								defaultMep="http://www.w3.org/2004/08/wsdl/in-out" 
-								soap="true" />
-						</http:endpoints>
-					</http:component>
-				</sm:component>
-			</sm:activationSpec>
-		</sm:activationSpecs>
-	</sm:container>
+    <bean id="transactionManager" class="org.apache.geronimo.transaction.manager.GeronimoTransactionManager"/>
+
+    <bean id="jndi"
+          class="org.apache.xbean.spring.jndi.SpringInitialContextFactory" 
+          factory-method="makeInitialContext"
+          singleton="true"
+          >
+      <property name="entries" ref="jndiEntries" />
+    </bean>
+
+    <util:map id="jndiEntries">
+    </util:map>
+    
+    <sm:container 
+        id="jbi" 
+        embedded="true" 
+        rootDir="target/test/smx"
+        transactionManager="#transactionManager"
+        depends-on="jndi"
+        >
+        <sm:activationSpecs>
+            <sm:activationSpec id="hello-http">
+                <sm:component>
+                    <http:component>
+                        <http:endpoints>
+                            <http:endpoint 
+                                service="hello:HelloService"
+                                endpoint="http" 
+                                defaultOperation="Hello"
+                                role="consumer" 
+                                locationURI="http://localhost:8192/HelloHttp/"
+                                defaultMep="http://www.w3.org/2004/08/wsdl/in-out" 
+                                soap="true" />
+                        </http:endpoints>
+                    </http:component>
+                </sm:component>
+            </sm:activationSpec>
+        </sm:activationSpecs>
+    </sm:container>
 </beans>
