@@ -61,6 +61,7 @@ public class MessageDaoImpl extends HibernateDao implements MessageDAO {
         _session.save(newdata);
         _hself.setMessageData(newdata);
         update();
+        leaving("MessageDaoImpl.setData");
     }
 
     public Element getData() {
@@ -83,6 +84,7 @@ public class MessageDaoImpl extends HibernateDao implements MessageDAO {
         _session.save(newdata);
         _hself.setHeader(newdata);
         update();
+        leaving("MessageDaoImpl.setHeader");
     }
 
     public Element getHeader() {

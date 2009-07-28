@@ -131,20 +131,19 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
         XmlDataDAO cached = _variables.get(varName);
         if (cached != null) return _variables.get(varName);
 
-        HXmlData data;
-        Query qry = getSession().createQuery(QRY_VARIABLE);
-        qry.setString(0,varName);
-        qry.setLong(1,_scope.getId());
-        List res = qry.list();
-
-        if(res.size() > 0)
-            data = (HXmlData)res.get(0);
-        else {
+        HXmlData data = null;
+        for (HXmlData e : _scope.getVariables()) {
+            if (e.getName().equals(varName) && e.getScope().getId().equals(_scope.getId())) {
+                data = e;
+            }
+        }
+        if (data == null) {
             data = new HXmlData();
             data.setName(varName);
             data.setScope(_scope);
+            _scope.getVariables().add(data);
         }
-
+        
         XmlDataDaoImpl varDao = new XmlDataDaoImpl(_sm, data);
         _variables.put(varName, varDao);
         return varDao;
