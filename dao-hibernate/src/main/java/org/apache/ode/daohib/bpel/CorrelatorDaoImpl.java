@@ -117,15 +117,12 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         // Make sure we obtain a lock for the selector we want to find.
         q.setLockMode("hs", LockMode.UPGRADE);
 
-        HCorrelatorSelector selector;
-        List selectors;
         List<HProcessInstance> targets = new ArrayList<HProcessInstance>();
-        selectors = q.list();
-        for (Object selo : selectors) {
-            selector = (HCorrelatorSelector) selo;
+        for (HCorrelatorSelector selector : (List<HCorrelatorSelector>)q.list()) {
             if (selector != null) {
+                boolean isRoutePolicyOne = selector.getRoute() == null || "one".equals(selector.getRoute()); 
                 if ("all".equals(selector.getRoute()) ||
-                        ("one".equals(selector.getRoute()) && !targets.contains(selector.getInstance()))) {
+                        (isRoutePolicyOne && !targets.contains(selector.getInstance()))) {
                     routes.add(new MessageRouteDaoImpl(_sm, selector));
                     targets.add(selector.getInstance());
                 }
