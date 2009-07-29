@@ -132,9 +132,9 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
         }
         _sessionManager = createSessionManager(properties, _ds, _tm);
     }
-    
+
     protected SessionManager createSessionManager(Properties properties, DataSource ds, TransactionManager tm) {
-    	return new SessionManager(properties, ds, tm);
+        return new SessionManager(properties, ds, tm);
     }
 
     private static final String DEFAULT_HIBERNATE_DIALECT = "org.hibernate.dialect.DerbyDialect";
@@ -160,6 +160,8 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
         // Oracle 8 and Oracle >8
         HIBERNATE_DIALECTS.put("Apache Derby", new DialectFactory.VersionInsensitiveMapper(
                 "org.hibernate.dialect.DerbyDialect"));
+        HIBERNATE_DIALECTS.put("INGRES", new DialectFactory.VersionInsensitiveMapper(
+                "org.hibernate.dialect.IngresDialect"));
     }
 
     public void shutdown() {
