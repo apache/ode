@@ -56,6 +56,10 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
     /** filter for finding a matching selector. */
     private static final String FLTR_SELECTORS = ("from " + HCorrelatorSelector.class.getName()
             + " hs where hs.correlationKey = ? and hs.processType = ? and hs.correlator.correlatorId = ?").intern();
+    private static final String FLTR_SELECTORS_SUBQUERY = ("from  " + HCorrelatorSelector.class.getName()
+            + " hs where hs.correlationKey = ? and hs.processType = ? and hs.correlatorId = " +
+            "(select hc.id from " + HCorrelator.class.getName() + " hc where hc.correlatorId = ? )").intern();
+
 
     private static final String LOCK_SELECTORS = "update from " + HCorrelatorSelector.class.getName() +
         " set lock = lock+1 where correlationKey = ? and processType = ?".intern();
@@ -121,7 +125,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         lockQry.setString(1, processType);
         if (lockQry.executeUpdate() > 0) {
             
-            Query q = getSession().createQuery(FLTR_SELECTORS);
+            Query q = getSession().createQuery(_sm.canJoinForUpdate() ? FLTR_SELECTORS : FLTR_SELECTORS_SUBQUERY);
             q.setString(0, key == null ? null : key.toCanonicalString());
             q.setString(1, processType);
             q.setString(2, _hobj.getCorrelatorId());

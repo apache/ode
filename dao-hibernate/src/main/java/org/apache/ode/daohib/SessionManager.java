@@ -25,6 +25,7 @@ import org.hibernate.MappingException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.cfg.Environment;
 
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
@@ -48,9 +49,13 @@ public class SessionManager {
   private static final Map<String, DataSource> _dataSources = 
     Collections.synchronizedMap(new HashMap<String,DataSource>());
 
+  private static final String[] CANNOT_JOIN_FOR_UPDATE_DIALECTS =
+    {"org.hibernate.dialect.IngresDialect"};
+
   private final String _uuid = new UUID().toString();
   private final TransactionManager _txManager;
   private final SessionFactory _sessionFactory;
+  private boolean _canJoinForUpdate = true;
 
   /** Inaccessible constructor. */
   public SessionManager(Properties env, DataSource ds, TransactionManager tx) throws HibernateException {
@@ -65,10 +70,33 @@ public class SessionManager {
             .setProperties(env)
             .setProperty(PROP_GUID, _uuid)
             .buildSessionFactory();
+      /*
+      Some Hibernate dialects (like IngresDialect) do not support update for join.
+      We need to distinguish them and explicitly define subqueries, otherwise Hibernate
+      implicitly generates joins which causes problems during update for such DBMS.
+      See org.apache.ode.daohib.bpel.CorrelatorDaoImpl for instance.
+      */
+    String currentHibDialect = env.getProperty(Environment.DIALECT);
+    for (String dialect : CANNOT_JOIN_FOR_UPDATE_DIALECTS) {
+        if (dialect.equals(currentHibDialect)) {
+            _canJoinForUpdate = false;
+        }
+    }
   }
 
   TransactionManager getTransactionManager() {
     return _txManager;
+  }
+
+    /**
+     * Returns flag which shows whether " where .. join ... for update" kind of queries can be used (supported
+     * by currently effective {@link org.hibernate.dialect.Dialect}. If it's {@code false} than sub-query fallback
+     * should be invoked instead.
+     *
+     * @return currently returns false only for {@link org.hibernate.dialect.IngresDialect}
+     */
+  public boolean canJoinForUpdate() {
+    return _canJoinForUpdate;
   }
 
   /**
