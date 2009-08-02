@@ -102,7 +102,7 @@ module NativeDB
             else
               test.with REQUIRES
   
-              prepare_config(name, dbprops, "#{base}/target/conf.#{name}", "#{base}/src/main/webapp/WEB-INF/conf.template")
+              prepare_config(name, dbprops, "#{base}/target/conf.#{name}", "#{base}/src/test/webapp/WEB-INF/conf.template")
               dbs <<= ", " if dbs.length > 0
               dbs <<= "#{base}/target/conf.#{name}"
             end
