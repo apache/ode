@@ -202,7 +202,13 @@ public class AssignHelper extends ACTIVITY {
         final OdeInternalInstance napi = getBpelRuntime();
         Node lval = null;
         if (!(to instanceof OAssign.PartnerLinkRef)) {
-            VariableInstance lvar = _scopeFrame.resolve(to.getVariable());
+            VariableInstance lvar;
+            try {
+                lvar = _scopeFrame.resolve(to.getVariable());
+            } catch (RuntimeException e) {
+                __log.error("iid: " + napi.getInstanceId() + " error evaluating lvalue");
+                throw new FaultException(getOActivity().getOwner().constants.qnSelectionFailure, e.getMessage());
+            }
             if (!napi.isVariableInitialized(lvar)) {
                 Document doc = DOMUtils.newDocument();
                 Node val = to.getVariable().type.newInstance(doc);

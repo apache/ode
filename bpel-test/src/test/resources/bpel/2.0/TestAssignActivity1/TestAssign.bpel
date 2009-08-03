@@ -103,6 +103,19 @@
                 <to variable="otherMsgVar" part="TestPart"/>
             </copy>
         </assign>
+        <scope>
+            <faultHandlers>
+                <catchAll>
+                   <empty/>
+                </catchAll>
+            </faultHandlers>
+            <assign>
+                <copy>
+                    <from>1</from>
+                    <to>1</to>
+                </copy>
+            </assign>
+        </scope>     
         <reply name="end" partnerLink="TestAssignPartnerLink" portType="test:TestAssignPortType"
                operation="testAssign" variable="otherMsgVar"/>
     </sequence>
