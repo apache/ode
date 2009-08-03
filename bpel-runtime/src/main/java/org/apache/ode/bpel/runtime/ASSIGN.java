@@ -127,7 +127,13 @@ class ASSIGN extends ACTIVITY {
         final BpelRuntimeContext napi = getBpelRuntimeContext();
         Node lval = null;
         if (!(to instanceof OAssign.PartnerLinkRef)) {
-            VariableInstance lvar = _scopeFrame.resolve(to.getVariable());
+            VariableInstance lvar;
+            try {
+                lvar = _scopeFrame.resolve(to.getVariable());
+            } catch (RuntimeException e) {
+                __log.error("iid: " + getBpelRuntimeContext().getPid() + " error evaluating lvalue");
+                throw new FaultException(getOAsssign().getOwner().constants.qnSelectionFailure, e.getMessage());
+            }
             if (lvar == null) {
                 String msg = __msgs.msgEvalException(to.toString(), "Could not resolve variable in current scope");
                 if (__log.isDebugEnabled()) __log.debug(to + ": " + msg);
