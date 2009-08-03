@@ -23,7 +23,7 @@ package org.apache.ode.daohib.bpel.hobj;
  *
  * @hibernate.class table="BPEL_MESSAGE"
  * @hibernate.query name="SELECT_MESSAGE_IDS_BY_MEX" query="select id from HMessage as m WHERE m.messageExchange = :messageExchange"
- * @hibernate.query name="SELECT_MESSAGE_IDS_BY_INSTANCES" query="select id from HMessage as m WHERE m.messageExchange IN(select e from HMessageExchange e where e.instance in (:instances))"
+ * @hibernate.query name="SELECT_MESSAGE_IDS_BY_INSTANCES" query="select m.id from HMessage m, HMessageExchange mex WHERE m.messageExchange = mex and mex.instance in (:instances)"
  */
 public class HMessage extends HObject {
     public final static String SELECT_MESSAGE_IDS_BY_MEX = "SELECT_MESSAGE_IDS_BY_MEX";

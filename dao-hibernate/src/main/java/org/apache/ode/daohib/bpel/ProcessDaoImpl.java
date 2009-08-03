@@ -227,8 +227,8 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO, Deferred
         deleteByIds(HVariableProperty.class, getSession().getNamedQuery(HVariableProperty.SELECT_VARIABLE_PROPERTY_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
         deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_XMLDATA_LDATA_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
         deleteByIds(HXmlData.class, getSession().getNamedQuery(HXmlData.SELECT_XMLDATA_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
-
-        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_PARTNER_LINK_LDATA_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
+        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_PARTNER_LINK_LDATA_IDS_BY_INSTANCES_1).setParameterList("instances", instances).list());
+        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_PARTNER_LINK_LDATA_IDS_BY_INSTANCES_2).setParameterList("instances", instances).list());
         deleteByIds(HPartnerLink.class, getSession().getNamedQuery(HPartnerLink.SELECT_PARTNER_LINK_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
         deleteByIds(HScope.class, getSession().getNamedQuery(HScope.SELECT_SCOPE_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
     }
@@ -236,11 +236,12 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO, Deferred
     @SuppressWarnings("unchecked")
     private void deleteMessages(Collection<HProcessInstance> instances) {
         deleteByIds(HActivityRecovery.class, getSession().getNamedQuery(HCorrelatorMessage.SELECT_CORMESSAGE_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
-
-        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
+        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_1).setParameterList("instances", instances).list());
+        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_2).setParameterList("instances", instances).list());
         deleteByIds(HMessage.class, getSession().getNamedQuery(HMessage.SELECT_MESSAGE_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
-        getSession().getNamedQuery(HMessageExchangeProperty.DELETE_MEX_PROPS_BY_INSTANCES).setParameterList("instances", instances).executeUpdate();
-        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MEX_LDATA_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
+        deleteByIds(HMessageExchangeProperty.class, getSession().getNamedQuery(HMessageExchangeProperty.SELECT_MEX_PROPS_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
+        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MEX_LDATA_IDS_BY_INSTANCES_1).setParameterList("instances", instances).list());
+        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MEX_LDATA_IDS_BY_INSTANCES_2).setParameterList("instances", instances).list());
         deleteByIds(HMessageExchange.class, getSession().getNamedQuery(HMessageExchange.SELECT_MEX_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
     }
     

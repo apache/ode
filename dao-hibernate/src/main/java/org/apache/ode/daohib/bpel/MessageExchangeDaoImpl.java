@@ -359,7 +359,8 @@ public class MessageExchangeDaoImpl extends HibernateDao implements
 
     @SuppressWarnings("unchecked")
     public void releasePremieMessages() {
-        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_MEX).setParameter("mex", _hself).list());
+        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_MEX_1).setParameter("mex", _hself).list());
+        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_MEX_2).setParameter("mex", _hself).list());
         deleteByIds(HCorrelatorMessage.class, getSession().getNamedQuery(HCorrelatorMessage.SELECT_CORMESSAGE_IDS_BY_MEX).setParameter("mex", _hself).list());
     }
 
@@ -369,7 +370,8 @@ public class MessageExchangeDaoImpl extends HibernateDao implements
     
     @SuppressWarnings("unchecked")
     public void deleteMessages() {
-        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_MEX).setParameter("mex", _hself).list());
+        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_MEX_1).setParameter("mex", _hself).list());
+        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_MEX_2).setParameter("mex", _hself).list());
         deleteByIds(HCorrelatorMessage.class, getSession().getNamedQuery(HCorrelatorMessage.SELECT_CORMESSAGE_IDS_BY_MEX).setParameter("mex", _hself).list());
           
         getSession().delete(_hself);
