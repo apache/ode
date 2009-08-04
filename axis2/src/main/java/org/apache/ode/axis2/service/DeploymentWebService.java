@@ -140,6 +140,10 @@ public class DeploymentWebService {
                     if (zip == null || packagePart == null)
                         throw new OdeFault("Your message should contain an element named 'package' with a 'zip' element"); 
 
+                    String bundleName = namePart.getText().trim();
+                    if (!validBundleName(namePart.getText()))
+                        throw new OdeFault("Invalid bundle name, only non empty alpha-numerics and _ strings are allowed.");
+
                     OMText binaryNode = (OMText) zip.getFirstOMChild();
                     if (binaryNode == null) {
                         throw new OdeFault("Empty binary node under <zip> element");
@@ -151,7 +155,7 @@ public class DeploymentWebService {
                         // it to hold on for a while.
                         _poller.hold();
 
-                        File dest = new File(_deployPath, namePart.getText() + "-" + _store.getCurrentVersion());
+                        File dest = new File(_deployPath, bundleName + "-" + _store.getCurrentVersion());
                         dest.mkdir();
                         unzip(dest, (DataHandler) binaryNode.getDataHandler());
 
@@ -189,11 +193,13 @@ public class DeploymentWebService {
                     }
                 } else if (operation.equals("undeploy")) {
                     OMElement part = messageContext.getEnvelope().getBody().getFirstElement().getFirstElement();
+                    if (part == null) throw new OdeFault("Missing bundle name in undeploy message.");
 
-                    String pkg = part.getText();
-                    if(StringUtils.isBlank(pkg)){
-                        throw new OdeFault("Empty package name received!");
+                    String pkg = part.getText().trim();
+                    if (!validBundleName(pkg)) {
+                        throw new OdeFault("Invalid bundle name, only non empty alpha-numerics and _ strings are allowed.");
                     }
+
                     File deploymentDir = new File(_deployPath, pkg);
                     if (!deploymentDir.exists())
                         throw new OdeFault("Couldn't find deployment package " + pkg + " in directory " + _deployPath);
@@ -299,6 +305,11 @@ public class DeploymentWebService {
             envelope.getBody().addChild(responseOp);
             AxisEngine.send(outMsgContext);
         }
+
+        private boolean validBundleName(String bundle) {
+            if (StringUtils.isBlank(bundle)) return false;
+            return bundle.matches("[\\p{L}0-9_\\-]*");
+        }
     }
 
     private static void copyInputStream(InputStream in, OutputStream out)
@@ -310,6 +321,6 @@ public class DeploymentWebService {
         out.close();
     }
 
-	
+
 
 }
