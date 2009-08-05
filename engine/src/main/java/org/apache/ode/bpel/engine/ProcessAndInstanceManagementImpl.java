@@ -947,12 +947,6 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                 }
             }
         }
-
-        if (instance.getActivityFailureCount() > 0) {
-            TFailuresInfo failures = info.addNewFailures();
-            failures.setDtFailure(toCalendar(instance.getActivityFailureDateTime()));
-            failures.setCount(instance.getActivityFailureCount());
-        }
     }
 
     private void fillScopeInfo(TScopeInfo scopeInfo, ScopeDAO scope, boolean includeActivityInfo) {
