@@ -191,12 +191,14 @@ public class Properties {
             }
             if (properties.containsKey(PROP_JMS_REPLY_TIMEOUT)) {
                 String value = properties.get(PROP_JMS_REPLY_TIMEOUT);
-                try {
-                    options.setProperty(JMSConstants.JMS_WAIT_REPLY, Long.valueOf(value));
-                } catch (NumberFormatException e) {
-                    if (log.isWarnEnabled())
-                        log.warn("Mal-formatted Property: [" + Properties.PROP_JMS_REPLY_TIMEOUT + "=" + value + "]. Long expected. Property will be skipped.");
-                }
+                options.setProperty(JMSConstants.JMS_WAIT_REPLY, value);
+                // The value of this property must be a string object, not a long object. 
+//                try {
+//                    options.setProperty(JMSConstants.JMS_WAIT_REPLY, Long.valueOf(value));
+//                } catch (NumberFormatException e) {
+//                    if (log.isWarnEnabled())
+//                        log.warn("Mal-formatted Property: [" + Properties.PROP_JMS_REPLY_TIMEOUT + "=" + value + "]. Long expected. Property will be skipped.");
+//                }
             }
             if (properties.containsKey(PROP_JMS_DESTINATION_TYPE)) {
                 String value = properties.get(PROP_JMS_DESTINATION_TYPE);
