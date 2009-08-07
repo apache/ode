@@ -109,14 +109,14 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
             throw new ExternalVariableModuleException("No valid data source configuration for JDBC external varible " + evarId);
         }
 
-        Connection conn;
+        Connection conn = null;
         DatabaseMetaData metaData;
         try {
             conn = ds.getConnection();
             metaData = conn.getMetaData();
         } catch (Exception ex) {
             try {
-                conn.close();
+                if (conn != null) conn.close();
             } catch (SQLException e) {
                 // ignore
             }
