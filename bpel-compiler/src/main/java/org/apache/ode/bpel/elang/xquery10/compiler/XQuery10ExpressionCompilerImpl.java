@@ -21,7 +21,9 @@ package org.apache.ode.bpel.elang.xquery10.compiler;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -298,14 +300,13 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
     	return null;
     }
     
-    private List<String> getVariableNames(String xquery) {
-    	List<String> variableNames = new ArrayList<String>();
+    protected static Collection<String> getVariableNames(String xquery) {
+    	Collection<String> variableNames = new LinkedHashSet<String>();
     	for (int index = xquery.indexOf("$"); index != -1; index = xquery.indexOf("$")) {
-    		StringBuffer variableName = new StringBuffer();
-    		for (char ch = xquery.charAt(++index); 
-    			XMLChar.isNCName(ch); 
-    			ch = xquery.charAt(++index)) {
-    			variableName.append(ch);
+    		StringBuilder variableName = new StringBuilder();
+    		index++;
+    		while(index < xquery.length() && XMLChar.isNCName(xquery.charAt(index))) {
+    		    variableName.append(xquery.charAt(index++));
     		}
         	variableNames.add(variableName.toString());
         	xquery = xquery.substring(index);
