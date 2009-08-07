@@ -113,9 +113,13 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
         DatabaseMetaData metaData;
         try {
             conn = ds.getConnection();
-            conn.setAutoCommit(false);
             metaData = conn.getMetaData();
         } catch (Exception ex) {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                // ignore
+            }
             throw new ExternalVariableModuleException("Unable to open database connection for external variable " + evarId, ex);
         }
         
@@ -355,7 +359,11 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
             return stmt.executeUpdate();
         } finally {
             if (stmt != null) stmt.close();
-            conn.close();
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                // ignore
+            }
         }
     }
 
@@ -526,7 +534,11 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
             }
         } finally {
             if (stmt != null) stmt.close();
-            conn.close();
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                // ignore
+            }
         }
 
         return ret;
@@ -586,7 +598,11 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
             return keys;
         } finally {
             if (stmt != null) stmt.close();
-            conn.close();
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                // ignore
+            }
         }
     }
 
