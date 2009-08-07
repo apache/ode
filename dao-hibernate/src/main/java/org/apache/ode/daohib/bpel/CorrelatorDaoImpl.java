@@ -39,6 +39,7 @@ import org.apache.ode.utils.CollectionUtils;
 import org.hibernate.Hibernate;
 import org.hibernate.LockMode;
 import org.hibernate.Query;
+import org.hibernate.Session;
 
 import javax.xml.namespace.QName;
 
@@ -219,10 +220,12 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         entering("CorrelatorDaoImpl.removeRoutes");
         String hdr = "removeRoutes(" + routeGroupId + ", iid=" + target.getInstanceId() + "): ";
         __log.debug(hdr);
-        Query q = getSession().createQuery(QRY_DELSELECTORS);
+        Session session = getSession();
+        Query q = session.createQuery(QRY_DELSELECTORS);
         q.setString(0, routeGroupId); // groupId
         q.setEntity(1, ((ProcessInstanceDaoImpl) target).getHibernateObj()); // instance
         int updates = q.executeUpdate();
+        session.flush(); // explicit flush to ensure route removed
         __log.debug(hdr + "deleted " + updates + " rows");
 
     }

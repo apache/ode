@@ -111,12 +111,17 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
     }
 
     void removeLocalRoutes(String routeGroupId, ProcessInstanceDAO target) {
+        boolean flush = false;
         for (Iterator<MessageRouteDAOImpl> itr=_routes.iterator(); itr.hasNext(); ) {
             MessageRouteDAOImpl mr = itr.next();
             if ( mr.getGroupId().equals(routeGroupId) && mr.getTargetInstance().equals(target)) {
                 itr.remove();
                 getEM().remove(mr);
+                flush = true;
             }
+        }
+        if (flush) {
+            getEM().flush();
         }
     }
 }
