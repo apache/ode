@@ -44,10 +44,11 @@ public interface ExtensionOperation {
      * access to <code>element</code> if necessary. 
      * 
      * @param context injected ExtensionContext
+     * @param cid channel id (needed for async completion)
      * @param element the extension element (child of <code>extensionActivity</code> 
      * or <code>extensionAssignOperation</code> 
      * @throws FaultException
      */
-    void run(Object context, Element element) throws FaultException;
+    void run(Object context, String cid, Element element) throws FaultException;
     
 }

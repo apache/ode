@@ -139,19 +139,19 @@ public interface ExtensionContext {
     /**
      * Marks the currently executed activity as successfully completed.
      */
-    void complete();
+    void complete(String cid);
     
     /**
      * Marks the currently executed activity as faulted.
      * @param t an exception to be reported as the fault cause.
      */
-    void completeWithFault(Throwable t);
+    void completeWithFault(String cid, Throwable t);
 
     /**
      * Marks the currently executed activity as faulted.
      * @param fault a fault.
      */
-    void completeWithFault(FaultException fault);
+    void completeWithFault(String cid, FaultException fault);
 
     /*
      * Low-level-methods

@@ -31,16 +31,16 @@ public abstract class AbstractSyncExtensionOperation implements ExtensionOperati
 
 	protected abstract void runSync(ExtensionContext context, Element element) throws FaultException;
 	
-	public void run(Object contexto, Element element)
+	public void run(Object contexto, String cid, Element element)
 			throws FaultException {
         ExtensionContext context = (ExtensionContext) contexto;
 		try {
 			runSync(context, element);
-			context.complete();
+			context.complete(cid);
 		} catch (FaultException f) {
-			context.completeWithFault(f);
+			context.completeWithFault(cid, f);
 		} catch (Exception e) {
-			context.completeWithFault(e);
+			context.completeWithFault(cid, e);
 		}
 	}
 }

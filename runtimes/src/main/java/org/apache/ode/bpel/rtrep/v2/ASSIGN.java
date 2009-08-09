@@ -18,26 +18,25 @@
  */
 package org.apache.ode.bpel.rtrep.v2;
 
-import java.util.List;
 import java.net.URI;
 
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
+import org.apache.ode.bpel.evt.CorrelationSetWriteEvent;
 import org.apache.ode.bpel.evt.PartnerLinkModificationEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
-import org.apache.ode.bpel.evt.CorrelationSetWriteEvent;
-import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
-import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
-import org.apache.ode.bpel.rtrep.common.extension.ExtensibilityQNames;
 import org.apache.ode.bpel.extension.ExtensionOperation;
+import org.apache.ode.bpel.rtrep.common.extension.ExtensibilityQNames;
+import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
+import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
-import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -330,14 +329,14 @@ class ASSIGN extends ACTIVITY {
                     }
                 }
                 // act like <empty> - do nothing
-                context.complete();
+                context.complete(_self.parent.export());
                 return;
             }
 
-            ea.run(context, eao.nestedElement.getElement());
+            ea.run(context, _self.parent.export(), eao.nestedElement.getElement());
         } catch (FaultException fault) {
             __log.error(fault);
-            context.completeWithFault(fault);
+            context.completeWithFault(_self.parent.export(), fault);
         }
     }
 

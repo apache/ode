@@ -415,6 +415,20 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
             }
         }
     }
+    
+    public void completeExtensionActivity(final String channelId, final FaultData faultData) {
+        _vpu.inject(new JacobRunnable() {
+			private static final long serialVersionUID = 5198590543947804763L;
+
+            public void run() {
+                ParentScopeChannel channel = importChannel(channelId, ParentScopeChannel.class);
+                if (channel == null) {
+                	throw new RuntimeException("Could not resolve channel ID (" + channelId + ") for extension activity.");
+                }
+                channel.completed(faultData, CompensationHandler.emptySet());
+            }
+        });
+    }
 
     /**
      * Proxy to {@link ProcessControlContext# }.

@@ -544,4 +544,8 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	public void completeExtensionActivity(String channelId, FaultData faultData) {
+		// TODO Auto-generated method stub
+	}
 }

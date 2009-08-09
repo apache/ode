@@ -122,17 +122,17 @@ public class ExtensibilityTest extends BPELTestAbstract {
 	public static class TestExtensionActivity implements ExtensionOperation {
 		private static final long serialVersionUID = 1L;
 
-		public void run(Object context,
+		public void run(Object context, String cid,
 				Element element) throws FaultException {
 			TestExtensionBundle.wasExecuted = true;
-			((ExtensionContext)context).complete();
+			((ExtensionContext)context).complete(cid);
 		}
 	}
 	
 	public static class TestExtensionAssignOperation implements ExtensionOperation {
 		private static final long serialVersionUID = 1L;
 
-		public void run(Object contexto, Element element)
+		public void run(Object contexto, String cid, Element element)
 				throws FaultException {
             ExtensionContext context = (ExtensionContext) contexto;
 			//Node val = context.readVariable("myVar");
@@ -144,7 +144,7 @@ public class ExtensibilityTest extends BPELTestAbstract {
 				e.printStackTrace();
 				Assert.fail();
 			} finally {
-				context.complete();
+				context.complete(cid);
 			}
 		}
 	}
@@ -152,10 +152,10 @@ public class ExtensibilityTest extends BPELTestAbstract {
 	public static class TestExtensionValidatorActivity extends AbstractAsyncExtensionOperation {
 		private static final long serialVersionUID = 1L;
 
-		public void run(Object context,
+		public void run(Object context, String cid,
 				Element element) throws FaultException {
 			TestExtensionBundle.wasExecuted = true;
-			((ExtensionContext)context).complete();
+			((ExtensionContext)context).complete(cid);
 		}
 
 		public void validate(CompilerContext context, ExtensibleElement element)

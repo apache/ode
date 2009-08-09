@@ -55,14 +55,14 @@ public class EXTENSIONACTIVITY extends ACTIVITY {
                     }
                 }
                 // act like <empty> - do nothing
-                context.complete();
+                context.complete(_self.parent.export());
                 return;
             }
 
-            ea.run(context, oea.nestedElement.getElement());
+            ea.run(context, _self.parent.export(), oea.nestedElement.getElement());
         } catch (FaultException fault) {
             __log.error(fault);
-            context.completeWithFault(fault);
+            context.completeWithFault(_self.parent.export(), fault);
         }
 
     }

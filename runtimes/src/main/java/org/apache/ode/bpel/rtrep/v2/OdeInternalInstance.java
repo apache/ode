@@ -129,6 +129,8 @@ public interface OdeInternalInstance {
     Node fetchVariableData(VariableInstance variable, ScopeFrame scopeFrame, boolean forWriting) throws FaultException;
 
     ExtensionOperation createExtensionActivityImplementation(QName name);
+    
+    void completeExtensionActivity(String channelId, FaultData faultData);
 
     void terminate();
 

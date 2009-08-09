@@ -100,16 +100,16 @@ public class MockExtensionContext implements ExtensionContext {
 		throw new UnsupportedOperationException("This method is not available in this mock implementation.");
 	}
 
-	public void complete() {
+	public void complete(String cid) {
 		this.completed = true;
 	}
 
-	public void completeWithFault(Throwable t) {
+	public void completeWithFault(String cid, Throwable t) {
 		this.completed = true;
 		this.faulted = true;
 	}
 
-	public void completeWithFault(FaultException fault) {
+	public void completeWithFault(String cid, FaultException fault) {
 		this.completed = true;
 		this.faulted = true;
 		this.fault = fault;

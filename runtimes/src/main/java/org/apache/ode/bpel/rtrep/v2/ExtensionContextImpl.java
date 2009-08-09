@@ -142,9 +142,9 @@ public class ExtensionContextImpl implements ExtensionContext {
         _context.sendEvent(event);
 	}
 	
-	public void complete() {
+	public void complete(String cid) {
 		if (!hasCompleted) {
-			_activityInfo.parent.completed(null, CompensationHandler.emptySet());
+			_context.completeExtensionActivity(cid, null);
 			hasCompleted = true;
 		} else {
 			if (__log.isWarnEnabled()) {
@@ -153,13 +153,13 @@ public class ExtensionContextImpl implements ExtensionContext {
 		}
 	}
 	
-	public void completeWithFault(Throwable t) {
+	public void completeWithFault(String cid, Throwable t) {
 		if (!hasCompleted) {
 			StringWriter sw = new StringWriter();
 			t.printStackTrace(new PrintWriter(sw));
 			FaultData fault = new FaultData(new QName(Namespaces.WSBPEL2_0_FINAL_EXEC, "subLanguageExecutionFault"),
                     _activityInfo.o, sw.getBuffer().toString());
-	        _activityInfo.parent.completed(fault, CompensationHandler.emptySet());
+			_context.completeExtensionActivity(cid, fault);
 			hasCompleted = true;
 		} else {
 			if (__log.isWarnEnabled()) {
@@ -168,10 +168,10 @@ public class ExtensionContextImpl implements ExtensionContext {
 		}
 	}
 	
-	public void completeWithFault(FaultException ex) {
+	public void completeWithFault(String cid, FaultException ex) {
 		if (!hasCompleted) {
 			FaultData fault = new FaultData(ex.getQName(), _activityInfo.o, ex.getMessage());
-			_activityInfo.parent.completed(fault, CompensationHandler.emptySet());
+			_context.completeExtensionActivity(cid, fault);
 			hasCompleted = true;
 		} else {
 			if (__log.isWarnEnabled()) {

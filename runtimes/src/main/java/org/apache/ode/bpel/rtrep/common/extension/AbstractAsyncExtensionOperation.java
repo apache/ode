@@ -29,7 +29,7 @@ import org.w3c.dom.Element;
  */
 public abstract class AbstractAsyncExtensionOperation implements ExtensionOperation {
 
-	public abstract void run(Object context, Element element)
+	public abstract void run(Object context, String cid, Element element)
 			throws FaultException;
 	
 }
