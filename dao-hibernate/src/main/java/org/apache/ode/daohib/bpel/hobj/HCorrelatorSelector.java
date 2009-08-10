@@ -32,6 +32,7 @@ public class HCorrelatorSelector extends HObject {
     private String _groupId;
     private int _idx;
     private HCorrelator _correlator;
+    private String _correlatorId;
     private String _correlationKey;
     private String _processType;
     private String _routePolicy;
@@ -126,6 +127,17 @@ public class HCorrelatorSelector extends HObject {
 
     public void setCorrelator(HCorrelator correlator) {
         _correlator = correlator;
+    }
+
+    /**
+     * @hibernate.property column="CORRELATOR" not-null="true" insert="false" update="false"
+     */
+    public String getCorrelatorId() {
+        return _correlatorId;
+    }
+
+    public void setCorrelatorId(String correlatorId) {
+        this._correlatorId = correlatorId;
     }
 
 }
