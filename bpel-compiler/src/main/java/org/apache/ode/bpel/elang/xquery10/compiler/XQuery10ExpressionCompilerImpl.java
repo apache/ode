@@ -271,6 +271,7 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
         } catch (XQException xqe) {
             __log.debug(xqe);
             __log.info("Couldn't validate properly expression " + xqueryStr);
+            throw new CompilationException(__msgs.errXQuery10Syntax(xqueryStr, "Couldn't validate XQuery expression"));
         } catch (WrappedResolverException wre) {
             if (wre._compilationMsg != null)
                 throw new CompilationException(wre._compilationMsg, wre);

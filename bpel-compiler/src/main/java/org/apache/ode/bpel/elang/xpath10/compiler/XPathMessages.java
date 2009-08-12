@@ -87,6 +87,12 @@ public class XPathMessages extends CompilationMessageBundle {
                 "The string \"{0}\" is not a valid XPath 2.0 expression: {1}", xPathString, message);
     }
 
+    /** The string "{0}" is not a valid XQuery 1.0 expression. */
+    public CompilationMessage errXQuery10Syntax(String xQueryString, String message) {
+        return super.formatCompilationMessage(
+                "The string \"{0}\" is not a valid XQuery 1.0 expression: {1}", xQueryString, message);
+    }
+    
     /** The XPath node with value "{0}" was not a text node. */
     public CompilationMessage errUnexpectedNodeTypeForXPath(String string) {
         return super.formatCompilationMessage(
