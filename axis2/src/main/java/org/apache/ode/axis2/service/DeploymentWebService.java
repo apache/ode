@@ -317,8 +317,13 @@ public class DeploymentWebService {
         }
 
         private boolean validBundleName(String bundle) {
-            if (StringUtils.isBlank(bundle)) return false;
-            return bundle.matches("[\\p{L}0-9_\\-]*");
+            boolean valid;
+            if (StringUtils.isBlank(bundle)) valid = false;
+            else valid = bundle.matches("[\\p{L}0-9_\\-]*");
+            if (__log.isDebugEnabled()) {
+                __log.debug("Validating bundle " + bundle + " valid: " + valid);
+            }
+            return valid;
         }
     }
 

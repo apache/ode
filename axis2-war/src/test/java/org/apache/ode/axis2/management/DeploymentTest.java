@@ -33,6 +33,8 @@ import static org.testng.AssertJUnit.*;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.xml.namespace.QName;
 import java.io.ByteArrayOutputStream;
@@ -41,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class DeploymentTest extends Axis2TestBase {
+    private static final Log __log = LogFactory.getLog(DeploymentTest.class);
 
     private OMFactory _factory;
     private ServiceClientUtil _client;
@@ -148,7 +151,8 @@ public class DeploymentTest extends Axis2TestBase {
             undeploy(null);
             fail("Undeploying a null or empty package must fail");
         } catch (Exception e) {
-            String expectedMsg = "Empty package name received!";
+            __log.debug("got exception from deployment" + e.getMessage());
+            String expectedMsg = "Invalid bundle name";
             assertTrue("Unexpected exception received", e.getMessage().contains("operation undeploy") && e.getMessage().contains(expectedMsg));
         }
     }
