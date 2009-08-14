@@ -41,7 +41,10 @@ import javax.wsdl.*;
 import javax.wsdl.extensions.ExtensibilityElement;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamSource;
 
+import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.io.IOException;
 import java.net.URI;
@@ -296,8 +299,27 @@ class WSDLRegistry {
         return null;
     }
 
+    /**
+     * @return All parsed schemas. This doesn't include schemas from bpel imports.
+     */
 	Map<URI, Document> getSchemaDocuments() {
 		return _documentSchemas;
 	}
 
+	/**
+	 * @return All captured schema sources including those from bpel imports.
+	 */
+	Map<URI, Source> getSchemaSources() {
+        Map<URI, Source> schemaSources = new HashMap<URI, Source>();
+        for (URI uri : _documentSchemas.keySet()) {
+            Document document = _documentSchemas.get(uri);
+            schemaSources.put(uri, new DOMSource(document));
+        }
+
+        for (URI uri : _schemas.keySet()) {
+            schemaSources.put(uri, new StreamSource(new ByteArrayInputStream(_schemas.get(uri))));
+        }
+        
+        return schemaSources;
+	}
 }

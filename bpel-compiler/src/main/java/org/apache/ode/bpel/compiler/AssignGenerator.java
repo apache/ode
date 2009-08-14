@@ -34,6 +34,7 @@ import org.apache.ode.bpel.compiler.bom.VariableVal;
 import org.apache.ode.bpel.o.DebugInfo;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OAssign;
+import org.apache.ode.bpel.o.OVarType;
 import org.apache.ode.bpel.o.OAssign.RValue;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.utils.DOMUtils;
@@ -71,13 +72,15 @@ class AssignGenerator extends DefaultActivityGenerator {
             ocopy.debugInfo = new DebugInfo(_context.getSourceLocation(), scopy.getLineNo(),
                     source.getExtensibilityElements());
             try {
-                if (scopy.getFrom() == null)
-                    throw new CompilationException(__cmsgs.errMissingFromSpec().setSource(scopy));
-                ocopy.from = compileFrom(scopy.getFrom());
                 if (scopy.getTo() == null)
                     throw new CompilationException(__cmsgs.errMissingToSpec().setSource(scopy));
-                ocopy.to = compileTo(scopy.getTo());
+                Object[] toResultType = new Object[1];
+                ocopy.to = compileTo(scopy.getTo(), toResultType);
 
+                if (scopy.getFrom() == null)
+                    throw new CompilationException(__cmsgs.errMissingFromSpec().setSource(scopy));
+                ocopy.from = compileFrom(scopy.getFrom(), toResultType[0]);
+                
                 verifyCopy(ocopy);
                 oassign.copy.add(ocopy);
 
@@ -150,7 +153,7 @@ class AssignGenerator extends DefaultActivityGenerator {
         __log.debug("Copy verified OK: " + ocopy);
     }
 
-    private OAssign.RValue compileFrom(From from) {
+    private OAssign.RValue compileFrom(From from, Object requestedResultType) {
         assert from != null;
         try {
             if (from.isExtensionVal()) {
@@ -167,16 +170,19 @@ class AssignGenerator extends DefaultActivityGenerator {
                 VariableVal vv = from.getAsVariableVal();
                 OAssign.VariableRef vref = new OAssign.VariableRef(_context.getOProcess());
                 vref.variable = _context.resolveVariable(vv.getVariable());
+                OVarType rootNodeType = vref.variable.type;
                 if (vv.getPart() != null) {
                     vref.part = _context.resolvePart(vref.variable, vv.getPart());
+                    rootNodeType = vref.part.type;
                 }
                 if (vv.getHeader() != null) {
                     vref.headerPart = _context.resolveHeaderPart(vref.variable, vv.getHeader());
                     if (vref.headerPart == null)
                         vref.headerPart = new OMessageVarType.Part(_context.getOProcess(), vv.getHeader(), null);
+                    rootNodeType = vref.headerPart.type;
                 }
                 if (vv.getLocation() != null && vv.getLocation().getExpression() != null)
-                    vref.location = _context.compileExpr(vv.getLocation());
+                    vref.location = _context.compileExpr(vv.getLocation(), rootNodeType, requestedResultType, new Object[1]);
                 return vref;
             } else if (from.isPartnerLinkVal()) {
                 PartnerLinkVal plv = from.getAsPartnerLinkVal();
@@ -185,7 +191,7 @@ class AssignGenerator extends DefaultActivityGenerator {
                 plref.isMyEndpointReference = (plv.getEndpointReference() == PartnerLinkVal.EndpointReference.MYROLE);
                 return plref;
             } else if (from.getAsExpression() != null) {
-                return new OAssign.Expression(_context.getOProcess(), _context.compileExpr(from.getAsExpression()));
+                return new OAssign.Expression(_context.getOProcess(), _context.compileExpr(from.getAsExpression(), null, requestedResultType, new Object[1]));
             }
 
             throw new CompilationException(__cmsgs.errUnkownFromSpec().setSource(from));
@@ -219,7 +225,7 @@ class AssignGenerator extends DefaultActivityGenerator {
         return new OAssign.Literal(_context.getOProcess(), newDoc);
     }
 
-    private OAssign.LValue compileTo(To to) {
+    private OAssign.LValue compileTo(To to, Object[] resultType) {
         assert to != null;
 
         try {
@@ -232,16 +238,20 @@ class AssignGenerator extends DefaultActivityGenerator {
                 VariableVal vv = to.getAsVariableVal();
                 OAssign.VariableRef vref = new OAssign.VariableRef(_context.getOProcess());
                 vref.variable = _context.resolveVariable(vv.getVariable());
+                OVarType rootNodeType = vref.variable.type;
                 if (to.getAsVariableVal().getPart() != null) {
                     vref.part = _context.resolvePart(vref.variable, vv.getPart());
+                    rootNodeType = vref.part.type;
                 }
                 if (to.getAsVariableVal().getHeader() != null) {
                     vref.headerPart = _context.resolveHeaderPart(vref.variable, vv.getHeader());
                     if (vref.headerPart == null)
                         vref.headerPart = new OMessageVarType.Part(_context.getOProcess(), to.getAsVariableVal().getHeader(), null);
+                    rootNodeType = vref.headerPart.type;
                 }
+                resultType[0] = rootNodeType;
                 if (vv.getLocation() != null && vv.getLocation().getExpression() != null)
-                    vref.location = _context.compileExpr(vv.getLocation());
+                    vref.location = _context.compileExpr(vv.getLocation(), rootNodeType, null, resultType);
                 return vref;
             } else if (to.isPartnerLinkVal()) {
                 OAssign.PartnerLinkRef plref = new OAssign.PartnerLinkRef(_context.getOProcess());
@@ -249,7 +259,7 @@ class AssignGenerator extends DefaultActivityGenerator {
                 return plref;
             } else if (to.getAsExpression() != null){
                 return new OAssign.LValueExpression(_context.getOProcess(), _context
-                        .compileLValueExpr(to.getAsExpression()));
+                        .compileLValueExpr(to.getAsExpression(), null, null, resultType));
             }
 
             throw new CompilationException(__cmsgs.errUnknownToSpec().setSource(to));

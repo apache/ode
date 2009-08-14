@@ -52,6 +52,7 @@ import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.compiler.api.ExpressionCompiler;
+import org.apache.ode.bpel.compiler.api.ExpressionValidator;
 import org.apache.ode.bpel.compiler.api.SourceLocation;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.Bpel11QNames;
@@ -171,6 +172,8 @@ abstract class BpelCompiler implements CompilerContext {
     private final HashMap<String, ExpressionCompiler> _expLanguageCompilers = new HashMap<String, ExpressionCompiler>();
 
     private final HashMap<String, OExpressionLanguage> _expLanguages = new HashMap<String, OExpressionLanguage>();
+    
+    private ExpressionValidatorFactory _expressionValidatorFactory = new ExpressionValidatorFactory(System.getProperties());
 
     private WSDLFactory4BPEL _wsdlFactory;
 
@@ -532,30 +535,45 @@ abstract class BpelCompiler implements CompilerContext {
     }
 
     public OLValueExpression compileLValueExpr(Expression expression) throws CompilationException {
-        return (OLValueExpression) compileExpr(expression, false, true);
+        return compileLValueExpr(expression, null, null, new Object[1]);
+    }
+
+    public OLValueExpression compileLValueExpr(Expression expression, OVarType rootNodeType, Object requestedResultType, Object[] resultType) throws CompilationException {
+        return (OLValueExpression) compileExpr(expression, false, true, rootNodeType, requestedResultType, resultType);
     }
 
     public OExpression compileJoinCondition(Expression expression) throws CompilationException {
-        return compileExpr(expression, true, false);
+        return compileExpr(expression, true, false, null, null, new Object[1]);
     }
 
     public OExpression compileExpr(Expression expression) throws CompilationException {
-        return compileExpr(expression, false, false);
+        return compileExpr(expression, null, null, new Object[1]);
+    }
+    
+    public OExpression compileExpr(Expression expression, OVarType rootNodeType, Object requestedResultType, Object[] resultType) throws CompilationException {
+        return compileExpr(expression, false, false, rootNodeType, requestedResultType, resultType);
     }
 
     public OExpression compileExpr(String expr, NSContext nc) {
         // Does this really work?
         BpelObject cur = _structureStack.topSource();
-        return compileExpr(new Expression11(cur.getElement(),cur.getElement().getOwnerDocument().createTextNode(expr)),false,false);
+        return compileExpr(new Expression11(cur.getElement(),cur.getElement().getOwnerDocument().createTextNode(expr)), false, false, null, null, new Object[1]);
     }
 
-    private OExpression compileExpr(Expression expression, boolean isJoinCondition, boolean isLValue) {
+    private OExpression compileExpr(Expression expression, boolean isJoinCondition, boolean isLValue, OVarType rootNodeType, Object requestedResultType, Object[] resultType) {
         String expLang = getExpressionLanguage(expression);
         ExpressionCompiler ec = findExpLangCompiler(expLang);
         ec.setCompilerContext(this);
+        ExpressionValidator ev = _expressionValidatorFactory.getValidator();
 
         try {
-            OExpression oexpr = (isJoinCondition) ? ec.compileJoinCondition(expression) : ec.compile(expression);
+            OExpression oexpr;
+            if (isJoinCondition) {
+                oexpr = ec.compileJoinCondition(expression);
+            } else {
+                oexpr = ec.compile(expression);
+                resultType[0] = ev.validate(expression, rootNodeType, requestedResultType);
+            }
 
             oexpr.debugInfo = createDebugInfo(expression, expression.toString());
 
@@ -683,6 +701,8 @@ abstract class BpelCompiler implements CompilerContext {
             }
         }
 
+        _expressionValidatorFactory.getValidator().bpelImportsLoaded(_processDef, this);
+        
         switch (_processDef.getSuppressJoinFailure()) {
         case NO:
         case NOTSET:
@@ -748,6 +768,8 @@ abstract class BpelCompiler implements CompilerContext {
         
         XslTransformHandler.getInstance().clearXSLSheets(_oprocess.getQName());
 
+        _expressionValidatorFactory.getValidator().bpelCompilationCompleted(_processDef);
+        
         if (hasErrors) {
             throw new CompilationException(__cmsgs.errCompilationErrors(_errors.size(), sb.toString()));
         }
@@ -781,7 +803,7 @@ abstract class BpelCompiler implements CompilerContext {
     }
     
     private String getOdeNamespace() {
-    	return Namespaces.ODE_EXTENSION_NS;
+        return Namespaces.ODE_EXTENSION_NS;
     }
 
     // TODO unused?
@@ -975,6 +997,7 @@ abstract class BpelCompiler implements CompilerContext {
         }
 
         OMessageVarType messageType = resolveMessageType(src.getMessageType());
+        OVarType rootNodeType = messageType;
         alias.varType = messageType;
         // bpel 2.0 excludes declaration of part;
         // bpel 1.1 requires it
@@ -983,9 +1006,10 @@ abstract class BpelCompiler implements CompilerContext {
             if (alias.part == null)
                 throw new CompilationException(__cmsgs.errUnknownPartInAlias(src.getPart(),
                         messageType.messageType.toString()));
+            rootNodeType = alias.part.type;
         }
         if (src.getQuery() != null)
-            alias.location = compileExpr(src.getQuery());
+            alias.location = compileExpr(src.getQuery(), rootNodeType, null, new Object[1]);
         property.aliases.add(alias);
         alias.debugInfo = createDebugInfo(_processDef, src.getMessageType() + " --> " + src.getPropertyName());
         return alias;
@@ -1298,12 +1322,12 @@ abstract class BpelCompiler implements CompilerContext {
 
                 Set<String> csetNames = new HashSet<String>(); // prevents duplicate cset in on one set of correlations
                 for (Correlation correlation : onEvent.getCorrelations()) {
-                	if( csetNames.contains(correlation.getCorrelationSet() ) ) {
+                    if( csetNames.contains(correlation.getCorrelationSet() ) ) {
                         throw new CompilationException(__cmsgs.errDuplicateUseCorrelationSet(correlation
                                 .getCorrelationSet()));
-                	}
+                    }
 
-                	OScope.CorrelationSet cset = resolveCorrelationSet(correlation.getCorrelationSet());
+                    OScope.CorrelationSet cset = resolveCorrelationSet(correlation.getCorrelationSet());
 
                     switch (correlation.getInitiate()) {
                     case UNSET:
@@ -1315,7 +1339,7 @@ abstract class BpelCompiler implements CompilerContext {
                         oevent.initCorrelations.add(cset);
                         break;
                     case JOIN:
-                    	cset.hasJoinUseCases = true;
+                        cset.hasJoinUseCases = true;
                         oevent.joinCorrelations.add(cset);
                         oevent.partnerLink.addCorrelationSetForOperation(oevent.operation, cset, true);
                     }
@@ -1678,26 +1702,20 @@ abstract class BpelCompiler implements CompilerContext {
         return rval;
     }
     
-    public Map<URI, Source> getSchemaSources() {    	
-    	Map<URI, Document> schemaBytes = _wsdlRegistry.getSchemaDocuments();
-    	Map<URI, Source> schemaSources = new HashMap<URI, Source>();
-    	for (URI uri : schemaBytes.keySet()) {
-    		Document document = schemaBytes.get(uri);
-    		schemaSources.put(uri, new DOMSource(document));
-    	}
-    	return schemaSources;
+    public Map<URI, Source> getSchemaSources() {        
+        return _wsdlRegistry.getSchemaSources();
     }
     
-	/**
-	 * Retrieves the base URI that the BPEL Process execution contextis running relative to.
-	 * 
-	 * @return URI - the URI representing the absolute physical file path location that this process is defined within.
-	 * @throws IOException 
-	 * @throws MalformedURLException 
-	 */
-	 public URI getBaseResourceURI() {
-		return _resourceFinder.getBaseResourceURI();
-	}
+    /**
+     * Retrieves the base URI that the BPEL Process execution contextis running relative to.
+     * 
+     * @return URI - the URI representing the absolute physical file path location that this process is defined within.
+     * @throws IOException 
+     * @throws MalformedURLException 
+     */
+     public URI getBaseResourceURI() {
+        return _resourceFinder.getBaseResourceURI();
+    }
     
 
     /**
@@ -1714,10 +1732,10 @@ abstract class BpelCompiler implements CompilerContext {
         oextvar.debugInfo = createDebugInfo(src, null);
 
         if (src.getExternalId() == null)
-        	throw new CompilationException(__cmsgs.errMustSpecifyExternalVariableId(src.getName()));
-        	
+            throw new CompilationException(__cmsgs.errMustSpecifyExternalVariableId(src.getName()));
+            
         if (src.getRelated() == null)
-        	throw new CompilationException(__cmsgs.errMustSpecifyRelatedVariable(src.getName()));
+            throw new CompilationException(__cmsgs.errMustSpecifyRelatedVariable(src.getName()));
         oextvar.related = resolveVariable(src.getRelated());
         
         return oextvar;

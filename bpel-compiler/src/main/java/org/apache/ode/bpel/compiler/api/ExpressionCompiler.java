@@ -20,6 +20,7 @@ package org.apache.ode.bpel.compiler.api;
 
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLValueExpression;
+import org.apache.ode.bpel.o.OVarType;
 
 import java.util.Map;
 

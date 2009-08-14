@@ -162,7 +162,7 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
         }
 
         try {
-        	XQDataSource xqds = new SaxonXQDataSource();
+        	XQDataSource xqds = new SaxonXQDataSource(new Configuration());
             XQConnection xqconn = xqds.getConnection();
             
             __log.debug("Compiling expression " + xqueryStr);
@@ -196,12 +196,12 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
             declarations.declareVariable(
             		getQName(nsContext, Namespaces.ODE_EXTENSION_NS, "pid"), 
             		getQName(nsContext, Namespaces.XML_SCHEMA, "integer"));
-            Map<URI, Source> schemaDocuments = _compilerContext.getSchemaSources();
-            for (URI schemaUri : schemaDocuments.keySet()) {
-            	Source schemaSource = schemaDocuments.get(schemaUri);
-            	// Don't add schema sources, since our Saxon library is not schema-aware. 
-            	// configuration.addSchemaSource(schemaSource);
-            }
+//            Map<URI, Source> schemaDocuments = _compilerContext.getSchemaSources();
+//            for (URI schemaUri : schemaDocuments.keySet()) {
+//            	Source schemaSource = schemaDocuments.get(schemaUri);
+//            	// Don't add schema sources, since our Saxon library is not schema-aware. 
+//            	// configuration.addSchemaSource(schemaSource);
+//            }
             configuration.setSchemaValidationMode(Validation.SKIP);
             List<OScope.Variable> variables = _compilerContext.getAccessibleVariables();
             Map<QName, QName> variableTypes = new HashMap<QName, QName>();

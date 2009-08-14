@@ -37,6 +37,7 @@ import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OVarType;
 import org.apache.ode.bpel.o.OXsdTypeVarType;
 import org.apache.ode.bpel.o.OXslSheet;
 import org.apache.ode.bpel.o.OScope.Variable;
@@ -56,9 +57,15 @@ public interface CompilerContext {
             throws CompilationException;
 
     OExpression compileExpr(Expression expr)
+    throws CompilationException;
+    
+    OExpression compileExpr(Expression expr, OVarType rootNodeType, Object requestedResultType, Object[] resultType)
             throws CompilationException;
 
     OLValueExpression compileLValueExpr(Expression expr)
+    throws CompilationException;
+    
+    OLValueExpression compileLValueExpr(Expression expr, OVarType rootNodeType, Object requestedResultType, Object[] resultType)
             throws CompilationException;
 
     /**
