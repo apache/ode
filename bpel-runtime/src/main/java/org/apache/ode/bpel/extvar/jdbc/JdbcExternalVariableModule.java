@@ -221,13 +221,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
                 throw new ExternalVariableModuleException("External variable " + evarId + " did not have any <column> elements!");
 
             _vars.put(evarId, dbev);
-            
-            conn.commit();
         } catch (SQLException se) {
-        	try {
-	        	conn.rollback();
-        	} catch (SQLException e) {        		
-        	}
             throw new ExternalVariableModuleException("SQL Error", se);
         } finally {
             try {
