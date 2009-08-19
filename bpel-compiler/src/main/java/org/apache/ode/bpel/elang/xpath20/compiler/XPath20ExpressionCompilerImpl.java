@@ -194,11 +194,11 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
 		int firstVariable = xpathStr.indexOf("$"), 
 			lastVariable = xpathStr.lastIndexOf("$"),
 			firstFunction = xpathStr.indexOf("("); 
+		StringBuffer variableExpr = new StringBuffer();
 		if ((firstVariable > 0 && // the xpath references a variable
 				firstFunction > 0) || // the xpath contains a function
 			(firstVariable < lastVariable)) { // the xpath references multiple variables  
 			// most likely, the variable reference has not been resolved, so make that happen
-			StringBuffer variableExpr = new StringBuffer();
 			boolean quoted = false, doubleQuoted = false, variable = false;
 			Name11Checker nameChecker = Name11Checker.getInstance();
 			for (int index = 0; index < xpathStr.length(); index++) {
@@ -228,9 +228,13 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
 							variable = false;
 							variableExpr.setLength(variableExpr.length() - 1);
 							variableExprs.add(variableExpr.toString());
+							variableExpr.setLength(0);
 						}
 					}
 				}
+			}
+			if (variableExpr.length() > 0) {
+				variableExprs.add(variableExpr.toString());
 			}
 		}
 		return variableExprs;
