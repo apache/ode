@@ -634,6 +634,8 @@ define "ode-extensions", :base_dir => "extensions" do
   end
 end
 
+task :default => "ode-extensions:package"
+
 define "apache-ode" do
   [:version, :group, :manifest, :meta_inf].each { |prop| send "#{prop}=", project("ode").send(prop) }
 
