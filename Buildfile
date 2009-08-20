@@ -675,12 +675,13 @@ define "apache-ode" do
         zip.include(project.path_to("target/LICENSE"))
 
         # Tools scripts (like bpelc and sendsoap)
-        mkdir_p project.path_to("target/bin")
         bins = file(project.path_to("target/bin")=>FileList[project.path_to("src/bin/*")]) do |task|
+          mkdir_p project.path_to("target/bin")
           mkpath task.name
           cp task.prerequisites, task.name
           chmod 0755, FileList[task.name + "/*"], :verbose=>false
         end
+        bins.invoke
         zip.include(bins)
 
         # Include supported database schemas
@@ -692,6 +693,9 @@ define "apache-ode" do
 
         project.check zip, "should contain mysql.sql" do
           it.should contain("sql/mysql.sql")
+        end
+        project.check zip, "should contain sendsoap.bat" do
+          it.should contain("bin/sendsoap.bat")
         end
       end
     end
