@@ -46,7 +46,7 @@ public class JSOperationTest {
 		c.getVariables().put("request", DOMUtils.stringToDOM("<message><TestPart>Hello</TestPart></message>"));
 		JSExtensionOperation jso = new JSExtensionOperation();
 		Element e = DOMUtils.stringToDOM("<js:script xmlns:js=\"js\"><![CDATA[" + s + "]]></js:script>");
-		jso.run(c, e);
+		jso.run(c, null, e);
 		String res = DOMUtils.domToString(c.getVariables().get("request"));
 		Assert.assertTrue(c.completed);
 		Assert.assertFalse(c.faulted);
@@ -61,7 +61,7 @@ public class JSOperationTest {
 		c.getVariables().put("request", DOMUtils.stringToDOM("<message><TestPart>Hello</TestPart></message>"));
 		JSExtensionOperation jso = new JSExtensionOperation();
 		Element e = DOMUtils.stringToDOM("<js:script xmlns:js=\"js\"><![CDATA[" + s + "]]></js:script>");
-		jso.run(c, e);
+		jso.run(c, null, e);
 		String res = DOMUtils.domToString(c.getVariables().get("request"));
 		Assert.assertTrue(c.completed);
 		Assert.assertFalse(c.faulted);
@@ -81,7 +81,7 @@ public class JSOperationTest {
 		c.getVariables().put("items", DOMUtils.stringToDOM("<message><TestPart><items><item><name>WSDL consulting</name><price>2500</price></item></items></TestPart></message>"));
 		JSExtensionOperation jso = new JSExtensionOperation();
 		Element e = DOMUtils.stringToDOM("<js:script xmlns:js=\"js\"><![CDATA[" + s + "]]></js:script>");
-		jso.run(c, e);
+		jso.run(c, null, e);
 		String res = DOMUtils.domToString(c.getVariables().get("items"));
 		Assert.assertTrue(c.completed);
 		Assert.assertFalse(c.faulted);
@@ -98,7 +98,7 @@ public class JSOperationTest {
 		c.getVariables().put("items", DOMUtils.stringToDOM("<message><TestPart><items><item><name>WSDL consulting</name><price>2500</price></item></items></TestPart></message>"));
 		JSExtensionOperation jso = new JSExtensionOperation();
 		Element e = DOMUtils.stringToDOM("<js:script xmlns:js=\"js\"><![CDATA[" + s + "]]></js:script>");
-		jso.run(c, e);
+		jso.run(c, null, e);
 		String res = DOMUtils.domToString(c.getVariables().get("items"));
 		Assert.assertTrue(c.completed);
 		Assert.assertFalse(c.faulted);
@@ -112,7 +112,7 @@ public class JSOperationTest {
 		MockExtensionContext c = new MockExtensionContext();
 		JSExtensionOperation jso = new JSExtensionOperation();
 		Element e = DOMUtils.stringToDOM("<js:script xmlns:js=\"js\"><![CDATA[" + s + "]]></js:script>");
-		jso.run(c, e);
+		jso.run(c, null, e);
 		Assert.assertTrue(c.completed);
 		Assert.assertTrue(c.faulted);
 	}
@@ -124,7 +124,7 @@ public class JSOperationTest {
 		MockExtensionContext c = new MockExtensionContext();
 		JSExtensionOperation jso = new JSExtensionOperation();
 		Element e = DOMUtils.stringToDOM("<js:script xmlns:js=\"js\"><![CDATA[" + s + "]]></js:script>");
-		jso.run(c, e);
+		jso.run(c, null, e);
 		Assert.assertTrue(c.completed);
 		Assert.assertFalse(c.faulted);
 		Assert.assertEquals(1, c.msgs.size());
@@ -140,7 +140,7 @@ public class JSOperationTest {
 		c.duDir = this.getClass().getResource("/").toURI();
 		JSExtensionOperation jso = new JSExtensionOperation();
 		Element e = DOMUtils.stringToDOM("<js:script xmlns:js=\"js\"><![CDATA[" + s + "]]></js:script>");
-		jso.run(c, e);
+		jso.run(c, null, e);
 		Assert.assertTrue(c.completed);
 		Assert.assertFalse(c.faulted);
 		Assert.assertEquals(1, c.msgs.size());
@@ -156,7 +156,7 @@ public class JSOperationTest {
 		c.duDir = this.getClass().getResource("/").toURI();
 		JSExtensionOperation jso = new JSExtensionOperation();
 		Element e = DOMUtils.stringToDOM("<js:script xmlns:js=\"js\"><![CDATA[" + s + "]]></js:script>");
-		jso.run(c, e);
+		jso.run(c, null, e);
 		Assert.assertTrue(c.completed);
 		Assert.assertFalse(c.faulted);
 		Assert.assertEquals(1, c.msgs.size());
@@ -172,7 +172,7 @@ public class JSOperationTest {
 		c.duDir = this.getClass().getResource("/").toURI();
 		JSExtensionOperation jso = new JSExtensionOperation();
 		Element e = DOMUtils.stringToDOM("<js:script xmlns:js=\"js\"><![CDATA[" + s + "]]></js:script>");
-		jso.run(c, e);
+		jso.run(c, null, e);
 		Assert.assertTrue(c.completed);
 		Assert.assertFalse(c.faulted);
 		Assert.assertEquals(1, c.msgs.size());
@@ -188,7 +188,7 @@ public class JSOperationTest {
 		c.duDir = this.getClass().getResource("/").toURI();
 		JSExtensionOperation jso = new JSExtensionOperation();
 		Element e = DOMUtils.stringToDOM("<js:script xmlns:js=\"js\"><![CDATA[" + s + "]]></js:script>");
-		jso.run(c, e);
+		jso.run(c, null, e);
 		Assert.assertTrue(c.completed);
 		Assert.assertTrue(c.faulted);
 		Assert.assertEquals(0, c.msgs.size());
