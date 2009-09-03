@@ -78,36 +78,39 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
             return Recognized.UNSURE;
         }
 
-        for (String pname : ((Set<String>) op.getInput().getMessage().getParts().keySet())) {
-            Part part = op.getInput().getMessage().getPart(pname);
-            Element pdata = null;
-            // servicemix-http has a (bad) habit of placing the SOAP body content directly in the normalized message
+        // servicemix-http has a (bad) habit of placing the SOAP body content directly in the normalized message.
+        // We need to recognize it
+    	__log.debug("Recognizing document content");
+        if (op.getInput().getMessage().getParts().size() == 1) {
+            Part part = (Part) op.getInput().getMessage().getParts().values().iterator().next();
             QName elementName = part.getElementName();
             if (elementName != null && elementName.getLocalPart().equals(msg.getLocalName())
                     && elementName.getNamespaceURI().equals(msg.getNamespaceURI())) {
-                pdata = msg;
+            	__log.debug("Recognized");
+                return Recognized.TRUE;
             }
-            if (pdata == null) {
-                // with RPC semantic the body is wrapped by a partName which is same as bodyElementName
-                pdata = DOMUtils.findChildByName(msg, new QName(null, part.getName()));
+        }
+
+        // Recognize RPC style message
+    	__log.debug("Recognizing RPC style content");
+        for (String pname : ((Set<String>) op.getInput().getMessage().getParts().keySet())) {
+            Part part = op.getInput().getMessage().getPart(pname);
+            
+            if (part.getElementName() != null) {
+                //RPC style invocation doesn't allow element parts, so we don't accept it
+            	__log.debug("Part " + part.getName() + " has element content " + part.getElementName() + ". It's not allowed for RPC style.");
+            	return Recognized.FALSE;
             }
+            
+            // with RPC semantic the body is wrapped by a partName which is same as bodyElementName
+            Element pdata = DOMUtils.findChildByName(msg, new QName(null, part.getName()));
             if (pdata == null) {
                 __log.debug("no part data for " + part.getName() + " -- unrecognized.");
                 return Recognized.FALSE;
             }
-            if (part.getElementName() != null) {
-                Element child = DOMUtils.getFirstChildElement(pdata);
-                if (child == null) {
-                    __log.debug("element part " + part.getName() + " does not contain element " + part.getElementName()
-                            + " -- unrecognized");
-                    return Recognized.FALSE;
-                }
-
-            }
         }
 
         return Recognized.TRUE;
-
     }
 
     public void toNMS(NormalizedMessage nmsMsg, Message odeMsg, javax.wsdl.Message msgdef, QName fault) throws MessagingException,

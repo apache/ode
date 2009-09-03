@@ -85,6 +85,7 @@ abstract class OdeConsumer extends ServiceBridge implements JbiMessageExchangePr
             jbiMex.setEndpoint(se);
             jbiMex.setService(se.getServiceName());
             jbiMex.setOperation(opname);
+
         } catch (MessagingException e) {
             String errmsg = "Unable to create JBI message exchange for ODE message exchange " + odeMex;
             __log.error(errmsg, e);
@@ -100,6 +101,7 @@ abstract class OdeConsumer extends ServiceBridge implements JbiMessageExchangePr
                 NormalizedMessage nmsg = inonly.createMessage();
                 mapper.toNMS(nmsg, odeMex.getRequest(), odeMex.getOperation().getInput().getMessage(), null);
                 inonly.setInMessage(nmsg);
+                copyMexProperties(jbiMex, odeMex);
                 _ode._scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
                     public void afterCompletion(boolean success) {
                         if (success) {
@@ -116,6 +118,7 @@ abstract class OdeConsumer extends ServiceBridge implements JbiMessageExchangePr
                 NormalizedMessage nmsg = inout.createMessage();
                 mapper.toNMS(nmsg, odeMex.getRequest(), odeMex.getOperation().getInput().getMessage(), null);
                 inout.setInMessage(nmsg);
+                copyMexProperties(jbiMex, odeMex);
                 _ode._scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
                     public void afterCompletion(boolean success) {
                         if (success) {

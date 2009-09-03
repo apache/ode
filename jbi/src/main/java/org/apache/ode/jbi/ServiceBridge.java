@@ -20,9 +20,13 @@ package org.apache.ode.jbi;
 
 import java.util.Set;
 
+import javax.jbi.messaging.NormalizedMessage;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 
 /**
  * Base-class for classes providing JBI-ODE translation services. 
@@ -40,14 +44,19 @@ public class ServiceBridge {
      * @param jbiMex destination JBI message-exchange
      * @param odeMex source ODE message-exchange
      */
-    protected void copyMexProperties(javax.jbi.messaging.MessageExchange jbiMex, MyRoleMessageExchange odeMex) {
+    protected void copyMexProperties(javax.jbi.messaging.MessageExchange jbiMex, PartnerRoleMessageExchange odeMex) {
+        __log.debug(odeMex + ": pmex copyProperties");
+        NormalizedMessage in = jbiMex.getMessage("in");
         for (String propName : odeMex.getPropertyNames()) {
             String val = odeMex.getProperty(propName);
             if (val != null) {
-                jbiMex.setProperty(propName, val);
-                __log.debug(jbiMex + ": set property " + propName + " = " + val);
+                in.setProperty(propName, val);
+                __log.debug(jbiMex + ": set pmex property " + propName + " = " + val);
             }
         }
+
+        in.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, odeMex.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID));
+        in.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID));
     }
     
     /**
@@ -58,21 +67,22 @@ public class ServiceBridge {
      */
     @SuppressWarnings("unchecked")
     protected void copyMexProperties(MyRoleMessageExchange odeMex, javax.jbi.messaging.MessageExchange jbiMex) {
-        for (String propName : (Set<String>) jbiMex.getPropertyNames()) {
-            if (propName.startsWith("org.apache.ode")) {
+        __log.debug(odeMex + ": mmex copyProperties");
+        NormalizedMessage in = jbiMex.getMessage("in");
+        for (String propName : (Set<String>) in.getPropertyNames()) {
+            Object val = in.getProperty(propName);
+            if (propName.startsWith("org.apache.ode") ) {
                 // Handle ODE-specific properties
-                Object val = jbiMex.getProperty(propName);
                 if (val != null) {
                     String sval = val.toString();
                     odeMex.setProperty(propName, sval);
-                    __log.debug(odeMex + ": set property " + propName + " = " + sval);
+                    __log.debug(odeMex + ": set mmex property " + propName + " = " + sval);
                 }
             } else {
                 // Non ODE-specific properties,
                 // TODO: Should we copy these?
+                __log.debug(odeMex + ": other mmex property " + propName + " = " + val);
             }
         }
     }
-
-
 }
