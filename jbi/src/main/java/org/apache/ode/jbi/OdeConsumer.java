@@ -208,7 +208,7 @@ abstract class OdeConsumer extends ServiceBridge implements JbiMessageExchangePr
                     // need to reload mex since we're in a different transaction
                     PartnerRoleMessageExchange pmex = (PartnerRoleMessageExchange) _ode._server.getEngine().getMessageExchange(outstanding.getMessageExchangeId());
                     if (pmex == null) {
-                        __log.warn("Received a response for unknown partner role message exchange " + pmex.getMessageExchangeId());
+                        __log.warn("Received a response for unknown partner role message exchange " + outstanding.getMessageExchangeId());
                         return Boolean.FALSE;
                     }
                     String mapperName = pmex.getProperty(Mapper.class.getName());
