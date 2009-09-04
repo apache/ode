@@ -213,18 +213,8 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
     private Object evaluate(OExpression cexp, EvaluationContext ctx, QName type) throws FaultException, EvaluationException {
         try {
             OXPath20ExpressionBPEL20 oxpath20 = ((OXPath20ExpressionBPEL20) cexp);
-            System.setProperty("javax.xml.xpath.XPathFactory:"+NamespaceConstant.OBJECT_MODEL_SAXON,
-		            "net.sf.saxon.xpath.XPathFactoryImpl");
-		    System.setProperty("javax.xml.xpath.XPathFactory:"+XPathConstants.DOM_OBJECT_MODEL,
-		            "net.sf.saxon.xpath.XPathFactoryImpl");
-		    System.setProperty("javax.xml.xpath.XPathFactory:"+NamespaceConstant.OBJECT_MODEL_JDOM,
-		            "net.sf.saxon.xpath.XPathFactoryImpl");
-		    System.setProperty("javax.xml.xpath.XPathFactory:"+NamespaceConstant.OBJECT_MODEL_XOM,
-		            "net.sf.saxon.xpath.XPathFactoryImpl");
-		    System.setProperty("javax.xml.xpath.XPathFactory:"+NamespaceConstant.OBJECT_MODEL_DOM4J,
-		            "net.sf.saxon.xpath.XPathFactoryImpl");
-    
-            XPathFactory xpf = XPathFactory.newInstance(NamespaceConstant.OBJECT_MODEL_SAXON);
+            XPathFactory xpf = new XPathFactoryImpl();
+
             JaxpFunctionResolver funcResolver = new JaxpFunctionResolver(
                     ctx, oxpath20);
             JaxpVariableResolver varResolver = new JaxpVariableResolver(ctx, oxpath20, ((XPathFactoryImpl) xpf).getConfiguration());

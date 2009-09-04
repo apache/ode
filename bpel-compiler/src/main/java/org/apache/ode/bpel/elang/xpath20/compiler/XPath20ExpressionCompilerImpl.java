@@ -140,10 +140,7 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
         out.xpath = xpathStr;
         try {        	
             __log.debug("Compiling expression " + xpathStr);            
-            System.setProperty(
-            		"javax.xml.xpath.XPathFactory:" + NamespaceConstant.OBJECT_MODEL_SAXON,
-            		"net.sf.saxon.xpath.XPathFactoryImpl");
-            XPathFactory xpf = XPathFactory.newInstance(NamespaceConstant.OBJECT_MODEL_SAXON);
+            XPathFactory xpf = new XPathFactoryImpl();
             JaxpFunctionResolver funcResolver = new JaxpFunctionResolver(
                     _compilerContext, out, source.getNamespaceContext(), _bpelNS);
             JaxpVariableResolver varResolver = new JaxpVariableResolver(_compilerContext, out);
@@ -166,9 +163,6 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
                 	// swallow errors caused by uninitialized variable 
             	}
             }
-        } catch (XPathFactoryConfigurationException xpfce) {
-            __log.debug(xpfce);
-            __log.info("Couldn't validate properly expression " + xpathStr);
         } catch (XPathExpressionException e) {
             __log.debug(e);
             __log.info("Couldn't validate properly expression " + xpathStr);
