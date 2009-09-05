@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<beans xmlns:sm="http://servicemix.apache.org/config/1.0"
+       xmlns:http="http://servicemix.apache.org/http/1.0"
+       xmlns:eip="http://servicemix.apache.org/eip/1.0"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:jencks="http://jencks.org/2.0"
+       xmlns:mws="http://ode/bpel/unit-test.wsdl"
+       xmlns:ws="http://playmobile.pl/process/mnpm/portIn" 
+       xmlns:sem="http://playmobile.pl/service/mnpm"
+       xmlns:bpel="http://sample.bpel.org/bpel/sample"
+       >
+
+    <bean id="transactionManager" class="org.apache.geronimo.transaction.manager.GeronimoTransactionManager"/>
+
+  <jencks:connectionTracker id="connectionTracker" geronimoTransactionManager="#transactionManager" />
+    
+  <jencks:workManager
+            id="workManager"
+            threadPoolSize="200"
+            transactionManager="#transactionManager" />
+  
+  <jencks:bootstrapContext
+            id="bootstrapContext"
+            workManager="#workManager"
+            transactionManager="#transactionManager" />
+  
+  <jencks:poolingSupport 
+            id="poolingSupport" 
+            connectionMaxIdleMinutes="5"
+            poolMaxSize="20"
+            />
+  
+  <jencks:connectionManager
+            id="connectionManager"
+            containerManagedSecurity="false"
+            transaction="xa"
+            transactionManager="#transactionManager"
+            poolingSupport="#poolingSupport"
+            connectionTracker="#connectionTracker" 
+            />
+
+    <bean id="localDerbyMCF" class="org.tranql.connector.derby.EmbeddedXAMCF">
+        <property name="databaseName" value="target/test/testdb"/>
+        <property name="createDatabase" value="true"/>
+        <property name="userName" value = "sa"/>
+        <property name="password" value = ""/>
+    </bean>
+    <bean id="localDerbyDataSource" class="org.springframework.jca.support.LocalConnectionFactoryBean">
+        <property name="managedConnectionFactory" ref="localDerbyMCF"/>
+        <property name="connectionManager" ref="connectionManager"/>
+    </bean>
+    
+    <bean id="jndi"
+          class="org.apache.xbean.spring.jndi.SpringInitialContextFactory" 
+          factory-method="makeInitialContext"
+          singleton="true"
+          depends-on="bootstrapContext"
+          >
+      <property name="entries" ref="jndiEntries" />
+    </bean>
+
+    <util:map id="jndiEntries">
+        <entry key="testds" value-ref="localDerbyDataSource"/>
+    </util:map>
+    
+
+
+    <sm:container 
+        id="jbi" 
+        embedded="true" 
+        rootDir="target/test/smx"
+        transactionManager="#transactionManager"
+        depends-on="jndi"
+        >
+        <sm:activationSpecs>
+            <sm:activationSpec id="ms-eip">
+                <sm:component>
+                    <eip:component>
+                        <eip:endpoints>
+  <eip:content-based-router service="bpel:OnEventCorrelationB010Fwd" endpoint="OnEventCorrelationB" forwardOperation="true">
+    <eip:rules>
+      <eip:routing-rule>
+        <eip:target>
+          <eip:exchange-target service="bpel:OnEventCorrelationB010"/>
+        </eip:target>
+      </eip:routing-rule>
+    </eip:rules>
+  </eip:content-based-router>
+
+  <eip:content-based-router service="bpel:OnEventCorrelationB110Fwd" endpoint="OnEventCorrelationB" forwardOperation="true">
+    <eip:rules>
+      <eip:routing-rule>
+        <eip:target>
+          <eip:exchange-target service="bpel:OnEventCorrelationB110"/>
+        </eip:target>
+      </eip:routing-rule>
+    </eip:rules>
+  </eip:content-based-router>
+
+  <eip:content-based-router service="bpel:OnEventCorrelationB011Fwd" endpoint="OnEventCorrelationB" forwardOperation="true">
+    <eip:rules>
+      <eip:routing-rule>
+        <eip:target>
+          <eip:exchange-target service="bpel:OnEventCorrelationB011"/>
+        </eip:target>
+      </eip:routing-rule>
+    </eip:rules>
+  </eip:content-based-router>
+
+  <eip:content-based-router service="bpel:OnEventCorrelationB111Fwd" endpoint="OnEventCorrelationB" forwardOperation="true">
+    <eip:rules>
+      <eip:routing-rule>
+        <eip:target>
+          <eip:exchange-target service="bpel:OnEventCorrelationB111"/>
+        </eip:target>
+      </eip:routing-rule>
+    </eip:rules>
+  </eip:content-based-router>
+
+                        </eip:endpoints>
+                    </eip:component>
+                </sm:component>
+            </sm:activationSpec>
+        </sm:activationSpecs>
+    </sm:container>
+</beans>
