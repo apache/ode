@@ -19,6 +19,7 @@ package org.apache.ode.jbi;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -103,50 +104,68 @@ public class JbiTestBase extends SpringTestSupport {
     protected void go() throws Exception {
         enableProcess(getTestName(), true);
 
-        String request = testProperties.getProperty("request");
-        String expectedResponse = testProperties.getProperty("response");
-        {
-	        String httpUrl = testProperties.getProperty("http.url");
-	        if (httpUrl != null) {
-	            log.debug(getTestName() + " sending http request to " + httpUrl + " request: " + request);
-	            URLConnection connection = new URL(httpUrl).openConnection();
-	            connection.setDoOutput(true);
-	            connection.setDoInput(true);
-	            //Send request
-	            OutputStream os = connection.getOutputStream();
-	            PrintWriter wt = new PrintWriter(os);
-	            wt.print(request);
-	            wt.flush();
-	            wt.close();
-	            // Read the response.
-	            InputStream is = connection.getInputStream();
-	            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	            FileUtil.copyInputStream(is, baos);
-	            String result = baos.toString();
-	            log.debug(getTestName() + " have result: " + result);
-	            matchResponse(expectedResponse, result);
-	        }
+        int i = 0;
+        while (true) {
+            String prefix = i == 0 ? "" : "" + i;
+            
+            String request = testProperties.getProperty(prefix + "request");
+            if (request == null) {
+                if (i == 0) continue;
+                else break;
+            }
+            if (request.startsWith("@")) {
+                request = inputStreamToString(getClass().getResourceAsStream("/" + getTestName() + "/" + request.substring(1)));
+            }
+            String expectedResponse = testProperties.getProperty(prefix + "response");
+            {
+    	        String httpUrl = testProperties.getProperty(prefix + "http.url");
+    	        if (httpUrl != null) {
+    	            log.debug(getTestName() + " sending http request to " + httpUrl + " request: " + request);
+    	            URLConnection connection = new URL(httpUrl).openConnection();
+    	            connection.setDoOutput(true);
+    	            connection.setDoInput(true);
+    	            //Send request
+    	            OutputStream os = connection.getOutputStream();
+    	            PrintWriter wt = new PrintWriter(os);
+    	            wt.print(request);
+    	            wt.flush();
+    	            wt.close();
+    	            // Read the response.
+    	            String result = inputStreamToString(connection.getInputStream());
+    	            
+    	            log.debug(getTestName() + " have result: " + result);
+    	            matchResponse(expectedResponse, result);
+    	        }
+            }
+            {
+    	        if (testProperties.getProperty(prefix + "nmr.service") != null) {
+    	            DefaultServiceMixClient client = new DefaultServiceMixClient(jbiContainer);
+    	            InOut io = client.createInOutExchange();
+    	            io.setService(QName.valueOf(testProperties.getProperty(prefix + "nmr.service")));
+    	            io.setOperation(QName.valueOf(testProperties.getProperty(prefix + "nmr.operation")));
+    	            io.getInMessage().setContent(new StreamSource(new ByteArrayInputStream(request.getBytes())));
+    	            client.sendSync(io,20000);
+    	            assertEquals(ExchangeStatus.ACTIVE,io.getStatus());
+    	            assertNotNull(io.getOutMessage());
+    	            String result = new SourceTransformer().contentToString(io.getOutMessage());
+    	            matchResponse(expectedResponse, result);
+    	            client.done(io);
+    	        }
+            }
+            
+            i++;
         }
-        {
-	        if (testProperties.getProperty("nmr.service") != null) {
-	            DefaultServiceMixClient client = new DefaultServiceMixClient(jbiContainer);
-	            InOut io = client.createInOutExchange();
-	            io.setService(QName.valueOf(testProperties.getProperty("nmr.service")));
-	            io.setOperation(QName.valueOf(testProperties.getProperty("nmr.operation")));
-	            io.getInMessage().setContent(new StreamSource(new ByteArrayInputStream(request.getBytes())));
-	            client.sendSync(io,20000);
-	            assertEquals(ExchangeStatus.ACTIVE,io.getStatus());
-	            assertNotNull(io.getOutMessage());
-	            String result = new SourceTransformer().contentToString(io.getOutMessage());
-	            matchResponse(expectedResponse, result);
-	            client.done(io);
-	        }
-        }	
         
         enableProcess(getTestName(), false);
     }
     
     protected void matchResponse(String expectedResponse, String result) {
         assertTrue("Response doesn't match expected regex.\nExpected: " + expectedResponse + "\nReceived: " + result, Pattern.compile(expectedResponse, Pattern.DOTALL).matcher(result).matches());
+    }
+    
+    private String inputStreamToString(InputStream is) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        FileUtil.copyInputStream(is, baos);
+        return baos.toString();
     }
 }

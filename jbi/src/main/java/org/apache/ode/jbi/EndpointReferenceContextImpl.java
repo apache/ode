@@ -34,6 +34,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Implementation of the ODE {@link org.apache.ode.bpel.iapi.EndpointReferenceContext}
@@ -117,6 +118,8 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
   }
 
     public Map getConfigLookup(EndpointReference epr) {
-        return ((MutableEndpoint)epr).toMap();
+        Map m = new HashMap();
+        m.put("service", ((JbiEndpointReference)epr).getServiceEndpoint().getServiceName());
+        return m;
     }
 }

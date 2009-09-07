@@ -524,12 +524,14 @@ define "ode" do
       GERONIMO.transaction, JAVAX.connector, JAVAX.ejb, JAVAX.persistence, JAVAX.stream,
       JAVAX.transaction, JAXEN, JBI, OPENJPA, SAXON, SERVICEMIX, SPRING, TRANQL,
       XALAN, XBEAN, XMLBEANS, XSTREAM,
-      LOG4J
+      LOG4J,
+      DOM4J,
+      HIBERNATE
 
       test.setup unzip(_("target/test/smx/ode")=>project("dao-jpa-ojpa-derby").package(:zip))
       test.setup unzip(_("target/test/smx/ode")=>project("dao-hibernate-db").package(:zip))
       test.setup task(:prepare_jbi_tests) do |task|
-      cp _("src/main/jbi/ode-jbi.properties"), _("target/test/smx/ode")
+      cp _("src/test/jbi/ode-jbi.properties"), _("target/test/smx/ode")
       cp _("src/main/jbi/hibernate.properties"), _("target/test/smx/ode")
       rm_rf Dir["target/test/resources"]
       cp_r _("src/test/resources"), _("target/test/resources")

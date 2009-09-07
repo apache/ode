@@ -15,9 +15,7 @@
  * limitations under the License.
  */
 package org.apache.ode.jbi;
-import org.junit.Ignore;
 
-@Ignore
 public class CommunicationJbiTest extends JbiTestBase {
     public void testCommunication() throws Exception {
         go();
