@@ -150,7 +150,12 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
             return;
         }
 
-        if (msgdef.getParts().size() > 1 || ((Part) msgdef.getParts().values().iterator().next()).getElementName() == null) {
+        if (msgdef.getParts().size() == 0) {
+            if (__log.isDebugEnabled())
+                __log.debug("toNMS() ode message (rpc-like): no parts");
+            nmsMsg.setContent(null);
+            return;
+        } else if (msgdef.getParts().size() != 1 || ((Part) msgdef.getParts().values().iterator().next()).getElementName() == null) {
             // If we have more than one part, or a single non-element part, then we can't use the standard
             // NMS doc-lit like convention. Instead we place the entire message on the bus and hope for the
             // best.
@@ -166,12 +171,24 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
     }
 
     public void toODE(Message odeMsg, NormalizedMessage nmsMsg, javax.wsdl.Message msgdef) throws MessageTranslationException {
-        Element nms = parse(nmsMsg.getContent());
-        boolean docLit = false;
-
+        Element nms;
+        if (nmsMsg.getContent() != null) {
+            nms = parse(nmsMsg.getContent());
+        } else {
+            Document doc = newDocument();
+            Element message = doc.createElement("message");
+            odeMsg.setMessage(message);
+            if (__log.isDebugEnabled()) {
+                __log.debug("toODE() normalized message:\n" + prettyPrint(message));
+            }
+            return;
+        }
+        
         if (__log.isDebugEnabled()) {
             __log.debug("toODE() normalized message:\n" + prettyPrint(nms));
         }
+
+        boolean docLit = false;
 
         for (String pname : ((Set<String>) msgdef.getParts().keySet())) {
             Part part = msgdef.getPart(pname);
