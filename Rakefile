@@ -121,7 +121,7 @@ SERVICEMIX          = [
                         "tranql:tranql-connector-derby-common:jar:1.1"
                         ]
 SPRING              = ["org.springframework:spring:jar:2.5.6"]
-TRANQL              = [ "tranql:tranql-connector:jar:1.1", "axion:axion:jar:1.0-M3-dev", COMMONS.primitives ]
+TRANQL              = [ "tranql:tranql-connector:jar:1.1", COMMONS.primitives ]
 WOODSTOX            = "woodstox:wstx-asl:jar:3.2.1"
 WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.1"
 XALAN               = "org.apache.ode:xalan:jar:2.7.0-2"
