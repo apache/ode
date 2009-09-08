@@ -37,7 +37,7 @@ import org.apache.ode.utils.DOMUtils;
 
 public class MessageImpl implements Message {
 
-    MessageDAO _dao;
+    public MessageDAO _dao;
 
     public MessageImpl(MessageDAO message) {
         _dao = message;

@@ -46,6 +46,7 @@ public class HCorrelationProperty extends HObject {
         _namespace = namespace;
         _value = value;
         _correlationSet = correlationSet;
+        _correlationSet.getProperties().add(this);
     }
 
     public HCorrelationProperty(QName qname, String value, HCorrelationSet correlationSet) {
@@ -54,6 +55,7 @@ public class HCorrelationProperty extends HObject {
         _namespace = qname.getNamespaceURI();
         _value = value;
         _correlationSet = correlationSet;
+        _correlationSet.getProperties().add(this);
     }
 
     /**

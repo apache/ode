@@ -47,7 +47,7 @@ import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorConte
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMessageExchange {
+public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMessageExchange {
 
 
     private static final Log __log = LogFactory.getLog(MyRoleMessageExchangeImpl.class);

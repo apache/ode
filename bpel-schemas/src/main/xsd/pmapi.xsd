@@ -33,6 +33,91 @@
     <element name="event-info" type="pmapi:tEventInfo"/>
     <element name="event-info-list" type="pmapi:tEventInfoList"/>
 
+    <simpleType name="ExchangeType">
+        <restriction base="string">
+            <enumeration value="M"/>
+            <enumeration value="P"/>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="ReplayType">
+        <restriction base="string">
+            <enumeration value="MOCK"/>
+            <enumeration value="IGNORE"/>
+        </restriction>
+    </simpleType>
+    
+    <complexType name="GetCommunication">
+    	<xs:sequence>
+    		<xs:element name="iid" type="long" maxOccurs="unbounded"></xs:element>
+    	</xs:sequence>
+    </complexType>
+    
+   	<xs:complexType name="GetCommunicationResponse">
+   		<xs:sequence>
+        	<element name="restoreInstance" minOccurs="0" maxOccurs="unbounded" type="pmapi:CommunicationType"/>
+   		</xs:sequence>
+   	</xs:complexType>
+
+    <element name="getCommunicationResponse" type="pmapi:GetCommunicationResponse"/>
+
+    <complexType name="CommunicationType">
+    	<sequence>
+    		<element name="processType" type="QName" />
+
+    		<element name="serviceConfig" maxOccurs="unbounded">
+    			<complexType>
+    				<sequence>
+    					<element name="name" type="QName" />
+    					<element name="replayingType"
+    						type="pmapi:ReplayType" />
+    				</sequence>
+    			</complexType>
+    		</element>
+
+    		<element name="exchange" maxOccurs="unbounded">
+    			<complexType>
+    				<sequence>
+    					<element name="type" type="pmapi:ExchangeType" />
+    					<element name="createTime" type="dateTime" />
+    					<element name="service" type="QName" />
+    					<element name="operation" type="string" />
+    					<element name="in" type="anyType" />
+    					<element name="out" type="anyType"
+    						minOccurs="0" />
+    					<element name="fault" minOccurs="0">
+    						<complexType>
+    							<sequence>
+    								<element name="type" type="QName" />
+    								<element name="explanation"
+    									type="string" />
+    								<element name="message"
+    									type="anyType" />
+    							</sequence>
+    						</complexType>
+    					</element>
+    				</sequence>
+    			</complexType>
+    		</element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="Replay">
+        <sequence>
+        	<element name="upgradeInstance" minOccurs="0" maxOccurs="unbounded" type="long"/>
+        	<element name="replaceInstance" minOccurs="0" maxOccurs="unbounded" type="long"/>
+        	<element name="restoreInstance" minOccurs="0" maxOccurs="unbounded" type="pmapi:CommunicationType"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="ReplayResponse">
+        <sequence>
+            <element name="restoredIID" type="long" minOccurs="0" maxOccurs="unbounded"/>
+        </sequence>
+    </complexType>
+    
+    <element name="replayResponse" type="pmapi:ReplayResponse"/>
+
     <complexType name="tProcessInfo">
         <annotation>
             <documentation>Information about a BPEL process.</documentation>

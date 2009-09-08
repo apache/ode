@@ -72,6 +72,10 @@ public class MessageExchangeDaoImpl extends HibernateDao implements
         return _hself.getInsertTime();
     }
 
+    public void setCreateTime(Date createTime) {
+        _hself.setInsertTime(createTime);
+    }
+
     public MessageDAO getRequest() {
         entering("MessageExchangeDaoImpl.getRequest");
         return _hself.getRequest() == null ? null : new MessageDaoImpl(_sm, _hself.getRequest());

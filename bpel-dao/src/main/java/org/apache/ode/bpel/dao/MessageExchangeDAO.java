@@ -54,6 +54,8 @@ public interface MessageExchangeDAO {
      */
     Date getCreateTime();
 
+    void setCreateTime(Date createTime);
+
     /**
      * Get the input message.
      *

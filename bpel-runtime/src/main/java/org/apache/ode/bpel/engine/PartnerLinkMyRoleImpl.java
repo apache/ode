@@ -59,7 +59,7 @@ import org.w3c.dom.Element;
 /**
  * @author Matthieu Riou <mriou at apache dot org>
  */
-class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
+public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
     private static final Log __log = LogFactory.getLog(BpelProcess.class);
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
@@ -154,12 +154,12 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         return routingInfos;
     }
 
-    class RoutingInfo {
-        MessageRouteDAO messageRoute;
-        CorrelationKeySet matchedKeySet;
-        CorrelatorDAO correlator;
+    public static class RoutingInfo {
+        public MessageRouteDAO messageRoute;
+        public CorrelationKeySet matchedKeySet;
+        public CorrelatorDAO correlator;
 //        CorrelationKey[] keys;
-        CorrelationKeySet wholeKeySet;
+        public CorrelationKeySet wholeKeySet;
 
         public RoutingInfo(MessageRouteDAO messageRoute, CorrelationKeySet matchedKeySet,
                            CorrelatorDAO correlator, CorrelationKeySet wholeKeySet) {
@@ -202,7 +202,9 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         _process.saveEvent(evt, newInstance);
         mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.CREATE_INSTANCE);
         mex.getDAO().setInstance(newInstance);
-
+        if (mex.getDAO().getCreateTime() == null)
+            mex.getDAO().setCreateTime(instance.getCurrentEventDateTime()); 
+        
         instance.execute();
     }
 
@@ -237,6 +239,9 @@ class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 
         mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.MATCHED);
         mex.getDAO().setInstance(routing.messageRoute.getTargetInstance());
+        if (mex.getDAO().getCreateTime() == null)
+            mex.getDAO().setCreateTime(instance.getCurrentEventDateTime()); 
+        
         instance.execute();
     }
 

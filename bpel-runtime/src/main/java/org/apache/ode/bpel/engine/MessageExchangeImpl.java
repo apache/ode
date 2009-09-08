@@ -151,7 +151,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
         _operation = operation;
     }
 
-    MessageExchangeDAO getDAO() {
+    public MessageExchangeDAO getDAO() {
         return _dao;
     }
 

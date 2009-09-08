@@ -407,4 +407,8 @@ public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstan
     public String toString() {
         return "mem.instance(type=" + _processDao.getType() + " iid=" + _instanceId + ")";
     }
+
+    public Collection<String> getMessageExchangeIds() {
+        return _messageExchanges.keySet();
+    }
 }

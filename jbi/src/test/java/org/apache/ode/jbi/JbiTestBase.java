@@ -110,8 +110,10 @@ public class JbiTestBase extends SpringTestSupport {
             
             String request = testProperties.getProperty(prefix + "request");
             if (request == null) {
-                if (i == 0) continue;
-                else break;
+                if (i == 0) {
+                    i++;
+                    continue;
+                } else break;
             }
             if (request.startsWith("@")) {
                 request = inputStreamToString(getClass().getResourceAsStream("/" + getTestName() + "/" + request.substring(1)));

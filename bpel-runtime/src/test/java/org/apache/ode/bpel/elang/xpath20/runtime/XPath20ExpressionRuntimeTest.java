@@ -38,6 +38,7 @@ import org.w3c.dom.NodeList;
 import javax.xml.namespace.QName;
 
 import java.net.URI;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -156,14 +157,18 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
     }
     
     public URI getBaseResourceURI() {
-    	return null;
+        return null;
     }
 
-	public Node getPropertyValue(QName propertyName) {
-		return null;
-	}
+    public Node getPropertyValue(QName propertyName) {
+        return null;
+    }
 
-	public QName getProcessQName() {
-		return null;
-	}
+    public QName getProcessQName() {
+        return null;
+    }
+
+    public Date getCurrentEventDateTime() {
+        return null;
+    }
 }

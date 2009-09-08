@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.runtime;
 
 import java.net.URI;
+import java.util.Date;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
@@ -46,112 +47,115 @@ import org.w3c.dom.Node;
  * variables, link statuses, and the like.
  */
 public class ExprEvaluationContextImpl implements EvaluationContext {
-	private static final Log __log = LogFactory
-			.getLog(ExprEvaluationContextImpl.class);
+    private static final Log __log = LogFactory
+            .getLog(ExprEvaluationContextImpl.class);
 
-	private BpelRuntimeContext _native;
+    private BpelRuntimeContext _native;
 
-	private ScopeFrame _scopeInstance;
+    private ScopeFrame _scopeInstance;
 
-	private Map<OLink, Boolean> _linkVals;
+    private Map<OLink, Boolean> _linkVals;
 
-	private Node _root;
+    private Node _root;
 
-	public ExprEvaluationContextImpl(ScopeFrame scopeInstace,
-			BpelRuntimeContext ntv) {
-		_native = ntv;
-		_scopeInstance = scopeInstace;
-	}
+    public ExprEvaluationContextImpl(ScopeFrame scopeInstace,
+            BpelRuntimeContext ntv) {
+        _native = ntv;
+        _scopeInstance = scopeInstace;
+    }
 
-	public ExprEvaluationContextImpl(ScopeFrame scopeInstace,
-			BpelRuntimeContext ntv, Node root) {
-		this(scopeInstace, ntv);
-		_root = root;
-	}
+    public ExprEvaluationContextImpl(ScopeFrame scopeInstace,
+            BpelRuntimeContext ntv, Node root) {
+        this(scopeInstace, ntv);
+        _root = root;
+    }
 
-	public ExprEvaluationContextImpl(ScopeFrame scopeInstnce,
-			BpelRuntimeContext ntv, Map<OLink, Boolean> linkVals) {
-		this(scopeInstnce, ntv);
-		_linkVals = linkVals;
-	}
+    public ExprEvaluationContextImpl(ScopeFrame scopeInstnce,
+            BpelRuntimeContext ntv, Map<OLink, Boolean> linkVals) {
+        this(scopeInstnce, ntv);
+        _linkVals = linkVals;
+    }
 
-	public Node readVariable(OScope.Variable variable, OMessageVarType.Part part)
-			throws FaultException {
-		if (__log.isTraceEnabled())
-			__log.trace("readVariable(" + variable + "," + part + ")");
+    public Node readVariable(OScope.Variable variable, OMessageVarType.Part part)
+            throws FaultException {
+        if (__log.isTraceEnabled())
+            __log.trace("readVariable(" + variable + "," + part + ")");
 
-		// TODO: check for null _scopeInstance
+        // TODO: check for null _scopeInstance
 
-		Node ret;
-		if (variable.type instanceof OConstantVarType) {
-			ret = ((OConstantVarType) variable.type).getValue();
-		} else {
-			VariableInstance varInstance = _scopeInstance.resolve(variable);
-			if (varInstance == null)
-				return null;
-			VariableReadEvent vre = new VariableReadEvent();
-			vre.setVarName(varInstance.declaration.name);
-			sendEvent(vre);
-			ret = _scopeInstance.fetchVariableData(_native,varInstance, part, false);
-		}
-		return ret;
-	}
+        Node ret;
+        if (variable.type instanceof OConstantVarType) {
+            ret = ((OConstantVarType) variable.type).getValue();
+        } else {
+            VariableInstance varInstance = _scopeInstance.resolve(variable);
+            if (varInstance == null)
+                return null;
+            VariableReadEvent vre = new VariableReadEvent();
+            vre.setVarName(varInstance.declaration.name);
+            sendEvent(vre);
+            ret = _scopeInstance.fetchVariableData(_native,varInstance, part, false);
+        }
+        return ret;
+    }
 
-	public Node evaluateQuery(Node root, OExpression expr)
-			throws FaultException, EvaluationException {
-		return _native.getExpLangRuntime()
-				.evaluateNode(
-						expr,
-						new ExprEvaluationContextImpl(_scopeInstance,
-								_native, root));
-	}
+    public Node evaluateQuery(Node root, OExpression expr)
+            throws FaultException, EvaluationException {
+        return _native.getExpLangRuntime()
+                .evaluateNode(
+                        expr,
+                        new ExprEvaluationContextImpl(_scopeInstance,
+                                _native, root));
+    }
 
-	public String readMessageProperty(OScope.Variable variable,
-			OProcess.OProperty property) throws FaultException {
-		VariableInstance varInstance = _scopeInstance.resolve(variable);
-		return _native.readProperty(varInstance, property);
-	}
+    public String readMessageProperty(OScope.Variable variable,
+            OProcess.OProperty property) throws FaultException {
+        VariableInstance varInstance = _scopeInstance.resolve(variable);
+        return _native.readProperty(varInstance, property);
+    }
 
-	public boolean isLinkActive(OLink olink) throws FaultException {
-		return _linkVals.get(olink);
-	}
+    public boolean isLinkActive(OLink olink) throws FaultException {
+        return _linkVals.get(olink);
+    }
 
-	public String toString() {
-		return "{ExprEvaluationContextImpl scopeInstance=" + _scopeInstance
-				+ ", activeLinks=" + _linkVals + "}";
-	}
+    public String toString() {
+        return "{ExprEvaluationContextImpl scopeInstance=" + _scopeInstance
+                + ", activeLinks=" + _linkVals + "}";
+    }
 
-	public Node getRootNode() {
-		return _root;
-	}
+    public Node getRootNode() {
+        return _root;
+    }
 
-	public Node getPartData(Element message, Part part) throws FaultException {
-		return _scopeInstance.getPartData(message, part);
-	}
+    public Node getPartData(Element message, Part part) throws FaultException {
+        return _scopeInstance.getPartData(message, part);
+    }
 
-	public Long getProcessId() {
-		return _native.getPid();
-	}
+    public Long getProcessId() {
+        return _native.getPid();
+    }
 
-	public boolean narrowTypes() {
-		return true;
-	}
+    public boolean narrowTypes() {
+        return true;
+    }
 
-	private void sendEvent(ScopeEvent se) {
-		_scopeInstance.fillEventInfo(se);
-		_native.sendEvent(se);
-	}
+    private void sendEvent(ScopeEvent se) {
+        _scopeInstance.fillEventInfo(se);
+        _native.sendEvent(se);
+    }
 
-	public URI getBaseResourceURI() {
-		return _native.getBaseResourceURI();
-	}
-	
-	public Node getPropertyValue(QName propertyName) {
-		return _native.getProcessProperty(propertyName);
-	}
+    public URI getBaseResourceURI() {
+        return _native.getBaseResourceURI();
+    }
+    
+    public Node getPropertyValue(QName propertyName) {
+        return _native.getProcessProperty(propertyName);
+    }
 
-	public QName getProcessQName() {
-		return _native.getProcessQName();
-	}
+    public QName getProcessQName() {
+        return _native.getProcessQName();
+    }
 
+    public Date getCurrentEventDateTime() {
+        return _native.getCurrentEventDateTime();
+    }
 }

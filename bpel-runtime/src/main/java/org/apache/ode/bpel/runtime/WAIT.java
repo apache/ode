@@ -61,7 +61,7 @@ class WAIT extends ACTIVITY {
         }
 
 
-        if(dueDate.getTime() > System.currentTimeMillis()){
+        if(dueDate.getTime() > getBpelRuntimeContext().getCurrentEventDateTime().getTime()) {
             final TimerResponseChannel timerChannel = newChannel(TimerResponseChannel.class);
             getBpelRuntimeContext().registerTimer(timerChannel, dueDate);
 

@@ -19,6 +19,8 @@
 
 package org.apache.ode.bpel.elang.xpath20.compiler;
 
+import java.util.Date;
+
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.elang.xpath10.compiler.XPathMessages;
@@ -62,6 +64,8 @@ public class JaxpVariableResolver implements XPathVariableResolver {
                 || Namespaces.ODE_EXTENSION_NS.equals(variableName.getNamespaceURI())) {
             if ("pid".equals(variableName.getLocalPart()) || "processQName".equals(variableName.getLocalPart()))
                 return "";
+            if ("currentEventDateTime".equals(variableName.getLocalPart())) 
+                return new Date(1L);
         }
 
         try {

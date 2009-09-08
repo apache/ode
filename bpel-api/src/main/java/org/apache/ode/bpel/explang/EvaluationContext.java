@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.explang;
 
 import java.net.URI;
+import java.util.Date;
 
 import javax.xml.namespace.QName;
 
@@ -122,4 +123,5 @@ public interface EvaluationContext {
      */
     Node getPropertyValue(QName propertyName);
 
+    Date getCurrentEventDateTime();
 }

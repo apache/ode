@@ -217,6 +217,18 @@
     <message name="recoverActivityOutput">
         <part name="instance-info" type="typ:tInstanceInfo"/>
     </message>
+    <message name="replayInput">
+        <part name="replay" type="typ:Replay"/>
+    </message>
+    <message name="replayOutput">
+        <part name="replayResponse" type="typ:ReplayResponse"/>
+    </message>
+    <message name="getCommunicationInput">
+        <part name="getCommunication" type="typ:GetCommunication"/>
+    </message>
+    <message name="getCommunicationOutput">
+        <part name="getCommunicationResponse" type="typ:GetCommunicationResponse"/>
+    </message>
     <message name="managementFault">
         <part name="managementFault" element="tns:ManagementFault"/>
     </message>
@@ -353,6 +365,16 @@
         <operation name="recoverActivity">
             <input message="tns:recoverActivityInput"/>
             <output message="tns:recoverActivityOutput"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
+        </operation>
+        <operation name="replay">
+            <input message="tns:replayInput"/>
+            <output message="tns:replayOutput"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
+        </operation>
+        <operation name="getCommunication">
+            <input message="tns:getCommunicationInput"/>
+            <output message="tns:getCommunicationOutput"/>
             <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
     </portType>
@@ -664,6 +686,30 @@
              </fault>
         </operation>
         <operation name="recoverActivity">
+            <soap:operation soapAction="" style="rpc"/>
+            <input>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
+            </input>
+            <output>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
+            </output>
+            <fault name="ManagementFault">
+                <soap:fault name="ManagementFault" use="literal"/>
+             </fault>
+        </operation>
+        <operation name="replay">
+            <soap:operation soapAction="" style="rpc"/>
+            <input>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
+            </input>
+            <output>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
+            </output>
+            <fault name="ManagementFault">
+                <soap:fault name="ManagementFault" use="literal"/>
+             </fault>
+        </operation>
+        <operation name="getCommunication">
             <soap:operation soapAction="" style="rpc"/>
             <input>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>

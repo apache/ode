@@ -33,7 +33,9 @@ import javax.xml.stream.XMLStreamReader;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axiom.om.impl.dom.NamespaceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.pmapi.ProcessInfoCustomizer;
@@ -69,7 +71,10 @@ public class DynamicService<T> {
             Object result = invokedMethod.invoke(_service, params);
             OMElement response = null;
             if (result != null) {
-                response = OM.createOMElement(new QName(payload.getNamespace().getNamespaceURI(), methodName+"Response"));
+                if (__log.isDebugEnabled())
+                    __log.debug("Invoke: operation "+operation+" on "+_clazz + ":\n" + payload + "\nOM:" + OM + " namespace:" + payload.getNamespace());
+                response = OM.createOMElement(new QName((payload.getNamespace() == null ? "" : payload.getNamespace().getNamespaceURI()), methodName+"Response"));
+
                 OMElement parts = convertToOM(result);
                 parts = stripNamespace(parts);
                 response.addChild(parts);
@@ -128,9 +133,11 @@ public class DynamicService<T> {
             return alist.toArray((Object[]) Array.newInstance(targetClazz, alist.size()));
         } else if (XmlObject.class.isAssignableFrom(clazz)) {
             try {
-                Class beanFactory = Class.forName(clazz.getCanonicalName() + ".Factory");
+                Class beanFactory = clazz.forName(clazz.getCanonicalName() + "$Factory");
+                elmt.setNamespace(new NamespaceImpl(""));
+                elmt.setLocalName("xml-fragment");
                 return beanFactory.getMethod("parse", XMLStreamReader.class)
-                        .invoke(elmt.getXMLStreamReaderWithoutCaching());
+                        .invoke(null, elmt.getXMLStreamReaderWithoutCaching());
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException("Couldn't find class " + clazz.getCanonicalName() + ".Factory to instantiate xml bean", e);
             } catch (IllegalAccessException e) {

@@ -100,8 +100,7 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
         return null;
     }
 
-    public Node fetchVariableData(VariableInstance var, OMessageVarType.Part partname, boolean forWriting)
-            throws FaultException {
+    public Node fetchVariableData(VariableInstance var, OMessageVarType.Part partname, boolean forWriting) throws FaultException {
         return null;
     }
 
@@ -138,19 +137,16 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
         _fault = faultData;
     }
 
-    public void select(PickResponseChannel response, Date timeout, boolean createInstnace, Selector[] selectors)
-            throws FaultException {
+    public void select(PickResponseChannel response, Date timeout, boolean createInstnace, Selector[] selectors) throws FaultException {
     }
 
-    public void cancelOutstandingRequests(String channelId) {        
+    public void cancelOutstandingRequests(String channelId) {
     }
 
-    public void reply(PartnerLinkInstance plink, String opName, String mexId, Element msg, QName fault)
-            throws FaultException {
+    public void reply(PartnerLinkInstance plink, String opName, String mexId, Element msg, QName fault) throws FaultException {
     }
 
-    public String invoke(int aid, PartnerLinkInstance partnerLinkInstance, Operation operation, Element outboundMsg,
-            InvokeResponseChannel invokeResponseChannel) {
+    public String invoke(int aid, PartnerLinkInstance partnerLinkInstance, Operation operation, Element outboundMsg, InvokeResponseChannel invokeResponseChannel) {
         return null;
     }
 
@@ -170,7 +166,7 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 
     public void initializePartnerLinks(Long parentScopeId, Collection<OPartnerLink> partnerLinks) {
     }
-    
+
     public void testEmptyProcess() {
         OProcess proc = new OProcess("2.0");
         proc.procesScope = new OScope(proc, null);
@@ -399,8 +395,7 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
         return null;
     }
 
-    public void registerActivityForRecovery(ActivityRecoveryChannel channel, long activityId, String reason,
-                                            Date dateTime, Element data, String[] actions, int retries) {
+    public void registerActivityForRecovery(ActivityRecoveryChannel channel, long activityId, String reason, Date dateTime, Element data, String[] actions, int retries) {
     }
 
     public void unregisterActivityForRecovery(ActivityRecoveryChannel channel) {
@@ -410,52 +405,56 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
     }
 
     public String getPartnerFaultExplanation(String mexid) {
-      return null;
+        return null;
     }
 
     public void releasePartnerMex(String mexId, boolean instanceSucceeded) {
         // TODO Auto-generated method stub
-        
+
     }
 
     public void initializeExternalVariable(VariableInstance instance, HashMap<String, String> keymap) {
         // TODO Auto-generated method stub
-        
+
     }
 
-	public Node readExtVar(Variable variable, Node reference) throws ExternalVariableModuleException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public Node readExtVar(Variable variable, Node reference) throws ExternalVariableModuleException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	public Node readVariable(Long scopeInstanceId, String varname, boolean forWriting) throws FaultException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public Node readVariable(Long scopeInstanceId, String varname, boolean forWriting) throws FaultException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	public ValueReferencePair writeExtVar(Variable variable, Node reference, Node value) throws ExternalVariableModuleException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public ValueReferencePair writeExtVar(Variable variable, Node reference, Node value) throws ExternalVariableModuleException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	public Node writeVariable(VariableInstance var, Node changes) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	public URI getBaseResourceURI() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public Node writeVariable(VariableInstance var, Node changes) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	public Node getProcessProperty(QName propertyName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public URI getBaseResourceURI() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	public QName getProcessQName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public Node getProcessProperty(QName propertyName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
+    public QName getProcessQName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Date getCurrentEventDateTime() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

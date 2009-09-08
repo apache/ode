@@ -92,6 +92,7 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection, FilteredInstanc
     public MessageExchangeDAO createMessageExchange(char dir) {
         HMessageExchange mex = new HMessageExchange();
         mex.setDirection(dir);
+        mex.setInsertTime(new Date(System.currentTimeMillis()));
         getSession().save(mex);
         return new MessageExchangeDaoImpl(_sm, mex);
     }

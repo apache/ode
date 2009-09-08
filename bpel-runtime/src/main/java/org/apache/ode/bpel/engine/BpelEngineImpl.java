@@ -99,7 +99,7 @@ public class BpelEngineImpl implements BpelEngine {
 
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
-	private static final double PROCESS_OVERHEAD_MEMORY_FACTOR = 1.2;
+    private static final double PROCESS_OVERHEAD_MEMORY_FACTOR = 1.2;
 
     /** Active processes, keyed by process id. */
     final HashMap<QName, BpelProcess> _activeProcesses = new HashMap<QName, BpelProcess>();
@@ -125,7 +125,7 @@ public class BpelEngineImpl implements BpelEngine {
     }
 
     public SharedEndpoints getSharedEndpoints() {
-    	return _sharedEps;
+        return _sharedEps;
     }
     
     public MyRoleMessageExchange createMessageExchange(String clientKey, QName targetService,
@@ -139,17 +139,17 @@ public class BpelEngineImpl implements BpelEngine {
         
         if (targets.size() == 1) {
             // If the number of targets is one, create and return a simple MEX
-        	BpelProcess target = targets.get(0);
-        	return createNewMyRoleMex(target, clientKey, targetService, operation, pipedMexId);
+            BpelProcess target = targets.get(0);
+            return createNewMyRoleMex(target, clientKey, targetService, operation, pipedMexId);
         } else {
-        	// If the number of targets is greater than one, create and return
-        	// a brokered MEX that embeds the simple MEXs for each of the targets
-        	BpelProcess template = targets.get(0);
+            // If the number of targets is greater than one, create and return
+            // a brokered MEX that embeds the simple MEXs for each of the targets
+            BpelProcess template = targets.get(0);
             ArrayList<MyRoleMessageExchange> meps = new ArrayList<MyRoleMessageExchange>();
-        	for (BpelProcess target : targets) {
-        		meps.add(createNewMyRoleMex(target, clientKey, targetService, operation, pipedMexId));
-        	}
-        	return createNewMyRoleMex(template, meps);	
+            for (BpelProcess target : targets) {
+                meps.add(createNewMyRoleMex(target, clientKey, targetService, operation, pipedMexId));
+            }
+            return createNewMyRoleMex(template, meps);  
         }
     }
     
@@ -185,13 +185,13 @@ public class BpelEngineImpl implements BpelEngine {
      * @throws BpelEngineException
      */
     private MyRoleMessageExchange createNewMyRoleMex(BpelProcess target, List<MyRoleMessageExchange> meps) 
-    		throws BpelEngineException {
-    	MyRoleMessageExchangeImpl templateMex = (MyRoleMessageExchangeImpl) meps.get(0);
-    	MessageExchangeDAO templateMexDao = templateMex.getDAO();
-    	return new BrokeredMyRoleMessageExchangeImpl(target, this, meps, templateMexDao, templateMex);
+            throws BpelEngineException {
+        MyRoleMessageExchangeImpl templateMex = (MyRoleMessageExchangeImpl) meps.get(0);
+        MessageExchangeDAO templateMexDao = templateMex.getDAO();
+        return new BrokeredMyRoleMessageExchangeImpl(target, this, meps, templateMexDao, templateMex);
     }
     
-    	
+        
     public MyRoleMessageExchange createMessageExchange(String clientKey, QName targetService, String operation) {
         return createMessageExchange(clientKey, targetService, operation, null);        
     }
@@ -200,7 +200,7 @@ public class BpelEngineImpl implements BpelEngine {
         MessageExchangeDAO mexdao = _contexts.inMemDao.getConnection().getMessageExchange(mexId);
         if (mexdao == null) mexdao = _contexts.dao.getConnection().getMessageExchange(mexId);
         if (mexdao != null)
-	        mexdao.setProcess(processDao);
+            mexdao.setProcess(processDao);
     }
     
     public MessageExchange getMessageExchange(String mexId) {
@@ -236,9 +236,9 @@ public class BpelEngineImpl implements BpelEngine {
                 OPartnerLink plink = (OPartnerLink) process.getOProcess().getChild(mexdao.getPartnerLinkModelId());
                 // the partner link might not be hydrated
                 if (plink != null) {
-	                PortType ptype = plink.myRolePortType;
-	                Operation op = plink.getMyRoleOperation(mexdao.getOperation());
-	                mex.setPortOp(ptype, op);
+                    PortType ptype = plink.myRolePortType;
+                    Operation op = plink.getMyRoleOperation(mexdao.getOperation());
+                    mex.setPortOp(ptype, op);
                 }
             }
             break;
@@ -253,8 +253,8 @@ public class BpelEngineImpl implements BpelEngine {
     
     // enable extensibility
     protected PartnerRoleMessageExchangeImpl createPartnerRoleMessageExchangeImpl(
-    		MessageExchangeDAO mexdao, PortType ptype, Operation op, OPartnerLink plink, BpelProcess process) {
-    	return new PartnerRoleMessageExchangeImpl(this, mexdao, ptype, op, null, plink.hasMyRole() ? process
+            MessageExchangeDAO mexdao, PortType ptype, Operation op, OPartnerLink plink, BpelProcess process) {
+        return new PartnerRoleMessageExchangeImpl(this, mexdao, ptype, op, null, plink.hasMyRole() ? process
                 .getInitialMyRoleEPR(plink) : null, process.getPartnerRoleChannel(plink));
     }
 
@@ -282,7 +282,7 @@ public class BpelEngineImpl implements BpelEngine {
             // release the resources held by this process
             p.dehydrate();
             // update the process footprints list
-        	_hydratedSizes.remove(p.getPID());
+            _hydratedSizes.remove(p.getPID());
         }
         return p;
     }
@@ -292,7 +292,7 @@ public class BpelEngineImpl implements BpelEngine {
     }
     
     public BpelProcess getProcess(QName pid) {
-    	return _activeProcesses.get(pid);
+        return _activeProcesses.get(pid);
     }
 
     /**
@@ -305,8 +305,8 @@ public class BpelEngineImpl implements BpelEngine {
             __log.debug("Register process: serviceId=" + e + ", process=" + process);
             List<BpelProcess> processes = _serviceMap.get(e);
             if (processes == null) {
-            	processes = new ArrayList<BpelProcess>();
-            	_serviceMap.put(e, processes);
+                processes = new ArrayList<BpelProcess>();
+                _serviceMap.put(e, processes);
             }
             // Remove any older version of the process from the list
             Iterator<BpelProcess> processesIter = processes.iterator();
@@ -358,9 +358,9 @@ public class BpelEngineImpl implements BpelEngine {
     public void onScheduledJob(Scheduler.JobInfo jobInfo) throws Scheduler.JobProcessorException {
         final WorkEvent we = new WorkEvent(jobInfo.jobDetail);
 
-    	if( __log.isTraceEnabled() ) __log.trace("[JOB] onScheduledJob " + jobInfo + "" + we.getIID());
-    	
-    	// We lock the instance to prevent concurrent transactions and prevent unnecessary rollbacks,
+        if( __log.isTraceEnabled() ) __log.trace("[JOB] onScheduledJob " + jobInfo + "" + we.getIID());
+        
+        // We lock the instance to prevent concurrent transactions and prevent unnecessary rollbacks,
         // Note that we don't want to wait too long here to get our lock, since we are likely holding
         // on to scheduler's locks of various sorts.
         try {
@@ -427,9 +427,9 @@ public class BpelEngineImpl implements BpelEngine {
                     if (isTwoWay) {
                         String causeCodeValue = mex.getProperty("causeCode");
                         mex.getDAO().setProcess(process.getProcessDAO());
-                    	sendMyRoleFault(process, we, causeCodeValue != null ? 
-                    			Integer.valueOf(causeCodeValue) : InvalidProcessException.DEFAULT_CAUSE_CODE);
-                    	return;
+                        sendMyRoleFault(process, we, causeCodeValue != null ? 
+                                Integer.valueOf(causeCodeValue) : InvalidProcessException.DEFAULT_CAUSE_CODE);
+                        return;
                     } else {
                         throw new Scheduler.JobProcessorException(checkRetry(jobInfo, null));
                     }
@@ -490,7 +490,7 @@ public class BpelEngineImpl implements BpelEngine {
         // Note that the eventListeners list is a copy-on-write array, so need
         // to mess with synchronization.
         for (org.apache.ode.bpel.iapi.BpelEventListener l : _contexts.eventListeners) {
-   			l.onEvent(event);
+            l.onEvent(event);
         }
     }
 
@@ -503,173 +503,173 @@ public class BpelEngineImpl implements BpelEngine {
         return _contexts.globalInterceptors;
     }
 
-	
+    
     public void registerMessageExchangeInterceptor(MessageExchangeInterceptor interceptor) {
-    	_contexts.globalInterceptors.add(interceptor);
+        _contexts.globalInterceptors.add(interceptor);
     }
     
     public void unregisterMessageExchangeInterceptor(MessageExchangeInterceptor interceptor) {
-    	_contexts.globalInterceptors.remove(interceptor);
+        _contexts.globalInterceptors.remove(interceptor);
     }
     
     public void unregisterMessageExchangeInterceptor(Class interceptorClass) {
-    	MessageExchangeInterceptor candidate = null;
-    	for (MessageExchangeInterceptor interceptor : _contexts.globalInterceptors) {
-    		if (interceptor.getClass().isAssignableFrom(interceptorClass)) {
-    			candidate = interceptor;
-    			break;
-    		}
-    	}
-    	if (candidate != null) {
-    		_contexts.globalInterceptors.remove(candidate);
-    	}
+        MessageExchangeInterceptor candidate = null;
+        for (MessageExchangeInterceptor interceptor : _contexts.globalInterceptors) {
+            if (interceptor.getClass().isAssignableFrom(interceptorClass)) {
+                candidate = interceptor;
+                break;
+            }
+        }
+        if (candidate != null) {
+            _contexts.globalInterceptors.remove(candidate);
+        }
     }
     
-	public long getTotalBpelFootprint() {
-		long bpelFootprint = 0;
-		for (BpelProcess process : _activeProcesses.values()) {
-			Long size = _hydratedSizes.get(process.getPID());
-			if (size == null) {
-				size = _unhydratedSizes.get(process.getPID());
-			}
-			if (size != null && size.longValue() > 0) {
-				bpelFootprint += size;
-			}
-		}
-		return bpelFootprint;
-	}
+    public long getTotalBpelFootprint() {
+        long bpelFootprint = 0;
+        for (BpelProcess process : _activeProcesses.values()) {
+            Long size = _hydratedSizes.get(process.getPID());
+            if (size == null) {
+                size = _unhydratedSizes.get(process.getPID());
+            }
+            if (size != null && size.longValue() > 0) {
+                bpelFootprint += size;
+            }
+        }
+        return bpelFootprint;
+    }
 
-	public long getHydratedFootprint() {
-		long hydratedFootprint = 0;
-		for (BpelProcess process : _activeProcesses.values()) {
-			if (!process.hintIsHydrated()) {
-				continue;
-			}
-			Long size = _hydratedSizes.get(process.getPID());
-			if (size == null) {
-				size = _unhydratedSizes.get(process.getPID());
-			}
-			if (size != null && size.longValue() > 0) {
-				hydratedFootprint += size;
-			}
-		}
-		return hydratedFootprint;
-	}
-	
-	public long getHydratedProcessSize(QName processName) {
-		return getHydratedProcessSize(_activeProcesses.get(processName));
-	}
-	
-	private long getHydratedProcessSize(BpelProcess process) {		
-		long potentialGrowth = 0;
-		if (!process.hintIsHydrated()) {
-			Long mySize = _hydratedSizes.get(process.getPID());
-			if (mySize == null) {
-				mySize = _unhydratedSizes.get(process.getPID());
-			}
-			if (mySize != null && mySize.longValue() > 0) {
-				potentialGrowth = mySize.longValue();
-			}
-		}
-		return getHydratedProcessSize(potentialGrowth);
-	}
-	
-	private long getHydratedProcessSize(long potentialGrowth) {
-		long processMemory = (long) 
-			((getHydratedFootprint() + potentialGrowth) *
-					PROCESS_OVERHEAD_MEMORY_FACTOR);
-		return processMemory;	
-	}	
+    public long getHydratedFootprint() {
+        long hydratedFootprint = 0;
+        for (BpelProcess process : _activeProcesses.values()) {
+            if (!process.hintIsHydrated()) {
+                continue;
+            }
+            Long size = _hydratedSizes.get(process.getPID());
+            if (size == null) {
+                size = _unhydratedSizes.get(process.getPID());
+            }
+            if (size != null && size.longValue() > 0) {
+                hydratedFootprint += size;
+            }
+        }
+        return hydratedFootprint;
+    }
+    
+    public long getHydratedProcessSize(QName processName) {
+        return getHydratedProcessSize(_activeProcesses.get(processName));
+    }
+    
+    private long getHydratedProcessSize(BpelProcess process) {      
+        long potentialGrowth = 0;
+        if (!process.hintIsHydrated()) {
+            Long mySize = _hydratedSizes.get(process.getPID());
+            if (mySize == null) {
+                mySize = _unhydratedSizes.get(process.getPID());
+            }
+            if (mySize != null && mySize.longValue() > 0) {
+                potentialGrowth = mySize.longValue();
+            }
+        }
+        return getHydratedProcessSize(potentialGrowth);
+    }
+    
+    private long getHydratedProcessSize(long potentialGrowth) {
+        long processMemory = (long) 
+            ((getHydratedFootprint() + potentialGrowth) *
+                    PROCESS_OVERHEAD_MEMORY_FACTOR);
+        return processMemory;   
+    }   
 
-	public int getHydratedProcessCount(QName processName) {
-		int processCount = 0;
-		for (BpelProcess process : _activeProcesses.values()) {
-			if (process.hintIsHydrated() || process.getPID().equals(processName)) {
-				processCount++;
-			}
-		}		
-		return processCount;
-	}	
+    public int getHydratedProcessCount(QName processName) {
+        int processCount = 0;
+        for (BpelProcess process : _activeProcesses.values()) {
+            if (process.hintIsHydrated() || process.getPID().equals(processName)) {
+                processCount++;
+            }
+        }       
+        return processCount;
+    }   
 
-	private long _processThrottledMaximumSize = Long.MAX_VALUE;
-	private int _processThrottledMaximumCount = Integer.MAX_VALUE;
-	private int _instanceThrottledMaximumCount = Integer.MAX_VALUE;
-	private boolean _hydrationThrottled = false;
+    private long _processThrottledMaximumSize = Long.MAX_VALUE;
+    private int _processThrottledMaximumCount = Integer.MAX_VALUE;
+    private int _instanceThrottledMaximumCount = Integer.MAX_VALUE;
+    private boolean _hydrationThrottled = false;
 
-	public void setInstanceThrottledMaximumCount(
-			int instanceThrottledMaximumCount) {
-		this._instanceThrottledMaximumCount = instanceThrottledMaximumCount;
-	}
-	
-	public int getInstanceThrottledMaximumCount() {
-		return _instanceThrottledMaximumCount;
-	}
-	
-	public void setProcessThrottledMaximumCount(
-			int hydrationThrottledMaximumCount) {
-		this._processThrottledMaximumCount = hydrationThrottledMaximumCount;
+    public void setInstanceThrottledMaximumCount(
+            int instanceThrottledMaximumCount) {
+        this._instanceThrottledMaximumCount = instanceThrottledMaximumCount;
+    }
+    
+    public int getInstanceThrottledMaximumCount() {
+        return _instanceThrottledMaximumCount;
+    }
+    
+    public void setProcessThrottledMaximumCount(
+            int hydrationThrottledMaximumCount) {
+        this._processThrottledMaximumCount = hydrationThrottledMaximumCount;
         if (hydrationThrottledMaximumCount < Integer.MAX_VALUE) {
-	        registerMessageExchangeInterceptor(new ProcessCountThrottler());
+            registerMessageExchangeInterceptor(new ProcessCountThrottler());
         } else {
-        	unregisterMessageExchangeInterceptor(ProcessCountThrottler.class);
+            unregisterMessageExchangeInterceptor(ProcessCountThrottler.class);
         }
-	}
-	
-	public int getProcessThrottledMaximumCount() {
-		return _processThrottledMaximumCount;
-	}
+    }
+    
+    public int getProcessThrottledMaximumCount() {
+        return _processThrottledMaximumCount;
+    }
 
-	public void setProcessThrottledMaximumSize(
-			long hydrationThrottledMaximumSize) {
-		this._processThrottledMaximumSize = hydrationThrottledMaximumSize;
+    public void setProcessThrottledMaximumSize(
+            long hydrationThrottledMaximumSize) {
+        this._processThrottledMaximumSize = hydrationThrottledMaximumSize;
         if (hydrationThrottledMaximumSize < Long.MAX_VALUE) {
-	        registerMessageExchangeInterceptor(new ProcessSizeThrottler());
+            registerMessageExchangeInterceptor(new ProcessSizeThrottler());
         } else {
-        	unregisterMessageExchangeInterceptor(ProcessSizeThrottler.class);
+            unregisterMessageExchangeInterceptor(ProcessSizeThrottler.class);
         }
-	}
+    }
 
-	public long getProcessThrottledMaximumSize() {
-		return _processThrottledMaximumSize;
-	}
-	
-	public void setProcessSize(QName processId, boolean hydratedOnce) {
-		BpelProcess process = _activeProcesses.get(processId);
-		long processSize = process.sizeOf();
-		if (hydratedOnce) {
+    public long getProcessThrottledMaximumSize() {
+        return _processThrottledMaximumSize;
+    }
+    
+    public void setProcessSize(QName processId, boolean hydratedOnce) {
+        BpelProcess process = _activeProcesses.get(processId);
+        long processSize = process.sizeOf();
+        if (hydratedOnce) {
             _hydratedSizes.put(process.getPID(), new Long(processSize));
             _unhydratedSizes.remove(process.getPID());
-		} else {
-			_hydratedSizes.remove(process.getPID());
-            _unhydratedSizes.put(process.getPID(), new Long(processSize));			
-		}
-	}
+        } else {
+            _hydratedSizes.remove(process.getPID());
+            _unhydratedSizes.put(process.getPID(), new Long(processSize));          
+        }
+    }
 
-	/**
-	 * Returns true if the last used process was dehydrated because it was not in-use.
-	 */
-	public boolean dehydrateLastUnusedProcess() {
-		BpelProcess lastUnusedProcess = null;
-		long lastUsedMinimum = Long.MAX_VALUE;
-		for (BpelProcess process : _activeProcesses.values()) {
-			if (process.hintIsHydrated() 
-					&& process.getLastUsed() < lastUsedMinimum 
-					&& process.getInstanceInUseCount() == 0) {
-				lastUsedMinimum = process.getLastUsed();
-				lastUnusedProcess = process;
-			}
-		}
-		if (lastUnusedProcess != null) {
-			lastUnusedProcess.dehydrate();
-			return true;
-		}
-		return false;
-	}
+    /**
+     * Returns true if the last used process was dehydrated because it was not in-use.
+     */
+    public boolean dehydrateLastUnusedProcess() {
+        BpelProcess lastUnusedProcess = null;
+        long lastUsedMinimum = Long.MAX_VALUE;
+        for (BpelProcess process : _activeProcesses.values()) {
+            if (process.hintIsHydrated() 
+                    && process.getLastUsed() < lastUsedMinimum 
+                    && process.getInstanceInUseCount() == 0) {
+                lastUsedMinimum = process.getLastUsed();
+                lastUnusedProcess = process;
+            }
+        }
+        if (lastUnusedProcess != null) {
+            lastUnusedProcess.dehydrate();
+            return true;
+        }
+        return false;
+    }
 
-	public void sendMyRoleFault(BpelProcess process, WorkEvent we, int causeCode) {
-		MessageExchange mex = (MessageExchange) getMessageExchange(we.getMexId());
+    public void sendMyRoleFault(BpelProcess process, WorkEvent we, int causeCode) {
+        MessageExchange mex = (MessageExchange) getMessageExchange(we.getMexId());
         if (!(mex instanceof MyRoleMessageExchange)) {
-        	return;
+            return;
         }
         QName faultQName = null;
         OConstants constants = process.getOProcess().constants;
@@ -713,18 +713,29 @@ public class BpelEngineImpl implements BpelEngine {
             }
             MexDaoUtil.setFaulted((MessageExchangeImpl) mex, faultQName, faultElement);
         }
-	}
-	
-	private void sendPartnerRoleFailure(WorkEvent we, FailureType failureType) {
+    }
+    
+    private void sendPartnerRoleFailure(WorkEvent we, FailureType failureType) {
         MessageExchange mex = (MessageExchange) getMessageExchange(we.getMexId());
-		if (mex instanceof PartnerRoleMessageExchange) {
-	        if (mex.getStatus() == MessageExchange.Status.ASYNC || mex.getStatus() == MessageExchange.Status.REQUEST) {
-	            String msg = "No response received for invoke (mexId=" + we.getMexId() + "), forcing it into a failed state.";
-	            if (__log.isDebugEnabled()) __log.debug(msg);
-				MexDaoUtil.setFailure((PartnerRoleMessageExchangeImpl) mex, failureType, msg, null);
-	        }
-		}
-	}
+        if (mex instanceof PartnerRoleMessageExchange) {
+            if (mex.getStatus() == MessageExchange.Status.ASYNC || mex.getStatus() == MessageExchange.Status.REQUEST) {
+                String msg = "No response received for invoke (mexId=" + we.getMexId() + "), forcing it into a failed state.";
+                if (__log.isDebugEnabled()) __log.debug(msg);
+                MexDaoUtil.setFailure((PartnerRoleMessageExchangeImpl) mex, failureType, msg, null);
+            }
+        }
+    }
 
+    public BpelProcess getNewestProcessByType(QName processType) {
+        int v = -1;
+        BpelProcess q = null;
+        for (BpelProcess p : _activeProcesses.values()) {
+            if (p.getProcessType().equals(processType) && v < p.getVersion()) {
+                v = p.getVersion();
+                q = p;
+            }
+        }
+        return q;
+    }
 }
 

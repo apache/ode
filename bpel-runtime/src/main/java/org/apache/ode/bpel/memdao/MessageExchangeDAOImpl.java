@@ -36,159 +36,163 @@ import java.util.Set;
 public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchangeDAO {
 
     private String messageExchangeId;
-	private MessageDAO response;
-	private Date createTime;
-	private MessageDAO request;
-	private String operation;
-	private QName portType;
-	private String status;
-	private int partnerLinkModelId;
-	private String correlationId;
-	private String pattern;
-	private Element ePR;
-	private Element callbackEPR;
-	private String channel;
-	private boolean propagateTransactionFlag;
-	private QName fault;
+    private MessageDAO response;
+    private Date createTime;
+    private MessageDAO request;
+    private String operation;
+    private QName portType;
+    private String status;
+    private int partnerLinkModelId;
+    private String correlationId;
+    private String pattern;
+    private Element ePR;
+    private Element callbackEPR;
+    private String channel;
+    private boolean propagateTransactionFlag;
+    private QName fault;
     private String faultExplanation;
     private String correlationStatus;
-	private ProcessDAO process;
-	private ProcessInstanceDAO instance;
-	private char direction;
-	private QName callee;
-	private Properties properties = new Properties();
+    private ProcessDAO process;
+    private ProcessInstanceDAO instance;
+    private char direction;
+    private QName callee;
+    private Properties properties = new Properties();
     private PartnerLinkDAOImpl _plink;
     private String pipedMessageExchangeId;
     private int subscriberCount;
 
-	public MessageExchangeDAOImpl(char direction, String messageEchangeId){
-		this.direction = direction;
-		this.messageExchangeId = messageEchangeId;
+    public MessageExchangeDAOImpl(char direction, String messageEchangeId){
+        this.direction = direction;
+        this.messageExchangeId = messageEchangeId;
     }
-	
-	public String getMessageExchangeId() {
-		return messageExchangeId;
-	}
+    
+    public String getMessageExchangeId() {
+        return messageExchangeId;
+    }
 
-	public MessageDAO getResponse() {
-		return response;
-	}
+    public MessageDAO getResponse() {
+        return response;
+    }
 
-	public Date getCreateTime() {
-		return createTime;
-	}
+    public Date getCreateTime() {
+        return createTime;
+    }
 
-	public MessageDAO getRequest() {
-		return request;
-	}
+    public void setCreateTime(Date d) {
+        createTime = d;
+    }
 
-	public String getOperation() {
-		return operation;
-	}
+    public MessageDAO getRequest() {
+        return request;
+    }
 
-	public QName getPortType() {
-		return portType;
-	}
+    public String getOperation() {
+        return operation;
+    }
 
-	public void setPortType(QName porttype) {
-		this.portType = porttype;
+    public QName getPortType() {
+        return portType;
+    }
 
-	}
+    public void setPortType(QName porttype) {
+        this.portType = porttype;
 
-	public void setStatus(String status) {
-		this.status = status;
+    }
 
-	}
+    public void setStatus(String status) {
+        this.status = status;
 
-	public String getStatus() {
-		return status;
-	}
+    }
 
-	public MessageDAO createMessage(QName type) {
-		MessageDAO messageDAO = new MessageDAOImpl(this);
-		messageDAO.setType(type);
-		return messageDAO;
-	}
+    public String getStatus() {
+        return status;
+    }
 
-	public void setRequest(MessageDAO msg) {
-		this.request = msg;
+    public MessageDAO createMessage(QName type) {
+        MessageDAO messageDAO = new MessageDAOImpl(this);
+        messageDAO.setType(type);
+        return messageDAO;
+    }
 
-	}
+    public void setRequest(MessageDAO msg) {
+        this.request = msg;
 
-	public void setResponse(MessageDAO msg) {
-		this.response = msg;
+    }
 
-	}
+    public void setResponse(MessageDAO msg) {
+        this.response = msg;
 
-	public int getPartnerLinkModelId() {
-		return partnerLinkModelId;
-	}
+    }
 
-	public void setPartnerLinkModelId(int modelId) {
-		this.partnerLinkModelId = modelId;
+    public int getPartnerLinkModelId() {
+        return partnerLinkModelId;
+    }
 
-	}
+    public void setPartnerLinkModelId(int modelId) {
+        this.partnerLinkModelId = modelId;
 
-	public String getCorrelationId() {
-		return correlationId;
-	}
+    }
 
-	public void setCorrelationId(String correlationId) {
-		this.correlationId = correlationId;
+    public String getCorrelationId() {
+        return correlationId;
+    }
 
-	}
+    public void setCorrelationId(String correlationId) {
+        this.correlationId = correlationId;
 
-	public void setPattern(String string) {
-		this.pattern = string;
+    }
 
-	}
+    public void setPattern(String string) {
+        this.pattern = string;
 
-	public void setOperation(String opname) {
-		this.operation = opname;
+    }
 
-	}
+    public void setOperation(String opname) {
+        this.operation = opname;
 
-	public void setEPR(Element epr) {
-		this.ePR = epr;
+    }
 
-	}
+    public void setEPR(Element epr) {
+        this.ePR = epr;
 
-	public Element getEPR() {
-		return ePR;
-	}
+    }
 
-	public void setCallbackEPR(Element epr) {
-		this.callbackEPR = epr;
+    public Element getEPR() {
+        return ePR;
+    }
 
-	}
+    public void setCallbackEPR(Element epr) {
+        this.callbackEPR = epr;
 
-	public Element getCallbackEPR() {
-		return callbackEPR;
-	}
+    }
 
-	public String getPattern() {
-		return pattern;
-	}
+    public Element getCallbackEPR() {
+        return callbackEPR;
+    }
 
-	public String getChannel() {
-		return channel;
-	}
+    public String getPattern() {
+        return pattern;
+    }
 
-	public void setChannel(String string) {
-		this.channel = string;
-	}
+    public String getChannel() {
+        return channel;
+    }
 
-	public boolean getPropagateTransactionFlag() {
-		return propagateTransactionFlag;
-	}
+    public void setChannel(String string) {
+        this.channel = string;
+    }
 
-	public QName getFault() {
-		return fault;
-	}
+    public boolean getPropagateTransactionFlag() {
+        return propagateTransactionFlag;
+    }
 
-	public void setFault(QName faultType) {
-		this.fault = faultType;
-	}
+    public QName getFault() {
+        return fault;
+    }
+
+    public void setFault(QName faultType) {
+        this.fault = faultType;
+    }
 
     public String getFaultExplanation() {
         return faultExplanation;
@@ -201,51 +205,51 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 
 
     public void setCorrelationStatus(String cstatus) {
-		this.correlationStatus = cstatus;
-	}
+        this.correlationStatus = cstatus;
+    }
 
-	public String getCorrelationStatus() {
-		return correlationStatus;
-	}
+    public String getCorrelationStatus() {
+        return correlationStatus;
+    }
 
-	public ProcessDAO getProcess() {
-		return process;
-	}
+    public ProcessDAO getProcess() {
+        return process;
+    }
 
-	public void setProcess(ProcessDAO process) {
-		this.process = process;
+    public void setProcess(ProcessDAO process) {
+        this.process = process;
 
-	}
+    }
 
-	public void setInstance(ProcessInstanceDAO dao) {
-		this.instance = dao;
+    public void setInstance(ProcessInstanceDAO dao) {
+        this.instance = dao;
 
-	}
+    }
 
-	public ProcessInstanceDAO getInstance() {
-		return instance;
-	}
+    public ProcessInstanceDAO getInstance() {
+        return instance;
+    }
 
-	public char getDirection() {
-		return direction;
-	}
+    public char getDirection() {
+        return direction;
+    }
 
-	public QName getCallee() {
-		return callee;
-	}
+    public QName getCallee() {
+        return callee;
+    }
 
-	public void setCallee(QName callee) {
-		this.callee = callee;
+    public void setCallee(QName callee) {
+        this.callee = callee;
 
-	}
+    }
 
-	public String getProperty(String key) {
-		return properties.getProperty(key);
-	}
+    public String getProperty(String key) {
+        return properties.getProperty(key);
+    }
 
-	public void setProperty(String key, String value) {
-		properties.setProperty(key,value);
-	}
+    public void setProperty(String key, String value) {
+        properties.setProperty(key,value);
+    }
 
     public void setPartnerLink(PartnerLinkDAO plinkDAO) {
         _plink = (PartnerLinkDAOImpl) plinkDAO;
@@ -272,18 +276,18 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
         this.pipedMessageExchangeId = pipedMessageExchangeId;
     }
 
-	public int getSubscriberCount() {
-		return subscriberCount;
-	}
-	
-	public void setSubscriberCount(int subscriberCount) {
-		this.subscriberCount = subscriberCount;
-	}
+    public int getSubscriberCount() {
+        return subscriberCount;
+    }
+    
+    public void setSubscriberCount(int subscriberCount) {
+        this.subscriberCount = subscriberCount;
+    }
 
-	public void incrementSubscriberCount() {
-		++subscriberCount;
-	}
-	
+    public void incrementSubscriberCount() {
+        ++subscriberCount;
+    }
+    
     public void release(boolean doClean) {
         instance = null;
         process = null;
@@ -294,7 +298,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
     }
 
     public void releasePremieMessages() {
-    	// do nothing; early messages are deleted during CorrelatorDaoImpl().dequeueMessage()
+        // do nothing; early messages are deleted during CorrelatorDaoImpl().dequeueMessage()
     }
     
     public String toString() {

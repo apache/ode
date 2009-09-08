@@ -524,5 +524,13 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
       entering("ProcessInstanceDaoImpl.getConnection");
     return new BpelDAOConnectionImpl(_sm);
   }
+ 
+   public Collection<String> getMessageExchangeIds() {
+        Collection<String> c = new HashSet<String>();
+        for (HMessageExchange m : _instance.getMessageExchanges()) {
+            c.add(m.getId().toString());
+        }
+        return c;
+    }
 
 }

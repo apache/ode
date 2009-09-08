@@ -72,6 +72,9 @@ public class JaxpVariableResolver implements XPathVariableResolver {
             } else if ("processQName".equals(variableName.getLocalPart())) {
                 return _ectx.getProcessQName();
             }
+            if ("currentEventDateTime".equals(variableName.getLocalPart())) {
+                return _ectx.getCurrentEventDateTime();
+            }
         }
 
         OXPath10ExpressionBPEL20 expr = _oxpath;

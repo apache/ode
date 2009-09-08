@@ -57,6 +57,8 @@ import javax.xml.namespace.QName;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -83,23 +85,23 @@ class ASSIGN extends ACTIVITY {
             try {
                 copy(aCopy);
             } catch (FaultException fault) {
-            	if (aCopy.ignoreMissingFromData) {
-	            	if (fault.getQName().equals(getOAsssign().getOwner().constants.qnSelectionFailure) &&
-	            			(fault.getCause() != null && "ignoreMissingFromData".equals(fault.getCause().getMessage()))) {
-	            	continue;
-	            	}
-            	}
-            	if (aCopy.ignoreUninitializedFromVariable) {
-	            	if (fault.getQName().equals(getOAsssign().getOwner().constants.qnUninitializedVariable) &&
-	            			(fault.getCause() == null || !"throwUninitializedToVariable".equals(fault.getCause().getMessage()))) {
-	            	continue;
-	            	}
-            	}
+                if (aCopy.ignoreMissingFromData) {
+                    if (fault.getQName().equals(getOAsssign().getOwner().constants.qnSelectionFailure) &&
+                            (fault.getCause() != null && "ignoreMissingFromData".equals(fault.getCause().getMessage()))) {
+                    continue;
+                    }
+                }
+                if (aCopy.ignoreUninitializedFromVariable) {
+                    if (fault.getQName().equals(getOAsssign().getOwner().constants.qnUninitializedVariable) &&
+                            (fault.getCause() == null || !"throwUninitializedToVariable".equals(fault.getCause().getMessage()))) {
+                    continue;
+                    }
+                }
                 faultData = createFault(fault.getQName(), aCopy, fault
                         .getMessage());
                 break;
             } catch (ExternalVariableModuleException e) {
-            	__log.error("Exception while initializing external variable", e);
+                __log.error("Exception while initializing external variable", e);
                 _self.parent.failure(e.toString(), null);
                 return;
             }
@@ -157,7 +159,7 @@ class ASSIGN extends ACTIVITY {
         return lval;
     }
 
-	/**
+    /**
      * Get the r-value. There are several possibilities:
      * <ul>
      * <li>a message is selected - an element representing the whole message is
@@ -238,14 +240,14 @@ class ASSIGN extends ACTIVITY {
             retVal = (Node) l.get(0);
         } else if (from instanceof OAssign.Literal) {
             Element literalRoot;
-			try {
-				literalRoot = ((OAssign.Literal) from).getXmlLiteral().getDocumentElement();
-			} catch (Exception e) {
+            try {
+                literalRoot = ((OAssign.Literal) from).getXmlLiteral().getDocumentElement();
+            } catch (Exception e) {
                 String msg = __msgs.msgEvalException(from.toString(), e.getMessage());
                 if (__log.isDebugEnabled()) __log.debug(from + ": " + msg);
                 if (e.getCause() instanceof FaultException) throw (FaultException)e.getCause();
                 throw new FaultException(getOAsssign().getOwner().constants.qnSelectionFailure, msg);
-			}
+            }
             assert literalRoot.getLocalName().equals("literal");
             // We'd like a single text node...
 
@@ -341,7 +343,7 @@ class ASSIGN extends ACTIVITY {
         return retVal;
     }
 
-	private void copy(OAssign.Copy ocopy) throws FaultException, ExternalVariableModuleException {
+    private void copy(OAssign.Copy ocopy) throws FaultException, ExternalVariableModuleException {
 
         if (__log.isDebugEnabled())
             __log.debug("Assign.copy(" + ocopy + ")");
@@ -410,7 +412,7 @@ class ASSIGN extends ACTIVITY {
                                 lvalue));
             } else if (ocopy.to instanceof OAssign.LValueExpression) {
                 LValueExpression lexpr = (LValueExpression) ocopy.to;
-	            lexpr.setInsertMissingToData(ocopy.insertMissingToData);
+                lexpr.setInsertMissingToData(ocopy.insertMissingToData);
                 lvaluePtr = evalQuery(lvalue, null, lexpr.expression,
                         new EvaluationContextProxy(lexpr.getVariable(), lvalue));
                 if (__log.isDebugEnabled())
@@ -455,20 +457,20 @@ class ASSIGN extends ACTIVITY {
         sendEvent(se);
     }
 
-	@Override
-	Node fetchVariableData(VariableInstance variable, boolean forWriting)
-			throws FaultException {
-		try {
-			return super.fetchVariableData(variable, forWriting);
-		} catch (FaultException fe) {
-			if (forWriting) {
-				fe = new FaultException(fe.getQName(), fe.getMessage(), new Throwable("throwUninitializedToVariable"));
-			}
-			throw fe;
-		}
-	}
-	
-	private void replaceEndpointRefence(PartnerLinkInstance plval, Node rvalue) throws FaultException {
+    @Override
+    Node fetchVariableData(VariableInstance variable, boolean forWriting)
+            throws FaultException {
+        try {
+            return super.fetchVariableData(variable, forWriting);
+        } catch (FaultException fe) {
+            if (forWriting) {
+                fe = new FaultException(fe.getQName(), fe.getMessage(), new Throwable("throwUninitializedToVariable"));
+            }
+            throw fe;
+        }
+    }
+    
+    private void replaceEndpointRefence(PartnerLinkInstance plval, Node rvalue) throws FaultException {
       if (rvalue.getNodeType() == Node.ATTRIBUTE_NODE){
           rvalue = rvalue.getOwnerDocument().createTextNode(((Attr) rvalue).getValue());
       }
@@ -630,13 +632,13 @@ class ASSIGN extends ACTIVITY {
         if (expression != null) {
             // Neat little trick....
             try {
-				data = ec.evaluateQuery(data, expression);
-			} catch (EvaluationException e) {
+                data = ec.evaluateQuery(data, expression);
+            } catch (EvaluationException e) {
                 String msg = __msgs.msgEvalException(expression.toString(), e.getMessage());
                 if (__log.isDebugEnabled()) __log.debug(expression + ": " + msg);
                 if (e.getCause() instanceof FaultException) throw (FaultException)e.getCause();
                 throw new FaultException(getOAsssign().getOwner().constants.qnSubLanguageExecutionFault, msg);
-			}
+            }
         }
 
         return data;
@@ -667,7 +669,7 @@ class ASSIGN extends ACTIVITY {
             } else
                 return _ctx.readVariable(variable, part);
 
-        }		/**
+        }       /**
      * @see org.apache.ode.bpel.explang.EvaluationContext#readMessageProperty(org.apache.ode.bpel.o.OScope.Variable,
      *      org.apache.ode.bpel.o.OProcess.OProperty)
      */
@@ -718,17 +720,21 @@ class ASSIGN extends ACTIVITY {
             return false;
         }
 
-		public URI getBaseResourceURI() {
-			return _ctx.getBaseResourceURI();
-		}
+        public URI getBaseResourceURI() {
+            return _ctx.getBaseResourceURI();
+        }
 
-		public Node getPropertyValue(QName propertyName) {
-			return _ctx.getPropertyValue(propertyName);
-		}
+        public Node getPropertyValue(QName propertyName) {
+            return _ctx.getPropertyValue(propertyName);
+        }
 
-		public QName getProcessQName() {
-			return _ctx.getProcessQName();
-		}
+        public QName getProcessQName() {
+            return _ctx.getProcessQName();
+        }
+
+        public Date getCurrentEventDateTime() {
+            return Calendar.getInstance().getTime(); 
+        }
     }
 
 }
