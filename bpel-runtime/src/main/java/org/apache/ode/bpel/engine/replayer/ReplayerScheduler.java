@@ -92,7 +92,9 @@ public class ReplayerScheduler implements Scheduler {
         while (!taskQueue.isEmpty()) {
             TaskElement taskElement = taskQueue.remove();
             __log.debug("executing action at time " + taskElement.when);
-            taskElement.runtimeContext.setCurrentEventDateTime(taskElement.when);
+            if (taskElement.runtimeContext != null) {
+                taskElement.runtimeContext.setCurrentEventDateTime(taskElement.when);
+            }
             taskElement.action.call();
         }
     }

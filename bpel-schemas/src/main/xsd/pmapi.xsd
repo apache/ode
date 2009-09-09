@@ -48,65 +48,73 @@
     </simpleType>
     
     <complexType name="GetCommunication">
-    	<xs:sequence>
-    		<xs:element name="iid" type="long" maxOccurs="unbounded"></xs:element>
-    	</xs:sequence>
+        <xs:sequence>
+            <xs:element name="iid" type="long" maxOccurs="unbounded"></xs:element>
+        </xs:sequence>
     </complexType>
     
-   	<xs:complexType name="GetCommunicationResponse">
-   		<xs:sequence>
-        	<element name="restoreInstance" minOccurs="0" maxOccurs="unbounded" type="pmapi:CommunicationType"/>
-   		</xs:sequence>
-   	</xs:complexType>
+    <xs:complexType name="GetCommunicationResponse">
+        <xs:sequence>
+            <element name="restoreInstance" minOccurs="0" maxOccurs="unbounded" type="pmapi:CommunicationType"/>
+        </xs:sequence>
+    </xs:complexType>
 
     <element name="getCommunicationResponse" type="pmapi:GetCommunicationResponse"/>
 
     <complexType name="CommunicationType">
-    	<sequence>
-    		<element name="processType" type="QName" />
+        <sequence>
+            <element name="processType" type="QName" />
 
-    		<element name="serviceConfig" maxOccurs="unbounded">
-    			<complexType>
-    				<sequence>
-    					<element name="name" type="QName" />
-    					<element name="replayingType"
-    						type="pmapi:ReplayType" />
-    				</sequence>
-    			</complexType>
-    		</element>
+            <element name="serviceConfig" maxOccurs="unbounded">
+                <complexType>
+                    <sequence>
+                        <element name="name" type="QName" />
+                        <element name="replayingType"
+                            type="pmapi:ReplayType" />
+                    </sequence>
+                </complexType>
+            </element>
 
-    		<element name="exchange" maxOccurs="unbounded">
-    			<complexType>
-    				<sequence>
-    					<element name="type" type="pmapi:ExchangeType" />
-    					<element name="createTime" type="dateTime" />
-    					<element name="service" type="QName" />
-    					<element name="operation" type="string" />
-    					<element name="in" type="anyType" />
-    					<element name="out" type="anyType"
-    						minOccurs="0" />
-    					<element name="fault" minOccurs="0">
-    						<complexType>
-    							<sequence>
-    								<element name="type" type="QName" />
-    								<element name="explanation"
-    									type="string" />
-    								<element name="message"
-    									type="anyType" />
-    							</sequence>
-    						</complexType>
-    					</element>
-    				</sequence>
-    			</complexType>
-    		</element>
-    	</sequence>
+            <element name="exchange" maxOccurs="unbounded">
+                <complexType>
+                    <sequence>
+                        <element name="type" type="pmapi:ExchangeType" />
+                        <element name="createTime" type="dateTime" />
+                        <element name="service" type="QName" />
+                        <element name="operation" type="string" />
+                        <element name="in" type="anyType" />
+                        <choice>
+                            <element name="out" type="anyType"/>
+                            <element name="fault">
+                                <complexType>
+                                    <sequence>
+                                        <element name="type" type="QName" />
+                                        <element name="explanation"
+                                            type="string" />
+                                        <element name="message"
+                                            type="anyType" />
+                                    </sequence>
+                                </complexType>
+                            </element>
+                            <element name="failure">
+                                <complexType>
+                                    <sequence>
+                                        <element name="explanation" type="string" />
+                                    </sequence>
+                                </complexType>
+                           </element>
+                        </choice>
+                    </sequence>
+                </complexType>
+            </element>
+        </sequence>
     </complexType>
 
     <complexType name="Replay">
         <sequence>
-        	<element name="upgradeInstance" minOccurs="0" maxOccurs="unbounded" type="long"/>
-        	<element name="replaceInstance" minOccurs="0" maxOccurs="unbounded" type="long"/>
-        	<element name="restoreInstance" minOccurs="0" maxOccurs="unbounded" type="pmapi:CommunicationType"/>
+            <element name="upgradeInstance" minOccurs="0" maxOccurs="unbounded" type="long"/>
+            <element name="replaceInstance" minOccurs="0" maxOccurs="unbounded" type="long"/>
+            <element name="restoreInstance" minOccurs="0" maxOccurs="unbounded" type="pmapi:CommunicationType"/>
         </sequence>
     </complexType>
 

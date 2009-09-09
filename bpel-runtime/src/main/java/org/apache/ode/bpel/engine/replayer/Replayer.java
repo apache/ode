@@ -34,6 +34,7 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.engine.BpelEngineImpl;
 import org.apache.ode.bpel.iapi.BpelEngine;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.pmapi.CommunicationType;
 import org.apache.ode.bpel.pmapi.ExchangeType;
@@ -125,6 +126,8 @@ public class Replayer {
         CommunicationType result = CommunicationType.Factory.newInstance();
         List<Exchange> list = new ArrayList<Exchange>();
         ProcessInstanceDAO instance = conn.getInstance(iid);
+        if (instance == null)
+            return result;
         result.setProcessType(instance.getProcess().getType());
 
         for (String mexId : instance.getMessageExchangeIds()) {
@@ -140,13 +143,18 @@ public class Replayer {
                 __log.error("", e1);
             }
             try {
-                if (mexDao.getResponse() != null) {
-                    if ("FAULT".equals(mexDao.getStatus())) {
-                        Fault f = e.addNewFault();
-                        f.setType(mexDao.getFault());
-                        f.setExplanation(mexDao.getFaultExplanation());
+                Status status = Status.valueOf(mexDao.getStatus());
+                if (status == Status.FAULT) {
+                    Fault f = e.addNewFault();
+                    f.setType(mexDao.getFault());
+                    f.setExplanation(mexDao.getFaultExplanation());
+                    if (mexDao.getResponse() != null) {
                         f.setMessage(XmlObject.Factory.parse(mexDao.getResponse().getData()));
-                    } else {
+                    }
+                } else if (status == Status.FAILURE) {
+                    e.addNewFailure().setExplanation(mexDao.getFaultExplanation());
+                } else {
+                    if (mexDao.getResponse() != null) {
                         e.setOut(XmlObject.Factory.parse(mexDao.getResponse().getData()));
                     }
                 }

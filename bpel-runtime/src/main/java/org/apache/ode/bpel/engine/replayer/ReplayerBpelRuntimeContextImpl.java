@@ -85,7 +85,7 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
     public String invoke(int aid, PartnerLinkInstance partnerLink, Operation operation, Element outgoingMessage, InvokeResponseChannel channel) throws FaultException {
         __log.debug("invoke");
 
-        Exchange answer = replayerContext.answers.fetchAnswer(partnerLink.partnerLink.partnerRolePortType.getQName(), operation.getName());
+        Exchange answer = replayerContext.answers.fetchAnswer(partnerLink.partnerLink.partnerRolePortType.getQName(), operation.getName(), outgoingMessage, getCurrentEventDateTime());
 
         PartnerLinkDAO plinkDAO = fetchPartnerLinkDAO(partnerLink);
 
@@ -127,6 +127,9 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
                 }
                 mexDao.setResponse(response);
                 mexDao.setStatus(Status.RESPONSE.toString());
+            } else if (answer.isSetFailure()) {
+                mexDao.setFaultExplanation(answer.getFailure().getExplanation());
+                mexDao.setStatus(Status.FAILURE.toString());
             } else {
                 // We don't have output for in-out operation - resulting with
                 // replayer error to the top
@@ -188,7 +191,7 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
         MessageDAO message = mex.createMessage(plinkInstnace.partnerLink.getMyRoleOperation(opName).getOutput().getMessage().getQName());
         buildOutgoingMessage(message, msg);
 
-        __log.debug("reply mexRef:" + mexRef);
+        __log.debug("instance replied mexRef:" + mexRef + " " + DOMUtils.domToString(msg));
         mex.setResponse(message);
         mex.setStatus(Status.RESPONSE.toString());
     }
@@ -249,6 +252,7 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
                     // Kill the route so some new message does not get routed to
                     // same process instance.
                     routing.correlator.removeRoutes(routing.messageRoute.getGroupId(), _dao);
+
                     execute();
                     return true;
                 }

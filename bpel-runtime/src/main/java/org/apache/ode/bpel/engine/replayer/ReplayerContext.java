@@ -41,6 +41,8 @@ import org.apache.ode.bpel.pmapi.CommunicationType;
 import org.apache.ode.bpel.pmapi.ExchangeType;
 import org.apache.ode.bpel.pmapi.CommunicationType.Exchange;
 import org.apache.ode.bpel.runtime.PROCESS;
+import org.apache.ode.utils.DOMUtils;
+import org.w3c.dom.Element;
 
 /**
  * Context holding replayer state (eg. invoke answers) for single instance during replaying.
@@ -77,14 +79,14 @@ public class ReplayerContext {
             v.answers.add(e);
         }
 
-        public Exchange fetchAnswer(QName service, String operation) {
+        public Exchange fetchAnswer(QName service, String operation, Element outgointMessage, Date currentEventDateTime) {
             __log.debug("fetching answer for " + service + " " + operation);
             String key = getAnswersKey(service, operation);
             AnswersForKey v = answersMap.get(key);
-            if (v == null) {
-                throw new IllegalStateException("answer for " + service + " " + operation + " not found");
+            Exchange e = v == null ? null : v.answerPos < v.answers.size() ? v.answers.get(v.answerPos) : null;
+            if (e == null) {
+                throw new IllegalStateException("answer for " + service + " " + operation + " at time " + currentEventDateTime + " not found, outgoing message was " + DOMUtils.domToString(outgointMessage));
             }
-            Exchange e = v.answers.get(v.answerPos);
             v.answerPos++;
             __log.debug("fetched " + e);
             return e;
@@ -129,50 +131,67 @@ public class ReplayerContext {
         }, time, runtimeContext);
     }
 
-    public void init(CommunicationType r, ReplayerScheduler scheduler) throws Exception {
+    public void init(final CommunicationType r, ReplayerScheduler scheduler) throws Exception {
         this.scheduler = scheduler;
-        List<Exchange> exchangeList = r.getExchangeList();
+        final List<Exchange> exchangeList = r.getExchangeList();
 
         for (int i = 1; i < exchangeList.size(); i++) {
             Exchange e = exchangeList.get(i);
-            if (e.getType() == ExchangeType.P) {
+            // We skip failures, because INVOKE_CHECK job is not handled by
+            // replayer
+            if (e.getType() == ExchangeType.P && !e.isSetFailure()) {
                 answers.add(e);
             }
         }
 
         {
             final Exchange e = exchangeList.get(0);
-            final BpelProcess p = bpelEngine.getNewestProcessByType(r.getProcessType());
-            final ProcessDAO processDAO = p.getProcessDAO();
-            final MyRoleMessageExchangeImpl mex = ReplayerBpelRuntimeContextImpl.createMyRoleMex(e, bpelEngine);
 
-            p.invokeProcess(mex, new BpelProcess.InvokeHandler() {
-                public boolean invoke(PartnerLinkMyRoleImpl target, RoutingInfo routing, boolean createInstance) {
-                    if (routing.messageRoute == null && createInstance) {
-                        ProcessInstanceDAO newInstance = processDAO.createInstance(routing.correlator);
+            final Date time = e.getCreateTime().getTime();
+            scheduler.scheduleReplayerJob(new Callable<Void>() {
+                public Void call() throws Exception {
+                    __log.debug("initial call " + e);
 
-                        runtimeContext = new ReplayerBpelRuntimeContextImpl(p, newInstance, new PROCESS(p.getOProcess()), mex, ReplayerContext.this);
-                        runtimeContext.setCurrentEventDateTime(e.getCreateTime().getTime());
-                        runtimeContext.updateMyRoleMex(mex);
-                        // first receive is matched to provided mex
-                        runtimeContext.execute();
-                        return true;
-                    } else if (routing.messageRoute != null) {
-                        throw new IllegalStateException("Instantiating mex causes invocation of existing instance " + mex);
+                    final BpelProcess p = bpelEngine.getNewestProcessByType(r.getProcessType());
+                    final ProcessDAO processDAO = p.getProcessDAO();
+                    final MyRoleMessageExchangeImpl mex = ReplayerBpelRuntimeContextImpl.createMyRoleMex(e, bpelEngine);
+
+                    p.invokeProcess(mex,
+                    // time,
+                            new BpelProcess.InvokeHandler() {
+                                public boolean invoke(PartnerLinkMyRoleImpl target, RoutingInfo routing, boolean createInstance) {
+                                    if (routing.messageRoute == null && createInstance) {
+                                        ProcessInstanceDAO newInstance = processDAO.createInstance(routing.correlator);
+
+                                        runtimeContext = new ReplayerBpelRuntimeContextImpl(p, newInstance, new PROCESS(p.getOProcess()), mex,
+                                        // time,
+                                                ReplayerContext.this);
+                                        runtimeContext.setCurrentEventDateTime(time);
+                                        runtimeContext.updateMyRoleMex(mex);
+                                        // first receive is matched to provided
+                                        // mex
+                                        runtimeContext.execute();
+                                        return true;
+                                    } else if (routing.messageRoute != null) {
+                                        throw new IllegalStateException("Instantiating mex causes invocation of existing instance " + mex);
+                                    }
+                                    return false;
+                                }
+                            });
+
+                    for (int i = 1; i < exchangeList.size(); i++) {
+                        Exchange e2 = exchangeList.get(i);
+                        if (e2.getType() == ExchangeType.M) {
+                            MyRoleMessageExchangeImpl mex2 = ReplayerBpelRuntimeContextImpl.createMyRoleMex(e2, bpelEngine);
+                            runtimeContext.updateMyRoleMex(mex2);
+                            scheduleInvoke(e2, mex2);
+                        }
                     }
-                    return false;
+                    return null;
                 }
-            });
+            }, time, null);
         }
 
-        for (int i = 1; i < exchangeList.size(); i++) {
-            Exchange e = exchangeList.get(i);
-            if (e.getType() == ExchangeType.M) {
-                MyRoleMessageExchangeImpl mex = ReplayerBpelRuntimeContextImpl.createMyRoleMex(e, bpelEngine);
-                runtimeContext.updateMyRoleMex(mex);
-                scheduleInvoke(e, mex);
-            }
-        }
     }
 
     public void run() throws Exception {
