@@ -93,22 +93,27 @@ public class ODEWSProcess extends ODEProcess {
     }
 
     void deactivate() {
-        // Deactivate all the my-role endpoints.
-        for (Endpoint endpoint : _myEprs.keySet()) {
-            // Deactivate the EPR only if there are no more references
-            // to this endpoint from any (active) BPEL process.
-            if (isShareable(endpoint)) {
-                __log.debug("deactivating shared endpoint " + endpoint);
-                if (!_sharedEps.decrementReferenceCount(endpoint)) {
+        // the BindingContext contains only the endpoints for the latest process version
+        if (org.apache.ode.bpel.iapi.ProcessState.ACTIVE.equals(_pconf.getState())) {
+            // Deactivate all the my-role endpoints.
+            for (Endpoint endpoint : _myEprs.keySet()) {
+                // Deactivate the EPR only if there are no more references
+                // to this endpoint from any (active) BPEL process.
+                if (isShareable(endpoint)) {
+                    __log.debug("deactivating shared endpoint " + endpoint);
+                    if (!_sharedEps.decrementReferenceCount(endpoint)) {
+                        _contexts.bindingContext.deactivateMyRoleEndpoint(endpoint);
+                        _sharedEps.removeEndpoint(endpoint);
+                    }
+                } else {
+                    __log.debug("deactivating non-shared endpoint " + endpoint);
                     _contexts.bindingContext.deactivateMyRoleEndpoint(endpoint);
-                    _sharedEps.removeEndpoint(endpoint);
                 }
-            } else {
-                __log.debug("deactivating non-shared endpoint " + endpoint);
-                _contexts.bindingContext.deactivateMyRoleEndpoint(endpoint);
             }
+            // TODO Deactivate all the partner-role channels
+        } else {
+            if (__log.isDebugEnabled()) __log.debug("pid " + _pid + " is not ACTIVE, no endpoints to deactivate");
         }
-        // TODO Deactivate all the partner-role channels
     }
 
     /**
