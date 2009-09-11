@@ -47,7 +47,7 @@ import java.util.Date;
 			query="select r._instanceId, count(r._id) from ActivityRecoveryDAOImpl r where r._instance in(:instances) group by r._instanceId")
 })
 public class ActivityRecoveryDAOImpl implements ActivityRecoveryDAO {
- 	public final static String DELETE_ACTIVITY_RECOVERIES_BY_IDS = "DELETE_ACTIVITY_RECOVERIES_BY_IDS";
+ 	public final static String DELETE_ACTIVITY_RECOVERIES_BY_IDS = "DELETE_ACTIVITY_RECOVERIES_BY_IDS";
 	public final static String COUNT_ACTIVITY_RECOVERIES_BY_INSTANCES = "COUNT_ACTIVITY_RECOVERIES_BY_INSTANCES";
 	
     @Id @Column(name="ID")
