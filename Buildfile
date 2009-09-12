@@ -126,8 +126,8 @@ COMMONS             = struct(
   :pool             =>"commons-pool:commons-pool:jar:1.2",
   :primitives       =>"commons-primitives:commons-primitives:jar:1.0"
 )
-DERBY               = "org.apache.derby:derby:jar:10.4.1.3"
-DERBY_TOOLS         = "org.apache.derby:derbytools:jar:10.4.1.3"
+DERBY               = "org.apache.derby:derby:jar:10.5.3.0"
+DERBY_TOOLS         = "org.apache.derby:derbytools:jar:10.5.3.0"
 DOM4J               = "dom4j:dom4j:jar:1.6.1"
 GERONIMO            = struct(
   :kernel           =>"org.apache.geronimo.modules:geronimo-kernel:jar:2.0.1",
