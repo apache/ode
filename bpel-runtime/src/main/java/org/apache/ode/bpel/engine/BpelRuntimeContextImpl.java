@@ -772,6 +772,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             myRoleMex.invoke(odeRequest);
 
             // Can't expect any sync response
+            scheduleInvokeCheck(mex, partnerLink.partnerLink);
             mex.replyAsync();
         } else {
             // If we couldn't find the endpoint, then there is no sense
