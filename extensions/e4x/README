@@ -25,7 +25,7 @@ How to use
     before the first activity.
     
     <bpel:extensions>
-        <bpel:extension namespace="http://ode.apache.org/extensions/js" 
+        <bpel:extension namespace="http://ode.apache.org/extensions/e4x" 
                 mustUnderstand="yes"/>
     </bpel:extensions>
     
