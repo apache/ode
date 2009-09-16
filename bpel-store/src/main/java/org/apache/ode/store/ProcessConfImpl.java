@@ -428,7 +428,7 @@ public class ProcessConfImpl implements ProcessConf {
         // do it manually to save resources (instead of using a thread)
         propertiesWatchDog.check();
         final Map prop = propertiesWatchDog.getObserver().get().getProperties(service, port);
-        if(!map.isEmpty() && __log.isDebugEnabled()) {
+        if(!prop.isEmpty() && __log.isDebugEnabled()) {
             StringBuilder msg = new StringBuilder("Properties for ");
             if(service!=null) msg.append("service ").append(service);
             if(port!=null) msg.append(", port ").append(port);
