@@ -186,6 +186,12 @@
                     <throw faultName="selectionFailure"/>
                 </if>
     
+				<!-- validate that you can invoke XSLT stylesheets from withing XQuery -->
+                <if>
+                    <condition expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">not(string-length(string(bpws:doXslTransform('HelloXQueryWorld.xsl', $myVar.TestPart))) > 0)</condition>
+                    <throw faultName="selectionFailure"/>
+                </if>
+				
                 <assign>
                     <copy>
                         <from>$i + 1</from>
