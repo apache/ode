@@ -102,6 +102,7 @@ SERVICEMIX          = [
                         group("servicemix-utils", 
                             :under=>"org.apache.servicemix", :version=>"1.0.0"),
                         "commons-httpclient:commons-httpclient:jar:3.0", 
+                        "commons-codec:commons-codec:jar:1.2",
                         "org.mortbay.jetty:jetty:jar:6.1.12rc1",
                         "org.mortbay.jetty:jetty-client:jar:6.1.12rc1",
                         "org.mortbay.jetty:jetty-sslengine:jar:6.1.12rc1",
@@ -517,7 +518,7 @@ define "ode" do
       jbi.include path_to("src/main/jbi/ode-jbi.properties")
     end
 
-    test.using :properties=>{ "java.naming.factory.initial" => "org.apache.xbean.spring.jndi.SpringInitialContextFactory"}
+    test.using :properties=>{ "java.naming.factory.initial" => "org.apache.xbean.spring.jndi.SpringInitialContextFactory"}, :java_args=>ENV['TEST_JVM_ARGS']
     test.with projects("dao-jpa", "dao-hibernate", "bpel-compiler", "bpel-api-jca", "jca-ra",
       "jca-server", "jacob"),
       BACKPORT, COMMONS.lang, COMMONS.collections, DERBY, GERONIMO.connector, GERONIMO.kernel,

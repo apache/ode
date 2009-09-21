@@ -30,7 +30,7 @@
 
   <partnerLinks>
     <partnerLink name="mainPartnerLink" partnerLinkType="resp:ResponderPartnerLinkType"
-                 myRole="responder" partnerRole="main" initializePartnerRole="yes"/>
+                 myRole="responder" partnerRole="main" initializePartnerRole="no"/>
   </partnerLinks>
 
   <variables>
@@ -47,6 +47,10 @@
     <receive name="start" partnerLink="mainPartnerLink" variable="dummy2"
              portType="resp:MSResponderPortType" operation="initiate" createInstance="yes"/>
     <assign>
+      <copy>
+        <from>$dummy2.reply-to/*</from>
+        <to partnerLink="mainPartnerLink"/>
+      </copy>
       <copy>
         <from>123</from>
         <to variable="dummy3" part="payload"/>
@@ -73,7 +77,7 @@
              portType="resp:MSResponderPortType" operation="EndpointReference"/>
     <assign>
       <copy>
-        <from variable="eprmessage" part="payload"/>
+        <from>$eprmessage.payload/*</from>
         <to partnerLink="mainPartnerLink"/>
       </copy>
       <copy>

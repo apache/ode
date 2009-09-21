@@ -135,8 +135,25 @@
     </eip:rules>
   </eip:content-based-router>
 
+
                         </eip:endpoints>
                     </eip:component>
+                </sm:component>
+            </sm:activationSpec>
+            <sm:activationSpec id="http">
+                <sm:component>
+                    <http:component>
+                        <http:endpoints>
+                            <http:endpoint 
+                                service="bpel:EPRTest2"
+                                endpoint="http" 
+                                role="consumer" 
+                                locationURI="http://localhost:8192/EPRTest2/"
+                                defaultMep="http://www.w3.org/2004/08/wsdl/in-out"
+                                defaultOperation="opInOut"
+                                soap="true" />
+                        </http:endpoints>
+                    </http:component>
                 </sm:component>
             </sm:activationSpec>
         </sm:activationSpecs>

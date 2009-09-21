@@ -71,19 +71,16 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
 
     Document doc = DOMUtils.newDocument();
     DocumentFragment fragment = doc.createDocumentFragment();
-    Element e = DOMUtils.findChildByName(epr, JBI_EPR, true);
-    if (e != null) {
-        fragment.appendChild(doc.importNode(e, true));
-    }
-    
+    NodeList children = epr.getChildNodes();
+    for (int i = 0 ; i < children.getLength(); ++i)
+        if (children.item(i) instanceof Element)
+            fragment.appendChild(doc.importNode(children.item(i), true));
     ServiceEndpoint se = _ode.getContext().resolveEndpointReference(fragment);
-    if (__log.isDebugEnabled()) {
-        __log.debug("resolveEndpointReference2 jbiepr:" + DOMUtils.domToString(fragment) + " se:" + se);
-    }
     if (se == null)
       return null;
     return new JbiEndpointReference(se);
   }
+
 
   public EndpointReference convertEndpoint(QName eprType, Element epr) {
       Document doc = DOMUtils.newDocument();

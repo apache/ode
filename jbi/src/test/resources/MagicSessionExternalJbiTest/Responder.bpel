@@ -48,7 +48,7 @@
              portType="resp:MSResponderPortType" operation="initiate" createInstance="yes"/>
     <assign>
       <copy>
-        <from variable="dummy2" part="reply-to"/>
+        <from>$dummy2.reply-to/*</from>
         <to partnerLink="mainPartnerLink"/>
       </copy>
       <copy>
@@ -77,7 +77,7 @@
              portType="resp:MSResponderPortType" operation="EndpointReference"/>
     <assign>
       <copy>
-        <from variable="eprmessage" part="payload"/>
+        <from>$eprmessage.payload/*</from>
         <to partnerLink="mainPartnerLink"/>
       </copy>
       <copy>

@@ -55,9 +55,9 @@
     <!-- Initializing message, starting the responder process with the magic session
          and expecting a callback -->
     <assign>
-      <copy>
+      <copy keepSrcElementName="yes">
         <from partnerLink="responderPartnerLink" endpointReference="myRole"/>
-        <to variable="dummy2" part="reply-to"/>
+        <to>$dummy2.reply-to/*</to>
       </copy>
       <copy>
         <from>123</from>
@@ -86,9 +86,9 @@
     <!-- Sending our endpoint explicitly to have our partner calling us back using it
          (demonstrating assignment) -->
     <assign>
-      <copy>
+      <copy keepSrcElementName="yes">
         <from partnerLink="responderPartnerLink" endpointReference="myRole"/>
-        <to variable="eprmessage" part="payload"/>
+        <to>$eprmessage.payload/*</to>
       </copy>
     </assign>
     <invoke name="eprPassing" partnerLink="responderPartnerLink" portType="test:MSResponderPortType"

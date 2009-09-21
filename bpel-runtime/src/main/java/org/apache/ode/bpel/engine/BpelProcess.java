@@ -1104,13 +1104,15 @@ public class BpelProcess {
         // OPartnerLink, PartnerLinkPartnerRoleImpl
         final PartnerLinkPartnerRoleImpl linkPartnerRole = _partnerRoles.get(partnerLink);
         long timeout = Properties.DEFAULT_MEX_TIMEOUT;
-        String timeout_property = _pconf.getEndpointProperties(linkPartnerRole._initialEPR).get(Properties.PROP_MEX_TIMEOUT);
-        if (timeout_property != null) {
-            try {
-                timeout = Long.parseLong(timeout_property);
-            } catch (NumberFormatException e) {
-                if (__log.isWarnEnabled())
-                    __log.warn("Mal-formatted Property: [" + Properties.PROP_MEX_TIMEOUT + "=" + timeout_property + "] Default value (" + timeout + ") will be used");
+        if (linkPartnerRole._initialEPR != null) {
+            String timeout_property = _pconf.getEndpointProperties(linkPartnerRole._initialEPR).get(Properties.PROP_MEX_TIMEOUT);
+            if (timeout_property != null) {
+                try {
+                    timeout = Long.parseLong(timeout_property);
+                } catch (NumberFormatException e) {
+                    if (__log.isWarnEnabled())
+                        __log.warn("Mal-formatted Property: [" + Properties.PROP_MEX_TIMEOUT + "=" + timeout_property + "] Default value (" + timeout + ") will be used");
+                }
             }
         }
 

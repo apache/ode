@@ -25,14 +25,7 @@
         xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-        xmlns:wsa="http://www.w3.org/2005/08/addressing"
         xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
-
-    <wsdl:types>
-        <xsd:schema>
-            <xsd:import namespace="http://www.w3.org/2005/08/addressing" schemaLocation="ws-addr.xsd"/>
-        </xsd:schema>
-    </wsdl:types>
 
     <wsdl:message name="ExecuteMessage">
         <wsdl:part name="payload" type="xsd:string"/>
@@ -56,7 +49,7 @@
 
     <wsdl:message name="InitiateMessage">
         <wsdl:part name="payload" type="xsd:string"/>
-        <wsdl:part name="reply-to" type="wsa:EndpointReferenceType"/>
+        <wsdl:part name="reply-to" type="xsd:anyType"/>
     </wsdl:message>
 
     <wsdl:message name="DoubleCallMessage">
@@ -64,7 +57,7 @@
     </wsdl:message>
 
     <wsdl:message name="TripleCallMessage">
-        <wsdl:part name="payload" type="wsa:EndpointReferenceType"/>
+        <wsdl:part name="payload" type="xsd:anyType"/>
     </wsdl:message>
 
     <wsdl:portType name="MSExecutePortType">
