@@ -40,6 +40,8 @@ public class OdeSUManager implements ServiceUnitManager {
 
   private static final Messages __msgs = Messages.getMessages(Messages.class);
 
+  private static final String XMLNS_JBI_MGMT = "http://java.sun.com/xml/ns/jbi/management-message";
+  
   private OdeContext _ode;
 
   /** All the service units that have been "init"ed. */
@@ -221,24 +223,24 @@ public class OdeSUManager implements ServiceUnitManager {
       throw new RuntimeException(ex);
     }
 
-    Element elem = doc.createElement("component-task-result");
+    Element elem = doc.createElementNS(XMLNS_JBI_MGMT, "component-task-result");
     doc.appendChild(elem);
-    Element compNameElem = doc.createElement("component-name");
+    Element compNameElem = doc.createElementNS(XMLNS_JBI_MGMT, "component-name");
     elem.appendChild(compNameElem);
-        Element compTaskRsltDtlsElem = doc.createElement("component-task-result-details");
+    Element compTaskRsltDtlsElem = doc.createElementNS(XMLNS_JBI_MGMT, "component-task-result-details");
     elem.appendChild(compTaskRsltDtlsElem);
-    Element taskRsltDtlsElem = doc.createElement("task-result-details");
+    Element taskRsltDtlsElem = doc.createElementNS(XMLNS_JBI_MGMT, "task-result-details");
     compTaskRsltDtlsElem.appendChild(taskRsltDtlsElem);
 
-    Element taskId = doc.createElement("task-id");
+    Element taskId = doc.createElementNS(XMLNS_JBI_MGMT, "task-id");
     taskRsltDtlsElem.appendChild(taskId);
 
-    Element taskResult = doc.createElement("task-result");
+    Element taskResult = doc.createElementNS(XMLNS_JBI_MGMT, "task-result");
     taskRsltDtlsElem.appendChild(taskResult);
 
     // Why do I have to tell this thing the component name? It /knows/ the
     // component name....
-        compNameElem.appendChild(doc.createTextNode(_ode.getContext().getComponentName()));
+    compNameElem.appendChild(doc.createTextNode(_ode.getContext().getComponentName()));
 
     // And why on earth do I have to tell my caller the method he just
     // called?
