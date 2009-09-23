@@ -135,7 +135,7 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public void associateEvent(PartnerLinkInstance plinkInstance, String opName, String mexRef, String scopeIid) {
+    public void associateEvent(PartnerLinkInstance plinkInstance, String opName, CorrelationKey key, String mexRef, String mexDAO) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 

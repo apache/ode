@@ -86,4 +86,8 @@ public class MessageRouting20Test extends BPELTestAbstract {
     @Test public void testCorrelationUnique() throws Throwable {
         go("/bpel/2.0/TestCorrelationUnique");
     }
+    
+    @Test public void testIMA() throws Throwable {
+        go("/bpel/2.0/TestIMA");
+    }
 }

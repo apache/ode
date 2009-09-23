@@ -36,7 +36,6 @@ import org.apache.ode.bpel.rtrep.v2.channels.PickResponseChannelListener;
 import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
 import org.apache.ode.bpel.rapi.InvalidProcessException;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.xsd.Duration;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.iapi.BpelEngineException;
@@ -92,28 +91,9 @@ class PICK extends ACTIVITY {
                     getBpelRuntime().checkResourceRoute(_scopeFrame.resolve(onMessage.resource),
                             onMessage.messageExchangeId, pickResponseChannel, idx);
                 } else {
-                    CorrelationKey key = null;
                     PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(onMessage.partnerLink);
-                    if (onMessage.matchCorrelation == null && !_opick.createInstanceFlag) {
-                        // Adding a route for opaque correlation. In this case,
-                        // correlation is on "out-of-band" session-id
-                        String sessionId = getBpelRuntime().fetchMySessionId(pLinkInstance);
-                        key = new CorrelationKey(-1, new String[] { sessionId });
-                    } else if (onMessage.matchCorrelation != null) {
-                        if (!getBpelRuntime().isCorrelationInitialized(
-                                _scopeFrame.resolve(onMessage.matchCorrelation))) {
-                            // the following should really test if this is a "join" type correlation...
-                            if (!_opick.createInstanceFlag)
-                                throw new FaultException(_opick.getOwner().constants.qnCorrelationViolation,
-                                        "Correlation not initialized.");
-                        } else {
-                            key = getBpelRuntime().readCorrelation(_scopeFrame.resolve(onMessage.matchCorrelation));
-                            assert key != null;
-                        }
-                    }
-
                     selectors[idx] = new Selector(idx, pLinkInstance, onMessage.operation.getName(), onMessage.operation
-                            .getOutput() == null, onMessage.messageExchangeId, key);
+                            .getOutput() == null, onMessage.messageExchangeId, getCorrelationKey(onMessage));
                     idx++;
                 }
             }
@@ -136,6 +116,29 @@ class PICK extends ACTIVITY {
         }
 
         instance(new WAITING(_scopeFrame, pickResponseChannel));
+    }
+    
+    private CorrelationKey getCorrelationKey(OPickReceive.OnMessage onMessage) throws FaultException {
+        CorrelationKey key = null;
+        PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(onMessage.partnerLink);
+        if (onMessage.matchCorrelation == null && !_opick.createInstanceFlag) {
+            // Adding a route for opaque correlation. In this case,
+            // correlation is on "out-of-band" session-id
+            String sessionId = getBpelRuntime().fetchMySessionId(pLinkInstance);
+            key = new CorrelationKey(-1, new String[] { sessionId });
+        } else if (onMessage.matchCorrelation != null) {
+            if (!getBpelRuntime().isCorrelationInitialized(
+                    _scopeFrame.resolve(onMessage.matchCorrelation))) {
+                // the following should really test if this is a "join" type correlation...
+                if (!_opick.createInstanceFlag)
+                    throw new FaultException(_opick.getOwner().constants.qnCorrelationViolation,
+                            "Correlation not initialized.");
+            } else {
+                key = getBpelRuntime().readCorrelation(_scopeFrame.resolve(onMessage.matchCorrelation));
+                assert key != null;
+            }
+        }
+        return key;
     }
 
     /**
@@ -287,15 +290,17 @@ class PICK extends ACTIVITY {
                     if (_alarm != null) {
                         dpe(_alarm.activity);
                     }
-
-                    if (_opick.onMessages.size() > 1 && onMessage.operation.getOutput() == null) {
-                        // Releasing other onMessage that could be two-ways with an oustanding request
-                        getBpelRuntime().cancelOutstandingRequests(_pickResponseChannel.export());
-                    }
                     
                     FaultData fault;
-                    initVariable(mexId, onMessage);
                     try {
+                        if (onMessage.operation.getOutput() == null) {
+                            getBpelRuntime().cancelOutstandingRequests(_pickResponseChannel.export());
+                        } else {
+                            getBpelRuntime().associateEvent(_scopeFrame.resolve(onMessage.partnerLink),
+                                    onMessage.operation.getName(), getCorrelationKey(onMessage), onMessage.messageExchangeId, mexId);
+                        }
+                        initVariable(mexId, onMessage);
+
                         if (onMessage.isRestful() && onMessage.getResource().isInstantiateResource())
                             getBpelRuntime().setInstantiatingMex(mexId);
 

@@ -67,7 +67,7 @@ class REPLY extends ACTIVITY {
                         mid+eventFrameId, (Element)msg, oreply.fault);
             else
                 getBpelRuntime().reply(_scopeFrame.resolve(oreply.partnerLink), oreply.operation.getName(),
-                        mid+eventFrameId, (Element)msg, oreply.fault);
+                        mid, (Element)msg, oreply.fault);
         } catch (FaultException e) {
             __log.error(e);
             fault = createFault(e.getQName(), oreply);
