@@ -46,6 +46,7 @@ public class DeploymentBrowser {
     private AxisConfiguration _config;
     private File _appRoot;
 
+
     public DeploymentBrowser(ProcessStoreImpl store, AxisConfiguration config, File appRoot) {
         _store = store;
         _config = config;
@@ -168,6 +169,8 @@ public class DeploymentBrowser {
                             List<File> files = _store.getProcessConfiguration(processes.get(0)).getFiles();
                             for (final File file : files) {
                                 String relativePath = requestURI.substring(deplUri + 12 + 9 + segments[1].length());
+                                // replace slashes with the correct file separator so the match below is not always false
+                                relativePath = relativePath.replace('/', File.separatorChar);
                                 if (file.getPath().endsWith(relativePath)) {
                                     renderXml(response, new DocBody() {
                                         public void render(Writer out) throws IOException {
