@@ -163,6 +163,14 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
                 	// swallow errors caused by uninitialized variable 
             	}
             }
+            for (String functionExpr : extractFunctionExprs(xpathStr)) {
+                expr = xpe.compile(functionExpr);
+            	try {
+            		expr.evaluate(node);
+            	} catch (XPathExpressionException xpee) {
+                	// swallow errors caused by uninitialized variable 
+            	}
+            }
         } catch (XPathExpressionException e) {
             __log.debug(e);
             __log.info("Couldn't validate properly expression " + xpathStr);
@@ -234,6 +242,73 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
 		return variableExprs;
 	}
 
+    /**
+     * Returns the list of function references in the given XPath expression
+     * that may not have been resolved properly, which is the case especially 
+     * if the expression contains a preceding function, which short circuited the evaluation.
+     *  
+     * @param xpathStr
+     * @return list of function expressions that may not have been resolved properly
+     */
+    private List<String> extractFunctionExprs(String xpathStr) {    	
+		ArrayList<String> functionExprs = new ArrayList<String>();
+		int firstFunction = xpathStr.indexOf("("), 
+			lastFunction = xpathStr.lastIndexOf("("); 
+		StringBuffer functionExpr = new StringBuffer();
+		if ((firstFunction > 0 && // the xpath contains a function
+				firstFunction < lastFunction)) { // the xpath references multiple variables 
+			// most likely, the variable reference has not been resolved, so make that happen
+			boolean quoted = false, doubleQuoted = false, function = false, arguments = false;
+			Name11Checker nameChecker = Name11Checker.getInstance();
+			for (int index = firstFunction; index < xpathStr.length(); index++) {
+				if (!function) {
+					int colonIndex = xpathStr.indexOf(':', index);
+					if (colonIndex == -1) {
+						break;
+					}
+					while (colonIndex >= 0 && nameChecker.isNCNameChar(xpathStr.charAt(--colonIndex)));
+					if (xpathStr.charAt(colonIndex) == '$') {
+						index = xpathStr.indexOf(':', index) + 1;
+						continue;
+					}
+					function = true;
+					arguments = false;
+					functionExpr.setLength(0);
+					index = colonIndex;
+					continue;
+				}
+				char ch = xpathStr.charAt(index);
+				if (function) {
+					functionExpr.append(ch);
+					// in the name is qualified, don't check if its a qname when we're at the ":" character
+					if (ch == ':') {
+						continue;
+					} else if (ch == '(') {
+						if (nameChecker.isQName(functionExpr.substring(0, functionExpr.length() - 1))) {
+							arguments = true;
+						} else {
+							function = false;
+							continue;
+						}
+					} else if (ch == ')') {
+						if (arguments) {
+							function = false;
+							functionExprs.add(functionExpr.toString());
+							functionExpr.setLength(0);							
+						}
+					} else {
+						if (!arguments) {
+							if (!nameChecker.isQName(functionExpr.substring(0, functionExpr.length()))) {
+								function = false;
+							}
+						}
+					}
+				}
+			}
+		}
+		return functionExprs;
+	}
+    
 	public Map<String, String> getProperties() {
         return _properties;
     }
