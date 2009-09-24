@@ -108,6 +108,7 @@ AXIS2_MODULES        = struct(
                               :version=>"1.4"), 
                         "org.apache.ws.security:wss4j:jar:1.5.4", 
                         "org.apache.santuario:xmlsec:jar:1.4.1",
+                        "org.apache.axis2:mex:jar:impl:1.41", # 1.41 is not a type!
                         "opensaml:opensaml:jar:1.1",
                         "bouncycastle:bcprov-jdk15:jar:132"]
 )
