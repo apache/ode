@@ -116,7 +116,7 @@ public class WorkEvent {
     }
 
     public QName getProcessId() {
-        return _jobDetail.get("pid") != null? QName.valueOf((String) _jobDetail.get("pid")) : null;
+        return _jobDetail.get("pid") != null? QName.valueOf(_jobDetail.get("pid").toString()) : null;
     }
 }
 
