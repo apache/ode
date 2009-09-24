@@ -239,10 +239,11 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO, Deferred
         deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_1).setParameterList("instances", instances).list());
         deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_2).setParameterList("instances", instances).list());
         deleteByIds(HMessage.class, getSession().getNamedQuery(HMessage.SELECT_MESSAGE_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
-        deleteByIds(HMessageExchangeProperty.class, getSession().getNamedQuery(HMessageExchangeProperty.SELECT_MEX_PROPS_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
         deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MEX_LDATA_IDS_BY_INSTANCES_1).setParameterList("instances", instances).list());
         deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MEX_LDATA_IDS_BY_INSTANCES_2).setParameterList("instances", instances).list());
-        deleteByIds(HMessageExchange.class, getSession().getNamedQuery(HMessageExchange.SELECT_MEX_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
+        List<Long> mex = getSession().getNamedQuery(HMessageExchange.SELECT_MEX_IDS_BY_INSTANCES).setParameterList("instances", instances).list();
+        deleteByColumn(HMessageExchangeProperty.class, "mex.id", mex);
+        deleteByIds(HMessageExchange.class, mex);
     }
     
     @SuppressWarnings("unchecked")

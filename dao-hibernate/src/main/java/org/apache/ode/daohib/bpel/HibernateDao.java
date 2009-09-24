@@ -95,15 +95,27 @@ public abstract class HibernateDao {
 
     @SuppressWarnings("unchecked")
     protected void deleteByIds(Class entity, List<Long> ids) {
-        if( ids != null && ids.size() > 0 ) {
-            StringBuffer buf = new StringBuffer();
-            buf.append("delete from ");
-            buf.append(entity.getName());
-            buf.append(" as e where e.id in(:ids)");
+        deleteByColumn(entity, "id", ids);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void deleteByColumn(Class entity, String column, List<Long> values) {
+        if( values != null && values.size() > 0 ) {
+            final String delete = "delete from "+entity.getName()+" as e where e."+column+" in (:values)";
+
+            // some databases don't like long lists of values with IN operator
+            // so we delete in batches.  Oracle 9i, for instance, doesn't support
+            // more than 1000 -- we opt to be conservative.
+            final int batchSize = 100;
             
-            Query query = getSession().createQuery(buf.toString());
-            query.setParameterList("ids", ids);
-            query.executeUpdate();
+            int index = 0;
+            while (index < values.size()) {
+                List<Long> subList = values.subList(index, Math.min(index+batchSize, values.size()));
+                Query query = getSession().createQuery(delete);
+                query.setParameterList("values", subList);
+                query.executeUpdate();
+                index += batchSize;
+            }
         }
     }    
 }

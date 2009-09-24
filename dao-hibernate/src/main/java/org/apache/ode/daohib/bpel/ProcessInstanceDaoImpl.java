@@ -388,17 +388,19 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
   @SuppressWarnings("unchecked")
   private void deleteMessages(HProcessInstance[] instances) {
       // there are chances that some unmatched messages are still there
-      deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_1).setParameterList("instances", instances).list());
-      deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_2).setParameterList("instances", instances).list());
+      deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_1).setParameterList("instances", instances).list());
+      deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_2).setParameterList("instances", instances).list());
 
-      Collection unmatchedMex = getSession().getNamedQuery(HMessageExchange.SELECT_UNMATCHED_MEX_BY_INSTANCES).setParameterList("instances", instances).list();
-      if( !unmatchedMex.isEmpty() ) {
-          getSession().delete(unmatchedMex);
-      }
+      deleteByIds(HMessage.class, getSession().getNamedQuery(HMessage.SELECT_MESSAGE_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
+
       deleteByIds(HCorrelatorMessage.class, getSession().getNamedQuery(HCorrelatorMessage.SELECT_CORMESSAGE_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
       deleteByIds(HCorrelatorSelector.class, getSession().getNamedQuery(HCorrelatorSelector.SELECT_MESSAGE_ROUTE_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
+
+      List<Long> mex = getSession().getNamedQuery(HMessageExchange.SELECT_MEX_IDS_BY_INSTANCES).setParameterList("instances", instances).list();
+      deleteByColumn(HMessageExchangeProperty.class, "mex.id", mex);
+      deleteByIds(HMessageExchange.class, mex);
   }
-  
+
   @SuppressWarnings("unchecked")
   private void deleteCorrelations(HProcessInstance[] instances) {
       deleteByIds(HCorrelationProperty.class, getSession().getNamedQuery(HCorrelationProperty.SELECT_CORPROP_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
