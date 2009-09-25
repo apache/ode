@@ -97,6 +97,35 @@
                 <to variable="myVar" part="TestPart"/>
             </copy>
         </assign>
+        <scope>
+            <variables>
+                <variable name="date" type="xsd:date"></variable>
+                <variable name="dateTime" type="xsd:dateTime"></variable>
+                <variable name="result" type="xsd:string"></variable>
+            </variables>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'2009-01-02'</from>
+                        <to>$date</to>
+                    </copy>
+                    <copy>
+                        <from>'2009-01-02T08:34:45'</from>
+                        <to>$dateTime</to>
+                    </copy>
+                    <copy>
+                        <from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
+                            if ($date + xsd:dayTimeDuration('P3D') = xsd:date('2009-01-05') and $dateTime + xsd:dayTimeDuration('P2D') = xsd:dateTime('2009-01-04T08:34:45')) then "OK" else "BAD"
+                        </from>
+                        <to>$result</to>
+                    </copy>
+                </assign>
+                <if>
+                    <condition>not($result = 'OK')</condition>
+                    <throw faultName="error"></throw>
+                </if>
+            </sequence>
+        </scope>
         <reply name="end"  
                 partnerLink="HelloXQueryPartnerLink"
                 portType="test:HelloXQueryPortType" 

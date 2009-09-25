@@ -45,9 +45,13 @@ import javax.xml.xquery.XQStaticContext;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.Validation;
 import net.sf.saxon.trans.DynamicError;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.DurationValue;
 import net.sf.saxon.xqj.SaxonXQConnection;
+import net.sf.saxon.xqj.SaxonXQDataFactory;
 import net.sf.saxon.xqj.SaxonXQDataSource;
+import net.sf.saxon.xqj.SaxonXQItem;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -351,34 +355,42 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
             for (QName variable : exp.getAllUnboundExternalVariables()) {
             	// Evaluate referenced variable
                 Object value = variableResolver.resolveVariable(variable);
+                if (value instanceof AtomicValue) {
+                    AtomicValue v = (AtomicValue) value;
+                    try {
+                        exp.bindItem(variable, new SaxonXQItem(v.asItem(), (SaxonXQConnection) xqconn));
+                    } catch (XPathException e) {
+                        __log.error("", e);
+                    }
+                } else {
+                    
+                    // Figure out type of variable
+                    XQSequenceType xqType = getItemType(xqconn, value);
+                    
+                    // Saxon doesn't like binding sequences to variables
+                    if (value instanceof Node) {
+                    	// a node is a node-list, but the inverse isn't true.
+                    	// so, if the value is truly a node, leave it alone.
+                    } else if (value instanceof NodeList) {
+                        // So extract the first item from the node list
+                    	NodeList nodeList = (NodeList) value;
+                    	ArrayList nodeArray = new ArrayList();
+                    	for (int i = 0; i < nodeList.getLength(); i++) {
+                    		nodeArray.add(nodeList.item(i));
+                    	}
+                    	value = xqconn.createSequence(nodeArray.iterator());
+                    }
                 
-                // Figure out type of variable
-                XQSequenceType xqType = getItemType(xqconn, value);
-                
-                // Saxon doesn't like binding sequences to variables
-                if (value instanceof Node) {
-                	// a node is a node-list, but the inverse isn't true.
-                	// so, if the value is truly a node, leave it alone.
-                } else if (value instanceof NodeList) {
-                    // So extract the first item from the node list
-                	NodeList nodeList = (NodeList) value;
-                	ArrayList nodeArray = new ArrayList();
-                	for (int i = 0; i < nodeList.getLength(); i++) {
-                		nodeArray.add(nodeList.item(i));
-                	}
-                	value = xqconn.createSequence(nodeArray.iterator());
-                }
-                
-                
-                // Bind value with external variable
-                if (value != null && xqType != null) {
-                	if (value instanceof XQSequence) {
-                		exp.bindSequence(variable, (XQSequence) value);
-                	} else {
-                		if (xqType instanceof XQItemType) {
-			                exp.bindObject(variable, value, (XQItemType) xqType);
-                		}
-                	}
+                    // Bind value with external variable
+                    if (value != null && xqType != null) {
+                    	if (value instanceof XQSequence) {
+                    		exp.bindSequence(variable, (XQSequence) value);
+                    	} else {
+                    		if (xqType instanceof XQItemType) {
+    			                exp.bindObject(variable, value, (XQItemType) xqType);
+                    		}
+                    	}
+                    }
                 }
             }
 

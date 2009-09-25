@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.rtrep.v2.*;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.xsd.XSTypes;
 import org.apache.ode.utils.xsl.XslTransformHandler;
 import org.jaxen.Context;
 import org.jaxen.Function;

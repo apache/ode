@@ -19,12 +19,13 @@
 
 package org.apache.ode.bpel.rtrep.v2.xpath20;
 
-import java.util.Calendar;
-
 import javax.xml.namespace.QName;
 import javax.xml.xpath.XPathVariableResolver;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.type.AtomicType;
+import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.value.StringValue;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,7 +37,6 @@ import org.apache.ode.bpel.rtrep.v2.OScope;
 import org.apache.ode.bpel.rtrep.v2.OXsdTypeVarType;
 import org.apache.ode.bpel.rtrep.v2.xpath10.OXPath10ExpressionBPEL20;
 import org.apache.ode.utils.Namespaces;
-import org.apache.ode.utils.xsd.XSTypes;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -123,15 +123,22 @@ public class JaxpVariableResolver implements XPathVariableResolver {
         	: simpleNode.getOwnerDocument();
         String text = simpleNode.getTextContent();
         try {
-            Object jobj = XSTypes.toJavaObject(type,text);
-            if (jobj instanceof Calendar) {
-                // Saxon 9.x prefers Dates over Calendars.
-                return ((Calendar) jobj).getTime();
-            } else if (jobj instanceof String) {
-                // Saxon 9.x has a bug for which this is a workaround.
-                return doc.createTextNode(jobj.toString());
-            } 
-            return jobj;
+            {
+                int fp = _config.getNamePool().allocate("", type.getNamespaceURI(), type.getLocalPart());
+                SchemaType type2 = _config.getSchemaType(fp);
+                if (type2 == null || !type2.isAtomicType()) {
+                    if (__log.isDebugEnabled()) {
+                        __log.debug("converting " + type + " value " + text + " result: " + null);
+                    }
+                    return null;
+                } else {
+                    Object value = StringValue.convertStringToAtomicType(text, (AtomicType) type2 , null);
+                    if (__log.isDebugEnabled()) {
+                        __log.debug("converting " + type + " value " + text + " result: " + value);
+                    }
+                    return value;
+                }
+            }
         } catch (Exception e) {
 	        // Elegant way failed, trying brute force 
 	        try {
