@@ -577,7 +577,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         }
     }
 
-    public void runTask(Task task) {
+    public void runTask(final Task task) {
         if (task instanceof Job) {
             Job job = (Job)task;
             if( job.detail.get("runnable") != null ) {
@@ -585,8 +585,18 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
             } else {
                 runJob(job);
             }
-        } else if (task instanceof SchedulerTask)
-            ((SchedulerTask) task).run();
+        } else if (task instanceof SchedulerTask) {
+            _exec.submit(new Callable<Void>() {
+                public Void call() throws Exception {
+                    try {
+                        ((SchedulerTask) task).run();
+                    } catch (Exception ex) {
+                        __log.error("Error during SchedulerTask execution", ex);
+                    }
+                    return null;
+                }
+            });
+        }
     }
 
     public void updateHeartBeat(String nodeId) {
