@@ -26,6 +26,14 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import javax.xml.namespace.QName;
+import javax.xml.xquery.XQConnection;
+import javax.xml.xquery.XQConstants;
+import javax.xml.xquery.XQDataSource;
+import javax.xml.xquery.XQPreparedExpression;
+import javax.xml.xquery.XQResultSequence;
+
+import net.sf.saxon.xqj.SaxonXQConnection;
+import net.sf.saxon.xqj.SaxonXQDataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,10 +47,18 @@ import org.apache.ode.bpel.engine.PartnerLinkMyRoleImpl.RoutingInfo;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.pmapi.CommunicationType;
 import org.apache.ode.bpel.pmapi.ExchangeType;
+import org.apache.ode.bpel.pmapi.MockQueryRequestDocument;
+import org.apache.ode.bpel.pmapi.MockQueryResponseDocument;
+import org.apache.ode.bpel.pmapi.ResponseType;
 import org.apache.ode.bpel.pmapi.CommunicationType.Exchange;
+import org.apache.ode.bpel.pmapi.CommunicationType.ServiceConfig;
 import org.apache.ode.bpel.runtime.PROCESS;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.xmlbeans.XmlAnySimpleType;
+import org.apache.xmlbeans.XmlObject;
+import org.apache.xmlbeans.XmlOptions;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * Context holding replayer state (eg. invoke answers) for single instance during replaying.
@@ -57,44 +73,114 @@ public class ReplayerContext {
 
     public BpelEngineImpl bpelEngine;
     public ReplayerBpelRuntimeContextImpl runtimeContext;
+    
+    public Map<QName, ServiceConfig> servicesConfig = new HashMap<QName, ServiceConfig>();
 
     public final Date replayStartDate;
 
     public Answers answers = new Answers();
 
-    public static class Answers {
+    public class Answers {
         public Map<String, AnswersForKey> answersMap = new HashMap<String, AnswersForKey>();
 
-        public static String getAnswersKey(QName service, String operation) {
+        public String getAnswersKey(QName service, String operation) {
             return service.toString() + ";" + operation;
         }
 
         public void add(Exchange e) {
-            String key = getAnswersKey(e.getService(), e.getOperation());
-            AnswersForKey v = answersMap.get(key);
-            if (v == null) {
-                v = new AnswersForKey();
-                answersMap.put(key, v);
+            ServiceConfig cfg = getServiceConfig(e.getService());
+            if (cfg.getReplayType().isSetMock()) {
+                String key = getAnswersKey(e.getService(), e.getOperation());
+                AnswersForKey v = answersMap.get(key);
+                if (v == null) {
+                    v = new AnswersForKey();
+                    answersMap.put(key, v);
+                }
+                v.answers.add(e);
             }
-            v.answers.add(e);
         }
 
-        public Exchange fetchAnswer(QName service, String operation, Element outgointMessage, Date currentEventDateTime) {
+        public Exchange fetchAnswer(QName service, String operation, Element outgoingMessage, Date currentEventDateTime) {
             __log.debug("fetching answer for " + service + " " + operation);
-            String key = getAnswersKey(service, operation);
-            AnswersForKey v = answersMap.get(key);
-            Exchange e = v == null ? null : v.answerPos < v.answers.size() ? v.answers.get(v.answerPos) : null;
-            if (e == null) {
-                throw new IllegalStateException("answer for " + service + " " + operation + " at time " + currentEventDateTime + " not found, outgoing message was " + DOMUtils.domToString(outgointMessage));
-            }
-            v.answerPos++;
-            __log.debug("fetched " + e);
-            return e;
+            
+            ServiceConfig cfg = getServiceConfig(service);
+            
+            if (cfg.getReplayType().isSetMock()) {
+                String key = getAnswersKey(service, operation);
+                AnswersForKey v = answersMap.get(key);
+                Exchange e = v == null ? null : v.answerPos < v.answers.size() ? v.answers.get(v.answerPos) : null;
+                if (e == null) {
+                    throw new IllegalStateException("answer for " + service + " " + operation + " at time " + currentEventDateTime + " not found, outgoing message was " + DOMUtils.domToString(outgoingMessage));
+                }
+                v.answerPos++;
+                __log.debug("fetched " + e);
+                return e;
+            } else if (cfg.getReplayType().isSetMockQuery()) {
+                return fetchMockQuery(service, operation, outgoingMessage, cfg);
+            } else assert(false);
+            return null;
         }
 
         public void remainingExchanges(List<Exchange> e) {
             for (AnswersForKey v : answersMap.values()) {
                 v.remainingExchanges(e);
+            }
+        }
+        
+        private Exchange fetchMockQuery(QName service, String operation, Element outgoingMessage, org.apache.ode.bpel.pmapi.CommunicationType.ServiceConfig serviceConfig) {
+            try {
+                MockQueryRequestDocument request = MockQueryRequestDocument.Factory.newInstance();
+                request.addNewMockQueryRequest().addNewIn().set(XmlObject.Factory.parse(outgoingMessage));
+                String xquery = serviceConfig.getReplayType().getMockQuery();
+                
+                XQDataSource xqds = new SaxonXQDataSource();
+                XQConnection xqconn = xqds.getConnection();
+    
+                net.sf.saxon.Configuration configuration = ((SaxonXQConnection) xqconn).getConfiguration();
+                configuration.setHostLanguage(net.sf.saxon.Configuration.XQUERY);
+//                XQStaticContext staticEnv = xqconn.getStaticContext();
+                XQPreparedExpression exp = xqconn.prepareExpression(xquery);
+                Node requestNode = DOMUtils.parse(request.newXMLStreamReader());
+                if (__log.isDebugEnabled()) {
+                    __log.debug("request " + request.toString());
+                }
+                exp.bindItem(XQConstants.CONTEXT_ITEM, xqconn.createItemFromNode(requestNode, xqconn.createNodeType()));
+                XQResultSequence result = exp.executeQuery();
+                MockQueryResponseDocument response = MockQueryResponseDocument.Factory.parse(result.getSequenceAsStream());
+                {
+                    XmlOptions opts = new XmlOptions();
+                    List<Object> errors = new ArrayList<Object>();
+                    opts.setErrorListener(errors);
+                    if (!response.validate(opts)) {
+                        __log.error("MockQuery response doesn't validate. Errors: " + errors + " Request: " + request.toString() + " Response: " + response.toString(), new Exception());
+                        throw new IllegalStateException("MockQuery response doesn't validate.");
+                    }
+                }
+                ResponseType response2 = response.getMockQueryResponse();
+                
+                if (__log.isDebugEnabled()) {
+                    __log.debug("mockQuery result " + response);
+                }
+                
+                
+                Exchange answer = Exchange.Factory.newInstance();
+                {
+                    if (response2.isSetOut()) {
+                        answer.setOut(response2.getOut());
+                    }
+                    if (response2.isSetFault()) {
+                        answer.setFault(response2.getFault());
+                    }
+                    if (response2.isSetFailure()) {
+                        answer.setFailure(response2.getFailure());
+                    }
+                }
+                
+                return answer;
+            } catch (Exception e) {
+                __log.error("", e);
+                __log.error(e.getCause());
+                throw new IllegalStateException(e.getMessage());
             }
         }
     }
@@ -133,6 +219,11 @@ public class ReplayerContext {
 
     public void init(final CommunicationType r, ReplayerScheduler scheduler) throws Exception {
         this.scheduler = scheduler;
+        
+        for (ServiceConfig s : r.getServiceConfigList()) {
+            servicesConfig.put(s.getService(), s);
+        }
+        
         final List<Exchange> exchangeList = r.getExchangeList();
 
         for (int i = 1; i < exchangeList.size(); i++) {
@@ -201,5 +292,15 @@ public class ReplayerContext {
     public ReplayerContext(Date replayStartDate) {
         super();
         this.replayStartDate = replayStartDate;
+    }
+    
+    public ServiceConfig getServiceConfig(QName service) {
+        ServiceConfig c = servicesConfig.get(service);
+        if (c == null) {
+            c = ServiceConfig.Factory.newInstance();
+            c.setService(service);
+            c.addNewReplayType().setMock(XmlAnySimpleType.Factory.newInstance());
+            return c;
+        } else return c;
     }
 }

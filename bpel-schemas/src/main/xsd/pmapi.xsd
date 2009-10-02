@@ -40,12 +40,41 @@
         </restriction>
     </simpleType>
 
-    <simpleType name="ReplayType">
-        <restriction base="string">
-            <enumeration value="MOCK"/>
-            <enumeration value="IGNORE"/>
-        </restriction>
-    </simpleType>
+    <xs:complexType name="ReplayType">
+        <xs:choice>
+            <xs:element name="mock" type="anySimpleType"></xs:element>
+            <xs:element name="mockQuery" type="string"></xs:element>
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:element name="mockQueryRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <element name="createTime" type="dateTime"/>
+                <element name="service" type="QName"/>
+                <element name="operation" type="string"/>
+                <element name="in" type="anyType"/>
+                <xs:element name="pattern">
+                    <xs:simpleType>
+                        <restriction base="string">
+                            <enumeration value="IN_ONLY"/>
+                            <enumeration value="IN_OUT"/>
+                        </restriction>
+                    </xs:simpleType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="mockQueryResponse" type="pmapi:ResponseType"/>
+
+    <xs:complexType name="ResponseType">
+        <choice>
+            <element name="out" type="anyType" />
+            <element name="fault" type="pmapi:FaultType" />
+            <element name="failure" type="pmapi:FailureType" />
+        </choice>
+    </xs:complexType>
     
     <complexType name="GetCommunication">
         <xs:sequence>
@@ -61,6 +90,20 @@
 
     <element name="getCommunicationResponse" type="pmapi:GetCommunicationResponse"/>
 
+    <complexType name="FaultType">
+        <sequence>
+            <element name="type" type="QName" />
+            <element name="explanation" type="string" />
+            <element name="message" type="anyType" />
+        </sequence>
+    </complexType>
+
+    <complexType name="FailureType">
+        <sequence>
+            <element name="explanation" type="string" />
+        </sequence>
+    </complexType>
+
     <complexType name="CommunicationType">
         <sequence>
             <element name="processType" type="QName" />
@@ -68,9 +111,8 @@
             <element name="serviceConfig" maxOccurs="unbounded">
                 <complexType>
                     <sequence>
-                        <element name="name" type="QName" />
-                        <element name="replayingType"
-                            type="pmapi:ReplayType" />
+                        <element name="service" type="QName" />
+                        <xs:element name="replayType" type="pmapi:ReplayType"/>
                     </sequence>
                 </complexType>
             </element>
@@ -83,26 +125,10 @@
                         <element name="service" type="QName" />
                         <element name="operation" type="string" />
                         <element name="in" type="anyType" />
-                        <choice>
+                        <choice> <!-- ResponseType -->
                             <element name="out" type="anyType"/>
-                            <element name="fault">
-                                <complexType>
-                                    <sequence>
-                                        <element name="type" type="QName" />
-                                        <element name="explanation"
-                                            type="string" />
-                                        <element name="message"
-                                            type="anyType" />
-                                    </sequence>
-                                </complexType>
-                            </element>
-                            <element name="failure">
-                                <complexType>
-                                    <sequence>
-                                        <element name="explanation" type="string" />
-                                    </sequence>
-                                </complexType>
-                           </element>
+                            <element name="fault" type="pmapi:FaultType"/>
+                            <element name="failure" type="pmapi:FailureType"/>
                         </choice>
                     </sequence>
                 </complexType>

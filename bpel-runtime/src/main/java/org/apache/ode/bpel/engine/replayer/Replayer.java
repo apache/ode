@@ -38,11 +38,11 @@ import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.pmapi.CommunicationType;
 import org.apache.ode.bpel.pmapi.ExchangeType;
+import org.apache.ode.bpel.pmapi.FaultType;
 import org.apache.ode.bpel.pmapi.GetCommunication;
 import org.apache.ode.bpel.pmapi.GetCommunicationResponse;
 import org.apache.ode.bpel.pmapi.Replay;
 import org.apache.ode.bpel.pmapi.CommunicationType.Exchange;
-import org.apache.ode.bpel.pmapi.CommunicationType.Exchange.Fault;
 import org.apache.xmlbeans.XmlCalendar;
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
@@ -145,7 +145,7 @@ public class Replayer {
             try {
                 Status status = Status.valueOf(mexDao.getStatus());
                 if (status == Status.FAULT) {
-                    Fault f = e.addNewFault();
+                    FaultType f = e.addNewFault();
                     f.setType(mexDao.getFault());
                     f.setExplanation(mexDao.getFaultExplanation());
                     if (mexDao.getResponse() != null) {
