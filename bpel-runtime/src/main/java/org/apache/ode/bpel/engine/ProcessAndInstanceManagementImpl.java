@@ -171,15 +171,23 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         ProcessInfoListDocument ret = ProcessInfoListDocument.Factory.newInstance();
         final TProcessInfoList procInfoList = ret.addNewProcessInfoList();
         final ProcessFilter processFilter = new ProcessFilter(filter, orderKeys);
-
-        for (ProcessConf pconf : processQuery(processFilter)) {
-            try {
-                fillProcessInfo(procInfoList.addNewProcessInfo(), pconf, custom);
-            } catch (Exception e) {
-                __log.error("Exception when querying process " + pconf.getProcessId(), e);
-            }
+        try {
+            _db.exec(new BpelDatabase.Callable<Object>() {
+                public Object run(BpelDAOConnection conn) {
+                    for (ProcessConf pconf : processQuery(processFilter)) {
+                        try {
+                            fillProcessInfo(procInfoList.addNewProcessInfo(), pconf, custom);
+                        } catch (Exception e) {
+                            __log.error("Exception when querying process " + pconf.getProcessId(), e);
+                        }
+                    }
+                    return null;
+                }
+            });
+        } catch (Exception e) {
+            __log.error("Exception while listing processes", e);
+            throw new ProcessingException("Exception while listing processes: " + e.toString());
         }
-
         return ret;
     }
 

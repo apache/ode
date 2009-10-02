@@ -216,6 +216,20 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     }
 
     public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
+        boolean existingTransaction = false;
+        try {
+            existingTransaction = _txm.getTransaction() != null;
+        } catch (Exception ex) {
+            String errmsg = "Internal Error, could not get current transaction.";
+            throw new ContextException(errmsg, ex);
+        }
+
+        // already in transaction, execute and return directly
+        if (existingTransaction) {
+            return transaction.call();
+        }
+
+        // run in new transaction
         try {
             if (__log.isDebugEnabled()) __log.debug("Beginning a new transaction");
             _txm.begin();
