@@ -122,6 +122,14 @@
     <message name="listInstancesOutput">
         <part name="instance-info-list" type="typ:tInstanceInfoList"/>
     </message>
+    <message name="listInstancesSummaryInput">
+        <part name="filter" type="xsd:string"/>
+        <part name="order" type="xsd:string"/>
+        <part name="limit" type="xsd:int"/>
+    </message>
+    <message name="listInstancesSummaryOutput">
+        <part name="instance-info-list" type="typ:tInstanceInfoList"/>
+    </message>
     <message name="queryInstancesInput">
         <part name="payload" type="xsd:string"/>
     </message>
@@ -290,6 +298,11 @@
         <operation name="listInstances">
             <input message="tns:listInstancesInput"/>
             <output message="tns:listInstancesOutput"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
+        </operation>
+        <operation name="listInstancesSummary">
+            <input message="tns:listInstancesSummaryInput"/>
+            <output message="tns:listInstancesSummaryOutput"/>
             <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="queryInstances">
@@ -506,6 +519,18 @@
     <binding name="InstanceManagementBinding" type="tns:InstanceManagementPortType">
         <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
         <operation name="listInstances">
+            <soap:operation soapAction="" style="rpc"/>
+            <input>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
+            </input>
+            <output>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
+            </output>
+            <fault name="ManagementFault">
+                <soap:fault name="ManagementFault" use="literal"/>
+             </fault>
+        </operation>
+        <operation name="listInstancesSummary">
             <soap:operation soapAction="" style="rpc"/>
             <input>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
