@@ -79,8 +79,9 @@ public class CleanFaultTest extends CleanTestBase {
         ProcessDAO process = null;
         try {
             initialLargeDataCount = getLargeDataCount(0);
-            
-            server.sendRequestFile("http://localhost:8888/processes/helloWorld", bundleName, "testRequest.soap");
+
+            String response = server.sendRequestFile("http://localhost:8888/processes/helloWorld", bundleName, "testRequest.soap");
+            System.out.println(response);
             assertInstanceCleanup(instances, activityRecoveries, correlationSets, faults, exchanges, routes, messsages, partnerLinks, scopes, variables, events, largeData);
             process = assertInstanceCleanup(instances, activityRecoveries, correlationSets, faults, exchanges, routes, messsages, partnerLinks, scopes, variables, events, largeData);
         } finally {
