@@ -24,23 +24,23 @@ package org.apache.ode.daohib.bpel.hobj;
  * instance needs to store as part of its state large binary or text
  * data, a reference to an instance of this class must be created.
  * @hibernate.class table="LARGE_DATA"
- * @hibernate.query name="SELECT_ACTIVITY_RECOVERY_LDATA_IDS_BY_INSTANCES" query="select a.details.id from HActivityRecovery as a where a.instance in (:instances)"
- * @hibernate.query name="SELECT_JACOB_LDATA_IDS_BY_INSTANCES" query="select i.jacobState.id from HProcessInstance as i where i in (:instances)"
- * @hibernate.query name="SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_1" query="select m.messageData.id from HMessage m where m.messageExchange.instance in (:instances)"
- * @hibernate.query name="SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_2" query="select m.header.id from HMessage m where m.messageExchange.instance in (:instances)"
- * @hibernate.query name="SELECT_MEX_LDATA_IDS_BY_INSTANCES_1" query="select e.endpoint.id from HMessageExchange as e where e.instance in (:instances)"
- * @hibernate.query name="SELECT_MEX_LDATA_IDS_BY_INSTANCES_2" query="select e.callbackEndpoint.id from HMessageExchange as e where e.instance in (:instances)"
+ * @hibernate.query name="SELECT_ACTIVITY_RECOVERY_LDATA_IDS_BY_INSTANCES" query="select a.details.id from HActivityRecovery as a where a.instance in (:instances) and a.details is not null"
+ * @hibernate.query name="SELECT_JACOB_LDATA_IDS_BY_INSTANCES" query="select i.jacobState.id from HProcessInstance as i where i in (:instances) and i.jacobState is not null"
+ * @hibernate.query name="SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_1" query="select m.messageData.id from HMessage m where m.messageExchange.instance in (:instances) and m.messageData is not null"
+ * @hibernate.query name="SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_2" query="select m.header.id from HMessage m where m.messageExchange.instance in (:instances) and m.header is not null"
+ * @hibernate.query name="SELECT_MEX_LDATA_IDS_BY_INSTANCES_1" query="select e.endpoint.id from HMessageExchange as e where e.instance in (:instances) and e.endpoint is not null"
+ * @hibernate.query name="SELECT_MEX_LDATA_IDS_BY_INSTANCES_2" query="select e.callbackEndpoint.id from HMessageExchange as e where e.instance in (:instances) and e.callbackEndpoint is not null"
  *
- * @hibernate.query name="SELECT_EVENT_LDATA_IDS_BY_INSTANCES" query="select e.data.id from HBpelEvent as e where e.instance in (:instances)"
- * @hibernate.query name="SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_1" query="select m.messageData.id from HMessage m, HCorrelatorMessage cm where m.messageExchange = cm.messageExchange and m.messageExchange.instance in (:instances)"
- * @hibernate.query name="SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_2" query="select m.header.id from HMessage m, HCorrelatorMessage cm where m.messageExchange = cm.messageExchange and m.messageExchange.instance in (:instances)"
- * @hibernate.query name="SELECT_XMLDATA_LDATA_IDS_BY_INSTANCES" query="select x.data.id from HXmlData as x where x.instance in (:instances)"
- * @hibernate.query name="SELECT_PARTNER_LINK_LDATA_IDS_BY_INSTANCES_1" query="select l.myEPR.id from HPartnerLink as l where l.scope.instance in (:instances)"
- * @hibernate.query name="SELECT_PARTNER_LINK_LDATA_IDS_BY_INSTANCES_2" query="select l.partnerEPR.id from HPartnerLink as l where l.scope.instance in (:instances)"
- * @hibernate.query name="SELECT_FAULT_LDATA_IDS_BY_INSTANCE_IDS" query="select f.data.id from HFaultData as f, HProcessInstance as i where f.id = i.fault and i.id in (:instanceIds)"
+ * @hibernate.query name="SELECT_EVENT_LDATA_IDS_BY_INSTANCES" query="select e.data.id from HBpelEvent as e where e.instance in (:instances) and e.data is not null"
+ * @hibernate.query name="SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_1" query="select m.messageData.id from HMessage m, HCorrelatorMessage cm where m.messageExchange = cm.messageExchange and m.messageExchange.instance in (:instances) and m.messageData is not null"
+ * @hibernate.query name="SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_2" query="select m.header.id from HMessage m, HCorrelatorMessage cm where m.messageExchange = cm.messageExchange and m.messageExchange.instance in (:instances) and m.header is not null"
+ * @hibernate.query name="SELECT_XMLDATA_LDATA_IDS_BY_INSTANCES" query="select x.data.id from HXmlData as x where x.instance in (:instances) and x.data is not null"
+ * @hibernate.query name="SELECT_PARTNER_LINK_LDATA_IDS_BY_INSTANCES_1" query="select l.myEPR.id from HPartnerLink as l where l.scope.instance in (:instances) and l.myEPR is not null"
+ * @hibernate.query name="SELECT_PARTNER_LINK_LDATA_IDS_BY_INSTANCES_2" query="select l.partnerEPR.id from HPartnerLink as l where l.scope.instance in (:instances) and l.partnerEPR is not null"
+ * @hibernate.query name="SELECT_FAULT_LDATA_IDS_BY_INSTANCE_IDS" query="select f.data.id from HFaultData as f, HProcessInstance as i where f.id = i.fault and i.id in (:instanceIds) and f.data is not null"
 
- * @hibernate.query name="SELECT_MESSAGE_LDATA_IDS_BY_MEX_1" query="select m.messageData.id from HMessage m where m.messageExchange = :mex"
- * @hibernate.query name="SELECT_MESSAGE_LDATA_IDS_BY_MEX_2" query="select m.header.id from HMessage m where m.messageExchange = :mex"
+ * @hibernate.query name="SELECT_MESSAGE_LDATA_IDS_BY_MEX_1" query="select m.messageData.id from HMessage m where m.messageExchange = :mex and m.messageData is not null"
+ * @hibernate.query name="SELECT_MESSAGE_LDATA_IDS_BY_MEX_2" query="select m.header.id from HMessage m where m.messageExchange = :mex and m.header is not null"
  */
 public class HLargeData extends HObject {
     public final static String SELECT_ACTIVITY_RECOVERY_LDATA_IDS_BY_INSTANCES = "SELECT_ACTIVITY_RECOVERY_LDATA_IDS_BY_INSTANCES";
