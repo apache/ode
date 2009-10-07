@@ -31,11 +31,11 @@ import java.util.Set;
  * matched up to a pcik/receive.
  * 
  * @hibernate.class table="BPEL_CORRELATOR"
- * @hibernate.query name="DELETE_CORRELATORS_BY_PROCESS" query="delete from HCorrelator as c where c.process = :process"
+ * @hibernate.query name="SELECT_CORRELATOR_IDS_BY_PROCESS" query="select id from HCorrelator as c where c.process = :process"
  */
 public class HCorrelator extends HObject {
-    public final static String DELETE_CORRELATORS_BY_PROCESS = "DELETE_CORRELATORS_BY_PROCESS";
-
+	public final static String SELECT_CORRELATOR_IDS_BY_PROCESS = "SELECT_CORRELATOR_IDS_BY_PROCESS";
+	
     private HProcess _process;
 
     private String _correlatorId;

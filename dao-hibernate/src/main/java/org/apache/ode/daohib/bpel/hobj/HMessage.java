@@ -22,14 +22,17 @@ package org.apache.ode.daohib.bpel.hobj;
 /**
  * Hibernate-managed table for keeping track of messages.
  *
- * @hibernate.class
- *  table="BPEL_MESSAGE"
- * @hibernate.query name="DELETE_MESSAGES_BY_MEX" query="delete from HMessage as m where m in(select request from HMessageExchange e where e = :messageExchange) or m in(select response from HMessageExchange e where e = :messageExchange)"
- * @hibernate.query name="DELETE_MESSAGES_BY_INSTANCES" query="delete from HMessage as m where m in(select request from HMessageExchange e where e.instance in (:instances)) or m in(select response from HMessageExchange e where e.instance in (:instances))"
+ * @hibernate.class table="BPEL_MESSAGE"
+ * @hibernate.query name="SELECT_MESSAGE_IDS_BY_MEX_1" query="select mex.request.id from HMessageExchange mex WHERE mex = :messageExchange and mex.request is not null"
+ * @hibernate.query name="SELECT_MESSAGE_IDS_BY_MEX_2" query="select mex.response.id from HMessageExchange mex WHERE mex = :messageExchange and mex.response is not null"
+ * @hibernate.query name="SELECT_MESSAGE_IDS_BY_INSTANCES_1" query="select mex.request.id from HMessageExchange mex WHERE mex.instance in (:instances) and mex.request.id is not null"
+ * @hibernate.query name="SELECT_MESSAGE_IDS_BY_INSTANCES_2" query="select mex.response.id from HMessageExchange mex WHERE mex.instance in (:instances) and mex.response.id is not null"
  */
 public class HMessage extends HObject {
-    public final static String DELETE_MESSAGES_BY_MEX = "DELETE_MESSAGES_BY_MEX";
-    public final static String DELETE_MESSAGES_BY_INSTANCES = "DELETE_MESSAGES_BY_INSTANCES";
+    public final static String SELECT_MESSAGE_IDS_BY_MEX_1 = "SELECT_MESSAGE_IDS_BY_MEX_1";
+    public final static String SELECT_MESSAGE_IDS_BY_MEX_2 = "SELECT_MESSAGE_IDS_BY_MEX_2";
+    public final static String SELECT_MESSAGE_IDS_BY_INSTANCES_1 = "SELECT_MESSAGE_IDS_BY_INSTANCES_1";
+    public final static String SELECT_MESSAGE_IDS_BY_INSTANCES_2 = "SELECT_MESSAGE_IDS_BY_INSTANCES_2";
 
     private String _type;
     private HLargeData _data;

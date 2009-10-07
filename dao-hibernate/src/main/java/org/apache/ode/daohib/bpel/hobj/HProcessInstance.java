@@ -31,13 +31,11 @@ import java.util.Set;
  * @hibernate.query name="COUNT_FAILED_INSTANCES_BY_PROCESS_IDS_AND_STATES" query="select count(i.id) as cnt, max(i.activityFailureDateTime) as lastFailureDt from HProcessInstance as i where i.process.processId in (:processIds) and i.state in(:states) and i.activityFailureCount > 0"
  * @hibernate.query name="SELECT_INSTANCES_BY_PROCESS" query="from HProcessInstance as i where i.process = :process)"
  * @hibernate.query name="SELECT_INSTANCES_BY_PROCESSES_AND_STATES" query="from HProcessInstance as i where i.process in (:processes) and i.state in (:states)"
- * @hibernate.query name="DELETE_INSTANCES" query="delete from HProcessInstance as i where i in (:instances)"
  */
 public class HProcessInstance extends HObject {
     public static final String COUNT_FAILED_INSTANCES_BY_PROCESS_IDS_AND_STATES="COUNT_FAILED_INSTANCES_BY_PROCESS_IDS_AND_STATES";
     public static final String SELECT_INSTANCES_BY_PROCESS="SELECT_INSTANCES_BY_PROCESS";
     public static final String SELECT_INSTANCES_BY_PROCESSES_AND_STATES="SELECT_INSTANCES_BY_PROCESSES_AND_STATES";
-    public static final String DELETE_INSTANCES="DELETE_INSTANCES";
 
     /** Foreign key to owner {@link HProcess}. */
     private HProcess _process;

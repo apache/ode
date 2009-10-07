@@ -25,12 +25,12 @@ import java.util.Collection;
  * Hibernate table representing correlation set values.
  * 
  * @hibernate.class table="BPEL_CORRELATION_SET"
- * @hibernate.query name="DELETE_CORSETS_BY_INSTANCES" query="delete from HCorrelationSet as c where c.instance in (:instances)"
+ * @hibernate.query name="SELECT_CORSET_IDS_BY_INSTANCES" query="select id from HCorrelationSet as c where c.instance in (:instances)"
  * @hibernate.query name="SELECT_CORSETS_BY_INSTANCES" query="from HCorrelationSet as c left join fetch c.properties where c.instance.id in (:instances)"
  * @hibernate.query name="SELECT_CORSETS_BY_PROCESS_STATES" query="from HCorrelationSet as c left join fetch c.process left join fetch c.instance where c.instance.state in (:states)"
  */
-public class HCorrelationSet extends HObject {
-    public static final String DELETE_CORSETS_BY_INSTANCES = "DELETE_CORSETS_BY_INSTANCES";
+public class HCorrelationSet extends HObject{
+    public static final String SELECT_CORSET_IDS_BY_INSTANCES = "SELECT_CORSET_IDS_BY_INSTANCES";
     public static final String SELECT_CORSETS_BY_INSTANCES = "SELECT_CORSETS_BY_INSTANCES";
     public static final String SELECT_CORSETS_BY_PROCESS_STATES = "SELECT_CORSETS_BY_PROCESS_STATES";
 	  

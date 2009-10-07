@@ -23,10 +23,10 @@ import java.util.HashSet;
 
 /**
  * @hibernate.class table="BPEL_XML_DATA"
- * @hibernate.query name="DELETE_XMLDATA_BY_INSTANCES" query="delete from HXmlData as x where x.instance in (:instances)"
+ * @hibernate.query name="SELECT_XMLDATA_IDS_BY_INSTANCES" query="select id from HXmlData as x where x.instance in (:instances)"
  */
-public class HXmlData extends HObject {
-    public static final String DELETE_XMLDATA_BY_INSTANCES = "DELETE_XMLDATA_BY_INSTANCES";
+public class HXmlData extends HObject{
+    public static final String SELECT_XMLDATA_IDS_BY_INSTANCES = "SELECT_XMLDATA_IDS_BY_INSTANCES";
 
     private boolean _simpleType;
     private HLargeData _data;

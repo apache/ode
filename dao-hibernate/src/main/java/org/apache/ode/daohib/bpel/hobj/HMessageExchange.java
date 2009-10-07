@@ -26,11 +26,11 @@ import java.util.Map;
  * Hibernate-managed table for keeping track of message exchanges.
  * 
  * @hibernate.class table="BPEL_MESSAGE_EXCHANGE" dynamic-update="true"
- * @hibernate.query name="DELETE_MEX_BY_INSTANCES" query="delete from HMessageExchange as m where m.instance in (:instances)"
+ * @hibernate.query name="SELECT_MEX_IDS_BY_INSTANCES" query="select id from HMessageExchange as m where m.instance in (:instances)"
  * @hibernate.query name="SELECT_UNMATCHED_MEX_BY_INSTANCES" query="from HMessageExchange as m where m in(select cm.messageExchange from HCorrelatorMessage as cm where cm.messageExchange.instance in (:instances))"
  */
 public class HMessageExchange extends HObject {
-    public final static String DELETE_MEX_BY_INSTANCES = "DELETE_MEX_BY_INSTANCES";
+    public final static String SELECT_MEX_IDS_BY_INSTANCES = "SELECT_MEX_IDS_BY_INSTANCES";
     public final static String SELECT_UNMATCHED_MEX_BY_INSTANCES = "SELECT_UNMATCHED_MEX_BY_INSTANCES";
 
     private String _channelName;

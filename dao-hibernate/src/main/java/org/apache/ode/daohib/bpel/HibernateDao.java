@@ -22,10 +22,12 @@ import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Query;
 import org.hibernate.Session;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Base class for our DAO objects.
@@ -102,4 +104,30 @@ public abstract class HibernateDao {
 
         return ids;
     }
+
+    @SuppressWarnings("unchecked")
+    protected void deleteByIds(Class entity, List<Long> ids) {
+        deleteByColumn(entity, "id", ids);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void deleteByColumn(Class entity, String column, List<Long> values) {
+        if( values != null && values.size() > 0 ) {
+            final String delete = "delete from "+entity.getName()+" as e where e."+column+" in (:values)";
+
+            // some databases don't like long lists of values with IN operator
+            // so we delete in batches.  Oracle 9i, for instance, doesn't support
+            // more than 1000 -- we opt to be conservative.
+            final int batchSize = 100;
+            
+            int index = 0;
+            while (index < values.size()) {
+                List<Long> subList = values.subList(index, Math.min(index+batchSize, values.size()));
+                Query query = getSession().createQuery(delete);
+                query.setParameterList("values", subList);
+                query.executeUpdate();
+                index += batchSize;
+            }
+        }
+    }    
 }

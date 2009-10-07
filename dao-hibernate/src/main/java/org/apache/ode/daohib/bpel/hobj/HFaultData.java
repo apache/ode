@@ -23,10 +23,10 @@ package org.apache.ode.daohib.bpel.hobj;
  * Persistent representation of a fault.
  * 
  * @hibernate.class table="BPEL_FAULT"
- * @hibernate.query name="DELETE_FAULTS_BY_INSTANCES" query="delete from HFaultData as f where f in (select i.fault from HProcessInstance as i where i in (:instances))"
+ * @hibernate.query name="SELECT_FAULT_IDS_BY_INSTANCES" query="select id from HFaultData as f where f in (select i.fault from HProcessInstance as i where i in (:instances))"
  */
 public class HFaultData extends HObject {
-    public final static String DELETE_FAULTS_BY_INSTANCES = "DELETE_FAULTS_BY_INSTANCES";
+    public final static String SELECT_FAULT_IDS_BY_INSTANCES = "SELECT_FAULT_IDS_BY_INSTANCES";
 
     private String _name;
     private String _explanation;

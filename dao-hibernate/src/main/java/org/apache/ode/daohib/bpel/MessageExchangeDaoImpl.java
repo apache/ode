@@ -36,6 +36,8 @@ import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HCorrelatorMessage;
 import org.apache.ode.daohib.bpel.hobj.HLargeData;
@@ -46,8 +48,16 @@ import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 
-public class MessageExchangeDaoImpl extends HibernateDao implements MessageExchangeDAO {
+import javax.xml.namespace.QName;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Set;
 
+public class MessageExchangeDaoImpl extends HibernateDao implements
+        MessageExchangeDAO {
+    @SuppressWarnings("unused")
+    private static final Log __log = LogFactory.getLog(MessageExchangeDaoImpl.class);
+    
     private HMessageExchange _hself;
 
     // Used when provided process and instance aren't hibernate implementations. The relation
@@ -340,10 +350,23 @@ public class MessageExchangeDaoImpl extends HibernateDao implements MessageExcha
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public void releasePremieMessages() {
+        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_MEX_1).setParameter("mex", _hself).list());
+        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_MEX_2).setParameter("mex", _hself).list());
+        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_MEX_3).setParameter("mex", _hself).list());
+        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_MEX_4).setParameter("mex", _hself).list());
+        deleteByIds(HCorrelatorMessage.class, getSession().getNamedQuery(HCorrelatorMessage.SELECT_CORMESSAGE_IDS_BY_MEX).setParameter("mex", _hself).list());
+    }
+
+    @SuppressWarnings("unchecked")
     public void deleteMessages() {
-        getSession().getNamedQuery(HLargeData.DELETE_MESSAGE_LDATA_BY_MEX).setParameter("mex", _hself).executeUpdate();
-        getSession().getNamedQuery(HCorrelatorMessage.DELETE_CORMESSAGES_BY_MEX).setParameter("mex", _hself).executeUpdate();
-        
+        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_MEX_1).setParameter("mex", _hself).list());
+        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_MEX_2).setParameter("mex", _hself).list());
+        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_MEX_3).setParameter("mex", _hself).list());
+        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_MEX_4).setParameter("mex", _hself).list());
+        deleteByIds(HCorrelatorMessage.class, getSession().getNamedQuery(HCorrelatorMessage.SELECT_CORMESSAGE_IDS_BY_MEX).setParameter("mex", _hself).list());
+          
         getSession().delete(_hself);
         // This deletes endpoint LData, callbackEndpoint LData, request HMessage, response HMessage, HMessageExchangeProperty 
     }

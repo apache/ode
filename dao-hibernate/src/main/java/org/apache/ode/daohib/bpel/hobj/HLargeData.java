@@ -25,34 +25,55 @@ package org.apache.ode.daohib.bpel.hobj;
  * an instance of this class must be created.
  * 
  * @hibernate.class table="LARGE_DATA"
- * @hibernate.query name="DELETE_ACTIVITY_RECOVERY_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select a.details from HActivityRecovery as a where a.instance in (:instances))"
- * @hibernate.query name="DELETE_JACOB_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select i.jacobState from HProcessInstance as i where i in (:instances))"
- * @hibernate.query name="DELETE_MESSAGE_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select x.request.messageData.id from HMessageExchange x where x.instance in(:instances)) or d.id in(select x.response.messageData.id from HMessageExchange x where x.instance in(:instances)) or d.id in(select x.request.header.id from HMessageExchange x where x.instance in (:instances)) or d.id in(select x.response.header.id from HMessageExchange x where x.instance in (:instances))"
- * @hibernate.query name="DELETE_MEX_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select e.endpoint from HMessageExchange as e where e.instance in (:instances)) or d IN(select e.callbackEndpoint from HMessageExchange as e where e.instance in (:instances))"
+ * @hibernate.query name="SELECT_ACTIVITY_RECOVERY_LDATA_IDS_BY_INSTANCES" query="select a.details.id from HActivityRecovery as a where a.instance in (:instances) and a.details is not null"
+ * @hibernate.query name="SELECT_JACOB_LDATA_IDS_BY_INSTANCES" query="select i.jacobState.id from HProcessInstance as i where i in (:instances) and i.jacobState is not null"
+ * @hibernate.query name="SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_1" query="select mex.request.messageData.id from HMessageExchange mex where mex.instance in (:instances) and mex.request.messageData is not null"
+ * @hibernate.query name="SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_2" query="select mex.response.messageData.id from HMessageExchange mex where mex.instance in (:instances) and mex.response.messageData is not null"
+ * @hibernate.query name="SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_3" query="select mex.request.header.id from HMessageExchange mex where mex.instance in (:instances) and mex.request.header is not null"
+ * @hibernate.query name="SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_4" query="select mex.response.header.id from HMessageExchange mex where mex.instance in (:instances) and mex.response.header is not null"
+ * @hibernate.query name="SELECT_MEX_LDATA_IDS_BY_INSTANCES_1" query="select e.endpoint.id from HMessageExchange as e where e.instance in (:instances) and e.endpoint is not null"
+ * @hibernate.query name="SELECT_MEX_LDATA_IDS_BY_INSTANCES_2" query="select e.callbackEndpoint.id from HMessageExchange as e where e.instance in (:instances) and e.callbackEndpoint is not null"
  *
- * @hibernate.query name="DELETE_EVENT_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select e.data from HBpelEvent as e where e.instance in (:instances))"
- * @hibernate.query name="DELETE_UNMATCHED_MESSAGE_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select cm.messageExchange.request.messageData from HCorrelatorMessage cm where cm.messageExchange.instance in (:instances)) or d in(select cm.messageExchange.response.messageData from HCorrelatorMessage cm where cm.messageExchange.instance in (:instances)) or d in(select cm.messageExchange.request.header from HCorrelatorMessage cm where cm.messageExchange.instance in (:instances)) or d in(select cm.messageExchange.response.header from HCorrelatorMessage cm where cm.messageExchange.instance in (:instances))"
- * @hibernate.query name="DELETE_XMLDATA_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select x.data from HXmlData as x where x.instance in (:instances))"
- * @hibernate.query name="DELETE_PARTNER_LINK_LDATA_BY_INSTANCES" query="delete from HLargeData as d where d in(select l.myEPR from HPartnerLink as l where l.scope.instance in (:instances)) or d IN(select l.partnerEPR from HPartnerLink as l where l.scope.instance in (:instances))"
- * @hibernate.query name="DELETE_FAULT_LDATA_BY_INSTANCE_IDS" query="delete from HLargeData as d where d in(select f.data from HFaultData as f, HProcessInstance as i where f.id = i.fault and i.id in (:instanceIds))"
- * 
- * use two nested sub-selects
- * @hibernate.query name="DELETE_MESSAGE_LDATA_BY_MEX" query="delete from HLargeData as d where d in(select m.messageData from HMessage m where m in(select x.request from HMessageExchange x where x = :mex) or m in(select x.response from HMessageExchange x where x = :mex)) or d in(select m.header from HMessage m where m in(select x.request from HMessageExchange x where x = :mex) or m in(select x.response from HMessageExchange x where x = :mex))"
+ * @hibernate.query name="SELECT_EVENT_LDATA_IDS_BY_INSTANCES" query="select e.data.id from HBpelEvent as e where e.instance in (:instances) and e.data is not null"
+ * @hibernate.query name="SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_1" query="select mex.request.messageData.id from HMessageExchange mex, HCorrelatorMessage cm where mex = cm.messageExchange and mex.instance in (:instances) and mex.request.messageData is not null"
+ * @hibernate.query name="SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_2" query="select mex.response.messageData.id from HMessageExchange mex, HCorrelatorMessage cm where mex = cm.messageExchange and mex.instance in (:instances) and mex.response.messageData is not null"
+ * @hibernate.query name="SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_3" query="select mex.request.header.id from HMessageExchange mex, HCorrelatorMessage cm where mex = cm.messageExchange and mex.instance in (:instances) and mex.request.header is not null"
+ * @hibernate.query name="SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_4" query="select mex.response.header.id from HMessageExchange mex, HCorrelatorMessage cm where mex = cm.messageExchange and mex.instance in (:instances) and mex.response.header is not null"
+ * @hibernate.query name="SELECT_XMLDATA_LDATA_IDS_BY_INSTANCES" query="select x.data.id from HXmlData as x where x.instance in (:instances) and x.data is not null"
+ * @hibernate.query name="SELECT_PARTNER_LINK_LDATA_IDS_BY_INSTANCES_1" query="select l.myEPR.id from HPartnerLink as l where l.scope.instance in (:instances) and l.myEPR is not null"
+ * @hibernate.query name="SELECT_PARTNER_LINK_LDATA_IDS_BY_INSTANCES_2" query="select l.partnerEPR.id from HPartnerLink as l where l.scope.instance in (:instances) and l.partnerEPR is not null"
+ * @hibernate.query name="SELECT_FAULT_LDATA_IDS_BY_INSTANCE_IDS" query="select f.data.id from HFaultData as f, HProcessInstance as i where f.id = i.fault and i.id in (:instanceIds) and f.data is not null"
+
+ * @hibernate.query name="SELECT_MESSAGE_LDATA_IDS_BY_MEX_1" query="select mex.request.messageData.id from HMessageExchange mex where mex = :mex and mex.request.messageData is not null"
+ * @hibernate.query name="SELECT_MESSAGE_LDATA_IDS_BY_MEX_2" query="select mex.response.messageData.id from HMessageExchange mex where mex = :mex and mex.response.messageData is not null"
+ * @hibernate.query name="SELECT_MESSAGE_LDATA_IDS_BY_MEX_3" query="select mex.request.header.id from HMessageExchange mex where mex = :mex and mex.request.header is not null"
+ * @hibernate.query name="SELECT_MESSAGE_LDATA_IDS_BY_MEX_4" query="select mex.response.header.id from HMessageExchange mex where mex = :mex and mex.response.header is not null"
  */
 public class HLargeData extends HObject {
+    public final static String SELECT_ACTIVITY_RECOVERY_LDATA_IDS_BY_INSTANCES = "SELECT_ACTIVITY_RECOVERY_LDATA_IDS_BY_INSTANCES";
+    public final static String SELECT_JACOB_LDATA_IDS_BY_INSTANCES = "SELECT_JACOB_LDATA_IDS_BY_INSTANCES";
+    public final static String SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_1 = "SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_1";
+    public final static String SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_2 = "SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_2";
+    public final static String SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_3 = "SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_3";
+    public final static String SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_4 = "SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_4";
+    public final static String SELECT_MEX_LDATA_IDS_BY_INSTANCES_1 = "SELECT_MEX_LDATA_IDS_BY_INSTANCES_1";
+    public final static String SELECT_MEX_LDATA_IDS_BY_INSTANCES_2 = "SELECT_MEX_LDATA_IDS_BY_INSTANCES_2";
+
+    public final static String SELECT_EVENT_LDATA_IDS_BY_INSTANCES = "SELECT_EVENT_LDATA_IDS_BY_INSTANCES";
+    public final static String SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_1 = "SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_1";
+    public final static String SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_2 = "SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_2";
+    public final static String SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_3 = "SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_3";
+    public final static String SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_4 = "SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_4";
+    public final static String SELECT_XMLDATA_LDATA_IDS_BY_INSTANCES = "SELECT_XMLDATA_LDATA_IDS_BY_INSTANCES";
+    public final static String SELECT_PARTNER_LINK_LDATA_IDS_BY_INSTANCES_1 = "SELECT_PARTNER_LINK_LDATA_IDS_BY_INSTANCES_1";
+    public final static String SELECT_PARTNER_LINK_LDATA_IDS_BY_INSTANCES_2 = "SELECT_PARTNER_LINK_LDATA_IDS_BY_INSTANCES_2";
+    public final static String SELECT_FAULT_LDATA_IDS_BY_INSTANCE_IDS = "SELECT_FAULT_LDATA_IDS_BY_INSTANCE_IDS";
     
-    public final static String DELETE_ACTIVITY_RECOVERY_LDATA_BY_INSTANCES = "DELETE_ACTIVITY_RECOVERY_LDATA_BY_INSTANCES";
-    public final static String DELETE_JACOB_LDATA_BY_INSTANCES = "DELETE_JACOB_LDATA_BY_INSTANCES";
-    public final static String DELETE_MESSAGE_LDATA_BY_INSTANCES = "DELETE_MESSAGE_LDATA_BY_INSTANCES";
-    public final static String DELETE_MEX_LDATA_BY_INSTANCES = "DELETE_MEX_LDATA_BY_INSTANCES";
-
-    public final static String DELETE_EVENT_LDATA_BY_INSTANCES = "DELETE_EVENT_LDATA_BY_INSTANCES";
-    public final static String DELETE_MESSAGE_LDATA_BY_MEX = "DELETE_MESSAGE_LDATA_BY_MEX";
-    public final static String DELETE_UNMATCHED_MESSAGE_LDATA_BY_INSTANCES = "DELETE_UNMATCHED_MESSAGE_LDATA_BY_INSTANCES";
-    public final static String DELETE_XMLDATA_LDATA_BY_INSTANCES = "DELETE_XMLDATA_LDATA_BY_INSTANCES";
-    public final static String DELETE_PARTNER_LINK_LDATA_BY_INSTANCES = "DELETE_PARTNER_LINK_LDATA_BY_INSTANCES";
-    public final static String DELETE_FAULT_LDATA_BY_INSTANCE_IDS = "DELETE_FAULT_LDATA_BY_INSTANCE_IDS";
-
+    public final static String SELECT_MESSAGE_LDATA_IDS_BY_MEX_1 = "SELECT_MESSAGE_LDATA_IDS_BY_MEX_1";
+    public final static String SELECT_MESSAGE_LDATA_IDS_BY_MEX_2 = "SELECT_MESSAGE_LDATA_IDS_BY_MEX_2";
+    public final static String SELECT_MESSAGE_LDATA_IDS_BY_MEX_3 = "SELECT_MESSAGE_LDATA_IDS_BY_MEX_3";
+    public final static String SELECT_MESSAGE_LDATA_IDS_BY_MEX_4 = "SELECT_MESSAGE_LDATA_IDS_BY_MEX_4";
+	
     private byte[] binary = null;
 
     public HLargeData() {

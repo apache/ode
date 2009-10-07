@@ -25,11 +25,11 @@ import java.io.Serializable;
  * is excluded from schema export.
  * 
  * @hibernate.class table="BPEL_MEX_PROPS" lazy="true"
- * @hibernate.query name="DELETE_MEX_PROPS_BY_INSTANCES" query="delete from HMessageExchangeProperty as p where p.mex in(select e from HMessageExchange e where e.instance in (:instances))"
+ * @hibernate.query name="SELECT_MEX_PROPS_IDS_BY_INSTANCES" query="select p.id from HMessageExchangeProperty p, HMessageExchange e where p.mex = e and e.instance in (:instances)"
  */
 @SuppressWarnings("serial")
 public class HMessageExchangeProperty implements Serializable {
-    public final static String DELETE_MEX_PROPS_BY_INSTANCES = "DELETE_MEX_PROPS_BY_INSTANCES";
+    public final static String SELECT_MEX_PROPS_IDS_BY_INSTANCES = "SELECT_MEX_PROPS_IDS_BY_INSTANCES";
 
 	private HMessageExchange _mex;
 	private String _name;
@@ -82,15 +82,15 @@ public class HMessageExchangeProperty implements Serializable {
 		_value = value;
 	}
 
-	public boolean equals(Object another) {
-		// fake implementation to suppress hibernate warning on key not hash-searchable; 
-		// actually HMessageExchangePropery is never retrieved by the id 
-		return super.equals(another);
-	}
-	
-	public int hashCode() {
-		// fake implementation to suppress hibernate warning on key not hash-searchable
-		// actually HMessageExchangePropery is never retrieved by the id 
-		return _mex.hashCode() * 29 + _name.hashCode() * 13;
-	}
+    public boolean equals(Object another) {
+        // fake implementation to suppress hibernate warning on key not hash-searchable; 
+        // actually HMessageExchangePropery is never retrieved by the id 
+        return super.equals(another);
+    }
+    
+    public int hashCode() {
+        // fake implementation to suppress hibernate warning on key not hash-searchable
+        // actually HMessageExchangePropery is never retrieved by the id 
+        return _mex.hashCode() * 29 + _name.hashCode() * 13;
+    }
 }

@@ -20,12 +20,12 @@ package org.apache.ode.daohib.bpel.hobj;
 
 /**
  * @hibernate.class table="BPEL_UNMATCHED" lazy="true"
- * @hibernate.query name="DELETE_CORMESSAGES_BY_INSTANCES" query="delete from HCorrelatorMessage as m where m.messageExchange in(select mex from HMessageExchange as mex where mex.instance in (:instances))"
- * @hibernate.query name="DELETE_CORMESSAGES_BY_MEX" query="delete from HCorrelatorMessage as m where m.messageExchange = :mex"
+ * @hibernate.query name="SELECT_CORMESSAGE_IDS_BY_INSTANCES" query="select id from HCorrelatorMessage as m where m.messageExchange in(select mex from HMessageExchange as mex where mex.instance in (:instances))"
+ * @hibernate.query name="SELECT_CORMESSAGE_IDS_BY_MEX" query="select id from HCorrelatorMessage as m where m.messageExchange = :mex"
  */
 public class HCorrelatorMessage extends HObject {
-    public final static String DELETE_CORMESSAGES_BY_MEX = "DELETE_CORMESSAGES_BY_MEX";
-    public final static String DELETE_CORMESSAGES_BY_INSTANCES = "DELETE_CORMESSAGES_BY_INSTANCES";
+    public final static String SELECT_CORMESSAGE_IDS_BY_MEX = "SELECT_CORMESSAGE_IDS_BY_MEX";
+    public final static String SELECT_CORMESSAGE_IDS_BY_INSTANCES = "SELECT_CORMESSAGE_IDS_BY_INSTANCES";
 
     private HMessageExchange _messageExchange;
     private HCorrelator _correlator;
