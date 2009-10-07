@@ -312,13 +312,23 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection, FilteredInstanc
         if (instances.size() == 0) {
             return new HashMap<Long, Collection<CorrelationSetDAO>>();
         }
-        Long[] iids = new Long[instances.size()];
+        ArrayList<Long> iids = new ArrayList<Long>(instances.size());
         int i=0;
         for (ProcessInstanceDAO dao: instances) {
-            iids[i] = dao.getInstanceId();
+            iids.add(dao.getInstanceId());
             i++;
         }
-        Collection<HCorrelationSet> csets = getSession().getNamedQuery(HCorrelationSet.SELECT_CORSETS_BY_INSTANCES).setParameterList("instances", iids).list();
+        Collection<HCorrelationSet> csets = new ArrayList<HCorrelationSet>();
+        // some databases don't like long lists of values with IN operator
+        // so we select in batches.  Oracle 9i, for instance, doesn't support
+        // more than 1000 -- we opt to be conservative.
+        final int batchSize = 100;
+        int index = 0;
+        while (index < iids.size()) {
+            List<Long> subList = iids.subList(index, Math.min(index+batchSize, iids.size()));
+            csets.addAll(getSession().getNamedQuery(HCorrelationSet.SELECT_CORSETS_BY_INSTANCES).setParameterList("instances", subList).list());
+            index += batchSize;
+        }
         Map<Long, Collection<CorrelationSetDAO>> map = new HashMap<Long, Collection<CorrelationSetDAO>>();
         for (HCorrelationSet cset: csets) {
             Long id = cset.getInstance().getId();
