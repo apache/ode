@@ -1275,10 +1275,14 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         MessageExchangeDAO dao = _dao.getConnection().getMessageExchange(mexId);
         dao.release(_bpelProcess.isCleanupCategoryEnabled(instanceSucceeded, CLEANUP_CATEGORY.MESSAGES) );
 
-        // Canceling invocation check job
+        // We used to cancel the invoke check job here but it turns out
+        // it creates more contention on the ODE_JOB table.  It's better
+        // just to let the job get scheduled and discarded quietly
+        /*
         String jobId = dao.getProperty("invokeCheckJobId");
         if (jobId != null)
             _bpelProcess._engine._contexts.scheduler.cancelJob(jobId);
+        */
     }
 
 
