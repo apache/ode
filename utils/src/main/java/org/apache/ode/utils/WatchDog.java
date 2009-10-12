@@ -151,6 +151,16 @@ public class WatchDog<T, C extends WatchDog.Observer> implements Runnable {
                         if (log.isInfoEnabled()) log.info("[" + mutable + "]" + " does not exist.");
                     }
                 }
+            }catch(Exception e){
+                if (log.isDebugEnabled()) log.debug("[" + mutable + "]" + " exception occurred during check.", e);
+                // reset so that the next check retries right away
+                expire = 0;
+                lastModif = null;
+                existedBefore = false;
+                warnedAlready = false;
+                observer.reset();
+                if (log.isInfoEnabled()) log.info("[" + mutable + "] resetted.");
+                throw new RuntimeException(e);
             } finally {
                 observer.getLock().unlock();
             }
@@ -244,6 +254,8 @@ public class WatchDog<T, C extends WatchDog.Observer> implements Runnable {
          */
         void init();
 
+        void reset();
+
         /**
          * Called only if the resource previously existed and now does not exist.
          * <br/>The default implementation invokes {@link #init()} .
@@ -286,6 +298,10 @@ public class WatchDog<T, C extends WatchDog.Observer> implements Runnable {
          * empty implementation
          */
         public void init() {
+        }
+
+        public void reset() {
+            object = null;
         }
 
         /**

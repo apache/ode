@@ -90,13 +90,20 @@ public class AxisUtils {
         }
     }
 
-    public static void applySecurityPolicy(AxisService service, String policy_file) {
+    public static void applySecurityPolicy(AxisService service, String policy_file) throws IllegalArgumentException {
         URI policyUri = new File(policy_file).toURI();
         if (log.isDebugEnabled()) log.debug("Applying security policy: " + policyUri);
         try {
             InputStream policyStream = policyUri.toURL().openStream();
             try {
                 Policy policyDoc = PolicyEngine.getPolicy(policyStream);
+                // Neethi parser is really dumb.
+                // In case of parsing error, the exception is printed out and swallowed. Null is returned.
+                if(policyDoc == null){
+                    String msg = "Failed to parse policy: "+policy_file+". Due to Neethi limitations the reason can't be provided. See stacktraces in standard output (not logs)";
+                    log.error(msg);
+                    throw new IllegalArgumentException(msg);
+                }
                 service.getPolicyInclude().addPolicyElement(PolicyInclude.AXIS_SERVICE_POLICY, policyDoc);
                 // make sure the proper modules are engaged, if they are available
                 engageModules(service, "rampart", "rahas");
