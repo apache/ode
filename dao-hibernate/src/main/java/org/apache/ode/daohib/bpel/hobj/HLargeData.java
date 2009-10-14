@@ -23,7 +23,11 @@ package org.apache.ode.daohib.bpel.hobj;
  * Used to store large data sets into a single table. When an HObject
  * instance needs to store as part of its state large binary or text
  * data, a reference to an instance of this class must be created.
+ *
  * @hibernate.class table="LARGE_DATA"
+ *
+ * @hibernate.typedef name="gzip" class="org.apache.ode.daohib.bpel.hobj.GZipDataType"
+ *
  * @hibernate.query name="SELECT_ACTIVITY_RECOVERY_LDATA_IDS_BY_INSTANCES" query="select a.details.id from HActivityRecovery as a where a.instance in (:instances) and a.details is not null"
  * @hibernate.query name="SELECT_JACOB_LDATA_IDS_BY_INSTANCES" query="select i.jacobState.id from HProcessInstance as i where i in (:instances) and i.jacobState is not null"
  * @hibernate.query name="SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_1" query="select m.messageData.id from HMessage m where m.messageExchange.instance in (:instances) and m.messageData is not null"
@@ -57,10 +61,10 @@ public class HLargeData extends HObject {
     public final static String SELECT_PARTNER_LINK_LDATA_IDS_BY_INSTANCES_1 = "SELECT_PARTNER_LINK_LDATA_IDS_BY_INSTANCES_1";
     public final static String SELECT_PARTNER_LINK_LDATA_IDS_BY_INSTANCES_2 = "SELECT_PARTNER_LINK_LDATA_IDS_BY_INSTANCES_2";
     public final static String SELECT_FAULT_LDATA_IDS_BY_INSTANCE_IDS = "SELECT_FAULT_LDATA_IDS_BY_INSTANCE_IDS";
-    
+
     public final static String SELECT_MESSAGE_LDATA_IDS_BY_MEX_1 = "SELECT_MESSAGE_LDATA_IDS_BY_MEX_1";
     public final static String SELECT_MESSAGE_LDATA_IDS_BY_MEX_2 = "SELECT_MESSAGE_LDATA_IDS_BY_MEX_2";
-	
+
     private byte[] binary = null;
 
     public HLargeData() {
@@ -78,14 +82,14 @@ public class HLargeData extends HObject {
     }
 
     /**
-     * @hibernate.property type="binary" length="2G"
+     * @hibernate.property type="gzip"
      *
      * @hibernate.column name="BIN_DATA" sql-type="blob(2G)"
      */
     public byte[] getBinary() {
         return binary;
     }
-                                                                    
+
     public void setBinary(byte[] binary) {
         this.binary = binary;
     }
