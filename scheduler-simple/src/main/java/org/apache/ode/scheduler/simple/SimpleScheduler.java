@@ -682,9 +682,9 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     }
 
     void enqueue(Job job) {
-        boolean outstanding = _outstandingJobs.putIfAbsent(job.jobId, job.schedDate) == null;
-        boolean processed = _processedSinceLastLoadTask.get(job.jobId) == null;
-        if (!outstanding && !processed) {
+        boolean not_outstanding = _outstandingJobs.putIfAbsent(job.jobId, job.schedDate) == null;
+        boolean not_processed = _processedSinceLastLoadTask.get(job.jobId) == null;
+        if (not_outstanding && not_processed) {
             if (job.schedDate <= System.currentTimeMillis()) {
                 runJob(job);
             } else {
