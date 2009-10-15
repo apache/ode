@@ -54,7 +54,6 @@ public class Properties {
     // its default value
     public static final int DEFAULT_MEX_TIMEOUT = 2 * 60 * 1000;
 
-    public static final String PROP_MEX_FAILURE_VERBOSE = "mex.failure.verbose";
 
     public static final String PROP_HTTP_CONNECTION_TIMEOUT = HttpConnectionParams.CONNECTION_TIMEOUT;
     public static final String PROP_HTTP_SOCKET_TIMEOUT = HttpMethodParams.SO_TIMEOUT;

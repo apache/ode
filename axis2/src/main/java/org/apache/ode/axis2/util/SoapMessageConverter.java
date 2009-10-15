@@ -44,9 +44,7 @@ import javax.wsdl.extensions.soap.SOAPBody;
 import javax.wsdl.extensions.soap.SOAPHeader;
 import javax.wsdl.extensions.soap.SOAPOperation;
 import javax.xml.namespace.QName;
-import javax.xml.transform.dom.DOMSource;
 import java.util.*;
-import java.io.IOException;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
@@ -544,30 +542,6 @@ public class SoapMessageConverter {
         // The detail is a dummy <detail> node containing the interesting fault element
         QName elName = flt.getDetail().getFirstElement().getQName();
         return WsdlUtils.inferFault(operation, elName);
-    }
-
-    /**
-     *
-     * @param faultExplanation
-     * @param faultResponse
-     * @return an OdeFault
-     */
-    public OdeFault createOdeFault(String faultExplanation, org.apache.ode.bpel.iapi.Message faultResponse) {
-        String message = new StringBuilder("Message exchange failure due to: ").append(faultExplanation).toString();
-        OMElement detail = null;
-        if (faultResponse!=null) {
-            Element messageElement = faultResponse.getMessage();
-            if (messageElement != null) {
-                Element detailElement = DOMUtils.getFirstChildElement(messageElement);
-                if (detailElement != null) {
-                    try {
-                        detail = OMUtils.toOM(new DOMSource(messageElement));
-                    } catch (IOException ignore) {
-                    }
-                }
-            }
-        }
-        return new OdeFault(message, detail);
     }
 
 }

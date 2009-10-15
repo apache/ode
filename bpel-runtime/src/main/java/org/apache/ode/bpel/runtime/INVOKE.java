@@ -184,10 +184,10 @@ public class INVOKE extends ACTIVITY {
                         // and either retry or indicate failure condition.
                         // admin to resume the process.
                         String reason = getBpelRuntimeContext().getPartnerFaultExplanation(mexId);
-                        Element msg = getBpelRuntimeContext().getPartnerResponse(mexId);
                         __log.error("Failure during invoke: " + reason);
                         try {
-                            _self.parent.failure(reason, msg);
+                            Element el = DOMUtils.stringToDOM("<invokeFailure><![CDATA["+reason+"]]></invokeFailure>");
+                            _self.parent.failure(reason, el);
                         } catch (Exception e) {
                             _self.parent.failure(reason, null);
                         }

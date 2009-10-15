@@ -35,7 +35,6 @@ import javax.xml.namespace.QName;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axiom.soap.SOAPFault;
-import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.context.MessageContext;
@@ -60,9 +59,6 @@ import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.Properties;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.xml.transform.dom.DOMSource;
-import java.io.IOException;
 
 /**
  * A running service, encapsulates the Axis service, its receivers and our
@@ -273,19 +269,7 @@ public class ODEService {
                 writeHeader(msgContext, mex);
                 break;
             case FAILURE:
-                if (__log.isDebugEnabled())
-                    __log.debug("Failure response message: " + mex.getFault());
-                OdeFault odeFault;
-                String beVerbose = _pconf.getEndpointProperties(_serviceRef).get(Properties.PROP_MEX_FAILURE_VERBOSE);
-                // default is true
-                if (beVerbose == null || Boolean.valueOf(beVerbose)) {
-                    odeFault = _converter.createOdeFault(mex.getFaultExplanation(), mex.getFaultResponse());
-                } else {
-                    odeFault = new OdeFault("Message exchange failure.");
-                    odeFault.setDetail(null);
-                    odeFault.setStackTrace(new StackTraceElement[]{});
-                }
-                throw odeFault;
+                throw new OdeFault("Message exchange failure");
             default:
                 throw new OdeFault("Received ODE message exchange in unexpected state: " + mex.getStatus());
         }

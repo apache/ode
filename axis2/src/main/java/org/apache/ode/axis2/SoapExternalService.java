@@ -20,8 +20,6 @@
 package org.apache.ode.axis2;
 
 import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.SOAPFaultReason;
-import org.apache.axiom.soap.SOAPFault;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.client.OperationClient;
@@ -484,11 +482,8 @@ public class SoapExternalService implements ExternalService {
                             } else {
                                 if (__log.isWarnEnabled())
                                     __log.warn("Fault response: faultType=(unkown)\n" + reply.getEnvelope().toString());
-                                final SOAPFaultReason r = reply.getEnvelope().getBody().getFault().getReason();
-                                SOAPFault f = reply.getEnvelope().getBody().getFault();
-                                String reason = r != null ? r.getText() : "Unspecified";
-                                Element details = f != null ? OMUtils.toDOM(f) : null;
-                                odeMex.replyWithFailure(FailureType.OTHER, reason, details);
+                                odeMex.replyWithFailure(FailureType.OTHER, reply.getEnvelope().getBody()
+                                        .getFault().getText(), OMUtils.toDOM(reply.getEnvelope().getBody()));
                             }
                         } else {
                             Message response = odeMex.createMessage(odeMex.getOperation().getOutput().getMessage().getQName());

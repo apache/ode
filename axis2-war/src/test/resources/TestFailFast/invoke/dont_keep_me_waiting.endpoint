@@ -1,4 +1,0 @@
-
-# if the test fails, client be waiting until timeout
-# Set a smaller timeout to avoid blocking too long.
-mex.timeout=10000
