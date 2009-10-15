@@ -367,6 +367,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         _todo.clearTasks(UpgradeJobsTask.class);
         _todo.clearTasks(LoadImmediateTask.class);
         _todo.clearTasks(CheckStaleNodes.class);
+        _processedSinceLastLoadTask.clear();
         _outstandingJobs.clear();
 
         _knownNodes.clear();
@@ -415,6 +416,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         _todo.clearTasks(UpgradeJobsTask.class);
         _todo.clearTasks(LoadImmediateTask.class);
         _todo.clearTasks(CheckStaleNodes.class);
+        _processedSinceLastLoadTask.clear();
         _outstandingJobs.clear();
 
         // disable because this is not the right way to do it
