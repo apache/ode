@@ -26,9 +26,7 @@ package org.apache.ode.daohib.bpel.hobj;
  *
  * @hibernate.class table="LARGE_DATA"
  *
- * @hibernate.typedef name="gzip" class="org.apache.ode.daohib.bpel.hobj.GZipDataType"
- *
- * @hibernate.query name="SELECT_ACTIVITY_RECOVERY_LDATA_IDS_BY_INSTANCES" query="select a.details.id from HActivityRecovery as a where a.instance in (:instances) and a.details is not null"
+ *  @hibernate.query name="SELECT_ACTIVITY_RECOVERY_LDATA_IDS_BY_INSTANCES" query="select a.details.id from HActivityRecovery as a where a.instance in (:instances) and a.details is not null"
  * @hibernate.query name="SELECT_JACOB_LDATA_IDS_BY_INSTANCES" query="select i.jacobState.id from HProcessInstance as i where i in (:instances) and i.jacobState is not null"
  * @hibernate.query name="SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_1" query="select m.messageData.id from HMessage m where m.messageExchange.instance in (:instances) and m.messageData is not null"
  * @hibernate.query name="SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_2" query="select m.header.id from HMessage m where m.messageExchange.instance in (:instances) and m.header is not null"
