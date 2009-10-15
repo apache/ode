@@ -379,7 +379,7 @@ define "ode" do
     resources hibernate_doclet(:package=>"org.apache.ode.daohib.bpel.hobj", :excludedtags=>"@version,@author,@todo")
 
     # doclet does not support not-found="ignore"
-    build {
+    task "hbm-hack" do |task|
       process_instance_hbm_file = project.path_to("target/classes/org/apache/ode/daohib/bpel/hobj/HProcessInstance.hbm.xml") 
       process_instance_hbm = File.read(process_instance_hbm_file)
       if !process_instance_hbm.include? "not-found=\"ignore\""
@@ -395,7 +395,8 @@ define "ode" do
         content.insert(content.index("<class") - 1, typedef)
         File.open(hbm, "w") { |f| f << content }
       end
-    }
+    end
+    task "test" => "hbm-hack"
 
     test.with project("bpel-epr"), BACKPORT, COMMONS.collections, COMMONS.lang, HSQLDB,
       GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, SPRING
