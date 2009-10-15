@@ -82,7 +82,7 @@ public class HLargeData extends HObject {
     }
 
     /**
-     * @hibernate.property type="gzip"
+     * @hibernate.property type="org.apache.ode.daohib.bpel.hobj.GZipDataType"
      *
      * @hibernate.column name="BIN_DATA" sql-type="blob(2G)"
      */

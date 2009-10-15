@@ -386,15 +386,6 @@ define "ode" do
         process_instance_hbm.insert(process_instance_hbm.index("class=\"org.apache.ode.daohib.bpel.hobj.HProcess\"") - 1, "not-found=\"ignore\" ")
         File.open(process_instance_hbm_file, "w") { |f| f << process_instance_hbm }
       end
-      # add gzip typedef (doclet does not support it correctly)
-      typedef = <<-END
-        <typedef name="gzip" class="org.apache.ode.daohib.bpel.hobj.GZipDataType"/>
-      END
-      Dir[project.path_to("target/classes")+"/**/*.hbm.xml"].select { |f| File.read(f).include? 'type="gzip"' }.each do |hbm|
-        content = File.read(hbm)
-        content.insert(content.index("<class") - 1, typedef)
-        File.open(hbm, "w") { |f| f << content }
-      end
     end
     task "test" => "hbm-hack"
 
