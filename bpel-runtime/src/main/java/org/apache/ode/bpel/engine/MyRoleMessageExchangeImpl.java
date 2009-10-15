@@ -54,7 +54,7 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
     
     protected BpelProcess _process;
 
-    private static Map<String, ResponseCallback> _waitingCallbacks =
+    protected static Map<String, ResponseCallback> _waitingCallbacks =
             new ConcurrentHashMap<String, ResponseCallback>();
 
     public MyRoleMessageExchangeImpl(BpelProcess process, BpelEngineImpl engine, MessageExchangeDAO mexdao) {
@@ -186,7 +186,7 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
     public void release(boolean instanceSucceeded) {
         if(__log.isDebugEnabled()) __log.debug("Releasing mex " + getMessageExchangeId());
         if (_process != null) {
-	        _dao.release(_process.isCleanupCategoryEnabled(instanceSucceeded, CLEANUP_CATEGORY.MESSAGES));
+            _dao.release(_process.isCleanupCategoryEnabled(instanceSucceeded, CLEANUP_CATEGORY.MESSAGES));
         }
         _dao = null;
     }
@@ -197,21 +197,21 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
      * @param message
      * @return
      */
-	protected Message cloneMessage(Message message) {
-		Message clone = createMessage(message.getType());
-		clone.setMessage((Element) message.getMessage().cloneNode(true));
-		Map<String, Node> headerParts = message.getHeaderParts();
-		for (String partName : headerParts.keySet()) {
-			clone.setHeaderPart(partName, (Element) headerParts.get(partName).cloneNode(true)); 
-		}
-		Map<String, Node> parts = message.getHeaderParts();
-		for (String partName : parts.keySet()) {
-			clone.setHeaderPart(partName, (Element) parts.get(partName).cloneNode(true)); 
-		}
-		return clone;
-	}
+    protected Message cloneMessage(Message message) {
+        Message clone = createMessage(message.getType());
+        clone.setMessage((Element) message.getMessage().cloneNode(true));
+        Map<String, Node> headerParts = message.getHeaderParts();
+        for (String partName : headerParts.keySet()) {
+            clone.setHeaderPart(partName, (Element) headerParts.get(partName).cloneNode(true)); 
+        }
+        Map<String, Node> parts = message.getHeaderParts();
+        for (String partName : parts.keySet()) {
+            clone.setHeaderPart(partName, (Element) parts.get(partName).cloneNode(true)); 
+        }
+        return clone;
+    }
     
-	@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     static class ResponseFuture implements Future {
         private String _clientId;
         private boolean _done = false;
@@ -249,13 +249,18 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
         }
     }
 
+    @Override
     protected void responseReceived() {
         final String cid = getClientId();
         _engine._contexts.scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
             public void afterCompletion(boolean success) {
                 __log.debug("Received myrole mex response callback");
-                ResponseCallback callback = _waitingCallbacks.remove(cid);
-                if (callback != null) callback.responseReceived();
+                if( success ) {
+                    ResponseCallback callback = _waitingCallbacks.remove(cid);
+                    if (callback != null) callback.responseReceived();
+                } else {
+                    __log.warn("Transaction is rolled back on sending back the response.");
+                }
             }
             public void beforeCompletion() {
             }
@@ -288,5 +293,4 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
             _timedout = _waiting;
         }
     }
-
 }
