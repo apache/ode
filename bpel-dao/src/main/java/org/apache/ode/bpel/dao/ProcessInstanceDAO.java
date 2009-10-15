@@ -25,7 +25,6 @@ import org.w3c.dom.Element;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
-import java.util.List;
 
 import javax.xml.namespace.QName;
 
@@ -197,6 +196,13 @@ public interface ProcessInstanceDAO {
      * Delete the process instance object from the database.
      */
     void delete(Set<CLEANUP_CATEGORY> cleanupCategories);
+
+    /**
+     * Delete the process instance object from the database.
+     * @param cleanupCategories the categories of entities to delete
+     * @param deleteMyRoleMex will clean up the my role mex if set to true
+     */
+    void delete(Set<CLEANUP_CATEGORY> cleanupCategories, boolean deleteMyRoleMex);
 
     /**
      * Insert a BPEL event to the database (associating with this process).

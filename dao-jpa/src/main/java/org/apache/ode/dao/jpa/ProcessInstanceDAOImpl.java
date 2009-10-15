@@ -153,6 +153,10 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
     }
     
     public void delete(Set<CLEANUP_CATEGORY> cleanupCategories) {
+        delete(cleanupCategories, true);
+    }
+
+    public void delete(Set<CLEANUP_CATEGORY> cleanupCategories, boolean deleteMyRoleMex) {
         if(__log.isDebugEnabled()) __log.debug("Cleaning up instance Data with " + cleanupCategories);
         
         // remove jacob state

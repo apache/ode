@@ -280,6 +280,10 @@ public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstan
     }
 
     public void delete(Set<CLEANUP_CATEGORY> cleanupCategories) {
+        delete(cleanupCategories, true);
+    }
+
+    public void delete(Set<CLEANUP_CATEGORY> cleanupCategories, boolean deleteMyRoleMex) {
         _processDao._instances.remove(_instanceId);
     }
 
