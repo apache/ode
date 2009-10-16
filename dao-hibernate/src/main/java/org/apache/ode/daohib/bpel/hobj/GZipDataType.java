@@ -81,6 +81,7 @@ public class GZipDataType implements UserType {
     public boolean equals(Object x, Object y) {
         byte[] buf1 = (byte[]) x;
         byte[] buf2 = (byte[]) y;
+        if (buf1 == buf2) return true;
         if (buf1 == null && buf2 != null) return false;
         if (buf1 != null && buf2 == null) return false;
         if (buf1.length != buf2.length) return false;
