@@ -387,7 +387,7 @@ define "ode" do
         File.open(process_instance_hbm_file, "w") { |f| f << process_instance_hbm }
       end
     end
-    task "test" => "hbm-hack"
+    task "compile" => "hbm-hack"
 
     test.with project("bpel-epr"), BACKPORT, COMMONS.collections, COMMONS.lang, HSQLDB,
       GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, SPRING
