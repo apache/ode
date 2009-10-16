@@ -132,35 +132,37 @@ public class GZipDataType implements UserType {
     /** Write an instance of the mapped class to a prepared statement. */
     public void nullSafeSet(PreparedStatement st, Object value, int index) throws SQLException {
         byte[] buf = (byte[]) value;
-        synchronized (STATS_LOCK) {
-            if (_totalBytesBefore > Integer.MAX_VALUE) {
-                // prevent overflow - renormalize to percent value
-                _totalBytesAfter = _totalBytesAfter*100/_totalBytesBefore;
-                _totalBytesBefore = 100;
+        if (buf != null) {
+            synchronized (STATS_LOCK) {
+                if (_totalBytesBefore > Integer.MAX_VALUE) {
+                    // prevent overflow - renormalize to percent value
+                    _totalBytesAfter = _totalBytesAfter*100/_totalBytesBefore;
+                    _totalBytesBefore = 100;
+                }
+                _totalBytesBefore += buf.length;
             }
-            _totalBytesBefore += buf.length;
-        }
-        // only try to zip if we have more than 100 bytes
-        if (buf != null && buf.length > 100 && _compressionEnabled) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream(buf.length);
-            for (int i=0; i<GZIP_PREFIX.length; i++) {
-                baos.write(GZIP_PREFIX[i]);
+            // only try to zip if we have more than 100 bytes
+            if (buf != null && buf.length > 100 && _compressionEnabled) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream(buf.length);
+                for (int i=0; i<GZIP_PREFIX.length; i++) {
+                    baos.write(GZIP_PREFIX[i]);
+                }
+                gzip((byte[]) value, baos);
+                byte[] zipped = baos.toByteArray();
+                // only use zipped representation if we gain 2% or more
+                if (zipped.length*100/buf.length < 99) {
+                    buf = zipped;
+                }
             }
-            gzip((byte[]) value, baos);
-            byte[] zipped = baos.toByteArray();
-            // only use zipped representation if we gain 2% or more
-            if (zipped.length*100/buf.length < 99) {
-                buf = zipped;
+            synchronized (STATS_LOCK) {
+                _totalBytesAfter += buf.length;
             }
-        }
-        synchronized (STATS_LOCK) {
-            _totalBytesAfter += buf.length;
-        }
-        if (log.isDebugEnabled()) {
-            long now = System.currentTimeMillis();
-            if (_lastLogTime+5000 < now) {
-                log.debug("Average compression ratio: "+ (_totalBytesAfter*100/_totalBytesBefore)+"%");
-                _lastLogTime = now;
+            if (log.isDebugEnabled()) {
+                long now = System.currentTimeMillis();
+                if (_lastLogTime+5000 < now) {
+                    log.debug("Average compression ratio: "+ (_totalBytesAfter*100/_totalBytesBefore)+"%");
+                    _lastLogTime = now;
+                }
             }
         }
         st.setBytes(index, buf);
