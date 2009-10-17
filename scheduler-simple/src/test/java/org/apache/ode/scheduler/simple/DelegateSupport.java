@@ -21,6 +21,9 @@ package org.apache.ode.scheduler.simple;
 
 import java.sql.Connection;
 
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+
 import org.apache.ode.utils.GUID;
 import org.hsqldb.jdbc.jdbcDataSource;
 
@@ -32,19 +35,28 @@ import org.hsqldb.jdbc.jdbcDataSource;
  */
 public class DelegateSupport {
 
-    private jdbcDataSource _ds;
-    private JdbcDelegate _del;
+    protected DataSource _ds;
+    protected JdbcDelegate _del;
 
     public DelegateSupport() throws Exception {
-        _ds = new jdbcDataSource();
-        _ds.setDatabase("jdbc:hsqldb:mem:" + new GUID().toString());
-        _ds.setUser("sa");
-        _ds.setPassword("");
+    	this(null);
+    }
+
+    public DelegateSupport(TransactionManager txm) throws Exception {
+    	initialize(txm);
+    }
+
+    protected void initialize(TransactionManager txm) throws Exception {
+        jdbcDataSource ds = new jdbcDataSource();
+        ds.setDatabase("jdbc:hsqldb:mem:" + new GUID().toString());
+        ds.setUser("sa");
+        ds.setPassword("");
+        _ds = ds;
         
         setup();
         _del = new JdbcDelegate(_ds);
     }
-
+    
     public DatabaseDelegate delegate() {
         return _del;
     }

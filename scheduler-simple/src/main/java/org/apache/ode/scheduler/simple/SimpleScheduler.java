@@ -131,6 +131,12 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
 
     private long _pollIntervalForPolledRunnable = Long.getLong("org.apache.ode.polledRunnable.pollInterval", 10 * 60 * 1000);
 
+    /** Number of immediate retries when the transaction fails **/
+    private int _immediateTransactionRetryLimit = 3;
+
+    /** Interval between immediate retries when the transaction fails **/
+    private long _immediateTransactionRetryInterval = 1000;
+
     public SimpleScheduler(String nodeId, DatabaseDelegate del, Properties conf) {
         _nodeId = nodeId;
         _db = del;
@@ -140,6 +146,10 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         _staleInterval = getLongProperty(conf, "ode.scheduler.staleInterval", _staleInterval);
         _tps = getIntProperty(conf, "ode.scheduler.transactionsPerSecond", _tps);
         _warningDelay =  getLongProperty(conf, "ode.scheduler.warningDelay", _warningDelay);
+
+        _immediateTransactionRetryLimit = getIntProperty(conf, "ode.scheduler.immediateTransactionRetryLimit", _immediateTransactionRetryLimit);
+        _immediateTransactionRetryInterval = getLongProperty(conf, "ode.scheduler.immediateTransactionRetryInterval", _immediateTransactionRetryInterval);
+
         _todo = new SchedulerThread(this);
     }
 
@@ -235,30 +245,43 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         }
 
         // run in new transaction
-        try {
-            if (__log.isDebugEnabled()) __log.debug("Beginning a new transaction");
-            _txm.begin();
-        } catch (Exception ex) {
-            String errmsg = "Internal Error, could not begin transaction.";
-            throw new ContextException(errmsg, ex);
-        }
-
-        boolean success = false;
-        try {
-            T retval = transaction.call();
-            success = true;
-            return retval;
-        } catch (Exception ex) {
-            throw ex;
-        } finally {
-            if (success) {
-                if (__log.isDebugEnabled()) __log.debug("Commiting on " + _txm + "...");
-                _txm.commit();
-            } else {
-                if (__log.isDebugEnabled()) __log.debug("Rollbacking on " + _txm + "...");
-                _txm.rollback();
+        Exception ex = null;
+        int immediateRetryCount = _immediateTransactionRetryLimit;
+        do {
+            try {
+                if (__log.isDebugEnabled()) __log.debug("Beginning a new transaction");
+                _txm.begin();
+            } catch (Exception e) {
+                String errmsg = "Internal Error, could not begin transaction.";
+                throw new ContextException(errmsg, e);
             }
-        }
+
+            try {
+                ex = null;
+                return transaction.call();
+            } catch (Exception e) {
+                ex = e;
+            } finally {
+                if (ex == null) {
+                    if (__log.isDebugEnabled()) __log.debug("Commiting on " + _txm + "...");
+                    try {
+                        _txm.commit();
+                    } catch( Exception e2 ) {
+                        ex = e2;
+                    }
+                } else {
+                    if (__log.isDebugEnabled()) __log.debug("Rollbacking on " + _txm + "...");
+                    _txm.rollback();
+                }
+                
+                if( ex != null && immediateRetryCount > 0 ) {
+                    if (__log.isDebugEnabled())  __log.debug("Will retry the transaction in " + _immediateTransactionRetryInterval + " msecs on " + _txm + " for error: ", ex);
+                    Thread.sleep(_immediateTransactionRetryInterval);
+                }
+            }
+        } while( immediateRetryCount-- > 0 );
+        
+        throw ex;
     }
 
     public void setRollbackOnly() throws Exception {

@@ -329,7 +329,7 @@ define "ode" do
     compile.with projects("bpel-api", "utils"), COMMONS.collections, COMMONS.logging, JAVAX.transaction, LOG4J
     test.compile.with HSQLDB, GERONIMO.kernel, GERONIMO.transaction
     test.with HSQLDB, JAVAX.transaction, JAVAX.resource, JAVAX.connector, LOG4J,
-          GERONIMO.kernel, GERONIMO.transaction, BACKPORT, JAVAX.ejb
+          GERONIMO.kernel, GERONIMO.transaction, GERONIMO.connector, TRANQL, BACKPORT, JAVAX.ejb
     package :jar
   end
 

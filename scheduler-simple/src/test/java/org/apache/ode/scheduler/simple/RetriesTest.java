@@ -24,6 +24,7 @@ import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
 
 import javax.transaction.TransactionManager;
 import java.util.*;
+import java.util.concurrent.Callable;
 
 import junit.framework.TestCase;
 
@@ -37,10 +38,11 @@ public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
     ArrayList<Scheduler.JobInfo> _commit;
     TransactionManager _txm;
     int _tried = 0;
-
+    Scheduler.JobInfo _jobInfo = null;
+    
     public void setUp() throws Exception {
         _txm = new GeronimoTransactionManager();
-        _ds = new DelegateSupport();
+        _ds = new GeronimoDelegateSupport(_txm);
 
         _scheduler = newScheduler("n1");
         _jobs = new ArrayList<Scheduler.JobInfo>(100);
@@ -64,13 +66,33 @@ public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
         }
 
         Thread.sleep(10000);
-        assertEquals(3, _tried);
+        assertEquals(8, _tried);
     }
 
+    public void testExecTransaction() throws Exception {
+        final int[] tryCount = new int[1];
+        tryCount[0] = 0;
+        
+        Callable<Void> transaction = new Callable<Void>() {
+            public Void call() throws Exception {
+                tryCount[0]++;
+                if( tryCount[0] < 3 ) {
+                    throw new Exception("any");
+                } else {
+                    return null;
+                }
+            }            
+        };
+
+        _scheduler.execTransaction(transaction);
+        assertEquals(3, tryCount[0]);
+    }
 
     public void onScheduledJob(Scheduler.JobInfo jobInfo) throws Scheduler.JobProcessorException {
+        _jobInfo = jobInfo;
+        
         _tried++;
-        throw new Scheduler.JobProcessorException(jobInfo.retryCount < 3);
+        throw new Scheduler.JobProcessorException(jobInfo.retryCount < 1);
     }
 
     Map<String, Object> newDetail(String x) {
@@ -85,5 +107,4 @@ public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
         scheduler.setTransactionManager(_txm);
         return scheduler;
     }
-
 }
