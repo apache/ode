@@ -99,7 +99,7 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
         propMap.put("openjpa.ManagedRuntime", new JpaTxMgrProvider(_tm));
         propMap.put("openjpa.ConnectionFactory", _ds);
         propMap.put("openjpa.ConnectionFactoryMode", "managed");
-        propMap.put("openjpa.FlushBeforeQueries", "false");
+//        propMap.put("openjpa.FlushBeforeQueries", "false");
         propMap.put("openjpa.FetchBatchSize", 1000);
         propMap.put("openjpa.jdbc.TransactionIsolation", "read-committed");
 
