@@ -34,6 +34,7 @@ import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 
+@Ignore
 public class OdeJbiComponentLifeCycleTest extends TestCase {
 
     JBIContainer container;

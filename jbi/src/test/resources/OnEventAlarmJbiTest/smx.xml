@@ -20,14 +20,16 @@
 <beans xmlns:sm="http://servicemix.apache.org/config/1.0"
        xmlns:http="http://servicemix.apache.org/http/1.0"
        xmlns:eip="http://servicemix.apache.org/eip/1.0"
-       xmlns:hello="urn:/HelloWorld2.wsdl"
        xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:jencks="http://jencks.org/2.0"
+       xmlns:mws="http://ode/bpel/unit-test.wsdl"
+       xmlns:bpel="http://sample.bpel.org/bpel/sample"
        >
 
     <util:map id="jndiEntries">
         <entry key="java:comp/env/jdbc/ode" value-ref="odeDS"/>
     </util:map>
-    
+
     <sm:container 
         id="jbi" 
         embedded="true" 
@@ -35,23 +37,5 @@
         transactionManager="#transactionManager"
         depends-on="jndi"
         >
-        <sm:activationSpecs>
-            <sm:activationSpec id="hello-http">
-                <sm:component>
-                    <http:component>
-                        <http:endpoints>
-                            <http:endpoint 
-                                service="hello:HelloService"
-                                endpoint="http" 
-                                defaultOperation="Hello"
-                                role="consumer" 
-                                locationURI="http://localhost:8192/HelloHttp/"
-                                defaultMep="http://www.w3.org/2004/08/wsdl/in-out" 
-                                soap="true" />
-                        </http:endpoints>
-                    </http:component>
-                </sm:component>
-            </sm:activationSpec>
-        </sm:activationSpecs>
     </sm:container>
 </beans>

@@ -19,6 +19,7 @@ package org.apache.ode.jbi;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -52,12 +53,16 @@ public class JbiTestBase extends SpringTestSupport {
 
     protected OdeComponent odeComponent;
     protected JBIContainer jbiContainer;
-
+    
     protected Properties testProperties;
+    protected DefaultServiceMixClient smxClient;
     
     @Override
     protected AbstractXmlApplicationContext createBeanFactory() {
-        return new ClassPathXmlApplicationContext("/" + getTestName() + "/smx.xml");
+        return new ClassPathXmlApplicationContext(new String[] {
+            "/smx-base.xml",
+            "/" + getTestName() + "/smx.xml"
+        });
     }
     
     @Override
@@ -75,6 +80,8 @@ public class JbiTestBase extends SpringTestSupport {
         
         testProperties = new Properties();
         testProperties.load(getClass().getResourceAsStream("/" + getTestName() + "/test.properties"));
+        
+        smxClient = new DefaultServiceMixClient(jbiContainer);
     }
     
     protected String getTestName() {
@@ -101,52 +108,96 @@ public class JbiTestBase extends SpringTestSupport {
 
 
     protected void go() throws Exception {
-        enableProcess(getTestName(), true);
+        boolean manualDeploy = Boolean.parseBoolean("" + testProperties.getProperty("manualDeploy"));
+        if (!manualDeploy) 
+            enableProcess(getTestName(), true);
 
-        String request = testProperties.getProperty("request");
-        String expectedResponse = testProperties.getProperty("response");
-        {
-	        String httpUrl = testProperties.getProperty("http.url");
-	        if (httpUrl != null) {
-	            log.debug(getTestName() + " sending http request to " + httpUrl + " request: " + request);
-	            URLConnection connection = new URL(httpUrl).openConnection();
-	            connection.setDoOutput(true);
-	            connection.setDoInput(true);
-	            //Send request
-	            OutputStream os = connection.getOutputStream();
-	            PrintWriter wt = new PrintWriter(os);
-	            wt.print(request);
-	            wt.flush();
-	            wt.close();
-	            // Read the response.
-	            InputStream is = connection.getInputStream();
-	            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	            FileUtil.copyInputStream(is, baos);
-	            String result = baos.toString();
-	            log.debug(getTestName() + " have result: " + result);
-	            matchResponse(expectedResponse, result);
-	        }
-        }
-        {
-	        if (testProperties.getProperty("nmr.service") != null) {
-	            DefaultServiceMixClient client = new DefaultServiceMixClient(jbiContainer);
-	            InOut io = client.createInOutExchange();
-	            io.setService(QName.valueOf(testProperties.getProperty("nmr.service")));
-	            io.setOperation(QName.valueOf(testProperties.getProperty("nmr.operation")));
-	            io.getInMessage().setContent(new StreamSource(new ByteArrayInputStream(request.getBytes())));
-	            client.sendSync(io,20000);
-	            assertEquals(ExchangeStatus.ACTIVE,io.getStatus());
-	            assertNotNull(io.getOutMessage());
-	            String result = new SourceTransformer().contentToString(io.getOutMessage());
-	            matchResponse(expectedResponse, result);
-	            client.done(io);
-	        }
-        }	
+        int i = 0;
+        boolean loop;
+        do {
+            String prefix = i == 0 ? "" : "" + i;
+            loop = i == 0;
+
+            {
+                String deploy = testProperties.getProperty(prefix + "deploy");
+                if (deploy != null) {
+                    loop = true;
+                    enableProcess(getTestName() + "/" + deploy, true);
+                }
+            }
+            {
+                String undeploy = testProperties.getProperty(prefix + "undeploy");
+                if (undeploy != null) {
+                    loop = true;
+                    enableProcess(getTestName() + "/" + undeploy, false);
+                }
+            }
+            
+            String request = testProperties.getProperty(prefix + "request");
+            if (request != null && request.startsWith("@")) {
+                request = inputStreamToString(getClass().getResourceAsStream("/" + getTestName() + "/" + request.substring(1)));
+            }
+            String expectedResponse = testProperties.getProperty(prefix + "response");
+            {
+                String delay = testProperties.getProperty(prefix + "delay");
+                if (delay != null) {
+                    loop = true;
+                    long d = Long.parseLong(delay);
+                    log.debug("Sleeping " + d + " ms");
+                    Thread.sleep(d);
+                }
+            }
+            {
+    	        String httpUrl = testProperties.getProperty(prefix + "http.url");
+    	        if (httpUrl != null && request != null) {
+                    loop = true;
+    	            log.debug(getTestName() + " sending http request to " + httpUrl + " request: " + request);
+    	            URLConnection connection = new URL(httpUrl).openConnection();
+    	            connection.setDoOutput(true);
+    	            connection.setDoInput(true);
+    	            //Send request
+    	            OutputStream os = connection.getOutputStream();
+    	            PrintWriter wt = new PrintWriter(os);
+    	            wt.print(request);
+    	            wt.flush();
+    	            wt.close();
+    	            // Read the response.
+    	            String result = inputStreamToString(connection.getInputStream());
+    	            
+    	            log.debug(getTestName() + " have result: " + result);
+    	            matchResponse(expectedResponse, result);
+    	        }
+            }
+            {
+    	        if (testProperties.getProperty(prefix + "nmr.service") != null && request != null) {
+                    loop = true;
+    	            InOut io = smxClient.createInOutExchange();
+    	            io.setService(QName.valueOf(testProperties.getProperty(prefix + "nmr.service")));
+    	            io.setOperation(QName.valueOf(testProperties.getProperty(prefix + "nmr.operation")));
+    	            io.getInMessage().setContent(new StreamSource(new ByteArrayInputStream(request.getBytes())));
+    	            smxClient.sendSync(io,20000);
+    	            assertEquals(ExchangeStatus.ACTIVE,io.getStatus());
+    	            assertNotNull(io.getOutMessage());
+    	            String result = new SourceTransformer().contentToString(io.getOutMessage());
+    	            matchResponse(expectedResponse, result);
+    	            smxClient.done(io);
+    	        }
+            }
+            
+            i++;
+        } while (loop);
         
-        enableProcess(getTestName(), false);
+        if (!manualDeploy)
+            enableProcess(getTestName(), false);
     }
     
     protected void matchResponse(String expectedResponse, String result) {
         assertTrue("Response doesn't match expected regex.\nExpected: " + expectedResponse + "\nReceived: " + result, Pattern.compile(expectedResponse, Pattern.DOTALL).matcher(result).matches());
+    }
+    
+    private String inputStreamToString(InputStream is) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        FileUtil.copyInputStream(is, baos);
+        return baos.toString();
     }
 }
