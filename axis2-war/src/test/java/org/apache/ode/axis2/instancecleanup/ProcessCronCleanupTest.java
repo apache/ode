@@ -6,8 +6,8 @@ import org.hibernate.Query;
 import org.testng.annotations.Test;
 
 public class ProcessCronCleanupTest extends CleanTestBase {
-    @Test(dataProvider="configs")
-    public void testCleanAll() throws Exception {
+//	@Test(dataProvider="configs")
+    public void _testCleanAll() throws Exception {
         go("TestProcessCronCleanup", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
