@@ -32,6 +32,7 @@ import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannelListener;
+import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -122,7 +123,7 @@ class EH_ALARM extends BpelJacobRunnable {
 
         /**
          * Concretion constructor.
-         * @param alarm date at which time to fire
+         * @param alarm date at which time to fire. If null, then we wait forever (for control channels handling)
          */
         WAIT(Calendar alarm) {
             _alarm = alarm;
@@ -131,10 +132,28 @@ class EH_ALARM extends BpelJacobRunnable {
         public void run() {
             Calendar now = Calendar.getInstance();
 
-            if (now.before(_alarm)) {
+            Set<ChannelListener> listeners = new EventHandlerControlChannelListener(_cc) {
+                private static final long serialVersionUID = -7750428941445331236L;
+
+                public void stop() {
+                    _psc.completed(null, _comps);
+                }
+
+            }.or(new TerminationChannelListener(_tc) {
+                private static final long serialVersionUID = 6100105997983514609L;
+
+                public void terminate() {
+                    _psc.completed(null, _comps);
+                }
+            });
+
+            if (_alarm == null) {
+                object(false, listeners);
+            } else if (now.before(_alarm)) {
                 TimerResponseChannel trc = newChannel(TimerResponseChannel.class);
                 getBpelRuntimeContext().registerTimer(trc,_alarm.getTime());
-                object(false,new TimerResponseChannelListener(trc){
+                
+                listeners.add(new TimerResponseChannelListener(trc){
                     private static final long serialVersionUID = 1110683632756756017L;
 
                     public void onTimeout() {
@@ -145,20 +164,8 @@ class EH_ALARM extends BpelJacobRunnable {
                     public void onCancel() {
                         _psc.completed(null, _comps);
                     }
-                }.or(new EventHandlerControlChannelListener(_cc) {
-                    private static final long serialVersionUID = -7750428941445331236L;
-
-                    public void stop() {
-                        _psc.completed(null, _comps);
-                    }
-
-                }.or(new TerminationChannelListener(_tc) {
-                    private static final long serialVersionUID = 6100105997983514609L;
-
-                    public void terminate() {
-                        _psc.completed(null, _comps);
-                    }
-                })));
+                });
+                object(false, listeners);
             } else /* now is later then alarm time */ {
                 // If the alarm has passed we fire the nested activity
                 ActivityInfo child = new ActivityInfo(genMonotonic(),
@@ -226,7 +233,12 @@ class EH_ALARM extends BpelJacobRunnable {
                         }
                         instance(new WAIT(next));
                     } else {
-                        _psc.completed(faultData, _comps);
+                        if (faultData != null) {
+                            //propagate completion into bounding scope only if we got fault during processing onAlarm
+                            _psc.completed(faultData, _comps);
+                        } else {
+                            instance(new WAIT(null));
+                        }
                     }
                 }
 
