@@ -32,10 +32,10 @@ public class BpelActivityTest extends Axis2TestBase implements ODEConfigDirAware
         if (server.isDeployed(bundleName)) server.undeployProcess(bundleName);
         server.deployProcess(bundleName);
 
-        new Thread() {
+        new Thread("SECOND CLIENT") {
             public void run() {
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(3000);
                     String response = server.sendRequestFile("http://localhost:8888/ode/processes/OnEventCorrelation/",
                             bundleName, "testRequest.soap");
                 } catch( Exception e ) {
@@ -44,30 +44,35 @@ public class BpelActivityTest extends Axis2TestBase implements ODEConfigDirAware
             }
         }.start();
 
-        new Thread() {
+        new Thread("THIRD CLIENT") {
           public void run() {
               try {
-                  Thread.sleep(4000);
+                  Thread.sleep(6000);
                   server.sendRequestFile("http://localhost:8888/ode/processes/OnEventCorrelation/",
                             bundleName, "testRequest.soap");
               } catch( Exception e ) {
                   fail(e.getMessage());
               } finally {
+                  try {
+                      Thread.sleep(1000);
+                  } catch( Exception e2 ) {
+                  }
                   server.undeployProcess(bundleName);
               }
           }
         }.start();
 
         try {
-        	server.sendRequestFile("http://localhost:8888/ode/processes/OnEventCorrelation/",
+            Thread.currentThread().setName("FIRST CLIENT");
+            server.sendRequestFile("http://localhost:8888/ode/processes/OnEventCorrelation/",
                 bundleName, "testRequest.soap");
-            Thread.sleep(6000);
+            Thread.sleep(9000);
         } catch( Exception e ) {
             fail(e.getMessage());
         }
     }
 
-	public String getODEConfigDir() {
+    public String getODEConfigDir() {
         return HIB_DERBY_CONF_DIR;
-	}
+    }
 }
