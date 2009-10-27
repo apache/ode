@@ -452,7 +452,7 @@ public class BpelEngineImpl implements BpelEngine {
             throw new Scheduler.JobProcessorException(rte, checkRetry(jobInfo, rte));
         } catch (Throwable t) {
             __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), t);
-            throw new Scheduler.JobProcessorException(false);
+            throw new Scheduler.JobProcessorException(t, true);
         }
     }
 
