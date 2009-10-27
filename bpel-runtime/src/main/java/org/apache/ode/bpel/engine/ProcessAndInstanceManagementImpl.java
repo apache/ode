@@ -139,8 +139,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 /**
- * Implentation of the Process and InstanceManagement APIs.
- * 
+ * Implementation of the Process and InstanceManagement APIs.
+ *
  * @todo Move this out of the engine, it no longer belongs here.
  */
 public class ProcessAndInstanceManagementImpl implements InstanceManagement, ProcessManagement {
@@ -156,7 +156,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
     protected ProcessStore _store;
 
     // Calendar can be expensive to initialize so we cache and clone it
-    protected Calendar _calendar = Calendar.getInstance(); 
+    protected Calendar _calendar = Calendar.getInstance();
 
     protected BpelServerImpl _server;
 
@@ -173,11 +173,12 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         final ProcessFilter processFilter = new ProcessFilter(filter, orderKeys);
         try {
             _db.exec(new BpelDatabase.Callable<Object>() {
-                public Object run(BpelDAOConnection conn) {
+                public Object run(BpelDAOConnection conn) throws Exception {
                     for (ProcessConf pconf : processQuery(processFilter)) {
                         try {
-                            fillProcessInfo(procInfoList.addNewProcessInfo(), pconf, custom);
+                            fillProcessInfo(conn, procInfoList.addNewProcessInfo(), pconf, custom);
                         } catch (Exception e) {
+                            failIfSQLException(e);
                             __log.error("Exception when querying process " + pconf.getProcessId(), e);
                         }
                     }
@@ -199,8 +200,17 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         return listProcessesCustom(null, null, ProcessInfoCustomizer.ALL);
     }
 
-    public ProcessInfoDocument getProcessInfoCustom(QName pid, ProcessInfoCustomizer custom) {
-        return genProcessInfoDocument(pid, custom);
+    public ProcessInfoDocument getProcessInfoCustom(final QName pid, final ProcessInfoCustomizer custom) {
+        try {
+            return _db.exec(new BpelDatabase.Callable<ProcessInfoDocument>() {
+                public ProcessInfoDocument run(BpelDAOConnection conn) {
+                    return genProcessInfoDocument(conn, pid, custom);
+                }
+            });
+        } catch (Exception ex) {
+            __log.error("Exception in getProcessInfoCustom()", ex);
+            throw new ManagementException("Exception in getProcessInfoCustom(): " + ex.toString());
+        }
     }
 
     public ProcessInfoDocument getProcessInfo(QName pid) {
@@ -214,20 +224,20 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             __log.error("Exception while setting process state", ex);
             throw new ManagementException("Error setting process state: " + ex.toString());
         }
-        return genProcessInfoDocument(pid, ProcessInfoCustomizer.NONE);
+        return getProcessInfoCustom(pid, ProcessInfoCustomizer.NONE);
     }
 
-    public ProcessInfoDocument setRetired(final QName pid, final boolean retired) throws ManagementException {
+    public ProcessInfoDocument setRetired(QName pid, boolean retired) throws ManagementException {
         try {
             _store.setState(pid, retired ? ProcessState.RETIRED : ProcessState.ACTIVE);
         } catch (BpelEngineException e) {
             __log.error("Exception while setting process as retired", e);
             throw new ProcessNotFoundException("ProcessNotFound:" + pid);
         }
-        return genProcessInfoDocument(pid, ProcessInfoCustomizer.NONE);
+        return getProcessInfoCustom(pid, ProcessInfoCustomizer.NONE);
     }
 
-    public void setPackageRetired(final String packageName, final boolean retired)
+    public void setPackageRetired(String packageName, boolean retired)
             throws ManagementException {
         try {
             _store.setRetiredPackage(packageName, retired);
@@ -242,29 +252,35 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         ProcessInfoDocument ret = ProcessInfoDocument.Factory.newInstance();
         final TProcessInfo pi = ret.addNewProcessInfo();
         try {
-            try {
-                _store.setProperty(pid, propertyName, value);
-            } catch (Exception ex) {
-                // Likely the process no longer exists in the store.
-                __log.debug("Error setting property value for " + pid + "; " + propertyName, ex);
-            }
+            _db.exec(new BpelDatabase.Callable<Object>() {
+                public Object run(BpelDAOConnection conn) throws Exception {
+                    try {
+                        _store.setProperty(pid, propertyName, value);
+                    } catch (Exception ex) {
+                        failIfSQLException(ex);
 
-            // We have to do this after we set the property, since the
-            // ProcessConf object
-            // is immutable.
-            ProcessConf proc = _store.getProcessConfiguration(pid);
-            if (proc == null)
-                throw new ProcessNotFoundException("ProcessNotFound:" + pid);
+                        // Likely the process no longer exists in the store.
+                        __log.debug("Error setting property value for " + pid + "; " + propertyName, ex);
+                    }
 
-            fillProcessInfo(pi, proc, new ProcessInfoCustomizer(ProcessInfoCustomizer.Item.PROPERTIES));
+                    // We have to do this after we set the property, since the
+                    // ProcessConf object
+                    // is immutable.
+                    ProcessConf proc = _store.getProcessConfiguration(pid);
+                    if (proc == null)
+                        throw new ProcessNotFoundException("ProcessNotFound:" + pid);
 
+                    fillProcessInfo(conn, pi, proc, new ProcessInfoCustomizer(ProcessInfoCustomizer.Item.PROPERTIES));
+
+                    return null;
+                }
+            });
         } catch (ManagementException me) {
             throw me;
         } catch (Exception e) {
             __log.error("Exception while setting process property", e);
             throw new ProcessingException("Exception while setting process property: " + e.toString());
         }
-
         return ret;
     }
 
@@ -273,28 +289,34 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         ProcessInfoDocument ret = ProcessInfoDocument.Factory.newInstance();
         final TProcessInfo pi = ret.addNewProcessInfo();
         try {
-            try {
-                _store.setProperty(pid, propertyName, value);
-            } catch (Exception ex) {
-                // Likely the process no longer exists in the store.
-                __log.debug("Error setting property value for " + pid + "; " + propertyName, ex);
-            }
+            _db.exec(new BpelDatabase.Callable<Object>() {
+                public Object run(BpelDAOConnection conn) throws Exception {
+                    try {
+                        _store.setProperty(pid, propertyName, value);
+                    } catch (Exception ex) {
+                        failIfSQLException(ex);
 
-            // We have to do this after we set the property, since the
-            // ProcessConf object is immutable.
-            ProcessConf proc = _store.getProcessConfiguration(pid);
-            if (proc == null)
-                throw new ProcessNotFoundException("ProcessNotFound:" + pid);
+                        // Likely the process no longer exists in the store.
+                        __log.debug("Error setting property value for " + pid + "; " + propertyName, ex);
+                    }
 
-            fillProcessInfo(pi, proc, new ProcessInfoCustomizer(ProcessInfoCustomizer.Item.PROPERTIES));
+                    // We have to do this after we set the property, since the
+                    // ProcessConf object is immutable.
+                    ProcessConf proc = _store.getProcessConfiguration(pid);
+                    if (proc == null)
+                        throw new ProcessNotFoundException("ProcessNotFound:" + pid);
 
+                    fillProcessInfo(conn, pi, proc, new ProcessInfoCustomizer(ProcessInfoCustomizer.Item.PROPERTIES));
+
+                    return null;
+                }
+            });
         } catch (ManagementException me) {
             throw me;
         } catch (Exception e) {
             __log.error("Exception while setting process property", e);
             throw new ProcessingException("Exception while setting process property" + e.toString());
         }
-
         return ret;
     }
 
@@ -358,16 +380,34 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         return listInstancesSummary(null, null, limit);
     }
 
-    public InstanceInfoDocument getInstanceInfo(Long iid) throws InstanceNotFoundException {
-        return genInstanceInfoDocument(iid);
+    public InstanceInfoDocument getInstanceInfo(final Long iid) throws InstanceNotFoundException {
+        try {
+            return _db.exec(new BpelDatabase.Callable<InstanceInfoDocument>() {
+                public InstanceInfoDocument run(BpelDAOConnection conn) {
+                    return genInstanceInfoDocument(conn, iid);
+                }
+            });
+        } catch (Exception e) {
+            __log.error("Exception while retrieving instance info", e);
+            throw new ProcessingException("Exception while retrieving instance info: " + e.toString());
+        }
     }
 
     public ScopeInfoDocument getScopeInfo(String siid) {
         return getScopeInfoWithActivity(siid, false);
     }
 
-    public ScopeInfoDocument getScopeInfoWithActivity(String siid, boolean includeActivityInfo) {
-        return genScopeInfoDocument(siid, includeActivityInfo);
+    public ScopeInfoDocument getScopeInfoWithActivity(final String siid, final boolean includeActivityInfo) {
+        try {
+            return _db.exec(new BpelDatabase.Callable<ScopeInfoDocument>() {
+                public ScopeInfoDocument run(BpelDAOConnection conn) throws Exception {
+                    return genScopeInfoDocument(conn, siid, includeActivityInfo);
+                }
+            });
+        } catch (Exception e) {
+            __log.error("Exception while retrieving scope info", e);
+            throw new ProcessingException("Exception while retrieving scope info: " + e.toString());
+        }
     }
 
     public VariableInfoDocument getVariableInfo(final String scopeId, final String varName) throws ManagementException {
@@ -406,32 +446,32 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
     //
     public InstanceInfoDocument fault(Long iid, QName faultname, Element faultData) {
         // TODO: Implement
-        return genInstanceInfoDocument(iid);
+        return getInstanceInfo(iid);
     }
 
-    public InstanceInfoDocument resume(final Long iid) {
+    public InstanceInfoDocument resume(Long iid) {
         // We need debugger support in order to resume (since we have to force
         // a reduction. If one is not available the getDebugger() method should
         // throw a ProcessingException
         getDebugger(iid).resume(iid);
 
-        return genInstanceInfoDocument(iid);
+        return getInstanceInfo(iid);
     }
 
-    public InstanceInfoDocument suspend(final Long iid) throws ManagementException {
+    public InstanceInfoDocument suspend(Long iid) throws ManagementException {
         DebuggerSupport debugSupport = getDebugger(iid);
         assert debugSupport != null : "getDebugger(Long) returned NULL!";
         debugSupport.suspend(iid);
 
-        return genInstanceInfoDocument(iid);
+        return getInstanceInfo(iid);
     }
 
-    public InstanceInfoDocument terminate(final Long iid) throws ManagementException {
+    public InstanceInfoDocument terminate(Long iid) throws ManagementException {
         DebuggerSupport debugSupport = getDebugger(iid);
         assert debugSupport != null : "getDebugger(Long) returned NULL!";
         debugSupport.terminate(iid);
 
-        return genInstanceInfoDocument(iid);
+        return getInstanceInfo(iid);
     }
 
     public InstanceInfoDocument recoverActivity(final Long iid, final Long aid, final String action) {
@@ -457,15 +497,13 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             __log.error("Exception during activity recovery", e);
             throw new ProcessingException("Exception during activity recovery" + e.toString());
         }
-        return genInstanceInfoDocument(iid);
+        return getInstanceInfo(iid);
     }
 
     public Collection<Long> delete(String filter) {
         final InstanceFilter instanceFilter = new InstanceFilter(filter);
-
         final List<Long> ret = new LinkedList<Long>();
         try {
-
             _db.exec(new BpelDatabase.Callable<Object>() {
                 public Object run(BpelDAOConnection conn) {
                     Collection<ProcessInstanceDAO> instances = conn.instanceQuery(instanceFilter);
@@ -484,7 +522,6 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             __log.error("Exception during instance deletion", e);
             throw new ProcessingException("Exception during instance deletion: " + e.toString());
         }
-
         return ret;
     }
 
@@ -561,14 +598,13 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
      * Get the {@link DebuggerSupport} object for the given process identifier.
      * Debugger support is required for operations that resume execution in some
      * way or manipulate the breakpoints.
-     * 
+     *
      * @param procid
      *            process identifier
      * @return associated debugger support object
      * @throws ManagementException
      */
     protected final DebuggerSupport getDebugger(QName procid) throws ManagementException {
-
         BpelProcess process = _server._engine._activeProcesses.get(procid);
         if (process == null)
             throw new ProcessNotFoundException("The process \"" + procid + "\" does not exist.");
@@ -580,7 +616,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
      * Get the {@link DebuggerSupport} object for the given instance identifier.
      * Debugger support is required for operations that resume execution in some
      * way or manipulate the breakpoints.
-     * 
+     *
      * @param iid
      *            instance identifier
      * @return associated debugger support object
@@ -588,7 +624,6 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
      */
     protected final DebuggerSupport getDebugger(final Long iid) {
         QName processId;
-
         try {
             processId = _db.exec(new BpelDatabase.Callable<QName>() {
                 public QName run(BpelDAOConnection conn) throws Exception {
@@ -607,7 +642,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
     /**
      * Execute a database transaction, unwrapping nested
      * {@link ManagementException}s.
-     * 
+     *
      * @param runnable
      *            action to run
      * @return
@@ -627,7 +662,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
     /**
      * Execute a database transaction, unwrapping nested
      * {@link ManagementException}s.
-     * 
+     *
      * @param callable
      *            action to run
      * @return
@@ -645,18 +680,18 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         }
     }
 
-    private ProcessInfoDocument genProcessInfoDocument(final QName procid, final ProcessInfoCustomizer custom)
+    private ProcessInfoDocument genProcessInfoDocument(BpelDAOConnection conn, QName procid, ProcessInfoCustomizer custom)
             throws ManagementException {
         if (procid == null) {
             throw new InvalidRequestException("Valid QName as process id expected.");
         }
         ProcessInfoDocument ret = ProcessInfoDocument.Factory.newInstance();
-        final TProcessInfo pi = ret.addNewProcessInfo();
+        TProcessInfo pi = ret.addNewProcessInfo();
         try {
             ProcessConf pconf = _store.getProcessConfiguration(procid);
             if (pconf == null)
                 throw new ProcessNotFoundException("ProcessNotFound:" + procid);
-            fillProcessInfo(pi, pconf, custom);
+            fillProcessInfo(conn, pi, pconf, custom);
         } catch (ManagementException me) {
             throw me;
         } catch (Exception e) {
@@ -670,47 +705,41 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
     /**
      * Generate a {@link InstanceInfoDocument} for a given instance. This
      * document contains general information about the instance.
-     * 
+     *
      * @param iid
      *            instance identifier
      * @return generated document
      */
-    private InstanceInfoDocument genInstanceInfoDocument(final Long iid) {
+    private InstanceInfoDocument genInstanceInfoDocument(BpelDAOConnection conn,  Long iid) {
         if (iid == null)
             throw new InvalidRequestException("Must specifiy instance id.");
 
         InstanceInfoDocument ret = InstanceInfoDocument.Factory.newInstance();
-        final TInstanceInfo ii = ret.addNewInstanceInfo();
+        TInstanceInfo ii = ret.addNewInstanceInfo();
 
         ii.setIid(iid.toString());
-        dbexec(new BpelDatabase.Callable<Object>() {
-            public Object run(BpelDAOConnection conn) throws Exception {
-                ProcessInstanceDAO instance = conn.getInstance(iid);
-
-                if (instance == null)
-                    throw new InstanceNotFoundException("InstanceNotFoundException " + iid);
-                // TODO: deal with "ERROR" state information.
-                fillInstanceInfo(ii, instance);
-                return null;
-            }
-        });
-
+        ProcessInstanceDAO instance = conn.getInstance(iid);
+        if (instance == null)
+            throw new InstanceNotFoundException("InstanceNotFoundException " + iid);
+        // TODO: deal with "ERROR" state information.
+        fillInstanceInfo(ii, instance);
         return ret;
     }
 
     /**
      * Generate a {@link ScopeInfoDocument} for a given scope instance.
-     * 
+     *
      * @param siid
      *            scope instance identifier
      * @param includeActivityInfo
      * @return generated document
+     * @throws Exception
      */
-    private ScopeInfoDocument genScopeInfoDocument(final String siid, final boolean includeActivityInfo) {
+    private ScopeInfoDocument genScopeInfoDocument(BpelDAOConnection conn, String siid, boolean includeActivityInfo) throws Exception {
         if (siid == null)
             throw new InvalidRequestException("Must specifiy scope instance id.");
 
-        final Long siidl;
+        Long siidl;
         try {
             siidl = new Long(siid);
         } catch (NumberFormatException nfe) {
@@ -718,29 +747,25 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         }
 
         ScopeInfoDocument ret = ScopeInfoDocument.Factory.newInstance();
-        final TScopeInfo ii = ret.addNewScopeInfo();
+        TScopeInfo ii = ret.addNewScopeInfo();
 
         ii.setSiid(siid);
-        dbexec(new BpelDatabase.Callable<Object>() {
-            public Object run(BpelDAOConnection conn) throws Exception {
-                try {
-                ScopeDAO instance = conn.getScope(siidl);
-                if (instance == null)
-                    throw new InvalidRequestException("Scope not found: " + siidl);
-                // TODO: deal with "ERROR" state information.
-                fillScopeInfo(ii, instance, includeActivityInfo);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-        });
+        try {
+            ScopeDAO instance = conn.getScope(siidl);
+            if (instance == null)
+                throw new InvalidRequestException("Scope not found: " + siidl);
+            // TODO: deal with "ERROR" state information.
+            fillScopeInfo(ii, instance, includeActivityInfo);
+        } catch (Exception e) {
+            failIfSQLException(e);
+            __log.error("Exception while retrieving scope information", e);
+        }
         return ret;
     }
 
     /**
      * Fill in the <code>process-info</code> element of the transfer object.
-     * 
+     *
      * @param info
      *            destination XMLBean
      * @param pconf
@@ -751,9 +776,11 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
      *            used to customize the quantity of information produced in the
      *            info
      */
-    private void fillProcessInfo(TProcessInfo info, ProcessConf pconf, ProcessInfoCustomizer custom) {
+    private void fillProcessInfo(BpelDAOConnection conn, TProcessInfo info, ProcessConf pconf, ProcessInfoCustomizer custom) {
         if (pconf == null)
             throw new IllegalArgumentException("Null pconf.");
+
+        if( __log.isDebugEnabled() ) __log.debug("Filling process info for " + pconf.getProcessId());
 
         info.setPid(pconf.getProcessId().toString());
         // TODO: ACTIVE and RETIRED should be used separately.
@@ -770,18 +797,19 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
         TDeploymentInfo depinfo = info.addNewDeploymentInfo();
         depinfo.setPackage(pconf.getPackage());
+        if( __log.isDebugEnabled() ) __log.debug(" package name: " + depinfo.getPackage());
         depinfo.setDocument(pconf.getBpelDocument());
         depinfo.setDeployDate(toCalendar(pconf.getDeployDate()));
         depinfo.setDeployer(pconf.getDeployer());
         if (custom.includeInstanceSummary()) {
             TInstanceSummary isum = info.addNewInstanceSummary();
-            genInstanceSummaryEntry(isum.addNewInstances(), TInstanceStatus.ACTIVE, pconf);
-            genInstanceSummaryEntry(isum.addNewInstances(), TInstanceStatus.COMPLETED, pconf);
-            genInstanceSummaryEntry(isum.addNewInstances(), TInstanceStatus.ERROR, pconf);
-            genInstanceSummaryEntry(isum.addNewInstances(), TInstanceStatus.FAILED, pconf);
-            genInstanceSummaryEntry(isum.addNewInstances(), TInstanceStatus.SUSPENDED, pconf);
-            genInstanceSummaryEntry(isum.addNewInstances(), TInstanceStatus.TERMINATED, pconf);
-            getInstanceSummaryActivityFailure(isum, pconf);
+            genInstanceSummaryEntry(conn, isum.addNewInstances(), TInstanceStatus.ACTIVE, pconf);
+            genInstanceSummaryEntry(conn, isum.addNewInstances(), TInstanceStatus.COMPLETED, pconf);
+            genInstanceSummaryEntry(conn, isum.addNewInstances(), TInstanceStatus.ERROR, pconf);
+            genInstanceSummaryEntry(conn, isum.addNewInstances(), TInstanceStatus.FAILED, pconf);
+            genInstanceSummaryEntry(conn, isum.addNewInstances(), TInstanceStatus.SUSPENDED, pconf);
+            genInstanceSummaryEntry(conn, isum.addNewInstances(), TInstanceStatus.TERMINATED, pconf);
+            getInstanceSummaryActivityFailure(conn, isum, pconf);
         }
 
         TProcessInfo.Documents docinfo = info.addNewDocuments();
@@ -801,7 +829,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                 Node node2append = processInfoDoc.importNode(propEntry.getValue(), true);
                 propNode.appendChild(node2append);
             }
-        } 
+        }
 
         TEndpointReferences eprs = info.addNewEndpoints();
         OProcess oprocess = _server._engine.getOProcess(pconf.getProcessId());
@@ -826,7 +854,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
     /**
      * Generate document information elements for a set of files.
-     * 
+     *
      * @param docinfo
      *            target element
      * @param files
@@ -861,40 +889,30 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         }
     }
 
-    private void genInstanceSummaryEntry(TInstanceSummary.Instances instances, TInstanceStatus.Enum state,
-            ProcessConf pconf) {
+    private void genInstanceSummaryEntry(BpelDAOConnection conn, TInstanceSummary.Instances instances,
+                                         TInstanceStatus.Enum state, ProcessConf pconf)
+    {
         instances.setState(state);
         String queryStatus = InstanceFilter.StatusKeys.valueOf(state.toString()).toString().toLowerCase();
-        final InstanceFilter instanceFilter = new InstanceFilter("status=" + queryStatus 
-                + " pid="+ pconf.getProcessId());
-        
-        int count = dbexec(new BpelDatabase.Callable<Integer>() {
+        InstanceFilter instanceFilter = new InstanceFilter("status=" + queryStatus + " pid="+ pconf.getProcessId());
 
-            public Integer run(BpelDAOConnection conn) throws Exception {
-                return conn.instanceQuery(instanceFilter).size();
-            }
-        });
+        // TODO: this is grossly inefficient
+        int count = conn.instanceQuery(instanceFilter).size();
         instances.setCount(count);
     }
 
-    private void getInstanceSummaryActivityFailure(final TInstanceSummary summary, final ProcessConf pconf) {
-        dbexec(new BpelDatabase.Callable<Void>() {
-            public Void run(BpelDAOConnection conn) throws Exception {
-                String queryStatus = InstanceFilter.StatusKeys.valueOf(TInstanceStatus.ACTIVE.toString()).toString().toLowerCase();
-                Object[] results = conn.getProcessManagement().findFailedCountAndLastFailedDateForProcessId(
-                        conn, queryStatus, String.valueOf(pconf.getProcessId()));
-                
-                long failureInstances = (Long)results[0];
-                Date lastFailureDt = (Date)results[1];
-                if (failureInstances > 0) {
-                    TFailuresInfo failures = summary.addNewFailures();
-                    failures.setDtFailure(toCalendar(lastFailureDt));
-                    failures.setCount((int)failureInstances);
-                }
+    private void getInstanceSummaryActivityFailure(BpelDAOConnection conn, TInstanceSummary summary, ProcessConf pconf) {
+        String queryStatus = InstanceFilter.StatusKeys.valueOf(TInstanceStatus.ACTIVE.toString()).toString().toLowerCase();
+        Object[] results = conn.getProcessManagement().findFailedCountAndLastFailedDateForProcessId(
+                conn, queryStatus, String.valueOf(pconf.getProcessId()));
 
-                return null;
-            }
-        });
+        long failureInstances = (Long)results[0];
+        Date lastFailureDt = (Date)results[1];
+        if (failureInstances > 0) {
+            TFailuresInfo failures = summary.addNewFailures();
+            failures.setDtFailure(toCalendar(lastFailureDt));
+            failures.setCount((int)failureInstances);
+        }
     }
 
     private void fillProperties(TInstanceInfo info, ProcessInstanceDAO instance, Map<QName, String> props) {
@@ -929,7 +947,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             failures.setCount(instance.getActivityFailureCount());
         }
     }
-    
+
     private void fillInstanceInfo(TInstanceInfo info, ProcessInstanceDAO instance) {
         fillInstanceSummary(info, instance);
 
@@ -1136,7 +1154,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
     /**
      * Convert a {@link Date} to a {@link Calendar}.
-     * 
+     *
      * @param dtime
      *            a {@link Date}
      * @return a {@link Calendar}
@@ -1156,7 +1174,6 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
     public InstanceInfoListDocument queryInstances(final String query) {
         InstanceInfoListDocument ret = InstanceInfoListDocument.Factory.newInstance();
         final TInstanceInfoList infolist = ret.addNewInstanceInfoList();
-
         try {
             _db.exec(new BpelDatabase.Callable<Object>() {
                 public Object run(BpelDAOConnection conn) {
@@ -1171,7 +1188,6 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             __log.error("Exception while querying instances", e);
             throw new ProcessingException("Exception while querying instances: " + e.toString());
         }
-
         return ret;
     }
 
@@ -1180,7 +1196,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
      * implemented in memory rather than via database calls since the processes
      * are managed by the {@link ProcessStore} object and we don't want to make
      * this needlessly complicated.
-     * 
+     *
      * @param filter
      * @return
      */
@@ -1316,7 +1332,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
                 Collections.sort(confs, cchain);
             }
-            
+
         }
 
         return confs;
@@ -1343,7 +1359,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                     }
                 }
             });
-            
+
             if (e[0] != null) {
                 __log.debug("throwing pending exception");
                 throw e[0];
@@ -1353,7 +1369,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             throw new ManagementException("", e2);
         }
     }
-    
+
     public GetCommunicationResponseDocument getCommunication(final GetCommunication request) throws ManagementException {
         final Throwable[] e = new Throwable[1];
         try {
@@ -1361,7 +1377,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                 public GetCommunicationResponseDocument run(BpelDAOConnection conn) throws Exception {
                     try {
                         Replayer replayer = new Replayer();
-        
+
                         GetCommunicationResponseDocument responseDoc = GetCommunicationResponseDocument.Factory.newInstance();
                         responseDoc.setGetCommunicationResponse(replayer.getCommunication(request, conn));
                         return responseDoc;
@@ -1380,4 +1396,12 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             throw new ManagementException("", e2);
         }
     }
+
+    private static void failIfSQLException(Exception e) throws Exception {
+        String[] fatal = { "org.hibernate", "org.apache.openjpa", "java.sql", "javax.sql" };
+        for (int i=0; i<fatal.length; i++) {
+            if (e.getClass().getName().startsWith(fatal[i])) throw e;
+        }
+    }
+
 }
