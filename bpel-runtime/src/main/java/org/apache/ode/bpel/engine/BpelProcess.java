@@ -1100,18 +1100,28 @@ public class BpelProcess {
                     PROCESS_MEMORY_TO_SERIALIZED_SIZE_RATIO;
     }
 
-    public long getTimeout(OPartnerLink partnerLink) {
+    public long getTimeout(OPartnerLink partnerLink, boolean p2p) {
         // OPartnerLink, PartnerLinkPartnerRoleImpl
         final PartnerLinkPartnerRoleImpl linkPartnerRole = _partnerRoles.get(partnerLink);
         long timeout = Properties.DEFAULT_MEX_TIMEOUT;
         if (linkPartnerRole._initialEPR != null) {
-            String timeout_property = _pconf.getEndpointProperties(linkPartnerRole._initialEPR).get(Properties.PROP_MEX_TIMEOUT);
-            if (timeout_property != null) {
+            String property = null;
+            String value = null;
+            Map<String, String> props = _pconf.getEndpointProperties(linkPartnerRole._initialEPR);
+            if (p2p) {
+                property = Properties.PROP_P2P_MEX_TIMEOUT;
+                value = props.get(property);
+            }
+            if (value == null) {
+                property = Properties.PROP_MEX_TIMEOUT;
+                value = props.get(property);
+            }
+            if (value != null) {
                 try {
-                    timeout = Long.parseLong(timeout_property);
+                    timeout = Long.parseLong(value);
                 } catch (NumberFormatException e) {
                     if (__log.isWarnEnabled())
-                        __log.warn("Mal-formatted Property: [" + Properties.PROP_MEX_TIMEOUT + "=" + timeout_property + "] Default value (" + timeout + ") will be used");
+                        __log.warn("Mal-formatted Property: [" + property + "=" + value + "] Default value (" + timeout + ") will be used");
                 }
             }
         }

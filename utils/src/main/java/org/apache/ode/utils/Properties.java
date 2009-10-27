@@ -48,12 +48,17 @@ import java.util.Map;
 public class Properties {
 
     /**
-     * Property used to define how long (in miiliseconds) the message will wait for a response. Default value is {@link #DEFAULT_MEX_TIMEOUT}
+     * Property used to define how long (in milliseconds) the message will wait for a response. Default value is {@link #DEFAULT_MEX_TIMEOUT}
      */
     public static final String PROP_MEX_TIMEOUT = "mex.timeout";
+
+    /**
+     * Property used to define how long (in milliseconds) the message will wait for a response for process-to-process invocations.
+     */
+    public static final String PROP_P2P_MEX_TIMEOUT = "p2p.mex.timeout";
+
     // its default value
     public static final int DEFAULT_MEX_TIMEOUT = 2 * 60 * 1000;
-
 
     public static final String PROP_HTTP_CONNECTION_TIMEOUT = HttpConnectionParams.CONNECTION_TIMEOUT;
     public static final String PROP_HTTP_SOCKET_TIMEOUT = HttpMethodParams.SO_TIMEOUT;

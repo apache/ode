@@ -104,8 +104,8 @@ public class BpelEngineImpl implements BpelEngine {
     /** Active processes, keyed by process id. */
     final HashMap<QName, BpelProcess> _activeProcesses = new HashMap<QName, BpelProcess>();
 
-    /** Mapping from myrole endpoint name to active process. */
-    private final HashMap<Endpoint, List<BpelProcess>> _serviceMap = new HashMap<Endpoint, List<BpelProcess>>();
+    /** Mapping from myrole service name to active process. */
+    private final HashMap<QName, List<BpelProcess>> _serviceMap = new HashMap<QName, List<BpelProcess>>();
 
     /** Mapping from a potentially shared endpoint to its EPR */ 
     private SharedEndpoints _sharedEps;     
@@ -265,10 +265,9 @@ public class BpelEngineImpl implements BpelEngine {
             if (__log.isDebugEnabled())
                 __log.debug("Deactivating process " + p.getPID());
 
-            Iterator<Map.Entry<Endpoint,List<BpelProcess>>> serviceIter = _serviceMap.entrySet().iterator();
+            Iterator<List<BpelProcess>> serviceIter = _serviceMap.values().iterator();
             while (serviceIter.hasNext()) {
-                Map.Entry<Endpoint,List<BpelProcess>> processEntry = serviceIter.next();
-                Iterator<BpelProcess> entryProcesses = processEntry.getValue().iterator();
+                Iterator<BpelProcess> entryProcesses = serviceIter.next().iterator();
                 while (entryProcesses.hasNext()) {
                     BpelProcess entryProcess = entryProcesses.next();
                     if (entryProcess.getPID().equals(process)) {
@@ -303,10 +302,10 @@ public class BpelEngineImpl implements BpelEngine {
         _activeProcesses.put(process.getPID(), process);
         for (Endpoint e : process.getServiceNames()) {
             __log.debug("Register process: serviceId=" + e + ", process=" + process);
-            List<BpelProcess> processes = _serviceMap.get(e);
+            List<BpelProcess> processes = _serviceMap.get(e.serviceName);
             if (processes == null) {
                 processes = new ArrayList<BpelProcess>();
-                _serviceMap.put(e, processes);
+                _serviceMap.put(e.serviceName, processes);
             }
             // Remove any older version of the process from the list
             Iterator<BpelProcess> processesIter = processes.iterator();
@@ -336,12 +335,7 @@ public class BpelEngineImpl implements BpelEngine {
     List<BpelProcess> route(QName service, Message request) {
         // TODO: use the message to route to the correct service if more than
         // one service is listening on the same endpoint.
-
-        List<BpelProcess> routed = null;
-        for (Endpoint endpoint : _serviceMap.keySet()) {
-            if (endpoint.serviceName.equals(service))
-                routed = _serviceMap.get(endpoint);
-        }
+        List<BpelProcess> routed = _serviceMap.get(service);
         if (__log.isDebugEnabled())
             __log.debug("Routed: svcQname " + service + " --> " + routed);
         return routed;
