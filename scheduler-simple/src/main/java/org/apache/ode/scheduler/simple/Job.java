@@ -21,6 +21,7 @@ package org.apache.ode.scheduler.simple;
 
 import java.util.Map;
 
+import java.text.SimpleDateFormat;
 import org.apache.ode.utils.GUID;
 
 /**
@@ -29,6 +30,8 @@ import org.apache.ode.utils.GUID;
  * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
  */
 class Job extends Task {
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+
     String jobId;
     boolean transacted;
     Map<String,Object> detail;
@@ -57,6 +60,7 @@ class Job extends Task {
     
     @Override
     public String toString() {
-        return "Job "+jobId+" transacted: "+transacted+" persisted: "+persisted+" details: "+detail;
+        SimpleDateFormat f = (SimpleDateFormat) DATE_FORMAT.clone();
+        return "Job "+jobId+" time: "+f.format(schedDate)+" transacted: "+transacted+" persisted: "+persisted+" details: "+detail;
     }
 }
