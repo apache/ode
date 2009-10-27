@@ -52,6 +52,8 @@ public class JdbcDelegate implements DatabaseDelegate {
 
     private static final String UPDATE_REASSIGN = "update ODE_JOB set nodeid = ?, scheduled = 0 where nodeid = ?";
 
+    private static final String UPDATE_JOB = "update ODE_JOB set ts = ?, details = ? where jobid = ?";
+
     private static final String UPGRADE_JOB_DEFAULT = "update ODE_JOB set nodeid = ? where nodeid is null "
             + "and mod(ts,?) = ? and ts < ?";
 
@@ -150,6 +152,34 @@ public class JdbcDelegate implements DatabaseDelegate {
                 throw new DatabaseException(ex);
             }
             ps.setBytes(6, bos.toByteArray());
+            return ps.executeUpdate() == 1;
+        } catch (SQLException se) {
+            throw new DatabaseException(se);
+        } finally {
+            close(ps);
+            close(con);
+        }
+    }
+
+    public boolean updateJob(Job job) throws DatabaseException {
+        if (__log.isDebugEnabled())
+            __log.debug("updateJob " + job.jobId + " details=" + job);
+
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            con = getConnection();
+            ps = con.prepareStatement(UPDATE_JOB);
+            ps.setLong(1, job.schedDate);
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            try {
+                StreamUtils.write(bos, (Serializable) job.detail);
+            } catch (Exception ex) {
+                __log.error("Error serializing job detail: " + job.detail);
+                throw new DatabaseException(ex);
+            }
+            ps.setBytes(2, bos.toByteArray());
+            ps.setString(3, job.jobId);
             return ps.executeUpdate() == 1;
         } catch (SQLException se) {
             throw new DatabaseException(se);

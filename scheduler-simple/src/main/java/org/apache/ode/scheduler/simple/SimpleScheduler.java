@@ -478,7 +478,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
                 final Scheduler.JobInfo jobInfo = new Scheduler.JobInfo(job.jobId, job.detail,
                         (Integer) (job.detail.get("retry") != null ? job.detail.get("retry") : 0));
                 if (job.transacted) {
-                    final boolean[] needRetry = new boolean[]{false};
+                    final boolean[] needRetry = new boolean[]{true};
                     try {
                         execTransaction(new Callable<Void>() {
                             public Void call() throws Exception {
@@ -499,10 +499,9 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
                                         _db.insertJob(job, _nodeId, false);
                                     }
                                 } catch (JobProcessorException jpe) {
-                                    if (jpe.retry) {
-                                        needRetry[0] = true;
-                                    } else {
-                                        __log.error("Error while processing transaction, no retry.", jpe);
+                                    if (!jpe.retry) {
+                                        needRetry[0] = false;
+                                        __log.error("Error while processing job, no retry: "+job, jpe);
                                     }
                                     // Let execTransaction know that shit happened.
                                     throw jpe;
@@ -515,11 +514,32 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
                         // it the synchronization is a best-effort but not perfect.
                         __log.debug("job no longer in db forced rollback.");
                     } catch (final Exception ex) {
-                        __log.error("Error while executing transaction", ex);
+                        __log.error("Error while executing job: "+job, ex);
 
                         // We only get here if the above execTransaction fails, so that transaction got
                         // rollbacked already
-                        execTransaction(new Retry(job, needRetry[0]));
+                        if (job.persisted) {
+                            execTransaction(new Callable<Void>() {
+                                public Void call() throws Exception {
+                                    if (needRetry[0]) {
+                                        int retry = job.detail.get("retry") != null ? (((Integer) job.detail.get("retry")) + 1) : 0;
+                                        if (retry <= 10) {
+                                            job.detail.put("retry", retry);
+                                            long delay = (long)(Math.pow(5, retry));
+                                            job.schedDate = System.currentTimeMillis() + delay*1000;
+                                            _db.updateJob(job);
+                                            __log.error("Error while processing job, retrying in " + delay + "s");
+                                        } else {
+                                            _db.deleteJob(job.jobId, _nodeId);
+                                            __log.error("Error while processing job after 10 retries, no more retries:" + job);
+                                        }
+                                    } else {
+                                        _db.deleteJob(job.jobId, _nodeId);
+                                    }
+                                    return null;
+                                }
+                            });
+                        }
                     }
                 } else {
                     processor.onScheduledJob(jobInfo);
@@ -566,44 +586,6 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
      */
     protected void runPolledRunnable(final Job job) {
          _exec.submit(new RunJob(job, _polledRunnableProcessor));
-    }
-
-    class Retry implements Callable<Void> {
-        final Job job;
-        final boolean needRetry;
-
-        Retry(Job job, boolean needRetry) {
-            this.job = job;
-            this.needRetry = needRetry;
-        }
-
-        public Void call() throws Exception {
-            if (needRetry) {
-                int retry = job.detail.get("retry") != null ? (((Integer) job.detail.get("retry")) + 1) : 0;
-                if (retry <= 10) {
-                    long delay = doRetry(job);
-                    __log.error("Error while processing transaction, retrying in " + delay + "s");
-                } else {
-                    __log.error("Error while processing transaction after 10 retries, no more retries:" + job);
-                }
-            }
-
-            // We got rollbacked, as we schedule a retry we want to be sure the original job is
-            // really deleted
-            if (job.persisted) _db.deleteJob(job.jobId, _nodeId);
-
-            return null;
-        }
-
-        private long doRetry(Job job) throws DatabaseException {
-          int retry = job.detail.get("retry") != null ? (((Integer)job.detail.get("retry")) + 1) : 0;
-          job.detail.put("retry", retry);
-          long delay = (long)(Math.pow(5, retry));
-          Job jobRetry = new Job(System.currentTimeMillis() + delay*1000, true, job.detail);
-          _db.insertJob(jobRetry, _nodeId, false);
-          return delay;
-        }
-
     }
 
     private void addTodoOnCommit(final Job job) {
@@ -725,16 +707,18 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     }
 
     void enqueue(Job job) {
-        boolean not_outstanding = _outstandingJobs.putIfAbsent(job.jobId, job.schedDate) == null;
-        boolean not_processed = _processedSinceLastLoadTask.get(job.jobId) == null;
-        if (not_outstanding && not_processed) {
-            if (job.schedDate <= System.currentTimeMillis()) {
-                runJob(job);
+        if (_processedSinceLastLoadTask.get(job.jobId) == null) {
+            if (_outstandingJobs.putIfAbsent(job.jobId, job.schedDate) == null) {
+                if (job.schedDate <= System.currentTimeMillis()) {
+                    runJob(job);
+                } else {
+                    _todo.enqueue(job);
+                }
             } else {
-                _todo.enqueue(job);
+              if (__log.isDebugEnabled()) __log.debug("Job "+job.jobId+" is being processed (outstanding job)");
             }
-        }else if(__log.isDebugEnabled()){
-            __log.debug("Job "+job.jobId+" is already queued or processed");
+        } else {
+            if (__log.isDebugEnabled()) __log.debug("Job "+job.jobId+" is being processed (processed since last load)");
         }
     }
 

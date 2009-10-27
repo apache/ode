@@ -38,6 +38,14 @@ public interface DatabaseDelegate {
     boolean insertJob(Job job, String nodeId, boolean loaded) throws DatabaseException ;
 
     /**
+     * Update the job in the database (only updates timestamp and details)
+     *
+     * @param job the job
+     * @throws DatabaseException in case of error
+     */
+    boolean updateJob(Job job) throws DatabaseException;
+
+    /**
      * Delete a job from the database.
      * @param jobid job identifier 
      * @param nodeId node identifier
