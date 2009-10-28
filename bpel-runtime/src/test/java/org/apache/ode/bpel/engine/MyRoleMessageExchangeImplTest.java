@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import javax.transaction.TransactionManager;
+import javax.xml.namespace.QName;
 
 import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
@@ -23,7 +24,17 @@ public class MyRoleMessageExchangeImplTest extends MockObjectTestCase {
     TransactionManager _txm;
     
     public void testResponseReceived() throws Exception {
-        mexDao.expects(exactly(3)).method("getCorrelationId").will(returnValue("corrId"));
+        mexDao.expects(atLeastOnce()).method("getDirection").will(returnValue(MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE));
+        mexDao.expects(atLeastOnce()).method("getMessageExchangeId").will(returnValue("163"));
+        mexDao.expects(atLeastOnce()).method("getCorrelationId").will(returnValue("corrId"));
+        mexDao.expects(atLeastOnce()).method("getCorrelationStatus").will(returnValue("MATCHED"));
+        mexDao.expects(atLeastOnce()).method("getPattern").will(returnValue("PATTERN"));
+        mexDao.expects(atLeastOnce()).method("getCallee").will(returnValue(new QName("CALLEE")));
+        mexDao.expects(atLeastOnce()).method("getStatus").will(returnValue("10"));
+        mexDao.expects(atLeastOnce()).method("getOperation").will(returnValue("10"));
+        mexDao.expects(atLeastOnce()).method("getPipedMessageExchangeId").will(returnValue("163"));
+        mexDao.expects(atLeastOnce()).method("getFault").will(returnValue(null));
+        mexDao.expects(atLeastOnce()).method("getResponse").will(returnValue(null));
         
         final boolean[] responded = new boolean[1];
         myRoleMexImpl.callbacks().put("corrId", new ResponseCallback() {
@@ -52,7 +63,18 @@ public class MyRoleMessageExchangeImplTest extends MockObjectTestCase {
     }
     
     public void testResponseTimeout() throws Exception {
+        mexDao.expects(atLeastOnce()).method("getDirection").will(returnValue(MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE));
+        mexDao.expects(atLeastOnce()).method("getMessageExchangeId").will(returnValue("163"));
         mexDao.expects(atLeastOnce()).method("getCorrelationId").will(returnValue("corrId"));
+        mexDao.expects(atLeastOnce()).method("getCorrelationStatus").will(returnValue("MATCHED"));
+        mexDao.expects(atLeastOnce()).method("getPattern").will(returnValue("PATTERN"));
+        mexDao.expects(atLeastOnce()).method("getCallee").will(returnValue(new QName("CALLEE")));
+        mexDao.expects(atLeastOnce()).method("getStatus").will(returnValue("10"));
+        mexDao.expects(atLeastOnce()).method("getOperation").will(returnValue("10"));
+        mexDao.expects(atLeastOnce()).method("getPipedMessageExchangeId").will(returnValue("163"));
+        mexDao.expects(atLeastOnce()).method("getFault").will(returnValue(null));
+        mexDao.expects(atLeastOnce()).method("getResponse").will(returnValue(null));
+
         myRoleMexImpl.callbacks().put("corrId", new MyRoleMessageExchangeImpl.ResponseCallback());
 
         _txm.begin();

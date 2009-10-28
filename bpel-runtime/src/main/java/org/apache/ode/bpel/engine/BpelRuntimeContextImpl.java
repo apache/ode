@@ -227,7 +227,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             public void afterCompletion(boolean success) {
             }
             public void beforeCompletion() { 
-                _dao.delete(_bpelProcess.getCleanupCategories(false), false);
+                _dao.delete(_bpelProcess.getCleanupCategories(false));
             }
         });
     }
@@ -256,7 +256,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             public void afterCompletion(boolean success) {
             }
             public void beforeCompletion() { 
-                _dao.delete(_bpelProcess.getCleanupCategories(true), false);
+                _dao.delete(_bpelProcess.getCleanupCategories(true));
             }
         });
     }

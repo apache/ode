@@ -153,10 +153,6 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
     }
     
     public void delete(Set<CLEANUP_CATEGORY> cleanupCategories) {
-        delete(cleanupCategories, true);
-    }
-
-    public void delete(Set<CLEANUP_CATEGORY> cleanupCategories, boolean deleteMyRoleMex) {
         if(__log.isDebugEnabled()) __log.debug("Cleaning up instance Data with " + cleanupCategories);
         
         // remove jacob state
@@ -207,8 +203,13 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
         batchUpdateByIds(scopeIds.iterator(), getEM().createNamedQuery(ScopeDAOImpl.DELETE_SCOPES_BY_SCOPE_IDS), "ids");
     }
 
-    private void deleteMessageRoutes() {
+    @SuppressWarnings("unchecked")
+	private void deleteMessageRoutes() {
         getEM().createNamedQuery(MessageRouteDAOImpl.DELETE_MESSAGE_ROUTES_BY_INSTANCE).setParameter ("instance", this).executeUpdate();
+        Collection<MessageExchangeDAOImpl> mexes = getEM().createNamedQuery(MessageExchangeDAOImpl.SELECT_MEXES_BY_INSTANCE).setParameter ("instance", this).getResultList();
+        for( MessageExchangeDAOImpl mex : mexes ) {
+            getEM().remove(mex);
+        }
     }
     
     @SuppressWarnings("unchecked")

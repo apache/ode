@@ -326,10 +326,6 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
   }
 
   public void delete(Set<CLEANUP_CATEGORY> cleanupCategories) {
-      delete(cleanupCategories, true);
-  }
-  
-  public void delete(Set<CLEANUP_CATEGORY> cleanupCategories, boolean deleteMyRoleMex) {
     entering("ProcessInstanceDaoImpl.delete");
     if(__log.isDebugEnabled()) __log.debug("Cleaning up instance data with categories = " + cleanupCategories);
       
@@ -349,7 +345,7 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
     }
 
     if( cleanupCategories.contains(CLEANUP_CATEGORY.MESSAGES) ) {
-      deleteMessages(instances, deleteMyRoleMex);
+      deleteMessages(instances);
     }
       
     if( cleanupCategories.contains(CLEANUP_CATEGORY.VARIABLES) ) {
@@ -390,37 +386,20 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
   }
 
   @SuppressWarnings("unchecked")
-  private void deleteMessages(HProcessInstance[] instances, boolean deleteMyRoleMex) {
-      // Let's delete ALL mex properties here
-      List<Long> allMexes = getSession().getNamedQuery(HMessageExchange.SELECT_MEX_IDS_BY_INSTANCES).setParameterList("instances", instances).list();
-      deleteByColumn(HMessageExchangeProperty.class, "mex.id", allMexes);
+  private void deleteMessages(HProcessInstance[] instances) {
+      // Let's delete mex properties here
+      List<Long> mexes = getSession().getNamedQuery(HMessageExchange.SELECT_MEX_IDS_BY_INSTANCES).setParameterList("instances", instances).list();
+      deleteByColumn(HMessageExchangeProperty.class, "mex.id", mexes);
 
-      if( deleteMyRoleMex ) { // Delete my role mex and partner role mexes
-          // delete message data
-          deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_1).setParameterList("instances", instances).list());
-          deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_2).setParameterList("instances", instances).list());
+      // delete message data
+      deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_1).setParameterList("instances", instances).list());
+      deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_2).setParameterList("instances", instances).list());
 
-          // delete messages
-          deleteByIds(HMessage.class, getSession().getNamedQuery(HMessage.SELECT_MESSAGE_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
-          
-          // delete all mexes
-          deleteByIds(HMessageExchange.class, allMexes);
-      } else { // Delete only the unmatched mexes, there are chances that some unmatched messages are still there
-          // delete message data 
-          deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_1).setParameterList("instances", instances).list());
-          deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_2).setParameterList("instances", instances).list());
-
-          Collection<HMessageExchange> unmatchedMex = getSession().getNamedQuery(HMessageExchange.SELECT_UNMATCHED_MEX_BY_INSTANCES).setParameterList("instances", instances).list();
-          if( !unmatchedMex.isEmpty() ) {
-              List<Long> mexIdList = new ArrayList<Long>();
-              for( HMessageExchange mex : unmatchedMex ) {
-                  mexIdList.add(mex.getId());
-              }
-
-              // delete unmatched mexes
-              getSession().delete(unmatchedMex);
-          }
-      }
+      // delete messages
+      deleteByIds(HMessage.class, getSession().getNamedQuery(HMessage.SELECT_MESSAGE_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
+      
+      // delete mexes
+      deleteByIds(HMessageExchange.class, mexes);
 
       // Delete routes and unmatched messages
       deleteByIds(HCorrelatorMessage.class, getSession().getNamedQuery(HCorrelatorMessage.SELECT_CORMESSAGE_IDS_BY_INSTANCES).setParameterList("instances", instances).list());

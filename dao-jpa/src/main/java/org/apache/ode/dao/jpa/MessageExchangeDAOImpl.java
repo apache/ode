@@ -53,13 +53,15 @@ import java.util.Set;
 @Table(name="ODE_MESSAGE_EXCHANGE")
 @NamedQueries({
     @NamedQuery(name=MessageExchangeDAOImpl.DELETE_MEXS_BY_PROCESS, query="delete from MessageExchangeDAOImpl as m where m._process = :process"),
-    @NamedQuery(name=MessageExchangeDAOImpl.SELECT_MEX_IDS_BY_PROCESS, query="select m._id from MessageExchangeDAOImpl as m where m._process = :process")
+    @NamedQuery(name=MessageExchangeDAOImpl.SELECT_MEX_IDS_BY_PROCESS, query="select m._id from MessageExchangeDAOImpl as m where m._process = :process"),
+    @NamedQuery(name=MessageExchangeDAOImpl.SELECT_MEXES_BY_INSTANCE, query="select x from MessageExchangeDAOImpl as x where x._processInst = :instance")
 })
 public class MessageExchangeDAOImpl extends OpenJPADAO implements MessageExchangeDAO, CorrelatorMessageDAO {
     private static final Log __log = LogFactory.getLog(MessageExchangeDAOImpl.class);
     
     public final static String DELETE_MEXS_BY_PROCESS = "DELETE_MEXS_BY_PROCESS";
     public final static String SELECT_MEX_IDS_BY_PROCESS = "SELECT_MEX_IDS_BY_PROCESS";
+    public final static String SELECT_MEXES_BY_INSTANCE = "SELECT_MEXES_BY_INSTANCE";
     
     @Id @Column(name="MESSAGE_EXCHANGE_ID") 
     private String _id;
