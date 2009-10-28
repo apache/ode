@@ -38,6 +38,9 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.collections.map.MultiKeyMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -51,6 +54,8 @@ import org.w3c.dom.Node;
  * of the same XSL sheet.
  */
 public class XslTransformHandler {
+
+    private static final Log __log = LogFactory.getLog(XslTransformHandler.class);
 
   private static XslTransformHandler __singleton;
 
@@ -138,19 +143,23 @@ public class XslTransformHandler {
         }
       }
       String method = tf.getOutputProperties().getProperty("method");
-      if (method == null || method.equals("xml") || method.equals("html")) {
+      if (method == null || "xml".equals(method)) {
     	  DOMResult result = new DOMResult();
     	  tf.transform(source, result);
     	  Node node = result.getNode();
     	  if(node.getNodeType() == Node.DOCUMENT_NODE)
     		  node = ((Document)node).getDocumentElement();
+          if(__log.isDebugEnabled()) __log.debug("Returned node: type="+node.getNodeType()+", "+ DOMUtils.domToString(node));
     	  return node;
       } else {
+          // text and html outputs are handled the same way
           StringWriter writerResult = new StringWriter();
           StreamResult result = new StreamResult(writerResult);
     	  tf.transform(source, result);
           writerResult.flush();
-          return writerResult.toString();
+          String output = writerResult.toString();
+          if(__log.isDebugEnabled()) __log.debug("Returned string: "+output);
+          return output;
       }
     } catch (TransformerConfigurationException e) {
       throw new XslTransformException(e);
