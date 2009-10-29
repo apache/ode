@@ -526,25 +526,27 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 __log.debug("Replying to a p2p mex, myrole " + m + " - partnerole " + pmex);
             }
             try {
-                switch (m.getStatus()) {
-                    case FAILURE:
-                        // We can't seem to get the failure out of the myrole mex?
-                        pmex.replyWithFailure(MessageExchange.FailureType.OTHER, "operation failed", null);
-                        break;
-                    case FAULT:
-                        Message faultRes = pmex.createMessage(pmex.getOperation().getFault(m.getFault().getLocalPart())
-                                .getMessage().getQName());
-                        faultRes.setMessage(m.getResponse().getMessage());
-                        pmex.replyWithFault(m.getFault(), faultRes);
-                        break;
-                    case RESPONSE:
-                        Message response = pmex.createMessage(pmex.getOperation().getOutput().getMessage().getQName());
-                        response.setMessage(m.getResponse().getMessage());
-                        pmex.reply(response);
-                        break;
-                    default:
-                        __log.warn("Unexpected state: " + m.getStatus());
-                        break;
+                if (pmex != null) {
+                    switch (m.getStatus()) {
+                        case FAILURE:
+                            // We can't seem to get the failure out of the myrole mex?
+                            pmex.replyWithFailure(MessageExchange.FailureType.OTHER, "operation failed", null);
+                            break;
+                        case FAULT:
+                            Message faultRes = pmex.createMessage(pmex.getOperation().getFault(m.getFault().getLocalPart())
+                                    .getMessage().getQName());
+                            faultRes.setMessage(m.getResponse().getMessage());
+                            pmex.replyWithFault(m.getFault(), faultRes);
+                            break;
+                        case RESPONSE:
+                            Message response = pmex.createMessage(pmex.getOperation().getOutput().getMessage().getQName());
+                            response.setMessage(m.getResponse().getMessage());
+                            pmex.reply(response);
+                            break;
+                        default:
+                            __log.warn("Unexpected state: " + m.getStatus());
+                            break;
+                    }
                 }
             } finally {
                 mex.release(_bpelProcess.isCleanupCategoryEnabled(m.getStatus() == MessageExchange.Status.RESPONSE, CLEANUP_CATEGORY.MESSAGES));
