@@ -46,6 +46,7 @@ import javax.transaction.xa.XAResource;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.util.IdleConnectionTimeoutThread;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -120,6 +121,7 @@ public class ODEServer {
     private ManagementService _mgtService;
 
     protected MultiThreadedHttpConnectionManager httpConnectionManager;
+    protected IdleConnectionTimeoutThread idleConnectionTimeoutThread;
     
     public void init(ServletConfig config, AxisConfiguration axisConf) throws ServletException {
         init(config.getServletContext().getRealPath("/WEB-INF"), axisConf);
@@ -361,6 +363,14 @@ public class ODEServer {
                     __log.error("Unable to shut down HTTP connection manager.", t);
                 }
             }
+            if(idleConnectionTimeoutThread!=null){
+                __log.debug("shutting down Idle Connection Timeout Thread.");
+                try {
+                    idleConnectionTimeoutThread.shutdown();
+                } catch(Throwable t) {
+                    __log.error("Unable to shut down Idle Connection Timeout Thread.", t);
+                }
+            }
             try {
                 __log.debug("cleaning up temporary files.");
                 TempFileManager.cleanup();
@@ -516,6 +526,22 @@ public class ODEServer {
         }
         httpConnectionManager.getParams().setDefaultMaxConnectionsPerHost(max_per_host);
         httpConnectionManager.getParams().setMaxTotalConnections(max_total);
+
+        // Register the connection manager to a idle check thread
+        idleConnectionTimeoutThread = new IdleConnectionTimeoutThread();
+        idleConnectionTimeoutThread.setName("Http_Idle_Connection_Timeout_Thread");
+        long idleConnectionTimeout = Long.parseLong(_odeConfig.getProperty("http.idle.connection.timeout", "30000"));
+        long idleConnectionCheckInterval = Long.parseLong(_odeConfig.getProperty("http.idle.connection.check.interval", "30000"));
+
+        if(__log.isDebugEnabled()){
+            __log.debug("http.idle.connection.timeout="+idleConnectionTimeout);
+            __log.debug("http.idle.connection.check.interval="+idleConnectionCheckInterval);
+        }
+        idleConnectionTimeoutThread.setConnectionTimeout(idleConnectionTimeout);
+        idleConnectionTimeoutThread.setTimeoutInterval(idleConnectionCheckInterval);
+
+        idleConnectionTimeoutThread.addConnectionManager(httpConnectionManager);
+        idleConnectionTimeoutThread.start();
     }
 
     public ProcessStoreImpl getProcessStore() {
