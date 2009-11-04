@@ -497,6 +497,18 @@ public class ProcessStoreImpl implements ProcessStore {
             }
         });
 
+        // Dispatch DISABLED, RETIRED and ACTIVE events in that order
+        Collections.sort(loaded, new Comparator<ProcessConf>() {
+            public int compare(ProcessConf o1, ProcessConf o2) {
+                return stateValue(o1.getState()) - stateValue(o2.getState());
+            }
+            int stateValue(ProcessState state) {
+                if (ProcessState.DISABLED.equals(state)) return 0;
+                if (ProcessState.RETIRED.equals(state)) return 1;
+                if (ProcessState.ACTIVE.equals(state)) return 2;
+                throw new IllegalStateException("Unexpected process state: "+state);
+            }
+        });
         for (ProcessConfImpl p : loaded) {
             try {
                 fireStateChange(p.getProcessId(), p.getState(), p.getDeploymentUnit().getName());
