@@ -194,9 +194,15 @@ public interface ProcessInstanceDAO {
 
     /**
      * Delete the process instance object from the database.
-     * @param cleanupCategories the categories of entities to delete
      */
     void delete(Set<CLEANUP_CATEGORY> cleanupCategories);
+
+    /**
+     * Delete the process instance object from the database.
+     * @param cleanupCategories the categories of entities to delete
+     * @param deleteMyRoleMex will clean up the my role mex if set to true
+     */
+    void delete(Set<CLEANUP_CATEGORY> cleanupCategories, boolean deleteMyRoleMex);
 
     /**
      * Insert a BPEL event to the database (associating with this process).

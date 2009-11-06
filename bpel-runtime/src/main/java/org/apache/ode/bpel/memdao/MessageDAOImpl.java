@@ -36,13 +36,6 @@ public class MessageDAOImpl extends DaoBaseImpl implements MessageDAO {
 		this.messageExchange = messageExchange;
 	}
 
-	public MessageDAOImpl(MessageExchangeDAO messageExchange, QName type, Element data, Element header) {
-		this.messageExchange = messageExchange;
-		this.type = type;
-		this.data = data;
-		this.header = header;
-	}
-
 	public void setType(QName type) {
 		this.type = type;
 	}

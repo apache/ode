@@ -19,7 +19,10 @@
 
 package org.apache.ode.bpel.engine;
 
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -30,7 +33,6 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
@@ -42,12 +44,12 @@ import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext;
-import org.apache.ode.bpel.memdao.MessageDAOImpl;
-import org.apache.ode.bpel.memdao.MessageExchangeDAOImpl;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMessageExchange {
+
+
     private static final Log __log = LogFactory.getLog(MyRoleMessageExchangeImpl.class);
     
     protected BpelProcess _process;
@@ -221,7 +223,6 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
         public boolean cancel(boolean mayInterruptIfRunning) {
             throw new UnsupportedOperationException();
         }
-        
         public Object get() throws InterruptedException, ExecutionException {
             try {
                 return get(0, TimeUnit.MILLISECONDS);
@@ -230,27 +231,19 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
                 throw new ExecutionException(e);
             }
         }
-        
         public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
             ResponseCallback callback = _waitingCallbacks.get(_clientId);
             if (callback != null) {
                 callback.waitResponse(timeout);
                 _done = true;
-
-                // There's the small window after the response times out, in which the myRoleMex is set, ignore that case
-                if (callback._timedout) {
+                if (callback._timedout)
                     throw new TimeoutException("Message exchange " + this + " timed out(" + timeout + " ms) when waiting for a response!");
-                }
-                
-                return callback._myRoleMex;
             }
             return null;
         }
-        
         public boolean isCancelled() {
             return false;
         }
-        
         public boolean isDone() {
             return _done;
         }
@@ -260,69 +253,23 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
     protected void responseReceived() {
         final String cid = getClientId();
         _engine._contexts.scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
-            public void beforeCompletion() {
-                ResponseCallback callback = _waitingCallbacks.get(cid);
-                if (callback != null) {
-                    // Create a mem-backed message exchange and populate properties from the real one
-                    // this requires a valid persistent framework's session and thus 
-                    // should be done in the 'beforeCompletion()'
-                    MessageExchangeDAO mexDao = getDAO();
-                    if(mexDao != null) {
-                        callback._myRoleMex = createTransientMessageExchange(mexDao);
-                    } else if( __log.isDebugEnabled() ) __log.debug("The MEX Dao has been already released.");
-                }
-            }
-
             public void afterCompletion(boolean success) {
                 __log.debug("Received myrole mex response callback");
                 if( success ) {
                     ResponseCallback callback = _waitingCallbacks.remove(cid);
-                    if (callback != null) {
-                        callback.responseReceived();
-                    }
+                    if (callback != null) callback.responseReceived();
                 } else {
                     __log.warn("Transaction is rolled back on sending back the response.");
                 }
             }
+            public void beforeCompletion() {
+            }
         });
-    }
-
-    private MyRoleMessageExchangeImpl createTransientMessageExchange(MessageExchangeDAO persistentDao) {
-        MessageExchangeDAOImpl dao = new MessageExchangeDAOImpl(persistentDao.getDirection(), getMessageExchangeId());
-        dao.setCorrelationId(persistentDao.getCorrelationId());
-        dao.setCorrelationStatus(persistentDao.getCorrelationStatus());
-        dao.setPattern(persistentDao.getPattern());
-        dao.setCallee(persistentDao.getCallee());
-        dao.setStatus(persistentDao.getStatus());
-        dao.setOperation(persistentDao.getOperation());
-        dao.setPipedMessageExchangeId(persistentDao.getPipedMessageExchangeId());
-        dao.setFault(getFault());
-
-        if(getResponse() != null) {
-            assert getResponse() instanceof MessageImpl;
-
-            MessageDAO responseDao = ((MessageImpl)getResponse())._dao;
-            responseDao = new MessageDAOImpl(null, responseDao.getType(), responseDao.getData(), responseDao.getHeader());
-            dao.setResponse(responseDao);
-        } else if(getFaultResponse() != null) {
-            assert getFaultResponse() instanceof MessageImpl;
-
-            MessageDAO responseDao = ((MessageImpl)getFaultResponse())._dao;
-            responseDao = new MessageDAOImpl(null, responseDao.getType(), responseDao.getData(), responseDao.getHeader());
-            dao.setResponse(responseDao);
-        }
-        
-        MyRoleMessageExchangeImpl memMexCopy =  new MyRoleMessageExchangeImpl(_process, _engine, dao);
-        memMexCopy.setPortOp(getPortType(), getOperation());
-        
-        return memMexCopy;
     }
 
     static class ResponseCallback {
         private boolean _timedout;
         private boolean _waiting = true;
-        // this object does not have to be synchronized
-        private volatile MyRoleMessageExchangeImpl _myRoleMex;
 
         synchronized boolean responseReceived() {
             if (_timedout) {

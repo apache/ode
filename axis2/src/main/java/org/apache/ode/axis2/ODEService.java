@@ -21,6 +21,7 @@ package org.apache.ode.axis2;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.Map;
 
 import javax.transaction.TransactionManager;
 import javax.wsdl.Definition;
@@ -92,10 +93,9 @@ public class ODEService {
     }
     
     public String getName() {
-        return _axisService.getName();
+    	return _axisService.getName();
     }
     
-    @SuppressWarnings("unchecked")
     public void onAxisMessageExchange(MessageContext msgContext, MessageContext outMsgContext, SOAPFactory soapFactory)
             throws AxisFault {
         boolean success = true;
@@ -141,7 +141,7 @@ public class ODEService {
             success = false;
             String message = e.getMessage();
             if (message == null) {
-                message = "An exception occured while invoking ODE.";
+            	message = "An exception occured while invoking ODE.";
             }
             throw new OdeFault(message, e);
         } finally {
@@ -158,33 +158,55 @@ public class ODEService {
         if (odeMex.getOperation().getOutput() != null) {
             // Waits for the response to arrive
             try {
-                odeMex = (MyRoleMessageExchange)responseFuture.get(getTimeout(), TimeUnit.MILLISECONDS);
+                responseFuture.get(getTimeout(), TimeUnit.MILLISECONDS);
             } catch (Exception e) {
                 String errorMsg = "Timeout or execution error when waiting for response to MEX "
                         + odeMex + " " + e.toString();
                 __log.error(errorMsg, e);
-                
                 throw new OdeFault(errorMsg);
             }
-            
-            // this should not happen, if odeMex is null, you should always get the Timout exception
-            assert odeMex != null;
-            
+
             if (outMsgContext != null) {
                 SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
                 outMsgContext.setEnvelope(envelope);
 
                 // Hopefully we have a response
                 __log.debug("Handling response for MEX " + odeMex);
+                boolean commit = false;
                 try {
+                    if (__log.isDebugEnabled()) __log.debug("Starting transaction.");
+                    _txManager.begin();
+                } catch (Exception ex) {
+                    throw new OdeFault("Error starting transaction!", ex);
+                }
+                try {
+                    // Refreshing the message exchange
+                    odeMex = (MyRoleMessageExchange) _server.getEngine().getMessageExchange(odeMex.getMessageExchangeId());
                     onResponse(odeMex, outMsgContext);
+                    commit = true;
                 } catch (AxisFault af) {
                     __log.warn("MEX produced a fault " + odeMex, af);
+                    commit = true;
                     throw af;
                 } catch (Exception e) {
                     __log.error("Error processing response for MEX " + odeMex, e);
                     throw new OdeFault("An exception occured when invoking ODE.", e);
                 } finally {
+                    odeMex.release(commit);
+                    if (commit) {
+                        try {
+                            if (__log.isDebugEnabled()) __log.debug("Comitting transaction.");
+                            _txManager.commit();
+                        } catch (Exception e) {
+                            throw new OdeFault("Commit failed!", e);
+                        }
+                    } else {
+                        try {
+                            _txManager.rollback();
+                        } catch (Exception ex) {
+                            throw new OdeFault("Rollback failed!", ex);
+                        }
+                    }
                 }
             }
             if (!success) {

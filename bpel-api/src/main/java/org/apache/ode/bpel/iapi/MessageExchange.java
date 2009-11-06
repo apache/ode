@@ -21,7 +21,6 @@ package org.apache.ode.bpel.iapi;
 import javax.wsdl.Operation;
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
-
 import java.util.Set;
 
 /**
