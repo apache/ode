@@ -14,7 +14,7 @@
 #    limitations under the License.
 #
 
-gem "buildr", "~>1.2.4"
+gem "buildr", "~>1.3"
 require "buildr"
 require "buildr/xmlbeans.rb"
 require "buildr/openjpa"
@@ -24,7 +24,6 @@ require "buildr/hibernate"
 
 # Keep this structure to allow the build system to update version numbers.
 VERSION_NUMBER = "1.3.4-SNAPSHOT"
-NEXT_VERSION = "1.3.4"
 
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
@@ -149,16 +148,7 @@ repositories.remote << "http://download.java.net/maven/2"
 repositories.remote << "http://ws.zones.apache.org/repository2"
 repositories.release_to[:url] ||= "sftp://guest@localhost/home/guest"
 
-# Changing releases tag names
-class Release
-  class << self
-    def tag_with_apache_ode(version)
-      tag_without_apache_ode("APACHE_ODE_#{version.upcase}")
-    end
-    alias_method_chain :tag, :apache_ode
-  end
-end
-
+Release.find.tag_name = lambda { |version| "APACHE_ODE_#{version.upcase}" }
 
 desc "Apache ODE"
 #define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
@@ -361,7 +351,7 @@ define "ode" do
   define "bpel-test" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-runtime",
       "bpel-store", "utils", "bpel-epr", "dao-jpa", "agents"),
-      DERBY, Java::JUnit::JUNIT_REQUIRES, JAVAX.persistence, OPENJPA, WSDL4J, COMMONS.httpclient,
+      DERBY, JUnit.dependencies, JAVAX.persistence, OPENJPA, WSDL4J, COMMONS.httpclient,
     COMMONS.codec
 
     test.with projects("bpel-obj", "jacob", "bpel-schemas",
@@ -489,7 +479,6 @@ define "ode" do
 
   desc "ODE Jacob APR Code Generation"
   define "jacob-ap" do
-    compile.with Java.tools_jar
     package :jar
   end
 
@@ -570,7 +559,7 @@ define "ode" do
   desc "ODE Agents"
   define "agents" do
      compile
-     package(:jar, :manifest=>_("target/classes/META-INF/MANIFEST.MF"))
+     package(:jar).with :manifest=>_("src/main/resources/META-INF/MANIFEST.MF")
   end
 
 end

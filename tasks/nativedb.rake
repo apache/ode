@@ -42,7 +42,7 @@ module NativeDB
     def create_hib_db(name, args)
       if File.exist? SETTINGS
         require SETTINGS
-        db, dbprops = Rake.application.resolve_args(args)
+        db, dbprops = args.keys.first, args.values.first
         file(File.expand_path(db)) do |task|
           puts "Creating(preparing) database: #{db}."
           rm_rf task.name if File.exist?(task.name)
@@ -67,7 +67,7 @@ module NativeDB
     def create_jpa_db(base, name, args)
       if File.exist? SETTINGS
         require SETTINGS
-        db, dbprops = Rake.application.resolve_args(args)
+        db, dbprops = args.keys.first, args.values.first
         file(File.expand_path(db)) do |task|
           puts "Creating(preparing) database: #{db}."
           rm_rf task.name if File.exist?(task.name)

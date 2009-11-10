@@ -38,7 +38,7 @@ import java.util.Properties;
  * test that the result is the one expected would take a huge test database
  * (with at least a process and an instance for every possible combination).
  */
-public class BaseTestDAO extends TestCase {
+public abstract class BaseTestDAO extends TestCase {
 
     protected BpelDAOConnection daoConn;
     private TransactionManager txm;
