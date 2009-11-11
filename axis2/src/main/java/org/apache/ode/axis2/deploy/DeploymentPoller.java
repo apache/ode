@@ -82,14 +82,7 @@ public class DeploymentPoller {
     /** Filter accepting directories containing a ode dd file. */
     private static final FileFilter _fileFilter = new FileFilter() {
         public boolean accept(File path) {
-            if (path.isDirectory()) {
-                return path.listFiles(new FilenameFilter() {
-                    public boolean accept(File dir, String name) {
-                        return name.toLowerCase().equals("deploy.xml");
-                    }
-                }).length == 1;
-            } else
-                return false;
+            return new File(path, "deploy.xml").exists();
         }
     };
 
