@@ -19,7 +19,7 @@ module Derby
 
   REQUIRES = Buildr.group("derby", "derbytools", :under=>"org.apache.derby", :version=>"10.1.2.1")
 
-  Java.rjb.onload { Java.rjb.classpath << REQUIRES  }
+  Java.classpath << REQUIRES
 
   class << self
 
@@ -45,11 +45,6 @@ module Derby
       end
     end
 
-  protected
-
-    # This will download all the required artifacts before returning a classpath, and we want to do this only once.
-    def requires()
-      @requires ||= Buildr.artifacts(REQUIRES).each(&:invoke).map(&:to_s).join(File::PATH_SEPARATOR)
-    end
   end
+
 end
