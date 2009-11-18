@@ -457,4 +457,9 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
         // TODO Auto-generated method stub
         return null;
     }
+    
+    public void processOutstandingRequest(PartnerLinkInstance partnerLink,
+        String opName, String mexId, String mexRef) {
+        // TODO Auto-generated method stub
+    }
 }

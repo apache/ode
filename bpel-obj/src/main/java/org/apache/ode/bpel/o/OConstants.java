@@ -31,6 +31,7 @@ public class OConstants extends OBase {
     public QName qnMissingReply;
     public QName qnUninitializedVariable;
     public QName qnConflictingReceive;
+    public QName qnConflictingRequest;
     public QName qnSelectionFailure;
     public QName qnMismatchedAssignmentFailure;
     public QName qnJoinFailure;

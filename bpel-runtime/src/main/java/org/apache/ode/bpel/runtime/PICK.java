@@ -296,10 +296,7 @@ class PICK extends ACTIVITY {
                         dpe(_alarm.activity);
                     }
 
-                    if (_opick.onMessages.size() > 1 && onMessage.operation.getOutput() == null) {
-                        // Releasing other onMessage that could be two-ways with an oustanding request
-                        getBpelRuntimeContext().cancelOutstandingRequests(_pickResponseChannel.export());
-                    }
+                    getBpelRuntimeContext().cancelOutstandingRequests(_pickResponseChannel.export());
 
                     FaultData fault;
                     initVariable(mexId, onMessage);
@@ -336,6 +333,10 @@ class PICK extends ACTIVITY {
                                         _scopeFrame.resolve(onMessage.partnerLink), partnersSessionId);
 
                         }
+                        // this request is now waiting for a reply
+                        getBpelRuntimeContext().processOutstandingRequest(_scopeFrame.resolve(onMessage.partnerLink), 
+                                onMessage.operation.getName(), onMessage.messageExchangeId, mexId);
+                        
                     } catch (FaultException e) {
                         __log.error(e);
                         fault = createFault(e.getQName(), onMessage);
@@ -343,6 +344,7 @@ class PICK extends ACTIVITY {
                         dpe(onMessage.activity);
                         return;
                     }
+
 
                     // load 'onMessage' activity
                     // Because we are done with all the DPE, we can simply

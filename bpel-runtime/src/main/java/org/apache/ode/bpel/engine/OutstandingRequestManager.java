@@ -24,6 +24,7 @@ import org.apache.ode.utils.ObjectPrinter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -43,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
  * for asynchronous messages. 
  * </p> 
  */
+@Deprecated
 public class OutstandingRequestManager implements Serializable {
   private static final long serialVersionUID = -5556374398943757951L;
 
@@ -211,19 +213,23 @@ public class OutstandingRequestManager implements Serializable {
       "byChannel", _byChannel
     });
   }
+  
+  public Map<RequestIdTuple, Entry> getRids() {
+      return _byRid;
+  }
 
   /**
    * Tuple identifying an outstanding request (i.e. a receive,pick, or onMessage on a
    * synchronous operation needing a reply).
    */
-  private class RequestIdTuple  implements Serializable {
+  public class RequestIdTuple  implements Serializable {
     private static final long serialVersionUID = -1059389611839777482L;
     /** On which partner link it was received. */
-    PartnerLinkInstance partnerLink;
+    public PartnerLinkInstance partnerLink;
     /** Name of the operation. */
-    String opName;
+    public String opName;
     /** Message exchange identifier. */
-    String mexId;
+    public String mexId;
 
     /** Constructor. */
     private RequestIdTuple(PartnerLinkInstance partnerLink, String opName, String mexId) {
@@ -254,9 +260,9 @@ public class OutstandingRequestManager implements Serializable {
 
   public class Entry implements Serializable {
     private static final long serialVersionUID = -583743124656582887L;
-    final String pickResponseChannel;
+    public final String pickResponseChannel;
     public Object[] selectors;
-    String mexRef;
+    public String mexRef;
 
     private Entry(String pickResponseChannel, Selector[] selectors) {
       this.pickResponseChannel = pickResponseChannel;

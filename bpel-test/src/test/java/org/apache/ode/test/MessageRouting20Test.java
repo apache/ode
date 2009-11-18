@@ -127,5 +127,8 @@ public class MessageRouting20Test extends BPELTestAbstract {
     @Test public void testConcurrentSyncMex() throws Throwable {
         go("/bpel/2.0/TestConcurrentSyncMex");
     }
-
+    
+    @Test public void testIMA() throws Throwable {
+        go("/bpel/2.0/TestIMA");
+    }
 }

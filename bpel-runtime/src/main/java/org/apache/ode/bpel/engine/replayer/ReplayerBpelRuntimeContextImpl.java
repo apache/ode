@@ -180,7 +180,7 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
 
     @Override
     public void reply(PartnerLinkInstance plinkInstnace, String opName, String mexId, Element msg, QName fault) throws FaultException {
-        String mexRef = _outstandingRequests.release(plinkInstnace, opName, mexId);
+        String mexRef = _imaManager.release(plinkInstnace, opName, mexId);
 
         if (mexRef == null) {
             throw new FaultException(_bpelProcess.getOProcess().constants.qnMissingRequest);

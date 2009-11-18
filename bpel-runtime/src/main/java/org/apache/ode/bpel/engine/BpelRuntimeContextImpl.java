@@ -114,6 +114,8 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     protected OutstandingRequestManager _outstandingRequests;
 
+    protected IMAManager _imaManager;
+
     protected BpelProcess _bpelProcess;
 
     private Date _currentEventDateTime;
@@ -132,14 +134,15 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         _soup = new ExecutionQueueImpl(null);
         _soup.setReplacementMap(_bpelProcess.getReplacementMap(dao.getProcess().getProcessId()));
-        _outstandingRequests = new OutstandingRequestManager();
+        _outstandingRequests = null;
+        _imaManager = new IMAManager();
         _vpu.setContext(_soup);
 
         if (bpelProcess.isInMemory()) {
             ProcessInstanceDaoImpl inmem = (ProcessInstanceDaoImpl) _dao;
             if (inmem.getSoup() != null) {
                 _soup = (ExecutionQueueImpl) inmem.getSoup();
-                _outstandingRequests = (OutstandingRequestManager) _soup.getGlobalData();
+                _imaManager = (IMAManager) _soup.getGlobalData();
                 _vpu.setContext(_soup);
             }
         } else {
@@ -151,7 +154,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
-                _outstandingRequests = (OutstandingRequestManager) _soup.getGlobalData();
+                _imaManager = (IMAManager) _soup.getGlobalData();
             }
         }
 
@@ -332,12 +335,12 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             correlators.add(processDao.getCorrelator(correlatorId));
         }
 
-        int conflict = _outstandingRequests.findConflict(selectors);
+        int conflict = _imaManager.findConflict(selectors);
         if (conflict != -1)
             throw new FaultException(_bpelProcess.getOProcess().constants.qnConflictingReceive, selectors[conflict]
                     .toString());
 
-        _outstandingRequests.register(pickResponseChannelStr, selectors);
+        _imaManager.register(pickResponseChannelStr, selectors);
 
         // First check if we match to a new instance.
         if (_instantiatingMessageExchange != null && _dao.getState() == ProcessState.STATE_READY) {
@@ -483,13 +486,18 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     public void cancelOutstandingRequests(String channelId) {
-        _outstandingRequests.cancel(channelId);
+        _imaManager.cancel(channelId, false);
+    }
+    
+    public void processOutstandingRequest(PartnerLinkInstance partnerLink, String opName, String bpelMexId, String odeMexId) throws FaultException {
+        String mexRef = _imaManager.processOutstandingRequest(partnerLink, opName, bpelMexId, odeMexId);
+        if (mexRef != null) {
+            reply(mexRef, partnerLink, opName, bpelMexId, null, _bpelProcess.getOProcess().constants.qnConflictingRequest, true);
+            throw new FaultException(_bpelProcess.getOProcess().constants.qnConflictingRequest);
+        }
     }
 
-    public void reply(final PartnerLinkInstance plinkInstnace, final String opName, final String mexId, Element msg,
-                      QName fault) throws FaultException {
-        String mexRef = _outstandingRequests.release(plinkInstnace, opName, mexId);
-
+    public void reply(String mexRef, final PartnerLinkInstance plinkInstnace, final String opName, final String mexId, Element msg, QName fault, boolean failure) throws FaultException {
         if (mexRef == null) {
             throw new FaultException(_bpelProcess.getOProcess().constants.qnMissingRequest);
         }
@@ -510,7 +518,9 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _bpelProcess.initMyRoleMex(m);
         m.setResponse(new MessageImpl(message));
 
-        if (fault != null) {
+        if (failure) {
+            mex.setStatus(MessageExchange.Status.FAILURE.toString());
+        } else if (fault != null) {
             mex.setStatus(MessageExchange.Status.FAULT.toString());
             mex.setFault(fault);
             evt.setAspect(ProcessMessageExchangeEvent.PROCESS_FAULT);
@@ -555,6 +565,12 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         // send event
         sendEvent(evt);
+    }
+
+    public void reply(final PartnerLinkInstance plinkInstnace, final String opName, final String mexId, Element msg,
+                      QName fault) throws FaultException {
+        String mexRef = _imaManager.release(plinkInstnace, opName, mexId);
+        reply(mexRef, plinkInstnace, opName, mexId, msg, fault, false);
     }
 
     /**
@@ -876,13 +892,14 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
     public void execute() {
         long maxTime = System.currentTimeMillis() + _maxReductionTimeMs;
         boolean canReduce = true;
+        assert _outstandingRequests == null && _imaManager != null;
         while (ProcessState.canExecute(_dao.getState()) && System.currentTimeMillis() < maxTime && canReduce) {
             canReduce = _vpu.execute();
         }
         _dao.setLastActiveTime(new Date());
         if (!ProcessState.isFinished(_dao.getState())) {
             if (__log.isDebugEnabled()) __log.debug("Setting execution state on instance " + _iid);
-            _soup.setGlobalData(_outstandingRequests);
+            _soup.setGlobalData(_imaManager);
 
             if (_bpelProcess.isInMemory()) {
                 // don't serialize in-memory processes
@@ -936,8 +953,6 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             sendEvent(evt);
         }
 
-        _outstandingRequests.associate(responsechannel, mex.getMessageExchangeId());
-
         final String mexId = mex.getMessageExchangeId();
         _vpu.inject(new JacobRunnable() {
             private static final long serialVersionUID = 3168964409165899533L;
@@ -953,7 +968,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         // In case this is a pick event, we remove routes,
         // and cancel the outstanding requests.
         _dao.getProcess().removeRoutes(timerResponseChannel, _dao);
-        _outstandingRequests.cancel(timerResponseChannel);
+        _imaManager.cancel(timerResponseChannel, true);
 
         // Ignore timer events after the process is finished.
         if (ProcessState.isFinished(_dao.getState())) {
@@ -976,7 +991,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         // receive/reply association.
         final String id = timerResponseChannel.export();
         _dao.getProcess().removeRoutes(id, _dao);
-        _outstandingRequests.cancel(id);
+        _imaManager.cancel(id, true);
 
         _vpu.inject(new JacobRunnable() {
             private static final long serialVersionUID = 6157913683737696396L;
@@ -1095,7 +1110,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     private void completeOutstandingMessageExchanges() {
-        String[] mexRefs = _outstandingRequests.releaseAll();
+        String[] mexRefs = _imaManager.releaseAll();
         for (String mexId : mexRefs) {
             MessageExchangeDAO mexDao = _dao.getConnection().getMessageExchange(mexId);
             if (mexDao != null) {
@@ -1120,7 +1135,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     private void faultOutstandingMessageExchanges(FaultData faultData) {
-        String[] mexRefs = _outstandingRequests.releaseAll();
+        String[] mexRefs = _imaManager.releaseAll();
         for (String mexId : mexRefs) {
             MessageExchangeDAO mexDao = _dao.getConnection().getMessageExchange(mexId);
             if (mexDao != null) {
@@ -1140,7 +1155,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     private void failOutstandingMessageExchanges() {
-        String[] mexRefs = _outstandingRequests.releaseAll();
+        String[] mexRefs = _imaManager.releaseAll();
         for (String mexId : mexRefs) {
             MessageExchangeDAO mexDao = _dao.getConnection().getMessageExchange(mexId);
             if (mexDao != null) {

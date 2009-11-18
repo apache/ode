@@ -779,6 +779,7 @@ abstract class BpelCompiler implements CompilerContext {
     private OConstants makeConstants() {
         OConstants constants = new OConstants(_oprocess);
         constants.qnConflictingReceive = new QName(getBpwsNamespace(), "conflictingReceive");
+        constants.qnConflictingRequest = new QName(getBpwsNamespace(), "conflictingRequest");
         constants.qnCorrelationViolation = new QName(getBpwsNamespace(), "correlationViolation");
         constants.qnForcedTermination = new QName(getBpwsNamespace(), "forcedTermination");
         constants.qnJoinFailure = new QName(getBpwsNamespace(), "joinFailure");

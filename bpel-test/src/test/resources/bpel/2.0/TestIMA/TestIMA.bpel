@@ -1,0 +1,211 @@
+<!--
+    ~ Licensed to the Apache Software Foundation (ASF) under one
+    ~ or more contributor license agreements.  See the NOTICE file
+    ~ distributed with this work for additional information
+    ~ regarding copyright ownership.  The ASF licenses this file
+    ~ to you under the Apache License, Version 2.0 (the
+    ~ "License"); you may not use this file except in compliance
+    ~ with the License.  You may obtain a copy of the License at
+    ~
+    ~    http://www.apache.org/licenses/LICENSE-2.0
+    ~
+    ~ Unless required by applicable law or agreed to in writing,
+    ~ software distributed under the License is distributed on an
+    ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    ~ KIND, either express or implied.  See the License for the
+    ~ specific language governing permissions and limitations
+    ~ under the License.
+-->
+
+<bpel:process name="TestIMAProcess" targetNamespace="http://ode/bpel/unit-test/TestIMA" suppressJoinFailure="yes" xmlns:tns="http://ode/bpel/unit-test/TestIMA" xmlns:wns="http://ode/bpel/unit-test/TestIMA.wsdl" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://docs.oasis-open.org/wsbpel/2.0/process/executable /usr/share/bpel-schema/ws-bpel_executable.xsd">
+    <bpel:import location="TestIMA.wsdl" namespace="http://ode/bpel/unit-test/TestIMA.wsdl" importType="http://schemas.xmlsoap.org/wsdl/" />
+    <bpel:partnerLinks>
+        <bpel:partnerLink name="client" partnerLinkType="wns:TestIMAPL" myRole="TestIMAProvider" partnerRole="TestIMAProvider"/>
+    </bpel:partnerLinks>
+    <bpel:variables>
+        <bpel:variable name="input" messageType="wns:TestIMAMessage" />
+        <bpel:variable name="output" messageType="wns:TestIMAMessage" />
+    </bpel:variables>
+    <bpel:correlationSets>
+        <bpel:correlationSet name="CorrelationSet" properties="wns:input"></bpel:correlationSet>
+    </bpel:correlationSets>
+    <bpel:sequence>
+        <bpel:receive partnerLink="client" portType="wns:TestIMA" operation="process" variable="input" createInstance="yes">
+            <bpel:correlations>
+                <bpel:correlation set="CorrelationSet" initiate="yes"></bpel:correlation>
+            </bpel:correlations>
+        </bpel:receive>
+        
+        <bpel:scope name="ConflictingReceiveInOnly">
+            <bpel:faultHandlers>
+                <bpel:catch faultName="bpel:conflictingReceive">
+                    <bpel:empty/>
+                </bpel:catch>
+            </bpel:faultHandlers>
+            <bpel:sequence>
+                <bpel:flow>
+                    <bpel:receive partnerLink="client" operation="inOnly" variable="input">
+                        <bpel:correlations>
+                            <bpel:correlation set="CorrelationSet" initiate="no"></bpel:correlation>
+                        </bpel:correlations>
+                    </bpel:receive>
+                    <bpel:receive partnerLink="client" operation="inOnly" variable="input">
+                        <bpel:correlations>
+                            <bpel:correlation set="CorrelationSet" initiate="no"></bpel:correlation>
+                        </bpel:correlations>
+                    </bpel:receive>
+                </bpel:flow>
+                <bpel:throw faultName="error"/>
+            </bpel:sequence>
+        </bpel:scope>
+        
+        <bpel:scope name="ConflictingReceiveInOut">
+            <bpel:faultHandlers>
+                <bpel:catch faultName="bpel:conflictingReceive">
+                    <bpel:empty/>
+                </bpel:catch>
+            </bpel:faultHandlers>
+            <bpel:sequence>
+                <bpel:flow>
+                    <bpel:receive partnerLink="client" operation="inOut" variable="input">
+                        <bpel:correlations>
+                            <bpel:correlation set="CorrelationSet" initiate="no"></bpel:correlation>
+                        </bpel:correlations>
+                    </bpel:receive>
+                    <bpel:receive partnerLink="client" operation="inOut" variable="input">
+                        <bpel:correlations>
+                            <bpel:correlation set="CorrelationSet" initiate="no"></bpel:correlation>
+                        </bpel:correlations>
+                    </bpel:receive>
+                </bpel:flow>
+                <bpel:throw faultName="error"/>
+            </bpel:sequence>
+        </bpel:scope>
+        
+        <bpel:scope name="ConflictingReceiveInOutTwoMexes">
+            <bpel:faultHandlers>
+                <bpel:catch faultName="bpel:conflictingReceive">
+                    <bpel:empty/>
+                </bpel:catch>
+            </bpel:faultHandlers>
+            <bpel:sequence>
+                <bpel:flow>
+                    <bpel:receive partnerLink="client" operation="inOut" variable="input" messageExchange="mex1">
+                        <bpel:correlations>
+                            <bpel:correlation set="CorrelationSet" initiate="no"></bpel:correlation>
+                        </bpel:correlations>
+                    </bpel:receive>
+                    <bpel:receive partnerLink="client" operation="inOut" variable="input" messageExchange="mex2">
+                        <bpel:correlations>
+                            <bpel:correlation set="CorrelationSet" initiate="no"></bpel:correlation>
+                        </bpel:correlations>
+                    </bpel:receive>
+                </bpel:flow>
+                <bpel:throw faultName="error"/>
+            </bpel:sequence>
+        </bpel:scope>
+
+        <!-- 
+           ~ This is correct path example, because it relies on sequential operations for the same mex1.
+           ~ No conflictingRequest is thrown here. 
+         -->
+        <bpel:scope name="NoConflictingRequest">
+            <bpel:sequence>
+                <bpel:receive partnerLink="client" operation="inOut2" variable="input" messageExchange="mex1">
+                    <bpel:correlations>
+                        <bpel:correlation set="CorrelationSet" initiate="no"></bpel:correlation>
+                    </bpel:correlations>
+                </bpel:receive>
+                <bpel:flow>
+                    <bpel:sequence>
+                        <bpel:wait>
+                            <!-- We need a constraint of executing following reply in new job in order to register concurrent receive before reply -->
+                            <bpel:for>'PT1S'</bpel:for>
+                        </bpel:wait>
+                        <bpel:reply partnerLink="client" portType="wns:TestIMA" operation="inOut2" variable="input" messageExchange="mex1" />
+                    </bpel:sequence>
+                    <bpel:sequence>
+                        <bpel:receive partnerLink="client" operation="inOut2" variable="input" messageExchange="mex1">
+                            <bpel:correlations>
+                                <bpel:correlation set="CorrelationSet" initiate="no"></bpel:correlation>
+                            </bpel:correlations>
+                        </bpel:receive>
+                        <bpel:reply partnerLink="client" portType="wns:TestIMA" operation="inOut2" variable="input" messageExchange="mex1" />
+                    </bpel:sequence>
+                </bpel:flow>
+            </bpel:sequence>
+        </bpel:scope>
+
+        <bpel:scope name="ConflictingRequest">
+            <bpel:sequence>
+                <bpel:receive partnerLink="client" operation="inOut3" variable="input" messageExchange="mex1">
+                    <bpel:correlations>
+                        <bpel:correlation set="CorrelationSet" initiate="no"></bpel:correlation>
+                    </bpel:correlations>
+                </bpel:receive>
+                <bpel:flow>
+                    <bpel:scope xmlns:ext="http://ode.apache.org/activityRecovery">
+                        <bpel:faultHandlers>
+                            <bpel:catch faultName="ext:activityFailure">
+                                <bpel:empty/>
+                            </bpel:catch>
+                        </bpel:faultHandlers>
+                        <bpel:sequence>
+                            <bpel:invoke operation="inOut3" partnerLink="client" inputVariable="input" outputVariable="output">
+                                <ext:failureHandling>
+                                  <ext:faultOnFailure>true</ext:faultOnFailure>
+                                </ext:failureHandling>
+                            </bpel:invoke>
+                            <bpel:throw faultName="error"></bpel:throw>
+                        </bpel:sequence>
+                    </bpel:scope>
+                    <bpel:scope>
+                        <bpel:faultHandlers>
+                            <bpel:catch faultName="bpel:conflictingRequest">
+                                <bpel:empty/>
+                            </bpel:catch>
+                        </bpel:faultHandlers>
+                        <bpel:sequence>
+                            <bpel:receive operation="inOut3" partnerLink="client" variable="input" messageExchange="mex1">
+                                <bpel:correlations>
+                                    <bpel:correlation set="CorrelationSet" initiate="no"></bpel:correlation>
+                                </bpel:correlations>
+                            </bpel:receive>
+                            <bpel:throw faultName="error"></bpel:throw>
+                        </bpel:sequence>
+                    </bpel:scope>
+                </bpel:flow>
+                <bpel:reply operation="inOut3" partnerLink="client" variable="input" messageExchange="mex1"/>
+                
+                <bpel:receive partnerLink="client" operation="inOut3" variable="input" messageExchange="mex1">
+                    <bpel:correlations>
+                        <bpel:correlation set="CorrelationSet" initiate="no"></bpel:correlation>
+                    </bpel:correlations>
+                </bpel:receive>
+                <bpel:reply operation="inOut3" partnerLink="client" variable="input" messageExchange="mex1"/>
+            </bpel:sequence>
+        </bpel:scope>
+        
+        <bpel:scope name="TwoMexesInOut">
+            <bpel:sequence>
+                <bpel:receive partnerLink="client" operation="inOut4" variable="input" messageExchange="mex2">
+                    <bpel:correlations>
+                        <bpel:correlation set="CorrelationSet" initiate="no"></bpel:correlation>
+                    </bpel:correlations>
+                </bpel:receive>
+                
+                <bpel:receive partnerLink="client" operation="inOut4" variable="input" messageExchange="mex3">
+                    <bpel:correlations>
+                        <bpel:correlation set="CorrelationSet" initiate="no"></bpel:correlation>
+                    </bpel:correlations>
+                </bpel:receive>
+
+                <bpel:reply partnerLink="client" portType="wns:TestIMA" operation="inOut4" variable="input" messageExchange="mex2" />
+                <bpel:reply partnerLink="client" portType="wns:TestIMA" operation="inOut4" variable="input" messageExchange="mex3" />
+            </bpel:sequence>
+        </bpel:scope>
+        
+        <bpel:reply partnerLink="client" portType="wns:TestIMA" operation="process" variable="input" />
+    </bpel:sequence>
+</bpel:process>
+
