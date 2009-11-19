@@ -371,10 +371,7 @@ public class BpelEngineImpl implements BpelEngine {
             throw new Scheduler.JobProcessorException(true);
         } catch (org.apache.ode.bpel.engine.InstanceLockManager.TimeoutException e) {
             __log.debug("Instance " + we.getIID() + " is busy, rescheduling job.");
-            // TODO: This should really be more of something like the exponential backoff algorithm in ethernet.
-            _contexts.scheduler.schedulePersistedJob(jobInfo.jobDetail, new Date(System.currentTimeMillis()
-                    + Math.min(randomExp(1000), 10000)));
-            return;
+            throw new Scheduler.JobProcessorException(true);
         }
         // DONT PUT CODE HERE-need this method real tight in a try/catch block, we need to handle
         // all types of failure here, the scheduler is not going to know how to handle our errors,
@@ -425,7 +422,7 @@ public class BpelEngineImpl implements BpelEngine {
                                 Integer.valueOf(causeCodeValue) : InvalidProcessException.DEFAULT_CAUSE_CODE);
                         return;
                     } else {
-                        throw new Scheduler.JobProcessorException(checkRetry(jobInfo, null));
+                        throw new Scheduler.JobProcessorException(checkRetry(we));
                     }
                 }
             }
@@ -434,25 +431,26 @@ public class BpelEngineImpl implements BpelEngine {
             debuggingDelay();
         } catch (BpelEngineException bee) {
             __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), bee);
-            throw new Scheduler.JobProcessorException(bee, checkRetry(jobInfo, bee));
+            throw new Scheduler.JobProcessorException(bee, checkRetry(we));
         } catch (ContextException ce) {
             __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), ce);
-            throw new Scheduler.JobProcessorException(ce, checkRetry(jobInfo, ce));
+            throw new Scheduler.JobProcessorException(ce, checkRetry(we));
         } catch (InvalidProcessException ipe) {
             __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), ipe);
             sendMyRoleFault(process, we, ipe.getCauseCode());
         } catch (RuntimeException rte) {
             __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), rte);
-            throw new Scheduler.JobProcessorException(rte, checkRetry(jobInfo, rte));
+            throw new Scheduler.JobProcessorException(rte, checkRetry(we));
         } catch (Throwable t) {
             __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), t);
-            throw new Scheduler.JobProcessorException(t, true);
+            throw new Scheduler.JobProcessorException(t, checkRetry(we));
         }
     }
 
-    private boolean checkRetry(final JobInfo jobInfo, Throwable t) {
-        __log.error("Job could not be completed after " + jobInfo.retryCount + " retries: " + jobInfo, t);
-        return jobInfo.jobDetail.get("inmem") == null;
+    private boolean checkRetry(WorkEvent we) {
+        // Only retry if the job is NOT in memory. Not that this does not guaranty that a retry will be scheduled.
+        // Actually events are not retried if not persisted and the scheduler might choose to discard the event if it has been retried too many times.
+        return !we.isInMem();
     }
 
     /**
