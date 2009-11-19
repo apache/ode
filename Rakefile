@@ -43,8 +43,8 @@ AXIS2_MODULES        = struct(
                               :version=>"1.3"), 
                         "org.apache.ws.security:wss4j:jar:1.5.3", 
                         "org.apache.santuario:xmlsec:jar:1.4.0",
-                        "opensaml:opensaml:jar:1.1",
-                        "bouncycastle:bcprov-jdk15:jar:132"] 
+                        "org.opensaml:opensaml:jar:1.1",
+                        "bouncycastle:bcprov-jdk15:jar:140"] 
 )
 AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.3"
 BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:3.0"
@@ -145,7 +145,6 @@ repositories.remote << "http://people.apache.org/repo/m2-incubating-repository"
 repositories.remote << "http://repo1.maven.org/maven2"
 repositories.remote << "http://people.apache.org/repo/m2-snapshot-repository"
 repositories.remote << "http://download.java.net/maven/2"
-repositories.remote << "http://ws.zones.apache.org/repository2"
 repositories.release_to[:url] ||= "sftp://guest@localhost/home/guest"
 
 Release.find.tag_name = lambda { |version| "APACHE_ODE_#{version.upcase}" }
