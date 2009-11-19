@@ -657,7 +657,11 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         we.setChannel(timerChannel.export());
         we.setType(WorkEvent.Type.TIMER);
         we.setInMem(_bpelProcess.isInMemory());
-        _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), timeToFire);
+        if(_bpelProcess.isInMemory()){
+            _bpelProcess._engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail(), timeToFire);
+        }else{
+            _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), timeToFire);
+        }
     }
 
     private void scheduleCorrelatorMatcher(String correlatorId, CorrelationKeySet keySet) {
@@ -667,7 +671,11 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         we.setCorrelatorId(correlatorId);
         we.setCorrelationKeySet(keySet);
         we.setInMem(_bpelProcess.isInMemory());
-        _bpelProcess._engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
+        if(_bpelProcess.isInMemory()){
+            _bpelProcess._engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
+        }else{
+            _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+        }
     }
 
     /**

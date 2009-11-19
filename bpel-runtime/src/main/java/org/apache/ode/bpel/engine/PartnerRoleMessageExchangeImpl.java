@@ -134,8 +134,7 @@ public class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implemen
         WorkEvent we = new WorkEvent();
         we.setIID(getDAO().getInstance().getInstanceId());
         we.setType(Type.INVOKE_RESPONSE);
-        if (_engine._activeProcesses.get(getDAO().getProcess().getProcessId()).isInMemory())
-            we.setInMem(true);
+        we.setInMem(_engine._activeProcesses.get(getDAO().getProcess().getProcessId()).isInMemory());
         we.setChannel(getDAO().getChannel());
         we.setMexId(getDAO().getMessageExchangeId());
         if (we.isInMem())

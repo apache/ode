@@ -137,7 +137,7 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
             // Schedule a new job for invocation
             WorkEvent we = new WorkEvent();
             we.setType(WorkEvent.Type.INVOKE_INTERNAL);
-            if (target.isInMemory()) we.setInMem(true);
+            we.setInMem(target.isInMemory());
             we.setProcessId(target.getPID());
             we.setMexId(getDAO().getMessageExchangeId());
 
