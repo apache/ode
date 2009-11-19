@@ -61,8 +61,16 @@ public interface Scheduler {
      * jobs scheduled from a transactional context should be scheduled
      * regardless of whether the transaction commits.
      *
+     * @param transacted should the job be executed in a transaction?
      * @param jobDetail information about the job
+     * @param when does the job should be executed?
      * @return unique (as far as the scheduler is concerned) job identifier
+     */
+    String scheduleVolatileJob(boolean transacted, Map<String,Object> jobDetail, Date when) throws ContextException;
+
+    /**
+     * Schedule a volatile job for right now
+     * @see #scheduleVolatileJob(boolean, java.util.Map, java.util.Date)
      */
     String scheduleVolatileJob(boolean transacted, Map<String,Object> jobDetail) throws ContextException;
 

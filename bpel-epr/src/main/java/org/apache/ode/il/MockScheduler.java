@@ -71,59 +71,66 @@ public class MockScheduler implements Scheduler {
 
     public String schedulePersistedJob(final Map<String, Object> detail, final Date date) throws ContextException {
         if (date != null) {
+            return scheduleVolatileJob(true, detail, date);
+        } else {
+            return scheduleVolatileJob(true, detail);
+        }
+    }
+
+    public String scheduleVolatileJob(boolean transacted, Map<String, Object> jobDetail) throws ContextException {
+        return scheduleVolatileJob(transacted, jobDetail, null);
+    }
+
+    public String scheduleVolatileJob(final boolean transacted, final Map<String, Object> detail, final Date date) throws ContextException {
+        if (date != null) {
             registerSynchronizer(new Synchronizer() {
                 public void afterCompletion(boolean success) {
                     if (!success) return;
                     _timer.schedule(new TimerTask() {
                         @SuppressWarnings("unchecked")
                         public void run() {
-                            try {
-                                execIsolatedTransaction(new Callable() {
-                                    public Object call() throws Exception {
-                                        JobInfo ji = new JobInfo("volatileJob", detail, 0);
-                                        doExecute(ji);
-                                        return null;
-                                    }
-                                });
-                            } catch (Exception e) {
-                                throw new ContextException("Failure when scheduling a new volatile job.", e);
-                            }
+                            exec(transacted, detail);
                         }
                     }, date);
                 }
-                public void beforeCompletion() { }
+
+                public void beforeCompletion() {
+                }
             });
             return null;
         } else {
-            return scheduleVolatileJob(true, detail);
+            registerSynchronizer(new Synchronizer() {
+                @SuppressWarnings("unchecked")
+                public void afterCompletion(boolean success) {
+                    if (!success) return;
+                    exec(transacted, detail);
+                }
+
+                public void beforeCompletion() {
+                }
+            });
+            return null;
         }
     }
 
-    public String scheduleVolatileJob(final boolean transacted, final Map<String, Object> detail) throws ContextException {
-        registerSynchronizer(new Synchronizer() {
-            @SuppressWarnings("unchecked")
-            public void afterCompletion(boolean success) {
-                if (!success) return;
-                try {
-                    if (transacted) {
-                        execIsolatedTransaction(new Callable() {
-                            public Object call() throws Exception {
-                                JobInfo ji = new JobInfo("volatileJob", detail, 0);
-                                doExecute(ji);
-                                return null;
-                            }
-                        });
-                    } else {
+    private void exec(boolean transacted, final Map<String, Object> detail) {
+        try {
+            if (transacted) {
+
+                execIsolatedTransaction(new Callable() {
+                    public Object call() throws Exception {
                         JobInfo ji = new JobInfo("volatileJob", detail, 0);
                         doExecute(ji);
+                        return null;
                     }
-                } catch (Exception e) {
-                    throw new ContextException("Failure when starting a new volatile job.", e);
-                }
+                });
+            } else {
+                JobInfo ji = new JobInfo("volatileJob", detail, 0);
+                doExecute(ji);
             }
-            public void beforeCompletion() { }
-        });
-        return null;
+        } catch (Exception e) {
+            throw new ContextException("Failure when scheduling a new volatile job.", e);
+        }
     }
 
     public String scheduleMapSerializableRunnable(final MapSerializableRunnable runnable, final Date when) throws ContextException {

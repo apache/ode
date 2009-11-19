@@ -300,9 +300,13 @@ class MockBpelServer {
             runnable.run();
             return new GUID().toString();
         }
-        
+
         public String scheduleVolatileJob(boolean transacted, Map<String,Object> jobDetail) throws ContextException {
-            String jobId = _scheduler.scheduleVolatileJob(transacted, jobDetail);
+            return scheduleVolatileJob(transacted, jobDetail, null);
+        }
+
+        public String scheduleVolatileJob(boolean transacted, Map<String, Object> jobDetail, Date when) throws ContextException {
+            String jobId = _scheduler.scheduleVolatileJob(transacted, jobDetail, when);
             _nextSchedule = System.currentTimeMillis();
             return jobId;
         }

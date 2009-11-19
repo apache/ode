@@ -378,7 +378,14 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     }
 
     public String scheduleVolatileJob(boolean transacted, Map<String, Object> jobDetail) throws ContextException {
-        Job job = new Job(System.currentTimeMillis(), transacted, jobDetail);
+        return scheduleVolatileJob(transacted, jobDetail, null);
+    }
+
+    public String scheduleVolatileJob(boolean transacted, Map<String, Object> jobDetail, Date when) throws ContextException {
+        long ctime = System.currentTimeMillis();
+        if (when == null)
+            when = new Date(ctime);
+        Job job = new Job(when.getTime(), transacted, jobDetail);
         job.persisted = false;
         addTodoOnCommit(job);
         return job.toString();

@@ -117,6 +117,10 @@ public class ReplayerScheduler implements Scheduler {
         return null;
     }
 
+    public String scheduleVolatileJob(boolean transacted, Map<String, Object> jobDetail, Date when) throws ContextException {
+        return null;
+    }
+
     public String scheduleVolatileJob(boolean transacted, Map<String, Object> jobDetail) throws ContextException {
         return null;
     }
