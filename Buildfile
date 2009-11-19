@@ -109,8 +109,8 @@ AXIS2_MODULES        = struct(
                         "org.apache.ws.security:wss4j:jar:1.5.4", 
                         "org.apache.santuario:xmlsec:jar:1.4.1",
                         "org.apache.axis2:mex:jar:impl:1.41", # 1.41 is not a type!
-                        "opensaml:opensaml:jar:1.1",
-                        "bouncycastle:bcprov-jdk15:jar:132"]
+                        "org.opensaml:opensaml:jar:1.1",
+                        "bouncycastle:bcprov-jdk15:jar:140"] 
 )
 AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.4.1"
 AXIS2_ALL           = AXIS2_DEPS #group("axis2-adb", "axis2-codegen", "axis2-kernel", "axis2-java2wsdl", "axis2-jibx", "axis2-saaj", "axis2-xmlbeans", :under=>"org.apache.axis2", :version=>"1.4.1")
@@ -212,7 +212,6 @@ repositories.remote << "http://people.apache.org/repo/m2-incubating-repository"
 repositories.remote << "http://repo1.maven.org/maven2"
 repositories.remote << "http://people.apache.org/repo/m2-snapshot-repository"
 repositories.remote << "http://download.java.net/maven/2"
-repositories.remote << "http://ws.zones.apache.org/repository2"
 repositories.remote << "http://repository.jboss.org/maven2"
 repositories.release_to[:url] ||= "sftp://guest@localhost/home/guest"
 
