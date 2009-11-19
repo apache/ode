@@ -508,7 +508,6 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
                                 } catch (JobProcessorException jpe) {
                                     if (!jpe.retry) {
                                         needRetry[0] = false;
-                                        __log.error("Error while processing job, no retry: "+job, jpe);
                                     }
                                     // Let execTransaction know that shit happened.
                                     throw jpe;
@@ -519,9 +518,9 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
                     } catch (JobNoLongerInDbException jde) {
                         // This may happen if two node try to do the same job... we try to avoid
                         // it the synchronization is a best-effort but not perfect.
-                        __log.debug("job no longer in db forced rollback.");
+                        __log.debug("job no longer in db forced rollback: "+job);
                     } catch (final Exception ex) {
-                        __log.error("Error while executing job: "+job, ex);
+                        __log.error("Error while processing a "+(job.persisted?"":"non-")+"persisted job"+(needRetry[0] && job.persisted?": ":", no retry: ")+job, ex);
 
                         // We only get here if the above execTransaction fails, so that transaction got
                         // rollbacked already
