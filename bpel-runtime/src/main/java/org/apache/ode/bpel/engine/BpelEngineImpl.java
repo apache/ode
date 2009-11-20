@@ -402,33 +402,37 @@ public class BpelEngineImpl implements BpelEngine {
                 return;
             }
 
-            
-            if (we.getType().equals(WorkEvent.Type.INVOKE_CHECK)) {
-                if (__log.isDebugEnabled()) __log.debug("handleWorkEvent: InvokeCheck event for mexid " + we.getMexId());
-                
-                sendPartnerRoleFailure(we, MessageExchange.FailureType.COMMUNICATION_ERROR);
-                return;
-            } else if (we.getType().equals(WorkEvent.Type.INVOKE_INTERNAL)) {
-                if (__log.isDebugEnabled()) __log.debug("handleWorkEvent: InvokeInternal event for mexid " + we.getMexId());
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            try {
+                Thread.currentThread().setContextClassLoader(process._classLoader);            
+                if (we.getType().equals(WorkEvent.Type.INVOKE_CHECK)) {
+                    if (__log.isDebugEnabled()) __log.debug("handleWorkEvent: InvokeCheck event for mexid " + we.getMexId());
+               
+                    sendPartnerRoleFailure(we, MessageExchange.FailureType.COMMUNICATION_ERROR);
+                    return;
+                } else if (we.getType().equals(WorkEvent.Type.INVOKE_INTERNAL)) {
+                    if (__log.isDebugEnabled()) __log.debug("handleWorkEvent: InvokeInternal event for mexid " + we.getMexId());
 
-                setMessageExchangeProcess(we.getMexId(), process.getProcessDAO());
-                MyRoleMessageExchangeImpl mex = (MyRoleMessageExchangeImpl) getMessageExchange(we.getMexId());
-                if (!process.processInterceptors(mex, InterceptorInvoker.__onJobScheduled)) {
-                    boolean isTwoWay = Boolean.valueOf(mex.getProperty("isTwoWay"));
-                    if (isTwoWay) {
-                        String causeCodeValue = mex.getProperty("causeCode");
-                        mex.getDAO().setProcess(process.getProcessDAO());
-                        sendMyRoleFault(process, we, causeCodeValue != null ? 
+                    setMessageExchangeProcess(we.getMexId(), process.getProcessDAO());
+                    MyRoleMessageExchangeImpl mex = (MyRoleMessageExchangeImpl) getMessageExchange(we.getMexId());
+                    if (!process.processInterceptors(mex, InterceptorInvoker.__onJobScheduled)) {
+                        boolean isTwoWay = Boolean.valueOf(mex.getProperty("isTwoWay"));
+                        if (isTwoWay) {
+                            String causeCodeValue = mex.getProperty("causeCode");
+                            mex.getDAO().setProcess(process.getProcessDAO());
+                            sendMyRoleFault(process, we, causeCodeValue != null ? 
                                 Integer.valueOf(causeCodeValue) : InvalidProcessException.DEFAULT_CAUSE_CODE);
-                        return;
-                    } else {
-                        throw new Scheduler.JobProcessorException(checkRetry(we));
+                            return;
+                        } else {
+                            throw new Scheduler.JobProcessorException(checkRetry(we));
+                        }
                     }
                 }
+                process.handleWorkEvent(jobInfo.jobDetail);
+                debuggingDelay();
+            } finally {
+                Thread.currentThread().setContextClassLoader(cl);
             }
-
-            process.handleWorkEvent(jobInfo.jobDetail);
-            debuggingDelay();
         } catch (BpelEngineException bee) {
             __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), bee);
             throw new Scheduler.JobProcessorException(bee, checkRetry(we));

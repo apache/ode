@@ -457,6 +457,10 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
         // TODO Auto-generated method stub
         return null;
     }
+
+    public ClassLoader getProcessClassLoader() {
+        return getClass().getClassLoader();
+    }
     
     public void processOutstandingRequest(PartnerLinkInstance partnerLink,
         String opName, String mexId, String mexRef) {

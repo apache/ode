@@ -299,4 +299,6 @@ public interface BpelRuntimeContext {
     void processOutstandingRequest(PartnerLinkInstance partnerLink, String opName, String bpelMexId, String odeMexId) throws FaultException;
 
     Date getCurrentEventDateTime();
+
+    ClassLoader getProcessClassLoader();
 }

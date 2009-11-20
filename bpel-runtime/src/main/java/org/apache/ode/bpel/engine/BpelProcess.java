@@ -113,6 +113,8 @@ public class BpelProcess {
     private volatile long _lastUsed;
 
     BpelEngineImpl _engine;
+    ClassLoader _classLoader = getClass().getClassLoader();
+
     DebuggerSupport _debugger;
     ExpressionLanguageRuntimeRegistry _expLangRuntimeRegistry;
     private ReplacementMap _replacementMap;

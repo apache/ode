@@ -21,7 +21,13 @@ package org.apache.ode.bpel.engine;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -42,6 +48,8 @@ import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
+import org.apache.ode.bpel.evar.ExternalVariableModule.Value;
 import org.apache.ode.bpel.evt.CorrelationSetWriteEvent;
 import org.apache.ode.bpel.evt.ProcessCompletionEvent;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
@@ -61,6 +69,7 @@ import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
+import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OPartnerLink;
@@ -1481,4 +1490,9 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
     public void setCurrentEventDateTime(Date eventDateTime) {
         _currentEventDateTime = eventDateTime;
     }
+
+    public ClassLoader getProcessClassLoader() {
+        return _bpelProcess._classLoader;
+    }
+
 }

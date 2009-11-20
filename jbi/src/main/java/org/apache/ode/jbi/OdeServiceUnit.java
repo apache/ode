@@ -19,15 +19,20 @@
 
 package org.apache.ode.jbi;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.jbi.management.DeploymentException;
-import javax.xml.namespace.QName;
 import java.io.File;
+import java.io.FilenameFilter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import javax.jbi.management.DeploymentException;
+import javax.xml.namespace.QName;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Representation of a JBI service unit. A JBI service unit may actually consist
@@ -49,6 +54,7 @@ class OdeServiceUnit {
 
     private Collection<QName> _registered = new ArrayList<QName>();
     
+    private static final String LIB_DIR = "lib";
     
     /** Ctor. */
     OdeServiceUnit(OdeContext ode, String serviceUnitID, String serviceUnitRootPath) {
@@ -58,13 +64,17 @@ class OdeServiceUnit {
     }
 
     public void deploy() throws DeploymentException {
-        try {
+    	ClassLoader cl = Thread.currentThread().getContextClassLoader();
+    	try {
+    		Thread.currentThread().setContextClassLoader(getConfigurationClassLoader());
             _ode._store.deploy(_serviceUnitRootPath);
         } catch (Exception ex) {
             String errmsg = __msgs.msgOdeProcessDeploymentFailed(_serviceUnitRootPath, _serviceUnitID);
             __log.error(errmsg, ex);
             throw new DeploymentException(errmsg, ex);
-        } 
+        } finally {
+        	Thread.currentThread().setContextClassLoader(cl);
+        }
     }
 
     public void undeploy() throws Exception {
@@ -131,6 +141,36 @@ class OdeServiceUnit {
             } catch (Exception ex) {
                 __log.error("Unable to unload " + pid, ex);
             }
+        }
+    }
+    
+    public ClassLoader getConfigurationClassLoader() throws DeploymentException {
+    	return new URLClassLoader(getDefaultLocations(), getClass().getClassLoader());
+    }
+    
+    protected URL[] getDefaultLocations() throws DeploymentException {
+        try {
+            File[] jars = new File(_serviceUnitRootPath, LIB_DIR).listFiles(new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    name = name.toLowerCase();
+                    return name.endsWith(".jar") || name.endsWith(".zip");
+                }
+            });
+            URL[] urls = new URL[jars != null ? jars.length + 1 : 1];
+            urls[0] = _serviceUnitRootPath.toURI().toURL();
+            if (jars != null) {
+                for (int i = 0; i < jars.length; i++) {
+                    urls[i + 1] = jars[i].toURI().toURL();
+                }
+            }
+            if (__log.isDebugEnabled()) {
+            	for (URL u : urls) {
+            		__log.debug("in classpath for "+_serviceUnitID+" using url: "+u);
+            	}
+            }
+            return urls;
+        } catch (MalformedURLException e) {
+            throw new DeploymentException("Unable to get default classpath locations", e);
         }
     }
 
