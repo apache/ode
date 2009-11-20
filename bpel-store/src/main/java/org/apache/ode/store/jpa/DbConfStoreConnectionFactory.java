@@ -49,7 +49,7 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
         initTxMgr(txFactoryClassName);
 
         HashMap<String, Object> propMap = new HashMap<String,Object>();
-        propMap.put("openjpa.Log", "log4j");
+        propMap.put("openjpa.Log", "commons");
         propMap.put("openjpa.ManagedRuntime", new JpaTxMgrProvider(_txMgr));
         propMap.put("openjpa.ConnectionFactory", _ds);
         propMap.put("openjpa.ConnectionFactoryMode", "managed");

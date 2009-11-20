@@ -60,8 +60,8 @@ COMMONS             = struct(
   :pool             =>"commons-pool:commons-pool:jar:1.2",
   :primitives       =>"commons-primitives:commons-primitives:jar:1.0"
 )
-DERBY               = "org.apache.derby:derby:jar:10.5.3.0"
-DERBY_TOOLS         = "org.apache.derby:derbytools:jar:10.5.3.0"
+DERBY               = "org.apache.derby:derby:jar:10.5.3.0_1"
+DERBY_TOOLS         = "org.apache.derby:derbytools:jar:10.5.3.0_1"
 DOM4J               = "dom4j:dom4j:jar:1.6.1"
 GERONIMO            = struct(
   :kernel           =>"org.apache.geronimo.modules:geronimo-kernel:jar:2.0.1",
@@ -126,7 +126,6 @@ WOODSTOX            = "woodstox:wstx-asl:jar:3.2.1"
 WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.1"
 XALAN               = "org.apache.ode:xalan:jar:2.7.0-2"
 XERCES              = "xerces:xercesImpl:jar:2.9.0"
-XSTREAM             = "xstream:xstream:jar:1.2"
 WS_COMMONS          = struct(
   :axiom            =>AXIOM,
   :neethi           =>"org.apache.neethi:neethi:jar:2.0.2",
@@ -145,9 +144,18 @@ repositories.remote << "http://people.apache.org/repo/m2-incubating-repository"
 repositories.remote << "http://repo1.maven.org/maven2"
 repositories.remote << "http://people.apache.org/repo/m2-snapshot-repository"
 repositories.remote << "http://download.java.net/maven/2"
+repositories.remote << "http://www.aqute.biz/repo"
 repositories.release_to[:url] ||= "sftp://guest@localhost/home/guest"
 
-Release.find.tag_name = lambda { |version| "APACHE_ODE_#{version.upcase}" }
+BUNDLE_VERSIONS = {
+  "ode.version" => VERSION_NUMBER,
+  "derby.version" => artifact(DERBY).version,
+  "servicemix.nmr.version" => "1.1.0-SNAPSHOT",
+  "servicemix.specs.version" => "1.4-SNAPSHOT",
+  "servicemix.shared.version" => "2009.02-SNAPSHOT",
+  "geronimo.specs.version" => "1.1.1",
+}
+Release.find.tag_name = lambda { |version| "APACHE_ODE_#{version.upcase}" } if Release.find
 
 desc "Apache ODE"
 #define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
@@ -497,7 +505,7 @@ define "ode" do
         ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
         COMMONS.primitives, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector, 
         JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA, 
-        SAXON, TRANQL, XALAN, XERCES, XMLBEANS, XSTREAM, WSDL4J)
+        SAXON, TRANQL, XALAN, XERCES, XMLBEANS, WSDL4J)
 
       jbi.component :type=>:service_engine, :name=>"OdeBpelEngine", :description=>self.comment
       jbi.component :class_name=>"org.apache.ode.jbi.OdeComponent", :libs=>libs
@@ -513,7 +521,7 @@ define "ode" do
       BACKPORT, COMMONS.lang, COMMONS.collections, DERBY, GERONIMO.connector, GERONIMO.kernel,
       GERONIMO.transaction, JAVAX.connector, JAVAX.ejb, JAVAX.persistence, JAVAX.stream,
       JAVAX.transaction, JAXEN, JBI, OPENJPA, SAXON, SERVICEMIX, SPRING, TRANQL,
-      XALAN, XBEAN, XMLBEANS, XSTREAM,
+      XALAN, XBEAN, XMLBEANS, 
       LOG4J,
       DOM4J,
       HIBERNATE
@@ -526,6 +534,51 @@ define "ode" do
       rm_rf Dir["target/test/resources"]
       cp_r _("src/test/resources"), _("target/test/resources")
     end
+  end
+  desc "ODE JBI Packaging for Karaf"
+  define "jbi-karaf" do
+    ode_libs = artifacts(projects("bpel-api", "bpel-api-jca", "bpel-compiler", "bpel-connector", "bpel-dao",
+                                  "bpel-epr", "jca-ra", "jca-server", "bpel-obj", "bpel-ql", "bpel-runtime",
+                                  "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
+                                  "jacob", "jacob-ap", "utils", "agents"))
+    libs = artifacts(ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
+                     COMMONS.primitives, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector, 
+                     JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA, 
+                     SAXON, TRANQL, XALAN, XERCES, XMLBEANS, WSDL4J)
+    package(:bundle).tap do |bnd|
+      bnd.bnd_file = _("bnd.bnd")
+      bnd.classpath = (ode_libs + artifacts(project("jbi").package(:jar)) + libs).join(File::PATH_SEPARATOR)
+      bnd.properties.update(BUNDLE_VERSIONS)
+
+      # inline log4j helper classes
+      bnd.properties["log4j.jar"] = artifact(LOG4J).to_s
+
+      # inline dao zip files
+      zips = artifacts(project("dao-hibernate-db").package(:zip), project("dao-jpa-ojpa-derby").package(:zip))
+      inlines = zips.map{|item| "@" + item.to_s}
+      bnd.properties["inlines"] = inlines.join(', ')
+
+      # embed jars
+      bnd_libs = ode_libs + artifacts(AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp,
+                                      COMMONS.lang, COMMONS.pool, COMMONS.primitives, GERONIMO.connector,
+                                      JAXEN, JAVAX.connector, JAVAX.persistence, JAVAX.ejb, OPENJPA, SAXON, TRANQL, 
+                                      XALAN, XERCES, XMLBEANS, WSDL4J)
+      includes = bnd_libs.map{|item| File.basename(item.to_s)} 
+      bnd.properties["includes"] = includes.join(', ') 
+    end
+
+    # Generate features.xml
+    def package_as_feature(file_name)
+      file file_name  => [_("src/main/filtered-resources/features.xml")] do
+        filter(_("src/main/filtered-resources")).include("features.xml").into(_("target")).using(BUNDLE_VERSIONS).run
+        mv _("target/features.xml"), file_name
+      end
+    end
+    def package_as_feature_spec(spec)
+      spec.merge({ :type=>:xml, :classifier=>'features' })
+    end
+    package(:feature)
+
   end
 
   desc "ODE JCA Resource Archive"

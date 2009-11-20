@@ -20,6 +20,7 @@
 package org.apache.ode.jbi;
 
 import java.io.File;
+import java.util.Properties;
 
 import org.apache.ode.jbi.msgmap.JbiWsdl11WrapperMapper;
 
@@ -34,13 +35,13 @@ public class OdeConfigProperties extends org.apache.ode.il.config.OdeConfigPrope
    
     private static final String PROP_MSGMAPPER = "messageMapper";
 
-
-    private String _installDir;
-
     public OdeConfigProperties(File cfgFile) {
         super(cfgFile, "ode-jbi.");
     }
 
+    public OdeConfigProperties(Properties properties) {
+        super(properties, "ode-jbi.");
+    }
 
 
     /**

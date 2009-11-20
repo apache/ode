@@ -34,8 +34,12 @@ public class OdeComponent implements Component {
     private OdeLifeCycle _lifeCycle;
 
     public OdeComponent() {
-        _lifeCycle = new OdeLifeCycle();
+        this(new OdeLifeCycle());        
     }
+
+    public OdeComponent(OdeLifeCycle lifeCycle) {
+        _lifeCycle = lifeCycle;
+    }   
 
     public ComponentLifeCycle getLifeCycle() {
         return _lifeCycle;
@@ -117,4 +121,5 @@ public class OdeComponent implements Component {
     // We are an engine, so we don't have to worry about this.
         return null;
     }
+
 }

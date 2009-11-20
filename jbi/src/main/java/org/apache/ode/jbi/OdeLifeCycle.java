@@ -21,8 +21,6 @@ package org.apache.ode.jbi;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Executors;
 
 import javax.jbi.JBIException;
@@ -39,7 +37,6 @@ import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.ProcessAndInstanceManagementMBean;
-import org.apache.ode.bpel.engine.ProcessAndInstanceManagementImpl;
 import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
 
 import org.apache.ode.bpel.iapi.BpelEventListener;
@@ -78,6 +75,16 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 
     private ObjectName _mbeanName;
 
+    private OdeConfigProperties _config;
+
+    public OdeLifeCycle() {
+        
+    }
+
+    public OdeLifeCycle(OdeConfigProperties config) {
+        _config = config;
+    }
+
     ServiceUnitManager getSUManager() {
         return _suManager;
     }
@@ -104,8 +111,13 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             if (_ode.getContext().getWorkspaceRoot() != null)
                 TempFileManager.setWorkingDirectory(new File(_ode.getContext().getWorkspaceRoot()));
 
-            __log.debug("Loading properties.");
-            initProperties();
+            if (_config == null) {
+                __log.debug("Loading properties.");
+                initProperties();
+            } else {
+                __log.debug("Applying properties.");
+                _ode._config = _config;
+            }
 
             __log.debug("Initializing message mappers.");
             initMappers();
@@ -183,7 +195,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 
         _ode._dataSource = _db.getDataSource();
     }
-
+    
     /**
      * Load the "ode-jbi.properties" file from the install directory.
      *

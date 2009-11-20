@@ -1,0 +1,35 @@
+Bundle-SymbolicName: org.apache.ode.jbi
+Bundle-Name: Apache ODE Service Engine
+Bundle-Version: ${ode.version}
+
+Export-Package: org.apache.ode.jbi;version=${ode.version}
+Private-Package: org.apache.ode.jbi*;version=${ode.version}
+
+Import-Package: \
+        !com.sun.mirror*, \
+        !junit.framework*, \
+        !org.apache.axis2.client*, \
+        !org.apache.tools.ant*, \
+        javax.jbi*;version="1.0", \
+        javax.transaction*;version="1.1", \
+        org.apache.commons.httpclient*;version="3.0", \
+        org.apache.commons.logging*;version="1.1", \
+        org.apache.geronimo.transaction.manager;version="2.0", \
+        org.osgi.service.command;version="[0.2,1)", \
+        org.springframework.beans.factory.xml;version="2.5", \
+        org.w3c.dom, \
+        org.xml.sax, \
+        org.xml.sax.ext, \
+        org.xml.sax.helpers, \
+        *;resolution:=optional
+
+DynamicImport-Package:javax.*,org.xml.*,org.w3c.*
+
+Include-Resource: ${includes}, \
+                  ${inlines}, \
+                  @${log4j.jar}!/org/apache/log4j/helpers/AbsoluteTimeDateFormat.class, \
+                  src/main/resources
+
+Bundle-ClassPath: .,${includes}
+
+-removeheaders = Include-Resource, Private-Package
