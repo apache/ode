@@ -241,7 +241,8 @@ define "ode" do
     end
     test.setup unzip("#{webapp_dir}/WEB-INF"=>project("dao-jpa-ojpa-derby").package(:zip))
     test.setup unzip("#{webapp_dir}/WEB-INF"=>project("dao-hibernate-db").package(:zip))
-   
+    test.exclude('*') unless Buildr.environment != 'hudson'
+
     NativeDB.prepare_configs test, _(".")
 
     test.setup WSSecurity.prepare_secure_services_tests("#{test.resources.target}/TestRampartBasic/secured-services", "sample*.axis2", AXIS2_MODULES.mods)
