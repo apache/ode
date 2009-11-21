@@ -107,6 +107,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     private DehydrationPolicy _dehydrationPolicy;
     private boolean _hydrationLazy;
     private int _hydrationLazyMinimumSize;
+    private int _migrationTransactionTimeout;
     
     BpelEngineImpl _engine;
     protected BpelDatabase _db;
@@ -156,7 +157,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             __log.debug("BPEL SERVER starting.");
 
             // Eventually running some migrations before starting
-            new MigrationHandler(_contexts).migrate(_registeredProcesses);
+            if (!(new MigrationHandler(_contexts).migrate(_registeredProcesses, _migrationTransactionTimeout))) {
+            	throw new RuntimeException("An error occurred while migrating your database to a newer version of the server. Please make sure that the required migration scripts have been executed before starting the server.");
+            }
 
             _state = State.RUNNING;
             __log.info(__msgs.msgServerStarted());
@@ -672,4 +675,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             deleteProcessDAO(pconf.getProcessId(), pconf.isTransient());
         }
     }
+
+	public void setMigrationTransactionTimeout(int migrationTransactionTimeout) {
+		this._migrationTransactionTimeout = migrationTransactionTimeout;
+	}
 }

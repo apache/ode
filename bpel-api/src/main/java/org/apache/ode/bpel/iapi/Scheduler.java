@@ -94,6 +94,21 @@ public interface Scheduler {
     <T> T execTransaction(Callable<T> transaction)
             throws Exception, ContextException;
 
+    /**
+     * Execute a {@link Callable} in a transactional context. If the callable
+     * throws an exception, then the transaction will be rolled back, otherwise
+     * the transaction will commit. Also, modify the value of the timeout value 
+     * that is associated with the transactions started by the current thread. 
+     *
+     * @param <T> return type
+     * @param transaction transaction to execute
+     * @param timeout, The value of the timeout in seconds. If the value is zero, the transaction service uses the default value.
+     * @return result
+     * @throws Exception
+     */
+    <T> T execTransaction(Callable<T> transaction, int timeout)
+            throws Exception, ContextException;
+    
     void setRollbackOnly() throws Exception;
 
     /**

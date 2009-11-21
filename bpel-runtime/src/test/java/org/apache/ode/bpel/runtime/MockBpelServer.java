@@ -316,7 +316,11 @@ class MockBpelServer {
         }
 
         public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
-            return _scheduler.execTransaction(transaction);
+            return _scheduler.execTransaction(transaction, 0);
+        }
+        
+        public <T> T execTransaction(Callable<T> transaction, int timeout) throws Exception, ContextException {
+       		return _scheduler.execTransaction(transaction, timeout);
         }
 
         public void beginTransaction() throws Exception {

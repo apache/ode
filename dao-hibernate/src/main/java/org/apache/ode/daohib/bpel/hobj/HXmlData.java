@@ -26,11 +26,11 @@ import java.util.HashSet;
  * @hibernate.class table="BPEL_XML_DATA"
  * @hibernate.query name="SELECT_XMLDATA_IDS_BY_INSTANCES" query="select id from HXmlData as x where x.instance in (:instances)"
  */
-public class HXmlData extends HObject{
+public class HXmlData extends HObject {
     public static final String SELECT_XMLDATA_IDS_BY_INSTANCES = "SELECT_XMLDATA_IDS_BY_INSTANCES";
 
     private boolean _simpleType;
-    private HLargeData _data;
+    private byte[] _data;
     private Collection<HVariableProperty> _properties = new HashSet<HVariableProperty>();
     private String _name;
     private HScope _scope;
@@ -42,13 +42,15 @@ public class HXmlData extends HObject{
     }
 
     /**
-     * @hibernate.many-to-one column="LDATA_ID" cascade="delete" foreign-key="none"
+     * @hibernate.property type="org.apache.ode.daohib.bpel.hobj.GZipDataType"
+     *
+     * @hibernate.column name="DATA" sql-type="blob(2G)"
      */
-    public HLargeData getData() {
+    public byte[] getData() {
         return _data;
     }
 
-    public void setData(HLargeData data) {
+    public void setData(byte[] data) {
         _data = data;
     }
 

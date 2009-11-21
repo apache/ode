@@ -1242,4 +1242,13 @@ public class DOMUtils {
 			}
 		}
     }
+
+    public static Element stringToDOM(byte[] bytes) throws SAXException, IOException {
+        return stringToDOM(new String(bytes));
+    }
+
+    public static byte[] domToBytes(Element element) {
+        String stringifiedElement = domToString(element);
+        return (stringifiedElement != null) ? stringifiedElement.getBytes() : null;
+    }
 }

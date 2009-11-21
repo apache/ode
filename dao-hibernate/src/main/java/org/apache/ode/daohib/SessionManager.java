@@ -139,7 +139,6 @@ public class SessionManager {
                 .addClass(HBpelEvent.class)
                 .addClass(HFaultData.class)
                 .addClass(HActivityRecovery.class)
-                .addClass(HLargeData.class)
                 .addClass(HMessageExchangeProperty.class);
     }
 

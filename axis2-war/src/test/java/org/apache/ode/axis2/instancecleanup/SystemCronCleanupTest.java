@@ -4,7 +4,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.engine.cron.SystemSchedulesConfig;
-import org.hibernate.Query;
+
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -15,7 +15,6 @@ public class SystemCronCleanupTest extends CleanTestBase {
         System.setProperty(SystemSchedulesConfig.SCHEDULE_CONFIG_FILE_PROP_KEY, customSchedulesFilePath);
     }
 
-    // SEAN - Disable for now, wait until Alexis upgrades Axis to 1.5
 //    @Test(dataProvider="configs")
     public void _testCleanAll() throws Exception {
         go("TestSystemCronCleanup", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -62,12 +61,5 @@ public class SystemCronCleanupTest extends CleanTestBase {
     protected ProcessInstanceDAO getInstance() {
         return HibDaoConnectionFactoryImpl.getInstance();
     }
-    
-    @Override
-    protected int getLargeDataCount(int echoCount) throws Exception {
-        initTM();
-        Query query = HibDaoConnectionFactoryImpl.getSession().createQuery("select count(id) from HLargeData as l");
-        
-        return ((Long)query.uniqueResult()).intValue();
-    }
+
 }

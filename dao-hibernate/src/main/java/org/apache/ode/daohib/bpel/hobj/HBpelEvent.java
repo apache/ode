@@ -38,7 +38,7 @@ public class HBpelEvent extends HObject {
 
     private HProcess _process;
     private HProcessInstance _instance;
-    private HLargeData _data;
+    private byte[] _data;
 
     /** Scope identifier, possibly null. */
     private Long _scopeId;
@@ -108,13 +108,15 @@ public class HBpelEvent extends HObject {
 
 
     /**
-     * @hibernate.many-to-one column="LDATA_ID" cascade="delete" foreign-key="none"
+     * @hibernate.property type="org.apache.ode.daohib.bpel.hobj.GZipDataType"
+     *
+     * @hibernate.column name="DATA" sql-type="blob(2G)"
      */
-    public HLargeData getData() {
+    public byte[] getData() {
         return _data;
     }
 
-    public void setData(HLargeData data) {
+    public void setData(byte[] data) {
         _data = data;
     }
 

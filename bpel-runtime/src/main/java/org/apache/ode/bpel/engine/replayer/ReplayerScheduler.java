@@ -69,6 +69,10 @@ public class ReplayerScheduler implements Scheduler {
         throw new IllegalStateException();
     }
 
+    public <T> T execTransaction(Callable<T> transaction, int timeout) throws Exception, ContextException {
+        throw new IllegalStateException();
+    }
+    
     public boolean isTransacted() {
         return true;
     }

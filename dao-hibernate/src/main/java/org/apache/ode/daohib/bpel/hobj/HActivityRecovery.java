@@ -35,7 +35,7 @@ public class HActivityRecovery extends HObject {
     private String            _channel;
     private String            _reason;
     private Date                _dateTime;
-    private HLargeData    _details;
+    private byte[]			  _details;
     private String            _actions;
     private int                 _retries;
 
@@ -98,13 +98,15 @@ public class HActivityRecovery extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="LDATA_ID" cascade="delete" foreign-key="none"
+     * @hibernate.property type="org.apache.ode.daohib.bpel.hobj.GZipDataType"
+     *
+     * @hibernate.column name="DETAILS" sql-type="blob(2G)"
      */
-    public HLargeData getDetails() {
+    public byte[] getDetails() {
         return _details;
     }
 
-    public void setDetails(HLargeData details) {
+    public void setDetails(byte[] details) {
         _details = details;
     }
 

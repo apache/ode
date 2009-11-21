@@ -142,5 +142,8 @@ public abstract class CleanTestBase extends Axis2TestBase implements ODEConfigDi
 
     protected abstract ProcessInstanceDAO getInstance();
     
-    protected abstract int getLargeDataCount(int echoCount) throws Exception;
+	protected int getLargeDataCount(int echoCount) throws Exception {
+		return echoCount;
+	}
+    
 }

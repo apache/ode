@@ -23,7 +23,6 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.daohib.SessionManager;
-import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HPartnerLink;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
@@ -84,7 +83,7 @@ public class PartnerLinkDAOImpl extends HibernateDao implements PartnerLinkDAO {
         if (_self.getMyEPR() == null)
             return null;
         try {
-            return DOMUtils.stringToDOM(_self.getMyEPR().getText());
+            return DOMUtils.stringToDOM(_self.getMyEPR());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -93,14 +92,10 @@ public class PartnerLinkDAOImpl extends HibernateDao implements PartnerLinkDAO {
     public void setMyEPR(Element val) {
         entering("PartnerLinkDAOImpl.setMyEPR");
         _myEPR = val;
-        if (_self.getMyEPR() != null)
-            _sm.getSession().delete(_self.getMyEPR());
         if (val == null) {
             _self.setMyEPR(null);
         } else {
-            HLargeData ld = new HLargeData(DOMUtils.domToString(val));
-            getSession().save(ld);
-            _self.setMyEPR(ld);
+            _self.setMyEPR(DOMUtils.domToBytes(val));
         }
         getSession().update(_self);
     }
@@ -112,7 +107,7 @@ public class PartnerLinkDAOImpl extends HibernateDao implements PartnerLinkDAO {
         if (_self.getPartnerEPR() == null)
             return null;
         try {
-            return _partnerEPR = DOMUtils.stringToDOM(_self.getPartnerEPR().getText());
+            return _partnerEPR = DOMUtils.stringToDOM(_self.getPartnerEPR());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -121,14 +116,10 @@ public class PartnerLinkDAOImpl extends HibernateDao implements PartnerLinkDAO {
     public void setPartnerEPR(Element val) {
         entering("PartnerLinkDAOImpl.setPartnerEPR");
         _partnerEPR = val;
-        if (_self.getPartnerEPR() != null)
-            _sm.getSession().delete(_self.getPartnerEPR());
         if (val == null) {
             _self.setPartnerEPR(null);
         } else {
-            HLargeData ld = new HLargeData(DOMUtils.domToString(val));
-            getSession().save(ld);
-            _self.setPartnerEPR(ld);
+            _self.setPartnerEPR(DOMUtils.domToBytes(val));
         }
         getSession().update(_self);
     }

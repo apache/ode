@@ -95,6 +95,8 @@ public class OdeConfigProperties {
     
     public static final String PROP_DAOCF = "dao.factory";
     
+    public static final String PROP_MIGRATION_TRANSACTION_TIMEOUT = "migration.transaction.timeout";
+    
     public static final String DEFAULT_TX_FACTORY_CLASS_NAME = "org.apache.ode.il.EmbeddedGeronimoFactory";
 
     private File _cfgFile;
@@ -312,6 +314,10 @@ public class OdeConfigProperties {
 
     public String getDbInternalPassword() {
         return getProperty(PROP_DB_INTERNAL_PASSWORD);
+    }
+    
+    public int getMigrationTransactionTimeout() {
+    	return Integer.valueOf(getProperty(PROP_MIGRATION_TRANSACTION_TIMEOUT, String.valueOf(0)));
     }
 
 }

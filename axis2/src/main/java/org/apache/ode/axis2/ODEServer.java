@@ -500,6 +500,7 @@ public class ODEServer {
             dehy.setProcessMaxCount(_odeConfig.getDehydrationMaximumCount());
             _bpelServer.setDehydrationPolicy(dehy);
         }
+        _bpelServer.setMigrationTransactionTimeout(_odeConfig.getMigrationTransactionTimeout());
         _bpelServer.setConfigProperties(_odeConfig.getProperties());
         _bpelServer.init();
         _bpelServer.setInstanceThrottledMaximumCount(_odeConfig.getInstanceThrottledMaximumCount());

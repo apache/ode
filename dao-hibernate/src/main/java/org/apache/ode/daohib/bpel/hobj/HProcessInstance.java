@@ -59,8 +59,8 @@ public class HProcessInstance extends HObject {
 
     private HFaultData _fault;
 
-    private HLargeData _jacobState;
-
+    private byte[] _jacobState;
+    
     private short _previousState;
 
     private short _state;
@@ -105,13 +105,15 @@ public class HProcessInstance extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="JACOB_STATE" foreign-key="none"
+     * @hibernate.property type="org.apache.ode.daohib.bpel.hobj.GZipDataType"
+     *
+     * @hibernate.column name="JACOB_STATE_DATA" sql-type="blob(2G)"
      */
-    public HLargeData getJacobState() {
+    public byte[] getJacobState() {
         return _jacobState;
     }
 
-    public void setJacobState(HLargeData jacobState) {
+    public void setJacobState(byte[] jacobState) {
         _jacobState = jacobState;
     }
 

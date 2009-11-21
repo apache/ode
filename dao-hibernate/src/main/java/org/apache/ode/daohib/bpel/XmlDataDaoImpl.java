@@ -18,16 +18,14 @@
  */
 package org.apache.ode.daohib.bpel;
 
+import java.util.Iterator;
+
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.XmlDataDAO;
 import org.apache.ode.daohib.SessionManager;
-import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HVariableProperty;
 import org.apache.ode.daohib.bpel.hobj.HXmlData;
 import org.apache.ode.utils.DOMUtils;
-
-import java.util.Iterator;
-
 import org.hibernate.Query;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -37,7 +35,7 @@ import org.w3c.dom.Text;
 /**
  * Hibernate-based {@link XmlDataDAO} implementation.
  */
-class XmlDataDaoImpl extends HibernateDao implements XmlDataDAO {
+public class XmlDataDaoImpl extends HibernateDao implements XmlDataDAO {
 
 
     private static final String QUERY_PROPERTY =
@@ -60,7 +58,7 @@ class XmlDataDaoImpl extends HibernateDao implements XmlDataDAO {
      */
     public boolean isNull() {
         entering("XmlDataDaoImpl.isNull");
-        return _data.getData() == null;
+        return (_data.getData() == null || _data.getData().length == 0);
     }
 
     /**
@@ -73,6 +71,7 @@ class XmlDataDaoImpl extends HibernateDao implements XmlDataDAO {
         }
         return _node;
     }
+
     /**
      * @see org.apache.ode.bpel.dao.XmlDataDAO#remove()
      */
@@ -87,22 +86,12 @@ class XmlDataDaoImpl extends HibernateDao implements XmlDataDAO {
         _node = val;
         _data.setSimpleType(!(val instanceof Element));
 
-        HLargeData ld = _data.getData();
-
-        if (ld == null) {
-            ld = new HLargeData();
-        } else {
-            ld.setBinary(null);
-        } 
-        
         if(_data.isSimpleType()) {
-            ld.setBinary(_node.getNodeValue().getBytes());
-            _data.setData(ld);
+            _data.setData(_node.getNodeValue().getBytes());
         } else {
-            ld.setBinary(DOMUtils.domToString(_node).getBytes());
-            _data.setData(ld);
+            _data.setData(DOMUtils.domToString(_node).getBytes());
         }
-        getSession().saveOrUpdate(ld);
+        
         getSession().saveOrUpdate(_data);
         leaving("XmlDataDaoImpl.set");
     }
@@ -154,9 +143,9 @@ class XmlDataDaoImpl extends HibernateDao implements XmlDataDAO {
     }
 
     private Node prepare(){
-        if(_data.getData() == null)
+        if(_data.getData() == null || _data.getData().length == 0)
             return null;
-        String data = _data.getData().getText();
+        String data = new String(_data.getData());
         if(_data.isSimpleType()){
             Document d = DOMUtils.newDocument();
             // we create a dummy wrapper element

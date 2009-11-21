@@ -30,7 +30,7 @@ public class HFaultData extends HObject {
 
     private String _name;
     private String _explanation;
-    private HLargeData _data;
+    private byte[] _data;
     private int _lineNo;
     private int _activityId;
 
@@ -46,16 +46,18 @@ public class HFaultData extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="LDATA_ID" cascade="delete" foreign-key="none"
+     * @hibernate.property type="org.apache.ode.daohib.bpel.hobj.GZipDataType"
+     *
+     * @hibernate.column name="DATA" sql-type="blob(2G)"
      */
-    public HLargeData getData() {
+    public byte[] getData() {
         return _data;
     }
 
-    public void setData(HLargeData data) {
+    public void setData(byte[] data) {
         _data = data;
     }
-
+    
     /**
      * @hibernate.property column="EXPLANATION" length="4000"
      */

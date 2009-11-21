@@ -18,6 +18,14 @@
  */
 package org.apache.ode.daohib.bpel;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
@@ -39,12 +47,10 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
 
-import java.util.*;
-
 /**
  * Hibernate-based {@link ScopeDAO} implementation.
  */
-class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
+public class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
 
 
     private static final String QRY_VARIABLE = "from " + HXmlData.class.getName() +
@@ -143,7 +149,7 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
             data.setScope(_scope);
             _scope.getVariables().add(data);
         }
-        
+
         XmlDataDaoImpl varDao = new XmlDataDaoImpl(_sm, data);
         _variables.put(varName, varDao);
         return varDao;
@@ -248,7 +254,7 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
         try {
             CollectionsX.transformEx(ret,hevents,new UnaryFunctionEx<HBpelEvent,BpelEvent>() {
                 public BpelEvent apply(HBpelEvent x) throws Exception{
-                    return (BpelEvent) SerializableUtils.toObject(x.getData().getBinary(),BpelEvent.class.getClassLoader());
+                    return (BpelEvent) SerializableUtils.toObject(x.getData(),BpelEvent.class.getClassLoader());
                 }
 
             });
@@ -257,5 +263,4 @@ class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
         }
         return ret;
     }
-
 }

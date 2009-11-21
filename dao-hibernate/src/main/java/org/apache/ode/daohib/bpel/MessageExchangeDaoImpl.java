@@ -19,6 +19,14 @@
 
 package org.apache.ode.daohib.bpel;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Set;
+
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageDAO;
@@ -28,18 +36,14 @@ import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HCorrelatorMessage;
-import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HMessage;
 import org.apache.ode.daohib.bpel.hobj.HMessageExchange;
 import org.apache.ode.daohib.bpel.hobj.HProcess;
 import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.stl.CollectionsX;
+import org.apache.ode.utils.stl.UnaryFunctionEx;
 import org.w3c.dom.Element;
-
-import javax.xml.namespace.QName;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Set;
 
 public class MessageExchangeDaoImpl extends HibernateDao implements
         MessageExchangeDAO {
@@ -166,9 +170,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements
         if (source == null)
             _hself.setEndpoint(null);
         else {
-            HLargeData ld = new HLargeData(DOMUtils.domToString(source));
-            getSession().save(ld);
-            _hself.setEndpoint(ld);
+            _hself.setEndpoint(DOMUtils.domToBytes(source));
         }
 
         getSession().saveOrUpdate(_hself);
@@ -177,11 +179,11 @@ public class MessageExchangeDaoImpl extends HibernateDao implements
 
     public Element getEPR() {
         entering("MessageExchangeDaoImpl.getEPR");
-        HLargeData ld = _hself.getEndpoint();
-        if (ld == null)
+        byte[] endpoint = _hself.getEndpoint();
+        if (endpoint == null)
             return null;
         try {
-            return DOMUtils.stringToDOM(ld.getText());
+            return DOMUtils.stringToDOM(endpoint);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -192,9 +194,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements
         if (source == null)
             _hself.setCallbackEndpoint(null);
         else {
-            HLargeData ld = new HLargeData(DOMUtils.domToString(source));
-            getSession().save(ld);
-            _hself.setCallbackEndpoint(ld);
+        	_hself.setCallbackEndpoint(DOMUtils.domToBytes(source));
         }
 
         getSession().saveOrUpdate(_hself);
@@ -203,11 +203,11 @@ public class MessageExchangeDaoImpl extends HibernateDao implements
 
     public Element getCallbackEPR() {
         entering("MessageExchangeDaoImpl.getCallbackEPR");
-        HLargeData ld = _hself.getCallbackEndpoint();
-        if (ld == null)
+        byte[] endpoint = _hself.getCallbackEndpoint();
+        if (endpoint == null)
             return null;
         try {
-            return DOMUtils.stringToDOM(ld.getText());
+            return DOMUtils.stringToDOM(endpoint);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -363,8 +363,6 @@ public class MessageExchangeDaoImpl extends HibernateDao implements
 
     @SuppressWarnings("unchecked")
     public void releasePremieMessages() {
-        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_MEX_1).setParameter("mex", _hself).list());
-        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_MEX_2).setParameter("mex", _hself).list());
         deleteByIds(HCorrelatorMessage.class, getSession().getNamedQuery(HCorrelatorMessage.SELECT_CORMESSAGE_IDS_BY_MEX).setParameter("mex", _hself).list());
     }
 
@@ -374,11 +372,10 @@ public class MessageExchangeDaoImpl extends HibernateDao implements
     
     @SuppressWarnings("unchecked")
     public void deleteMessages() {
-        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_MEX_1).setParameter("mex", _hself).list());
-        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_MEX_2).setParameter("mex", _hself).list());
         deleteByIds(HCorrelatorMessage.class, getSession().getNamedQuery(HCorrelatorMessage.SELECT_CORMESSAGE_IDS_BY_MEX).setParameter("mex", _hself).list());
           
         getSession().delete(_hself);
         // This deletes endpoint LData, callbackEndpoint LData, request HMessage, response HMessage, HMessageExchangeProperty 
     }
+    
 }

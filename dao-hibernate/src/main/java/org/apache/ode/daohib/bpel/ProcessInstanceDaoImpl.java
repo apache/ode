@@ -18,14 +18,48 @@
  */
 package org.apache.ode.daohib.bpel;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.ProcessState;
-import org.apache.ode.bpel.dao.*;
+import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.CorrelationSetDAO;
+import org.apache.ode.bpel.dao.CorrelatorDAO;
+import org.apache.ode.bpel.dao.FaultDAO;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.ScopeDAO;
+import org.apache.ode.bpel.dao.ScopeStateEnum;
+import org.apache.ode.bpel.dao.XmlDataDAO;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.daohib.SessionManager;
-import org.apache.ode.daohib.bpel.hobj.*;
+import org.apache.ode.daohib.bpel.hobj.HActivityRecovery;
+import org.apache.ode.daohib.bpel.hobj.HBpelEvent;
+import org.apache.ode.daohib.bpel.hobj.HCorrelationProperty;
+import org.apache.ode.daohib.bpel.hobj.HCorrelationSet;
+import org.apache.ode.daohib.bpel.hobj.HCorrelatorMessage;
+import org.apache.ode.daohib.bpel.hobj.HCorrelatorSelector;
+import org.apache.ode.daohib.bpel.hobj.HFaultData;
+import org.apache.ode.daohib.bpel.hobj.HMessage;
+import org.apache.ode.daohib.bpel.hobj.HMessageExchange;
+import org.apache.ode.daohib.bpel.hobj.HMessageExchangeProperty;
+import org.apache.ode.daohib.bpel.hobj.HPartnerLink;
+import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
+import org.apache.ode.daohib.bpel.hobj.HScope;
+import org.apache.ode.daohib.bpel.hobj.HVariableProperty;
+import org.apache.ode.daohib.bpel.hobj.HXmlData;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.QNameUtils;
 import org.apache.ode.utils.stl.CollectionsX;
@@ -36,9 +70,6 @@ import org.hibernate.Query;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.w3c.dom.Element;
-
-import javax.xml.namespace.QName;
-import java.util.*;
 
 /**
  * Hibernate-based {@link ProcessInstanceDAO} implementation.
@@ -95,9 +126,7 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
     fault.setLineNo(lineNo);
     fault.setActivityId(activityId);
     if (faultData != null) {
-      HLargeData ld = new HLargeData(DOMUtils.domToString(faultData));
-      fault.setData(ld);
-      getSession().save(ld);
+      fault.setData(DOMUtils.domToBytes(faultData));
     }
 
     _instance.setFault(fault);
@@ -119,7 +148,7 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
   public byte[] getExecutionState() {
         entering("ProcessInstanceDaoImpl.getExecutionState");
     if (_instance.getJacobState() == null) return null;
-    return _instance.getJacobState().getBinary();
+    return _instance.getJacobState();
   }
     
   /**
@@ -127,12 +156,8 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
    */
   public void setExecutionState(byte[] bytes) {
         entering("ProcessInstanceDaoImpl.setExecutionState");
-    if (_instance.getJacobState() != null)
-      getSession().delete(_instance.getJacobState());
     if (bytes.length > 0) {
-      HLargeData ld = new HLargeData(bytes);
-      _instance.setJacobState(ld);
-      getSession().save(ld);
+      _instance.setJacobState(bytes);
     }
     getSession().update(_instance);
   }
@@ -334,8 +359,7 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
     if(__log.isDebugEnabled()) __log.debug("Cleaning up instance data with categories = " + cleanupCategories);
       
     if( _instance.getJacobState() != null ) {
-      getSession().delete(_instance.getJacobState());
-      _instance.setJacobState(null);
+        _instance.setJacobState(null);
     }
 
     HProcessInstance[] instances = new HProcessInstance[] {_instance};
@@ -367,7 +391,6 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
   
   @SuppressWarnings("unchecked")
   private void deleteInstances(HProcessInstance[] instances) {
-    deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_FAULT_LDATA_IDS_BY_INSTANCE_IDS).setParameterList("instanceIds", HObject.toIdArray(instances)).list());
     deleteByIds(HFaultData.class, getSession().getNamedQuery(HFaultData.SELECT_FAULT_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
 
     getSession().delete(_instance); // this deletes JcobState, HActivityRecovery -> ActivityRecovery-LData
@@ -379,11 +402,8 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
       deleteByIds(HCorrelationSet.class, getSession().getNamedQuery(HCorrelationSet.SELECT_CORSET_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
 
       deleteByIds(HVariableProperty.class, getSession().getNamedQuery(HVariableProperty.SELECT_VARIABLE_PROPERTY_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
-      deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_XMLDATA_LDATA_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
       deleteByIds(HXmlData.class, getSession().getNamedQuery(HXmlData.SELECT_XMLDATA_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
 
-      deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_PARTNER_LINK_LDATA_IDS_BY_INSTANCES_1).setParameterList("instances", instances).list());
-      deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_PARTNER_LINK_LDATA_IDS_BY_INSTANCES_2).setParameterList("instances", instances).list());
       deleteByIds(HPartnerLink.class, getSession().getNamedQuery(HPartnerLink.SELECT_PARTNER_LINK_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
 
       deleteByIds(HScope.class, getSession().getNamedQuery(HScope.SELECT_SCOPE_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
@@ -396,20 +416,12 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
       deleteByColumn(HMessageExchangeProperty.class, "mex.id", allMexes);
 
       if( deleteMyRoleMex ) { // Delete my role mex and partner role mexes
-          // delete message data
-          deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_1).setParameterList("instances", instances).list());
-          deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_2).setParameterList("instances", instances).list());
-
           // delete messages
           deleteByIds(HMessage.class, getSession().getNamedQuery(HMessage.SELECT_MESSAGE_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
           
           // delete all mexes
           deleteByIds(HMessageExchange.class, allMexes);
       } else { // Delete only the unmatched mexes, there are chances that some unmatched messages are still there
-          // delete message data 
-          deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_1).setParameterList("instances", instances).list());
-          deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_UNMATCHED_MESSAGE_LDATA_IDS_BY_INSTANCES_2).setParameterList("instances", instances).list());
-
           Collection<HMessageExchange> unmatchedMex = getSession().getNamedQuery(HMessageExchange.SELECT_UNMATCHED_MEX_BY_INSTANCES).setParameterList("instances", instances).list();
           if( !unmatchedMex.isEmpty() ) {
               List<Long> mexIdList = new ArrayList<Long>();
@@ -435,7 +447,6 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
 
   @SuppressWarnings("unchecked")
   private void deleteEvents(HProcessInstance[] instances) {
-      deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_EVENT_LDATA_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
       deleteByIds(HBpelEvent.class, getSession().getNamedQuery(HBpelEvent.SELECT_EVENT_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
   }
 
@@ -518,9 +529,7 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
     recovery.setDateTime(dateTime);
     recovery.setRetries(retries);
     if (data != null) {
-      HLargeData ld = new HLargeData(DOMUtils.domToString(data));
-      recovery.setDetails(ld);
-      getSession().save(ld);
+      recovery.setDetails(DOMUtils.domToBytes(data));
     }
     String list = actions[0];
     for (int i = 1; i < actions.length; ++i)

@@ -20,16 +20,15 @@
 package org.apache.ode.daohib.bpel;
 
 
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.daohib.SessionManager;
-import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HMessage;
 import org.apache.ode.utils.DOMUtils;
 import org.hibernate.Session;
 import org.w3c.dom.Element;
-
-import javax.xml.namespace.QName;
 
 
 public class MessageDaoImpl extends HibernateDao implements MessageDAO {
@@ -56,11 +55,7 @@ public class MessageDaoImpl extends HibernateDao implements MessageDAO {
     public void setData(Element value) {
         entering("MessageDaoImpl.setData");
         if (value == null) return;
-        if (_hself.getMessageData() != null)
-            _session.delete(_hself.getMessageData());
-        HLargeData newdata = new HLargeData(DOMUtils.domToString(value));
-        _session.save(newdata);
-        _hself.setMessageData(newdata);
+        _hself.setMessageData(DOMUtils.domToBytes(value));
         update();
         leaving("MessageDaoImpl.setData");
     }
@@ -70,7 +65,7 @@ public class MessageDaoImpl extends HibernateDao implements MessageDAO {
         if (_hself.getMessageData() == null)
             return null;
         try {
-            return DOMUtils.stringToDOM(_hself.getMessageData().getText());
+            return DOMUtils.stringToDOM(_hself.getMessageData());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -79,11 +74,7 @@ public class MessageDaoImpl extends HibernateDao implements MessageDAO {
     public void setHeader(Element value) {
         entering("MessageDaoImpl.setHeader");
         if (value == null) return;
-        if (_hself.getHeader() != null)
-            _session.delete(_hself.getHeader());
-        HLargeData newdata = new HLargeData(DOMUtils.domToString(value));
-        _session.save(newdata);
-        _hself.setHeader(newdata);
+        _hself.setHeader(DOMUtils.domToBytes(value));
         update();
         leaving("MessageDaoImpl.setHeader");
     }
@@ -92,7 +83,7 @@ public class MessageDaoImpl extends HibernateDao implements MessageDAO {
         entering("MessageDaoImpl.getHeader");
         if (_hself.getHeader() == null) return null;
         try {
-            return DOMUtils.stringToDOM(_hself.getHeader().getText());
+            return DOMUtils.stringToDOM(_hself.getHeader());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

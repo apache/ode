@@ -44,10 +44,10 @@ public class HMessageExchange extends HObject {
 
     private String _portType;
 
-    private HLargeData _endpoint;
-
-    private HLargeData _callbackEndpoint;
-
+    private byte[] _endpoint;
+    
+    private byte[] _callbackEndpoint;
+    
     private HMessage _request;
 
     private HMessage _response;
@@ -121,24 +121,28 @@ public class HMessageExchange extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="LDATA_EPR_ID" cascade="delete" foreign-key="none"
+     * @hibernate.property type="org.apache.ode.daohib.bpel.hobj.GZipDataType"
+     *
+     * @hibernate.column name="ENDPOINT" sql-type="blob(2G)"
      */
-    public HLargeData getEndpoint() {
+    public byte[] getEndpoint() {
         return _endpoint;
     }
 
-    public void setEndpoint(HLargeData endpoint) {
+    public void setEndpoint(byte[] endpoint) {
         _endpoint = endpoint;
     }
 
-    /**
-     * @hibernate.many-to-one column="LDATA_CEPR_ID" cascade="delete" foreign-key="none"
+     /**
+     * @hibernate.property type="org.apache.ode.daohib.bpel.hobj.GZipDataType"
+     *
+     * @hibernate.column name="CALLBACK_ENDPOINT" sql-type="blob(2G)"
      */
-    public HLargeData getCallbackEndpoint() {
+    public byte[] getCallbackEndpoint() {
         return _callbackEndpoint;
     }
 
-    public void setCallbackEndpoint(HLargeData endpoint) {
+    public void setCallbackEndpoint(byte[] endpoint) {
         _callbackEndpoint = endpoint;
     }
 
@@ -354,4 +358,5 @@ public class HMessageExchange extends HObject {
     public void incrementSubscriberCount() {
     	setSubscriberCount(getSubscriberCount() + 1);
     }
+
 }

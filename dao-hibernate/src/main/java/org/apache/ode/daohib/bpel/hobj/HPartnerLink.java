@@ -41,10 +41,10 @@ public class HPartnerLink extends HObject {
 
     private String _svcName;
 
-    private HLargeData _myEPR;
-
-    private HLargeData _partnerEPR;
-
+    private byte[] _myEPR;
+    
+    private byte[] _partnerEPR;
+    
     private HScope _scope;
 
     private HProcess _process;
@@ -84,25 +84,29 @@ public class HPartnerLink extends HObject {
     }
 
     /**
-     * @hibernate.many-to-one column="MYROLE_EPR" cascade="delete" foreign-key="none"
+     * @hibernate.property type="org.apache.ode.daohib.bpel.hobj.GZipDataType"
+     *
+     * @hibernate.column name="MYROLE_EPR_DATA" sql-type="blob(2G)"
      */
-    public HLargeData getMyEPR() {
+    public byte[] getMyEPR() {
         return _myEPR;
     }
 
-    public void setMyEPR(HLargeData data) {
-        _myEPR = data;
+    public void setMyEPR(byte[] myEPR) {
+        _myEPR = myEPR;
     }
 
     /**
-     * @hibernate.many-to-one column="PARTNERROLE_EPR" cascade="delete" foreign-key="none"
+     * @hibernate.property type="org.apache.ode.daohib.bpel.hobj.GZipDataType"
+     *
+     * @hibernate.column name="PARTNERROLE_EPR_DATA" sql-type="blob(2G)"
      */
-    public HLargeData getPartnerEPR() {
+	public byte[] getPartnerEPR() {
         return _partnerEPR;
     }
 
-    public void setPartnerEPR(HLargeData data) {
-        _partnerEPR = data;
+    public void setPartnerEPR(byte[] partnerEPR) {
+        _partnerEPR = partnerEPR;
     }
 
     /**

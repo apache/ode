@@ -53,7 +53,6 @@ import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HBpelEvent;
 import org.apache.ode.daohib.bpel.hobj.HCorrelationSet;
-import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HMessageExchange;
 import org.apache.ode.daohib.bpel.hobj.HProcess;
 import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
@@ -239,9 +238,7 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection, FilteredInstanc
             ObjectOutputStream oos = new ObjectOutputStream(bos);
             oos.writeObject(event);
             oos.flush();
-            HLargeData ld = new HLargeData(bos.toByteArray());
-            hevent.setData(ld);
-            sess.save(ld);
+            hevent.setData(bos.toByteArray());
         } catch (Throwable ex) {
             // this is really unexpected.
             __log.fatal("InternalError: BpelEvent serialization failed.", ex);
@@ -275,7 +272,7 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection, FilteredInstanc
         try {
             CollectionsX.transformEx(ret, hevents, new UnaryFunctionEx<HBpelEvent, BpelEvent>() {
                 public BpelEvent apply(HBpelEvent x) throws Exception {
-                    return (BpelEvent) SerializableUtils.toObject(x.getData().getBinary(), BpelEvent.class
+                    return (BpelEvent) SerializableUtils.toObject(x.getData(), BpelEvent.class
                             .getClassLoader());
                 }
 

@@ -18,6 +18,15 @@
  */
 package org.apache.ode.daohib.bpel;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
@@ -36,11 +45,9 @@ import org.apache.ode.daohib.bpel.hobj.HCorrelator;
 import org.apache.ode.daohib.bpel.hobj.HCorrelatorMessage;
 import org.apache.ode.daohib.bpel.hobj.HCorrelatorSelector;
 import org.apache.ode.daohib.bpel.hobj.HFaultData;
-import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HMessage;
 import org.apache.ode.daohib.bpel.hobj.HMessageExchange;
 import org.apache.ode.daohib.bpel.hobj.HMessageExchangeProperty;
-import org.apache.ode.daohib.bpel.hobj.HObject;
 import org.apache.ode.daohib.bpel.hobj.HPartnerLink;
 import org.apache.ode.daohib.bpel.hobj.HProcess;
 import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
@@ -50,17 +57,10 @@ import org.apache.ode.daohib.bpel.hobj.HXmlData;
 import org.hibernate.Criteria;
 import org.hibernate.Hibernate;
 import org.hibernate.Query;
+import org.hibernate.StaleStateException;
+import org.hibernate.UnresolvableObjectException;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
-
-import javax.xml.namespace.QName;
-
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Hibernate-based {@link ProcessDAO} implementation.
@@ -155,11 +155,20 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO, Deferred
 
         // delete process dao
         deleteByIds(HCorrelator.class, getSession().getNamedQuery(HCorrelator.SELECT_CORRELATOR_IDS_BY_PROCESS).setParameter("process", _process).list());
-        getSession().delete(_process); // this deletes HCorrelator -> HCorrelatorSelector
+        try {
+            getSession().refresh(_process);
+            getSession().delete(_process); // this deletes HCorrelator -> HCorrelatorSelector
 
-        // after this delete, we have a use case that creates the process with the same procid.
-        // for hibernate to work without the database deferred constraint check, let's just flush the session.
-        getSession().flush();
+            // after this delete, we have a use case that creates the process with the same procid.
+            // for hibernate to work without the database deferred constraint check, let's just flush the session.
+            getSession().flush();
+        } catch( UnresolvableObjectException sse ) {
+            __log.debug("Process: " + getProcessId() + " has been already deleted.");
+            // don't sweat, they already deleted by another thread or process
+        } catch( StaleStateException sse ) {
+            __log.debug("Process: " + getProcessId() + " has been already deleted.");
+            // don't sweat, they already deleted by another thread or process
+        }
     }
     
     @SuppressWarnings("unchecked")
@@ -209,12 +218,9 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO, Deferred
 
     @SuppressWarnings("unchecked")
     private void deleteProcessInstances(Collection<HProcessInstance> instances) {
-        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_ACTIVITY_RECOVERY_LDATA_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
         deleteByIds(HActivityRecovery.class, getSession().getNamedQuery(HActivityRecovery.SELECT_ACTIVITY_RECOVERY_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
-        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_FAULT_LDATA_IDS_BY_INSTANCE_IDS).setParameterList("instanceIds", HObject.toIdArray(instances)).list());
         deleteByIds(HFaultData.class, getSession().getNamedQuery(HFaultData.SELECT_FAULT_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
-        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_JACOB_LDATA_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
-        
+
         List<Long> instanceIds = new ArrayList<Long>();
         for( HProcessInstance instance : instances ) {
             instanceIds.add(instance.getId());
@@ -225,10 +231,7 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO, Deferred
     @SuppressWarnings("unchecked")
     private void deleteVariables(Collection<HProcessInstance> instances) {
         deleteByIds(HVariableProperty.class, getSession().getNamedQuery(HVariableProperty.SELECT_VARIABLE_PROPERTY_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
-        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_XMLDATA_LDATA_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
         deleteByIds(HXmlData.class, getSession().getNamedQuery(HXmlData.SELECT_XMLDATA_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
-        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_PARTNER_LINK_LDATA_IDS_BY_INSTANCES_1).setParameterList("instances", instances).list());
-        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_PARTNER_LINK_LDATA_IDS_BY_INSTANCES_2).setParameterList("instances", instances).list());
         deleteByIds(HPartnerLink.class, getSession().getNamedQuery(HPartnerLink.SELECT_PARTNER_LINK_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
         deleteByIds(HScope.class, getSession().getNamedQuery(HScope.SELECT_SCOPE_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
     }
@@ -236,11 +239,7 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO, Deferred
     @SuppressWarnings("unchecked")
     private void deleteMessages(Collection<HProcessInstance> instances) {
         deleteByIds(HActivityRecovery.class, getSession().getNamedQuery(HCorrelatorMessage.SELECT_CORMESSAGE_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
-        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_1).setParameterList("instances", instances).list());
-        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MESSAGE_LDATA_IDS_BY_INSTANCES_2).setParameterList("instances", instances).list());
         deleteByIds(HMessage.class, getSession().getNamedQuery(HMessage.SELECT_MESSAGE_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
-        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MEX_LDATA_IDS_BY_INSTANCES_1).setParameterList("instances", instances).list());
-        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_MEX_LDATA_IDS_BY_INSTANCES_2).setParameterList("instances", instances).list());
         List<Long> mex = getSession().getNamedQuery(HMessageExchange.SELECT_MEX_IDS_BY_INSTANCES).setParameterList("instances", instances).list();
         deleteByColumn(HMessageExchangeProperty.class, "mex.id", mex);
         deleteByIds(HMessageExchange.class, mex);
@@ -254,7 +253,6 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO, Deferred
 
     @SuppressWarnings("unchecked")
     private void deleteEvents(Collection<HProcessInstance> instances) {
-        deleteByIds(HLargeData.class, getSession().getNamedQuery(HLargeData.SELECT_EVENT_LDATA_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
         deleteByIds(HBpelEvent.class, getSession().getNamedQuery(HBpelEvent.SELECT_EVENT_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
     }
 

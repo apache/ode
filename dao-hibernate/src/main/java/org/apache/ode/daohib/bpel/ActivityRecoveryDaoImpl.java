@@ -19,15 +19,15 @@
 
 package org.apache.ode.daohib.bpel;
 
+import java.io.IOException;
+import java.util.Date;
+
 import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HActivityRecovery;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-
-import java.io.IOException;
-import java.util.Date;
 
 /**
  * Hibernate based {@link ActivityRecoveryDao} implementation
@@ -56,12 +56,14 @@ public class ActivityRecoveryDaoImpl extends HibernateDao implements ActivityRec
     public Date getDateTime() {
         return _self.getDateTime();
     }
-
+    
     public Element getDetails() {
         entering("ActivityRecoveryDaoImpl.getDetails");
-        if (_self.getDetails() == null) return null;
+        if (_self.getDetails() == null) {
+            return null;
+        }
         try {
-            return DOMUtils.stringToDOM(_self.getDetails().getText());
+            return DOMUtils.stringToDOM(_self.getDetails());
         } catch (SAXException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {

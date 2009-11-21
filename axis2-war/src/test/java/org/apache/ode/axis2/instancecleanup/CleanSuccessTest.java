@@ -80,6 +80,10 @@ public class CleanSuccessTest extends CleanTestBase {
             server.sendRequestFile("http://localhost:8888/processes/FirstProcess/FirstProcess/FirstProcess/Client", bundleName, "testRequest.soap");
             process = assertInstanceCleanup(instances, activityRecoveries, correlationSets, faults, exchanges, routes, messsages, partnerLinks, scopes, variables, events, largeData);
         } finally {
+            try {
+                Thread.sleep(1000);
+            } catch(Exception e) {
+            }
             server.undeployProcess(bundleName);
             assertProcessCleanup(process);
         }

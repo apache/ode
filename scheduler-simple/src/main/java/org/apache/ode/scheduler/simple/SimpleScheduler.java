@@ -63,6 +63,8 @@ import org.apache.log4j.helpers.AbsoluteTimeDateFormat;
 public class SimpleScheduler implements Scheduler, TaskRunner {
     private static final Log __log = LogFactory.getLog(SimpleScheduler.class);
 
+    private static final int DEFAULT_TRANSACTION_TIMEOUT = 60 * 1000;
+
     /**
      * Jobs scheduled with a time that is between [now, now+immediateInterval] will be assigned to the current node, and placed
      * directly on the todo queue.
@@ -231,9 +233,18 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     }
 
     public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
+        return execTransaction(transaction, 0);
+    }
+
+    public <T> T execTransaction(Callable<T> transaction, int timeout) throws Exception, ContextException {
         TransactionManager txm = _txm;
         if( txm == null ) {
             throw new ContextException("Cannot locate the transaction manager; the server might be shutting down.");
+        }
+
+        // The value of the timeout is in seconds. If the value is zero, the transaction service restores the default value.
+        if (timeout < 0) {
+           throw new IllegalArgumentException("Timeout must be positive, received: "+timeout);
         }
         
         boolean existingTransaction = false;
@@ -252,39 +263,47 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         // run in new transaction
         Exception ex = null;
         int immediateRetryCount = _immediateTransactionRetryLimit;
-        do {
-            try {
-                if (__log.isDebugEnabled()) __log.debug("Beginning a new transaction");
-                txm.begin();
-            } catch (Exception e) {
-                String errmsg = "Internal Error, could not begin transaction.";
-                throw new ContextException(errmsg, e);
-            }
-
-            try {
-                ex = null;
-                return transaction.call();
-            } catch (Exception e) {
-                ex = e;
-            } finally {
-                if (ex == null) {
-                    if (__log.isDebugEnabled()) __log.debug("Commiting on " + txm + "...");
-                    try {
-                        txm.commit();
-                    } catch( Exception e2 ) {
-                        ex = e2;
+        
+        _txm.setTransactionTimeout(timeout);
+        if(__log.isDebugEnabled() && timeout!=0) __log.debug("Custom transaction timeout: "+timeout);
+        try {
+            do {
+                try {
+                    if (__log.isDebugEnabled()) __log.debug("Beginning a new transaction");
+                    txm.begin();
+                } catch (Exception e) {
+                    String errmsg = "Internal Error, could not begin transaction.";
+                    throw new ContextException(errmsg, e);
+                }
+    
+                try {
+                    ex = null;
+                    return transaction.call();
+                } catch (Exception e) {
+                    ex = e;
+                } finally {
+                    if (ex == null) {
+                        if (__log.isDebugEnabled()) __log.debug("Commiting on " + txm + "...");
+                        try {
+                            txm.commit();
+                        } catch( Exception e2 ) {
+                            ex = e2;
+                        }
+                    } else {
+                        if (__log.isDebugEnabled()) __log.debug("Rollbacking on " + txm + "...");
+                        txm.rollback();
                     }
-                } else {
-                    if (__log.isDebugEnabled()) __log.debug("Rollbacking on " + txm + "...");
-                    txm.rollback();
+                    
+                    if( ex != null && immediateRetryCount > 0 ) {
+                        if (__log.isDebugEnabled())  __log.debug("Will retry the transaction in " + _immediateTransactionRetryInterval + " msecs on " + _txm + " for error: ", ex);
+                        Thread.sleep(_immediateTransactionRetryInterval);
+                    }
                 }
-                
-                if( ex != null && immediateRetryCount > 0 ) {
-                    if (__log.isDebugEnabled())  __log.debug("Will retry the transaction in " + _immediateTransactionRetryInterval + " msecs on " + _txm + " for error: ", ex);
-                    Thread.sleep(_immediateTransactionRetryInterval);
-                }
-            }
-        } while( immediateRetryCount-- > 0 );
+            } while( immediateRetryCount-- > 0 );
+        } finally {
+            // 0 restores the default value
+            _txm.setTransactionTimeout(0);
+        }
         
         throw ex;
     }

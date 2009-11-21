@@ -19,16 +19,22 @@
 
 package org.apache.ode.bpel.engine.migration;
 
-import org.apache.ode.bpel.engine.Contexts;
-import org.apache.ode.bpel.engine.BpelDatabase;
-import org.apache.ode.bpel.engine.BpelProcess;
-import org.apache.ode.bpel.dao.BpelDAOConnection;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import java.sql.*;
-import java.util.*;
-import java.util.concurrent.Callable;
+import org.apache.ode.bpel.engine.BpelProcess;
+import org.apache.ode.bpel.engine.Contexts;
 
 /**
  * Checks database schema versions and migrates when necessary.
@@ -38,9 +44,11 @@ public class MigrationHandler {
 
     public static final int CURRENT_SCHEMA_VERSION = 6;
 
+
     private Contexts _contexts;
     private List<MigrationLink> migrationLinks = new ArrayList<MigrationLink>() {{
-        add(new MigrationLink(1, 2, new Migration[] { new CorrelatorsMigration(), new CorrelationKeyMigration() } ));
+        add(new MigrationLink(1, 2, new Migration[] { new CorrelatorsMigration(), 
+        												new CorrelationKeyMigration() } ));
         add(new MigrationLink(2, 3, new Migration[] { new CorrelationKeySetMigration() } ));
         add(new MigrationLink(4, 3, new Migration[] { new CorrelationKeySetMigration() } ));
         add(new MigrationLink(3, 5, new Migration[] { new CorrelationKeySetDataMigration() } ));
@@ -52,10 +60,10 @@ public class MigrationHandler {
         this._contexts = _contexts;
     }
 
-    public boolean migrate(final Set<BpelProcess> registeredProcesses) {
+    public boolean migrate(final Set<BpelProcess> registeredProcesses, int migrationTransactionTimeout) {
         if (_contexts.dao.getDataSource() == null) {
             __log.debug("No datasource available, stopping migration. Probably running fully in-memory.");
-            return false;
+            return true;
         }
 
         final int version;
@@ -68,10 +76,10 @@ public class MigrationHandler {
         }
         if (version == -1) {
             __log.info("No schema version available from the database, migrations will be skipped.");
-            return false;
+            return true;
         }
         if (version == CURRENT_SCHEMA_VERSION) return true;
-
+        
         try {
             boolean success = _contexts.scheduler.execTransaction(new Callable<Boolean>() {
                 public Boolean call() throws Exception {
@@ -92,7 +100,7 @@ public class MigrationHandler {
                         return success;
                     }
                 }
-            });
+            }, migrationTransactionTimeout);
             return success;
         } catch (Exception e) {
             __log.error("An error occured while migrating your database to a newer version of ODE, changes have " +
@@ -182,6 +190,5 @@ public class MigrationHandler {
                 throw new RuntimeException(e);
             }
         }
-
     }
 }
