@@ -2,7 +2,8 @@ Bundle-SymbolicName: org.apache.ode.jbi
 Bundle-Name: Apache ODE Service Engine
 Bundle-Version: ${ode.version}
 
-Export-Package: org.apache.ode.jbi;version=${ode.version}
+Export-Package: org.apache.ode.jbi;version=${ode.version}, \
+        org.apache.ode.bpel.pmapi;version=${ode.version}
 Private-Package: org.apache.ode.jbi*;version=${ode.version}
 
 Import-Package: \

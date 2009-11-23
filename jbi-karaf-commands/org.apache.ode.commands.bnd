@@ -1,0 +1,10 @@
+Bundle-Name: Apache ODE Commands
+Bundle-Version: ${ode.version}
+Require-Bundle: org.apache.ode.jbi
+
+Import-Package: org.osgi.service.command,*
+Private-Package: org.apache.ode.karaf.commands;version=${ode.version}
+Include-Resource: src/main/resources
+
+-removeheaders = Include-Resource
+

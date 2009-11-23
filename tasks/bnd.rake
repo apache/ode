@@ -36,6 +36,9 @@ class BndTask < Rake::FileTask
   # Classpath string for building the bundle
   attr_accessor :classpath
 
+  # Sourcepath
+  attr_accessor :sourcepath
+
   # Path to bnd file
   attr_accessor :bnd_file
   
@@ -58,7 +61,8 @@ class BndTask < Rake::FileTask
         end
         
         project.taskdef :name=>'bnd', :classname=>'aQute.bnd.ant.BndTask', :classpath=>Buildr.artifact(BND)
-        project.bnd(:classpath=>classpath, :files=>File.expand_path(bnd_file), :output=>name, 
+        project.bnd(:classpath=>classpath, :sourcepath=>(sourcepath == nil) ? "" : File.expand_path(sourcepath), 
+                    :files=>File.expand_path(bnd_file), :output=>name, 
                     :eclipse=>false, :failok=>false, :exceptions=>true) 
       end
     end

@@ -88,6 +88,12 @@ JAXEN               = "jaxen:jaxen:jar:1.1.1"
 JBI                 = group("org.apache.servicemix.specs.jbi-api-1.0", :under=>"org.apache.servicemix.specs", :version=>"1.1.0")
 JENCKS              = "org.jencks:jencks:jar:all:1.3"
 JIBX                = "jibx:jibx-run:jar:1.1-beta3"
+KARAF               = [
+                        "org.apache.felix:org.osgi.core:jar:1.4.0",
+                        "org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.console:jar:1.0.0",
+                        group("org.apache.felix.gogo.commands","org.apache.felix.gogo.runtime", 
+                          :under=>"org.apache.felix.gogo", :version=>"0.2.0")
+                      ]
 LOG4J               = "log4j:log4j:jar:1.2.13"
 OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.3.0-SNAPSHOT",
                        "net.sourceforge.serp:serp:jar:1.13.1"]
@@ -536,6 +542,19 @@ define "ode" do
       cp_r _("src/test/resources"), _("target/test/resources")
     end
   end
+
+  desc "ODE Commmands for Karaf"
+  define "jbi-karaf-commands" do
+    compile.with projects("bpel-schemas", "jbi"), JBI, KARAF, XMLBEANS, COMMONS.logging
+    libs = artifacts(projects("bpel-schemas", "jbi"), JBI, KARAF, XMLBEANS, COMMONS.logging)
+    package(:bundle).tap do |bnd|
+      bnd.bnd_file = _("org.apache.ode.commands.bnd")
+      bnd.sourcepath = _("src/main/java")
+      bnd.classpath = _("target/classes") + File::PATH_SEPARATOR + libs.join(File::PATH_SEPARATOR)
+      bnd.properties.update(BUNDLE_VERSIONS)
+    end
+  end
+
   desc "ODE JBI Packaging for Karaf"
   define "jbi-karaf" do
     ode_libs = artifacts(projects("bpel-api", "bpel-api-jca", "bpel-compiler", "bpel-connector", "bpel-dao",
