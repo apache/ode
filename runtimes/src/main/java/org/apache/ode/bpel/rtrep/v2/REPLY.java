@@ -18,13 +18,10 @@
  */
 package org.apache.ode.bpel.rtrep.v2;
 
-import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
-
-import java.util.Iterator;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -67,13 +64,13 @@ class REPLY extends ACTIVITY {
                         mid+eventFrameId, (Element)msg, oreply.fault);
             else
                 getBpelRuntime().reply(_scopeFrame.resolve(oreply.partnerLink), oreply.operation.getName(),
-                        mid, (Element)msg, oreply.fault);
+                        mid, (Element)msg, oreply.fault, computePropagationRules(oreply, oreply.getPropagates()));
         } catch (FaultException e) {
             __log.error(e);
             fault = createFault(e.getQName(), oreply);
             try {
 	            getBpelRuntime().reply(_scopeFrame.resolve(oreply.partnerLink), oreply.operation.getName(),
-	                    oreply.messageExchangeId, (Element)msg, e.getQName());
+	                    oreply.messageExchangeId, (Element)msg, e.getQName(), computePropagationRules(oreply, oreply.getPropagates()));
             } catch (FaultException fe) {
                 fault = createFault(e.getQName(), oreply);
             }

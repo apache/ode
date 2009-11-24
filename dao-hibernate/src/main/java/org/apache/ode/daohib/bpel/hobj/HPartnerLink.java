@@ -19,6 +19,7 @@
 
 package org.apache.ode.daohib.bpel.hobj;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -56,6 +57,8 @@ public class HPartnerLink extends HObject {
     private String _partnerSessionId;
 
     private Set<HMessageExchange> _mex;
+
+    private Set<HContextValue> _contextValues = new HashSet<HContextValue>();
 
     public HPartnerLink() {
         super();
@@ -199,6 +202,22 @@ public class HPartnerLink extends HObject {
 
     public void setMessageExchanges(Set<HMessageExchange> mex) {
       _mex = mex;
+    }
+
+    /**
+     * Get the context value objects for partner links.
+     * 
+     * @return {@link Set}&lt;{@link HContextValue}&gt; with context values
+     * @hibernate.set lazy="true" inverse="true" cascade="delete"
+     * @hibernate.collection-key column="PARTNERLINK" foreign-key="none"
+     * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HContextValue"
+     */
+    public Set<HContextValue> getContextValues() {
+        return _contextValues;
+    }
+
+    public void setContextValues(Set<HContextValue> contextValues) {
+        _contextValues = contextValues;
     }
 
 }

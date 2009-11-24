@@ -110,7 +110,7 @@ public class WSDL11Endpoint implements MutableEndpoint {
     Element serviceRef = doc.createElementNS(Namespaces.WSBPEL2_0_FINAL_SERVREF, "service-ref");
     doc.appendChild(serviceRef);
     serviceRef.appendChild(doc.importNode(_serviceElmt, true));
-    return _serviceElmt.getOwnerDocument();
+    return doc;
   }
 
   public Map toMap() {

@@ -20,6 +20,7 @@ package org.apache.ode.bpel.iapi;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
@@ -160,6 +161,22 @@ public interface ProcessConf {
      * @return list of extension elements 
      */
     List<Element> getExtensionElement(QName qname);
+    
+    /**
+     * Returns the context propagation rules defined in the DD.
+     * @return list of context propagation rules
+     */
+    List<PropagationRule> getPropagationRules();
+    
+    /**
+     * Gets the list of context interceptors defined in the DD.
+     * The key is the full qualified class name of the interceptor to
+     * be loaded, the value is an element containing custom configuration
+     * properties.
+     * 
+     * @return list of context interceptors
+     */
+    Map<String, Element> getContextInterceptors();
 
     boolean isEventEnabled(List<String> scopeNames, BpelEvent.TYPE type);
 
@@ -217,7 +234,7 @@ public interface ProcessConf {
         }
     }
     
-    public class CleanupInfo implements java.io.Serializable {
+    public class CleanupInfo implements Serializable {
         private List<String> _filters = new ArrayList<String>();
         
         private final Set<CLEANUP_CATEGORY> _categories = EnumSet.noneOf(CLEANUP_CATEGORY.class);
@@ -243,6 +260,32 @@ public interface ProcessConf {
             buf.append(_categories);
             
             return buf.toString();
+        }
+    }
+    
+    public class PropagationRule implements Serializable {
+        private static final long serialVersionUID = 5496856170262204149L;
+
+        private String fromPL;
+        private String toPL;
+        private List<String> contexts = new ArrayList<String>();
+        public String getFromPL() {
+            return fromPL;
+        }
+        public void setFromPL(String fromPL) {
+            this.fromPL = fromPL;
+        }
+        public String getToPL() {
+            return toPL;
+        }
+        public void setToPL(String toPL) {
+            this.toPL = toPL;
+        }
+        public List<String> getContexts() {
+            return contexts;
+        }
+        public void setContexts(List<String> contexts) {
+            this.contexts = contexts;
         }
     }
 }

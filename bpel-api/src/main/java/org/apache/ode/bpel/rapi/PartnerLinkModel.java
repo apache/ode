@@ -10,6 +10,8 @@ public interface PartnerLinkModel {
     
     String getName();
     
+    ScopeModel getDeclaringScope();
+    
     boolean hasMyRole();
 
     boolean hasPartnerRole();

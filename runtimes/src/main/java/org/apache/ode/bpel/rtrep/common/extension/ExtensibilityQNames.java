@@ -30,6 +30,16 @@ public abstract class ExtensibilityQNames {
     public static final QName FAILURE_HANDLING_RETRY_DELAY  = new QName(NS_ACTIVITY_RECOVERY, "retryDelay");
     public static final QName FAILURE_HANDLING_FAULT_ON     = new QName(NS_ACTIVITY_RECOVERY, "faultOnFailure");
 
+    /*
+     * Context Propagation extensibility elements and attributes
+     */
+    public static final String NS_CONTEXT_PROPAGATION       = "http://ode.apache.org/contextPropagation";
+    public static final QName CONTEXT_PROPAGATE             = new QName(NS_CONTEXT_PROPAGATION, "propagate");
+    public static final QName CONTEXT_FROM_PARTNER_LINK     = new QName(NS_CONTEXT_PROPAGATION, "fromPartnerLink");
+    public static final QName CONTEXT_FROM_VARIABLE         = new QName(NS_CONTEXT_PROPAGATION, "fromVariable");
+    public static final QName CONTEXT_CONTEXT               = new QName(NS_CONTEXT_PROPAGATION, "context");
+    
+    
     public static final String NS_BPEL_EXTENSIBILITY = "http://ode.apache.org/bpelExtensibility";
     public static final QName UNKNOWN_EA_FAULT_NAME  = new QName(NS_BPEL_EXTENSIBILITY, "unknownExtensionImplementation");
 

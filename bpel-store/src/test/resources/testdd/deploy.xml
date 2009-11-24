@@ -26,5 +26,15 @@
 		<provide partnerLink="helloPartnerLink">
 			<service name="wns:HelloService" port="HelloPort"/>
 		</provide>
+		<context>
+			<propagate from="helloPartnerLink" to="helloPartnerLink" context="*"/>
+			<interceptor>
+				<class-name>org.apache.ode.bpel.context.TestInterceptor</class-name>
+				<config>
+					<myparam1>x</myparam1>
+					<myparam2>y</myparam2>
+				</config>
+			</interceptor>
+		</context>
 	</process>
 </deploy>

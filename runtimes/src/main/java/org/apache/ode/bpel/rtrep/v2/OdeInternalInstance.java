@@ -1,24 +1,31 @@
 package org.apache.ode.bpel.rtrep.v2;
 
-import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.evar.ExternalVariableModuleException;
-import org.apache.ode.bpel.rtrep.v2.channels.TimerResponseChannel;
-import org.apache.ode.bpel.rtrep.v2.channels.ActivityRecoveryChannel;
-import org.apache.ode.bpel.rtrep.v2.channels.PickResponseChannel;
-import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
-import org.apache.ode.bpel.extension.ExtensionOperation;
-import org.apache.ode.bpel.evt.ScopeEvent;
-import org.apache.ode.bpel.evt.ProcessInstanceStartedEvent;
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
+import java.net.URI;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
-import java.net.URI;
+
+import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
+import org.apache.ode.bpel.evt.ProcessInstanceStartedEvent;
+import org.apache.ode.bpel.evt.ScopeEvent;
+import org.apache.ode.bpel.extension.ExtensionOperation;
+import org.apache.ode.bpel.iapi.ProcessConf.PropagationRule;
+import org.apache.ode.bpel.rapi.ContextData;
+import org.apache.ode.bpel.rapi.PartnerLink;
+import org.apache.ode.bpel.rapi.IOContext.Direction;
+import org.apache.ode.bpel.rtrep.v2.channels.ActivityRecoveryChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
+import org.apache.ode.bpel.rtrep.v2.channels.PickResponseChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.TimerResponseChannel;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 
 public interface OdeInternalInstance {
@@ -44,7 +51,7 @@ public interface OdeInternalInstance {
 
     String getInstantiatingUrl();
 
-    String invoke(String invokeId, PartnerLinkInstance instance, Operation operation, Element outboundMsg, Object object)
+    String invoke(String invokeId, PartnerLinkInstance instance, Operation operation, Element outboundMsg, Object object, Set<org.apache.ode.bpel.rapi.PropagationRule> propagationRules)
             throws FaultException;
 
     String invoke(String requestId, org.apache.ode.bpel.iapi.Resource resource, Element outgoingMessage)
@@ -160,9 +167,14 @@ public interface OdeInternalInstance {
 
     void associateEvent(ResourceInstance resourceInstance, String mexRef, String scopeIid);
 
-    void reply(PartnerLinkInstance plink, String opName, String bpelmex, Element element, QName fault)
+    void reply(PartnerLinkInstance plink, String opName, String bpelmex, Element element, QName fault, Set<org.apache.ode.bpel.rapi.PropagationRule> propagationRules)
             throws FaultException;
 
     void reply(ResourceInstance resource, String bpelmex, Element element, QName fault) throws FaultException;
 
+    void invokeContextInterceptorsInbound(String mexId, PartnerLink pl, Direction dir);
+    ContextData fetchContextData(PartnerLink pLink);
+    void writeContextData(PartnerLink pLink, Node ctxData, Set<String> contextsFilter);
+
+	List<PropagationRule> getPropagationRules();
 }

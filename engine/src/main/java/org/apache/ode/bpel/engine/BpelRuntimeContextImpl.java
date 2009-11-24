@@ -21,7 +21,14 @@ package org.apache.ode.bpel.engine;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -31,6 +38,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.ProcessState;
+import org.apache.ode.bpel.context.ContextDataImpl;
+import org.apache.ode.bpel.context.ContextInterceptor;
+import org.apache.ode.bpel.dao.ContextValueDAO;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageDAO;
@@ -49,7 +59,13 @@ import org.apache.ode.bpel.evt.ProcessInstanceStateChangeEvent;
 import org.apache.ode.bpel.evt.ProcessMessageExchangeEvent;
 import org.apache.ode.bpel.evt.ProcessTerminationEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
-import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.PartnerRoleChannel;
+import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.WSMessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
@@ -57,6 +73,7 @@ import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
+import org.apache.ode.bpel.rapi.ContextData;
 import org.apache.ode.bpel.rapi.CorrelationSet;
 import org.apache.ode.bpel.rapi.FaultInfo;
 import org.apache.ode.bpel.rapi.NoSuchOperationException;
@@ -64,10 +81,14 @@ import org.apache.ode.bpel.rapi.OdeRTInstance;
 import org.apache.ode.bpel.rapi.OdeRTInstanceContext;
 import org.apache.ode.bpel.rapi.PartnerLink;
 import org.apache.ode.bpel.rapi.PartnerLinkModel;
+import org.apache.ode.bpel.rapi.PropagationRule;
+import org.apache.ode.bpel.rapi.Resource;
+import org.apache.ode.bpel.rapi.ResourceModel;
 import org.apache.ode.bpel.rapi.Selector;
 import org.apache.ode.bpel.rapi.UninitializedPartnerEPR;
 import org.apache.ode.bpel.rapi.UninitializedVariableException;
 import org.apache.ode.bpel.rapi.Variable;
+import org.apache.ode.bpel.rapi.ContextData.ContextName;
 import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
@@ -78,10 +99,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.apache.ode.bpel.rapi.*;
-import org.apache.ode.bpel.rapi.Resource;
-
-import org.w3c.dom.*;
+import org.w3c.dom.Text;
 
 class BpelRuntimeContextImpl implements OdeRTInstanceContext {
 
@@ -396,6 +414,66 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
     public Element fetchMyRoleEndpointReferenceData(PartnerLink pLink) {
         return ((ODEWSProcess)_bpelProcess).getInitialMyRoleEPR(pLink.getModel()).toXML().getDocumentElement();
     }
+    
+    public ContextData fetchContextData(PartnerLink pLink) {
+        ContextData cdata = new ContextDataImpl();
+        
+        PartnerLinkDAO pldao = fetchPartnerLinkDAO(pLink);
+        for (ContextValueDAO cvd : pldao.getContextValues()) {
+            cdata.put(cvd.getNamespace(), cvd.getKey(), cvd.getValue());
+        }
+
+        return cdata;
+    }
+    
+    public void writeContextData(PartnerLink pLink, Node ctxData, Set<String> filter) {
+        writeContextData(pLink, ContextDataImpl.fromXML(ctxData), filter);
+    }
+    
+    /**
+     * @param filter if null, select all.
+     */
+    private void writeContextData(PartnerLink pLink, ContextData ctxData, Set<String> filter) {
+        boolean removeUnsetKeys;
+        boolean useFilter;
+        
+        if (filter == null) {
+            removeUnsetKeys = true;
+            useFilter = false;
+        } else if (filter.contains("*")) {
+            removeUnsetKeys = true;
+            useFilter = false;
+        } else if (filter.contains("+")) {
+            removeUnsetKeys = false;
+            useFilter = false;
+        } else {
+            useFilter = true;
+            removeUnsetKeys = false;
+        }
+        
+        //TODO evaluate filter
+        Set<ContextName> unusedKeys = new HashSet<ContextName>();
+        PartnerLinkDAO pldao = fetchPartnerLinkDAO(pLink);
+        for (ContextValueDAO cvd : pldao.getContextValues()) {
+            unusedKeys.add(new ContextName(cvd.getNamespace(), cvd.getKey()));
+        }
+
+        // update existing and add new context values.
+        for (ContextName name : ctxData.getContextNames()) {
+            if (useFilter && !filter.contains(name.getNamespace())) {
+                continue;
+            }
+            pldao.setContextValue(name.getNamespace(), name.getKey(), ctxData.get(name));
+            unusedKeys.remove(name);
+        }
+        
+        if (removeUnsetKeys) {
+            // remove deleted context keys
+            for (ContextName n : unusedKeys) {
+                pldao.removeContextValue(n.getNamespace(), n.getKey());
+            }
+        }
+    }
 
     private PartnerLinkDAO fetchPartnerLinkDAO(PartnerLink pLink) {
         ScopeDAO scopeDAO = _dao.getScope(pLink.getScopeId());
@@ -468,7 +546,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         dataDAO.setProperty(QNameUtils.fromQName(property), value);
     }
 
-    public void reply(String mexId, final PartnerLink plink, final String opName, Element msg, QName fault)
+    public void reply(String mexId, final PartnerLink plink, final String opName, Element msg, QName fault, Set<org.apache.ode.bpel.rapi.PropagationRule> propagationRules)
             throws NoSuchOperationException {
         // prepare event
         ProcessMessageExchangeEvent evt = new ProcessMessageExchangeEvent();
@@ -489,6 +567,10 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
 
         myrolemex.setResponse(message);
 
+        if (propagationRules != null) {
+            invokeContextInterceptorsOutbound(myrolemex, plink, propagationRules, Direction.INBOUND_REPLY);
+        }
+        
         AckType ackType;
         if (fault != null) {
             ackType = AckType.FAULT;
@@ -599,7 +681,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         _bpelProcess.scheduleJob(j, null);
     }
 
-    public String invoke(String requestId, PartnerLink partnerLink, Operation operation, Element outgoingMessage)
+    public String invoke(String requestId, PartnerLink partnerLink, Operation operation, Element outgoingMessage, Set<PropagationRule> propagationRules)
             throws UninitializedPartnerEPR {
 
         MessageExchangeDAO mexDao = _dao.getConnection().createMessageExchange(new GUID().toString(),
@@ -637,6 +719,10 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         mexDao.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_TRANSACTED, Boolean.valueOf(_atomicScope).toString());
         message.setType(operation.getInput().getMessage().getQName());
         buildOutgoingMessage(message, outgoingMessage);
+        
+        if (propagationRules != null) {
+        	invokeContextInterceptorsOutbound(mexDao, partnerLink, propagationRules, Direction.OUTBOUND);
+        }
 
         // prepare event
         ProcessMessageExchangeEvent evt = new ProcessMessageExchangeEvent();
@@ -835,7 +921,7 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
             evt.setNewState(ProcessState.STATE_ACTIVE);
             sendEvent(evt);
         }
-
+        // TODO: place context processing here
         _rti.onSelectEvent(responseChannelId, mexdao.getMessageExchangeId(), idx);
     }
 
@@ -1183,4 +1269,68 @@ class BpelRuntimeContextImpl implements OdeRTInstanceContext {
         }
         return dao;
     }
+    
+    public void invokeContextInterceptorsOutbound(MessageExchangeDAO mexdao, PartnerLink pl, Set<PropagationRule> propagationRules, Direction dir) {
+    	Set<ContextName> knownKeys = new HashSet<ContextName>();    
+    	ContextData cdata = new ContextDataImpl();
+    	
+		for (PropagationRule pr : propagationRules) {
+			PartnerLinkDAO pldao = fetchPartnerLinkDAO(pr.getFromPL());
+	    	for (ContextValueDAO cvd : pldao.getContextValues()) {
+	    		ContextName cn = new ContextName(cvd.getNamespace(), cvd.getKey());
+	    		if (!knownKeys.contains(cn) && (pr.isPropagateAll() || pr.getContexts().contains(cvd.getNamespace()))) {
+    	    		cdata.put(cvd.getNamespace(), cvd.getKey(), cvd.getValue());
+    	    		knownKeys.add(cn);
+	    		} else {
+	    			__log.warn("ContextPropagation: Duplicate context key from a different partner link. Taking the first one declared.");
+	    		}
+	    	}
+		}
+    		
+    	// process process interceptors
+    	// -> use a linkedhashset to get rid of duplicates while perserving the order 
+    	//   (local contexts first, then global contexts).
+    	Set<ContextInterceptor> interceptors = new LinkedHashSet<ContextInterceptor>();
+    	interceptors.addAll(_bpelProcess._ctxInterceptors);
+    	interceptors.addAll(_contexts.contextInterceptorRegistry);
+    	
+    	for (ContextInterceptor interceptor : interceptors) {
+    		try {
+    			interceptor.process(cdata, mexdao, dir);
+    		} catch (Exception e) {
+				// catch all
+    			__log.error("Error in context interceptor '" + interceptor.getClass().getName() + "' while processing " + dir + " MEX " + mexdao, e);
+			}
+    	}
+
+    }
+    
+    public void invokeContextInterceptorsInbound(String mexId, PartnerLink pl, Direction dir) {
+    	MessageExchangeDAO mexdao = getExistingMex(mexId);
+    
+    	ContextData cdata = fetchContextData(pl);
+    	
+    	// process process interceptors
+    	// -> use a linkedhashset to get rid of duplicates while perserving the order 
+    	//   (local contexts first, then global contexts).
+    	Set<ContextInterceptor> interceptors = new LinkedHashSet<ContextInterceptor>();
+    	interceptors.addAll(_bpelProcess._ctxInterceptors);
+    	interceptors.addAll(_contexts.contextInterceptorRegistry);
+    	
+    	for (ContextInterceptor interceptor : interceptors) {
+    		try {
+    			interceptor.process(cdata, mexdao, dir);
+    		} catch (Exception e) {
+				// catch all
+    			__log.error("Error in context interceptor '" + interceptor.getClass().getName() + "' while processing in " + dir + " MEX " + mexdao, e);
+			}
+    	}
+    	
+    	writeContextData(pl, cdata, null);
+    }
+
+	public List<org.apache.ode.bpel.iapi.ProcessConf.PropagationRule> getPropagationRules() {
+		return _bpelProcess._pconf.getPropagationRules();
+	}
+
 }

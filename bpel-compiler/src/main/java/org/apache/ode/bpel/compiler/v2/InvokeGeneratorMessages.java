@@ -52,5 +52,4 @@ public class InvokeGeneratorMessages extends CompilationMessageBundle {
                 "partner link.", iptype, pltype);
 
     }
-
 }

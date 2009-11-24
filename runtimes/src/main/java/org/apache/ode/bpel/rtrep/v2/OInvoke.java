@@ -20,6 +20,7 @@ package org.apache.ode.bpel.rtrep.v2;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.wsdl.Operation;
 
@@ -34,6 +35,7 @@ public class OInvoke extends OActivity implements OComm {
     public OScope.Variable outputVar;
     public Operation operation;
     public OResource resource;
+    public Set<OContextPropagation> propagates;
 
     /** Correlation sets initialized on the input message. */
     public final List<OScope.CorrelationSet> initCorrelationsInput = new ArrayList<OScope.CorrelationSet>();
@@ -67,4 +69,7 @@ public class OInvoke extends OActivity implements OComm {
         return resource != null;
     }
 
+    public Set<OContextPropagation> getPropagates() {
+        return propagates;
+    }
 }

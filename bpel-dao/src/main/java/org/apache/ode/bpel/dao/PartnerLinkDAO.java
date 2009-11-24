@@ -19,6 +19,8 @@
 
 package org.apache.ode.bpel.dao;
 
+import java.util.Collection;
+
 import javax.xml.namespace.QName;
 
 import org.w3c.dom.Element;
@@ -33,40 +35,47 @@ import org.w3c.dom.Element;
  */
 public interface PartnerLinkDAO {
 
-  /**
-   * Get the model id of the partner link.
-   * @return
-   */
-  public int getPartnerLinkModelId();
-  
-  public String getMyRoleName();
+    /**
+     * Get the model id of the partner link.
+     * @return
+     */
+    public int getPartnerLinkModelId();
 
-  public String getPartnerRoleName();
-  
-  public String getPartnerLinkName();
+    public String getMyRoleName();
 
-  /**
-   * Get the service name associated with this partner link.
-   * @return
-   */
-  public QName getMyRoleServiceName();
+    public String getPartnerRoleName();
 
-  public void setMyRoleServiceName(QName svcName);
-  
-  public Element getMyEPR();
+    public String getPartnerLinkName();
 
-  public void setMyEPR(Element val);
+    /**
+     * Get the service name associated with this partner link.
+     * @return
+     */
+    public QName getMyRoleServiceName();
 
-  public Element getPartnerEPR();
+    public void setMyRoleServiceName(QName svcName);
 
-  public void setPartnerEPR(Element val);
+    public Element getMyEPR();
 
-public String getMySessionId();
+    public void setMyEPR(Element val);
 
-public String getPartnerSessionId();
+    public Element getPartnerEPR();
 
-public void setPartnerSessionId(String session);
+    public void setPartnerEPR(Element val);
 
-public void setMySessionId(String sessionId);
+    public String getMySessionId();
+
+    public String getPartnerSessionId();
+
+    public void setPartnerSessionId(String session);
+
+    public void setMySessionId(String sessionId);
+
+    /**
+     * Get all context storage objects declared in this partner link instance.
+     */
+    public Collection<ContextValueDAO> getContextValues();
+    public void setContextValue(String namespace, String key, String value);
+    public void removeContextValue(String namespace, String key);
 
 }

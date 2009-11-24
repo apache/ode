@@ -32,17 +32,17 @@ import java.io.Serializable;
 public class PartnerLinkInstance implements Serializable, PartnerLink {
     private static final long serialVersionUID = 1L;
 
-    public OPartnerLink partnerLink;
+    public PartnerLinkModel partnerLink;
 
     public Long scopeInstanceId;
 
-    public PartnerLinkInstance(Long scopeInstanceId, OPartnerLink partnerLink) {
+    public PartnerLinkInstance(Long scopeInstanceId, PartnerLinkModel partnerLink) {
         this.partnerLink = partnerLink;
         this.scopeInstanceId = scopeInstanceId;
     }
 
     public String getName() {
-        return partnerLink.name;
+        return partnerLink.getName();
     }
 
     public PartnerLinkModel getModel() {

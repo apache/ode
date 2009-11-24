@@ -18,18 +18,30 @@
  */
 package org.apache.ode.bpel.compiler.v2;
 
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import org.apache.ode.bpel.compiler.CommonCompilationMessages;
 import org.apache.ode.bpel.compiler.v2.CompilerContext;
+import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.BpelObject;
+import org.apache.ode.bpel.compiler.bom.ContextPropagation;
 import org.apache.ode.bpel.compiler.bom.FailureHandling;
 import org.apache.ode.bpel.rtrep.v2.OActivity;
+import org.apache.ode.bpel.rtrep.v2.OContextPropagation;
 import org.apache.ode.bpel.rtrep.v2.OFailureHandling;
 import org.apache.ode.bpel.rtrep.common.extension.ExtensibilityQNames;
+import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
 
 /**
  * Base implementation of the {@link ActivityGenerator} interface.
  */
 abstract class DefaultActivityGenerator implements ActivityGenerator {
+    private static final CommonCompilationMessages _cmsgsGeneral =
+        MessageBundle.getMessages(CommonCompilationMessages.class);
+
     protected CompilerContext _context;
 
     public void setContext(CompilerContext context) {
@@ -53,6 +65,31 @@ abstract class DefaultActivityGenerator implements ActivityGenerator {
         obj.retryDelay = extElement.getRetryDelay();
         obj.faultOnFailure = extElement.getFaultOnFailure();
         output.setFailureHandling(obj);
+    }
+
+    protected Set<OContextPropagation> doContextPropagation(BpelObject src) {
+        Set<OContextPropagation> props = new LinkedHashSet<OContextPropagation>();
+        // Context propagation extensibility element.
+        for (Element element : src.getExtensibilityElements(ExtensibilityQNames.CONTEXT_PROPAGATE)) {
+            ContextPropagation extElement = new ContextPropagation(element);
+            OContextPropagation obj = new OContextPropagation();
+            obj.contexts = Arrays.asList(extElement.getContext().split("\\s+"));
+            if (obj.contexts == null) {
+                throw new CompilationException(_cmsgsGeneral.errMissingContextAttribute());
+            }
+            String fromVariableName = extElement.getFromVariable();
+            String fromPartnerLinkName = extElement.getFromPartnerLink();
+            if (fromPartnerLinkName != null && fromVariableName == null) {
+                obj.fromPartnerLink = _context.resolvePartnerLink(fromPartnerLinkName);    
+            } else if (fromPartnerLinkName == null && fromVariableName != null) {
+                obj.fromVariable = _context.resolveVariable(fromVariableName);
+            } else {
+                throw new CompilationException(_cmsgsGeneral.errMissingVariableOrPartnerLinkAttribute());
+            }
+            props.add(obj);
+        }
+        
+        return props.isEmpty() ? null : props;
     }
 
 }

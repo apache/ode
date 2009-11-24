@@ -20,9 +20,8 @@
 package org.apache.ode.dao.jpa;
 
 
-import org.apache.ode.bpel.dao.PartnerLinkDAO;
-import org.apache.ode.utils.DOMUtils;
-import org.w3c.dom.Element;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -36,16 +35,23 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.Query;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.dao.ContextValueDAO;
+import org.apache.ode.bpel.dao.PartnerLinkDAO;
+import org.apache.ode.utils.DOMUtils;
+import org.w3c.dom.Element;
 
 @Entity
 @Table(name="ODE_PARTNER_LINK")
 @NamedQueries({
     @NamedQuery(name=PartnerLinkDAOImpl.DELETE_PARTNER_LINKS_BY_SCOPE_IDS, query="delete from PartnerLinkDAOImpl as l where l._scopeId in (:scopeIds)")
 })
-public class PartnerLinkDAOImpl implements PartnerLinkDAO {
+public class PartnerLinkDAOImpl extends OpenJPADAO implements PartnerLinkDAO {
     public final static String DELETE_PARTNER_LINKS_BY_SCOPE_IDS = "DELETE_PARTNER_LINKS_BY_SCOPE_IDS";
 
 	@Id @Column(name="PARTNER_LINK_ID") 
@@ -81,6 +87,9 @@ public class PartnerLinkDAOImpl implements PartnerLinkDAO {
     @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="SCOPE_ID")
     @SuppressWarnings("unused")
     private ScopeDAOImpl _scope;
+    
+    @OneToMany(targetEntity=ContextValueDAOImpl.class,mappedBy="_partnerLink",fetch=FetchType.LAZY,cascade={CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
+    private Collection<ContextValueDAO> _contextValues = new ArrayList<ContextValueDAO>();
 
     public PartnerLinkDAOImpl() {}
 	public PartnerLinkDAOImpl(int modelId, String name, String myRole, String partnerRole) {
@@ -171,4 +180,32 @@ public class PartnerLinkDAOImpl implements PartnerLinkDAO {
     public void setScope(ScopeDAOImpl scope) {
         _scope = scope;
     }
+    
+	public Collection<ContextValueDAO> getContextValues() {
+		return _contextValues;
+	}
+
+	public void removeContextValue(String namespace, String key) {
+		Query q = getEM().createNamedQuery(ContextValueDAOImpl.DELETE_CONTEXT_VALUES_BY_KEYS);
+		q.setParameter("namespace", namespace);
+		q.setParameter("key", key);
+	}
+
+	public void setContextValue(String namespace, String key, String value) {
+        ContextValueDAO val = null;
+        for (ContextValueDAO v : getContextValues()) {
+            if (v.getNamespace().equals(namespace) && v.getKey().equals(key)) {
+                val = v;
+            }
+        }
+		
+        if (val == null) {
+        	val = new ContextValueDAOImpl(this, namespace, key);
+        	getEM().persist(val);
+            _contextValues.add(val);
+        }
+        
+        val.setValue(value);
+	}
+
 }

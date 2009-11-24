@@ -1,6 +1,7 @@
 package org.apache.ode.bpel.rapi;
 
 import java.util.Collection;
+import java.util.Set;
 
 import javax.xml.namespace.QName;
 
@@ -165,6 +166,10 @@ public interface VariableContext {
     void writeCorrelation(CorrelationSet cset, QName[] propNames,
                           CorrelationKey correlation) throws FaultException;
 
+    
+    ContextData fetchContextData(PartnerLink pLink);
+    void writeContextData(PartnerLink pLink, Node ctxData, Set<String> contextsFilter);
+    
     public class ValueReferencePair {
         public Node value;
         public Node reference;

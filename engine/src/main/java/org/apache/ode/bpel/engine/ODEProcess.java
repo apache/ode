@@ -37,11 +37,25 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.dao.*;
+import org.apache.ode.bpel.context.ContextInterceptor;
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.CorrelatorDAO;
+import org.apache.ode.bpel.dao.MessageDAO;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.dao.MessageRouteDAO;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableConf;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableManager;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
-import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.BpelEventListener;
+import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.InvocationStyle;
+import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.WSMessageExchange;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.intercept.FailMessageExchangeException;
 import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
@@ -49,8 +63,13 @@ import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
+import org.apache.ode.bpel.rapi.FaultInfo;
+import org.apache.ode.bpel.rapi.OdeRTInstance;
+import org.apache.ode.bpel.rapi.OdeRuntime;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
+import org.apache.ode.bpel.rapi.ProcessModel;
+import org.apache.ode.bpel.rapi.Serializer;
 import org.apache.ode.il.config.OdeConfigProperties;
-import org.apache.ode.bpel.rapi.*;
 import org.apache.ode.jacob.soup.ReplacementMap;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.utils.ObjectPrinter;
@@ -90,7 +109,10 @@ public abstract class ODEProcess {
 
     /** Deploy-time configuraton for external variables. */
     protected ExternalVariableConf _extVarConf;
-        protected ExternalVariableManager _evm;
+    protected ExternalVariableManager _evm;
+    
+    /** process' context interceptors. */
+    protected List<ContextInterceptor> _ctxInterceptors = new ArrayList<ContextInterceptor>();
     
     ODEProcess(BpelServerImpl server, ProcessConf conf, BpelEventListener debugger, IncomingMessageExchangeCache mexCache) {
         _server = server;
@@ -136,7 +158,7 @@ public abstract class ODEProcess {
     }
     
     /**
-     * Intiialize the external variable configuration/engine manager. This is called from hydration logic, so it 
+     * Initialize the external variable configuration/engine manager. This is called from hydration logic, so it 
      * is possible to change the external variable configuration at runtime.
      * 
      */
@@ -146,6 +168,25 @@ public abstract class ODEProcess {
         _evm = new ExternalVariableManager(_pid, _extVarConf, _contexts.externalVariableEngines);
     }
     
+    /**
+     * Initialize and configure context interceptors. This is called from hydration logic.
+     */
+    void initContextInterceptors() {
+        _ctxInterceptors = new ArrayList<ContextInterceptor>();
+        Map<String, Element> conf = _pconf.getContextInterceptors();
+        for (String fqcn : conf.keySet()) {
+            try {
+                ContextInterceptor ci = (ContextInterceptor)Class.forName(fqcn).newInstance();
+                ci.configure(conf.get(fqcn));
+                _ctxInterceptors.add(ci);
+                __log.info("Context interceptor " + fqcn + " successfully loaded and configured.");
+            } catch (Exception e) {
+                __log.warn("Couldn't register the context interceptor " + fqcn + ", the class couldn't be "
+                        + "loaded properly: " + e);
+            }
+        }
+    }
+
     public OdeConfigProperties getProperties() {
         return _server.getConfigProperties();
     }
@@ -322,7 +363,7 @@ public abstract class ODEProcess {
      * Process the message-exchange interceptors.
      * @return <code>true</code> if execution should continue, <code>false</code> otherwise
      */
-    boolean processInterceptors(MessageExchangeDAO mexdao, InterceptorInvoker invoker) {
+    boolean processMexInterceptors(MessageExchangeDAO mexdao, InterceptorInvoker invoker) {
         InterceptorContextImpl ictx = new InterceptorContextImpl(_contexts.dao.getConnection(), mexdao, getProcessDAO(), _pconf);
 
         try {
@@ -341,6 +382,7 @@ public abstract class ODEProcess {
 
         return true;
     }
+    
 
     /**
      * Handle a work event; this method is called from the scheduler thread and should be very quick, i.e. any serious work needs to

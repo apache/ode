@@ -30,6 +30,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.rapi.CorrelationSetModel;
 import org.apache.ode.bpel.rapi.PartnerLinkModel;
+import org.apache.ode.bpel.rapi.ScopeModel;
 
 /**
  * Compiled representation of a BPEL partnerLink.
@@ -72,6 +73,10 @@ public class OPartnerLink extends OBase implements PartnerLinkModel {
 
     public String getName() {
         return name;
+    }
+    
+    public ScopeModel getDeclaringScope() {
+    	return declaringScope;
     }
 
     public boolean hasMyRole() {

@@ -21,10 +21,12 @@ package org.apache.ode.bpel.rtrep.v2;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -33,19 +35,27 @@ import junit.framework.TestCase;
 
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.evt.ScopeEvent;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.ProcessInstanceStartedEvent;
+import org.apache.ode.bpel.evt.ScopeEvent;
+import org.apache.ode.bpel.extension.ExtensionOperation;
+import org.apache.ode.bpel.iapi.Resource;
+import org.apache.ode.bpel.iapi.ProcessConf.PropagationRule;
+import org.apache.ode.bpel.rapi.ContextData;
+import org.apache.ode.bpel.rapi.FaultInfo;
+import org.apache.ode.bpel.rapi.OdeRTInstanceContext;
+import org.apache.ode.bpel.rapi.PartnerLink;
+import org.apache.ode.bpel.rapi.VariableContext;
+import org.apache.ode.bpel.rapi.IOContext.Direction;
+import org.apache.ode.bpel.rtrep.v2.channels.ActivityRecoveryChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
+import org.apache.ode.bpel.rtrep.v2.channels.PickResponseChannel;
+import org.apache.ode.bpel.rtrep.v2.channels.TimerResponseChannel;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
-import org.apache.ode.bpel.evar.ExternalVariableModuleException;
-import org.apache.ode.bpel.rapi.*;
-import org.apache.ode.bpel.rtrep.v2.channels.*;
-import org.apache.ode.bpel.extension.ExtensionOperation;
-import org.apache.ode.bpel.iapi.*;
-import org.apache.ode.bpel.iapi.Resource;
+import org.junit.Assert;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.junit.Assert;
 
 /**
  * Test core BPEL processing capabilities.
@@ -154,7 +164,7 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
     public void cancelOutstandingRequests(String channelId) {
     }
 
-    public String invoke(String invokeId, PartnerLinkInstance instance, Operation operation, Element outboundMsg, Object object) throws FaultException {
+    public String invoke(String invokeId, PartnerLinkInstance instance, Operation operation, Element outboundMsg, Object object, Set<org.apache.ode.bpel.rapi.PropagationRule> propagationRules) throws FaultException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
@@ -210,7 +220,7 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public void reply(PartnerLinkInstance plink, String opName, String bpelmex, Element element, QName fault) throws FaultException {
+    public void reply(PartnerLinkInstance plink, String opName, String bpelmex, Element element, QName fault, Set<org.apache.ode.bpel.rapi.PropagationRule> propagationRules) throws FaultException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
@@ -548,4 +558,31 @@ public class CoreBpelTest extends TestCase implements OdeInternalInstance {
 	public void completeExtensionActivity(String channelId, FaultData faultData) {
 		// TODO Auto-generated method stub
 	}
+
+	public void invokeContextInterceptorsInbound(String mexId, PartnerLink pl,
+			Direction dir) {
+		// TODO Auto-generated method stub
+	}
+
+	public void invokeContextInterceptorsOutbound(String mexId, PartnerLink pl,
+			Set<org.apache.ode.bpel.rapi.PropagationRule> propagationRules) {
+		// TODO Auto-generated method stub
+	}
+
+	public List<PropagationRule> getPropagationRules() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+    public ContextData fetchContextData(PartnerLink pLink) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void writeContextData(PartnerLink pLink, Node ctxData,
+            Set<String> ctxFilter) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

@@ -40,6 +40,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.context.ContextInterceptor;
 import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.engine.cron.CronScheduler;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
@@ -276,6 +277,14 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
     public void unregisterExtensionBundle(String nsURI) {
         _contexts.extensionRegistry.remove(nsURI);
+    }
+
+    public void registerContextInterceptor(ContextInterceptor interceptor) {
+    	_contexts.contextInterceptorRegistry.add(interceptor);
+    }
+
+    public void unregisterContextInterceptor(ContextInterceptor interceptor) {
+        _contexts.contextInterceptorRegistry.remove(interceptor);
     }
 
     public void stop() {

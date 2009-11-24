@@ -23,6 +23,7 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
+import org.apache.ode.utils.stl.UnaryFunction;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -128,6 +129,14 @@ public class BpelObject extends SourceLocation {
         if (e == null)
             return null;
         return e.getElement();
+    }
+
+    public List<Element> getExtensibilityElements(QName extElName) {
+        return CollectionsX.transform(new ArrayList<Element>(), getChildren(extElName), new UnaryFunction<BpelObject, Element>() {
+			public Element apply(BpelObject x) {
+				return x.getElement();
+			}
+		});
     }
 
     public Element getFirstExtensibilityElement() {

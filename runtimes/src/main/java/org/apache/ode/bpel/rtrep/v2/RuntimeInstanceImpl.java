@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.net.URI;
 
 import javax.wsdl.Operation;
@@ -17,11 +19,13 @@ import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ProcessInstanceStartedEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.rapi.*;
+import org.apache.ode.bpel.rapi.IOContext.Direction;
 import org.apache.ode.bpel.rtrep.v2.channels.*;
 import org.apache.ode.bpel.extension.ExtensionOperation;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evar.IncompleteKeyException;
 import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.ProcessConf.PropagationRule;
 import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
@@ -483,7 +487,7 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
         if(!getORM().associateEvent(plinkInstance, opName, key, mexRef, mexDAO)) {
             //For conflicting request, we need to reply immediately to incoming event.
             try {
-                _brc.reply(mexDAO, plinkInstance, opName, null, _runtime._oprocess.constants.qnConflictingRequest);
+                _brc.reply(mexDAO, plinkInstance, opName, null, _runtime._oprocess.constants.qnConflictingRequest, null);
             } catch (NoSuchOperationException e) {
                 throw new IllegalStateException(e);
             }
@@ -495,13 +499,13 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
         getORM().associateEvent(resourceInstance, resourceInstance.getModel().getMethod(), mexRef, scopeIid);
     }
 
-    public void reply(PartnerLinkInstance plink, String opName, String bpelmex, Element element, QName fault) throws FaultException {
+    public void reply(PartnerLinkInstance plink, String opName, String bpelmex, Element element, QName fault, Set<org.apache.ode.bpel.rapi.PropagationRule> propagationRules) throws FaultException {
         String mexid = getORM().release(plink, opName, bpelmex);
         if (mexid == null)
             throw new FaultException(_runtime._oprocess.constants.qnMissingRequest);
 
         try {
-            _brc.reply(mexid, plink, opName, element, fault);
+            _brc.reply(mexid, plink, opName, element, fault, propagationRules);
         } catch (NoSuchOperationException e) {
             // reply to operation that is either not defined or one-way. Perhaps this should be detected at compile time?
             throw new FaultException(_runtime._oprocess.constants.qnMissingRequest,
@@ -644,10 +648,10 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
      * @param outboundMsg
      * @param object
      */
-    public String invoke(String invokeId, PartnerLinkInstance instance, Operation operation, Element outboundMsg, Object object)
+    public String invoke(String invokeId, PartnerLinkInstance instance, Operation operation, Element outboundMsg, Object object, Set<org.apache.ode.bpel.rapi.PropagationRule> propagationRules)
             throws FaultException {
         try {
-            return _brc.invoke(invokeId, instance, operation, outboundMsg);
+            return _brc.invoke(invokeId, instance, operation, outboundMsg, propagationRules);
         } catch (UninitializedPartnerEPR e) {
             throw new FaultException(_runtime._oprocess.constants.qnUninitializedPartnerRole);
         }
@@ -840,4 +844,21 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
 	public Node getProcessProperty(QName propertyName) {
 		return _brc.getProcessProperty(propertyName);
 	}
+
+	public void invokeContextInterceptorsInbound(String mexId, PartnerLink pl,
+			Direction dir) {
+		_brc.invokeContextInterceptorsInbound(mexId, pl, dir);
+	}
+
+	public List<PropagationRule> getPropagationRules() {
+		return _brc.getPropagationRules();
+	}
+
+    public ContextData fetchContextData(PartnerLink pLink) {
+        return _brc.fetchContextData(pLink);
+    }
+
+    public void writeContextData(PartnerLink pLink, Node ctxData, Set<String> contextsFilter) {
+        _brc.writeContextData(pLink, ctxData, contextsFilter);
+    }
 }

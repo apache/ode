@@ -1,24 +1,40 @@
 package org.apache.ode.bpel.engine;
 
-import org.apache.ode.bpel.rapi.PartnerLinkModel;
-import org.apache.ode.bpel.rapi.ProcessModel;
-import org.apache.ode.bpel.rapi.ConstantsModel;
-import org.apache.ode.bpel.rapi.InvalidProcessException;
-import org.apache.ode.bpel.iapi.*;
+import java.io.InputStream;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
+import javax.wsdl.Operation;
+import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.dao.MessageDAO;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.BpelEventListener;
+import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.InvocationStyle;
+import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.PartnerRoleChannel;
+import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.JobType;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
-import org.apache.ode.utils.*;
-import org.w3c.dom.Element;
+import org.apache.ode.bpel.rapi.ConstantsModel;
+import org.apache.ode.bpel.rapi.InvalidProcessException;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
+import org.apache.ode.bpel.rapi.ProcessModel;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.GUID;
+import org.apache.ode.utils.Namespaces;
 import org.w3c.dom.Document;
-
-import javax.xml.namespace.QName;
-import javax.wsdl.Operation;
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.io.InputStream;
+import org.w3c.dom.Element;
 
 public class ODEWSProcess extends ODEProcess {
 
@@ -277,6 +293,7 @@ public class ODEWSProcess extends ODEProcess {
             _partnerRoles = null;
             _myRoles = null;
             _endpointToMyRoleMap = null;
+            _ctxInterceptors = null;
         }
 
         private void doHydrate() {
@@ -298,6 +315,7 @@ public class ODEWSProcess extends ODEProcess {
 
             setRoles(_processModel);
             initExternalVariables();
+            initContextInterceptors();
 
             if (!_hydratedOnce) {
                 for (PartnerLinkPartnerRoleImpl prole : _partnerRoles.values()) {
@@ -367,7 +385,7 @@ public class ODEWSProcess extends ODEProcess {
 
             mexdao.setPattern((op.getOutput() == null) ? MessageExchange.MessageExchangePattern.REQUEST_ONLY
                     : MessageExchange.MessageExchangePattern.REQUEST_RESPONSE);
-            if (!processInterceptors(mexdao, InterceptorInvoker.__onProcessInvoked)) {
+            if (!processMexInterceptors(mexdao, InterceptorInvoker.__onProcessInvoked)) {
                 __log.debug("Aborting processing of mex " + mexdao.getMessageExchangeId() + " due to interceptors.");
                 onMyRoleMexAck(mexdao, oldstatus);
                 return;
@@ -381,7 +399,7 @@ public class ODEWSProcess extends ODEProcess {
             }
 
             mexdao.setProcess(getProcessDAO());
-
+            
             markused();
             MyRoleMessageExchange.CorrelationStatus cstatus = target.invokeMyRole(mexdao);
             if (cstatus == null) {
@@ -594,14 +612,14 @@ public class ODEWSProcess extends ODEProcess {
 
         Operation operation = oplink.getPartnerRoleOperation(mexdao.getOperation());
 
-        if (!processInterceptors(mexdao, InterceptorInvoker.__onPartnerInvoked)) {
+        if (!processMexInterceptors(mexdao, InterceptorInvoker.__onPartnerInvoked)) {
             __log.debug("Partner invocation intercepted.");
             return;
         }
-
+        
         mexdao.setStatus(MessageExchange.Status.REQ);
         try {
-            if (p2pProcesses != null && p2pProcesses.size() != 0) {
+        	if (p2pProcesses != null && p2pProcesses.size() != 0) {
                 /* P2P (process-to-process) invocation, special logic */
                 // First, make a copy of the original request message
                 MessageDAO request = mexdao.getRequest();

@@ -18,6 +18,9 @@
  */
 package org.apache.ode.bpel.compiler.v2;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
@@ -25,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.AssignActivity;
+import org.apache.ode.bpel.compiler.bom.ContextVal;
 import org.apache.ode.bpel.compiler.bom.Copy;
 import org.apache.ode.bpel.compiler.bom.ExtensionAssignOperation;
 import org.apache.ode.bpel.compiler.bom.ExtensionVal;
@@ -225,6 +229,15 @@ class AssignGenerator extends DefaultActivityGenerator {
                 plref.partnerLink = _context.resolvePartnerLink(plv.getPartnerLink());
                 plref.isMyEndpointReference = (plv.getEndpointReference() == PartnerLinkVal.EndpointReference.MYROLE);
                 return plref;
+            } else if (from.isContextVal()) {
+                ContextVal cv = from.getAsContextVal();
+                OAssign.ContextRef cref = new OAssign.ContextRef(_context.getOProcess());
+                cref.partnerLink = _context.resolvePartnerLink(cv.getPartnerLink());
+                cref.contexts = extractContextNames(cv.getContext());
+                if (cv.getLocation() != null && cv.getLocation().getExpression() != null) {
+                    cref.location = _context.compileExpr(cv.getLocation());
+                }
+                return cref;
             } else if (from.getAsExpression() != null) {
                 return new OAssign.Expression(_context.getOProcess(), _context.compileExpr(from.getAsExpression()));
             }
@@ -236,6 +249,19 @@ class AssignGenerator extends DefaultActivityGenerator {
                 ce.getCompilationMessage().source = from;
             throw ce;
         }
+    }
+
+    private Set<String> extractContextNames(String context) {
+        Set<String> contexts = new LinkedHashSet<String>();
+        for (String c : context.split("\\s+")) {
+            if ("*".equals(c)) {
+                contexts.clear();
+                contexts.add("*");
+            } else {
+                contexts.add(c);
+            }
+        }
+        return contexts;
     }
 
     /**
@@ -290,6 +316,11 @@ class AssignGenerator extends DefaultActivityGenerator {
                 OAssign.PartnerLinkRef plref = new OAssign.PartnerLinkRef(_context.getOProcess());
                 plref.partnerLink = _context.resolvePartnerLink(to.getAsPartnerLinkVal().getPartnerLink());
                 return plref;
+            } else if (to.isContextVal()) {
+                ContextVal cv = to.getAsContextVal();
+                OAssign.ContextRef cref = new OAssign.ContextRef(_context.getOProcess());
+                cref.partnerLink = _context.resolvePartnerLink(cv.getPartnerLink());
+                return cref;
             } else if (to.getAsExpression() != null){
                 return new OAssign.LValueExpression(_context.getOProcess(), _context
                         .compileLValueExpr(to.getAsExpression()));

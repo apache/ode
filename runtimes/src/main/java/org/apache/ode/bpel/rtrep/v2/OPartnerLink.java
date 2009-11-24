@@ -20,6 +20,7 @@ package org.apache.ode.bpel.rtrep.v2;
 
 import org.apache.ode.bpel.rapi.PartnerLinkModel;
 import org.apache.ode.bpel.rapi.CorrelationSetModel;
+import org.apache.ode.bpel.rapi.ScopeModel;
 
 import javax.wsdl.Operation;
 import javax.wsdl.PortType;
@@ -70,7 +71,11 @@ public class OPartnerLink extends OBase implements PartnerLinkModel {
     public String getName() {
         return name;
     }
-
+    
+    public ScopeModel getDeclaringScope() {
+    	return declaringScope;
+    }
+    
     public String getMyRoleName() {
         return myRoleName;
     }

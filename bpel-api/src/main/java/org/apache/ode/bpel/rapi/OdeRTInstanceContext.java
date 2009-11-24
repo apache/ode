@@ -18,9 +18,12 @@
  */
 package org.apache.ode.bpel.rapi;
 
+import java.util.List;
+
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
+import org.apache.ode.bpel.iapi.ProcessConf.PropagationRule;
 import org.w3c.dom.Node;
 
 /**
@@ -75,4 +78,6 @@ public interface OdeRTInstanceContext extends IOContext, ProcessControlContext, 
     void setAtomicScope(boolean atomicScope);
 
     Node getProcessProperty(QName propertyName);
+
+	List<PropagationRule> getPropagationRules();
 }

@@ -447,7 +447,7 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
             throw new FaultException(_runtime._oprocess.constants.qnMissingRequest);
 
         try {
-            _brc.reply(mexid, plink, opName, element, fault);
+            _brc.reply(mexid, plink, opName, element, fault, null);
         } catch (NoSuchOperationException e) {
             // reply to operation that is either not defined or one-way. Perhaps this should be detected at compile time?
             throw new FaultException(_runtime._oprocess.constants.qnMissingRequest,
@@ -573,7 +573,7 @@ public class RuntimeInstanceImpl implements OdeInternalInstance, OdeRTInstance {
     public String invoke(String invokeId, PartnerLinkInstance instance, Operation operation, Element outboundMsg, Object object)
             throws FaultException {
         try {
-            return _brc.invoke(invokeId, instance, operation, outboundMsg);
+            return _brc.invoke(invokeId, instance, operation, outboundMsg, null);
         } catch (UninitializedPartnerEPR e) {
             throw new FaultException(_runtime._oprocess.constants.qnUninitializedPartnerRole);
         }

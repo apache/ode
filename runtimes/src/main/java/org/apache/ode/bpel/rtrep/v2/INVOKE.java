@@ -19,20 +19,20 @@
 package org.apache.ode.bpel.rtrep.v2;
 
 import java.util.Collection;
-import java.util.Date;
 
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
+import org.apache.ode.bpel.iapi.Resource;
+import org.apache.ode.bpel.rapi.IOContext;
 import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
 import org.apache.ode.bpel.rtrep.v2.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.InvokeResponseChannelListener;
 import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
-import org.apache.ode.bpel.evar.ExternalVariableModuleException;
-import org.apache.ode.bpel.iapi.Resource;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -98,7 +98,7 @@ public class INVOKE extends ACTIVITY {
             if (!isTwoWay) {
                 FaultData faultData = null;
                 getBpelRuntime().invoke(null, _scopeFrame.resolve(_oinvoke.partnerLink),
-                        _oinvoke.operation, outboundMsg, null);
+                        _oinvoke.operation, outboundMsg, null, computePropagationRules(_oinvoke, _oinvoke.getPropagates()));
                 _self.parent.completed(faultData, CompensationHandler.emptySet());
 
             } else /* two-way */{
@@ -107,7 +107,7 @@ public class INVOKE extends ACTIVITY {
 
                 final String mexId = getBpelRuntime().invoke(invokeResponseChannel.export(),
                         _scopeFrame.resolve(_oinvoke.partnerLink), _oinvoke.operation,
-                        outboundMsg, invokeResponseChannel);
+                        outboundMsg, invokeResponseChannel, computePropagationRules(_oinvoke, _oinvoke.getPropagates()));
 
                 setupListeners(mexId, invokeResponseChannel, outputVar);
             }
@@ -118,11 +118,15 @@ public class INVOKE extends ACTIVITY {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void setupListeners(final String mexId, final InvokeResponseChannel invokeResponseChannel, final VariableInstance outputVar) {
         object(false, new InvokeResponseChannelListener(invokeResponseChannel) {
             private static final long serialVersionUID = 4496880438819196765L;
 
             public void onResponse() {
+                // invoke context interceptors
+                getBpelRuntime().invokeContextInterceptorsInbound(mexId, _scopeFrame.resolve(_oinvoke.partnerLink), IOContext.Direction.OUTBOUND_REPLY);
+
                 // we don't have to write variable data -> this already
                 // happened in the nativeAPI impl
                 FaultData fault = null;
@@ -248,5 +252,5 @@ public class INVOKE extends ACTIVITY {
             return (Element) outboundMsg;
         } else return null;
     }
-
+    
 }

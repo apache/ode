@@ -275,7 +275,7 @@ public class BpelObjectFactory {
         QName type = new QName(el.getNamespaceURI(), el.getLocalName());
         Class cls = _mappings.get(type);
         if (cls == null) {
-            __log.warn("Unrecognized element in BPEL dom: " + type);
+            __log.info("Unrecognized element in BPEL dom: " + type);
             return new BpelObject(el);
         }
         try {

@@ -19,6 +19,10 @@
 
 package org.apache.ode.bpel.compiler.v2;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.Correlation;
@@ -30,10 +34,6 @@ import org.apache.ode.bpel.rtrep.v2.OScope;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Generates code for <code>&lt;invoke&gt;</code> activities.
@@ -109,6 +109,8 @@ class InvokeGenerator extends DefaultActivityGenerator {
             doCorrelations(inoutcorrelations, oinvoke.outputVar, oinvoke.assertCorrelationsOutput, oinvoke.initCorrelationsOutput);
         }
 
+        oinvoke.propagates = doContextPropagation(src);
+        
         // Partner link could be initialized with magic session in a previous receive.
         // if (!oinvoke.getOwner().version.equals(Constants.NS_BPEL4WS_2003_03)) {
         // if (!oinvoke.partnerLink.initializePartnerRole && !_context.isPartnerLinkAssigned(oinvoke.partnerLink.getName())) {

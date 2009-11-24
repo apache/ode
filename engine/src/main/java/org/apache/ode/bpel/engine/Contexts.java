@@ -19,8 +19,8 @@
 
 package org.apache.ode.bpel.engine;
 
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,7 +34,11 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.context.ContextInterceptor;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.engine.cron.CronScheduler;
+import org.apache.ode.bpel.evar.ExternalVariableModule;
+import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.BpelEventListener;
@@ -42,9 +46,6 @@ import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
-import org.apache.ode.bpel.engine.cron.CronScheduler;
-import org.apache.ode.bpel.evar.ExternalVariableModule;
-import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 
 /**
  * Aggregation of all the contexts provided to the BPEL engine by the integration layer.
@@ -69,6 +70,9 @@ public class Contexts {
     /** Global extension bundle registry **/
     final Map<String, ExtensionBundleRuntime> extensionRegistry = new ConcurrentHashMap<String, ExtensionBundleRuntime>();
     
+    /** Global context interceptor registry **/
+    final List<ContextInterceptor> contextInterceptorRegistry = new CopyOnWriteArrayList<ContextInterceptor>();
+
     /** Mapping from external variable engine identifier to the engine implementation. */
     final HashMap<QName, ExternalVariableModule> externalVariableEngines = new HashMap<QName, ExternalVariableModule>();
 

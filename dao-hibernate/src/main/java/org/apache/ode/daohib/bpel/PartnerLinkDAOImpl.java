@@ -19,13 +19,22 @@
 
 package org.apache.ode.daohib.bpel;
 
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.xml.namespace.QName;
 
+import org.apache.ode.bpel.dao.ContextValueDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.daohib.SessionManager;
+import org.apache.ode.daohib.bpel.hobj.HContextValue;
 import org.apache.ode.daohib.bpel.hobj.HLargeData;
 import org.apache.ode.daohib.bpel.hobj.HPartnerLink;
 import org.apache.ode.utils.DOMUtils;
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.w3c.dom.Element;
 
 /**
@@ -35,6 +44,8 @@ import org.w3c.dom.Element;
  * (general endpoint configuration).
  */
 public class PartnerLinkDAOImpl extends HibernateDao implements PartnerLinkDAO {
+    private static final String QRY_DEL_CTX_VALUES = "delete from " + HContextValue.class.getName()
+    + " where namespace = ? and key = ?".intern();
 
 
     /** Cached copy of my epr */
@@ -151,5 +162,48 @@ public class PartnerLinkDAOImpl extends HibernateDao implements PartnerLinkDAO {
         _self.setMySessionId(sessionId);
 
     }
+
+    public Collection<ContextValueDAO> getContextValues() {
+        entering("PartnerLinkDAOImpl.getContextValues");
+        Set<ContextValueDAO> results = new HashSet<ContextValueDAO>();
+        for (HContextValue hContextValue : _self.getContextValues()) {
+        	results.add(new ContextValueDaoImpl(_sm, hContextValue));
+        }
+        return results;
+    }
+    
+	public void removeContextValue(String namespace, String key) {
+        entering("PartnerLinkDAOImpl.removeContextValue");
+        Session session = getSession();
+        Query q = session.createQuery(QRY_DEL_CTX_VALUES);
+        q.setString(0, namespace); // namespace
+        q.setString(0, key); // key
+        q.executeUpdate();
+        session.flush(); // explicit flush to ensure value removed.
+	}
+
+	public void setContextValue(String namespace, String key, String value) {
+        entering("PartnerLinkDAOImpl.setContextValue");
+        HContextValue hvalue = null;
+        for (HContextValue c : _self.getContextValues()) {
+            if (c.getNamespace().equals(namespace) && c.getKey().equals(key)) {
+                hvalue = c;
+            }
+        }
+
+		if (hvalue == null) {
+	        hvalue = new HContextValue();
+	        hvalue.setNamespace(namespace);
+	        hvalue.setKey(key);
+	        hvalue.setPartnerLink(_self);
+	        _self.getContextValues().add(hvalue);
+	        
+	        hvalue.setLock(0);
+	        hvalue.setCreated(new Date());
+	        getSession().save(hvalue);
+		}
+		
+        hvalue.setValue(value);
+	}
 
 }

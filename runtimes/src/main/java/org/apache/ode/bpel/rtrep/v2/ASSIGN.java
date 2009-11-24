@@ -27,11 +27,13 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
+import org.apache.ode.bpel.evt.PartnerLinkContextModificationEvent;
 import org.apache.ode.bpel.evt.CorrelationSetWriteEvent;
 import org.apache.ode.bpel.evt.PartnerLinkModificationEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.extension.ExtensionOperation;
+import org.apache.ode.bpel.rapi.ContextData;
 import org.apache.ode.bpel.rtrep.common.extension.ExtensibilityQNames;
 import org.apache.ode.bpel.rtrep.common.extension.ExtensionContext;
 import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
@@ -194,8 +196,12 @@ class ASSIGN extends ACTIVITY {
                 PartnerLinkInstance plval = _scopeFrame.resolve(pLinkRef.partnerLink);
                 replaceEndpointRefence(plval, rvalue);
                 se = new PartnerLinkModificationEvent(((OAssign.PartnerLinkRef) ocopy.to).partnerLink.getName());
+            } else if (ocopy.to instanceof OAssign.ContextRef) {
+                OAssign.ContextRef ctxRef = (OAssign.ContextRef) ocopy.to;
+                getBpelRuntime().writeContextData(_scopeFrame.resolve(ctxRef.partnerLink), rvalue, ctxRef.contexts);
+                se = new PartnerLinkContextModificationEvent(ctxRef.partnerLink.getName(), rvalue);
             } else if (ocopy.to.getVariable().type instanceof OPropertyVarType) {
-                // For poperty assignment, the property, the variable that points to it and the correlation set
+                // For property assignment, the property, the variable that points to it and the correlation set
                 // all have the same name
                 CorrelationSetInstance csetInstance = _scopeFrame.resolveCorrelation(ocopy.to.getVariable().name);
                 CorrelationKey ckey = new CorrelationKey(csetInstance.declaration.getId(), new String[] { rvalue.getTextContent() });

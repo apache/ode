@@ -34,10 +34,12 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dd.TCleanup;
+import org.apache.ode.bpel.dd.TContextInterceptor;
 import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.dd.TInvoke;
 import org.apache.ode.bpel.dd.TMexInterceptor;
 import org.apache.ode.bpel.dd.TProcessEvents;
+import org.apache.ode.bpel.dd.TPropagate;
 import org.apache.ode.bpel.dd.TProvide;
 import org.apache.ode.bpel.dd.TSchedule;
 import org.apache.ode.bpel.dd.TScopeEvents;
@@ -57,6 +59,7 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.HierarchicalProperties;
 import org.apache.ode.utils.WatchDog;
 import org.apache.ode.utils.CollectionUtils;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -78,6 +81,8 @@ public class ProcessConfImpl implements ProcessConf {
     private final HashMap<String, Endpoint> _myRoleEndpoints = new HashMap<String, Endpoint>();
     private final ArrayList<QName> _sharedServices = new ArrayList<QName>();
     private final Map<String, Set<BpelEvent.TYPE>> _events = new HashMap<String, Set<BpelEvent.TYPE>>();
+    private final List<PropagationRule> _propagationRules = new ArrayList<PropagationRule>();
+    private final Map<String, Element> _ctxi = new HashMap<String, Element>(); 
     private final ArrayList<String> _mexi = new ArrayList<String>();
     ProcessState _state;
     final TDeployment.Process _pinfo;
@@ -114,6 +119,8 @@ public class ProcessConfImpl implements ProcessConf {
         initLinks();
         initMexInterceptors();
         initEventList();
+        initPropagationRules();
+        initContextInterceptors();
 
         processCleanupConfImpl = new ProcessCleanupConfImpl(pinfo);
         
@@ -480,5 +487,47 @@ public class ProcessConfImpl implements ProcessConf {
         }
         
         return jobs;
+    }
+
+    public Map<String, Element> getContextInterceptors() {
+        return _ctxi;
+    }
+
+
+    public List<PropagationRule> getPropagationRules() {
+        return _propagationRules;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void initPropagationRules() {
+        if (_pinfo.getContext() != null) {
+            for (TPropagate propagate : _pinfo.getContext().getPropagateList()) {
+                PropagationRule rule = new PropagationRule();
+                rule.setFromPL(propagate.getFrom());
+                rule.setToPL(propagate.getTo());
+                rule.setContexts(propagate.getContext());
+                _propagationRules.add(rule);
+            }
+        }
+    }
+    
+    private void initContextInterceptors() {
+        if (_pinfo.getContext() != null) {
+            for (TContextInterceptor i : _pinfo.getContext().getInterceptorList()) {
+                if (i.getConfig().getDomNode().getNodeType() != Node.ELEMENT_NODE){
+                    __log.warn("Ignoring configuration for " + i.getClassName() + " since it is not an XML element.");
+                    continue;
+                }
+                Element config = (Element)i.getConfig().getDomNode();
+                if (config != null) {
+                    // We'll need DOM Level 3
+                    Document doc = DOMUtils.newDocument();
+                    doc.appendChild(doc.importNode(config, true));
+                    _ctxi.put(i.getClassName(), doc.getDocumentElement());
+                } else {
+                    _ctxi.put(i.getClassName(), null);
+                }
+            }
+        }
     }
 }

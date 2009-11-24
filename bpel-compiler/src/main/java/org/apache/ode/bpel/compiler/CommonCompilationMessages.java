@@ -489,7 +489,18 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
 		return this.formatCompilationMessage("The external variable declaration for \"{0}\" must specify an external variable identifier.", name);
 	}
 
-  public CompilationMessage errEmptyCatch() {
-    return this.formatCompilationMessage("Empty catch faut handlers are forbidden.");
-  }
+	public CompilationMessage errEmptyCatch() {
+	    return this.formatCompilationMessage("Empty catch faut handlers are forbidden.");
+	}
+
+    /** Context propagation must define a context attribute */
+    public CompilationMessage errMissingContextAttribute() {
+        return this.formatCompilationMessage("<propagate> element must define a 'context' attribute.");
+    }
+
+    /** Context propagation must define either a fromVariable or a 
+     * fromPartnerLink attribute */
+    public CompilationMessage errMissingVariableOrPartnerLinkAttribute() {
+        return this.formatCompilationMessage("<propagate> element must define either a 'fromVariable' or a 'fromPartnerLink' attribute.");
+    }
 }

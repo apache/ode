@@ -21,6 +21,8 @@ package org.apache.ode.bpel.rtrep.v2;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.evt.ScopeEvent;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
+import org.apache.ode.bpel.rapi.ScopeModel;
 import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
 
 import java.io.Serializable;
@@ -82,7 +84,7 @@ class ScopeFrame implements Serializable {
     }
 
 
-    public ScopeFrame find(OScope scope) {
+    public ScopeFrame find(ScopeModel scope) {
         if (oscope.getId() == scope.getId()) return this;
         return (parent != null) ? parent.find(scope) : null;
     }
@@ -121,8 +123,8 @@ class ScopeFrame implements Serializable {
         return new ResourceInstance(find(resource.getDeclaringScope()).scopeInstanceId, resource);
     }
 
-    public PartnerLinkInstance resolve(OPartnerLink partnerLink) {
-        return new PartnerLinkInstance(find(partnerLink.declaringScope).scopeInstanceId, partnerLink);
+    public PartnerLinkInstance resolve(PartnerLinkModel partnerLink) {
+        return new PartnerLinkInstance(find(partnerLink.getDeclaringScope()).scopeInstanceId, partnerLink);
     }
 
     public String toString() {

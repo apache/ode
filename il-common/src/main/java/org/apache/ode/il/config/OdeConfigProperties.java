@@ -88,6 +88,8 @@ public class OdeConfigProperties {
     
     public static final String PROP_EXTENSION_BUNDLES_RT = "extension.bundles.runtime";
     public static final String PROP_EXTENSION_BUNDLES_VAL = "extension.bundles.validation";
+    
+    public static final String PROP_CONTEXT_INTERCEPTORS = "context.interceptors";
 
     private File _cfgFile;
 
@@ -288,4 +290,9 @@ public class OdeConfigProperties {
     public int getAtomicScopeRetryDelay() {
         return Integer.valueOf(getProperty(OdeConfigProperties.PROP_ATOMIC_SCOPES_RETRY_DELAY, "60"));
     }
+    
+    public String getContextInterceptors() {
+        return getProperty(PROP_CONTEXT_INTERCEPTORS);
+    }
+
 }

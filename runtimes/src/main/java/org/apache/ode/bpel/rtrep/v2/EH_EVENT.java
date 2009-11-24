@@ -35,6 +35,7 @@ import org.apache.ode.bpel.rtrep.v2.channels.PickResponseChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.PickResponseChannelListener;
 import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
+import org.apache.ode.bpel.rapi.IOContext;
 import org.apache.ode.bpel.rapi.InvalidProcessException;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
@@ -228,6 +229,9 @@ class EH_EVENT extends BpelJacobRunnable {
                         private static final long serialVersionUID = -4929999153478677288L;
 
                         public void onRequestRcvd(int selectorIdx, String mexId) {
+                            // invoke context interceptors
+                            getBpelRuntime().invokeContextInterceptorsInbound(mexId, _scopeFrame.resolve(_oevent.partnerLink), IOContext.Direction.INBOUND);
+
                             // The receipt of the message causes a new scope to be created:
                             ScopeFrame ehScopeFrame = new ScopeFrame(_oevent,
                                     getBpelRuntime().createScopeInstance(_scopeFrame.scopeInstanceId, _oevent),

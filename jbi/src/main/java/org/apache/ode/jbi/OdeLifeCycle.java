@@ -42,6 +42,7 @@ import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 import org.apache.ode.bpel.extension.ExtensionBundleValidation;
 import org.apache.ode.bpel.connector.BpelServerConnector;
+import org.apache.ode.bpel.context.ContextInterceptor;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.ProcessAndInstanceManagementMBean;
@@ -127,6 +128,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             registerEventListeners();
 
             registerMexInterceptors();
+            
+            registerContextInterceptors();
             
             registerExtensionActivityBundles();
             
@@ -346,6 +349,22 @@ public class OdeLifeCycle implements ComponentLifeCycle {
                     __log.info(__msgs.msgMessageExchangeInterceptorRegistered(interceptorCN));
                 } catch (Exception e) {
                     __log.warn("Couldn't register the event listener " + interceptorCN + ", the class couldn't be "
+                            + "loaded properly: " + e);
+                }
+            }
+        }
+    }
+
+    private void registerContextInterceptors() {
+        String interceptorsStr = _ode._config.getContextInterceptors();
+        if (interceptorsStr != null) {
+            for (StringTokenizer tokenizer = new StringTokenizer(interceptorsStr, ",;"); tokenizer.hasMoreTokens();) {
+                String interceptorCN = tokenizer.nextToken();
+                try {
+                    _ode._server.registerContextInterceptor((ContextInterceptor) Class.forName(interceptorCN).newInstance());
+                    __log.info(__msgs.msgContextInterceptorRegistered(interceptorCN));
+                } catch (Exception e) {
+                    __log.warn("Couldn't register the context interceptor " + interceptorCN + ", the class couldn't be "
                             + "loaded properly: " + e);
                 }
             }

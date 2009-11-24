@@ -27,12 +27,14 @@ import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
 
 import org.apache.ode.bpel.compiler.bom.Activity;
+import org.apache.ode.bpel.compiler.bom.BpelObject;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.compiler.bom.ScopeLikeActivity;
 import org.apache.ode.bpel.compiler.SourceLocation;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.rtrep.v2.OActivity;
+import org.apache.ode.bpel.rtrep.v2.OContextPropagation;
 import org.apache.ode.bpel.rtrep.v2.OExpression;
 import org.apache.ode.bpel.rtrep.v2.OLValueExpression;
 import org.apache.ode.bpel.rtrep.v2.OLink;
@@ -128,7 +130,7 @@ public interface CompilerContext {
 
     OScope.CorrelationSet resolveCorrelationSet(String csetName)
             throws CompilationException;
-
+    
     String getSourceLocation();
 
     boolean isPartnerLinkAssigned(String plink);

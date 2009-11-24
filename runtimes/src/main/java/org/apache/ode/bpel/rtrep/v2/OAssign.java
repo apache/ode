@@ -21,6 +21,7 @@ package org.apache.ode.bpel.rtrep.v2;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.namespace.QName;
 
@@ -290,4 +291,27 @@ public class OAssign extends OActivity {
               return "{PLinkRef " + partnerLink + "!" + isMyEndpointReference + "}";
           }
     }
+
+    public static class ContextRef extends OBase implements RValue, LValue {
+        private static final long serialVersionUID = 1L;
+        public OPartnerLink partnerLink;
+        public Set<String> contexts;
+        public OExpression location;
+
+        public ContextRef(OProcess owner) { super(owner); }
+
+        // Must fit in a LValue even if it's not variable based
+        public OScope.Variable getVariable() {
+            return null;
+        }
+
+        public boolean isCopyAll() {
+            return contexts.contains("*");
+        }
+        
+        public String toString() {
+            return "{PLinkRef " + partnerLink + "!" + contexts + 
+                (location == null ? "" : "->" + location.toString())+ "}";
+        }
+  }
 }

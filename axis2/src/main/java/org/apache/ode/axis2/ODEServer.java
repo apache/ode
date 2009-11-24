@@ -66,6 +66,7 @@ import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 import org.apache.ode.bpel.extension.ExtensionBundleValidation;
 import org.apache.ode.bpel.connector.BpelServerConnector;
+import org.apache.ode.bpel.context.ContextInterceptor;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
@@ -180,6 +181,7 @@ public class ODEServer {
             // Register BPEL event listeners configured in axis2.properties file.
             registerEventListeners();
             registerMexInterceptors();
+            registerContextInterceptors();
 
             registerExtensionActivityBundles();
 
@@ -649,7 +651,23 @@ public class ODEServer {
                     _bpelServer.registerMessageExchangeInterceptor((MessageExchangeInterceptor) Class.forName(interceptorCN).newInstance());
                     __log.info(__msgs.msgMessageExchangeInterceptorRegistered(interceptorCN));
                 } catch (Exception e) {
-                    __log.warn("Couldn't register the event listener " + interceptorCN + ", the class couldn't be "
+                    __log.warn("Couldn't register the message exchange interceptor " + interceptorCN + ", the class couldn't be "
+                            + "loaded properly: " + e);
+                }
+            }
+        }
+    }
+
+    private void registerContextInterceptors() {
+        String interceptorsStr = _odeConfig.getContextInterceptors();
+        if (interceptorsStr != null) {
+            for (StringTokenizer tokenizer = new StringTokenizer(interceptorsStr, ",;"); tokenizer.hasMoreTokens();) {
+                String interceptorCN = tokenizer.nextToken();
+                try {
+                    _bpelServer.registerContextInterceptor((ContextInterceptor) Class.forName(interceptorCN).newInstance());
+                    __log.info(__msgs.msgContextInterceptorRegistered(interceptorCN));
+                } catch (Exception e) {
+                    __log.warn("Couldn't register the context interceptor " + interceptorCN + ", the class couldn't be "
                             + "loaded properly: " + e);
                 }
             }

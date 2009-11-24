@@ -62,13 +62,23 @@ public class ToFrom extends BpelObject {
     }
     
     public PartnerLinkVal getAsPartnerLinkVal() {
-        if (getAttribute("partnerLink",null) != null)
+        if (getAttribute("partnerLink",null) != null && getAttribute("context", null) == null)
             return new PartnerLinkVal(getElement());
         return null;
     }
     
+    public ContextVal getAsContextVal() {
+        if (getAttribute("partnerLink",null) != null && getAttribute("context", null) != null)
+            return new ContextVal(getElement());
+        return null;
+    }
+
     public boolean isPartnerLinkVal() {
         return getAsPartnerLinkVal() != null;
+    }
+
+    public boolean isContextVal() {
+        return getAsContextVal() != null;
     }
 
     public boolean isPropertyVal() {

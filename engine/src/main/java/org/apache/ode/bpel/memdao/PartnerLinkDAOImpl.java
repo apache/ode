@@ -19,10 +19,15 @@
 
 package org.apache.ode.bpel.memdao;
 
-import org.apache.ode.bpel.dao.PartnerLinkDAO;
-import org.w3c.dom.Element;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.dao.ContextValueDAO;
+import org.apache.ode.bpel.dao.PartnerLinkDAO;
+import org.w3c.dom.Element;
 
 /**
  * A very simple, in-memory implementation of the
@@ -47,6 +52,8 @@ public class PartnerLinkDAOImpl extends DaoBaseImpl implements PartnerLinkDAO {
     private String _partnerSessionId;
 
     private String _mySessionId;
+    
+    private Map<String, ContextValueDAO> _contextValues = new HashMap<String, ContextValueDAO>();
 
     public String getPartnerLinkName() {
         return _linkName;
@@ -119,5 +126,23 @@ public class PartnerLinkDAOImpl extends DaoBaseImpl implements PartnerLinkDAO {
     public void setMySessionId(String sessionId) {
         _mySessionId = sessionId;
     }
+
+    public Collection<ContextValueDAO> getContextValues() {
+        return _contextValues.values();
+    }
+
+	public void removeContextValue(String namespace, String key) {
+		_contextValues.remove(namespace + "#:#" + key);
+	}
+
+	public void setContextValue(String namespace, String key, String value) {
+		ContextValueDAO val = _contextValues.get(namespace + "#:#" + key);
+		if (val == null) {
+			val = new ContextValueDAOImpl(namespace, key);
+			_contextValues.put(namespace + "#:#" + key,  val);
+		}
+		
+		val.setValue(value);
+	}
 
 }

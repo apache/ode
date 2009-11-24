@@ -5,7 +5,7 @@ import javax.xml.namespace.QName;
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.w3c.dom.Element;
 
-class DbBackedMessageImpl extends MessageImpl {
+public class DbBackedMessageImpl extends MessageImpl {
 
     private MessageDAO _dao;
     

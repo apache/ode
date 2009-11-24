@@ -2,6 +2,7 @@ package org.apache.ode.bpel.rapi;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -10,7 +11,8 @@ import org.apache.ode.bpel.common.FaultException;
 import org.w3c.dom.Element;
 
 public interface IOContext {
-
+    enum Direction { INBOUND, OUTBOUND, INBOUND_REPLY, OUTBOUND_REPLY };
+    
     /**
      * Non-deterministic "select" (used to implement receive/pick) and the like. Calling this method will request that the engine
      * wait for the first message on a certain set of input ports.
@@ -43,7 +45,7 @@ public interface IOContext {
      * @param fault fault type, or <code>null</code> if no fault
      * @throws NoSuchOperationException
      */
-    void reply(String mexId, PartnerLink plink, String opName, Element msg, QName fault) throws NoSuchOperationException;
+    void reply(String mexId, PartnerLink plink, String opName, Element msg, QName fault, Set<org.apache.ode.bpel.rapi.PropagationRule> propagationRules) throws NoSuchOperationException;
 
     void reply(String mexId, Resource resource, Element msg, QName fault) throws NoSuchOperationException;
 
@@ -58,7 +60,7 @@ public interface IOContext {
      * @throws UninitializedPartnerEPR
      * @throws FaultException
      */
-    String /* MexId */invoke(String invokeId, PartnerLink partnerLinkInstance, Operation operation, Element outboundMsg)
+    String /* MexId */invoke(String invokeId, PartnerLink partnerLinkInstance, Operation operation, Element outboundMsg, Set<org.apache.ode.bpel.rapi.PropagationRule> propagationRules)
             throws UninitializedPartnerEPR;
 
     String invoke(String requestId, org.apache.ode.bpel.iapi.Resource resource, Element outgoingMessage);
@@ -119,5 +121,13 @@ public interface IOContext {
      * @returns <code>true</code> if timer was found and canelled. 
      */
     boolean cancelTimer(String timerId);
+
+    /**
+     * Invoke context interceptors for inbound communication
+     * @param mexId
+     * @param pl partner link whose contexts should be processed.
+     * @param dir direction
+     */
+    public void invokeContextInterceptorsInbound(String mexId, PartnerLink pl, Direction dir);
 
 }

@@ -19,11 +19,14 @@
 package org.apache.ode.bpel.rtrep.v2;
 
 import java.util.List;
+
 import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
+import org.apache.ode.bpel.rapi.ContextData;
 import org.apache.ode.bpel.rtrep.v2.OScope.Variable;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.msg.MessageBundle;
@@ -201,7 +204,7 @@ public class AssignHelper extends ACTIVITY {
     public Node evalLValue(OAssign.LValue to) throws FaultException, ExternalVariableModuleException {
         final OdeInternalInstance napi = getBpelRuntime();
         Node lval = null;
-        if (!(to instanceof OAssign.PartnerLinkRef)) {
+        if (!(to instanceof OAssign.PartnerLinkRef) && !(to instanceof OAssign.ContextRef)) {
             VariableInstance lvar;
             try {
                 lvar = _scopeFrame.resolve(to.getVariable());
@@ -284,6 +287,10 @@ public class AssignHelper extends ACTIVITY {
                 __log.debug("RValue is a partner link, corresponding endpoint "
                         + tempVal.getClass().getName() + " has value " + DOMUtils.domToString(tempVal));
             retVal = tempVal;
+        } else if (from instanceof OAssign.ContextRef) {
+            OAssign.ContextRef ctxRef = (OAssign.ContextRef) from;
+            ContextData cdata = getBpelRuntime().fetchContextData(_scopeFrame.resolve(ctxRef.partnerLink));
+            retVal = evalQuery(cdata.toXML(ctxRef.contexts), null, ctxRef.location, getEvaluationContext());
         } else if (from instanceof OAssign.Expression) {
             OExpression expr = ((OAssign.Expression) from).expression;
             List<Node> l = getBpelRuntime().getExpLangRuntime().evaluate(expr, getEvaluationContext());

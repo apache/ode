@@ -111,5 +111,7 @@ class ReplyGenerator extends DefaultActivityGenerator  {
                 _context.resolvePropertyAlias(oreply.variable, property.name);
             }
         }
+        
+        oreply.propagates = doContextPropagation(src);
     }
 }

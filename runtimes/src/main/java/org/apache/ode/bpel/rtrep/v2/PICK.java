@@ -34,6 +34,7 @@ import org.apache.ode.bpel.rtrep.v2.channels.FaultData;
 import org.apache.ode.bpel.rtrep.v2.channels.PickResponseChannel;
 import org.apache.ode.bpel.rtrep.v2.channels.PickResponseChannelListener;
 import org.apache.ode.bpel.rtrep.v2.channels.TerminationChannelListener;
+import org.apache.ode.bpel.rapi.IOContext;
 import org.apache.ode.bpel.rapi.InvalidProcessException;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.xsd.Duration;
@@ -279,6 +280,9 @@ class PICK extends ACTIVITY {
                 public void onRequestRcvd(int selectorIdx, String mexId) {
                     OPickReceive.OnMessage onMessage = _opick.onMessages.get(selectorIdx);
 
+                    // invoke context interceptors
+                    getBpelRuntime().invokeContextInterceptorsInbound(mexId, _scopeFrame.resolve(onMessage.partnerLink), IOContext.Direction.INBOUND);
+                    
                     // dead path the non-selected onMessage blocks.
                     for (OPickReceive.OnMessage onmsg : _opick.onMessages) {
                         if (!onmsg.equals(onMessage)) {

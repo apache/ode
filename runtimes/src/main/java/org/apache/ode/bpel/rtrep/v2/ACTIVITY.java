@@ -18,19 +18,26 @@
  */
 package org.apache.ode.bpel.rtrep.v2;
 
-import org.apache.ode.bpel.evt.ActivityDisabledEvent;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
+import org.apache.ode.bpel.evt.ActivityDisabledEvent;
 import org.apache.ode.bpel.evt.ActivityEvent;
 import org.apache.ode.bpel.evt.EventContext;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableReadEvent;
-import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.evar.ExternalVariableModuleException;
+import org.apache.ode.bpel.rapi.PartnerLink;
+import org.apache.ode.bpel.rapi.PartnerLinkModel;
+import org.apache.ode.bpel.rapi.PropagationRule;
 import org.apache.ode.jacob.IndexedObject;
 import org.w3c.dom.Node;
 
@@ -143,7 +150,71 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
     void commitChanges(VariableInstance var, Node val) throws ExternalVariableModuleException {
         getBpelRuntime().commitChanges(var, _scopeFrame, val);
     }
+    
+    Set<PropagationRule> computePropagationRules(OComm ocomm, Set<OContextPropagation> propagates) {
+        Map<PartnerLink, Set<String>> contextsByPL = new LinkedHashMap<PartnerLink, Set<String>>(); 
+        
+        if (propagates != null) {
+            for (OContextPropagation p : propagates) {
+                PartnerLink pl = _scopeFrame.resolve(p.fromPartnerLink);
+                Set<String> contexts = contextsByPL.get(pl);
+                if (contexts == null) {
+                    contexts = new HashSet<String>();
+                    contextsByPL.put(pl, contexts);
+                }
+                if (contexts.contains("*")) {
+                    continue;
+                }
+                for (String context : p.contexts) {
+                    if (context.equals("*")) {
+                        contexts.clear();
+                        contexts.add("*");
+                        break;
+                    } else {
+                        contexts.add(context);
+                    }
+                }
+            }
+        }
+        
+        for (org.apache.ode.bpel.iapi.ProcessConf.PropagationRule p : getBpelRuntime().getPropagationRules()) {
+            PartnerLinkModel pl = _self.o.getOwner().getPartnerLink(p.getFromPL());
+            if (pl == null) {
+                __log.warn("Invoke " + ocomm + " is configured to propagate context information from partner link " + p.getFromPL() + " which could not be resolved. Therefore the propagation rule will be ignored." );
+                continue;
+            }
+            if (p.getToPL().equals(ocomm.getPartnerLink().name)) {
+                Set<String> contexts = contextsByPL.get(pl);
+                if (contexts == null) {
+                    contexts = new HashSet<String>();
+                    contextsByPL.put(_scopeFrame.resolve(pl), contexts);
+                }
+                if (contexts.contains("*")) {
+                    continue;
+                }
+                for (String context : p.getContexts()) {
+                    if ("*".equals(context)) {
+                        contexts.clear();
+                        contexts.add("*");
+                        break;
+                    } else {
+                        contexts.add(context);
+                    }
+                }
+            }
+        }
+        
+        Set<PropagationRule> ruleset = new LinkedHashSet<PropagationRule>();
+        for (PartnerLink pl : contextsByPL.keySet()) {
+            PropagationRule pr = new PropagationRule();
+            pr.setFromPL(pl);
+            pr.setContexts(contextsByPL.get(pl));
+            ruleset.add(pr);
+        }
 
+        return ruleset;
+    }
+    
     public static final class Key implements Serializable {
         private static final long serialVersionUID = 1L;
 

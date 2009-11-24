@@ -20,6 +20,7 @@ package org.apache.ode.bpel.rtrep.v2;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
@@ -27,7 +28,7 @@ import javax.xml.namespace.QName;
 /**
  * Compiled representation of the BPEL <code>&lt;reply&gt;</code> activity.
  */
-public class OReply extends OActivity {
+public class OReply extends OActivity implements OComm {
   
     static final long serialVersionUID = -1L  ;
 
@@ -42,6 +43,7 @@ public class OReply extends OActivity {
     public OPartnerLink partnerLink;
     public Operation operation;
     public OScope.Variable variable;
+    public Set<OContextPropagation> propagates;
 
     /** Correlation sets initialized. */
     public final List<OScope.CorrelationSet> initCorrelations = new ArrayList<OScope.CorrelationSet>();
@@ -55,4 +57,25 @@ public class OReply extends OActivity {
     public OReply(OProcess owner, OActivity parent) {
         super(owner, parent);
     }
+    
+    public Set<OContextPropagation> getPropagates() {
+        return propagates;
+    }
+
+    public Operation getOperation() {
+        return operation;
+    }
+
+    public OPartnerLink getPartnerLink() {
+        return partnerLink;
+    }
+
+    public OResource getResource() {
+        return resource;
+    }
+
+    public boolean isRestful() {
+        return resource != null;
+    }
+
 }

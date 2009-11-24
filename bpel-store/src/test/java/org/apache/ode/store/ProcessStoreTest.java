@@ -28,6 +28,7 @@ import javax.xml.namespace.QName;
 import junit.framework.TestCase;
 
 import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.utils.DOMUtils;
 
 public class ProcessStoreTest extends TestCase {
 
@@ -67,6 +68,10 @@ public class ProcessStoreTest extends TestCase {
         assertNotNull(pconf);
         assertEquals(_testdd.getName(),pconf.getPackage());
         assertEquals(pname, pconf.getProcessId());
+        assertEquals(1, pconf.getPropagationRules().size());
+        assertEquals(1, pconf.getContextInterceptors().keySet().size());
+        assertNotNull(pconf.getContextInterceptors().get("org.apache.ode.bpel.context.TestInterceptor"));
+        assertEquals("myparam1", DOMUtils.getElementContent(pconf.getContextInterceptors().get("org.apache.ode.bpel.context.TestInterceptor")).getLocalName());
     } 
     
     public void testGetProcesses() {
