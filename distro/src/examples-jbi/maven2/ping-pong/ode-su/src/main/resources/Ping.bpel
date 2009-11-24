@@ -28,11 +28,11 @@
 	    xmlns:fun="java:org.apache.ode.ping.AttachPing"
         expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
 
-    <import location="Ping.wsdl"
+    <import location="classpath:Ping.wsdl"
             namespace="urn:/Ping.wsdl"
             importType="http://schemas.xmlsoap.org/wsdl/" />
 
-    <import location="Pong.wsdl"
+    <import location="classpath:Pong.wsdl"
             namespace="urn:/Pong.wsdl"
             importType="http://schemas.xmlsoap.org/wsdl/" />
 

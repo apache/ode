@@ -88,18 +88,26 @@ public class DefaultResourceFinder implements ResourceFinder {
         // Note that if we get an absolute URI, the relativize operation will simply
         // return the absolute URI.
         URI relative = _relativeDir.toURI().relativize(uri);
-        if (relative.isAbsolute() && !relative.getScheme().equals("urn")) {
-           __log.fatal("openResource: invalid scheme (should be urn:)  " + uri);
-           return null;
-        }
+        if (relative.isAbsolute() && relative.getScheme().equals("classpath")) {
+            InputStream r = Thread.currentThread().getContextClassLoader().getResourceAsStream(relative.getSchemeSpecificPart());
+            if (r == null) {
+                __log.error("classpath resource not found " + absolute);
+            }
+            return r;
+        } else {
+            if (relative.isAbsolute() && !(relative.getScheme().equals("urn"))) {
+               __log.fatal("openResource: invalid scheme (should be urn: or classpath:)  " + uri);
+               return null;
+            }
 
-        File f = new File(absolute.getPath(), relative.getPath());
-        if (!f.exists()) {
-            __log.debug("fileNotFound: " + f);
-            return null;
-        }
+            File f = new File(absolute.getPath(), relative.getPath());
+            if (!f.exists()) {
+                __log.debug("fileNotFound: " + f);
+                return null;
+            }
 
-        return new FileInputStream(f);
+            return new FileInputStream(f);
+        }
     }
     
     public URI getBaseResourceURI() {
