@@ -19,7 +19,7 @@
 package org.apache.ode.bpel.context;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,7 +51,7 @@ import org.w3c.dom.Node;
  */
 public class ContextDataImpl implements ContextData {
 
-    protected Map<String, Map<String,String>> contexts = new HashMap<String, Map<String, String>>();
+    protected Map<String, Map<String,String>> contexts = new LinkedHashMap<String, Map<String, String>>();
     
     public ContextDataImpl() {
     }
@@ -62,7 +62,7 @@ public class ContextDataImpl implements ContextData {
     public void put(String context, String key, String value) {
         Map<String, String> ctx = contexts.get(context);
         if (ctx == null) {
-            ctx = new HashMap<String, String>();
+            ctx = new LinkedHashMap<String, String>();
             contexts.put(context, ctx);
         }
         ctx.put(key, value);
