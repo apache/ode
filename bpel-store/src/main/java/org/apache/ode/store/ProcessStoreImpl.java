@@ -690,8 +690,14 @@ public class ProcessStoreImpl implements ProcessStore {
         if (f.exists())
             return f;
         f = new File(_deployDir, dudao.getName());
-        if (f.exists())
+        if (f.exists()) {
+	        try {
+		        dudao.setDeploymentUnitDir(f.getCanonicalPath());
+	        } catch (IOException e) {
+		        __log.warn("Could not update deployment unit directory for " + dudao.getName(), e); 
+	        }
             return f;
+        }
 
         return null;
     }

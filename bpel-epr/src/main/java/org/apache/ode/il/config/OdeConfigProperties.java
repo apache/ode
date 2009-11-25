@@ -71,6 +71,8 @@ public class OdeConfigProperties {
 
     public static final String PROP_WORKING_DIR = "working.dir";
 
+    public static final String PROP_DEPLOY_DIR = "deploy.dir";
+    
     public static final String PROP_EVENT_LISTENERS = "event.listeners";
 
     public static final String PROP_MEX_INTERCEPTORS = "mex.interceptors";
@@ -239,6 +241,10 @@ public class OdeConfigProperties {
         return getProperty(OdeConfigProperties.PROP_WORKING_DIR);
     }
 
+    public String getDeployDir() {
+        return getProperty(OdeConfigProperties.PROP_DEPLOY_DIR);
+    }
+    
     public String getTxFactoryClass() {
         return getProperty(OdeConfigProperties.PROP_TX_FACTORY_CLASS, DEFAULT_TX_FACTORY_CLASS_NAME);
     }

@@ -440,6 +440,10 @@ public class ODEServer {
         _store = createProcessStore(eprContext, _db.getDataSource());
         _store.registerListener(new ProcessStoreListenerImpl());
         _store.setDeployDir(new File(_workRoot, "processes"));
+        _store.setDeployDir(
+        		_odeConfig.getDeployDir() != null ?
+	        		new File(_odeConfig.getDeployDir()) :
+	        		new File(_workRoot, "processes"));
         _store.setConfigDir(_configRoot);
     }
 
