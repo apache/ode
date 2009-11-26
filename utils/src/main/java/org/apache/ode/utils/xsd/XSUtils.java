@@ -30,6 +30,7 @@ import org.apache.xerces.xni.parser.XMLParseException;
 import org.apache.xerces.xs.XSModel;
 import org.w3c.dom.ls.LSInput;
 
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -47,26 +48,6 @@ public class XSUtils {
     private static final XsdMessages __msgs = MessageBundle.getMessages(XsdMessages.class);
 
     /**
-     * Recursively "capture" XSD documents starting at the given URI and
-     * using an {@link XMLEntityResolver} to obtain document streams. The
-     * result is a mapping from the XSD URI to a byte array containing the
-     * "captured" document stream.
-     *
-     * @param initialUri URI of the schema
-     * @param resolver {@link XMLEntityResolver} used to obtain XSD document streams
-     *
-     * @return mapping between schema URI and the "captured" schema text (in byte form)
-     */
-    public static Map<URI, byte[]> captureSchema(String initialUri, XMLEntityResolver resolver)
-            throws XsdException {
-        DOMInputImpl input = new DOMInputImpl();
-        input.setSystemId(initialUri);
-        Map<URI, byte[]> ret = captureSchema(input, resolver);
-
-        return ret;
-    }
-
-    /**
      * Capture the schemas supplied by the reader.  <code>systemURI</code> is
      * required to resolve any relative uris encountered during the parse.
      *
@@ -76,25 +57,17 @@ public class XSUtils {
      *
      * @return
      */
-    public static Map<URI, byte[]> captureSchema(URI systemURI, String schemaData,
+    public static Map<URI, byte[]> captureSchema(URI systemURI, byte[] schemaData,
                                                  XMLEntityResolver resolver) throws XsdException {
         if (__log.isDebugEnabled())
             __log.debug("captureSchema(URI,Text,...): systemURI=" + systemURI);
 
         DOMInputImpl input = new DOMInputImpl();
         input.setSystemId(systemURI.toString());
-        input.setStringData(schemaData);
+        input.setStringData(new String(schemaData));
 
         Map<URI, byte[]> ret = captureSchema(input, resolver);
-        // Let's not forget the root schema.
-        try {
-            // TODO don't assume UTF-8 - but which encoding is required?
-            // either we need another parameter or the entire idea of
-            // passing in a String needs to be revised.
-            ret.put(systemURI, schemaData.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException uenc) {
-            throw new RuntimeException(uenc);
-        }
+        ret.put(systemURI, schemaData);
         return ret;
     }
 
@@ -106,7 +79,7 @@ public class XSUtils {
         Map<URI, byte[]> captured = new HashMap<URI, byte[]>();
 
         if (resolver == null) {
-            resolver = new DefaultXMLEntityResolver();
+            throw new IllegalStateException("no resolver set");
         }
 
         CapturingXMLEntityResolver cr = new CapturingXMLEntityResolver(captured, resolver);

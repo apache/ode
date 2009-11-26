@@ -38,9 +38,9 @@ public class XMLSchemaType implements ExtensibilityElement, Serializable {
   /** For compatibility with some older classes. */
   public static final QName qname = QNAME;
 
-  private String _xmlSchema;
+  private byte[] _xmlSchema;
 
-  public XMLSchemaType(String xmlSchema) {
+  public XMLSchemaType(byte[] xmlSchema) {
     super();
     _xmlSchema = xmlSchema;
   }
@@ -71,12 +71,7 @@ public class XMLSchemaType implements ExtensibilityElement, Serializable {
     return Boolean.FALSE;
   }
 
-  /**
-   * Returns the schema content as string.
-   *
-   * @return
-   */
-  public String getXMLSchema() {
+  public byte[] getXMLSchema() {
     return _xmlSchema;
   }
 }

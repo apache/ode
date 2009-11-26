@@ -26,8 +26,8 @@
         xmlns:pong="urn:/Pong.wsdl"
         expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
 
-    <import location="classpath:Pong.wsdl"
-            namespace="urn:/Pong.wsdl"
+    <import location="common.wsdl"
+            namespace="http://www.example.org/common/"
             importType="http://schemas.xmlsoap.org/wsdl/" />
 
     <partnerLinks>

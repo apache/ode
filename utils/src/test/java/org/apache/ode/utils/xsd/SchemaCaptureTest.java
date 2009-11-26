@@ -18,8 +18,18 @@
  */
 package org.apache.ode.utils.xsd;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.utils.StreamUtils;
 import org.apache.ode.utils.TestResources;
+import org.apache.xerces.xni.XMLResourceIdentifier;
+import org.apache.xerces.xni.XNIException;
+import org.apache.xerces.xni.parser.XMLEntityResolver;
+import org.apache.xerces.xni.parser.XMLInputSource;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
 
@@ -29,13 +39,33 @@ import junit.framework.TestCase;
  * Test schema capture functionality.
  */
 public class SchemaCaptureTest extends TestCase {
+    private static Log __log = LogFactory.getLog(SchemaCaptureTest.class);
 
   public void testSchemaCapture() throws Exception {
-      System.out.println("GETTING RESOURCE " + TestResources.getRetailerSchema());
-    String initialURI = TestResources.getRetailerSchema().toExternalForm();
-    Map<URI, byte[]> s = XSUtils.captureSchema(initialURI, new DefaultXMLEntityResolver());
+      __log.debug("GETTING RESOURCE " + TestResources.getRetailerSchema());
+    InputStream xsdStream = new FileInputStream(TestResources.getRetailerSchema().getFile());
+    byte[] data;
+    try {
+        data = StreamUtils.read(xsdStream);
+    } finally {
+        xsdStream.close();
+    }
+
+    Map<URI, byte[]> s = XSUtils.captureSchema(URI.create("schema.xsd"), data, new XMLEntityResolver() {
+        public XMLInputSource resolveEntity(XMLResourceIdentifier resourceIdentifier) throws XNIException, IOException {
+            XMLInputSource src = new XMLInputSource(resourceIdentifier);
+            String literalUri = resourceIdentifier.getLiteralSystemId();
+        
+            if (literalUri != null) {
+              src.setByteStream(getClass().getClassLoader().getResourceAsStream(literalUri));
+            }
+            
+            return src;
+        }
+    });
     // we expect the root schema and three includes
-    assertEquals(4, s.size());
+    __log.debug("loaded " + s.keySet());
+    assertEquals(5, s.size());
   }
 
 }

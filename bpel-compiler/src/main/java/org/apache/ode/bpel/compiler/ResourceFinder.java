@@ -40,5 +40,7 @@ public interface ResourceFinder {
     InputStream openResource(URI uri) throws MalformedURLException, IOException;
 
     URI getBaseResourceURI();
+    
+    URI resolve(URI parent, URI child);
 }
 

@@ -17,27 +17,19 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <parent>
-    <groupId>org.apache.ode.ping-pong</groupId>
-    <artifactId>pom</artifactId>
-    <version>1.0.0</version>
-  </parent>
-
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.apache.ode.ping-pong</groupId>
-  <artifactId>ping-pong-http-su</artifactId>
-  <packaging>jbi-service-unit</packaging>
-
-    <dependencies>
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>common</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-     </dependencies>
-
-  <properties>
-    <componentName>servicemix-http</componentName>
-  </properties>
-</project>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:/Ping.wsdl" xmlns:tns="urn:/Ping.wsdl" elementFormDefault="qualified">
+  <element name="PingRequest">
+    <complexType>
+      <all>
+        <element name="text" type="string"/>
+      </all>
+    </complexType>
+  </element>
+  <element name="PingResponse">
+    <complexType>
+      <all>
+        <element name="text" type="string"/>
+      </all>
+    </complexType>
+  </element>
+</schema>

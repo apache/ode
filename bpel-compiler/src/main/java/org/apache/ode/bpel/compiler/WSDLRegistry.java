@@ -63,7 +63,7 @@ class WSDLRegistry {
     private final HashMap<String, ArrayList<Definition4BPEL>> _definitions = new HashMap<String, ArrayList<Definition4BPEL>>();
 
     private final Map<URI, byte[]> _schemas = new HashMap<URI,byte[]>();
-    private final Map<URI, String> _internalSchemas = new HashMap<URI, String>();
+    private final Map<URI, byte[]> _internalSchemas = new HashMap<URI, byte[]>();
     private final Map<URI, Document> _documentSchemas = new HashMap<URI, Document>();
 
     private SchemaModel _model;
@@ -205,14 +205,14 @@ class WSDLRegistry {
                 ExtensibilityElement ee = iter.next();
                 
                 if (ee instanceof XMLSchemaType) {
-                    String schema = ((XMLSchemaType)ee).getXMLSchema();
+                    byte[] schema = ((XMLSchemaType)ee).getXMLSchema();
                     WsdlFinderXMLEntityResolver resolver = new WsdlFinderXMLEntityResolver(rf, defuri, _internalSchemas, false);
                     try {
                         Map<URI, byte[]> capture = XSUtils.captureSchema(defuri, schema, resolver);
                         _schemas.putAll(capture);
 
                         try {
-                            Document doc = DOMUtils.parse(new InputSource(new StringReader(schema)));
+                            Document doc = DOMUtils.parse(new InputSource(new ByteArrayInputStream(schema)));
                             String schemaTargetNS = doc.getDocumentElement().getAttribute("targetNamespace");
                             if (schemaTargetNS != null && schemaTargetNS.length() > 0) {
                                 _internalSchemas.put(new URI(schemaTargetNS), schema);

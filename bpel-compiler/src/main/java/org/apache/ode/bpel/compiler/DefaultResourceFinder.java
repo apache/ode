@@ -59,7 +59,7 @@ public class DefaultResourceFinder implements ResourceFinder {
         checkDir("absoluteDir", absoluteDir);
         _relativeDir = relativeDir;
         _absoluteDir = absoluteDir;
-        }
+    }
 
     private void checkDir(String arg, File dir) {
         if (dir == null) {
@@ -71,6 +71,28 @@ public class DefaultResourceFinder implements ResourceFinder {
     }
 
     public InputStream openResource(URI uri) throws MalformedURLException, IOException {
+        InputStream r = openFileResource(uri);
+        if (r != null) {
+            return r;
+        }
+        
+        if (__log.isDebugEnabled()) {
+            __log.debug("trying classpath resource for " + uri);
+        }
+        
+        r = Thread.currentThread().getContextClassLoader().getResourceAsStream(uri.getPath());
+        if (r != null) {
+            return r;
+        } else {
+            if (__log.isDebugEnabled()) {
+                __log.debug("classpath resource not found " + uri);
+            }
+            return null;
+        }
+    
+    }
+
+    private InputStream openFileResource(URI uri) throws MalformedURLException, IOException {
         URI absolute = _absoluteDir.toURI();
         if (__log.isDebugEnabled()) {
             __log.debug("openResource: uri="+uri+" relativeDir="+_relativeDir+" absoluteDir="+_absoluteDir);
@@ -80,7 +102,7 @@ public class DefaultResourceFinder implements ResourceFinder {
             try {
                 return uri.toURL().openStream();
             } catch (Exception except) {
-                __log.fatal("openResource: unable to open file URL " + uri + "; " + except.toString());
+                __log.debug("openResource: unable to open file URL " + uri + "; " + except.toString());
                 return null;
             }
         }
@@ -88,30 +110,35 @@ public class DefaultResourceFinder implements ResourceFinder {
         // Note that if we get an absolute URI, the relativize operation will simply
         // return the absolute URI.
         URI relative = _relativeDir.toURI().relativize(uri);
-        if (relative.isAbsolute() && relative.getScheme().equals("classpath")) {
-            InputStream r = Thread.currentThread().getContextClassLoader().getResourceAsStream(relative.getSchemeSpecificPart());
-            if (r == null) {
-                __log.error("classpath resource not found " + absolute);
-            }
-            return r;
-        } else {
-            if (relative.isAbsolute() && !(relative.getScheme().equals("urn"))) {
-               __log.fatal("openResource: invalid scheme (should be urn: or classpath:)  " + uri);
-               return null;
-            }
+        if (relative.isAbsolute() && !(relative.getScheme().equals("urn"))) {
+           __log.fatal("openResource: invalid scheme (should be urn:)  " + uri);
+           return null;
+        }
 
-            File f = new File(absolute.getPath(), relative.getPath());
-            if (!f.exists()) {
-                __log.debug("fileNotFound: " + f);
-                return null;
-            }
-
+        File f = new File(absolute.getPath(), relative.getPath());
+        if (f.exists()) {
             return new FileInputStream(f);
+        } else {
+            if (__log.isDebugEnabled()) {
+                __log.debug("fileNotFound: " + f);
+            }
+            return null;
         }
     }
     
     public URI getBaseResourceURI() {
         return _absoluteDir.toURI();
+    }
+
+    public URI resolve(URI parent, URI child) {
+        if (parent.isAbsolute()) {
+            parent = _absoluteDir.toURI().relativize(parent);
+        }
+        URI result = parent.resolve(child);
+        if (__log.isDebugEnabled()) {
+            __log.debug("resolving URI: parent " + parent + " child " + child + " result " + result);
+        }
+        return result;
     }
 
 }

@@ -192,7 +192,7 @@ abstract class BpelCompiler implements CompilerContext {
         Definition4BPEL def;
         try {
             WSDLReader r = _wsdlFactory.newWSDLReader();
-            WSDLLocatorImpl locator = new WSDLLocatorImpl(_resourceFinder, from.resolve(wsdlImport));
+            WSDLLocatorImpl locator = new WSDLLocatorImpl(_resourceFinder, _resourceFinder.resolve(from, wsdlImport));
             def = (Definition4BPEL) r.readWSDL(locator);
         } catch (WSDLException e) {
             recoveredFromError(sloc, new CompilationException(__cmsgs.errWsdlParseError(e
@@ -202,7 +202,7 @@ abstract class BpelCompiler implements CompilerContext {
         }
 
         try {
-            _wsdlRegistry.addDefinition(def, _resourceFinder, from.resolve(wsdlImport));
+            _wsdlRegistry.addDefinition(def, _resourceFinder, _resourceFinder.resolve(from, wsdlImport));
             if (__log.isDebugEnabled())
                 __log.debug("Added WSDL Definition: " + wsdlImport);
         } catch (CompilationException ce) {
@@ -211,13 +211,12 @@ abstract class BpelCompiler implements CompilerContext {
     }
 
     public void addXsdImport(URI from, URI location, SourceLocation sloc) {
-        URI resFrom = from.resolve(location);
+        URI resFrom = _resourceFinder.resolve(from, location);
         if (__log.isDebugEnabled())
             __log.debug("Adding XSD import from " + resFrom + " location " + location);
         XMLEntityResolver resolver = new WsdlFinderXMLEntityResolver(_resourceFinder,
-                location, new HashMap<URI,String>(), true);
+                location, new HashMap<URI,byte[]>(), true);
         try {
-            Map<URI, byte[]> schemas = XSUtils.captureSchema(resFrom.toString(), resolver);
             InputStream xsdStream = _resourceFinder.openResource(resFrom);
             byte[] data;
             try {
@@ -225,7 +224,8 @@ abstract class BpelCompiler implements CompilerContext {
             } finally {
                 xsdStream.close();
             }
-            schemas.put(resFrom, data);
+            
+            Map<URI, byte[]> schemas = XSUtils.captureSchema(resFrom, data, resolver);
             _wsdlRegistry.addSchemas(schemas);
         } catch (XsdException e) {
             CompilationException ce =  new CompilationException(__cmsgs.errInvalidImport(location.toString()));
