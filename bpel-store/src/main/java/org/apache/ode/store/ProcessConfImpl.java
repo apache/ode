@@ -379,7 +379,7 @@ public class ProcessConfImpl implements ProcessConf {
         }
 
         // Events filtered at the process level
-        if (processEvents.getEnableEventList() != null) {
+        if (processEvents.getEnableEventList() != null && !processEvents.getEnableEventList().isEmpty()) {
             List<String> enabled = processEvents.getEnableEventList();
             HashSet<BpelEvent.TYPE> evtSet = new HashSet<BpelEvent.TYPE>();
             for (String enEvt : enabled) {
