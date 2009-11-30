@@ -71,6 +71,8 @@ public class DefaultResourceFinder implements ResourceFinder {
     }
 
     public InputStream openResource(URI uri) throws MalformedURLException, IOException {
+        uri = relativize(uri);
+        
         InputStream r = openFileResource(uri);
         if (r != null) {
             return r;
@@ -130,15 +132,22 @@ public class DefaultResourceFinder implements ResourceFinder {
         return _absoluteDir.toURI();
     }
 
+    private URI relativize(URI u) {
+        if (u.isAbsolute()) {
+            return _absoluteDir.toURI().relativize(u);
+        } else return u;
+    }
+    
     public URI resolve(URI parent, URI child) {
-        if (parent.isAbsolute()) {
-            parent = _absoluteDir.toURI().relativize(parent);
-        }
+        parent = relativize(parent);
+        child = relativize(child);
         URI result = parent.resolve(child);
+        URI result2 = _absoluteDir.toURI().resolve(result);
         if (__log.isDebugEnabled()) {
-            __log.debug("resolving URI: parent " + parent + " child " + child + " result " + result);
+            __log.debug("resolving URI: parent " + parent + " child " + child + " result " + result + " resultAbsolute:" + result2);
         }
-        return result;
+        
+        return result2;
     }
 
 }

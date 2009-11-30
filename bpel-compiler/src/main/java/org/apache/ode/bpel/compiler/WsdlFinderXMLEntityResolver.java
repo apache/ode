@@ -95,7 +95,7 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
             }
             return null;
         } else {
-            location = _wsdlFinder.resolve(_baseURI, URI.create(resourceIdentifier.getLiteralSystemId()));
+            location = _wsdlFinder.resolve(URI.create(resourceIdentifier.getBaseSystemId()), URI.create(resourceIdentifier.getLiteralSystemId()));
         }
 
         if (__log.isDebugEnabled())
