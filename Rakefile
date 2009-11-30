@@ -126,6 +126,7 @@ SERVICEMIX          = [
                         "commons-beanutils:commons-beanutils:jar:1.7.0",
                         "tranql:tranql-connector-derby-common:jar:1.1"
                         ]
+SLF4J = group(%w{ slf4j-api slf4j-log4j12 jcl104-over-slf4j }, :under=>"org.slf4j", :version=>"1.4.3")                        
 SPRING              = ["org.springframework:spring:jar:2.5.6"]
 TRANQL              = [ "tranql:tranql-connector:jar:1.1", COMMONS.primitives ]
 WOODSTOX            = "woodstox:wstx-asl:jar:3.2.1"
@@ -529,6 +530,7 @@ define "ode" do
       GERONIMO.transaction, JAVAX.connector, JAVAX.ejb, JAVAX.persistence, JAVAX.stream,
       JAVAX.transaction, JAXEN, JBI, OPENJPA, SAXON, SERVICEMIX, SPRING, TRANQL,
       XALAN, XBEAN, XMLBEANS, 
+      SLF4J,
       LOG4J,
       DOM4J,
       HIBERNATE

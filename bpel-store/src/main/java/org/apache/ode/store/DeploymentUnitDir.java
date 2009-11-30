@@ -139,7 +139,14 @@ class DeploymentUnitDir {
         if (bpels.size() == 0)
             throw new IllegalArgumentException("Directory " + _duDirectory.getName() + " does not contain any process!");
         for (File bpel : bpels) {
-            compile(bpel);
+        	String b = bpel.getAbsolutePath();
+        	File cbp = new File(b.substring(0,b.lastIndexOf(".bpel")) + ".cbp"); 
+        	if (!cbp.exists()) {
+        		__log.debug("compiling " + bpel);
+        		compile(bpel);
+        	} else {
+        		__log.debug("skipping compilation of " + bpel + " cbp found: " + cbp);
+        	}
         }
     }
 
@@ -375,6 +382,17 @@ class DeploymentUnitDir {
 
     public long getVersion() {
         return _version;
+    }
+    
+    /**
+     * @return Static DU version number generated from DU name. -1 when package doesn't use versioning.
+     */
+    public long getStaticVersion() {
+        try {
+            return Integer.parseInt(getName().substring(getName().lastIndexOf("-") + 1));
+        } catch (Throwable t) {
+            return -1;
+        }
     }
 
     public void setVersion(long version) {

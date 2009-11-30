@@ -24,17 +24,8 @@
        xmlns:util="http://www.springframework.org/schema/util"
        >
 
-    <bean id="transactionManager" class="org.apache.geronimo.transaction.manager.GeronimoTransactionManager"/>
-
-    <bean id="jndi"
-          class="org.apache.xbean.spring.jndi.SpringInitialContextFactory" 
-          factory-method="makeInitialContext"
-          singleton="true"
-          >
-      <property name="entries" ref="jndiEntries" />
-    </bean>
-
     <util:map id="jndiEntries">
+        <entry key="java:comp/env/jdbc/ode" value-ref="odeDS"/>
     </util:map>
     
     <sm:container 

@@ -64,16 +64,20 @@ class OdeServiceUnit {
     }
 
     public void deploy() throws DeploymentException {
-    	ClassLoader cl = Thread.currentThread().getContextClassLoader();
-    	try {
-    		Thread.currentThread().setContextClassLoader(getConfigurationClassLoader());
-            _ode._store.deploy(_serviceUnitRootPath);
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(getConfigurationClassLoader());
+            // JBI ServiceUnits don't use autoincrement version, 
+            // because in ServiceMix redeploying component yields to redeploying dependent
+            // ServiceUnits, and we don't want to create new processes versions 
+            // on such redeployments 
+            _ode._store.deploy(_serviceUnitRootPath, false);
         } catch (Exception ex) {
             String errmsg = __msgs.msgOdeProcessDeploymentFailed(_serviceUnitRootPath, _serviceUnitID);
             __log.error(errmsg, ex);
             throw new DeploymentException(errmsg, ex);
         } finally {
-        	Thread.currentThread().setContextClassLoader(cl);
+            Thread.currentThread().setContextClassLoader(cl);
         }
     }
 

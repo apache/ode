@@ -63,18 +63,26 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
     private Element _serviceref;
 
     private Endpoint _endpoint;
+    
+    private int count;
 
     public OdeService(OdeContext odeContext, Endpoint endpoint) throws Exception {
         _ode = odeContext;
         _endpoint = endpoint;
     }
 
+    public int getCount() {
+    	return count;
+    }
     /**
      * Do the JBI endpoint activation.
      * 
      * @throws JBIException
      */
     public void activate() throws JBIException {
+    	count++;
+    	if(count != 1)
+    		return;
         if (_serviceref == null) {
             ServiceEndpoint[] candidates = _ode.getContext().getExternalEndpointsForService(_endpoint.serviceName);
             if (candidates.length != 0) {
@@ -92,6 +100,9 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
      * Deactivate endpoints in JBI.
      */
     public void deactivate() throws JBIException {
+    	count--;
+    	if(count != 0) 
+    		return;
         _ode.getContext().deactivateEndpoint(_internal);
         __log.debug("Dectivated endpoint " + _endpoint);
     }

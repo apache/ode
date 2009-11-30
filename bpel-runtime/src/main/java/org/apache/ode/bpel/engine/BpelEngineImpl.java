@@ -313,8 +313,18 @@ public class BpelEngineImpl implements BpelEngine {
                 BpelProcess cachedVersion = processesIter.next();
                 __log.debug("cached version " + cachedVersion.getPID() + " vs registering version " + process.getPID());
                 if (cachedVersion.getProcessType().equals(process.getProcessType())) {
-                    processesIter.remove();
-                    cachedVersion.deactivate();
+                    //Check for versions to retain newer one
+                    if (cachedVersion.getVersion() > process.getVersion()) {
+                	    __log.debug("removing current version");
+                        process.activate(this);
+                        process.deactivate();
+                        return;
+                    } else {
+                	    __log.debug("removing cached older version");
+                        processesIter.remove();
+                		cachedVersion.deactivate();
+                    }
+
                 }
             }
             processes.add(process);

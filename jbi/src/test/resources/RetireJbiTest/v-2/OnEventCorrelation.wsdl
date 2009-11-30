@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:tns="http://sample.bpel.org/bpel/sample" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" name="OnEventCorrelation" targetNamespace="http://sample.bpel.org/bpel/sample"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+>
+  <message name="OnEventCorrelationMessage">
+    <part type="xsd:string" name="payload"/>
+    <part type="xsd:string" name="payload2"/>
+  </message>
+  <portType name="OnEventCorrelation">
+    <operation name="initiate">
+      <input message="tns:OnEventCorrelationMessage"/>
+      <output message="tns:OnEventCorrelationMessage"/>
+    </operation>
+    <operation name="complete">
+      <input message="tns:OnEventCorrelationMessage"/>
+      <output message="tns:OnEventCorrelationMessage"/>
+    </operation>
+  </portType>
+  <binding name="OnEventCorrelationBinding" type="tns:OnEventCorrelation">
+    <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="initiate">
+      <wsdlsoap:operation soapAction="initiate"/>
+      <input>
+        <wsdlsoap:body use="literal"/>
+      </input>
+      <output>
+        <wsdlsoap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="complete">
+      <wsdlsoap:operation soapAction="complete"/>
+      <input>
+        <wsdlsoap:body use="literal"/>
+      </input>
+      <output>
+        <wsdlsoap:body use="literal"/>
+      </output>
+    </operation>
+  </binding>
+  <service name="OnEventCorrelation">
+    <port binding="tns:OnEventCorrelationBinding" name="OnEventCorrelation">
+      <wsdlsoap:address location="http://localhost:8080/ode/processes/OnEventCorrelation/"/>
+    </port>
+  </service>
+    <plnk:partnerLinkType name="OnEventCorrelation">
+        <plnk:role name="OnEventCorrelationProvider" portType="tns:OnEventCorrelation"/>
+    </plnk:partnerLinkType>
+</definitions>

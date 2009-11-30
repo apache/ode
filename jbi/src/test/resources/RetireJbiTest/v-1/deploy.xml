@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <!--
 
     Licensed to the Apache Software Foundation (ASF) under one or more
@@ -17,23 +17,15 @@
     limitations under the License.
 
 -->
-<beans xmlns:sm="http://servicemix.apache.org/config/1.0"
-	   xmlns:http="http://servicemix.apache.org/http/1.0"
-	   xmlns:eip="http://servicemix.apache.org/eip/1.0"
-       xmlns:util="http://www.springframework.org/schema/util"
-       xmlns:jencks="http://jencks.org/2.0"
-	   >
+<dd:deploy xmlns:dd="http://www.apache.org/ode/schemas/dd/2007/03"
+    xmlns:bpel="http://sample.bpel.org/bpel/sample"
+    >
 
-    <util:map id="jndiEntries">
-        <entry key="java:comp/env/jdbc/ode" value-ref="odeDS"/>
-    </util:map>
-	
-	<sm:container 
-		id="jbi" 
-		embedded="true" 
-		rootDir="target/test/smx"
-		transactionManager="#transactionManager"
-		depends-on="jndi"
-		>
-	</sm:container>
-</beans>
+    <dd:process
+        name="bpel:OnEventCorrelation" fileName="OnEventCorrelation.bpel">
+        <!--dd:process-events generate="none"/-->
+        <dd:provide partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelation" port="OnEventCorrelation" />
+        </dd:provide>
+    </dd:process>
+</dd:deploy>

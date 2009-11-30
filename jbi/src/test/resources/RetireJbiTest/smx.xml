@@ -23,7 +23,6 @@
        xmlns:util="http://www.springframework.org/schema/util"
        xmlns:jencks="http://jencks.org/2.0"
        xmlns:mws="http://ode/bpel/unit-test.wsdl"
-       xmlns:bpel="http://sample.bpel.org/bpel/sample"
        >
 
     <util:map id="jndiEntries">
@@ -37,24 +36,5 @@
         transactionManager="#transactionManager"
         depends-on="jndi"
         >
-        <sm:activationSpecs>
-            <sm:activationSpec id="ms-eip">
-                <sm:component>
-                    <eip:component>
-                        <eip:endpoints>
-			  <eip:content-based-router service="bpel:OnEventCorrelation2Fwd" endpoint="OnEventCorrelation2" forwardOperation="true">
-			    <eip:rules>
-			      <eip:routing-rule>
-				<eip:target>
-				  <eip:exchange-target service="bpel:OnEventCorrelation2"/>
-				</eip:target>
-			      </eip:routing-rule>
-			    </eip:rules>
-			  </eip:content-based-router>
-                        </eip:endpoints>
-                    </eip:component>
-                </sm:component>
-            </sm:activationSpec>
-        </sm:activationSpecs>
     </sm:container>
 </beans>

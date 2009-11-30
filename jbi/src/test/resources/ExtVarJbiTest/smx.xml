@@ -23,58 +23,34 @@
        xmlns:util="http://www.springframework.org/schema/util"
        xmlns:jencks="http://jencks.org/2.0"
 	   >
-
-	<bean id="transactionManager" class="org.apache.geronimo.transaction.manager.GeronimoTransactionManager"/>
-
-  <jencks:connectionTracker id="connectionTracker" geronimoTransactionManager="#transactionManager" />
-    
-  <jencks:workManager
-            id="workManager"
-            threadPoolSize="200"
-            transactionManager="#transactionManager" />
-  
-  <jencks:bootstrapContext
-            id="bootstrapContext"
-            workManager="#workManager"
-            transactionManager="#transactionManager" />
-  
   <jencks:poolingSupport 
-            id="poolingSupport" 
+            id="poolingSupport2" 
             connectionMaxIdleMinutes="5"
             poolMaxSize="20"
             />
   
   <jencks:connectionManager
-            id="connectionManager"
+            id="connectionManager2"
             containerManagedSecurity="false"
-            transaction="xa"
+            transaction="local"
             transactionManager="#transactionManager"
-            poolingSupport="#poolingSupport"
+            poolingSupport="#poolingSupport2"
             connectionTracker="#connectionTracker" 
             />
-
-    <bean id="localDerbyMCF" class="org.tranql.connector.derby.EmbeddedXAMCF">
+    <bean id="localDerbyMCF" class="org.tranql.connector.derby.EmbeddedLocalMCF">
 	    <property name="databaseName" value="target/test/testdb"/>
 	    <property name="createDatabase" value="true"/>
 		<property name="userName" value = "sa"/>
         <property name="password" value = ""/>
 	</bean>
-	<bean id="localDerbyDataSource" class="org.springframework.jca.support.LocalConnectionFactoryBean">
+	<bean id="localDerbyDataSource" class="org.jencks.factory.ConnectionFactoryFactoryBean">
 	    <property name="managedConnectionFactory" ref="localDerbyMCF"/>
-	    <property name="connectionManager" ref="connectionManager"/>
+	    <property name="connectionManager" ref="connectionManager2"/>
 	</bean>
 	
-	<bean id="jndi"
-	      class="org.apache.xbean.spring.jndi.SpringInitialContextFactory" 
-	      factory-method="makeInitialContext"
-	      singleton="true"
-	      depends-on="bootstrapContext"
-	      >
-	  <property name="entries" ref="jndiEntries" />
-	</bean>
-
     <util:map id="jndiEntries">
-	    <entry key="testds" value-ref="localDerbyDataSource"/>
+        <entry key="java:comp/env/jdbc/ode" value-ref="odeDS"/>
+        <entry key="testds" value-ref="localDerbyDataSource"/>
 	</util:map>
 	
 	<sm:container 

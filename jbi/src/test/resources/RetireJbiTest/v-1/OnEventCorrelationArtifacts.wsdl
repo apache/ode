@@ -17,23 +17,19 @@
     limitations under the License.
 
 -->
-<beans xmlns:sm="http://servicemix.apache.org/config/1.0"
-	   xmlns:http="http://servicemix.apache.org/http/1.0"
-	   xmlns:eip="http://servicemix.apache.org/eip/1.0"
-       xmlns:util="http://www.springframework.org/schema/util"
-       xmlns:jencks="http://jencks.org/2.0"
-	   >
-
-    <util:map id="jndiEntries">
-        <entry key="java:comp/env/jdbc/ode" value-ref="odeDS"/>
-    </util:map>
-	
-	<sm:container 
-		id="jbi" 
-		embedded="true" 
-		rootDir="target/test/smx"
-		transactionManager="#transactionManager"
-		depends-on="jndi"
-		>
-	</sm:container>
-</beans>
+<definitions 
+    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" 
+    xmlns:tns="http://sample.bpel.org/bpel/sampleArtifacts" 
+    xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    xmlns:bpel="http://sample.bpel.org/bpel/sample" 
+    name="OnEventCorrelationArtifacts" 
+    targetNamespace="http://sample.bpel.org/bpel/sampleArtifacts" 
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    >
+<vprop:property name="input" type="xs:string"/>
+<vprop:propertyAlias messageType="bpel:OnEventCorrelationMessage" part="payload" propertyName="tns:input">
+<!--vprop:query><![CDATA[bpel:input]]></vprop:query-->
+</vprop:propertyAlias>
+<import location="OnEventCorrelation.wsdl" namespace="http://sample.bpel.org/bpel/sample"/>
+</definitions>

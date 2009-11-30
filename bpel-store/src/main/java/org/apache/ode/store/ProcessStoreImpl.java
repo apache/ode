@@ -165,14 +165,18 @@ public class ProcessStoreImpl implements ProcessStore {
     /**
      * Deploys a process.
      */
+    public Collection<QName> deploy(final File deploymentUnitDirectory, boolean autoincrementVersion) {
+    	return deploy(deploymentUnitDirectory, true, null, autoincrementVersion);
+    }
+
     public Collection<QName> deploy(final File deploymentUnitDirectory) {
-    	return deploy(deploymentUnitDirectory, true, null);
+        return deploy(deploymentUnitDirectory, true, null, true);
     }
 
     /**
      * Deploys a process.
      */
-    public Collection<QName> deploy(final File deploymentUnitDirectory, boolean activate, String duName) {
+    public Collection<QName> deploy(final File deploymentUnitDirectory, boolean activate, String duName, boolean autoincrementVersion) {
         __log.info(__msgs.msgDeployStarting(deploymentUnitDirectory));
 
         final Date deployDate = new Date();
@@ -197,12 +201,18 @@ public class ProcessStoreImpl implements ProcessStore {
         Collection<QName> deployed;
 
         _rw.writeLock().lock();
-        // Process and DU use a monotonically increased single version number.
-        long version = exec(new Callable<Long>() {
-            public Long call(ConfStoreConnection conn) {
-                return conn.getNextVersion();
-            }
-        });
+        long version;
+        if (autoincrementVersion || du.getStaticVersion() == -1) {
+            // Process and DU use a monotonically increased single version number by default.
+            version = exec(new Callable<Long>() {
+                public Long call(ConfStoreConnection conn) {
+                    return conn.getNextVersion();
+                }
+            });
+        } else {
+            version = du.getStaticVersion();
+        }
+        du.setVersion(version);
 
         try {
             if (_deploymentUnits.containsKey(du.getName())) {
@@ -215,11 +225,6 @@ public class ProcessStoreImpl implements ProcessStore {
 
             for (TDeployment.Process processDD : dd.getDeploy().getProcessList()) {
                 QName pid = toPid(processDD.getName(), version);
-
-                // Retires older version if we can find one
-                DeploymentUnitDir oldDU = findOldDU(du.getName());
-                if (oldDU != null)
-                    setRetiredPackage(oldDU.getName(), true);
 
                 if (_processes.containsKey(pid)) {
                     String errmsg = __msgs.msgDeployFailDuplicatePID(processDD.getName(), du.getName());
@@ -297,6 +302,16 @@ public class ProcessStoreImpl implements ProcessStore {
 
         });
 
+        try {
+            _rw.writeLock().lock();
+	        for (TDeployment.Process processDD : dd.getDeploy().getProcessList()) {
+	            // Retires older version if we can find one
+	            retireOldDUs(du.getName(), (int) version);
+	        }
+	    } finally {
+	        _rw.writeLock().unlock();
+	    }
+        
         // We want the events to be fired outside of the bounds of the writelock.
         try {
             for (ProcessConfImpl process : processes) {
@@ -822,21 +837,34 @@ public class ProcessStoreImpl implements ProcessStore {
         return new QName(processType.getNamespaceURI(), processType.getLocalPart() + "-" + version);
     }
 
-    private DeploymentUnitDir findOldDU(String newName) {
-        DeploymentUnitDir old = null;
+    private void retireOldDUs(String newName, int version) {
         int dashIdx = newName.lastIndexOf("-");
+        String radical;
         if (dashIdx > 0 && dashIdx + 1 < newName.length()) {
-            String radical = newName.substring(0, dashIdx);
-            int newVersion = -1;
-            try {
-                newVersion = Integer.parseInt(newName.substring(newName.lastIndexOf("-") + 1));
-            } catch (NumberFormatException e) {
-                // Swallowing, if we can't parse then we just can't find an old version
-            }
-            while (old == null && newVersion >= 0)
-                old = _deploymentUnits.get(radical + "-" + (newVersion--));
+            radical = newName.substring(0, dashIdx);
+        } else {
+        	radical = newName;
         }
-        return old;
+
+        SortedSet<Integer> versions = new TreeSet<Integer>();
+        for (String name : _deploymentUnits.keySet()) {
+        	if (name.startsWith(radical + "-")) {
+        		try {
+        			int v = Integer.parseInt(name.substring(radical.length() + 1));
+        			versions.add(v);
+        		} catch (NumberFormatException e) {
+        		}
+        	}
+        }
+        
+        if (versions.size() > 1) {
+	        SortedSet<Integer> retireVersions = versions.headSet(versions.last());
+	        for (Integer version2 : retireVersions) {
+	        	String name = radical + "-" + version2;
+	        	__log.debug("Set retired package " + name);
+	        	setRetiredPackage(name, true);
+	        }
+        }
     }
 
     private class SimpleThreadFactory implements ThreadFactory {

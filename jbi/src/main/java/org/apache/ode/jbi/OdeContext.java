@@ -174,12 +174,15 @@ final public class OdeContext {
         return (TransactionManager) getContext().getTransactionManager();
     }
 
-    public MyEndpointReference activateEndpoint(QName pid, Endpoint endpoint) throws Exception {
+    public synchronized MyEndpointReference activateEndpoint(QName pid, Endpoint endpoint) throws Exception {
         if (__log.isDebugEnabled()) {
             __log.debug("Activate endpoint: " + endpoint);
         }
 
-        OdeService service = new OdeService(this, endpoint);
+        
+        OdeService service=_activeOdeServices.get(endpoint);
+        if(service == null)
+        	service = new OdeService(this, endpoint);
         try {
             ProcessConf pc = _store.getProcessConfiguration(pid);
             InputStream is = pc.getCBPInputStream();
@@ -223,12 +226,15 @@ final public class OdeContext {
 
     }
 
-    public void deactivateEndpoint(Endpoint endpoint) throws Exception {
-        OdeService svc = _activeOdeServices.remove(endpoint);
+    public synchronized void  deactivateEndpoint(Endpoint endpoint) throws Exception {
+        OdeService svc = _activeOdeServices.get(endpoint);
 
         if (svc != null) {
             _serviceEprMap.remove(svc);
-            svc.deactivate();
+            svc.deactivate();        
+            if(svc.getCount() < 1 ) {
+        	_activeOdeServices.remove(endpoint);
+            }
         }
     }
 

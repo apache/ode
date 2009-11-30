@@ -28,60 +28,9 @@
        xmlns:bpel="http://sample.bpel.org/bpel/sample"
        >
 
-    <bean id="transactionManager" class="org.apache.geronimo.transaction.manager.GeronimoTransactionManager"/>
-
-  <jencks:connectionTracker id="connectionTracker" geronimoTransactionManager="#transactionManager" />
-    
-  <jencks:workManager
-            id="workManager"
-            threadPoolSize="200"
-            transactionManager="#transactionManager" />
-  
-  <jencks:bootstrapContext
-            id="bootstrapContext"
-            workManager="#workManager"
-            transactionManager="#transactionManager" />
-  
-  <jencks:poolingSupport 
-            id="poolingSupport" 
-            connectionMaxIdleMinutes="5"
-            poolMaxSize="20"
-            />
-  
-  <jencks:connectionManager
-            id="connectionManager"
-            containerManagedSecurity="false"
-            transaction="xa"
-            transactionManager="#transactionManager"
-            poolingSupport="#poolingSupport"
-            connectionTracker="#connectionTracker" 
-            />
-
-    <bean id="localDerbyMCF" class="org.tranql.connector.derby.EmbeddedXAMCF">
-        <property name="databaseName" value="target/test/testdb"/>
-        <property name="createDatabase" value="true"/>
-        <property name="userName" value = "sa"/>
-        <property name="password" value = ""/>
-    </bean>
-    <bean id="localDerbyDataSource" class="org.springframework.jca.support.LocalConnectionFactoryBean">
-        <property name="managedConnectionFactory" ref="localDerbyMCF"/>
-        <property name="connectionManager" ref="connectionManager"/>
-    </bean>
-    
-    <bean id="jndi"
-          class="org.apache.xbean.spring.jndi.SpringInitialContextFactory" 
-          factory-method="makeInitialContext"
-          singleton="true"
-          depends-on="bootstrapContext"
-          >
-      <property name="entries" ref="jndiEntries" />
-    </bean>
-
     <util:map id="jndiEntries">
-        <entry key="testds" value-ref="localDerbyDataSource"/>
+        <entry key="java:comp/env/jdbc/ode" value-ref="odeDS"/>
     </util:map>
-    
-
 
     <sm:container 
         id="jbi" 
