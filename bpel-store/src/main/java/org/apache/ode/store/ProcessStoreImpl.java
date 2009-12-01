@@ -187,6 +187,20 @@ public class ProcessStoreImpl implements ProcessStore {
         	// Override the package name if given from the parameter
         	du.setName(duName);
         }
+        
+        long version;
+        if (autoincrementVersion || du.getStaticVersion() == -1) {
+            // Process and DU use a monotonically increased single version number by default.
+            version = exec(new Callable<Long>() {
+                public Long call(ConfStoreConnection conn) {
+                    return conn.getNextVersion();
+                }
+            });
+        } else {
+            version = du.getStaticVersion();
+        }
+        du.setVersion(version);
+        
         try {
             du.compile();
         } catch (CompilationException ce) {
@@ -201,18 +215,6 @@ public class ProcessStoreImpl implements ProcessStore {
         Collection<QName> deployed;
 
         _rw.writeLock().lock();
-        long version;
-        if (autoincrementVersion || du.getStaticVersion() == -1) {
-            // Process and DU use a monotonically increased single version number by default.
-            version = exec(new Callable<Long>() {
-                public Long call(ConfStoreConnection conn) {
-                    return conn.getNextVersion();
-                }
-            });
-        } else {
-            version = du.getStaticVersion();
-        }
-        du.setVersion(version);
 
         try {
             if (_deploymentUnits.containsKey(du.getName())) {

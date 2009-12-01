@@ -22,7 +22,7 @@
  xmlns:tns="http://ode/bpel/unit-test/testCorrelation"
  xmlns:wns="http://ode/bpel/unit-test/testCorrelation.wsdl"
  xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
- name="TestCorrelationProcess"
+ name="TestCorrelationNegativeProcess"
  targetNamespace="http://ode/bpel/unit-test/testCorrelation"
  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
  expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
