@@ -277,6 +277,7 @@ define "ode" do
       COMMONS.logging, JAVAX.stream, JAXEN, SAXON, WSDL4J, XALAN, XERCES, COMMONS.collections
     test.resources { filter(project("bpel-scripts").path_to("src/main/resources")).into(test.resources.target).run }
     package :jar
+    test.with SLF4J, LOG4J
   end
 
   desc "ODE JCA Connector Implementation"

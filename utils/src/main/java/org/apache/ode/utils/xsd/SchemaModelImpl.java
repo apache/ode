@@ -189,6 +189,8 @@ public class SchemaModelImpl implements SchemaModel {
             String location = "";
             if (resourceIdentifier.getNamespace() != null && _schemas.get(resourceIdentifier.getNamespace()) != null)
                 location = resourceIdentifier.getNamespace();
+            else if (resourceIdentifier.getLiteralSystemId() != null && _schemas.get(resourceIdentifier.getLiteralSystemId()) != null)
+                location = resourceIdentifier.getLiteralSystemId();
             else if (resourceIdentifier.getExpandedSystemId() != null && _schemas.get(resourceIdentifier.getExpandedSystemId()) != null)
                 location = resourceIdentifier.getExpandedSystemId();
             else {
