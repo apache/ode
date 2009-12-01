@@ -18,9 +18,11 @@
  */
 package org.apache.ode.bpel.o;
 
-import org.apache.ode.utils.ObjectPrinter;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 
@@ -77,4 +79,29 @@ public abstract class OActivity extends OAgent {
         return buf.toString();
     }
 
+    @Override
+    public String digest() {
+        StringBuffer buf = new StringBuffer(getClass().getSimpleName());
+        buf.append('#');
+        buf.append(getId());
+        buf.append("{");
+        List<OAgent> l = new ArrayList<OAgent>();
+        l.addAll(nested);
+        Collections.sort(l, new Comparator<OAgent>() {
+            private String key(OAgent o) {
+                return o.getClass().getSimpleName() + "#" + o.getId();
+            }
+            
+            public int compare(OAgent o1, OAgent o2) {
+                return key(o1).compareTo(key(o2));
+            }
+        });
+        
+        for (OAgent child : l) {
+            buf.append(child.digest());
+            buf.append(";");
+        }
+        buf.append("}");
+        return buf.toString();
+    }
 }

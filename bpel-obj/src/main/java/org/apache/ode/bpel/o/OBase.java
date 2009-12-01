@@ -78,6 +78,9 @@ public class OBase implements Serializable {
     		debugInfo.extensibilityElements = null;
     		debugInfo = null;
     	}
+    }
     	
+    public String digest() {
+        return "";
     }
 }

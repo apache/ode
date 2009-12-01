@@ -216,4 +216,9 @@ public class OProcess extends OBase {
     	xsdTypes.clear();
     	xslSheets.clear();
     }
+
+    @Override
+    public String digest() {
+        return processName + ";" + procesScope.digest();
+    }
 }

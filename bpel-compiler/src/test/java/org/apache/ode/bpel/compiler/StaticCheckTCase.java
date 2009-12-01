@@ -86,7 +86,7 @@ class StaticCheckTCase extends TestCase implements CompileListener {
 
   public void runTest() throws Exception {
     try {
-      _compiler.compile(new File(_bpelURL.toURI()));
+      _compiler.compile(new File(_bpelURL.toURI()), 0);
       fail("Expected compilation exception.");
     } catch (CompilationException ce) {
       _errors.add(ce.getCompilationMessage());

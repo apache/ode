@@ -39,6 +39,7 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.BpelC;
+import org.apache.ode.bpel.compiler.BpelCompiler;
 import org.apache.ode.bpel.compiler.DefaultResourceFinder;
 import org.apache.ode.bpel.compiler.WSDLLocatorImpl;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
@@ -185,7 +186,7 @@ class DeploymentUnitDir {
         InternPool.runBlock(new InternableBlock() {
         	public void run() {
                 try {
-                    bpelc.compile(bpelFile);
+                    bpelc.compile(bpelFile, getVersion());
                 } catch (IOException e) {
                     __log.error("Compile error in " + bpelFile, e);
                 }
@@ -388,11 +389,7 @@ class DeploymentUnitDir {
      * @return Static DU version number generated from DU name. -1 when package doesn't use versioning.
      */
     public long getStaticVersion() {
-        try {
-            return Integer.parseInt(getName().substring(getName().lastIndexOf("-") + 1));
-        } catch (Throwable t) {
-            return -1;
-        }
+        return BpelCompiler.getVersion(getName());
     }
 
     public void setVersion(long version) {

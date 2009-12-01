@@ -132,7 +132,7 @@ import org.w3c.dom.Node;
  * and XSD documents) into compiled representations suitable for execution by
  * the ODE BPEL Service Provider. TODO: Move process validation into this class.
  */
-abstract class BpelCompiler implements CompilerContext {
+public abstract class BpelCompiler implements CompilerContext {
     /** Class-severity logger. */
     protected static final Log __log = LogFactory.getLog(BpelCompiler.class);
 
@@ -633,10 +633,18 @@ abstract class BpelCompiler implements CompilerContext {
         _errors.add(bce.getCompilationMessage());
     }
 
+    public static long getVersion(String dirName) {
+        try {
+            return Integer.parseInt(dirName.substring(dirName.lastIndexOf("-") + 1));
+        } catch (Throwable t) {
+            return 0;
+        }
+    }
+    
     /**
      * Compile a process.
      */
-    public OProcess compile(final Process process, ResourceFinder rf) throws CompilationException {
+    public OProcess compile(final Process process, ResourceFinder rf, long version) throws CompilationException {
         if (process == null)
             throw new NullPointerException("Null process parameter");
         
@@ -662,7 +670,7 @@ abstract class BpelCompiler implements CompilerContext {
         }
 
         _oprocess = new OProcess(bpelVersionUri);
-        _oprocess.guid = new GUID().toString();
+        _oprocess.guid = null;
         _oprocess.constants = makeConstants();
         _oprocess.debugInfo = createDebugInfo(process, "process");
         
@@ -772,6 +780,14 @@ abstract class BpelCompiler implements CompilerContext {
         
         if (hasErrors) {
             throw new CompilationException(__cmsgs.errCompilationErrors(_errors.size(), sb.toString()));
+        }
+        
+        {
+            String digest = "version:" + version + ";" + _oprocess.digest();
+            _oprocess.guid = GUID.makeGUID(digest);
+            if (__log.isDebugEnabled()) {
+                __log.debug("Compiled process digest: " + digest + "\nguid: " + _oprocess.guid);
+            }
         }
         return _oprocess;
     }

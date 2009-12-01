@@ -181,7 +181,7 @@ public class BpelC {
      * @throws CompilationException
      *           if one occurs while compiling.
      */
-    public void compile(final Process process, String outputPath) throws CompilationException, IOException {
+    public void compile(final Process process, String outputPath, long version) throws CompilationException, IOException {
         if (process == null)
             throw new NullPointerException("Attempt to compile NULL process.");
 
@@ -260,7 +260,7 @@ public class BpelC {
 
         OProcess oprocess;
         try {
-            oprocess = compiler.compile(process,wf);
+            oprocess = compiler.compile(process,wf,version);
         }
         catch (CompilationException cex) {
             this.invalidate();
@@ -301,7 +301,7 @@ public class BpelC {
      * output.
      * @throws CompilationException if one occurs while compiling the process.
      */
-    public void compile(File bpelFile) throws CompilationException, IOException {
+    public void compile(File bpelFile, long version) throws CompilationException, IOException {
         if (__log.isDebugEnabled()) {
             __log.debug("compile(URL)");
         }
@@ -330,7 +330,7 @@ public class BpelC {
         String bpelPath = bpelFile.getAbsolutePath();
         String cbpPath = bpelPath.substring(0, bpelPath.lastIndexOf(".")) + ".cbp";
 
-        compile(process, cbpPath);
+        compile(process, cbpPath, version);
         this.invalidate();
     }
 
