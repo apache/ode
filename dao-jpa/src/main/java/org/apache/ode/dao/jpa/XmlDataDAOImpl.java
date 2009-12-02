@@ -123,6 +123,13 @@ public class XmlDataDAOImpl implements XmlDataDAO {
         return null;
 	}
 
+    private XmlDataProperty getPropertyObject(String propertyName) {
+        for (XmlDataProperty prop : _props) {
+            if (prop.getPropertyKey().equals(propertyName)) return prop;
+        }
+        return null;
+    }
+
 	public ScopeDAO getScopeDAO() {
 		return _scope;
 	}
@@ -147,7 +154,12 @@ public class XmlDataDAOImpl implements XmlDataDAO {
 	}
 
 	public void setProperty(String pname, String pvalue) {
-        _props.add(new XmlDataProperty(pname, pvalue, this));
+        XmlDataProperty prop = getPropertyObject(pname);
+        if (prop == null) {
+            _props.add(new XmlDataProperty(pname, pvalue, this));
+        } else {
+            prop.setPropertyValue(pvalue);
+        }
 	}
 
 }
