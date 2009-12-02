@@ -261,7 +261,7 @@ define "ode" do
     end
     package(:war).path("WEB-INF/modules").include(artifacts(AXIS2_MODULES.mods))
     package(:war).tap do |root|
-      root.merge(artifact(AXIS2_WAR)).exclude("WEB-INF/**/*").exclude("META-INF/**/*")
+      root.merge(artifact(AXIS2_WAR)).exclude("WEB-INF/*").exclude("META-INF/*")
     end
 
     task("start"=>[package(:war), jetty.use]) do |task|
