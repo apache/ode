@@ -150,7 +150,7 @@ public class CronScheduler {
         }
 
         synchronized( _systemTerminationListeners) {
-            if( __log.isInfoEnabled() ) __log.info("Refreshing SYSTEM CRON jobs.");
+            if( __log.isDebugEnabled() ) __log.debug("Refreshing SYSTEM CRON jobs.");
 
             try {
                 // if error thrown on reading the schedules.xml, do not cancel existing cron jobs
