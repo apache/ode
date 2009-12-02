@@ -79,7 +79,7 @@ public class SystemSchedulesConfig {
             }
         }
         
-        __log.info("SYSTEM CRON configuration found cron jobs: " + jobs);
+        if( __log.isDebugEnabled() ) __log.debug("SYSTEM CRON configuration found cron jobs: " + jobs);
         return jobs;
     }
 
