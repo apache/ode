@@ -503,7 +503,7 @@ define "ode" do
 
   desc "ODE OpenJPA Derby Database"
   define "dao-jpa-db" do
-    %w{ derby mysql oracle }.each do |db|
+    %w{ derby mysql oracle postgres }.each do |db|
       db_xml = _("src/main/descriptors/persistence.#{db}.xml")
       scheduler_sql = _("src/main/scripts/simplesched-#{db}.sql")
       partial_sql = file("target/partial.#{db}.sql"=>db_xml) do |task|
