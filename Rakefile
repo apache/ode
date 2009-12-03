@@ -234,7 +234,8 @@ define "ode" do
       rm_rf Dir[_(webapp_dir) + "/**/.svn"]
       cp_r _("src/test/webapp"), test.compile.target.to_s
       rm_rf Dir[_(webapp_dir) + "/**/.svn"]
-      cp Dir[_("src/main/webapp/WEB-INF/classes/*")], test.compile.target.to_s
+      cp_r Dir[_("src/main/webapp/WEB-INF/classes/*")], test.compile.target.to_s
+	  rm_rf Dir[_(webapp_dir) + "/**/.svn"]
       cp Dir[project("axis2").path_to("src/main/wsdl/*")], "#{webapp_dir}/WEB-INF"
       cp project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd"), "#{webapp_dir}/WEB-INF"
       rm_rf Dir[_(webapp_dir) + "/**/.svn"]
@@ -248,7 +249,7 @@ define "ode" do
     end
     test.setup unzip("#{webapp_dir}/WEB-INF"=>project("dao-jpa-ojpa-derby").package(:zip))
     test.setup unzip("#{webapp_dir}/WEB-INF"=>project("dao-hibernate-db").package(:zip))
-    test.exclude('*') unless Buildr.environment != 'hudson'
+    test.exclude('*') if Buildr.environment == 'hudson'
 
     NativeDB.prepare_configs test, _(".")
 
