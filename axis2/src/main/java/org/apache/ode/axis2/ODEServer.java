@@ -217,6 +217,8 @@ public class ODEServer {
             __log.info(__msgs.msgPollingStarted(deploymentDir.getAbsolutePath()));
             __log.info(__msgs.msgOdeStarted());
             success = true;
+        } catch (Throwable t) {
+            __log.error("ODE server could not be started.", t);
         } finally {
             if (!success)
                 try {
