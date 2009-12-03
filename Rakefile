@@ -95,7 +95,7 @@ KARAF               = [
                           :under=>"org.apache.felix.gogo", :version=>"0.2.0")
                       ]
 LOG4J               = "log4j:log4j:jar:1.2.13"
-OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.3.0-SNAPSHOT",
+OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.2.1",
                        "net.sourceforge.serp:serp:jar:1.13.1"]
 
 SAXON               = group("saxon", "saxon-xpath", "saxon-dom", "saxon-xqj", :under=>"net.sf.saxon", :version=>"9.x")
