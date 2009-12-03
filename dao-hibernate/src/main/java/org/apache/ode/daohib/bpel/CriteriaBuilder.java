@@ -61,7 +61,7 @@ class CriteriaBuilder {
     if (iids != null && iids.size() > 0) {
         Disjunction disj = Restrictions.disjunction();
         for (String iid: iids) {
-            crit.add(Restrictions.eq("id", new Long(iid)));
+            disj.add(Restrictions.eq("id", new Long(iid)));
         }
         crit.add(disj);
     }
@@ -99,7 +99,7 @@ class CriteriaBuilder {
     // Specific filter for correlation properties
     if (filter.getPropertyValuesFilter() != null) {
       Criteria propCrit = crit.createCriteria("correlationSets").createCriteria("properties");
-      for (Map.Entry corValue : filter.getPropertyValuesFilter().entrySet()) {
+      for (Map.Entry<String, String> corValue : filter.getPropertyValuesFilter().entrySet()) {
         String propName = (String)corValue.getKey();
         if (propName.startsWith("{")) {
           String namespace = propName.substring(1, propName.lastIndexOf("}"));
