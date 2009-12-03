@@ -34,7 +34,7 @@
         <class>org.apache.ode.dao.jpa.ResourceRouteDAOImpl</class>
         <class>org.apache.ode.dao.jpa.ScopeDAOImpl</class>
         <class>org.apache.ode.dao.jpa.XmlDataDAOImpl</class>
-
+        <class>org.apache.ode.dao.jpa.ContextValueDAOImpl</class>
         <properties>
             <!-- Properties for an embedded Derby connection 
             <property name="openjpa.ConnectionDriverName" value="org.apache.commons.dbcp.BasicDataSource"/>
