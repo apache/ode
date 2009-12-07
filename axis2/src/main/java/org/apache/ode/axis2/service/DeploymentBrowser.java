@@ -159,7 +159,7 @@ public class DeploymentBrowser {
                                         out.write("<p><a href=\"" + relativePath + "\">" + relativePath + "</a></p>");
                                     }
                                 } else {
-                                    out.write("<p>Couldn't find bundle " + segments[2] + "</p>");
+                                    out.write("<p>Couldn't find bundle " + segments[1] + "</p>");
                                 }
                             }
                         });
