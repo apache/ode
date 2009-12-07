@@ -616,7 +616,7 @@ org.apache.ode.ProcessHandling = {};
             }
             
             function handleNo(){
-                org.apache.ode.Widgets..alert('Retiring cancelled!', YAHOO.widget.SimpleDialog.ICON_INFO);  
+                org.apache.ode.Widgets.alert('Retiring cancelled!', YAHOO.widget.SimpleDialog.ICON_INFO);  
             }
             var msg = 'Do you want to retire the process '+ processName + '?';
             org.apache.ode.Widgets.operationConfirm(msg, handleYes, handleNo);         
@@ -764,7 +764,7 @@ org.apache.ode.ProcessHandling = {};
                     
                     var callbackIn = {
                         success: handleSuccessIn,
-                        failure: handleFailureIn,                       
+                        failure: handleFailureIn
                     }
                     
                     var requestIn = YAHOO.util.Connect.asyncRequest('GET', proDefURL, callbackIn);
@@ -777,7 +777,7 @@ org.apache.ode.ProcessHandling = {};
             
             var callback = {
                 success: handleSuccess,
-                failure: handleFailure,             
+                failure: handleFailure
             } 
             
             var request = YAHOO.util.Connect.asyncRequest('GET', urlRequestURL, callback);                      
