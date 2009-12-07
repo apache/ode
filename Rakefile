@@ -50,14 +50,14 @@ AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.3"
 BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:3.0"
 COMMONS             = struct(
   :codec            =>"commons-codec:commons-codec:jar:1.3",
-  :collections      =>"commons-collections:commons-collections:jar:3.1",
-  :dbcp             =>"commons-dbcp:commons-dbcp:jar:1.2.1",
+  :collections      =>"commons-collections:commons-collections:jar:3.2.1",
+  :dbcp             =>"commons-dbcp:commons-dbcp:jar:1.2.2",
   :fileupload       =>"commons-fileupload:commons-fileupload:jar:1.1.1",
-  :httpclient       =>"commons-httpclient:commons-httpclient:jar:3.0",
-  :lang             =>"commons-lang:commons-lang:jar:2.3",
+  :httpclient       =>"commons-httpclient:commons-httpclient:jar:3.1",
+  :lang             =>"commons-lang:commons-lang:jar:2.4",
   :logging          =>"commons-logging:commons-logging:jar:1.1",
   :io               =>"commons-io:commons-io:jar:1.4",
-  :pool             =>"commons-pool:commons-pool:jar:1.2",
+  :pool             =>"commons-pool:commons-pool:jar:1.4",
   :primitives       =>"commons-primitives:commons-primitives:jar:1.0"
 )
 DERBY               = "org.apache.derby:derby:jar:10.5.3.0_1"
@@ -156,11 +156,15 @@ repositories.release_to[:url] ||= "sftp://guest@localhost/home/guest"
 
 BUNDLE_VERSIONS = {
   "ode.version" => VERSION_NUMBER,
+  "commons.collections.version" => artifact(COMMONS.collections).version,
+  "commons.httpclient.bundle.version" => "3.1_1",
+  "commons.lang.version" => artifact(COMMONS.lang).version,
+  "commons.pool.version" => artifact(COMMONS.pool).version,
   "derby.version" => artifact(DERBY).version,
-  "servicemix.nmr.version" => "1.1.0-SNAPSHOT",
-  "servicemix.specs.version" => "1.4-SNAPSHOT",
-  "servicemix.shared.version" => "2009.02-SNAPSHOT",
   "geronimo.specs.version" => "1.1.1",
+  "servicemix.nmr.version" => "1.1.0-SNAPSHOT",
+  "servicemix.shared.version" => "2009.02-SNAPSHOT",
+  "servicemix.specs.version" => "1.4-SNAPSHOT",
 }
 Release.find.tag_name = lambda { |version| "APACHE_ODE_#{version.upcase}" } if Release.find
 
@@ -583,9 +587,9 @@ define "ode" do
       bnd.properties["inlines"] = inlines.join(', ')
 
       # embed jars
-      bnd_libs = ode_libs + artifacts(AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp,
-                                      COMMONS.lang, COMMONS.pool, COMMONS.primitives, GERONIMO.connector,
-                                      JAXEN, JAVAX.connector, JAVAX.persistence, JAVAX.ejb, OPENJPA, SAXON, TRANQL, 
+      bnd_libs = ode_libs + artifacts(AXIOM, BACKPORT, GERONIMO.connector, JAXEN, 
+                                      JAVAX.connector, JAVAX.persistence, JAVAX.ejb, 
+                                      OPENJPA, SAXON, TRANQL, 
                                       XALAN, XERCES, XMLBEANS, WSDL4J)
       includes = bnd_libs.map{|item| File.basename(item.to_s)} 
       bnd.properties["includes"] = includes.join(', ') 

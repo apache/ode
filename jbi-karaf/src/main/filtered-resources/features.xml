@@ -19,10 +19,14 @@
 <features>
     <repository>mvn:org.apache.servicemix.nmr/apache-servicemix-nmr/${servicemix.nmr.version}/xml/features</repository>
     <feature name="ode" version="${ode.version}">
-	<feature version="${servicemix.nmr.version}">transaction</feature>
+        <feature version="${servicemix.nmr.version}">transaction</feature>
         <bundle>mvn:org.apache.geronimo.specs/geronimo-jta_1.1_spec/${geronimo.specs.version}</bundle>
         <bundle>mvn:org.apache.geronimo.specs/geronimo-jms_1.1_spec/${geronimo.specs.version}</bundle>
         <bundle>mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.stax-api-1.0/${servicemix.specs.version}</bundle>
+        <bundle>mvn:commons-collections/commons-collections/${commons.collections.version}</bundle>
+        <bundle>mvn:commons-pool/commons-pool/${commons.pool.version}</bundle>
+        <bundle>mvn:commons-lang/commons-lang/${commons.lang.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.commons-httpclient/${commons.httpclient.bundle.version}</bundle>
         <bundle>mvn:org.apache.derby/derby/${derby.version}</bundle>
         <bundle>mvn:org.apache.ode/ode-jbi-karaf/${ode.version}/jar/bundle</bundle>
     </feature>
