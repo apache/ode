@@ -23,18 +23,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.dd.DeployDocument;
 import org.apache.ode.bpel.dd.TDeployment;
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.ProcessConf;
-import org.apache.ode.bpel.iapi.ProcessState;
-import org.apache.ode.bpel.iapi.ProcessStore;
-import org.apache.ode.bpel.iapi.ProcessStoreEvent;
-import org.apache.ode.bpel.iapi.ProcessStoreListener;
-import org.apache.ode.bpel.iapi.EndpointReferenceContext;
+import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.msg.MessageBundle;
-import org.apache.ode.il.config.OdeConfigProperties;
 import org.hsqldb.jdbc.jdbcDataSource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -46,13 +40,11 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * <p>
@@ -78,6 +70,8 @@ public class ProcessStoreImpl implements ProcessStore {
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
     private final CopyOnWriteArrayList<ProcessStoreListener> _listeners = new CopyOnWriteArrayList<ProcessStoreListener>();
+
+     private static final String VERSION_REGEXP = "([-\\Q.\\E](\\d)+)?";
 
     private Map<QName, ProcessConfImpl> _processes = new HashMap<QName, ProcessConfImpl>();
 
@@ -223,7 +217,7 @@ public class ProcessStoreImpl implements ProcessStore {
                 throw new ContextException(errmsg);
             }
 
-            du.setVersion(version);
+            retirePreviousPackageVersions(du);
 
             for (TDeployment.Process processDD : dd.getDeploy().getProcessList()) {
                 QName pid = toPid(processDD.getName(), version);
@@ -303,16 +297,6 @@ public class ProcessStoreImpl implements ProcessStore {
             }
 
         });
-
-        try {
-            _rw.writeLock().lock();
-	        for (TDeployment.Process processDD : dd.getDeploy().getProcessList()) {
-	            // Retires older version if we can find one
-	            retireOldDUs(du.getName(), (int) version);
-	        }
-	    } finally {
-	        _rw.writeLock().unlock();
-	    }
         
         // We want the events to be fired outside of the bounds of the writelock.
         try {
@@ -330,6 +314,34 @@ public class ProcessStoreImpl implements ProcessStore {
         }
 
         return deployed;
+    }
+
+    /**
+     * Retire all the other versions of the same DU:
+     * first take the DU name and insert version regexp,
+     * than try to match the this string against names of already deployed DUs.
+     * For instance if we are deploying DU "AbsenceRequest-2/AbsenceRequest.ode" and
+     * there's already version 2 than regexp
+     * "AbsenceRequest([-\\.](\d)+)?/AbsenceRequest.ode" will be matched against
+     * "AbsenceRequest-2/AbsenceRequest.ode" and setRetirePackage() will be called accordingly.
+     */
+    private void retirePreviousPackageVersions(DeploymentUnitDir du) {
+        //retire all the other versions of the same DU
+        String[] nameParts = du.getName().split("/");
+        nameParts[0] += VERSION_REGEXP;
+        StringBuilder duNameRegExp = new StringBuilder(du.getName().length() * 2);
+        for (int i = 0, n = nameParts.length; i < n; i++) {
+            if (i > 0) duNameRegExp.append("/");
+            duNameRegExp.append(nameParts[i]);
+        }
+
+        Pattern duNamePattern = Pattern.compile(duNameRegExp.toString());
+        for (String deployedDUname : _deploymentUnits.keySet()) {
+            Matcher matcher = duNamePattern.matcher(deployedDUname);
+            if (matcher.matches()) {
+                setRetiredPackage(deployedDUname, true);
+            }
+        }
     }
 
     public Collection<QName> undeploy(final File dir) {
@@ -837,36 +849,6 @@ public class ProcessStoreImpl implements ProcessStore {
 
     private QName toPid(QName processType, long version) {
         return new QName(processType.getNamespaceURI(), processType.getLocalPart() + "-" + version);
-    }
-
-    private void retireOldDUs(String newName, int version) {
-        int dashIdx = newName.lastIndexOf("-");
-        String radical;
-        if (dashIdx > 0 && dashIdx + 1 < newName.length()) {
-            radical = newName.substring(0, dashIdx);
-        } else {
-        	radical = newName;
-        }
-
-        SortedSet<Integer> versions = new TreeSet<Integer>();
-        for (String name : _deploymentUnits.keySet()) {
-        	if (name.startsWith(radical + "-")) {
-        		try {
-        			int v = Integer.parseInt(name.substring(radical.length() + 1));
-        			versions.add(v);
-        		} catch (NumberFormatException e) {
-        		}
-        	}
-        }
-        
-        if (versions.size() > 1) {
-	        SortedSet<Integer> retireVersions = versions.headSet(versions.last());
-	        for (Integer version2 : retireVersions) {
-	        	String name = radical + "-" + version2;
-	        	__log.debug("Set retired package " + name);
-	        	setRetiredPackage(name, true);
-	        }
-        }
     }
 
     private class SimpleThreadFactory implements ThreadFactory {
