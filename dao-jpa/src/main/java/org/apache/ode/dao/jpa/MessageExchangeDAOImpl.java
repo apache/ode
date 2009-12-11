@@ -264,6 +264,8 @@ public class MessageExchangeDAOImpl extends OpenJPADAO implements MessageExchang
     }
 
     public void setFaultExplanation(String explanation) {
+        if(explanation != null && explanation.length() > 255)
+             explanation = explanation.substring(0,254);
         _faultExplanation = explanation;
     }
 
