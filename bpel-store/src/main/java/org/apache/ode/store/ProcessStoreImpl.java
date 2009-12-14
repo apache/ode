@@ -71,8 +71,6 @@ public class ProcessStoreImpl implements ProcessStore {
 
     private final CopyOnWriteArrayList<ProcessStoreListener> _listeners = new CopyOnWriteArrayList<ProcessStoreListener>();
 
-     private static final String VERSION_REGEXP = "([-\\Q.\\E](\\d)+)?";
-
     private Map<QName, ProcessConfImpl> _processes = new HashMap<QName, ProcessConfImpl>();
 
     private Map<String, DeploymentUnitDir> _deploymentUnits = new HashMap<String, DeploymentUnitDir>();
@@ -328,7 +326,9 @@ public class ProcessStoreImpl implements ProcessStore {
     private void retirePreviousPackageVersions(DeploymentUnitDir du) {
         //retire all the other versions of the same DU
         String[] nameParts = du.getName().split("/");
-        nameParts[0] += VERSION_REGEXP;
+           /* Replace the version number (if any) with regexp to match any version number */
+            nameParts[0] = nameParts[0].replaceAll("([-\\Q.\\E](\\d)+)?\\z", "");
+            nameParts[0] += "([-\\Q.\\E](\\d)+)?";
         StringBuilder duNameRegExp = new StringBuilder(du.getName().length() * 2);
         for (int i = 0, n = nameParts.length; i < n; i++) {
             if (i > 0) duNameRegExp.append("/");
