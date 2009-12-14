@@ -77,8 +77,6 @@ public class ProcessStoreImpl implements ProcessStore {
 
     private final CopyOnWriteArrayList<ProcessStoreListener> _listeners = new CopyOnWriteArrayList<ProcessStoreListener>();
 
-    private static final String VERSION_REGEXP = "([-\\Q.\\E](\\d)+)?";
-
     private Map<QName, ProcessConfImpl> _processes = new HashMap<QName, ProcessConfImpl>();
 
     private Map<String, DeploymentUnitDir> _deploymentUnits = new HashMap<String, DeploymentUnitDir>();
@@ -318,7 +316,9 @@ public class ProcessStoreImpl implements ProcessStore {
     private void retirePreviousPackageVersions(DeploymentUnitDir du) {
         //retire all the other versions of the same DU
         String[] nameParts = du.getName().split("/");
-        nameParts[0] += VERSION_REGEXP;
+        /* Replace the version number (if any) with regexp to match any version number */
+        nameParts[0] = nameParts[0].replaceAll("([-\\Q.\\E](\\d)+)?\\z", "");
+        nameParts[0] += "([-\\Q.\\E](\\d)+)?";
         StringBuilder duNameRegExp = new StringBuilder(du.getName().length() * 2);
         for (int i = 0, n = nameParts.length; i < n; i++) {
             if (i > 0) duNameRegExp.append("/");
@@ -820,23 +820,6 @@ public class ProcessStoreImpl implements ProcessStore {
 
     private QName toPid(QName processType, long version) {
         return new QName(processType.getNamespaceURI(), processType.getLocalPart() + "-" + version);
-    }
-
-    private DeploymentUnitDir findOldDU(String newName) {
-        DeploymentUnitDir old = null;
-        int dashIdx = newName.lastIndexOf("-");
-        if (dashIdx > 0 && dashIdx + 1 < newName.length()) {
-            String radical = newName.substring(0, dashIdx);
-            int newVersion = -1;
-            try {
-                newVersion = Integer.parseInt(newName.substring(newName.lastIndexOf("-") + 1));
-            } catch (NumberFormatException e) {
-                // Swallowing, if we can't parse then we just can't find an old version
-            }
-            while (old == null && newVersion >= 0)
-                old = _deploymentUnits.get(radical + "-" + (newVersion--));
-        }
-        return old;
     }
 
 	public void setExtensionValidators(Map<QName, ExtensionValidator> extensionValidators) {
