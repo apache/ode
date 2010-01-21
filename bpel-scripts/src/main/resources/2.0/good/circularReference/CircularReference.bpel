@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpel:process xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" 
+    xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" 
+    xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:ode="http://www.apache.org/ode/type/extension" 
+    xmlns:this="http://example.com/CircularReference1" 
+    xmlns:xml="http://www.w3.org/XML/1998/namespace" 
+    xmlns:atomic="http://ode.apache.org/atomicScope" 
+    queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" 
+    expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" 
+    name="CircularReference" 
+    targetNamespace="http://example.com/CircularReference">
+  <bpel:import namespace="http://example.com/CircularReference1" location="CircularReference1.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:partnerLinks>
+   <bpel:partnerLink name="pnlk" 
+    partnerLinkType="this:pnlkt" 
+    myRole="pnlkt_role"/>
+  </bpel:partnerLinks>
+  <bpel:variables>
+    <bpel:variable name="start" messageType="this:EventStartMessageRequest"/>
+  </bpel:variables>
+  
+  <bpel:sequence>
+    <bpel:receive portType="this:portType" 
+    operation="EventStartMessage" variable="start" 
+    createInstance="yes" name="start" partnerLink="pnlk" />
+  </bpel:sequence>
+</bpel:process>

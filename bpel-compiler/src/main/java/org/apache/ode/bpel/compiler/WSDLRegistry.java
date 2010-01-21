@@ -134,6 +134,20 @@ class WSDLRegistry {
                 __log.info("WSDL at " + defuri + " is a duplicate import, your documents " +
                         "should all be in different namespaces (its's not nice but will still work).");
             }
+	        boolean alreadyProcessed = false;
+	        for (Definition4BPEL aDef : _definitions.get(def.getTargetNamespace())) {
+	            if (aDef.getDocumentBaseURI().equals(def.getDocumentBaseURI())) {
+	                alreadyProcessed = true;
+	                break;
+	            }
+	        }
+	        if (alreadyProcessed) {
+	            if (__log.isInfoEnabled()) {
+	                __log.info("WSDL at " + defuri + " is already imported, this denotes a circular reference.");
+	                // no need to keep going: either return or throw an error
+	            }
+	            return;
+	        }
         }
 
         ArrayList<Definition4BPEL> defs = null;

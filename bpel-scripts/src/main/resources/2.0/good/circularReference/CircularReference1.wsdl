@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='utf-8'?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" 
+xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" 
+xmlns:xml="http://www.w3.org/XML/1998/namespace" 
+xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+xmlns:this="http://example.com/CircularReference1" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+targetNamespace="http://example.com/CircularReference1">
+    <wsdl:types>
+        <xs:schema elementFormDefault="qualified" targetNamespace="urn:targetnm">
+            <xs:element name="EventStartMessageRequest" type="xs:string"/>
+            <xs:element name="EventStartMessageResponse" type="xs:string"/>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:import namespace="http://example.com/CircularReference2" location="CircularReference2.wsdl"/>
+    <wsdl:message name="EventStartMessageRequest">
+        <wsdl:part name="body" element="this:EventStartMessageRequest"/>
+    </wsdl:message>
+    <wsdl:message name="EventStartMessageResponse">
+        <wsdl:part name="body" element="this:EventStartMessageResponse"/>
+    </wsdl:message>
+    <pnlk:partnerLinkType name="pnlkt">
+        <pnlk:role name="pnlkt_role" portType="this:portType"/>
+    </pnlk:partnerLinkType>
+    <wsdl:portType name="portType">
+        <wsdl:operation name="EventStartMessage">
+            <wsdl:input message="this:EventStartMessageRequest" name="EventStartMessage"/>
+            <wsdl:output message="this:EventStartMessageResponse" name="EventStartMessageResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="binding" type="this:portType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="EventStartMessage">
+            <soap:operation style="document" soapAction="http://www.example.com/eventStartMessage"/>
+            <wsdl:input name="EventStartMessage">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="EventStartMessageResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="service">
+        <wsdl:port name="servicePort" binding="this:binding">
+            <soap:address location="http://example.com/hello"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
