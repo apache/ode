@@ -25,11 +25,15 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.wsdl.Operation;
+import javax.wsdl.PortType;
+
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.ProcessState;
 
 
 /**
@@ -65,10 +69,13 @@ public class BrokeredMyRoleMessageExchangeImpl
     public Future invoke(Message request) {
     	Future myFuture = null;
         for (MyRoleMessageExchange subscriber : subscribers) {
-            Future theirFuture = subscriber.invoke(request);
-            if (subscriber == template) {
-            	myFuture = theirFuture;
-            }
+        	BpelProcess process = ((MyRoleMessageExchangeImpl) subscriber)._process;
+        	if (process.getConf().getState() == ProcessState.ACTIVE) {
+	            Future theirFuture = subscriber.invoke(request);
+	            if (myFuture == null) {
+	            	myFuture = theirFuture;
+	            }
+        	}
         }
         return myFuture;
     }
@@ -115,5 +122,15 @@ public class BrokeredMyRoleMessageExchangeImpl
     	for (MyRoleMessageExchange subscriber : subscribers) {
 	    	((MyRoleMessageExchangeImpl) subscriber).setSubscriberCount(subscriberCount);
     	}
+    }
+    
+    @Override
+    public PortType getPortType() {
+    	return template.getPortType();
+    }
+    
+    @Override
+    public Operation getOperation() {
+    	return template.getOperation();
     }
 }
