@@ -25,6 +25,14 @@ import javax.xml.namespace.QName;
 import javax.xml.xpath.XPathVariableResolver;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.type.AtomicType;
+import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.ValidationException;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.Value;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,6 +44,7 @@ import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OXsdTypeVarType;
+import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.xsd.XSTypes;
 import org.w3c.dom.Document;
@@ -61,7 +70,7 @@ public class JaxpVariableResolver implements XPathVariableResolver {
     public Object resolveVariable(QName variableName) {
         __log.debug("Resolving variable " + variableName);
 
-        if(!(_oxpath instanceof OXPath10ExpressionBPEL20)){
+        if (!(_oxpath instanceof OXPath10ExpressionBPEL20)) {
             throw new IllegalStateException("XPath variables not supported for bpel 1.1");
         }
 
@@ -78,7 +87,7 @@ public class JaxpVariableResolver implements XPathVariableResolver {
         }
 
         OXPath10ExpressionBPEL20 expr = _oxpath;
-        if(expr.isJoinExpression){
+        if (expr.isJoinExpression) {
             OLink olink = _oxpath.links.get(variableName.getLocalPart());
 
             try {
@@ -86,7 +95,7 @@ public class JaxpVariableResolver implements XPathVariableResolver {
             } catch (FaultException e) {
                 throw new WrappedResolverException(e);
             }
-        }else{
+        } else {
             String varName;
             String partName;
             int dotloc = variableName.getLocalPart().indexOf('.');
@@ -98,58 +107,52 @@ public class JaxpVariableResolver implements XPathVariableResolver {
                 partName = variableName.getLocalPart().substring(dotloc + 1);
             }
             OScope.Variable variable = _oxpath.vars.get(varName);
-            OMessageVarType.Part part = partName == null ? null : ((OMessageVarType)variable.type).parts.get(partName);
+            OMessageVarType.Part part = partName == null ? null : ((OMessageVarType) variable.type).parts.get(partName);
 
-            try{
+            try {
                 final Node variableNode = _ectx.readVariable(variable, part);
                 if (variableNode == null)
-                    throw new FaultException(variable.getOwner().constants.qnSelectionFailure,
-                            "Unknown variable " + variableName.getLocalPart());
+                    throw new FaultException(variable.getOwner().constants.qnSelectionFailure, "Unknown variable " + variableName.getLocalPart());
                 if (_ectx.narrowTypes()) {
-                    if (variable.type instanceof OXsdTypeVarType && ((OXsdTypeVarType)variable.type).simple)
-                        return getSimpleContent(variableNode,((OXsdTypeVarType)variable.type).xsdType);
-                    if (part != null && part.type instanceof OXsdTypeVarType && ((OXsdTypeVarType)part.type).simple)
-                        return getSimpleContent(variableNode,((OXsdTypeVarType)part.type).xsdType);
+                    if (variable.type instanceof OXsdTypeVarType && ((OXsdTypeVarType) variable.type).simple)
+                        return getSimpleContent(variableNode, ((OXsdTypeVarType) variable.type).xsdType);
+                    if (part != null && part.type instanceof OXsdTypeVarType && ((OXsdTypeVarType) part.type).simple)
+                        return getSimpleContent(variableNode, ((OXsdTypeVarType) part.type).xsdType);
                 }
 
                 // Saxon used to expect a node list, but now a regular node will suffice.
                 return variableNode;
-            }catch(FaultException e){
+            } catch (FaultException e) {
                 throw new WrappedResolverException(e);
             }
         }
     }
-    
-    private Object getSimpleContent(Node simpleNode, QName type) {
-        Document doc = (simpleNode instanceof Document) 
-        	? ((Document) simpleNode) 
-        	: simpleNode.getOwnerDocument();
-        String text = simpleNode.getTextContent();
-        try {
-            Object jobj = XSTypes.toJavaObject(type,text);
-            if (jobj instanceof Calendar) {
-                // Saxon 9.x prefers Dates over Calendars.
-                return ((Calendar) jobj).getTime();
-            } else if (jobj instanceof String) {
-                // Saxon 9.x has a bug for which this is a workaround.
-                return doc.createTextNode(jobj.toString());
-            } 
-            return jobj;
-        } catch (Exception e) {
-	        // Elegant way failed, trying brute force 
-	        try {
-	    	    return Integer.valueOf(text);
-	      	} catch (NumberFormatException nfe) { }
-	      	try {
-	      		return Double.valueOf(text);
-	      	} catch (NumberFormatException nfe) { }
-	      
-	        // Remember: always a node set
-	        if (simpleNode.getParentNode() != null)
-	            return simpleNode.getParentNode().getChildNodes();
-	        else {        	
-	            return doc.createTextNode(text);
-	        }
+
+    public static Value convertSimpleTypeToSaxon(QName type, String value, Configuration _config) {
+        int fp = _config.getNamePool().allocate("", type.getNamespaceURI(), type.getLocalPart());
+        SchemaType type2 = _config.getSchemaType(fp);
+        if (type2 == null || !type2.isAtomicType()) {
+            __log.warn("Can't find simple type " + type + " value " + value + " result: " + null);
+            return null;
+        } else {
+            try {
+                AtomicValue value2 = StringValue.convertStringToAtomicType(value, (AtomicType) type2, null).asAtomic();
+                if (__log.isDebugEnabled()) {
+                    __log.debug("converting " + type + " value " + value + " result: " + value2);
+                }
+                return value2;
+            } catch (ValidationException e) {
+                __log.debug("Can't convert " + value + " to " + type + " returning empty sequence");
+                return EmptySequence.getInstance();
+            }
         }
+    }
+
+    public static Object getSimpleContent(Node simpleNode, QName type) {
+        Document doc = (simpleNode instanceof Document) ? ((Document) simpleNode) : simpleNode.getOwnerDocument();
+        String text = simpleNode.getTextContent();
+        Object o = convertSimpleTypeToSaxon(type, text, Configuration.makeConfiguration(null, null));
+        __log.debug("getSimpleContent for " + DOMUtils.domToString(simpleNode) + " " + type + " returned " + o);
+        return o;
     }
 }

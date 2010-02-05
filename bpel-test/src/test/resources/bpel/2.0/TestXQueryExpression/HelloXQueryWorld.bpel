@@ -46,6 +46,9 @@
         <variable name="stringVar" type="xsd:string"/>
         <variable name="boolVar" type="xsd:boolean"/>
         <variable name="i" type="xsd:int"/>
+        <variable name="myVar2" messageType="test:HelloXQueryMessage"/>
+        <variable name="date1" type="xsd:date"/>
+        <variable name="dateTime1" type="xsd:dateTime"/>
     </variables>
             
     <sequence>   
@@ -61,6 +64,43 @@
             operation="HelloXQuery"
             variable="myVar"
             createInstance="yes"/>
+            
+        <bpws:assign>
+          <copy>
+            <from>''</from>
+            <to variable="date1"/>
+          </copy>
+        </bpws:assign>
+        <if>
+            <condition>not(empty($date1))</condition>
+            <throw faultName="error"/>
+        </if>
+        
+        <bpws:assign>
+          <copy>
+            <from>'2009-01-01'</from>
+            <to variable="date1"/>
+          </copy>
+          <copy>
+            <from>'2009-01-02T12:32:32'</from>
+            <to variable="dateTime1"/>
+          </copy>
+          <copy>
+            <bpws:from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
+                                      <![CDATA[
+                                      <test:test1 xmlns:test="http://test.org">
+                                          <test:test2>{ if (string-length(xsd:string($date1)) != 0) then $date1 else $dateTime1 }</test:test2>
+                                      </test:test1>
+                                      ]]>
+            </bpws:from>
+            <to variable="myVar2" part="TestPart"/>
+          </copy>
+        </bpws:assign>
+        <if>
+            <condition>not($myVar2.TestPart/*/text() eq '2009-01-01')</condition>
+            <throw faultName="error"/>
+        </if>
+        
         <assign name="assign1">
             <copy>
                 <from variable="myVar" part="TestPart"/>

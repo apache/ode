@@ -363,34 +363,54 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
             	// Evaluate referenced variable
                 Object value = variableResolver.resolveVariable(variable);
                 
-                // Figure out type of variable
-                XQSequenceType xqType = getItemType(xqconn, value);
-                
-                // Saxon doesn't like binding sequences to variables
-                if (value instanceof Node) {
-                	// a node is a node-list, but the inverse isn't true.
-                	// so, if the value is truly a node, leave it alone.
-                } else if (value instanceof NodeList) {
-                    // So extract the first item from the node list
-                	NodeList nodeList = (NodeList) value;
-                	ArrayList nodeArray = new ArrayList();
-                	for (int i = 0; i < nodeList.getLength(); i++) {
-                		nodeArray.add(nodeList.item(i));
-                	}
-                	value = xqconn.createSequence(nodeArray.iterator());
-                }
-                
-                
-                // Bind value with external variable
-                if (value != null && xqType != null) {
-                	if (value instanceof XQSequence) {
-                		exp.bindSequence(variable, (XQSequence) value);
-                	} else {
-                		if (xqType instanceof XQItemType) {
-			                exp.bindObject(variable, value, (XQItemType) xqType);
-                		}
-                	}
-                }
+                 if (value instanceof Value) {
+                     SaxonXQConnection saxonConn = (SaxonXQConnection) xqconn;
+                     try {
+                         Item item = ((Value) value).asItem();
+                         if (item == null) {
+                             exp.bindSequence(variable, xqconn.createSequence(Collections.EMPTY_LIST.iterator()));
+                         } else {
+                             XQItem item2 = new SaxonXQItem(item, saxonConn);
+                             exp.bindItem(variable, item2);
+                         }
+                     } catch (XPathException e) {
+                         __log.warn("", e);
+                     }
+                 } else {
+                     
+                     if (value instanceof Date) {
+                         Date d = (Date) value;
+                         value = org.apache.ode.utils.ISO8601DateParser.format(d);
+                     }
+ 
+                     // Figure out type of variable
+                     XQSequenceType xqType = getItemType(xqconn, value);
+ 
+                     // Saxon doesn't like binding sequences to variables
+                     if (value instanceof Node) {
+                         // a node is a node-list, but the inverse isn't true.
+                         // so, if the value is truly a node, leave it alone.
+                     } else if (value instanceof NodeList) {
+                         // So extract the first item from the node list
+                         NodeList nodeList = (NodeList) value;
+                         ArrayList nodeArray = new ArrayList();
+                         for (int i = 0; i < nodeList.getLength(); i++) {
+                             nodeArray.add(nodeList.item(i));
+                         }
+                         value = xqconn.createSequence(nodeArray.iterator());
+                     }
+ 
+                     // Bind value with external variable
+                     if (value != null && xqType != null) {
+                         if (value instanceof XQSequence) {
+                             exp.bindSequence(variable, (XQSequence) value);
+                         } else {
+                             if (xqType instanceof XQItemType) {
+                                 exp.bindObject(variable, value, (XQItemType) xqType);
+                             }
+                         }
+                     }
+                  }
             }
 
             // Set context node
