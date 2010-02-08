@@ -46,11 +46,15 @@ import javax.xml.xquery.XQSequenceType;
 import javax.xml.xquery.XQStaticContext;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Validation;
 import net.sf.saxon.trans.DynamicError;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.DurationValue;
+import net.sf.saxon.value.Value;
 import net.sf.saxon.xqj.SaxonXQConnection;
 import net.sf.saxon.xqj.SaxonXQDataSource;
+import net.sf.saxon.xqj.SaxonXQItem;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

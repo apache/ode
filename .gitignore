@@ -8,6 +8,9 @@
 *.iws
 *.zip
 *.jar
+*.orig
+*.rej
+*~
 .classpath
 .project
 .metadata
