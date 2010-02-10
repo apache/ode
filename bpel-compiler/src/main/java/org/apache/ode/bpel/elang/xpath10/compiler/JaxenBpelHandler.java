@@ -118,22 +118,18 @@ class JaxenBpelHandler extends JaxenHandler {
       throw new CompilationException(
           __msgs.errUndeclaredFunctionPrefix(prefix,c.getFunctionName()));
     } else if (isBpelNamespace(ns)) {
-      try {
         if (Constants.EXT_FUNCTION_GETVARIABLEDATA.equals(c.getFunctionName())) {
-          compileGetVariableData(c);
+            compileGetVariableData(c);
         } else if (Constants.EXT_FUNCTION_GETVARIABLEPROPRTY.equals(c
                 .getFunctionName())) {
-          compileGetVariableProperty(c);
+            compileGetVariableProperty(c);
         } else if (Constants.EXT_FUNCTION_GETLINKSTATUS.equals(c.getFunctionName())) {
-          compileGetLinkStatus(c);
+            compileGetLinkStatus(c);
         } else if (Constants.EXT_FUNCTION_DOXSLTRANSFORM.equals(c.getFunctionName())) {
-          compileDoXslTransform(c);
+            compileDoXslTransform(c);
         } else {
-          throw new CompilationException(__msgs.errUnknownBpelFunction(c.getFunctionName()));
+            throw new CompilationException(__msgs.errUnknownBpelFunction(c.getFunctionName()));
         }
-      } catch (CompilationException ce) {
-        throw new RuntimeException(ce);
-      }
     }
   }
 

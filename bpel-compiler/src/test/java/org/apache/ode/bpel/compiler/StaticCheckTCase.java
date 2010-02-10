@@ -28,11 +28,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.xml.transform.TransformerFactory;
+
 import junit.framework.TestCase;
 
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
+import org.apache.ode.utils.xsl.XslTransformHandler;
 
 
 /**
@@ -63,6 +66,8 @@ class StaticCheckTCase extends TestCase implements CompileListener {
 
   protected void setUp() throws Exception {
     super.setUp();
+    TransformerFactory trsf = new net.sf.saxon.TransformerFactoryImpl();
+    XslTransformHandler.getInstance().setTransformerFactory(trsf);
     _compiler = BpelC.newBpelCompiler();
     _compiler.setCompileListener(this);
     _errors.clear();
@@ -86,7 +91,7 @@ class StaticCheckTCase extends TestCase implements CompileListener {
 
   public void runTest() throws Exception {
     try {
-      _compiler.compile(new File(_bpelURL.toURI()), 0);
+      _compiler.compile(new File(_bpelURL.toURI()), 1L);
       fail("Expected compilation exception.");
     } catch (CompilationException ce) {
       _errors.add(ce.getCompilationMessage());
