@@ -163,7 +163,7 @@
 
     <xs:complexType name="tEnableEventList">
         <xs:sequence>
-            <xs:element name="enable-event" minOccurs="1" maxOccurs="unbounded" type="xs:string"/>
+            <xs:element name="enable-event" minOccurs="0" maxOccurs="unbounded" type="xs:string"/>
         </xs:sequence>
     </xs:complexType>
 
@@ -179,7 +179,7 @@
         <xs:complexContent>
             <xs:extension base="dd:tEnableEventList">
                 <xs:sequence>
-                    <xs:element name="scope-events" minOccurs="1" maxOccurs="unbounded" type="dd:tScopeEvents"/>
+                    <xs:element name="scope-events" minOccurs="0" maxOccurs="unbounded" type="dd:tScopeEvents"/>
                 </xs:sequence>
                 <xs:attribute name="generate" use="optional">
                     <xs:simpleType>
