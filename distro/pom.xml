@@ -115,6 +115,21 @@
               <tarLongFileMode>gnu</tarLongFileMode>
             </configuration>
           </execution>
+          <execution>
+            <id>source-distro</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <finalName>apache-ode-sources-${project.version}</finalName>
+              <appendAssemblyId>false</appendAssemblyId>
+              <descriptors>
+                <descriptor>src/main/assembly/src.xml</descriptor>
+              </descriptors>
+              <tarLongFileMode>gnu</tarLongFileMode>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
      </plugins>
