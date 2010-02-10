@@ -166,7 +166,7 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
     public Node evaluateNode(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
         List retVal = evaluate(cexp, ctx);
         if (retVal.size() == 0)
-            throw new FaultException(cexp.getOwner().constants.qnSelectionFailure, "No results for expression: " + cexp);
+            throw new FaultException(cexp.getOwner().constants.qnSelectionFailure, "No results for expression: " + cexp, new Throwable("ignoreMissingFromData"));
         if (retVal.size() > 1)
             throw new FaultException(cexp.getOwner().constants.qnSelectionFailure, "Multiple results for expression: " + cexp);
         return (Node) retVal.get(0);

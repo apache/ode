@@ -19,7 +19,8 @@
 
 <deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
   xmlns:pns="http://ode/bpel/unit-testAssign1"
-  xmlns:wns="http://ode/bpel/unit-testAssign1.wsdl">
+  xmlns:wns="http://ode/bpel/unit-testAssign1.wsdl"
+  xmlns:ns1="test:test">
 
 
 	<process name="pns:TestAssign">
@@ -29,4 +30,12 @@
 			<service name="wns:TestAssignService" port="TestAssignPort"/>
 		</provide>
 	</process>
+
+  <process name="ns1:TestIgnoreMissingFromData">
+    <active>true</active>
+    <provide partnerLink="client">
+      <service name="ns1:TestIgnoreMissingFromDataService" port="TestIgnoreMissingFromDataPort"/>
+    </provide>
+  </process>
+
 </deploy>
