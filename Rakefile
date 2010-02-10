@@ -22,137 +22,11 @@ require "buildr/javacc"
 require "buildr/jetty"
 require "buildr/hibernate"
 
+require File.join(File.dirname(__FILE__), 'repositories.rb')
+require File.join(File.dirname(__FILE__), 'dependencies.rb')
+
 # Keep this structure to allow the build system to update version numbers.
 VERSION_NUMBER = "1.3.4-SNAPSHOT"
-
-ANNONGEN            = "annogen:annogen:jar:0.1.0"
-ANT                 = "ant:ant:jar:1.6.5"
-AXIOM               = [ group("axiom-api", "axiom-impl", "axiom-dom",
-                        :under=>"org.apache.ws.commons.axiom", :version=>"1.2.5") ]
-AXIS2_ALL           = group("axis2-adb", "axis2-codegen", "axis2-kernel",
-                        "axis2-java2wsdl", "axis2-jibx", "axis2-saaj", "axis2-xmlbeans",
-                        :under=>"org.apache.axis2", :version=>"1.3")
-AXIS2_TEST          = group("httpcore", "httpcore-nio", "httpcore-niossl", 
-                           :under=>"org.apache.httpcomponents", :version=>"4.0-alpha5")
-AXIS2_MODULES        = struct(
- :mods              => ["org.apache.rampart:rampart:mar:1.3", 
-                         "org.apache.rampart:rahas:mar:1.3",
-                         "org.apache.axis2:addressing:mar:1.3"],
- :libs              => [group("rampart-core", "rampart-policy", "rampart-trust",
-                              :under=>"org.apache.rampart",
-                              :version=>"1.3"), 
-                        "org.apache.ws.security:wss4j:jar:1.5.3", 
-                        "org.apache.santuario:xmlsec:jar:1.4.0",
-                        "org.opensaml:opensaml:jar:1.1",
-                        "bouncycastle:bcprov-jdk15:jar:140"] 
-)
-AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.3"
-BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:3.0"
-COMMONS             = struct(
-  :codec            =>"commons-codec:commons-codec:jar:1.3",
-  :collections      =>"commons-collections:commons-collections:jar:3.2.1",
-  :dbcp             =>"commons-dbcp:commons-dbcp:jar:1.2.2",
-  :fileupload       =>"commons-fileupload:commons-fileupload:jar:1.1.1",
-  :httpclient       =>"commons-httpclient:commons-httpclient:jar:3.1",
-  :lang             =>"commons-lang:commons-lang:jar:2.4",
-  :logging          =>"commons-logging:commons-logging:jar:1.1",
-  :io               =>"commons-io:commons-io:jar:1.4",
-  :pool             =>"commons-pool:commons-pool:jar:1.4",
-  :primitives       =>"commons-primitives:commons-primitives:jar:1.0"
-)
-DERBY               = "org.apache.derby:derby:jar:10.5.3.0_1"
-DERBY_TOOLS         = "org.apache.derby:derbytools:jar:10.5.3.0_1"
-DOM4J               = "dom4j:dom4j:jar:1.6.1"
-GERONIMO            = struct(
-  :kernel           =>"org.apache.geronimo.modules:geronimo-kernel:jar:2.0.1",
-  :transaction      =>"org.apache.geronimo.components:geronimo-transaction:jar:2.0.1",
-  :connector        =>"org.apache.geronimo.components:geronimo-connector:jar:2.0.1"
-)
-HIBERNATE           = [ "org.hibernate:hibernate:jar:3.2.5.ga", "asm:asm:jar:1.5.3",
-                        "antlr:antlr:jar:2.7.6", "cglib:cglib:jar:2.1_3", "net.sf.ehcache:ehcache:jar:1.2.3" ]
-HSQLDB              = "hsqldb:hsqldb:jar:1.8.0.7"
-JAVAX               = struct(
-  :activation       =>"javax.activation:activation:jar:1.1",
-  #:activation       =>"geronimo-spec:geronimo-spec-activation:jar:1.0.2-rc4",
-  :connector        =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec:jar:1.0",
-  :ejb              =>"org.apache.geronimo.specs:geronimo-ejb_2.1_spec:jar:1.1",
-  :javamail         =>"geronimo-spec:geronimo-spec-javamail:jar:1.3.1-rc5",
-  :jms              =>"geronimo-spec:geronimo-spec-jms:jar:1.1-rc4",
-  :persistence      =>"javax.persistence:persistence-api:jar:1.0",
-  :servlet          =>"org.apache.geronimo.specs:geronimo-servlet_2.4_spec:jar:1.0",
-  :stream           =>"stax:stax-api:jar:1.0.1",
-  :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.1_spec:jar:1.1",
-  :resource         =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec:jar:1.0"
-)
-JAXEN               = "jaxen:jaxen:jar:1.1.1"
-JBI                 = group("org.apache.servicemix.specs.jbi-api-1.0", :under=>"org.apache.servicemix.specs", :version=>"1.1.0")
-JENCKS              = "org.jencks:jencks:jar:all:1.3"
-JIBX                = "jibx:jibx-run:jar:1.1-beta3"
-KARAF               = [
-                        "org.apache.felix:org.osgi.core:jar:1.4.0",
-                        "org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.console:jar:1.0.0",
-                        group("org.apache.felix.gogo.commands","org.apache.felix.gogo.runtime", 
-                          :under=>"org.apache.felix.gogo", :version=>"0.2.0")
-                      ]
-LOG4J               = "log4j:log4j:jar:1.2.13"
-OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.2.1",
-                       "net.sourceforge.serp:serp:jar:1.13.1"]
-
-SAXON               = group("saxon", "saxon-xpath", "saxon-dom", "saxon-xqj", :under=>"net.sf.saxon", :version=>"9.x")
-SERVICEMIX          = [
-                        group("servicemix-core", 
-                            :under=>"org.apache.servicemix", :version=>"3.3"), 
-                        group("servicemix-soap", "servicemix-common", "servicemix-shared", "servicemix-http", "servicemix-eip",
-                            :under=>"org.apache.servicemix", :version=>"2008.01"), 
-                        group("servicemix-utils", 
-                            :under=>"org.apache.servicemix", :version=>"1.0.0"),
-                        "commons-httpclient:commons-httpclient:jar:3.0", 
-                        "commons-codec:commons-codec:jar:1.2",
-                        "org.mortbay.jetty:jetty:jar:6.1.12rc1",
-                        "org.mortbay.jetty:jetty-client:jar:6.1.12rc1",
-                        "org.mortbay.jetty:jetty-sslengine:jar:6.1.12rc1",
-                        "org.mortbay.jetty:servlet-api-2.5:jar:6.1.12rc1",
-                        "org.mortbay.jetty:jetty-util:jar:6.1.12rc1",
-                        "org.codehaus.woodstox:wstx-asl:jar:3.2.2",
-                        "org.apache.geronimo.specs:geronimo-activation_1.1_spec:jar:1.0.1",
-                        "org.apache.geronimo.specs:geronimo-annotation_1.0_spec:jar:1.1",
-                        "org.apache.geronimo.specs:geronimo-javamail_1.4_spec:jar:1.2",
-                        "org.apache.geronimo.specs:geronimo-stax-api_1.0_spec:jar:1.0.1",
-                        "org.apache.geronimo.specs:geronimo-jms_1.1_spec:jar:1.1",
-                        "org.jencks:jencks:jar:2.1",
-                        "org.objectweb.howl:howl:jar:1.0.1-1",
-                        "org.apache.activemq:activemq-core:jar:4.1.1",
-                        "org.apache.activemq:activemq-ra:jar:4.1.1",
-                        "commons-beanutils:commons-beanutils:jar:1.7.0",
-                        "tranql:tranql-connector-derby-common:jar:1.1"
-                        ]
-SLF4J = group(%w{ slf4j-api slf4j-log4j12 jcl104-over-slf4j }, :under=>"org.slf4j", :version=>"1.4.3")                        
-SPRING              = ["org.springframework:spring:jar:2.5.6"]
-TRANQL              = [ "tranql:tranql-connector:jar:1.1", COMMONS.primitives ]
-WOODSTOX            = "woodstox:wstx-asl:jar:3.2.1"
-WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.1"
-XALAN               = "org.apache.ode:xalan:jar:2.7.0-2"
-XERCES              = "xerces:xercesImpl:jar:2.9.0"
-WS_COMMONS          = struct(
-  :axiom            =>AXIOM,
-  :neethi           =>"org.apache.neethi:neethi:jar:2.0.2",
-  :xml_schema       =>"org.apache.ws.commons.schema:XmlSchema:jar:1.3.2"
-)
-XBEAN               = [
-  "org.apache.xbean:xbean-kernel:jar:3.3",
-  "org.apache.xbean:xbean-server:jar:3.3",
-  "org.apache.xbean:xbean-spring:jar:3.4.3",
-  "org.apache.xbean:xbean-classloader:jar:3.4.3"
-]
-XMLBEANS            = "org.apache.xmlbeans:xmlbeans:jar:2.3.0"
-
-repositories.remote << "http://www.intalio.org/public/maven2"
-repositories.remote << "http://people.apache.org/repo/m2-incubating-repository"
-repositories.remote << "http://repo1.maven.org/maven2"
-repositories.remote << "http://people.apache.org/repo/m2-snapshot-repository"
-repositories.remote << "http://download.java.net/maven/2"
-repositories.remote << "http://www.aqute.biz/repo"
-repositories.release_to[:url] ||= "sftp://guest@localhost/home/guest"
 
 BUNDLE_VERSIONS = {
   "ode.version" => VERSION_NUMBER,
@@ -169,7 +43,6 @@ BUNDLE_VERSIONS = {
 Release.find.tag_name = lambda { |version| "APACHE_ODE_#{version.upcase}" } if Release.find
 
 desc "Apache ODE"
-#define "ode", :group=>"org.apache.ode", :version=>VERSION_NUMBER do
 define "ode" do
   project.version = VERSION_NUMBER
   project.group = "org.apache.ode"
