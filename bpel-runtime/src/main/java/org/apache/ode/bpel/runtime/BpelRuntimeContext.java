@@ -29,6 +29,7 @@ import javax.xml.namespace.QName;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
+import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
@@ -108,6 +109,13 @@ public interface BpelRuntimeContext {
      * @return
      */
     boolean isPartnerRoleEndpointInitialized(PartnerLinkInstance pLink);
+
+    /**
+     * Retrieve failure handling info for invoke
+     * @param pLink
+     * @return
+     */
+    OFailureHandling getFailureHandlingForPartnerLink(OPartnerLink pLink);
 
     /**
      * Fetches our session id associated with the partner link instance.  This will always return a

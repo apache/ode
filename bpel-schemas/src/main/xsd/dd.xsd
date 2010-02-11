@@ -19,9 +19,12 @@
   -->
 
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:ext="http://ode.apache.org/activityRecovery"
            targetNamespace="http://www.apache.org/ode/schemas/dd/2007/03"
            xmlns:dd="http://www.apache.org/ode/schemas/dd/2007/03"
            elementFormDefault="qualified">
+
+    <xs:import namespace="http://ode.apache.org/activityRecovery" schemaLocation="activityRecovery.xsd"></xs:import>
 
     <xs:element name="deploy" id="deploy" type="dd:tDeployment">
     </xs:element>
@@ -130,6 +133,7 @@
                     <xs:attribute name="name" type="xs:QName" use="required"/>
                 </xs:complexType>
             </xs:element>
+            <xs:element ref="ext:failureHandling" minOccurs="0"/>
         </xs:choice>
         <xs:attribute name="partnerLink" type="xs:string" use="required"/>
     </xs:complexType>

@@ -71,6 +71,7 @@ import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
+import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
@@ -1493,6 +1494,10 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     public ClassLoader getProcessClassLoader() {
         return _bpelProcess._classLoader;
+    }
+
+    public OFailureHandling getFailureHandlingForPartnerLink(OPartnerLink pLink) {
+        return _bpelProcess.getConf().getInvokeFailureHandling().get(pLink.name);
     }
 
 }

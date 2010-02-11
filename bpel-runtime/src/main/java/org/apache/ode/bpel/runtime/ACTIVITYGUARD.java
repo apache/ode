@@ -29,6 +29,7 @@ import org.apache.ode.bpel.evt.ActivityRecoveryEvent;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OExpression;
+import org.apache.ode.bpel.o.OInvoke;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OFailureHandling;
@@ -237,6 +238,15 @@ class ACTIVITYGUARD extends ACTIVITY {
                     // Implicit scope can tell the difference between cancelled and completed.
                     _self.parent.cancelled();
                 }
+                
+                private OFailureHandling getFailureHandling() {
+                    if (_oactivity instanceof OInvoke) {
+                        OInvoke _oinvoke = (OInvoke) _oactivity;
+                        OFailureHandling f = getBpelRuntimeContext().getFailureHandlingForPartnerLink(_oinvoke.partnerLink);
+                        if (f != null) return f;
+                    }
+                    return _oactivity.getFailureHandling();
+                }
 
                 public void failure(String reason, Element data) {
                     if (_failure == null)
@@ -245,7 +255,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                     _failure.reason = reason;
                     _failure.data = data;
 
-                    OFailureHandling failureHandling = _oactivity.getFailureHandling();
+                    OFailureHandling failureHandling = getFailureHandling();
                     if (failureHandling != null && failureHandling.faultOnFailure) {
                       // No attempt to retry or enter activity recovery state, simply fault.
                         if (__log.isDebugEnabled())

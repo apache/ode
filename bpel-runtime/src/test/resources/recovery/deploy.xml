@@ -47,6 +47,22 @@
     </invoke>
   </process>
 
+  <process name="pns:FailureToFault2">
+    <active>true</active>
+    <provide partnerLink="instantiatingPartnerLink">
+      <service name="wns:FailureToFault2" port="soap"/>
+    </provide>
+    <invoke partnerLink="failingPartnerLink">
+      <service name="wns:FailingService" port="soap"/>
+      <ext:failureHandling xmlns:ext="http://ode.apache.org/activityRecovery">
+        <ext:faultOnFailure>true</ext:faultOnFailure>
+      </ext:failureHandling>
+    </invoke>
+    <invoke partnerLink="instantiatingPartnerLink">
+      <service name="wns:ResponseService" port="soap"/>
+    </invoke>
+  </process>
+
   <process name="pns:FailureNoRetry">
     <active>true</active>
     <provide partnerLink="instantiatingPartnerLink">

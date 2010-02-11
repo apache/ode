@@ -32,6 +32,7 @@ import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.evt.BpelEvent;
+import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.utils.CronExpression;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -156,6 +157,12 @@ public interface ProcessConf {
      * @return map of partner link names and associated enpoints
      */
     Map<String, Endpoint> getInvokeEndpoints();
+
+    /**
+     * Returns failure handling info for invokes.
+     * @return
+     */
+    public Map<String, OFailureHandling> getInvokeFailureHandling();
     
     /**
      * Tells if the service is shareable

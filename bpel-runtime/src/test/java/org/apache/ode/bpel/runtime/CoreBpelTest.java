@@ -35,6 +35,7 @@ import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.o.OCatch;
 import org.apache.ode.bpel.o.OEmpty;
+import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.o.OFaultHandler;
 import org.apache.ode.bpel.o.OFlow;
 import org.apache.ode.bpel.o.OMessageVarType;
@@ -465,5 +466,9 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
     public void processOutstandingRequest(PartnerLinkInstance partnerLink,
         String opName, String mexId, String mexRef) {
         // TODO Auto-generated method stub
+    }
+
+    public OFailureHandling getFailureHandlingForPartnerLink(OPartnerLink pLink) {
+        return null;
     }
 }

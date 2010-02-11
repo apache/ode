@@ -33,6 +33,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.activityRecovery.FailureHandlingDocument.FailureHandling;
 import org.apache.ode.bpel.dd.TCleanup;
 import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.dd.TInvoke;
@@ -49,6 +50,7 @@ import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
 import org.apache.ode.utils.CronExpression;
 import org.apache.ode.utils.DOMUtils;
@@ -72,6 +74,7 @@ public class ProcessConfImpl implements ProcessConf {
     private File _configDir;
     private final Map<QName, Node> _props;
     private final HashMap<String, Endpoint> _partnerRoleInitialValues = new HashMap<String, Endpoint>();
+    private final HashMap<String, OFailureHandling> _partnerRoleFailureHandling = new HashMap<String, OFailureHandling>();
 
     private final HashMap<String, Endpoint> _myRoleEndpoints = new HashMap<String, Endpoint>();
     private final ArrayList<QName> _sharedServices = new ArrayList<QName>();
@@ -164,6 +167,17 @@ public class ProcessConfImpl implements ProcessConf {
                 __log.debug("Processing <invoke> element for process " + _pinfo.getName() + ": partnerlink " + plinkName + " --> "
                         + service);
                 _partnerRoleInitialValues.put(plinkName, new Endpoint(service.getName(), service.getPort()));
+                
+                {
+                    if (invoke.isSetFailureHandling()) {
+                        FailureHandling f = invoke.getFailureHandling();
+                        OFailureHandling g = new OFailureHandling();
+                        if (f.isSetFaultOnFailure()) g.faultOnFailure = f.getFaultOnFailure();
+                        if (f.isSetRetryDelay()) g.retryDelay = f.getRetryDelay();
+                        if (f.isSetRetryFor()) g.retryFor = f.getRetryFor();
+                        _partnerRoleFailureHandling.put(plinkName, g);
+                    }
+                }
             }
         }
 
@@ -281,6 +295,10 @@ public class ProcessConfImpl implements ProcessConf {
 
     public Map<String, Endpoint> getInvokeEndpoints() {
         return Collections.unmodifiableMap(_partnerRoleInitialValues);
+    }
+
+    public Map<String, OFailureHandling> getInvokeFailureHandling() {
+        return Collections.unmodifiableMap(_partnerRoleFailureHandling);
     }
 
     public Map<String, Endpoint> getProvideEndpoints() {
