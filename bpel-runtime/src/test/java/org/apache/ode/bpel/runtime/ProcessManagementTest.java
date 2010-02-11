@@ -44,7 +44,7 @@ public class ProcessManagementTest extends TestCase {
     public void testFilterProcessesByName() throws Exception {
 
         List<TProcessInfo> pilist = _management.listProcesses(null,null).getProcessInfoList().getProcessInfoList();
-        assertEquals(5,pilist.size());
+        assertEquals(6,pilist.size());
 
         pilist = _management.listProcesses("name=FailureInh*",null).getProcessInfoList().getProcessInfoList();
         assertEquals(1,pilist.size());
@@ -56,10 +56,10 @@ public class ProcessManagementTest extends TestCase {
         assertEquals(0,pilist.size());
 
         pilist = _management.listProcesses("namespace="+NAMESPACE,null).getProcessInfoList().getProcessInfoList();
-        assertEquals(5,pilist.size());
+        assertEquals(6,pilist.size());
 
         pilist = _management.listProcesses("namespace=http:*",null).getProcessInfoList().getProcessInfoList();
-        assertEquals(5,pilist.size());
+        assertEquals(6,pilist.size());
         
         pilist = _management.listProcesses("namespace=foo:*",null).getProcessInfoList().getProcessInfoList();
         assertEquals(0,pilist.size());
@@ -88,7 +88,7 @@ public class ProcessManagementTest extends TestCase {
     public void testListProcessCustom() {
         List<TProcessInfo> pilist = 
             _management.listProcessesCustom(null,"name", ProcessInfoCustomizer.ALL).getProcessInfoList().getProcessInfoList();
-        assertEquals(5,pilist.size());
+        assertEquals(6,pilist.size());
     }
     
     protected void setUp() throws Exception {
