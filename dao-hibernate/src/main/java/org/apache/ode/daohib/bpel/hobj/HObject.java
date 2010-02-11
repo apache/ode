@@ -54,7 +54,9 @@ public class HObject {
     /**
      * Auto-generated primary key.
      * 
-     * @hibernate.id generator-class="native" column="ID"
+     * @hibernate.id generator-class="org.apache.ode.daohib.NativeHiLoGenerator" column="ID"
+     * @hibernate.generator-param name="sequence" value="hibernate_seqhilo"
+     * @hibernate.generator-param name="max_lo" value="99"
      */
     public Long getId() {
         return _id;

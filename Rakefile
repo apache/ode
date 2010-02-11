@@ -288,7 +288,7 @@ define "ode" do
     bpel_store = project("bpel-store").compile.target
 
     Buildr::Hibernate::REQUIRES[:xdoclet] =  Buildr.group("xdoclet", "xdoclet-xdoclet-module", "xdoclet-hibernate-module",
-      :under=>"xdoclet", :version=>"1.2.3") + ["xdoclet:xjavadoc:jar:1.1-j5"]
+      :under=>"xdoclet", :version=>"1.2.3") + ["xdoclet:xjavadoc:jar:1.1-j5"] + projects("dao-hibernate")
 
     export = lambda do |properties, source, target|
       file(target=>[properties, source]) do |task|
