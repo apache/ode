@@ -151,7 +151,7 @@ public class DeploymentBrowser {
                         renderHtml(response, "Files in Bundle " + segments[1], new DocBody() {
                             public void render(Writer out) throws IOException {
                                 List<QName> processes = _store.listProcesses(segments[1]);
-                                if (processes != null) {
+                                if (processes != null && processes.size() > 0) {
                                     List<File> files = _store.getProcessConfiguration(processes.get(0)).getFiles();
                                     for (File file : files) {
                                         String relativePath = file.getPath().substring(file.getPath()
@@ -165,7 +165,7 @@ public class DeploymentBrowser {
                         });
                     } else if (segments.length > 2) {
                         List<QName> processes = _store.listProcesses(segments[1]);
-                        if (processes != null) {
+                        if (processes != null && processes.size() > 0) {
                             List<File> files = _store.getProcessConfiguration(processes.get(0)).getFiles();
                             for (final File file : files) {
                                 String relativePath = requestURI.substring(deplUri + 12 + 9 + segments[1].length());
