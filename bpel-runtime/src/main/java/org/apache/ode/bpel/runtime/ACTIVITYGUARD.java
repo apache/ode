@@ -256,8 +256,8 @@ class ACTIVITYGUARD extends ACTIVITY {
                     _failure.data = data;
 
                     OFailureHandling failureHandling = getFailureHandling();
-                    if (failureHandling != null && failureHandling.faultOnFailure) {
-                      // No attempt to retry or enter activity recovery state, simply fault.
+                    if (failureHandling != null && failureHandling.faultOnFailure && _failure.retryCount >= failureHandling.retryFor) {
+                        //Fault after retries (may be 0)
                         if (__log.isDebugEnabled())
                             __log.debug("ActivityRecovery: Activity " + _self.aId + " faulting on failure");
                         FaultData faultData = createFault(OFailureHandling.FAILURE_FAULT_NAME, _oactivity, reason);
