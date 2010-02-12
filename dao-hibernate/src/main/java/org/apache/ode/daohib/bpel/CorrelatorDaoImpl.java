@@ -134,6 +134,13 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
 
         if(__log.isDebugEnabled()) __log.debug(hdr + "found " + routes);
 
+        // obtain a lock on the correlator to eliminate potential race condition.
+        if(__log.isDebugEnabled()) __log.debug("Obtain record lock on " + _hobj);
+        Query correlatorLockQuery = getSession().createQuery("from HCorrelator as hc where id = :id");
+        correlatorLockQuery.setLong("id", _hobj.getId());
+        correlatorLockQuery.setLockMode("hc", LockMode.UPGRADE);
+        correlatorLockQuery.list();
+
         return routes;
     }
 
