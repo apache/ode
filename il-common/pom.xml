@@ -66,6 +66,12 @@
       <artifactId>jencks</artifactId>
       <version>${jencks.version}</version>
       <classifier>all</classifier>
+      <exclusions>
+       <exclusion>
+        <groupId>geronimo</groupId>
+        <artifactId>geronimo-connector</artifactId>
+       </exclusion>
+      </exclusions>
     </dependency>
    </dependencies>
 </project>

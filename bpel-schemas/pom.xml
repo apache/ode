@@ -50,6 +50,7 @@
 		<configuration>
 		   <schemaDirectory>src/main/xsd</schemaDirectory>
                    <sourceGenerationDirectory>target/generated/xmlbeans</sourceGenerationDirectory>
+				   <classGenerationDirectory>target/generated/xmlbeans</classGenerationDirectory>
                    <xmlConfigs>
                        <xmlConfig implementation="java.io.File">src/main/xsd/dd.xsdconfig</xmlConfig>
                        <xmlConfig implementation="java.io.File">src/main/xsd/pmapi.xsdconfig</xmlConfig>

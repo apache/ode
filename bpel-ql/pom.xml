@@ -48,6 +48,10 @@
        <plugin>
          <groupId>org.codehaus.mojo</groupId>
          <artifactId>javacc-maven-plugin</artifactId>
+		 <configuration>
+		    <outputDirectory>target/generated/javacc</outputDirectory>
+		    <interimDirectory>target/generated/jjtree</interimDirectory>
+		 </configuration>
          <executions>
            <execution>
              <goals>
