@@ -156,7 +156,7 @@ public class HttpMethodConverterTest extends TestCase {
     }
 
 
-    class MockEPR implements EndpointReference, MutableEndpoint {
+    static class MockEPR implements EndpointReference, MutableEndpoint {
         String url;
 
         MockEPR(String url) {
@@ -189,7 +189,7 @@ public class HttpMethodConverterTest extends TestCase {
         }
     }
 
-    class MockMessage implements Message {
+    static class MockMessage implements Message {
         Element elt;
 
         MockMessage(Element elt) {
@@ -238,7 +238,7 @@ public class HttpMethodConverterTest extends TestCase {
         }
     }
 
-    class MockMessageExchange implements PartnerRoleMessageExchange {
+    static class MockMessageExchange implements PartnerRoleMessageExchange {
         Operation op;
         Message req;
         EndpointReference epr;

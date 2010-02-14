@@ -107,7 +107,7 @@ public class SchedulerThreadTest extends TestCase implements TaskRunner {
     }
     
     
-    class TR {
+    static class TR {
         long time;
         Task task;
         TR(long time, Task task) {

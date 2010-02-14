@@ -163,7 +163,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
     /**
      * Compile time checking for the non standard ode:splitToElements function.
      */
-    public class SplitToElements implements XPathFunction {
+    public static class SplitToElements implements XPathFunction {
         public Object evaluate(List params) throws XPathFunctionException {
             if (params.size() < 3 || params.size() > 4) {
                 throw new CompilationException(
@@ -201,7 +201,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
         }
     }
     
-    public class InsertInto implements XPathFunction {
+    public static class InsertInto implements XPathFunction {
     	public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 3) {
                 throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_INSERT_AFTER));
@@ -210,7 +210,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
     	}
     }
     
-    public class InsertAfter implements XPathFunction {
+    public static class InsertAfter implements XPathFunction {
     	public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() < 2 || args.size() > 3) {
                 throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_INSERT_AFTER));
@@ -219,7 +219,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
     	}
     }
     
-    public class InsertBefore implements XPathFunction {
+    public static class InsertBefore implements XPathFunction {
     	public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() < 2 || args.size() > 3) {
                 throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_INSERT_BEFORE));
@@ -228,7 +228,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
     	}
     }
 
-    public class InsertAsFirstInto implements XPathFunction {
+    public static class InsertAsFirstInto implements XPathFunction {
     	public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 2) {
                 throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_INSERT_AS_FIRST_INTO));
@@ -237,7 +237,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
     	}
     }
 
-    public class InsertAsLastInto implements XPathFunction {
+    public static class InsertAsLastInto implements XPathFunction {
     	public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 2) {
                 throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_INSERT_AS_LAST_INTO));
@@ -246,7 +246,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
     	}
     }
 
-    public class Delete implements XPathFunction {
+    public static class Delete implements XPathFunction {
     	public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() < 1 || args.size() > 2) {
                 throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_DELETE));
@@ -255,7 +255,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
     	}
     }
     
-    public class Rename implements XPathFunction {
+    public static class Rename implements XPathFunction {
     	public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() < 2) {
                 throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_RENAME));
@@ -264,7 +264,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
     	}
     }
     
-    public class ProcessProperty implements XPathFunction {
+    public static class ProcessProperty implements XPathFunction {
     	public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 1) {
                 throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_PROCESS_PROPERTY));

@@ -106,7 +106,7 @@ public class ManagementService {
         return _instanceMgmt;
     }
 
-    class DynamicMessageReceiver<T> extends AbstractMessageReceiver {
+    static class DynamicMessageReceiver<T> extends AbstractMessageReceiver {
         T _service;
 
         public DynamicMessageReceiver(T service) {

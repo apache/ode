@@ -35,7 +35,7 @@ public class FailureInvokeTest extends Axis2TestBase {
         }
     }
 
-    private class Killer implements Runnable {
+    private static class Killer implements Runnable {
         private FailureInvokeTest test;
 
         private Killer(FailureInvokeTest test) {

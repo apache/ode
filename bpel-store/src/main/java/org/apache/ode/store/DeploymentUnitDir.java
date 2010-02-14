@@ -313,7 +313,7 @@ class DeploymentUnitDir {
         return result;
     }
 
-    public final class CBPInfo {
+    public static final class CBPInfo {
         final QName processName;
         final String guid;
         final File cbp;

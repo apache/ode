@@ -283,7 +283,7 @@ class OutstandingRequestManager implements Serializable {
      * Tuple identifying an outstanding request (i.e. a receive,pick, or onMessage on a
      * synchronous operation needing a reply).
      */
-    private class RequestIdTuple  implements Serializable {
+    private static class RequestIdTuple  implements Serializable {
         private static final long serialVersionUID = -1059389611839777482L;
         /** On which partner link it was received. */
         PartnerLinkInstance partnerLink;
@@ -322,7 +322,7 @@ class OutstandingRequestManager implements Serializable {
     /**
      * Tuple identifying an outstanding reply (i.e. a reply).
      */
-    private class ReplyIdTuple  implements Serializable {
+    private static class ReplyIdTuple  implements Serializable {
         private static final long serialVersionUID = -2993419819851933718L;
         /** On which partner link it was received. */
         PartnerLinkInstance partnerLink;
@@ -358,7 +358,7 @@ class OutstandingRequestManager implements Serializable {
         }
     }
 
-    private class RequestResTuple  implements Serializable {
+    private static class RequestResTuple  implements Serializable {
         private static final long serialVersionUID = -1059359612839777482L;
         /** Name of the operation. */
         ResourceInstance resource;
@@ -388,7 +388,7 @@ class OutstandingRequestManager implements Serializable {
         }
     }
 
-    private class SelectEntry implements Serializable {
+    private static class SelectEntry implements Serializable {
         private static final long serialVersionUID = -583743124656582887L;
         final String pickResponseChannel;
         final Selector[] selectors;
@@ -408,7 +408,7 @@ class OutstandingRequestManager implements Serializable {
         }
     }
 
-    private class RestEntry implements Serializable {
+    private static class RestEntry implements Serializable {
         private static final long serialVersionUID = -583733124656582887L;
         final String pickResponseChannel;
         String mexRef;

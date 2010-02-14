@@ -357,7 +357,7 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
     	return typeQName;
     }
 
-    private class XQueryDeclarations {
+    private static class XQueryDeclarations {
     	StringBuffer declarations = new StringBuffer();
     	
     	public XQueryDeclarations() {}

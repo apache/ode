@@ -188,7 +188,7 @@ public abstract class Axis2TestBase {
         }
     }
 
-    protected class ODEAxis2Server extends AxisServer {
+    protected static class ODEAxis2Server extends AxisServer {
 
         ODEServer _ode;
         String odeRootDir;

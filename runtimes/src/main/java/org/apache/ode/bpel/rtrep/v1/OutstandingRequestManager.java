@@ -212,7 +212,7 @@ class OutstandingRequestManager implements Serializable {
      * Tuple identifying an outstanding request (i.e. a receive,pick, or onMessage on a
      * synchronous operation needing a reply).
      */
-    private class RequestIdTuple  implements Serializable {
+    private static class RequestIdTuple  implements Serializable {
         private static final long serialVersionUID = -1059389611839777482L;
         /** On which partner link it was received. */
         PartnerLinkInstance partnerLink;
@@ -248,7 +248,7 @@ class OutstandingRequestManager implements Serializable {
         }
     }
 
-    private class Entry implements Serializable {
+    private static class Entry implements Serializable {
         private static final long serialVersionUID = -583743124656582887L;
         final String pickResponseChannel;
         final Selector[] selectors;

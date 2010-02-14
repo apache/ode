@@ -128,7 +128,7 @@ public class JettyWrapper {
         }
     }
 
-    private class ArithmeticsServiceHandler extends AbstractHandler {
+    private static class ArithmeticsServiceHandler extends AbstractHandler {
         /*
         8 urls to handle:
         (GET)       http://localhost:8888/HttpBindingTestService/OlaElMundo-GET/plus/(left):(right)
@@ -306,7 +306,7 @@ public class JettyWrapper {
         }
     }
 
-    private class BlogServiceHandler extends AbstractHandler {
+    private static class BlogServiceHandler extends AbstractHandler {
 
         public void handle(String s, HttpServletRequest request, HttpServletResponse response, int i) throws IOException, ServletException {
             String method = request.getMethod();

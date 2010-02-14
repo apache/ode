@@ -827,7 +827,7 @@ public class ProcessStoreImpl implements ProcessStore {
 	}
     
 
-    private class SimpleThreadFactory implements ThreadFactory {
+    private static class SimpleThreadFactory implements ThreadFactory {
         int threadNumber = 0;
         public Thread newThread(Runnable r) {
             threadNumber += 1;

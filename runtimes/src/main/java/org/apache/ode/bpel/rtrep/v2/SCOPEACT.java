@@ -407,7 +407,7 @@ public class SCOPEACT extends ACTIVITY {
      * Interceptor that goes to sleep for sometime before retrying the failed atomic scope
      *
      */
-    private class SLEEPER extends BpelJacobRunnable {
+    private static class SLEEPER extends BpelJacobRunnable {
 
         private static final long serialVersionUID = -476393080609348172L;
 
