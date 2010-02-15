@@ -422,7 +422,7 @@ public class DOMUtils {
 
         String value = null;
         short nodeType = node.getNodeType();
-        if (nodeType == Node.ELEMENT_NODE || nodeType == Node.DOCUMENT_NODE) {
+        if (nodeType == Node.ELEMENT_NODE || nodeType == Node.DOCUMENT_NODE || nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
             // serializer doesn't handle Node type well, only Element
             DOMSerializerImpl ser = new DOMSerializerImpl();
             ser.setParameter(Constants.DOM_NAMESPACES, Boolean.TRUE);

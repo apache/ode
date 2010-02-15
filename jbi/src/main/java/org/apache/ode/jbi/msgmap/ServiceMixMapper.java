@@ -20,6 +20,8 @@
 package org.apache.ode.jbi.msgmap;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.jbi.messaging.MessagingException;
@@ -33,7 +35,9 @@ import javax.xml.transform.dom.DOMSource;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
+import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * Message mapper for dealing with the degenerate messages that servicemix components such as servicemix-http provide. These
@@ -117,6 +121,29 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
             MessageTranslationException {
         if (msgdef == null)
             throw new NullPointerException("msdef must not be null.");
+        
+        Map<String, Node> headers = odeMsg.getHeaderParts();
+        if (headers != null) {
+            for (String header : headers.keySet()) {
+                if (__log.isDebugEnabled()) {
+                    __log.debug("toNMS() header " + header + " := " + DOMUtils.domToString(headers.get(header)) );
+                }
+                
+                Map<QName, DocumentFragment> headers2 = (Map<QName, DocumentFragment>) nmsMsg.getProperty("org.apache.servicemix.soap.headers");
+                if (headers2 == null) {
+                    headers2 = new HashMap<QName, DocumentFragment>();
+                    nmsMsg.setProperty("org.apache.servicemix.soap.headers", headers2);
+                }
+                
+                Node v = headers.get(header);
+                DocumentFragment f = v.getOwnerDocument().createDocumentFragment();
+                f.appendChild(v);
+                headers2.put(QName.valueOf(header), f);
+            }
+        }
+
+        
+        
         Element ode = odeMsg == null ? null : odeMsg.getMessage();
         Element part = ode == null ? null : DOMUtils.getFirstChildElement(ode);
         Element firstPartEl = part == null ? null : DOMUtils.getFirstChildElement(part);
@@ -219,6 +246,20 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
                 __log.debug("toODE() ode message:\n" + prettyPrint(nms));
             }
             odeMsg.setMessage(nms);
+        }
+        
+        Map<QName, DocumentFragment> headers = (Map<QName, DocumentFragment>) nmsMsg.getProperty("org.apache.servicemix.soap.headers");
+        if (headers != null) {
+            for (QName header : headers.keySet()) {
+                if (__log.isDebugEnabled()) {
+                    __log.debug("toODE() header " + header + " := " + DOMUtils.domToString(headers.get(header)) );
+                }
+                try {
+                    odeMsg.setHeaderPart(header.getLocalPart(), DOMUtils.stringToDOM(DOMUtils.domToString(headers.get(header))));
+                } catch (Exception e) {
+                    __log.error("Can't copy input header " + header);
+                }
+            }
         }
     }
 
