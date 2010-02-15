@@ -239,14 +239,12 @@ class ASSIGN extends ACTIVITY {
             }
             retVal = (Node) l.get(0);
         } else if (from instanceof OAssign.Literal) {
+            String literal = ((OAssign.Literal) from).getXmlLiteral();
             Element literalRoot;
             try {
-                literalRoot = ((OAssign.Literal) from).getXmlLiteral().getDocumentElement();
+                literalRoot = DOMUtils.stringToDOM(literal);
             } catch (Exception e) {
-                String msg = __msgs.msgEvalException(from.toString(), e.getMessage());
-                if (__log.isDebugEnabled()) __log.debug(from + ": " + msg);
-                if (e.getCause() instanceof FaultException) throw (FaultException)e.getCause();
-                throw new FaultException(getOAsssign().getOwner().constants.qnSelectionFailure, msg);
+                throw new RuntimeException("XML literal parsing failed " + literal, e);
             }
             assert literalRoot.getLocalName().equals("literal");
             // We'd like a single text node...

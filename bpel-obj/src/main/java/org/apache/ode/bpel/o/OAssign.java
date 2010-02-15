@@ -18,17 +18,15 @@
  */
 package org.apache.ode.bpel.o;
 
-import org.apache.ode.bpel.o.OScope.Variable;
-import org.apache.ode.utils.DOMUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
-
-import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.o.OScope.Variable;
+import org.apache.ode.utils.DOMUtils;
+import org.w3c.dom.Document;
 
 public class OAssign extends OActivity {
     static final long serialVersionUID = -1L  ;
@@ -80,37 +78,39 @@ public class OAssign extends OActivity {
 
     public static class Literal extends OBase implements RValue {
         private static final long serialVersionUID = 1L;
-        public transient String stringLiteral;
+        public transient String xmlLiteral;
 
         public Literal(OProcess owner, Document xmlLiteral) {
             super(owner);
             if (xmlLiteral == null)
                 throw new IllegalArgumentException("null xmlLiteral!");
-            this.stringLiteral = DOMUtils.domToString(xmlLiteral);
+            this.xmlLiteral = DOMUtils.domToString(xmlLiteral);
         }
 
         public String toString() {
-            return "{Literal " + stringLiteral + "}";
+            return "{Literal " + xmlLiteral + "}";
         }
 
         private void writeObject(java.io.ObjectOutputStream out)
                 throws IOException
         {
-            out.writeObject(stringLiteral);
+            out.writeObject(xmlLiteral);
         }
 
         private void readObject(java.io.ObjectInputStream in)
                 throws IOException
         {
+            String domStr = null;
             try {
-                stringLiteral = (String) in.readObject();
+                domStr = (String) in.readObject();
             } catch (ClassNotFoundException e) {
                 throw (IOException)(new IOException("XML de-serialization error.")).initCause(e);
             }
+            xmlLiteral = domStr;
         }
 
-        public Document getXmlLiteral() throws SAXException, IOException {
-            return DOMUtils.stringToDOM(stringLiteral).getOwnerDocument();
+        public String getXmlLiteral() {
+            return xmlLiteral;
         }
     }
 
