@@ -181,7 +181,7 @@ public class JbiTestBase extends SpringTestSupport {
     	            String result = inputStreamToString(connection.getInputStream());
     	            
     	            log.debug(getTestName() + " have result: " + result);
-    	            matchResponse(expectedResponse, result);
+    	            matchResponse(expectedResponse, result, true);
     	        }
             }
             {
@@ -192,11 +192,14 @@ public class JbiTestBase extends SpringTestSupport {
     	            io.setOperation(QName.valueOf(testProperties.getProperty(prefix + "nmr.operation")));
     	            io.getInMessage().setContent(new StreamSource(new ByteArrayInputStream(request.getBytes())));
     	            smxClient.sendSync(io,20000);
-    	            assertEquals(ExchangeStatus.ACTIVE,io.getStatus());
-    	            assertNotNull(io.getOutMessage());
-    	            String result = new SourceTransformer().contentToString(io.getOutMessage());
-    	            matchResponse(expectedResponse, result);
-    	            smxClient.done(io);
+                    if (io.getStatus() == ExchangeStatus.ACTIVE) {
+                        assertNotNull(io.getOutMessage());
+                        String result = new SourceTransformer().contentToString(io.getOutMessage());
+                        matchResponse(expectedResponse, result, true);
+                        smxClient.done(io);
+                    } else {
+                        matchResponse(expectedResponse, "", false);
+                    }
     	        }
             }
             
@@ -207,8 +210,12 @@ public class JbiTestBase extends SpringTestSupport {
             enableProcess(getTestName(), false);
     }
     
-    protected void matchResponse(String expectedResponse, String result) {
-        assertTrue("Response doesn't match expected regex.\nExpected: " + expectedResponse + "\nReceived: " + result, Pattern.compile(expectedResponse, Pattern.DOTALL).matcher(result).matches());
+    protected void matchResponse(String expectedResponse, String result, boolean succeeded) {
+        if (succeeded) {
+            assertTrue("Response doesn't match expected regex.\nExpected: " + expectedResponse + "\nReceived: " + result, Pattern.compile(expectedResponse, Pattern.DOTALL).matcher(result).matches());
+        } else {
+            assertTrue("Expected success, but got fault", expectedResponse.equals("FAULT"));
+        }
     }
     
     private String inputStreamToString(InputStream is) throws IOException {

@@ -26,6 +26,7 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Scheduler;
 
@@ -38,6 +39,10 @@ import org.apache.ode.bpel.iapi.Scheduler;
 public class ReplayerScheduler implements Scheduler {
     private static final Log __log = LogFactory.getLog(ReplayerScheduler.class);
 
+    public Replayer replayer;
+    
+    public static ThreadLocal<TaskElement> currentTaskElement = new ThreadLocal<TaskElement>();
+    
     private PriorityQueue<TaskElement> taskQueue = new PriorityQueue<TaskElement>();
 
     private static class TaskElement implements Comparable<TaskElement> {
@@ -92,14 +97,21 @@ public class ReplayerScheduler implements Scheduler {
     public void shutdown() {
     }
 
-    public void startReplaying() throws Exception {
+    public void startReplaying(Replayer replayer) throws Exception {
+        this.replayer = replayer;
         while (!taskQueue.isEmpty()) {
             TaskElement taskElement = taskQueue.remove();
-            __log.debug("executing action at time " + taskElement.when);
-            if (taskElement.runtimeContext != null) {
-                taskElement.runtimeContext.setCurrentEventDateTime(taskElement.when);
+            
+            try {
+                currentTaskElement.set(taskElement);
+                __log.debug("executing action at time " + taskElement.when);
+                if (taskElement.runtimeContext != null) {
+                    taskElement.runtimeContext.setCurrentEventDateTime(taskElement.when);
+                }
+                taskElement.action.call();
+            } finally {
+                currentTaskElement.set(null);
             }
-            taskElement.action.call();
         }
     }
 
@@ -117,18 +129,31 @@ public class ReplayerScheduler implements Scheduler {
         return null;
     }
 
-    public String schedulePersistedJob(Map<String, Object> jobDetail, Date when) throws ContextException {
-        return null;
-    }
-
-    public String scheduleVolatileJob(boolean transacted, Map<String, Object> jobDetail, Date when) throws ContextException {
-        return null;
-    }
-
-    public String scheduleVolatileJob(boolean transacted, Map<String, Object> jobDetail) throws ContextException {
+    public String schedulePersistedJob(final Map<String, Object> jobDetail, final Date when1) throws ContextException {
+        final Date when = when1 == null ? currentTaskElement.get().when : when1;
+        __log.debug("schedulePersistedJob " + jobDetail + " " + when, new Exception());
+        scheduleReplayerJob(new Callable<Void>() {
+            public Void call() throws Exception {
+                replayer.handleWorkEvent(jobDetail, when);
+                return null;
+            }
+        }, when, null);
+        
         return null;
     }
 
     public void setPolledRunnableProcesser(JobProcessor polledRunnableProcessor) {
+    }
+
+    public String scheduleVolatileJob(boolean transacted, Map<String, Object> jobDetail, Date when) throws ContextException {
+        // TODO Auto-generated method stub
+        __log.debug("scheduleVolatileJob");
+        return null;
+    }
+
+    public String scheduleVolatileJob(boolean transacted, Map<String, Object> jobDetail) throws ContextException {
+        // TODO Auto-generated method stub
+        __log.debug("scheduleVolatileJob");
+        return null;
     }
 }

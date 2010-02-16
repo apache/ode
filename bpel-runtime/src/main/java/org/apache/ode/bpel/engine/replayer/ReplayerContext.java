@@ -75,6 +75,7 @@ public class ReplayerContext {
     public ReplayerBpelRuntimeContextImpl runtimeContext;
     
     public Map<QName, ServiceConfig> servicesConfig = new HashMap<QName, ServiceConfig>();
+    public CommunicationType replayerConfig;
 
     public final Date replayStartDate;
 
@@ -100,7 +101,7 @@ public class ReplayerContext {
             }
         }
 
-        public Exchange fetchAnswer(QName service, String operation, Element outgoingMessage, Date currentEventDateTime) {
+        public AnswerResult fetchAnswer(QName service, String operation, Element outgoingMessage, Date currentEventDateTime) {
             __log.debug("fetching answer for " + service + " " + operation);
             
             ServiceConfig cfg = getServiceConfig(service);
@@ -114,9 +115,11 @@ public class ReplayerContext {
                 }
                 v.answerPos++;
                 __log.debug("fetched " + e);
-                return e;
+                return new AnswerResult(false, e);
             } else if (cfg.getReplayType().isSetMockQuery()) {
-                return fetchMockQuery(service, operation, outgoingMessage, cfg);
+                return new AnswerResult(false, fetchMockQuery(service, operation, outgoingMessage, cfg));
+            } else if (cfg.getReplayType().isSetLive()) {
+                return new AnswerResult(true, null);
             } else assert(false);
             return null;
         }
@@ -220,6 +223,8 @@ public class ReplayerContext {
     public void init(final CommunicationType r, ReplayerScheduler scheduler) throws Exception {
         this.scheduler = scheduler;
         
+        replayerConfig = r;
+        
         for (ServiceConfig s : r.getServiceConfigList()) {
             servicesConfig.put(s.getService(), s);
         }
@@ -285,10 +290,6 @@ public class ReplayerContext {
 
     }
 
-    public void run() throws Exception {
-        scheduler.startReplaying();
-    }
-
     public ReplayerContext(Date replayStartDate) {
         super();
         this.replayStartDate = replayStartDate;
@@ -302,5 +303,25 @@ public class ReplayerContext {
             c.addNewReplayType().setMock(XmlAnySimpleType.Factory.newInstance());
             return c;
         } else return c;
+    }
+    
+    public void checkRollbackOnFault() {
+        if (replayerConfig.getRollbackOnFault()) {
+            RuntimeException e = new RuntimeException("Process instance run into fault.");
+            if (__log.isDebugEnabled()) {
+                __log.debug("", e);
+            }
+            throw e;
+        }
+    }
+    
+    public static class AnswerResult {
+        public final boolean isLive;
+        public final Exchange e;
+        public AnswerResult(boolean isLive, Exchange e) {
+            super();
+            this.isLive = isLive;
+            this.e = e;
+        }
     }
 }

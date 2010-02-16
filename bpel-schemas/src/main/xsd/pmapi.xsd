@@ -44,6 +44,7 @@
         <xs:choice>
             <xs:element name="mock" type="anySimpleType"></xs:element>
             <xs:element name="mockQuery" type="string"></xs:element>
+            <xs:element name="live" type="anySimpleType"></xs:element>
         </xs:choice>
     </xs:complexType>
 
@@ -107,6 +108,7 @@
     <complexType name="CommunicationType">
         <sequence>
             <element name="processType" type="QName" />
+            <element name="rollbackOnFault" type="boolean" minOccurs="0" default="true"/>
 
             <element name="serviceConfig" maxOccurs="unbounded">
                 <complexType>

@@ -29,7 +29,10 @@
             <dd:service name="bpel:OnEventCorrelationInit" port="OnEventCorrelation" />
         </dd:provide>
         <dd:invoke partnerLink="client">
-            <dd:service name="bpel:OnEventCorrelation2Fwd" port="OnEventCorrelation2" />
+            <dd:service name="bpel:OnEventCorrelation2" port="OnEventCorrelation2" />
+        </dd:invoke>
+        <dd:invoke partnerLink="client2">
+            <dd:service name="bpel:OnEventCorrelation2NonExistent" port="OnEventCorrelation2" />
         </dd:invoke>
     </dd:process>
     <dd:process

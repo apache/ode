@@ -22,10 +22,12 @@
   <bpws:import importType="http://schemas.xmlsoap.org/wsdl/" location="OnEventCorrelationArtifacts.wsdl" namespace="http://sample.bpel.org/bpel/sampleArtifacts"/>
   <bpws:partnerLinks>
     <bpws:partnerLink myRole="OnEventCorrelationProvider" partnerRole="OnEventCorrelationProvider" name="client" partnerLinkType="tns:OnEventCorrelation"/>
+    <bpws:partnerLink partnerRole="OnEventCorrelationProvider" name="client2" partnerLinkType="tns:OnEventCorrelation"/>
   </bpws:partnerLinks>
   <bpws:variables>
     <bpws:variable messageType="tns:OnEventCorrelationMessage" name="input"/>
     <bpws:variable messageType="tns:OnEventCorrelationMessage" name="output"/>
+    <bpws:variable messageType="tns:OnEventCorrelationMessage" name="output2"/>
     <bpws:variable type="xsd:int" name="i"/>
     <bpws:variable type="xsd:int" name="j"/>
   </bpws:variables>
@@ -41,6 +43,7 @@
           </bpws:correlations>
         </bpws:receive>
         <bpws:invoke partnerLink="client" operation="initiate" outputVariable="output" inputVariable="input"/>
+
         <bpws:assign>
           <bpws:copy>
             <bpws:from>concat('first-', $ode:currentEventDateTime, ';', $output.payload)</bpws:from>
@@ -51,7 +54,25 @@
             <bpws:to>$i</bpws:to>
           </bpws:copy>
         </bpws:assign>
+        
+        <bpws:if>
+            <bpws:condition>$input.payload2 = 'livetest'</bpws:condition>
+            <bpws:sequence>
+                <bpws:invoke partnerLink="client" operation="complete" outputVariable="output2" inputVariable="input"/>
+                <bpws:assign>
+                  <bpws:copy>
+                    <bpws:from>concat('second-', $ode:currentEventDateTime, ';', $output2.payload, ";", $output.payload)</bpws:from>
+                    <bpws:to>$output.payload</bpws:to>
+                  </bpws:copy>
+                </bpws:assign>
+            </bpws:sequence>
+        </bpws:if>
+            
         <bpws:reply operation="initiate" partnerLink="client" variable="output" messageExchange="mex1"/>
+        <bpws:if>
+          <bpws:condition>$input.payload2 = 'rollbackOnFault'</bpws:condition>
+          <bpws:throw faultName="abc"/>
+        </bpws:if>
       </bpws:sequence>
     </bpws:scope>
     <bpws:while>

@@ -33,29 +33,29 @@ public class WorkEvent {
 
     private Map<String, Object> _jobDetail;
 
-    WorkEvent(Map<String, Object> jobDetail) {
+    public WorkEvent(Map<String, Object> jobDetail) {
         _jobDetail = jobDetail;
     }
 
-    WorkEvent() {
+    public WorkEvent() {
         _jobDetail = new HashMap<String, Object>();
     }
 
-    Long getIID() {
+    public Long getIID() {
         return (Long) _jobDetail.get("iid");
     }
 
-    Type getType() {
+    public Type getType() {
         return Type.valueOf((String) _jobDetail.get("type"));
     }
 
-    void setType(Type timer) {
+    public void setType(Type timer) {
 
         _jobDetail.put("type", timer.toString());
 
     }
 
-    Map<String, Object> getDetail() {
+    public Map<String, Object> getDetail() {
         return _jobDetail;
     }
 

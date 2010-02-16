@@ -34,6 +34,7 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.engine.replayer.Replayer;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
@@ -49,9 +50,8 @@ import org.w3c.dom.Node;
 
 public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMessageExchange {
 
-
     private static final Log __log = LogFactory.getLog(MyRoleMessageExchangeImpl.class);
-    
+
     protected BpelProcess _process;
 
     protected static Map<String, ResponseCallback> _waitingCallbacks =
@@ -66,7 +66,7 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
         return CorrelationStatus.valueOf(getDAO().getCorrelationStatus());
     }
 
-    void setCorrelationStatus(CorrelationStatus status) {
+    public void setCorrelationStatus(CorrelationStatus status) {
         getDAO().setCorrelationStatus(status.toString());
     }
 
@@ -75,8 +75,7 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
      * 
      * @param mex
      *            message exchange
-     * @return <code>true</code> if execution should continue,
-     *         <code>false</code> otherwise
+     * @return <code>true</code> if execution should continue, <code>false</code> otherwise
      */
     private boolean processInterceptors(MyRoleMessageExchangeImpl mex, InterceptorInvoker invoker) {
         InterceptorContextImpl ictx = new InterceptorContextImpl(_engine._contexts.dao.getConnection(), 
@@ -89,8 +88,7 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
         return true;
     }
 
-    boolean processInterceptor(MessageExchangeInterceptor i, MyRoleMessageExchangeImpl mex, InterceptorContext ictx,
-            InterceptorInvoker invoker) {
+    boolean processInterceptor(MessageExchangeInterceptor i, MyRoleMessageExchangeImpl mex, InterceptorContext ictx, InterceptorInvoker invoker) {
         __log.debug(invoker + "--> interceptor " + i);
         try {
             invoker.invoke(i, mex, ictx);
@@ -100,8 +98,7 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
             return false;
         } catch (AbortMessageExchangeException ame) {
             __log.debug("interceptor " + i + " cause invoke on " + this + " to be aborted with FAILURE: " + ame.getMessage());
-            mex.setFailure(MessageExchange.FailureType.ABORTED, __msgs.msgInterceptorAborted(mex.getMessageExchangeId(), i
-                    .toString(), ame.getMessage()), null);
+            mex.setFailure(MessageExchange.FailureType.ABORTED, __msgs.msgInterceptorAborted(mex.getMessageExchangeId(), i.toString(), ame.getMessage()), null);
             return false;
         }
         return true;
@@ -147,10 +144,15 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
             }
 
             setStatus(Status.ASYNC);
-            if (target.isInMemory())
-                _engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
-            else
-                _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+            Replayer replayer = Replayer.replayer.get();
+            if (replayer == null) {
+                if (target.isInMemory())
+                    _engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
+                else
+                    _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+            } else {
+                replayer.scheduler.schedulePersistedJob(we.getDetail(), null);
+            }
             return new ResponseFuture(getClientId());
         }
     }
@@ -172,8 +174,7 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
 
     public String toString() {
         try {
-            return "{MyRoleMex#" + getMessageExchangeId() + " [Client " + getClientId() + "] calling " + getServiceName() + "."
-                    + getOperationName() + "(...)}";
+            return "{MyRoleMex#" + getMessageExchangeId() + " [Client " + getClientId() + "] calling " + getServiceName() + "." + getOperationName() + "(...)}";
         } catch (Throwable t) {
             return "{MyRoleMex#???}";
         }
@@ -190,7 +191,7 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
         }
         _dao = null;
     }
-    
+
     /**
      * Return a deep clone of the given message
      * 
@@ -223,6 +224,7 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
         public boolean cancel(boolean mayInterruptIfRunning) {
             throw new UnsupportedOperationException();
         }
+
         public Object get() throws InterruptedException, ExecutionException {
             try {
                 return get(0, TimeUnit.MILLISECONDS);
@@ -231,6 +233,7 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
                 throw new ExecutionException(e);
             }
         }
+
         public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
             ResponseCallback callback = _waitingCallbacks.get(_clientId);
             if (callback != null) {
@@ -241,9 +244,11 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
             }
             return null;
         }
+
         public boolean isCancelled() {
             return false;
         }
+
         public boolean isDone() {
             return _done;
         }
@@ -262,6 +267,7 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
                     __log.warn("Transaction is rolled back on sending back the response.");
                 }
             }
+
             public void beforeCompletion() {
             }
         });

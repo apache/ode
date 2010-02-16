@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.engine.WorkEvent.Type;
+import org.apache.ode.bpel.engine.replayer.Replayer;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
@@ -137,10 +138,15 @@ public class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implemen
         we.setInMem(_engine._activeProcesses.get(getDAO().getProcess().getProcessId()).isInMemory());
         we.setChannel(getDAO().getChannel());
         we.setMexId(getDAO().getMessageExchangeId());
-        if (we.isInMem())
-            _engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
-        else
-            _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+        Replayer replayer = Replayer.replayer.get();
+        if (replayer == null) {
+            if (we.isInMem())
+                _engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
+            else
+                _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+        } else {
+            replayer.scheduler.schedulePersistedJob(we.getDetail(), null);
+        }
     }
 
     /**

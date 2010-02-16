@@ -102,7 +102,7 @@ public class BpelEngineImpl implements BpelEngine {
     private static final double PROCESS_OVERHEAD_MEMORY_FACTOR = 1.2;
 
     /** Active processes, keyed by process id. */
-    final HashMap<QName, BpelProcess> _activeProcesses = new HashMap<QName, BpelProcess>();
+    public final HashMap<QName, BpelProcess> _activeProcesses = new HashMap<QName, BpelProcess>();
 
     /** Mapping from myrole service name to active process. */
     private final HashMap<QName, List<BpelProcess>> _serviceMap = new HashMap<QName, List<BpelProcess>>();

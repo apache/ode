@@ -29,10 +29,16 @@
     <bpws:variable type="xsd:int" name="i"/>
     <bpws:variable type="xsd:int" name="j"/>
   </bpws:variables>
+  <bpws:correlationSets>
+    <bpws:correlationSet name="CorrelationSet" properties="ns:input ns:input2"/>
+  </bpws:correlationSets>
   <bpws:sequence name="main">
     <bpws:scope>
       <bpws:sequence>
         <bpws:receive createInstance="yes" operation="initiate" partnerLink="client" portType="tns:OnEventCorrelation" variable="input" messageExchange="mex1">
+                  <bpws:correlations>
+                    <bpws:correlation initiate="yes" set="CorrelationSet"/>
+                  </bpws:correlations>
         </bpws:receive>
         <bpws:assign>
           <bpws:copy>
@@ -41,7 +47,27 @@
           </bpws:copy>
         </bpws:assign>
         <bpws:reply operation="initiate" partnerLink="client" variable="output" messageExchange="mex1"/>
-      </bpws:sequence>
+
+        <bpws:if>
+            <bpws:condition>$input.payload2 = 'livetest'</bpws:condition>
+            <bpws:sequence>
+                <bpws:receive createInstance="no" operation="complete" partnerLink="client" portType="tns:OnEventCorrelation" variable="input" messageExchange="mex2">
+                  <bpws:correlations>
+                    <bpws:correlation initiate="no" set="CorrelationSet"/>
+                  </bpws:correlations>
+                </bpws:receive>
+                <bpws:assign>
+                  <bpws:copy>
+                    <bpws:from>'test9'</bpws:from>
+                    <bpws:to>$output.payload</bpws:to>
+                  </bpws:copy>
+                </bpws:assign>
+                <bpws:reply operation="complete" partnerLink="client" variable="output" messageExchange="mex2"/>
+            </bpws:sequence>
+        </bpws:if>
+
+    </bpws:sequence>
+
     </bpws:scope>
   </bpws:sequence>
 </bpws:process>
