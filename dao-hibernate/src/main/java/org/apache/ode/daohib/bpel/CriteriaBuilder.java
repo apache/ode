@@ -33,7 +33,6 @@ import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.Filter;
 import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.utils.ISO8601DateParser;
-import org.apache.ode.utils.RelativeDateParser;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -79,14 +78,8 @@ class CriteriaBuilder {
             if (filter.getPidFilter() != null) {
                 StringBuffer filters = new StringBuffer();
                 List<String> pids = filter.getPidFilter();
-                String cmp;
-                if (filter.arePidsNegative()) {
-                    cmp = " != ";
-                } else {
-                    cmp = " = ";
-                }
                 for (int m = 0; m < pids.size(); m++) {
-                    filters.append(" pi.process.id ").append(cmp).append(" :pid").append(m);
+                    filters.append(" pi.process.id =").append(" :pid").append(m);
                     parameters.put("pid" + m, pids.get(m));
                     if (m < pids.size() - 1) filters.append(" or");
                 }
