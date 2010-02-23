@@ -69,6 +69,7 @@ import org.hibernate.Criteria;
 import org.hibernate.FetchMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Projections;
 
@@ -191,13 +192,9 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection, FilteredInstanc
 
     @SuppressWarnings("unchecked")
     private static List<HProcessInstance> _instanceQueryForList(Session session, boolean countOnly, InstanceFilter filter) {
-        Criteria crit = session.createCriteria(HProcessInstance.class);
         CriteriaBuilder cb = new CriteriaBuilder();
-        cb.buildCriteria(crit, filter);
         
-        crit.setFetchMode("fault", FetchMode.JOIN);
-
-        return crit.list();
+        return cb.buildHQLQuery(session, filter).list();
     }
 
     static ProcessInstanceDAO _getInstance(SessionManager sm, Session session, Long iid) {
