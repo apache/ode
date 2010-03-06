@@ -25,6 +25,7 @@ import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.pmapi.BpelManagementFacade;
+import org.apache.ode.bpel.pmapi.ScopeInfoDocument;
 import org.apache.ode.bpel.pmapi.TActivityInfo;
 import org.apache.ode.bpel.pmapi.TActivityStatus;
 import org.apache.ode.bpel.pmapi.TFailureInfo;
@@ -49,6 +50,7 @@ import javax.xml.namespace.QName;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Test activity recovery and failure handling.
@@ -427,8 +429,18 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
 
     protected ArrayList<TActivityInfo> getRecoveriesInScope(TInstanceInfo instance, TScopeInfo scope,
                                                             ArrayList<TActivityInfo> recoveries) throws Exception {
-        if (scope == null)
-            scope = _management.getScopeInfoWithActivity(instance.getRootScope().getSiid(), true).getScopeInfo();
+        if (scope == null) {
+            if (instance != null) {
+                TScopeRef x = instance.getRootScope();
+                if (x != null) {
+                    ScopeInfoDocument v = _management.getScopeInfoWithActivity(x.getSiid(), true);
+                    if (v != null) {
+                        scope = v.getScopeInfo();
+                    }
+                }
+            }
+            if (scope == null) return (ArrayList<TActivityInfo>) Collections.EMPTY_LIST;
+        }
         if (recoveries == null)
             recoveries = new ArrayList<TActivityInfo>();
         TScopeInfo.Activities activities = scope.getActivities();
