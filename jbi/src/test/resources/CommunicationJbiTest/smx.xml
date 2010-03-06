@@ -97,7 +97,7 @@
                                 service="bpel:EPRTest2"
                                 endpoint="http" 
                                 role="consumer" 
-                                locationURI="http://localhost:8192/EPRTest2/"
+                                locationURI="http://localhost:8198/EPRTest2/"
                                 defaultMep="http://www.w3.org/2004/08/wsdl/in-out"
                                 defaultOperation="opInOut"
                                 soap="true" />

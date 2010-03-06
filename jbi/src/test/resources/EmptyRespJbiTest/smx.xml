@@ -65,7 +65,7 @@
 				targetEndpoint="PingPort"
                                 defaultOperation="Ping"
                                 role="consumer"
-                                locationURI="http://localhost:8192/PingHttp/"
+                                locationURI="http://localhost:8198/PingHttp/"
                                 defaultMep="http://www.w3.org/2004/08/wsdl/in-out" 
 				wsdlResource="classpath:EmptyRespJbiTest/Ping.wsdl"
 				soapVersion="1.1"

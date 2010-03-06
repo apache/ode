@@ -1,0 +1,105 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<project>
+
+	<property name="db.scripts.dir" value="${basedir}/target" />
+	<property name="sql.dir" value="${basedir}/src/main/sql"/>
+        <property name="dao-hibernate.classes" value="${basedir}/../dao-hibernate/target/classes" />
+	<property name="bpel-store.classes" value="${basedir}/../bpel-store/target/classes" />
+
+	<path id="classpath">
+	  <pathelement path="${maven.runtime.classpath}"/>
+	</path>
+	
+  <target name="create-schema">
+  	
+	<taskdef name="schemaexport" classname="org.hibernate.tool.hbm2ddl.SchemaExportTask" 
+		 classpathref="classpath"/>
+
+    <mkdir dir="target"/>
+    <mkdir dir="${db.scripts.dir}" />
+
+    <!-- Derby -->
+    <create-ddl db="derby"/>
+
+    <!-- MySQL -->
+    <create-ddl db="mysql"/>
+
+    <!-- Oracle -->
+    <create-ddl db="oracle"/>
+
+    <!-- PostgreSQL -->
+    <create-ddl db="postgres"/>
+  	
+    <!-- Sybase -->
+    <create-ddl db="hsql" />
+
+    <!-- MSSQL -->
+    <create-ddl db="sqlserver" />
+
+    <!-- Firebird -->
+    <create-ddl db="firebird" />
+
+  </target>
+
+  <target name="zip-derby-db">
+    <zip destfile="${basedir}/target/ode-dao-hibernate-db-${ode.version}.zip" basedir="${basedir}/target/derby/" />
+
+  </target>
+
+  <!--
+     ============================================
+     Macro defs, no need to change anything below
+     ============================================
+  -->
+
+  <macrodef name="create-ddl">
+    <attribute name="db"/>
+
+    <sequential>
+      <echo></echo>
+      <echo>=====================</echo>
+      <echo>Create DDL @{db}</echo>
+	 <schemaexport
+		properties="${sql.dir}/ode.@{db}.properties"
+		quiet="yes"
+		text="yes"
+		create="yes"
+		delimiter=";"
+		output="${db.scripts.dir}/partial.@{db}.sql">
+		<fileset dir="${dao-hibernate.classes}/">
+		    <include name="**/*.hbm.xml"/>
+                    <exclude name="**/HMessageExchangeProperty.hbm.xml" />
+		</fileset>
+		<fileset dir="${bpel-store.classes}/">
+		    <include name="**/*.hbm.xml"/>
+		</fileset>
+	    </schemaexport>
+        <concat destfile="${db.scripts.dir}/@{db}.sql">
+          <fileset file="${sql.dir}/simplesched-@{db}.sql"/>
+          <fileset file="${db.scripts.dir}/partial.@{db}.sql"/>
+        </concat>
+      <echo>Done.</echo>
+      <echo>=====================</echo>
+    </sequential>
+  </macrodef>
+
+</project>
+

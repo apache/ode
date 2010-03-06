@@ -41,7 +41,7 @@
             <bpws:literal>
 <sref:service-ref xmlns:sref="http://docs.oasis-open.org/wsbpel/2.0/serviceref">
   <wsa:EndpointReference xmlns:wsa="http://www.w3.org/2005/08/addressing">
-    <wsa:Address>http://localhost:8192/EPRTest2/?http.soap=true&amp;http.soapVersion=1.1</wsa:Address>
+    <wsa:Address>http://localhost:8198/EPRTest2/?http.soap=true&amp;http.soapVersion=1.1</wsa:Address>
   </wsa:EndpointReference>
 </sref:service-ref> 
             </bpws:literal>
