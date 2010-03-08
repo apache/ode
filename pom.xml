@@ -130,6 +130,7 @@
 	  <module>bpel-test</module>
 	  <module>axis2</module>
 	  <module>jbi</module>
+	  <module>jbi-karaf</module>
 	  <module>axis2-war</module>
 	  <module>distro</module>
     </modules>

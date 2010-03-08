@@ -424,63 +424,63 @@ define "ode" do
     end
   end
 
-  desc "ODE Commmands for Karaf"
-  define "jbi-karaf-commands" do
-    compile.with projects("bpel-schemas", "jbi"), JBI, KARAF, XMLBEANS, COMMONS.logging
-    libs = artifacts(projects("bpel-schemas", "jbi"), JBI, KARAF, XMLBEANS, COMMONS.logging)
-    package(:bundle).tap do |bnd|
-      bnd.bnd_file = _("org.apache.ode.commands.bnd")
-      bnd.sourcepath = _("src/main/java")
-      bnd.classpath = _("target/classes") + File::PATH_SEPARATOR + libs.join(File::PATH_SEPARATOR)
-      bnd.properties.update(BUNDLE_VERSIONS)
-    end
-  end
-
-  desc "ODE JBI Packaging for Karaf"
-  define "jbi-karaf" do
-    ode_libs = artifacts(projects("bpel-api", "bpel-api-jca", "bpel-compiler", "bpel-connector", "bpel-dao",
-                                  "bpel-epr", "jca-ra", "jca-server", "bpel-obj", "bpel-ql", "bpel-runtime",
-                                  "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
-                                  "jacob", "jacob-ap", "utils", "agents"))
-    libs = artifacts(ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
-                     COMMONS.primitives, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector, 
-                     JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA, 
-                     SAXON, TRANQL, XALAN, XERCES, XMLBEANS, WSDL4J)
-    package(:bundle).tap do |bnd|
-      bnd.bnd_file = _("bnd.bnd")
-      bnd.classpath = (ode_libs + artifacts(project("jbi").package(:jar)) + libs).join(File::PATH_SEPARATOR)
-      bnd.properties.update(BUNDLE_VERSIONS)
-
-      # inline log4j helper classes
-      bnd.properties["log4j.jar"] = artifact(LOG4J).to_s
-
-      # inline dao zip files
-      zips = artifacts(project("dao-hibernate-db").package(:zip), project("dao-jpa-ojpa-derby").package(:zip))
-      inlines = zips.map{|item| "@" + item.to_s}
-      bnd.properties["inlines"] = inlines.join(', ')
-
-      # embed jars
-      bnd_libs = ode_libs + artifacts(AXIOM, BACKPORT, GERONIMO.connector, JAXEN, 
-                                      JAVAX.connector, JAVAX.persistence, JAVAX.ejb, 
-                                      OPENJPA, SAXON, TRANQL, 
-                                      XALAN, XERCES, XMLBEANS, WSDL4J)
-      includes = bnd_libs.map{|item| File.basename(item.to_s)} 
-      bnd.properties["includes"] = includes.join(', ') 
-    end
-
-    # Generate features.xml
-    def package_as_feature(file_name)
-      file file_name  => [_("src/main/filtered-resources/features.xml")] do
-        filter(_("src/main/filtered-resources")).include("features.xml").into(_("target")).using(BUNDLE_VERSIONS).run
-        mv _("target/features.xml"), file_name
-      end
-    end
-    def package_as_feature_spec(spec)
-      spec.merge({ :type=>:xml, :classifier=>'features' })
-    end
-    package(:feature)
-
-  end
+#  desc "ODE Commmands for Karaf"
+#  define "jbi-karaf-commands" do
+#    compile.with projects("bpel-schemas", "jbi"), JBI, KARAF, XMLBEANS, COMMONS.logging
+#    libs = artifacts(projects("bpel-schemas", "jbi"), JBI, KARAF, XMLBEANS, COMMONS.logging)
+#    package(:bundle).tap do |bnd|
+#      bnd.bnd_file = _("org.apache.ode.commands.bnd")
+#      bnd.sourcepath = _("src/main/java")
+#      bnd.classpath = _("target/classes") + File::PATH_SEPARATOR + libs.join(File::PATH_SEPARATOR)
+#      bnd.properties.update(BUNDLE_VERSIONS)
+#    end
+#  end
+#
+#  desc "ODE JBI Packaging for Karaf"
+#  define "jbi-karaf" do
+#    ode_libs = artifacts(projects("bpel-api", "bpel-api-jca", "bpel-compiler", "bpel-connector", "bpel-dao",
+#                                  "bpel-epr", "jca-ra", "jca-server", "bpel-obj", "bpel-ql", "bpel-runtime",
+#                                  "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
+#                                  "jacob", "jacob-ap", "utils", "agents"))
+#    libs = artifacts(ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
+#                     COMMONS.primitives, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector, 
+#                     JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA, 
+#                     SAXON, TRANQL, XALAN, XERCES, XMLBEANS, WSDL4J)
+#    package(:bundle).tap do |bnd|
+#      bnd.bnd_file = _("bnd.bnd")
+#      bnd.classpath = (ode_libs + artifacts(project("jbi").package(:jar)) + libs).join(File::PATH_SEPARATOR)
+#      bnd.properties.update(BUNDLE_VERSIONS)
+#
+#      # inline log4j helper classes
+#      bnd.properties["log4j.jar"] = artifact(LOG4J).to_s
+#
+#      # inline dao zip files
+#      zips = artifacts(project("dao-hibernate-db").package(:zip), project("dao-jpa-ojpa-derby").package(:zip))
+#      inlines = zips.map{|item| "@" + item.to_s}
+#      bnd.properties["inlines"] = inlines.join(', ')
+#
+#      # embed jars
+#      bnd_libs = ode_libs + artifacts(AXIOM, BACKPORT, GERONIMO.connector, JAXEN, 
+#                                      JAVAX.connector, JAVAX.persistence, JAVAX.ejb, 
+#                                      OPENJPA, SAXON, TRANQL, 
+#                                      XALAN, XERCES, XMLBEANS, WSDL4J)
+#      includes = bnd_libs.map{|item| File.basename(item.to_s)} 
+#      bnd.properties["includes"] = includes.join(', ') 
+#    end
+#
+#    # Generate features.xml
+#    def package_as_feature(file_name)
+#      file file_name  => [_("src/main/filtered-resources/features.xml")] do
+#        filter(_("src/main/filtered-resources")).include("features.xml").into(_("target")).using(BUNDLE_VERSIONS).run
+#        mv _("target/features.xml"), file_name
+#      end
+#    end
+#    def package_as_feature_spec(spec)
+#      spec.merge({ :type=>:xml, :classifier=>'features' })
+#    end
+#    package(:feature)
+#
+#  end
 
   desc "ODE JCA Resource Archive"
   define "jca-ra" do

@@ -26,6 +26,10 @@
     <packaging>bundle</packaging>
     <modelVersion>4.0.0</modelVersion>
 
+   <properties>
+    <jbi.version>1.1.0</jbi.version>
+    </properties>
+
   <parent>
     <groupId>org.apache.ode</groupId>
     <artifactId>ode</artifactId>
@@ -110,6 +114,24 @@ src/main/resources,
             <artifactId>ode-dao-jpa</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.ode</groupId>
+            <artifactId>ode-jbi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>4.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.specs</groupId>
+            <artifactId>org.apache.servicemix.specs.jbi-api-1.0</artifactId>
+            <version>${jbi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
     </dependencies>
 </project>
