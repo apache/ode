@@ -147,10 +147,9 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             _suManager = new OdeSUManager(_ode);
             _initSuccess = true;
             __log.info(__msgs.msgOdeInitialized());
-        } finally {
-            if (!_initSuccess) {
-                // TODO ..then what? at least shutdown the scheduler
-            }
+        } catch (Throwable t) {
+            __log.fatal("", t);
+            throw new JBIException("Fatal error", t);
         }
     }
 

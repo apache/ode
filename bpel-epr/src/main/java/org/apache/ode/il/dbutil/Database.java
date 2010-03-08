@@ -26,6 +26,7 @@ import javax.naming.InitialContext;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.derby.jdbc.EmbeddedDriver;
@@ -136,7 +137,7 @@ public class Database {
 
     public DataSource getDataSource() {
         //return __logSql.isDebugEnabled() ? new LoggingDataSourceWrapper(_datasource, __logSql) : _datasource;
-    	return __logSql.isDebugEnabled() ? LoggingInterceptor.createLoggingDS(_datasource, __logSql) : _datasource;
+        return __logSql.isDebugEnabled() ? LoggingInterceptor.createLoggingDS(_datasource, __logSql) : _datasource;
     }
 
     private void initDataSource() throws DatabaseConfigException {
@@ -170,14 +171,13 @@ public class Database {
         __log.info(__msgs.msgOdeUsingInternalDb(_odeConfig.getDbIntenralJdbcUrl(), _odeConfig.getDbInternalJdbcDriverClass()));
         initInternalDb(_odeConfig.getDbIntenralJdbcUrl(), _odeConfig.getDbInternalJdbcDriverClass(),
                 _odeConfig.getDbInternalUserName(), _odeConfig.getDbInternalPassword());
-
     }
 
     private void initInternalDb(String url, String driverClass, String username,String password) throws DatabaseConfigException {
 
         __log.debug("Creating connection pool for " + url + " with driver " + driverClass);
         if (!(_txm instanceof RecoverableTransactionManager)) {
-        	throw new RuntimeException("TransactionManager is not recoverable.");
+            throw new RuntimeException("TransactionManager is not recoverable.");
         }
 
         TransactionSupport transactionSupport = LocalTransactions.INSTANCE;
@@ -201,15 +201,31 @@ public class Database {
                     getClass().getName(),
                     getClass().getClassLoader());
 
-        JDBCDriverMCF mcf = new JDBCDriverMCF();
+        
         try {
-            mcf.setDriver(driverClass);
-            mcf.setConnectionURL(url);
-            if (username != null) {
-                mcf.setUserName(username);
-            }
-            if (password != null) {
-                mcf.setPassword(password);
+            javax.resource.spi.ManagedConnectionFactory mcf = null;
+            String mcfClass = _odeConfig.getDbInternalMCFClass();
+            if (mcfClass != null) {
+                Properties dbInternalMCFProps = _odeConfig.getDbInternalMCFProperties();
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Using internal DB MCF " + mcfClass + " " + dbInternalMCFProps);
+                }
+                mcf = (javax.resource.spi.ManagedConnectionFactory) Class.forName(mcfClass).newInstance();
+                BeanUtils.copyProperties(mcf, dbInternalMCFProps);
+            } else {
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Using internal DB JDBCDriverMCF");
+                }
+                JDBCDriverMCF mcf2 = new JDBCDriverMCF();
+                mcf = mcf2;
+                mcf2.setDriver(driverClass);
+                mcf2.setConnectionURL(url);
+                if (username != null) {
+                    mcf2.setUserName(username);
+                }
+                if (password != null) {
+                    mcf2.setPassword(password);
+                }
             }
             _connectionManager.doStart();
             _datasource = (DataSource) mcf.createConnectionFactory(_connectionManager);

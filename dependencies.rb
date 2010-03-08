@@ -46,7 +46,8 @@ COMMONS             = struct(
   :logging          =>"commons-logging:commons-logging:jar:1.1",
   :io               =>"commons-io:commons-io:jar:1.4",
   :pool             =>"commons-pool:commons-pool:jar:1.4",
-  :primitives       =>"commons-primitives:commons-primitives:jar:1.0"
+  :primitives       =>"commons-primitives:commons-primitives:jar:1.0",
+  :beanutils        =>"commons-beanutils:commons-beanutils:jar:1.8.2"
 )
 DERBY               = "org.apache.derby:derby:jar:10.5.3.0_1"
 DERBY_TOOLS         = "org.apache.derby:derbytools:jar:10.5.3.0_1"

@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -172,8 +173,8 @@ public class OdeConfigProperties {
         }
         for (Object key : _props.keySet()) {
             String value = (String) _props.get(key);
-        	value = SystemUtils.replaceSystemProperties(value);
-        	_props.put(key, value);
+            value = SystemUtils.replaceSystemProperties(value);
+            _props.put(key, value);
         }
     }
 
@@ -202,6 +203,22 @@ public class OdeConfigProperties {
 
     public String getDbIntenralJdbcUrl() {
         return getProperty(OdeConfigProperties.PROP_DB_INTERNAL_URL, "jdbc:derby://localhost/ode");
+    }
+    
+    public String getDbInternalMCFClass() {
+        return getProperty("db.int.mcf");
+    }
+    
+    public Properties getDbInternalMCFProperties() {
+        String prefix = _prefix + "db.int.mcf.";
+        Properties p = new Properties();
+        for (Map.Entry<Object, Object> e : _props.entrySet()) {
+            String s = "" + e.getKey();
+            if (s.startsWith(prefix)) {
+                p.put(s.substring(prefix.length()), e.getValue());
+            }
+        }
+        return p;
     }
 
     /**
@@ -266,7 +283,7 @@ public class OdeConfigProperties {
     }
 
     public long getDehydrationMaximumAge() {     
-    	return Long.valueOf(getProperty(PROP_PROCESS_DEHYDRATION_MAXIMUM_AGE, ""+20*60*1000));
+        return Long.valueOf(getProperty(PROP_PROCESS_DEHYDRATION_MAXIMUM_AGE, ""+20*60*1000));
     }
     
     public int getDehydrationMaximumCount() {
@@ -323,7 +340,7 @@ public class OdeConfigProperties {
     }
     
     public int getMigrationTransactionTimeout() {
-    	return Integer.valueOf(getProperty(PROP_MIGRATION_TRANSACTION_TIMEOUT, String.valueOf(0)));
+        return Integer.valueOf(getProperty(PROP_MIGRATION_TRANSACTION_TIMEOUT, String.valueOf(0)));
     }
 
 }
