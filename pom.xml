@@ -99,6 +99,7 @@
         <xml.parser.version>2.6.2</xml.parser.version>
         <activemq.version>4.1.1</activemq.version>
         <xml-apis.version>1.3.04</xml-apis.version>
+        <servicemix.nmr.version>1.1.0-SNAPSHOT</servicemix.nmr.version>
     </properties>
 
 
@@ -130,6 +131,7 @@
 	  <module>bpel-test</module>
 	  <module>axis2</module>
 	  <module>jbi</module>
+	  <module>jbi-bundle</module>
 	  <module>jbi-karaf</module>
 	  <module>axis2-war</module>
 	  <module>distro</module>
