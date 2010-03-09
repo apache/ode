@@ -439,7 +439,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
                     }
                 }
             }
-            if (scope == null) return (ArrayList<TActivityInfo>) Collections.EMPTY_LIST;
+            if (scope == null) return new ArrayList<TActivityInfo>();
         }
         if (recoveries == null)
             recoveries = new ArrayList<TActivityInfo>();
