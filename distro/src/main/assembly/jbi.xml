@@ -30,6 +30,9 @@
     <fileSet>
       <directory>src/examples-jbi</directory>
       <outputDirectory>/examples</outputDirectory>
+      <excludes>
+          <exclude>**/target/**</exclude>
+      </excludes>
     </fileSet>
 
     <fileSet>
