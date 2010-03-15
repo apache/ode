@@ -52,21 +52,26 @@ public class OutstandingRequestsMigration implements Migration {
                 __log.debug("Migrating outstanding requests for for instance " + instance.getInstanceId());
 
                 try {
-                    ExecutionQueueImpl soup = new ExecutionQueueImpl(this.getClass().getClassLoader());
-                    soup.setReplacementMap(process.getReplacementMap(processDao.getProcessId()));
-                    soup.read(new ByteArrayInputStream(instance.getExecutionState()));
-                    Object data = soup.getGlobalData();
-                    if (data instanceof OutstandingRequestManager) {
-                        OutstandingRequestManager orm = (OutstandingRequestManager) data;
-    
-                        IMAManager imaManager = new IMAManager();
-                        imaManager.migrateRids(orm.getRids());
-                        soup.setGlobalData(imaManager);
-                        
-                        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                        soup.write(bos);
-                        instance.setExecutionState(bos.toByteArray());
-                        __log.debug("Migrated outstanding requests for for instance " + instance.getInstanceId());
+                    if (instance.getExecutionState() == null) {
+                        //Completed instance
+                        __log.debug("Skipped");
+                    } else {
+                        ExecutionQueueImpl soup = new ExecutionQueueImpl(this.getClass().getClassLoader());
+                        soup.setReplacementMap(process.getReplacementMap(processDao.getProcessId()));
+                        soup.read(new ByteArrayInputStream(instance.getExecutionState()));
+                        Object data = soup.getGlobalData();
+                        if (data instanceof OutstandingRequestManager) {
+                            OutstandingRequestManager orm = (OutstandingRequestManager) data;
+        
+                            IMAManager imaManager = new IMAManager();
+                            imaManager.migrateRids(orm.getRids());
+                            soup.setGlobalData(imaManager);
+                            
+                            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                            soup.write(bos);
+                            instance.setExecutionState(bos.toByteArray());
+                            __log.debug("Migrated outstanding requests for for instance " + instance.getInstanceId());
+                        }
                     }
                 } catch (Exception e) {
                     __log.debug("", e);
