@@ -49,7 +49,7 @@ public class OutstandingRequestsMigration implements Migration {
             Collection<ProcessInstanceDAO> pis = processDao.getActiveInstances();
 
             for (ProcessInstanceDAO instance : pis) {
-                __log.debug("Migrating outstanding requests for for instance " + instance.getInstanceId());
+                __log.debug("Migrating outstanding requests for instance " + instance.getInstanceId());
 
                 try {
                     if (instance.getExecutionState() == null) {
@@ -70,12 +70,12 @@ public class OutstandingRequestsMigration implements Migration {
                             ByteArrayOutputStream bos = new ByteArrayOutputStream();
                             soup.write(bos);
                             instance.setExecutionState(bos.toByteArray());
-                            __log.debug("Migrated outstanding requests for for instance " + instance.getInstanceId());
+                            __log.debug("Migrated outstanding requests for instance " + instance.getInstanceId());
                         }
                     }
                 } catch (Exception e) {
                     __log.debug("", e);
-                    __log.error("Error migrating outstanding requests for for instance " + instance.getInstanceId());
+                    __log.error("Error migrating outstanding requests for instance " + instance.getInstanceId());
                     migrationResult = false;
                 }
             }
