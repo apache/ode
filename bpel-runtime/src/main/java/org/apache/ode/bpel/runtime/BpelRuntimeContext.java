@@ -20,7 +20,6 @@ package org.apache.ode.bpel.runtime;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.Map;
 import java.net.URI;
 
 import javax.wsdl.Operation;
@@ -29,7 +28,6 @@ import javax.xml.namespace.QName;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
-import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
@@ -40,6 +38,7 @@ import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
+import org.apache.ode.bpel.iapi.ProcessConf.PartnerRoleConfig;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -115,7 +114,7 @@ public interface BpelRuntimeContext {
      * @param pLink
      * @return
      */
-    OFailureHandling getFailureHandlingForPartnerLink(OPartnerLink pLink);
+    PartnerRoleConfig getConfigForPartnerLink(OPartnerLink pLink);
 
     /**
      * Fetches our session id associated with the partner link instance.  This will always return a

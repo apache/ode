@@ -50,6 +50,7 @@ import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.ProcessConf.PartnerRoleConfig;
 import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
 import org.apache.ode.utils.CronExpression;
@@ -74,7 +75,7 @@ public class ProcessConfImpl implements ProcessConf {
     private File _configDir;
     private final Map<QName, Node> _props;
     private final HashMap<String, Endpoint> _partnerRoleInitialValues = new HashMap<String, Endpoint>();
-    private final HashMap<String, OFailureHandling> _partnerRoleFailureHandling = new HashMap<String, OFailureHandling>();
+    private final HashMap<String, PartnerRoleConfig> _partnerRoleConfig = new HashMap<String, PartnerRoleConfig>();
 
     private final HashMap<String, Endpoint> _myRoleEndpoints = new HashMap<String, Endpoint>();
     private final ArrayList<QName> _sharedServices = new ArrayList<QName>();
@@ -169,14 +170,19 @@ public class ProcessConfImpl implements ProcessConf {
                 _partnerRoleInitialValues.put(plinkName, new Endpoint(service.getName(), service.getPort()));
                 
                 {
+                    OFailureHandling g = null;
+                    
                     if (invoke.isSetFailureHandling()) {
                         FailureHandling f = invoke.getFailureHandling();
-                        OFailureHandling g = new OFailureHandling();
+                        g = new OFailureHandling();
                         if (f.isSetFaultOnFailure()) g.faultOnFailure = f.getFaultOnFailure();
                         if (f.isSetRetryDelay()) g.retryDelay = f.getRetryDelay();
                         if (f.isSetRetryFor()) g.retryFor = f.getRetryFor();
-                        _partnerRoleFailureHandling.put(plinkName, g);
                     }
+                    
+                    PartnerRoleConfig c = new PartnerRoleConfig(g, invoke.getUsePeer2Peer());
+                    __log.debug("PartnerRoleConfig for " + plinkName + " " + c.failureHandling + " usePeer2Peer: " + c.usePeer2Peer);
+                    _partnerRoleConfig.put(plinkName, c);
                 }
             }
         }
@@ -297,8 +303,8 @@ public class ProcessConfImpl implements ProcessConf {
         return Collections.unmodifiableMap(_partnerRoleInitialValues);
     }
 
-    public Map<String, OFailureHandling> getInvokeFailureHandling() {
-        return Collections.unmodifiableMap(_partnerRoleFailureHandling);
+    public Map<String, PartnerRoleConfig> getPartnerRoleConfig() {
+        return Collections.unmodifiableMap(_partnerRoleConfig);
     }
 
     public Map<String, Endpoint> getProvideEndpoints() {

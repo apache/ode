@@ -33,6 +33,8 @@ class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
     Endpoint _initialPartner;
 
     public PartnerRoleChannel _channel;
+    
+    public boolean usePeer2Peer = true;
 
     PartnerLinkPartnerRoleImpl(BpelProcess process, OPartnerLink plink, Endpoint initialPartner) {
         super(process, plink);

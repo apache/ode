@@ -70,6 +70,7 @@ import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
+import org.apache.ode.bpel.iapi.ProcessConf.PartnerRoleConfig;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
 import org.apache.ode.bpel.o.OFailureHandling;
@@ -792,7 +793,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         List<BpelProcess> p2pProcesses = null;
         
         Endpoint partnerEndpoint = _bpelProcess.getInitialPartnerRoleEndpoint(partnerLink.partnerLink);
-        if (partnerEndpoint != null)
+        if (getConfigForPartnerLink(partnerLink.partnerLink).usePeer2Peer && partnerEndpoint != null)
             p2pProcesses = _bpelProcess.getEngine().route(partnerEndpoint.serviceName, mex.getRequest());
 
         if (p2pProcesses != null && !p2pProcesses.isEmpty()) {
@@ -1515,8 +1516,13 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         return _bpelProcess._classLoader;
     }
 
-    public OFailureHandling getFailureHandlingForPartnerLink(OPartnerLink pLink) {
-        return _bpelProcess.getConf().getInvokeFailureHandling().get(pLink.name);
+    public PartnerRoleConfig getConfigForPartnerLink(OPartnerLink pLink) {
+        PartnerRoleConfig c = _bpelProcess.getConf().getPartnerRoleConfig().get(pLink.name);
+        if (c == null) {
+            return new PartnerRoleConfig(null, true);
+        } else {
+            return c;
+        }
     }
 
 }

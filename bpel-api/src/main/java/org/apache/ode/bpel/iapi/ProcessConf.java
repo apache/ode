@@ -45,6 +45,17 @@ import org.w3c.dom.Node;
  */
 public interface ProcessConf {
 
+    public static class PartnerRoleConfig {
+        public final OFailureHandling failureHandling;
+        public final boolean usePeer2Peer;
+        
+        public PartnerRoleConfig(OFailureHandling failureHandling, boolean usePeer2Peer) {
+            super();
+            this.failureHandling = failureHandling;
+            this.usePeer2Peer = usePeer2Peer;
+        }
+    }
+    
     /**
      * Get the process id, generally the same as the type.
      * @return process id.
@@ -162,7 +173,7 @@ public interface ProcessConf {
      * Returns failure handling info for invokes.
      * @return
      */
-    public Map<String, OFailureHandling> getInvokeFailureHandling();
+    public Map<String, PartnerRoleConfig> getPartnerRoleConfig();
     
     /**
      * Tells if the service is shareable

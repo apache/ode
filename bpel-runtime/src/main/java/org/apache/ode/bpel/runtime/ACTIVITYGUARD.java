@@ -242,7 +242,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                 private OFailureHandling getFailureHandling() {
                     if (_oactivity instanceof OInvoke) {
                         OInvoke _oinvoke = (OInvoke) _oactivity;
-                        OFailureHandling f = getBpelRuntimeContext().getFailureHandlingForPartnerLink(_oinvoke.partnerLink);
+                        OFailureHandling f = getBpelRuntimeContext().getConfigForPartnerLink(_oinvoke.partnerLink).failureHandling;
                         if (f != null) return f;
                     }
                     return _oactivity.getFailureHandling();

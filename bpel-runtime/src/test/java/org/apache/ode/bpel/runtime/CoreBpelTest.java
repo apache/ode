@@ -54,6 +54,7 @@ import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
+import org.apache.ode.bpel.iapi.ProcessConf.PartnerRoleConfig;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -468,7 +469,7 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
         // TODO Auto-generated method stub
     }
 
-    public OFailureHandling getFailureHandlingForPartnerLink(OPartnerLink pLink) {
-        return null;
+    public PartnerRoleConfig getConfigForPartnerLink(OPartnerLink pLink) {
+        return new PartnerRoleConfig(null, true);
     }
 }

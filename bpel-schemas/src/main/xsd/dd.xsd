@@ -126,7 +126,7 @@
     </xs:complexType>
 
     <xs:complexType name="tInvoke">
-        <xs:choice>
+        <xs:sequence>
             <xs:element name="service" minOccurs="1" maxOccurs="1" type="dd:tService"/>
             <xs:element name="binding" minOccurs="0" maxOccurs="1">
                 <xs:complexType>
@@ -134,8 +134,9 @@
                 </xs:complexType>
             </xs:element>
             <xs:element ref="ext:failureHandling" minOccurs="0"/>
-        </xs:choice>
+        </xs:sequence>
         <xs:attribute name="partnerLink" type="xs:string" use="required"/>
+        <xs:attribute name="usePeer2Peer" type="xs:boolean" use="optional" default="true"/>
     </xs:complexType>
 
     <xs:complexType name="tService">
