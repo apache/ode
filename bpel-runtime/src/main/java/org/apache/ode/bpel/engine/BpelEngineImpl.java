@@ -46,6 +46,7 @@ import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
@@ -133,20 +134,31 @@ public class BpelEngineImpl implements BpelEngine {
             throws BpelEngineException {
 
         List<BpelProcess> targets = route(targetService, null);
+        List<BpelProcess> activeTargets = new ArrayList<BpelProcess>();
+        for (BpelProcess target : targets) {
+            if (target.getConf().getState() == ProcessState.ACTIVE) {
+                activeTargets.add(target);
+            }
+        }
 
         if (targets == null || targets.size() == 0)
             throw new BpelEngineException("NoSuchService: " + targetService);
         
-        if (targets.size() == 1) {
+        if (targets.size() == 1 || activeTargets.size() == 1) {
             // If the number of targets is one, create and return a simple MEX
-            BpelProcess target = targets.get(0);
+            BpelProcess target;
+            if (activeTargets.size() == 1) {
+                target = activeTargets.get(0);
+            } else {
+                target = targets.get(0);
+            }
             return createNewMyRoleMex(target, clientKey, targetService, operation, pipedMexId);
         } else {
             // If the number of targets is greater than one, create and return
             // a brokered MEX that embeds the simple MEXs for each of the targets
-            BpelProcess template = targets.get(0);
+            BpelProcess template = activeTargets.get(0);
             ArrayList<MyRoleMessageExchange> meps = new ArrayList<MyRoleMessageExchange>();
-            for (BpelProcess target : targets) {
+            for (BpelProcess target : activeTargets) {
                 meps.add(createNewMyRoleMex(target, clientKey, targetService, operation, pipedMexId));
             }
             return createNewMyRoleMex(template, meps);  
