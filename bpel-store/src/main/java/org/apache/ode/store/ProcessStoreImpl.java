@@ -370,15 +370,17 @@ public class ProcessStoreImpl implements ProcessStore {
             if (du != null) {
                 undeployed = toPids(du.getProcessNames(), du.getVersion());
             }
+            
+            for (QName pn : undeployed) {
+                fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.UNDEPLOYED, pn, du.getName()));
+                __log.info(__msgs.msgProcessUndeployed(pn));
+            }
+            
             _processes.keySet().removeAll(undeployed);
         } finally {
             _rw.writeLock().unlock();
         }
 
-        for (QName pn : undeployed) {
-            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.UNDEPLOYED, pn, du.getName()));
-            __log.info(__msgs.msgProcessUndeployed(pn));
-        }        
         return undeployed;
     }
 
