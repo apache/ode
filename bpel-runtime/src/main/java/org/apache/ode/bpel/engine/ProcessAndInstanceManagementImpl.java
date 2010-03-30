@@ -28,9 +28,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.xml.namespace.QName;
@@ -50,6 +52,8 @@ import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.bpel.dao.ProcessManagementDAO.FailedSummaryValue;
+import org.apache.ode.bpel.dao.ProcessManagementDAO.InstanceSummaryKey;
 import org.apache.ode.bpel.engine.replayer.Replayer;
 import org.apache.ode.bpel.evt.ActivityEvent;
 import org.apache.ode.bpel.evt.BpelEvent;
@@ -174,13 +178,20 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         try {
             _db.exec(new BpelDatabase.Callable<Object>() {
                 public Object run(BpelDAOConnection conn) throws Exception {
-                    for (ProcessConf pconf : processQuery(processFilter)) {
+                    Collection<ProcessConf> pconfs = processQuery(processFilter);
+                    for (ProcessConf pconf : pconfs) {
                         try {
-                            fillProcessInfo(conn, procInfoList.addNewProcessInfo(), pconf, custom);
+                            fillProcessInfo(procInfoList.addNewProcessInfo(), pconf, custom);
                         } catch (Exception e) {
                             failIfSQLException(e);
                             __log.error("Exception when querying process " + pconf.getProcessId(), e);
                         }
+                    }
+                    try {
+                        fillProcessInfoSummary(conn, procInfoList.getProcessInfoList(), custom);
+                    } catch (Exception e) {
+                        failIfSQLException(e);
+                        __log.error("Exception fetching instances summary", e);
                     }
                     return null;
                 }
@@ -270,7 +281,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                     if (proc == null)
                         throw new ProcessNotFoundException("ProcessNotFound:" + pid);
 
-                    fillProcessInfo(conn, pi, proc, new ProcessInfoCustomizer(ProcessInfoCustomizer.Item.PROPERTIES));
+                    fillProcessInfo(pi, proc, new ProcessInfoCustomizer(ProcessInfoCustomizer.Item.PROPERTIES));
 
                     return null;
                 }
@@ -306,7 +317,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                     if (proc == null)
                         throw new ProcessNotFoundException("ProcessNotFound:" + pid);
 
-                    fillProcessInfo(conn, pi, proc, new ProcessInfoCustomizer(ProcessInfoCustomizer.Item.PROPERTIES));
+                    fillProcessInfo(pi, proc, new ProcessInfoCustomizer(ProcessInfoCustomizer.Item.PROPERTIES));
 
                     return null;
                 }
@@ -350,7 +361,6 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                 public Object run(BpelDAOConnection conn) {
                     Collection<ProcessInstanceDAO> instances = conn.instanceQuery(instanceFilter);
                     Map<Long, Collection<CorrelationSetDAO>> icsets = conn.getCorrelationSets(instances);
-                    conn.getProcessManagement().prefetchActivityFailureCounts(instances);
                     for (ProcessInstanceDAO instance : instances) {
                         TInstanceInfo info = infolist.addNewInstanceInfo();
                         fillInstanceSummary(info, instance);
@@ -691,7 +701,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             ProcessConf pconf = _store.getProcessConfiguration(procid);
             if (pconf == null)
                 throw new ProcessNotFoundException("ProcessNotFound:" + procid);
-            fillProcessInfo(conn, pi, pconf, custom);
+            fillProcessInfo(pi, pconf, custom);
+            fillProcessInfoSummary(conn, Collections.singletonList(pi), custom);
         } catch (ManagementException me) {
             throw me;
         } catch (Exception e) {
@@ -763,6 +774,29 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         return ret;
     }
 
+    private void fillProcessInfoSummary(BpelDAOConnection conn, List<TProcessInfo> infos, ProcessInfoCustomizer custom) {
+        if (custom.includeInstanceSummary()) {
+            Set<String> pids = new HashSet<String>();
+            for (TProcessInfo i : infos) {
+               pids.add(i.getPid()); 
+            }
+
+            Map<InstanceSummaryKey, Long> m = conn.getProcessManagement().countInstancesSummary(pids);
+            Map<String, FailedSummaryValue> f = conn.getProcessManagement().findFailedCountAndLastFailedDateForProcessIds(pids);
+            
+            for (TProcessInfo info : infos) {
+                TInstanceSummary isum = info.addNewInstanceSummary();
+                genInstanceSummaryEntry(isum.addNewInstances(), TInstanceStatus.ACTIVE, info.getPid(), m);
+                genInstanceSummaryEntry(isum.addNewInstances(), TInstanceStatus.COMPLETED, info.getPid(), m);
+                genInstanceSummaryEntry(isum.addNewInstances(), TInstanceStatus.ERROR, info.getPid(), m);
+                genInstanceSummaryEntry(isum.addNewInstances(), TInstanceStatus.FAILED, info.getPid(), m);
+                genInstanceSummaryEntry(isum.addNewInstances(), TInstanceStatus.SUSPENDED, info.getPid(), m);
+                genInstanceSummaryEntry(isum.addNewInstances(), TInstanceStatus.TERMINATED, info.getPid(), m);
+                getInstanceSummaryActivityFailure(isum, f, info.getPid());
+            }
+        }
+    }
+    
     /**
      * Fill in the <code>process-info</code> element of the transfer object.
      *
@@ -776,7 +810,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
      *            used to customize the quantity of information produced in the
      *            info
      */
-    private void fillProcessInfo(BpelDAOConnection conn, TProcessInfo info, ProcessConf pconf, ProcessInfoCustomizer custom) {
+    private void fillProcessInfo(TProcessInfo info, ProcessConf pconf, ProcessInfoCustomizer custom) {
         if (pconf == null)
             throw new IllegalArgumentException("Null pconf.");
 
@@ -801,16 +835,6 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         depinfo.setDocument(pconf.getBpelDocument());
         depinfo.setDeployDate(toCalendar(pconf.getDeployDate()));
         depinfo.setDeployer(pconf.getDeployer());
-        if (custom.includeInstanceSummary()) {
-            TInstanceSummary isum = info.addNewInstanceSummary();
-            genInstanceSummaryEntry(conn, isum.addNewInstances(), TInstanceStatus.ACTIVE, pconf);
-            genInstanceSummaryEntry(conn, isum.addNewInstances(), TInstanceStatus.COMPLETED, pconf);
-            genInstanceSummaryEntry(conn, isum.addNewInstances(), TInstanceStatus.ERROR, pconf);
-            genInstanceSummaryEntry(conn, isum.addNewInstances(), TInstanceStatus.FAILED, pconf);
-            genInstanceSummaryEntry(conn, isum.addNewInstances(), TInstanceStatus.SUSPENDED, pconf);
-            genInstanceSummaryEntry(conn, isum.addNewInstances(), TInstanceStatus.TERMINATED, pconf);
-            getInstanceSummaryActivityFailure(conn, isum, pconf);
-        }
 
         TProcessInfo.Documents docinfo = info.addNewDocuments();
         List<File> files = pconf.getFiles();
@@ -851,7 +875,19 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
         // TODO: add documents to the above data structure.
     }
-
+    
+    String findVersionStringFromNodeToken(String packageName) {
+    	int i = packageName.length() - 1;
+    	while( i > 0 && Character.isDigit(packageName.charAt(i)) ) {
+    		i--;
+    	}
+    	if( i < packageName.length() - 1 && packageName.charAt(i) == '-') {
+    		return packageName.substring(i + 1);
+    	}
+    	
+    	return null;
+    }
+        
     /**
      * Generate document information elements for a set of files.
      *
@@ -889,29 +925,20 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         }
     }
 
-    private void genInstanceSummaryEntry(BpelDAOConnection conn, TInstanceSummary.Instances instances,
-                                         TInstanceStatus.Enum state, ProcessConf pconf)
+    private void genInstanceSummaryEntry(TInstanceSummary.Instances instances,
+                                         TInstanceStatus.Enum state, String pid, Map<InstanceSummaryKey, Long> summary)
     {
         instances.setState(state);
-        String queryStatus = InstanceFilter.StatusKeys.valueOf(state.toString()).toString().toLowerCase();
-        InstanceFilter instanceFilter = new InstanceFilter("status=" + queryStatus + " pid="+ pconf.getProcessId());
-
-        // TODO: this is grossly inefficient
-        int count = conn.instanceQuery(instanceFilter).size();
-        instances.setCount(count);
+        Long count = summary.get(new InstanceSummaryKey(pid, state.toString())); 
+        instances.setCount(count == null ? 0 : count.intValue());
     }
 
-    private void getInstanceSummaryActivityFailure(BpelDAOConnection conn, TInstanceSummary summary, ProcessConf pconf) {
-        String queryStatus = InstanceFilter.StatusKeys.valueOf(TInstanceStatus.ACTIVE.toString()).toString().toLowerCase();
-        Object[] results = conn.getProcessManagement().findFailedCountAndLastFailedDateForProcessId(
-                conn, queryStatus, String.valueOf(pconf.getProcessId()));
-
-        long failureInstances = (Long)results[0];
-        Date lastFailureDt = (Date)results[1];
-        if (failureInstances > 0) {
+    private void getInstanceSummaryActivityFailure(TInstanceSummary summary, Map<String, FailedSummaryValue> f, String pid) {
+        FailedSummaryValue v = f.get(pid);
+        if (v != null) {
             TFailuresInfo failures = summary.addNewFailures();
-            failures.setDtFailure(toCalendar(lastFailureDt));
-            failures.setCount((int)failureInstances);
+            failures.setDtFailure(toCalendar(v.lastFailed));
+            failures.setCount(v.count.intValue());
         }
     }
 

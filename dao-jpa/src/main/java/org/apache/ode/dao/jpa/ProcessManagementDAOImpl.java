@@ -22,6 +22,8 @@ package org.apache.ode.dao.jpa;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import javax.xml.namespace.QName;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -32,6 +34,8 @@ import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ProcessManagementDAO;
+import org.apache.ode.bpel.dao.ProcessManagementDAO.FailedSummaryValue;
+import org.apache.ode.bpel.dao.ProcessManagementDAO.InstanceSummaryKey;
 
 public class ProcessManagementDAOImpl implements ProcessManagementDAO {
 	private static final Log __log = LogFactory.getLog(ProcessManagementDAOImpl.class);
@@ -72,4 +76,19 @@ public class ProcessManagementDAOImpl implements ProcessManagementDAO {
 			}
 		}
 	}
+
+    public int countInstancesByPidAndString(BpelDAOConnection conn, QName pid, String status) {
+        InstanceFilter instanceFilter = new InstanceFilter("status=" + status + " pid="+ pid);
+
+        // TODO: this is grossly inefficient
+        return conn.instanceQuery(instanceFilter).size();
+    }
+    
+    public Map<InstanceSummaryKey, Long> countInstancesSummary(Set<String> pids) {
+        return new HashMap<InstanceSummaryKey, Long>();
+    }
+    
+    public Map<String, FailedSummaryValue> findFailedCountAndLastFailedDateForProcessIds(Set<String> pids) {
+        return new HashMap<String, FailedSummaryValue>();
+    }
 }

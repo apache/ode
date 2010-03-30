@@ -273,7 +273,7 @@ define "ode" do
     end
     task "compile" => "hbm-hack"
 
-    test.with project("bpel-epr"), BACKPORT, COMMONS.collections, COMMONS.lang, HSQLDB,
+    test.with project("bpel-epr"), BACKPORT, COMMONS.collections, COMMONS.lang, DERBY, COMMONS.logging, LOG4J, SLF4J,
       GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, SPRING
 
     package :jar

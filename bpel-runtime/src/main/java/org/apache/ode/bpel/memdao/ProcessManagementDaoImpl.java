@@ -21,11 +21,16 @@ package org.apache.ode.bpel.memdao;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ProcessManagementDAO;
+import org.apache.ode.bpel.dao.ProcessManagementDAO.InstanceSummaryKey;
 
 public class ProcessManagementDaoImpl extends DaoBaseImpl implements ProcessManagementDAO {
 	public Object[] findFailedCountAndLastFailedDateForProcessId(BpelDAOConnection conn, String status, String processId) {
@@ -49,4 +54,19 @@ public class ProcessManagementDaoImpl extends DaoBaseImpl implements ProcessMana
 	public void prefetchActivityFailureCounts(Collection<ProcessInstanceDAO> instances) {
 		// do nothing 
 	}
+
+    public int countInstancesByPidAndString(BpelDAOConnection conn, QName pid, String status) {
+        InstanceFilter instanceFilter = new InstanceFilter("status=" + status + " pid="+ pid);
+
+        // TODO: this is grossly inefficient
+        return conn.instanceQuery(instanceFilter).size();
+    }
+    
+    public Map<InstanceSummaryKey, Long> countInstancesSummary(Set<String> pids) {
+        return new HashMap<InstanceSummaryKey, Long>();
+    }
+
+    public Map<String, FailedSummaryValue> findFailedCountAndLastFailedDateForProcessIds(Set<String> pids) {
+        return new HashMap<String, FailedSummaryValue>();
+    }
 }

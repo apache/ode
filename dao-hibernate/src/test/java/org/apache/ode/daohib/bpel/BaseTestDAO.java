@@ -19,15 +19,15 @@
 
 package org.apache.ode.daohib.bpel;
 
+import javax.resource.spi.ConnectionManager;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
 import junit.framework.TestCase;
 
+import org.apache.derby.jdbc.EmbeddedXADataSource;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.il.EmbeddedGeronimoFactory;
-import org.apache.ode.utils.GUID;
-import org.hsqldb.jdbc.jdbcDataSource;
 import org.hibernate.cfg.Environment;
 
 import java.util.Properties;
@@ -41,11 +41,13 @@ import java.util.Properties;
 public abstract class BaseTestDAO extends TestCase {
 
     protected BpelDAOConnection daoConn;
-    private TransactionManager txm;
+    protected TransactionManager txm;
+    protected ConnectionManager connectionManager;
     private DataSource ds;
 
     protected void initTM() throws Exception {
         EmbeddedGeronimoFactory factory = new EmbeddedGeronimoFactory();
+        connectionManager = new org.apache.geronimo.connector.outbound.GenericConnectionManager();
         txm = factory.getTransactionManager();
         ds = getDataSource();
         txm.begin();
@@ -66,11 +68,12 @@ public abstract class BaseTestDAO extends TestCase {
 
     protected DataSource getDataSource() {
         if (ds == null) {
-            jdbcDataSource hsqlds = new jdbcDataSource();
-            hsqlds.setDatabase("jdbc:hsqldb:mem:" + new GUID().toString());
-            hsqlds.setUser("sa");
-            hsqlds.setPassword("");
-            ds = hsqlds;
+            EmbeddedXADataSource ds = new EmbeddedXADataSource();
+            ds.setCreateDatabase("create");
+            ds.setDatabaseName("target/testdb");
+            ds.setUser("sa");
+            ds.setPassword("");
+            this.ds = ds;
         }
         return ds;
     }

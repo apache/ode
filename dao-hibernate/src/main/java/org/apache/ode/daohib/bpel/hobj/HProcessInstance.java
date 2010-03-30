@@ -28,14 +28,16 @@ import java.util.Set;
  * Hibernate table representing a BPEL process instance.
  * 
  * @hibernate.class table="BPEL_INSTANCE" dynamic-update="true" lazy="true"
- * @hibernate.query name="COUNT_FAILED_INSTANCES_BY_PROCESS_IDS_AND_STATES" query="select count(i.id) as cnt, max(i.activityFailureDateTime) as lastFailureDt from HProcessInstance as i where i.process.processId in (:processIds) and i.state in(:states) and i.activityFailureCount > 0"
+ * @hibernate.query name="COUNT_FAILED_INSTANCES_BY_PROCESSES_IDS_AND_STATES" query="select i.process.processId as pid, count(i.id) as cnt, max(i.activityFailureDateTime) as lastFailureDt from HProcessInstance as i where i.process.processId in (:processIds) and i.state = 20 and i.activityFailureCount > 0 group by i.process.processId"
  * @hibernate.query name="SELECT_INSTANCES_BY_PROCESS" query="from HProcessInstance as i where i.process = :process)"
  * @hibernate.query name="SELECT_INSTANCES_BY_PROCESS_AND_STATES" query="from HProcessInstance as i where i.process = :process and i.state in (:states)"
+ * @hibernate.query name="COUNT_INSTANCES_BY_PROCESSES_IDS_AND_STATES" query="select i.process.processId as pid, count(i.id) as cnt from HProcessInstance as i where i.process.processId in (:processIds) and i.state in(:states) group by i.process.processId"
  */
 public class HProcessInstance extends HObject {
-    public static final String COUNT_FAILED_INSTANCES_BY_PROCESS_IDS_AND_STATES="COUNT_FAILED_INSTANCES_BY_PROCESS_IDS_AND_STATES";
+    public static final String COUNT_FAILED_INSTANCES_BY_PROCESSES_IDS_AND_STATES="COUNT_FAILED_INSTANCES_BY_PROCESSES_IDS_AND_STATES";
     public static final String SELECT_INSTANCES_BY_PROCESS="SELECT_INSTANCES_BY_PROCESS";
     public static final String SELECT_INSTANCES_BY_PROCESS_AND_STATES="SELECT_INSTANCES_BY_PROCESS_AND_STATES";
+    public static final String COUNT_INSTANCES_BY_PROCESSES_IDS_AND_STATES = "COUNT_INSTANCES_BY_PROCESSES_IDS_AND_STATES";
 
 	/** Foreign key to owner {@link HProcess}. */
     private HProcess _process;

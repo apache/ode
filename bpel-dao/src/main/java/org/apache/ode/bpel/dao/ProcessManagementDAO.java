@@ -20,31 +20,83 @@
 package org.apache.ode.bpel.dao;
 
 import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+import java.util.Set;
+
+import javax.xml.namespace.QName;
 
 /**
- * This DAO handles any process and instance management related database operations. The idea is to separate out
- * the operational side of database tasks from core engine.
+ * This DAO handles any process and instance management related database
+ * operations. The idea is to separate out the operational side of database
+ * tasks from core engine.
  * 
  * @author sean
- *
+ * 
  */
 public interface ProcessManagementDAO {
-	/**
-	 * Finds process instances that have failures on a given process id, and, returns the number of failed instances
-	 * and the last failed date in an object array.
-	 * 
-	 * @param conn BpelDAOConnection
-	 * @param status the status string, e.g. "active"
-	 * @param processId the string representation of the QName of the process
-	 * @return an array containing the number of failed instances and the last failed date
-	 */
-	public Object[] findFailedCountAndLastFailedDateForProcessId(BpelDAOConnection conn, String status, String processId);
-	
-	/**
-	 * Prefetches the counts of activity failures for the given instances and sets the values to the _activityFailureCount
-	 * member variable of the ProcesInstanceDAOImpl.
-	 * 
-	 * @param instances a collection of process instances
-	 */
-	public void prefetchActivityFailureCounts(Collection<ProcessInstanceDAO> instances);
+    public static class InstanceSummaryKey {
+        public final String pid;
+        public final String instanceStatus;
+
+        public InstanceSummaryKey(String pid, String instanceStatus) {
+            super();
+            this.pid = pid;
+            this.instanceStatus = instanceStatus;
+        }
+
+        @Override
+        public String toString() {
+            return "InstanceSummaryKey [instanceStatus=" + instanceStatus
+                    + ", pid=" + pid + "]";
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime
+                    * result
+                    + ((instanceStatus == null) ? 0 : instanceStatus.hashCode());
+            result = prime * result + ((pid == null) ? 0 : pid.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            InstanceSummaryKey other = (InstanceSummaryKey) obj;
+            if (instanceStatus == null) {
+                if (other.instanceStatus != null)
+                    return false;
+            } else if (!instanceStatus.equals(other.instanceStatus))
+                return false;
+            if (pid == null) {
+                if (other.pid != null)
+                    return false;
+            } else if (!pid.equals(other.pid))
+                return false;
+            return true;
+        }
+        
+    }
+    
+    public static class FailedSummaryValue {
+        public final Long count;
+        public final Date lastFailed;
+        public FailedSummaryValue(Long count, Date lastFailed) {
+            super();
+            this.count = count;
+            this.lastFailed = lastFailed;
+        }
+    }
+
+    public Map<InstanceSummaryKey, Long> countInstancesSummary(Set<String> pids);
+    
+    public Map<String, FailedSummaryValue> findFailedCountAndLastFailedDateForProcessIds(Set<String> pids);
 }
