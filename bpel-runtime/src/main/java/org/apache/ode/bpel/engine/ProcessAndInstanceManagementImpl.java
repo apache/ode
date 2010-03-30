@@ -211,6 +211,10 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         return listProcessesCustom(null, null, ProcessInfoCustomizer.ALL);
     }
 
+    public ProcessInfoListDocument listProcessesSummaryOnly() {
+        return listProcessesCustom(null, null, ProcessInfoCustomizer.SUMMARYONLY);
+    }
+
     public ProcessInfoDocument getProcessInfoCustom(final QName pid, final ProcessInfoCustomizer custom) {
         try {
             return _db.exec(new BpelDatabase.Callable<ProcessInfoDocument>() {
@@ -836,12 +840,14 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         depinfo.setDeployDate(toCalendar(pconf.getDeployDate()));
         depinfo.setDeployer(pconf.getDeployer());
 
-        TProcessInfo.Documents docinfo = info.addNewDocuments();
-        List<File> files = pconf.getFiles();
-        if (files != null)
-            genDocumentInfo(docinfo, files.toArray(new File[files.size()]), true);
-        else if (__log.isDebugEnabled())
-            __log.debug("fillProcessInfo: No files for " + pconf.getProcessId());
+        if (custom.includeDocumentLists()) {
+            TProcessInfo.Documents docinfo = info.addNewDocuments();
+            List<File> files = pconf.getFiles();
+            if (files != null)
+                genDocumentInfo(docinfo, files.toArray(new File[files.size()]), true);
+            else if (__log.isDebugEnabled())
+                __log.debug("fillProcessInfo: No files for " + pconf.getProcessId());
+        }
 
         TProcessProperties properties = info.addNewProperties();
         if (custom.includeProcessProperties()) {
