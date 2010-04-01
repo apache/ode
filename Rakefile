@@ -203,7 +203,9 @@ define "ode" do
     test.with projects("scheduler-simple", "dao-jpa", "dao-hibernate", "bpel-epr"),
         BACKPORT, COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
         GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, TRANQL, HSQLDB, JAVAX.ejb,
-        LOG4J, XERCES, Buildr::OpenJPA::REQUIRES, XALAN
+        OPENJPA, XERCES, XALAN, LOG4J, SLF4J,
+        DOM4J, HIBERNATE,
+        "tranql:tranql-connector-derby-common:jar:1.1"
 
     package :jar
   end

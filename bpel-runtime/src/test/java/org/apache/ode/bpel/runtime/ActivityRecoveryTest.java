@@ -19,13 +19,14 @@
 package org.apache.ode.bpel.runtime;
 
 import org.apache.ode.bpel.engine.BpelManagementFacadeImpl;
+import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.pmapi.BpelManagementFacade;
-import org.apache.ode.bpel.pmapi.ScopeInfoDocument;
+import org.apache.ode.bpel.pmapi.ProcessInfoDocument;
 import org.apache.ode.bpel.pmapi.TActivityInfo;
 import org.apache.ode.bpel.pmapi.TActivityStatus;
 import org.apache.ode.bpel.pmapi.TFailureInfo;
@@ -50,18 +51,17 @@ import javax.xml.namespace.QName;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * Test activity recovery and failure handling.
  */
 public class ActivityRecoveryTest extends MockObjectTestCase {
-    // the maximum ammout of time to wait for an instance to reach a
-    // desired status or for an activity to become available for recovery
+	// the maximum ammout of time to wait for an instance to reach a
+	// desired status or for an activity to become available for recovery
     static final int MAX_WAIT = 10000;
     // poll interval
-    static final int DELAY = 10;
-    
+    static final int DELAY = 100;
+	
     static final String   NAMESPACE = "http://ode.apache.org/bpel/unit-test";
     static final String[] ACTIONS = new String[]{ "retry", "cancel", "fault" };
     MockBpelServer        _server;
@@ -70,6 +70,10 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
     QName                 _processId;
     private Mock _testService;
 
+    static {
+        // disable deferred process instance cleanup for faster testing
+        System.setProperty(BpelServerImpl.DEFERRED_PROCESS_INSTANCE_CLEANUP_DISABLED_NAME, "true");
+    }
 
     /**
      * The process calls the failing service, simulated by a call to invoke.
@@ -80,7 +84,6 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
         public boolean invoke(); 
         public void completed();
     }
-
 
     public void testInvokeSucceeds() throws Exception {
         // Since the service invocation succeeds, the process completes.
@@ -159,8 +162,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
 
         execute("FailureToFault");
         assertNotNull(lastInstance(TInstanceStatus.FAILED));
-        TInstanceInfo v = lastInstance(TInstanceStatus.FAILED);
-        assertTrue(OFailureHandling.FAILURE_FAULT_NAME.equals(v.getFaultInfo().getName()));
+        assertEquals(OFailureHandling.FAILURE_FAULT_NAME, lastInstance(TInstanceStatus.FAILED).getFaultInfo().getName());
         assertNoFailures();
     }
 
@@ -171,7 +173,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
 
         execute("FailureToFault2");
         assertNotNull(lastInstance(TInstanceStatus.FAILED));
-        assertTrue(OFailureHandling.FAILURE_FAULT_NAME.equals(lastInstance(TInstanceStatus.FAILED).getFaultInfo().getName()));
+        assertEquals(OFailureHandling.FAILURE_FAULT_NAME, lastInstance(TInstanceStatus.FAILED).getFaultInfo().getName());
         assertNoFailures();
     }
 
@@ -330,30 +332,30 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
      * @throws Exception
      */
     protected TInstanceInfo lastInstance(TInstanceStatus.Enum expected) throws Exception {
-        int counter = 0;
-        do {
-            TInstanceInfo info = getInstanceInfo();
-            if (info != null  && (expected == null || expected != TInstanceStatus.FAILED && info.getStatus() == expected || expected == TInstanceStatus.FAILED && info.getFaultInfo() != null)) {
-                return info;
-            }
-            if (counter * DELAY > MAX_WAIT) {
-                throw new Exception("Timed out wait for instance to reach "+expected+
-                        " status. Actual status: "+(info==null?"missing instance" : info.getStatus()));
-            }
-            counter++;
-            Thread.sleep(DELAY);
-        } while (true);
+    	int counter = 0;
+    	do {
+    		TInstanceInfo info = getInstanceInfo();
+    		if (info != null  && (expected == null || info.getStatus() == expected)) {
+    			return info;
+    		}
+    		if (counter * DELAY > MAX_WAIT) {
+    			throw new Exception("Timed out wait for instance to reach "+expected+
+    					" status. Actual status: "+(info==null?"missing instance" : info.getStatus()));
+    		}
+    		counter++;
+    		Thread.sleep(DELAY);
+    	} while (true);
     }
     /**
      * get the instance info for the last instance 
      */
     private TInstanceInfo getInstanceInfo() {
-        TInstanceInfoList instances = _management.listInstances("", "", 1000).getInstanceInfoList();
-        int size = instances.sizeOfInstanceInfoArray();
-        if (size > 0) {
-            return instances.getInstanceInfoArray(instances.sizeOfInstanceInfoArray() - 1);
-        }
-        return null;
+    	TInstanceInfoList instances = _management.listInstances("", "", 1000).getInstanceInfoList();
+		int size = instances.sizeOfInstanceInfoArray();
+		if (size > 0) {
+			return instances.getInstanceInfoArray(instances.sizeOfInstanceInfoArray() - 1);
+		}
+		return null;
     }
 
     /**
@@ -364,20 +366,22 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
         // Process is still active, none of the completed states.
         assertNotNull(lastInstance(TInstanceStatus.ACTIVE));
         // Tests here will only generate one failure.
-        TInstanceInfo instance;
-        TFailuresInfo failures;
+        TInstanceInfo instance = lastInstance(null);
+        int count = 30;
+        int sleep = 0;
         while (true) {
-            instance = lastInstance(null);
-            failures = instance.getFailures();
-            if (failures == null) {
-                Thread.sleep(DELAY);
-            } else {
-                break;
-            }
+            count--;
+            if (count <= 0) throw new AssertionError("No failures info, which are required");
+            Thread.sleep(sleep);
+            sleep = 1000;
+            TFailuresInfo failures = instance.getFailures();
+            if (!(failures != null && failures.getCount() == 1)) continue;
+            ProcessInfoDocument m = _management.getProcessInfo(_processId);
+            if (!m.getProcessInfo().isSetInstanceSummary()) continue;
+            failures = m.getProcessInfo().getInstanceSummary().getFailures();
+            if (!(failures != null && failures.getCount() == 1)) continue;
+            break;
         }
-        assertTrue(failures != null && failures.getCount() == 1);
-        failures = _management.getProcessInfo(_processId).getProcessInfo().getInstanceSummary().getFailures();
-        assertTrue(failures != null && failures.getCount() == 1);
         // Look for individual activities inside the process instance.
         ArrayList<TActivityInfo> recoveries = getRecoveriesInScope(instance, null, null);
         assertTrue(recoveries.size() == 1);
@@ -397,7 +401,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
      * recovery channel for the activity in question.
      */
     protected void recover(String action) throws Exception {
-        ArrayList<TActivityInfo> recoveries = getRecoveries();
+    	ArrayList<TActivityInfo> recoveries = getRecoveries();
         assertTrue(recoveries.size() == 1);
         TActivityInfo activity = recoveries.get(0);
         assertNotNull(activity);
@@ -409,38 +413,28 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
      * if MAX_WAIT exceeded
      */
     private ArrayList<TActivityInfo> getRecoveries() throws Exception {
-        TInstanceInfo instance = null;
-        int counter = 0;
-        do {
-            instance = getInstanceInfo();
-            if (instance != null) {
-                ArrayList<TActivityInfo> recoveries = getRecoveriesInScope(instance, null, null);
-                if (recoveries.size() > 0) {
-                    return recoveries;
-                }
-            }
-            if (counter * DELAY > MAX_WAIT) {
-                throw new Exception("Timed out wait for recovery activities");
-            }
-            Thread.sleep(DELAY);
-            counter++;
-        } while (true);
+    	TInstanceInfo instance = null;
+    	int counter = 0;
+    	do {
+    		instance = getInstanceInfo();
+    		if (instance != null) {
+    			ArrayList<TActivityInfo> recoveries = getRecoveriesInScope(instance, null, null);
+    			if (recoveries.size() > 0) {
+    				return recoveries;
+    			}
+    		}
+    		if (counter * DELAY > MAX_WAIT) {
+    			throw new Exception("Timed out wait for recovery activities");
+    		}
+    		Thread.sleep(DELAY);
+    		counter++;
+    	} while (true);
     }
 
     protected ArrayList<TActivityInfo> getRecoveriesInScope(TInstanceInfo instance, TScopeInfo scope,
                                                             ArrayList<TActivityInfo> recoveries) throws Exception {
-        if (scope == null) {
-            if (instance != null) {
-                TScopeRef x = instance.getRootScope();
-                if (x != null) {
-                    ScopeInfoDocument v = _management.getScopeInfoWithActivity(x.getSiid(), true);
-                    if (v != null) {
-                        scope = v.getScopeInfo();
-                    }
-                }
-            }
-            if (scope == null) return new ArrayList<TActivityInfo>();
-        }
+        if (scope == null)
+            scope = _management.getScopeInfoWithActivity(instance.getRootScope().getSiid(), true).getScopeInfo();
         if (recoveries == null)
             recoveries = new ArrayList<TActivityInfo>();
         TScopeInfo.Activities activities = scope.getActivities();

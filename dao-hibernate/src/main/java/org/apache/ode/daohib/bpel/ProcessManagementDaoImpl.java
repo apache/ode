@@ -38,14 +38,16 @@ public class ProcessManagementDaoImpl extends HibernateDao implements ProcessMan
 
     public Map<InstanceSummaryKey, Long> countInstancesSummary(Set<String> pids) {
         Map<InstanceSummaryKey, Long> result = new HashMap<InstanceSummaryKey, Long>();
-        for (StatusKeys status : InstanceFilter.StatusKeys.values()) {
-            Query query = getSession().getNamedQuery(HProcessInstance.COUNT_INSTANCES_BY_PROCESSES_IDS_AND_STATES);
-            query.setParameterList("states", new InstanceFilter("status=" + status.toString()).convertFilterState());
-            query.setParameterList("processIds", pids);
-            for (Object o : query.list()) {
-                Object[] row = (Object[]) o;
-                InstanceSummaryKey key = new InstanceSummaryKey(row[0].toString(), status.toString());
-                result.put(key, (Long) row[1]);
+        if (!pids.isEmpty()) {
+            for (StatusKeys status : InstanceFilter.StatusKeys.values()) {
+                Query query = getSession().getNamedQuery(HProcessInstance.COUNT_INSTANCES_BY_PROCESSES_IDS_AND_STATES);
+                query.setParameterList("states", new InstanceFilter("status=" + status.toString()).convertFilterState());
+                query.setParameterList("processIds", pids);
+                for (Object o : query.list()) {
+                    Object[] row = (Object[]) o;
+                    InstanceSummaryKey key = new InstanceSummaryKey(row[0].toString(), status.toString());
+                    result.put(key, (Long) row[1]);
+                }
             }
         }
         return result;
@@ -53,11 +55,13 @@ public class ProcessManagementDaoImpl extends HibernateDao implements ProcessMan
     
     public Map<String, FailedSummaryValue> findFailedCountAndLastFailedDateForProcessIds(Set<String> pids) {
         Map<String, FailedSummaryValue> result = new HashMap<String, FailedSummaryValue>();
-        Query query = getSession().getNamedQuery(HProcessInstance.COUNT_FAILED_INSTANCES_BY_PROCESSES_IDS_AND_STATES);
-        query.setParameterList("processIds", pids);
-        for (Object o : query.list()) {
-            Object[] row = (Object[]) o;
-            result.put(row[0].toString(), new FailedSummaryValue((Long) row[1], (Date) row[2]));
+        if (!pids.isEmpty()) {
+            Query query = getSession().getNamedQuery(HProcessInstance.COUNT_FAILED_INSTANCES_BY_PROCESSES_IDS_AND_STATES);
+            query.setParameterList("processIds", pids);
+            for (Object o : query.list()) {
+                Object[] row = (Object[]) o;
+                result.put(row[0].toString(), new FailedSummaryValue((Long) row[1], (Date) row[2]));
+            }
         }
         return result;
     }
