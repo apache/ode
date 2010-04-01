@@ -31,6 +31,7 @@ import org.apache.ode.axis2.service.ServiceClientUtil;
 import org.apache.ode.tools.sendsoap.cline.HttpSoapSender;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.il.OMUtils;
+import org.apache.ode.axis2.ODEConfigDirAware;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.IteratorUtils;
 import org.testng.annotations.AfterMethod;
@@ -47,7 +48,7 @@ import java.util.*;
 
 import static org.testng.AssertJUnit.assertTrue;
 
-public class InstanceManagementTest extends Axis2TestBase {
+public class InstanceManagementTest extends Axis2TestBase implements ODEConfigDirAware {
 
     private OMFactory _factory;
     private DateFormat xsdDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
@@ -98,7 +99,7 @@ public class InstanceManagementTest extends Axis2TestBase {
                 result.toString().indexOf("DynPartnerResponder") >= 0);
     }
 
-  @Test
+  @Test(dataProvider="configs")
     public void testInstanceSummaryListProcess() throws Exception {
         OMElement listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
                 new String[] {"name=DynPartnerMain", ""});
@@ -268,4 +269,7 @@ public class InstanceManagementTest extends Axis2TestBase {
         return _client.send(msg, "http://localhost:"+getTestPort(0)+"/processes/DeploymentService");
     }
 
+    public String getODEConfigDir() {
+        return HIB_DERBY_CONF_DIR;
+    }
 }
