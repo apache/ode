@@ -69,6 +69,7 @@ import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.iapi.ProcessConf.PartnerRoleConfig;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
@@ -522,35 +523,40 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             if (BpelProcess.__log.isDebugEnabled()) {
                 __log.debug("Replying to a p2p mex, myrole " + m + " - partnerole " + pmex);
             }
-            try {
-                switch (m.getStatus()) {
-                    case FAILURE:
-                        // We can't seem to get the failure out of the myrole mex?
-                        pmex.replyWithFailure(MessageExchange.FailureType.OTHER, "operation failed", null);
-                        break;
-                    case FAULT:
-                    	Fault fault = pmex.getOperation().getFault(m.getFault().getLocalPart());
-                    	if (fault == null) {
-                    		__log.error("process " + _bpelProcess + " instance " + _iid + " thrown unmapped fault in p2p communication " + m.getFault() + " " + m.getFaultExplanation() + " - converted to failure");
-                            pmex.replyWithFailure(MessageExchange.FailureType.OTHER, "process thrown unmapped fault in p2p communication " + m.getFault() + " " + m.getFaultExplanation() + " - converted to failure", m.getFaultResponse().getMessage());
-                    	} else {
-	                        Message faultRes = pmex.createMessage(pmex.getOperation().getFault(m.getFault().getLocalPart())
-	                                .getMessage().getQName());
-	                        faultRes.setMessage(m.getResponse().getMessage());
-	                        pmex.replyWithFault(m.getFault(), faultRes);
-                    	}
-                        break;
-                    case RESPONSE:
-                        Message response = pmex.createMessage(pmex.getOperation().getOutput().getMessage().getQName());
-                        response.setMessage(m.getResponse().getMessage());
-                        pmex.reply(response);
-                        break;
-                    default:
-                        __log.warn("Unexpected state: " + m.getStatus());
-                        break;
+
+            if (pmex.getStatus() == Status.ASYNC || pmex.getStatus() == Status.REQUEST) {
+                try {
+                    switch (m.getStatus()) {
+                        case FAILURE:
+                            // We can't seem to get the failure out of the myrole mex?
+                            pmex.replyWithFailure(MessageExchange.FailureType.OTHER, "operation failed", null);
+                            break;
+                        case FAULT:
+                        	Fault fault = pmex.getOperation().getFault(m.getFault().getLocalPart());
+                        	if (fault == null) {
+                        		__log.error("process " + _bpelProcess + " instance " + _iid + " thrown unmapped fault in p2p communication " + m.getFault() + " " + m.getFaultExplanation() + " - converted to failure");
+                                pmex.replyWithFailure(MessageExchange.FailureType.OTHER, "process thrown unmapped fault in p2p communication " + m.getFault() + " " + m.getFaultExplanation() + " - converted to failure", m.getFaultResponse().getMessage());
+                        	} else {
+    	                        Message faultRes = pmex.createMessage(pmex.getOperation().getFault(m.getFault().getLocalPart())
+    	                                .getMessage().getQName());
+    	                        faultRes.setMessage(m.getResponse().getMessage());
+    	                        pmex.replyWithFault(m.getFault(), faultRes);
+                        	}
+                            break;
+                        case RESPONSE:
+                            Message response = pmex.createMessage(pmex.getOperation().getOutput().getMessage().getQName());
+                            response.setMessage(m.getResponse().getMessage());
+                            pmex.reply(response);
+                            break;
+                        default:
+                            __log.warn("Unexpected state: " + m.getStatus());
+                            break;
+                    }
+                } finally {
+                    mex.release(_bpelProcess.isCleanupCategoryEnabled(m.getStatus() == MessageExchange.Status.RESPONSE, CLEANUP_CATEGORY.MESSAGES));
                 }
-            } finally {
-                mex.release(_bpelProcess.isCleanupCategoryEnabled(m.getStatus() == MessageExchange.Status.RESPONSE, CLEANUP_CATEGORY.MESSAGES));
+            } else {
+                __log.warn("Can't send response to a p2p mex: " + mex + " partner mex: " + pmex);
             }
         } else {
             checkInvokeExternalPermission();

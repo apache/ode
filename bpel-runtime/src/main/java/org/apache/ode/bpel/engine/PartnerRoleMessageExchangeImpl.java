@@ -165,7 +165,7 @@ public class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implemen
     public String toString() {
         try {
             return "{PartnerRoleMex#" + getMessageExchangeId() + " [PID " + getCaller() + "] calling " + _epr + "."
-                    + getOperationName() + "(...)}";
+                    + getOperationName() + "(...) Status " + getStatus() + "}";
 
         } catch (Throwable t) {
             return "{PartnerRoleMex#????}";
