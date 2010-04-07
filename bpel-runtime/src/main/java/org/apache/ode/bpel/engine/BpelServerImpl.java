@@ -221,8 +221,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             __log.debug("BPEL SERVER STOPPING");
 
-            processDefReaper.interrupt();
-            processDefReaper = null;
+            if (processDefReaper != null) {
+                processDefReaper.interrupt();
+                processDefReaper = null;
+            }
             _contexts.scheduler.stop();
             _engine = null;
             _state = State.INIT;
