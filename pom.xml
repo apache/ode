@@ -239,10 +239,29 @@
         <enabled>false</enabled>
       </snapshots>
     </repository>
+    <!--
     <repository>
       <id>servicemix</id>
       <name>Apache ServiceMix Repository</name>
       <url>http://svn.apache.org/repos/asf/servicemix/m2-repo</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    -->
+    <repository>
+      <id>saxon-repo</id>
+      <name>Saxon Repo</name>
+      <url>http://people.apache.org/~rr/saxon-repo</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
     </repository>
   </repositories>
 
