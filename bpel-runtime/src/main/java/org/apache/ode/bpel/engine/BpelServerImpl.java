@@ -108,6 +108,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     private boolean _hydrationLazy;
     private int _hydrationLazyMinimumSize;
     private int _migrationTransactionTimeout;
+    private Thread processDefReaper;
     
     BpelEngineImpl _engine;
     protected BpelDatabase _db;
@@ -164,10 +165,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             _state = State.RUNNING;
             __log.info(__msgs.msgServerStarted());
             if (_dehydrationPolicy != null) {
-                Thread thread = new Thread(new ProcessDefReaper(), "Dehydrator");
-                thread.setDaemon(true);
-                thread.start();
-                
+                processDefReaper = new Thread(new ProcessDefReaper(), "Dehydrator");
+                processDefReaper.setDaemon(true);
+                processDefReaper.start();
             }
         } finally {
             _mngmtLock.writeLock().unlock();
@@ -221,6 +221,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             __log.debug("BPEL SERVER STOPPING");
 
+            processDefReaper.interrupt();
+            processDefReaper = null;
             _contexts.scheduler.stop();
             _engine = null;
             _state = State.INIT;
@@ -478,7 +480,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                     }
                 }
             } catch (InterruptedException e) {
-                __log.info(e);
+                __log.debug(e);
             }
         }
     }
