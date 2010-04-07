@@ -31,19 +31,23 @@ import static org.testng.AssertJUnit.assertTrue;
  * If not applied, the default 120-sec timeouts will be used. 5sec < 120sec, so the request will succeed.
  *
  */
-public class NoP2PTest extends Axis2TestBase {
+public class ClusteredOutgoingTrafficTest extends Axis2TestBase implements ODEConfigDirAware {
     @Test(dataProvider="configs")
-    public void testNoP2P() throws Exception {
-        String bundleName = "TestNoP2P";
+    public void test() throws Exception {
+        String bundleName = "TestClusteredOutgoingTraffic";
         if (server.isDeployed(bundleName)) server.undeployProcess(bundleName);
         server.deployProcess(bundleName);
         try {
             String response = server.sendRequestFile("http://localhost:8888/ode/processes/PingPongService/",
                     bundleName, "testRequest.soap");
             System.out.println(response);
-            assertTrue(response.contains("magic"));
+            assertTrue(response.contains("clusterOutput"));
         } finally {
             server.undeployProcess(bundleName);
         }
+    }
+
+    public String getODEConfigDir() {
+        return HIB_DERBY_CONF_DIR;
     }
 }

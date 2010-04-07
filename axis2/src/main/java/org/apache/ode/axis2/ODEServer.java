@@ -23,6 +23,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
@@ -53,6 +56,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.deploy.DeploymentPoller;
 import org.apache.ode.axis2.service.DeploymentWebService;
 import org.apache.ode.axis2.service.ManagementService;
+import org.apache.ode.axis2.util.ClusterUrlTransformer;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
@@ -119,6 +123,8 @@ public class ODEServer {
     private BpelServerConnector _connector;
 
     private ManagementService _mgtService;
+    
+    protected ClusterUrlTransformer _clusterUrlTransformer;
 
     protected MultiThreadedHttpConnectionManager httpConnectionManager;
     protected IdleConnectionTimeoutThread idleConnectionTimeoutThread;
@@ -477,6 +483,11 @@ public class ODEServer {
         else
             _executorService = Executors.newFixedThreadPool(_odeConfig.getThreadPoolMaxSize(), threadFactory);
         
+        {
+            List<String> targets = new ArrayList<String>();
+            Collections.addAll(targets, _odeConfig.getProperty("cluster.localRoute.targets", "").split(","));
+            _clusterUrlTransformer = new ClusterUrlTransformer(targets, _odeConfig.getProperty("cluster.localRoute.base", "http://localhost:8080/ode/processes/"));
+        }
         _bpelServer = new BpelServerImpl();
         _scheduler = createScheduler();
         _scheduler.setJobProcessor(_bpelServer);

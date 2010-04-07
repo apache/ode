@@ -204,10 +204,10 @@ public class BindingContextImpl implements BindingContext {
         try {
             if (WsdlUtils.useHTTPBinding(def, serviceName, portName)) {
                 if (__log.isDebugEnabled()) __log.debug("Creating HTTP-bound external service " + serviceName);
-                extService = new HttpExternalService(pconf, serviceName, portName, _server._executorService, _server._scheduler, _server._bpelServer, _server.httpConnectionManager);
+                extService = new HttpExternalService(pconf, serviceName, portName, _server._executorService, _server._scheduler, _server._bpelServer, _server.httpConnectionManager, _server._clusterUrlTransformer);
             } else if (WsdlUtils.useSOAPBinding(def, serviceName, portName)) {
                 if (__log.isDebugEnabled()) __log.debug("Creating SOAP-bound external service " + serviceName);
-                extService = new SoapExternalService(pconf, serviceName, portName, _server._executorService, _server._axisConfig, _server._scheduler, _server._bpelServer, _server.httpConnectionManager);
+                extService = new SoapExternalService(pconf, serviceName, portName, _server._executorService, _server._axisConfig, _server._scheduler, _server._bpelServer, _server.httpConnectionManager, _server._clusterUrlTransformer);
             }
         } catch (Exception ex) {
             __log.error("Could not create external service.", ex);

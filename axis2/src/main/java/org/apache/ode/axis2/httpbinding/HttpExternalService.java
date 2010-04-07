@@ -30,6 +30,7 @@ import org.apache.ode.axis2.ExternalService;
 import org.apache.ode.axis2.ODEService;
 import org.apache.ode.utils.Properties;
 import org.apache.ode.axis2.OdeFault;
+import org.apache.ode.axis2.util.ClusterUrlTransformer;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.WSAEndpoint;
 import org.apache.ode.bpel.epr.MutableEndpoint;
@@ -83,9 +84,11 @@ public class HttpExternalService implements ExternalService {
     protected Binding portBinding;
     private URL endpointUrl;
 
+    private ClusterUrlTransformer clusterUrlTransformer;
+
     public HttpExternalService(ProcessConf pconf, QName serviceName, String portName,
                                ExecutorService executorService, Scheduler scheduler, BpelServer server,
-                               MultiThreadedHttpConnectionManager connManager) throws OdeFault {
+                               MultiThreadedHttpConnectionManager connManager, ClusterUrlTransformer clusterUrlTransformer) throws OdeFault {
         if (log.isDebugEnabled())
             log.debug("new HTTP External service, service name=[" + serviceName + "]; port name=[" + portName + "]");
         this.portName = portName;
@@ -94,6 +97,7 @@ public class HttpExternalService implements ExternalService {
         this.scheduler = scheduler;
         this.server = server;
         this.pconf = pconf;
+        this.clusterUrlTransformer = clusterUrlTransformer;
         Definition definition = pconf.getDefinitionForService(serviceName);
         Service serviceDef = definition.getService(serviceName);
         if (serviceDef == null)
@@ -165,6 +169,8 @@ public class HttpExternalService implements ExternalService {
                 if (log.isDebugEnabled()) log.debug("Endpoint URL overridden by process. "+endpointUrl+" => "+mexEndpointUrl);
             }
 
+            baseUrl = clusterUrlTransformer.rewriteOutgoingClusterURL(baseUrl);
+            
             // build the http method
             final HttpMethod method = httpMethodConverter.createHttpRequest(odeMex, params, baseUrl);
 

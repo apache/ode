@@ -37,8 +37,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
+import org.apache.ode.axis2.util.ClusterUrlTransformer;
 import org.apache.ode.axis2.util.SoapMessageConverter;
 import org.apache.ode.axis2.util.AxisUtils;
+import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.epr.WSAEndpoint;
@@ -100,10 +102,11 @@ public class SoapExternalService implements ExternalService {
     private Scheduler _sched;
     private BpelServer _server;
     private ProcessConf _pconf;
+    private ClusterUrlTransformer _clusterUrlTransformer;
     private String endpointUrl;
 
     public SoapExternalService(ProcessConf pconf, QName serviceName, String portName, ExecutorService executorService,
-                               AxisConfiguration axisConfig, Scheduler sched, BpelServer server, MultiThreadedHttpConnectionManager connManager) throws AxisFault {
+                               AxisConfiguration axisConfig, Scheduler sched, BpelServer server, MultiThreadedHttpConnectionManager connManager, ClusterUrlTransformer clusterUrlTransformer) throws AxisFault {
         _definition = pconf.getDefinitionForService(serviceName);
         _serviceName = serviceName;
         _portName = portName;
@@ -113,6 +116,7 @@ public class SoapExternalService implements ExternalService {
         _converter = new SoapMessageConverter(_definition, serviceName, portName);
         _server = server;
         _pconf = pconf;
+        _clusterUrlTransformer = clusterUrlTransformer;
 
         File fileToWatch = new File(_pconf.getBaseURI().resolve(_serviceName.getLocalPart() + ".axis2"));
         _axisServiceWatchDog = WatchDog.watchFile(fileToWatch, new ServiceFileObserver(fileToWatch));
@@ -163,6 +167,9 @@ public class SoapExternalService implements ExternalService {
             }else{
                 if (__log.isDebugEnabled()) __log.debug("Endpoint URL overridden by process. "+endpointUrl+" => "+mexEndpointUrl);
             }
+            
+            
+            axisEPR.setAddress(_clusterUrlTransformer.rewriteOutgoingClusterURL(axisEPR.getAddress()));
 
             if (__log.isDebugEnabled()) {
                 __log.debug("Axis2 sending message to " + axisEPR.getAddress() + " using MEX " + odeMex);
