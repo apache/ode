@@ -97,9 +97,11 @@ public class ProcessConfImpl implements ProcessConf {
     private EndpointReferenceContext eprContext;
 
     private final ProcessCleanupConfImpl processCleanupConfImpl;
+    
+    private final boolean generateProcessEventsAll;
 
     ProcessConfImpl(QName pid, QName type, long version, DeploymentUnitDir du, TDeployment.Process pinfo, Date deployDate,
-                    Map<QName, Node> props, ProcessState pstate, EndpointReferenceContext eprContext, File configDir) {
+                    Map<QName, Node> props, ProcessState pstate, EndpointReferenceContext eprContext, File configDir, boolean generateProcessEventsAll) {
         _pid = pid;
         _version = version;
         _du = du;
@@ -110,6 +112,7 @@ public class ProcessConfImpl implements ProcessConf {
         _state = pstate;
         _type = type;
         _inMemory = _pinfo.isSetInMemory() && _pinfo.getInMemory();
+        this.generateProcessEventsAll = generateProcessEventsAll;
         this.eprContext = eprContext;
 
         propertiesWatchDog = new WatchDog<Map<File, Long>, PropertiesObserver>(new PropertiesMutable(), new PropertiesObserver());
@@ -385,11 +388,13 @@ public class ProcessConfImpl implements ProcessConf {
         TProcessEvents processEvents = _pinfo.getProcessEvents();
         // No filtering, using defaults
         if (processEvents == null) {
-            HashSet<BpelEvent.TYPE> all = new HashSet<BpelEvent.TYPE>();
-            for (BpelEvent.TYPE t : BpelEvent.TYPE.values()) {
-                if (!t.equals(BpelEvent.TYPE.scopeHandling)) all.add(t);
+            if (generateProcessEventsAll) {
+                HashSet<BpelEvent.TYPE> all = new HashSet<BpelEvent.TYPE>();
+                for (BpelEvent.TYPE t : BpelEvent.TYPE.values()) {
+                    if (!t.equals(BpelEvent.TYPE.scopeHandling)) all.add(t);
+                }
+                _events.put(null, all);
             }
-            _events.put(null, all);
             return;
         }
 

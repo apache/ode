@@ -81,6 +81,8 @@ public class ProcessStoreImpl implements ProcessStore {
     private ConfStoreConnectionFactory _cf;
 
     private EndpointReferenceContext eprContext;
+    
+    private boolean generateProcessEventsAll;
 
     protected File _deployDir;
 
@@ -105,6 +107,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
     public ProcessStoreImpl(EndpointReferenceContext eprContext, DataSource ds, String persistenceType, OdeConfigProperties props, boolean createDatamodel) {
         this.eprContext = eprContext;
+        this.generateProcessEventsAll = props.getProperty("generateProcessEvents", "all").equals("all");
         if (ds != null) {
             // ugly hack
             if (persistenceType.toLowerCase().indexOf("hib") != -1) {
@@ -236,7 +239,7 @@ public class ProcessStoreImpl implements ProcessStore {
                 }
 
                 ProcessConfImpl pconf = new ProcessConfImpl(pid, processDD.getName(), version, du, processDD, deployDate,
-                        calcInitialProperties(processDD), calcInitialState(processDD), eprContext, _configDir);
+                        calcInitialProperties(processDD), calcInitialState(processDD), eprContext, _configDir, generateProcessEventsAll);
                 processes.add(pconf);
             }
 
@@ -693,7 +696,7 @@ public class ProcessStoreImpl implements ProcessStore {
                 // TODO: update the props based on the values in the DB.
 
                 ProcessConfImpl pconf = new ProcessConfImpl(p.getPID(), p.getType(), p.getVersion(), dud, pinfo, dudao
-                        .getDeployDate(), props, p.getState(), eprContext, _configDir);
+                        .getDeployDate(), props, p.getState(), eprContext, _configDir, generateProcessEventsAll);
                 version = p.getVersion();
 
                 _processes.put(pconf.getProcessId(), pconf);
