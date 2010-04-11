@@ -283,7 +283,8 @@ public class SoapExternalService implements ExternalService {
                 }
                 if (__log.isDebugEnabled())
                     __log.debug("Create a new ServiceClient for " + anonymousService.getName());
-                client = new ServiceClient(_configContext, anonymousService);
+                client = new ServiceClient(_configContext, null);
+                client.setAxisService(anonymousService);
             }
             _cachedClients.set(client);
         }
