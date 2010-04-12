@@ -1,0 +1,86 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<process name="HeaderTest"
+    targetNamespace="http://ode/bpel/unit-test" 
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:tns="http://ode/bpel/unit-test"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:test="http://ode/bpel/unit-test.wsdl"
+    xmlns:dummy="http://axis2.ode.apache.org"
+    queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+    expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+
+  <import location="CorrelationMultiTest.wsdl"
+     namespace="http://ode/bpel/unit-test.wsdl"
+     importType="http://schemas.xmlsoap.org/wsdl/" />
+
+   <partnerLinks>
+      <partnerLink name="helloPartnerLink" 
+         partnerLinkType="test:HeaderTestPartnerLinkType" myRole="me" />
+      <partnerLink name="dummyPartnerLink"
+         partnerLinkType="test:DummyPartnerLinkType" partnerRole="you" />
+   </partnerLinks>
+    
+   <variables>
+     <variable name="myInVar" messageType="test:HeaderTestMessage"/>
+     <variable name="myOutVar" messageType="test:HeaderTestMessage"/>
+     <variable name="input" messageType="dummy:longOperationRequest"/>
+     <variable name="output" messageType="dummy:longOperationResponse"/>
+   </variables>
+    <correlationSets>
+        <correlationSet name="testCorr1" properties="test:testCorrelationID1"/>
+        <correlationSet name="testCorr2" properties="test:testCorrelationID2"/>
+        <correlationSet name="testCorr3" properties="test:testCorrelationID3"/>
+        <correlationSet name="testCorr4" properties="test:testCorrelationID4"/>
+    </correlationSets>
+   <sequence>
+       <receive name="start" partnerLink="helloPartnerLink" portType="test:HeaderTestPortType"
+          operation="hello" variable="myInVar" createInstance="yes">
+            <correlations>
+                <correlation set="testCorr1" initiate="yes"/>
+            </correlations>
+       </receive>
+
+       <assign>
+           <copy>
+                <from>'correlationUnicity1'</from>
+                <to>$myOutVar.TestPart</to>
+           </copy>
+       </assign>
+
+       <reply name="end" partnerLink="helloPartnerLink" portType="test:HeaderTestPortType"
+              operation="hello" variable="myOutVar"/>
+              
+        <receive name="receive2" partnerLink="helloPartnerLink" portType="test:HeaderTestPortType" 
+            operation="continue" variable="myInVar">
+            <correlations>
+                <correlation set="testCorr1" initiate="no"/>
+            </correlations>
+        </receive>
+        <assign>
+            <copy>
+                <from>
+                    concat($myOutVar.TestPart, $myInVar.TestPart/requestText)
+                </from>
+                <to>$myOutVar.TestPart</to>
+            </copy>
+        </assign>
+
+   </sequence>
+</process>
