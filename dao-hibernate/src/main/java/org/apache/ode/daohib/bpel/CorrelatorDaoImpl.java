@@ -47,6 +47,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
 
     /** filter for finding a matching selector. */
     private static final String LOCK_SELECTORS = "update from HCorrelatorSelector as hs set hs.lock = hs.lock+1 where hs.processType = :processType";
+    private static final String CHECK_SELECTORS = "from HCorrelatorSelector as hs where hs.processType = :processType and hs.correlator.correlatorId = :correlatorId";
     private static final String FLTR_SELECTORS = "from HCorrelatorSelector as hs where hs.processType = :processType and hs.correlator.correlatorId = :correlatorId";
     private static final String FLTR_SELECTORS_SUBQUERY = ("from HCorrelatorSelector as hs where hs.processType = :processType and hs.correlatorId = " +
             "(select hc.id from HCorrelator as hc where hc.correlatorId = :correlatorId )").intern();
@@ -226,14 +227,13 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
             __log.debug(hdr + "saved " + hsel);
     }
 
-    public boolean checkRoute(CorrelationKey ckey) {
+    public boolean checkRoute(CorrelationKeySet correlationKeySet) {
         entering("CorrelatorDaoImpl.checkRoute");
-        Query lockQry = getSession().createQuery(LOCK_SELECTORS);
-        lockQry.setString("ckey", ckey == null ? null : ckey.toCanonicalString());
-        lockQry.setEntity("corr",_hobj);
-        lockQry.setReadOnly(true);
-        return lockQry.list().isEmpty();
-
+        Query q = getSession().getNamedQuery(HCorrelatorSelector.SELECT_MESSAGE_ROUTE);
+        q.setEntity("corr",_hobj);
+        q.setString("ckey", correlationKeySet.toCanonicalString());
+        q.setReadOnly(true);
+        return q.list().isEmpty();
     }
 
     public String getCorrelatorId() {

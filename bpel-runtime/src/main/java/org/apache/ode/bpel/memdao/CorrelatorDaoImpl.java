@@ -134,7 +134,6 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
         });
     }
 
-
     public boolean checkRoute(CorrelationKey ckey) {
         return true;
     }
@@ -181,6 +180,10 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
             keySet = new CorrelationKeySet();
             keySet.add(ckey);
         }
+    }
+
+    public boolean checkRoute(CorrelationKeySet correlationKeySet) {
+        return true;
     }
 
 }

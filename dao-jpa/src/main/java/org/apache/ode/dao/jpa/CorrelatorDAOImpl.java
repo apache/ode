@@ -190,4 +190,9 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
     public Collection<MessageRouteDAO> getAllRoutes() {
         return new ArrayList<MessageRouteDAO>(_routes);
     }
+
+    public boolean checkRoute(CorrelationKeySet correlationKeySet) {
+        // TODO Auto-generated method stub
+        return true;
+    }
 }

@@ -348,11 +348,23 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             correlators.add(processDao.getCorrelator(correlatorId));
         }
 
+        // Checking conflicts
         int conflict = _imaManager.findConflict(selectors);
         if (conflict != -1)
             throw new FaultException(_bpelProcess.getOProcess().constants.qnConflictingReceive, selectors[conflict]
                     .toString());
 
+        // Check for ambiguous receive
+        for (int i = 0; i < selectors.length; ++i) {
+            CorrelatorDAO correlator = correlators.get(i);
+            Selector selector = selectors[i];
+
+            if (!correlator.checkRoute(selector.correlationKeySet)) {
+                throw new FaultException(_bpelProcess.getOProcess().constants.qnAmbiguousReceive(), selector.toString());
+            }
+        }
+
+        //Registering
         _imaManager.register(pickResponseChannelStr, selectors);
 
         // First check if we match to a new instance.

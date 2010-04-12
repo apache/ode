@@ -22,11 +22,13 @@ package org.apache.ode.daohib.bpel.hobj;
 /**
  * @hibernate.class table="BPEL_SELECTORS" lazy="true"
  * @hibernate.query name="SELECT_MESSAGE_ROUTE_IDS_BY_PROCESS" query="select id from HCorrelatorSelector as m where m.correlator in(select c from HCorrelator c where c.process = :process)"
- * @hibernate.query name="SELECT_MESSAGE_ROUTE_IDS_BY_INSTANCES" query="select id from HCorrelatorSelector as m where m.instance in (:instances))"
+ * @hibernate.query name="SELECT_MESSAGE_ROUTE_IDS_BY_INSTANCES" query="select id from HCorrelatorSelector as m where m.instance in (:instances)"
+ * @hibernate.query name="SELECT_MESSAGE_ROUTE" query="select m.id from HCorrelatorSelector as m where m.correlator = :corr and m.correlationKey = :ckey"
  */
 public class HCorrelatorSelector extends HObject {
     public static final String SELECT_MESSAGE_ROUTE_IDS_BY_PROCESS = "SELECT_MESSAGE_ROUTE_IDS_BY_PROCESS";
     public static final String SELECT_MESSAGE_ROUTE_IDS_BY_INSTANCES = "SELECT_MESSAGE_ROUTE_IDS_BY_INSTANCES";
+    public static final String SELECT_MESSAGE_ROUTE = "SELECT_MESSAGE_ROUTE";
 
     private HProcessInstance _instance;
     private String _groupId;

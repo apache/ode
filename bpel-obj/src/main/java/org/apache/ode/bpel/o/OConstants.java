@@ -54,5 +54,12 @@ public class OConstants extends OBase {
     public OConstants(OProcess owner) {
         super(owner);
     }
-
+    
+    private String getNS() {
+        return qnMissingRequest.getNamespaceURI();
+    }
+    
+    public QName qnAmbiguousReceive() {
+        return new QName(getNS(), "ambiguousReceive");
+    }
 }

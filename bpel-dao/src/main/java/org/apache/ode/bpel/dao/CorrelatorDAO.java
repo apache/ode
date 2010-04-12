@@ -20,6 +20,7 @@ package org.apache.ode.bpel.dao;
 
 import java.util.List;
 
+import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.CorrelationKeySet;
 
 import java.util.Collection;
@@ -88,6 +89,13 @@ public interface CorrelatorDAO {
    */
   List<MessageRouteDAO> findRoute(CorrelationKeySet correlationKeySet);
 
+  /**
+   * Check if corresponding key set is free to register (see ODE-804) 
+   * @param correlationKeySet
+   * @return true - available, false - not available
+   */
+  boolean checkRoute(CorrelationKeySet correlationKeySet);
+  
   /**
    * Add a route from the given correlation key to the given process instance.
    * @param routeGroupId identifier of the group of routes to which this route belongs
