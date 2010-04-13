@@ -53,6 +53,17 @@
           <for>'PT5S'</for>
         </wait>
       	
+        <scope>
+            <faultHandlers>
+                <catchAll>
+                    <empty/>
+                </catchAll>
+            </faultHandlers>
+            <wait>
+              <for expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">xsd:double('')</for>
+            </wait>
+        </scope>
+
        <reply name="endReply" 
               operation="testOperation" 
               partnerLink="testPartnerLink"

@@ -57,7 +57,8 @@ class WAIT extends ACTIVITY {
         } catch (EvaluationException ee) {
             String msg = "Unexpected error evaluating wait condition.";
             __log.error(msg, ee);
-            throw new InvalidProcessException(msg,ee);
+            _self.parent.completed(createFault(_self.o.getOwner().constants.qnSubLanguageExecutionFault,  _self.o), CompensationHandler.emptySet());
+            return;
         }
 
 
