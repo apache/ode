@@ -79,7 +79,7 @@ class CriteriaBuilder {
                 StringBuffer filters = new StringBuffer();
                 List<String> pids = filter.getPidFilter();
                 for (int m = 0; m < pids.size(); m++) {
-                    filters.append(" pi.process.id =").append(" :pid").append(m);
+                    filters.append(" pi.process.processId =").append(" :pid").append(m);
                     parameters.put("pid" + m, pids.get(m));
                     if (m < pids.size() - 1) filters.append(" or");
                 }
