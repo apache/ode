@@ -86,7 +86,7 @@ class CriteriaBuilder {
                     cmp = " = ";
                 }
                 for (int m = 0; m < pids.size(); m++) {
-                    filters.append(" pi.process.id ").append(cmp).append(" :pid").append(m);
+                    filters.append(" pi.process.processId ").append(cmp).append(" :pid").append(m);
                     parameters.put("pid" + m, pids.get(m));
                     if (m < pids.size() - 1) filters.append(" or");
                 }
