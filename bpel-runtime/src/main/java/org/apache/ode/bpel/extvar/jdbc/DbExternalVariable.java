@@ -142,7 +142,8 @@ class DbExternalVariable {
 
 			sb.append(c.colname);
 		}
-		sb.append(" from " + table);
+		sb.append(" from ");
+		sb.append(schema + "." + table);
 		if (_keycolumns.size() > 0) {
 			sb.append(" where ");
 			first = true;
@@ -166,7 +167,7 @@ class DbExternalVariable {
 	private void createUpdate() {
 		_updcolumns.clear();
 		StringBuilder sb = new StringBuilder("update ");
-		sb.append(table);
+		sb.append(schema + "." + table);
 		sb.append(" set ");
 		boolean first = true;
 		for (Column c : _columns) {
@@ -213,7 +214,7 @@ class DbExternalVariable {
 	private void createInsert() {
 		_inscolumns.clear();
 		StringBuilder sb = new StringBuilder("insert into ");
-		sb.append(table);
+		sb.append(schema + "." + table);
 		sb.append(" ( ");
 		boolean first = true;
 		for (Column c : _columns) {
