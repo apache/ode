@@ -211,14 +211,15 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
     public void invokeInstance(MyRoleMessageExchangeImpl mex, RoutingInfo routing) {
         Operation operation = getMyRoleOperation(mex.getOperationName());
         if (__log.isDebugEnabled()) {
-            __log.debug("INPUTMSG: " + routing.correlator.getCorrelatorId() + ": ROUTING to instance "
+            __log.debug("INPUTMSG: " + routing.correlator.getCorrelatorId() + ": ROUTING to existing instance "
                     + routing.messageRoute.getTargetInstance().getInstanceId());
         }
 
         ProcessInstanceDAO instanceDao = routing.messageRoute.getTargetInstance();
+    	BpelProcess process2 = _process._engine._activeProcesses.get(instanceDao.getProcess().getProcessId());
 
         // Reload process instance for DAO.
-        BpelRuntimeContextImpl instance = _process.createRuntimeContext(instanceDao, null, null);
+        BpelRuntimeContextImpl instance = process2.createRuntimeContext(instanceDao, null, null);
         instance.inputMsgMatch(routing.messageRoute.getGroupId(), routing.messageRoute.getIndex(), mex);
 
         // Kill the route so some new message does not get routed to
@@ -226,16 +227,16 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         routing.correlator.removeRoutes(routing.messageRoute.getGroupId(), instanceDao);
 
         // send process instance event
-        CorrelationMatchEvent evt = new CorrelationMatchEvent(new QName(_process.getOProcess().targetNamespace,
-                _process.getOProcess().getName()), _process.getProcessDAO().getProcessId(),
+        CorrelationMatchEvent evt = new CorrelationMatchEvent(new QName(process2.getOProcess().targetNamespace,
+        		process2.getOProcess().getName()), process2.getProcessDAO().getProcessId(),
                 instanceDao.getInstanceId(), routing.matchedKeySet);
         evt.setPortType(mex.getPortType().getQName());
         evt.setOperation(operation.getName());
         evt.setMexId(mex.getMessageExchangeId());
 
-        _process._debugger.onEvent(evt);
+        process2._debugger.onEvent(evt);
         // store event
-        _process.saveEvent(evt, instanceDao);
+        process2.saveEvent(evt, instanceDao);
 
         mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.MATCHED);
         mex.getDAO().setInstance(routing.messageRoute.getTargetInstance());
