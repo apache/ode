@@ -105,7 +105,7 @@
              <configuration>
                <source>
                  import java.io.File
-                 def process_instance_hbm_file = new File('${project.build.outputDirectory}', 'org/apache/ode/daohib/bpel/hobj/HProcessInstance.hbm.xml')
+                 def process_instance_hbm_file = new File(project.build.outputDirectory, 'org/apache/ode/daohib/bpel/hobj/HProcessInstance.hbm.xml')
                  def contents = process_instance_hbm_file.text
                  if (!contents.contains('not-found="ignore"')) {
                      process_instance_hbm_file.text = contents.replace('class="org.apache.ode.daohib.bpel.hobj.HProcess"',
