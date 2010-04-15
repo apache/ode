@@ -485,15 +485,26 @@
               </resources>              
             </configuration>            
           </execution>
+          <execution>
+            <id>copy-resources2</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/test/resources</outputDirectory>
+              <resources>          
+                <resource>
+                  <directory>src/test/resources</directory>
+                </resource>
+              </resources>              
+            </configuration>            
+          </execution>
         </executions>
       </plugin>
      </plugins>
      
      <testResources>
-       <testResource>
-         <directory>src/test/resources</directory>
-         <targetPath>${project.build.directory}/test/resources</targetPath>
-       </testResource>
        <testResource>
          <directory>src/test/resources</directory>
          <targetPath>${project.build.testOutputDirectory}</targetPath>
