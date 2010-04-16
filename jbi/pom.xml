@@ -474,7 +474,7 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${project.build.directory}/test/smx/ode</outputDirectory>
+              <outputDirectory>target/test/smx/ode</outputDirectory>
               <resources>          
                 <resource>
                   <directory>${basedir}/../dao-jpa-ojpa-derby/target/derby</directory>
@@ -492,7 +492,7 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${project.build.directory}/test/resources</outputDirectory>
+              <outputDirectory>target/test/resources</outputDirectory>
               <resources>          
                 <resource>
                   <directory>src/test/resources</directory>
@@ -507,16 +507,15 @@
      <testResources>
        <testResource>
          <directory>src/test/resources</directory>
-         <targetPath>${project.build.testOutputDirectory}</targetPath>
        </testResource>
        <testResource>
          <directory>src/test/jbi</directory>
-         <targetPath>${project.build.directory}/test/smx/ode</targetPath>
+         <targetPath>../test/smx/ode</targetPath>
        </testResource>
        <testResource>
          <directory>src/main/jbi</directory>
          <includes><include>hibernate.properties</include></includes>
-         <targetPath>${project.build.directory}/test/smx/ode</targetPath>
+         <targetPath>../test/smx/ode</targetPath>
        </testResource>
      </testResources>
    </build>
