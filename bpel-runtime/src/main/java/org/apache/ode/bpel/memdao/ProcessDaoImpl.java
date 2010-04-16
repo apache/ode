@@ -242,7 +242,9 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
                 Long id = (Long) oldInstances[i];
                 Long age = _instancesAge.get(id);
                 if (age != null && now-age > _conn._mexTtl) {
-                    __log.warn("Discarding in-memory instance "+id+" because it exceeded its time-to-live: "+_instances.get(id));
+                    if (_instances.get(id) != null) {
+                        __log.warn("Discarding in-memory instance "+id+" because it exceeded its time-to-live: "+_instances.get(id));
+                    }
                     _instances.remove(id);
                     _instancesAge.remove(id);
                 }
