@@ -1164,8 +1164,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             info.setMexId(((ProcessMessageExchangeEvent) event).getMessageExchangeId());
         }
         if (event instanceof ScopeCompletionEvent) {
-            info.setSuccess(((ScopeCompletionEvent) event).isSuccess());
-            info.setFault(((ScopeCompletionEvent) event).getFault());
+            info.setSuccess(true);
         }
         if (event instanceof ScopeEvent) {
             info.setScopeId(((ScopeEvent) event).getScopeId());

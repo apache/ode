@@ -121,7 +121,7 @@ public class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
      * @see org.apache.ode.bpel.dao.ScopeDAO#getState()
      */
     public ScopeStateEnum getState() {
-        return new ScopeStateEnum(_scope.getState());
+        return ScopeStateEnum.valueOf(_scope.getState());
     }
     /**
      * @see org.apache.ode.bpel.dao.ScopeDAO#getName()

@@ -220,7 +220,7 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
         : null);
     scope.setName(name);
     scope.setScopeModelId(scopeModelId);
-    scope.setState(ScopeStateEnum.ACTIVE.toString());
+    scope.setState(ScopeStateEnum.NEW.toString());
     scope.setInstance(_instance);
     scope.setCreated(new Date());
 //    _instance.addScope(scope);

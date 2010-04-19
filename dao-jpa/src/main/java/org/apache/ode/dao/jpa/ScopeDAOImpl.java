@@ -163,7 +163,7 @@ public class ScopeDAOImpl extends OpenJPADAO implements ScopeDAO {
 	}
 
 	public ScopeStateEnum getState() {
-		return new ScopeStateEnum(_scopeState);
+		return ScopeStateEnum.valueOf(_scopeState);
 	}
 
 	public XmlDataDAO getVariable(String varName) {

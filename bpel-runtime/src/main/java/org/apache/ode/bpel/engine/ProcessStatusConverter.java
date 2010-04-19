@@ -61,11 +61,8 @@ class ProcessStatusConverter {
   	}
   
     __scopeStateMap.put(ScopeStateEnum.ACTIVE, TScopeStatus.ACTIVE);
-    __scopeStateMap.put(ScopeStateEnum.COMPENSATED,TScopeStatus.COMPENSATED);
-    __scopeStateMap.put(ScopeStateEnum.COMPENSATING,TScopeStatus.COMPENSATING);
     __scopeStateMap.put(ScopeStateEnum.COMPLETED,TScopeStatus.COMPLETED);
-    __scopeStateMap.put(ScopeStateEnum.FAULTED,TScopeStatus.FAULTED);
-    __scopeStateMap.put(ScopeStateEnum.FAULTHANDLER,TScopeStatus.FAULTED);
+    __scopeStateMap.put(ScopeStateEnum.FAULT,TScopeStatus.FAULTED);
     
   }
   

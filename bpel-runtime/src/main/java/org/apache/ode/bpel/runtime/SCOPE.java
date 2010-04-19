@@ -30,6 +30,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.evt.ScopeCompletionEvent;
 import org.apache.ode.bpel.evt.ScopeFaultEvent;
 import org.apache.ode.bpel.evt.ScopeStartEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
@@ -352,6 +353,8 @@ class SCOPE extends ACTIVITY {
                         });
                     }
                 } else /* completed ok */ {
+                    sendEvent(new ScopeCompletionEvent());
+                    
                     if (_oscope.compensationHandler != null) {
                         CompensationHandler compensationHandler = new CompensationHandler(
                             _scopeFrame,

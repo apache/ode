@@ -48,6 +48,7 @@ import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
+import org.apache.ode.bpel.dao.ScopeStateEnum;
 import org.apache.ode.bpel.dao.XmlDataDAO;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evar.ExternalVariableModule.Value;
@@ -57,7 +58,10 @@ import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.evt.ProcessInstanceStateChangeEvent;
 import org.apache.ode.bpel.evt.ProcessMessageExchangeEvent;
 import org.apache.ode.bpel.evt.ProcessTerminationEvent;
+import org.apache.ode.bpel.evt.ScopeCompletionEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
+import org.apache.ode.bpel.evt.ScopeFaultEvent;
+import org.apache.ode.bpel.evt.ScopeStartEvent;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
@@ -1119,6 +1123,11 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         sendEvent(evt);
     }
 
+    private void saveScopeState(Long scopeId, ScopeStateEnum scopeState) {
+        ScopeDAO scope = _dao.getScope(scopeId);
+        scope.setState(scopeState);
+    }
+    
     /**
      * @see BpelRuntimeContext#sendEvent(org.apache.ode.bpel.evt.ProcessInstanceEvent)
      */
@@ -1132,7 +1141,17 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         // filter scopes
         List<String> scopeNames = null;
         if (event instanceof ScopeEvent) {
-            scopeNames = ((ScopeEvent) event).getParentScopesNames();
+            ScopeEvent sevent = (ScopeEvent) event;
+            
+            scopeNames = sevent.getParentScopesNames();
+            
+            if (sevent instanceof ScopeStartEvent) {
+                saveScopeState(sevent.getScopeId(), ScopeStateEnum.ACTIVE);
+            } else if (sevent instanceof ScopeCompletionEvent) {
+                saveScopeState(sevent.getScopeId(), ScopeStateEnum.COMPLETED);
+            } else if (sevent instanceof ScopeFaultEvent) {
+                saveScopeState(sevent.getScopeId(), ScopeStateEnum.FAULT);
+            }
         }
 
         // saving
