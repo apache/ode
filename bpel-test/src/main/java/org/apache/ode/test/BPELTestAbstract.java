@@ -664,7 +664,7 @@ public abstract class BPELTestAbstract {
                     if (mex.getResponse() == null)
                         failure(_invocation, "Expected response, but got none.", null);
                     String responseStr = DOMUtils.domToString(mex.getResponse().getMessage());
-                    System.out.println("=>" + responseStr);
+                    //System.out.println("=>" + responseStr);
                     Matcher matcher = _invocation.expectedResponsePattern.matcher(responseStr);
                     if (!matcher.matches())
                         failure(_invocation, "Response does not match expected pattern", _invocation.expectedResponsePattern, responseStr);
