@@ -58,7 +58,7 @@ public class XmlDataDaoImpl extends HibernateDao implements XmlDataDAO {
      */
     public boolean isNull() {
         entering("XmlDataDaoImpl.isNull");
-        return (_data.getData() == null || _data.getData().length == 0);
+        return (_data.getSimpleValue() == null && (_data.getData() == null || _data.getData().length == 0));
     }
 
     /**
@@ -84,14 +84,26 @@ public class XmlDataDaoImpl extends HibernateDao implements XmlDataDAO {
     public void set(Node val) {
         entering("XmlDataDaoImpl.set");
         _node = val;
-        _data.setSimpleType(!(val instanceof Element));
-
-        if(_data.isSimpleType()) {
-            _data.setData(_node.getNodeValue().getBytes());
-        } else {
+        if (val != null && val.getNamespaceURI() == null && "temporary-simple-type-wrapper".equals(val.getLocalName())) {
+            _data.setSimpleType(true);
+            String value = _node.getTextContent();
+            if (value.length() <= 255) {
+                _data.setSimpleValue(value);
+                _data.setData(null);
+            } else {
+                _data.setData(value.getBytes());
+                _data.setSimpleValue(null);
+            }
+        } else if (val instanceof Element) {
+            _data.setSimpleType(false);
             _data.setData(DOMUtils.domToString(_node).getBytes());
+            _data.setSimpleValue(null);
+        } else {
+            _data.setSimpleType(true);
+            _data.setSimpleValue(_node.getNodeValue());
+            _data.setData(null);
         }
-        
+
         getSession().saveOrUpdate(_data);
         leaving("XmlDataDaoImpl.set");
     }
@@ -143,20 +155,28 @@ public class XmlDataDaoImpl extends HibernateDao implements XmlDataDAO {
     }
 
     private Node prepare(){
-        if(_data.getData() == null || _data.getData().length == 0)
-            return null;
-        String data = new String(_data.getData());
-        if(_data.isSimpleType()){
+        if(_data.isSimpleType()) {
+            String data;
+            if (_data.getSimpleValue() != null) {
+                data = _data.getSimpleValue();
+            } else {
+                if(_data.getData() == null || _data.getData().length == 0)
+                    return null;
+                data = new String(_data.getData());
+            }
             Document d = DOMUtils.newDocument();
             // we create a dummy wrapper element
             // prevents some apps from complaining
             // when text node is not actual child of document
-            Element e = d.createElement("text-node-wrapper");
+            Element e = d.createElement("temporary-simple-type-wrapper");
             Text tnode = d.createTextNode(data);
             d.appendChild(e);
             e.appendChild(tnode);
             return tnode;
-        }else{
+        } else {
+            if(_data.getData() == null || _data.getData().length == 0)
+                return null;
+            String data = new String(_data.getData());
             try{
                 return DOMUtils.stringToDOM(data);
             }catch(Exception e){

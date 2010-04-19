@@ -33,6 +33,7 @@ public class HXmlData extends HObject {
     private byte[] _data;
     private Collection<HVariableProperty> _properties = new HashSet<HVariableProperty>();
     private String _name;
+    private String _simpleValue;
     private HScope _scope;
     private HProcessInstance _instance;
 
@@ -53,7 +54,7 @@ public class HXmlData extends HObject {
     public void setData(byte[] data) {
         _data = data;
     }
-
+    
     /**
      * @hibernate.property
      *    column="NAME"
@@ -67,6 +68,21 @@ public class HXmlData extends HObject {
 
     public void setName(String name) {
         _name = name;
+    }
+
+    /**
+     * @hibernate.property
+     *    column="SIMPLE_VALUE"
+     *    type="string"
+     *    length="255"
+     *    not-null="false"
+     */
+    public String getSimpleValue() {
+        return _simpleValue;
+    }
+
+    public void setSimpleValue(String simpleValue) {
+        _simpleValue = simpleValue;
     }
 
     /**
