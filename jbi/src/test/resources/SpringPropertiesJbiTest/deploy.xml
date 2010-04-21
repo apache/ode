@@ -7,7 +7,7 @@
         name="bpel:OnEventCorrelation" fileName="OnEventCorrelation.bpel">
         <!--dd:process-events generate="none"/-->
         <dd:provide partnerLink="client">
-            <dd:service name="bpel:OnEventCorrelation" port="OnEventCorrelation" />
+            <dd:service name="bpel:OnEventCorrelation3" port="OnEventCorrelation" />
         </dd:provide>
     </dd:process>
 </dd:deploy>
