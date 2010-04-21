@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.wsdl.Definition;
@@ -54,6 +55,17 @@ import org.apache.ode.utils.InternPool;
 import org.apache.ode.utils.InternPool.InternableBlock;
 import org.apache.ode.utils.fs.FileUtils;
 import org.apache.xmlbeans.XmlOptions;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.MessageSourceResolvable;
+import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
+import org.springframework.core.io.Resource;
 import org.w3c.dom.Node;
 
 /**
@@ -70,6 +82,7 @@ class DeploymentUnitDir {
     private String _name;
     private File _duDirectory;
     private File _descriptorFile;
+    private Properties _properties = new Properties();
 
     private HashMap<QName, CBPInfo> _processes = new HashMap<QName, CBPInfo>();
     private HashMap<QName, TDeployment.Process> _processInfo = new HashMap<QName, TDeployment.Process>();
@@ -114,6 +127,17 @@ class DeploymentUnitDir {
 
         if (!_descriptorFile.exists())
             throw new IllegalArgumentException("Directory " + dir + " does not contain a deploy.xml file!");
+
+        try {
+            ApplicationContext ctx = new ClassPathXmlApplicationContext("beans.xml");
+            _properties = (java.util.Properties) ctx.getBean("properties");
+            if (__log.isDebugEnabled()) {
+                __log.debug("Loaded spring properties from file beans.xml:" + _properties + " for " +  _name);
+            }
+        } catch (Exception e) {
+            __log.info("Can't initialize beans.xml application context " + e + " for " + _name);
+        }
+
     }
 
 
@@ -350,7 +374,7 @@ class DeploymentUnitDir {
                 continue;
 
             if (bpelFile.getName().equals(process.getFileName())) {
-                Map<QName, Node> props = ProcessStoreImpl.calcInitialProperties(process);
+                Map<QName, Node> props = ProcessStoreImpl.calcInitialProperties(_properties, process);
                 Map<String, Object> result = new HashMap<String, Object>();
                 result.put(BpelC.PROCESS_CUSTOM_PROPERTIES, props);
                 return result;
@@ -396,4 +420,7 @@ class DeploymentUnitDir {
         _version = version;
     }
 
+    public Properties getProperties() {
+        return _properties;
+    }
 }

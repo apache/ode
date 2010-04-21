@@ -239,7 +239,7 @@ public class ProcessStoreImpl implements ProcessStore {
                 }
 
                 ProcessConfImpl pconf = new ProcessConfImpl(pid, processDD.getName(), version, du, processDD, deployDate,
-                        calcInitialProperties(processDD), calcInitialState(processDD), eprContext, _configDir, generateProcessEventsAll);
+                        calcInitialProperties(du.getProperties(), processDD), calcInitialState(processDD), eprContext, _configDir, generateProcessEventsAll);
                 processes.add(pconf);
             }
 
@@ -625,8 +625,18 @@ public class ProcessStoreImpl implements ProcessStore {
      * @param dd
      * @return
      */
-    public static Map<QName, Node> calcInitialProperties(TDeployment.Process dd) {
+    public static Map<QName, Node> calcInitialProperties(Properties properties, TDeployment.Process dd) {
         HashMap<QName, Node> ret = new HashMap<QName, Node>();
+        
+        for (Object key1 : properties.keySet()) {
+            String key = (String) key1;
+            Document doc = DOMUtils.newDocument();
+            doc.appendChild(doc.createElementNS(null, "temporary-simple-type-wrapper"));
+            doc.getDocumentElement().appendChild(doc.createTextNode(properties.getProperty(key)));
+            
+            ret.put(new QName(key), doc.getDocumentElement());
+        }
+        
         if (dd.getPropertyList().size() > 0) {
             for (TDeployment.Process.Property property : dd.getPropertyList()) {
                 Element elmtContent = DOMUtils.getElementContent(property.getDomNode());
@@ -692,7 +702,7 @@ public class ProcessStoreImpl implements ProcessStore {
                     continue;
                 }
 
-                Map<QName, Node> props = calcInitialProperties(pinfo);
+                Map<QName, Node> props = calcInitialProperties(dud.getProperties(), pinfo);
                 // TODO: update the props based on the values in the DB.
 
                 ProcessConfImpl pconf = new ProcessConfImpl(p.getPID(), p.getType(), p.getVersion(), dud, pinfo, dudao

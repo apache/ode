@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:tns="http://sample.bpel.org/bpel/sample" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" name="OnEventCorrelation" targetNamespace="http://sample.bpel.org/bpel/sample"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+>
+  <message name="OnEventCorrelationMessage">
+    <part type="xsd:string" name="payload"/>
+    <part type="xsd:string" name="payload2"/>
+  </message>
+  <portType name="OnEventCorrelation">
+    <operation name="initiate">
+      <input message="tns:OnEventCorrelationMessage"/>
+      <output message="tns:OnEventCorrelationMessage"/>
+    </operation>
+    <operation name="complete">
+      <input message="tns:OnEventCorrelationMessage"/>
+      <output message="tns:OnEventCorrelationMessage"/>
+    </operation>
+  </portType>
+  <binding name="OnEventCorrelationBinding" type="tns:OnEventCorrelation">
+    <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="initiate">
+      <wsdlsoap:operation soapAction="initiate"/>
+      <input>
+        <wsdlsoap:body use="literal"/>
+      </input>
+      <output>
+        <wsdlsoap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="complete">
+      <wsdlsoap:operation soapAction="complete"/>
+      <input>
+        <wsdlsoap:body use="literal"/>
+      </input>
+      <output>
+        <wsdlsoap:body use="literal"/>
+      </output>
+    </operation>
+  </binding>
+  <service name="OnEventCorrelation">
+    <port binding="tns:OnEventCorrelationBinding" name="OnEventCorrelation">
+      <wsdlsoap:address location="http://localhost:8835/ode/processes/OnEventCorrelation/"/>
+    </port>
+  </service>
+    <plnk:partnerLinkType name="OnEventCorrelation">
+        <plnk:role name="OnEventCorrelationProvider" portType="tns:OnEventCorrelation"/>
+    </plnk:partnerLinkType>
+</definitions>

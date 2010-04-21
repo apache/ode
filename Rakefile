@@ -198,7 +198,9 @@ define "ode" do
     compile.from apt
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-epr", "bpel-obj", "bpel-schemas",
       "bpel-store", "jacob", "jacob-ap", "utils", "agents"),
-      COMMONS.logging, COMMONS.collections, COMMONS.httpclient, JAXEN, JAVAX.persistence, JAVAX.stream, SAXON, WSDL4J, XMLBEANS
+      COMMONS.logging, COMMONS.collections, COMMONS.httpclient, JAXEN, JAVAX.persistence, JAVAX.stream, SAXON, WSDL4J, XMLBEANS,
+      SPRING
+
 
     test.with projects("scheduler-simple", "dao-jpa", "dao-hibernate", "bpel-epr"),
         BACKPORT, COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
@@ -234,7 +236,7 @@ define "ode" do
   define "bpel-store" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-obj", "bpel-schemas", "bpel-epr",
       "dao-hibernate", "dao-jpa", "utils"),
-      COMMONS.logging, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J, OPENJPA
+      COMMONS.logging, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J, OPENJPA, SPRING
     compile { open_jpa_enhance }
     resources hibernate_doclet(:package=>"org.apache.ode.store.hib", :excludedtags=>"@version,@author,@todo")
 
@@ -253,7 +255,7 @@ define "ode" do
     test.with projects("bpel-obj", "jacob", "bpel-schemas",
       "bpel-scripts", "scheduler-simple"),
       COMMONS.collections, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector,
-      JAVAX.stream, JAVAX.transaction, JAXEN, HSQLDB, LOG4J, SAXON, XERCES, XMLBEANS, XALAN, GERONIMO.transaction
+      JAVAX.stream, JAVAX.transaction, JAXEN, HSQLDB, LOG4J, SAXON, XERCES, XMLBEANS, XALAN, GERONIMO.transaction, SPRING
 
     package :jar
   end

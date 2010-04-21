@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpws:process xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns="http://sample.bpel.org/bpel/sampleArtifacts" xmlns:tns="http://sample.bpel.org/bpel/sample" exitOnStandardFault="yes" name="OnEventCorrelation" suppressJoinFailure="yes" targetNamespace="http://sample.bpel.org/bpel/sample" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+    xmlns:ode="http://www.apache.org/ode/type/extension"
+    >
+  <bpws:import importType="http://schemas.xmlsoap.org/wsdl/" location="OnEventCorrelation.wsdl" namespace="http://sample.bpel.org/bpel/sample"/>
+  <bpws:import importType="http://schemas.xmlsoap.org/wsdl/" location="OnEventCorrelationArtifacts.wsdl" namespace="http://sample.bpel.org/bpel/sampleArtifacts"/>
+  <bpws:partnerLinks>
+    <bpws:partnerLink myRole="OnEventCorrelationProvider" name="client" partnerLinkType="tns:OnEventCorrelation"/>
+  </bpws:partnerLinks>
+  <bpws:variables>
+    <bpws:variable messageType="tns:OnEventCorrelationMessage" name="input"/>
+    <bpws:variable messageType="tns:OnEventCorrelationMessage" name="output"/>
+    <bpws:variable type="xsd:int" name="i"/>
+  </bpws:variables>
+  <bpws:correlationSets>
+    <bpws:correlationSet name="CorrelationSet" properties="ns:input"/>
+  </bpws:correlationSets>
+  <bpws:sequence name="main">
+    <bpws:scope name="Initialize">
+      <bpws:sequence>
+        <bpws:receive createInstance="yes" operation="initiate" partnerLink="client" portType="tns:OnEventCorrelation" variable="input">
+          <bpws:correlations>
+            <bpws:correlation initiate="yes" set="CorrelationSet"/>
+          </bpws:correlations>
+        </bpws:receive>
+        <bpws:assign>
+          <bpws:copy>
+            <bpws:from>ode:process-property('weirdProp')</bpws:from>
+            <bpws:to>$output.payload</bpws:to>
+          </bpws:copy>
+        </bpws:assign>
+        <bpws:reply operation="initiate" partnerLink="client" variable="output"/>
+      </bpws:sequence>
+    </bpws:scope>
+  </bpws:sequence>
+</bpws:process>
