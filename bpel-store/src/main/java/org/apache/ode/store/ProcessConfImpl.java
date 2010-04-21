@@ -19,14 +19,23 @@
 package org.apache.ode.store;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileFilter;
 import java.net.URI;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
@@ -46,18 +55,18 @@ import org.apache.ode.bpel.dd.TService;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessState;
-import org.apache.ode.bpel.iapi.EndpointReferenceContext;
-import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.iapi.ProcessConf.PartnerRoleConfig;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
+import org.apache.ode.utils.CollectionUtils;
 import org.apache.ode.utils.CronExpression;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.HierarchicalProperties;
 import org.apache.ode.utils.WatchDog;
-import org.apache.ode.utils.CollectionUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -538,10 +547,10 @@ public class ProcessConfImpl implements ProcessConf {
                     cleanupInfo.setFilters(aCleanup.getFilterList());
                     ProcessCleanupConfImpl.processACleanup(cleanupInfo.getCategories(), aCleanup.getCategoryList());
                     
-                    Map<String, Object> runnableDetails = new HashMap<String, Object>();
-                    runnableDetails.put("cleanupInfo", cleanupInfo);
-                    runnableDetails.put("pid", _pid);
-                    runnableDetails.put("transactionSize", 10);
+                    JobDetails runnableDetails = new JobDetails();
+                    runnableDetails.getDetailsExt().put("cleanupInfo", cleanupInfo);
+                    runnableDetails.getDetailsExt().put("pid", _pid);
+                    runnableDetails.getDetailsExt().put("transactionSize", 10);
                     job.getRunnableDetailList().add(runnableDetails);
                 }
                 jobs.add(job);

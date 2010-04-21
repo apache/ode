@@ -20,6 +20,8 @@
 package org.apache.ode.scheduler.simple;
 
 import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
 
 import javax.transaction.TransactionManager;
@@ -32,6 +34,8 @@ import junit.framework.TestCase;
  * @author Matthieu Riou <mriou@apache.org>
  */
 public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
+    private static final Log __log = LogFactory.getLog(RetriesTest.class);
+    
     DelegateSupport _ds;
     SimpleScheduler _scheduler;
     ArrayList<Scheduler.JobInfo> _jobs;
@@ -66,7 +70,7 @@ public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
         }
 
         Thread.sleep(10000);
-        assertEquals(8, _tried);
+        assertEquals(4, _tried);
     }
 
     public void testExecTransaction() throws Exception {
@@ -95,10 +99,10 @@ public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
         throw new Scheduler.JobProcessorException(jobInfo.retryCount < 1);
     }
 
-    Map<String, Object> newDetail(String x) {
-        HashMap<String, Object> det = new HashMap<String, Object>();
-        det.put("foo", x);
-        return det;
+    Scheduler.JobDetails newDetail(String x) {
+        Scheduler.JobDetails jd = new Scheduler.JobDetails();
+        jd.getDetailsExt().put("foo", x);
+        return jd;
     }
 
     private SimpleScheduler newScheduler(String nodeId) {

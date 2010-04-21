@@ -26,6 +26,10 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.common.CorrelationKeySet;
+
 /**
  * The BPEL scheduler.
  */
@@ -42,7 +46,7 @@ public interface Scheduler {
      * @param when when the job should run (<code>null</code> means now)
      * @return unique job identifier
      */
-    String schedulePersistedJob(Map<String,Object>jobDetail,Date when)
+    String schedulePersistedJob(JobDetails jobDetail,Date when)
             throws ContextException ;
 
 
@@ -66,13 +70,13 @@ public interface Scheduler {
      * @param when does the job should be executed?
      * @return unique (as far as the scheduler is concerned) job identifier
      */
-    String scheduleVolatileJob(boolean transacted, Map<String,Object> jobDetail, Date when) throws ContextException;
+    String scheduleVolatileJob(boolean transacted, JobDetails jobDetail, Date when) throws ContextException;
 
     /**
      * Schedule a volatile job for right now
      * @see #scheduleVolatileJob(boolean, java.util.Map, java.util.Date)
      */
-    String scheduleVolatileJob(boolean transacted, Map<String,Object> jobDetail) throws ContextException;
+    String scheduleVolatileJob(boolean transacted, JobDetails jobDetail) throws ContextException;
 
     /**
      * Make a good effort to cancel the job. If its already running no big
@@ -166,6 +170,105 @@ public interface Scheduler {
         void onScheduledJob(JobInfo jobInfo) throws JobProcessorException;
     }
 
+    public enum JobType {
+        TIMER, 
+        RESUME, 
+        INVOKE_INTERNAL, 
+        INVOKE_RESPONSE, 
+        MATCHER, 
+        INVOKE_CHECK
+    }
+    
+    public static class JobDetails {
+        public Long instanceId;
+        public String mexId;
+        public String processId;
+        public String type;
+        public String channel;
+        public String correlatorId;
+        public String correlationKeySet;
+        public Integer retryCount;
+        public Boolean inMem;
+        public Map<String, Object> detailsExt = new HashMap<String, Object>();
+        
+        public Boolean getInMem() {
+            return inMem == null ? false : inMem;
+        }
+        public void setInMem(Boolean inMem) {
+            this.inMem = inMem;
+        }
+        public String getMexId() {
+            return mexId;
+        }
+        public void setMexId(String mexId) {
+            this.mexId = mexId;
+        }
+        public QName getProcessId() {
+            return processId == null ? null : QName.valueOf(processId);
+        }
+        public void setProcessId(QName processId) {
+            this.processId = "" + processId;
+        }
+        public JobType getType() {
+            return JobType.valueOf(type);
+        }
+        public void setType(JobType type) {
+            this.type = type.toString();
+        }
+        public String getChannel() {
+            return channel;
+        }
+        public void setChannel(String channel) {
+            this.channel = channel;
+        }
+        public String getCorrelatorId() {
+            return correlatorId;
+        }
+        public void setCorrelatorId(String correlatorId) {
+            this.correlatorId = correlatorId;
+        }
+        public CorrelationKeySet getCorrelationKeySet() {
+            return new CorrelationKeySet(correlationKeySet);
+        }
+        public void setCorrelationKeySet(CorrelationKeySet correlationKeySet) {
+            this.correlationKeySet = correlationKeySet == null ? null : correlationKeySet.toCanonicalString();
+        }
+        public Integer getRetryCount() {
+            return retryCount == null ? 0 : retryCount;
+        }
+        public void setRetryCount(Integer retryCount) {
+            this.retryCount = retryCount;
+        }
+        public Long getInstanceId() {
+            return instanceId;
+        }
+        public void setInstanceId(Long instanceId) {
+            this.instanceId = instanceId;
+        }
+        public Map<String, Object> getDetailsExt() {
+            return detailsExt;
+        }
+        public void setDetailsExt(Map<String, Object> detailsExt) {
+            this.detailsExt = detailsExt;
+        }
+        
+        @Override
+        public String toString() {
+            return "JobDetails("
+            + " instanceId: " + instanceId
+            + " mexId: " + mexId
+            + " processId: " + processId
+            + " type: " + type
+            + " channel: " + channel
+            + " correlatorId: " + correlatorId
+            + " correlationKeySet: " + correlationKeySet
+            + " retryCount: " + retryCount
+            + " inMem: " + inMem
+            + " detailsExt: " + detailsExt
+            + ")";
+        }
+    }
+    
     /**
      * Wrapper containing information about a scheduled job.
      * @author mszefler
@@ -174,17 +277,16 @@ public interface Scheduler {
         private static final long serialVersionUID = 1L;
         public final String jobName;
         public final int retryCount;
-        public final Map<String,Object> jobDetail;
+        public final JobDetails jobDetail;
 
-        public JobInfo(String jobName, Map<String,Object>jobDetail, int retryCount) {
+        public JobInfo(String jobName, JobDetails jobDetail, int retryCount) {
             this.jobName = jobName;
             this.jobDetail = jobDetail;
             this.retryCount = retryCount;
         }
 
         public String toString() {
-            // Wrap in hashmap in case the underlying object has no toString method.
-            return jobName + "["+retryCount +"]: " + new HashMap<Object, Object>(jobDetail);
+            return jobName + "["+retryCount +"]: " + jobDetail;
         }
     }
 
@@ -208,7 +310,7 @@ public interface Scheduler {
     }
 
     public interface MapSerializableRunnable extends Runnable, Serializable {
-        void storeToDetailsMap(Map<String, Object> details);
-        void restoreFromDetailsMap(Map<String, Object> details);
+        void storeToDetails(JobDetails details);
+        void restoreFromDetails(JobDetails details);
     }
 }

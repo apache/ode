@@ -20,6 +20,7 @@ import org.apache.ode.bpel.engine.BpelServerImpl.ContextsAware;
 import org.apache.ode.bpel.iapi.ClusterAware;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessConf.CronJob;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.MapSerializableRunnable;
 import org.apache.ode.utils.CronExpression;
 
@@ -112,11 +113,11 @@ public class CronScheduler {
                 Runnable runnable = new Runnable() {
                     public void run() {
                         if( __log.isDebugEnabled() ) __log.debug("Running cron cleanup with details list size: " + job.getRunnableDetailList().size());
-                        for( Map<String, Object> details : job.getRunnableDetailList() ) {
+                        for( JobDetails details : job.getRunnableDetailList() ) {
                             try {
                                 // for each clean up for the scheduled time
                                 RuntimeDataCleanupRunnable cleanup = new RuntimeDataCleanupRunnable();
-                                cleanup.restoreFromDetailsMap(details);
+                                cleanup.restoreFromDetails(details);
                                 cleanup.setContexts(_contexts);
                                 cleanup.run();
                                 if( __log.isDebugEnabled() ) __log.debug("Finished running runtime data cleanup from a PROCESS CRON job: " + cleanup);
@@ -168,17 +169,17 @@ public class CronScheduler {
                     // for each different scheduled time
                     Runnable runnable = new Runnable() {
                         public void run() {
-                            for( Map<String, Object> details : job.getRunnableDetailList() ) {
+                            for( JobDetails details : job.getRunnableDetailList() ) {
                                 try {
                                     // for now, we have only runtime data cleanup cron job defined
                                     // for each clean up for the scheduled time
                                     RuntimeDataCleanupRunnable cleanup = new RuntimeDataCleanupRunnable();
                                     synchronized( _terminationListenersByPid ) {
                                         if( !_terminationListenersByPid.isEmpty() ) {
-                                            details.put("pidsToExclude", _terminationListenersByPid.keySet());
+                                            details.getDetailsExt().put("pidsToExclude", _terminationListenersByPid.keySet());
                                         }
                                     }
-                                    cleanup.restoreFromDetailsMap(details);
+                                    cleanup.restoreFromDetails(details);
                                     cleanup.setContexts(_contexts);
                                     cleanup.run();
                                     if( __log.isDebugEnabled() ) __log.debug("Finished running runtime data cleanup from a SYSTEM CRON job:" + cleanup);
@@ -197,7 +198,7 @@ public class CronScheduler {
     }
 
     public TerminationListener schedule(final CronExpression cronExpression, 
-            final Runnable runnable, final Map<String, Object> runnableDetails, 
+            final Runnable runnable, final JobDetails runnableDetails, 
             TerminationListener terminationListener) {
         if( _shuttingDown ) {
             __log.info("CRON Scheduler is being shut down. This new scheduling request is ignored.");
@@ -250,12 +251,12 @@ public class CronScheduler {
         private volatile boolean terminated = false;
         private Date nextScheduleTime;
         private Runnable runnable;
-        private Map<String, Object> runnableDetails;
+        private JobDetails runnableDetails;
         private CronExpression cronExpression;
         private TerminationListener terminationListener;
         
         public CronScheduledJob(Date nextScheduleTime,
-                Runnable runnable, Map<String, Object> runnableDetails,
+                Runnable runnable, JobDetails runnableDetails,
                 CronExpression cronExpression, TerminationListener terminationListener) {
             this.nextScheduleTime = nextScheduleTime;
             this.runnable = runnable;
@@ -277,7 +278,7 @@ public class CronScheduler {
                     nextScheduleTime.getTime() < System.currentTimeMillis() + TOLERABLE_SCHEDULE_DELAY) {
                     if( runnableDetails != null && 
                             runnable instanceof MapSerializableRunnable ) {
-                        ((MapSerializableRunnable)runnable).restoreFromDetailsMap(runnableDetails);
+                        ((MapSerializableRunnable)runnable).restoreFromDetails(runnableDetails);
                     }
                     if (runnable instanceof ContextsAware) {
                         ((ContextsAware) runnable).setContexts(_contexts);

@@ -69,7 +69,7 @@ public class MockScheduler implements Scheduler {
         }
     };
 
-    public String schedulePersistedJob(final Map<String, Object> detail, final Date date) throws ContextException {
+    public String schedulePersistedJob(final JobDetails detail, final Date date) throws ContextException {
         if (date != null) {
             return scheduleVolatileJob(true, detail, date);
         } else {
@@ -77,11 +77,11 @@ public class MockScheduler implements Scheduler {
         }
     }
 
-    public String scheduleVolatileJob(boolean transacted, Map<String, Object> jobDetail) throws ContextException {
+    public String scheduleVolatileJob(boolean transacted, JobDetails jobDetail) throws ContextException {
         return scheduleVolatileJob(transacted, jobDetail, null);
     }
 
-    public String scheduleVolatileJob(final boolean transacted, final Map<String, Object> detail, final Date date) throws ContextException {
+    public String scheduleVolatileJob(final boolean transacted, final JobDetails detail, final Date date) throws ContextException {
         if (date != null) {
             registerSynchronizer(new Synchronizer() {
                 public void afterCompletion(boolean success) {
@@ -113,7 +113,7 @@ public class MockScheduler implements Scheduler {
         }
     }
 
-    private void exec(boolean transacted, final Map<String, Object> detail) {
+    private void exec(boolean transacted, final JobDetails detail) {
         try {
             if (transacted) {
 
@@ -148,7 +148,7 @@ public class MockScheduler implements Scheduler {
             });
             return null;
         } else {
-            return scheduleVolatileJob(true, new HashMap<String, Object>());
+            return scheduleVolatileJob(true, new JobDetails());
         }
     }
     

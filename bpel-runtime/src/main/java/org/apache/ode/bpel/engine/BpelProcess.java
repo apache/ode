@@ -55,6 +55,8 @@ import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
+import org.apache.ode.bpel.iapi.Scheduler.JobType;
 import org.apache.ode.bpel.intercept.InstanceCountThrottler;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
@@ -402,20 +404,20 @@ public class BpelProcess {
     }
 
     /**
-     * @see org.apache.ode.bpel.engine.BpelProcess#handleWorkEvent(java.util.Map<java.lang.String,java.lang.Object>)
+     * @see org.apache.ode.bpel.engine.BpelProcess#handleJobDetails(java.util.Map<java.lang.String,java.lang.Object>)
      */
-    public void handleWorkEvent(Map<String, Object> jobData) {
+    public void handleJobDetails(JobDetails jobData) {
         try {
             _hydrationLatch.latch(1);
             markused();
             if (__log.isDebugEnabled()) {
-                __log.debug(ObjectPrinter.stringifyMethodEnter("handleWorkEvent", new Object[] { "jobData", jobData }));
+                __log.debug(ObjectPrinter.stringifyMethodEnter("handleJobDetails", new Object[] { "jobData", jobData }));
             }
 
-            WorkEvent we = new WorkEvent(jobData);
+            JobDetails we = jobData;
 
             // Process level events
-            if (we.getType().equals(WorkEvent.Type.INVOKE_INTERNAL)) {
+            if (we.getType().equals(JobType.INVOKE_INTERNAL)) {
                 if (__log.isDebugEnabled()) {
                     __log.debug("InvokeInternal event for mexid " + we.getMexId());
                 }
@@ -423,10 +425,10 @@ public class BpelProcess {
                 invokeProcess(mex);
             } else {
                 // Instance level events
-                ProcessInstanceDAO procInstance = getProcessDAO().getInstance(we.getIID());
+                ProcessInstanceDAO procInstance = getProcessDAO().getInstance(we.getInstanceId());
                 if (procInstance == null) {
                     if (__log.isDebugEnabled()) {
-                        __log.debug("handleWorkEvent: no ProcessInstance found with iid " + we.getIID() + "; ignoring.");
+                        __log.debug("handleJobDetails: no ProcessInstance found with iid " + we.getInstanceId() + "; ignoring.");
                     }
                     return;
                 }
@@ -435,26 +437,26 @@ public class BpelProcess {
                 switch (we.getType()) {
                     case TIMER:
                         if (__log.isDebugEnabled()) {
-                            __log.debug("handleWorkEvent: TimerWork event for process instance " + processInstance);
+                            __log.debug("handleJobDetails: TimerWork event for process instance " + processInstance);
                         }
                         processInstance.timerEvent(we.getChannel());
                         break;
                     case RESUME:
                         if (__log.isDebugEnabled()) {
-                            __log.debug("handleWorkEvent: ResumeWork event for iid " + we.getIID());
+                            __log.debug("handleJobDetails: ResumeWork event for iid " + we.getInstanceId());
                         }
                         processInstance.execute();
                         break;
                     case INVOKE_RESPONSE:
                         if (__log.isDebugEnabled()) {
-                            __log.debug("InvokeResponse event for iid " + we.getIID());
+                            __log.debug("InvokeResponse event for iid " + we.getInstanceId());
                         }
                         processInstance.invocationResponse(we.getMexId(), we.getChannel());
                         processInstance.execute();
                         break;
                     case MATCHER:
                         if (__log.isDebugEnabled()) {
-                            __log.debug("Matcher event for iid " + we.getIID());
+                            __log.debug("Matcher event for iid " + we.getInstanceId());
                         }
                         if( procInstance.getState() == ProcessState.STATE_COMPLETED_OK 
                                 || procInstance.getState() == ProcessState.STATE_COMPLETED_WITH_FAULT ) {

@@ -129,12 +129,12 @@ public class ReplayerScheduler implements Scheduler {
         return null;
     }
 
-    public String schedulePersistedJob(final Map<String, Object> jobDetail, final Date when1) throws ContextException {
+    public String schedulePersistedJob(final JobDetails jobDetail, final Date when1) throws ContextException {
         final Date when = when1 == null ? currentTaskElement.get().when : when1;
         __log.debug("schedulePersistedJob " + jobDetail + " " + when, new Exception());
         scheduleReplayerJob(new Callable<Void>() {
             public Void call() throws Exception {
-                replayer.handleWorkEvent(jobDetail, when);
+                replayer.handleJobDetails(jobDetail, when);
                 return null;
             }
         }, when, null);
@@ -145,13 +145,13 @@ public class ReplayerScheduler implements Scheduler {
     public void setPolledRunnableProcesser(JobProcessor polledRunnableProcessor) {
     }
 
-    public String scheduleVolatileJob(boolean transacted, Map<String, Object> jobDetail, Date when) throws ContextException {
+    public String scheduleVolatileJob(boolean transacted, JobDetails jobDetail, Date when) throws ContextException {
         // TODO Auto-generated method stub
         __log.debug("scheduleVolatileJob");
         return null;
     }
 
-    public String scheduleVolatileJob(boolean transacted, Map<String, Object> jobDetail) throws ContextException {
+    public String scheduleVolatileJob(boolean transacted, JobDetails jobDetail) throws ContextException {
         // TODO Auto-generated method stub
         __log.debug("scheduleVolatileJob");
         return null;

@@ -22,6 +22,7 @@ package org.apache.ode.scheduler.simple;
 import java.util.Map;
 
 import java.text.SimpleDateFormat;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.utils.GUID;
 
 /**
@@ -34,14 +35,14 @@ class Job extends Task {
 
     String jobId;
     boolean transacted;
-    Map<String,Object> detail;
+    JobDetails detail;
     boolean persisted = true;
 
-    public Job(long when, boolean transacted, Map<String, Object> jobDetail) {
+    public Job(long when, boolean transacted, JobDetails jobDetail) {
         this(when, new GUID().toString(),transacted,jobDetail);
     }
-    
-    public Job(long when, String jobId, boolean transacted,Map<String, Object> jobDetail) {
+
+    public Job(long when, String jobId, boolean transacted, JobDetails jobDetail) {
         super(when);
         this.jobId = jobId;
         this.detail = jobDetail;

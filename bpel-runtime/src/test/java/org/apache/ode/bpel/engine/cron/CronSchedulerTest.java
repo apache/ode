@@ -17,6 +17,7 @@ import org.apache.ode.bpel.engine.cron.RuntimeDataCleanupRunnable;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.iapi.ProcessConf.CleanupInfo;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.daohib.bpel.BpelDAOConnectionImpl;
 import org.apache.ode.utils.CronExpression;
 import org.jmock.Mock;
@@ -71,14 +72,14 @@ public class CronSchedulerTest extends MockObjectTestCase {
         CronExpression cronExpr = new CronExpression("* * * * * ?");
         RuntimeDataCleanupRunnable runnable = new RuntimeDataCleanupRunnable();
         
-        Map<String, Object> details = new HashMap<String, Object>();
-        details.put("pid", new QName("test"));
-        details.put("transactionSize", 10);
+        JobDetails details = new JobDetails();
+        details.setProcessId(new QName("test"));
+        details.getDetailsExt().put("transactionSize", 10);
         CleanupInfo cleanupInfo = new CleanupInfo();
         cleanupInfo.getFilters().add("a=b");
         cleanupInfo.getCategories().add(CLEANUP_CATEGORY.CORRELATIONS);
-        details.put("cleanupInfo", cleanupInfo);
-        runnable.restoreFromDetailsMap(details);
+        details.getDetailsExt().put("cleanupInfo", cleanupInfo);
+        runnable.restoreFromDetails(details);
         runnable.setContexts(contexts);
         
         NotifyingTerminationListener listener = new NotifyingTerminationListener();

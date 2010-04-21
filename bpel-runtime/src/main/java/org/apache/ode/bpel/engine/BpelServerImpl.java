@@ -619,7 +619,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 }
                 if( statusOfPriorTry == JOB_STATUS.COMPLETED ) {
                     resultsByJobId.remove(jobInfo.jobName);
-                    jobInfo.jobDetail.put("runnable_status", JOB_STATUS.COMPLETED);
+                    jobInfo.jobDetail.getDetailsExt().put("runnable_status", JOB_STATUS.COMPLETED);
                     return;
                 }
                 if( statusOfPriorTry == JOB_STATUS.PENDING || statusOfPriorTry == JOB_STATUS.FAILED ) {
@@ -633,8 +633,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 _polledRunnableExec.submit(new Runnable() {
                     public void run() {
                         try {
-                            MapSerializableRunnable runnable = (MapSerializableRunnable)jobInfo.jobDetail.get("runnable");
-                            runnable.restoreFromDetailsMap(jobInfo.jobDetail);
+                            MapSerializableRunnable runnable = (MapSerializableRunnable)jobInfo.jobDetail.getDetailsExt().get("runnable");
+                            runnable.restoreFromDetails(jobInfo.jobDetail);
                             if( runnable instanceof ContextsAware ) {
                                 ((ContextsAware)runnable).setContexts(_contexts);
                             }
@@ -653,7 +653,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 });
             }
             
-            jobInfo.jobDetail.put("runnable_status", JOB_STATUS.IN_PROGRESS);
+            jobInfo.jobDetail.getDetailsExt().put("runnable_status", JOB_STATUS.IN_PROGRESS);
             if( exceptionThrownOnPriorTry != null ) {
                 throw new Scheduler.JobProcessorException(exceptionThrownOnPriorTry, true);
             }

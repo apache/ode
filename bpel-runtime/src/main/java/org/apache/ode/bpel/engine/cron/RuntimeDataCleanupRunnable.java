@@ -1,5 +1,6 @@
 package org.apache.ode.bpel.engine.cron;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -15,6 +16,7 @@ import org.apache.ode.bpel.engine.Contexts;
 import org.apache.ode.bpel.engine.BpelServerImpl.ContextsAware;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.iapi.ProcessConf.CleanupInfo;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.MapSerializableRunnable;
 
 public class RuntimeDataCleanupRunnable implements MapSerializableRunnable, ContextsAware {
@@ -33,14 +35,14 @@ public class RuntimeDataCleanupRunnable implements MapSerializableRunnable, Cont
     }
     
     @SuppressWarnings("unchecked")
-    public void restoreFromDetailsMap(Map<String, Object> details) {
-        _cleanupInfo = (CleanupInfo)details.get("cleanupInfo");
-        _transactionSize = (Integer)details.get("transactionSize");
-        _pid = (QName)details.get("pid");
-        _pidsToExclude = (Set<QName>)details.get("pidsToExclude");
+    public void restoreFromDetails(JobDetails details) {
+        _cleanupInfo = (CleanupInfo)details.getDetailsExt().get("cleanupInfo");
+        _transactionSize = (Integer)details.getDetailsExt().get("transactionSize");
+        _pid = (QName) details.getDetailsExt().get("pid");
+        _pidsToExclude = (Set<QName>)details.getDetailsExt().get("pidsToExclude");
     }
 
-    public void storeToDetailsMap(Map<String, Object> details) {
+    public void storeToDetails(JobDetails details) {
         // we don't serialize
     }
 

@@ -52,7 +52,9 @@ import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
+import org.apache.ode.bpel.iapi.Scheduler.JobType;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.intercept.ProcessCountThrottler;
@@ -372,18 +374,18 @@ public class BpelEngineImpl implements BpelEngine {
     }
 
     public void onScheduledJob(Scheduler.JobInfo jobInfo) throws Scheduler.JobProcessorException {
-        final WorkEvent we = new WorkEvent(jobInfo.jobDetail);
+        final JobDetails we = jobInfo.jobDetail;
 
-        if( __log.isTraceEnabled() ) __log.trace("[JOB] onScheduledJob " + jobInfo + "" + we.getIID());
+        if( __log.isTraceEnabled() ) __log.trace("[JOB] onScheduledJob " + jobInfo + "" + we.getInstanceId());
         
         // We lock the instance to prevent concurrent transactions and prevent unnecessary rollbacks,
         // Note that we don't want to wait too long here to get our lock, since we are likely holding
         // on to scheduler's locks of various sorts.
         try {
-            _instanceLockManager.lock(we.getIID(), 1, TimeUnit.MICROSECONDS);
+            _instanceLockManager.lock(we.getInstanceId(), 1, TimeUnit.MICROSECONDS);
             _contexts.scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
                 public void afterCompletion(boolean success) {
-                    _instanceLockManager.unlock(we.getIID());
+                    _instanceLockManager.unlock(we.getInstanceId());
                 }
                 public void beforeCompletion() { }
             });
@@ -392,7 +394,7 @@ public class BpelEngineImpl implements BpelEngine {
             __log.debug("Thread interrupted, job will be rescheduled: " + jobInfo);
             throw new Scheduler.JobProcessorException(true);
         } catch (org.apache.ode.bpel.engine.InstanceLockManager.TimeoutException e) {
-            __log.debug("Instance " + we.getIID() + " is busy, rescheduling job.");
+            __log.debug("Instance " + we.getInstanceId() + " is busy, rescheduling job.");
             throw new Scheduler.JobProcessorException(true);
         }
         // DONT PUT CODE HERE-need this method real tight in a try/catch block, we need to handle
@@ -405,11 +407,11 @@ public class BpelEngineImpl implements BpelEngine {
                 process = _activeProcesses.get(we.getProcessId());
             } else {
                 ProcessInstanceDAO instance;
-                if (we.isInMem()) instance = _contexts.inMemDao.getConnection().getInstance(we.getIID());
-                else instance = _contexts.dao.getConnection().getInstance(we.getIID());
+                if (we.getInMem()) instance = _contexts.inMemDao.getConnection().getInstance(we.getInstanceId());
+                else instance = _contexts.dao.getConnection().getInstance(we.getInstanceId());
 
                 if (instance == null) {
-                    __log.debug(__msgs.msgScheduledJobReferencesUnknownInstance(we.getIID()));
+                    __log.debug(__msgs.msgScheduledJobReferencesUnknownInstance(we.getInstanceId()));
                     // nothing we can do, this instance is not in the database, it will always fail, not 
                     // exactly an error since can occur in normal course of events.
                     return;
@@ -427,13 +429,13 @@ public class BpelEngineImpl implements BpelEngine {
             ClassLoader cl = Thread.currentThread().getContextClassLoader();
             try {
                 Thread.currentThread().setContextClassLoader(process._classLoader);            
-                if (we.getType().equals(WorkEvent.Type.INVOKE_CHECK)) {
-                    if (__log.isDebugEnabled()) __log.debug("handleWorkEvent: InvokeCheck event for mexid " + we.getMexId());
+                if (we.getType().equals(JobType.INVOKE_CHECK)) {
+                    if (__log.isDebugEnabled()) __log.debug("handleJobDetails: InvokeCheck event for mexid " + we.getMexId());
                
                     sendPartnerRoleFailure(we, MessageExchange.FailureType.COMMUNICATION_ERROR);
                     return;
-                } else if (we.getType().equals(WorkEvent.Type.INVOKE_INTERNAL)) {
-                    if (__log.isDebugEnabled()) __log.debug("handleWorkEvent: InvokeInternal event for mexid " + we.getMexId());
+                } else if (we.getType().equals(JobType.INVOKE_INTERNAL)) {
+                    if (__log.isDebugEnabled()) __log.debug("handleJobDetails: InvokeInternal event for mexid " + we.getMexId());
 
                     setMessageExchangeProcess(we.getMexId(), process.getProcessDAO());
                     MyRoleMessageExchangeImpl mex = (MyRoleMessageExchangeImpl) getMessageExchange(we.getMexId());
@@ -450,33 +452,33 @@ public class BpelEngineImpl implements BpelEngine {
                         }
                     }
                 }
-                process.handleWorkEvent(jobInfo.jobDetail);
+                process.handleJobDetails(jobInfo.jobDetail);
                 debuggingDelay();
             } finally {
                 Thread.currentThread().setContextClassLoader(cl);
             }
         } catch (BpelEngineException bee) {
-            __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), bee);
+            __log.error(__msgs.msgScheduledJobFailed(we), bee);
             throw new Scheduler.JobProcessorException(bee, checkRetry(we));
         } catch (ContextException ce) {
-            __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), ce);
+            __log.error(__msgs.msgScheduledJobFailed(we), ce);
             throw new Scheduler.JobProcessorException(ce, checkRetry(we));
         } catch (InvalidProcessException ipe) {
-            __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), ipe);
+            __log.error(__msgs.msgScheduledJobFailed(we), ipe);
             sendMyRoleFault(process, we, ipe.getCauseCode());
         } catch (RuntimeException rte) {
-            __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), rte);
+            __log.error(__msgs.msgScheduledJobFailed(we), rte);
             throw new Scheduler.JobProcessorException(rte, checkRetry(we));
         } catch (Throwable t) {
-            __log.error(__msgs.msgScheduledJobFailed(we.getDetail()), t);
+            __log.error(__msgs.msgScheduledJobFailed(we), t);
             throw new Scheduler.JobProcessorException(t, checkRetry(we));
         }
     }
 
-    private boolean checkRetry(WorkEvent we) {
+    private boolean checkRetry(JobDetails we) {
         // Only retry if the job is NOT in memory. Not that this does not guaranty that a retry will be scheduled.
         // Actually events are not retried if not persisted and the scheduler might choose to discard the event if it has been retried too many times.
-        return !we.isInMem();
+        return !we.getInMem();
     }
 
     /**
@@ -684,7 +686,7 @@ public class BpelEngineImpl implements BpelEngine {
         return false;
     }
 
-    public void sendMyRoleFault(BpelProcess process, WorkEvent we, int causeCode) {
+    public void sendMyRoleFault(BpelProcess process, JobDetails we, int causeCode) {
         MessageExchange mex = (MessageExchange) getMessageExchange(we.getMexId());
         if (!(mex instanceof MyRoleMessageExchange)) {
             return;
@@ -717,7 +719,7 @@ public class BpelEngineImpl implements BpelEngine {
                             && activeProcess.getConf().getType().equals(process.getConf().getType())) {
                         we.setProcessId(activeProcess._pid);
                         ((MyRoleMessageExchangeImpl) mex)._process = activeProcess;
-                        process.handleWorkEvent(we.getDetail());
+                        process.handleJobDetails(we);
                         return;
                     }
                 }
@@ -733,7 +735,7 @@ public class BpelEngineImpl implements BpelEngine {
         }
     }
     
-    private void sendPartnerRoleFailure(WorkEvent we, FailureType failureType) {
+    private void sendPartnerRoleFailure(JobDetails we, FailureType failureType) {
         MessageExchange mex = (MessageExchange) getMessageExchange(we.getMexId());
         if (mex instanceof PartnerRoleMessageExchange) {
             if (mex.getStatus() == MessageExchange.Status.ASYNC || mex.getStatus() == MessageExchange.Status.REQUEST) {

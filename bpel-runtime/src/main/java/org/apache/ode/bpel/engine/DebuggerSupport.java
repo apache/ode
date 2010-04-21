@@ -21,6 +21,8 @@ package org.apache.ode.bpel.engine;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.DebuggerContext;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
+import org.apache.ode.bpel.iapi.Scheduler.JobType;
 import org.apache.ode.bpel.bdi.breaks.Breakpoint;
 import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
@@ -173,10 +175,10 @@ public class DebuggerSupport implements DebuggerContext {
                         __log.debug("step(" + iid + ") adding step indicator to table.");
                         _step.add(iid);
 
-                        WorkEvent we = new WorkEvent();
-                        we.setIID(iid);
-                        we.setType(WorkEvent.Type.RESUME);
-                        _process._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+                        JobDetails we = new JobDetails();
+                        we.setInstanceId(iid);
+                        we.setType(JobType.RESUME);
+                        _process._engine._contexts.scheduler.schedulePersistedJob(we, null);
 
                         return true;
                     }
@@ -297,10 +299,10 @@ public class DebuggerSupport implements DebuggerContext {
                         _process.saveEvent(evt, instance);
                         onEvent(evt);
 
-                        WorkEvent we = new WorkEvent();
-                        we.setType(WorkEvent.Type.RESUME);
-                        we.setIID(iid);
-                        _process._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+                        JobDetails we = new JobDetails();
+                        we.setType(JobType.RESUME);
+                        we.setInstanceId(iid);
+                        _process._engine._contexts.scheduler.schedulePersistedJob(we, null);
 
 
                         return true;

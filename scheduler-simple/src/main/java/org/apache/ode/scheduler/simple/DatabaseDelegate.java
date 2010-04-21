@@ -38,7 +38,7 @@ public interface DatabaseDelegate {
     boolean insertJob(Job job, String nodeId, boolean loaded) throws DatabaseException ;
 
     /**
-     * Update the job in the database (only updates timestamp and details)
+     * Update the job in the database (only updates timestamp and retryCount)
      *
      * @param job the job
      * @throws DatabaseException in case of error

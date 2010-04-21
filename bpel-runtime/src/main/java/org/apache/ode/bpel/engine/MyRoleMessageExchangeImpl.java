@@ -40,6 +40,8 @@ import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
+import org.apache.ode.bpel.iapi.Scheduler.JobType;
 import org.apache.ode.bpel.intercept.AbortMessageExchangeException;
 import org.apache.ode.bpel.intercept.FaultMessageExchangeException;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
@@ -132,8 +134,8 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
             return null;
         } else {
             // Schedule a new job for invocation
-            WorkEvent we = new WorkEvent();
-            we.setType(WorkEvent.Type.INVOKE_INTERNAL);
+            JobDetails we = new JobDetails();
+            we.setType(JobType.INVOKE_INTERNAL);
             we.setInMem(target.isInMemory());
             we.setProcessId(target.getPID());
             we.setMexId(getDAO().getMessageExchangeId());
@@ -147,11 +149,11 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
             Replayer replayer = Replayer.replayer.get();
             if (replayer == null) {
                 if (target.isInMemory())
-                    _engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
+                    _engine._contexts.scheduler.scheduleVolatileJob(true, we);
                 else
-                    _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+                    _engine._contexts.scheduler.schedulePersistedJob(we, null);
             } else {
-                replayer.scheduler.schedulePersistedJob(we.getDetail(), null);
+                replayer.scheduler.schedulePersistedJob(we, null);
             }
             return new ResponseFuture(getClientId());
         }

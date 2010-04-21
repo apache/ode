@@ -22,13 +22,14 @@ package org.apache.ode.bpel.engine;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.engine.WorkEvent.Type;
 import org.apache.ode.bpel.engine.replayer.Replayer;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
+import org.apache.ode.bpel.iapi.Scheduler.JobType;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 
@@ -132,20 +133,20 @@ public class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implemen
         if (LOG.isDebugEnabled()) {
             LOG.debug("create work event for mex=" + getMessageExchangeId());
         }
-        WorkEvent we = new WorkEvent();
-        we.setIID(getDAO().getInstance().getInstanceId());
-        we.setType(Type.INVOKE_RESPONSE);
+        JobDetails we = new JobDetails();
+        we.setInstanceId(getDAO().getInstance().getInstanceId());
+        we.setType(JobType.INVOKE_RESPONSE);
         we.setInMem(_engine._activeProcesses.get(getDAO().getProcess().getProcessId()).isInMemory());
         we.setChannel(getDAO().getChannel());
         we.setMexId(getDAO().getMessageExchangeId());
         Replayer replayer = Replayer.replayer.get();
         if (replayer == null) {
-            if (we.isInMem())
-                _engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
+            if (we.getInMem())
+                _engine._contexts.scheduler.scheduleVolatileJob(true, we);
             else
-                _engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+                _engine._contexts.scheduler.schedulePersistedJob(we, null);
         } else {
-            replayer.scheduler.schedulePersistedJob(we.getDetail(), null);
+            replayer.scheduler.schedulePersistedJob(we, null);
         }
     }
 

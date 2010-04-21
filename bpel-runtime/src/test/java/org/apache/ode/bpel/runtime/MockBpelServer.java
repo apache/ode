@@ -342,10 +342,10 @@ class MockBpelServer {
             _scheduler.setJobProcessor(server);
         }
 
-        public String schedulePersistedJob(Map<String,Object>jobDetail,Date when) throws ContextException {
+        public String schedulePersistedJob(JobDetails jobDetail,Date when) throws ContextException {
             String jobId = _scheduler.schedulePersistedJob(jobDetail, when);
             // Invocation checks get scheduled much later, we don't want (or need) to wait for them
-            if (!"INVOKE_CHECK".equals(jobDetail.get("type")))
+            if (jobDetail.getType() != JobType.INVOKE_CHECK)
                 _nextSchedule = when == null ?  System.currentTimeMillis() : when.getTime();
             return jobId;
         }
@@ -355,11 +355,11 @@ class MockBpelServer {
             return new GUID().toString();
         }
 
-        public String scheduleVolatileJob(boolean transacted, Map<String,Object> jobDetail) throws ContextException {
+        public String scheduleVolatileJob(boolean transacted, JobDetails jobDetail) throws ContextException {
             return scheduleVolatileJob(transacted, jobDetail, null);
         }
 
-        public String scheduleVolatileJob(boolean transacted, Map<String, Object> jobDetail, Date when) throws ContextException {
+        public String scheduleVolatileJob(boolean transacted, JobDetails jobDetail, Date when) throws ContextException {
             String jobId = _scheduler.scheduleVolatileJob(transacted, jobDetail, when);
             _nextSchedule = System.currentTimeMillis();
             return jobId;

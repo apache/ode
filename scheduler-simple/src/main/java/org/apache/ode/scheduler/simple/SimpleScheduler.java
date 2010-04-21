@@ -33,12 +33,15 @@ import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
+import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.log4j.helpers.AbsoluteTimeDateFormat;
+import org.apache.ode.bpel.iapi.Scheduler.JobType;
 
 /**
  * A reliable and relatively simple scheduler that uses a database to persist information about
@@ -340,7 +343,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         }
     }
 
-    public String schedulePersistedJob(final Map<String, Object> jobDetail, Date when) throws ContextException {
+    public String schedulePersistedJob(final JobDetails jobDetail, Date when) throws ContextException {
         long ctime = System.currentTimeMillis();
         if (when == null)
             when = new Date(ctime);
@@ -356,10 +359,10 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         if (when == null)
             when = new Date(ctime);
 
-        Map<String, Object> jobDetails = new HashMap<String, Object>();
-        jobDetails.put("runnable", runnable);
-        runnable.storeToDetailsMap(jobDetails);
-
+        JobDetails jobDetails = new JobDetails();
+        jobDetails.getDetailsExt().put("runnable", runnable);
+        runnable.storeToDetails(jobDetails);
+        
         if (__log.isDebugEnabled())
             __log.debug("scheduling " + jobDetails + " for " + when);
 
@@ -396,11 +399,11 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         return job.jobId;
     }
 
-    public String scheduleVolatileJob(boolean transacted, Map<String, Object> jobDetail) throws ContextException {
+    public String scheduleVolatileJob(boolean transacted, JobDetails jobDetail) throws ContextException {
         return scheduleVolatileJob(transacted, jobDetail, null);
     }
 
-    public String scheduleVolatileJob(boolean transacted, Map<String, Object> jobDetail, Date when) throws ContextException {
+    public String scheduleVolatileJob(boolean transacted, JobDetails jobDetail, Date when) throws ContextException {
         long ctime = System.currentTimeMillis();
         if (when == null)
             when = new Date(ctime);
@@ -502,7 +505,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         public Void call() throws Exception {
             try {
                 final Scheduler.JobInfo jobInfo = new Scheduler.JobInfo(job.jobId, job.detail,
-                        (Integer) (job.detail.get("retry") != null ? job.detail.get("retry") : 0));
+                        job.detail.getRetryCount());
                 if (job.transacted) {
                     final boolean[] needRetry = new boolean[]{true};
                     try {
@@ -514,7 +517,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
                                 try {
                                     processor.onScheduledJob(jobInfo);
                                     // If the job is a "runnable" job, schedule the next job occurence
-                                    if (job.detail.get("runnable") != null && !"COMPLETED".equals(String.valueOf(jobInfo.jobDetail.get("runnable_status")))) {
+                                    if (job.detail.getDetailsExt().get("runnable") != null && !"COMPLETED".equals(String.valueOf(jobInfo.jobDetail.getDetailsExt().get("runnable_status")))) {
                                         // the runnable is still in progress, schedule checker to 10 mins later
                                         if (_pollIntervalForPolledRunnable < 0) {
                                             if (__log.isWarnEnabled())
@@ -547,9 +550,9 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
                             execTransaction(new Callable<Void>() {
                                 public Void call() throws Exception {
                                     if (needRetry[0]) {
-                                        int retry = job.detail.get("retry") != null ? (((Integer) job.detail.get("retry")) + 1) : 0;
+                                        int retry = job.detail.getRetryCount() + 1;
                                         if (retry <= 10) {
-                                            job.detail.put("retry", retry);
+                                            job.detail.setRetryCount(retry);
                                             long delay = (long)(Math.pow(5, retry));
                                             job.schedDate = System.currentTimeMillis() + delay*1000;
                                             _db.updateJob(job);
@@ -643,7 +646,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     public void runTask(final Task task) {
         if (task instanceof Job) {
             Job job = (Job)task;
-            if( job.detail.get("runnable") != null ) {
+            if( job.detail.getDetailsExt().get("runnable") != null ) {
                 runPolledRunnable(job);
             } else {
                 runJob(job);
@@ -811,8 +814,16 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         } finally {
             __log.debug("node recovery complete");
         }
-
     }
+
+//    private long doRetry(Job job) throws DatabaseException {
+//        int retry = job.detail.getRetryCount() + 1;
+//        job.detail.setRetryCount(retry);
+//        long delay = (long)(Math.pow(5, retry - 1));
+//        Job jobRetry = new Job(System.currentTimeMillis() + delay*1000, true, job.detail);
+//        _db.insertJob(jobRetry, _nodeId, false);
+//        return delay;
+//    }
 
     private abstract class SchedulerTask extends Task implements Runnable {
         SchedulerTask(long schedDate) {

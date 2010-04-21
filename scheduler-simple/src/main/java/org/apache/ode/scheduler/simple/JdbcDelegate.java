@@ -27,11 +27,18 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
+import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
+import org.apache.ode.utils.DbIsolation;                                                                                                                                 
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,7 +59,7 @@ public class JdbcDelegate implements DatabaseDelegate {
 
     private static final String UPDATE_REASSIGN = "update ODE_JOB set nodeid = ?, scheduled = 0 where nodeid = ?";
 
-    private static final String UPDATE_JOB = "update ODE_JOB set ts = ?, details = ? where jobid = ?";
+    private static final String UPDATE_JOB = "update ODE_JOB set ts = ?, retryCount = ? where jobid = ?";
 
     private static final String UPGRADE_JOB_DEFAULT = "update ODE_JOB set nodeid = ? where nodeid is null "
             + "and mod(ts,?) = ? and ts < ?";
@@ -70,12 +77,60 @@ public class JdbcDelegate implements DatabaseDelegate {
             + "and -1 <> ? and -1 <> ? and ts < ?";
     
     private static final String SAVE_JOB = "insert into ODE_JOB "
-            + " (jobid, nodeid, ts, scheduled, transacted, details) values(?, ?, ?, ?, ?, ?)";
+            + " (jobid, nodeid, ts, scheduled, transacted, "
+            + "instanceId,"
+            + "mexId,"
+            + "processId,"
+            + "type,"
+            + "channel,"
+            + "correlatorId,"
+            + "correlationKeySet,"
+            + "retryCount,"
+            + "inMem,"
+            + "detailsExt"
+            + ") values(?, ?, ?, ?, ?,"
+            + "?,"
+            + "?,"
+            + "?,"
+            + "?,"
+            + "?,"
+            + "?,"
+            + "?,"
+            + "?,"
+            + "?,"
+            + "?"
+            + ")";
 
     private static final String GET_NODEIDS = "select distinct nodeid from ODE_JOB";
 
-    private static final String SCHEDULE_IMMEDIATE = "select jobid, ts, transacted, scheduled, details from ODE_JOB "
-            + "where nodeid = ? and ts < ? order by ts";
+    private static final String SCHEDULE_IMMEDIATE = "select jobid, ts, transacted, scheduled, "
+        + "instanceId,"
+        + "mexId,"
+        + "processId,"
+        + "type,"
+        + "channel,"
+        + "correlatorId,"
+        + "correlationKeySet,"
+        + "retryCount,"
+        + "inMem,"
+        + "detailsExt"
+        + " from ODE_JOB "
+            + "where nodeid = ? and scheduled = 0 and ts < ? order by ts";
+
+//  public Long instanceId;
+//  public String mexId;
+//  public String processId;
+//  public String type;
+//  public String channel;
+//  public String correlatorId;
+//  public String correlationKeySet;
+//  public Integer retryCount;
+//  public Boolean inMem;
+//  public Map<String, Object> detailsExt = new HashMap<String, Object>();    
+    
+    private static final String UPDATE_SCHEDULED = "update ODE_JOB set scheduled = 1 where jobid in (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+    private static final int UPDATE_SCHEDULED_SLOTS = 10;
 
     private DataSource _ds;
 
@@ -137,21 +192,39 @@ public class JdbcDelegate implements DatabaseDelegate {
         Connection con = null;
         PreparedStatement ps = null;
         try {
+            int i = 1;
             con = getConnection();
             ps = con.prepareStatement(SAVE_JOB);
-            ps.setString(1, job.jobId);
-            ps.setString(2, nodeId);
-            ps.setLong(3, job.schedDate);
-            ps.setInt(4, asInteger(loaded));
-            ps.setInt(5, asInteger(job.transacted));
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            try {
-                StreamUtils.write(bos, (Serializable) job.detail);
-            } catch (Exception ex) {
-                __log.error("Error serializing job detail: " + job.detail);
-                throw new DatabaseException(ex);
+            ps.setString(i++, job.jobId);
+            ps.setString(i++, nodeId);
+            ps.setLong(i++, job.schedDate);
+            ps.setInt(i++, asInteger(loaded));
+            ps.setInt(i++, asInteger(job.transacted));
+            
+            JobDetails details = job.detail;
+            ps.setObject(i++, details.instanceId, Types.BIGINT);
+            ps.setObject(i++, details.mexId, Types.VARCHAR);
+            ps.setObject(i++, details.processId, Types.VARCHAR);
+            ps.setObject(i++, details.type, Types.VARCHAR);
+            ps.setObject(i++, details.channel, Types.VARCHAR);
+            ps.setObject(i++, details.correlatorId, Types.VARCHAR);
+            ps.setObject(i++, details.correlationKeySet, Types.VARCHAR);
+            ps.setObject(i++, details.retryCount, Types.INTEGER);
+            ps.setObject(i++, details.inMem, Types.INTEGER);
+            
+            if (details.detailsExt == null || details.detailsExt.size() == 0) {
+                ps.setObject(i++, null, Types.BLOB);
+            } else {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                try {
+                    StreamUtils.write(bos, (Serializable) details.detailsExt);
+                } catch (Exception ex) {
+                    __log.error("Error serializing job detail: " + job.detail);
+                    throw new DatabaseException(ex);
+                }
+                ps.setBytes(i++, bos.toByteArray());
             }
-            ps.setBytes(6, bos.toByteArray());
+            
             return ps.executeUpdate() == 1;
         } catch (SQLException se) {
             throw new DatabaseException(se);
@@ -163,7 +236,7 @@ public class JdbcDelegate implements DatabaseDelegate {
 
     public boolean updateJob(Job job) throws DatabaseException {
         if (__log.isDebugEnabled())
-            __log.debug("updateJob " + job.jobId + " details=" + job);
+            __log.debug("updateJob " + job.jobId + " retryCount=" + job.detail.getRetryCount());
 
         Connection con = null;
         PreparedStatement ps = null;
@@ -171,14 +244,7 @@ public class JdbcDelegate implements DatabaseDelegate {
             con = getConnection();
             ps = con.prepareStatement(UPDATE_JOB);
             ps.setLong(1, job.schedDate);
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            try {
-                StreamUtils.write(bos, (Serializable) job.detail);
-            } catch (Exception ex) {
-                __log.error("Error serializing job detail: " + job.detail);
-                throw new DatabaseException(ex);
-            }
-            ps.setBytes(2, bos.toByteArray());
+            ps.setInt(2, job.detail.getRetryCount());
             ps.setString(3, job.jobId);
             return ps.executeUpdate() == 1;
         } catch (SQLException se) {
@@ -200,16 +266,64 @@ public class JdbcDelegate implements DatabaseDelegate {
             ps.setString(1, nodeId);
             ps.setLong(2, maxtime);
             ps.setMaxRows(maxjobs);
+            
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                Map<String, Object> details;
-                try {
-                    ObjectInputStream is = new ObjectInputStream(rs.getBinaryStream(5));
-                    details = (Map<String, Object>) is.readObject();
-                    is.close();
-                } catch (Exception e) {
-                    throw new DatabaseException("Error deserializing job details", e);
+                Scheduler.JobDetails details = new Scheduler.JobDetails();
+                details.instanceId = (Long) rs.getObject("instanceId");
+                details.mexId = (String) rs.getObject("mexId");
+                details.processId = (String) rs.getObject("processId");
+                details.type = (String) rs.getObject("type");
+                details.channel = (String) rs.getObject("channel");
+                details.correlatorId = (String) rs.getObject("correlatorId");
+                details.correlationKeySet = (String) rs.getObject("correlationKeySet");
+                details.retryCount = (Integer) rs.getObject("retryCount");
+                details.inMem = (Boolean) rs.getObject("inMem");
+                if (rs.getObject("detailsExt") != null) {
+                    try {
+                        ObjectInputStream is = new ObjectInputStream(rs.getBinaryStream("detailsExt"));
+                        details.detailsExt = (Map<String, Object>) is.readObject();
+                        is.close();
+                    } catch (Exception e) {
+                        throw new DatabaseException("Error deserializing job detailsExt", e);
+                    }
                 }
+                
+                {
+                    //For compatibility reasons, we check whether there are entries inside
+                    //jobDetailsExt blob, which correspond to extracted entries. If so, we
+                    //use them.
+
+                    Map<String, Object> detailsExt = details.getDetailsExt();
+                    if (detailsExt.get("type") != null) {
+                        details.type = (String) detailsExt.get("type");
+                    }
+                    if (detailsExt.get("iid") != null) {
+                        details.instanceId = (Long) detailsExt.get("iid");
+                    }
+                    if (detailsExt.get("pid") != null) {
+                        details.processId = (String) detailsExt.get("pid");
+                    }
+                    if (detailsExt.get("inmem") != null) {
+                        details.inMem = (Boolean) detailsExt.get("inmem");
+                    }
+                    if (detailsExt.get("ckey") != null) {
+                        details.correlationKeySet = (String) detailsExt.get("ckey");
+                    }
+                    if (detailsExt.get("channel") != null) {
+                        details.channel = (String) detailsExt.get("channel");
+                    }
+                    if (detailsExt.get("mexid") != null) {
+                        details.mexId = (String) detailsExt.get("mexid");
+                    }
+                    if (detailsExt.get("correlatorId") != null) {
+                        details.correlatorId = (String) detailsExt.get("correlatorId");
+                    }
+                    if (detailsExt.get("retryCount") != null) {
+                        details.retryCount = Integer.parseInt((String) detailsExt.get("retryCount"));
+                    }
+                }
+                
                 Job job = new Job(rs.getLong(2), rs.getString(1), asBoolean(rs.getInt(3)), details);
                 ret.add(job);
             }

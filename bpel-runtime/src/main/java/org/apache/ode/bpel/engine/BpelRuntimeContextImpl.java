@@ -76,6 +76,8 @@ import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.iapi.ProcessConf.PartnerRoleConfig;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
+import org.apache.ode.bpel.iapi.Scheduler.JobType;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
 import org.apache.ode.bpel.o.OFailureHandling;
@@ -702,29 +704,29 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     public void registerTimer(TimerResponseChannel timerChannel, Date timeToFire) {
-        WorkEvent we = new WorkEvent();
-        we.setIID(_dao.getInstanceId());
+        JobDetails we = new JobDetails();
+        we.setInstanceId(_dao.getInstanceId());
         we.setChannel(timerChannel.export());
-        we.setType(WorkEvent.Type.TIMER);
+        we.setType(JobType.TIMER);
         we.setInMem(_bpelProcess.isInMemory());
         if(_bpelProcess.isInMemory()){
-            _bpelProcess._engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail(), timeToFire);
+            _bpelProcess._engine._contexts.scheduler.scheduleVolatileJob(true, we, timeToFire);
         }else{
-            _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), timeToFire);
+            _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we, timeToFire);
         }
     }
 
     private void scheduleCorrelatorMatcher(String correlatorId, CorrelationKeySet keySet) {
-        WorkEvent we = new WorkEvent();
-        we.setIID(_dao.getInstanceId());
-        we.setType(WorkEvent.Type.MATCHER);
+        JobDetails we = new JobDetails();
+        we.setInstanceId(_dao.getInstanceId());
+        we.setType(JobType.MATCHER);
         we.setCorrelatorId(correlatorId);
         we.setCorrelationKeySet(keySet);
         we.setInMem(_bpelProcess.isInMemory());
         if(_bpelProcess.isInMemory()){
-            _bpelProcess._engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
+            _bpelProcess._engine._contexts.scheduler.scheduleVolatileJob(true, we);
         }else{
-            _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), null);
+            _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we, null);
         }
     }
 
@@ -915,16 +917,16 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         boolean isTwoWay = mex.getMessageExchangePattern() ==
                 org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern.REQUEST_RESPONSE;
         if (!_bpelProcess.isInMemory() && isTwoWay) {
-            WorkEvent event = new WorkEvent();
+            JobDetails event = new JobDetails();
             event.setMexId(mex.getMessageExchangeId());
             event.setProcessId(_bpelProcess.getPID());
             event.setInMem(false);
-            event.setType(WorkEvent.Type.INVOKE_CHECK);
+            event.setType(JobType.INVOKE_CHECK);
             // use a greater timeout to make sure the check job does not get executed while the service invocation is still waiting for a response
             long timeout = getBpelProcess().getTimeout(partnerLink, p2p);
             if (__log.isDebugEnabled()) __log.debug("Creating invocation check event in "+timeout+"ms for mexid " + mex.getMessageExchangeId());
             Date future = new Date(System.currentTimeMillis() + timeout);
-            String jobId = _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(event.getDetail(), future);
+            String jobId = _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(event, future);
             mex.setProperty("invokeCheckJobId", jobId);
         }
     }
@@ -981,14 +983,14 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 if (__log.isDebugEnabled())
                     __log.debug("MaxTime exceeded for instance # " + _iid);
                 try {
-                    WorkEvent we = new WorkEvent();
-                    we.setIID(_iid);
-                    we.setType(WorkEvent.Type.RESUME);
+                    JobDetails we = new JobDetails();
+                    we.setInstanceId(_iid);
+                    we.setType(JobType.RESUME);
                     we.setInMem(_bpelProcess.isInMemory());
                     if (_bpelProcess.isInMemory())
-                        _bpelProcess._engine._contexts.scheduler.scheduleVolatileJob(true, we.getDetail());
+                        _bpelProcess._engine._contexts.scheduler.scheduleVolatileJob(true, we);
                     else
-                        _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we.getDetail(), new Date());
+                        _bpelProcess._engine._contexts.scheduler.schedulePersistedJob(we, new Date());
                 } catch (ContextException e) {
                     __log.error("Failed to schedule resume task.", e);
                     throw new BpelEngineException(e);

@@ -40,13 +40,14 @@ import org.apache.ode.bpel.engine.BpelEngineImpl;
 import org.apache.ode.bpel.engine.BpelProcess;
 import org.apache.ode.bpel.engine.MyRoleMessageExchangeImpl;
 import org.apache.ode.bpel.engine.PartnerLinkMyRoleImpl;
-import org.apache.ode.bpel.engine.WorkEvent;
 import org.apache.ode.bpel.engine.PartnerLinkMyRoleImpl.RoutingInfo;
 import org.apache.ode.bpel.evt.CorrelationMatchEvent;
 import org.apache.ode.bpel.iapi.BpelEngine;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
+import org.apache.ode.bpel.iapi.Scheduler.JobType;
 import org.apache.ode.bpel.pmapi.CommunicationType;
 import org.apache.ode.bpel.pmapi.ExchangeType;
 import org.apache.ode.bpel.pmapi.FaultType;
@@ -222,10 +223,10 @@ public class Replayer {
         return null;
     }
     
-    public void handleWorkEvent(Map<String, Object> jobDetail, final Date when) {
-        WorkEvent we = new WorkEvent(jobDetail);
-        __log.debug("handleWorkEvent " + jobDetail + " " + when);
-        if (we.getType() == WorkEvent.Type.INVOKE_INTERNAL) {
+    public void handleJobDetails(JobDetails jobDetail, final Date when) {
+        JobDetails we = jobDetail;
+        __log.debug("handleJobDetails " + jobDetail + " " + when);
+        if (we.getType() == JobType.INVOKE_INTERNAL) {
             final BpelProcess p = engine._activeProcesses.get(we.getProcessId());
             final ProcessDAO processDAO = p.getProcessDAO();
             final MyRoleMessageExchangeImpl mex = (MyRoleMessageExchangeImpl) engine.getMessageExchange(we.getMexId());
@@ -270,9 +271,9 @@ public class Replayer {
                             return false;
                         }
                     });
-        } else if (we.getType() == WorkEvent.Type.INVOKE_RESPONSE) {
+        } else if (we.getType() == JobType.INVOKE_RESPONSE) {
             __log.debug("reply for live communication");
-            ReplayerContext ctx = findReplayedInstance(we.getIID());
+            ReplayerContext ctx = findReplayedInstance(we.getInstanceId());
             assert ctx != null;
             ctx.runtimeContext.invocationResponse(we.getMexId(), we.getChannel());
             ctx.runtimeContext.execute();

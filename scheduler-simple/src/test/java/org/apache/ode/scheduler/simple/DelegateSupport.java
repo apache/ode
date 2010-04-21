@@ -19,6 +19,7 @@
 
 package org.apache.ode.scheduler.simple;
 
+import java.io.InputStream;
 import java.sql.Connection;
 
 import javax.sql.DataSource;
@@ -64,9 +65,18 @@ public class DelegateSupport {
     public void setup() throws Exception {
         Connection c = _ds.getConnection();
         try {
+            StringBuffer sql = new StringBuffer();
+
+            {
+                InputStream in = getClass().getResourceAsStream("/simplesched-hsql.sql");
+                int v;
+                while ((v = in.read()) != -1) {
+                    sql.append((char) v);
+                }
+            }
+            
             c.createStatement().executeUpdate("CREATE ALIAS MOD FOR \"org.apache.ode.scheduler.simple.DelegateSupport.mod\";");
-            String sql = "CREATE TABLE \"ODE_JOB\" (\"JOBID\" CHAR(64) NOT NULL, \"TS\" NUMERIC  NOT NULL, \"NODEID\" char(64)  NULL, \"SCHEDULED\" int  NOT NULL, \"TRANSACTED\" int  NOT NULL, \"DETAILS\" BINARY(4096)  NULL, PRIMARY KEY(\"JOBID\"));";
-            c.createStatement().executeUpdate(sql);
+            c.createStatement().executeUpdate(sql.toString());
         } finally {
             c.close();
         }
