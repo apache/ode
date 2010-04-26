@@ -231,12 +231,11 @@
         <dependency>
           <groupId>org.apache.ode</groupId>
           <artifactId>ode-dao-hibernate</artifactId>
-          <exclusions>
-           <exclusion>
-             <groupId>org.hibernate</groupId>
-             <artifactId>hibernate</artifactId>
-           </exclusion>
-          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.hibernate</groupId>
+          <artifactId>hibernate</artifactId>
+          <scope>provided</scope>
         </dependency>
         <dependency>
           <groupId>org.apache.ode</groupId>
