@@ -255,6 +255,21 @@ public class JdbcDelegate implements DatabaseDelegate {
         }
     }
 
+    private Long asLong(Object o) {
+        if (o == null) return null;
+        else if (o instanceof BigDecimal) return ((BigDecimal) o).longValue();
+        else if (o instanceof Long) return (Long) o;
+        else if (o instanceof Integer) return ((Integer) o).longValue();
+        else throw new IllegalStateException("Can't convert to long " + o.getClass());
+    }
+
+    private Integer asInteger(Object o) {
+        if (o == null) return null;
+        else if (o instanceof BigDecimal) return ((BigDecimal) o).intValue();
+        else if (o instanceof Integer) return (Integer) o;
+        else throw new IllegalStateException("Can't convert to integer " + o.getClass());
+    }
+
     @SuppressWarnings("unchecked")
     public List<Job> dequeueImmediate(String nodeId, long maxtime, int maxjobs) throws DatabaseException {
         ArrayList<Job> ret = new ArrayList<Job>(maxjobs);
@@ -270,15 +285,15 @@ public class JdbcDelegate implements DatabaseDelegate {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Scheduler.JobDetails details = new Scheduler.JobDetails();
-                details.instanceId = (Long) rs.getObject("instanceId");
+                details.instanceId = asLong(rs.getObject("instanceId"));
                 details.mexId = (String) rs.getObject("mexId");
                 details.processId = (String) rs.getObject("processId");
                 details.type = (String) rs.getObject("type");
                 details.channel = (String) rs.getObject("channel");
                 details.correlatorId = (String) rs.getObject("correlatorId");
                 details.correlationKeySet = (String) rs.getObject("correlationKeySet");
-                details.retryCount = (Integer) rs.getObject("retryCount");
-                details.inMem = (Boolean) rs.getObject("inMem");
+                details.retryCount = asInteger(rs.getObject("retryCount"));
+                details.inMem = asBoolean(rs.getInt("inMem"));
                 if (rs.getObject("detailsExt") != null) {
                     try {
                         ObjectInputStream is = new ObjectInputStream(rs.getBinaryStream("detailsExt"));
@@ -324,7 +339,7 @@ public class JdbcDelegate implements DatabaseDelegate {
                     }
                 }
                 
-                Job job = new Job(rs.getLong(2), rs.getString(1), asBoolean(rs.getInt(3)), details);
+                Job job = new Job(rs.getLong("ts"), rs.getString("jobid"), asBoolean(rs.getInt("transacted")), details);
                 ret.add(job);
             }
             rs.close();
