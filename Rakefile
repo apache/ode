@@ -76,7 +76,7 @@ define "ode" do
       COMMONS.lang, COMMONS.logging, COMMONS.pool, DERBY, DERBY_TOOLS, JAXEN, JAVAX.activation, JAVAX.ejb, JAVAX.javamail,
       JAVAX.connector, JAVAX.jms, JAVAX.persistence, JAVAX.transaction, JAVAX.stream,  JIBX,
       GERONIMO.connector, GERONIMO.kernel, GERONIMO.transaction, LOG4J, OPENJPA, SAXON, TRANQL,
-      WOODSTOX, WSDL4J, WS_COMMONS, XALAN, XERCES, XMLBEANS,
+      WOODSTOX, WSDL4J, WS_COMMONS, XALAN, XERCES, XMLBEANS, SPRING,
       AXIS2_MODULES.libs
 
     package(:war).with(:libs=>libs).path("WEB-INF").tap do |web_inf|
