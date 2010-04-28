@@ -117,7 +117,7 @@
 		<include>axion:axion</include>   
 		<include>xerces:xercesImpl</include>   
         <include>org.objectweb.howl:howl</include>   
-		<include>xstream:xstream</include>   
+		<include>com.thoughtworks.xstream:xstream</include>   
         <include>xalan:serializer</include>   
         <include>xml-apis:xml-apis</include>   
         <include>org.apache.geronimo.specs:geronimo-jpa_3.0_spec</include>   
