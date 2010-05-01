@@ -108,7 +108,7 @@
 		<include>net.sf.saxon:saxon-xqj</include>
 		<include>wsdl4j:wsdl4j</include>
 		<include>tranql:tranql-connector</include>
-		<include>org.apache.ode:xalan</include>
+		<include>xalan:xalan</include>
 		<include>org.apache.xmlbeans:xmlbeans</include>
 		<include>com.thoughtworks.xstream:xstream</include>
 		<include>axion:axion</include>   
