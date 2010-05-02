@@ -143,7 +143,7 @@
 	<include>jaxen:jaxen</include>  
 	<include>log4j:log4j</include> 
 	<include>wsdl4j:wsdl4j</include>
-	<include>org.apache.ode:xalan</include>
+	<include>xalan:xalan</include>
 	<include>xerces:xercesImpl</include>
       </includes>
     </dependencySet>
