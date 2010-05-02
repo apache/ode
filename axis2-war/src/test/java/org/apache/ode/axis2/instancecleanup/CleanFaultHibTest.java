@@ -1,7 +1,7 @@
 package org.apache.ode.axis2.instancecleanup;
 
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.dao.bpel.ProcessInstanceDAO;
 import org.hibernate.Query;
 
 public class CleanFaultHibTest extends CleanFaultTest {

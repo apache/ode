@@ -2,7 +2,7 @@ package org.apache.ode.bpel.engine;
 
 import javax.wsdl.Operation;
 
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.dao.bpel.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.InvocationStyle;

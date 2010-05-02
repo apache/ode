@@ -19,11 +19,11 @@
   -->
 
 <project>
-    <groupId>org.apache.ode</groupId>
-    <artifactId>ode-bpel-store</artifactId>
-    <name>ODE :: Process Store</name>
-    <packaging>jar</packaging>
-    <modelVersion>4.0.0</modelVersion>
+  <groupId>org.apache.ode</groupId>
+  <artifactId>ode-bpel-store</artifactId>
+  <name>ODE :: Process Store</name>
+  <packaging>jar</packaging>
+  <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.ode</groupId>
@@ -34,11 +34,7 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.ode</groupId>
-      <artifactId>ode-bpel-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.ode</groupId>
-      <artifactId>ode-runtimes</artifactId>
+      <artifactId>ode-bpel-schemas</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.ode</groupId>
@@ -46,19 +42,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.ode</groupId>
-      <artifactId>ode-bpel-dao</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.ode</groupId>
-      <artifactId>ode-bpel-schemas</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.ode</groupId>
       <artifactId>ode-il-common</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.ode</groupId>
-      <artifactId>ode-dao-hibernate</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.ode</groupId>
@@ -69,77 +53,8 @@
       <artifactId>commons-logging</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.persistence</groupId>
-      <artifactId>persistence-api</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.apache.geronimo.specs</groupId>
-        <artifactId>geronimo-stax-api_1.0_spec</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>hsqldb</groupId>
-        <artifactId>hsqldb</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.apache.xmlbeans</groupId>
-        <artifactId>xmlbeans</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>xerces</groupId>
-        <artifactId>xercesImpl</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>wsdl4j</groupId>
-        <artifactId>wsdl4j</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>commons-collections</groupId>
-      <artifactId>commons-collections</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.apache.geronimo.specs</groupId>
-        <artifactId>geronimo-j2ee-connector_1.5_spec</artifactId>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.apache.geronimo.specs</groupId>
-        <artifactId>geronimo-jta_1.1_spec</artifactId>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>jaxen</groupId>
-      <artifactId>jaxen</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>dom4j</groupId>
-      <artifactId>dom4j</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>xalan</groupId>
-      <artifactId>xalan</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -148,71 +63,82 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.openjpa</groupId>
-      <artifactId>openjpa</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>net.sourceforge.serp</groupId>
-      <artifactId>serp</artifactId>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
       <scope>test</scope>
     </dependency>
-   </dependencies>
+    <dependency>
+      <groupId>org.apache.geronimo.components</groupId>
+      <artifactId>geronimo-transaction</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.ode</groupId>
+      <artifactId>ode-dao-jpa-ojpa</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- for the integration tests - seems to work with the openjpa enhanced enities -->
+    <dependency>
+      <groupId>org.apache.ode</groupId>
+      <artifactId>ode-dao-jpa-hibernate</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.ode</groupId>
+      <artifactId>ode-dao-hibernate</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 
-   <build>
-     <plugins>
+  <build>
+    <plugins>
       <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
+        <artifactId>maven-surefire-plugin</artifactId>
         <executions>
           <execution>
-            <id>openjpa-enhancer</id>
-            <phase>process-classes</phase>
+            <id>hibernate-jpa</id>
+            <phase>integration-test</phase>
             <goals>
-              <goal>run</goal>
+              <goal>test</goal>
             </goals>
             <configuration>
-              <tasks>
-                <property name="maven.runtime.classpath" refid="maven.test.classpath"/>
-                <path id="classpath">
-		   <pathelement path="${maven.runtime.classpath}"/>
-		</path>
-		<taskdef name="openjpac" classname="org.apache.openjpa.ant.PCEnhancerTask" classpathref="classpath"/>
-                <openjpac>
-		    <fileset dir="${basedir}/src/main">
-		      <include name="**/*.java" />
-		    </fileset>
-		    <classpath>
-		     <pathelement location="${basedir}/target/classes"/>
-		     <pathelement path="${maven.runtime.classpath}"/>
-		    </classpath>
-		 </openjpac>
-              </tasks>
+              <reportsDirectory>${project.build.directory}/surefire-reports/hibernate-jpa</reportsDirectory>
+              <systemProperties>
+                <property>
+                  <name>dao.factory.store</name>
+                  <value>org.apache.ode.dao.jpa.hibernate.ConfStoreDAOConnectionFactoryImpl</value>
+                </property>
+              </systemProperties>
+              <includes>
+                <include>**/DaoTest.java</include>
+                <include>**/ProcessStoreTest.java</include>
+              </includes>
+            </configuration>
+          </execution>
+          <execution>
+            <id>hibernate</id>
+            <phase>integration-test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <reportsDirectory>${project.build.directory}/surefire-reports/hibernate</reportsDirectory>
+              <systemProperties>
+                <property>
+                  <name>dao.factory.store</name>
+                  <value>org.apache.ode.dao.hib.store.ConfStoreDAOConnectionFactoryImpl</value>
+                </property>
+              </systemProperties>
+              <includes>
+                <include>**/DaoTest.java</include>
+                <include>**/ProcessStoreTest.java</include>
+              </includes>
             </configuration>
           </execution>
         </executions>
       </plugin>
+    </plugins>
+  </build>
 
-       <plugin>
-         <groupId>org.codehaus.mojo</groupId>
-         <artifactId>xdoclet-maven-plugin</artifactId>
-         <executions>
-           <execution>
-             <phase>generate-sources</phase>
-             <goals>
-               <goal>xdoclet</goal>
-             </goals>
-	     
-             <configuration>
-               <tasks>
-                 <hibernatedoclet excludedTags="@version,@author,@todo" verbose="true"
-                   destdir="${project.build.outputDirectory}" force="true">
-                   <hibernate version="3.0"/>
-                   <fileset dir="${project.build.sourceDirectory}" includes="org/apache/ode/store/hib/*.java"/>
-                 </hibernatedoclet>
-               </tasks>
-             </configuration>
-           </execution>
-         </executions>
-       </plugin>
-     </plugins>
-   </build>
 </project>
+

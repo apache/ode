@@ -23,7 +23,6 @@
     <groupId>org.apache.ode.extensions</groupId>
     <artifactId>ode-extensions-jms-eventpublisher</artifactId>
     <packaging>jar</packaging>
-    <version> 1.0-beta</version>
     <name>ODE :: Extensions JMS Event Publisher</name>
     <parent>
         <groupId>org.apache.ode</groupId>

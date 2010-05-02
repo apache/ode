@@ -25,7 +25,7 @@ import javax.wsdl.Operation;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.dao.bpel.MessageExchangeDAO;
 import org.apache.ode.bpel.engine.PartnerRoleMessageExchangeImpl.State;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.Endpoint;

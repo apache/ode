@@ -33,7 +33,6 @@ import javax.jbi.component.ServiceUnitManager;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.naming.InitialContext;
-import javax.transaction.TransactionManager;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
@@ -43,18 +42,18 @@ import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 import org.apache.ode.bpel.extension.ExtensionBundleValidation;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.context.ContextInterceptor;
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
+import org.apache.ode.dao.bpel.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.ProcessAndInstanceManagementMBean;
 import org.apache.ode.bpel.evtproc.DebugBpelEventListener;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
-import org.apache.ode.bpel.rtrep.common.extension.AbstractExtensionBundle;
 import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
+import org.apache.ode.dao.scheduler.SchedulerDAOConnectionFactory;
+import org.apache.ode.dao.store.ConfStoreDAOConnectionFactory;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.il.dbutil.DatabaseConfigException;
 import org.apache.ode.jbi.msgmap.Mapper;
-import org.apache.ode.scheduler.simple.JdbcDelegate;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.GUID;
@@ -227,17 +226,14 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             _ode._executorService = Executors.newCachedThreadPool();
         else
             _ode._executorService = Executors.newFixedThreadPool(_ode._config.getThreadPoolMaxSize());
-        SimpleScheduler sched =new SimpleScheduler(new GUID().toString(), new JdbcDelegate(_ode._dataSource),  _ode._config.getProperties());
+        SimpleScheduler sched =new SimpleScheduler(new GUID().toString(), _ode._sdaocf, _ode.getTransactionManager(),  _ode._config.getProperties());
         sched.setJobProcessor(_ode._server);
-        sched.setTransactionManager((TransactionManager) _ode.getContext().getTransactionManager());
         _ode._scheduler = sched;
-
-        _ode._store = new ProcessStoreImpl(_ode._eprContext, _ode._dataSource,
-                _ode._config.getDAOConnectionFactory(), _ode._config, false);
+        _ode._store = new ProcessStoreImpl(_ode._eprContext, _ode.getTransactionManager(), _ode._cdaocf);
         registerExternalVariableModules();
         _ode._store.loadAll();
 
-        _ode._server.setDaoConnectionFactory(_ode._daocf);
+        _ode._server.setDaoConnectionFactory(_ode._bdaocf);
         _ode._server.setEndpointReferenceContext(_ode._eprContext);
         _ode._server.setMessageExchangeContext(_ode._mexContext);
         _ode._server.setBindingContext(new BindingContextImpl(_ode));
@@ -264,14 +260,20 @@ public class OdeLifeCycle implements ComponentLifeCycle {
      * @throws JBIException
      */
     private void initDao() throws JBIException {
-        BpelDAOConnectionFactoryJDBC cf;
+        BpelDAOConnectionFactory bcf;
+        ConfStoreDAOConnectionFactory ccf;
+        SchedulerDAOConnectionFactory scf;
         try {
-            cf = _db.createDaoCF();
+            bcf = _db.createDaoCF();
+            ccf = _db.createDaoStoreCF();
+            scf = _db.createDaoSchedulerCF();
         } catch (DatabaseConfigException e) {
             String errmsg = __msgs.msgDAOInstantiationFailed(_ode._config.getDAOConnectionFactory());
             throw new JBIException(errmsg,e);
         }
-        _ode._daocf = cf;
+        _ode._bdaocf = bcf;
+        _ode._sdaocf = scf;
+
     }
 
     private void initConnector() throws JBIException {
@@ -511,6 +513,30 @@ public class OdeLifeCycle implements ComponentLifeCycle {
                 _ode._scheduler.shutdown();
             } catch (Exception ex) {
 
+            }
+
+            try {
+                _ode._bdaocf.shutdown();
+            } catch (Exception ex) {
+                __log.debug("error shutting down bpel conn.", ex);
+            } finally {
+                 _ode._bdaocf = null;
+            }
+
+             try {
+                _ode._cdaocf.shutdown();
+            } catch (Exception ex) {
+                __log.debug("error shutting down conf store conn.", ex);
+            } finally {
+                 _ode._cdaocf = null;
+            }
+
+            try {
+                _ode._sdaocf.shutdown();
+            } catch (Exception ex) {
+                __log.debug("error shutting down sched conn.", ex);
+            } finally {
+                 _ode._sdaocf = null;
             }
 
             try {

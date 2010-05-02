@@ -64,7 +64,8 @@
         <wsdl4j.version>1.6.2</wsdl4j.version>
 	<woodstox.version>3.2.4</woodstox.version>
 	<javax.mail.version>1.4</javax.mail.version>
-        <hibernate.version>3.3.1.GA</hibernate.version>
+        <hibernate.version>3.3.2.GA</hibernate.version>
+	<hibernate.entitymanager.version>3.4.0.GA</hibernate.entitymanager.version>
         <javassist.version>3.4.GA</javassist.version>
 	<spring.version>2.5.6</spring.version>
         <geronimo.specs.version>1.0</geronimo.specs.version>
@@ -88,7 +89,8 @@
         <xmlbeans.version>2.3.0</xmlbeans.version>
         <xstream.version>1.2</xstream.version>
 	<junit.version>4.4</junit.version>
-        <hsqldb.version>1.8.0.7</hsqldb.version>
+        <hsqldb.version>1.8.0.10</hsqldb.version>
+        <h2.version>1.2.131</h2.version>
 	<persistence-api.version>1.0</persistence-api.version>
 	<xalan.version>2.7.1</xalan.version>
         <ant.version>1.6.5</ant.version>
@@ -123,16 +125,18 @@
       <module>dao-hibernate</module>
       <module>tools</module>
       <module>bpel-store</module>
-	  <module>dao-jpa-db</module>
+      <module>dao-jpa-db</module>
+      <module>dao-jpa-ojpa</module>
+      <module>dao-jpa-hibernate</module>
       <module>dao-hibernate-db</module>
       <module>engine</module>
       <module>bpel-connector</module>
-	  <module>bpel-test</module>
-	  <module>extensions</module>
-	  <module>axis2</module>
-	  <module>jbi</module>
-	  <module>axis2-war</module>
-	  <module>distro</module>
+      <module>bpel-test</module>
+      <module>extensions</module>
+      <module>axis2</module>
+      <module>jbi</module>
+      <module>axis2-war</module>
+      <module>distro</module>
     </modules>
 
     <build>
@@ -199,7 +203,7 @@
 		      <groupId>org.apache.derby</groupId>
 		      <artifactId>derbytools</artifactId>
 		      <version>${derby.version}</version>
-		    </dependency> 
+		    </dependency>
 		</dependencies>
 	      </plugin>
 
@@ -385,6 +389,22 @@
                 <groupId>org.apache.ode</groupId>
                 <artifactId>ode-dao-jpa</artifactId>
                 <version>${ode.version}</version>
+            </dependency>
+			<dependency>
+              <groupId>org.apache.ode</groupId>
+              <artifactId>ode-dao-jpa</artifactId>
+              <version>${project.version}</version>
+              <classifier>openjpa</classifier>
+            </dependency>
+            <dependency>
+              <groupId>org.apache.ode</groupId>
+              <artifactId>ode-dao-jpa-ojpa</artifactId>
+              <version>${project.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>org.apache.ode</groupId>
+              <artifactId>ode-dao-jpa-hibernate</artifactId>
+              <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.ode</groupId>
@@ -703,7 +723,19 @@
                     </exclusion>
                 </exclusions>
             </dependency>
- 
+
+			<dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-entitymanager</artifactId>
+                <version>${hibernate.entitymanager.version}</version>
+				<exclusions>
+                    <exclusion>
+                        <artifactId>jta</artifactId>
+                        <groupId>javax.transaction</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
             <dependency>
                 <groupId>javassist</groupId>
                 <artifactId>javassist</artifactId>
@@ -806,6 +838,12 @@
                 <artifactId>hsqldb</artifactId>
                 <version>${hsqldb.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.version}</version>
+            </dependency>
+
 
             <!-- AXIS2 dependencies -->
             <dependency>
@@ -893,3 +931,5 @@
     </dependencyManagement>
 
 </project>
+
+

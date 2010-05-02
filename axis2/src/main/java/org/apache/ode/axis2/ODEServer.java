@@ -67,7 +67,7 @@ import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 import org.apache.ode.bpel.extension.ExtensionBundleValidation;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.context.ContextInterceptor;
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.dao.bpel.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
 import org.apache.ode.bpel.engine.cron.CronScheduler;
@@ -83,8 +83,10 @@ import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.pmapi.InstanceManagement;
 import org.apache.ode.bpel.pmapi.ProcessManagement;
+import org.apache.ode.dao.scheduler.SchedulerDAOConnectionFactory;
+import org.apache.ode.dao.store.ConfStoreDAOConnectionFactory;
 import org.apache.ode.il.dbutil.Database;
-import org.apache.ode.scheduler.simple.JdbcDelegate;
+import org.apache.ode.il.txutil.TxManager;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.GUID;
@@ -111,7 +113,9 @@ public class ODEServer {
     protected ODEConfigProperties _odeConfig;
     protected AxisConfiguration _axisConfig;
     protected TransactionManager _txMgr;
-    protected BpelDAOConnectionFactory _daoCF;
+    protected BpelDAOConnectionFactory _bpelDaoCF;
+    protected ConfStoreDAOConnectionFactory _storeDaoCF;
+    protected SchedulerDAOConnectionFactory _schedDaoCF;
     protected Scheduler _scheduler;
 
     protected ExecutorService _executorService;
@@ -302,15 +306,31 @@ public class ODEServer {
                     __log.debug("Store could not be shutdown.", t);
                 }
 
-            if (_daoCF != null)
+            if (_bpelDaoCF != null)
                 try {
-                    _daoCF.shutdown();
+                    _bpelDaoCF.shutdown();
                 } catch (Throwable ex) {
-                    __log.debug("DOA shutdown failed.", ex);
+                    __log.debug("Bpel DOA shutdown failed.", ex);
                 } finally {
-                    _daoCF = null;
+                    _bpelDaoCF = null;
+                }
+            if (_storeDaoCF != null)
+                try {
+                    _storeDaoCF.shutdown();
+                } catch (Throwable ex) {
+                    __log.debug("Store DOA shutdown failed.", ex);
+                } finally {
+                    _storeDaoCF = null;
                 }
 
+            if (_schedDaoCF != null)
+                try {
+                    _schedDaoCF.shutdown();
+                } catch (Throwable ex) {
+                    __log.debug("Scheduler DOA shutdown failed.", ex);
+                } finally {
+                    _bpelDaoCF = null;
+                }
             if (_db != null)
                 try {
                     _db.shutdown();
@@ -445,18 +465,13 @@ public class ODEServer {
 
     @SuppressWarnings("unchecked")
     private void initTxMgr() throws ServletException {
-        String txFactoryName = _odeConfig.getTxFactoryClass();
-        __log.debug("Initializing transaction manager using " + txFactoryName);
         try {
-            Class txFactClass = this.getClass().getClassLoader().loadClass(txFactoryName);
-            Object txFact = txFactClass.newInstance();
-            _txMgr = (TransactionManager) txFactClass.getMethod("getTransactionManager", (Class[]) null).invoke(txFact);
-            if (__logTx.isDebugEnabled() && System.getProperty("ode.debug.tx") != null)
-                _txMgr = new DebugTxMgr(_txMgr);
+            TxManager mgr = new TxManager(_odeConfig);
+            _txMgr = mgr.createTransactionManager();
             _axisConfig.addParameter("ode.transaction.manager", _txMgr);
         } catch (Exception e) {
-            __log.fatal("Couldn't initialize a transaction manager with factory: " + txFactoryName, e);
-            throw new ServletException("Couldn't initialize a transaction manager with factory: " + txFactoryName, e);
+            __log.fatal("Couldn't initialize a transaction manager", e);
+            throw new ServletException("Couldn't initialize a transaction manager", e);
         }
     }
 
@@ -484,9 +499,13 @@ public class ODEServer {
      * @throws ServletException
      */
     protected void initDAO() throws ServletException {
-        __log.info(__msgs.msgOdeUsingDAOImpl(_odeConfig.getDAOConnectionFactory()));
+        __log.info(__msgs.msgOdeUsingBpelDAOImpl(_odeConfig.getDAOConnectionFactory()));
+        __log.info(__msgs.msgOdeUsingStoreDAOImpl(_odeConfig.getDAOConfStoreConnectionFactory()));
+        __log.info(__msgs.msgOdeUsingSchedDAOImpl(_odeConfig.getDAOSchedulerConnectionFactory()));
         try {
-            _daoCF = _db.createDaoCF();
+            _bpelDaoCF = _db.createDaoCF();
+            _storeDaoCF = _db.createDaoStoreCF();
+            _schedDaoCF = _db.createDaoSchedulerCF();
         } catch (Exception ex) {
             String errmsg = __msgs.msgDAOInstantiationFailed(_odeConfig.getDAOConnectionFactory());
             __log.error(errmsg, ex);
@@ -503,14 +522,11 @@ public class ODEServer {
     }
 
     protected ProcessStoreImpl createProcessStore(EndpointReferenceContext eprContext, DataSource ds) {
-        return new ProcessStoreImpl(eprContext, ds, _odeConfig.getDAOConnectionFactory(), _odeConfig, false);
+        return new ProcessStoreImpl(eprContext,_txMgr,_storeDaoCF);
     }
 
     protected Scheduler createScheduler() {
-        SimpleScheduler scheduler = new SimpleScheduler(new GUID().toString(),new JdbcDelegate(_db.getDataSource()), _odeConfig.getProperties());
-        scheduler.setTransactionManager(_txMgr);
-
-        return scheduler;
+         return new SimpleScheduler(new GUID().toString(),_schedDaoCF,_txMgr, _odeConfig.getProperties());
     }
 
     protected void initBpelServer(EndpointReferenceContextImpl eprContext) {
@@ -546,7 +562,7 @@ public class ODEServer {
         polledRunnableProcessor.setContexts(_bpelServer.getContexts());
         _scheduler.setPolledRunnableProcesser(polledRunnableProcessor);
         
-        _bpelServer.setDaoConnectionFactory(_daoCF);
+        _bpelServer.setDaoConnectionFactory(_bpelDaoCF);
         _bpelServer.setEndpointReferenceContext(eprContext);
         _bpelServer.setMessageExchangeContext(new MessageExchangeContextImpl(this));
         _bpelServer.setBindingContext(new BindingContextImpl(this));
@@ -765,102 +781,6 @@ public class ODEServer {
         }
     }
 
-    // Transactional debugging stuff, to track down all these little annoying bugs.
-    private class DebugTxMgr implements TransactionManager {
-        private TransactionManager _tm;
-
-        public DebugTxMgr(TransactionManager tm) {
-            _tm = tm;
-        }
-
-        public void begin() throws NotSupportedException, SystemException {
-            __logTx.debug("Txm begin");
-            _tm.begin();
-        }
-
-        public void commit() throws HeuristicMixedException, HeuristicRollbackException, IllegalStateException, RollbackException, SecurityException, SystemException {
-            __logTx.debug("Txm commit");
-            for (StackTraceElement traceElement : Thread.currentThread().getStackTrace()) {
-                __logTx.debug(traceElement.toString());
-            }
-            _tm.commit();
-        }
-
-        public int getStatus() throws SystemException {
-            __logTx.debug("Txm status");
-            return _tm.getStatus();
-        }
-
-        public Transaction getTransaction() throws SystemException {
-            Transaction tx = _tm.getTransaction();
-            __logTx.debug("Txm get tx " + tx);
-            return tx == null ? null : new DebugTx(tx);
-        }
-
-        public void resume(Transaction transaction) throws IllegalStateException, InvalidTransactionException, SystemException {
-            __logTx.debug("Txm resume");
-            _tm.resume(transaction);
-        }
-
-        public void rollback() throws IllegalStateException, SecurityException, SystemException {
-            __logTx.debug("Txm rollback");
-            _tm.rollback();
-        }
-
-        public void setRollbackOnly() throws IllegalStateException, SystemException {
-            __logTx.debug("Txm set rollback");
-            _tm.setRollbackOnly();
-        }
-
-        public void setTransactionTimeout(int i) throws SystemException {
-            __logTx.debug("Txm set tiemout " + i);
-            _tm.setTransactionTimeout(i);
-        }
-
-        public Transaction suspend() throws SystemException {
-            __logTx.debug("Txm suspend");
-            return _tm.suspend();
-        }
-    }
-
-    private class DebugTx implements Transaction {
-        private Transaction _tx;
-
-        public DebugTx(Transaction tx) {
-            _tx = tx;
-        }
-
-        public void commit() throws HeuristicMixedException, HeuristicRollbackException, RollbackException, SecurityException, SystemException {
-            __logTx.debug("Tx commit");
-            _tx.commit();
-        }
-
-        public boolean delistResource(XAResource xaResource, int i) throws IllegalStateException, SystemException {
-            return _tx.delistResource(xaResource, i);
-        }
-
-        public boolean enlistResource(XAResource xaResource) throws IllegalStateException, RollbackException, SystemException {
-            return _tx.enlistResource(xaResource);
-        }
-
-        public int getStatus() throws SystemException {
-            return _tx.getStatus();
-        }
-
-        public void registerSynchronization(Synchronization synchronization) throws IllegalStateException, RollbackException, SystemException {
-            __logTx.debug("Synchronization registration on " + synchronization.getClass().getName());
-            _tx.registerSynchronization(synchronization);
-        }
-
-        public void rollback() throws IllegalStateException, SystemException {
-            __logTx.debug("Tx rollback");
-            _tx.rollback();
-        }
-
-        public void setRollbackOnly() throws IllegalStateException, SystemException {
-            __logTx.debug("Tx set rollback");
-            _tx.setRollbackOnly();
-        }
-    }
+   
 
 }

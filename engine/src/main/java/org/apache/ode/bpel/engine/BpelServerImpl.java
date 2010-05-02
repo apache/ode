@@ -41,7 +41,7 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.context.ContextInterceptor;
-import org.apache.ode.bpel.dao.*;
+import org.apache.ode.dao.bpel.*;
 import org.apache.ode.bpel.engine.cron.CronScheduler;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
 import org.apache.ode.bpel.evt.BpelEvent;
@@ -118,6 +118,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     private ExecutorService _exec;
 
     BpelDatabase _db;
+
+    private boolean _shutdownExecutor = false;
 
     /**
      * Management lock for synchronizing management operations and preventing processing (transactions) from occuring while
@@ -206,6 +208,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                     }
                 };
                 _exec = Executors.newCachedThreadPool(threadFactory);
+                _shutdownExecutor = true;
             }
             
             if (_contexts.txManager == null) {
@@ -298,6 +301,11 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             __log.debug("BPEL SERVER STOPPING");
 
             _contexts.scheduler.stop();
+            if (_shutdownExecutor){
+                _exec.shutdownNow();
+                _exec = null;
+                _shutdownExecutor = false;
+            }
             _state = State.INIT;
             __log.debug(__msgs.msgServerStopped());
         } finally {
@@ -541,10 +549,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 _contexts.execTransaction(new Callable<Void>() {
                     public Void call() throws Exception {
                         _contexts.scheduler.jobCompleted(jobInfo.jobName);
-                        Date future = new Date(System.currentTimeMillis() + (60 * 1000));
-                        __log.debug(__msgs.msgReschedulingJobForInactiveProcess(j.getProcessId(), jobInfo.jobName, future));
+		                Date future = new Date(System.currentTimeMillis() + (60 * 1000));
+		                __log.debug(__msgs.msgReschedulingJobForInactiveProcess(j.getProcessId(), jobInfo.jobName, future));
                         _contexts.scheduler.schedulePersistedJob(j, future);            
-                        return null;
+						return null;
                     }
                     
                 });
@@ -665,9 +673,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                             ResourceRouteDAO rr = _contexts.dao.getConnection()
                                     .getResourceRoute(resource.getUrl(), resource.getMethod());
                             if (rr == null) return null;
-                            ProcessDAO processDao = rr.getInstance().getProcess();
+                        ProcessDAO processDao = rr.getInstance().getProcess();
                             return processDao.getProcessId();
-                        }
+                    }
                     });
                     for (ODEProcess odeRestProcess : _registeredProcesses.values()) {
                         if (odeRestProcess._pid.equals(processId)) target = (ODERESTProcess)odeRestProcess;

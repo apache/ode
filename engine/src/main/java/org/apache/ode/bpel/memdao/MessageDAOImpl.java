@@ -21,7 +21,7 @@ package org.apache.ode.bpel.memdao;
 
 import javax.xml.namespace.QName;
 
-import org.apache.ode.bpel.dao.MessageDAO;
+import org.apache.ode.dao.bpel.MessageDAO;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 

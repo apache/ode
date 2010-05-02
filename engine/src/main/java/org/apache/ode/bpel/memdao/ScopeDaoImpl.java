@@ -18,11 +18,11 @@
  */
 package org.apache.ode.bpel.memdao;
 
-import org.apache.ode.bpel.dao.CorrelationSetDAO;
-import org.apache.ode.bpel.dao.PartnerLinkDAO;
-import org.apache.ode.bpel.dao.ScopeDAO;
-import org.apache.ode.bpel.dao.ScopeStateEnum;
-import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.dao.bpel.CorrelationSetDAO;
+import org.apache.ode.dao.bpel.PartnerLinkDAO;
+import org.apache.ode.dao.bpel.ScopeDAO;
+import org.apache.ode.dao.bpel.ScopeStateEnum;
+import org.apache.ode.dao.bpel.XmlDataDAO;
 import org.apache.ode.bpel.evt.BpelEvent;
 
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ class ScopeDaoImpl extends DaoBaseImpl implements ScopeDAO {
     private Map<String, CorrelationSetDAO> _correlations = new HashMap<String, CorrelationSetDAO>();
     private Map<Integer, PartnerLinkDAO> _eprs = new HashMap<Integer, PartnerLinkDAO>();
     private ProcessInstanceDaoImpl _processInstance;
-    private org.apache.ode.bpel.dao.ScopeDAO _parent;
+    private ScopeDAO _parent;
     private Long _instanceId;
     private int _scopeModelId;
 
@@ -62,7 +62,7 @@ class ScopeDaoImpl extends DaoBaseImpl implements ScopeDAO {
 
 
     /**
-     * @see org.apache.ode.bpel.dao.ScopeDAO#getCorrelationSet(java.lang.String)
+     * @see org.apache.ode.dao.bpel.ScopeDAO#getCorrelationSet(java.lang.String)
      */
     public CorrelationSetDAO getCorrelationSet(String corrSetName) {
         CorrelationSetDAO corr = _correlations.get(corrSetName);
@@ -76,42 +76,42 @@ class ScopeDaoImpl extends DaoBaseImpl implements ScopeDAO {
     }
 
     /**
-     * @see org.apache.ode.bpel.dao.ScopeDAO#getParentScope()
+     * @see org.apache.ode.dao.bpel.ScopeDAO#getParentScope()
      */
-    public org.apache.ode.bpel.dao.ScopeDAO getParentScope() {
+    public org.apache.ode.dao.bpel.ScopeDAO getParentScope() {
         return _parent;
     }
 
     /**
-     * @see org.apache.ode.bpel.dao.ScopeDAO#getProcessInstance()
+     * @see org.apache.ode.dao.bpel.ScopeDAO#getProcessInstance()
      */
-    public org.apache.ode.bpel.dao.ProcessInstanceDAO getProcessInstance() {
+    public org.apache.ode.dao.bpel.ProcessInstanceDAO getProcessInstance() {
         return _processInstance;
     }
 
     /**
-     * @see org.apache.ode.bpel.dao.ScopeDAO#setState(org.apache.ode.bpel.dao.ScopeStateEnum)
+     * @see org.apache.ode.dao.bpel.ScopeDAO#setState(org.apache.ode.dao.bpel.ScopeStateEnum)
      */
-    public void setState(org.apache.ode.bpel.dao.ScopeStateEnum state) {
+    public void setState(org.apache.ode.dao.bpel.ScopeStateEnum state) {
         _state = state;
     }
 
     /**
-     * @see org.apache.ode.bpel.dao.ScopeDAO#getState()
+     * @see org.apache.ode.dao.bpel.ScopeDAO#getState()
      */
-    public org.apache.ode.bpel.dao.ScopeStateEnum getState() {
+    public org.apache.ode.dao.bpel.ScopeStateEnum getState() {
         return _state;
     }
 
     /**
-     * @see org.apache.ode.bpel.dao.ScopeDAO#getName()
+     * @see org.apache.ode.dao.bpel.ScopeDAO#getName()
      */
     public String getName() {
         return _type;
     }
 
     /**
-     * @see org.apache.ode.bpel.dao.ScopeDAO#getVariable(java.lang.String)
+     * @see org.apache.ode.dao.bpel.ScopeDAO#getVariable(java.lang.String)
      */
     public XmlDataDAO getVariable(String varName) {
         XmlDataDAO v = _variables.get(varName);
@@ -129,14 +129,14 @@ class ScopeDaoImpl extends DaoBaseImpl implements ScopeDAO {
     }
 
     /**
-     * @see org.apache.ode.bpel.dao.ScopeDAO#getScopeInstanceId()
+     * @see org.apache.ode.dao.bpel.ScopeDAO#getScopeInstanceId()
      */
     public Long getScopeInstanceId() {
         return _instanceId;
     }
 
     /**
-     * @see org.apache.ode.bpel.dao.ScopeDAO#getModelId()
+     * @see org.apache.ode.dao.bpel.ScopeDAO#getModelId()
      */
     public int getModelId() {
         return _scopeModelId;

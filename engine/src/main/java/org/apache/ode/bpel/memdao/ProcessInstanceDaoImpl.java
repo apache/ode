@@ -19,7 +19,7 @@
 package org.apache.ode.bpel.memdao;
 
 import org.apache.ode.bpel.common.ProcessState;
-import org.apache.ode.bpel.dao.*;
+import org.apache.ode.dao.bpel.*;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.utils.QNameUtils;
@@ -202,7 +202,7 @@ public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstan
     }
 
     /**
-     * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getScope(java.lang.Long)
+     * @see org.apache.ode.dao.bpel.ProcessInstanceDAO#getScope(java.lang.Long)
      */
     public ScopeDAO getScope(Long scopeInstanceId) {
         return _scopes.get(scopeInstanceId);
@@ -216,7 +216,7 @@ public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstan
     }
 
     /**
-     * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#insertBpelEvent(org.apache.ode.bpel.evt.ProcessInstanceEvent)
+     * @see org.apache.ode.dao.bpel.ProcessInstanceDAO#insertBpelEvent(org.apache.ode.bpel.evt.ProcessInstanceEvent)
      */
     public void insertBpelEvent(ProcessInstanceEvent event) {
         _events.add(event);
@@ -227,7 +227,7 @@ public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstan
     }
 
     /**
-     * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getInstantiatingCorrelator()
+     * @see org.apache.ode.dao.bpel.ProcessInstanceDAO#getInstantiatingCorrelator()
      */
     public CorrelatorDAO getInstantiatingCorrelator() {
         return _instantiatingCorrelator;
@@ -256,7 +256,7 @@ public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstan
     }
 
     /**
-     * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getScopes(java.lang.String)
+     * @see org.apache.ode.dao.bpel.ProcessInstanceDAO#getScopes(java.lang.String)
      */
     public Collection<ScopeDAO> getScopes(String scopeName) {
         List<ScopeDAO> scopes = _scopesByName.get(scopeName);
@@ -264,28 +264,28 @@ public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstan
     }
 
     /**
-     * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getPreviousState()
+     * @see org.apache.ode.dao.bpel.ProcessInstanceDAO#getPreviousState()
      */
     public short getPreviousState() {
         return _previousState;
     }
 
     /**
-     * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getLastActiveTime()
+     * @see org.apache.ode.dao.bpel.ProcessInstanceDAO#getLastActiveTime()
      */
     public Date getLastActiveTime() {
         return _lastActive;
     }
 
     /**
-     * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#setLastActiveTime(java.util.Date)
+     * @see org.apache.ode.dao.bpel.ProcessInstanceDAO#setLastActiveTime(java.util.Date)
      */
     public void setLastActiveTime(Date dt) {
         _lastActive = dt;
     }
 
     /**
-     * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#finishCompletion()
+     * @see org.apache.ode.dao.bpel.ProcessInstanceDAO#finishCompletion()
      */
     public void finishCompletion() {
         // make sure we have completed.

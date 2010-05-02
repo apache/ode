@@ -97,7 +97,7 @@ public interface Scheduler {
         INVOKE_CHECK
     }
     
-    public static class JobDetails {
+    public static class JobDetails implements Cloneable {
         public Long instanceId;
         public String mexId;
         public String processId;
@@ -108,7 +108,12 @@ public interface Scheduler {
         public Integer retryCount;
         public Boolean inMem;
         public Map<String, Object> detailsExt = new HashMap<String, Object>();
-        
+
+        @Override
+        public JobDetails clone() throws CloneNotSupportedException {
+          return (JobDetails)super.clone();
+        }
+
         public Boolean getInMem() {
             return inMem == null ? false : inMem;
         }

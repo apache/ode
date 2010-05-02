@@ -27,7 +27,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Configuration object used for configuring the intergration layer. The propereties are those likely to be common to all layers.
@@ -46,6 +48,8 @@ public class OdeConfigProperties {
 
     public static final String PROP_DB_EMBEDDED_NAME = "db.emb.name";
 
+    public static final String PROP_DB_EMBEDDED_TYPE = "db.emb.type";
+
     public static final String PROP_DB_EMBEDDED_CREATE = "db.emb.create";
 
     public static final String PROP_DB_INTERNAL_URL = "db.int.jdbcurl";
@@ -59,7 +63,7 @@ public class OdeConfigProperties {
     public static final String PROP_DB_LOGGING = "db.logging";
 
     public static final String PROP_TX_FACTORY_CLASS = "tx.factory.class";
-
+    
     public static final String PROP_POOL_MAX = "db.pool.max";
 
     public static final String PROP_POOL_MIN = "db.pool.min";
@@ -85,6 +89,10 @@ public class OdeConfigProperties {
     public static final String PROP_ATOMIC_SCOPES_RETRY_DELAY = "scopes.atomic.retry.delay";
     
     public static final String PROP_DAOCF = "dao.factory";
+
+    public static final String PROP_DAOCF_STORE = "dao.factory.store";
+
+    public static final String PROP_DAOCF_SCHEDULER = "dao.factory.scheduler";
     
     public static final String PROP_EXTENSION_BUNDLES_RT = "extension.bundles.runtime";
     public static final String PROP_EXTENSION_BUNDLES_VAL = "extension.bundles.validation";
@@ -98,19 +106,35 @@ public class OdeConfigProperties {
     private Properties _props;
 
     /** Default defaults for the database embedded name and dao connection factory class. */
-    public static String DEFAULT_DB_EMB_NAME = "jpadb";
-    private static String __daoCfClass = "org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl";
+    public static String DEFAULT_DB_EMB_NAME = "ode-db";
+    public static String DEFAULT_DB_EMB_TYPE = "h2";
+    public static String DEFAULT_DAOCF_CLASS = "org.apache.ode.dao.jpa.openjpa.BpelDAOConnectionFactoryImpl";
+    public static String DEFAULT_DAOCF_STORE_CLASS = "org.apache.ode.dao.jpa.openjpa.ConfStoreDAOConnectionFactoryImpl";
+    public static String DEFAULT_DAOCF_SCHEDULER_CLASS = "org.apache.ode.dao.jpa.openjpa.SchedulerDAOConnectionFactoryImpl";
 
     static {
         String odep = System.getProperty("ode.persistence");
         if (odep != null &&
                 "hibernate".equalsIgnoreCase(odep)) {
             __log.debug("Using HIBERNATE due to system property override!");
-            DEFAULT_DB_EMB_NAME = "hibdb";
-            __daoCfClass = "org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl";
-
+            DEFAULT_DB_EMB_NAME = "ode-db-hib";
+            DEFAULT_DAOCF_CLASS = "org.apache.ode.dao.hib.bpel.BpelDAOConnectionFactoryImpl";
+            DEFAULT_DAOCF_STORE_CLASS = "org.apache.ode.dao.hib.store.ConfStoreDAOConnectionFactoryImpl";
+            DEFAULT_DAOCF_SCHEDULER_CLASS = "org.apache.ode.scheduler.simple.jdbc.SchedulerDAOConnectionFactoryImpl";
         }
     }
+    /**
+     * Possible database implementation.
+     */
+    public enum EmbeddedDbType {
+        
+        DERBY,
+        
+        H2,
+
+        HSQL
+    }
+
     /**
      * Possible database modes.
      */
@@ -118,10 +142,10 @@ public class OdeConfigProperties {
         /** External data-source (managed by app server) */
         EXTERNAL,
 
-        /** Internal data-source (User provides database info, Ode provides connection pool) */
+        /** Internal data-source (User provides database info) */
         INTERNAL,
 
-        /** Embedded database (Ode provides default embedded database with connection pool) */
+        /** Embedded database (Ode provides default embedded database) */
         EMBEDDED
     }
 
@@ -176,8 +200,12 @@ public class OdeConfigProperties {
         return getProperty(OdeConfigProperties.PROP_DB_EMBEDDED_NAME, DEFAULT_DB_EMB_NAME);
     }
 
+    public EmbeddedDbType getDbEmbeddedType() {
+        return EmbeddedDbType.valueOf(getProperty(OdeConfigProperties.PROP_DB_EMBEDDED_TYPE, DEFAULT_DB_EMB_TYPE).trim().toUpperCase());
+    }
+
     public boolean isDbEmbeddedCreate() {
-        return Boolean.valueOf(getProperty(OdeConfigProperties.PROP_DB_EMBEDDED_CREATE, "false"));
+        return Boolean.valueOf(getProperty(OdeConfigProperties.PROP_DB_EMBEDDED_CREATE, "true"));
     }
 
     public DatabaseMode getDbMode() {
@@ -186,7 +214,15 @@ public class OdeConfigProperties {
     }
 
     public String getDAOConnectionFactory() {
-        return getProperty(PROP_DAOCF, __daoCfClass);
+        return getProperty(PROP_DAOCF, DEFAULT_DAOCF_CLASS);
+    }
+
+    public String getDAOConfStoreConnectionFactory() {
+        return getProperty(PROP_DAOCF_STORE, DEFAULT_DAOCF_STORE_CLASS);
+    }
+
+    public String getDAOSchedulerConnectionFactory() {
+        return getProperty(PROP_DAOCF_SCHEDULER, DEFAULT_DAOCF_SCHEDULER_CLASS);
     }
 
     public String getDbDataSource() {
@@ -215,7 +251,7 @@ public class OdeConfigProperties {
     }
 
     public int getPoolMaxSize() {
-        return Integer.valueOf(getProperty(OdeConfigProperties.PROP_POOL_MAX, "10"));
+        return Integer.valueOf(getProperty(OdeConfigProperties.PROP_POOL_MAX, "15"));
     }
 
     public int getPoolMinSize() {
@@ -264,7 +300,18 @@ public class OdeConfigProperties {
     }
 
     public Properties getProperties() {
-        return _props;
+        if (_prefix == null || _prefix.length() == 0) {
+            return _props;
+        } else {
+            Properties newProps = new Properties();
+            for (Entry entry : _props.entrySet()) {
+                String key = (String) entry.getKey();
+                if (key.startsWith(_prefix)) {
+                    newProps.put(key.substring(_prefix.length()), entry.getValue());
+                }
+            }
+            return newProps;
+        }
     }
 
     public String getDbInternalUserName() {

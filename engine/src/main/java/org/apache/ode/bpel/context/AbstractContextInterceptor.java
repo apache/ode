@@ -2,12 +2,12 @@ package org.apache.ode.bpel.context;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.engine.DbBackedMessageImpl;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.rapi.ContextData;
 import org.apache.ode.bpel.rapi.IOContext;
+import org.apache.ode.dao.bpel.MessageExchangeDAO;
 import org.w3c.dom.Element;
 
 public abstract class AbstractContextInterceptor implements ContextInterceptor {

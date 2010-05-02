@@ -35,7 +35,7 @@
                 <jdbc:table>extvartable1</jdbc:table>
                 <jdbc:init mode="insert"/> 
                 <jdbc:column name="id1" key="yes" generator="uuid" /> 
-                <jdbc:column name="id2" column-name="_id2_" key="yes" generator="uuid" />     
+                <jdbc:column name="id2" column-name="id2_" key="yes" generator="uuid" />     
                 <jdbc:column name="pid" generator="pid" />
                 <jdbc:column name="iid" generator="iid" />
                 <jdbc:column name="cts" generator="ctimestamp" />

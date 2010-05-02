@@ -19,8 +19,8 @@
 package org.apache.ode.bpel.memdao;
 
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.dao.MessageRouteDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.dao.bpel.MessageRouteDAO;
+import org.apache.ode.dao.bpel.ProcessInstanceDAO;
 
 
 /**

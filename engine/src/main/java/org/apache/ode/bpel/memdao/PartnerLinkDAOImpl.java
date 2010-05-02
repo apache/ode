@@ -25,13 +25,13 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
-import org.apache.ode.bpel.dao.ContextValueDAO;
-import org.apache.ode.bpel.dao.PartnerLinkDAO;
+import org.apache.ode.dao.bpel.ContextValueDAO;
+import org.apache.ode.dao.bpel.PartnerLinkDAO;
 import org.w3c.dom.Element;
 
 /**
  * A very simple, in-memory implementation of the
- * {@link org.apache.ode.bpel.dao.PartnerLinkDAO} interface.
+ * {@link org.apache.ode.dao.bpel.PartnerLinkDAO} interface.
  */
 public class PartnerLinkDAOImpl extends DaoBaseImpl implements PartnerLinkDAO {
 

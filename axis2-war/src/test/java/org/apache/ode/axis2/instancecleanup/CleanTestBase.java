@@ -8,10 +8,10 @@ import java.io.File;
 import org.apache.ode.axis2.Axis2TestBase;
 import org.apache.ode.axis2.ODEConfigDirAware;
 import org.apache.ode.axis2.ODEConfigProperties;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceProfileDAO;
-import org.apache.ode.bpel.dao.ProcessProfileDAO;
+import org.apache.ode.dao.bpel.ProcessDAO;
+import org.apache.ode.dao.bpel.ProcessInstanceDAO;
+import org.apache.ode.dao.bpel.ProcessInstanceProfileDAO;
+import org.apache.ode.dao.bpel.ProcessProfileDAO;
 import org.apache.ode.il.EmbeddedGeronimoFactory;
 import org.apache.ode.il.dbutil.Database;
 import org.testng.annotations.AfterMethod;
@@ -20,7 +20,7 @@ import javax.transaction.TransactionManager;
 
 public abstract class CleanTestBase extends Axis2TestBase implements ODEConfigDirAware {
     protected ProfilingBpelDAOConnection daoConn;
-    protected TransactionManager txm;
+    protected TransactionManager _txm;
     protected int initialLargeDataCount = 0;
     
     @AfterMethod
@@ -30,31 +30,30 @@ public abstract class CleanTestBase extends Axis2TestBase implements ODEConfigDi
     }
     
     protected void initTM() throws Exception {
-        if( txm != null ) {
+        if( _txm != null ) {
             try {
-                txm.commit();
+                _txm.commit();
             } catch( Exception e ) {
                 //ignore 
             }
         }
-        EmbeddedGeronimoFactory factory = new EmbeddedGeronimoFactory();
-        txm = factory.getTransactionManager();
+        _txm = new EmbeddedGeronimoFactory().getTransactionManager();
         Database db = getDatabase();
-        db.setTransactionManager(txm);
+        db.setTransactionManager(_txm);
         db.start();
-        txm.begin();
+        _txm.begin();
 
         daoConn = (ProfilingBpelDAOConnection)db.createDaoCF().getConnection();
     }
 
     protected void stopTM() throws Exception {
-        if( txm != null ) {
+        if( _txm != null ) {
             try {
-                txm.commit();
+                _txm.commit();
             } catch( Exception e ) { 
                 //ignore 
             }
-            txm = null;
+            _txm = null;
         }
     }
 
@@ -77,7 +76,7 @@ public abstract class CleanTestBase extends Axis2TestBase implements ODEConfigDi
     }
 
     protected TransactionManager getTransactionManager() {
-        return txm;
+        return _txm;
     }
 
     protected ProcessDAO assertInstanceCleanup(int instances, int activityRecoveries, int correlationSets, int faults, int exchanges, int routes, int messsages, int partnerLinks, int scopes, int variables, int events, int largeData) throws Exception {

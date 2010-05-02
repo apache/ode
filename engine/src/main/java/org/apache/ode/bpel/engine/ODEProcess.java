@@ -38,13 +38,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.context.ContextInterceptor;
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.CorrelatorDAO;
-import org.apache.ode.bpel.dao.MessageDAO;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.dao.MessageRouteDAO;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.dao.bpel.BpelDAOConnection;
+import org.apache.ode.dao.bpel.CorrelatorDAO;
+import org.apache.ode.dao.bpel.MessageDAO;
+import org.apache.ode.dao.bpel.MessageExchangeDAO;
+import org.apache.ode.dao.bpel.MessageRouteDAO;
+import org.apache.ode.dao.bpel.ProcessDAO;
+import org.apache.ode.dao.bpel.ProcessInstanceDAO;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableConf;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableManager;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
@@ -121,8 +121,10 @@ public abstract class ODEProcess {
         _contexts = server._contexts;
         if (_contexts.dao instanceof BpelDAOConnectionFactoryImpl)
             _inMemDao = (BpelDAOConnectionFactoryImpl) _contexts.dao;
-        else
-            _inMemDao = new BpelDAOConnectionFactoryImpl(_contexts.txManager);
+        else{
+            _inMemDao = new BpelDAOConnectionFactoryImpl();
+            _inMemDao.init(null, _contexts.txManager, null);
+        }
         _incomingMexCache = mexCache;
 
         // TODO : do this on a per-partnerlink basis, support transacted styles.
@@ -696,15 +698,15 @@ public abstract class ODEProcess {
             if( _contexts.isTransacted() ) {
                 _contexts.dao.getConnection().releaseMessageExchange(mexId);
             } else {
-                try {
+            try {                
                     _contexts.execTransaction(new Callable<Object>() {
                         public Object call() throws Exception {
                             _contexts.dao.getConnection().releaseMessageExchange(mexId);
                             return null;
                         }
                     });
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
                 }
             }
         }

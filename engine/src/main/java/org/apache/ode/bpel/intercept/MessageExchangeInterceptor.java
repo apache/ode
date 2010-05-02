@@ -18,9 +18,9 @@
  */
 package org.apache.ode.bpel.intercept;
 
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.dao.bpel.BpelDAOConnection;
+import org.apache.ode.dao.bpel.MessageExchangeDAO;
+import org.apache.ode.dao.bpel.ProcessDAO;
 import org.apache.ode.bpel.iapi.ProcessConf;
 
 /**

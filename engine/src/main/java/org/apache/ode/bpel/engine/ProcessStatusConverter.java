@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.ode.bpel.common.ProcessState;
-import org.apache.ode.bpel.dao.ScopeStateEnum;
+import org.apache.ode.dao.bpel.ScopeStateEnum;
 import org.apache.ode.bpel.pmapi.ProcessingException;
 import org.apache.ode.bpel.pmapi.TInstanceStatus;
 import org.apache.ode.bpel.pmapi.TScopeStatus;

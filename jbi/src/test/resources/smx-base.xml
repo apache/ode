@@ -54,7 +54,7 @@
             />
 
     <bean id="odeMCF" class="org.tranql.connector.derby.EmbeddedLocalMCF">
-      <property name="databaseName" value="target/test/smx/ode/hibdb"/>
+      <property name="databaseName" value="target/test/smx/ode/odb-db-hib"/>
       <property name="createDatabase" value="false"/>
     <property name="userName" value = "sa"/>
         <property name="password" value = ""/>

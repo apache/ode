@@ -18,9 +18,12 @@
  */
 package org.apache.ode.store;
 
+import org.apache.ode.dao.store.ProcessConfDAO;
+import org.apache.ode.dao.store.DeploymentUnitDAO;
+import org.apache.ode.dao.store.ConfStoreDAOConnectionFactory;
+import org.apache.ode.dao.store.ConfStoreDAOConnection;
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -31,8 +34,8 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.transaction.TransactionManager;
 
-import javax.sql.DataSource;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
@@ -42,12 +45,9 @@ import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.dd.DeployDocument;
 import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.iapi.*;
-import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.msg.MessageBundle;
-import org.hsqldb.jdbc.jdbcDataSource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -86,12 +86,11 @@ public class ProcessStoreImpl implements ProcessStore {
     /** Guards access to the _processes and _deploymentUnits */
     private final ReadWriteLock _rw = new ReentrantReadWriteLock();
 
-    /** GUID used to create a unique in-memory db. */
-    private String _guid = new GUID().toString();
+    final private ConfStoreDAOConnectionFactory _cf;
 
-    private ConfStoreConnectionFactory _cf;
+    final private EndpointReferenceContext _eprContext;
 
-    private EndpointReferenceContext eprContext;
+    final private TransactionManager _txm;
 
     protected File _deployDir;
 
@@ -106,51 +105,16 @@ public class ProcessStoreImpl implements ProcessStore {
     private ExecutorService _executor = Executors.newSingleThreadExecutor(new SimpleThreadFactory());
 
     /**
-     * In-memory DataSource, or <code>null</code> if we are using a real DS. We need this to shutdown the DB.
-     */
-    private DataSource _inMemDs;
-
-    public ProcessStoreImpl() {
-        this(null, null, "", new OdeConfigProperties(new Properties(), ""), true);
-    }
-
-    public ProcessStoreImpl(EndpointReferenceContext eprContext, DataSource ds, String persistenceType, OdeConfigProperties props, boolean createDatamodel) {
-        this.eprContext = eprContext;
-        if (ds != null) {
-            // ugly hack
-            if (persistenceType.toLowerCase().indexOf("hib") != -1)
-                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(ds, props.getProperties(), createDatamodel);
-            else
-                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(ds, createDatamodel);
-        } else {
-            // If the datasource is not provided, then we create a HSQL-based in-memory
-            // database. Makes testing a bit simpler.
-            DataSource hsqlds = createInternalDS(_guid);
-            if ("hibernate".equalsIgnoreCase(persistenceType))
-                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(hsqlds, props.getProperties(), createDatamodel);
-            else
-                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(hsqlds, createDatamodel);
-            _inMemDs = hsqlds;
-        }
-
-    }
-
-    /**
      * Constructor that hardwires OpenJPA on a new in-memory database. Suitable for tests.
      */
-    public ProcessStoreImpl(EndpointReferenceContext eprContext, DataSource inMemDs) {
-        this.eprContext = eprContext;
-        DataSource hsqlds = createInternalDS(new GUID().toString());
-        //when in memory we always create the model as we are starting from scratch
-        _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(hsqlds, true);
-        _inMemDs = hsqlds;
+    public <E> ProcessStoreImpl(EndpointReferenceContext eprContext, TransactionManager mgr, ConfStoreDAOConnectionFactory cf) {
+        _eprContext = eprContext;
+        _txm = mgr;
+        _cf=cf;
     }
 
     public void shutdown() {
-        if (_inMemDs != null) {
-            shutdownInternalDB(_inMemDs);
-            _inMemDs = null;
-        }
+        
     }
 
     @Override
@@ -191,7 +155,7 @@ public class ProcessStoreImpl implements ProcessStore {
         _rw.writeLock().lock();
         // Process and DU use a monotonically increased single version number.
         long version = exec(new Callable<Long>() {
-            public Long call(ConfStoreConnection conn) {
+            public Long call(ConfStoreDAOConnection conn) {
                 return conn.getNextVersion();
             }
         });
@@ -226,7 +190,7 @@ public class ProcessStoreImpl implements ProcessStore {
                 }
 
                 ProcessConfImpl pconf = new ProcessConfImpl(pid, processDD.getName(), version, du, processDD, deployDate,
-                        calcInitialProperties(processDD), calcInitialState(processDD), eprContext, _configDir);
+                        calcInitialProperties(processDD), calcInitialState(processDD), _eprContext, _configDir);
                 processes.add(pconf);
             }
 
@@ -245,7 +209,7 @@ public class ProcessStoreImpl implements ProcessStore {
         // Do the deployment in the DB. We need this so that we remember deployments across system shutdowns.
         // We don't fail if there is a DB error, simply print some errors.
         deployed = exec(new Callable<Collection<QName>>() {
-            public Collection<QName> call(ConfStoreConnection conn) {
+            public Collection<QName> call(ConfStoreDAOConnection conn) {
                 // Check that this deployment unit is not deployed.
                 DeploymentUnitDAO dudao = conn.getDeploymentUnit(du.getName());
                 if (dudao != null) {
@@ -337,7 +301,7 @@ public class ProcessStoreImpl implements ProcessStore {
     public Collection<QName> undeploy(final File dir) {
         try {
             exec(new Callable<Collection<QName>>() {
-                public Collection<QName> call(ConfStoreConnection conn) {
+                public Collection<QName> call(ConfStoreDAOConnection conn) {
                     DeploymentUnitDAO dudao = conn.getDeploymentUnit(dir.getName());
                     if (dudao != null)
                         dudao.delete();
@@ -411,7 +375,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
         // Update in the database.
         ProcessState old = exec(new Callable<ProcessState>() {
-            public ProcessState call(ConfStoreConnection conn) {
+            public ProcessState call(ConfStoreDAOConnection conn) {
                 DeploymentUnitDAO dudao = conn.getDeploymentUnit(dudir.getName());
                 if (dudao == null) {
                     String errmsg = __msgs.msgProcessNotFound(pid);
@@ -472,7 +436,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
         final DeploymentUnitDir dudir = pconf.getDeploymentUnit();
         exec(new ProcessStoreImpl.Callable<Object>() {
-            public Object call(ConfStoreConnection conn) {
+            public Object call(ConfStoreDAOConnection conn) {
                 DeploymentUnitDAO dudao = conn.getDeploymentUnit(dudir.getName());
                 if (dudao == null)
                     return null;
@@ -494,7 +458,7 @@ public class ProcessStoreImpl implements ProcessStore {
     public void loadAll() {
         final ArrayList<ProcessConfImpl> loaded = new ArrayList<ProcessConfImpl>();
         exec(new Callable<Object>() {
-            public Object call(ConfStoreConnection conn) {
+            public Object call(ConfStoreDAOConnection conn) {
                 Collection<DeploymentUnitDAO> dus = conn.getDeploymentUnits();
                 for (DeploymentUnitDAO du : dus)
                     try {
@@ -539,7 +503,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
     public long getCurrentVersion() {
         long version = exec(new Callable<Long>() {
-            public Long call(ConfStoreConnection conn) {
+            public Long call(ConfStoreDAOConnection conn) {
                 return conn.getNextVersion();
             }
         });
@@ -597,7 +561,7 @@ public class ProcessStoreImpl implements ProcessStore {
         }
     }
 
-    private ConfStoreConnection getConnection() {
+    private ConfStoreDAOConnection getConnection() {
         return _cf.getConnection();
     }
 
@@ -678,7 +642,7 @@ public class ProcessStoreImpl implements ProcessStore {
                 // TODO: update the props based on the values in the DB.
 
                 ProcessConfImpl pconf = new ProcessConfImpl(p.getPID(), p.getType(), p.getVersion(), dud, pinfo, dudao
-                        .getDeployDate(), props, p.getState(), eprContext, _configDir);
+                        .getDeployDate(), props, p.getState(), _eprContext, _configDir);
                 version = p.getVersion();
 
                 _processes.put(pconf.getProcessId(), pconf);
@@ -722,7 +686,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
         try {
             return exec(new Callable<Boolean>() {
-                public Boolean call(ConfStoreConnection conn) {
+                public Boolean call(ConfStoreDAOConnection conn) {
                     DeploymentUnitDAO dudao = conn.getDeploymentUnit(duName);
                     if (dudao == null)
                         return false;
@@ -748,30 +712,31 @@ public class ProcessStoreImpl implements ProcessStore {
     abstract class Callable<V> implements java.util.concurrent.Callable<V> {
         public V call() {
             boolean success = false;
-            ConfStoreConnection conn = getConnection();
+            ConfStoreDAOConnection conn = _cf.getConnection();
             try {
-                conn.begin();
+                if (_txm!=null)
+                    _txm.begin();
                 V r = call(conn);
-                conn.commit();
+                if (_txm!=null)
+                    _txm.commit();
                 success = true;
                 return r;
+            }catch (Exception e){
+                __log.error("TxError",e);
+                return null;
             } finally {
-                if (!success)
+                if (!success && _txm != null)
                     try {
-                        conn.rollback();
+                        _txm.rollback();
                     } catch (Exception ex) {
-                        __log.error("DbError", ex);
+                        __log.error("TxError", ex);
                     }
-                try {
                     conn.close();
-                } catch (Exception ex) {
-                    __log.error("DbError", ex);
-                }
             }
 
         }
 
-        abstract V call(ConfStoreConnection conn);
+        abstract V call(ConfStoreDAOConnection conn);
     }
 
     public void setDeployDir(File depDir) {
@@ -794,22 +759,7 @@ public class ProcessStoreImpl implements ProcessStore {
         this._configDir = configDir;
     }
 
-    public static DataSource createInternalDS(String guid) {
-        jdbcDataSource hsqlds = new jdbcDataSource();
-        hsqlds.setDatabase("jdbc:hsqldb:mem:" + guid);
-        hsqlds.setUser("sa");
-        hsqlds.setPassword("");
-        return hsqlds;
-    }
-
-    public static void shutdownInternalDB(DataSource ds) {
-        try {
-            ds.getConnection().createStatement().execute("SHUTDOWN;");
-        } catch (SQLException e) {
-            __log.error("Error shutting down.", e);
-        }
-    }
-
+    
     private List<QName> toPids(Collection<QName> processTypes, long version) {
         ArrayList<QName> result = new ArrayList<QName>();
         for (QName pqName : processTypes) {

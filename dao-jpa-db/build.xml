@@ -71,9 +71,8 @@
 		   <path refid="classpath"/> 
 		</classpath>
         </mappingtool>
-        <concat destfile="${db.scripts.dir}/@{db}.sql">
+        <concat destfile="${db.scripts.dir}/scripts/@{db}.sql">
           <fileset file="${scripts.dir}/license-header.sql"/>
-          <fileset file="${scripts.dir}/simplesched-@{db}.sql"/>
           <fileset file="${db.scripts.dir}/partial.@{db}.sql"/>
         </concat>
       <echo>Done.</echo>

@@ -19,11 +19,11 @@
   -->
 
 <project>
-    <groupId>org.apache.ode</groupId>
-    <artifactId>ode-engine</artifactId>
-    <name>ODE :: Runtime Engine</name>
-    <packaging>jar</packaging>
-    <modelVersion>4.0.0</modelVersion>
+  <groupId>org.apache.ode</groupId>
+  <artifactId>ode-engine</artifactId>
+  <name>ODE :: Runtime Engine</name>
+  <packaging>jar</packaging>
+  <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.ode</groupId>
@@ -67,20 +67,6 @@
     <dependency>
       <groupId>org.apache.ode</groupId>
       <artifactId>ode-il-common</artifactId>
-       <exclusions>
-          <exclusion>
-           <groupId>geronimo</groupId>
-           <artifactId>geronimo-connector</artifactId>
-         </exclusion>
-		 <exclusion>
-		   <groupId>geronimo</groupId>
-		   <artifactId>geronimo-transaction</artifactId>
-		 </exclusion>
-		 <exclusion>
-		   <groupId>org.apache.geronimo.specs</groupId>
-		   <artifactId>geronimo-jta_1.0.1B_spec</artifactId>
-		 </exclusion>
-       </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.ode</groupId>
@@ -89,14 +75,14 @@
     </dependency>
     <dependency>
       <groupId>org.apache.ode</groupId>
-      <artifactId>ode-dao-jpa</artifactId>
+      <artifactId>ode-dao-jpa-ojpa</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
+    <!-- <dependency>
       <groupId>org.apache.ode</groupId>
       <artifactId>ode-dao-hibernate</artifactId>
       <scope>test</scope>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>org.apache.ode</groupId>
       <artifactId>ode-runtimes</artifactId>
@@ -113,19 +99,21 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>hsqldb</groupId>
-      <artifactId>hsqldb</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>jmock</groupId>
       <artifactId>jmock</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.derby</groupId>
-      <artifactId>derby</artifactId>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
       <scope>test</scope>
     </dependency>
-   </dependencies>
+    <dependency>
+      <groupId>org.apache.geronimo.components</groupId>
+      <artifactId>geronimo-transaction</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
 </project>
+
+

@@ -22,7 +22,7 @@ import org.apache.ode.bpel.bdi.breaks.ActivityBreakpoint;
 import org.apache.ode.bpel.bdi.breaks.Breakpoint;
 import org.apache.ode.bpel.bdi.breaks.VariableModificationBreakpoint;
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.dao.*;
+import org.apache.ode.dao.bpel.*;
 import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.pmapi.*;

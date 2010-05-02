@@ -10,8 +10,8 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.InstanceFilter;
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.FilteredInstanceDeletable;
+import org.apache.ode.dao.bpel.BpelDAOConnection;
+import org.apache.ode.dao.bpel.FilteredInstanceDeletable;
 import org.apache.ode.bpel.engine.Contexts;
 import org.apache.ode.bpel.engine.BpelServerImpl.ContextsAware;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
@@ -85,10 +85,10 @@ public class RuntimeDataCleanupRunnable implements MapSerializableRunnable, Cont
     
     int cleanInstances(String filter, final Set<CLEANUP_CATEGORY> categories, int limit) {
         _log.debug("CleanInstances using filter: " + filter + ", limit: " + limit);
-        
+
         final InstanceFilter instanceFilter = new InstanceFilter(filter, "", limit);
         try {
-            if( _contexts.scheduler != null ) {
+            if (_contexts.scheduler != null) {
                 return _contexts.execTransaction(new Callable<Integer>() {
                     public Integer call() throws Exception {
                         BpelDAOConnection con = _contexts.dao.getConnection();
@@ -100,11 +100,11 @@ public class RuntimeDataCleanupRunnable implements MapSerializableRunnable, Cont
                 });
             } else {
                 return 0;
-            }
+                }
         } catch (RuntimeException re) {
             throw re;
         } catch (Exception e) {
-            throw new RuntimeException("Exception while listing instances: ",  e);
+            throw new RuntimeException("Exception while listing instances: ", e);
         }
     }
 }

@@ -16,27 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.ode.scheduler.simple;
 
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicLong;
-
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
-import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.iapi.Scheduler.JobType;
+import org.apache.ode.dao.scheduler.JobDAO;
+import org.apache.ode.dao.scheduler.SchedulerDAOConnection;
+import org.apache.ode.dao.scheduler.SchedulerDAOConnectionFactory;
 
 /**
  * A reliable and relatively simple scheduler that uses a database to persist information about scheduled tasks.
@@ -56,305 +53,257 @@ import org.apache.ode.bpel.iapi.Scheduler.JobType;
  *
  */
 public class SimpleScheduler implements Scheduler, TaskRunner {
-    private static final Log __log = LogFactory.getLog(SimpleScheduler.class);
 
-    /**
-     * Jobs scheduled with a time that is between [now, now+immediateInterval] will be assigned to the current node, and placed
-     * directly on the todo queue.
-     */
-    long _immediateInterval = 30000;
+  private static final Log __log = LogFactory.getLog(SimpleScheduler.class);
+  /**
+   * Jobs scheduled with a time that is between [now, now+immediateInterval] will be assigned to the current node, and placed
+   * directly on the todo queue.
+   */
+  long _immediateInterval = 30000;
+  /**
+   * Jobs sccheduled with a time that is between (now+immediateInterval,now+nearFutureInterval) will be assigned to the current
+   * node, but will not be placed on the todo queue (the promoter will pick them up).
+   */
+  long _nearFutureInterval = 10 * 60 * 1000;
+  /** 10s of no communication and you are deemed dead. */
+  long _staleInterval = 10000;
+  String _nodeId;
+  /** Maximum number of jobs in the "near future" / todo queue. */
+  int _todoLimit = 10000;
+  /** The object that actually handles the jobs. */
+  volatile JobProcessor _jobProcessor;
+  volatile JobProcessor _polledRunnableProcessor;
+  private SchedulerThread _todo;
+  private SchedulerDAOConnectionFactory _dbcf;
+  private TransactionManager _txm;
+  /** All the nodes we know about */
+  private CopyOnWriteArraySet<String> _knownNodes = new CopyOnWriteArraySet<String>();
+  /** When we last heard from our nodes. */
+  private ConcurrentHashMap<String, Long> _lastHeartBeat = new ConcurrentHashMap<String, Long>();
+  private boolean _running;
+  /** Time for next upgrade. */
+  private AtomicLong _nextUpgrade = new AtomicLong();
+  /** Time for next job load */
+  private AtomicLong _nextScheduleImmediate = new AtomicLong();
+  private Random _random = new Random();
 
-    /**
-     * Jobs sccheduled with a time that is between (now+immediateInterval,now+nearFutureInterval) will be assigned to the current
-     * node, but will not be placed on the todo queue (the promoter will pick them up).
-     */
-    long _nearFutureInterval = 10 * 60 * 1000;
+  public SimpleScheduler(String nodeId, SchedulerDAOConnectionFactory dbcf, TransactionManager mgr, Properties conf) {
+    _nodeId = nodeId;
+    _dbcf = dbcf;
+    _txm = mgr;
+    _todoLimit = Integer.parseInt(conf.getProperty("ode.scheduler.queueLength", "10000"));
+    _todo = new SchedulerThread(this);
+  }
 
-    /** 10s of no communication and you are deemed dead. */
-    long _staleInterval = 10000;
+  public void setNodeId(String nodeId) {
+    _nodeId = nodeId;
+  }
 
-    TransactionManager _txm;
+  public void setStaleInterval(long staleInterval) {
+    _staleInterval = staleInterval;
+  }
 
-    String _nodeId;
+  public void setImmediateInterval(long immediateInterval) {
+    _immediateInterval = immediateInterval;
+  }
 
-    /** Maximum number of jobs in the "near future" / todo queue. */
-    int _todoLimit = 10000;
+  public void setNearFutureInterval(long nearFutureInterval) {
+    _nearFutureInterval = nearFutureInterval;
+  }
 
-    /** The object that actually handles the jobs. */
-    volatile JobProcessor _jobProcessor;
+  public void setSchedulerDAOConnectionFactory(SchedulerDAOConnectionFactory dbcf) {
+    _dbcf = dbcf;
+  }
 
-    volatile JobProcessor _polledRunnableProcessor;
+  public void setPolledRunnableProcesser(JobProcessor polledRunnableProcessor) {
+    _polledRunnableProcessor = polledRunnableProcessor;
+  }
 
-    private SchedulerThread _todo;
-
-    private DatabaseDelegate _db;
-
-    /** All the nodes we know about */
-    private CopyOnWriteArraySet<String> _knownNodes = new CopyOnWriteArraySet<String>();
-
-    /** When we last heard from our nodes. */
-    private ConcurrentHashMap<String, Long> _lastHeartBeat = new ConcurrentHashMap<String, Long>();
-
-    private boolean _running;
-
-    /** Time for next upgrade. */
-    private AtomicLong _nextUpgrade = new AtomicLong();
-
-    /** Time for next job load */
-    private AtomicLong _nextScheduleImmediate = new AtomicLong();
-
-    private Random _random = new Random();
-
-    public SimpleScheduler(String nodeId, DatabaseDelegate del, Properties conf) {
-        _nodeId = nodeId;
-        _db = del;
-        _todoLimit = Integer.parseInt(conf.getProperty("ode.scheduler.queueLength", "10000"));
-        _todo = new SchedulerThread(this);
-    }
-
-    public void setNodeId(String nodeId) {
-        _nodeId = nodeId;
-    }
-
-    public void setStaleInterval(long staleInterval) {
-        _staleInterval = staleInterval;
-    }
-
-    public void setImmediateInterval(long immediateInterval) {
-        _immediateInterval = immediateInterval;
-    }
-
-    public void setNearFutureInterval(long nearFutureInterval) {
-        _nearFutureInterval = nearFutureInterval;
-    }
-
-    public void setTransactionManager(TransactionManager txm) {
-        _txm = txm;
-    }
-
-    public void setDatabaseDelegate(DatabaseDelegate dbd) {
-        _db = dbd;
-    }
-
-    public void setPolledRunnableProcesser(JobProcessor polledRunnableProcessor) {
-        _polledRunnableProcessor = polledRunnableProcessor;
-    }
-
-    public void cancelJob(String jobId) throws ContextException {
-        _todo.dequeue(new Job(0, jobId, false, null));
-        try {
-            _db.deleteJob(jobId, _nodeId);
-        } catch (DatabaseException e) {
-            __log.debug("Job removal failed.", e);
-            throw new ContextException("Job removal failed.", e);
+    public void cancelJob(final String jobId) throws ContextException {
+        SchedulerDAOConnection conn = _dbcf.getConnection();
+        _todo.dequeue(new JobDAOTask(jobId));
+        if (!conn.deleteJob(jobId, _nodeId)) {
+            __log.debug("Job removal failed.");
+            throw new ContextException("Job removal failed.");
         }
     }
 
-    public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
-        try {
-            if (__log.isDebugEnabled()) __log.debug("Beginning a new transaction");
-            _txm.begin();
-        } catch (Exception ex) {
-            String errmsg = "Internal Error, could not begin transaction.";
-            throw new ContextException(errmsg, ex);
+  public String schedulePersistedJob(final JobDetails jobDetail, Date when) throws ContextException {
+    long ctime = System.currentTimeMillis();
+    if (when == null) {
+      when = new Date(ctime);
+    }
+
+    if (__log.isDebugEnabled()) {
+      __log.debug("scheduling " + jobDetail + " for " + when);
+    }
+
+    return schedulePersistedJob(jobDetail, true, when, ctime);
+  }
+
+  public String scheduleMapSerializableRunnable(MapSerializableRunnable runnable, Date when) throws ContextException {
+    long ctime = System.currentTimeMillis();
+    if (when == null) {
+      when = new Date(ctime);
+    }
+
+    JobDetails jobDetails = new JobDetails();
+    jobDetails.getDetailsExt().put("runnable", runnable);
+    runnable.storeToDetails(jobDetails);
+
+    if (__log.isDebugEnabled()) {
+      __log.debug("scheduling " + jobDetails + " for " + when);
+    }
+
+    return schedulePersistedJob(jobDetails, true, when, ctime);
+  }
+
+    private JobDAO insertJob(final boolean transacted, final JobDetails jobDetails, final long scheduledDate, final String nodeID, final boolean loaded, final boolean enqueue) throws ContextException {
+        SchedulerDAOConnection conn = _dbcf.getConnection();
+        final JobDAO job = conn.createJob(transacted, jobDetails, true, scheduledDate);
+        if (!conn.insertJob(job, nodeID, loaded)) {
+            String msg = String.format("Database insert failed. jobId %s nodeId %s", job.getJobId(), nodeID);
+            __log.error(msg);
+            throw new ContextException(msg);
         }
-        boolean success = false;
-        try {
-            T retval = transaction.call();
-            success = true;
-            return retval;
-        } catch (Exception ex) {
-            throw ex;
-        } finally {
-            if (success) {
-                if (__log.isDebugEnabled()) __log.debug("Commiting...");
-                _txm.commit();
-            } else {
-                if (__log.isDebugEnabled()) __log.debug("Rollbacking...");
-                _txm.rollback();
-            }
+        if (enqueue) {
+            addTodoOnCommit(new JobDAOTask(job));
         }
+        return job;
     }
 
-    public String schedulePersistedJob(final JobDetails jobDetail, Date when) throws ContextException {
-        long ctime = System.currentTimeMillis();
-        if (when == null)
-            when = new Date(ctime);
+  public String schedulePersistedJob(JobDetails jobDetails, boolean transacted, Date when, long ctime) throws ContextException {
+    boolean immediate = when.getTime() <= ctime + _immediateInterval;
+    boolean nearfuture = !immediate && when.getTime() <= ctime + _nearFutureInterval;
+    JobDAO job;
 
-        if (__log.isDebugEnabled())
-            __log.debug("scheduling " + jobDetail + " for " + when);
+    if (immediate) {
+      // If we have too many jobs in the queue, we don't allow any new ones
+      if (_todo.size() > _todoLimit) {
+        __log.error("The execution queue is backed up, the engine can't keep up with the load. Either "
+                + "increase the queue size or regulate the flow.");
+        return null;
+      }
+      job = insertJob(transacted, jobDetails, when.getTime(), _nodeId, true, true);
+      __log.debug("scheduled immediate job: " + job.getJobId());
+    } else if (nearfuture) {
+      // Near future, assign the job to ourselves (why? -- this makes it very unlikely that we
+      // would get two nodes trying to process the same instance, which causes unsightly rollbacks).
+      job = insertJob(transacted, jobDetails, when.getTime(), _nodeId, false, false);
+      __log.debug("scheduled near-future job: " + job.getJobId());
+    } else /* far future */ {
+      // Not the near future, we don't assign a node-id, we'll assign it later.
+      job = insertJob(transacted, jobDetails, when.getTime(), null, false, false);
+      __log.debug("scheduled far-future job: " + job.getJobId());
+    }
+    return job.getJobId();
+  }
 
-        return schedulePersistedJob(new Job(when.getTime(), true, jobDetail), when, ctime);
+    public String scheduleVolatileJob(final boolean transacted, final JobDetails jobDetail) throws ContextException {
+        SchedulerDAOConnection conn = _dbcf.getConnection();
+        final JobDAO job = conn.createJob(transacted, jobDetail, false, System.currentTimeMillis());
+        addTodoOnCommit(new JobDAOTask(job));
+        return job.getJobId();
     }
 
-    public String scheduleMapSerializableRunnable(MapSerializableRunnable runnable, Date when) throws ContextException {
-        long ctime = System.currentTimeMillis();
-        if (when == null)
-            when = new Date(ctime);
+  public void setJobProcessor(JobProcessor processor) throws ContextException {
+    _jobProcessor = processor;
+  }
 
-        JobDetails jobDetails = new JobDetails();
-        jobDetails.getDetailsExt().put("runnable", runnable);
-        runnable.storeToDetails(jobDetails);
-        
-        if (__log.isDebugEnabled())
-            __log.debug("scheduling " + jobDetails + " for " + when);
+  public void shutdown() {
+    stop();
+    _jobProcessor = null;
+    _todo = null;
+  }
 
-        return schedulePersistedJob(new Job(when.getTime(), true, jobDetails), when, ctime);
+  public synchronized void start() {
+    if (_running) {
+      return;
     }
 
-    public String schedulePersistedJob(Job job, Date when, long ctime) throws ContextException {
-        boolean immediate = when.getTime() <= ctime + _immediateInterval;
-        boolean nearfuture = !immediate && when.getTime() <= ctime + _nearFutureInterval;
-        try {
-            if (immediate) {
-                // If we have too many jobs in the queue, we don't allow any new ones
-                if (_todo.size() > _todoLimit) {
-                    __log.error("The execution queue is backed up, the engine can't keep up with the load. Either " +
-                            "increase the queue size or regulate the flow.");
-                    return null;
-                }
+    _todo.clearTasks(UpgradeJobsTask.class);
+    _todo.clearTasks(LoadImmediateTask.class);
+    _todo.clearTasks(CheckStaleNodes.class);
 
-                // Immediate scheduling means we put it in the DB for safe keeping
-                _db.insertJob(job, _nodeId, true);
-                // And add it to our todo list .
-                addTodoOnCommit(job);
+    _knownNodes.clear();
 
-                __log.debug("scheduled immediate job: " + job.jobId);
-            } else if (nearfuture) {
-                // Near future, assign the job to ourselves (why? -- this makes it very unlikely that we
-                // would get two nodes trying to process the same instance, which causes unsightly rollbacks).
-                _db.insertJob(job, _nodeId, false);
-                __log.debug("scheduled near-future job: " + job.jobId);
-            } else /* far future */{
-                // Not the near future, we don't assign a node-id, we'll assign it later.
-                _db.insertJob(job, null, false);
-                __log.debug("scheduled far-future job: " + job.jobId);
-            }
-        } catch (DatabaseException dbe) {
-            __log.error("Database error.", dbe);
-            throw new ContextException("Database error.", dbe);
-        }
-        return job.jobId;
+      exec(new Callable<Boolean>() {
 
+          public Boolean call(SchedulerDAOConnection conn) throws ContextException {
+              List<String> ids = conn.getNodeIds();
+              if (ids == null) {
+                  __log.error("Error retrieving node list.");
+                  throw new ContextException("Error retrieving node list.");
+              }
+              _knownNodes.addAll(ids);
+              return null;
+          }
+      });
+
+      // Pretend we got a heartbeat...
+      for (String s : _knownNodes) {
+      _lastHeartBeat.put(s, System.currentTimeMillis());
     }
 
-    public String scheduleVolatileJob(boolean transacted, JobDetails jobDetail) throws ContextException {
-        Job job = new Job(System.currentTimeMillis(), transacted, jobDetail);
-        job.persisted = false;
-        addTodoOnCommit(job);
-        return job.toString();
+    // schedule immediate job loading for now!
+    _todo.enqueue(new LoadImmediateTask(System.currentTimeMillis()));
+
+    // schedule check for stale nodes, make it random so that the nodes don't overlap.
+    _todo.enqueue(new CheckStaleNodes(System.currentTimeMillis() + (long) (_random.nextDouble() * _staleInterval)));
+
+    // do the upgrade sometime (random) in the immediate interval.
+    _todo.enqueue(new UpgradeJobsTask(System.currentTimeMillis() + (long) (_random.nextDouble() * _immediateInterval)));
+
+    _todo.start();
+    _running = true;
+  }
+
+  public synchronized void stop() {
+    if (!_running) {
+      return;
     }
 
-    public void setJobProcessor(JobProcessor processor) throws ContextException {
-        _jobProcessor = processor;
-    }
+    _todo.stop();
+    _todo.clearTasks(UpgradeJobsTask.class);
+    _todo.clearTasks(LoadImmediateTask.class);
+    _todo.clearTasks(CheckStaleNodes.class);
+    _running = false;
+  }
 
-    public void shutdown() {
-        stop();
-        _jobProcessor = null;
-        _txm = null;
-        _todo = null;
-    }
-
-    public synchronized void start() {
-        if (_running)
-            return;
-
-        _todo.clearTasks(UpgradeJobsTask.class);
-        _todo.clearTasks(LoadImmediateTask.class);
-        _todo.clearTasks(CheckStaleNodes.class);
-
-        _knownNodes.clear();
-
-        try {
-            execTransaction(new Callable<Void>() {
-
-                public Void call() throws Exception {
-                    _knownNodes.addAll(_db.getNodeIds());
-                    return null;
-                }
-
-            });
-        } catch (Exception ex) {
-            __log.error("Error retrieving node list.", ex);
-            throw new ContextException("Error retrieving node list.", ex);
-        }
-
-        // Pretend we got a heartbeat...
-        for (String s : _knownNodes)
-            _lastHeartBeat.put(s, System.currentTimeMillis());
-
-        // schedule immediate job loading for now!
-        _todo.enqueue(new LoadImmediateTask(System.currentTimeMillis()));
-
-        // schedule check for stale nodes, make it random so that the nodes don't overlap.
-        _todo.enqueue(new CheckStaleNodes(System.currentTimeMillis() + (long) (_random.nextDouble() * _staleInterval)));
-
-        // do the upgrade sometime (random) in the immediate interval.
-        _todo.enqueue(new UpgradeJobsTask(System.currentTimeMillis() + (long) (_random.nextDouble() * _immediateInterval)));
-
-        _todo.start();
-        _running = true;
-    }
-
-    public synchronized void stop() {
-        if (!_running)
-            return;
-
-        _todo.stop();
-        _todo.clearTasks(UpgradeJobsTask.class);
-        _todo.clearTasks(LoadImmediateTask.class);
-        _todo.clearTasks(CheckStaleNodes.class);
-        _running = false;
-    }
-
-    public void jobCompleted(String jobId) {
-        boolean deleted = false;
-        try {
-            deleted = _db.deleteJob(jobId, _nodeId);
-        } catch (DatabaseException de) {
-            String errmsg = "Database error.";
-            __log.error(errmsg, de);
-            throw new ContextException(errmsg, de);
-        }
-
+    public void jobCompleted(final String jobId) {
+        SchedulerDAOConnection conn = _dbcf.getConnection();
+        boolean deleted = conn.deleteJob(jobId, _nodeId);
         if (!deleted) {
-            try {
-                _txm.getTransaction().setRollbackOnly();
-            } catch (Exception ex) {
-                __log.error("Transaction manager error; setRollbackOnly() failed.", ex);
-            }
-
             throw new ContextException("Job no longer in database: jobId=" + jobId);
         }
     }
 
+  /**
+   * Run a job in the current thread.
+   *
+   * @param job
+   *            job to run.
+   */
+  protected void runJob(final JobDAO job) {
+    final Scheduler.JobInfo jobInfo = new Scheduler.JobInfo(job.getJobId(), job.getDetails(), job.getDetails().getRetryCount());
 
-    /**
-     * Run a job in the current thread.
-     *
-     * @param job
-     *            job to run.
-     */
-    protected void runJob(final Job job) {
-        final Scheduler.JobInfo jobInfo = new Scheduler.JobInfo(job.jobId, job.detail, job.detail.getRetryCount());
-
-        try {
-            try {
-                _jobProcessor.onScheduledJob(jobInfo);
-            } catch (JobProcessorException jpe) {
-                if (jpe.retry)
-                    __log.error("Error while processing transaction, retrying in " + doRetry(job) + "s");
-                else
-                    __log.error("Error while processing transaction, no retry.", jpe);
-            }
-        } catch (Exception ex) {
-            __log.error("Error in scheduler processor.", ex);
+    try {
+      try {
+        _jobProcessor.onScheduledJob(jobInfo);
+      } catch (JobProcessorException jpe) {
+        if (jpe.retry) {
+          __log.error("Error while processing transaction, retrying in " + doRetry(job) + "s");
+        } else {
+          __log.error("Error while processing transaction, no retry.", jpe);
         }
-
+      }
+    } catch (Exception ex) {
+      __log.error("Error in scheduler processor.", ex);
     }
 
-    private void addTodoOnCommit(final Job job) {
+  }
+
+    private void addTodoOnCommit(final JobDAOTask job) {
 
         Transaction tx;
         try {
@@ -365,72 +314,75 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
             throw new ContextException(errmsg, ex);
         }
 
-        if (tx == null)
-            throw new ContextException("Missing required transaction in thread " + Thread.currentThread());
+        if (tx == null) {
+            _todo.enqueue(job);
+        } else {
+            try {
+                tx.registerSynchronization(new Synchronization() {
 
-        try {
-            tx.registerSynchronization(new Synchronization() {
-
-                public void afterCompletion(int status) {
-                    if (status == Status.STATUS_COMMITTED) {
-                        _todo.enqueue(job);
+                    public void afterCompletion(int status) {
+                        if (status == Status.STATUS_COMMITTED) {
+                            _todo.enqueue(job);
+                        }
                     }
-                }
 
-                public void beforeCompletion() {
-                }
-
-            });
-
-        } catch (Exception e) {
-            String errmsg = "Unable to registrer synchronizer. ";
-            __log.error(errmsg, e);
-            throw new ContextException(errmsg, e);
+                    public void beforeCompletion() {
+                    }
+                });
+            } catch (Exception e) {
+                String errmsg = "Unable to registrer synchronizer. ";
+                __log.error(errmsg, e);
+                throw new ContextException(errmsg, e);
+            }
         }
     }
 
-    public void runTask(Task task) {
-        if (task instanceof Job)
-            runJob((Job) task);
-        if (task instanceof SchedulerTask)
-            ((SchedulerTask) task).run();
+  public void runTask(Task task) {
+    if (task instanceof JobDAOTask) {
+      runJob(((JobDAOTask) task).dao);
+    }
+    if (task instanceof SchedulerTask) {
+      ((SchedulerTask) task).run();
+    }
+  }
+
+  public void updateHeartBeat(String nodeId) {
+    if (nodeId == null) {
+      return;
     }
 
-    public void updateHeartBeat(String nodeId) {
-        if (nodeId == null)
-            return;
-
-        if (_nodeId.equals(nodeId))
-            return;
-
-        _lastHeartBeat.put(nodeId, System.currentTimeMillis());
-        _knownNodes.add(nodeId);
+    if (_nodeId.equals(nodeId)) {
+      return;
     }
+
+    _lastHeartBeat.put(nodeId, System.currentTimeMillis());
+    _knownNodes.add(nodeId);
+  }
 
     boolean doLoadImmediate() {
         __log.debug("LOAD IMMEDIATE started");
-        List<Job> jobs;
-        try {
-            do {
-                jobs = execTransaction(new Callable<List<Job>>() {
-                    public List<Job> call() throws Exception {
-                        return _db.dequeueImmediate(_nodeId, System.currentTimeMillis() + _immediateInterval, 10);
-                    }
-                });
-                for (Job j : jobs) {
-                    if (__log.isDebugEnabled())
-                        __log.debug("todo.enqueue job from db: " + j.jobId + " for " + j.schedDate);
 
-                    _todo.enqueue(j);
+        List<JobDAO> jobs;
+        do {
+            jobs = exec(new Callable<List<JobDAO>>() {
+                public List<JobDAO> call(SchedulerDAOConnection conn) throws ContextException {
+                    return conn.dequeueImmediate(_nodeId, System.currentTimeMillis() + _immediateInterval, 10);
                 }
-            } while (jobs.size() == 10);
-            return true;
-        } catch (Exception ex) {
-            __log.error("Error loading immediate jobs from database.", ex);
-            return false;
-        } finally {
-            __log.debug("LOAD IMMEDIATE complete");
-        }
+            });
+            if (jobs == null) {
+                __log.error("Error loading immediate jobs from database.");
+                return false;
+            }
+            for (JobDAO j : jobs) {
+                if (__log.isDebugEnabled()) {
+                    __log.debug("todo.enqueue job from db: " + j.getJobId() + " for " + j.getScheduledDate());
+                }
+                _todo.enqueue(new JobDAOTask(j));
+            }
+
+        } while (jobs.size() == 10);
+        __log.debug("LOAD IMMEDIATE complete");
+        return true;
     }
 
     boolean doUpgrade() {
@@ -446,154 +398,214 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         // of the time by the number of nodes to create the node assignment.
         // This can be done in a single update statement.
         final long maxtime = System.currentTimeMillis() + _nearFutureInterval;
-        try {
-            return execTransaction(new Callable<Boolean>() {
-
-                public Boolean call() throws Exception {
-                    int numNodes = knownNodes.size();
-                    for (int i = 0; i < numNodes; ++i) {
-                        String node = knownNodes.get(i);
-                        _db.updateAssignToNode(node, i, numNodes, maxtime);
-                    }
-                    return true;
+        return exec(new Callable<Boolean>() {
+            public Boolean call(SchedulerDAOConnection conn) throws ContextException {
+                int numNodes = knownNodes.size();
+                if (numNodes == -1) {
+                    __log.error("Database error upgrading jobs.");
+                    return false;
                 }
-
-            });
-
-        } catch (Exception ex) {
-            __log.error("Database error upgrading jobs.", ex);
-            return false;
-        } finally {
-            __log.debug("UPGRADE complete");
-        }
-
+                for (int i = 0; i < numNodes; ++i) {
+                    String node = knownNodes.get(i);
+                    if (conn.updateAssignToNode(node, i, numNodes, maxtime) == -1) {
+                        __log.error("updateAssignToNode failed");
+                        return false;
+                    }
+                }
+                __log.debug("UPGRADE complete");
+                return true;
+            }
+        });
     }
 
-    /**
-     * Re-assign stale node's jobs to self.
-     *
-     * @param nodeId
-     */
+  /**
+   * Re-assign stale node's jobs to self.
+   *
+   * @param nodeId
+   */
     void recoverStaleNode(final String nodeId) {
         __log.debug("recovering stale node " + nodeId);
-        try {
-            int numrows = execTransaction(new Callable<Integer>() {
+        int numrows = exec(new Callable<Integer>() {
 
-                public Integer call() throws Exception {
-                    return _db.updateReassign(nodeId, _nodeId);
+            public Integer call(SchedulerDAOConnection conn) throws ContextException {
+                int numrows = conn.updateReassign(nodeId, _nodeId);
+                if (numrows == -1) {
+                    __log.error("Database error reassigning node.");
+                    throw new ContextException("Database error reassigning node.");
                 }
+                __log.debug("reassigned " + numrows + " jobs to self. ");
+                return numrows;
 
-            });
+            }
+        });
 
-            __log.debug("reassigned " + numrows + " jobs to self. ");
+        // We can now forget about this node, if we see it again, it will be
+        // "new to us"
+        _knownNodes.remove(nodeId);
+        _lastHeartBeat.remove(nodeId);
 
-            // We can now forget about this node, if we see it again, it will be
-            // "new to us"
-            _knownNodes.remove(nodeId);
-            _lastHeartBeat.remove(nodeId);
-
-            // Force a load-immediate to catch anything new from the recovered node.
-            doLoadImmediate();
-
-        } catch (Exception ex) {
-            __log.error("Database error reassigning node.", ex);
-        } finally {
-            __log.debug("node recovery complete");
-        }
+        // Force a load-immediate to catch anything new from the recovered node.
+        doLoadImmediate();
+        __log.debug("node recovery complete");
     }
 
-    private long doRetry(Job job) throws DatabaseException {
-        int retry = job.detail.getRetryCount() + 1;
-        job.detail.setRetryCount(retry);
-        long delay = (long)(Math.pow(5, retry - 1));
-        Job jobRetry = new Job(System.currentTimeMillis() + delay*1000, true, job.detail);
-        _db.insertJob(jobRetry, _nodeId, false);
+    private long doRetry(final JobDAO job) {
+        final int retry = job.getDetails().getRetryCount() + 1;
+        final long delay = (long) (Math.pow(5, retry - 1));
+
+        /*even though the JobDetails property is marked with Transient Hibernate
+        still treats any changes to it as a modification and will attempt to persist it.
+        for the new Job we will clone the existing details.*/
+
+        Scheduler.JobDetails newJobDetails;
+        try {
+            newJobDetails = job.getDetails().clone();
+        } catch (CloneNotSupportedException ce) {
+            __log.error("Unable to clone job details", ce);
+            return -1L;
+        }
+        newJobDetails.setRetryCount(newJobDetails.getRetryCount() + 1);
+        SchedulerDAOConnection conn = _dbcf.getConnection();
+        JobDAO jobRetry = conn.createJob(job.isTransacted(), newJobDetails, job.isPersisted(), System.currentTimeMillis() + delay * 1000);
+        if (!conn.insertJob(jobRetry, _nodeId, false)) {
+            __log.debug("retry failed for Job " + jobRetry.getJobId());
+            return -1L;
+        }
+        __log.debug("added retry for Job " + job.getJobId() + " at " + job.getScheduledDate() + " new Job: " + jobRetry.getJobId() + " at " + jobRetry.getScheduledDate());
         return delay;
     }
 
-    private abstract class SchedulerTask extends Task implements Runnable {
-        SchedulerTask(long schedDate) {
-            super(schedDate);
-        }
-    }
-
-    private class LoadImmediateTask extends SchedulerTask {
-
-        LoadImmediateTask(long schedDate) {
-            super(schedDate);
-        }
-
-        public void run() {
-            boolean success = false;
-            try {
-                success = doLoadImmediate();
-            } finally {
-                if (success)
-                    _todo.enqueue(new LoadImmediateTask(System.currentTimeMillis() + (long) (_immediateInterval * .75)));
-                else
-                    _todo.enqueue(new LoadImmediateTask(System.currentTimeMillis() + 100));
-            }
-        }
-
+  <T> T exec(Callable<T> callable) throws ContextException {
+        //Execute the work on the current thread
+      return callable.call();
     }
 
     /**
-     * Upgrade jobs from far future to immediate future (basically, assign them to a node).
+     * Wrapper for database transactions.
      *
-     * @author mszefler
+     * @author Maciej Szefler
      *
+     * @param <V>
+     *            return type
      */
-    private class UpgradeJobsTask extends SchedulerTask {
+    abstract class Callable<V> implements java.util.concurrent.Callable<V> {
 
-        UpgradeJobsTask(long schedDate) {
-            super(schedDate);
-        }
-
-        public void run() {
-            long ctime = System.currentTimeMillis();
-            long ntime = _nextUpgrade.get();
-            __log.debug("UPGRADE task for " + schedDate + " fired at " + ctime);
-
-            // We could be too early, this can happen if upgrade gets delayed due to another
-            // node
-            if (_nextUpgrade.get() > System.currentTimeMillis()) {
-                __log.debug("UPGRADE skipped -- wait another " + (ntime - ctime) + "ms");
-                _todo.enqueue(new UpgradeJobsTask(ntime));
-                return;
-            }
-
+        public V call() throws ContextException {
             boolean success = false;
+            SchedulerDAOConnection conn = _dbcf.getConnection();
             try {
-                success = doUpgrade();
+                if (_txm != null) {
+                    _txm.begin();
+                }
+                V r = call(conn);
+                if (_txm != null) {
+                    _txm.commit();
+                }
+                success = true;
+                return r;
+            } catch (ContextException ce) {
+                throw ce;
+            } catch (Exception e) {
+                throw new ContextException("TxError", e);
             } finally {
-                long future = System.currentTimeMillis() + (success ? (long) (_nearFutureInterval * .50) : 100);
-                _nextUpgrade.set(future);
-                _todo.enqueue(new UpgradeJobsTask(future));
-                __log.debug("UPGRADE completed, success = " + success + "; next time in " + (future - ctime) + "ms");
+
+                try {
+                    if (!success && _txm != null ) {
+                        _txm.rollback();
+                    }
+                } catch (Exception ex) {
+                    __log.error("TxError", ex);
+                }
+                conn.close();
             }
+
         }
 
+        abstract V call(SchedulerDAOConnection conn) throws ContextException;
     }
 
-    /**
-     * Check if any of the nodes in our cluster are stale.
-     */
-    private class CheckStaleNodes extends SchedulerTask {
+  private abstract class SchedulerTask extends Task implements Runnable {
 
-        CheckStaleNodes(long schedDate) {
-            super(schedDate);
-        }
+    SchedulerTask(long schedDate) {
+      super(schedDate);
+    }
+  }
 
-        public void run() {
-            _todo.enqueue(new CheckStaleNodes(System.currentTimeMillis() + _staleInterval));
-            __log.debug("CHECK STALE NODES started");
-            for (String nodeId : _knownNodes) {
-                Long lastSeen = _lastHeartBeat.get(nodeId);
-                if (lastSeen == null || (System.currentTimeMillis() - lastSeen) > _staleInterval)
-                    recoverStaleNode(nodeId);
-            }
-        }
+  private class LoadImmediateTask extends SchedulerTask {
 
+    LoadImmediateTask(long schedDate) {
+      super(schedDate);
     }
 
+    public void run() {
+      boolean success = false;
+      try {
+        success = doLoadImmediate();
+      } finally {
+        if (success) {
+          _todo.enqueue(new LoadImmediateTask(System.currentTimeMillis() + (long) (_immediateInterval * .75)));
+        } else {
+          _todo.enqueue(new LoadImmediateTask(System.currentTimeMillis() + 100));
+        }
+      }
+    }
+  }
+
+  /**
+   * Upgrade jobs from far future to immediate future (basically, assign them to a node).
+   *
+   * @author mszefler
+   *
+   */
+  private class UpgradeJobsTask extends SchedulerTask {
+
+    UpgradeJobsTask(long schedDate) {
+      super(schedDate);
+    }
+
+    public void run() {
+      long ctime = System.currentTimeMillis();
+      long ntime = _nextUpgrade.get();
+      __log.debug("UPGRADE task for " + schedDate + " fired at " + ctime);
+
+      // We could be too early, this can happen if upgrade gets delayed due to another
+      // node
+      if (_nextUpgrade.get() > System.currentTimeMillis()) {
+        __log.debug("UPGRADE skipped -- wait another " + (ntime - ctime) + "ms");
+        _todo.enqueue(new UpgradeJobsTask(ntime));
+        return;
+      }
+
+      boolean success = false;
+      try {
+        success = doUpgrade();
+      } finally {
+        long future = System.currentTimeMillis() + (success ? (long) (_nearFutureInterval * .50) : 100);
+        _nextUpgrade.set(future);
+        _todo.enqueue(new UpgradeJobsTask(future));
+        __log.debug("UPGRADE completed, success = " + success + "; next time in " + (future - ctime) + "ms");
+      }
+    }
+  }
+
+  /**
+   * Check if any of the nodes in our cluster are stale.
+   */
+  private class CheckStaleNodes extends SchedulerTask {
+
+    CheckStaleNodes(long schedDate) {
+      super(schedDate);
+    }
+
+    public void run() {
+      _todo.enqueue(new CheckStaleNodes(System.currentTimeMillis() + _staleInterval));
+      __log.debug("CHECK STALE NODES started");
+      for (String nodeId : _knownNodes) {
+        Long lastSeen = _lastHeartBeat.get(nodeId);
+        if (lastSeen == null || (System.currentTimeMillis() - lastSeen) > _staleInterval) {
+          recoverStaleNode(nodeId);
+        }
+      }
+    }
+  }
 }

@@ -3,9 +3,9 @@ package org.apache.ode.bpel.engine;
 import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.rapi.ResourceModel;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ResourceRouteDAO;
+import org.apache.ode.dao.bpel.MessageExchangeDAO;
+import org.apache.ode.dao.bpel.ProcessInstanceDAO;
+import org.apache.ode.dao.bpel.ResourceRouteDAO;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.rapi.InvalidProcessException;
 import org.apache.ode.bpel.evt.NewProcessInstanceEvent;
@@ -66,6 +66,7 @@ public class ODERESTProcess extends ODEProcess {
             __log.error(errmsg, ex);
             throw new BpelEngineException(errmsg, ex);
         }
+
 
         for (ResourceRouteDAO rrDao : rrDaos) {
             Resource resource = new Resource(rrDao.getUrl(), "application/xml", rrDao.getMethod());

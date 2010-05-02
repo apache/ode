@@ -492,13 +492,43 @@ define "ode" do
     package(:zip).include(derby_db)
   end
 
-  desc "ODE OpenJPA DAO Implementation"
+  desc "ODE DAO Implementation"
   define "dao-jpa" do
     compile.with projects("bpel-api", "bpel-dao", "utils"),
       COMMONS.collections, COMMONS.logging, JAVAX.connector, JAVAX.persistence, JAVAX.transaction,
-      OPENJPA, XERCES
-    compile { open_jpa_enhance }
+      XERCES
     package :jar
+  end
+
+  desc "ODE Hibernate DAO Implementation"
+  define "dao-jpa-hibernate" do
+    compile.with projects("bpel-api", "utils", "bpel-dao", "dao-jpa"),
+	  COMMONS.collections, COMMONS.logging, JAVAX.connector, JAVAX.persistence, JAVAX.transaction,
+	  HIBERNATE, XERCES
+	package :jar
+  end
+
+  desc "ODE OpenJPA DAO Implementation"
+  define "dao-jpa-ojpa" do
+   compile.with projects("bpel-api", "bpel-dao", "utils","dao-jpa"),
+     COMMONS.collections, COMMONS.logging, JAVAX.connector, JAVAX.persistence, JAVAX.transaction,
+     OPENJPA, XERCES 
+   compile { open_jpa_enhance }
+
+    %w{ derby mysql oracle postgres }.each do |db|
+      db_xml = _("src/main/descriptors/persistence.#{db}.xml")
+      scheduler_sql = _("src/main/scripts/simplesched-#{db}.sql")
+      partial_sql = file("target/partial.#{db}.sql"=>db_xml) do |task|
+        mkpath _("target"), :verbose=>false
+        Buildr::OpenJPA.mapping_tool :properties=>db_xml, :action=>"build", :sql=>task.name,
+          :classpath=>projects("bpel-store", "dao-jpa", "bpel-api", "bpel-dao", "utils" )
+      end
+      sql = concat(_("target/#{db}.sql")=>[_("src/main/scripts/license-header.sql"), partial_sql, scheduler_sql])
+      build sql
+    end
+    derby_db = Derby.create(_("target/derby/jpadb")=>_("target/derby.sql"))
+
+   package :jar
   end
 
   desc "ODE OpenJPA Derby Database"

@@ -30,7 +30,7 @@ import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 
 /**
- * Implements the "todo" queue and prioritized scheduling mechanism. 
+ * Implements the "todo" queue and prioritized scheduling mechanism.
  *
  * @author mszefler
  * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
@@ -58,7 +58,7 @@ class SchedulerThread implements Runnable {
 
     SchedulerThread(TaskRunner runner) {
         _todo = new PriorityBlockingQueue<Task>(TODO_QUEUE_INITIAL_CAPACITY,
-                new JobComparatorByDate());
+                new TaskComparatorByDate());
         _taskrunner = runner;
     }
 

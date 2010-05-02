@@ -1,8 +1,8 @@
 package org.apache.ode.bpel.engine;
 
 import org.apache.ode.bpel.iapi.*;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.dao.MessageDAO;
+import org.apache.ode.dao.bpel.MessageExchangeDAO;
+import org.apache.ode.dao.bpel.MessageDAO;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

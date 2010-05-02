@@ -31,19 +31,17 @@ import javax.transaction.TransactionManager;
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
 
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
+import org.apache.ode.dao.bpel.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.*;
-import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
-import org.apache.ode.il.EmbeddedGeronimoFactory;
+import org.apache.ode.dao.store.ConfStoreDAOConnectionFactory;
 import org.apache.ode.il.MockScheduler;
 import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.il.dbutil.Database;
+import org.apache.ode.il.txutil.TxManager;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
-import org.hsqldb.jdbc.jdbcDataSource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -61,7 +59,9 @@ class MockBpelServer {
 
     MockScheduler _scheduler;
 
-    BpelDAOConnectionFactory _daoCF;
+    BpelDAOConnectionFactory _bpelDaoCF;
+
+    ConfStoreDAOConnectionFactory _confDaoCF;
 
     EndpointReferenceContext _eprContext;
 
@@ -82,12 +82,13 @@ class MockBpelServer {
             createDAOConnection();
             createScheduler();
             createEndpointReferenceContext();
-            if (_daoCF == null)
+            if (_bpelDaoCF == null || _confDaoCF == null)
                 throw new RuntimeException("No DAO");
-            _server.setDaoConnectionFactory(_daoCF);
+            _server.setDaoConnectionFactory(_bpelDaoCF);
             if (_scheduler == null)
                 throw new RuntimeException("No scheduler");
-            _store = new ProcessStoreImpl(_eprContext, _dataSource,"jpa", new OdeConfigProperties(new Properties(), ""), true);
+
+            _store = new ProcessStoreImpl(_eprContext,_txManager,_confDaoCF);
             _server.setTransactionManager(_txManager);
             _server.setScheduler(_scheduler);
             _server.setEndpointReferenceContext(_eprContext);
@@ -136,21 +137,26 @@ class MockBpelServer {
         _server.stop();
         _scheduler.stop();
         _scheduler.shutdown();
+        _bpelDaoCF.shutdown();
+        _confDaoCF.shutdown();
+		_database.shutdown();
     }
 
     protected TransactionManager createTransactionManager() throws Exception {
-        EmbeddedGeronimoFactory factory = new EmbeddedGeronimoFactory();
-        _txManager = factory.getTransactionManager();
+        TxManager mgr = new TxManager(new OdeConfigProperties(new Properties(),""));
+        _txManager = mgr.createTransactionManager();
         _txManager.setTransactionTimeout(30);
         return _txManager;
     }
 
     protected DataSource createDataSource() throws Exception {
-        jdbcDataSource hsqlds = new jdbcDataSource();
-        hsqlds.setDatabase("jdbc:hsqldb:mem:" + new GUID().toString());
-        hsqlds.setUser("sa");
-        hsqlds.setPassword("");
-        _dataSource = hsqlds;
+      Properties props = new Properties();
+      props.setProperty(OdeConfigProperties.PROP_DAOCF, System.getProperty(OdeConfigProperties.PROP_DAOCF,OdeConfigProperties.DEFAULT_DAOCF_CLASS));
+      OdeConfigProperties odeProps = new OdeConfigProperties(props,"");
+		_database = new Database(odeProps);
+        _database.setTransactionManager(_txManager);
+        _database.start();
+        _dataSource=_database.getDataSource();
         return _dataSource;
     }
 
@@ -166,22 +172,15 @@ class MockBpelServer {
         return _scheduler;
     }
 
-    protected BpelDAOConnectionFactory createDAOConnection() throws Exception {
+    protected void createDAOConnection() throws Exception {
         if (_txManager == null)
             throw new RuntimeException("No transaction manager");
         if (_dataSource == null)
             throw new RuntimeException("No data source");
+		
+        _bpelDaoCF = _database.createDaoCF();
+        _confDaoCF = _database.createDaoStoreCF();
 
-        BpelDAOConnectionFactoryJDBC daoCF = new BPELDAOConnectionFactoryImpl();
-        daoCF.setDataSource(_dataSource);
-        daoCF.setTransactionManager(_txManager);
-        Properties props = new Properties();
-        props.put("openjpa.Log", "log4j");
-        props.put("openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=false)");
-        daoCF.init(props);
-        _daoCF = daoCF;
-
-        return _daoCF;
     }
 
     protected EndpointReferenceContext createEndpointReferenceContext() {

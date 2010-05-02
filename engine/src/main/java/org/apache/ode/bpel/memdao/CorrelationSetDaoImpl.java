@@ -19,8 +19,8 @@
 package org.apache.ode.bpel.memdao;
 
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.dao.CorrelationSetDAO;
-import org.apache.ode.bpel.dao.ScopeDAO;
+import org.apache.ode.dao.bpel.CorrelationSetDAO;
+import org.apache.ode.dao.bpel.ScopeDAO;
 
 import javax.xml.namespace.QName;
 import java.util.HashMap;
@@ -42,7 +42,7 @@ class CorrelationSetDaoImpl extends DaoBaseImpl implements CorrelationSetDAO {
    * @param name correlation set name
    * @param scope the scope for which the correlation set is relevant
    */
-  public CorrelationSetDaoImpl(String name, org.apache.ode.bpel.dao.ScopeDAO scope) {
+  public CorrelationSetDaoImpl(String name, ScopeDAO scope) {
     _name = name;
     _scope = scope;
     _csetId = IdGen.newCorrelationSetId();
@@ -53,14 +53,14 @@ class CorrelationSetDaoImpl extends DaoBaseImpl implements CorrelationSetDAO {
   }
 
   /**
-   * @see org.apache.ode.bpel.dao.CorrelationSetDAO#getName()
+   * @see org.apache.ode.dao.bpel.CorrelationSetDAO#getName()
    */
   public String getName() {
     return _name;
   }
 
   /**
-   * @see org.apache.ode.bpel.dao.CorrelationSetDAO#getScope()
+   * @see org.apache.ode.dao.bpel.CorrelationSetDAO#getScope()
    */
   public ScopeDAO getScope() {
     return _scope;

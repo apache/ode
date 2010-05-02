@@ -21,6 +21,8 @@ package org.apache.ode.bpel.extvar.jdbc;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Properties;
+import javax.sql.DataSource;
 
 import javax.xml.namespace.QName;
 
@@ -29,10 +31,10 @@ import junit.framework.TestCase;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableConf;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableConf.Variable;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.GUID;
 import org.apache.ode.bpel.evar.ExternalVariableModule.Locator;
 import org.apache.ode.bpel.evar.ExternalVariableModule.Value;
-import org.hsqldb.jdbc.jdbcDataSource;
+import org.apache.ode.il.config.OdeConfigProperties;
+import org.apache.ode.il.dbutil.Database;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -54,32 +56,42 @@ public class JdbcExternalVariableEngineTest extends TestCase {
     final QName _varType = new QName("foo", "foobar");
     
     ExternalVariableConf _econf;
-    jdbcDataSource _ds;
+    Database _db;
     JdbcExternalVariableModule _engine;
     Element _el1;
 
     public void setUp() throws Exception {
-        _ds = new org.hsqldb.jdbc.jdbcDataSource();
-        _ds.setDatabase("jdbc:hsqldb:mem:" + new GUID().toString());
-        _ds.setUser("sa");
-       
-        Connection conn = _ds.getConnection();
+	     OdeConfigProperties props = new OdeConfigProperties(new Properties(),"");
+		_db = new Database(props);
+        _db.start();
+        
+        Connection conn = _db.getDataSource().getConnection();
         Statement s = conn.createStatement();
-        s.execute("create table extvartable1 (" +
-                "id1 VARCHAR PRIMARY KEY," +
-                "_id2_ VARCHAR," +
-                "pid VARCHAR, " +
-                "iid INT," +
-                "cts DATETIME," +
-                "uts DATETIME," +
-                "foo VARCHAR," +
-                "bar VARCHAR );");
+          String sql = "create table extvartable1 (" +
+                  "id1 VARCHAR(255), " +
+                  "id2_ VARCHAR(255), " +
+                  "pid VARCHAR(255), " +
+                  "iid INT, " +
+                  "cts TIMESTAMP, " +
+                  "uts TIMESTAMP, " +
+                  "foo VARCHAR(255), " +
+                  "bar VARCHAR(255), " +
+                  "PRIMARY KEY(id1) )";
+        System.out.println(sql);
+        s.executeUpdate(sql);
         
         _engine = new JdbcExternalVariableModule();
-        _engine.registerDataSource("testds",_ds);
+        _engine.registerDataSource("testds",_db.getDataSource());
         
         _el1=DOMUtils.stringToDOM("<foobar><id2>ignored</id2><foo>foo</foo><bar>bar</bar></foobar>");
     }
+
+
+  protected void tearDown() throws Exception {
+     _db.shutdown();
+  }
+
+
     
     @Test
     public void testConfigurationParsing() throws Exception {

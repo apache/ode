@@ -24,13 +24,8 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.apache.ode.scheduler.simple.SchedulerThread;
-import org.apache.ode.scheduler.simple.Task;
-import org.apache.ode.scheduler.simple.TaskRunner;
-
-
 import junit.framework.TestCase;
+
 
 /**
  * Test of SchedulerThread. 
@@ -44,6 +39,7 @@ public class SchedulerThreadTest extends TestCase implements TaskRunner {
     
     List<TR> _tasks = new ArrayList<TR>(100); 
     
+    @Override
     public void setUp() throws Exception {
         _st = new SchedulerThread(this);
     }

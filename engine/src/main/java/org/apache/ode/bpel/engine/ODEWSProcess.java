@@ -12,8 +12,8 @@ import java.util.concurrent.Callable;
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 
-import org.apache.ode.bpel.dao.MessageDAO;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.dao.bpel.MessageDAO;
+import org.apache.ode.dao.bpel.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.Endpoint;

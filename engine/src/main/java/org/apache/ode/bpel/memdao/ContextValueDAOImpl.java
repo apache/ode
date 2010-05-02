@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.memdao;
 
-import org.apache.ode.bpel.dao.ContextValueDAO;
+import org.apache.ode.dao.bpel.ContextValueDAO;
 
 public class ContextValueDAOImpl extends DaoBaseImpl implements ContextValueDAO {
 

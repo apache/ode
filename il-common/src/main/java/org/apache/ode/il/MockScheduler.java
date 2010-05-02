@@ -148,4 +148,9 @@ public class MockScheduler implements Scheduler {
 
     public void setPolledRunnableProcesser(JobProcessor delegatedRunnableProcessor) {
     }
+
+    public String reschedulePersistedJob(String jobId, JobDetails jobDetail, Date when) throws ContextException {
+        jobCompleted(jobId);
+        return schedulePersistedJob(jobDetail, when);
+    }
 }

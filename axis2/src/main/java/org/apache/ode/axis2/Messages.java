@@ -123,8 +123,16 @@ public class Messages extends MessageBundle {
         return "Shutdown completed. ";
     }
 
-    public String msgOdeUsingDAOImpl(String className) {
-        return format("Using DAO Connection Factory class {0}.", className);
+    public String msgOdeUsingBpelDAOImpl(String className) {
+        return format("Using Bpel DAO Connection Factory class {0}.", className);
+    }
+
+    public String msgOdeUsingStoreDAOImpl(String className) {
+        return format("Using Conf Store DAO Connection Factory class {0}.", className);
+    }
+
+    public String msgOdeUsingSchedDAOImpl(String className) {
+        return format("Using Scheduler DAO Connection Factory class {0}.", className);
     }
 
     public String msgDAOInstantiationFailed(String className) {

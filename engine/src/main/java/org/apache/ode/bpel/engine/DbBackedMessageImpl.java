@@ -2,7 +2,7 @@ package org.apache.ode.bpel.engine;
 
 import javax.xml.namespace.QName;
 
-import org.apache.ode.bpel.dao.MessageDAO;
+import org.apache.ode.dao.bpel.MessageDAO;
 import org.w3c.dom.Element;
 
 public class DbBackedMessageImpl extends MessageImpl {

@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.memdao;
 
-import org.apache.ode.bpel.dao.ScopeDAO;
-import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.dao.bpel.ScopeDAO;
+import org.apache.ode.dao.bpel.XmlDataDAO;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -91,14 +91,14 @@ class XmlDataDaoImpl extends DaoBaseImpl implements XmlDataDAO {
     }
 
     /**
-     * @see org.apache.ode.bpel.dao.XmlDataDAO#getProperty(java.lang.String)
+     * @see org.apache.ode.dao.bpel.XmlDataDAO#getProperty(java.lang.String)
      */
     public String getProperty(String propertyName) {
         return _properties.getProperty(propertyName);
     }
 
     /**
-     * @see org.apache.ode.bpel.dao.XmlDataDAO#setProperty(java.lang.String, java.lang.String)
+     * @see org.apache.ode.dao.bpel.XmlDataDAO#setProperty(java.lang.String, java.lang.String)
      */
     public void setProperty(String pname, String pvalue) {
         _properties.setProperty(pname, pvalue);
@@ -109,7 +109,7 @@ class XmlDataDaoImpl extends DaoBaseImpl implements XmlDataDAO {
     }
 
     /**
-     * @see org.apache.ode.bpel.dao.XmlDataDAO#getScopeDAO()
+     * @see org.apache.ode.dao.bpel.XmlDataDAO#getScopeDAO()
      */
     public ScopeDAO getScopeDAO() {
         return _scope;

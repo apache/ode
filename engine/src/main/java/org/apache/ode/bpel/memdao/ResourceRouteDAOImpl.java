@@ -1,7 +1,7 @@
 package org.apache.ode.bpel.memdao;
 
-import org.apache.ode.bpel.dao.ResourceRouteDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.dao.bpel.ResourceRouteDAO;
+import org.apache.ode.dao.bpel.ProcessInstanceDAO;
 
 public class ResourceRouteDAOImpl extends DaoBaseImpl implements ResourceRouteDAO {
     private Long _id;

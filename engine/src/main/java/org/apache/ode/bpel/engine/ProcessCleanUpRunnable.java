@@ -8,8 +8,8 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.dao.DeferredProcessInstanceCleanable;
-import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.dao.bpel.DeferredProcessInstanceCleanable;
+import org.apache.ode.dao.bpel.ProcessDAO;
 import org.apache.ode.bpel.engine.BpelServerImpl.ContextsAware;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.MapSerializableRunnable;
@@ -53,14 +53,14 @@ public class ProcessCleanUpRunnable implements MapSerializableRunnable, Contexts
                 transactionResultSize = _contexts.execTransaction(new Callable<Integer>() {
                     public Integer call() throws Exception {
                         ProcessDAO process = _contexts.dao.getConnection().createTransientProcess(_pid);
-                        if( !(process instanceof DeferredProcessInstanceCleanable) ) {
+                    if (!(process instanceof DeferredProcessInstanceCleanable)) {
                             throw new IllegalArgumentException("ProcessDAO does not implement DeferredProcessInstanceCleanable!!!");
-                        }
+                }
                         return ((DeferredProcessInstanceCleanable)process).deleteInstances(PROCESS_CLEANUP_TRANSACTION_SIZE);
-                    }
+                }
                 });
                 if(__log.isDebugEnabled()) __log.debug("Deleted " + transactionResultSize + "instances for old process: " + _pid + ".");
-            } while( transactionResultSize == PROCESS_CLEANUP_TRANSACTION_SIZE );
+            } while (transactionResultSize == PROCESS_CLEANUP_TRANSACTION_SIZE);
         } catch (RuntimeException re) {
             throw re;
         } catch (Exception ex) {

@@ -18,10 +18,11 @@
  */
 package org.apache.ode.bpel.context;
 
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
+
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.rapi.ContextData;
 import org.apache.ode.bpel.rapi.IOContext;
+import org.apache.ode.dao.bpel.MessageExchangeDAO;
 import org.w3c.dom.Element;
 
 /**

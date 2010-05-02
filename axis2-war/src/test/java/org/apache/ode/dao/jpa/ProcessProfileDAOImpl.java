@@ -24,26 +24,27 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
-import org.apache.ode.bpel.dao.CorrelationSetDAO;
-import org.apache.ode.bpel.dao.CorrelatorDAO;
-import org.apache.ode.bpel.dao.FaultDAO;
-import org.apache.ode.bpel.dao.MessageDAO;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.dao.MessageRouteDAO;
-import org.apache.ode.bpel.dao.PartnerLinkDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ProcessProfileDAO;
-import org.apache.ode.bpel.dao.ScopeDAO;
-import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.dao.bpel.ActivityRecoveryDAO;
+import org.apache.ode.dao.bpel.CorrelationSetDAO;
+import org.apache.ode.dao.bpel.CorrelatorDAO;
+import org.apache.ode.dao.bpel.FaultDAO;
+import org.apache.ode.dao.bpel.MessageDAO;
+import org.apache.ode.dao.bpel.MessageExchangeDAO;
+import org.apache.ode.dao.bpel.MessageRouteDAO;
+import org.apache.ode.dao.bpel.PartnerLinkDAO;
+import org.apache.ode.dao.bpel.ProcessInstanceDAO;
+import org.apache.ode.dao.bpel.ProcessProfileDAO;
+import org.apache.ode.dao.bpel.ScopeDAO;
+import org.apache.ode.dao.bpel.XmlDataDAO;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import org.apache.ode.dao.jpa.bpel.ProcessDAOImpl;
 
 /**
  * OpenJPA based {@link ProcessProfileDAO} implementation
  */
-public class ProcessProfileDAOImpl extends OpenJPADAO implements ProcessProfileDAO {
+public class ProcessProfileDAOImpl implements ProcessProfileDAO {
 	@SuppressWarnings("unused")
 	private static final Log __log = LogFactory.getLog(ProcessProfileDAOImpl.class);
 	

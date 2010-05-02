@@ -191,10 +191,6 @@ public class Messages extends MessageBundle {
       return format("Error reading Hibernate properties file \"{0}\".", hibernatePropFile);
     }
 
-    public String msgOdeInitHibernateDialectDetectFailed() {
-      return format("Error detecting database dialect; Hibernate DAO could not be started.");
-    }
-
     public String msgDeployFailDuplicateDU(String name) {
         return format("Deploy failed; Deployment Unit \"{0}\" already deployed!", name);
     }

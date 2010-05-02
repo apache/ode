@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.dao.bpel.MessageExchangeDAO;
 
 /**
  * Manage {@link IncomingMessageExchangeCache} object references.

@@ -34,7 +34,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.evtproc.DebugBpelEventListener;
 import org.apache.ode.bpel.iapi.*;
@@ -43,9 +42,11 @@ import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.bpel.rtrep.common.extension.AbstractExtensionBundle;
-import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
+import org.apache.ode.dao.bpel.BpelDAOConnectionFactory;
+import org.apache.ode.dao.store.ConfStoreDAOConnectionFactory;
 import org.apache.ode.il.MockScheduler;
 import org.apache.ode.il.config.OdeConfigProperties;
+import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.store.ProcessConfImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.DOMUtils;
@@ -70,7 +71,9 @@ public abstract class BPELTestAbstract {
 
     protected MockScheduler scheduler;
 
-    protected BpelDAOConnectionFactory _cf;
+    protected BpelDAOConnectionFactory _bcf;
+
+    protected ConfStoreDAOConnectionFactory _scf;
 
     /** Failures that have been detected. */
     protected List<Failure> _failures;
@@ -86,6 +89,8 @@ public abstract class BPELTestAbstract {
 
     private MockTransactionManager _txm;
 
+    private Database _db;
+
     @Before
     public void setUp() throws Exception {
         _failures = new CopyOnWriteArrayList<Failure>();
@@ -94,21 +99,22 @@ public abstract class BPELTestAbstract {
         _deployments = new ArrayList<Deployment>();
         _invocations = new ArrayList<Invocation>();
         _deployed = new ArrayList<Deployment>();
+        _txm = new MockTransactionManager();
+        Properties props = new Properties();
+        props.setProperty(OdeConfigProperties.PROP_DAOCF_STORE, System.getProperty(OdeConfigProperties.PROP_DAOCF_STORE,OdeConfigProperties.DEFAULT_DAOCF_STORE_CLASS));
+         OdeConfigProperties odeProps = new OdeConfigProperties(props,"");
+		_db = new Database(odeProps);
+                _db.setTransactionManager(_txm);
+        _db.start();
 
         if (Boolean.getBoolean("org.apache.ode.test.persistent")) {
-
-            _server.setDaoConnectionFactory(_cf);
-            _txm = new MockTransactionManager();
-
-            BPELDAOConnectionFactoryImpl cf = new BPELDAOConnectionFactoryImpl();
-            cf.setTransactionManager(_txm);
-            // cf.setDataSource(datasource);
+            _server.setDaoConnectionFactory(_bcf);
             scheduler = new MockScheduler(_txm);
         } else {
-            _txm = new MockTransactionManager();
             scheduler = new MockScheduler(_txm);
-            _cf = new BpelDAOConnectionFactoryImpl(_txm);
-            _server.setDaoConnectionFactory(_cf);
+            _bcf = new BpelDAOConnectionFactoryImpl();
+            _bcf.init(null,_txm, _txm);
+            _server.setDaoConnectionFactory(_bcf);
         }
         _server.setScheduler(scheduler);
         _server.setBindingContext(new BindingContextImpl());
@@ -128,7 +134,8 @@ public abstract class BPELTestAbstract {
                 return Collections.EMPTY_MAP;
             }
         };
-        store = new ProcessStoreImpl(eprContext, null, "jpa", new OdeConfigProperties(new Properties(), ""), true);
+        _scf = _db.createDaoStoreCF();
+        store = new ProcessStoreImpl(eprContext, _txm, _scf);
         // not needed: we do eclipcitly in doDeployment
 //        store.registerListener(new ProcessStoreListener() {
 //            public void onProcessStoreEvent(ProcessStoreEvent event) {
@@ -167,6 +174,9 @@ public abstract class BPELTestAbstract {
         _deployed = null;
         _deployments = null;
         _invocations = null;
+        _bcf.shutdown();
+        _scf.shutdown();
+        _db.shutdown();
     }
 
     public void registerExtensionBundle(AbstractExtensionBundle bundle) {

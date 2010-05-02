@@ -33,7 +33,7 @@ import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.Filter;
 import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.bpel.common.ProcessFilter;
-import org.apache.ode.bpel.dao.*;
+import org.apache.ode.dao.bpel.*;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.stl.CollectionsX;
@@ -63,6 +63,16 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
     BpelDAOConnectionImpl(Map<QName, ProcessDaoImpl> store, TransactionManager txm) {
         _store = store;
         _txm = txm;
+    }
+
+  /**
+  * Close this DAO connection.
+  */
+    public void close() {
+    }
+
+    public boolean isClosed() {
+      return false;
     }
 
     public ProcessDAO getProcess(QName processId) {
@@ -168,12 +178,6 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         }
 
         return matched;
-    }
-
-    /**
-     * Close this DAO connection.
-     */
-    public void close() {
     }
 
     public Collection<ProcessDAO> processQuery(ProcessFilter filter) {
@@ -384,7 +388,7 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
     }
 
     /**
-     * @see org.apache.ode.bpel.dao.BpelDAOConnection#instanceQuery(String)
+     * @see org.apache.ode.dao.bpel.BpelDAOConnection#instanceQuery(String)
      */
     public Collection<ProcessInstanceDAO> instanceQuery(String expression) {
         // TODO
@@ -439,4 +443,7 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
     public ProcessManagementDaoImpl getProcessManagement() {
         return new ProcessManagementDaoImpl();
     }
+
+
+
 }

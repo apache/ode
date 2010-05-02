@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.Date;
 
 import org.apache.ode.bpel.common.InstanceFilter;
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ProcessManagementDAO;
+import org.apache.ode.dao.bpel.BpelDAOConnection;
+import org.apache.ode.dao.bpel.ProcessInstanceDAO;
+import org.apache.ode.dao.bpel.ProcessManagementDAO;
 
 public class ProcessManagementDaoImpl extends DaoBaseImpl implements ProcessManagementDAO {
 	public Object[] findFailedCountAndLastFailedDateForProcessId(BpelDAOConnection conn, String status, String processId) {

@@ -27,8 +27,6 @@ import org.apache.geronimo.kernel.KernelRegistry;
 import org.apache.geronimo.kernel.config.MultiParentClassLoader;
 import org.apache.geronimo.kernel.repository.Artifact;
 import org.apache.geronimo.kernel.repository.Repository;
-import org.apache.geronimo.transaction.context.GeronimoTransactionManager;
-import org.apache.geronimo.transaction.context.TransactionContextManager;
 
 import javax.transaction.TransactionManager;
 import java.io.File;
@@ -36,6 +34,8 @@ import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
+import org.apache.geronimo.transaction.context.TransactionContextManager;
+import org.apache.geronimo.transaction.context.GeronimoTransactionManager;
 
 public class GeronimoFactory {
 
