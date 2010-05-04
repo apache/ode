@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<bpel:process xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ode="http://www.apache.org/ode/type/extension" xmlns:Pool3="http://example.com/ReproduceIsolationProblem/Pool3" xmlns:this="http://example.com/ReproduceIsolationProblem/Pool2" xmlns:Pool="http://example.com/ReproduceIsolationProblem/Pool" xmlns:diag="http://example.com/ReproduceIsolationProblem" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:bpmn="http://www.intalio.com/bpms" xmlns:atomic="http://ode.apache.org/atomicScope" queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" bpmn:label="Pool2" name="Pool2" bpmn:id="_bR-rAFOnEd-qUNL1xc5jrA" targetNamespace="http://example.com/ReproduceIsolationProblem/Pool2">
+  <bpel:import namespace="http://example.com/ReproduceIsolationProblem" location="ReproduceIsolationProblem.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:import namespace="http://example.com/ReproduceIsolationProblem/Pool2" location="ReproduceIsolationProblem-Pool2.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:import namespace="http://example.com/ReproduceIsolationProblem/Pool3" location="ReproduceIsolationProblem-Pool3.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:partnerLinks>
+    <bpel:partnerLink name="pool2AndPoolPlkVar" partnerLinkType="diag:Pool2AndPool" myRole="Pool2_for_Pool"/>
+    <bpel:partnerLink name="pool3AndPool2PlkVar" partnerLinkType="diag:Pool3AndPool2" initializePartnerRole="yes" partnerRole="Pool3_for_Pool2"/>
+  </bpel:partnerLinks>
+  <bpel:variables>
+    <bpel:variable name="this_21RequestMsg" messageType="this:_21Request"/>
+    <bpel:variable name="pool3_31RequestMsg" messageType="Pool3:_31Request"/>
+    <bpel:variable name="pool3_32RequestMsg" messageType="Pool3:_32Request"/>
+    <bpel:variable name="pool3_33RequestMsg" messageType="Pool3:_33Request"/>
+    <bpel:variable name="pool3_32ResponseMsg" messageType="Pool3:_32Response"/>
+    <bpel:variable name="pool3_33ResponseMsg" messageType="Pool3:_33Response"/>
+    <bpel:variable name="this_21ResponseMsg" messageType="this:_21Response"/>
+  </bpel:variables>
+  <bpel:sequence>
+    <bpel:receive partnerLink="pool2AndPoolPlkVar" portType="this:ForPool" operation="_21" variable="this_21RequestMsg" createInstance="yes" bpmn:label="21" name="_21" bpmn:id="_bzzlsFOnEd-qUNL1xc5jrA"></bpel:receive>
+    <bpel:assign name="init-variables-Pool2" bpmn:id="_bzzlsFOnEd-qUNL1xc5jrA">
+      <bpel:copy bpmn:label="$pool3_31RequestMsg">
+        <bpel:from>
+          <bpel:literal>
+<Pool3:_31Request></Pool3:_31Request></bpel:literal>
+        </bpel:from>
+        <bpel:to>$pool3_31RequestMsg.body</bpel:to>
+      </bpel:copy>
+      <bpel:copy bpmn:label="$pool3_32RequestMsg">
+        <bpel:from>
+          <bpel:literal>
+<Pool3:_32Request></Pool3:_32Request></bpel:literal>
+        </bpel:from>
+        <bpel:to>$pool3_32RequestMsg.body</bpel:to>
+      </bpel:copy>
+      <bpel:copy bpmn:label="$pool3_33RequestMsg">
+        <bpel:from>
+          <bpel:literal>
+<Pool3:_33Request></Pool3:_33Request></bpel:literal>
+        </bpel:from>
+        <bpel:to>$pool3_33RequestMsg.body</bpel:to>
+      </bpel:copy>
+      <bpel:copy bpmn:label="$this_21ResponseMsg">
+        <bpel:from>
+          <bpel:literal>
+<this:_21Response></this:_21Response></bpel:literal>
+        </bpel:from>
+        <bpel:to>$this_21ResponseMsg.body</bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+    <bpel:assign bpmn:label="22" name="_22" bpmn:id="_lf1mIFOnEd-qUNL1xc5jrA">
+      <bpel:copy>
+        <bpel:from>$ode:pid</bpel:from>
+        <bpel:to>$pool3_31RequestMsg.body</bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+    <bpel:invoke partnerLink="pool3AndPool2PlkVar" portType="Pool3:ForPool2" operation="_31" inputVariable="pool3_31RequestMsg" bpmn:label="22" name="_22-1" bpmn:id="_lf1mIFOnEd-qUNL1xc5jrA"></bpel:invoke>
+    <bpel:flow bpmn:label="Parallel_Gateway" name="Parallel_Gateway" bpmn:id="_iyPXcFOnEd-qUNL1xc5jrA">
+      <bpel:sequence>
+        <bpel:assign bpmn:label="23" name="_23" bpmn:id="_vhobMFOnEd-qUNL1xc5jrA">
+          <bpel:copy>
+            <bpel:from>$ode:pid</bpel:from>
+            <bpel:to>$pool3_32RequestMsg.body</bpel:to>
+          </bpel:copy>
+        </bpel:assign>
+        <bpel:invoke partnerLink="pool3AndPool2PlkVar" portType="Pool3:ForPool2" operation="_32" inputVariable="pool3_32RequestMsg" outputVariable="pool3_32ResponseMsg" bpmn:label="23" name="_23-1" bpmn:id="_vhobMFOnEd-qUNL1xc5jrA"></bpel:invoke>
+      </bpel:sequence>
+      <bpel:sequence>
+        <bpel:wait bpmn:label="wait 10 sec" name="wait_10_sec" bpmn:id="_wlu8gFOnEd-qUNL1xc5jrA">
+          <bpel:for>"PT1S"</bpel:for>
+        </bpel:wait>
+        <bpel:assign bpmn:label="34" name="_34" bpmn:id="_xAHLYFOnEd-qUNL1xc5jrA">
+          <bpel:copy>
+            <bpel:from>$ode:pid</bpel:from>
+            <bpel:to>$pool3_33RequestMsg.body</bpel:to>
+          </bpel:copy>
+        </bpel:assign>
+        <bpel:invoke partnerLink="pool3AndPool2PlkVar" portType="Pool3:ForPool2" operation="_33" inputVariable="pool3_33RequestMsg" outputVariable="pool3_33ResponseMsg" bpmn:label="34" name="_34-1" bpmn:id="_xAHLYFOnEd-qUNL1xc5jrA"></bpel:invoke>
+      </bpel:sequence>
+    </bpel:flow>
+    <bpel:invoke partnerLink="pool3AndPool2PlkVar" portType="Pool3:ForPool2" operation="_33" inputVariable="pool3_33RequestMsg" outputVariable="pool3_33ResponseMsg" bpmn:label="34" name="_34-1" bpmn:id="_xAHLYFOnEd-qUNL1xc5jrA"></bpel:invoke>
+    <bpel:reply partnerLink="pool2AndPoolPlkVar" portType="this:ForPool" operation="_21" variable="this_21ResponseMsg" bpmn:label="Task" name="Task" bpmn:id="_7W620FRaEd-y87rmjcz7YQ"></bpel:reply>
+  </bpel:sequence>
+</bpel:process>

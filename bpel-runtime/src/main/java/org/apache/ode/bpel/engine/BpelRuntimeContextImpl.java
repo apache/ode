@@ -1479,30 +1479,28 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         MessageExchangeDAO mexdao = correlator.dequeueMessage(ckeySet);
         if (mexdao != null) {
             __log.debug("MatcherEvent handling: found matching message in DB (i.e. message arrived before <receive>)");
-
-            if( MessageExchangePattern.REQUEST_RESPONSE.toString().equals(mexdao.getPattern())) {
-                __log.warn("A message arrived before a receive is ready for a request/response pattern. This may be processed to success. However, you should consider revising your process since this may cause performance degradataion");
-            }
-            
-            Set<String> groupIds = new HashSet<String>();
+        	if( MessageExchangePattern.REQUEST_RESPONSE.toString().equals(mexdao.getPattern())) {
+        		__log.warn("A message arrived before a receive is ready for a request/response pattern. This may be processed to success. However, you should consider revising your process since a TCP port and a container thread will be held for a longer time and the process will not scale under heavy load.");
+        	}
+        	
             for (MessageRouteDAO mroute : mroutes) {
                 // We have a match, so we can get rid of the routing entries.
-                groupIds.add(mroute.getGroupId());
-    
-                // Found message matching one of our selectors.
-                if (BpelProcess.__log.isDebugEnabled()) {
-                    BpelProcess.__log.debug("SELECT: " + mroute.getGroupId() + ": matched to MESSAGE " + mexdao
-                            + " on CKEYSET " + ckeySet);
-                }
-    
-                MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess, _bpelProcess._engine, mexdao);
-    
-                inputMsgMatch(mroute.getGroupId(), mroute.getIndex(), mex);
-                execute();
+                correlator.removeRoutes(mroute.getGroupId(), _dao);
             }
-            for (String groupId : groupIds) {
-                correlator.removeRoutes(groupId, _dao);
+
+            // Selecting first route to proceed, other matching entries are ignored
+            MessageRouteDAO mroute = mroutes.get(0);
+
+            // Found message matching one of our selectors.
+            if (BpelProcess.__log.isDebugEnabled()) {
+                BpelProcess.__log.debug("SELECT: " + mroute.getGroupId() + ": matched to MESSAGE " + mexdao
+                        + " on CKEYSET " + ckeySet);
             }
+
+            MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess, _bpelProcess._engine, mexdao);
+
+            inputMsgMatch(mroute.getGroupId(), mroute.getIndex(), mex);
+            execute();
 
             // Do not release yet if the process is suspended, the mex will be used again
             if (_dao.getState() != ProcessState.STATE_SUSPENDED)

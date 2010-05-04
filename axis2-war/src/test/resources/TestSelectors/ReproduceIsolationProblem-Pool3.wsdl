@@ -1,0 +1,100 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" xmlns:this="http://example.com/ReproduceIsolationProblem/Pool3" xmlns:Pool2="http://example.com/ReproduceIsolationProblem/Pool2" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:diag="http://example.com/ReproduceIsolationProblem" xmlns:xml="http://www.w3.org/XML/1998/namespace" targetNamespace="http://example.com/ReproduceIsolationProblem/Pool3">
+    <wsdl:types>
+        <xs:schema elementFormDefault="qualified" targetNamespace="http://example.com/ReproduceIsolationProblem/Pool3">
+            <xs:element name="_31Request" type="xs:string"/>
+            <xs:element name="_32Request" type="xs:string"/>
+            <xs:element name="_32Response" type="xs:string"/>
+            <xs:element name="_33Request" type="xs:string"/>
+            <xs:element name="_33Response" type="xs:string"/>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="_31Request">
+        <wsdl:part name="body" element="this:_31Request"/>
+    </wsdl:message>
+    <wsdl:message name="_32Request">
+        <wsdl:part name="body" element="this:_32Request"/>
+    </wsdl:message>
+    <wsdl:message name="_32Response">
+        <wsdl:part name="body" element="this:_32Response"/>
+    </wsdl:message>
+    <wsdl:message name="_33Request">
+        <wsdl:part name="body" element="this:_33Request"/>
+    </wsdl:message>
+    <wsdl:message name="_33Response">
+        <wsdl:part name="body" element="this:_33Response"/>
+    </wsdl:message>
+    <wsdl:portType name="ForPool2">
+        <wsdl:operation name="_31">
+            <wsdl:input message="this:_31Request" name="_31"/>
+        </wsdl:operation>
+        <wsdl:operation name="_32">
+            <wsdl:input message="this:_32Request" name="_32"/>
+            <wsdl:output message="this:_32Response" name="_32Response"/>
+        </wsdl:operation>
+        <wsdl:operation name="_33">
+            <wsdl:input message="this:_33Request" name="_33"/>
+            <wsdl:output message="this:_33Response" name="_33Response"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="CanonicBindingForPool2" type="this:ForPool2">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="_31">
+            <soap:operation style="document" soapAction="http://example.com/ReproduceIsolationProblem/Pool3/ForPool2/_31"/>
+            <wsdl:input name="_31">
+                <soap:body use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="_32">
+            <soap:operation style="document" soapAction="http://example.com/ReproduceIsolationProblem/Pool3/ForPool2/_32"/>
+            <wsdl:input name="_32">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="_32Response">
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="_33">
+            <soap:operation style="document" soapAction="http://example.com/ReproduceIsolationProblem/Pool3/ForPool2/_33"/>
+            <wsdl:input name="_33">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="_33Response">
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="CanonicServiceForPool2">
+        <wsdl:port name="canonicPort" binding="this:CanonicBindingForPool2">
+            <soap:address location="http://localhost:8080/ode/processes/Project-Reproduce-Isolation-Problem/ReproduceIsolationProblem/Pool3/Pool2"/>
+        </wsdl:port>
+    </wsdl:service>
+    <vprop:property name="prop" type="xs:string"/>
+    <vprop:propertyAlias propertyName="this:prop" messageType="this:_31Request" part="body">
+        <vprop:query>text()</vprop:query>
+    </vprop:propertyAlias>
+    <vprop:propertyAlias propertyName="this:prop" messageType="this:_33Request" part="body">
+        <vprop:query>text()</vprop:query>
+    </vprop:propertyAlias>
+    <vprop:propertyAlias propertyName="this:prop" messageType="this:_32Request" part="body">
+        <vprop:query>text()</vprop:query>
+    </vprop:propertyAlias>
+</wsdl:definitions>
