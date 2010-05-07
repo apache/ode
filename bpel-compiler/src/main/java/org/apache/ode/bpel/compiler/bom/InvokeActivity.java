@@ -86,7 +86,7 @@ public class InvokeActivity extends ScopeLikeActivity implements Communication {
      * @author mszefler
      *
      */
-    class BastardScope extends Scope {
+    static class BastardScope extends Scope {
 
         public BastardScope(Element el) {
             super(el);

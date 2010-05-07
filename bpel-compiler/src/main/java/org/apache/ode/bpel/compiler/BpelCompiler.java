@@ -302,7 +302,7 @@ public abstract class BpelCompiler implements CompilerContext {
         }
         // A "real" variable couldn't be found, checking if we're dealing with a
         // process custom property
-        if (_customProcessProperties != null && _customProcessProperties.get(varName) != null) {
+        if (_customProcessProperties != null && _customProcessProperties.get(QName.valueOf(varName)) != null) {
 
         }
         throw new CompilationException(__cmsgs.errUndeclaredVariable(varName));
@@ -1074,7 +1074,7 @@ public abstract class BpelCompiler implements CompilerContext {
                 oplink.myRoleName = myRole.getName();
                 QName portType = myRole.getPortType();
                 if (portType == null)
-                    throw new CompilationException(__cmsgs.errMissingMyRolePortType(portType, plink.getMyRole(), plinkType.getName()));
+                    throw new CompilationException(__cmsgs.errMissingMyRolePortType(myRole.getPortType(), plink.getMyRole(), plinkType.getName()));
                 oplink.myRolePortType = resolvePortType(portType);
             }
 
@@ -1089,7 +1089,7 @@ public abstract class BpelCompiler implements CompilerContext {
                 oplink.partnerRoleName = partnerRole.getName();
                 QName portType = partnerRole.getPortType();
                 if (portType == null)
-                    throw new CompilationException(__cmsgs.errMissingPartnerRolePortType(portType, plink.getPartnerRole(), plinkType.getName()));
+                    throw new CompilationException(__cmsgs.errMissingPartnerRolePortType(partnerRole.getPortType(), plink.getPartnerRole(), plinkType.getName()));
                 oplink.partnerRolePortType = resolvePortType(portType);
             }
 

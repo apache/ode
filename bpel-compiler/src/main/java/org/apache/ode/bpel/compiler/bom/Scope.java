@@ -160,7 +160,7 @@ public class Scope extends JoinFailureSuppressor {
             return Boolean.TRUE;
         if ("no".equals(value))
             return Boolean.FALSE;
-        return null;
+        return Boolean.FALSE;
     }
 
     /**

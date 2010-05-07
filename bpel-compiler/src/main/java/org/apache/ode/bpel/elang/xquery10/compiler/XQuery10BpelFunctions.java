@@ -146,18 +146,21 @@ public class XQuery10BpelFunctions {
      */
     private static XPathFunction resolveFunction(XPathContext context,
         QName name) {
-        JaxpFunctionResolver funcResolver = null;
         Item item = context.getCurrentIterator().current();
+        XPathFunction function = null;
 
         if (item instanceof NodeWrapper) {
             Node node = (Node) ((NodeWrapper) item).getUnderlyingNode();
-
+            JaxpFunctionResolver funcResolver = null;
             if (node != null) {
                 funcResolver = (JaxpFunctionResolver) node.getUserData(USER_DATA_KEY_FUNCTION_RESOLVER);
             }
+            if (funcResolver != null) {
+                function = funcResolver.resolveFunction(name, 0);
+            }
         }
 
-        return funcResolver.resolveFunction(name, 0);
+        return function;
     }
 
     /**

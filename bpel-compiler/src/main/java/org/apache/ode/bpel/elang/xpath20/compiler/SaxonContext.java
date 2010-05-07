@@ -35,8 +35,10 @@ import net.sf.saxon.xpath.XPathFunctionLibrary;
  */
 public class SaxonContext extends JAXPXPathStaticContext {
 
-    private JaxpVariableResolver _varResolver;
-    private JaxpFunctionResolver _funcResolver;
+  
+    private static final long serialVersionUID = 2460900369574468960L;
+    private transient JaxpVariableResolver _varResolver;
+    private transient JaxpFunctionResolver _funcResolver;
 
     public SaxonContext(Configuration config, JaxpVariableResolver varResolver,
                         JaxpFunctionResolver funcResolver) {

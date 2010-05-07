@@ -37,7 +37,7 @@ import java.util.ArrayList;
 public class OdeXPathFunctionLibrary extends net.sf.saxon.xpath.XPathFunctionLibrary {
     private static final long serialVersionUID = -8885396864277163797L;
     
-    private JaxpFunctionResolver _funcResolver;
+    private transient JaxpFunctionResolver _funcResolver;
 
     public OdeXPathFunctionLibrary(JaxpFunctionResolver funcResolver) {
         _funcResolver = funcResolver;
