@@ -50,7 +50,6 @@ import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
-import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
 import org.apache.ode.il.MockScheduler;
 import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.store.ProcessConfImpl;
@@ -105,7 +104,7 @@ public abstract class BPELTestAbstract {
         if (Boolean.getBoolean("org.apache.ode.test.persistent")) {
             emf = Persistence.createEntityManagerFactory("ode-unit-test-embedded");
             em = emf.createEntityManager();
-            _cf = new BPELDAOConnectionFactoryImpl();
+            _cf = new org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl();
             _server.setDaoConnectionFactory(_cf);
             scheduler = new MockScheduler() {
                 @Override
@@ -137,7 +136,7 @@ public abstract class BPELTestAbstract {
         _server.setBindingContext(new BindingContextImpl());
         _server.setMessageExchangeContext(mexContext);
         scheduler.setJobProcessor(_server);
-        store = new ProcessStoreImpl(null, null, "jpa", new OdeConfigProperties(new Properties(), ""), true);
+        store = new ProcessStoreImpl(null, null, "hibernate", new OdeConfigProperties(new Properties(), ""), true);
         store.registerListener(new ProcessStoreListener() {
             public void onProcessStoreEvent(ProcessStoreEvent event) {
                 // bounce the process

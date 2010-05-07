@@ -248,7 +248,7 @@ define "ode" do
   desc "ODE BPEL Tests"
   define "bpel-test" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-runtime",
-      "bpel-store", "utils", "bpel-epr", "dao-jpa", "agents"),
+      "bpel-store", "utils", "bpel-epr", "dao-hibernate", "agents"),
       DERBY, JUnit.dependencies, JAVAX.persistence, OPENJPA, WSDL4J, COMMONS.httpclient,
     COMMONS.codec
 
