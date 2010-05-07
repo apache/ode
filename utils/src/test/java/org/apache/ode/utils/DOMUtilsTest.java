@@ -20,7 +20,11 @@ package org.apache.ode.utils;
 
 import org.apache.ode.utils.TestResources;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Map;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import junit.framework.TestCase;
 
@@ -110,5 +114,36 @@ public class DOMUtilsTest extends TestCase {
       }
     }
   }
-
+  
+  public void testCloneNode() throws Exception {
+    String testString = "<ns1:parent xmlns:ns1=\"abc\">\n" +
+   "  <ns1:child xmlns=\"def\">\n" +
+   "     <ns2:nestedChild xmlns:ns2=\"def\"/>\n" +
+   "  </ns1:child>\n" +
+   "</ns1:parent>";
+    
+    Document doc = DOMUtils.parse(new ByteArrayInputStream(testString.getBytes()));
+    Node node = doc.getFirstChild();
+    Node clonedNode = DOMUtils.cloneNode(doc, node);
+    String actualString = DOMUtils.domToString(clonedNode).replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n", "");
+    assertEquals("XML Result", testString, actualString);
+  }
+  
+  public void testCloneNodeNewDocument() throws Exception {
+      String testString = "<ns1:parent xmlns:ns1=\"abc\">\n" +
+     "  <ns1:child xmlns=\"def\">\n" +
+     "     <ns2:nestedChild xmlns:ns2=\"def\"/>\n" +
+     "  </ns1:child>\n" +
+     "</ns1:parent>";
+      
+      Document doc = DOMUtils.parse(new ByteArrayInputStream(testString.getBytes()));
+      Document doc2 = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+      Node node = doc.getFirstChild();
+      Node clonedNode = DOMUtils.cloneNode(doc2, node);
+      
+      assertNotSame("DOM's are the same", doc, doc2);
+      String actualString = DOMUtils.domToString(clonedNode).replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n", "");
+      assertEquals("XML Result", testString, actualString);
+          
+  }
 }

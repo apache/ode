@@ -1155,16 +1155,8 @@ public class DOMUtils {
     	    		clonedNode = document.createElement(nodeName);
     			}
     		}
-    		// attributes are not treated as child nodes, so copy them explicitly
-    		NamedNodeMap attributes = ((Element) sourceNode).getAttributes();
-    		for (int i = 0; i < attributes.getLength(); i++) {
-    			Attr attributeClone = (Attr) cloneNode(document, attributes.item(i));
-    			if (attributeClone.getNamespaceURI() == null) {
-    				((Element) clonedNode).setAttributeNode(attributeClone);
-    			} else {
-    				((Element) clonedNode).setAttributeNodeNS(attributeClone);
-    			}
-    		}
+    		
+    		copyAttributes(document, sourceNode, clonedNode);
 			break;
     	case Node.ENTITY_NODE:
     		// TODO
@@ -1201,6 +1193,25 @@ public class DOMUtils {
 	    	}
     	}
     	return clonedNode;
+    }
+
+    private static void copyAttributes(Document document, Node sourceNode,
+            Node clonedNode) {
+        // attributes are not treated as child nodes, so copy them explicitly
+        NamedNodeMap attributes = ((Element) sourceNode).getAttributes();
+        for (int i = 0; i < attributes.getLength(); i++) {
+            Node attrNode = attributes.item(i);
+            Document nodeDoc = attrNode.getOwnerDocument();
+            Attr attributeClone = (Attr)attrNode.cloneNode(false);
+            if (nodeDoc != null && !document.equals(nodeDoc)) {
+                attributeClone = (Attr)document.importNode(attributeClone, false);
+            }
+            if (attributeClone.getNamespaceURI() == null) {
+        		((Element) clonedNode).setAttributeNode(attributeClone);
+        	} else {
+        		((Element) clonedNode).setAttributeNodeNS(attributeClone);
+        	}
+        }
     }
 
     /**
