@@ -79,7 +79,7 @@ public class CorrelationKeySet implements Serializable {
      */
     public CorrelationKeySet add(CorrelationKey ck) {
         for( CorrelationKey key : correlationKeys ) {
-            if( key.getCorrelationSetName() == ck.getCorrelationSetName() ) {
+            if( key.getCorrelationSetName().equals(ck.getCorrelationSetName()) ) {
                 correlationKeys.remove(ck);
                 break;
             }

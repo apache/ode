@@ -131,6 +131,10 @@ public class CorrelationKey implements Serializable {
      * @return <code>true</code> if the given object
      */
     public boolean equals(Object o) {
+        if (!(o instanceof CorrelationKey)) {
+            return false;
+        }
+        
         CorrelationKey okey = (CorrelationKey) o;
 
         if (okey == null || !okey._csetName.equals(_csetName) || okey._keyValues.length != _keyValues.length)

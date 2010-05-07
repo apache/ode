@@ -24,7 +24,7 @@ import org.w3c.dom.Node;
 public class VariableModificationEvent extends VariableEvent {
     private static final long serialVersionUID = 1L;
 
-    private Node newValue;
+    private transient Node newValue;
 
     public VariableModificationEvent() {
         super();
