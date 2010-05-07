@@ -38,6 +38,9 @@ public class ResourceInstance implements Serializable, Resource {
 
     @Override
     public boolean equals(Object obj) {
+    	if (obj == null) {
+    		return false;
+    	}
         ResourceInstance other = (ResourceInstance) obj;
         return scopeInstanceId.equals(other.getScopeInstanceId()) && resource.equals(other.getModel());
     }

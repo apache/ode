@@ -43,6 +43,9 @@ public class ScopeStateEnum {
   }
 
   public boolean equals(Object o) {
+	if (o == null) {
+		return false;
+	}
     return ((ScopeStateEnum)o).myName.equals(myName);
   }
 

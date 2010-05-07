@@ -233,6 +233,9 @@ class OutstandingRequestManager implements Serializable {
         }
 
         public boolean equals(Object obj) {
+        	if (obj == null) {
+        		return false;
+        	}
             RequestIdTuple other = (RequestIdTuple) obj;
             return other.partnerLink.equals(partnerLink) &&
                     other.opName.equals(opName) &&

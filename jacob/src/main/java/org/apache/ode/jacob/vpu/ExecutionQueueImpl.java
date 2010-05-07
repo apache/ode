@@ -806,6 +806,9 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         }
 
         public boolean equals(Object obj) {
+        	if (obj == null) {
+        		return false;
+        	}
             return ((ChannelRef) obj)._id.equals(_id);
         }
 

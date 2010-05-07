@@ -54,6 +54,9 @@ public class PartnerLinkInstance implements Serializable, PartnerLink {
     }
 
     public boolean equals(Object obj) {
+    	if (obj == null) {
+    		return false;
+    	}
         PartnerLinkInstance other = (PartnerLinkInstance) obj;
         return partnerLink.equals(other.partnerLink) && scopeInstanceId.equals(other.scopeInstanceId);
     }

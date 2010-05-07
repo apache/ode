@@ -304,6 +304,9 @@ class OutstandingRequestManager implements Serializable {
         }
 
         public boolean equals(Object obj) {
+        	if (obj == null) {
+        		return false;
+        	}
             RequestIdTuple other = (RequestIdTuple) obj;
             return other.partnerLink.equals(partnerLink) &&
                     other.opName.equals(opName) &&
@@ -343,6 +346,9 @@ class OutstandingRequestManager implements Serializable {
         }
 
         public boolean equals(Object obj) {
+        	if (obj == null) {
+        		return false;
+        	}
             ReplyIdTuple other = (ReplyIdTuple) obj;
             return other.partnerLink.equals(partnerLink) &&
                     other.opName.equals(opName) &&
@@ -379,6 +385,9 @@ class OutstandingRequestManager implements Serializable {
         }
 
         public boolean equals(Object obj) {
+        	if (obj == null) {
+        		return false;
+        	}
             RequestResTuple other = (RequestResTuple) obj;
             return other.resource.equals(resource) && other.method.equals(method) && other.mexId.equals(mexId);
         }

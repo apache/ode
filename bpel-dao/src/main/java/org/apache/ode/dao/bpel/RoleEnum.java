@@ -47,6 +47,9 @@ public class RoleEnum {
    * @see Object#equals(java.lang.Object)
    */
   public boolean equals(Object o) {
+	if (o == null) {
+		return false;
+	}
     return ((RoleEnum)o)._id == _id;
   }
 

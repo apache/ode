@@ -1118,7 +1118,7 @@ public class CronExpression implements Serializable, Cloneable {
             int min = cl.get(Calendar.MINUTE);
 
             // get second.................................................
-            st = seconds.tailSet(new Integer(sec));
+            st = seconds.tailSet(Integer.valueOf(sec));
             if (st != null && st.size() != 0) {
                 sec = ((Integer) st.first()).intValue();
             } else {
@@ -1133,7 +1133,7 @@ public class CronExpression implements Serializable, Cloneable {
             t = -1;
 
             // get minute.................................................
-            st = minutes.tailSet(new Integer(min));
+            st = minutes.tailSet(Integer.valueOf(min));
             if (st != null && st.size() != 0) {
                 t = min;
                 min = ((Integer) st.first()).intValue();
@@ -1154,7 +1154,7 @@ public class CronExpression implements Serializable, Cloneable {
             t = -1;
 
             // get hour...................................................
-            st = hours.tailSet(new Integer(hr));
+            st = hours.tailSet(Integer.valueOf(hr));
             if (st != null && st.size() != 0) {
                 t = hr;
                 hr = ((Integer) st.first()).intValue();
@@ -1182,7 +1182,7 @@ public class CronExpression implements Serializable, Cloneable {
             boolean dayOfMSpec = !daysOfMonth.contains(NO_SPEC);
             boolean dayOfWSpec = !daysOfWeek.contains(NO_SPEC);
             if (dayOfMSpec && !dayOfWSpec) { // get day by day of month rule
-                st = daysOfMonth.tailSet(new Integer(day));
+                st = daysOfMonth.tailSet(Integer.valueOf(day));
                 if (lastdayOfMonth) {
                     if(!nearestWeekday) {
                         t = day;
@@ -1375,7 +1375,7 @@ public class CronExpression implements Serializable, Cloneable {
                     int cDow = cl.get(Calendar.DAY_OF_WEEK); // current d-o-w
                     int dow = ((Integer) daysOfWeek.first()).intValue(); // desired
                     // d-o-w
-                    st = daysOfWeek.tailSet(new Integer(cDow));
+                    st = daysOfWeek.tailSet(Integer.valueOf(cDow));
                     if (st != null && st.size() > 0) {
                         dow = ((Integer) st.first()).intValue();
                     }
@@ -1430,7 +1430,7 @@ public class CronExpression implements Serializable, Cloneable {
             }
 
             // get month...................................................
-            st = months.tailSet(new Integer(mon));
+            st = months.tailSet(Integer.valueOf(mon));
             if (st != null && st.size() != 0) {
                 t = mon;
                 mon = ((Integer) st.first()).intValue();

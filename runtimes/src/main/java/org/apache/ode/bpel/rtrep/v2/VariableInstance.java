@@ -38,6 +38,9 @@ public class VariableInstance implements Serializable, Variable {
     }
 
     public boolean equals(Object obj) {
+    	if (obj == null) {
+    		return false;
+    	}
         VariableInstance other = (VariableInstance) obj;
         return other.declaration.equals(declaration) && other.scopeInstance.equals(scopeInstance);
     }
