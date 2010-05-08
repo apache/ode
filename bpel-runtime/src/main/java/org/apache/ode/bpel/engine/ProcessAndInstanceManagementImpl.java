@@ -75,6 +75,7 @@ import org.apache.ode.bpel.evt.ScopeCompletionEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.ScopeFaultEvent;
 import org.apache.ode.bpel.evt.VariableEvent;
+import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.evtproc.ActivityStateDocumentBuilder;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.BpelServer;
@@ -133,6 +134,7 @@ import org.apache.ode.bpel.pmapi.TScopeRef;
 import org.apache.ode.bpel.pmapi.TVariableInfo;
 import org.apache.ode.bpel.pmapi.TVariableRef;
 import org.apache.ode.bpel.pmapi.VariableInfoDocument;
+import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
@@ -1181,6 +1183,9 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         }
         if (event instanceof VariableEvent) {
             info.setVariableName(((VariableEvent) event).getVarName());
+        }
+        if(event instanceof VariableModificationEvent) {
+        	info.setNewValue(DOMUtils.domToString(((VariableModificationEvent) event).getNewValue()));
         }
     }
 

@@ -781,6 +781,7 @@
             <element name="activity-failure-reason" type="xs:string" minOccurs="0" maxOccurs="1"/>
             <element name="activity-recovery-action" type="xs:string" minOccurs="0" maxOccurs="1"/>
             <element name="variable-name" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <element name="new-value" type="xs:string" minOccurs="0" maxOccurs="1"/>
             <element name="port-type" type="xs:QName" minOccurs="0" maxOccurs="1"/>
             <element name="operation" type="xs:string" minOccurs="0" maxOccurs="1"/>
             <element name="correlation-set" type="xs:string" minOccurs="0" maxOccurs="1"/>
