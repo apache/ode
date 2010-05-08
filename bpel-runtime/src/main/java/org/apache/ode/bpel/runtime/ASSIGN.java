@@ -432,7 +432,8 @@ class ASSIGN extends ACTIVITY {
                         rvalue = ((Document)rvalue).getDocumentElement();
                 }
 
-                if (headerAssign && lvaluePtr.getParentNode().getNodeName().equals("message") && rvalue.getNodeType()==Node.ELEMENT_NODE) {
+                 Node parentNode = lvaluePtr.getParentNode();
+                if (headerAssign && parentNode != null && "message".equals(parentNode.getNodeName()) && rvalue.getNodeType()==Node.ELEMENT_NODE ) {
                     lvalue = copyInto((Element)lvalue, (Element) lvaluePtr, (Element) rvalue);
                 } else if (rvalue.getNodeType() == Node.ELEMENT_NODE && lvaluePtr.getNodeType() == Node.ELEMENT_NODE) {
                     lvalue = replaceElement((Element)lvalue, (Element) lvaluePtr, (Element) rvalue,
