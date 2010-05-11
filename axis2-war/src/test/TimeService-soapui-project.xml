@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project name="TimeService" resourceRoot="" soapui-version="3.5-beta1" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:interface xsi:type="con:WsdlInterface" wsaVersion="NONE" name="TimeServiceSoap" type="wsdl" bindingName="{http://ws.intalio.com/TimeService/}TimeServiceSoap" soapVersion="1_1" anonymous="optional" definition="file:/home/joker/mind/intalio/pxe/axis2-war/src/test/resources/TestCleanSuccess_All/TimeService.wsdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache type="TEXT" rootPart="file:/home/joker/mind/intalio/pxe/axis2-war/src/test/resources/TestCleanSuccess_All/TimeService.wsdl"><con:part><con:url>file:/home/joker/mind/intalio/pxe/axis2-war/src/test/resources/TestCleanSuccess_All/TimeService.wsdl</con:url><con:content><![CDATA[<!--~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.-->
+<wsdl:definitions targetNamespace="http://ws.intalio.com/TimeService/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://ws.intalio.com/TimeService/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:documentation>A sample Time service</wsdl:documentation>
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://ws.intalio.com/TimeService/">
+      <s:element name="getUTCTime" type="s:string"/>
+      <s:element name="getUTCTimeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="getUTCTimeResult" type="s:string"/>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="getCityTime">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="city" type="s:string"/>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="getCityTimeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="getCityTimeResult" type="s:string"/>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="getUTCTimeSoapIn">
+    <wsdl:part name="parameters" element="tns:getUTCTime"/>
+  </wsdl:message>
+  <wsdl:message name="getUTCTimeSoapOut">
+    <wsdl:part name="parameters" element="tns:getUTCTimeResponse"/>
+  </wsdl:message>
+  <wsdl:message name="getCityTimeSoapIn">
+    <wsdl:part name="parameters" element="tns:getCityTime"/>
+  </wsdl:message>
+  <wsdl:message name="getCityTimeSoapOut">
+    <wsdl:part name="parameters" element="tns:getCityTimeResponse"/>
+  </wsdl:message>
+  <wsdl:portType name="TimeServiceSoap">
+    <wsdl:operation name="getUTCTime">
+      <wsdl:input message="tns:getUTCTimeSoapIn"/>
+      <wsdl:output message="tns:getUTCTimeSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="getCityTime">
+      <wsdl:input message="tns:getCityTimeSoapIn"/>
+      <wsdl:output message="tns:getCityTimeSoapOut"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="TimeServiceSoap" type="tns:TimeServiceSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="getUTCTime">
+      <soap:operation soapAction="http://ws.intalio.com/TimeService/getUTCTime" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getCityTime">
+      <soap:operation soapAction="http://ws.intalio.com/TimeService/getCityTime" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="TimeService">
+    <wsdl:documentation>A sample Time service</wsdl:documentation>
+    <wsdl:port name="TimeServiceSoap" binding="tns:TimeServiceSoap">
+      <soap:address location="http://ws.intalio.com/TimeService/"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>]]></con:content><con:type>http://schemas.xmlsoap.org/wsdl/</con:type></con:part></con:definitionCache><con:endpoints><con:endpoint>http://ws.intalio.com/TimeService/</con:endpoint><con:endpoint>http://joker-laptop:8088/TimeService/</con:endpoint></con:endpoints><con:operation isOneWay="false" action="http://ws.intalio.com/TimeService/getCityTime" name="getCityTime" bindingOperationName="getCityTime" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://ws.intalio.com/TimeService/</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tim="http://ws.intalio.com/TimeService/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tim:getCityTime>
+         <!--Optional:-->
+         <tim:city>?</tim:city>
+      </tim:getCityTime>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://ws.intalio.com/TimeService/getCityTime"/></con:call></con:operation><con:operation isOneWay="false" action="http://ws.intalio.com/TimeService/getUTCTime" name="getUTCTime" bindingOperationName="getUTCTime" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://ws.intalio.com/TimeService/</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tim="http://ws.intalio.com/TimeService/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tim:getUTCTime>?</tim:getUTCTime>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://ws.intalio.com/TimeService/getUTCTime"/></con:call></con:operation></con:interface><con:mockService port="8088" path="/TimeService/" host="joker-laptop" name="TimeServiceSoap MockService" bindToHostOnly="false" docroot=""><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.mock.WsdlMockService@require-soap-action">false</con:setting></con:settings><con:mockOperation name="getCityTime" interface="TimeServiceSoap" operation="getCityTime"><con:settings/><con:dispatchStyle>SEQUENCE</con:dispatchStyle><con:defaultResponse>Response 1</con:defaultResponse><con:response name="Response 1" encoding="UTF-8"><con:settings/><con:responseContent><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tim="http://ws.intalio.com/TimeService/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tim:getCityTimeResponse>
+         <!--Optional:-->
+         <tim:getCityTimeResult>?</tim:getCityTimeResult>
+      </tim:getCityTimeResponse>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:responseContent><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://ws.intalio.com/TimeService/getCityTime"/></con:response><con:dispatchConfig/></con:mockOperation><con:mockOperation name="getUTCTime" interface="TimeServiceSoap" operation="getUTCTime"><con:settings/><con:dispatchStyle>SEQUENCE</con:dispatchStyle><con:defaultResponse>Response 1</con:defaultResponse><con:response name="Response 1" encoding="UTF-8"><con:settings/><con:responseContent><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tim="http://ws.intalio.com/TimeService/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tim:getUTCTimeResponse>
+         <!--Optional:-->
+         <tim:getUTCTimeResult>?</tim:getUTCTimeResult>
+      </tim:getUTCTimeResponse>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:responseContent><con:wsaConfig mustUnderstand="NONE" version="200508" action="http://ws.intalio.com/TimeService/getUTCTime"/></con:response><con:dispatchConfig/></con:mockOperation><con:properties/></con:mockService><con:properties/><con:wssContainer/></con:soapui-project>
