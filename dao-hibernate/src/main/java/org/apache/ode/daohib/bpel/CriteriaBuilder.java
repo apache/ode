@@ -69,7 +69,7 @@ class CriteriaBuilder {
                 List<String> iids = filter.getIidFilter();
                 for (int m = 0; m < iids.size(); m++) {
                     filters.append(" pi.id = :iid").append(m);
-                    parameters.put("iid" + m, iids.get(m));
+                    parameters.put("iid" + m, Long.parseLong(iids.get(m)));
                     if (m < iids.size() - 1) filters.append(" or");
                 }
                 clauses.add(" (" + filters + ")");
