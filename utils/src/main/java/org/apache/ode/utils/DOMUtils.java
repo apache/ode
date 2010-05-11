@@ -1109,25 +1109,7 @@ public class DOMUtils {
     	
     	switch (sourceNode.getNodeType()) {
     	case Node.ATTRIBUTE_NODE:
-    		if (namespaceURI == null) {
-    			clonedNode = document.createAttribute(nodeName);
-    		} else {
-    			String prefix = ((Attr) sourceNode).lookupPrefix(namespaceURI);
-    			// the prefix for the XML namespace can't be looked up, hence this...
-    			if (prefix == null && namespaceURI.equals(NS_URI_XMLNS)) {
-    				prefix = "xmlns";
-    			}
-    			// if a prefix exists, qualify the name with it
-    			if (prefix != null && !"".equals(prefix)) {
-        			nodeName = prefix + ":" + nodeName;
-    			}
-    			// create the appropriate type of attribute
-    			if (prefix != null) {
-	        		clonedNode = document.createAttributeNS(namespaceURI, nodeName);
-    			} else {
-    				clonedNode = document.createAttribute(nodeName);
-    			}
-    		}
+   		    clonedNode = document.importNode(sourceNode, false);
 			break;
     	case Node.CDATA_SECTION_NODE:
     		clonedNode = document.createCDATASection(((CDATASection) sourceNode).getData());
@@ -1190,13 +1172,16 @@ public class DOMUtils {
     	NodeList sourceChildren = sourceNode.getChildNodes();
     	if (sourceChildren != null) {
 	    	for (int i = 0; i < sourceChildren.getLength(); i++) {
-	    		Node sourceChild = sourceChildren.item(i);
-	    		Node clonedChild = cloneNode(document, sourceChild);
-	    		clonedNode.appendChild(clonedChild);
+	    	    if (sourceNode.getNodeType() != Node.ATTRIBUTE_NODE) {
+	    	        Node sourceChild = sourceChildren.item(i);
+	    	        Node clonedChild = cloneNode(document, sourceChild);
+	    	        clonedNode.appendChild(clonedChild);
+	    	    }
+	    		
 	    		// if the child has a textual value, parse it for any embedded prefixes
-	    		if (clonedChild.getNodeType() == Node.TEXT_NODE || 
-	    				clonedChild.getNodeType() == Node.CDATA_SECTION_NODE) {
-	    			parseEmbeddedPrefixes(sourceNode, clonedNode, clonedChild);
+	    		if (sourceChildren.item(i).getNodeType() == Node.TEXT_NODE || 
+	    				sourceChildren.item(i).getNodeType() == Node.CDATA_SECTION_NODE) {
+	    			parseEmbeddedPrefixes(sourceNode, clonedNode, sourceChildren.item(i));
 	    		}
 	    	}
     	}
