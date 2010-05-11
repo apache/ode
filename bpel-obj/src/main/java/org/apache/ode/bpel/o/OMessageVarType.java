@@ -68,6 +68,14 @@ public class OMessageVarType extends OVarType {
         return el;
     }
 
+    public String toString() {
+        StringBuffer buf = new StringBuffer(super.toString());
+        buf.append('(');
+        buf.append(this.messageType.toString());
+        buf.append(')');
+        return buf.toString();
+    } 
+
     public static class Part extends OBase {
         private static final long serialVersionUID = -2356665271228433779L;
         
