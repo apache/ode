@@ -19,6 +19,8 @@
 package org.apache.ode.tools.sendsoap.cline;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpConnectionManager;
+import org.apache.commons.httpclient.SimpleHttpConnectionManager;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -105,7 +107,10 @@ public class HttpSoapSender extends BaseCommandlineTool {
             m.appendReplacement(sb, now + "-" + c++);
         }
         m.appendTail(sb);
-        HttpClient httpClient = new HttpClient();
+        SimpleHttpConnectionManager mgr = new SimpleHttpConnectionManager();  
+        mgr.getParams().setConnectionTimeout(60000);
+        mgr.getParams().setSoTimeout(60000);
+        HttpClient httpClient = new HttpClient(mgr);
         PostMethod httpPostMethod = new PostMethod(u.toExternalForm());
         if (proxyServer != null && proxyServer.length() > 0) {
             httpClient.getState().setCredentials(new AuthScope(proxyServer, proxyPort),
