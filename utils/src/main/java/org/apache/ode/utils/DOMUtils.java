@@ -1109,7 +1109,28 @@ public class DOMUtils {
     	
     	switch (sourceNode.getNodeType()) {
     	case Node.ATTRIBUTE_NODE:
-   		    clonedNode = document.importNode(sourceNode, false);
+            if (namespaceURI == null) {
+                clonedNode = document.createAttribute(nodeName);
+                break;
+            } else {
+                String prefix = sourceNode.getPrefix();
+//                String prefix = ((Attr) sourceNode).lookupPrefix(namespaceURI);
+                // the prefix for the XML namespace can't be looked up, hence this...
+                if (prefix == null && namespaceURI.equals(NS_URI_XMLNS)) {
+                    nodeName = "xmlns";
+                }
+                // if a prefix exists, qualify the name with it
+                if (prefix != null && !"".equals(prefix)) {
+                    nodeName = prefix + ":" + nodeName;
+                }
+                // create the appropriate type of attribute
+                if (prefix != null) {
+                    clonedNode = document.createAttributeNS(namespaceURI, nodeName);
+                } else {
+                    clonedNode = document.createAttribute(nodeName);
+                }
+                clonedNode.setNodeValue(sourceNode.getNodeValue());
+            }
 			break;
     	case Node.CDATA_SECTION_NODE:
     		clonedNode = document.createCDATASection(((CDATASection) sourceNode).getData());

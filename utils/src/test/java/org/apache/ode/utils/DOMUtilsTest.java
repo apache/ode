@@ -19,6 +19,7 @@
 package org.apache.ode.utils;
 
 import net.sf.saxon.dom.DocumentBuilderFactoryImpl;
+import net.sf.saxon.xqj.SaxonXQDataSource;
 
 import org.apache.ode.utils.TestResources;
 
@@ -30,6 +31,11 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xquery.XQConnection;
+import javax.xml.xquery.XQDataSource;
+import javax.xml.xquery.XQItem;
+import javax.xml.xquery.XQPreparedExpression;
+import javax.xml.xquery.XQResultSequence;
 
 import junit.framework.TestCase;
 
@@ -215,6 +221,29 @@ public class DOMUtilsTest extends TestCase {
         assertEquals("XML Result", saxonString, actualString);
             
     }
+    
+    public void testSaxonXQueryResultValueClone() throws Exception {
+       String testString = "<test:test1 xmlns:test=\"http://test.org\">\n" +
+      "  <test:test2>asdf</test:test2>\n" +
+      "</test:test1>";
+       
+       Document doc = DOMUtils.parse(new ByteArrayInputStream(testString.getBytes()));
+       
+       XQDataSource ds = new SaxonXQDataSource();
+       XQConnection conn = ds.getConnection();
+       XQPreparedExpression exp = conn.prepareExpression(testString);
+       
+       XQResultSequence rs = exp.executeQuery();
+       rs.next();
+
+       XQItem xqitem = rs.getItem();
+       Node node = xqitem.getNode();
+       Node clonedNode = DOMUtils.cloneNode(DOMUtils.newDocument(), node);
+       assertNotNull(clonedNode);
+       
+    }
+    
+    
 
     private Document createSaxonDOM(String testString)
             throws ParserConfigurationException, SAXException, IOException {
