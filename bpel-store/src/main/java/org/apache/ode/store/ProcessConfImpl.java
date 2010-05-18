@@ -19,27 +19,35 @@
 package org.apache.ode.store;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileFilter;
 import java.net.URI;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.activityRecovery.FailureHandlingDocument.FailureHandling;
 import org.apache.ode.bpel.dd.TCleanup;
-import org.apache.ode.bpel.dd.TContextInterceptor;
 import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.dd.TInvoke;
 import org.apache.ode.bpel.dd.TMexInterceptor;
 import org.apache.ode.bpel.dd.TProcessEvents;
-import org.apache.ode.bpel.dd.TPropagate;
 import org.apache.ode.bpel.dd.TProvide;
 import org.apache.ode.bpel.dd.TSchedule;
 import org.apache.ode.bpel.dd.TScopeEvents;
@@ -47,19 +55,18 @@ import org.apache.ode.bpel.dd.TService;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessState;
-import org.apache.ode.bpel.iapi.EndpointReferenceContext;
-import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
-import org.apache.ode.bpel.rapi.ProcessModel;
+import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
+import org.apache.ode.utils.CollectionUtils;
 import org.apache.ode.utils.CronExpression;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.HierarchicalProperties;
 import org.apache.ode.utils.WatchDog;
-import org.apache.ode.utils.CollectionUtils;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -77,12 +84,11 @@ public class ProcessConfImpl implements ProcessConf {
     private File _configDir;
     private final Map<QName, Node> _props;
     private final HashMap<String, Endpoint> _partnerRoleInitialValues = new HashMap<String, Endpoint>();
+    private final HashMap<String, PartnerRoleConfig> _partnerRoleConfig = new HashMap<String, PartnerRoleConfig>();
 
     private final HashMap<String, Endpoint> _myRoleEndpoints = new HashMap<String, Endpoint>();
     private final ArrayList<QName> _sharedServices = new ArrayList<QName>();
     private final Map<String, Set<BpelEvent.TYPE>> _events = new HashMap<String, Set<BpelEvent.TYPE>>();
-    private final List<PropagationRule> _propagationRules = new ArrayList<PropagationRule>();
-    private final Map<String, Element> _ctxi = new HashMap<String, Element>(); 
     private final ArrayList<String> _mexi = new ArrayList<String>();
     ProcessState _state;
     final TDeployment.Process _pinfo;
@@ -94,15 +100,17 @@ public class ProcessConfImpl implements ProcessConf {
     // cache the inMemory flag because XMLBeans objects are heavily synchronized (guarded by a coarse-grained lock)
     private volatile boolean _inMemory = false;
 
-    // monitor the EPR property file and reload it if necessary
+    // monitor the IL property file and reload it if necessary
     private WatchDog<Map<File, Long>, PropertiesObserver> propertiesWatchDog;
 
     private EndpointReferenceContext eprContext;
 
     private final ProcessCleanupConfImpl processCleanupConfImpl;
+    
+    private final boolean generateProcessEventsAll;
 
     ProcessConfImpl(QName pid, QName type, long version, DeploymentUnitDir du, TDeployment.Process pinfo, Date deployDate,
-                    Map<QName, Node> props, ProcessState pstate, EndpointReferenceContext eprContext, File configDir) {
+                    Map<QName, Node> props, ProcessState pstate, EndpointReferenceContext eprContext, File configDir, boolean generateProcessEventsAll) {
         _pid = pid;
         _version = version;
         _du = du;
@@ -113,18 +121,18 @@ public class ProcessConfImpl implements ProcessConf {
         _state = pstate;
         _type = type;
         _inMemory = _pinfo.isSetInMemory() && _pinfo.getInMemory();
+        this.generateProcessEventsAll = generateProcessEventsAll;
         this.eprContext = eprContext;
+
         propertiesWatchDog = new WatchDog<Map<File, Long>, PropertiesObserver>(new PropertiesMutable(), new PropertiesObserver());
 
         initLinks();
         initMexInterceptors();
         initEventList();
-        initPropagationRules();
-        initContextInterceptors();
 
         processCleanupConfImpl = new ProcessCleanupConfImpl(pinfo);
         
-        initCronSchedules();
+        initSchedules();
     }
 
     private List<File> collectEndpointConfigFiles() {
@@ -151,7 +159,7 @@ public class ProcessConfImpl implements ProcessConf {
             if (__log.isErrorEnabled()) __log.error(_configDir + " does not exist or is not a directory");
         }
         return propFiles;
-    }    
+    }
 
     private void initMexInterceptors() {
         if (_pinfo.getMexInterceptors() != null) {
@@ -172,6 +180,22 @@ public class ProcessConfImpl implements ProcessConf {
                 __log.debug("Processing <invoke> element for process " + _pinfo.getName() + ": partnerlink " + plinkName + " --> "
                         + service);
                 _partnerRoleInitialValues.put(plinkName, new Endpoint(service.getName(), service.getPort()));
+                
+                {
+                    OFailureHandling g = null;
+                    
+                    if (invoke.isSetFailureHandling()) {
+                        FailureHandling f = invoke.getFailureHandling();
+                        g = new OFailureHandling();
+                        if (f.isSetFaultOnFailure()) g.faultOnFailure = f.getFaultOnFailure();
+                        if (f.isSetRetryDelay()) g.retryDelay = f.getRetryDelay();
+                        if (f.isSetRetryFor()) g.retryFor = f.getRetryFor();
+                    }
+                    
+                    PartnerRoleConfig c = new PartnerRoleConfig(g, invoke.getUsePeer2Peer());
+                    __log.debug("PartnerRoleConfig for " + plinkName + " " + c.failureHandling + " usePeer2Peer: " + c.usePeer2Peer);
+                    _partnerRoleConfig.put(plinkName, c);
+                }
             }
         }
 
@@ -188,7 +212,7 @@ public class ProcessConfImpl implements ProcessConf {
                 __log.debug("Processing <provide> element for process " + _pinfo.getName() + ": partnerlink " + plinkName + " --> "
                         + service.getName() + " : " + service.getPort());
                 _myRoleEndpoints.put(plinkName, new Endpoint(service.getName(), service.getPort()));
-                
+
                 if (provide.isSetEnableSharing()) {
                     _sharedServices.add(service.getName());
                 }
@@ -198,6 +222,10 @@ public class ProcessConfImpl implements ProcessConf {
 
     public Date getDeployDate() {
         return _deployDate;
+    }
+
+    public String getDeployer() {
+        return "";
     }
 
     public List<File> getFiles() {
@@ -235,10 +263,13 @@ public class ProcessConfImpl implements ProcessConf {
         }
     }
 
-    public ProcessModel getProcessModel() {
-        throw new UnsupportedOperationException();
+    public long getCBPFileSize() {
+        CBPInfo cbpInfo = _du.getCBPInfo(getType());
+        if (cbpInfo == null)
+            throw new ContextException("CBP record not found for type " + getType());
+        return cbpInfo.cbp.length();
     }
-
+    
     public String getBpelDocument() {
         CBPInfo cbpInfo = _du.getCBPInfo(getType());
         if (cbpInfo == null)
@@ -276,16 +307,60 @@ public class ProcessConfImpl implements ProcessConf {
         return _du.getDefinitionForService(serviceName);
     }
 
+    public Definition getDefinitionForPortType(QName portTypeName) {
+        return _du.getDefinitionForPortType(portTypeName);
+    }
+
     public Map<String, Endpoint> getInvokeEndpoints() {
         return Collections.unmodifiableMap(_partnerRoleInitialValues);
+    }
+
+    public Map<String, PartnerRoleConfig> getPartnerRoleConfig() {
+        return Collections.unmodifiableMap(_partnerRoleConfig);
     }
 
     public Map<String, Endpoint> getProvideEndpoints() {
         return Collections.unmodifiableMap(_myRoleEndpoints);
     }
-    
+
     public boolean isSharedService(QName serviceName) {
         return _sharedServices.contains(serviceName);
+    }
+
+    @SuppressWarnings("unused")
+    private void handleEndpoints() {
+        // for (TProvide provide : _pinfo.getProvideList()) {
+        // OPartnerLink pLink = _oprocess.getPartnerLink(provide.getPartnerLink());
+        // if (pLink == null) {
+        // String msg = __msgs.msgDDPartnerLinkNotFound(provide.getPartnerLink());
+        // __log.error(msg);
+        // throw new BpelEngineException(msg);
+        // }
+        // if (!pLink.hasMyRole()) {
+        // String msg = __msgs.msgDDMyRoleNotFound(provide.getPartnerLink());
+        // __log.error(msg);
+        // throw new BpelEngineException(msg);
+        // }
+        // }
+        // for (TInvoke invoke : _pinfo.getInvokeList()) {
+        // OPartnerLink pLink = _oprocess.getPartnerLink(invoke.getPartnerLink());
+        // if (pLink == null) {
+        // String msg = __msgs.msgDDPartnerLinkNotFound(invoke.getPartnerLink());
+        // __log.error(msg);
+        // throw new BpelEngineException(msg);
+        // }
+        // if (!pLink.hasPartnerRole()) {
+        // String msg = __msgs.msgDDPartnerRoleNotFound(invoke.getPartnerLink());
+        // __log.error(msg);
+        // throw new BpelEngineException(msg);
+        // }
+        // TODO Handle non initialize partner roles that just provide a binding
+        // if (!pLink.initializePartnerRole && _oprocess.version.equals(Namespaces.WS_BPEL_20_NS)) {
+        // String msg = ProcessDDInitializer.__msgs.msgDDNoInitiliazePartnerRole(invoke.getPartnerLink());
+        // ProcessDDInitializer.__log.error(msg);
+        // throw new BpelEngineException(msg);
+        // }
+        // }
     }
 
     DeploymentUnitDir getDeploymentUnit() {
@@ -294,10 +369,6 @@ public class ProcessConfImpl implements ProcessConf {
 
     public boolean isTransient() {
         return _inMemory;
-    }
-
-    public boolean isRestful() {
-        return getProvideEndpoints().size() == 0;
     }
 
     public void setTransient(boolean t) {
@@ -326,11 +397,13 @@ public class ProcessConfImpl implements ProcessConf {
         TProcessEvents processEvents = _pinfo.getProcessEvents();
         // No filtering, using defaults
         if (processEvents == null) {
-            HashSet<BpelEvent.TYPE> all = new HashSet<BpelEvent.TYPE>();
-            for (BpelEvent.TYPE t : BpelEvent.TYPE.values()) {
-                if (!t.equals(BpelEvent.TYPE.scopeHandling)) all.add(t);
+            if (generateProcessEventsAll) {
+                HashSet<BpelEvent.TYPE> all = new HashSet<BpelEvent.TYPE>();
+                for (BpelEvent.TYPE t : BpelEvent.TYPE.values()) {
+                    if (!t.equals(BpelEvent.TYPE.scopeHandling)) all.add(t);
+                }
+                _events.put(null, all);
             }
-            _events.put(null, all);
             return;
         }
 
@@ -344,7 +417,7 @@ public class ProcessConfImpl implements ProcessConf {
         }
 
         // Events filtered at the process level
-        if (processEvents.getEnableEventList() != null) {
+        if (processEvents.getEnableEventList() != null && !processEvents.getEnableEventList().isEmpty()) {
             List<String> enabled = processEvents.getEnableEventList();
             HashSet<BpelEvent.TYPE> evtSet = new HashSet<BpelEvent.TYPE>();
             for (String enEvt : enabled) {
@@ -428,7 +501,7 @@ public class ProcessConfImpl implements ProcessConf {
 
         @Override
         public String toString() {
-            return "Endpoint files for " + _du.toString();
+            return "Endpoint files for "+_du.toString();
         }
     }
 
@@ -452,8 +525,8 @@ public class ProcessConfImpl implements ProcessConf {
     public Set<CLEANUP_CATEGORY> getCleanupCategories(boolean instanceSucceeded) {
         return processCleanupConfImpl.getCleanupCategories(instanceSucceeded);
     }
-
-    private void initCronSchedules() {
+    
+    private void initSchedules() {
         for(TSchedule schedule : _pinfo.getScheduleList()) {
             for(TCleanup cleanup : schedule.getCleanupList()) {
                 assert !cleanup.getFilterList().isEmpty();
@@ -487,47 +560,5 @@ public class ProcessConfImpl implements ProcessConf {
         }
         
         return jobs;
-    }
-
-    public Map<String, Element> getContextInterceptors() {
-        return _ctxi;
-    }
-
-
-    public List<PropagationRule> getPropagationRules() {
-        return _propagationRules;
-    }
-    
-    @SuppressWarnings("unchecked")
-    private void initPropagationRules() {
-        if (_pinfo.getContext() != null) {
-            for (TPropagate propagate : _pinfo.getContext().getPropagateList()) {
-                PropagationRule rule = new PropagationRule();
-                rule.setFromPL(propagate.getFrom());
-                rule.setToPL(propagate.getTo());
-                rule.setContexts(propagate.getContext());
-                _propagationRules.add(rule);
-            }
-        }
-    }
-    
-    private void initContextInterceptors() {
-        if (_pinfo.getContext() != null) {
-            for (TContextInterceptor i : _pinfo.getContext().getInterceptorList()) {
-                if (i.getConfig().getDomNode().getNodeType() != Node.ELEMENT_NODE){
-                    __log.warn("Ignoring configuration for " + i.getClassName() + " since it is not an XML element.");
-                    continue;
-                }
-                Element config = (Element)i.getConfig().getDomNode();
-                if (config != null) {
-                    // We'll need DOM Level 3
-                    Document doc = DOMUtils.newDocument();
-                    doc.appendChild(doc.importNode(config, true));
-                    _ctxi.put(i.getClassName(), doc.getDocumentElement());
-                } else {
-                    _ctxi.put(i.getClassName(), null);
-                }
-            }
-        }
     }
 }

@@ -1,0 +1,4 @@
+Bundle-Activator: org.apache.ode.jbi.osgi.ServiceUnitActivator
+Export-Package: org.apache.ode.ping
+Import-Package: org.apache.ode.jbi.osgi,org.apache.servicemix.http,org.apache.servicemix.common.osgi
+Include-Resource: src/main/resources

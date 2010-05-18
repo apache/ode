@@ -18,12 +18,19 @@
  */
 package org.apache.ode.jbi;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.iapi.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.iapi.BindingContext;
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 
 /**
  * JBI Implementation of ODE's {@link org.apache.ode.bpel.iapi.BindingContext}
@@ -36,7 +43,7 @@ class BindingContextImpl implements BindingContext {
     private static final Log __log = LogFactory.getLog(BindingContextImpl.class);
 
     private final OdeContext _ode;
-
+    
     BindingContextImpl(OdeContext ode) {
         _ode = ode;
     }
@@ -70,15 +77,8 @@ class BindingContextImpl implements BindingContext {
         }
     }
 
-    public void activateProvidedResource(Resource resource) {
-        throw new UnsupportedOperationException("RESTful resources not supported in JBI integration layer.");
-    }
-
-    public void deactivateProvidedResource(Resource resource) {
-        throw new UnsupportedOperationException("RESTful resources not supported in JBI integration layer.");
-    }
-
-    private static class PartnerRoleChannelImpl implements PartnerRoleChannel {
+    
+    private class PartnerRoleChannelImpl implements PartnerRoleChannel {
         
         private final JbiEndpointReference _initialEPR;
 
@@ -99,4 +99,9 @@ class BindingContextImpl implements BindingContext {
         }
         
     }
+
+
+	public long calculateSizeofService(EndpointReference epr) {
+		return _ode.calculateSizeOfService(epr);
+	}
 }

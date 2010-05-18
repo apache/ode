@@ -48,9 +48,6 @@ public class UUID implements Serializable {
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	public boolean equals(Object o) {
-		if (o == null) {
-			return false;
-		}
 		return (o.getClass() == getClass()) && ((UUID) o)._id.equals(_id);
 	}
 

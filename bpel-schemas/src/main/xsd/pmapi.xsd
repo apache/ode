@@ -33,6 +33,127 @@
     <element name="event-info" type="pmapi:tEventInfo"/>
     <element name="event-info-list" type="pmapi:tEventInfoList"/>
 
+    <simpleType name="ExchangeType">
+        <restriction base="string">
+            <enumeration value="M"/>
+            <enumeration value="P"/>
+        </restriction>
+    </simpleType>
+
+    <xs:complexType name="ReplayType">
+        <xs:choice>
+            <xs:element name="mock" type="anySimpleType"></xs:element>
+            <xs:element name="mockQuery" type="string"></xs:element>
+            <xs:element name="live" type="anySimpleType"></xs:element>
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:element name="mockQueryRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <element name="createTime" type="dateTime"/>
+                <element name="service" type="QName"/>
+                <element name="operation" type="string"/>
+                <element name="in" type="anyType"/>
+                <xs:element name="pattern">
+                    <xs:simpleType>
+                        <restriction base="string">
+                            <enumeration value="IN_ONLY"/>
+                            <enumeration value="IN_OUT"/>
+                        </restriction>
+                    </xs:simpleType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="mockQueryResponse" type="pmapi:ResponseType"/>
+
+    <xs:complexType name="ResponseType">
+        <choice>
+            <element name="out" type="anyType" />
+            <element name="fault" type="pmapi:FaultType" />
+            <element name="failure" type="pmapi:FailureType" />
+        </choice>
+    </xs:complexType>
+    
+    <complexType name="GetCommunication">
+        <xs:sequence>
+            <xs:element name="iid" type="long" maxOccurs="unbounded"></xs:element>
+        </xs:sequence>
+    </complexType>
+    
+    <xs:complexType name="GetCommunicationResponse">
+        <xs:sequence>
+            <element name="restoreInstance" minOccurs="0" maxOccurs="unbounded" type="pmapi:CommunicationType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <element name="getCommunicationResponse" type="pmapi:GetCommunicationResponse"/>
+
+    <complexType name="FaultType">
+        <sequence>
+            <element name="type" type="QName" />
+            <element name="explanation" type="string" />
+            <element name="message" type="anyType" />
+        </sequence>
+    </complexType>
+
+    <complexType name="FailureType">
+        <sequence>
+            <element name="explanation" type="string" />
+        </sequence>
+    </complexType>
+
+    <complexType name="CommunicationType">
+        <sequence>
+            <element name="processType" type="QName" />
+            <element name="rollbackOnFault" type="boolean" minOccurs="0" default="true"/>
+
+            <element name="serviceConfig" maxOccurs="unbounded">
+                <complexType>
+                    <sequence>
+                        <element name="service" type="QName" />
+                        <xs:element name="replayType" type="pmapi:ReplayType"/>
+                    </sequence>
+                </complexType>
+            </element>
+
+            <element name="exchange" maxOccurs="unbounded">
+                <complexType>
+                    <sequence>
+                        <element name="type" type="pmapi:ExchangeType" />
+                        <element name="createTime" type="dateTime" />
+                        <element name="service" type="QName" />
+                        <element name="operation" type="string" />
+                        <element name="in" type="anyType" />
+                        <choice> <!-- ResponseType -->
+                            <element name="out" type="anyType"/>
+                            <element name="fault" type="pmapi:FaultType"/>
+                            <element name="failure" type="pmapi:FailureType"/>
+                        </choice>
+                    </sequence>
+                </complexType>
+            </element>
+        </sequence>
+    </complexType>
+
+    <complexType name="Replay">
+        <sequence>
+            <element name="upgradeInstance" minOccurs="0" maxOccurs="unbounded" type="long"/>
+            <element name="replaceInstance" minOccurs="0" maxOccurs="unbounded" type="long"/>
+            <element name="restoreInstance" minOccurs="0" maxOccurs="unbounded" type="pmapi:CommunicationType"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="ReplayResponse">
+        <sequence>
+            <element name="restoredIID" type="long" minOccurs="0" maxOccurs="unbounded"/>
+        </sequence>
+    </complexType>
+    
+    <element name="replayResponse" type="pmapi:ReplayResponse"/>
+
     <complexType name="tProcessInfo">
         <annotation>
             <documentation>Information about a BPEL process.</documentation>
@@ -137,11 +258,6 @@
             <enumeration value="FAILURE">
                 <annotation>
                     <documentation>Activity is in failure state, recovery required.</documentation>
-                </annotation>
-            </enumeration>
-            <enumeration value="DEAD">
-                <annotation>
-                    <documentation>Activity has been disabled by DPE.</documentation>
                 </annotation>
             </enumeration>
         </restriction>
@@ -447,12 +563,6 @@
                         completed.</documentation>
                 </annotation>
             </element>
-            <element name="dt-died" type="xs:dateTime" minOccurs="0">
-                <annotation>
-                    <documentation>The date/time when the activity has been
-                        eliminated.</documentation>
-                </annotation>
-            </element>
             <element name="failure" type="pmapi:tFailureInfo" minOccurs="0">
                 <annotation>
                     <documentation>Indicates activity is in the failure state and requires recovery.</documentation>
@@ -671,6 +781,7 @@
             <element name="activity-failure-reason" type="xs:string" minOccurs="0" maxOccurs="1"/>
             <element name="activity-recovery-action" type="xs:string" minOccurs="0" maxOccurs="1"/>
             <element name="variable-name" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <element name="new-value" type="xs:string" minOccurs="0" maxOccurs="1"/>
             <element name="port-type" type="xs:QName" minOccurs="0" maxOccurs="1"/>
             <element name="operation" type="xs:string" minOccurs="0" maxOccurs="1"/>
             <element name="correlation-set" type="xs:string" minOccurs="0" maxOccurs="1"/>

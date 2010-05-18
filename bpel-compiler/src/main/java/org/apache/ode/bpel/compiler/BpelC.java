@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Map;
+
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
@@ -33,19 +34,21 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
-import org.apache.ode.bpel.extension.ExtensionValidator;
+import org.apache.ode.bpel.compiler.api.SourceLocation;
 import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
 import org.apache.ode.bpel.compiler.bom.Process;
-import org.apache.ode.bpel.rapi.ProcessModel;
-import org.apache.ode.bpel.rapi.Serializer;
+import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.utils.StreamUtils;
 import org.apache.ode.utils.msg.MessageBundle;
+import org.apache.ode.utils.xsl.XslTransformHandler;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
 /**
  * <p>
- * Wrapper for BpelCompiler implementations, providing basic utility methods and auto-detection of BPEL version.
+ * Wrapper for {@link org.apache.ode.bpel.compiler.BpelCompiler} implementations,
+ * providing basic utility methods and auto-detection of BPEL version.
  * </p>
 s */
 public class BpelC {
@@ -63,7 +66,6 @@ public class BpelC {
     private ResourceFinder _wsdlFinder;
     private URI _bpel11wsdl;
     private Map<String,Object> _compileProperties;
-    private Map<QName, ExtensionValidator> _extensionValidators;
     private boolean _dryRun = false;
 
     public static BpelC newBpelCompiler() {
@@ -83,6 +85,7 @@ public class BpelC {
         this.setResourceFinder(null);
         this.setCompileListener(null);
         this.setOutputStream(null);
+        XslTransformHandler.getInstance().setErrorListener( new net.sf.saxon.StandardErrorListener() );
     }
 
     /**
@@ -138,15 +141,6 @@ public class BpelC {
     }
 
     /**
-     * Registers extension validators to eventually validate the content of extensibility
-     * elements. 
-     * @param extensionValidators
-     */
-    public void setExtensionValidators(Map<QName, ExtensionValidator> extensionValidators) {
-        _extensionValidators = extensionValidators;
-    }
-
-    /**
      * Set the output stream to which the compiled representation will be generated.
      * @param os compiled representation output stream
      */
@@ -163,7 +157,7 @@ public class BpelC {
         _outputStream = os;
 
         if (__log.isDebugEnabled()) {
-            __log.debug("Set output to stream " + os);
+            __log.debug("Sett output to stream " + os);
         }
     }
 
@@ -187,13 +181,15 @@ public class BpelC {
      * @throws CompilationException
      *           if one occurs while compiling.
      */
-    public void compile(final Process process, String outputPath) throws CompilationException, IOException {
+    public void compile(final Process process, String outputPath, long version) throws CompilationException, IOException {
         if (process == null)
             throw new NullPointerException("Attempt to compile NULL process.");
 
         logCompilationMessage(__cmsgs.infCompilingProcess());
 
+        BpelCompiler compiler;
         ResourceFinder wf;
+
         if (_wsdlFinder != null) {
             wf = _wsdlFinder;
         } else {
@@ -211,25 +207,27 @@ public class BpelC {
             }
         };
 
-        BpelCompiler compiler;
         try {
-            compiler = BpelCompilerFactory.latestCompiler(process.getBpelVersion());
-            compiler.setResourceFinder(wf);
-
             switch (process.getBpelVersion()) {
                 case BPEL20:
+                    compiler = new BpelCompiler20();
+                    compiler.setResourceFinder(wf);
                     if (_bpel11wsdl != null) {
                         CompilationMessage cmsg = __cmsgs.warnWsdlUriIgnoredFor20Process();
                         logCompilationMessage(cmsg);
                     }
                     break;
                 case BPEL20_DRAFT:
+                    compiler = new BpelCompiler20Draft();
+                    compiler.setResourceFinder(wf);
                     if (_bpel11wsdl != null) {
                         CompilationMessage cmsg = __cmsgs.warnWsdlUriIgnoredFor20Process();
                         logCompilationMessage(cmsg);
                     }
                     break;
                 case BPEL11:
+                    compiler = new BpelCompiler11();
+                    compiler.setResourceFinder(wf);
                     if (_bpel11wsdl != null) {
                         compiler.addWsdlImport(new URI(_bpelFile.getName()), _bpel11wsdl,null);
                     } else {
@@ -250,9 +248,6 @@ public class BpelC {
                 if (_compileProperties.get(PROCESS_CUSTOM_PROPERTIES) != null)
                     compiler.setCustomProperties((Map<QName, Node>) _compileProperties.get(PROCESS_CUSTOM_PROPERTIES));
             }
-            if (_extensionValidators != null) {
-            	compiler.setExtensionValidators(_extensionValidators);
-            }
         } catch (CompilationException ce) {
             this.invalidate();
             throw ce;
@@ -263,9 +258,9 @@ public class BpelC {
             throw new CompilationException(cmsg,ex);
         }
 
-        ProcessModel pmodel;
+        OProcess oprocess;
         try {
-            pmodel = compiler.compile(process, wf);
+            oprocess = compiler.compile(process,wf,version);
         }
         catch (CompilationException cex) {
             this.invalidate();
@@ -288,7 +283,7 @@ public class BpelC {
 
             try {
                 Serializer fileHeader = new Serializer(System.currentTimeMillis());
-                fileHeader.writePModel(pmodel, _outputStream);
+                fileHeader.writeOProcess(oprocess, _outputStream);
             } finally {
                 // close & mark myself invalid
                 this.invalidate();
@@ -306,7 +301,7 @@ public class BpelC {
      * output.
      * @throws CompilationException if one occurs while compiling the process.
      */
-    public void compile(File bpelFile) throws CompilationException, IOException {
+    public void compile(File bpelFile, long version) throws CompilationException, IOException {
         if (__log.isDebugEnabled()) {
             __log.debug("compile(URL)");
         }
@@ -324,7 +319,7 @@ public class BpelC {
 
             process = BpelObjectFactory.getInstance().parse(isrc,_bpelFile.toURI());
         } catch (Exception e) {
-            CompilationMessage cmsg = __cmsgs.errBpelParseErr().setSource(new SourceLocation(bpelFile.toURI()));
+            CompilationMessage cmsg = __cmsgs.errBpelParseErr().setSource(new SourceLocationImpl(bpelFile.toURI()));
             this.invalidate();
             throw new CompilationException(cmsg, e);
         }
@@ -335,7 +330,7 @@ public class BpelC {
         String bpelPath = bpelFile.getAbsolutePath();
         String cbpPath = bpelPath.substring(0, bpelPath.lastIndexOf(".")) + ".cbp";
 
-        compile(process, cbpPath);
+        compile(process, cbpPath, version);
         this.invalidate();
     }
 

@@ -1,3 +1,22 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.apache.ode.axis2.util;
 
 import org.apache.commons.logging.Log;
@@ -71,14 +90,21 @@ public class AxisUtils {
         }
     }
 
-    public static void applySecurityPolicy(AxisService service, String policy_file) {
+    public static void applySecurityPolicy(AxisService service, String policy_file) throws IllegalArgumentException {
         URI policyUri = new File(policy_file).toURI();
         if (log.isDebugEnabled()) log.debug("Applying security policy: " + policyUri);
         try {
             InputStream policyStream = policyUri.toURL().openStream();
             try {
                 Policy policyDoc = PolicyEngine.getPolicy(policyStream);
-                service.getPolicySubject().attachPolicy(policyDoc);
+                // Neethi parser is really dumb.
+                // In case of parsing error, the exception is printed out and swallowed. Null is returned.
+                if(policyDoc == null){
+                    String msg = "Failed to parse policy: "+policy_file+". Due to Neethi limitations the reason can't be provided. See stacktraces in standard output (not logs)";
+                    log.error(msg);
+                    throw new IllegalArgumentException(msg);
+                }
+                service.getPolicyInclude().addPolicyElement(PolicyInclude.AXIS_SERVICE_POLICY, policyDoc);
                 // make sure the proper modules are engaged, if they are available
                 engageModules(service, "rampart", "rahas");
             } finally {

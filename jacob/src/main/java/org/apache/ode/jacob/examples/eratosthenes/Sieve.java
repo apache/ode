@@ -50,7 +50,7 @@ public class Sieve extends JacobRunnable {
     instance(new Print(primes));
   }
 
-  public static class Foo {}
+  public class Foo {}
 
   /**
    * A counter, aka integer stream generator; represents the following process term:

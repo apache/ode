@@ -28,8 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * A partial implementation of URI Template expansion
@@ -321,14 +319,5 @@ public class URITemplate {
             m.put(nameValuePairs[i], nameValuePairs[i + 1]);
         }
         return m;
-    }
-
-    public static void main(String[] args) {
-        try {
-            System.out.println(new URI("http://google.com//hello/foobar"));
-            System.out.println(new URI("http://google.com//hello/foobar").normalize());
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
     }
 }

@@ -21,9 +21,6 @@ package org.apache.ode.jbi;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.concurrent.Executors;
 
 import javax.jbi.JBIException;
@@ -32,28 +29,22 @@ import javax.jbi.component.ComponentLifeCycle;
 import javax.jbi.component.ServiceUnitManager;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.naming.InitialContext;
-import javax.xml.namespace.QName;
+import javax.transaction.TransactionManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.extension.ExtensionValidator;
-import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
-import org.apache.ode.bpel.extension.ExtensionBundleValidation;
 import org.apache.ode.bpel.connector.BpelServerConnector;
-import org.apache.ode.bpel.context.ContextInterceptor;
-import org.apache.ode.dao.bpel.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.ProcessAndInstanceManagementMBean;
-import org.apache.ode.bpel.evtproc.DebugBpelEventListener;
+import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
+
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
-import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
-import org.apache.ode.dao.scheduler.SchedulerDAOConnectionFactory;
-import org.apache.ode.dao.store.ConfStoreDAOConnectionFactory;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.il.dbutil.DatabaseConfigException;
 import org.apache.ode.jbi.msgmap.Mapper;
+import org.apache.ode.scheduler.simple.JdbcDelegate;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.GUID;
@@ -81,8 +72,18 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     private BpelServerConnector _connector;
 
     private Database _db;
-    
+
     private ObjectName _mbeanName;
+
+    private OdeConfigProperties _config;
+
+    public OdeLifeCycle() {
+        
+    }
+
+    public OdeLifeCycle(OdeConfigProperties config) {
+        _config = config;
+    }
 
     ServiceUnitManager getSUManager() {
         return _suManager;
@@ -100,14 +101,23 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         try {
             _ode = OdeContext.getInstance();
             _ode.setContext(context);
-            
-            _ode._consumer = new OdeConsumer(_ode);
-            
+
+            // Use system property to determine if DeliveryChannel.sendSync or DeliveryChannel.send is used.
+            if (Boolean.getBoolean("org.apache.ode.jbi.sendSynch"))
+                _ode._consumer = new OdeConsumerSync(_ode);
+            else
+                _ode._consumer = new OdeConsumerAsync(_ode);
+
             if (_ode.getContext().getWorkspaceRoot() != null)
                 TempFileManager.setWorkingDirectory(new File(_ode.getContext().getWorkspaceRoot()));
 
-            __log.debug("Loading properties.");
-            initProperties();
+            if (_config == null) {
+                __log.debug("Loading properties.");
+                initProperties();
+            } else {
+                __log.debug("Applying properties.");
+                _ode._config = _config;
+            }
 
             __log.debug("Initializing message mappers.");
             initMappers();
@@ -118,8 +128,6 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             __log.debug("Starting Dao.");
             initDao();
 
-            __log.info("Hibernate started.");
-
             __log.debug("Starting BPEL server.");
             initBpelServer();
 
@@ -127,11 +135,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             registerEventListeners();
 
             registerMexInterceptors();
-            
-            registerContextInterceptors();
-            
-            registerExtensionActivityBundles();
-            
+
             registerMBean();
 
             __log.debug("Starting JCA connector.");
@@ -140,20 +144,19 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             __log.debug("Register ProcessManagement APIs");
             _ode.activatePMAPIs();
 
-
             _suManager = new OdeSUManager(_ode);
             _initSuccess = true;
             __log.info(__msgs.msgOdeInitialized());
-        } finally {
-            if (!_initSuccess) {
-                // TODO ..then what? at least shutdown the scheduler
-            }
+        } catch (Throwable t) {
+            __log.fatal("", t);
+            throw new JBIException("Fatal error", t);
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void initMappers() throws JBIException {
         String[] mappers = _ode._config.getMessageMappers();
-        Class mapperClass;
+        Class<Mapper> mapperClass;
         for (String className : mappers) {
             try {
                 mapperClass = (Class<Mapper>) Class.forName(className);
@@ -173,7 +176,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
                 __log.error(errmsg);
                 throw new JBIException(errmsg, t);
             }
-         }
+        }
     }
 
     private void initDataSource() throws JBIException {
@@ -191,7 +194,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 
         _ode._dataSource = _db.getDataSource();
     }
-
+    
     /**
      * Load the "ode-jbi.properties" file from the install directory.
      *
@@ -226,24 +229,25 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             _ode._executorService = Executors.newCachedThreadPool();
         else
             _ode._executorService = Executors.newFixedThreadPool(_ode._config.getThreadPoolMaxSize());
-        SimpleScheduler sched =new SimpleScheduler(new GUID().toString(), _ode._sdaocf, _ode.getTransactionManager(),  _ode._config.getProperties());
-        sched.setJobProcessor(_ode._server);
-        _ode._scheduler = sched;
-        _ode._store = new ProcessStoreImpl(_ode._eprContext, _ode.getTransactionManager(), _ode._cdaocf);
+        _ode._scheduler = new SimpleScheduler(new GUID().toString(),new JdbcDelegate(_ode._dataSource), _ode._config.getProperties());
+        _ode._scheduler.setJobProcessor(_ode._server);
+        _ode._scheduler.setExecutorService(_ode._executorService);
+        _ode._scheduler.setTransactionManager((TransactionManager) _ode.getContext().getTransactionManager());
+
+        _ode._store = new ProcessStoreImpl(_ode._eprContext , _ode._dataSource, _ode._config.getDAOConnectionFactory(), _ode._config, false);
         registerExternalVariableModules();
         _ode._store.loadAll();
 
-        _ode._server.setDaoConnectionFactory(_ode._bdaocf);
+        _ode._server.setInMemDaoConnectionFactory(new org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl(
+                _ode._scheduler, _ode._config.getInMemMexTtl()));
+        _ode._server.setDaoConnectionFactory(_ode._daocf);
         _ode._server.setEndpointReferenceContext(_ode._eprContext);
         _ode._server.setMessageExchangeContext(_ode._mexContext);
         _ode._server.setBindingContext(new BindingContextImpl(_ode));
         _ode._server.setScheduler(_ode._scheduler);
-        _ode._server.setTransactionManager(_ode.getTransactionManager());
-        _ode._server.setConfigProperties(_ode._config);
-        _ode._server.registerBpelEventListener(new DebugBpelEventListener());
+    _ode._server.setConfigProperties(_ode._config.getProperties());
 
         _ode._server.init();
-
     }
 
     private void registerExternalVariableModules() {
@@ -260,20 +264,14 @@ public class OdeLifeCycle implements ComponentLifeCycle {
      * @throws JBIException
      */
     private void initDao() throws JBIException {
-        BpelDAOConnectionFactory bcf;
-        ConfStoreDAOConnectionFactory ccf;
-        SchedulerDAOConnectionFactory scf;
+        BpelDAOConnectionFactoryJDBC cf;
         try {
-            bcf = _db.createDaoCF();
-            ccf = _db.createDaoStoreCF();
-            scf = _db.createDaoSchedulerCF();
+            cf = _db.createDaoCF();
         } catch (DatabaseConfigException e) {
             String errmsg = __msgs.msgDAOInstantiationFailed(_ode._config.getDAOConnectionFactory());
             throw new JBIException(errmsg,e);
         }
-        _ode._bdaocf = bcf;
-        _ode._sdaocf = scf;
-
+        _ode._daocf = cf;
     }
 
     private void initConnector() throws JBIException {
@@ -312,7 +310,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             throw new JBIException(e);
         }
     }
-    
+
     private void unregisterMBean() throws JBIException {
         try {
             if (_mbeanName != null) {
@@ -326,7 +324,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             throw new JBIException(e);
         }
     }
-    
+
     private void registerEventListeners() {
         String listenersStr = _ode._config.getEventListeners();
         if (listenersStr != null) {
@@ -357,59 +355,6 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         }
     }
 
-    private void registerContextInterceptors() {
-        String interceptorsStr = _ode._config.getContextInterceptors();
-        if (interceptorsStr != null) {
-            for (StringTokenizer tokenizer = new StringTokenizer(interceptorsStr, ",;"); tokenizer.hasMoreTokens();) {
-                String interceptorCN = tokenizer.nextToken();
-                try {
-                    _ode._server.registerContextInterceptor((ContextInterceptor) Class.forName(interceptorCN).newInstance());
-                    __log.info(__msgs.msgContextInterceptorRegistered(interceptorCN));
-                } catch (Exception e) {
-                    __log.warn("Couldn't register the context interceptor " + interceptorCN + ", the class couldn't be "
-                            + "loaded properly: " + e);
-                }
-            }
-        }
-    }
-
-    private void registerExtensionActivityBundles() {
-        String extensionsRTStr = _ode._config.getExtensionActivityBundlesRT();
-        String extensionsValStr = _ode._config.getExtensionActivityBundlesValidation();
-        if (extensionsRTStr != null) {
-            // TODO replace StringTokenizer by regex
-            for (StringTokenizer tokenizer = new StringTokenizer(extensionsRTStr, ",;"); tokenizer.hasMoreTokens();) {
-                String bundleCN = tokenizer.nextToken();
-                try {
-                    // instantiate bundle
-                    ExtensionBundleRuntime bundleRT = (ExtensionBundleRuntime) Class.forName(bundleCN).newInstance();
-                    // register extension bundle (BPEL server)
-                    _ode._server.registerExtensionBundle(bundleRT);
-                } catch (Exception e) {
-                    __log.warn("Couldn't register the extension bundle runtime " + bundleCN + ", the class couldn't be " +
-                            "loaded properly.");
-                }
-            }
-        }
-        if (extensionsValStr != null) {
-            Map<QName, ExtensionValidator> validators = new HashMap<QName, ExtensionValidator>();
-            for (StringTokenizer tokenizer = new StringTokenizer(extensionsValStr, ",;"); tokenizer.hasMoreTokens();) {
-                String bundleCN = tokenizer.nextToken();
-                try {
-                    // instantiate bundle
-                    ExtensionBundleValidation bundleVal = (ExtensionBundleValidation) Class.forName(bundleCN).newInstance();
-                    //add validators
-                    validators.putAll(bundleVal.getExtensionValidators());
-                } catch (Exception e) {
-                    __log.warn("Couldn't register the extension bundle validator " + bundleCN + ", the class couldn't be " +
-                            "loaded properly.");
-                }
-            }
-            // register extension bundle (BPEL store)
-            _ode._store.setExtensionValidators(validators);
-        }
-    }
-
     public synchronized void start() throws JBIException {
         if (_started)
             return;
@@ -436,6 +381,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
                 throw new JBIException(errmsg, ex);
             }
 
+            _ode._scheduler.start();
             _receiver = new Receiver(_ode);
             _receiver.start();
             _started = true;
@@ -492,7 +438,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     public void shutDown() throws JBIException {
         ClassLoader old = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-        
+
         unregisterMBean();
 
         _ode.deactivatePMAPIs();
@@ -516,30 +462,6 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             }
 
             try {
-                _ode._bdaocf.shutdown();
-            } catch (Exception ex) {
-                __log.debug("error shutting down bpel conn.", ex);
-            } finally {
-                 _ode._bdaocf = null;
-            }
-
-             try {
-                _ode._cdaocf.shutdown();
-            } catch (Exception ex) {
-                __log.debug("error shutting down conf store conn.", ex);
-            } finally {
-                 _ode._cdaocf = null;
-            }
-
-            try {
-                _ode._sdaocf.shutdown();
-            } catch (Exception ex) {
-                __log.debug("error shutting down sched conn.", ex);
-            } finally {
-                 _ode._sdaocf = null;
-            }
-
-            try {
                 _db.shutdown();
             } catch (Exception ex) {
                 __log.debug("error shutting down db.", ex);
@@ -559,29 +481,4 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private <T> T lookupInJndi(String objName) throws Exception {
-        ClassLoader old = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-        try {
-            InitialContext ctx = null;
-            try {
-                ctx = new InitialContext();
-                return (T) ctx.lookup(objName);
-            } finally {
-                if (ctx != null)
-                    try {
-                        ctx.close();
-                    } catch (Exception ex1) {
-                        ; // swallow
-                        __log.error("Error closing JNDI connection.", ex1);
-                    }
-            }
-        } finally {
-            Thread.currentThread().setContextClassLoader(old);
-        }
-
-    }
-
 }
-

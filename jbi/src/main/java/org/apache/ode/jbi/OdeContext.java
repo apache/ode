@@ -39,21 +39,21 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.dao.bpel.BpelDAOConnectionFactory;
+import org.apache.ode.agents.memory.SizingAgent;
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.ProcessAndInstanceManagementImpl;
 import org.apache.ode.bpel.iapi.Endpoint;
+import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.ProcessConf;
-import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.bpel.pmapi.InstanceManagement;
 import org.apache.ode.bpel.pmapi.ProcessManagement;
-import org.apache.ode.bpel.rapi.ProcessModel;
-import org.apache.ode.bpel.rapi.PartnerLinkModel;
-import org.apache.ode.bpel.rapi.Serializer;
-import org.apache.ode.dao.scheduler.SchedulerDAOConnectionFactory;
-import org.apache.ode.dao.store.ConfStoreDAOConnectionFactory;
 import org.apache.ode.jbi.msgmap.Mapper;
 import org.apache.ode.jbi.util.WSDLFlattener;
+import org.apache.ode.scheduler.simple.SimpleScheduler;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.w3c.dom.Document;
 
@@ -94,15 +94,11 @@ final public class OdeContext {
 
     MessageExchangeContextImpl _mexContext;
 
-    Scheduler _scheduler;
+    SimpleScheduler _scheduler;
 
     ExecutorService _executorService;
 
-    BpelDAOConnectionFactory _bdaocf;
-
-    ConfStoreDAOConnectionFactory _cdaocf;
-
-    SchedulerDAOConnectionFactory _sdaocf;
+    BpelDAOConnectionFactory _daocf;
 
     OdeConfigProperties _config;
 
@@ -121,6 +117,7 @@ final public class OdeContext {
 
     /** Mapping of Endpoint to OdeService */
     private Map<Endpoint, OdeService> _activeOdeServices = new ConcurrentHashMap<Endpoint, OdeService>();
+    private Map<OdeService, EndpointReference> _serviceEprMap = new HashMap<OdeService, EndpointReference>();
 
 
     /**
@@ -177,27 +174,30 @@ final public class OdeContext {
         return (TransactionManager) getContext().getTransactionManager();
     }
 
-    public MyEndpointReference activateEndpoint(QName pid, Endpoint endpoint) throws Exception {
+    public synchronized MyEndpointReference activateEndpoint(QName pid, Endpoint endpoint) throws Exception {
         if (__log.isDebugEnabled()) {
             __log.debug("Activate endpoint: " + endpoint);
         }
 
-        OdeService service = new OdeService(this, endpoint);
+        
+        OdeService service=_activeOdeServices.get(endpoint);
+        if(service == null)
+        	service = new OdeService(this, endpoint);
         try {
             ProcessConf pc = _store.getProcessConfiguration(pid);
-            ProcessModel compiledProcess = null;
             InputStream is = pc.getCBPInputStream();
+            OProcess compiledProcess = null;
             try {
                 Serializer ofh = new Serializer(is);
-                compiledProcess = ofh.readPModel();
+                compiledProcess = ofh.readOProcess();
             } finally {
                 is.close();            	
             }
             QName portType = null;
             for (Map.Entry<String, Endpoint> provide : pc.getProvideEndpoints().entrySet()) {
                 if (provide.getValue().equals(endpoint)) {
-                    PartnerLinkModel plink = compiledProcess.getPartnerLink(provide.getKey());
-                    portType = plink.getMyRolePortType().getQName();
+                    OPartnerLink plink = compiledProcess.getPartnerLink(provide.getKey());
+                    portType = plink.myRolePortType.getQName();
                     break;
                 }
             }
@@ -221,15 +221,20 @@ final public class OdeContext {
         MyEndpointReference myepr = new MyEndpointReference(service);
         service.activate();
         _activeOdeServices.put(endpoint, service);
+        _serviceEprMap.put(service, myepr);
         return myepr;
 
     }
 
-    public void deactivateEndpoint(Endpoint endpoint) throws Exception {
-        OdeService svc = _activeOdeServices.remove(endpoint);
+    public synchronized void  deactivateEndpoint(Endpoint endpoint) throws Exception {
+        OdeService svc = _activeOdeServices.get(endpoint);
 
         if (svc != null) {
-            svc.deactivate();
+            _serviceEprMap.remove(svc);
+            svc.deactivate();        
+            if(svc.getCount() < 1 ) {
+        	_activeOdeServices.remove(endpoint);
+            }
         }
     }
 
@@ -309,5 +314,17 @@ final public class OdeContext {
                 __log.error("Error deactivating InstanceManagement service", e);
             }
         }
+    }
+    
+    public long calculateSizeOfService(EndpointReference epr) {
+    	if (epr != null) {
+	    	for (OdeService odeService : _serviceEprMap.keySet()) {
+	    		EndpointReference serviceEpr = _serviceEprMap.get(odeService);
+	    		if (serviceEpr != null && epr.equals(serviceEpr)) {
+					return SizingAgent.deepSizeOf(odeService);
+	    		}
+	    	}
+    	}
+    	return 0;
     }
 }

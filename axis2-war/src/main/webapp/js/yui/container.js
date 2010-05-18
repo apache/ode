@@ -1663,7 +1663,7 @@ version: 2.5.2
             }
 
             if (this.body && ! Dom.inDocument(this.body)) {
-                // There is a body, but it's not in the DOM yet. Need to add it.		
+                // There is a body, but it's not in the DOM yet. Need to add it.        
                 if (this.footer && Dom.isAncestor(this.moduleElement, this.footer)) {
                     moduleElement.insertBefore(this.body, this.footer);
                 } else {

@@ -22,7 +22,7 @@
 
 
     <process name="pns:HelloWorld2">
-        <!--in-memory>false</in-memory-->	
+        <!--in-memory>false</in-memory-->   
         <active>true</active>
         <provide partnerLink="helloPartnerLink">
             <service name="wns:HelloService" port="HelloPort"/>

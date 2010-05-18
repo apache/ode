@@ -164,12 +164,6 @@ public class Messages extends MessageBundle {
         return format("Unknown operation \"{0}\" for port type \"{1}\".",operationName,portType);
     }
 
-    String msgPropertyAliasDerefFailedOnMessage(String aliasDescription, String reason) {
-        return this.format(
-                "Unable to evaluate apply property alias \"{0}\" to incoming message: {1}",
-                aliasDescription, reason);
-    }
-
     public String msgDeployStarting(File deploymentUnitDirectory) {
         return format("Starting deployment of processes from directory \"{0}\". ", deploymentUnitDirectory);
     }
@@ -189,6 +183,10 @@ public class Messages extends MessageBundle {
     public String msgOdeInitHibernateErrorReadingHibernateProperties(
         File hibernatePropFile) {
       return format("Error reading Hibernate properties file \"{0}\".", hibernatePropFile);
+    }
+
+    public String msgOdeInitHibernateDialectDetectFailed() {
+      return format("Error detecting database dialect; Hibernate DAO could not be started.");
     }
 
     public String msgDeployFailDuplicateDU(String name) {

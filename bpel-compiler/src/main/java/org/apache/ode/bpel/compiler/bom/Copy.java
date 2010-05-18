@@ -18,7 +18,6 @@
  */
 package org.apache.ode.bpel.compiler.bom;
 
-import org.apache.ode.bpel.compiler.bom.AssignActivity.AssignOperation;
 import org.w3c.dom.Element;
 
 /**
@@ -26,7 +25,7 @@ import org.w3c.dom.Element;
  * (L-value) and a "right hand side (R-value). The value on the right hand side
  * is copied to the location referenced in the left hand side.
  */
-public class Copy extends BpelObject implements AssignOperation {
+public class Copy extends BpelObject {
 
     public Copy(Element el) {
         super(el);
@@ -57,7 +56,7 @@ public class Copy extends BpelObject implements AssignOperation {
     public boolean isIgnoreMissingFromData() {
         return getAttribute("ignoreMissingFromData", "no").equals("yes");
     }
-    
+
     public boolean isIgnoreUninitializedFromVariable() {
         return getAttribute("ignoreUninitializedFromVariable", "no").equals("yes");
     }

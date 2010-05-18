@@ -22,12 +22,53 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 public class MessageRouting20Test extends BPELTestAbstract {
+
 	@Test public void testCorrelation() throws Throwable {
 		go("/bpel/2.0/TestCorrelation");
 	}
 
 	@Test public void testCorrelation1() throws Throwable {
 		go("/bpel/2.0/TestCorrelation1");
+	}
+
+	@Test public void testCorrelationJoin() throws Throwable {
+		go("/bpel/2.0/TestCorrelationJoin");
+	}
+
+	@Test public void testCorrelationJoinReceive() throws Throwable {
+		go("/bpel/2.0/TestCorrelationJoinReceive");
+	}
+
+	@Test public void testCorrelationJoinInvoke() throws Throwable {
+		go("/bpel/2.0/TestCorrelationJoinInvoke");
+	}
+
+	@Test public void testCorrelationJoinOnMessage() throws Throwable {
+		go("/bpel/2.0/TestCorrelationJoinOnMessage");
+	}
+
+	@Test public void testCorrelationJoinEvent() throws Throwable {
+		go("/bpel/2.0/TestCorrelationJoinEvent");
+	}
+
+	@Test public void testCorrelationJoinReply() throws Throwable {
+		go("/bpel/2.0/TestCorrelationJoinReply");
+	}
+
+	@Test public void testCorrelationMulti() throws Throwable {
+		go("/bpel/2.0/TestCorrelationMulti");
+	}
+
+	@Test public void testCorrelationMultiNegative() throws Throwable {
+		go("/bpel/2.0/TestCorrelationMultiNegative");
+	}
+
+	@Test public void testCorrelationMultiJoin() throws Throwable {
+		go("/bpel/2.0/TestCorrelationMultiJoin");
+	}
+
+	@Test public void testCorrelationMultiComplex() throws Throwable {
+		go("/bpel/2.0/TestCorrelationMultiComplex");
 	}
 
 	@Ignore("fix test bed for handling ASYNC mex") @Test public void testCorrelationOpaque() throws Throwable {
@@ -57,9 +98,9 @@ public class MessageRouting20Test extends BPELTestAbstract {
 		 * <receive> and a subsequent <pick> that does not define a correlation
 		 * key. The BPEL compiler should throw an exception indicating
 		 * the BPEL code error ( verify with spec ).
-		 *
+		 * 
 		 * See JIRA ODE-64
-		 *
+		 * 
 		 */
 		// TODO fix the bug first
 		negative("target/test-classes/bpel/2.0/NegativeCorrelationTest");
@@ -73,18 +114,18 @@ public class MessageRouting20Test extends BPELTestAbstract {
 		 * compiler should throw an exception indicating
 		 * the BPEL error ( verify with spec ) or at runtime
 		 * a clear initialization exception should be thrown.
-		 *
+		 * 
 		 * See JIRA ODE-61.
-		 *
+		 * 
 		 * The message exchange should return with a Fault/Failure.
-		 *
+		 * 
 		 */
 		// TODO fix the bug first
 		negative("target/test-classes/bpel/2.0/NegativeInitializationTest");
 	}
 
-    @Test public void testCorrelationUnique() throws Throwable {
-        go("/bpel/2.0/TestCorrelationUnique");
+    @Test public void testConcurrentSyncMex() throws Throwable {
+        go("/bpel/2.0/TestConcurrentSyncMex");
     }
     
     @Test public void testIMA() throws Throwable {

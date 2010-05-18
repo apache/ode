@@ -63,24 +63,24 @@ public class VersionedRedeployTest extends BPELTestAbstract {
         // Checking for each step that all instances still exist and that each process got one execution
         // so no instance has been created after a process has been retired.
         go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-1");
-        Assert.assertEquals(1, _bcf.getConnection().getProcess(qName1).getNumInstances());
+        Assert.assertEquals(1, _cf.getConnection().getProcess(qName1).getNumInstances());
 
         // clean up deployment and invocations
         _deployments.clear();
         _invocations.clear();
         
         go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-2");
-        Assert.assertEquals(1, _bcf.getConnection().getProcess(qName1).getNumInstances());
-        Assert.assertEquals(1, _bcf.getConnection().getProcess(qName2).getNumInstances());
+        Assert.assertEquals(1, _cf.getConnection().getProcess(qName1).getNumInstances());
+        Assert.assertEquals(1, _cf.getConnection().getProcess(qName2).getNumInstances());
         
         // clean up deployment and invocations
         _deployments.clear();
         _invocations.clear();
         
         go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-3");
-        Assert.assertEquals(1, _bcf.getConnection().getProcess(qName1).getNumInstances());
-        Assert.assertEquals(1, _bcf.getConnection().getProcess(qName2).getNumInstances());
-        Assert.assertEquals(1, _bcf.getConnection().getProcess(qName3).getNumInstances());
+        Assert.assertEquals(1, _cf.getConnection().getProcess(qName1).getNumInstances());
+        Assert.assertEquals(1, _cf.getConnection().getProcess(qName2).getNumInstances());
+        Assert.assertEquals(1, _cf.getConnection().getProcess(qName3).getNumInstances());
     }
 
     @Test public void testVersionedUndeployDeploy() throws Throwable {
@@ -95,7 +95,7 @@ public class VersionedRedeployTest extends BPELTestAbstract {
         Assert.assertNull(store.getProcessConfiguration(qName1));
         Assert.assertNull(store.getProcessConfiguration(qName3));
         
-        Assert.assertEquals(1, _bcf.getConnection().getProcess(qName2).getNumInstances());
+        Assert.assertEquals(1, _cf.getConnection().getProcess(qName2).getNumInstances());
     }
 
 }

@@ -37,7 +37,6 @@ import java.io.FileFilter;
  *
  *
  */
-@Test(suiteName="SecuredServicesTest-Policy")
 public class SecuredServicesTest extends Axis2TestBase {
 
     private String testDir= "TestRampartBasic/secured-services";

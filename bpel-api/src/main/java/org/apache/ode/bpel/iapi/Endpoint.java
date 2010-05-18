@@ -47,9 +47,9 @@ public class Endpoint {
      */
     @Override 
     public boolean equals(Object other) {
-    	if (other == null) {
-    		return false;
-    	}
+        if (!(other instanceof Endpoint)) {
+            return false;
+        }
         Endpoint o = (Endpoint) other;
         return o.serviceName.equals(serviceName) && o.portName.equals(portName);
     }

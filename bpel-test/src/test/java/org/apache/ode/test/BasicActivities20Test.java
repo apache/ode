@@ -26,13 +26,12 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MessageExchange.AckType;
 import org.junit.Test;
 
 public class BasicActivities20Test extends BPELTestAbstract {
 	
 	@Test public void testHelloWorld2() throws Throwable {
-        go("/bpel/2.0/HelloWorld2");
+		go("/bpel/2.0/HelloWorld2");
     }
 
 	@Test public void testNegativeTargetNS1() throws Throwable {
@@ -65,9 +64,9 @@ public class BasicActivities20Test extends BPELTestAbstract {
             null);
         inv.minimumWaitMs=5*1000L;
         inv.maximumWaitMs=7*1000L;
-        inv.expectedFinalStatus = AckType.RESPONSE;
-
-
+        inv.expectedStatus = MessageExchange.Status.ASYNC;
+        inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
+        
         go();
     }
     
@@ -83,8 +82,8 @@ public class BasicActivities20Test extends BPELTestAbstract {
             null);
         inv.minimumWaitMs=4*1000L;
         inv.maximumWaitMs=7*1000L;
-        inv.expectedFinalStatus = AckType.RESPONSE;
-        
+        inv.expectedStatus = MessageExchange.Status.ASYNC;
+        inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
         
         go();
     }
@@ -100,7 +99,8 @@ public class BasicActivities20Test extends BPELTestAbstract {
             "<message><TestPart/><Time>"+isountil+"</Time></message>",
             null);
         inv.maximumWaitMs=2*1000L;
-        inv.expectedFinalStatus = MessageExchange.AckType.RESPONSE;
+        inv.expectedStatus = MessageExchange.Status.ASYNC;
+        inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
 
         go();
     }
@@ -115,8 +115,8 @@ public class BasicActivities20Test extends BPELTestAbstract {
             "<message><body><start xmlns=\"http://ode.apache.org/example\">start</start></body></message>",
             null);
         inv.maximumWaitMs=20*1000L;
-        inv.expectedFinalStatus = AckType.RESPONSE;
-
+        inv.expectedStatus = MessageExchange.Status.ASYNC;
+        inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
 
         go();
     }

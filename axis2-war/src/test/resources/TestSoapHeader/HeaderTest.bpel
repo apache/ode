@@ -31,8 +31,10 @@
      importType="http://schemas.xmlsoap.org/wsdl/" />
 
    <partnerLinks>
-      <partnerLink name="helloPartnerLink" partnerLinkType="test:HeaderTestPartnerLinkType" myRole="me" />
-      <partnerLink name="dummyPartnerLink" partnerLinkType="test:DummyPartnerLinkType" myRole="me" partnerRole="you" />
+      <partnerLink name="helloPartnerLink" 
+         partnerLinkType="test:HeaderTestPartnerLinkType" myRole="me" />
+      <partnerLink name="dummyPartnerLink"
+         partnerLinkType="test:DummyPartnerLinkType" partnerRole="you" />
    </partnerLinks>
     
    <variables>
@@ -60,7 +62,7 @@
            </copy>
        </assign>
 
-       <invoke partnerLink="dummyPartnerLink" portType="dummy:DummyServicePortType"
+       <invoke partnerLink="dummyPartnerLink" portType="test:DummyServicePortType"
                operation="faultTest" inputVariable="faultInput" outputVariable="faultOutput"/>
 
        <assign>

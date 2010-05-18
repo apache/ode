@@ -52,6 +52,7 @@
     <!--<parameter name="ModulesDirectory" locked="false">modules</parameter>-->
 
 
+
     <!--Following params will set the proper context paths for invocations. All the endpoints will have a commons context-->
     <!--root which can configured using the following contextRoot parameter-->
     <!--<parameter name="contextRoot" locked="false">axis2</parameter>-->
@@ -131,25 +132,25 @@
         <!-- <parameter name="threadKeepAliveTime"       locked="false">240000</parameter>                  -->
         <!-- <parameter name="threadKeepAliveTimeUnit"   locked="false">MILLISECONDS</parameter>            -->
     </transportReceiver>
-
+    
     <!--Uncomment this and configure as appropriate for JMS transport support, after setting up your JMS environment (e.g. ActiveMQ)
     <transportReceiver name="jms" class="org.apache.axis2.transport.jms.JMSListener">
         <parameter name="myTopicConnectionFactory" locked="false">        	        	
-            <parameter name="java.naming.factory.initial" locked="false">org.apache.activemq.jndi.ActiveMQInitialContextFactory</parameter>
-            <parameter name="java.naming.provider.url" locked="false">tcp://localhost:61616</parameter>        	
-            <parameter name="transport.jms.ConnectionFactoryJNDIName" locked="false">TopicConnectionFactory</parameter>
+        	<parameter name="java.naming.factory.initial" locked="false">org.apache.activemq.jndi.ActiveMQInitialContextFactory</parameter>
+        	<parameter name="java.naming.provider.url" locked="false">tcp://localhost:61616</parameter>        	
+        	<parameter name="transport.jms.ConnectionFactoryJNDIName" locked="false">TopicConnectionFactory</parameter>
         </parameter>
 
         <parameter name="myQueueConnectionFactory" locked="false">        	        	
-            <parameter name="java.naming.factory.initial" locked="false">org.apache.activemq.jndi.ActiveMQInitialContextFactory</parameter>
-            <parameter name="java.naming.provider.url" locked="false">tcp://localhost:61616</parameter>        	
-            <parameter name="transport.jms.ConnectionFactoryJNDIName" locked="false">QueueConnectionFactory</parameter>
+        	<parameter name="java.naming.factory.initial" locked="false">org.apache.activemq.jndi.ActiveMQInitialContextFactory</parameter>
+        	<parameter name="java.naming.provider.url" locked="false">tcp://localhost:61616</parameter>        	
+        	<parameter name="transport.jms.ConnectionFactoryJNDIName" locked="false">QueueConnectionFactory</parameter>
         </parameter>
 
         <parameter name="default" locked="false">        	        	
-            <parameter name="java.naming.factory.initial" locked="false">org.apache.activemq.jndi.ActiveMQInitialContextFactory</parameter>
-            <parameter name="java.naming.provider.url" locked="false">tcp://localhost:61616</parameter>        	
-            <parameter name="transport.jms.ConnectionFactoryJNDIName" locked="false">QueueConnectionFactory</parameter>
+        	<parameter name="java.naming.factory.initial" locked="false">org.apache.activemq.jndi.ActiveMQInitialContextFactory</parameter>
+        	<parameter name="java.naming.provider.url" locked="false">tcp://localhost:61616</parameter>        	
+        	<parameter name="transport.jms.ConnectionFactoryJNDIName" locked="false">QueueConnectionFactory</parameter>
         </parameter>
     </transportReceiver>-->
 
@@ -162,13 +163,13 @@
     <!--<parameter name="transport.mail.replyToAddress" locked="false">axis2@127.0.0.1</parameter>-->
     <!--</transportReceiver>-->
 
-    <!--Uncomment if you want to have TCP transport support-->
+	<!--Uncomment if you want to have TCP transport support-->
     <!--transportReceiver name="tcp"
                        class="org.apache.axis2.transport.tcp.TCPServer">
         <parameter name="port" locked="false">6060</parameter-->>
-    <!--If you want to give your own host address for EPR generation-->
-    <!--uncommet following paramter , and set as you required.-->
-    <!--<parameter name="hostname" locked="false">tcp://myApp.com/ws</parameter>-->
+        <!--If you want to give your own host address for EPR generation-->
+        <!--uncomment following paramter , and set as you required.-->
+        <!--<parameter name="hostname" locked="false">tcp://myApp.com/ws</parameter>-->
     <!-- /transportReceiver -->
 
     <!-- ================================================= -->
@@ -208,6 +209,8 @@
     <!-- ================================================= -->
     <!-- Uncomment this to enable Addressing -->
     <!-- module ref="addressing"/-->
+	<!-- Uncomment this to enable Security -->
+	<!-- <module ref="rampart"/> -->
 
     <!--Configuring module , providing parameters for modules whether they refer or not-->
     <!--<moduleConfig name="addressing">-->
@@ -232,7 +235,9 @@
             <handler name="ODEAxisOperationDispatcher"
                      class="org.apache.ode.axis2.hooks.ODEAxisOperationDispatcher"/>
             <handler name="AddressingBasedDispatcher"
-                     class="org.apache.axis2.dispatchers.AddressingBasedDispatcher"/>
+                     class="org.apache.axis2.dispatchers.AddressingBasedDispatcher">
+                <order phase="Addressing"/>
+            </handler>
         </phase>
         <phase name="PreDispatch"/>
         <phase name="Dispatch" class="org.apache.axis2.engine.DispatchPhase">
@@ -247,22 +252,22 @@
         <!--   After Postdispatch phase module author or or service author can add any phase he want      -->
         <phase name="ProcessHeader">
             <handler name="SessionInHandler"
-                     class="org.apache.ode.axis2.hooks.SessionInHandler">
+                 class="org.apache.ode.axis2.hooks.SessionInHandler">
                 <order phase="PostDispatch"/>
             </handler>
         </phase>
         <phase name="OperationInPhase"/>
-        <phase name="soapmonitorPhase"/>
+	<phase name="soapmonitorPhase"/>
     </phaseOrder>
     <phaseOrder type="OutFlow">
         <!--      user can add his own phases to this area  -->
-        <phase name="ProcessHeader">
-            <handler name="SessionOutHandler"
-                     class="org.apache.ode.axis2.hooks.SessionOutHandler">
-                <order phase="PreDispatch"/>
-            </handler>
-        </phase>
-        <phase name="soapmonitorPhase"/>
+	<phase name="ProcessHeader">
+		<handler name="SessionOutHandler"
+			 class="org.apache.ode.axis2.hooks.SessionOutHandler">
+			<order phase="PreDispatch"/>
+		</handler>
+	</phase>
+	<phase name="soapmonitorPhase"/>
         <phase name="OperationOutPhase"/>
         <!--system predefined phase-->
         <!--these phase will run irrespective of the service-->
@@ -271,31 +276,41 @@
         <phase name="Security"/>
     </phaseOrder>
     <phaseOrder type="InFaultFlow">
+		<phase name="Security"/>
         <phase name="Addressing">
             <handler name="AddressingBasedDispatcher"
-                     class="org.apache.axis2.dispatchers.AddressingBasedDispatcher"/>
+                     class="org.apache.axis2.dispatchers.AddressingBasedDispatcher">
+                <order phase="Addressing"/>
+            </handler>
         </phase>
-        <phase name="Security"/>
         <phase name="PreDispatch"/>
         <phase name="Dispatch" class="org.apache.axis2.engine.DispatchPhase">
             <handler name="RequestURIBasedDispatcher"
-                     class="org.apache.axis2.dispatchers.RequestURIBasedDispatcher"/>
+                     class="org.apache.axis2.dispatchers.RequestURIBasedDispatcher">
+                <order phase="Dispatch"/>
+            </handler>
+
             <handler name="SOAPActionBasedDispatcher"
-                     class="org.apache.axis2.dispatchers.SOAPActionBasedDispatcher"/>
+                     class="org.apache.axis2.dispatchers.SOAPActionBasedDispatcher">
+                <order phase="Dispatch"/>
+            </handler>
+
             <handler name="SOAPMessageBodyBasedDispatcher"
-                     class="org.apache.axis2.dispatchers.SOAPMessageBodyBasedDispatcher"/>
+                     class="org.apache.axis2.dispatchers.SOAPMessageBodyBasedDispatcher">
+                <order phase="Dispatch"/>
+            </handler>
         </phase>
         <!--      user can add his own phases to this area  -->
         <phase name="OperationInFaultPhase"/>
-        <phase name="soapmonitorPhase"/>
+		<phase name="soapmonitorPhase"/>
     </phaseOrder>
     <phaseOrder type="OutFaultFlow">
         <!--      user can add his own phases to this area  -->
-        <phase name="soapmonitorPhase"/>
+		<phase name="soapmonitorPhase"/>
         <phase name="OperationOutFaultPhase"/>
         <phase name="PolicyDetermination"/>
         <phase name="MessageOut"/>
-        <phase name="Security"/>
+		<phase name="Security"/>
     </phaseOrder>
 </axisconfig>
 

@@ -1,0 +1,176 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<dd:deploy xmlns:dd="http://www.apache.org/ode/schemas/dd/2007/03"
+    xmlns:bpel="http://sample.bpel.org/bpel/sample"
+    >
+
+
+    <dd:process name="bpel:OnEventCorrelation000" fileName="OnEventCorrelation000.bpel">
+        <!--dd:process-events generate="none"/-->
+        <dd:in-memory>false</dd:in-memory>
+        <dd:provide partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelation000" port="OnEventCorrelation" />
+        </dd:provide>
+        <dd:invoke partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelationB000" port="OnEventCorrelationB" />
+        </dd:invoke>
+    </dd:process>
+    <dd:process name="bpel:OnEventCorrelationB000" fileName="OnEventCorrelationB000.bpel">
+        <dd:in-memory>false</dd:in-memory>
+        <dd:provide partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelationB000" port="OnEventCorrelationB" />
+        </dd:provide>
+    </dd:process>
+
+    <dd:process name="bpel:OnEventCorrelation100" fileName="OnEventCorrelation100.bpel">
+        <!--dd:process-events generate="none"/-->
+        <dd:in-memory>true</dd:in-memory>
+        <dd:provide partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelation100" port="OnEventCorrelation" />
+        </dd:provide>
+        <dd:invoke partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelationB100" port="OnEventCorrelationB" />
+        </dd:invoke>
+    </dd:process>
+    <dd:process name="bpel:OnEventCorrelationB100" fileName="OnEventCorrelationB100.bpel">
+        <dd:in-memory>false</dd:in-memory>
+        <dd:provide partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelationB100" port="OnEventCorrelationB" />
+        </dd:provide>
+    </dd:process>
+
+    <dd:process name="bpel:OnEventCorrelation010" fileName="OnEventCorrelation010.bpel">
+        <!--dd:process-events generate="none"/-->
+        <dd:in-memory>false</dd:in-memory>
+        <dd:provide partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelation010" port="OnEventCorrelation" />
+        </dd:provide>
+        <dd:invoke partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelationB010Fwd" port="OnEventCorrelationB" />
+        </dd:invoke>
+    </dd:process>
+    <dd:process name="bpel:OnEventCorrelationB010" fileName="OnEventCorrelationB010.bpel">
+        <dd:in-memory>false</dd:in-memory>
+        <dd:provide partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelationB010" port="OnEventCorrelationB" />
+        </dd:provide>
+    </dd:process>
+
+    <dd:process name="bpel:OnEventCorrelation110" fileName="OnEventCorrelation110.bpel">
+        <!--dd:process-events generate="none"/-->
+        <dd:in-memory>true</dd:in-memory>
+        <dd:provide partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelation110" port="OnEventCorrelation" />
+        </dd:provide>
+        <dd:invoke partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelationB110Fwd" port="OnEventCorrelationB" />
+        </dd:invoke>
+    </dd:process>
+    <dd:process name="bpel:OnEventCorrelationB110" fileName="OnEventCorrelationB110.bpel">
+        <dd:in-memory>false</dd:in-memory>
+        <dd:provide partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelationB110" port="OnEventCorrelationB" />
+        </dd:provide>
+    </dd:process>
+
+    <dd:process name="bpel:OnEventCorrelation001" fileName="OnEventCorrelation001.bpel">
+        <!--dd:process-events generate="none"/-->
+        <dd:in-memory>false</dd:in-memory>
+        <dd:provide partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelation001" port="OnEventCorrelation" />
+        </dd:provide>
+        <dd:invoke partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelationB001" port="OnEventCorrelationB" />
+        </dd:invoke>
+    </dd:process>
+    <dd:process name="bpel:OnEventCorrelationB001" fileName="OnEventCorrelationB001.bpel">
+        <dd:in-memory>true</dd:in-memory>
+        <dd:provide partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelationB001" port="OnEventCorrelationB" />
+        </dd:provide>
+    </dd:process>
+
+    <dd:process name="bpel:OnEventCorrelation101" fileName="OnEventCorrelation101.bpel">
+        <!--dd:process-events generate="none"/-->
+        <dd:in-memory>true</dd:in-memory>
+        <dd:provide partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelation101" port="OnEventCorrelation" />
+        </dd:provide>
+        <dd:invoke partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelationB101" port="OnEventCorrelationB" />
+        </dd:invoke>
+    </dd:process>
+    <dd:process name="bpel:OnEventCorrelationB101" fileName="OnEventCorrelationB101.bpel">
+        <dd:in-memory>true</dd:in-memory>
+        <dd:provide partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelationB101" port="OnEventCorrelationB" />
+        </dd:provide>
+    </dd:process>
+
+    <dd:process name="bpel:OnEventCorrelation011" fileName="OnEventCorrelation011.bpel">
+        <!--dd:process-events generate="none"/-->
+        <dd:in-memory>false</dd:in-memory>
+        <dd:provide partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelation011" port="OnEventCorrelation" />
+        </dd:provide>
+        <dd:invoke partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelationB011Fwd" port="OnEventCorrelationB" />
+        </dd:invoke>
+    </dd:process>
+    <dd:process name="bpel:OnEventCorrelationB011" fileName="OnEventCorrelationB011.bpel">
+        <dd:in-memory>true</dd:in-memory>
+        <dd:provide partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelationB011" port="OnEventCorrelationB" />
+        </dd:provide>
+    </dd:process>
+
+    <dd:process name="bpel:OnEventCorrelation111" fileName="OnEventCorrelation111.bpel">
+        <!--dd:process-events generate="none"/-->
+        <dd:in-memory>true</dd:in-memory>
+        <dd:provide partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelation111" port="OnEventCorrelation" />
+        </dd:provide>
+        <dd:invoke partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelationB111Fwd" port="OnEventCorrelationB" />
+        </dd:invoke>
+    </dd:process>
+    <dd:process name="bpel:OnEventCorrelationB111" fileName="OnEventCorrelationB111.bpel">
+        <dd:in-memory>true</dd:in-memory>
+        <dd:provide partnerLink="client">
+            <dd:service name="bpel:OnEventCorrelationB111" port="OnEventCorrelationB" />
+        </dd:provide>
+    </dd:process>
+
+
+    <dd:process name="bpel:EPRTest" fileName="EPRTest.bpel">
+        <!--dd:process-events generate="none"/-->
+        <dd:provide partnerLink="client">
+            <dd:service name="bpel:EPRTest" port="default" />
+        </dd:provide>
+    </dd:process>
+    
+    <dd:process name="bpel:EPRTest2" fileName="EPRTest2.bpel">
+        <dd:provide partnerLink="client">
+            <dd:service name="bpel:EPRTest2" port="default" />
+        </dd:provide>
+    </dd:process>
+
+</dd:deploy>
+

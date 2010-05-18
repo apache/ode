@@ -68,18 +68,18 @@ public class DeploymentPoller {
 
     private PollingThread _poller;
 
-    private ODEServer _odeServer;
+    protected ODEServer _odeServer;
 
     private boolean _onHold = false;
-
+    
     private SystemSchedulesConfig _systemSchedulesConf;
-
+    
     @SuppressWarnings("unchecked")
     private Map<String, WatchDog> dDWatchDogsByPath = new HashMap<String, WatchDog>();
     @SuppressWarnings("unchecked")
     private WatchDog _systemCronConfigWatchDog;
 
-    /** Filter accepting directories containing a .odedd file. */
+    /** Filter accepting directories containing a ode dd file. */
     private static final FileFilter _fileFilter = new FileFilter() {
         public boolean accept(File path) {
             return new File(path, "deploy.xml").exists();
@@ -93,7 +93,7 @@ public class DeploymentPoller {
         }
     };
 
-    public DeploymentPoller(File deployDir, ODEServer odeServer) {
+    public DeploymentPoller(File deployDir, final ODEServer odeServer) {
         _odeServer = odeServer;
         _deployDir = deployDir;
         if (!_deployDir.exists())
@@ -113,6 +113,10 @@ public class DeploymentPoller {
         _poller = null;
     }
 
+    protected boolean isDeploymentFromODEFileSystemAllowed() {
+        return true;
+    }
+
     /**
      * Scan the directory for new (or removed) files (called mainly from {@link PollingThread}) and calls whoever is in charge of
      * the actual deployment (or undeployment).
@@ -122,40 +126,42 @@ public class DeploymentPoller {
         File[] files = _deployDir.listFiles(_fileFilter);
 
         // Checking for new deployment directories
-        for (File file : files) {
-            File deployXml = new File(file, "deploy.xml");
-            File deployedMarker = new File(_deployDir, file.getName() + ".deployed");
+        if (isDeploymentFromODEFileSystemAllowed() && files != null) {
+            for (File file : files) {
+                File deployXml = new File(file, "deploy.xml");
+                File deployedMarker = new File(_deployDir, file.getName() + ".deployed");
 
-            if (!deployXml.exists()) {
-                // Skip if deploy.xml is abset
-                __log.debug("Not deploying " + file + " (missing deploy.xml)");
-            }
+                if (!deployXml.exists()) {
+                    // Skip if deploy.xml is abset
+                    __log.debug("Not deploying " + file + " (missing deploy.xml)");
+                }
 
-            WatchDog ddWatchDog = ensureDeployXmlWatchDog(file, deployXml);
-
-            if (deployedMarker.exists()) {
-                checkDeployXmlWatchDog(ddWatchDog);
-                continue;
-            }
-
-            try {
-                deployedMarker.createNewFile();
-            } catch (IOException e1) {
-                __log.error("Error creating deployed marker file, " + file + " will not be deployed");
-                continue;
-            }
-
-            try {
-                _odeServer.getProcessStore().undeploy(file);
-            } catch (Exception ex) {
-                __log.error("Error undeploying " + file.getName());
-            }
-
-            try {
-                Collection<QName> deployed = _odeServer.getProcessStore().deploy(file);
-                __log.info("Deployment of artifact " + file.getName() + " successful: " + deployed );
-            } catch (Exception e) {
-                __log.error("Deployment of " + file.getName() + " failed, aborting for now.", e);
+                WatchDog ddWatchDog = ensureDeployXmlWatchDog(file, deployXml);
+                
+                if (deployedMarker.exists()) {
+                    checkDeployXmlWatchDog(ddWatchDog);
+                    continue;
+                }
+    
+                try {
+                    deployedMarker.createNewFile();
+                } catch (IOException e1) {
+                    __log.error("Error creating deployed marker file, " + file + " will not be deployed");
+                    continue;
+                }
+    
+                try {
+                    _odeServer.getProcessStore().undeploy(file);
+                } catch (Exception ex) {
+                    __log.error("Error undeploying " + file.getName());
+                }
+    
+                try {
+                    Collection<QName> deployed = _odeServer.getProcessStore().deploy(file);
+                    __log.info("Deployment of artifact " + file.getName() + " successful: " + deployed );
+                } catch (Exception e) {
+                    __log.error("Deployment of " + file.getName() + " failed, aborting for now.", e);
+                }
             }
         }
 
@@ -167,11 +173,12 @@ public class DeploymentPoller {
             if (!deployDir.exists()) {
                 Collection<QName> undeployed = _odeServer.getProcessStore().undeploy(deployDir);
                 file.delete();
+                disposeDeployXmlWatchDog(deployDir);
                 if (undeployed.size() > 0)
                     __log.info("Successfully undeployed " + pkg);
             }
         }
-
+        
         checkSystemCronConfigWatchDog(_systemCronConfigWatchDog);
     }
 
@@ -220,6 +227,10 @@ public class DeploymentPoller {
     private class PollingThread extends Thread {
         private boolean _active = true;
 
+        public PollingThread() {
+            setName("DeploymentPoller");
+        }
+        
         /** Stop this poller, and block until it terminates. */
         void kill() {
             synchronized (this) {

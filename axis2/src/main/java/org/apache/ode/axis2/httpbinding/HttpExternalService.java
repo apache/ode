@@ -30,15 +30,17 @@ import org.apache.ode.axis2.ExternalService;
 import org.apache.ode.axis2.ODEService;
 import org.apache.ode.utils.Properties;
 import org.apache.ode.axis2.OdeFault;
+import org.apache.ode.axis2.util.ClusterUrlTransformer;
+import org.apache.ode.bpel.epr.EndpointFactory;
+import org.apache.ode.bpel.epr.WSAEndpoint;
+import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessConf;
-import org.apache.ode.il.epr.EndpointFactory;
-import org.apache.ode.il.epr.WSAEndpoint;
-import org.apache.ode.il.epr.MutableEndpoint;
+import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.wsdl.Messages;
 import org.apache.ode.utils.wsdl.WsdlUtils;
@@ -54,6 +56,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.net.URL;
 import java.net.MalformedURLException;
 
@@ -68,25 +71,33 @@ public class HttpExternalService implements ExternalService {
 
     private MultiThreadedHttpConnectionManager connections;
 
+    protected ExecutorService executorService;
+    protected Scheduler scheduler;
     protected BpelServer server;
     protected ProcessConf pconf;
     protected QName serviceName;
     protected String portName;
+    protected WSAEndpoint endpointReference;
 
     protected HttpMethodConverter httpMethodConverter;
-    protected WSAEndpoint endpointReference;
 
     protected Binding portBinding;
     private URL endpointUrl;
 
-    public HttpExternalService(ProcessConf pconf, QName serviceName, String portName, BpelServer server, MultiThreadedHttpConnectionManager connManager) throws OdeFault {
+    private ClusterUrlTransformer clusterUrlTransformer;
+
+    public HttpExternalService(ProcessConf pconf, QName serviceName, String portName,
+                               ExecutorService executorService, Scheduler scheduler, BpelServer server,
+                               MultiThreadedHttpConnectionManager connManager, ClusterUrlTransformer clusterUrlTransformer) throws OdeFault {
         if (log.isDebugEnabled())
             log.debug("new HTTP External service, service name=[" + serviceName + "]; port name=[" + portName + "]");
         this.portName = portName;
         this.serviceName = serviceName;
+        this.executorService = executorService;
+        this.scheduler = scheduler;
         this.server = server;
         this.pconf = pconf;
-
+        this.clusterUrlTransformer = clusterUrlTransformer;
         Definition definition = pconf.getDefinitionForService(serviceName);
         Service serviceDef = definition.getService(serviceName);
         if (serviceDef == null)
@@ -103,7 +114,7 @@ public class HttpExternalService implements ExternalService {
             throw new IllegalArgumentException(msgs.msgNoHTTPBindingForPort(portName));
         }
         // throws an IllegalArgumentException if not valid
-        new HttpBindingValidator(portBinding).validate();
+        new HttpBindingValidator(this.portBinding).validate();
 
         // initial endpoint reference
         Element eprElmt = ODEService.genEPRfromWSDL(definition, serviceName, portName);
@@ -158,6 +169,8 @@ public class HttpExternalService implements ExternalService {
                 if (log.isDebugEnabled()) log.debug("Endpoint URL overridden by process. "+endpointUrl+" => "+mexEndpointUrl);
             }
 
+            baseUrl = clusterUrlTransformer.rewriteOutgoingClusterURL(baseUrl);
+            
             // build the http method
             final HttpMethod method = httpMethodConverter.createHttpRequest(odeMex, params, baseUrl);
 
@@ -170,19 +183,30 @@ public class HttpExternalService implements ExternalService {
             Element authenticatePart = message == null ? null : DOMUtils.findChildByName(message, new QName(null, "WWW-Authenticate"));
             HttpHelper.configure(client, method.getURI(), authenticatePart, params);
 
-            // this callable encapsulates the http method execution and the process of the response 
+            // this callable encapsulates the http method execution and the process of the response
             final Callable executionCallable;
 
             // execute it
             boolean isTwoWay = odeMex.getMessageExchangePattern() == MessageExchange.MessageExchangePattern.REQUEST_RESPONSE;
             if (isTwoWay) {
                 // two way
-                executionCallable = new HttpExternalService.TwoWayCallable(client, method, odeMex);
-                executionCallable.call();
+                executionCallable = new HttpExternalService.TwoWayCallable(client, method, odeMex.getMessageExchangeId(), odeMex.getOperation());
+                scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
+                    public void afterCompletion(boolean success) {
+                        // If the TX is rolled back, then we don't send the request.
+                        if (!success) return;
+                        // The invocation must happen in a separate thread
+                        executorService.submit(executionCallable);
+                    }
+
+                    public void beforeCompletion() {
+                    }
+                });
+                odeMex.replyAsync();
             } else {
                 // one way, just execute and forget
-                executionCallable = new HttpExternalService.OneWayCallable(client, method, odeMex);
-                executionCallable.call();
+                executionCallable = new HttpExternalService.OneWayCallable(client, method, odeMex.getMessageExchangeId(), odeMex.getOperation());
+                executorService.submit(executionCallable);
                 odeMex.replyOneWayOk();
             }
         } catch (UnsupportedEncodingException e) {
@@ -190,7 +214,7 @@ public class HttpExternalService implements ExternalService {
             log.error("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] " + errmsg, e);
             odeMex.replyWithFailure(MessageExchange.FailureType.FORMAT_ERROR, errmsg, null);
         } catch (URIException e) {
-            String errmsg = "Invalid URI " + odeMex;
+            String errmsg = "Error sending message to " + getClass().getSimpleName() + " for ODE mex " + odeMex;
             log.error("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] " + errmsg, e);
             odeMex.replyWithFailure(MessageExchange.FailureType.FORMAT_ERROR, errmsg, null);
         } catch (Exception e) {
@@ -198,28 +222,29 @@ public class HttpExternalService implements ExternalService {
             log.error("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] " + errmsg, e);
             odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, null);
         }
-
     }
-
 
     private class OneWayCallable implements Callable<Void> {
         HttpMethod method;
-        PartnerRoleMessageExchange odeMex;
+        String mexId;
+        Operation operation;
         HttpClient client;
 
-        public OneWayCallable(HttpClient client, HttpMethod method, PartnerRoleMessageExchange odeMex) {
+        public OneWayCallable(HttpClient client, HttpMethod method, String mexId, Operation operation) {
             this.method = method;
-            this.odeMex = odeMex;
+            this.mexId = mexId;
+            this.operation = operation;
             this.client = client;
         }
 
-        public Void call() {
+        public Void call() throws Exception {
             try {
                 // simply execute the http method
                 if (log.isDebugEnabled()) {
-                    log.debug("Executing http request : " + method.getName() + " " + method.getURI());
+                    log.debug("Executing HTTP Request : " + method.getName() + " " + method.getURI());
                     log.debug(HttpHelper.requestToString(method));
                 }
+
                 final int statusCode = client.executeMethod(method);
                 // invoke getResponseBody to force the loading of the body
                 // Actually the processResponse may happen in a separate thread and
@@ -227,18 +252,24 @@ public class HttpExternalService implements ExternalService {
                 byte[] responseBody = method.getResponseBody();
                 // ... and process the response
                 if (log.isDebugEnabled()) {
-                    log.debug("Received response for MEX " + odeMex);
+                    log.debug("Received response for MEX " + mexId);
                     log.debug(HttpHelper.responseToString(method));
                 }
                 processResponse(statusCode);
             } catch (final IOException e) {
-                // Something happened, recording the failure
+                // ODE MEX needs to be invoked in a TX.
                 try {
-                    String errmsg = "Unable to execute HTTP request : " + e.getMessage();
-                    log.error("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] " + errmsg, e);
-                    odeMex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
+                    scheduler.execTransaction(new Callable<Void>() {
+                        public Void call() throws Exception {
+                            PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) server.getEngine().getMessageExchange(mexId);
+                            String errmsg = "Unable to execute http request : " + e.getMessage();
+                            log.error("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + operation.getName() + "] " + errmsg, e);
+                            odeMex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, errmsg, null);
+                            return null;
+                        }
+                    });
                 } catch (Exception e1) {
-                    String errmsg = "[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] Error executing reply transaction; reply will be lost.";
+                    String errmsg = "[Service: " + serviceName + ", Port: " + portName + ", Operation: " + operation.getName() + "] Error executing reply transaction; reply will be lost.";
                     log.error(errmsg, e);
                 }
             } finally {
@@ -257,32 +288,42 @@ public class HttpExternalService implements ExternalService {
                     if (log.isDebugEnabled())
                         log.debug("OneWay HTTP Request, Status-Line: " + method.getStatusLine() + " for " + method.getURI());
                 }
-            } catch (URIException e) {
-                String errmsg = "[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] Exception occured while processing the HTTP response of a one-way request: " + e.getMessage();
+            } catch (Exception e) {
+                String errmsg = "[Service: " + serviceName + ", Port: " + portName + ", Operation: " + operation.getName() + "] Exception occured while processing the HTTP response of a one-way request: " + e.getMessage();
                 log.error(errmsg, e);
             }
         }
     }
 
     private class TwoWayCallable extends OneWayCallable {
-
-        public TwoWayCallable(HttpClient client, HttpMethod method, PartnerRoleMessageExchange odeMex) {
-            super(client, method, odeMex);
+        public TwoWayCallable(org.apache.commons.httpclient.HttpClient client, HttpMethod method, String mexId, Operation operation) {
+            super(client, method, mexId, operation);
         }
 
         public void processResponse(final int statusCode) {
+            // ODE MEX needs to be invoked in a TX.
             try {
-                if (statusCode >= 200 && statusCode < 300) {
-                    _2xx_success();
-                } else if (statusCode >= 300 && statusCode < 400) {
-                    _3xx_redirection();
-                } else if (statusCode >= 400 && statusCode < 600) {
-                    _4xx_5xx_error();
-                } else {
-                    unmanagedStatus();
-                }
-            } catch (Exception e) {
-                replyWithFailure("Exception occured while processing the HTTP response of a two-way request. mexId= " + odeMex.getMessageExchangeId(), e);
+                scheduler.execTransaction(new Callable<Void>() {
+                    public Void call() throws Exception {
+                        try {
+                            if (statusCode >= 200 && statusCode < 300) {
+                                _2xx_success();
+                            } else if (statusCode >= 300 && statusCode < 400) {
+                                _3xx_redirection();
+                            } else if (statusCode >= 400 && statusCode < 600) {
+                                _4xx_5xx_error();
+                            } else {
+                                unmanagedStatus();
+                            }
+                        } catch (Exception e) {
+                            replyWithFailure("Exception occured while processing the HTTP response of a two-way request. mexId= " + mexId, e);
+                        }
+                        return null;
+                    }
+                });
+            } catch (Exception transactionException) {
+                String errmsg = "[Service: " + serviceName + ", Port: " + portName + ", Operation: " + operation.getName() + "] Error executing reply transaction; reply will be lost.";
+                log.error(errmsg, transactionException);
             }
         }
 
@@ -307,11 +348,13 @@ public class HttpExternalService implements ExternalService {
         }
 
         private void _2xx_success() throws Exception {
+            PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) server.getEngine().getMessageExchange(mexId);
             if (log.isDebugEnabled())
-                log.debug("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] HTTP Status-Line: " + method.getStatusLine() + " for " + method.getURI());
+                log.debug("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + operation.getName() + "] HTTP Status-Line: " + method.getStatusLine() + " for " + method.getURI());
             if (log.isDebugEnabled()) log.debug("Received response for MEX " + odeMex);
 
             Operation opDef = odeMex.getOperation();
+
             // this is the message to populate and send to ODE
             QName outputMsgName = odeMex.getOperation().getOutput().getMessage().getQName();
             Message odeResponse = odeMex.createMessage(outputMsgName);
@@ -329,13 +372,14 @@ public class HttpExternalService implements ExternalService {
         }
 
         void replyWithFault() {
+            PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) server.getEngine().getMessageExchange(mexId);
             Object[] fault = httpMethodConverter.parseFault(odeMex, method);
             Message response = (Message) fault[1];
             QName faultName = (QName) fault[0];
 
             // finally send the fault. We did it!
             if (log.isWarnEnabled())
-                log.warn("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] Fault response: faultName=" + faultName + " faultType=" + response.getType() + "\n" + DOMUtils.domToString(response.getMessage()));
+                log.warn("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + operation.getName() + "] Fault response: faultName=" + faultName + " faultType=" + response.getType() + "\n" + DOMUtils.domToString(response.getMessage()));
 
             odeMex.replyWithFault(faultName, response);
         }
@@ -346,9 +390,9 @@ public class HttpExternalService implements ExternalService {
         }
 
         void replyWithFailure(String errmsg, Throwable t) {
-            log.error("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + odeMex.getOperationName() + "] " + errmsg, t);
+            log.error("[Service: " + serviceName + ", Port: " + portName + ", Operation: " + operation.getName() + "] " + errmsg, t);
+            PartnerRoleMessageExchange odeMex = (PartnerRoleMessageExchange) server.getEngine().getMessageExchange(mexId);
             odeMex.replyWithFailure(MessageExchange.FailureType.OTHER, errmsg, HttpHelper.prepareDetailsElement(method));
         }
     }
-
 }

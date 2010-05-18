@@ -1,16 +1,33 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.apache.ode.test;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
 
 import javax.sql.DataSource;
 import javax.xml.namespace.QName;
 
+import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
 import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
-import org.apache.ode.il.config.OdeConfigProperties;
-import org.apache.ode.il.dbutil.Database;
 import org.junit.Test;
 
 /**
@@ -19,21 +36,22 @@ import org.junit.Test;
 public class ExternalVariableTest extends BPELTestAbstract {
 
     private JdbcExternalVariableModule _jdbcext;
-    private Database _db;
 
-    @Override
+    private DataSource _ds;
+
     public void setUp() throws Exception {
         super.setUp();
-
-        OdeConfigProperties props = new OdeConfigProperties(new Properties(),"");
-		_db = new Database(props);
-        _db.start();
+        
+        EmbeddedConnectionPoolDataSource ds = new EmbeddedConnectionPoolDataSource();
+        ds.setCreateDatabase("create");
+        ds.setDatabaseName("target/ExternalVariableTest");
+        _ds = ds;
 
         _jdbcext = new JdbcExternalVariableModule();
-        _jdbcext.registerDataSource("testds", _db.getDataSource());
+        _jdbcext.registerDataSource("testds", _ds);
         _server.registerExternalVariableEngine(_jdbcext);
 
-        Connection conn = _db.getDataSource().getConnection();
+        Connection conn = _ds.getConnection();
         Statement s = conn.createStatement();
         
         dropTable(s, "extvartable1");
@@ -56,14 +74,6 @@ public class ExternalVariableTest extends BPELTestAbstract {
 
         conn.close();
     }
-
-  @Override
-  public void tearDown() throws Exception {
-    super.tearDown();
-    _db.shutdown();
-  }
-
-
     
     private static void dropTable(Statement s, String name) {
         try {
@@ -91,15 +101,5 @@ public class ExternalVariableTest extends BPELTestAbstract {
     @Test
     public void testExtVarKeyGen() throws Throwable {
         go("/bpel/2.0/ExtVar-GenKey");
-    }
-    
-    /**
-     * Test inline variable initialization for external variables
-     * @author madars.vitolins _at gmail.com, 2009.04.11
-     * @throws Throwable
-     */
-    @Test
-    public void testExtVarInlineInit() throws Throwable {
-        go("/bpel/2.0/ExtVarInlineInit");
     }
 }

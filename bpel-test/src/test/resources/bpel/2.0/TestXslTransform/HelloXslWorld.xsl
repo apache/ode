@@ -17,17 +17,32 @@
   ~ under the License.
   -->
 
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0">
   <xsl:output method="xml"/>
   <xsl:param name="middle"/>
 
-  <xsl:template match="/">
+ <xsl:template match="node()|@*">
+   <xsl:copy>
+       <xsl:apply-templates select="@*"/>
+       <xsl:apply-templates/>
+   </xsl:copy>
+ </xsl:template>
+
+ <xsl:template match="TestPart">
     <!-- The root element is the one that will be used as a base for the assignment rvalue -->
     <xsl:element name="root">
       <xsl:element name="hello">
-        <xsl:value-of select="concat(*/content/text(), $middle, ' World')"/>
+           <xsl:apply-templates />
       </xsl:element>
     </xsl:element>
   </xsl:template>
+  
+  <xsl:template match="content">
+        <xsl:value-of select="concat(text(), $middle, ' World')"/>
+  </xsl:template>
 
+  <!-- The nilled() function does not work if your Saxon parser is not schema-aware -->
+  <!--<xsl:template match="*[nilled(current())]"/>-->
+  <!-- As a workaround, you may use boolean(@xsi:nil) instead of nilled(current()) -->
+  <xsl:template match="*[boolean(@xsi:nil)]"/> 
 </xsl:stylesheet>

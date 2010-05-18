@@ -56,7 +56,7 @@
            </copy>
        </assign>
 
-       <invoke partnerLink="dummyPartnerLink" portType="dummy:DummyServicePortType"
+       <invoke partnerLink="dummyPartnerLink" portType="test:DummyServicePortType"
                operation="faultTest" inputVariable="faultInput" outputVariable="faultOutput">
        </invoke>
 

@@ -21,7 +21,6 @@ package org.apache.ode.utils.fs;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -164,7 +163,7 @@ public class FileUtils {
         File[] allFiles = parentDir.listFiles();
         if (allFiles != null) {
             TreeSet<File> dirs = new TreeSet<File>();
-                TreeSet<File> acceptedFiles = new TreeSet<File>();
+            TreeSet<File> acceptedFiles = new TreeSet<File>();
             for (File f : allFiles) {
                 if (f.isDirectory()) {
                     dirs.add(f);

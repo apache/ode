@@ -18,83 +18,111 @@
  */
 package org.apache.ode.test;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class DataHandling20Test extends BPELTestAbstract {
-
-    @Test public void testComposeUrl() throws Throwable {
+    @Test
+    public void testComposeUrl() throws Throwable {
         go("/bpel/2.0/TestComposeUrl");
     }
-    @Test public void testCombineUrl() throws Throwable {
+
+    @Test
+    public void testCombineUrl() throws Throwable {
         go("/bpel/2.0/TestCombineUrl");
     }
-    @Test public void testExpandTemplate() throws Throwable {
+
+    @Test
+    public void testExpandTemplate() throws Throwable {
         go("/bpel/2.0/TestExpandTemplate");
     }
-    @Test public void testXPathNamespace1() throws Throwable {
+
+    @Test
+    public void testXPathNamespace1() throws Throwable {
         go("/bpel/2.0/TestXPathNamespace1");
     }
-    @Test public void testXPathNamespace2() throws Throwable {
+
+    @Test
+    public void testXPathNamespace2() throws Throwable {
         go("/bpel/2.0/TestXPathNamespace2");
     }
-    @Test public void testSubTreeAssign() throws Throwable {
+
+    @Test
+    public void testToQuery() throws Throwable {
+        go("/bpel/2.0/TestToQuery");
+    }
+    
+    @Test
+    public void testSubTreeAssign() throws Throwable {
         go("/bpel/2.0/TestSubTreeAssign");
     }
-    @Test public void testAssignActivity1() throws Throwable {
+
+    @Test
+    public void testAssignActivity1() throws Throwable {
         go("/bpel/2.0/TestAssignActivity1");
     }
-    @Test public void testAssignActivity2() throws Throwable {
+
+    @Test
+    public void testAssignActivity2() throws Throwable {
         go("/bpel/2.0/TestAssignActivity2");
     }
-    @Test public void testAssignActivity3() throws Throwable {
-        go("/bpel/2.0/TestAssignActivity3");
-    }
-    @Test public void testAssignComplex() throws Throwable {
+
+    @Test
+    public void testAssignComplex() throws Throwable {
         go("/bpel/2.0/TestAssignComplex");
     }
-    @Test public void testSimpleTypeParts() throws Throwable {
+
+    @Test
+    public void testSimpleTypeParts() throws Throwable {
         go("/bpel/2.0/TestSimpleTypeParts");
     }
-    @Test public void testSimpleVariableType() throws Throwable {
+
+    @Test
+    public void testSimpleVariableType() throws Throwable {
         go("/bpel/2.0/TestSimpleVariableType");
     }
-    @Test public void testXslTransform() throws Throwable {
+
+    @Test
+    public void testXslTransform() throws Throwable {
         go("/bpel/2.0/TestXslTransform");
     }
-    @Test public void testSplit() throws Throwable {
+
+    @Test
+    public void testSplit() throws Throwable {
         go("/bpel/2.0/TestSplit");
     }
-    @Test public void testCounter() throws Throwable {
+
+    @Test
+    public void testCounter() throws Throwable {
         go("/bpel/2.0/TestCounter");
     }
 
     @Test
-    public void testAssignDate() throws Throwable {
+    public void testDate() throws Throwable {
         go("/bpel/2.0/TestAssignDate");
-    }
-    
-    @Test
-    public void testAssignDate2() throws Throwable {
-        go("/bpel/2.0/TestAssignDate2");
     }
 
     @Test
     public void testMsgDate() throws Throwable {
         go("/bpel/2.0/TestMsgDate");
     }
-    @Test public void testDuration() throws Throwable {
+
+    @Test
+    public void testDuration() throws Throwable {
         go("/bpel/2.0/TestDuration");
     }
-    @Test public void testAssignMissingData() throws Throwable {
+
+    @Test
+    public void testAssignMissingData() throws Throwable {
         go("/bpel/2.0/TestAssignMissingData");
     }
-    @Test public void testXQueryExpression() throws Throwable {
+
+    @Test
+    public void testXQueryExpression() throws Throwable {
         go("/bpel/2.0/TestXQueryExpression");
     }
-    //madars.vitolins _at gmail.com  2009.04.11
-    //Inline variable initialization test
-    @Test public void testInlineVarInit() throws Throwable {
-        go("/bpel/2.0/TestInlineVarInit");
+
+    @Test
+    public void testInsertMissingData() throws Throwable {
+        go("/bpel/2.0/TestInsertMissingData");
     }
 }

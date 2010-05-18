@@ -46,6 +46,8 @@ public class ODEMessageReceiver extends AbstractMessageReceiver {
                         + msgContext.getAxisOperation().getName());
             // Client is expecting a response, running in the same thread
             MessageContext outMsgContext = MessageContextBuilder.createOutMessageContext(msgContext);
+            // pass on the endpoint properties for output context
+            outMsgContext.getOptions().setParent(_service.getOptions());
             outMsgContext.getOperationContext().addMessageContext(outMsgContext);
             invokeBusinessLogic(msgContext, outMsgContext);
             if (__log.isDebugEnabled()) {

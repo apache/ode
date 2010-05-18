@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<wsdl:definitions
+        targetNamespace="http://ode/bpel/unit-test.wsdl"
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:tns="http://ode/bpel/unit-test.wsdl"
+        xmlns:typens="http://ode/bpel/unit-test/testCorrelation.wsdl.types"
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:dummy="http://axis2.ode.apache.org"
+        xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+        xmlns:prop="http://docs.oasis-open.org/wsbpel/2.0/varprop">
+
+    <wsdl:import namespace="http://axis2.ode.apache.org" location="dummy-service.wsdl"/>
+
+    <wsdl:types>
+        <xsd:schema
+                targetNamespace="http://ode/bpel/unit-test/testCorrelation.wsdl.types"
+                xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+            <xsd:complexType name="testMessage">
+                <xsd:sequence>
+                    <xsd:element name="correlationID1" type="xsd:string"/>
+                    <xsd:element name="correlationID2" type="xsd:string"/>
+                    <xsd:element name="correlationID3" type="xsd:string"/>
+                    <xsd:element name="requestText" type="xsd:string"/>
+                </xsd:sequence>
+            </xsd:complexType>
+        </xsd:schema>
+    </wsdl:types>
+
+    <wsdl:message name="HeaderTestMessage">
+        <wsdl:part name="TestPart" type="typens:testMessage"/>
+    </wsdl:message>
+
+    <wsdl:portType name="HeaderTestPortType">
+        <wsdl:operation name="hello1">
+            <wsdl:input message="tns:HeaderTestMessage" name="TestIn"/>
+            <wsdl:output message="tns:HeaderTestMessage" name="TestOut"/>
+        </wsdl:operation>
+        <wsdl:operation name="hello2">
+            <wsdl:input message="tns:HeaderTestMessage" name="TestIn"/>
+        </wsdl:operation>
+        <wsdl:operation name="continue">
+            <wsdl:input message="tns:HeaderTestMessage" name="TestIn"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="HeaderTestSoapBinding" type="tns:HeaderTestPortType">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="hello1">
+            <soap:operation soapAction="" style="rpc"/>
+            <wsdl:input>
+                <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="hello2">
+            <soap:operation soapAction="" style="rpc"/>
+            <wsdl:input>
+                <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="continue">
+            <soap:operation soapAction="" style="rpc"/>
+            <wsdl:input>
+                <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="HeaderTestService">
+        <wsdl:port name="HeaderTestPort" binding="tns:HeaderTestSoapBinding">
+            <soap:address location="http://localhost:8888/ode/processes/correlationMultiTest"/>
+        </wsdl:port>
+    </wsdl:service>
+
+    <plnk:partnerLinkType name="HeaderTestPartnerLinkType">
+        <plnk:role name="me" portType="tns:HeaderTestPortType"/>
+        <plnk:role name="you" portType="tns:HeaderTestPortType"/>
+    </plnk:partnerLinkType>
+    <plnk:partnerLinkType name="DummyPartnerLinkType">
+        <plnk:role name="you" portType="dummy:DummyServicePortType"/>
+    </plnk:partnerLinkType>
+
+    <prop:property name="testCorrelationID1" type="xsd:string"/>
+    <prop:propertyAlias propertyName="tns:testCorrelationID1" messageType="tns:HeaderTestMessage" part="TestPart">
+        <prop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+            correlationID1
+        </prop:query>
+    </prop:propertyAlias>
+
+    <prop:property name="testCorrelationID2" type="xsd:string"/>
+    <prop:propertyAlias propertyName="tns:testCorrelationID2" messageType="tns:HeaderTestMessage" part="TestPart">
+        <prop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+            correlationID2
+        </prop:query>
+    </prop:propertyAlias>
+
+    <prop:property name="testCorrelationID3" type="xsd:string"/>
+    <prop:propertyAlias propertyName="tns:testCorrelationID3" messageType="tns:HeaderTestMessage" part="TestPart">
+        <prop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+            correlationID3
+        </prop:query>
+    </prop:propertyAlias>
+</wsdl:definitions>

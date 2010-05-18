@@ -30,11 +30,11 @@ import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 
 /**
- * Implements the "todo" queue and prioritized scheduling mechanism.
- *
+ * Implements the "todo" queue and prioritized scheduling mechanism. 
+ * 
  * @author mszefler
  * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
- *
+ * 
  */
 class SchedulerThread implements Runnable {
 
@@ -58,7 +58,7 @@ class SchedulerThread implements Runnable {
 
     SchedulerThread(TaskRunner runner) {
         _todo = new PriorityBlockingQueue<Task>(TODO_QUEUE_INITIAL_CAPACITY,
-                new TaskComparatorByDate());
+                new JobComparatorByDate());
         _taskrunner = runner;
     }
 
@@ -99,7 +99,7 @@ class SchedulerThread implements Runnable {
 
     /**
      * Add a job to the todo queue.
-     *
+     * 
      * @param job
      */
     void enqueue(Task task) {
@@ -127,10 +127,9 @@ class SchedulerThread implements Runnable {
         }
     }
 
-
     /**
      * Get the size of the todo queue.
-     *
+     * 
      * @return
      */
     public int size() {
@@ -163,7 +162,7 @@ class SchedulerThread implements Runnable {
 
     /**
      * Calculate the time until the next available job.
-     *
+     * 
      * @return time until next job, 0 if one is one is scheduled to go, and some
      *         really large number if there are no jobs to speak of
      */
@@ -178,7 +177,7 @@ class SchedulerThread implements Runnable {
     }
 
     /**
-     * Remove the tasks of a given type from the list.
+     * Remove the tasks of a given type from the list. 
      * @param tasktype type of task
      */
     public void clearTasks(final Class<? extends Task> tasktype) {

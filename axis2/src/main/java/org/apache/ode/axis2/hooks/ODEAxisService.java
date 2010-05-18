@@ -51,8 +51,8 @@ import org.apache.ode.axis2.util.Axis2UriResolver;
 import org.apache.ode.axis2.util.Axis2WSDLLocator;
 import org.apache.ode.axis2.util.AxisUtils;
 import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.epr.WSDL11Endpoint;
 import org.apache.ode.utils.Properties;
-import org.apache.ode.il.epr.WSDL11Endpoint;
 import org.apache.ws.commons.schema.XmlSchema;
 import org.apache.ws.commons.schema.XmlSchemaCollection;
 import org.w3c.dom.Element;
@@ -73,9 +73,10 @@ public class ODEAxisService {
                     +" WSDL="+wsdlDefinition.getDocumentBaseURI()+" BPEL="+pconf.getBpelDocument());
         }
 
+        InputStream is = null;
         try {
             URI baseUri = pconf.getBaseURI().resolve(wsdlDefinition.getDocumentBaseURI());
-            InputStream is = baseUri.toURL().openStream();
+            is = baseUri.toURL().openStream();
             WSDL11ToAxisServiceBuilder serviceBuilder = new WSDL11ToAxisPatchedBuilder(is, wsdlServiceName, portName);
             serviceBuilder.setBaseUri(baseUri.toString());
             serviceBuilder.setCustomResolver(new Axis2UriResolver());
@@ -90,7 +91,7 @@ public class ODEAxisService {
             axisService.setWsdlFound(true);
             axisService.setCustomWsdl(true);
             axisService.setClassLoader(axisConfig.getServiceClassLoader());
-
+        
             URL wsdlUrl = null;
             for (File file : pconf.getFiles()) {
                 if (file.getAbsolutePath().indexOf(wsdlDefinition.getDocumentBaseURI()) > 0)
@@ -113,7 +114,7 @@ public class ODEAxisService {
             final WSDL11Endpoint endpoint = new WSDL11Endpoint(wsdlServiceName, portName);
             final Map<String, String> properties = pconf.getEndpointProperties(endpoint);
             if(properties.get(Properties.PROP_SECURITY_POLICY)!=null){
-              AxisUtils.applySecurityPolicy(axisService, properties.get(Properties.PROP_SECURITY_POLICY));
+                AxisUtils.applySecurityPolicy(axisService, properties.get(Properties.PROP_SECURITY_POLICY));
             }
 
             // In doc/lit we need to declare a mapping between operations and message element names
@@ -128,34 +129,23 @@ public class ODEAxisService {
                     operation.setMessageReceiver(msgReceiver);
                 }
             }
-
+            
             // Set the JMS destination name on the Axis Service
             if (isJmsEndpoint(pconf, wsdlServiceName, portName)) {
                 axisService.addParameter(new Parameter(JMSConstants.DEST_PARAM, 
                         extractJMSDestinationName(axisServiceName, deriveBaseServiceUri(pconf))));
             }
-         
+
             return axisService;
         } catch (Exception e) {
             throw AxisFault.makeFault(e);
-        }
-    }
-
-    public static AxisService createService(AxisConfiguration axisConfig, QName serviceQName, String port,
-                                            String axisName, Definition wsdlDef, MessageReceiver receiver) throws AxisFault {
-        WSDL11ToAxisServiceBuilder serviceBuilder = new WSDL11ToAxisServiceBuilder(wsdlDef, serviceQName, port);
-        AxisService axisService = serviceBuilder.populateService();
-        axisService.setName(axisName);
-        axisService.setWsdlFound(true);
-        axisService.setClassLoader(axisConfig.getServiceClassLoader());
-        Iterator operations = axisService.getOperations();
-        while (operations.hasNext()) {
-            AxisOperation operation = (AxisOperation) operations.next();
-            if (operation.getMessageReceiver() == null) {
-                operation.setMessageReceiver(receiver);
+        } finally {
+            try {
+                if( is!=null) is.close();
+            } catch (IOException ioe) {
+                //Ignoring
             }
         }
-        return axisService;
     }
 
     /**
@@ -179,8 +169,26 @@ public class ODEAxisService {
         }
     }
 
+    public static AxisService createService(AxisConfiguration axisConfig, QName serviceQName, String port,
+                                            String axisName, Definition wsdlDef, MessageReceiver receiver) throws AxisFault {
+
+        WSDL11ToAxisServiceBuilder serviceBuilder = new WSDL11ToAxisServiceBuilder(wsdlDef, serviceQName, port);
+        AxisService axisService = serviceBuilder.populateService();
+        axisService.setName(axisName);
+        axisService.setWsdlFound(true);
+        axisService.setClassLoader(axisConfig.getServiceClassLoader());
+        Iterator operations = axisService.getOperations();
+        while (operations.hasNext()) {
+            AxisOperation operation = (AxisOperation) operations.next();
+            if (operation.getMessageReceiver() == null) {
+                operation.setMessageReceiver(receiver);
+            }
+        }
+        return axisService;
+    }
+
     private static String extractEndpointUri(ProcessConf pconf, QName wsdlServiceName, String portName) 
-    throws AxisFault {
+            throws AxisFault {
         Definition wsdlDefinition = pconf.getDefinitionForService(wsdlServiceName);
         String url = null;
         Service service = wsdlDefinition.getService(wsdlServiceName);
@@ -199,18 +207,18 @@ public class ODEAxisService {
         if (url == null) {
             throw new OdeFault("Could not extract any soap:address from service WSDL definition " + wsdlServiceName
                     + " (necessary to establish the process target address)!");
-        }		
+        }       
         return url;
-}
-
+    }
+    
     private static boolean isJmsEndpoint(ProcessConf pconf, QName wsdlServiceName, String portName) 
-        throws AxisFault {
+            throws AxisFault {
         String url = extractEndpointUri(pconf, wsdlServiceName, portName);
         return url.startsWith("jms:");
     }
     
     private static String extractServiceName(ProcessConf pconf, QName wsdlServiceName, String portName)
-        throws AxisFault {
+            throws AxisFault {
         String endpointUri = extractEndpointUri(pconf, wsdlServiceName, portName);
         String derivedUri = deriveBaseServiceUri(pconf);
         String serviceName = parseURLForService(endpointUri, derivedUri);
@@ -220,22 +228,22 @@ public class ODEAxisService {
         }
         return serviceName;
     }
-    
+
     /**
-    * Obtain the service name from the request URL. The request URL is expected to use the path "/processes/" under
-    * which all processes and their services are listed. Returns null if the path does not contain this part.
-    */
+     * Obtain the service name from the request URL. The request URL is expected to use the path "/processes/" under
+     * which all processes and their services are listed. Returns null if the path does not contain this part.
+     */
     protected static String parseURLForService(String path, String baseUri) {
         // Assume that path is HTTP-based, by default
         String servicePrefix = "/processes/";
         // Don't assume JMS-based paths start the same way 
-        if (path.startsWith("jms://")) {
-            servicePrefix = "jms://";
+        if (path.startsWith("jms:/")) {
+            servicePrefix = "jms:/";
         }
         int index = path.indexOf(servicePrefix);
         if (-1 != index) {
             String service;
-        
+
             int serviceStart = index + servicePrefix.length();
             if (path.length() > serviceStart + 1) {
                 service = path.substring(serviceStart);
@@ -247,9 +255,10 @@ public class ODEAxisService {
                 // Qualify shared JMS names with unique baseUri
                 // Since multiple processes may provide services at the same (JMS) endpoint, qualify
                 // the (JMS) endpoint-specific NCName with a process-relative URI, if necessary.
-                if (path.startsWith("jms")) {
+                if (path.startsWith("jms:/")) {
                     boolean slashPresent = baseUri.endsWith("/") || service.startsWith("/");
-                    service = baseUri + (slashPresent ? "" : "/") + service;		        
+                    // service = baseUri + (slashPresent ? "" : "/") + service; // allow successive slashes ("//") in the URI
+                    service = baseUri + "/" + service;
                 }
                 return service;
             }
@@ -257,37 +266,6 @@ public class ODEAxisService {
         return null;
     }
 
-    /*
-     * Generates a URI of the following form:
-     *     ${deploy_bundleNcName}/${diagram_relativeURL}/${process_relativeURL}
-     * When a service name (local part only) is qualified (prefixed) with the above,
-     * it results in a unique identifier that may be used as that service's name.  
-     */
-    public static String deriveBaseServiceUri(ProcessConf pconf) {
-        if (pconf != null) {
-            StringBuffer baseServiceUri = new StringBuffer();
-            String bundleName = pconf.getPackage();
-            if (bundleName != null) {
-                baseServiceUri.append(bundleName).append("/");
-                if (pconf.getBpelDocument() != null) {
-                    String bpelDocumentName = pconf.getBpelDocument();
-                    if (bpelDocumentName.indexOf(".") > 0) {
-                        bpelDocumentName = bpelDocumentName.substring(0, bpelDocumentName.indexOf("."));
-                    }
-                    baseServiceUri.append(bpelDocumentName).append("/");
-                    String processName = pconf.getType() != null 
-                        ? pconf.getType().getLocalPart() : null;
-                    if (processName != null) {
-                        baseServiceUri.append(processName);
-                        return baseServiceUri.toString();
-                    }
-                }
-            }
-            
-        }
-        return null;
-    }
-    
     private static void declarePartsElements(Definition wsdlDefinition, QName wsdlServiceName, String axisServiceName,
                                              String portName) {
         List wsldOps = wsdlDefinition.getService(wsdlServiceName).getPort(portName).getBinding().getPortType()
@@ -332,6 +310,37 @@ public class ODEAxisService {
             }
             return schemaCollection.read(element, baseUri);
         }
+    }
+
+    /*
+     * Generates a URI of the following form:
+     *     ${deploy_bundleNcName}/${diagram_relativeURL}/${process_relativeURL}
+     * When a service name (local part only) is qualified (prefixed) with the above,
+     * it results in a unique identifier that may be used as that service's name.  
+     */
+    public static String deriveBaseServiceUri(ProcessConf pconf) {
+        if (pconf != null) {
+            StringBuffer baseServiceUri = new StringBuffer();
+            String bundleName = pconf.getPackage();
+            if (bundleName != null) {
+                baseServiceUri.append(bundleName).append("/");
+                if (pconf.getBpelDocument() != null) {
+                    String bpelDocumentName = pconf.getBpelDocument();
+                    if (bpelDocumentName.indexOf(".") > 0) {
+                        bpelDocumentName = bpelDocumentName.substring(0, bpelDocumentName.indexOf("."));
+                    }
+                    baseServiceUri.append(bpelDocumentName).append("/");
+                    String processName = pconf.getType() != null 
+                        ? pconf.getType().getLocalPart() : null;
+                    if (processName != null) {
+                        baseServiceUri.append(processName);
+                        return baseServiceUri.toString();
+                    }
+                }
+            }
+            
+        }
+        return null;
     }
 
 }

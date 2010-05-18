@@ -55,7 +55,7 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
     private boolean _failIfNotFound = true;
 
     private ResourceFinder _wsdlFinder;
-    private Map<URI, String> _internalSchemas = new HashMap<URI, String>();
+    private Map<URI, byte[]> _internalSchemas = new HashMap<URI, byte[]>();
     private URI _baseURI;
     
     /**
@@ -65,7 +65,7 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
      *                typically this is the system URI of the WSDL containing an 
      *                embedded schema
      */
-    public WsdlFinderXMLEntityResolver(ResourceFinder finder, URI baseURI, Map<URI, String> internalSchemas,
+    public WsdlFinderXMLEntityResolver(ResourceFinder finder, URI baseURI, Map<URI, byte[]> internalSchemas,
             boolean failIfNotFound) {
         _wsdlFinder = finder;
         _baseURI = baseURI;
@@ -87,18 +87,15 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
             if (__log.isDebugEnabled()) __log.debug("resolveEntity: no schema location for "+resourceIdentifier.getNamespace());
             try {
                 if (_internalSchemas.get(new URI(resourceIdentifier.getNamespace())) != null) {
-                    src.setByteStream(new ByteArrayInputStream(_internalSchemas.get(new URI(resourceIdentifier.getNamespace())).getBytes()));
+                    src.setByteStream(new ByteArrayInputStream(_internalSchemas.get(new URI(resourceIdentifier.getNamespace()))));
                     return src;
                 }
             } catch (URISyntaxException e) {
                 __log.debug("resolveEntity: no schema location an no known namespace for: " + resourceIdentifier.getNamespace());
             }
             return null;
-        } else if (resourceIdentifier.getExpandedSystemId() != null) { 
-            // schema imported by other schema
-            location = _baseURI.resolve(resourceIdentifier.getExpandedSystemId());
         } else {
-            location = _baseURI.resolve(resourceIdentifier.getLiteralSystemId());
+            location = _wsdlFinder.resolve(URI.create(resourceIdentifier.getBaseSystemId()), URI.create(resourceIdentifier.getLiteralSystemId()));
         }
 
         if (__log.isDebugEnabled())
@@ -106,7 +103,7 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
                     + " at " + location);
 
         if (_internalSchemas.get(location) != null) {
-            src.setByteStream(new ByteArrayInputStream(_internalSchemas.get(location).getBytes()));
+            src.setByteStream(new ByteArrayInputStream(_internalSchemas.get(location)));
             return src;
         }
 

@@ -1,0 +1,14 @@
+create table ODE_JOB_BAK as select * from ODE_JOB;
+alter table ODE_JOB add instanceId number(37);
+alter table ODE_JOB add mexId varchar(255);
+alter table ODE_JOB add processId varchar(255);
+alter table ODE_JOB add type varchar(255);
+alter table ODE_JOB add channel varchar(255);
+alter table ODE_JOB add correlatorId varchar(255);
+alter table ODE_JOB add correlationKeySet varchar(255);
+alter table ODE_JOB add retryCount int;
+alter table ODE_JOB add inMem int;
+alter table ODE_JOB add priority int;
+alter table ODE_JOB add detailsExt blob;
+update ODE_JOB oj set detailsExt = (select details from ODE_JOB where jobid = oj.jobid);
+alter table ODE_JOB drop column details;

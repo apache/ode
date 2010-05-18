@@ -23,19 +23,21 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import javax.xml.namespace.QName;
 
-import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.common.CorrelationKeySet;
 
 /**
  * The BPEL scheduler.
  */
 public interface Scheduler {
     void setJobProcessor(JobProcessor processor) throws ContextException;
-
+    
     void setPolledRunnableProcesser(JobProcessor polledRunnableProcessor);
-
+    
     /**
      * Schedule a persisted job. Persisted jobs MUST survive system failure.
      * They also must not be scheduled unless the transaction associated with
@@ -47,6 +49,7 @@ public interface Scheduler {
     String schedulePersistedJob(JobDetails jobDetail,Date when)
             throws ContextException ;
 
+
     /**
      * Schedule a Runnable that will be executed on a dedicated thread pool.
      * @param runnable
@@ -56,7 +59,24 @@ public interface Scheduler {
      */
     String scheduleMapSerializableRunnable(MapSerializableRunnable runnable, Date when) throws ContextException;
 
-    void jobCompleted(String jobId);
+    /**
+     * Schedule a volatile (non-persisted) job. Volatile jobs should not be
+     * saved in the database and should not survive system crash. Volatile
+     * jobs scheduled from a transactional context should be scheduled
+     * regardless of whether the transaction commits.
+     *
+     * @param transacted should the job be executed in a transaction?
+     * @param jobDetail information about the job
+     * @param when does the job should be executed?
+     * @return unique (as far as the scheduler is concerned) job identifier
+     */
+    String scheduleVolatileJob(boolean transacted, JobDetails jobDetail, Date when) throws ContextException;
+
+    /**
+     * Schedule a volatile job for right now
+     * @see #scheduleVolatileJob(boolean, java.util.Map, java.util.Date)
+     */
+    String scheduleVolatileJob(boolean transacted, JobDetails jobDetail) throws ContextException;
 
     /**
      * Make a good effort to cancel the job. If its already running no big
@@ -65,55 +85,112 @@ public interface Scheduler {
      */
     void cancelJob(String jobId) throws ContextException;
 
+    /**
+     * Execute a {@link Callable} in a transactional context. If the callable
+     * throws an exception, then the transaction will be rolled back, otherwise
+     * the transaction will commit.
+     *
+     * @param <T> return type
+     * @param transaction transaction to execute
+     * @return result
+     * @throws Exception
+     */
+    <T> T execTransaction(Callable<T> transaction)
+            throws Exception, ContextException;
+
+    /**
+     * Execute a {@link Callable} in a transactional context. If the callable
+     * throws an exception, then the transaction will be rolled back, otherwise
+     * the transaction will commit. Also, modify the value of the timeout value 
+     * that is associated with the transactions started by the current thread. 
+     *
+     * @param <T> return type
+     * @param transaction transaction to execute
+     * @param timeout, The value of the timeout in seconds. If the value is zero, the transaction service uses the default value.
+     * @return result
+     * @throws Exception
+     */
+    <T> T execTransaction(Callable<T> transaction, int timeout)
+            throws Exception, ContextException;
+    
+    void setRollbackOnly() throws Exception;
+
+    /**
+     * Same as execTransaction but executes in a different thread to guarantee
+     * isolation from the main execution thread.
+     * @param transaction
+     * @return
+     * @throws Exception
+     * @throws ContextException
+     */
+    <T> Future<T> execIsolatedTransaction(final Callable<T> transaction)
+            throws Exception, ContextException;
+
+    /**
+     * @return true if the current thread is associated with a transaction.
+     */
+    boolean isTransacted();
+
+    /**
+     * Register a transaction synchronizer.
+     * @param synch synchronizer
+     * @throws ContextException
+     */
+    void registerSynchronizer(Synchronizer synch) throws ContextException;
+
     void start();
 
     void stop();
 
     void shutdown();
 
+    public interface Synchronizer {
+        /**
+         * Called after the transaction is completed.
+         * @param success indicates whether the transaction was comitted
+         */
+        void afterCompletion(boolean success);
+
+        /**
+         * Called before the transaction is completed.
+         */
+        void beforeCompletion();
+    }
+
     /**
      * Interface implemented by the object responsible for job execution.
      * @author mszefler
      */
     public interface JobProcessor {
+         /**
+          * Implements execution of the job.
+          * @param jobInfo the job information
+          * @throws JobProcessorException
+          */
         void onScheduledJob(JobInfo jobInfo) throws JobProcessorException;
     }
 
     public enum JobType {
         TIMER, 
-        
         RESUME, 
-        
-        /** Response from partner (i.e. the result of a partner-role invoke) has been received. */
-        PARTNER_RESPONSE, 
-        
+        INVOKE_INTERNAL, 
+        INVOKE_RESPONSE, 
         MATCHER, 
-        
-        /** Invoke a "my role" operation (i.e. implemented by the process). */
-        MYROLE_INVOKE, 
-        
-        MYROLE_INVOKE_ASYNC_RESPONSE,
-
         INVOKE_CHECK
     }
     
-    public static class JobDetails implements Cloneable {
+    public static class JobDetails {
         public Long instanceId;
         public String mexId;
         public String processId;
         public String type;
         public String channel;
         public String correlatorId;
-        public String correlationKey;
+        public String correlationKeySet;
         public Integer retryCount;
         public Boolean inMem;
         public Map<String, Object> detailsExt = new HashMap<String, Object>();
-
-        @Override
-        public JobDetails clone() throws CloneNotSupportedException {
-          return (JobDetails)super.clone();
-        }
-
+        
         public Boolean getInMem() {
             return inMem == null ? false : inMem;
         }
@@ -150,11 +227,11 @@ public interface Scheduler {
         public void setCorrelatorId(String correlatorId) {
             this.correlatorId = correlatorId;
         }
-        public CorrelationKey getCorrelationKey() {
-            return new CorrelationKey(correlationKey);
+        public CorrelationKeySet getCorrelationKeySet() {
+            return new CorrelationKeySet(correlationKeySet);
         }
-        public void setCorrelationKey(CorrelationKey correlationKey) {
-            this.correlationKey = correlationKey == null ? null : correlationKey.toCanonicalString();
+        public void setCorrelationKeySet(CorrelationKeySet correlationKeySet) {
+            this.correlationKeySet = correlationKeySet == null ? null : correlationKeySet.toCanonicalString();
         }
         public Integer getRetryCount() {
             return retryCount == null ? 0 : retryCount;
@@ -184,7 +261,7 @@ public interface Scheduler {
             + " type: " + type
             + " channel: " + channel
             + " correlatorId: " + correlatorId
-            + " correlationKey: " + correlationKey
+            + " correlationKeySet: " + correlationKeySet
             + " retryCount: " + retryCount
             + " inMem: " + inMem
             + " detailsExt: " + detailsExt
@@ -230,7 +307,6 @@ public interface Scheduler {
             super(cause);
             this.retry = retry;
         }
-
     }
 
     public interface MapSerializableRunnable extends Runnable, Serializable {

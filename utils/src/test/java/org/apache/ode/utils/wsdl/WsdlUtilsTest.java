@@ -67,16 +67,10 @@ public class WsdlUtilsTest extends TestCase {
     }
 
 
-    /* TODO fix me
     public void testEmptyBinding() {
         Port noBindingPort = dummyService.getPort("DummyService_port_with_empty_binding");
-        try {
-            WsdlUtils.getBindingExtension(noBindingPort);
-            fail("IllegalArgumentException expected!");
-        } catch (IllegalArgumentException e) {
-            // expected behavior
-        }
-    } */
+        assertNull("should return null", WsdlUtils.getBindingExtension(noBindingPort));
+    }
 
     public void testMultipleBinding() {
         // don't know how to test this edge case
@@ -202,8 +196,7 @@ public class WsdlUtilsTest extends TestCase {
     public void testGetMimeContentType() {
         Binding binding = definition.getBinding(new QName("http://axis2.ode.apache.org", "DummyServiceHttpBinding"));
         BindingOperation operation = binding.getBindingOperation("hello", null, null);
-
-         MIMEContent mimeContent = WsdlUtils.getMimeContent(operation.getBindingInput().getExtensibilityElements());
+        MIMEContent mimeContent = WsdlUtils.getMimeContent(operation.getBindingInput().getExtensibilityElements());
         assertNotNull("A MIME Content is expected!", mimeContent);
         assertEquals("text/xml", mimeContent.getType());
 
@@ -211,7 +204,6 @@ public class WsdlUtilsTest extends TestCase {
         operation = binding.getBindingOperation("hello", null, null);
         mimeContent = WsdlUtils.getMimeContent(operation.getBindingInput().getExtensibilityElements());
         assertNull("No content-type expected here!", mimeContent);
-
     }
 
      public void testGetHeaders() {

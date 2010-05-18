@@ -22,7 +22,6 @@ package org.apache.ode.utils.xsl;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URI;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
@@ -38,7 +37,10 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.collections.keyvalue.MultiKey;
+import org.apache.commons.collections.map.MultiKeyMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -53,10 +55,12 @@ import org.w3c.dom.Node;
  */
 public class XslTransformHandler {
 
+    private static final Log __log = LogFactory.getLog(XslTransformHandler.class);
+
   private static XslTransformHandler __singleton;
 
   private TransformerFactory _transformerFactory = null;
-  private final HashMap<MultiKey, Templates> _templateCache = new HashMap<MultiKey, Templates>();
+  private final MultiKeyMap _templateCache = new MultiKeyMap();
 
   /**
    * Singleton access.
@@ -85,7 +89,7 @@ public class XslTransformHandler {
    * @param body of the XSL document
    * @param resolver used to resolve includes and imports
    */
-  public void parseXSLSheet(URI baseUri, URI uri, String body, URIResolver resolver) {
+  public void parseXSLSheet(QName processQName, URI uri, String body, URIResolver resolver) {
     Templates tm;
     try {
       _transformerFactory.setURIResolver(resolver);
@@ -94,7 +98,7 @@ public class XslTransformHandler {
       throw new XslTransformException(e);
     }
     synchronized(_templateCache) {
-      _templateCache.put(new MultiKey(baseUri, uri), tm);
+      _templateCache.put(processQName, uri, tm);
     }
   }
 
@@ -105,12 +109,12 @@ public class XslTransformHandler {
    * @param body of the XSL document
    * @param resolver used to resolve includes and imports
    */
-  public void cacheXSLSheet(URI baseUri, URI uri, String body, URIResolver resolver) {
+  public void cacheXSLSheet(QName processQName, URI uri, String body, URIResolver resolver) {
     Templates tm;
     synchronized (_templateCache) {
-      tm = _templateCache.get(new MultiKey(baseUri, uri));
+      tm = (Templates) _templateCache.get(processQName, uri);
     }
-    if (tm == null) parseXSLSheet(baseUri, uri, body, resolver);
+    if (tm == null) parseXSLSheet(processQName, uri, body, resolver);
   }
 
   /**
@@ -120,12 +124,13 @@ public class XslTransformHandler {
    * @param source XML document
    * @param parameters passed to the stylesheet
    * @param resolver used to resolve includes and imports
+   * @return result of the transformation (XSL, HTML or text depending of the output method specified in stylesheet.
    */
-  public Object transform(URI baseUri, URI uri, Source source,
+  public Object transform(QName processQName, URI uri, Source source,
                         Map<QName, Object> parameters, URIResolver resolver) {
     Templates tm;
     synchronized (_templateCache) {
-      tm = _templateCache.get(new MultiKey(baseUri, uri));
+      tm = (Templates) _templateCache.get(processQName, uri);
     }
     if (tm == null)
       throw new XslTransformException("XSL sheet" + uri + " has not been parsed before transformation!");
@@ -137,21 +142,25 @@ public class XslTransformHandler {
           tf.setParameter(param.getKey().getLocalPart(), param.getValue());
         }
       }
-        String method = tf.getOutputProperties().getProperty("method");
-        if (method == null || method.equals("xml") || method.equals("html")) {
-            DOMResult result = new DOMResult();
-            tf.transform(source, result);
-            Node node = result.getNode();
-            if(node.getNodeType() == Node.DOCUMENT_NODE)
-                node = ((Document)node).getDocumentElement();
-            return node;
-        } else {
-            StringWriter writerResult = new StringWriter();
-            StreamResult result = new StreamResult(writerResult);
-            tf.transform(source, result);
-            writerResult.flush();
-            return writerResult.toString();
-        }
+      String method = tf.getOutputProperties().getProperty("method");
+      if (method == null || "xml".equals(method)) {
+    	  DOMResult result = new DOMResult();
+    	  tf.transform(source, result);
+    	  Node node = result.getNode();
+    	  if(node.getNodeType() == Node.DOCUMENT_NODE)
+    		  node = ((Document)node).getDocumentElement();
+          if(__log.isDebugEnabled()) __log.debug("Returned node: type="+node.getNodeType()+", "+ DOMUtils.domToString(node));
+    	  return node;
+      } else {
+          // text and html outputs are handled the same way
+          StringWriter writerResult = new StringWriter();
+          StreamResult result = new StreamResult(writerResult);
+    	  tf.transform(source, result);
+          writerResult.flush();
+          String output = writerResult.toString();
+          if(__log.isDebugEnabled()) __log.debug("Returned string: "+output);
+          return output;
+      }
     } catch (TransformerConfigurationException e) {
       throw new XslTransformException(e);
     } catch (TransformerException e) {
@@ -161,6 +170,12 @@ public class XslTransformHandler {
 
   public void setErrorListener(ErrorListener l) {
     _transformerFactory.setErrorListener(l);
+  }
+  
+  public void clearXSLSheets(QName processQName) {
+	synchronized (_templateCache) {
+		  _templateCache.removeAll(processQName);
+	}
   }
 
 }

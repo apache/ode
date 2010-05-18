@@ -79,13 +79,13 @@ EOF
 #    limitations under the License.
 #
 EOF
-    licenses[".bpel"] = licenses[".wsdl"] = licenses[".xsd"] = licenses[".soap"] = licenses[".xml"]
-    licenses['.usd'] = licenses['.xsl'] = licenses[".deploy"] =  
+    licenses[".bpel"] = licenses[".wsdl"] = licenses[".xsd"] = licenses[".soap"] = 
+    licenses['.usd'] = licenses['.xsl'] = licenses[".deploy"] = licenses[".xml"]  
     licenses[".rake"] = licenses[".tdef"] = licenses[".properties"]
     # This also tells us which files to look at.
     extensions = licenses.keys.join(",")
     count = FileList["**/*{#{extensions}}"].inject(0) do |count, filename|
-	  if !File.directory?(filename) && File.readlines(filename)[0..3].join !~ /Licensed to the Apache Software Foundation/
+      if File.file?(filename) and  File.readlines(filename)[0..3].join !~ /Licensed to the Apache Software Foundation/
         when_writing "Missing header in #{filename}" do
           # Figure the license from the file, inject it into the file and rewrite it.
           license = licenses[filename.pathmap("%x")]

@@ -112,13 +112,16 @@ public class OdeSUManager implements ServiceUnitManager {
       __log.error(errmsg, ex);
       throw new DeploymentException(errmsg, ex);
     }
-
+    ClassLoader cl = Thread.currentThread().getContextClassLoader();
     try {
-      su.start();
+     	Thread.currentThread().setContextClassLoader(su.getConfigurationClassLoader());
+    	su.start();
     } catch (Exception ex) {
       String errmsg = __msgs.msgServiceUnitStartFailed(serviceUnitID);
       __log.error(errmsg, ex);
       throw new DeploymentException(errmsg, ex);
+    } finally {
+    	Thread.currentThread().setContextClassLoader(cl);
     }
 
   }

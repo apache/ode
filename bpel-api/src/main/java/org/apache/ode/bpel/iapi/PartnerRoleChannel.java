@@ -19,8 +19,6 @@
 
 package org.apache.ode.bpel.iapi;
 
-import java.util.Set;
-
 /**
  * Representation of a communication link to a partner or partners. Objects of this
  * type generally represent a physical resource in the integration layer that is used

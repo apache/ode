@@ -21,26 +21,22 @@ package org.apache.ode.dao.jpa;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.dao.bpel.ActivityRecoveryDAO;
-import org.apache.ode.dao.bpel.CorrelationSetDAO;
-import org.apache.ode.dao.bpel.FaultDAO;
-import org.apache.ode.dao.bpel.MessageDAO;
-import org.apache.ode.dao.bpel.MessageExchangeDAO;
-import org.apache.ode.dao.bpel.MessageRouteDAO;
-import org.apache.ode.dao.bpel.PartnerLinkDAO;
-import org.apache.ode.dao.bpel.ProcessDAO;
-import org.apache.ode.dao.bpel.ScopeDAO;
-import org.apache.ode.dao.bpel.XmlDataDAO;
+import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
+import org.apache.ode.bpel.dao.CorrelationSetDAO;
+import org.apache.ode.bpel.dao.FaultDAO;
+import org.apache.ode.bpel.dao.MessageDAO;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.dao.MessageRouteDAO;
+import org.apache.ode.bpel.dao.PartnerLinkDAO;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceProfileDAO;
+import org.apache.ode.bpel.dao.ScopeDAO;
+import org.apache.ode.bpel.dao.XmlDataDAO;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import org.apache.ode.dao.bpel.ProcessInstanceProfileDAO;
-import org.apache.ode.dao.jpa.bpel.MessageExchangeDAOImpl;
-import org.apache.ode.dao.jpa.bpel.ProcessDAOImpl;
-import org.apache.ode.dao.jpa.bpel.ProcessInstanceDAOImpl;
 
 /**
  * OpenJPA based {@link ProcessInstanceProfileDAO} implementation
@@ -61,12 +57,7 @@ public class ProcessInstanceProfileDAOImpl extends ProcessProfileDAOImpl impleme
     }
     
     public List<MessageExchangeDAO> findMessageExchangesByInstance() {
-        List<MessageExchangeDAO> results = findByInstance("select x from MessageExchangeDAOImpl as x where x._processInst = :instance");
-        if( !results.isEmpty() ) {
-            LogFactory.getLog(ProcessInstanceProfileDAOImpl.class).debug("MESSAGE_EXCHANGE left over: " + ((MessageExchangeDAOImpl)results.get(0)).getMessageExchangeId());
-        }
-        
-        return results;
+        return findByInstance("select x from MessageExchangeDAOImpl as x where x._processInst = :instance");
     }
 
     public List<MessageRouteDAO> findMessageRoutesByInstance() {
@@ -74,17 +65,7 @@ public class ProcessInstanceProfileDAOImpl extends ProcessProfileDAOImpl impleme
     }
 
     public List<MessageDAO> findMessagesByInstance() {
-        // not quite efficient, this will have to load up the entire messages
-        List<MessageDAO> messages = new ArrayList<MessageDAO>();
-        
-        for( Object message : findByInstance("select x._request from MessageExchangeDAOImpl as x where x._processInst = :instance")) {
-            messages.add((MessageDAO)message);
-        }
-        for( Object message : findByInstance("select x._response from MessageExchangeDAOImpl as x where x._processInst = :instance")) {
-            messages.add((MessageDAO)message);
-        }
-        
-        return messages;
+        return findByInstance("select m from MessageDAOImpl as m where m._messageExchange._processInst = :instance");
     }
 
     public List<PartnerLinkDAO> findPartnerLinksByInstance() {

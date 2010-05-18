@@ -322,7 +322,7 @@
                 </assign>
                 <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
                         operation="doGET" inputVariable="idMsg" outputVariable="articleMsg"/>
-            </sequence>
+             </sequence>
         </scope>
 
         <!-- ############################################### -->

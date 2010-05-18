@@ -45,7 +45,7 @@
                                 endpoint="http" 
                                 defaultOperation="Hello"
                                 role="consumer" 
-                                locationURI="http://localhost:8192/HelloHttp/"
+                                locationURI="http://localhost:8198/HelloHttp/"
                                 defaultMep="http://www.w3.org/2004/08/wsdl/in-out" 
                                 soap="true" />
                         </http:endpoints>

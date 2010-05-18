@@ -24,6 +24,7 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -46,6 +47,8 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
+
+import net.sf.saxon.om.Name11Checker;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -419,7 +422,7 @@ public class DOMUtils {
 
         String value = null;
         short nodeType = node.getNodeType();
-        if (nodeType == Node.ELEMENT_NODE || nodeType == Node.DOCUMENT_NODE) {
+        if (nodeType == Node.ELEMENT_NODE || nodeType == Node.DOCUMENT_NODE || nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
             // serializer doesn't handle Node type well, only Element
             DOMSerializerImpl ser = new DOMSerializerImpl();
             ser.setParameter(Constants.DOM_NAMESPACES, Boolean.TRUE);
@@ -583,13 +586,13 @@ public class DOMUtils {
      * @param el
      */
     public static void pancakeNamespaces(Element el) {
-        Map<String, String> ns = getParentNamespaces(el);
+        Map ns = getParentNamespaces(el);
         Document d = el.getOwnerDocument();
         assert d != null;
-        Iterator<String> it = ns.keySet().iterator();
+        Iterator it = ns.keySet().iterator();
         while (it.hasNext()) {
-            String key = it.next();
-            String uri = ns.get(key);
+            String key = (String) it.next();
+            String uri = (String) ns.get(key);
             Attr a = d.createAttributeNS(NS_URI_XMLNS,
                     (key.length() != 0)?("xmlns:" + key):("xmlns"));
             a.setValue(uri);
@@ -691,8 +694,30 @@ public class DOMUtils {
         return true;
     }
 
-    public static QName getElementQName(Element el) {
-        return new QName(el.getNamespaceURI(),el.getLocalName());
+    public static QName getNodeQName(Node el) {
+    	String localName = el.getLocalName();
+    	String namespaceUri = el.getNamespaceURI();
+    	if (localName == null) {
+    		String nodeName = el.getNodeName();
+    		int colonIndex = nodeName.indexOf(":");
+    		if (colonIndex > 0) {
+    			localName = nodeName.substring(0, colonIndex);
+    			namespaceUri = nodeName.substring(colonIndex + 1);
+    		} else {
+    			localName = nodeName;
+    			namespaceUri = null;
+    		}
+    	}
+        return new QName(namespaceUri, localName);
+    }
+    
+    public static QName getNodeQName(String qualifiedName) {
+    	int index = qualifiedName.indexOf(":");
+    	if (index >= 0) {
+    		return new QName(qualifiedName.substring(0, index), qualifiedName.substring(index + 1));
+    	} else {
+    		return new QName(qualifiedName);
+    	}
     }
 
     /**
@@ -1009,22 +1034,6 @@ public class DOMUtils {
         return builder;
     }
 
-    /**
-     * Somewhat eases the pain of dealing with both Lists and Nodelists by converting either
-     * passed as parameter to a List.
-     * @param nl a NodeList or a List
-     * @return a List
-     */
-    public static List<Node> toList(Object nl) {
-        if (nl == null) return null;
-        if (nl instanceof List) return (List<Node>) nl;
-
-        NodeList cnl = (NodeList) nl;
-        LinkedList<Node> ll = new LinkedList<Node>();
-        for (int m = 0; m < cnl.getLength(); m++) ll.add(cnl.item(m));
-        return ll;
-    }
-
     public static List<Element> findChildrenByName(Element parent, QName name) {
         if (parent == null)
             throw new IllegalArgumentException("null parent");
@@ -1048,82 +1057,198 @@ public class DOMUtils {
         return ret;
     }
 
-    public static QName getNodeQName(String qualifiedName) {
-    	int index = qualifiedName.indexOf(":");
-    	if (index >= 0) {
-    		return new QName(qualifiedName.substring(0, index), qualifiedName.substring(index + 1));
-    	} else {
-    		return new QName(qualifiedName);
-    	}
+    /**
+     * Somewhat eases the pain of dealing with both Lists and Nodelists by converting either
+     * passed as parameter to a List.
+     * @param nl a NodeList or a List
+     * @return a List
+     */
+    public static List<Node> toList(Object nl) {
+        if (nl == null) return null;
+        if (nl instanceof List) return (List<Node>) nl;
+
+        NodeList cnl = (NodeList) nl;
+        List<Node> ll = new ArrayList<Node>();
+        for (int m = 0; m < cnl.getLength(); m++) ll.add(cnl.item(m));
+        return ll;
     }
 
 	public static Document getDocument(Node contextNode) {
 		return (contextNode == null) ? DOMUtils.newDocument() : contextNode.getOwnerDocument();
     }
-	
+
     public static String getQualifiedName(QName qName) {
     	String prefix = qName.getPrefix(), localPart = qName.getLocalPart();
     	return (prefix == null || "".equals(prefix)) ? localPart : (prefix + ":" + localPart);
     }
+    
+    /**
+     * Deep clone, but don't fry, the given node in the context of the given document. 
+     * For all intents and purposes, the clone is the exact same copy of the node, 
+     * except that it might have a different owner document. 
+     * 
+     * This method is fool-proof, unlike the <code>adoptNode</code> or <code>adoptNode</code> methods,
+     * in that it doesn't assume that the given node has a parent or a owner document.
+     * 
+     * @param document
+     * @param sourceNode
+     * @return a clone of node 
+     */
+    public static Node cloneNode(Document document, Node sourceNode) {
+    	Node clonedNode = null;
 
-    public static Node cloneNode(Document document, Node node) {
-    	Node clone = null;
-    	String namespaceURI = node.getNamespaceURI();
-    	String localName = node.getLocalName();
-    	switch (node.getNodeType()) {
+    	// what is my name?
+    	QName sourceQName = getNodeQName(sourceNode);
+    	String nodeName = sourceQName.getLocalPart();
+    	String namespaceURI = sourceQName.getNamespaceURI();
+    	
+    	// if the node is unqualified, don't assume that it inherits the WS-BPEL target namespace
+    	if (Namespaces.WSBPEL2_0_FINAL_EXEC.equals(namespaceURI)) {
+    		namespaceURI = null;
+    	}
+    	
+    	switch (sourceNode.getNodeType()) {
     	case Node.ATTRIBUTE_NODE:
     		if (namespaceURI == null) {
-    			clone = document.createAttribute(localName);
+    			clonedNode = document.createAttribute(nodeName);
     		} else {
-        		clone = document.createAttributeNS(namespaceURI, localName);
+    			String prefix = ((Attr) sourceNode).lookupPrefix(namespaceURI);
+    			// the prefix for the XML namespace can't be looked up, hence this...
+    			if (prefix == null && namespaceURI.equals(NS_URI_XMLNS)) {
+    				prefix = "xmlns";
+    			}
+    			// if a prefix exists, qualify the name with it
+    			if (prefix != null && !"".equals(prefix)) {
+        			nodeName = prefix + ":" + nodeName;
+    			}
+    			// create the appropriate type of attribute
+    			if (prefix != null) {
+	        		clonedNode = document.createAttributeNS(namespaceURI, nodeName);
+    			} else {
+    				clonedNode = document.createAttribute(nodeName);
+    			}
     		}
 			break;
     	case Node.CDATA_SECTION_NODE:
-    		clone = document.createCDATASection(((CDATASection) node).getData());
+    		clonedNode = document.createCDATASection(((CDATASection) sourceNode).getData());
 			break;
     	case Node.COMMENT_NODE:
-    		clone = document.createComment(((Comment) node).getData());
+    		clonedNode = document.createComment(((Comment) sourceNode).getData());
 			break;
     	case Node.DOCUMENT_FRAGMENT_NODE:
-    		clone = document.createDocumentFragment();
+    		clonedNode = document.createDocumentFragment();
 			break;
     	case Node.DOCUMENT_NODE:
-    		clone = document;
+    		clonedNode = document;
 			break;
     	case Node.ELEMENT_NODE:
+    		// create the appropriate type of element
     		if (namespaceURI == null) {
-	    		clone = document.createElement(localName);
+	    		clonedNode = document.createElement(nodeName);
     		} else {
-    			clone = document.createElementNS(namespaceURI, localName);
+    			String prefix = namespaceURI.equals(Namespaces.XMLNS_URI) ? 
+    					"xmlns" : ((Element) sourceNode).lookupPrefix(namespaceURI);
+    			if (prefix != null && !"".equals(prefix)) {
+        			nodeName = prefix + ":" + nodeName;
+        			clonedNode = document.createElementNS(namespaceURI, nodeName);
+    			} else {
+    	    		clonedNode = document.createElement(nodeName);
+    			}
+    		}
+    		// attributes are not treated as child nodes, so copy them explicitly
+    		NamedNodeMap attributes = ((Element) sourceNode).getAttributes();
+    		for (int i = 0; i < attributes.getLength(); i++) {
+    			Attr attributeClone = (Attr) cloneNode(document, attributes.item(i));
+    			if (attributeClone.getNamespaceURI() == null) {
+    				((Element) clonedNode).setAttributeNode(attributeClone);
+    			} else {
+    				((Element) clonedNode).setAttributeNodeNS(attributeClone);
+    			}
     		}
 			break;
     	case Node.ENTITY_NODE:
     		// TODO
 			break;
     	case Node.ENTITY_REFERENCE_NODE:
-    		clone = document.createEntityReference(localName);
+    		clonedNode = document.createEntityReference(nodeName);
     		// TODO
 			break;
     	case Node.NOTATION_NODE:
     		// TODO
 			break;
     	case Node.PROCESSING_INSTRUCTION_NODE:
-    		clone = document.createProcessingInstruction(((ProcessingInstruction) node).getData(), localName);
+    		clonedNode = document.createProcessingInstruction(((ProcessingInstruction) sourceNode).getData(), nodeName);
 			break;
     	case Node.TEXT_NODE:
-    		clone = document.createTextNode(((Text) node ).getData());
+    		clonedNode = document.createTextNode(((Text) sourceNode ).getData());
 			break;
 		default:
 			break;
     	}
-
-    	NodeList children = node.getChildNodes();
-    	if (children != null) {
-	    	for (int i = 0; i < children.getLength(); i++) {
-	    		clone.appendChild(cloneNode(document, children.item(i)));
+	    		
+    	// clone children of element and attribute nodes
+    	NodeList sourceChildren = sourceNode.getChildNodes();
+    	if (sourceChildren != null) {
+	    	for (int i = 0; i < sourceChildren.getLength(); i++) {
+	    		Node sourceChild = sourceChildren.item(i);
+	    		Node clonedChild = cloneNode(document, sourceChild);
+	    		clonedNode.appendChild(clonedChild);
+	    		// if the child has a textual value, parse it for any embedded prefixes
+	    		if (clonedChild.getNodeType() == Node.TEXT_NODE || 
+	    				clonedChild.getNodeType() == Node.CDATA_SECTION_NODE) {
+	    			parseEmbeddedPrefixes(sourceNode, clonedNode, clonedChild);
+	    		}
 	    	}
     	}
-	    		
-    	return clone;
+    	return clonedNode;
+    }
+
+    /**
+     * Parse the text in the cloneChild for any embedded prefixes, and define it in it's parent element
+     *  
+     * @param sourceNode
+     * @param clonedNode
+     * @param clonedChild
+     */
+    private static void parseEmbeddedPrefixes(Node sourceNode, Node clonedNode, Node clonedChild) {
+    	Element clonedElement = null;
+		if (clonedNode instanceof Attr) {
+			clonedElement = ((Attr) clonedNode).getOwnerElement();
+		} else if (clonedNode instanceof Element) {
+			clonedElement = (Element) clonedNode;
+		}
+		if (clonedElement == null) {
+			// couldn't find an element to set prefixes on, so bail out
+			return;
+		}
+		
+		String text = ((Text) clonedChild).getNodeValue();
+		if (text != null && text.indexOf(":") > 0) {
+			Name11Checker nameChecker = Name11Checker.getInstance();
+			for (int colonIndex = text.indexOf(":"); colonIndex != -1 && colonIndex < text.length(); colonIndex = text.indexOf(":", colonIndex +  1)) {
+				StringBuffer prefixString = new StringBuffer();
+				for (int prefixIndex = colonIndex - 1; 
+						prefixIndex >= 0 && nameChecker.isNCNameChar(text.charAt(prefixIndex)); 
+						prefixIndex--) {
+					prefixString.append(text.charAt(prefixIndex));
+				}
+				prefixString.reverse();
+				if (prefixString.length() > 0) {
+					String uri = sourceNode.lookupNamespaceURI(prefixString.toString());
+					if (uri != null) {
+						clonedElement.setAttributeNS(NS_URI_XMLNS, "xmlns:" + prefixString, uri);
+					}
+				}
+			}
+		}
+    }
+
+    public static Element stringToDOM(byte[] bytes) throws SAXException, IOException {
+        return stringToDOM(new String(bytes));
+    }
+
+    public static byte[] domToBytes(Element element) {
+        String stringifiedElement = domToString(element);
+        return (stringifiedElement != null) ? stringifiedElement.getBytes() : null;
     }
 }

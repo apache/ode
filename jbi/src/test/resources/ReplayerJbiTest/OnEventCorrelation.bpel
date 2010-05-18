@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<bpws:process xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns="http://sample.bpel.org/bpel/sampleArtifacts" xmlns:tns="http://sample.bpel.org/bpel/sample" xmlns:ode="http://www.apache.org/ode/type/extension" exitOnStandardFault="yes" name="OnEventCorrelation" suppressJoinFailure="yes" targetNamespace="http://sample.bpel.org/bpel/sample" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+  <bpws:import importType="http://schemas.xmlsoap.org/wsdl/" location="OnEventCorrelation.wsdl" namespace="http://sample.bpel.org/bpel/sample"/>
+  <bpws:import importType="http://schemas.xmlsoap.org/wsdl/" location="OnEventCorrelationArtifacts.wsdl" namespace="http://sample.bpel.org/bpel/sampleArtifacts"/>
+  <bpws:partnerLinks>
+    <bpws:partnerLink myRole="OnEventCorrelationProvider" partnerRole="OnEventCorrelationProvider" name="client" partnerLinkType="tns:OnEventCorrelation"/>
+    <bpws:partnerLink partnerRole="OnEventCorrelationProvider" name="client2" partnerLinkType="tns:OnEventCorrelation"/>
+  </bpws:partnerLinks>
+  <bpws:variables>
+    <bpws:variable messageType="tns:OnEventCorrelationMessage" name="input"/>
+    <bpws:variable messageType="tns:OnEventCorrelationMessage" name="output"/>
+    <bpws:variable messageType="tns:OnEventCorrelationMessage" name="output2"/>
+    <bpws:variable type="xsd:int" name="i"/>
+    <bpws:variable type="xsd:int" name="j"/>
+  </bpws:variables>
+  <bpws:correlationSets>
+    <bpws:correlationSet name="CorrelationSet" properties="ns:input ns:input2"/>
+  </bpws:correlationSets>
+  <bpws:sequence name="main">
+    <bpws:scope>
+      <bpws:sequence>
+        <bpws:receive createInstance="yes" operation="initiate" partnerLink="client" portType="tns:OnEventCorrelation" variable="input" messageExchange="mex1">
+          <bpws:correlations>
+            <bpws:correlation initiate="yes" set="CorrelationSet"/>
+          </bpws:correlations>
+        </bpws:receive>
+        <bpws:invoke partnerLink="client" operation="initiate" outputVariable="output" inputVariable="input"/>
+
+        <bpws:assign>
+          <bpws:copy>
+            <bpws:from>concat('first-', $ode:currentEventDateTime, ';', $output.payload)</bpws:from>
+            <bpws:to>$output.payload</bpws:to>
+          </bpws:copy>
+          <bpws:copy>
+            <bpws:from>0</bpws:from>
+            <bpws:to>$i</bpws:to>
+          </bpws:copy>
+        </bpws:assign>
+        
+        <bpws:if>
+            <bpws:condition>$input.payload2 = 'livetest'</bpws:condition>
+            <bpws:sequence>
+                <bpws:invoke partnerLink="client" operation="complete" outputVariable="output2" inputVariable="input"/>
+                <bpws:assign>
+                  <bpws:copy>
+                    <bpws:from>concat('second-', $ode:currentEventDateTime, ';', $output2.payload, ";", $output.payload)</bpws:from>
+                    <bpws:to>$output.payload</bpws:to>
+                  </bpws:copy>
+                </bpws:assign>
+            </bpws:sequence>
+        </bpws:if>
+            
+        <bpws:reply operation="initiate" partnerLink="client" variable="output" messageExchange="mex1"/>
+        <bpws:if>
+          <bpws:condition>$input.payload2 = 'rollbackOnFault'</bpws:condition>
+          <bpws:throw faultName="abc"/>
+        </bpws:if>
+      </bpws:sequence>
+    </bpws:scope>
+    <bpws:while>
+      <bpws:condition>$i &lt; 4 </bpws:condition>
+      <bpws:sequence>
+        <bpws:empty name="e1"/>
+        <bpws:assign>
+          <bpws:copy>
+            <bpws:from>$i + 1</bpws:from>
+            <bpws:to>$i</bpws:to>
+          </bpws:copy>
+        </bpws:assign>
+        <bpws:pick>
+          <bpws:onMessage operation="initiate" partnerLink="client" portType="tns:OnEventCorrelation" variable="input" messageExchange="mex2">
+            <bpws:correlations>
+              <bpws:correlation initiate="no" set="CorrelationSet"/>
+            </bpws:correlations>
+            <bpws:sequence>
+              <bpws:assign>
+                <bpws:copy>
+                  <bpws:from>concat('request-', $ode:currentEventDateTime, ';', $output.payload)</bpws:from>
+                  <bpws:to>$output.payload</bpws:to>
+                </bpws:copy>
+              </bpws:assign>
+              <bpws:reply operation="initiate" partnerLink="client" variable="output" messageExchange="mex2"/>
+            </bpws:sequence>
+          </bpws:onMessage>
+          <bpws:onAlarm>
+            <bpws:until>$ode:currentEventDateTime + xsd:dayTimeDuration('PT10S')</bpws:until>
+            <bpws:assign>
+              <bpws:copy>
+                <bpws:from>concat('timer-',$ode:currentEventDateTime, ';', $output.payload)</bpws:from>
+                <bpws:to>$output.payload</bpws:to>
+              </bpws:copy>
+            </bpws:assign>
+          </bpws:onAlarm>
+        </bpws:pick>
+      </bpws:sequence>
+    </bpws:while>
+        
+    
+    <bpws:receive createInstance="no" operation="initiate" partnerLink="client" portType="tns:OnEventCorrelation" variable="input" messageExchange="mex3">
+          <bpws:correlations>
+            <bpws:correlation initiate="no" set="CorrelationSet"/>
+          </bpws:correlations>
+        </bpws:receive>
+        <bpws:assign>
+          <bpws:copy>
+            <bpws:from>concat('final-', $ode:currentEventDateTime)</bpws:from>
+            <bpws:to>$output.payload2</bpws:to>
+          </bpws:copy>
+        </bpws:assign>
+        <bpws:reply operation="initiate" partnerLink="client" variable="output" messageExchange="mex3"/>
+  </bpws:sequence>
+</bpws:process>

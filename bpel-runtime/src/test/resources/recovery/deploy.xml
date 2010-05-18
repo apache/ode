@@ -1,0 +1,105 @@
+<?xml version="1.0" ?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
+        xmlns:pns="http://ode.apache.org/bpel/unit-test"
+        xmlns:wns="http://ode.apache.org/bpel/unit-test">
+
+  <process name="pns:FailureToRecovery">
+    <active>true</active>
+    <provide partnerLink="instantiatingPartnerLink">
+      <service name="wns:FailureToRecovery" port="soap"/>
+    </provide>
+    <invoke partnerLink="failingPartnerLink">
+      <service name="wns:FailingService" port="soap"/>
+    </invoke>
+    <invoke partnerLink="instantiatingPartnerLink">
+      <service name="wns:ResponseService" port="soap"/>
+    </invoke>
+  </process>
+
+  <process name="pns:FailureToFault">
+    <active>true</active>
+    <provide partnerLink="instantiatingPartnerLink">
+      <service name="wns:FailureToFault" port="soap"/>
+    </provide>
+    <invoke partnerLink="failingPartnerLink">
+      <service name="wns:FailingService" port="soap"/>
+    </invoke>
+    <invoke partnerLink="instantiatingPartnerLink">
+      <service name="wns:ResponseService" port="soap"/>
+    </invoke>
+  </process>
+
+  <process name="pns:FailureToFault2">
+    <active>true</active>
+    <provide partnerLink="instantiatingPartnerLink">
+      <service name="wns:FailureToFault2" port="soap"/>
+    </provide>
+    <invoke partnerLink="failingPartnerLink">
+      <service name="wns:FailingService" port="soap"/>
+      <ext:failureHandling xmlns:ext="http://ode.apache.org/activityRecovery">
+        <ext:faultOnFailure>true</ext:faultOnFailure>
+      </ext:failureHandling>
+    </invoke>
+    <invoke partnerLink="instantiatingPartnerLink">
+      <service name="wns:ResponseService" port="soap"/>
+    </invoke>
+  </process>
+
+  <process name="pns:FailureNoRetry">
+    <active>true</active>
+    <provide partnerLink="instantiatingPartnerLink">
+      <service name="wns:FailureNoRetry" port="soap"/>
+    </provide>
+    <invoke partnerLink="failingPartnerLink">
+      <service name="wns:FailingService" port="soap"/>
+    </invoke>
+    <invoke partnerLink="instantiatingPartnerLink">
+      <service name="wns:ResponseService" port="soap"/>
+    </invoke>
+  </process>
+
+  <process name="pns:FailureToCancel">
+    <active>true</active>
+    <provide partnerLink="instantiatingPartnerLink">
+      <service name="wns:FailureToCancel" port="soap"/>
+    </provide>
+    <invoke partnerLink="failingPartnerLink">
+      <service name="wns:FailingService" port="soap"/>
+    </invoke>
+    <invoke partnerLink="instantiatingPartnerLink">
+      <service name="wns:ResponseService" port="soap"/>
+    </invoke>
+  </process>
+
+  <process name="pns:FailureInheritence">
+    <active>true</active>
+    <provide partnerLink="instantiatingPartnerLink">
+      <service name="wns:FailureInheritence" port="soap"/>
+    </provide>
+    <invoke partnerLink="failingPartnerLink">
+      <service name="wns:FailingService" port="soap"/>
+    </invoke>
+    <invoke partnerLink="instantiatingPartnerLink">
+      <service name="wns:ResponseService" port="soap"/>
+    </invoke>
+  </process>
+</deploy>
+

@@ -25,11 +25,15 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.sql.Connection;
+import java.sql.Statement;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
 import javax.jbi.messaging.ExchangeStatus;
 import javax.jbi.messaging.InOut;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
 import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamSource;
 
@@ -65,10 +69,22 @@ public class JbiTestBase extends SpringTestSupport {
         });
     }
     
+    private void initOdeDb() throws Exception {
+        TransactionManager tm = (TransactionManager) getBean("transactionManager");
+        tm.begin();
+        Connection conn = ((DataSource) getBean("odeDS")).getConnection();
+        Statement s = conn.createStatement();
+        s.execute("delete from bpel_process");
+        s.close();
+        tm.commit();
+    }
+    
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
+        initOdeDb();
+        
         jbiContainer = ((JBIContainer) getBean("jbi"));
         odeComponent = new OdeComponent();
 
@@ -91,13 +107,15 @@ public class JbiTestBase extends SpringTestSupport {
     protected void enableProcess(String resource, boolean enable) throws Exception {
         resource = "target/test/resources/" + resource;
         String process = resource.substring(resource.lastIndexOf('/') + 1);
+        String dir = new File(resource).getAbsolutePath();
+        log.debug("enableProcess " + resource + " " + enable + " path: " + dir);
         if (enable) {
-            odeComponent.getServiceUnitManager().deploy(process, resource);
-            odeComponent.getServiceUnitManager().init(process, resource);
+            odeComponent.getServiceUnitManager().deploy(process, dir);
+            odeComponent.getServiceUnitManager().init(process, dir);
             odeComponent.getServiceUnitManager().start(process);
         } else {
             odeComponent.getServiceUnitManager().stop(process);
-            odeComponent.getServiceUnitManager().undeploy(process, resource);
+            odeComponent.getServiceUnitManager().undeploy(process, dir);
         }
     }
 
@@ -112,87 +130,97 @@ public class JbiTestBase extends SpringTestSupport {
         if (!manualDeploy) 
             enableProcess(getTestName(), true);
 
-        int i = 0;
-        boolean loop;
-        do {
-            String prefix = i == 0 ? "" : "" + i;
-            loop = i == 0;
+        try {
+            int i = 0;
+            boolean loop;
+            do {
+                String prefix = i == 0 ? "" : "" + i;
+                loop = i == 0;
+    
+                {
+                    String deploy = testProperties.getProperty(prefix + "deploy");
+                    if (deploy != null) {
+                        loop = true;
+                        enableProcess(getTestName() + "/" + deploy, true);
+                    }
+                }
+                {
+                    String undeploy = testProperties.getProperty(prefix + "undeploy");
+                    if (undeploy != null) {
+                        loop = true;
+                        enableProcess(getTestName() + "/" + undeploy, false);
+                    }
+                }
+                
+                String request = testProperties.getProperty(prefix + "request");
+                if (request != null && request.startsWith("@")) {
+                    request = inputStreamToString(getClass().getResourceAsStream("/" + getTestName() + "/" + request.substring(1)));
+                }
+                String expectedResponse = testProperties.getProperty(prefix + "response");
+                {
+                    String delay = testProperties.getProperty(prefix + "delay");
+                    if (delay != null) {
+                        loop = true;
+                        long d = Long.parseLong(delay);
+                        log.debug("Sleeping " + d + " ms");
+                        Thread.sleep(d);
+                    }
+                }
+                {
+        	        String httpUrl = testProperties.getProperty(prefix + "http.url");
+        	        if (httpUrl != null && request != null) {
+                        loop = true;
+        	            log.debug(getTestName() + " sending http request to " + httpUrl + " request: " + request);
+        	            URLConnection connection = new URL(httpUrl).openConnection();
+        	            connection.setDoOutput(true);
+        	            connection.setDoInput(true);
+        	            //Send request
+        	            OutputStream os = connection.getOutputStream();
+        	            PrintWriter wt = new PrintWriter(os);
+        	            wt.print(request);
+        	            wt.flush();
+        	            wt.close();
+        	            // Read the response.
+        	            String result = inputStreamToString(connection.getInputStream());
+        	            
+        	            log.debug(getTestName() + " have result: " + result);
+        	            matchResponse(expectedResponse, result, true);
+        	        }
+                }
+                {
+        	        if (testProperties.getProperty(prefix + "nmr.service") != null && request != null) {
+                        loop = true;
+        	            InOut io = smxClient.createInOutExchange();
+        	            io.setService(QName.valueOf(testProperties.getProperty(prefix + "nmr.service")));
+        	            io.setOperation(QName.valueOf(testProperties.getProperty(prefix + "nmr.operation")));
+        	            io.getInMessage().setContent(new StreamSource(new ByteArrayInputStream(request.getBytes())));
+        	            smxClient.sendSync(io,20000);
+                        if (io.getStatus() == ExchangeStatus.ACTIVE) {
+                            assertNotNull(io.getOutMessage());
+                            String result = new SourceTransformer().contentToString(io.getOutMessage());
+                            matchResponse(expectedResponse, result, true);
+                            smxClient.done(io);
+                        } else {
+                            matchResponse(expectedResponse, "", false);
+                        }
+        	    }
+                }
+                
+                i++;
+            } while (loop);
 
-            {
-                String deploy = testProperties.getProperty(prefix + "deploy");
-                if (deploy != null) {
-                    loop = true;
-                    enableProcess(getTestName() + "/" + deploy, true);
-                }
-            }
-            {
-                String undeploy = testProperties.getProperty(prefix + "undeploy");
-                if (undeploy != null) {
-                    loop = true;
-                    enableProcess(getTestName() + "/" + undeploy, false);
-                }
-            }
-            
-            String request = testProperties.getProperty(prefix + "request");
-            if (request != null && request.startsWith("@")) {
-                request = inputStreamToString(getClass().getResourceAsStream("/" + getTestName() + "/" + request.substring(1)));
-            }
-            String expectedResponse = testProperties.getProperty(prefix + "response");
-            {
-                String delay = testProperties.getProperty(prefix + "delay");
-                if (delay != null) {
-                    loop = true;
-                    long d = Long.parseLong(delay);
-                    log.debug("Sleeping " + d + " ms");
-                    Thread.sleep(d);
-                }
-            }
-            {
-    	        String httpUrl = testProperties.getProperty(prefix + "http.url");
-    	        if (httpUrl != null && request != null) {
-                    loop = true;
-    	            log.debug(getTestName() + " sending http request to " + httpUrl + " request: " + request);
-    	            URLConnection connection = new URL(httpUrl).openConnection();
-    	            connection.setDoOutput(true);
-    	            connection.setDoInput(true);
-    	            //Send request
-    	            OutputStream os = connection.getOutputStream();
-    	            PrintWriter wt = new PrintWriter(os);
-    	            wt.print(request);
-    	            wt.flush();
-    	            wt.close();
-    	            // Read the response.
-    	            String result = inputStreamToString(connection.getInputStream());
-    	            
-    	            log.debug(getTestName() + " have result: " + result);
-    	            matchResponse(expectedResponse, result);
-    	        }
-            }
-            {
-    	        if (testProperties.getProperty(prefix + "nmr.service") != null && request != null) {
-                    loop = true;
-    	            InOut io = smxClient.createInOutExchange();
-    	            io.setService(QName.valueOf(testProperties.getProperty(prefix + "nmr.service")));
-    	            io.setOperation(QName.valueOf(testProperties.getProperty(prefix + "nmr.operation")));
-    	            io.getInMessage().setContent(new StreamSource(new ByteArrayInputStream(request.getBytes())));
-    	            smxClient.sendSync(io,20000);
-    	            assertEquals(ExchangeStatus.ACTIVE,io.getStatus());
-    	            assertNotNull(io.getOutMessage());
-    	            String result = new SourceTransformer().contentToString(io.getOutMessage());
-    	            matchResponse(expectedResponse, result);
-    	            smxClient.done(io);
-    	        }
-            }
-            
-            i++;
-        } while (loop);
-        
-        if (!manualDeploy)
-            enableProcess(getTestName(), false);
+        } finally {
+            if (!manualDeploy)
+                enableProcess(getTestName(), false);
+        }
     }
     
-    protected void matchResponse(String expectedResponse, String result) {
-        assertTrue("Response doesn't match expected regex.\nExpected: " + expectedResponse + "\nReceived: " + result, Pattern.compile(expectedResponse, Pattern.DOTALL).matcher(result).matches());
+    protected void matchResponse(String expectedResponse, String result, boolean succeeded) {
+        if (succeeded) {
+            assertTrue("Response doesn't match expected regex.\nExpected: " + expectedResponse + "\nReceived: " + result, Pattern.compile(expectedResponse, Pattern.DOTALL).matcher(result).matches());
+        } else {
+            assertTrue("Expected success, but got fault", expectedResponse.equals("FAULT"));
+        }
     }
     
     private String inputStreamToString(InputStream is) throws IOException {

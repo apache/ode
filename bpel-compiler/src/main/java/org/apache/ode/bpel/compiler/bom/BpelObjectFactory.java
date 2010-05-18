@@ -21,7 +21,6 @@ package org.apache.ode.bpel.compiler.bom;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.bom.IfActivity.Case;
-import org.apache.ode.bpel.rtrep.common.extension.ExtensibilityQNames;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.XMLParserUtils;
 import org.w3c.dom.Document;
@@ -125,10 +124,6 @@ public class BpelObjectFactory {
         _mappings.put(Bpel20QNames.FINAL_EVENTHANDLERS, BpelObject.class);
         _mappings.put(Bpel20QNames.FINAL_TARGETS,Targets.class);
         _mappings.put(Bpel20QNames.FINAL_SOURCES,Sources.class);
-        _mappings.put(Bpel20QNames.FINAL_EXTENSIONS,Extensions.class);
-        _mappings.put(Bpel20QNames.FINAL_EXTENSION,Extension.class);
-        _mappings.put(Bpel20QNames.FINAL_EXTENSION_ACTIVITY,ExtensionActivity.class);
-        _mappings.put(Bpel20QNames.FINAL_EXTENSION_ASSIGN_OPERATION,ExtensionAssignOperation.class);
 
         //
         // BPEL 2.0 draft Mappings
@@ -202,10 +197,6 @@ public class BpelObjectFactory {
         _mappings.put(Bpel20QNames.TARGETS,Targets.class);
         _mappings.put(Bpel20QNames.SOURCES,Sources.class);
         _mappings.put(Bpel20QNames.RDF_LABEL,RdfLabel.class);
-        _mappings.put(Bpel20QNames.EXTENSIONS,Extensions.class);
-        _mappings.put(Bpel20QNames.EXTENSION,Extension.class);
-        _mappings.put(Bpel20QNames.EXTENSION_ACTIVITY,ExtensionActivity.class);
-        _mappings.put(Bpel20QNames.EXTENSIBLE_ASSIGN,ExtensionAssignOperation.class);
 
         //
         // BPEL 1.1 Mappings
@@ -275,7 +266,7 @@ public class BpelObjectFactory {
         QName type = new QName(el.getNamespaceURI(), el.getLocalName());
         Class cls = _mappings.get(type);
         if (cls == null) {
-            __log.info("Unrecognized element in BPEL dom: " + type);
+            __log.warn("Unrecognized element in BPEL dom: " + type);
             return new BpelObject(el);
         }
         try {

@@ -1,3 +1,22 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.apache.ode.axis2.httpbinding;
 
 import org.apache.commons.logging.Log;
@@ -25,29 +44,26 @@ import java.util.concurrent.CountDownLatch;
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
 public class HttpBindingTest extends Axis2TestBase {
+
     private static final Log log = LogFactory.getLog(HttpBindingTest.class);
 
     protected JettyWrapper jettyWrapper;
 
-    public HttpBindingTest(String name) {
-        super(name);
-    }
 
   @BeforeMethod
     protected void setUp() throws Exception {
         super.setUp();
-        final CountDownLatch latch = new CountDownLatch(1);
-      jettyWrapper = new JettyWrapper(7070);
+      jettyWrapper = new JettyWrapper(getTestPort(1));
       jettyWrapper.start();
   }
 
-  @AfterMethod
+    @AfterMethod
     protected void tearDown() throws Exception {
         jettyWrapper.stop();
         super.tearDown();
     }
 
-  @Test
+    @Test(dataProvider="configs")
     public void testHttpBinding() throws Exception {
         String bundleName = "TestHttpBinding";
         // deploy the required service
@@ -65,26 +81,26 @@ public class HttpBindingTest extends Axis2TestBase {
         }
     }
 
-  @Test
+    @Test(dataProvider="configs")
     public void testHttpBindingExt_GET() throws Exception {
         String bundleName = "TestHttpBindingExt_GET";
         executeBundle(bundleName);
 
     }
 
-  @Test
+    @Test(dataProvider="configs")
     public void testHttpBindingExt_DELETE() throws Exception {
         String bundleName = "TestHttpBindingExt_DELETE";
         executeBundle(bundleName);
     }
 
-  @Test
+    @Test(dataProvider="configs")
     public void testHttpBindingExt_POST() throws Exception {
         String bundleName = "TestHttpBindingExt_POST";
         executeBundle(bundleName);
     }
 
-  @Test
+    @Test(dataProvider="configs")
     public void testHttpBindingExt_PUT() throws Exception {
         String bundleName = "TestHttpBindingExt_PUT";
         executeBundle(bundleName);

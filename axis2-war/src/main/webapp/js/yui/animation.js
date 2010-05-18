@@ -1215,7 +1215,7 @@ YAHOO.util.Easing = {
         var val = null;
 
         if ( this.patterns.points.test(attr) ) {
-            var t = this.method(this.currentFrame, 0, 100, this.totalFrames) / 100;				
+            var t = this.method(this.currentFrame, 0, 100, this.totalFrames) / 100;             
             val = Y.Bezier.getPosition(this.runtimeAttributes[attr], t);
         } else {
             val = superclass.doMethod.call(this, attr, start, end);

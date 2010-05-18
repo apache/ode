@@ -51,6 +51,12 @@ public interface ProcessManagement {
   ProcessInfoListDocument listAllProcesses();
   
   /**
+   * List the processes known to the engine, excluding the document list, properties and end point configs.
+   * @return list of {@link ProcessInfoDocument}s (including instance summaries)
+   */
+  ProcessInfoListDocument listProcessesSummaryOnly();
+  
+  /**
    * Get the process info for a process.
    * @param pid name of the process
    * @param custom used to customize the quantity of information returned
@@ -106,7 +112,7 @@ public interface ProcessManagement {
   /**
    * Retire a process.
    * @param pid identifier of the process to retire
-   * @param retired new value of retired flag
+   * @param retired TODO
    * @return {@link ProcessInfoDocument} reflecting the modification
    */
   ProcessInfoDocument setRetired(QName pid, boolean retired)

@@ -20,6 +20,7 @@
 package org.apache.ode.utils;
 
 import org.apache.axis2.Constants;
+import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.transport.http.HTTPConstants;
@@ -29,17 +30,17 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpVersion;
 import org.apache.commons.httpclient.ProtocolException;
 import org.apache.commons.httpclient.params.DefaultHttpParams;
+import org.apache.commons.httpclient.params.HostParams;
+import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.params.HttpParams;
-import org.apache.commons.httpclient.params.HttpClientParams;
-import org.apache.commons.httpclient.params.HostParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
@@ -47,12 +48,17 @@ import java.util.Collection;
 public class Properties {
 
     /**
-     * Property used to define how long (in miiliseconds) the message will wait for a response. Default value is {@link #DEFAULT_MEX_TIMEOUT}
+     * Property used to define how long (in milliseconds) the message will wait for a response. Default value is {@link #DEFAULT_MEX_TIMEOUT}
      */
     public static final String PROP_MEX_TIMEOUT = "mex.timeout";
-    // its default value
-    public static final int DEFAULT_MEX_TIMEOUT = 30 * 1000;
 
+    /**
+     * Property used to define how long (in milliseconds) the message will wait for a response for process-to-process invocations.
+     */
+    public static final String PROP_P2P_MEX_TIMEOUT = "p2p.mex.timeout";
+
+    // its default value
+    public static final int DEFAULT_MEX_TIMEOUT = 2 * 60 * 1000;
 
     public static final String PROP_HTTP_CONNECTION_TIMEOUT = HttpConnectionParams.CONNECTION_TIMEOUT;
     public static final String PROP_HTTP_SOCKET_TIMEOUT = HttpMethodParams.SO_TIMEOUT;
@@ -84,6 +90,8 @@ public class Properties {
     public static final String PROP_SECURITY_POLICY = "security.policy.file";
     public static final String PROP_JMS_REPLY_DESTINATION = "jms.reply.destination";
     public static final String PROP_JMS_REPLY_TIMEOUT = "jms.reply.timeout";
+    public static final String PROP_JMS_DESTINATION_TYPE = "jms.destination.type";
+    public static final String PROP_SEND_WS_ADDRESSING_HEADERS = "ws-addressing.headers";
 
 
     protected static final Log log = LogFactory.getLog(Properties.class);
@@ -138,11 +146,10 @@ public class Properties {
             options.setProperty(Constants.Configuration.CHARACTER_SET_ENCODING, "UTF-8");
 
             /*then add all property pairs so that new properties (with string value)
-*              are automatically handled (i.e no translation needed) */
+                are automatically handled (i.e no translation needed) */
             for (Map.Entry<String, String> e : properties.entrySet()) {
                 options.setProperty(e.getKey(), e.getValue());
             }
-
             if (properties.containsKey(PROP_HTTP_CONNECTION_TIMEOUT)) {
                 final String value = properties.get(PROP_HTTP_CONNECTION_TIMEOUT);
                 try {
@@ -162,8 +169,7 @@ public class Properties {
                 }
             }
             if (properties.containsKey(PROP_HTTP_PROTOCOL_ENCODING)) {
-                if (log.isWarnEnabled())
-                    log.warn("Deprecated property: http.protocol.encoding. Use http.protocol.content-charset");
+                if(log.isWarnEnabled())log.warn("Deprecated property: http.protocol.encoding. Use http.protocol.content-charset");
                 options.setProperty(Constants.Configuration.CHARACTER_SET_ENCODING, properties.get(PROP_HTTP_PROTOCOL_ENCODING));
             }
             if (properties.containsKey(HttpMethodParams.HTTP_CONTENT_CHARSET)) {
@@ -189,12 +195,32 @@ public class Properties {
             }
             if (properties.containsKey(PROP_JMS_REPLY_TIMEOUT)) {
                 String value = properties.get(PROP_JMS_REPLY_TIMEOUT);
+                options.setProperty(JMSConstants.JMS_WAIT_REPLY, value);
+                // The value of this property must be a string object, not a long object. 
+//                try {
+//                    options.setProperty(JMSConstants.JMS_WAIT_REPLY, Long.valueOf(value));
+//                } catch (NumberFormatException e) {
+//                    if (log.isWarnEnabled())
+//                        log.warn("Mal-formatted Property: [" + Properties.PROP_JMS_REPLY_TIMEOUT + "=" + value + "]. Long expected. Property will be skipped.");
+//                }
+            }
+            if (properties.containsKey(PROP_JMS_DESTINATION_TYPE)) {
+                String value = properties.get(PROP_JMS_DESTINATION_TYPE);
                 try {
-                    options.setProperty(JMSConstants.JMS_WAIT_REPLY, Long.valueOf(value));
+                    options.setProperty(JMSConstants.DEST_TYPE_PARAM, Long.valueOf(value));
                 } catch (NumberFormatException e) {
                     if (log.isWarnEnabled())
-                        log.warn("Mal-formatted Property: [" + Properties.PROP_JMS_REPLY_TIMEOUT + "=" + value + "]. Long expected. Property will be skipped.");
+                        log.warn("Mal-formatted Property: [" + Properties.PROP_JMS_DESTINATION_TYPE + "=" + value + "]. Long expected. Property will be skipped.");
                 }
+            }
+            if(properties.containsKey(PROP_SEND_WS_ADDRESSING_HEADERS)){
+                String value = properties.get(PROP_SEND_WS_ADDRESSING_HEADERS);
+                options.setProperty(AddressingConstants.DISABLE_ADDRESSING_FOR_OUT_MESSAGES, !Boolean.parseBoolean(value));
+            }
+            if (properties.containsKey("ws-adddressing.headers")) {
+                if(log.isWarnEnabled())log.warn("Deprecated property: ws-adddressing.headers (Mind the 3 d's). Use ws-addressing.headers");                
+                String value = properties.get("ws-adddressing.headers");
+                options.setProperty(AddressingConstants.DISABLE_ADDRESSING_FOR_OUT_MESSAGES, !Boolean.parseBoolean(value));
             }
 
             // iterate through the properties to get Headers & Proxy information
@@ -229,7 +255,7 @@ public class Properties {
             p.setParameter(HttpMethodParams.HTTP_CONTENT_CHARSET, "UTF-8");
 
             /*then all property pairs so that new properties (with string value)
-*              are automatically handled (i.e no translation needed) */
+             are automatically handled (i.e no translation needed) */
             for (Map.Entry<String, String> e : properties.entrySet()) {
                 p.setParameter(e.getKey(), e.getValue());
             }
@@ -257,8 +283,7 @@ public class Properties {
             }
 
             if (properties.containsKey(PROP_HTTP_PROTOCOL_ENCODING)) {
-                if (log.isWarnEnabled())
-                    log.warn("Deprecated property: http.protocol.encoding. Use http.protocol.content-charset");
+                if(log.isWarnEnabled())log.warn("Deprecated property: http.protocol.encoding. Use http.protocol.content-charset");
                 p.setParameter(HttpMethodParams.HTTP_CONTENT_CHARSET, properties.get(PROP_HTTP_PROTOCOL_ENCODING));
             }
             // the next one is redundant because HttpMethodParams.HTTP_CONTENT_CHARSET accepts a string and we use the same property name
@@ -273,7 +298,7 @@ public class Properties {
                 } catch (ProtocolException e) {
                     if (log.isWarnEnabled())
 
-
+                    
                         log.warn("Mal-formatted Property: [" + PROP_HTTP_PROTOCOL_VERSION + "]", e);
                 }
             }

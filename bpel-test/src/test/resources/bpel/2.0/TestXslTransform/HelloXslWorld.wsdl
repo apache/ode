@@ -34,6 +34,7 @@
             <xsd:complexType name="ContentCT">
                 <xsd:sequence>
                     <xsd:element name="content" type="xsd:string"/>
+                    <xsd:element name="nillable" type="xsd:string" nillable="true"/>
                 </xsd:sequence>
             </xsd:complexType>
         </xsd:schema>

@@ -136,7 +136,7 @@ public class HttpBindingValidator {
                 String name = (String) it.next();
                 Pattern p = Pattern.compile(".*(\\(" + name + "\\)).*");
                 Matcher m = p.matcher(locationUri);
-                // WSLD spec requires that all message parts must be exactly once in the url pattern. 
+                // WSLD spec requires that all message parts must be exactly once in the url pattern.
                 // However ODE relaxes this.
                 // The only test is to make sure a part is not mentioned more than once
                 if (m.matches() && locationUri.split("(\\(" + name + "\\))", -1).length != 2) {

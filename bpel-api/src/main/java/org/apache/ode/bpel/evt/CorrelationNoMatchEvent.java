@@ -24,27 +24,42 @@ import java.util.Set;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.common.CorrelationKeySet;
 
 /**
- * Message arrived and matched neither (a) createInstance or (b) correlation match
+ * Message arrived and matched neither (a) createInstance or (b) correlation
+ * match
  */
 public class CorrelationNoMatchEvent extends CorrelationEvent {
-  private static final long serialVersionUID = 1L;
-  private final HashSet<CorrelationKey> _keys = new HashSet<CorrelationKey>();
-  
-  public CorrelationNoMatchEvent(QName qName, String opName, String mexId, CorrelationKey[] keys) {
-    super(qName, opName, mexId);
-    for (CorrelationKey key:keys)
-      _keys.add(key);
-  }
+    private static final long serialVersionUID = 1L;
+    
+    // left out for backward-compatibility
+    private final Set<CorrelationKey> _keys = new HashSet<CorrelationKey>();
+    private CorrelationKeySet _keySet = null;
 
-  public Set<CorrelationKey> getKeys() {
-    return _keys;
-  }
-  
-  public void setKeys(Set<CorrelationKey> keys) {
-    _keys.clear();
-    _keys.addAll(keys);
-  }
+    public CorrelationNoMatchEvent(QName qName, String opName, String mexId,
+            CorrelationKeySet keySet) {
+        super(qName, opName, mexId);
+
+        _keySet = keySet;
+    }
+
+    public CorrelationKeySet getKeySet() {
+        // backward-compatibility; add up keys
+        if( _keys.size() > 0 && _keySet == null ) {
+            _keySet = new CorrelationKeySet();
+        }
+        for (CorrelationKey aKey : _keys) {
+            if (aKey != null && !_keySet.contains(aKey)) {
+                _keySet.add(aKey);
+            }
+        }
+        
+        return _keySet;
+    }
+
+    public void setKeys(CorrelationKeySet keySet) {
+        _keySet = keySet;
+    }
 
 }

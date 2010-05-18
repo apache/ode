@@ -19,6 +19,11 @@
 
 package org.apache.ode.axis2;
 
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.Map;
+
+import javax.transaction.TransactionManager;
 import javax.wsdl.Definition;
 import javax.wsdl.Port;
 import javax.wsdl.Service;
@@ -31,37 +36,41 @@ import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axiom.soap.SOAPFault;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.Options;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.TwoChannelAxisOperation;
+import org.apache.axis2.transport.jms.JMSConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.axis2.soapbinding.SoapMessageConverter;
-import org.apache.ode.il.epr.EndpointFactory;
-import org.apache.ode.il.epr.MutableEndpoint;
-import org.apache.ode.il.epr.WSAEndpoint;
-import org.apache.ode.utils.*;
-import org.apache.ode.bpel.iapi.*;
-import org.apache.ode.bpel.iapi.MessageExchange.AckType;
-import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
+import org.apache.ode.axis2.util.SoapMessageConverter;
+import org.apache.ode.bpel.epr.EndpointFactory;
+import org.apache.ode.bpel.epr.MutableEndpoint;
+import org.apache.ode.bpel.epr.WSAEndpoint;
+import org.apache.ode.bpel.iapi.BpelServer;
+import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
+import org.apache.ode.utils.Properties;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * A running service, encapsulates the Axis service, its receivers and our receivers as well.
- * 
- * @author Matthieu Riou <mriou at apache dot org>
+ * A running service, encapsulates the Axis service, its receivers and our
+ * receivers as well.
  */
 public class ODEService {
-    private static final Log __log = LogFactory.getLog(ODEService.class);
 
-    public static final String TARGET_SESSION_ENDPOINT = "targetSessionEndpoint";
-    public static final String CALLBACK_SESSION_ENDPOINT = "callbackSessionEndpoint";
+    private static final Log __log = LogFactory.getLog(ODEService.class);
 
     private AxisService _axisService;
     private BpelServer _server;
+    private TransactionManager _txManager;
     private ProcessConf _pconf;
     private Definition _wsdlDef;
     private QName _serviceName;
@@ -69,73 +78,143 @@ public class ODEService {
     private WSAEndpoint _serviceRef;
     private SoapMessageConverter _converter;
 
-    public ODEService(AxisService axisService, ProcessConf pconf, QName serviceName, String portName, BpelServer server) throws AxisFault {
+    public ODEService(AxisService axisService, ProcessConf pconf, QName serviceName, String portName, BpelServer server,
+                      TransactionManager txManager) throws AxisFault {
         _axisService = axisService;
         _server = server;
+        _txManager = txManager;
+        _pconf = pconf;
+        _wsdlDef = pconf.getDefinitionForService(serviceName);
         _serviceName = serviceName;
-    _pconf = pconf;
-    _wsdlDef = pconf.getDefinitionForService(serviceName);
         _portName = portName;
         _serviceRef = EndpointFactory.convertToWSA(createServiceRef(genEPRfromWSDL(_wsdlDef, serviceName, portName)));
         _converter = new SoapMessageConverter(_wsdlDef, serviceName, portName);
-    }
 
+    }
+    
+    public String getName() {
+    	return _axisService.getName();
+    }
+    
     public void onAxisMessageExchange(MessageContext msgContext, MessageContext outMsgContext, SOAPFactory soapFactory)
             throws AxisFault {
+        boolean success = true;
         MyRoleMessageExchange odeMex = null;
+        Future responseFuture = null;
         try {
-            // Creating mesage exchange
+            _txManager.begin();
+            if (__log.isDebugEnabled()) __log.debug("Starting transaction.");
+
+            // Creating message exchange
             String messageId = new GUID().toString();
-            odeMex = _server.createMessageExchange(InvocationStyle.UNRELIABLE, _serviceName,
-                    msgContext.getAxisOperation().getName().getLocalPart(), "" + messageId);
-            
+            odeMex = _server.getEngine().createMessageExchange("" + messageId, _serviceName,
+                    msgContext.getAxisOperation().getName().getLocalPart());
             __log.debug("ODE routed to operation " + odeMex.getOperation() + " from service " + _serviceName);
+            odeMex.setProperty("isTwoWay", Boolean.toString(msgContext.getAxisOperation() instanceof TwoChannelAxisOperation));
+            if (odeMex.getOperation() != null) {
+                // Preparing message to send to ODE
+                Message odeRequest = odeMex.createMessage(odeMex.getOperation().getInput().getMessage().getQName());
+                _converter.parseSoapRequest(odeRequest, msgContext.getEnvelope(), odeMex.getOperation());
+                readHeader(msgContext, odeMex);
 
-            if (odeMex.getOperation() == null) {
-                String errmsg = "Call to " + _serviceName + "." + odeMex.getOperationName() + " was not routable.";
-                __log.error(errmsg);
-                throw new OdeFault(errmsg);
-            }
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Invoking ODE using MEX " + odeMex);
+                    __log.debug("Message content:  " + DOMUtils.domToString(odeRequest.getMessage()));
+                }
 
-            // Preparing message to send to ODE
-            Message odeRequest = odeMex.createMessage(odeMex.getOperation().getInput().getMessage().getQName());
-            _converter.parseSoapRequest(odeRequest, msgContext.getEnvelope(), odeMex.getOperation());
-            readHeader(msgContext, odeMex);
+                // Invoke ODE
+                responseFuture = odeMex.invoke(odeRequest);
 
-            if (__log.isDebugEnabled()) {
-                __log.debug("Invoking ODE using MEX " + odeMex);
-                __log.debug("Message content:  " + DOMUtils.domToString(odeRequest.getMessage()));
-            }
-
-            odeMex.setRequest(odeRequest);
-            odeMex.setTimeout(resolveTimeout());
-                if(__log.isDebugEnabled()) __log.debug("Blocking invoke with mex " + odeMex.getMessageExchangeId() + ".");
-                odeMex.invokeBlocking();
-
-            
-            if (odeMex.getOperation().getOutput() != null && outMsgContext != null) {
+                __log.debug("Commiting ODE MEX " + odeMex);
                 try {
-                    SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
-                    outMsgContext.setEnvelope(envelope);
-    
-                    // Hopefully we have a response
-                    __log.debug("Handling response for MEX " + odeMex);
-                    onResponse(odeMex, outMsgContext);
-                } finally {
-                    boolean instanceSucceeded = odeMex.getAckType() == AckType.ONEWAY || odeMex.getAckType() == AckType.RESPONSE;
-                    odeMex.release(_pconf.isCleanupCategoryEnabled(instanceSucceeded, CLEANUP_CATEGORY.MESSAGES));
+                    if (__log.isDebugEnabled()) __log.debug("Commiting transaction.");
+                    _txManager.commit();
+                } catch (Exception e) {
+                    __log.error("Commit failed", e);
+                    success = false;
+                }
+            } else {
+                success = false;
+            }
+        } catch (Exception e) {
+            __log.error("Exception occured while invoking ODE", e);
+            success = false;
+            String message = e.getMessage();
+            if (message == null) {
+            	message = "An exception occured while invoking ODE.";
+            }
+            throw new OdeFault(message, e);
+        } finally {
+            if (!success) {
+                if (odeMex != null) odeMex.release(success);
+                try {
+                    _txManager.rollback();
+                } catch (Exception e) {
+                    throw new OdeFault("Rollback failed", e);
                 }
             }
-        } catch (java.util.concurrent.TimeoutException te) {
-            String errmsg = "Call to " + _serviceName + "." + odeMex.getOperationName() + " timed out(" + resolveTimeout() + " ms).";
-            __log.error(errmsg, te);
-            throw new OdeFault(errmsg);
-        } catch (Exception e) {
-            String errmsg = "Call to " + _serviceName + "." + odeMex.getOperationName() + " caused an exception.";
-            __log.error(errmsg, e);
-            throw new OdeFault(errmsg, e);         
-        } finally {
-            // we cannot release ode mex here since it's outside of the transaction
+        }
+
+        if (odeMex.getOperation().getOutput() != null) {
+            // Waits for the response to arrive
+            try {
+                responseFuture.get(getTimeout(), TimeUnit.MILLISECONDS);
+            } catch (Exception e) {
+                String errorMsg = "Timeout or execution error when waiting for response to MEX "
+                        + odeMex + " " + e.toString();
+                __log.error(errorMsg, e);
+                throw new OdeFault(errorMsg);
+            }
+
+            if (outMsgContext != null) {
+                SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();
+                outMsgContext.setEnvelope(envelope);
+
+                // Hopefully we have a response
+                __log.debug("Handling response for MEX " + odeMex);
+                boolean commit = false;
+                try {
+                    if (__log.isDebugEnabled()) __log.debug("Starting transaction.");
+                    _txManager.begin();
+                } catch (Exception ex) {
+                    throw new OdeFault("Error starting transaction!", ex);
+                }
+                try {
+                    // Refreshing the message exchange
+                    odeMex = (MyRoleMessageExchange) _server.getEngine().getMessageExchange(odeMex.getMessageExchangeId());
+                    onResponse(odeMex, outMsgContext);
+                    commit = true;
+                } catch (AxisFault af) {
+                    __log.warn("MEX produced a fault " + odeMex, af);
+                    commit = true;
+                    throw af;
+                } catch (Exception e) {
+                    __log.error("Error processing response for MEX " + odeMex, e);
+                    throw new OdeFault("An exception occured when invoking ODE.", e);
+                } finally {
+                    odeMex.release(commit);
+                    if (commit) {
+                        try {
+                            if (__log.isDebugEnabled()) __log.debug("Comitting transaction.");
+                            _txManager.commit();
+                        } catch (Exception e) {
+                            throw new OdeFault("Commit failed!", e);
+                        }
+                    } else {
+                        try {
+                            _txManager.rollback();
+                        } catch (Exception ex) {
+                            throw new OdeFault("Rollback failed!", ex);
+                        }
+                    }
+                }
+            }
+            if (!success) {
+                throw new OdeFault("Message was either unroutable or timed out!");
+            }
+        } else {
+            // One ways cleanup
+            odeMex.release(true);
         }
     }
 
@@ -150,7 +229,7 @@ public class ODEService {
     /**
      * do not store the value so it can be dynamically updated
      */
-    private long resolveTimeout() {
+    private long getTimeout() {
         String timeout = _pconf.getEndpointProperties(_serviceRef).get(Properties.PROP_MEX_TIMEOUT);
         if (timeout != null) {
             try {
@@ -162,8 +241,17 @@ public class ODEService {
         return Properties.DEFAULT_MEX_TIMEOUT;
     }
 
+    /**
+     *
+     * @return an Option instance containing the properties for this endpoint
+     * @see org.apache.ode.bpel.iapi.ProcessConf#getEndpointProperties(org.apache.ode.bpel.iapi.EndpointReference)
+     */
+    public Options getOptions(){
+        return Properties.Axis2.translate(_pconf.getEndpointProperties(_serviceRef));
+    }
+
     private void onResponse(MyRoleMessageExchange mex, MessageContext msgContext) throws AxisFault {
-        switch (mex.getAckType()) {
+        switch (mex.getStatus()) {
             case FAULT:
                 if (__log.isDebugEnabled())
                     __log.debug("Fault response message: " + mex.getFault());
@@ -173,7 +261,7 @@ public class ODEService {
                 if (__log.isDebugEnabled())
                     __log.debug("Returning fault: " + msgContext.getEnvelope().toString());
                 break;
-            case ONEWAY:
+            case ASYNC:
             case RESPONSE:
                 _converter.createSoapResponse(msgContext, mex.getResponse(), mex.getOperation());
                 if (__log.isDebugEnabled())
@@ -188,18 +276,25 @@ public class ODEService {
     }
 
     /**
-     * Extracts endpoint information from Axis MessageContext (taken from WSA headers) to stuff them into ODE mesage exchange.
+     * Extracts endpoint information from Axis MessageContext (taken from WSA
+     * headers) to stuff them into ODE mesage exchange.
      */
     private void readHeader(MessageContext msgContext, MyRoleMessageExchange odeMex) {
-        Object otse = msgContext.getProperty(TARGET_SESSION_ENDPOINT);
-        Object ocse = msgContext.getProperty(CALLBACK_SESSION_ENDPOINT);
-        if (otse != null) {
-            Element serviceEpr = (Element) otse;
-            WSAEndpoint endpoint = new WSAEndpoint();
-            endpoint.set(serviceEpr);
-            // Extract the session ID for the local process.
-            odeMex.setProperty(WSMessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, endpoint.getSessionId());
+        String correlationId = (String) msgContext.getProperty(JMSConstants.JMS_COORELATION_ID);
+        if (correlationId != null) {
+            odeMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, correlationId);
+        } else {
+            Object otse = msgContext.getProperty("targetSessionEndpoint");
+            if (otse != null) {
+                Element serviceEpr = (Element) otse;
+                WSAEndpoint endpoint = new WSAEndpoint();
+                endpoint.set(serviceEpr);
+                // Extract the session ID for the local process.
+                odeMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, endpoint.getSessionId());
+            }
         }
+        
+        Object ocse = msgContext.getProperty("callbackSessionEndpoint");
         if (ocse != null) {
             Element serviceEpr = (Element) ocse;
             WSAEndpoint endpoint = new WSAEndpoint();
@@ -208,14 +303,15 @@ public class ODEService {
             // Save the session id of the remote process. Also, magically
             // initialize the EPR
             // of the partner to the EPR provided.
-            odeMex.setProperty(WSMessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, endpoint.getSessionId());
-            odeMex.setProperty(WSMessageExchange.PROPERTY_SEP_PARTNERROLE_EPR, DOMUtils.domToString(serviceEpr));
+            odeMex.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, endpoint.getSessionId());
+            odeMex.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_EPR, DOMUtils.domToString(serviceEpr));
         }
     }
 
     /**
-     * Handle callback endpoints for the case where partner contact process my-role which results in an "updated" my-role EPR due to
-     * session id injection.
+     * Handle callback endpoints for the case where partner contact process
+     * my-role which results in an "updated" my-role EPR due to session id
+     * injection.
      */
     private void writeHeader(MessageContext msgContext, MyRoleMessageExchange odeMex) {
         EndpointReference targetEPR = odeMex.getEndpointReference();
@@ -238,8 +334,9 @@ public class ODEService {
     }
 
     /**
-     * Return the service-ref element that will be used to represent this endpoint.
-     * 
+     * Return the service-ref element that will be used to represent this
+     * endpoint.
+     *
      * @return my service endpoint
      */
     public EndpointReference getMyServiceRef() {
@@ -248,11 +345,9 @@ public class ODEService {
 
     /**
      * Get the EPR of this service from the WSDL.
-     * 
-     * @param name
-     *            service name
-     * @param portName
-     *            port name
+     *
+     * @param name     service name
+     * @param portName port name
      * @return XML representation of the EPR
      */
     public static Element genEPRfromWSDL(Definition wsdlDef, QName name, String portName) {
@@ -291,7 +386,7 @@ public class ODEService {
 
     /**
      * Create-and-copy a service-ref element.
-     * 
+     *
      * @param elmt
      * @return wrapped element
      */

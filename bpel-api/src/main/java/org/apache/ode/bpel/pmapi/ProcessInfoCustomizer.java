@@ -19,6 +19,7 @@
 
 package org.apache.ode.bpel.pmapi;
 
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.StringTokenizer;
 
@@ -28,7 +29,8 @@ import java.util.StringTokenizer;
  */
 public class ProcessInfoCustomizer {
 
-  public static final ProcessInfoCustomizer ALL = new ProcessInfoCustomizer(Item.ENDPOINTS,Item.PROPERTIES,Item.SUMMARY);
+  public static final ProcessInfoCustomizer ALL = new ProcessInfoCustomizer(Item.ENDPOINTS,Item.PROPERTIES,Item.DOCUMENTS,Item.SUMMARY);
+  public static final ProcessInfoCustomizer SUMMARYONLY = new ProcessInfoCustomizer(Item.SUMMARY);
   public static final ProcessInfoCustomizer NONE = new ProcessInfoCustomizer();
 
   private HashSet<Item> _includes = new HashSet<Item>();
@@ -64,6 +66,10 @@ public class ProcessInfoCustomizer {
     return _includes.contains(Item.SUMMARY);
   }
 
+  public boolean includeDocumentLists() {
+    return _includes.contains(Item.DOCUMENTS);
+  }
+
   public boolean includeProcessProperties() {
     return _includes.contains(Item.PROPERTIES);
   }
@@ -71,9 +77,10 @@ public class ProcessInfoCustomizer {
   public boolean includeEndpoints() {
     return _includes.contains(Item.ENDPOINTS);
   }
-  
+
   public enum Item {
     SUMMARY,
+    DOCUMENTS,
     PROPERTIES,
     ENDPOINTS
   }

@@ -26,7 +26,6 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.axis2.ODEService;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.w3c.dom.Document;
@@ -49,16 +48,12 @@ public class SessionInHandler extends AbstractHandler {
             if (__log.isDebugEnabled())
                 __log.debug("Found a header in incoming message, checking if there are endpoints there.");
             // Checking if a session identifier has been provided for a stateful endpoint
-            OMElement wsaToSession = header.getFirstChildWithName(new QName(Namespaces.ODE_SESSION_NS, "session"));
-            if (wsaToSession == null) {
-                // perhaps there is an old intalio header?
-                wsaToSession = header.getFirstChildWithName(new QName(Namespaces.INTALIO_SESSION_NS, "session"));	
-            }
+            OMElement wsaToSession = header.getFirstChildWithName(new QName(Namespaces.INTALIO_SESSION_NS, "session"));
             if (wsaToSession != null) {
                 // Building an endpoint supposed to target the right instance
                 Document doc = DOMUtils.newDocument();
                 Element serviceEpr = doc.createElementNS(Namespaces.WS_ADDRESSING_NS, "EndpointReference");
-                Element sessionId = doc.createElementNS(Namespaces.ODE_SESSION_NS, "session");
+                Element sessionId = doc.createElementNS(Namespaces.INTALIO_SESSION_NS, "session");
                 doc.appendChild(serviceEpr);
                 serviceEpr.appendChild(sessionId);
                 sessionId.setTextContent(wsaToSession.getText());
@@ -74,22 +69,18 @@ public class SessionInHandler extends AbstractHandler {
                 }
                 if (__log.isDebugEnabled())
                     __log.debug("Constructed a TO endpoint: " + DOMUtils.domToString(serviceEpr));
-                messageContext.setProperty(ODEService.TARGET_SESSION_ENDPOINT, serviceEpr);
+                messageContext.setProperty("targetSessionEndpoint", serviceEpr);
             }
 
             // Seeing if there's a callback, in case our client would be stateful as well
-            OMElement callback = header.getFirstChildWithName(new QName(Namespaces.ODE_SESSION_NS, "callback"));
-            if (callback == null) {
-                // is there an old intalio header?
-                callback = header.getFirstChildWithName(new QName(Namespaces.INTALIO_SESSION_NS, "callback"));
-            }
+            OMElement callback = header.getFirstChildWithName(new QName(Namespaces.INTALIO_SESSION_NS, "callback"));
             if (callback != null) {
-                OMElement callbackSession = callback.getFirstChildWithName(new QName(callback.getNamespace().getNamespaceURI(), "session"));
+                OMElement callbackSession = callback.getFirstChildWithName(new QName(Namespaces.INTALIO_SESSION_NS, "session"));
                 if (callbackSession != null) {
                     // Building an endpoint that represents our client (we're supposed to call him later on)
                     Document doc = DOMUtils.newDocument();
                     Element serviceEpr = doc.createElementNS(Namespaces.WS_ADDRESSING_NS, "EndpointReference");
-                    Element sessionId = doc.createElementNS(Namespaces.ODE_SESSION_NS, "session");
+                    Element sessionId = doc.createElementNS(Namespaces.INTALIO_SESSION_NS, "session");
                     doc.appendChild(serviceEpr);
                     serviceEpr.appendChild(sessionId);
                     sessionId.setTextContent(callbackSession.getText());
@@ -105,7 +96,7 @@ public class SessionInHandler extends AbstractHandler {
                     }
                     if (__log.isDebugEnabled())
                         __log.debug("Constructed a CALLBACK endpoint: " + DOMUtils.domToString(serviceEpr));
-                    messageContext.setProperty(ODEService.CALLBACK_SESSION_ENDPOINT, serviceEpr);
+                    messageContext.setProperty("callbackSessionEndpoint", serviceEpr);
                 }
             }
         }

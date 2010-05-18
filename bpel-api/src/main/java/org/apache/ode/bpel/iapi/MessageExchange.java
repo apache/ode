@@ -26,6 +26,8 @@ import java.util.Set;
 /**
  * A representation of a communication (message-exchange) between the BPEL 
  * BPEL engine and an  external "partner".
+ * 
+ * @author mszefler
  */
 public interface MessageExchange {
 
@@ -45,27 +47,34 @@ public interface MessageExchange {
         /** New message exchange, has not been "invoked" */
         NEW,
 
-        /** The request was sent, blocking while waiting for the service to respond. */
-        REQ,
+        /** The request is being sent to the "server" */
+        REQUEST,
 
-        /** The request was sent, no longer blocking. */
+        /** Waiting for an asynchronous response from the "server" */
         ASYNC,
-        
-        /** The acknowledgement (either response/fault/failure) was sent. */
-        ACK,
 
-        /** The acknowledgement was processed. */
-        COMPLETED
+        /** The one way request has been sent to the server. */
+        // ONE_WAY, - supported as ASYNC + getMessageExchangePatter() - See JIRA ODE-54
 
-    }
-
-    public enum AckType {
+        /** Processing the response received from the "server". */
         RESPONSE,
-        ONEWAY,
+
+        /** Processing the fault received from the "server". */
         FAULT,
-        FAILURE
+
+        /** Processing a failure. */
+        FAILURE,
+
+        /** Message exchange completed succesfully. */
+        COMPLETED_OK,
+
+        /** Message exchange completed with a fault. */
+        COMPLETED_FAULT,
+
+        /** Message exchange completed with a failure. */
+        COMPLETED_FAILURE,
     }
-    
+
     /**
      * Enumeration of the types of failures.
      */
@@ -101,43 +110,26 @@ public interface MessageExchange {
      * time.
      * @return unique message exchange identifier
      */
-    String getMessageExchangeId() throws BpelEngineException;
+    String getMessageExchangeId()
+            throws BpelEngineException;
 
-
-    /**
-     * Get the invocation style for this message exchange. 
-     * @return
-     */
-    InvocationStyle getInvocationStyle();
-    
-    /**
-     * Get the time-out in ms. 
-     * @return
-     */
-    long getTimeout();
-
-    /**
-     * Set the time-out in ms
-     * @param timeout
-     */
-    void setTimeout(long timeout);
-    
     /**
      * Get the name of the operation (WSDL 1.1) / message exchange (WSDL 1.2?).
      *
      * @return name of the operation (WSDL 1.1) /message exchange (WSDL 1.2?).
      */
-    String getOperationName() throws BpelEngineException;
+    String getOperationName()
+            throws BpelEngineException;
 
 
     /**
      * Get a reference to the end-point targeted by this message exchange.
      * @return end-point reference for this message exchange
      */
-    EndpointReference getEndpointReference() throws BpelEngineException;
+    EndpointReference getEndpointReference()
+            throws BpelEngineException;
 
 
-    AckType getAckType();
 
     /**
      * Return the type of message-exchange that resulted form this invocation
@@ -155,13 +147,8 @@ public interface MessageExchange {
      */
     Message createMessage(QName msgType);
 
-    /**
-     * Indicates whether a transactions in associated with the message exchange. If this is the case, then the object must be used
-     * from a context (i.e. thread) that is associated with the same transaction. The TRANSACTED and RELIABLE invocation styles will
-     * have this flag set to <code>true</code>. ASYNC and BLOCKING styles will always have this set to <code>false</code>.
-     * @return <code>true<code> if there is a transaction associated with the object, <code>false</code> otherwise.
-     */
-    boolean isTransactional();
+    boolean isTransactionPropagated()
+            throws BpelEngineException;
 
     /**
      * Get the message exchange status.
@@ -180,6 +167,38 @@ public interface MessageExchange {
      * @return response message (or null if not avaiable)
      */
     Message getResponse();
+
+    /**
+     * Get the fault type.
+     * @return fault type, or <code>null</code> if not available/applicable.
+     */
+    QName getFault();
+
+    String getFaultExplanation();
+
+    /**
+     * Get the fault resposne message.
+     * @return fault response, or <code>null</code> if not available/applicable.
+     */
+    Message getFaultResponse();
+
+    /**
+     * Get the operation description for this message exchange.
+     * It is possible that the description cannot be resolved, for example if
+     * the EPR is unknown or if the operation does not exist.
+     * TODO: How to get rid of the WSDL4j dependency?
+     * @return WSDL operation description or <code>null</code> if not availble
+     */
+    Operation getOperation();
+
+    /**
+     * Get the port type description for this message exchange.
+     * It is possible that the description cannot be resolved, for example if
+     * the EPR is unknown or if the operation does not exist.
+     * TODO: How to get rid of the WSDL4j dependency?
+     * @return WSDL port type description or <code>null</code> if not available.
+     */
+    PortType getPortType();
 
     /**
      * Set a message exchange property. Message exchange properties are not
@@ -214,5 +233,4 @@ public interface MessageExchange {
     public static final String PROPERTY_SEP_MYROLE_SESSIONID = "org.apache.ode.bpel.myRoleSessionId";
     public static final String PROPERTY_SEP_PARTNERROLE_SESSIONID = "org.apache.ode.bpel.partnerRoleSessionId";
     public static final String PROPERTY_SEP_PARTNERROLE_EPR = "org.apache.ode.bpel.partnerRoleEPR";
-    public static final String PROPERTY_SEP_MYROLE_TRANSACTED = "org.apache.ode.bpel.myRoleTransacted";
 }

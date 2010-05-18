@@ -18,7 +18,7 @@
   ~ under the License.
   -->
 
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.ode</groupId>
     <artifactId>ode-jbi</artifactId>
@@ -26,7 +26,7 @@
     <parent>
         <groupId>org.apache.ode</groupId>
         <artifactId>ode</artifactId>
-        <version>2.0-SNAPSHOT</version>
+        <version>1.3.4-SNAPSHOT</version>
     </parent>
     
     <properties>
@@ -80,7 +80,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
-            <artifactId>ode-il-common</artifactId>
+            <artifactId>ode-bpel-epr</artifactId>
             <exclusions>
              <exclusion>
                <groupId>org.apache.geronimo.components</groupId>
@@ -97,8 +97,24 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.apache.geronimo.components</groupId>
+            <artifactId>geronimo-connector</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.components</groupId>
+            <artifactId>geronimo-transaction</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.ode</groupId>
-            <artifactId>ode-engine</artifactId>
+            <artifactId>ode-agents</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ode</groupId>
+            <artifactId>ode-bpel-obj</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ode</groupId>
+            <artifactId>ode-bpel-runtime</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
@@ -186,10 +202,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
-            <artifactId>ode-runtimes</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ode</groupId>
             <artifactId>ode-bpel-ql</artifactId>
         </dependency>
         <dependency>
@@ -219,16 +231,11 @@
         <dependency>
           <groupId>org.apache.ode</groupId>
           <artifactId>ode-dao-hibernate</artifactId>
-          <exclusions>
-           <exclusion>
-             <groupId>javassist</groupId>
-             <artifactId>javassist</artifactId>
-           </exclusion>
-           <exclusion>
-             <groupId>org.hibernate</groupId>
-             <artifactId>hibernate-core</artifactId>
-           </exclusion>
-          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.hibernate</groupId>
+          <artifactId>hibernate</artifactId>
+          <scope>provided</scope>
         </dependency>
         <dependency>
           <groupId>org.apache.ode</groupId>
@@ -247,8 +254,17 @@
           <artifactId>ode-jacob</artifactId>
         </dependency>
         <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+        </dependency>
+        <dependency>
           <groupId>junit</groupId>
           <artifactId>junit</artifactId>
+	  <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>commons-io</groupId>
+          <artifactId>commons-io</artifactId>
 	  <scope>test</scope>
         </dependency>
         <dependency>
@@ -299,6 +315,11 @@
           <artifactId>servicemix-utils</artifactId>
           <version>${servicemix.utils.version}</version>
 	  <scope>test</scope>
+        </dependency>
+        <dependency>
+           <groupId>org.apache.geronimo.specs</groupId>
+           <artifactId>geronimo-javamail_1.4_spec</artifactId>
+           <scope>test</scope>
         </dependency>
 
        <!-- for JBI packaging -->
@@ -365,11 +386,6 @@
        
        <!-- This is a way to specify the global exclusion in the dependency tree -->
        <dependency>
-          <groupId>xerces</groupId>
-          <artifactId>xercesImpl</artifactId>
-          <scope>provided</scope>
-       </dependency>
-       <dependency>
           <groupId>commons-httpclient</groupId>
           <artifactId>commons-httpclient</artifactId>
           <scope>provided</scope>
@@ -400,7 +416,7 @@
               <component>org.apache.ode.jbi.OdeComponent</component>
               <bootstrap>org.apache.ode.jbi.OdeBootstrap</bootstrap>
               <bootstrapClassLoaderDelegation>parent-first</bootstrapClassLoaderDelegation>
-              <componentClassLoaderDelegation>self-first</componentClassLoaderDelegation>
+              <componentClassLoaderDelegation>parent-first</componentClassLoaderDelegation>
               <type>service-engine</type>
               <name>OdeBpelEngine</name>
               <description>ODE JBI Integration Layer</description>
@@ -413,7 +429,9 @@
 		<artifactId>maven-surefire-plugin</artifactId>
 		<configuration>
        		<!-- FIXME: temporary skip it -->
-	   		<skipTests>true</skipTests>
+            <!--
+            <skipTests>true</skipTests>
+            -->
 			<systemProperties>
 				<property>
 					<name>java.naming.factory.initial</name>
@@ -443,7 +461,62 @@
           </execution>
         </executions>
       </plugin>
+      
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.4.2</version>
+        <executions>
+          <execution>
+            <id>copy-resources</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>target/test/smx/ode</outputDirectory>
+              <resources>          
+                <resource>
+                  <directory>${basedir}/../dao-jpa-ojpa-derby/target/derby</directory>
+                </resource>
+                <resource>
+                  <directory>${basedir}/../dao-hibernate-db/target/derby</directory>
+                </resource>
+              </resources>              
+            </configuration>            
+          </execution>
+          <execution>
+            <id>copy-resources2</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>target/test/resources</outputDirectory>
+              <resources>          
+                <resource>
+                  <directory>src/test/resources</directory>
+                </resource>
+              </resources>              
+            </configuration>            
+          </execution>
+        </executions>
+      </plugin>
      </plugins>
+     
+     <testResources>
+       <testResource>
+         <directory>src/test/resources</directory>
+       </testResource>
+       <testResource>
+         <directory>src/test/jbi</directory>
+         <targetPath>../test/smx/ode</targetPath>
+       </testResource>
+       <testResource>
+         <directory>src/main/jbi</directory>
+         <includes><include>hibernate.properties</include></includes>
+         <targetPath>../test/smx/ode</targetPath>
+       </testResource>
+     </testResources>
    </build>
 
 </project>

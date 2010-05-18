@@ -135,7 +135,10 @@ public interface InstanceManagement {
      */
     InstanceInfoListDocument listInstancesSummary(String filter, String order, int limit);
 
-    /** @deprecated use listInstances instead */
+    /**
+     * @deprecated As of Ode 1.3, this method is deprecated in favor of 
+     *             listInstances(filter, order, limit)
+     */
     InstanceInfoListDocument queryInstances(String query);
 
     /**
@@ -161,7 +164,7 @@ public interface InstanceManagement {
      * Get an instance by id.
      * @param iid
      * @return information about a specific instance
-     * @throws InstanceNotFoundException 
+     * @throws InstanceNotFoundException TODO
      */
     InstanceInfoDocument getInstanceInfo(Long iid) throws InstanceNotFoundException;
 

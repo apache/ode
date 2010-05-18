@@ -81,25 +81,25 @@ public abstract class JacobObject implements Serializable {
      * @param methodList method list for the communication reduction
      * @see JacobThread#object
      */
-    protected static <T extends Channel,  L extends ChannelListener<T>> T object(L methodList) {
+    protected static <T extends Channel> T object(ChannelListener<T> methodList) {
         JacobVPU.activeJacobThread().object(false, methodList);
         return methodList.getChannel();
     }
 
-    protected static <T extends Channel,  L extends ChannelListener<T>> void object(boolean replication, L methodList) {
+    protected static void object(boolean replication, ChannelListener methodList) {
         JacobVPU.activeJacobThread().object(replication, methodList);
     }
 
-    protected static  <T extends Channel, L extends ChannelListener<T>> void object(boolean replication, L[] methodLists) {
+    protected static void object(boolean replication, ChannelListener[] methodLists) {
         JacobVPU.activeJacobThread().object(replication, methodLists);
     }
 
-    protected static <T extends Channel, L extends ChannelListener<T>> void object(boolean replication, Set<L> methodLists) {
+    protected static void object(boolean replication, Set<ChannelListener> methodLists) {
         JacobVPU.activeJacobThread().object(replication,
                 methodLists.toArray(new ChannelListener[methodLists.size()]));
     }
 
-    protected static <T extends Channel, L extends ChannelListener<T>> T replication(L methodList) {
+    protected static <T extends Channel> T replication(ChannelListener<T> methodList) {
         JacobVPU.activeJacobThread().object(true, methodList);
         return methodList.getChannel();
     }

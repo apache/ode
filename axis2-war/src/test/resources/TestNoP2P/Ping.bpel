@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<process
+        name="Ping"
+        xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+        targetNamespace="urn:/PingPong"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:tns="urn:/PingPong"
+        expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+
+    <import location="Ping.wsdl"
+            namespace="http://www.example.org/common/"
+            importType="http://schemas.xmlsoap.org/wsdl/" />
+
+    <partnerLinks>
+        <partnerLink name="PingPartnerLink"
+                partnerLinkType="tns:PingPongPLT"
+                myRole="Provider" />
+        <partnerLink name="PongPartnerLink"
+                partnerLinkType="tns:PingPongPLT"
+                partnerRole="Provider"
+                initializePartnerRole="yes" />
+    </partnerLinks>
+
+    <variables>
+        <variable messageType="tns:PingRequest" name="pingRequest"/>
+        <variable messageType="tns:PingResponse" name="pingResponse"/>
+        <variable messageType="tns:PongRequest" name="pongRequest"/>
+        <variable messageType="tns:PongResponse" name="pongResponse"/>
+    </variables>
+
+    <sequence name="Main">
+        <receive name="pingReceive"
+                createInstance="yes"
+                operation="Ping"
+                partnerLink="PingPartnerLink"
+                portType="tns:PingPongPortType"
+                variable="pingRequest"/>
+
+        <assign>
+            <copy>
+                <from>
+                    <literal>
+                        <tns:PongRequest>
+                            <tns:in>test0</tns:in>
+                        </tns:PongRequest>
+                    </literal>
+                </from>
+                <to>$pongRequest.parameters</to>
+            </copy>
+        </assign>
+        
+        <invoke name="invokePong"
+                operation="Pong"
+                inputVariable="pongRequest"
+                outputVariable="pongResponse"
+                partnerLink="PongPartnerLink"
+                portType="tns:PingPongPortType"/>
+        
+        <assign name="assignPingResponse">
+            <copy>
+                <from>
+                    <literal>
+                        <tns:PingResponse>
+                            <tns:out>magic</tns:out>
+                        </tns:PingResponse>
+                    </literal>
+                </from>
+                <to>$pingResponse.parameters</to>
+            </copy>
+        </assign>
+
+        <reply name="pingReply"
+                partnerLink="PingPartnerLink"
+                portType="tns:PingPongPortType"
+                operation="Ping"
+                variable="pingResponse"/>
+    </sequence>
+</process>

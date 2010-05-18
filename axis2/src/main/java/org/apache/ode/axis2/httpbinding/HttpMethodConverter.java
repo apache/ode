@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.utils.Properties;
 import org.apache.ode.axis2.util.URLEncodedTransformer;
 import org.apache.ode.axis2.util.UrlReplacementTransformer;
+import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
@@ -44,20 +45,20 @@ import static org.apache.ode.utils.http.HttpUtils.bodyAllowed;
 import static org.apache.ode.utils.http.StatusCode._202_ACCEPTED;
 import org.apache.ode.utils.wsdl.Messages;
 import org.apache.ode.utils.wsdl.WsdlUtils;
-import org.apache.ode.il.epr.MutableEndpoint;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 import javax.wsdl.Binding;
 import javax.wsdl.BindingInput;
 import javax.wsdl.BindingOperation;
 import javax.wsdl.BindingOutput;
+import javax.wsdl.Definition;
+import javax.wsdl.Fault;
 import javax.wsdl.Message;
 import javax.wsdl.Operation;
 import javax.wsdl.Part;
-import javax.wsdl.Definition;
-import javax.wsdl.Fault;
 import javax.wsdl.extensions.UnknownExtensibilityElement;
 import javax.wsdl.extensions.http.HTTPOperation;
 import javax.wsdl.extensions.mime.MIMEContent;
@@ -456,7 +457,7 @@ public class HttpMethodConverter {
         odeMessage.setHeaderPart("Status-Line", HttpHelper.statusLineToElement(method.getStatusLine()));
     }
 
-    public void parseHttpResponse(org.apache.ode.bpel.iapi.Message odeResponse, HttpMethod method, Operation opDef) throws Exception {
+    public void parseHttpResponse(org.apache.ode.bpel.iapi.Message odeResponse, HttpMethod method, Operation opDef) throws SAXException, IOException {
         BindingOperation opBinding = binding.getBindingOperation(opDef.getName(), opDef.getInput().getName(), opDef.getOutput().getName());
         /* process headers */
         extractHttpResponseHeaders(odeResponse, method, opDef);

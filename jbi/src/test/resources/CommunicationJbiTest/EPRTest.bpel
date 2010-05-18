@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<bpws:process xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns="http://sample.bpel.org/bpel/sampleArtifacts" xmlns:tns="http://sample.bpel.org/bpel/sample" exitOnStandardFault="yes" name="EPRTest" suppressJoinFailure="yes" targetNamespace="http://sample.bpel.org/bpel/sample" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://docs.oasis-open.org/wsbpel/2.0/process/executable /usr/share/bpel-schema/ws-bpel_executable.xsd">
+  <bpws:import importType="http://schemas.xmlsoap.org/wsdl/" location="OnEventCorrelation.wsdl" namespace="http://sample.bpel.org/bpel/sample"/>
+  <bpws:import importType="http://schemas.xmlsoap.org/wsdl/" location="OnEventCorrelationArtifacts.wsdl" namespace="http://sample.bpel.org/bpel/sampleArtifacts"/>
+  <bpws:partnerLinks>
+    <bpws:partnerLink myRole="OnEventCorrelationProvider" partnerRole="OnEventCorrelationProvider" name="client" partnerLinkType="tns:OnEventCorrelation" initializePartnerRole="no"/>
+  </bpws:partnerLinks>
+  <bpws:variables>
+    <bpws:variable messageType="tns:OnEventCorrelationMessage" name="input"/>
+    <bpws:variable messageType="tns:OnEventCorrelationMessage" name="output"/>
+    <bpws:variable messageType="tns:OnEventCorrelationMessage" name="output2"/>
+    <bpws:variable type="xsd:string" name="s"/>
+  </bpws:variables>
+  <bpws:correlationSets>
+    <bpws:correlationSet name="CorrelationSet" properties="ns:input"/>
+  </bpws:correlationSets>
+  <bpws:sequence name="main">
+    <bpws:receive createInstance="yes" operation="opInOut" partnerLink="client" portType="tns:OnEventCorrelation" variable="input"/>
+    
+    <bpws:assign>
+      <bpws:copy>
+        <bpws:from>
+            <bpws:literal>
+<sref:service-ref xmlns:sref="http://docs.oasis-open.org/wsbpel/2.0/serviceref">
+  <wsa:EndpointReference xmlns:wsa="http://www.w3.org/2005/08/addressing">
+    <wsa:Address>http://localhost:8198/EPRTest2/?http.soap=true&amp;http.soapVersion=1.1</wsa:Address>
+  </wsa:EndpointReference>
+</sref:service-ref> 
+            </bpws:literal>
+         </bpws:from>
+         <bpws:to partnerLink="client"/>
+      </bpws:copy> 
+    </bpws:assign>
+
+    <bpws:invoke partnerLink="client" operation="opInOut" inputVariable="input" outputVariable="output"/>
+    
+    <bpws:assign>
+        <bpws:copy>
+            <bpws:from>$output</bpws:from>
+            <bpws:to>$output2</bpws:to>
+        </bpws:copy>
+    </bpws:assign>
+    
+    <bpws:assign>
+      <bpws:copy>
+        <bpws:from>
+            <bpws:literal>
+<sref:service-ref xmlns:sref="http://docs.oasis-open.org/wsbpel/2.0/serviceref">
+<jbi:end-point-reference jbi:end-point-name="default"
+      jbi:service-name="bpel:EPRTest2"
+      xmlns:jbi="http://java.sun.com/jbi/end-point-reference" xmlns:bpel="http://sample.bpel.org/bpel/sample"/>
+</sref:service-ref> 
+            </bpws:literal>
+         </bpws:from>
+         <bpws:to partnerLink="client"/>
+      </bpws:copy>
+        <bpws:copy>
+            <bpws:from>''</bpws:from>
+            <bpws:to>$input.data</bpws:to>
+        </bpws:copy>
+    </bpws:assign>
+    
+    <bpws:invoke partnerLink="client" operation="opInOut" inputVariable="input" outputVariable="output"/>
+    <bpws:assign>
+        <bpws:copy>
+            <bpws:from>concat($output2.data, $output.data)</bpws:from>
+            <bpws:to>$output2.data</bpws:to>
+        </bpws:copy>
+    </bpws:assign>
+
+    <bpws:reply operation="opInOut" partnerLink="client" variable="output2"/>
+  </bpws:sequence>
+</bpws:process>
+
+

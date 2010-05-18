@@ -29,8 +29,6 @@ import junit.framework.TestCase;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactoryBPEL11;
-import org.apache.ode.bpel.compiler.DefaultResourceFinder;
-import org.apache.ode.bpel.compiler.v2.WSDLRegistry;
 import org.apache.ode.utils.xsd.SchemaModel;
 
 public class WSDLRegistryTest extends TestCase {
@@ -70,10 +68,10 @@ public class WSDLRegistryTest extends TestCase {
     // load & register wsdl
     WSDLFactory4BPEL factory = (WSDLFactory4BPEL)WSDLFactoryBPEL11.newInstance();
     WSDLReader reader = factory.newWSDLReader();
-
+    
+    //ResourceFinder finder = new DefaultResourceFinder(new File(wsd.getPath()).getParentFile());
     File parent = new File(wsd.toURI().getPath()).getParentFile();
     ResourceFinder finder = new DefaultResourceFinder(parent, parent);
-
     WSDLLocatorImpl loc = new WSDLLocatorImpl(finder,wsd.toURI());
     Definition4BPEL wsdl = (Definition4BPEL) reader.readWSDL(loc);
     _registry.addDefinition(wsdl, finder, wsd.toURI());
@@ -84,6 +82,8 @@ public class WSDLRegistryTest extends TestCase {
 
     assertTrue("WSDL-Define type not visible.",m.knowsSchemaType(new QName("uri:testing", "TComplex1")));
     assertTrue("Type from import not visible.",m.knowsSchemaType(new QName("uri:test1", "TComplex2")));
+    
+    
   }
   
 }

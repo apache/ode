@@ -19,8 +19,6 @@
 
 package org.apache.ode.axis2.hooks;
 
-import java.io.IOException;
-
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -30,6 +28,8 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.transport.http.AxisServlet;
 import org.apache.ode.axis2.ODEServer;
 import org.apache.ode.axis2.service.DeploymentBrowser;
+
+import java.io.*;
 
 /**
  * Overrides standard AxisServlet to handle our service configurations and
@@ -54,13 +54,18 @@ public class ODEAxisServlet extends AxisServlet {
         _browser = new DeploymentBrowser(_odeServer.getProcessStore(), axisConfiguration, _odeServer.getAppRoot());
     }
 
-    public void stop() throws AxisFault {
-        super.stop();
-        _odeServer.shutDown();
+    // Prevents a stack overflow on WAS 6.1 due to the axis2 init delegation chain
+    public void init() throws ServletException {
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if (!_browser.doFilter(request, response)) super.doGet(request, response);
+    }
+
+
+    public void stop() throws AxisFault {
+        super.stop();
+        _odeServer.shutDown();
     }
 
     protected ODEServer createODEServer() {

@@ -7,9 +7,10 @@
         <link rel="stylesheet" href="js/yui/css/button.css" media="screen, projection"/>
         <link rel="stylesheet" href="js/bubbling/assets/accordion.css" media="screen, projection"/>
         <link rel="stylesheet" type="text/css" href="js/yui/tab/skins/sam/tabview.css"/>
-        <link rel="icon" href="favicon.ico" type="image/x-icon" />
-        <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+        <link rel="stylesheet" type=="text/css" href="js/codepress/codepress.css"/>
         <script type="text/javascript" src="js/WSRequest.js">
+        </script>
+        <script type="text/javascript" src="js/codepress/codepress.js">
         </script>
         <script type="text/javascript" src="js/ProcessManagementAPI.js">
         </script>
@@ -43,6 +44,11 @@
             YAHOO.util.Event.onDOMReady(init);
         </script>
         <style type="text/css">
+            button {
+                background: transparent url(../button/assets/add.gif) no-repeat scroll 10% 50%;
+                padding-left: 2em;
+            }
+            
             .link {
                 margin-left: 5px;
                 color: blue;
@@ -128,7 +134,7 @@
                         // Removes leading and ending whitespaces
                         function trim( value ) {
                             return LTrim(RTrim(value));
-                        }	
+                        }   
 
                         function clearOpstat(){
                             var opStatDiv = document.getElementById('opstat');

@@ -65,3 +65,4 @@
        <plnk:role name="you" portType="tns:HelloPortType"/>
    </plnk:partnerLinkType>
 </wsdl:definitions>
+

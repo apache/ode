@@ -20,15 +20,15 @@
 package org.apache.ode.bpel.iapi;
 
 import javax.xml.namespace.QName;
+
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Extension of the {@link org.apache.ode.bpel.iapi.MessageExchange} interface
  * that is provided by the engine for message-exchanges where the engine acts as
  * the server (i.e. where the engine is "invoked").
  */
-public interface MyRoleMessageExchange extends WSMessageExchange {
+public interface MyRoleMessageExchange extends MessageExchange {
 
     /**
      * Enumeration of message correlation results.
@@ -57,49 +57,33 @@ public interface MyRoleMessageExchange extends WSMessageExchange {
      */
     CorrelationStatus getCorrelationStatus();
 
-    /** 
-     * Get the type of failure. Only usable if AckType is FAILURE. 
-     * @return
+    /**
+     * "Invoke" a process hosted by the BPEL engine. The state of the invocation
+     * may be obtained by a call to the {@link MessageExchange#getStatus()}
+     * method. It is possible that the response for the operation is not
+     * immediately available (i.e the call to {@link #invoke(Message)} will
+     * return before a response is available). In such cases,
+     * {@link MessageExchange#getStatus()} == {@link Status#ASYNC} and the
+     * integration layer will receive an asynchronous notification from the BPEL
+     * engine via the
+     * {@link MessageExchangeContext#onAsyncReply(MyRoleMessageExchange)} when
+     * the response become available.
      */
-    FailureType getFailureType();
+    @SuppressWarnings("unchecked")
+    Future invoke(Message request);
 
-    void setRequest(Message request);
-    
-    /**
-     * Invoke a process hosted by the BPEL engine, blocking until the operation completes. 
-     * 
-     * @return the final status of the operation
-     * 
-     */
-    MessageExchange.Status invokeBlocking() throws BpelEngineException, TimeoutException;
-
-    /**
-     * Invoke a transactional process: this method must be invoked in a transaction. The invoking thread
-     * will be blocked for the duration of the call. 
-     * 
-     * @return the final status of the operation (provided that commit succeedes)
-     */
-    MessageExchange.Status invokeTransacted() throws BpelEngineException;
-
-    /**
-     * Invoke a reliable process: this method must be invoked in a transaction. The invoking thread will 
-     * not be blocked. When the response is available, it will be provided via the {@link MessageExchangeContext#onReliableReply(MyRoleMessageExchange)}.
-     * 
-     */
-    void invokeReliable();
-    
-    /**
-     * Invoke a processs asynchronously. This method will start an operation, but will not block; instead a future object is returned.
-     * 
-     * @return
-     */
-    Future<MessageExchange.Status> invokeAsync();
-        
     /**
      * Complete the message, exchange: indicates that the client has receive the
      * response (if any).
      */
     void complete();
+
+    /**
+     * Associate a client key with this message exchange.
+     * 
+     * @param clientKey
+     */
+    void setClientId(String clientKey);
 
     /**
      * Get the previously associated client key for this exchange.
@@ -114,6 +98,11 @@ public interface MyRoleMessageExchange extends WSMessageExchange {
      * @return service name
      */
     QName getServiceName();
-
+    
+    /**
+     * Should be called by the external partner when it's done with the
+     * message exchange. Ncessary for a better resource management and
+     * proper mex cleanup.
+     */
     void release(boolean instanceSucceeded);
 }

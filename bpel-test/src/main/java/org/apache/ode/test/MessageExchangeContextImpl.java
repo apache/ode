@@ -17,15 +17,38 @@
  * under the License.
  */
 
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.apache.ode.test;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Set;
 
 import javax.xml.namespace.QName;
 
-import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.Message;
+import org.apache.ode.bpel.iapi.MessageExchangeContext;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -45,9 +68,10 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 	// Probe Service is a simple concatination service
 	private static final QName probePT = new QName(PROBE_NS,"probeMessagePT");
 	private static final QName faultPT = new QName(FAULT_NS,"faultMessagePT");
-
 	
-	public void invokePartnerUnreliable(PartnerRoleMessageExchange mex)
+	private Message currentResponse;
+	
+	public void invokePartner(PartnerRoleMessageExchange mex)
 			throws ContextException {
 		QName calledPT = mex.getPortType().getQName();
 		
@@ -61,9 +85,13 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 
 	}
 
-	public void onMyRoleMessageExchangeStateChanged(MyRoleMessageExchange myRoleMex)
+	public void onAsyncReply(MyRoleMessageExchange myRoleMex)
 			throws BpelEngineException {
-
+		Status mStat = myRoleMex.getStatus();
+        if ( mStat == Status.RESPONSE ) {
+			currentResponse = myRoleMex.getResponse();
+		}
+		myRoleMex.complete();
 	}
 	
 	private void invokeProbeService(PartnerRoleMessageExchange prmx) {
@@ -74,9 +102,10 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 		if ( elm1 != null && elm2 != null ) {
 			String cat = elm2.getTextContent()+" -> "+elm1.getTextContent();
 			elm2.setTextContent(cat);
+			msg.setPart("probeData", elm2);
             final Message response = prmx.createMessage(prmx.getOperation().getOutput().getMessage().getQName());
+
             response.setMessage(msg.getMessage());
-            response.setPart("probeData", elm2);
 			prmx.reply(response);
 		}
 	}
@@ -129,27 +158,13 @@ public class MessageExchangeContextImpl implements MessageExchangeContext {
 		}
 
 	}
-
-
-    public void cancel(PartnerRoleMessageExchange mex) throws ContextException {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public Set<InvocationStyle> getSupportedInvocationStyle(PartnerRoleChannel prc, EndpointReference partnerEpr) {
-        return Collections.singleton(InvocationStyle.UNRELIABLE);
-    }
-
-    public void invokePartnerReliable(PartnerRoleMessageExchange mex) throws ContextException {
-        // TODO Auto-generated method stub
-    }
-
-    public void invokePartnerTransacted(PartnerRoleMessageExchange mex) throws ContextException {
-        // TODO Auto-generated method stub
-    }
-
-    public void invokeRestful(RESTOutMessageExchange mex) throws ContextException {
-        throw new UnsupportedOperationException("No support for RESTful invocations");
-    }
+	
+	public Message getCurrentResponse() {
+		return currentResponse;
+	}
+	
+	public void clearCurrentResponse() {
+		currentResponse = null;
+	}
 
 }

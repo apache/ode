@@ -16,198 +16,241 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.ode.scheduler.simple;
 
 import java.util.*;
 
+import javax.transaction.RollbackException;
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
+import javax.transaction.SystemException;
+import javax.transaction.TransactionManager;
+
+import junit.framework.TestCase;
+
+import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessor;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
+import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
 
-public class SimpleSchedulerTest extends SchedulerTestBase implements JobProcessor {
+public class SimpleSchedulerTest extends TestCase implements JobProcessor {
 
-  SimpleScheduler _scheduler;
-  ArrayList<JobInfo> _jobs;
+    DelegateSupport _ds;
+    SimpleScheduler _scheduler;
+    ArrayList<JobInfo> _jobs;
+    ArrayList<JobInfo> _commit;
+    TransactionManager _txm;
 
-  public void setUp() throws Exception {
-    super.setUp();
-    _scheduler = newScheduler("n1");
-    _jobs = new ArrayList<JobInfo>(100);
-  }
+    public void setUp() throws Exception {
+        _txm = new GeronimoTransactionManager();
+        _ds = new DelegateSupport();
 
-  public void tearDown() throws Exception {
-    _scheduler.shutdown();
-    super.tearDown();
-  }
-
-  public void testConcurrentExec() throws Exception {
-    _scheduler.start();
-    _txm.begin();
-    String jobId;
-    try {
-      jobId = _scheduler.schedulePersistedJob(newDetail("123"), new Date(System.currentTimeMillis() + 100));
-      Thread.sleep(200);
-      // Make sure we don't schedule until commit.
-      assertEquals(0, _jobs.size());
-    } finally {
-      _txm.commit();
-    }
-    // Wait for the job to be execed.
-    Thread.sleep(100);
-    // Should execute job,
-    assertEquals(1, _jobs.size());
-
-  }
-
-  public void testImmediateScheduling() throws Exception {
-    _scheduler.start();
-    _txm.begin();
-    try {
-      _scheduler.schedulePersistedJob(newDetail("123"), new Date());
-      Thread.sleep(100);
-      // Make sure we don't schedule until commit.
-      assertEquals(0, _jobs.size());
-    } finally {
-      _txm.commit();
-    }
-    Thread.sleep(100);
-    assertEquals(1, _jobs.size());
-  }
-
-  public void testStartStop() throws Exception {
-    _scheduler.start();
-    _txm.begin();
-    try {
-      for (int i = 0; i < 10; ++i) {
-        _scheduler.schedulePersistedJob(newDetail("123"), new Date(System.currentTimeMillis() + (i * 100)));
-      }
-    } finally {
-      _txm.commit();
-    }
-    Thread.sleep(100);
-    _scheduler.stop();
-    int jobs = _jobs.size();
-    assertTrue(jobs > 0);
-    assertTrue(jobs < 10);
-    Thread.sleep(200);
-    assertEquals(jobs, _jobs.size());
-    _scheduler.start();
-    Thread.sleep(1000);
-    assertEquals(10, _jobs.size());
-  }
-
-  public void testNearFutureScheduling() throws Exception {
-    // speed things up a bit to hit the right code paths
-    _scheduler.setNearFutureInterval(1000);
-    _scheduler.setImmediateInterval(500);
-    _scheduler.start();
-
-    _txm.begin();
-    try {
-      _scheduler.schedulePersistedJob(newDetail("123"), new Date(System.currentTimeMillis() + 750));
-    } finally {
-      _txm.commit();
+        _scheduler = newScheduler("n1");
+        _jobs = new ArrayList<JobInfo>(100);
+        _commit = new ArrayList<JobInfo>(100);
     }
 
-    Thread.sleep(850);
-    assertEquals(1, _jobs.size());
-  }
-
-  public void testFarFutureScheduling() throws Exception {
-    // speed things up a bit to hit the right code paths
-    _scheduler.setNearFutureInterval(700);
-    _scheduler.setImmediateInterval(300);
-    _scheduler.start();
-
-    _txm.begin();
-    try {
-      _scheduler.schedulePersistedJob(newDetail("123"), new Date(System.currentTimeMillis() + 750));
-    } finally {
-      _txm.commit();
+    public void tearDown() throws Exception {
+        _scheduler.shutdown();
     }
 
-    Thread.sleep(850);
-    assertEquals(1, _jobs.size());
-  }
-
-  public void testRecovery() throws Exception {
-    // speed things up a bit to hit the right code paths
-    _scheduler.setNearFutureInterval(200);
-    _scheduler.setImmediateInterval(100);
-    _scheduler.setStaleInterval(50);
-
-    _txm.begin();
-    try {
-      _scheduler.schedulePersistedJob(newDetail("immediate"), new Date(System.currentTimeMillis()));
-      _scheduler.schedulePersistedJob(newDetail("near"), new Date(System.currentTimeMillis() + 110));
-      _scheduler.schedulePersistedJob(newDetail("far"), new Date(System.currentTimeMillis() + 250));
-    } finally {
-      _txm.commit();
+    public void testConcurrentExec() throws Exception  {
+        _scheduler.start();
+        for (int i=0; i<10; i++) {
+            _txm.begin();
+            String jobId;
+            try {
+                int jobs = _jobs.size();
+                jobId = _scheduler.schedulePersistedJob(newDetail("123"), new Date(System.currentTimeMillis() + 200));
+                Thread.sleep(100);
+                // we're using transacted jobs which means it will commit at the end
+                // if the job is scheduled, the following assert is not valid @seanahn
+                // assertEquals(jobs, _jobs.size());            
+            } finally {
+                _txm.commit();
+            }
+            // Delete from DB
+            assertEquals(true,_ds.delegate().deleteJob(jobId, "n1"));
+            // Wait for the job to be execed.
+            Thread.sleep(250);
+            // We should always have same number of jobs/commits
+            assertEquals(_jobs.size(), _commit.size());
+        }
+    }
+    
+    public void testImmediateScheduling() throws Exception {
+        _scheduler.start();
+        _txm.begin();
+        try {
+            _scheduler.schedulePersistedJob(newDetail("123"), new Date());
+            Thread.sleep(100);
+            // we're using transacted jobs which means it will commit at the end
+            // if the job is scheduled, the following assert is not valid @seanahn
+            // assertEquals(jobs, _jobs.size());        
+        } finally {
+            _txm.commit();
+        }
+        Thread.sleep(100);
+        assertEquals(1, _jobs.size());
     }
 
-    _scheduler = newScheduler("n3");
-    _scheduler.setNearFutureInterval(200);
-    _scheduler.setImmediateInterval(100);
-    _scheduler.setStaleInterval(50);
-    _scheduler.start();
-    Thread.sleep(400);
-    assertEquals(3, _jobs.size());
-  }
-
-  public void testRecoverySuppressed() throws Exception {
-    // speed things up a bit to hit the right code paths
-    _scheduler.setNearFutureInterval(200);
-    _scheduler.setImmediateInterval(100);
-    _scheduler.setStaleInterval(50);
-
-    // schedule some jobs ...
-    _txm.begin();
-    try {
-      _scheduler.schedulePersistedJob(newDetail("immediate"), new Date(System.currentTimeMillis()));
-      _scheduler.schedulePersistedJob(newDetail("near"), new Date(System.currentTimeMillis() + 150));
-      _scheduler.schedulePersistedJob(newDetail("far"), new Date(System.currentTimeMillis() + 250));
-    } finally {
-      _txm.commit();
+    public void testStartStop() throws Exception {
+        _scheduler.start();
+        _txm.begin();
+        try {
+            for (int i = 0; i < 10; ++i)
+                _scheduler.schedulePersistedJob(newDetail("123"), new Date(System.currentTimeMillis() + (i * 100)));
+        } finally {
+            _txm.commit();
+        }
+        Thread.sleep(100);
+        _scheduler.stop();
+        int jobs = _jobs.size();
+        assertTrue(jobs > 0);
+        assertTrue(jobs < 10);
+        Thread.sleep(200);
+        assertEquals(jobs, _jobs.size());
+        _scheduler.start();
+        Thread.sleep(1000);
+        assertEquals(10, _jobs.size());
     }
 
-    // but don't start the scheduler....
+    public void testNearFutureScheduling() throws Exception {
+        // speed things up a bit to hit the right code paths
+        _scheduler.setNearFutureInterval(10000);
+        _scheduler.setImmediateInterval(5000);
+        _scheduler.start();
 
-    // create a second node for the scheduler.
-    SimpleScheduler scheduler = newScheduler("n3");
-    scheduler.setNearFutureInterval(200);
-    scheduler.setImmediateInterval(100);
-    scheduler.setStaleInterval(50);
-    scheduler.start();
-    for (int i = 0; i < 40; ++i) {
-      scheduler.updateHeartBeat("n1");
-      Thread.sleep(10);
+        _txm.begin();
+        try {
+            _scheduler.schedulePersistedJob(newDetail("123"), new Date(System.currentTimeMillis() + 7500));
+        } finally {
+            _txm.commit();
+        }
+
+        Thread.sleep(8500);
+        assertEquals(1, _jobs.size());
     }
 
-    scheduler.stop();
+    public void testFarFutureScheduling() throws Exception {
+        // speed things up a bit to hit the right code paths
+        _scheduler.setNearFutureInterval(7000);
+        _scheduler.setImmediateInterval(3000);
+        _scheduler.start();
 
-    assertTrue(_jobs.size() <= 1);
-    if (_jobs.size() == 1) {
-      assertEquals("far", _jobs.get(0).jobDetail.getDetailsExt().get("foo"));
+        _txm.begin();
+        try {
+            _scheduler.schedulePersistedJob(newDetail("123"), new Date(System.currentTimeMillis() + 7500));
+        } finally {
+            _txm.commit();
+        }
+
+        Thread.sleep(8500);
+        assertEquals(1, _jobs.size());
     }
-  }
 
-  public void onScheduledJob(final JobInfo jobInfo) throws JobProcessorException {
-    synchronized (_jobs) {
-      _jobs.add(jobInfo);
+    public void testRecovery() throws Exception {
+        // speed things up a bit to hit the right code paths
+        _scheduler.setNearFutureInterval(2000);
+        _scheduler.setImmediateInterval(1000);
+        _scheduler.setStaleInterval(500);
+
+        _txm.begin();
+        try {
+            _scheduler.schedulePersistedJob(newDetail("immediate"), new Date(System.currentTimeMillis()));
+            _scheduler.schedulePersistedJob(newDetail("near"), new Date(System.currentTimeMillis() + 1100));
+            _scheduler.schedulePersistedJob(newDetail("far"), new Date(System.currentTimeMillis() + 2500));
+        } finally {
+            _txm.commit();
+        }
+
+        _scheduler = newScheduler("n3");
+        _scheduler.setNearFutureInterval(2000);
+        _scheduler.setImmediateInterval(1000);
+        _scheduler.setStaleInterval(1000);
+        _scheduler.start();
+        Thread.sleep(4000);
+        assertEquals(3, _jobs.size());
     }
-  }
 
-  Scheduler.JobDetails newDetail(String x) {
-    Scheduler.JobDetails jd = new Scheduler.JobDetails();
-    jd.getDetailsExt().put("foo", x);
-    return jd;
-  }
+    public void testRecoverySuppressed() throws Exception {
+        // speed things up a bit to hit the right code paths
+        _scheduler.setNearFutureInterval(2000);
+        _scheduler.setImmediateInterval(1000);
+        _scheduler.setStaleInterval(500);
 
-  private SimpleScheduler newScheduler(String nodeId) {
-    SimpleScheduler scheduler = new SimpleScheduler(nodeId, _factory, _txm, new Properties());
-    scheduler.setJobProcessor(this);
-    return scheduler;
-  }
+        _txm.begin();
+        try {
+            _scheduler.schedulePersistedJob(newDetail("immediate"), new Date(System.currentTimeMillis()));
+            _scheduler.schedulePersistedJob(newDetail("near"), new Date(System.currentTimeMillis() + 1100));
+            _scheduler.schedulePersistedJob(newDetail("far"), new Date(System.currentTimeMillis() + 15000));
+        } finally {
+            _txm.commit();
+        }
+        _scheduler.stop();
+
+        _scheduler = newScheduler("n3");
+        _scheduler.setNearFutureInterval(2000);
+        _scheduler.setImmediateInterval(1000);
+        _scheduler.setStaleInterval(1000);
+        _scheduler.start();
+        for (int i = 0; i < 40; ++i) {
+            _scheduler.updateHeartBeat("n1");
+            Thread.sleep(100);
+        }
+
+        _scheduler.stop();
+        Thread.sleep(1000);
+
+        assertEquals(0, _jobs.size());
+    }
+
+    public void onScheduledJob(final JobInfo jobInfo) throws JobProcessorException {
+        synchronized (_jobs) {
+            _jobs.add(jobInfo);
+        }
+        
+        try {
+            _txm.getTransaction().registerSynchronization(new Synchronization() {
+
+                public void afterCompletion(int arg0) {
+                    if (arg0 == Status.STATUS_COMMITTED) 
+                        _commit.add(jobInfo);
+                }
+
+                public void beforeCompletion() {
+                    // TODO Auto-generated method stub
+                    
+                }
+                
+            });
+        } catch (IllegalStateException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (RollbackException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (SystemException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+    }
+
+    Scheduler.JobDetails newDetail(String x) {
+        Scheduler.JobDetails jd = new Scheduler.JobDetails();
+        jd.getDetailsExt().put("foo", x);
+        return jd;
+    }
+
+    private SimpleScheduler newScheduler(String nodeId) {
+        SimpleScheduler scheduler = new SimpleScheduler(nodeId, _ds.delegate(), new Properties());
+        scheduler.setJobProcessor(this);
+        scheduler.setTransactionManager(_txm);
+        return scheduler;
+    }
+    
 }
-

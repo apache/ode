@@ -18,38 +18,27 @@
  */
 package org.apache.ode.test;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class StructuredActivities20Test extends BPELTestAbstract {
-	@Ignore
 	@Test public void testFlowActivity1() throws Throwable {
         // Test Flow with XPath20
         go("/bpel/2.0/TestFlowActivity1");
     }
-	@Ignore
 	@Test public void testFlowActivity2() throws Throwable {
         // Test Flow with XPath10
         go("/bpel/2.0/TestFlowActivity2");
     }
- 	@Test public void testFlowLinks() throws Throwable {
-         // Test Flow with XPath10
-         go("/bpel/2.0/TestFlowLinks");
-     }
-    @Test public void testIsolatedScopes1() throws Throwable {
+	@Test public void testFlowLinks() throws Throwable {
         // Test Flow with XPath10
-        go("/bpel/2.0/TestIsolatedScopes1");
+        go("/bpel/2.0/TestFlowLinks");
     }
-	@Ignore
-    @Test public void testForEach() throws Throwable {
+	@Test public void testForEach() throws Throwable {
+        // Test Flow with XPath10
         go("/bpel/2.0/TestForEach");
     }
-    @Test public void testPickOneWay() throws Throwable {
+	@Test public void testPickOneWay() throws Throwable {
         // Test Flow with XPath10
         go("/bpel/2.0/TestPickOneWay");
-    }
-    @Override
-    protected int getMaximumWaitInMillis() {
-    	return 120 * 1000;
     }
 }

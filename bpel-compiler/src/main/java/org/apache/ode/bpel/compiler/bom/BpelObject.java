@@ -18,12 +18,11 @@
  */
 package org.apache.ode.bpel.compiler.bom;
 
-import org.apache.ode.bpel.compiler.SourceLocation;
+import org.apache.ode.bpel.compiler.api.SourceLocation;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
-import org.apache.ode.utils.stl.UnaryFunction;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -42,7 +41,7 @@ import java.util.Map;
  * location information (i.e. line numbers) and namespace context (XML namespace
  * prefix maps).
  */
-public class BpelObject extends SourceLocation {
+public class BpelObject implements SourceLocation {
 
     public static final QName ATTR_LINENO = new QName("urn:org.apache.ode.bpel.compiler", "lineno");
 
@@ -131,15 +130,7 @@ public class BpelObject extends SourceLocation {
         return e.getElement();
     }
 
-    public List<Element> getExtensibilityElements(QName extElName) {
-        return CollectionsX.transform(new ArrayList<Element>(), getChildren(extElName), new UnaryFunction<BpelObject, Element>() {
-			public Element apply(BpelObject x) {
-				return x.getElement();
-			}
-		});
-    }
-
-    public Element getFirstExtensibilityElement() {
+    public Element getFirstExtensibilityElementElement() {
     	Element child = null;
     	NodeList nl = getElement().getChildNodes();
         for (int i = 0; i < nl.getLength(); ++i) {

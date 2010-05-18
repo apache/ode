@@ -21,6 +21,7 @@ package org.apache.ode.bpel.compiler.bom;
 import java.util.Collections;
 import java.util.List;
 
+import javax.xml.namespace.QName;
 
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
@@ -159,17 +160,9 @@ public class Scope extends JoinFailureSuppressor {
             return Boolean.TRUE;
         if ("no".equals(value))
             return Boolean.FALSE;
-        return null;
+        return Boolean.FALSE;
     }
-    
-    public Boolean getIsolatedScope() {
-        String value = getAttribute("isolated", "no");
-        if ("yes".equals(value))
-            return Boolean.TRUE;
-        if ("no".equals(value))
-            return Boolean.FALSE;
-        return null;
-    }
+
     /**
      * Get a partnerLink declared in this scope.
      * 

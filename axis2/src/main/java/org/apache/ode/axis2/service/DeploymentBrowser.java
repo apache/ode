@@ -1,25 +1,40 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.apache.ode.axis2.service;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import org.apache.ode.store.ProcessStoreImpl;
+import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.utils.fs.FileUtils;
+import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.AxisOperation;
+import org.apache.commons.lang.StringUtils;
 
-import javax.servlet.ServletException;
+import javax.xml.namespace.QName;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.namespace.QName;
-
-import org.apache.axis2.description.AxisOperation;
-import org.apache.axis2.description.AxisService;
-import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.commons.lang.StringUtils;
-import org.apache.ode.store.ProcessStoreImpl;
-import org.apache.ode.utils.fs.FileUtils;
+import javax.servlet.ServletException;
+import java.io.*;
+import java.util.List;
+import java.util.Iterator;
+import java.util.ArrayList;
 
 /**
  * handles a set of URLs all starting with /deployment to publish all files in
@@ -30,6 +45,7 @@ public class DeploymentBrowser {
     private ProcessStoreImpl _store;
     private AxisConfiguration _config;
     private File _appRoot;
+
 
     public DeploymentBrowser(ProcessStoreImpl store, AxisConfiguration config, File appRoot) {
         _store = store;
@@ -82,7 +98,7 @@ public class DeploymentBrowser {
                                         Iterator iter = service.getOperations();
                                         ArrayList<String> ops = new ArrayList<String>();
                                         while (iter.hasNext()) ops.add(((AxisOperation)iter.next()).getName().getLocalPart());
-                                        out.write("<li>Operations: " + StringUtils.join(ops.iterator(), ", ") + "</li></ul>");
+                                        out.write("<li>Operations: " + StringUtils.join(ops, ", ") + "</li></ul>");
                                     }
                             }
                         });
@@ -135,7 +151,7 @@ public class DeploymentBrowser {
                         renderHtml(response, "Files in Bundle " + segments[1], new DocBody() {
                             public void render(Writer out) throws IOException {
                                 List<QName> processes = _store.listProcesses(segments[1]);
-                                if (processes != null) {
+                                if (processes != null && processes.size() > 0) {
                                     List<File> files = _store.getProcessConfiguration(processes.get(0)).getFiles();
                                     for (File file : files) {
                                         String relativePath = file.getPath().substring(file.getPath()
@@ -149,10 +165,12 @@ public class DeploymentBrowser {
                         });
                     } else if (segments.length > 2) {
                         List<QName> processes = _store.listProcesses(segments[1]);
-                        if (processes != null) {
+                        if (processes != null && processes.size() > 0) {
                             List<File> files = _store.getProcessConfiguration(processes.get(0)).getFiles();
                             for (final File file : files) {
                                 String relativePath = requestURI.substring(deplUri + 12 + 9 + segments[1].length());
+                                // replace slashes with the correct file separator so the match below is not always false
+                                relativePath = relativePath.replace('/', File.separatorChar);
                                 if (file.getPath().endsWith(relativePath)) {
                                     renderXml(response, new DocBody() {
                                         public void render(Writer out) throws IOException {
@@ -170,65 +188,65 @@ public class DeploymentBrowser {
                             });
                         }
                     }
-                } else if("getBundleDocs".equals(segments[0])){
-                    if(segments.length == 1){
-                        renderXml(response, new DocBody(){
-                            public void render(Writer out) throws IOException{
+                } else if ("getBundleDocs".equals(segments[0])) {
+                    if (segments.length == 1) {
+                        renderXml(response, new DocBody() {
+                            public void render(Writer out) throws IOException {
                                 out.write("<getBundleDocsResponse>");
                                 out.write("<error>Not enough args..</error>");
                                 out.write("</getBundleDocsResponse>");
                             }
                         });
-                    }else if (segments.length == 2){
+                    } else if (segments.length == 2) {
                         final String bundleName = segments[1];
                         final List<QName> processes = _store.listProcesses(bundleName);
-                        if(processes != null){
-                            renderXml(response, new DocBody(){
-                                public void render(Writer out) throws IOException{
+                        if (processes != null) {
+                            renderXml(response, new DocBody() {
+                                public void render(Writer out) throws IOException {
                                     out.write("<getBundleDocsResponse><name>"+ bundleName +"</name>");
                                     //final List<File> files = _store.getProcessConfiguration(processes.get(0)).getFiles();
                                     //final String pid = _store.getProcessConfiguration(processes.get(0)).getProcessId().toString();
                             
-                                    for(final QName process: processes){
+                                    for (final QName process: processes) {
                                         List<File> files = _store.getProcessConfiguration(process).getFiles();
                                         String pid = _store.getProcessConfiguration(process).getProcessId().toString();
                                         out.write("<process><pid>"+pid+"</pid>");
-                                        for (final File file : files){
-                                            if(file.getPath().endsWith(".wsdl")){
+                                        for (final File file : files) {
+                                            if (file.getPath().endsWith(".wsdl")) {
                                                 String relativePath = file.getPath().substring(_store.getDeployDir().getCanonicalPath().length() + 1);
-                                                out.write("<wsdl>"+ relativePath + "</wsdl>");                        				
+                                                out.write("<wsdl>"+ relativePath + "</wsdl>");                                      
                                             }
-                                            if(file.getPath().endsWith(".bpel")){	
+                                            if (file.getPath().endsWith(".bpel")) { 
                                                 String relativePath = file.getPath().substring(_store.getDeployDir().getCanonicalPath().length() + 1);
                                                 out.write("<bpel>"+ relativePath + "</bpel>");
                                             }
                                             
                                         }
                                         out.write("</process>");
-                                    }                					
+                                    }                                   
                                     out.write("</getBundleDocsResponse>");
                                 }
                             });
                             
                         }
                     }
-                }else if("getProcessDefinition".equals(segments[0])){
-                    if(segments.length == 1){
-                        renderXml(response, new DocBody(){
+                } else if ("getProcessDefinition".equals(segments[0])) {
+                    if (segments.length == 1) {
+                        renderXml(response, new DocBody() {
                             public void render(Writer out) throws IOException{
                                 out.write("<getProcessDefinitionResponse>");
                                 out.write("<error>Not enough args..</error>");
                                 out.write("</getProcessDefinitionResponse>");
                             }
                         });
-                    }else if (segments.length == 2){
+                    } else if (segments.length == 2) {
                         String processName = segments[1]; 
                         for (QName process :_store.getProcesses()) {
                             String[] nameVer = process.getLocalPart().split("-");
-                            if(processName.equals(nameVer[0])){
+                            if(processName.equals(nameVer[0])) {
                                 final String url = root + bundleUrlFor(_store.getProcessConfiguration(process).getBpelDocument());
-                                renderXml(response, new DocBody(){
-                                    public void render(Writer out) throws IOException{
+                                renderXml(response, new DocBody() {
+                                    public void render(Writer out) throws IOException {
                                         out.write("<getProcessDefinition>");
                                         out.write("<url>"+ url +"</url>");
                                         out.write("</getProcessDefinition>");
@@ -236,6 +254,7 @@ public class DeploymentBrowser {
                                 });
                             }
                         }
+                        
                     }
                 }
             }
@@ -257,8 +276,9 @@ public class DeploymentBrowser {
         out.write("</body></html>");
     }
     private void renderXml(HttpServletResponse response, DocBody docBody) throws IOException {
-        response.setContentType("text/xml");
-        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/xml; charset=utf-8");  
+        //response.setContentType("application/xml");
+        //response.setCharacterEncoding("UTF-8");
 
         Writer out = response.getWriter();
         docBody.render(out);

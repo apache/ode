@@ -69,9 +69,6 @@ public class ChannelFactory {
         }
 
         public boolean equals(Object other) {
-        	if (other == null) {
-        		return false;
-        	}
             return ((ChannelInvocationHandler) other)._backend.equals(_backend);
         }
 

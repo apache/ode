@@ -26,79 +26,80 @@ import java.io.*;
  */
 public class SerializableUtils {
 
-    /**
-     * Clone a <code>Serializable</code> object; for use when a
-     * <code>clone()</code> method is not available.
-     *
-     * @param obj
-     *          object to clone
-     *
-     * @return clone object
-     *
-     * @throws RuntimeException
-     */
-    public static Object cloneSerializable(Object obj) {
-        Object ret = null;
+  /**
+   * Clone a <code>Serializable</code> object; for use when a
+   * <code>clone()</code> method is not available.
+   * 
+   * @param obj
+   *          object to clone
+   * 
+   * @return clone object
+   * 
+   * @throws RuntimeException
+   */
+  public static Object cloneSerializable(Object obj) {
+    Object ret = null;
 
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream(StreamUtils.DEFAULT_BUFFER_SIZE);
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(obj);
-            oos.close();
+    try {
+      ByteArrayOutputStream baos = new ByteArrayOutputStream(StreamUtils.DEFAULT_BUFFER_SIZE);
+      ObjectOutputStream oos = new ObjectOutputStream(baos);
+      oos.writeObject(obj);
+      oos.close();
 
-            ByteArrayInputStream bis = new ByteArrayInputStream(baos.toByteArray());
-            ObjectInputStream ois = new ObjectInputStream(bis);
+      ByteArrayInputStream bis = new ByteArrayInputStream(baos.toByteArray());
+      ObjectInputStream ois = new ObjectInputStream(bis);
 
-            try {
-                ret = ois.readObject();
-            }
-            catch (ClassNotFoundException cnfe) {
-                assert false;
-            }
+      try {
+        ret = ois.readObject();
+      }
+      catch (ClassNotFoundException cnfe) {
+        assert false;
+      }
 
-            ois.close();
-        }
-        catch (IOException ioex) {
-            throw new RuntimeException("Unable to clone object: " + obj);
-        }
-
-        return ret;
+      ois.close();
+    }
+    catch (IOException ioex) {
+      throw new RuntimeException("Unable to clone object: " + obj);
     }
 
-    public static byte[] toBytes(Object obj) {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream(StreamUtils.DEFAULT_BUFFER_SIZE);
-        try {
-            ObjectOutputStream oos = new ObjectOutputStream(bos);
-            oos.writeObject(obj);
-        }
-        catch (IOException e) {
-            throw new RuntimeException("Error serializing object: " + obj.getClass() + ".", e);
-        }
-        return bos.toByteArray();
-    }
+    return ret;
+  }
 
-    public static Object toObject(InputStream binaryStream, final ClassLoader cl) {
-        try {
-            ObjectInputStream ois = new ObjectInputStream(binaryStream) {
+  public static byte[] toBytes(Object obj) {
+    ByteArrayOutputStream bos = new ByteArrayOutputStream(StreamUtils.DEFAULT_BUFFER_SIZE);
+    try {
+      ObjectOutputStream oos = new ObjectOutputStream(bos);
+      oos.writeObject(obj);
+    }
+    catch (IOException e) {
+      throw new RuntimeException("Error serializing object: " + obj.getClass() + ".", e);
+    }
+    return bos.toByteArray();
+  }
 
-                protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
-                    String name = desc.getName();
-                    try {
-                        return Class.forName(name, false, cl);
-                    } catch (ClassNotFoundException ex) {
-                        return super.resolveClass(desc);
-                    }
-                }
-            };
-            return ois.readObject();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+  public static Object toObject(InputStream binaryStream, final ClassLoader cl) {
+    try {
+      ObjectInputStream ois = new ObjectInputStream(binaryStream) {
+
+        protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+          String name = desc.getName();
+          try {
+              return Class.forName(name, false, cl);
+          } catch (ClassNotFoundException ex) {
+              return super.resolveClass(desc);
+          }
         }
+      };
+      return ois.readObject();
     }
+    catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 
-    public static Object toObject(byte[] arr, final ClassLoader cl) {
-        ByteArrayInputStream bis = new ByteArrayInputStream(arr);
-        return toObject(bis, cl);
-    }
+  public static Object toObject(byte[] arr, final ClassLoader cl) {
+    ByteArrayInputStream bis = new ByteArrayInputStream(arr);
+    return toObject(bis, cl);
+  }
 
 }

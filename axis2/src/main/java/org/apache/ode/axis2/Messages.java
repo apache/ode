@@ -115,24 +115,12 @@ public class Messages extends MessageBundle {
         return format("Registered message exchange interceptor: {0}", interceptorCN);
     }
 
-    public String msgContextInterceptorRegistered(String interceptorCN) {
-        return format("Registered context interceptor: {0}", interceptorCN);
-    }
-
     public String msgOdeShutdownCompleted() {
         return "Shutdown completed. ";
     }
 
-    public String msgOdeUsingBpelDAOImpl(String className) {
-        return format("Using Bpel DAO Connection Factory class {0}.", className);
-    }
-
-    public String msgOdeUsingStoreDAOImpl(String className) {
-        return format("Using Conf Store DAO Connection Factory class {0}.", className);
-    }
-
-    public String msgOdeUsingSchedDAOImpl(String className) {
-        return format("Using Scheduler DAO Connection Factory class {0}.", className);
+    public String msgOdeUsingDAOImpl(String className) {
+        return format("Using DAO Connection Factory class {0}.", className);
     }
 
     public String msgDAOInstantiationFailed(String className) {

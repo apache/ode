@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<bpel:process xmlns:bpel="http://schemas.xmlsoap.org/ws/2004/03/business-process/" xmlns:pnlk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:this="http://example.com/Process/Main" xmlns:tns="http://www.example.org/NewWSDLFile/" xmlns:NewWSDLFilePartner="http://www.example.org/NewWSDLFilePartner/" xmlns:diag="http://example.com/Process" xmlns:Partner="http://example.com/Process/Partner" xmlns:Pool="http://example.com/Process/Pool" xmlns:bpmn="http://www.intalio.com/bpms" xmlns:atomic="http://ode.apache.org/atomicScope" queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" bpmn:label="Main" bpmn:id="_SyDeYE8xEd2jjLZLPJ3siQ" name="Main" targetNamespace="http://example.com/Process/Main">
+  <bpel:import namespace="http://example.com/Process" location="Process.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:import namespace="http://example.com/Process/Main" location="Process-Main.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:import namespace="http://www.example.org/NewWSDLFile/" location="NewWSDLFile.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:import namespace="http://www.example.org/NewWSDLFilePartner/" location="NewWSDLFilePartner.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:partnerLinks>
+    <bpel:partnerLink name="mainAndPoolForPortTypeNewWSDLFilePlkVar" partnerLinkType="diag:MainAndPoolForPortTypeNewWSDLFilePlk" myRole="Main_for_Pool"/>
+    <bpel:partnerLink name="partnerAndMainForPortTypeNewWSDLFilePartnerPlkVar" partnerLinkType="diag:PartnerAndMainForPortTypeNewWSDLFilePartnerPlk" initializePartnerRole="true" partnerRole="Partner_for_Main"/>
+    <bpel:partnerLink name="partnerAndMainForPortTypeNewWSDLFilePlkVar" partnerLinkType="diag:PartnerAndMainForPortTypeNewWSDLFilePlk" myRole="Main_for_Partner"/>
+  </bpel:partnerLinks>
+  <bpel:correlationSets>
+    <bpel:correlationSet name="cs" properties="this:prop"/>
+  </bpel:correlationSets>
+  <bpel:variables>
+    <bpel:variable name="tnsNewOperationRequestMsg" messageType="tns:NewOperationRequest"/>
+    <bpel:variable name="tnsNewOperationResponseMsg" messageType="tns:NewOperationResponse"/>
+    <bpel:variable name="newWSDLFilePartnerNewOperationRequestMsg" messageType="NewWSDLFilePartner:NewOperationRequest"/>
+    <bpel:variable name="newWSDLFilePartnerNewOperationResponseMsg" messageType="NewWSDLFilePartner:NewOperationResponse"/>
+    <bpel:variable name="tnsRespOperationRequestMsg" messageType="tns:RespOperationRequest"/>
+    <bpel:variable name="tnsRespOperationResponseMsg" messageType="tns:RespOperationResponse"/>
+  </bpel:variables>
+  <bpel:sequence>
+    <bpel:receive partnerLink="mainAndPoolForPortTypeNewWSDLFilePlkVar" portType="tns:NewWSDLFile" operation="NewOperation"
+                  variable="tnsNewOperationRequestMsg" createInstance="yes" bpmn:label="EventStartMessage" bpmn:id="_WHmd4E8xEd2jjLZLPJ3siQ">
+      <bpel:correlations>
+        <bpel:correlation set="cs" initiate="yes"></bpel:correlation>
+      </bpel:correlations>
+    </bpel:receive>
+    <bpel:assign name="init-variables-Main">
+      <bpel:copy bpmn:label="$tnsNewOperationResponseMsg">
+        <bpel:from>
+          <bpel:literal>
+<tns:NewOperationResponse>
+  <out>
+  </out>
+</tns:NewOperationResponse>
+          </bpel:literal>
+        </bpel:from>
+        <bpel:to>$tnsNewOperationResponseMsg.parameters</bpel:to>
+      </bpel:copy>
+      <bpel:copy bpmn:label="$newWSDLFilePartnerNewOperationRequestMsg">
+        <bpel:from>
+          <bpel:literal><NewWSDLFilePartner:NewOperation>
+    <in>
+    </in>
+    <id>
+    </id>
+</NewWSDLFilePartner:NewOperation>
+          </bpel:literal>
+        </bpel:from>
+        <bpel:to>$newWSDLFilePartnerNewOperationRequestMsg.parameters</bpel:to>
+      </bpel:copy>
+      <bpel:copy bpmn:label="$tnsRespOperationResponseMsg">
+        <bpel:from>
+          <bpel:literal><tns:RespOperationResponse>
+    <out>
+    </out>
+</tns:RespOperationResponse>
+          </bpel:literal>
+        </bpel:from>
+        <bpel:to>$tnsRespOperationResponseMsg.parameters</bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+    <bpel:assign bpmn:label="Task" bpmn:id="_Zb0nsE8xEd2jjLZLPJ3siQ">
+      <bpel:copy>
+        <bpel:from>$tnsNewOperationRequestMsg.parameters/in</bpel:from>
+        <bpel:to>$newWSDLFilePartnerNewOperationRequestMsg.parameters/in</bpel:to>
+      </bpel:copy>
+      <bpel:copy>
+        <bpel:from>$tnsNewOperationRequestMsg.parameters/id</bpel:from>
+        <bpel:to>$newWSDLFilePartnerNewOperationRequestMsg.parameters/id</bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+    <bpel:invoke partnerLink="partnerAndMainForPortTypeNewWSDLFilePartnerPlkVar" portType="NewWSDLFilePartner:NewWSDLFilePartner" operation="NewOperation" inputVariable="newWSDLFilePartnerNewOperationRequestMsg" outputVariable="newWSDLFilePartnerNewOperationResponseMsg" bpmn:label="Task" bpmn:id="_Zb0nsE8xEd2jjLZLPJ3siQ"></bpel:invoke>
+    <bpel:receive partnerLink="partnerAndMainForPortTypeNewWSDLFilePlkVar" portType="tns:NewWSDLFile" operation="RespOperation" variable="tnsRespOperationRequestMsg" bpmn:label="Task" bpmn:id="_4qhNcE8zEd2jjLZLPJ3siQ">
+      <bpel:correlations>
+        <bpel:correlation set="cs" initiate="no"></bpel:correlation>
+      </bpel:correlations>
+    </bpel:receive>
+    <bpel:reply partnerLink="partnerAndMainForPortTypeNewWSDLFilePlkVar" portType="tns:NewWSDLFile" operation="RespOperation" variable="tnsRespOperationResponseMsg" bpmn:label="Task" bpmn:id="_4qhNcE8zEd2jjLZLPJ3siQ"></bpel:reply>
+    <bpel:assign bpmn:label="EventEndMessage" bpmn:id="_XUaPQE8xEd2jjLZLPJ3siQ">
+      <bpel:copy>
+        <bpel:from>$tnsRespOperationRequestMsg.parameters/in</bpel:from>
+        <bpel:to>$tnsNewOperationResponseMsg.parameters/out</bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+    <bpel:reply partnerLink="mainAndPoolForPortTypeNewWSDLFilePlkVar" portType="tns:NewWSDLFile" operation="NewOperation" variable="tnsNewOperationResponseMsg" bpmn:label="EventEndMessage" bpmn:id="_XUaPQE8xEd2jjLZLPJ3siQ"></bpel:reply>
+  </bpel:sequence>
+</bpel:process>

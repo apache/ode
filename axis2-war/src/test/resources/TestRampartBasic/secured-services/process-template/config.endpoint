@@ -1,0 +1,5 @@
+
+
+alias.sample-ns={sample.namespace}
+sample-ns.{sample.service.name}.ode.address=http://localhost:${system.test.port.0}/axis2/processes/{sample.service.name}
+

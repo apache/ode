@@ -21,7 +21,8 @@
 
 	<property name="db.scripts.dir" value="${basedir}/target" />
 	<property name="sql.dir" value="${basedir}/src/main/sql"/>
-    <property name="dao-hibernate.classes" value="${basedir}/../dao-hibernate/target/classes" />
+        <property name="dao-hibernate.classes" value="${basedir}/../dao-hibernate/target/classes" />
+	<property name="bpel-store.classes" value="${basedir}/../bpel-store/target/classes" />
 
 	<path id="classpath">
 	  <pathelement path="${maven.runtime.classpath}"/>
@@ -87,8 +88,12 @@
 		    <include name="**/*.hbm.xml"/>
                     <exclude name="**/HMessageExchangeProperty.hbm.xml" />
 		</fileset>
+		<fileset dir="${bpel-store.classes}/">
+		    <include name="**/*.hbm.xml"/>
+		</fileset>
 	    </schemaexport>
-        <concat destfile="${db.scripts.dir}/scripts/@{db}-hib.sql">
+        <concat destfile="${db.scripts.dir}/@{db}.sql">
+          <fileset file="${sql.dir}/common.sql"/>
           <fileset file="${sql.dir}/simplesched-@{db}.sql"/>
           <fileset file="${db.scripts.dir}/partial.@{db}.sql"/>
         </concat>
@@ -98,5 +103,4 @@
   </macrodef>
 
 </project>
-
 

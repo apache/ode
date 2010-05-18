@@ -92,6 +92,36 @@
 
 
         <!-- ############################################### -->
+        <!-- 500_expected_xml_body - Fault expected  -->
+        <!-- ############################################### -->
+        <scope>
+            <faultHandlers>
+                <catch faultMessageType="dummy:UpdateFault" faultName="dummy:UpdateException" faultVariable="faultVar">
+                    <empty/>
+                </catch>
+            </faultHandlers>
+            <sequence>
+                <assign>
+                    <copy>
+                        <from>'500_expected_xml_body'</from>
+                        <to variable="putMsg" header="Fault-Type"/>
+                    </copy>
+                </assign>
+                <invoke partnerLink="blogPartnerLink" portType="dummy:BlogPortType"
+                        operation="doPUT" inputVariable="putMsg" outputVariable="noPartMsg"/>
+                <assign>
+                    <copy>
+                        <from>'500_expected_xml_body: A fault should have been thrown'</from>
+                        <to>$outputVar.TestPart</to>
+                    </copy>
+                </assign>
+                <reply name="end" partnerLink="helloPartnerLink" portType="test:HelloPortType"
+                       operation="hello" variable="outputVar"/>
+            </sequence>
+        </scope>
+
+
+        <!-- ############################################### -->
         <!-- 500_no_body - failure expected  -->
         <!-- ############################################### -->
         <scope>

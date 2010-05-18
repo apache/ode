@@ -44,7 +44,7 @@
     </fileSet>
     
     <fileSet>
-      <directory>${basedir}/../dao-jpa-db/target/derby</directory>
+      <directory>${basedir}/../dao-jpa-ojpa-derby/target/derby</directory>
       <outputDirectory>/</outputDirectory>
     </fileSet>
 
@@ -67,12 +67,11 @@
 		<include>org.apache.ode:ode-bpel-compiler</include>
 		<include>org.apache.ode:ode-bpel-connector</include>
 		<include>org.apache.ode:ode-bpel-dao</include>
-		<include>org.apache.ode:ode-il-common</include>
+		<include>org.apache.ode:ode-bpel-epr</include>
 		<include>org.apache.ode:ode-jca-ra</include>
 		<include>org.apache.ode:ode-jca-server</include>
-		<include>org.apache.ode:ode-runtimes</include>
+		<include>org.apache.ode:ode-bpel-runtime</include>
 		<include>org.apache.ode:ode-bpel-ql</include>
-		<include>org.apache.ode:ode-engine</include>
 		<include>org.apache.ode:ode-scheduler-simple</include>
 		<include>org.apache.ode:ode-bpel-schemas</include>
 		<include>org.apache.ode:ode-bpel-store</include>
@@ -81,6 +80,8 @@
 		<include>org.apache.ode:ode-jacob</include>
 		<include>org.apache.ode:ode-jacob-ap</include>
 		<include>org.apache.ode:ode-utils</include>
+		<include>org.apache.ode:ode-agents</include>
+		<include>org.apache.ode:ode-bpel-obj</include>
 		<include>org.apache.ws.commons.axiom:axiom-api</include>  
 		<include>org.apache.ws.commons.axiom:axiom-impl</include>
 		<include>org.apache.ws.commons.axiom:axiom-dom</include>
@@ -90,11 +91,14 @@
 		<include>commons-dbcp:commons-dbcp</include> 
 		<include>commons-lang:commons-lang</include> 
 		<include>commons-pool:commons-pool</include> 
+		<include>commons-beanutils:commons-beanutils</include> 
 		<include>commons-primitives:commons-primitives</include> 
 		<include>org.apache.derby:derby</include> 
 		<include>org.apache.geronimo.specs:geronimo-ejb_2.1_spec</include> 
 		<include>org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec</include> 
 		<include>org.apache.geronimo.specs:geronimo-jta_1.1_spec</include> 
+		<include>org.apache.geronimo.components:geronimo-connector</include> 
+		<include>org.apache.geronimo.components:geronimo-transaction</include> 
 		<include>geronimo-spec:geronimo-spec-jms</include> 
 		<include>org.apache.geronimo.specs:geronimo-stax-api_1.0_spec</include> 
 		<include>jaxen:jaxen</include> 
@@ -110,8 +114,13 @@
 		<include>tranql:tranql-connector</include>
 		<include>xalan:xalan</include>
 		<include>org.apache.xmlbeans:xmlbeans</include>
-		<include>com.thoughtworks.xstream:xstream</include>
 		<include>axion:axion</include>   
+		<include>xerces:xercesImpl</include>   
+        <include>org.objectweb.howl:howl</include>   
+		<include>com.thoughtworks.xstream:xstream</include>   
+        <include>xalan:serializer</include>   
+        <include>xml-apis:xml-apis</include>   
+        <include>org.apache.geronimo.specs:geronimo-jpa_3.0_spec</include>   
       </includes>
     </dependencySet>
 

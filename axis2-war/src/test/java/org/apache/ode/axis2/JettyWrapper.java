@@ -56,8 +56,8 @@ public class JettyWrapper {
     }
 
 
-    public JettyWrapper(ContextHandler handler) {
-        server = new Server(7070);
+    public JettyWrapper(int port, ContextHandler handler) {
+        server = new Server(port);
         if(handler!=null) server.addHandler(handler);
         else addDefaultHandlers();
     }
@@ -84,7 +84,12 @@ public class JettyWrapper {
     }
 
     public void start() throws Exception {
-        server.start();
+        try {
+        	server.start();
+        } catch (Exception e) {
+        	server.stop();
+        	server.start();
+        }
     }
 
     public void stop() throws Exception {
@@ -110,7 +115,6 @@ public class JettyWrapper {
                         Enumeration values = request.getHeaders(hname);
                         while (values.hasMoreElements()) {
                             String next = (String) values.nextElement();
-                            System.out.println(hname + ": " + next);
                             response.addHeader(hname, next);
                         }
                     }
@@ -128,7 +132,7 @@ public class JettyWrapper {
         }
     }
 
-    private static class ArithmeticsServiceHandler extends AbstractHandler {
+    private class ArithmeticsServiceHandler extends AbstractHandler {
         /*
         8 urls to handle:
         (GET)       http://localhost:8888/HttpBindingTestService/OlaElMundo-GET/plus/(left):(right)
@@ -306,7 +310,7 @@ public class JettyWrapper {
         }
     }
 
-    private static class BlogServiceHandler extends AbstractHandler {
+    private class BlogServiceHandler extends AbstractHandler {
 
         public void handle(String s, HttpServletRequest request, HttpServletResponse response, int i) throws IOException, ServletException {
             String method = request.getMethod();

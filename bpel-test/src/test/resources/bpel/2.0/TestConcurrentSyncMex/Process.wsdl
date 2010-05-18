@@ -1,0 +1,32 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<wsdl:definitions xmlns:tns="http://www.example.org/NewWSDLFile/" xmlns:bpdm="http://www.intalio/designer/business-process-data-modeling" xmlns:NewWSDLFilePartner="http://www.example.org/NewWSDLFilePartner/" xmlns:Pool="http://example.com/Process/Pool" xmlns:diag="http://example.com/Process" xmlns:Main="http://example.com/Process/Main" xmlns:bpel="http://schemas.xmlsoap.org/ws/2004/03/business-process/" xmlns:pnlk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/" xmlns:Partner="http://example.com/Process/Partner" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://example.com/Process">
+    <wsdl:import namespace="http://www.example.org/NewWSDLFile/" location="NewWSDLFile.wsdl"/>
+    <wsdl:import namespace="http://www.example.org/NewWSDLFilePartner/" location="NewWSDLFilePartner.wsdl"/>
+    <pnlk:partnerLinkType name="PartnerAndMainForPortTypeNewWSDLFilePlk">
+        <pnlk:role name="Main_for_Partner" portType="tns:NewWSDLFile"/>
+    </pnlk:partnerLinkType>
+    <pnlk:partnerLinkType name="PartnerAndMainForPortTypeNewWSDLFilePartnerPlk">
+        <pnlk:role name="Partner_for_Main" portType="NewWSDLFilePartner:NewWSDLFilePartner"/>
+    </pnlk:partnerLinkType>
+    <pnlk:partnerLinkType name="MainAndPoolForPortTypeNewWSDLFilePlk">
+        <pnlk:role name="Main_for_Pool" portType="tns:NewWSDLFile"/>
+    </pnlk:partnerLinkType>
+</wsdl:definitions>

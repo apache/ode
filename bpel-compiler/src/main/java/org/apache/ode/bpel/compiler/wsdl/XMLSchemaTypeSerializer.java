@@ -76,6 +76,6 @@ public class XMLSchemaTypeSerializer implements ExtensionSerializer,
                                          ExtensionRegistry extensionRegistry)
                                   throws WSDLException {
     DOMUtils.pancakeNamespaces(element);
-    return new XMLSchemaType(DOMUtils.domToString(element));
+    return new XMLSchemaType(DOMUtils.domToString(element).getBytes());
   }
 }

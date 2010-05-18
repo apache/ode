@@ -145,14 +145,13 @@ end
 
 class Project
 
-  def package_as_jbi(file_name, options)
-    # The file name extension is zip, not jbi. And we also need to reset
-    # the type on the artifact specification.
-    # The file type is ZIP, not JBI, so update the file name/spec accordingly.
-    options[:type] = :zip
-    file_name = path_to(:target, Artifact.hash_to_file_name(options))
-    JBITask.define_task(file_name) unless Rake::Task.task_defined?(file_name)
-    file(file_name)
+
+  def package_as_jbi(file_name) #:nodoc
+    JBITask.define_task(file_name)
+  end
+
+  def package_as_jbi_spec(spec) #:nodoc
+    spec.merge({ :type=>:zip })
   end
 
 end

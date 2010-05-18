@@ -24,10 +24,10 @@
     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-	xmlns:ns0="http://www.w3schools.com" 
-	xmlns:ns1="http://ode/bpel/unit-test/testCorrelation1.wsdl.types" 
-	xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
-	xmlns:prop="http://docs.oasis-open.org/wsbpel/2.0/varprop" 
+    xmlns:ns0="http://www.w3schools.com" 
+    xmlns:ns1="http://ode/bpel/unit-test/testCorrelation1.wsdl.types" 
+    xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:prop="http://docs.oasis-open.org/wsbpel/2.0/varprop" 
     xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
     <wsdl:types>
         <xsd:schema targetNamespace="http://ode/bpel/unit-test/testCorrelation1.wsdl.types" xmlns="http://ode/bpel/unit-test/testCorrelation1.wsdl.types" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
@@ -87,7 +87,7 @@
     </wsdl:binding>
     <wsdl:service name="testCorrelation1Service">
         <wsdl:port name="testCorrelation1Port" binding="tns:testCorrelation1Binding">
-        	<soap:address location="http://localhost:8888/ode/processes/helloWorld"/>
+            <soap:address location="http://localhost:8888/ode/processes/helloWorld"/>
         </wsdl:port>
     </wsdl:service>
 

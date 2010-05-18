@@ -26,14 +26,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
+import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.il.epr.MutableEndpoint;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Implementation of the ODE {@link org.apache.ode.bpel.iapi.EndpointReferenceContext}
@@ -72,7 +73,8 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
     DocumentFragment fragment = doc.createDocumentFragment();
     NodeList children = epr.getChildNodes();
     for (int i = 0 ; i < children.getLength(); ++i)
-      fragment.appendChild(doc.importNode(children.item(i), true));
+        if (children.item(i) instanceof Element)
+            fragment.appendChild(doc.importNode(children.item(i), true));
     ServiceEndpoint se = _ode.getContext().resolveEndpointReference(fragment);
     if (se == null)
       return null;
@@ -113,6 +115,8 @@ public class EndpointReferenceContextImpl implements EndpointReferenceContext {
   }
 
     public Map getConfigLookup(EndpointReference epr) {
-        return ((MutableEndpoint)epr).toMap();
+        Map m = new HashMap();
+        m.put("service", ((JbiEndpointReference)epr).getServiceEndpoint().getServiceName());
+        return m;
     }
 }

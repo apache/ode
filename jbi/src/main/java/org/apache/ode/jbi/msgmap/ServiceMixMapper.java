@@ -20,6 +20,8 @@
 package org.apache.ode.jbi.msgmap;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.jbi.messaging.MessagingException;
@@ -33,7 +35,9 @@ import javax.xml.transform.dom.DOMSource;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
+import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * Message mapper for dealing with the degenerate messages that servicemix components such as servicemix-http provide. These
@@ -78,42 +82,68 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
             return Recognized.UNSURE;
         }
 
-        for (String pname : ((Set<String>) op.getInput().getMessage().getParts().keySet())) {
-            Part part = op.getInput().getMessage().getPart(pname);
-            Element pdata = null;
-            // servicemix-http has a (bad) habit of placing the SOAP body content directly in the normalized message
+        // servicemix-http has a (bad) habit of placing the SOAP body content directly in the normalized message.
+        // We need to recognize it
+    	__log.debug("Recognizing document content");
+        if (op.getInput().getMessage().getParts().size() == 1) {
+            Part part = (Part) op.getInput().getMessage().getParts().values().iterator().next();
             QName elementName = part.getElementName();
             if (elementName != null && elementName.getLocalPart().equals(msg.getLocalName())
                     && elementName.getNamespaceURI().equals(msg.getNamespaceURI())) {
-                pdata = msg;
+            	__log.debug("Recognized");
+                return Recognized.TRUE;
             }
-            if (pdata == null) {
-                // with RPC semantic the body is wrapped by a partName which is same as bodyElementName
-                pdata = DOMUtils.findChildByName(msg, new QName(null, part.getName()));
+        }
+
+        // Recognize RPC style message
+    	__log.debug("Recognizing RPC style content");
+        for (String pname : ((Set<String>) op.getInput().getMessage().getParts().keySet())) {
+            Part part = op.getInput().getMessage().getPart(pname);
+            
+            if (part.getElementName() != null) {
+                //RPC style invocation doesn't allow element parts, so we don't accept it
+            	__log.debug("Part " + part.getName() + " has element content " + part.getElementName() + ". It's not allowed for RPC style.");
+            	return Recognized.FALSE;
             }
+            
+            // with RPC semantic the body is wrapped by a partName which is same as bodyElementName
+            Element pdata = DOMUtils.findChildByName(msg, new QName(null, part.getName()));
             if (pdata == null) {
                 __log.debug("no part data for " + part.getName() + " -- unrecognized.");
                 return Recognized.FALSE;
             }
-            if (part.getElementName() != null) {
-                Element child = DOMUtils.getFirstChildElement(pdata);
-                if (child == null) {
-                    __log.debug("element part " + part.getName() + " does not contain element " + part.getElementName()
-                            + " -- unrecognized");
-                    return Recognized.FALSE;
-                }
-
-            }
         }
 
         return Recognized.TRUE;
-
     }
 
     public void toNMS(NormalizedMessage nmsMsg, Message odeMsg, javax.wsdl.Message msgdef, QName fault) throws MessagingException,
             MessageTranslationException {
         if (msgdef == null)
             throw new NullPointerException("msdef must not be null.");
+        
+        Map<String, Node> headers = odeMsg.getHeaderParts();
+        if (headers != null) {
+            for (String header : headers.keySet()) {
+                if (__log.isDebugEnabled()) {
+                    __log.debug("toNMS() header " + header + " := " + DOMUtils.domToString(headers.get(header)) );
+                }
+                
+                Map<QName, DocumentFragment> headers2 = (Map<QName, DocumentFragment>) nmsMsg.getProperty("org.apache.servicemix.soap.headers");
+                if (headers2 == null) {
+                    headers2 = new HashMap<QName, DocumentFragment>();
+                    nmsMsg.setProperty("org.apache.servicemix.soap.headers", headers2);
+                }
+                
+                Node v = headers.get(header);
+                DocumentFragment f = v.getOwnerDocument().createDocumentFragment();
+                f.appendChild(v);
+                headers2.put(QName.valueOf(header), f);
+            }
+        }
+
+        
+        
         Element ode = odeMsg == null ? null : odeMsg.getMessage();
         Element part = ode == null ? null : DOMUtils.getFirstChildElement(ode);
         Element firstPartEl = part == null ? null : DOMUtils.getFirstChildElement(part);
@@ -147,7 +177,12 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
             return;
         }
 
-        if (msgdef.getParts().size() > 1 || ((Part) msgdef.getParts().values().iterator().next()).getElementName() == null) {
+        if (msgdef.getParts().size() == 0) {
+            if (__log.isDebugEnabled())
+                __log.debug("toNMS() ode message (rpc-like): no parts");
+            nmsMsg.setContent(null);
+            return;
+        } else if (msgdef.getParts().size() != 1 || ((Part) msgdef.getParts().values().iterator().next()).getElementName() == null) {
             // If we have more than one part, or a single non-element part, then we can't use the standard
             // NMS doc-lit like convention. Instead we place the entire message on the bus and hope for the
             // best.
@@ -163,12 +198,24 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
     }
 
     public void toODE(Message odeMsg, NormalizedMessage nmsMsg, javax.wsdl.Message msgdef) throws MessageTranslationException {
-        Element nms = parse(nmsMsg.getContent());
-        boolean docLit = false;
-
+        Element nms;
+        if (nmsMsg.getContent() != null) {
+            nms = parse(nmsMsg.getContent());
+        } else {
+            Document doc = newDocument();
+            Element message = doc.createElement("message");
+            odeMsg.setMessage(message);
+            if (__log.isDebugEnabled()) {
+                __log.debug("toODE() normalized message:\n" + prettyPrint(message));
+            }
+            return;
+        }
+        
         if (__log.isDebugEnabled()) {
             __log.debug("toODE() normalized message:\n" + prettyPrint(nms));
         }
+
+        boolean docLit = false;
 
         for (String pname : ((Set<String>) msgdef.getParts().keySet())) {
             Part part = msgdef.getPart(pname);
@@ -199,6 +246,20 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
                 __log.debug("toODE() ode message:\n" + prettyPrint(nms));
             }
             odeMsg.setMessage(nms);
+        }
+        
+        Map<QName, DocumentFragment> headers = (Map<QName, DocumentFragment>) nmsMsg.getProperty("org.apache.servicemix.soap.headers");
+        if (headers != null) {
+            for (QName header : headers.keySet()) {
+                if (__log.isDebugEnabled()) {
+                    __log.debug("toODE() header " + header + " := " + DOMUtils.domToString(headers.get(header)) );
+                }
+                try {
+                    odeMsg.setHeaderPart(header.getLocalPart(), DOMUtils.stringToDOM(DOMUtils.domToString(headers.get(header))));
+                } catch (Exception e) {
+                    __log.error("Can't copy input header " + header);
+                }
+            }
         }
     }
 

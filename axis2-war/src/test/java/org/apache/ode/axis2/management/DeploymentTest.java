@@ -225,7 +225,7 @@ public class DeploymentTest extends Axis2TestBase {
     }
 
     private void undeploy(String pakage) throws Exception {
-        // Prepare undeploy message
+    	// Prepare undeploy message
         OMNamespace depns = _factory.createOMNamespace(Namespaces.ODE_DEPLOYAPI_NS, "deployapi");
         OMElement root = _factory.createOMElement("undeploy", depns);
         OMElement part = _factory.createOMElement("packageName", null);
@@ -241,11 +241,11 @@ public class DeploymentTest extends Axis2TestBase {
     }
 
     private OMElement sendToPM(OMElement msg) throws AxisFault {
-        return _client.send(msg, "http://localhost:8888/processes/ProcessManagement");
+        return _client.send(msg, "http://localhost:"+getTestPort(0)+"/processes/ProcessManagement");
     }
 
     private OMElement sendToDeployment(OMElement msg) throws AxisFault {
-        return _client.send(msg, "http://localhost:8888/processes/DeploymentService");
+        return _client.send(msg, "http://localhost:"+getTestPort(0)+"/processes/DeploymentService");
     }
 
 }

@@ -93,7 +93,7 @@
                 to qualify the "LED" comment
             2006-11-15: Rev 1.7: Alex Yiu
                 Issue R29: Removing the default for "initializePartnerRole"
-            2006-11-15: Rev 1.8: Alex Yiu	
+            2006-11-15: Rev 1.8: Alex Yiu   
                 Issue R33: Adding "ignoreMissingFromData" attribute
             2006-12-09: Rev 1.9: Alex Yiu
                 Changed the last modified date
@@ -130,7 +130,6 @@
                 <xsd:attribute name="suppressJoinFailure" type="tBoolean" default="no"/>
                 <xsd:attribute name="exitOnStandardFault" type="tBoolean" default="no"/>
                 <xsd:attribute name="abstractProcessProfile" type="xsd:anyURI" use="required"/>
-                <xsd:attribute name="atomic" type="tBoolean" default="no"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
@@ -420,7 +419,6 @@
                 </xsd:sequence>
                 <xsd:attribute name="messageType" type="xsd-derived:QName" use="optional"/>
                 <xsd:attribute name="element" type="xsd-derived:QName" use="optional"/>
-                <xsd:attribute name="atomic" type="tBoolean" default="no"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
@@ -443,6 +441,14 @@
                 <xsd:attribute name="operation" type="xsd-derived:NCName" use="optional"/>
                 <xsd:attribute name="messageExchange" type="xsd-derived:NCName" use="optional"/>
                 <xsd:attribute name="variable" type="BPELVariableName" use="optional"/>
+                <xsd:attribute name="route" use="optional" default="one">
+                    <xsd:simpleType>
+                        <xs:restriction base="xs:NMTOKEN">
+                            <xs:enumeration value="all"/>
+                            <xs:enumeration value="one"/>
+                        </xs:restriction>
+                    </xsd:simpleType>
+                </xsd:attribute>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
@@ -594,7 +600,7 @@
                 <xsd:attribute name="ignoreMissingFromData" type="tBoolean" use="optional" default="no"/>
                 <xsd:attribute name="ignoreUninitializedFromVariable" type="tBoolean" use="optional" default="no"/>
                 <xsd:attribute name="insertMissingToData" type="tBoolean" use="optional" default="no"/>
-        </xsd:extension>
+            </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
     
@@ -975,6 +981,14 @@
                 <xsd:attribute name="variable" type="BPELVariableName" use="optional"/>
                 <xsd:attribute name="createInstance" type="tBoolean" default="no"/>
                 <xsd:attribute name="messageExchange" type="xsd-derived:NCName" use="optional"/>
+                <xsd:attribute name="route" use="optional" default="one">
+                    <xsd:simpleType>
+                        <xs:restriction base="xs:NMTOKEN">
+                            <xs:enumeration value="all"/>
+                            <xs:enumeration value="one"/>
+                        </xs:restriction>
+                    </xsd:simpleType>
+                </xsd:attribute>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
@@ -1045,7 +1059,6 @@
                     <xsd:group ref="activity" minOccurs="0"/>
                 </xsd:sequence>
                 <xsd:attribute name="isolated" type="tBoolean" default="no"/>
-                <xsd:attribute name="atomic" type="tBoolean" default="no"/>
                 <xsd:attribute name="exitOnStandardFault" type="tBoolean"/>
             </xsd:extension>
         </xsd:complexContent>

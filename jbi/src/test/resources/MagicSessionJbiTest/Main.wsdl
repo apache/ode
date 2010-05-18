@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<wsdl:definitions
+        targetNamespace="http://ode/bpel/unit-test.wsdl"
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:tns="http://ode/bpel/unit-test.wsdl"
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
+
+    <wsdl:message name="ExecuteMessage">
+        <wsdl:part name="payload" type="xsd:string"/>
+    </wsdl:message>
+
+    <wsdl:message name="CallbackMessage">
+        <wsdl:part name="payload" type="xsd:string"/>
+    </wsdl:message>
+
+    <wsdl:message name="DoubleCallbackMessage">
+        <wsdl:part name="payload" type="xsd:string"/>
+    </wsdl:message>
+
+    <wsdl:message name="TripleCallbackMessage">
+        <wsdl:part name="payload" type="xsd:string"/>
+    </wsdl:message>
+
+    <wsdl:message name="ResultMessage">
+        <wsdl:part name="ack" type="xsd:string"/>
+    </wsdl:message>
+
+    <wsdl:message name="InitiateMessage">
+        <wsdl:part name="payload" type="xsd:string"/>
+        <wsdl:part name="reply-to" type="xsd:anyType"/>
+    </wsdl:message>
+
+    <wsdl:message name="DoubleCallMessage">
+        <wsdl:part name="payload" type="xsd:string"/>
+    </wsdl:message>
+
+    <wsdl:message name="TripleCallMessage">
+        <wsdl:part name="payload" type="xsd:anyType"/>
+    </wsdl:message>
+
+    <wsdl:portType name="MSExecutePortType">
+        <wsdl:operation name="execute">
+            <wsdl:input message="tns:ExecuteMessage" name="Execute"/>
+            <wsdl:output message="tns:ResultMessage" name="Result"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:portType name="MSMainPortType">
+        <wsdl:operation name="callback">
+            <wsdl:input message="tns:CallbackMessage" name="Callback"/>
+        </wsdl:operation>
+        <wsdl:operation name="doubleCallback">
+            <wsdl:input message="tns:DoubleCallbackMessage" name="DoubleCallback"/>
+        </wsdl:operation>
+        <wsdl:operation name="tripleCallback">
+            <wsdl:input message="tns:TripleCallbackMessage" name="TripleCallback"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:portType name="MSResponderPortType">
+        <wsdl:operation name="initiate">
+            <wsdl:input message="tns:InitiateMessage" name="Callback"/>
+        </wsdl:operation>
+        <wsdl:operation name="doubleCall">
+            <wsdl:input message="tns:DoubleCallMessage" name="DoubleCallback"/>
+        </wsdl:operation>
+        <wsdl:operation name="EndpointReference">
+            <wsdl:input message="tns:TripleCallMessage" name="EndpointReference"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="MSExecuteBinding" type="tns:MSExecutePortType">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="execute">
+            <soap:operation soapAction="" style="rpc"/>
+            <wsdl:input>
+                <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:binding name="MSMainBinding" type="tns:MSMainPortType">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="callback">
+            <soap:operation soapAction="" style="rpc"/>
+            <wsdl:input>
+                <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="doubleCallback">
+            <soap:operation soapAction="" style="rpc"/>
+            <wsdl:input>
+                <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="tripleCallback">
+            <soap:operation soapAction="" style="rpc"/>
+            <wsdl:input>
+                <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:binding name="MSResponderBinding" type="tns:MSResponderPortType">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="initiate">
+            <soap:operation soapAction="" style="rpc"/>
+            <wsdl:input>
+                <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="doubleCall">
+            <soap:operation soapAction="" style="rpc"/>
+            <wsdl:input>
+                <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="EndpointReference">
+            <soap:operation soapAction="" style="rpc"/>
+            <wsdl:input>
+                <soap:body namespace="http://ode/bpel/unit-test.wsdl" use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <!-- This service should be used to start the example. -->
+    <wsdl:service name="MSMainExecuteService">
+        <wsdl:port name="MSExecutePort" binding="tns:MSExecuteBinding">
+            <soap:address location="http://localhost:8080/ode/processes/MSMainExecuteService"/>
+        </wsdl:port>
+    </wsdl:service>
+
+    <!-- This service is internal, only used by the responder. -->
+    <wsdl:service name="MSMainService">
+        <wsdl:port name="MSMainPort" binding="tns:MSMainBinding">
+            <soap:address location="http://localhost:8080/ode/processes/MSMainService"/>
+        </wsdl:port>
+    </wsdl:service>
+
+    <!-- Service responding to the main service requests. -->
+    <wsdl:service name="MSResponderService">
+        <wsdl:port name="MSResponderPort" binding="tns:MSResponderBinding">
+            <soap:address location="http://localhost:8080/ode/processes/MSResponderService"/>
+        </wsdl:port>
+    </wsdl:service>
+
+    <plnk:partnerLinkType name="ResponderPartnerLinkType">
+        <plnk:role name="responder" portType="tns:MSResponderPortType"/>
+        <plnk:role name="main" portType="tns:MSMainPortType"/>
+    </plnk:partnerLinkType>
+
+    <plnk:partnerLinkType name="ExecutePartnerLinkType">
+        <plnk:role name="executor" portType="tns:MSExecutePortType"/>
+    </plnk:partnerLinkType>
+</wsdl:definitions>

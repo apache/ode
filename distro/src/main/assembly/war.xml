@@ -39,7 +39,7 @@
     </fileSet>
 
     <fileSet>
-      <directory>${basedir}/../dao-jpa-db/target/</directory>
+      <directory>${basedir}/../dao-jpa-ojpa-derby/target/</directory>
       <outputDirectory>/sql</outputDirectory>
       <includes>
       	<include>*.sql</include>
@@ -128,7 +128,6 @@
 	<include>org.apache.ode:ode-tools</include>
 	<include>org.apache.ode:ode-bpel-compiler</include>
 	<include>org.apache.ode:ode-bpel-api</include>
-	<include>org.apache.ode:ode-runtimes</include>
 	<include>org.apache.ode:ode-bpel-schemas</include>
 	<include>commons-logging:commons-logging</include>
 	<include>org.apache.ode:ode-utils</include>

@@ -61,12 +61,15 @@ class JbiEndpointReference implements EndpointReference {
   }
 
 public Document toXML() {
-    DocumentFragment fragment = getServiceEndpoint().getAsReference(_type);
-    if (fragment == null)
-      return null;
     Document doc = DOMUtils.newDocument();
     Element root = doc.createElementNS(SERVICE_REF_QNAME.getNamespaceURI(),SERVICE_REF_QNAME.getLocalPart());
-    root.appendChild(doc.importNode(fragment,true));
+    try {
+	    DocumentFragment fragment = getServiceEndpoint().getAsReference(_type);
+	    if (fragment != null) {
+	    	root.appendChild(doc.importNode(fragment,true));
+	    }
+    } catch (Throwable t) {
+    }
     doc.appendChild(root);
     return doc;
   }

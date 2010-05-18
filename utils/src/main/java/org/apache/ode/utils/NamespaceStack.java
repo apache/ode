@@ -230,7 +230,7 @@ public class NamespaceStack {
     return qn;
   }
   
-  private static class Frame {
+  private class Frame {
     
     Frame _parent;
     

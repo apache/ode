@@ -73,8 +73,8 @@ public class SoapHeader2Test extends Axis2TestBase {
                 boolean header1found = false, header2found = false;
                 String line;
                 while ((line = request.getReader().readLine()) != null && (!header1found || !header2found)) {
-                    header1found = header1found || line.matches(".*Hello from TestSoapHeader2</header1-field1>.*");
-                    header2found = header2found || line.matches(".*Hello from TestSoapHeader2</header2-field1>.*");
+                    header1found = header1found || line.matches(".*header1-field1>Hello from TestSoapHeader2.*");
+                    header2found = header2found || line.matches(".*header2-field1>Hello from TestSoapHeader2.*");
                 }
                 response.getOutputStream().print("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:unit=\"http://ode/bpel/unit-test.wsdl\">\n" +
                         "   <soapenv:Header/>\n" +
@@ -94,7 +94,7 @@ public class SoapHeader2Test extends Axis2TestBase {
             }
         });
 
-        jettyWrapper = new JettyWrapper(contextHandler);
+        jettyWrapper = new JettyWrapper(getTestPort(1), contextHandler);
         jettyWrapper.start();
     }
 

@@ -114,4 +114,6 @@ public interface ProcessStore {
      * @return
      */
     long getCurrentVersion();
+    
+    void refreshSchedules(String packageName);
 }

@@ -204,8 +204,8 @@ public class JbiWsdl11WrapperMapper extends BaseXmlMapper implements Mapper {
                 if (etype == null && p.getElementName() == null)
                     continue;
 
-                if (etype.equals(p.getElementName()))
-                    continue;
+                if (!etype.equals(p.getElementName()))
+                    continue fltiter;
             }
             
             return f;

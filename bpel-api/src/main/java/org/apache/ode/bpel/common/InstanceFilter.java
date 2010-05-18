@@ -22,10 +22,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.pmapi.InvalidRequestException;
 import org.apache.ode.utils.ISO8601DateParser;
+import org.apache.ode.utils.RelativeDateParser;
 
 import java.io.Serializable;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +49,9 @@ public class InstanceFilter extends Filter<InstanceFilter.Criteria> implements S
 
     /** If set, will filter on the process id (PID) and select all matching process definitions */
     private List<String> pids;
+
+    /** If set, the PID filter will work negatively */
+    private boolean arePidsNegative;
 
     /** If set, will filter on the process name (accepts ending with wildcard) */
     private String nameFilter;
@@ -105,6 +110,7 @@ public class InstanceFilter extends Filter<InstanceFilter.Criteria> implements S
         PID {
             void process(InstanceFilter filter, String key, String op, String value) {
                 filter.pids = parse(value);
+                filter.arePidsNegative = "<>".equals(op);
             }
         },
         NAME {
@@ -183,7 +189,7 @@ public class InstanceFilter extends Filter<InstanceFilter.Criteria> implements S
         if (startedDateFilter != null) {
             for (String ddf : startedDateFilter) {
                 try {
-                    ISO8601DateParser.parse(getDateWithoutOp(ddf));
+                    parseDateExpression(getDateWithoutOp(ddf));
                 } catch (ParseException e) {
                     throw new InvalidRequestException(
                             "Couldn't parse one of the filter date, please make "
@@ -195,7 +201,7 @@ public class InstanceFilter extends Filter<InstanceFilter.Criteria> implements S
         if (lastActiveDateFilter != null) {
             for (String ddf : lastActiveDateFilter) {
                 try {
-                    ISO8601DateParser.parse(getDateWithoutOp(ddf));
+                    parseDateExpression(getDateWithoutOp(ddf));
                 } catch (ParseException e) {
                     throw new InvalidRequestException(
                             "Couldn't parse one of the filter date, please make "
@@ -235,6 +241,14 @@ public class InstanceFilter extends Filter<InstanceFilter.Criteria> implements S
         this(filter, null, Integer.MAX_VALUE);
     }
 
+    private Date parseDateExpression(String date) throws ParseException {
+        if( date.toLowerCase().startsWith("-")  && date.length() > 1 ) {
+            return RelativeDateParser.parseRelativeDate(date.substring(1));
+        } else {
+            return ISO8601DateParser.parse(date);
+        }
+    }
+    
     /**
      * Converts the status filter value as given by a filter ('active',
      * 'suspended', ...) to an instance state as defined in the ProcessState
@@ -299,6 +313,10 @@ public class InstanceFilter extends Filter<InstanceFilter.Criteria> implements S
         return pids;
     }
 
+    public boolean arePidsNegative() {
+        return arePidsNegative;
+    }
+
     public List<String> getIidFilter() {
         return iids;
     }
@@ -339,7 +357,11 @@ public class InstanceFilter extends Filter<InstanceFilter.Criteria> implements S
         StringBuffer buf = new StringBuffer();
         buf.append("InstanceFilter {");
         buf.append("iids="+iids);
-        buf.append(",pids="+pids);
+        if( !arePidsNegative ) {
+            buf.append(",pids="+pids);
+        } else {
+            buf.append(",-pids="+pids);
+        }
         buf.append(",name="+nameFilter);
         buf.append(",namespace="+namespaceFilter);
         buf.append(",status="+statusFilter);

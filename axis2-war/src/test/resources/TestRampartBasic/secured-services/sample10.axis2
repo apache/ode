@@ -28,7 +28,7 @@
         <passwordCallbackClass>org.apache.rampart.samples.sample10.PWCBHandler</passwordCallbackClass>
         <signaturePropFile>TestRampartBasic/secured-services/client.properties</signaturePropFile>
         <signatureKeyIdentifier>DirectReference</signatureKeyIdentifier>
-        <encryptionKeyIdentifier>DirectReference</encryptionKeyIdentifier>
+        <encryptionKeyIdentifier>SKIKeyIdentifier</encryptionKeyIdentifier>
         <encryptionUser>service</encryptionUser>
         
         <optimizeParts>//xenc:EncryptedData/xenc:CipherData/xenc:CipherValue</optimizeParts>

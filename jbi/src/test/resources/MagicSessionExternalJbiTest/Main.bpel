@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<process name="MagicSessionMain"
+         targetNamespace="http://ode/bpel/unit-test"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:tns="http://ode/bpel/unit-test"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+         xmlns:test="http://ode/bpel/unit-test.wsdl">
+
+  <import location="Main.wsdl" namespace="http://ode/bpel/unit-test.wsdl"
+     importType="http://schemas.xmlsoap.org/wsdl/" />
+
+  <partnerLinks>
+    <partnerLink name="responderPartnerLink" partnerLinkType="test:ResponderPartnerLinkType"
+                 myRole="main" partnerRole="responder" initializePartnerRole="yes"/>
+    <partnerLink name="executePartnerLink" partnerLinkType="test:ExecutePartnerLinkType"
+                 myRole="executor"/>
+  </partnerLinks>
+
+  <variables>
+    <variable name="dummy" messageType="test:ExecuteMessage"/>
+    <variable name="dummy2" messageType="test:InitiateMessage"/>
+    <variable name="dummy3" messageType="test:CallbackMessage"/>
+    <variable name="dummy4" messageType="test:DoubleCallMessage"/>
+    <variable name="dummy5" messageType="test:DoubleCallbackMessage"/>
+    <variable name="eprmessage" messageType="test:TripleCallMessage"/>
+    <variable name="myepr" messageType="test:TripleCallbackMessage"/>
+    <variable name="result" messageType="test:ResultMessage"/>
+  </variables>
+
+  <sequence>
+    <!-- Start message -->
+    <receive name="start" partnerLink="executePartnerLink"
+             portType="test:MSExecutePortType" operation="execute" createInstance="yes" variable="dummy"/>
+
+    <!-- Initializing message, starting the responder process with the magic session
+         and expecting a callback -->
+    <assign>
+      <copy keepSrcElementName="yes">
+        <from partnerLink="responderPartnerLink" endpointReference="myRole"/>
+        <to>$dummy2.reply-to/*</to>
+      </copy>
+      <copy>
+        <from>123</from>
+        <to variable="dummy2" part="payload"/>
+      </copy>
+    </assign>
+    <invoke name="initiate" partnerLink="responderPartnerLink" portType="test:MSResponderPortType"
+            operation="initiate" inputVariable="dummy2"/>
+
+    <receive name="callback" partnerLink="responderPartnerLink"
+             portType="test:MSMainPortType" operation="callback" variable="dummy3"/>
+
+    <!-- Initializing message, calling our partner again with magic session (double invocation) -->
+    <assign>
+      <copy>
+        <from>123</from>
+        <to variable="dummy4" part="payload"/>
+      </copy>
+    </assign>
+    <invoke name="get-endpoint" partnerLink="responderPartnerLink" portType="test:MSResponderPortType"
+            operation="doubleCall" inputVariable="dummy4"/>
+
+    <receive name="doubleCallback" partnerLink="responderPartnerLink"
+             portType="test:MSMainPortType" operation="doubleCallback" variable="dummy5"/>
+
+    <!-- Sending our endpoint explicitly to have our partner calling us back using it
+         (demonstrating assignment) -->
+    <assign>
+      <copy keepSrcElementName="yes">
+        <from partnerLink="responderPartnerLink" endpointReference="myRole"/>
+        <to>$eprmessage.payload/*</to>
+      </copy>
+    </assign>
+    <invoke name="eprPassing" partnerLink="responderPartnerLink" portType="test:MSResponderPortType"
+            operation="EndpointReference" inputVariable="eprmessage"/>
+
+    <receive name="tripleCallback" partnerLink="responderPartnerLink"
+             portType="test:MSMainPortType" operation="tripleCallback" variable="myepr"/>
+
+    <!-- Done. -->
+    <assign>
+      <copy>
+        <from>'OK'</from>
+        <to variable="result" part="ack"/>
+      </copy>
+    </assign>
+    <reply name="end" partnerLink="executePartnerLink"
+           portType="test:MSExecutePortType" operation="execute" variable="result"/>
+
+  </sequence>
+</process>

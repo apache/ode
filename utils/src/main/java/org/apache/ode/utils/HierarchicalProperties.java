@@ -20,24 +20,17 @@
 package org.apache.ode.utils;
 
 import org.apache.commons.collections.map.MultiKeyMap;
-import org.apache.commons.collections.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.utils.fs.FileUtils;
+import org.apache.commons.lang.StringUtils;
 
 import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.Properties;
-import java.util.Set;
-import java.util.Arrays;
-import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * This class load a list of regular property files (order matters). The main feature is that property can
@@ -81,7 +74,7 @@ import java.util.List;
  * <p>
  * If a property name ends with ".file" or ".path", the assumption is made that the associated value is a path and as such is resolved against the path of the file it was loaded from.
  * </p>
- * This class is not thread-safe.
+ * Assigned properties must not start with 'system.' or 'env.'. These prefix are reserved to access system properties and environment variables.
  *
  * @author <a href="mailto:midon@intalio.com">Alexis Midon</a>
  */
@@ -113,7 +106,7 @@ public class HierarchicalProperties {
 
     /**
      * @param files  the property file to be loaded. The file may not exist.
-     *               But if the file exists it has to be a file (not a directory), otherwhise an IOException is thrown.
+     *               But if the file exists it has to be a file (not a directory), otherwhise an IOException is thrown. Files will be loaded in the given order.
      * @param prefix the property prefix
      * @throws IOException
      */
@@ -148,50 +141,28 @@ public class HierarchicalProperties {
     public void loadFiles() throws IOException {
         // #1. clear all existing content
         clear();
-        // #3. put the root map
-        hierarchicalMap.put(null, null, new ChainedMap());
 
-        for (File file : files) loadFile(file);
+        // #3. put the root map
+        initRoot();
+
+        for (File file : files) {
+            Properties props = loadFile(file);
+            if(!props.isEmpty()) processProperties(props, file);
+        }
+        replacePlaceholders();
     }
 
-    protected void loadFile(File file) throws IOException {
-        if (!file.exists()) {
-            if (log.isDebugEnabled()) log.debug("File does not exist [" + file + "]");
-            return;
-        }
-        Properties props = new Properties();
-        // #2. read the file
-        FileInputStream fis = new FileInputStream(file);
-        try {
-            if (log.isDebugEnabled()) log.debug("Loading property file: " + file);
-            props.load(fis);
-        } finally {
-            fis.close();
-        }
+    private ChainedMap initRoot() {
+        ChainedMap root = new ChainedMap();
+        hierarchicalMap.put(null, null, root);
+        return root;
+    }
 
-        // gather all aliases
-        Map<String, String> nsByAlias = new HashMap<String, String>();
+    private void processProperties(Properties props, File file) throws IOException {
 
-        for (Iterator it = props.entrySet().iterator(); it.hasNext();) {
-            Map.Entry e = (Map.Entry) it.next();
-            String key = (String) e.getKey();
-            String namespace = (String) e.getValue();
+        validatePropertyNames(props, file);
 
-
-            // replace any env variables by its value
-            namespace = SystemUtils.replaceSystemProperties(namespace);
-            props.put(key, namespace);
-
-            if (key.startsWith("alias.")) {
-                final String alias = key.substring("alias.".length(), key.length());
-                if (log.isDebugEnabled()) log.debug("Alias found: " + alias + " -> " + namespace);
-                if (nsByAlias.containsKey(alias) && namespace.equals(nsByAlias.get(alias)))
-                    throw new RuntimeException("Same alias used twice for 2 different namespaces! file=" + file + ", alias=" + alias);
-                nsByAlias.put(alias, namespace);
-                // remove the pair
-                it.remove();
-            }
-        }
+        Map<String, String> nsByAlias = collectAliases(props, file);
 
         // #4. process each property
 
@@ -243,6 +214,74 @@ public class HierarchicalProperties {
         }
     }
 
+    private Properties loadFile(File file) throws IOException {
+        Properties props = new Properties();
+        if (!file.exists()) {
+            if (log.isDebugEnabled()) log.debug("File does not exist [" + file + "]");
+            return props;
+        }
+        // #2. read the file
+        FileInputStream fis = new FileInputStream(file);
+        try {
+            if (log.isDebugEnabled()) log.debug("Loading property file: " + file);
+            props.load(fis);
+        } finally {
+            fis.close();
+        }
+        return props;
+    }
+
+    private Map<String, String> collectAliases(Properties props, File file) {
+        // gather all aliases
+        Map<String, String> nsByAlias = new HashMap<String, String>();
+
+        // replace env variable by their values and collect namespace aliases
+        for (Iterator it = props.entrySet().iterator(); it.hasNext();) {
+            Map.Entry e = (Map.Entry) it.next();
+            String key = (String) e.getKey();
+            String value = (String) e.getValue();
+
+            if (key.startsWith("alias.")) {
+                // we found an namespace alias
+                final String alias = key.substring("alias.".length(), key.length());
+                if (log.isDebugEnabled()) log.debug("Alias found: " + alias + " -> " + value);
+                if (nsByAlias.containsKey(alias) && value.equals(nsByAlias.get(alias)))
+                    throw new RuntimeException("Same alias used twice for 2 different namespaces! file=" + file + ", alias=" + alias);
+                nsByAlias.put(alias, value);
+                // remove the pair from the Properties
+                it.remove();
+            }
+        }
+        return nsByAlias;
+    }
+
+    private void validatePropertyNames(Properties props, File file) {
+        List invalids = new ArrayList();
+        for (Iterator<Object> it = props.keySet().iterator(); it.hasNext();) {
+            String name = (String) it.next();
+            if(name.startsWith("system.") || name.startsWith("env.")) invalids.add(name);
+        }
+        if(!invalids.isEmpty()){
+            throw new IllegalArgumentException("Property files cannot define properties starting with 'system.' nor 'env.' File="+file+". Invalid names="+StringUtils.join(invalids, ","));
+        }
+    }
+
+
+    private void replacePlaceholders() {
+        Pattern systemProperty = Pattern.compile("\\$\\{system\\.([^\\}]+)\\}");
+        Pattern environmentVariable = Pattern.compile("\\$\\{env\\.([^\\}]+)\\}");
+        Pattern localPlaceholder = Pattern.compile("\\$\\{([^\\}]+)\\}");
+        for (Iterator it = hierarchicalMap.values().iterator(); it.hasNext();) {
+            Map properties = ((ChainedMap) it.next()).child;
+            for (Iterator it1 = properties.entrySet().iterator(); it1.hasNext();) {
+                Map.Entry e = (Map.Entry) it1.next();
+                // /!\ replacement values themselves might contain placeholders. So always retrieve the value from the map entry
+                e.setValue(SystemUtils.replaceProperties((String) e.getValue(), localPlaceholder, getRootMap().child));
+                e.setValue(SystemUtils.replaceProperties((String) e.getValue(), systemProperty, System.getProperties()));
+                e.setValue(SystemUtils.replaceProperties((String) e.getValue(), environmentVariable, System.getenv()));
+            }
+        }
+    }
 
     /**
      * Clear all content. If {@link #loadFiles()} is not invoked later, all returned values will be null.
@@ -255,8 +294,7 @@ public class HierarchicalProperties {
     protected ChainedMap getRootMap() {
         Object o = hierarchicalMap.get(null, null);
         if (o == null) {
-            o = new ChainedMap();
-            hierarchicalMap.put(null, null, o);
+            o = initRoot();
         }
         return (ChainedMap) o;
     }

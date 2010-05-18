@@ -405,7 +405,7 @@ function WebService(endpointName)
             }
             return resultXML;
         }
-    }				
+    }               
 }
 WebService.visible = false;
 

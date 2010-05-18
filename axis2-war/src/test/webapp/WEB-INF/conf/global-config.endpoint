@@ -1,0 +1,20 @@
+t/resources/TestRampartBasic/secured-services/process-template/config.endpoint test/resources/TestRampartPolicy/secured-services/process-template/config.endpoint test/resources/TestRampartPolicy/secured-services/process-sample04_policy_in_service.xml/config.endpoint
+test/resources/TestSoapHeader/location.endpoint
+
+
+alias.dummy-ns=http://axis2.ode.apache.org
+dummy-ns.DummyService.ode.address=http://localhost:${system.test.port.0}/processes/DummyService
+
+alias.blog-ns=http://ode/bpel/test/blog
+blog-ns.BlogService.ode.address=http://localhost:${system.test.port.1}/HttpBindingTest/BlogService/article/{articleId}
+
+alias.arithmetics-ns=http://ode/bpel/test/arithmetics
+
+#arithmetics-ns.ArithmeticsService.ode.host=localhost
+#arithmetics-ns.ArithmeticsService.ode.port=7070
+
+arithmetics-ns.ArithmeticsService.OlaElMundo-GET_httpport.ode.address=http://localhost:${system.test.port.1}/HttpBindingTest/ArithmeticsService/OlaElMundo-GET
+arithmetics-ns.ArithmeticsService.OlaElMundo-POST_httpport.ode.address=http://localhost:${system.test.port.1}/HttpBindingTest/ArithmeticsService/OlaElMundo-POST
+arithmetics-ns.ArithmeticsService.OlaElMundo-PUT_httpport.ode.address=http://localhost:${system.test.port.1}/HttpBindingTest/ArithmeticsService/OlaElMundo-PUT
+arithmetics-ns.ArithmeticsService.OlaElMundo-DELETE_httpport.ode.address=http://localhost:${system.test.port.1}/HttpBindingTest/ArithmeticsService/OlaElMundo-DELETE
+arithmetics-ns.ArithmeticsService.SalutLaTerre_httpport.ode.address=http://localhost:${system.test.port.1}/HttpBindingTest/ArithmeticsService/SalutLaTerre

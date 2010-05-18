@@ -19,13 +19,13 @@
 
 package org.apache.ode.axis2;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.BpelEngineException;
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.MessageExchangeContext;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 
 /**
  * Implementation of the ODE {@link org.apache.ode.bpel.iapi.MessageExchangeContext}
@@ -35,60 +35,28 @@ import org.apache.ode.bpel.iapi.*;
 public class MessageExchangeContextImpl implements MessageExchangeContext {
 
     private static final Log __log = LogFactory.getLog(MessageExchangeContextImpl.class);
-    
-    /** The currently supported invocation styles. */
-    private static final Set<InvocationStyle> __supportedInvocationStyles;
-    
-    static {
-        HashSet<InvocationStyle> styles = new HashSet<InvocationStyle>();
-        styles.add(InvocationStyle.UNRELIABLE);
-        styles.add(InvocationStyle.TRANSACTED);
-        __supportedInvocationStyles = Collections.unmodifiableSet(styles);
-    }
-    
+
+    private ODEServer _server;
+
     public MessageExchangeContextImpl(ODEServer server) {
+        _server = server;
     }
 
-
-
-    public void invokePartnerUnreliable(PartnerRoleMessageExchange partnerRoleMessageExchange) throws ContextException {
+    public void invokePartner(PartnerRoleMessageExchange partnerRoleMessageExchange) throws ContextException {
         if (__log.isDebugEnabled())
             __log.debug("Invoking a partner operation: " + partnerRoleMessageExchange.getOperationName());
 
-        ExternalService service = (ExternalService)partnerRoleMessageExchange.getPartnerRoleChannel();
+        ExternalService service = (ExternalService)partnerRoleMessageExchange.getChannel();
         if (__log.isDebugEnabled())
             __log.debug("The service to invoke is the external service " + service.getServiceName()+":"+service.getPortName());
         service.invoke(partnerRoleMessageExchange);
-        
     }
 
-    public void invokePartnerReliable(PartnerRoleMessageExchange mex) throws ContextException {
-        // TODO: tie in to WS-RELIABLE* stack. 
-        throw new UnsupportedOperationException();
+    public void onAsyncReply(MyRoleMessageExchange myRoleMessageExchange) throws BpelEngineException {
+        if (__log.isDebugEnabled())
+            __log.debug("Processing an async reply from service " + myRoleMessageExchange.getServiceName());
+
+        // Nothing to do, no callback is necessary, the client just synchornizes itself with the
+        // mex reply when invoking the engine.
     }
-
-    public void invokePartnerTransacted(PartnerRoleMessageExchange mex) throws ContextException {
-        // TODO: should we check if the partner actually supports transactions?
-        invokePartnerUnreliable(mex);
-    }
-
-    public void invokeRestful(RESTOutMessageExchange mex) throws ContextException {
-        throw new UnsupportedOperationException("No support for RESTful invocations");
-    }
-
-    public void onMyRoleMessageExchangeStateChanged(MyRoleMessageExchange myRoleMessageExchange) throws BpelEngineException {
-        // Add code here to handle MEXs that we've "forgotten" about due to system failure etc.. mostly
-        // useful for RELIABLE, but nice to have with ASYNC/BLOCKING as well. 
-    }
-
-
-    public void cancel(PartnerRoleMessageExchange mex) throws ContextException {
-
-    }
-
-
-    public Set<InvocationStyle> getSupportedInvocationStyle(PartnerRoleChannel prc, EndpointReference partnerEpr) {
-        return __supportedInvocationStyles;
-    }
-
 }

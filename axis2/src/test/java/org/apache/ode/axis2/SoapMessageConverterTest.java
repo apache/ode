@@ -35,9 +35,10 @@ import org.apache.axiom.soap.impl.builder.StAXSOAPModelBuilder;
 import org.apache.axiom.soap.impl.dom.soap11.SOAP11Factory;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
-import org.apache.ode.axis2.soapbinding.SoapMessageConverter;
+import org.apache.ode.axis2.util.SoapMessageConverter;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.bpel.engine.MemBackedMessageImpl;
+import org.apache.ode.bpel.engine.MessageImpl;
+import org.apache.ode.bpel.memdao.MessageDAOImpl;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -95,7 +96,8 @@ public class SoapMessageConverterTest extends TestCase {
 
     public void testCreateSOAPRequest() throws Exception {
         MessageContext msgCtx = new MessageContext();
-        MemBackedMessageImpl odeMsg = new MemBackedMessageImpl(null, req1.getDocumentElement(), null, false);
+        MessageImpl odeMsg = new MessageImpl(new MessageDAOImpl(null));
+        odeMsg.setMessage(req1.getDocumentElement());
         portmapper.createSoapRequest(msgCtx, odeMsg, portType.getOperation("getObjectId", null, null));
         SOAPEnvelope env = msgCtx.getEnvelope();
         System.out.println("testCreateSOAPRequest: " + env);
@@ -109,7 +111,8 @@ public class SoapMessageConverterTest extends TestCase {
 
     public void testCreateSOAPRequestFail() throws Exception {
         MessageContext msgCtx = new MessageContext();
-        MemBackedMessageImpl odeMsg = new MemBackedMessageImpl(null, req1bad.getDocumentElement(), null, false);
+        MessageImpl odeMsg = new MessageImpl(new MessageDAOImpl(null));
+        odeMsg.setMessage(req1bad.getDocumentElement());
         try {
             portmapper.createSoapRequest(msgCtx, odeMsg, portType.getOperation("getObjectId", null, null));
             fail("Should have caused an ex");
@@ -125,7 +128,8 @@ public class SoapMessageConverterTest extends TestCase {
 
     public void testParseRequest() throws Exception {
         MessageContext msgCtx = new MessageContext();
-        MemBackedMessageImpl odeMsg1 = new MemBackedMessageImpl(null, req1.getDocumentElement(), null, false);
+        MessageImpl odeMsg1 = new MessageImpl(new MessageDAOImpl(null));
+        odeMsg1.setMessage(req1.getDocumentElement());
         odeMsg1.setHeaderPart("DocumentumRequestHeader", DOMUtils.findChildByName(req1.getDocumentElement(),
                 new QName("http://documentum.com/ws/2005/services", "DocumentumSecurityToken")));
         portmapper.createSoapRequest(msgCtx, odeMsg1, op1);
@@ -133,7 +137,8 @@ public class SoapMessageConverterTest extends TestCase {
         SOAPEnvelope env = msgCtx.getEnvelope();
         System.out.println("testParseRequest: " + env);
         Element odeMsgElmt = DOMUtils.stringToDOM("<message/>");
-        MemBackedMessageImpl odeMsg2 = new MemBackedMessageImpl(null, odeMsgElmt, null, false);
+        MessageImpl odeMsg2 = new MessageImpl(new MessageDAOImpl(null));
+        odeMsg1.setMessage(odeMsgElmt);
         portmapper.parseSoapRequest(odeMsg2, env, op1);
 
         System.out.println(DOMUtils.domToString(odeMsg2.getMessage()));
@@ -158,7 +163,8 @@ public class SoapMessageConverterTest extends TestCase {
         SOAPEnvelope se = builder.getSOAPEnvelope();
 
         Element msg = DOMUtils.stringToDOM("<message/>");
-        MemBackedMessageImpl odeMsg = new MemBackedMessageImpl(null, msg, null, false);
+        MessageImpl odeMsg = new MessageImpl(new MessageDAOImpl(null));
+        odeMsg.setMessage(msg);
         portmaper1.parseSoapRequest(odeMsg, se, opHello);
         System.out.println(DOMUtils.domToString(msg));
     }

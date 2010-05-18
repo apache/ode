@@ -153,8 +153,4 @@ public class Messages extends MessageBundle {
         return format("Registered message exchange interceptor: {0}", interceptorCN);
     }
 
-    public String msgContextInterceptorRegistered(String interceptorCN) {
-        return format("Registered context interceptor: {0}", interceptorCN);
-    }
-
 }

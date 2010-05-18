@@ -33,9 +33,7 @@ import org.testng.annotations.Test;
  *
  */
 public class EndpointConfigurationTest extends Axis2TestBase {
-
-
-  @Test
+    @Test
     public void testEndpointProperties() throws Exception {
         executeProcess();
     }
@@ -45,7 +43,7 @@ public class EndpointConfigurationTest extends Axis2TestBase {
     }
 
     protected void executeProcess(ContextHandler handler) throws Exception {
-        JettyWrapper jettyWrapper = new JettyWrapper(handler);
+        JettyWrapper jettyWrapper = new JettyWrapper(getTestPort(1), handler);
         jettyWrapper.start();
 
         try {
@@ -68,7 +66,7 @@ public class EndpointConfigurationTest extends Axis2TestBase {
      * Redo the exact same test but with Basic Authentication activated on the external service
      * @throws Exception
      */
-  @Test
+    @Test
     public void testHttpAuthentication() throws Exception {
         ContextHandler securedEchoContext;
         {
@@ -95,6 +93,4 @@ public class EndpointConfigurationTest extends Axis2TestBase {
         }
         executeProcess(securedEchoContext);
     }
-
-
 }

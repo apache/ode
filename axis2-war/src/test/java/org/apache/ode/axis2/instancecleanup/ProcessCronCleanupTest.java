@@ -1,13 +1,12 @@
 package org.apache.ode.axis2.instancecleanup;
 
-import org.apache.ode.dao.bpel.ProcessDAO;
-import org.apache.ode.dao.bpel.ProcessInstanceDAO;
-import org.hibernate.Query;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.testng.annotations.Test;
 
 public class ProcessCronCleanupTest extends CleanTestBase {
-    @Test(dataProvider="configs")
-    public void testCleanAll() throws Exception {
+//	@Test(dataProvider="configs")
+    public void _testCleanAll() throws Exception {
         go("TestProcessCronCleanup", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
@@ -29,18 +28,10 @@ public class ProcessCronCleanupTest extends CleanTestBase {
     }
 
     public String getODEConfigDir() {
-        return HIB_DERBY_CONF_DIR;
+    	return HIB_DERBY_CONF_DIR;
     }
     
     protected ProcessInstanceDAO getInstance() {
         return HibDaoConnectionFactoryImpl.getInstance();
-    }
-    
-    @Override
-    protected int getLargeDataCount(int echoCount) throws Exception {
-        initTM();
-        Query query = HibDaoConnectionFactoryImpl.getSession().createQuery("select count(id) from HLargeData as l");
-        
-        return ((Long)query.uniqueResult()).intValue();
     }
 }

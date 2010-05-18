@@ -25,7 +25,7 @@ import org.apache.commons.httpclient.params.DefaultHttpParams;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
-import org.apache.ode.il.epr.MutableEndpoint;
+import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
@@ -156,7 +156,7 @@ public class HttpMethodConverterTest extends TestCase {
     }
 
 
-    static class MockEPR implements EndpointReference, MutableEndpoint {
+    class MockEPR implements EndpointReference, MutableEndpoint {
         String url;
 
         MockEPR(String url) {
@@ -189,7 +189,7 @@ public class HttpMethodConverterTest extends TestCase {
         }
     }
 
-    static class MockMessage implements Message {
+    class MockMessage implements Message {
         Element elt;
 
         MockMessage(Element elt) {
@@ -238,7 +238,7 @@ public class HttpMethodConverterTest extends TestCase {
         }
     }
 
-    static class MockMessageExchange implements PartnerRoleMessageExchange {
+    class MockMessageExchange implements PartnerRoleMessageExchange {
         Operation op;
         Message req;
         EndpointReference epr;
@@ -260,11 +260,19 @@ public class HttpMethodConverterTest extends TestCase {
             return null;
         }
 
+        public PartnerRoleChannel getChannel() {
+            return null;
+        }
+
         public EndpointReference getMyRoleEndpointReference() {
             return null;
         }
 
         public void reply(Message response) throws BpelEngineException {
+
+        }
+
+        public void replyAsync() {
 
         }
 
@@ -328,6 +336,10 @@ public class HttpMethodConverterTest extends TestCase {
             return null;
         }
 
+        public boolean isTransactionPropagated() throws BpelEngineException {
+            return false;
+        }
+
         public void release() {
 
         }
@@ -336,35 +348,11 @@ public class HttpMethodConverterTest extends TestCase {
 
         }
 
-        public PartnerRoleChannel getPartnerRoleChannel() {
-            return null;
-        }
-
-        public void replyAsync(String foreignKey) {
-        }
-
-        public InvocationStyle getInvocationStyle() {
-            return null;
-        }
-
-        public long getTimeout() {
+        public int getSubscriberCount() {
             return 0;
         }
 
-        public void setTimeout(long timeout) {
-
-        }
-
-        public AckType getAckType() {
-            return null;
-        }
-
-        public boolean isTransactional() {
-            return false;
-        }
-
-        public boolean isSafe() {
-            return false;
+        public void setSubscriberCount(int subscriberCount) {
         }
     }
 }

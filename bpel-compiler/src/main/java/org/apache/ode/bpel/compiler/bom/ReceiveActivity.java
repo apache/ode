@@ -29,7 +29,7 @@ import org.w3c.dom.Element;
  */
 public class ReceiveActivity extends CreateInstanceActivity implements Communication {
     private final CommunicationHelper _commHelper;
-
+    
     public ReceiveActivity(Element el) {
         super(el);
         _commHelper = new CommunicationHelper(el);
@@ -51,6 +51,10 @@ public class ReceiveActivity extends CreateInstanceActivity implements Communica
      */
     public String getVariable() {
         return getAttribute("variable", null);
+    }
+    
+    public String getRoute() {
+    	return getAttribute("route", "one");
     }
 
     public String getOperation() {

@@ -98,11 +98,12 @@ public class SchemaModelImpl implements SchemaModel {
 
     private static class SchemaErrorHandler implements DOMErrorHandler {
         public boolean handleError(DOMError error) {
+            boolean isWarning = (error.getSeverity() == DOMError.SEVERITY_WARNING);
             __log.warn("Schema error", ((Exception)error.getRelatedException()));
             __log.warn(error.getLocation().getUri() + ":" + error.getLocation().getLineNumber());
             __log.warn(error.getRelatedData());
             __log.warn(error.getRelatedException());
-            return true;
+            return isWarning;
         }
     }
 
@@ -190,8 +191,14 @@ public class SchemaModelImpl implements SchemaModel {
                 location = resourceIdentifier.getNamespace();
             else if (resourceIdentifier.getLiteralSystemId() != null && _schemas.get(resourceIdentifier.getLiteralSystemId()) != null)
                 location = resourceIdentifier.getLiteralSystemId();
-            else if (resourceIdentifier.getBaseSystemId() != null && _schemas.get(resourceIdentifier.getBaseSystemId()) != null)
-                location = resourceIdentifier.getBaseSystemId();
+            else if (resourceIdentifier.getExpandedSystemId() != null && _schemas.get(resourceIdentifier.getExpandedSystemId()) != null)
+                location = resourceIdentifier.getExpandedSystemId();
+            else {
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Available schemas " + _schemas.keySet());
+                }
+                throw new IllegalStateException("Schema " + resourceIdentifier + " not captured");
+            }
 
             src.setByteStream(new ByteArrayInputStream(_schemas.get(location)));
             return src;

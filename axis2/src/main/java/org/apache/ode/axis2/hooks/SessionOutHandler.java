@@ -23,18 +23,18 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axiom.soap.SOAPHeader;
-import org.apache.axiom.soap.SOAPHeaderBlock;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.il.epr.EndpointFactory;
-import org.apache.ode.il.epr.MutableEndpoint;
-import org.apache.ode.il.epr.WSAEndpoint;
-import org.apache.ode.axis2.ODEService;
+import org.apache.ode.bpel.epr.EndpointFactory;
+import org.apache.ode.bpel.epr.MutableEndpoint;
+import org.apache.ode.bpel.epr.WSAEndpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.utils.Namespaces;
+import org.apache.ode.utils.Properties;
 
 /**
  * An outgoing handler adding session id information in the message
@@ -47,16 +47,23 @@ public class SessionOutHandler extends AbstractHandler {
 
 
     public InvocationResponse invoke(MessageContext messageContext) throws AxisFault {
-        EndpointReference otargetSession = (EndpointReference) messageContext.getProperty(ODEService.TARGET_SESSION_ENDPOINT);
-        EndpointReference ocallbackSession = (EndpointReference) messageContext.getProperty(ODEService.CALLBACK_SESSION_ENDPOINT);
+        // Skip this handler if ask to do so
+        if(messageContext.isPropertyTrue(AddressingConstants.DISABLE_ADDRESSING_FOR_OUT_MESSAGES)){
+            if(__log.isDebugEnabled()) __log.debug("Skipped WS-Adressing Headers for sessions");
+            return InvocationResponse.CONTINUE;
+        }
+
+        EndpointReference otargetSession = (EndpointReference) messageContext.getProperty("targetSessionEndpoint");
+        EndpointReference ocallbackSession = (EndpointReference) messageContext.getProperty("callbackSessionEndpoint");
         if (otargetSession == null)
-            otargetSession = (EndpointReference) messageContext.getOptions().getProperty(ODEService.TARGET_SESSION_ENDPOINT);
+            otargetSession = (EndpointReference) messageContext.getOptions().getProperty("targetSessionEndpoint");
         if (ocallbackSession == null)
-            ocallbackSession = (EndpointReference) messageContext.getOptions().getProperty(ODEService.CALLBACK_SESSION_ENDPOINT);
+            ocallbackSession = (EndpointReference) messageContext.getOptions().getProperty("callbackSessionEndpoint");
 
         if (otargetSession != null || ocallbackSession != null) {
             SOAPHeader header = messageContext.getEnvelope().getHeader();
             SOAPFactory factory = (SOAPFactory) messageContext.getEnvelope().getOMFactory();
+            OMNamespace intalioSessNS = factory.createOMNamespace(Namespaces.INTALIO_SESSION_NS, "intalio");
             OMNamespace odeSessNS = factory.createOMNamespace(Namespaces.ODE_SESSION_NS, "odesession");
             OMNamespace wsAddrNS = factory.createOMNamespace(Namespaces.WS_ADDRESSING_NS, "addr");
             if (header == null) {
@@ -95,21 +102,31 @@ public class SessionOutHandler extends AbstractHandler {
                     OMElement session = factory.createSOAPHeaderBlock("session", odeSessNS);
                     header.addChild(session);
                     session.setText(targetEpr.getSessionId());
+                    // same for intalio
+                    session = factory.createSOAPHeaderBlock("session", intalioSessNS);
+                    header.addChild(session);
+                    session.setText(targetEpr.getSessionId());
                 }
                 __log.debug("Sending stateful TO epr in message header using session " + targetEpr.getSessionId());
             }
 
             if (ocallbackSession != null && ocallbackSession instanceof MutableEndpoint) {
                 WSAEndpoint callbackEpr = EndpointFactory.convertToWSA((MutableEndpoint) ocallbackSession);
-                OMElement callback = factory.createSOAPHeaderBlock("callback", odeSessNS);
-                header.addChild(callback);
+                OMElement odeCallback = factory.createSOAPHeaderBlock("callback", odeSessNS);
+                OMElement intCallback = factory.createSOAPHeaderBlock("callback", intalioSessNS);
+                header.addChild(odeCallback);
+                header.addChild(intCallback);
                 OMElement address = factory.createOMElement("Address", wsAddrNS);
-                callback.addChild(address);
+                odeCallback.addChild(address);
+                intCallback.addChild(address.cloneOMElement());
                 address.setText(callbackEpr.getUrl());
                 if (callbackEpr.getSessionId() != null) {
-                    OMElement session = factory.createOMElement("session", odeSessNS);
-                    session.setText(callbackEpr.getSessionId());
-                    callback.addChild(session);
+                    OMElement odeSession = factory.createOMElement("session", odeSessNS);
+                    OMElement intSession = factory.createOMElement("session", intalioSessNS);
+                    odeSession.setText(callbackEpr.getSessionId());
+                    intSession.setText(callbackEpr.getSessionId());
+                    odeCallback.addChild(odeSession);
+                    intCallback.addChild(intSession);
                 }
                 __log.debug("Sending stateful FROM epr in message header using session " + callbackEpr.getSessionId());
             }
@@ -118,6 +135,6 @@ public class SessionOutHandler extends AbstractHandler {
             __log.debug(messageContext.getEnvelope().toString());
 
         }
-        return InvocationResponse.CONTINUE;        
+        return InvocationResponse.CONTINUE;
     }
 }

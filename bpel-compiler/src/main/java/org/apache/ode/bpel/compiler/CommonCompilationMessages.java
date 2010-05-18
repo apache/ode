@@ -108,6 +108,12 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
             "Attempt to reference undeclared correlation set \"{0}\".", csetName);
     }
 
+    /** Attempt to reference undeclared correlation set "{0}". */
+    public CompilationMessage errDuplicateUseCorrelationSet(String csetName) {
+        return this.formatCompilationMessage(
+            "Attempt to use a correlation set \"{0}\" more than once for a set of correlations.", csetName);
+    }
+
     /**
      * Cannot use non-message variable "{0}" in this context (message variable is
      * required).
@@ -444,10 +450,6 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
             return this.formatCompilationMessage("A scope enclosed inside an atomic scope cannot declare itself as not atomic");
     }
 
-    public CompilationMessage errIsolatedScopeNesting() {
-        return this.formatCompilationMessage("Cannot nest isolated scopes.");
-    }
-
     public CompilationMessage errProcessNameNotSpecified() {
         return this.formatCompilationMessage("The process name was not specified.");
     }
@@ -477,8 +479,8 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
         return this.formatCompilationMessage("Empty scopes are forbidden.");
     }
 
-	public CompilationMessage errEmptySequence() {
-		return this.formatCompilationMessage("Empty sequences are forbidden.");
+	public CompilationMessage errEmptyCatch() {
+		return this.formatCompilationMessage("Empty catch faut handlers are forbidden.");
 	}
 
 	public CompilationMessage errMustSpecifyRelatedVariable(String name) {
@@ -489,18 +491,8 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
 		return this.formatCompilationMessage("The external variable declaration for \"{0}\" must specify an external variable identifier.", name);
 	}
 
-	public CompilationMessage errEmptyCatch() {
-	    return this.formatCompilationMessage("Empty catch faut handlers are forbidden.");
+	public CompilationMessage errEmptySequence() {
+		return this.formatCompilationMessage("Empty sequences are forbidden.");
 	}
 
-    /** Context propagation must define a context attribute */
-    public CompilationMessage errMissingContextAttribute() {
-        return this.formatCompilationMessage("<propagate> element must define a 'context' attribute.");
-    }
-
-    /** Context propagation must define either a fromVariable or a 
-     * fromPartnerLink attribute */
-    public CompilationMessage errMissingVariableOrPartnerLinkAttribute() {
-        return this.formatCompilationMessage("<propagate> element must define either a 'fromVariable' or a 'fromPartnerLink' attribute.");
-    }
 }

@@ -27,10 +27,9 @@ import java.net.URI;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.compiler.ResourceFinder;
 
 /**
- * Basic implementation of the {@link org.apache.ode.bpel.compiler.ResourceFinder} interface. Resolves
+ * Basic implementation of the {@link ResourceFinder} interface. Resolves
  * URIs relative to a base URI specified at the time of construction.
  *
  * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
@@ -60,7 +59,7 @@ public class DefaultResourceFinder implements ResourceFinder {
         checkDir("absoluteDir", absoluteDir);
         _relativeDir = relativeDir;
         _absoluteDir = absoluteDir;
-        }
+    }
 
     private void checkDir(String arg, File dir) {
         if (dir == null) {
@@ -72,6 +71,30 @@ public class DefaultResourceFinder implements ResourceFinder {
     }
 
     public InputStream openResource(URI uri) throws MalformedURLException, IOException {
+        uri = relativize(uri);
+        
+        InputStream r = openFileResource(uri);
+        if (r != null) {
+            return r;
+        }
+        
+        if (__log.isDebugEnabled()) {
+            __log.debug("trying classpath resource for " + uri);
+        }
+        
+        r = Thread.currentThread().getContextClassLoader().getResourceAsStream(uri.getPath());
+        if (r != null) {
+            return r;
+        } else {
+            if (__log.isDebugEnabled()) {
+                __log.debug("classpath resource not found " + uri);
+            }
+            return null;
+        }
+    
+    }
+
+    private InputStream openFileResource(URI uri) throws MalformedURLException, IOException {
         URI absolute = _absoluteDir.toURI();
         if (__log.isDebugEnabled()) {
             __log.debug("openResource: uri="+uri+" relativeDir="+_relativeDir+" absoluteDir="+_absoluteDir);
@@ -81,7 +104,7 @@ public class DefaultResourceFinder implements ResourceFinder {
             try {
                 return uri.toURL().openStream();
             } catch (Exception except) {
-                __log.fatal("openResource: unable to open file URL " + uri + "; " + except.toString());
+                __log.debug("openResource: unable to open file URL " + uri + "; " + except.toString());
                 return null;
             }
         }
@@ -89,21 +112,42 @@ public class DefaultResourceFinder implements ResourceFinder {
         // Note that if we get an absolute URI, the relativize operation will simply
         // return the absolute URI.
         URI relative = _relativeDir.toURI().relativize(uri);
-        if (relative.isAbsolute() && !relative.getScheme().equals("urn")) {
+        if (relative.isAbsolute() && !(relative.getScheme().equals("urn"))) {
            __log.fatal("openResource: invalid scheme (should be urn:)  " + uri);
            return null;
         }
 
         File f = new File(absolute.getPath(), relative.getPath());
-        if (!f.exists()) {
-            __log.debug("fileNotFound: " + f);
+        if (f.exists()) {
+            return new FileInputStream(f);
+        } else {
+            if (__log.isDebugEnabled()) {
+                __log.debug("fileNotFound: " + f);
+            }
             return null;
         }
-
-        return new FileInputStream(f);
     }
-
+    
     public URI getBaseResourceURI() {
         return _absoluteDir.toURI();
     }
+
+    private URI relativize(URI u) {
+        if (u.isAbsolute()) {
+            return _absoluteDir.toURI().relativize(u);
+        } else return u;
+    }
+    
+    public URI resolve(URI parent, URI child) {
+        parent = relativize(parent);
+        child = relativize(child);
+        URI result = parent.resolve(child);
+        URI result2 = _absoluteDir.toURI().resolve(result);
+        if (__log.isDebugEnabled()) {
+            __log.debug("resolving URI: parent " + parent + " child " + child + " result " + result + " resultAbsolute:" + result2);
+        }
+        
+        return result2;
+    }
+
 }

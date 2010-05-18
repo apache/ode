@@ -144,14 +144,18 @@
                     </bpel:correlations>
                 </bpel:receive>
                 <bpel:flow>
-                    <bpel:scope>
+                    <bpel:scope xmlns:ext="http://ode.apache.org/activityRecovery">
                         <bpel:faultHandlers>
-                            <bpel:catch faultName="bpel:conflictingRequest">
+                            <bpel:catch faultName="ext:activityFailure">
                                 <bpel:empty/>
                             </bpel:catch>
                         </bpel:faultHandlers>
                         <bpel:sequence>
-                            <bpel:invoke operation="inOut3" partnerLink="client" inputVariable="input" outputVariable="output"/>
+                            <bpel:invoke operation="inOut3" partnerLink="client" inputVariable="input" outputVariable="output">
+                                <ext:failureHandling>
+                                  <ext:faultOnFailure>true</ext:faultOnFailure>
+                                </ext:failureHandling>
+                            </bpel:invoke>
                             <bpel:throw faultName="error"></bpel:throw>
                         </bpel:sequence>
                     </bpel:scope>

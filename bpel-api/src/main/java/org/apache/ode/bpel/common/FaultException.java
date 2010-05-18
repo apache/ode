@@ -27,36 +27,41 @@ import javax.xml.namespace.QName;
  * <p>As per BPEL specification, appendix A.</p>
  */
 public class FaultException extends Exception {
-  private static final long serialVersionUID = 389190682205802035L;
-  private final QName _qname;
+    private static final long serialVersionUID = 389190682205802035L;
+    private QName _qname;
 
-  
-  public FaultException(QName qname, String message, Throwable cause) {
-      super(qname.toString() + ": " + message, cause);
-      _qname = qname;
-  }
-  /**
-   * Create a new instance.
-   * @param qname the <code>QName</code> of the fault
-   * @param message a descriptive message for the exception
-   */
-  public FaultException(QName qname, String message) {
-    this(qname, message, null);
-  }
+    /**
+     * Create a new instance.
+     *
+     * @param qname   the <code>QName</code> of the fault
+     * @param message a descriptive message for the exception
+     */
+    public FaultException(QName qname, String message) {
+        super(message);
+        _qname = qname;
+    }
 
-  public FaultException(QName qname) {
-    this(qname, null, null);
-  }
+    public FaultException(QName qname) {
+        super(qname.toString());
+        _qname = qname;
+    }
 
-     public FaultException(QName qname, Throwable cause) {
-         this(qname, null, cause);
-     }
+    public FaultException(QName qname, String message, Throwable cause) {
+        super(message, cause);
+        this._qname = qname;
+    }
 
-  /**
-   * Get the (official) <code>QName</code> of this fault.
-   * @return the <code>QName</code> of the fault
-   */
-  public QName getQName() {
-    return _qname;
+    public FaultException(QName qname, Throwable cause) {
+        super(cause);
+        this._qname = qname;
+    }
+
+    /**
+     * Get the (official) <code>QName</code> of this fault.
+     *
+     * @return the <code>QName</code> of the fault
+     */
+    public QName getQName() {
+        return _qname;
   }
 }

@@ -21,14 +21,16 @@ package org.apache.ode.utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Map;
 
 /**
  * Extensions for java.lang.System
  */
 
 public class SystemUtils {
+    private static final Pattern PROPERTY_PATTERN = Pattern.compile("\\$\\{([^\\}]+)\\}");
 
-	/**
+    /**
 	 * @see System#getProperties()
 	 */
 	public static String javaVersion() {
@@ -146,18 +148,33 @@ public class SystemUtils {
 	 * e.g., "The java version is ${java.version}" ==> "The java version is 1.5.0_11"
 	 */
 	public static String replaceSystemProperties(String str) {
-		Pattern pattern = Pattern.compile("\\$\\{[^\\}]+\\}");
-		int start = 0;
+        return replaceProperties(str, PROPERTY_PATTERN, System.getProperties());
+    }
+
+    /**
+     * Match the received string against the given pattern, and replace each match by the value associated to the first group of the match (group(1)).
+     * <br/>If there's no value in the map, no substitution is made.
+     * <p>
+     * There's one constraint on the regex pattern, it should capture at least one group (i.e. match.groupe(1) should not be null). The value of this group is used to retrieved the replacement value from the map.
+     * For instance: pattern = "\\$\\{([^\\}]+)\\}"
+     * @param str
+     * @param pattern
+     * @param values
+     * @return
+     */
+    public static String replaceProperties(String str, Pattern pattern, Map values){
+        int start = 0;
 		while (true) {
 			Matcher match = pattern.matcher(str);
 			if (!match.find(start))
 				break;
-			String property = str.substring(match.start() + 2, match.end() - 1);
-			String value = System.getProperty(property);
+			String property = match.group(1);
+            if(property==null) throw new IllegalArgumentException("Regex pattern must capture at least 1 group! "+pattern.toString());
+			String value = (String) values.get(property);
 			if (value != null) {
 				str = match.replaceFirst(Matcher.quoteReplacement(value));
 			} else {
-				// if the system property doesn't exist, no substitution and skip to next
+				// if the property doesn't exist, no substitution and skip to next
 				start = match.end();
 			}
 		}

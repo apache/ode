@@ -106,7 +106,7 @@ public class ManagementService {
         return _instanceMgmt;
     }
 
-    static class DynamicMessageReceiver<T> extends AbstractMessageReceiver {
+    class DynamicMessageReceiver<T> extends AbstractMessageReceiver {
         T _service;
 
         public DynamicMessageReceiver(T service) {
@@ -133,24 +133,24 @@ public class ManagementService {
                 envelope.getBody().addFault(toSoapFault(e, soapFactory));
             }
             AxisEngine.send(outMsgContext);
-        }
+    }
 
         private SOAPFault toSoapFault(Exception e, SOAPFactory soapFactory) {
-            SOAPFault fault = soapFactory.createSOAPFault();
-            SOAPFaultCode code = soapFactory.createSOAPFaultCode(fault);
-            code.setText(new QName(Namespaces.SOAP_ENV_NS, "Server"));
-            SOAPFaultReason reason = soapFactory.createSOAPFaultReason(fault);
-            reason.setText(e.toString());
-    
-                OMElement detail = soapFactory
-                        .createOMElement(new QName(Namespaces.ODE_PMAPI_NS, e.getClass().getSimpleName()));
-            StringWriter stack = new StringWriter();
-            e.printStackTrace(new PrintWriter(stack));
-            detail.setText(stack.toString());
-            SOAPFaultDetail soapDetail = soapFactory.createSOAPFaultDetail(fault);
-            soapDetail.addDetailEntry(detail);
-            return fault;
-        }
+        SOAPFault fault = soapFactory.createSOAPFault();
+        SOAPFaultCode code = soapFactory.createSOAPFaultCode(fault);
+        code.setText(new QName(Namespaces.SOAP_ENV_NS, "Server"));
+        SOAPFaultReason reason = soapFactory.createSOAPFaultReason(fault);
+        reason.setText(e.toString());
+
+            OMElement detail = soapFactory
+                    .createOMElement(new QName(Namespaces.ODE_PMAPI_NS, e.getClass().getSimpleName()));
+        StringWriter stack = new StringWriter();
+        e.printStackTrace(new PrintWriter(stack));
+        detail.setText(stack.toString());
+        SOAPFaultDetail soapDetail = soapFactory.createSOAPFaultDetail(fault);
+        soapDetail.addDetailEntry(detail);
+        return fault;
+    }
     }
 
 }

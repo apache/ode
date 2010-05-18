@@ -31,6 +31,7 @@ import org.apache.ode.axis2.service.ServiceClientUtil;
 import org.apache.ode.tools.sendsoap.cline.HttpSoapSender;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.il.OMUtils;
+import org.apache.ode.axis2.ODEConfigDirAware;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.IteratorUtils;
 import org.testng.annotations.AfterMethod;
@@ -47,7 +48,7 @@ import java.util.*;
 
 import static org.testng.AssertJUnit.assertTrue;
 
-public class InstanceManagementTest extends Axis2TestBase {
+public class InstanceManagementTest extends Axis2TestBase implements ODEConfigDirAware {
 
     private OMFactory _factory;
     private DateFormat xsdDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
@@ -80,24 +81,25 @@ public class InstanceManagementTest extends Axis2TestBase {
         notSoLongAgo.add(Calendar.MINUTE, -2);
         String notSoLongAgoStr = xsdDF.format(notSoLongAgo.getTime());
         listRoot = _client.buildMessage("listInstances", new String[] {"filter", "order", "limit"},
-                new String[] {"name=DynPartnerMain namespace=http://ode/bpel/unit-test " +
+                new String[] {"name=DynPartnerResponder namespace=http://ode/bpel/responder " +
                         "started>=" + notSoLongAgoStr, "", "10"});
         result = sendToIM(listRoot);
-        assert(result.toString().split("instance-info").length == 5);
+        assertTrue(instanceNb(result) == 0);
     }
 
-/*  @Test
+    @Test
     public void testListAllInstances() throws Exception {
         OMElement root = _client.buildMessage("listAllInstancesWithLimit", new String[] {"limit"}, new String[] {"1"});
         OMElement result = sendToIM(root);
-        // We shold have only one instance (so 2 opening/closing elmts)
-        assert(result.toString().split("instance-info").length == 5);
-        // And one of our executed instances are there
-        assert(result.toString().indexOf("DynPartnerMain") >= 0 ||
-                result.toString().indexOf("DynPartnerResponder") >= 0);
-    }*/
 
-  @Test
+        // We should have only one instance (so 2 opening/closing elmts)
+        assertTrue("Must contain exactly 1 instance-info element", instanceNb(result) == 1);
+        // And one of our executed instances are there
+        assertTrue(result.toString().indexOf("DynPartnerMain") >= 0 ||
+                result.toString().indexOf("DynPartnerResponder") >= 0);
+    }
+
+  @Test(dataProvider="configs")
     public void testInstanceSummaryListProcess() throws Exception {
         OMElement listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"},
                 new String[] {"name=DynPartnerMain", ""});
@@ -111,18 +113,17 @@ public class InstanceManagementTest extends Axis2TestBase {
             OMElement omelmt = (OMElement) iter.next();
             count += Integer.parseInt(omelmt.getAttributeValue(new QName(null, "count")));
         }
-        assert(count == 1);
+        assertTrue(count == 1);
     }
 
-  @Test
+    @Test
     public void testGetInstanceInfo() throws Exception {
         OMElement root = _client.buildMessage("listAllInstances", new String[] {}, new String[] {});
         OMElement result = sendToIM(root);
-        String iid = result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "instance-info"))
-                .getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "iid")).getText();
+        String iid = instances(result).get(0).getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "iid")).getText();
         root = _client.buildMessage("getInstanceInfo", new String[] {"iid"}, new String[] {iid});
         result = sendToIM(root);
-        assert(result.toString().split("instance-info").length == 3);
+        assertTrue("Must return one <instance-info> element", instance(result)!=null);
     }
 
   @Test
@@ -133,23 +134,23 @@ public class InstanceManagementTest extends Axis2TestBase {
             @SuppressWarnings("unused")
             OMElement result = sendToIM(root);
         } catch (AxisFault axisFault) {
-            assert(axisFault.getMessage().indexOf("InstanceNotFoundException") > 0);
+            assertTrue("Should contain InstanceNotFoundException", axisFault.getMessage().contains("InstanceNotFoundException"));
         }
     }
 
-  @Test
+    @Test
     public void testGetScopeInfo() throws Exception {
-      OMElement root = _client.buildMessage("listInstances", new String[] {"filter", "order", "limit"},
-              new String[] {"name=DynPartnerMain", "", "10"});
+        OMElement root = _client.buildMessage("listInstances", new String[] {"filter", "order", "limit"},
+                new String[] {"name=DynPartnerMain", "", "10"});
         OMElement result = sendToIM(root);
-        String siid = result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "instance-info"))
+        String siid = instances(result).get(0)
                 .getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "root-scope"))
                 .getAttributeValue(new QName(null, "siid"));
         root = _client.buildMessage("getScopeInfoWithActivity", new String[] {"siid", "activityInfo"},
                 new String[] {siid, "true"});
         result = sendToIM(root);
-        assert(result.toString().split("scope-info").length == 3);
-        assert(result.toString().indexOf("activity-info") >= 0);
+        assertTrue(result.toString().split("scope-info").length == 3);
+        assertTrue(result.toString().indexOf("activity-info") >= 0);
     }
 
   @Test
@@ -157,38 +158,44 @@ public class InstanceManagementTest extends Axis2TestBase {
         OMElement root = _client.buildMessage("listInstances", new String[] {"filter", "order", "limit"},
                 new String[] {"name=DynPartnerMain", "", "10"});
         OMElement result = sendToIM(root);
-        String siid = result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "instance-info"))
+        String siid = instances(result).get(0)
                 .getFirstChildWithName(new QName(Namespaces.ODE_PMAPI_TYPES_NS, "root-scope"))
                 .getAttributeValue(new QName(null, "siid"));
         root = _client.buildMessage("getVariableInfo", new String[] {"sid", "varName"}, new String[] {siid, "dummy"});
         result = sendToIM(root);
-        assert(result.toString().indexOf("fire!") >= 0);
+        assertTrue(result.toString().indexOf("fire!") >= 0);
     }
 
 
-//    TODO uncomment when events querying is fixes on OpenJPA
-    
-//    public void testListEvents() throws Exception {
-//        OMElement root = _client.buildMessage("listEvents", new String[] {"instanceFilter", "eventFilter", "maxCount"},
-//                new String[] {"", "", "0"});
-//        OMElement result = sendToIM(root);
-//        assert(result.toString().split("event-info").length > 10);
-//    }
-//
-//    public void testGetEventTimeline() throws Exception {
-//        OMElement root = _client.buildMessage("getEventTimeline", new String[] {"instanceFilter", "eventFilter"},
-//                new String[] {"", ""});
-//        OMElement result = sendToIM(root);
-//        assert(result.toString().split("element").length > 10);
-//    }
+    //    TODO uncomment when events querying is fixes on OpenJPA
+    @Test(enabled = false)
+    public void testListEvents() throws Exception {
+        OMElement root = _client.buildMessage("listEvents", new String[]{"instanceFilter", "eventFilter", "maxCount"},
+                new String[]{"", "", "0"});
+        OMElement result = sendToIM(root);
+        assertTrue(result.toString().split("event-info").length > 10);
+    }
 
-  @Test
+    @Test(enabled = false)
+    public void testGetEventTimeline() throws Exception {
+        OMElement root = _client.buildMessage("getEventTimeline", new String[]{"instanceFilter", "eventFilter"},
+                new String[]{"", ""});
+        OMElement result = sendToIM(root);
+        assertTrue(result.toString().split("element").length > 10);
+    }
+
+    @Test
     public void testDeleteInstances() throws Exception {
         OMElement root = _client.buildMessage("listAllInstancesWithLimit", new String[] {"limit"}, new String[] {"1"});
         OMElement result = sendToIM(root);
-        String iid = result.getFirstElement().getFirstElement().getText();
-        System.out.println("=> " + result.getFirstElement().getFirstElement().getText());
-        _client.buildMessage("delete", new String[] {"piid"}, new String[] {iid});
+        String iid = instances(result).get(0).getFirstElement().getText();
+        System.out.println("=> " + iid);
+        OMElement msg= _client.buildMessage("delete", new String[]{"filter"}, new String[]{"iid="+iid});
+        OMElement response = sendToIM(msg);
+        System.out.println(response);
+                List<OMElement> elements = IteratorUtils.toList(response.getFirstElement().getChildrenWithName(new QName("", "element")));
+        assertTrue("Must delete only one instance", elements.size()==1);
+        assertTrue(iid.equals(elements.get(0).getText()));
     }
 
   @BeforeMethod
@@ -225,9 +232,7 @@ public class InstanceManagementTest extends Axis2TestBase {
         _deployedName = res.getFirstChildWithName(new QName(null, "response")).getFirstChildWithName(new QName("http://www.apache.org/ode/deployapi", "name")).getText();
 
         // Execute
-        URL svcUrl = new URL("http://localhost:8888/processes/DynMainService");
-        InputStream sis = this.getClass().getClassLoader().getResourceAsStream("testDynPartnerRequest.soap");
-        System.out.println(HttpSoapSender.doSend(svcUrl, sis, null, 0, null, null, null));
+      System.out.println(server.sendRequestFile("http://localhost:8888/processes/DynMainService", "testDynPartnerRequest.soap"));
         // Just making sure the instance starts
         Thread.sleep(1000);
     }
@@ -253,15 +258,18 @@ public class InstanceManagementTest extends Axis2TestBase {
     }
 
     private OMElement sendToPM(OMElement msg) throws AxisFault {
-        return _client.send(msg, "http://localhost:8888/processes/ProcessManagement");
+        return _client.send(msg, "http://localhost:"+getTestPort(0)+"/processes/ProcessManagement");
     }
 
     private OMElement sendToIM(OMElement msg) throws AxisFault {
-        return _client.send(msg, "http://localhost:8888/processes/InstanceManagement");
+        return _client.send(msg, "http://localhost:"+getTestPort(0)+"/processes/InstanceManagement");
     }
 
     private OMElement sendToDeployment(OMElement msg) throws AxisFault {
-        return _client.send(msg, "http://localhost:8888/processes/DeploymentService");
+        return _client.send(msg, "http://localhost:"+getTestPort(0)+"/processes/DeploymentService");
     }
 
+    public String getODEConfigDir() {
+        return HIB_DERBY_CONF_DIR;
+    }
 }

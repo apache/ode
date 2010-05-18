@@ -17,9 +17,9 @@
 
 module Derby
 
-  REQUIRES = Buildr.group("derby", "derbytools", :under=>"org.apache.derby", :version=>"10.4.1.3")
+  REQUIRES = Buildr.group("derby", "derbytools", :under=>"org.apache.derby", :version=>"10.1.2.1")
 
-  Java.classpath <<  REQUIRES
+  Java.classpath << REQUIRES
 
   class << self
 
@@ -29,7 +29,7 @@ module Derby
     # For example:
     #   Derby.create "mydb"=>derby.sql
     def create(args)
-      db, prereqs = args.keys.first, args.values.first 
+      db, prereqs = args.keys.first, args.values.first
       file(File.expand_path(db)=>prereqs) do |task|
         rm_rf task.name if File.exist?(task.name)
         Buildr.ant("derby") do |ant|
@@ -45,11 +45,6 @@ module Derby
       end
     end
 
-  protected
-
-    # This will download all the required artifacts before returning a classpath, and we want to do this only once.
-    def requires()
-      @requires ||= Buildr.artifacts(REQUIRES).each(&:invoke).map(&:to_s).join(File::PATH_SEPARATOR)
-    end
   end
+
 end

@@ -18,12 +18,9 @@
  */
 package org.apache.ode.bpel.compiler.bom;
 
-import java.util.Collections;
-
 import javax.xml.namespace.QName;
 
 import org.w3c.dom.Element;
-import org.apache.ode.bpel.rtrep.common.extension.ExtensibilityQNames;
 
 /**
  * BPEL Variable declaration.
@@ -115,14 +112,5 @@ public class Variable extends BpelObject {
      */
     public String getRelated() {
     	return  getAttribute(ExtensibilityQNames.EXTVAR_RELATED, null);
-    }
-    
-    /**
-     * Returns from-spec Element for variable inline initialization
-     * @author madars.vitolins _at gmail.com
-     * @return
-     */
-    public From getFrom() {
-    	return getFirstChild(From.class);
     }
 }

@@ -42,7 +42,7 @@
             <output message="tns:TestIMAMessage"/>
         </operation>
         <operation name="inOnly">
-        	<input message="tns:TestIMAMessage"></input>
+        	<input message="tns:TestIMAMessage"></input>
         </operation>
         <operation name="inOut">
             <input message="tns:TestIMAMessage"></input>

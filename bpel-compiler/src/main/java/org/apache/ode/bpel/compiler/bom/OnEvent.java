@@ -51,8 +51,4 @@ public class OnEvent extends OnMessage {
       return getNamespaceContext().derefQName(getAttribute("element",null));
   }
   
-  public boolean isAtomic() {
-      return Boolean.parseBoolean(getAttribute("atomic", "false"));
-  }    
-
 }

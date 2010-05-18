@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.apache.ode</groupId>
         <artifactId>ode</artifactId>
-        <version>2.0-SNAPSHOT</version>
+        <version>1.3.4-SNAPSHOT</version>
     </parent>
     
     <properties>
@@ -53,7 +53,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
-            <artifactId>ode-runtimes</artifactId>
+            <artifactId>ode-bpel-runtime</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
@@ -111,21 +111,6 @@
               <appendAssemblyId>false</appendAssemblyId>
               <descriptors>
                 <descriptor>src/main/assembly/jbi.xml</descriptor>
-              </descriptors>
-              <tarLongFileMode>gnu</tarLongFileMode>
-            </configuration>
-          </execution>
-          <execution>
-            <id>source-distro</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <finalName>apache-ode-sources-${project.version}</finalName>
-              <appendAssemblyId>false</appendAssemblyId>
-              <descriptors>
-                <descriptor>src/main/assembly/src.xml</descriptor>
               </descriptors>
               <tarLongFileMode>gnu</tarLongFileMode>
             </configuration>

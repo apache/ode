@@ -18,28 +18,6 @@
  */
 package org.apache.ode.store;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.compiler.BpelC;
-import org.apache.ode.bpel.compiler.DefaultResourceFinder;
-import org.apache.ode.bpel.compiler.WSDLLocatorImpl;
-import org.apache.ode.bpel.extension.ExtensionValidator;
-import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
-import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
-import org.apache.ode.bpel.compiler.wsdl.WSDLFactoryBPEL20;
-import org.apache.ode.bpel.dd.DeployDocument;
-import org.apache.ode.bpel.dd.TDeployment;
-import org.apache.ode.bpel.dd.TDeployment.Process;
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.rapi.Serializer;
-import org.apache.ode.utils.fs.FileUtils;
-import org.apache.xmlbeans.XmlOptions;
-import org.w3c.dom.Node;
-
-import javax.wsdl.Definition;
-import javax.wsdl.WSDLException;
-import javax.wsdl.xml.WSDLReader;
-import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -47,16 +25,54 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
-import java.util.TreeSet;
+
+import javax.wsdl.Definition;
+import javax.wsdl.WSDLException;
+import javax.wsdl.xml.WSDLReader;
+import javax.xml.namespace.QName;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.compiler.BpelC;
+import org.apache.ode.bpel.compiler.BpelCompiler;
+import org.apache.ode.bpel.compiler.DefaultResourceFinder;
+import org.apache.ode.bpel.compiler.WSDLLocatorImpl;
+import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
+import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
+import org.apache.ode.bpel.compiler.wsdl.WSDLFactoryBPEL20;
+import org.apache.ode.bpel.dd.DeployDocument;
+import org.apache.ode.bpel.dd.TDeployment;
+import org.apache.ode.bpel.dd.TDeployment.Process;
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.o.Serializer;
+import org.apache.ode.utils.InternPool;
+import org.apache.ode.utils.InternPool.InternableBlock;
+import org.apache.ode.utils.fs.FileUtils;
+import org.apache.xmlbeans.XmlOptions;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.MessageSourceResolvable;
+import org.springframework.context.NoSuchMessageException;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
+import org.springframework.core.io.Resource;
+import org.w3c.dom.Node;
 
 /**
  * Container providing various functions on the deployment directory.
+ *
+ * @author mriou
+ * @author Maciej Szefler <mszefler at gmail dot com>
  */
 class DeploymentUnitDir {
 
@@ -66,11 +82,11 @@ class DeploymentUnitDir {
     private String _name;
     private File _duDirectory;
     private File _descriptorFile;
+    private Properties _properties = new Properties();
 
-    private HashMap<QName, CBPInfo> _processes = new HashMap<QName,CBPInfo>();
-    private HashMap<QName, TDeployment.Process> _processInfo = new HashMap<QName,TDeployment.Process>();
-    private Map<QName, ExtensionValidator> _extensionValidators;
-    
+    private HashMap<QName, CBPInfo> _processes = new HashMap<QName, CBPInfo>();
+    private HashMap<QName, TDeployment.Process> _processInfo = new HashMap<QName, TDeployment.Process>();
+
     private volatile DeployDocument _dd;
     private volatile DocumentRegistry _docRegistry;
 
@@ -111,11 +127,27 @@ class DeploymentUnitDir {
 
         if (!_descriptorFile.exists())
             throw new IllegalArgumentException("Directory " + dir + " does not contain a deploy.xml file!");
+
+        try {
+            ApplicationContext ctx = new ClassPathXmlApplicationContext("beans.xml");
+            _properties = (java.util.Properties) ctx.getBean("properties");
+            if (__log.isDebugEnabled()) {
+                __log.debug("Loaded spring properties from file beans.xml:" + _properties + " for " +  _name);
+            }
+        } catch (Exception e) {
+            __log.info("Can't initialize beans.xml application context " + e + " for " + _name);
+        }
+
     }
 
 
     String getName() {
         return _duDirectory.getName();
+    }
+
+    void setName(String name) {
+    	// supports extensibility
+    	_name = name;
     }
 
     CBPInfo getCBPInfo(QName typeName) {
@@ -132,7 +164,14 @@ class DeploymentUnitDir {
         if (bpels.size() == 0)
             throw new IllegalArgumentException("Directory " + _duDirectory.getName() + " does not contain any process!");
         for (File bpel : bpels) {
-            compile(bpel);
+        	String b = bpel.getAbsolutePath();
+        	File cbp = new File(b.substring(0,b.lastIndexOf(".bpel")) + ".cbp"); 
+        	if (!cbp.exists()) {
+        		__log.debug("compiling " + bpel);
+        		compile(bpel);
+        	} else {
+        		__log.debug("skipping compilation of " + bpel + " cbp found: " + cbp);
+        	}
         }
     }
 
@@ -157,8 +196,8 @@ class DeploymentUnitDir {
         return !_duDirectory.exists();
     }
 
-    private void compile(File bpelFile) {
-        BpelC bpelc = BpelC.newBpelCompiler();
+    private void compile(final File bpelFile) {
+        final BpelC bpelc = BpelC.newBpelCompiler();
 
         // BPEL 1.1 does not suport the <import> element, so "global" WSDL needs to be configured explicitly.
         File bpel11wsdl = findBpel11Wsdl(bpelFile);
@@ -166,14 +205,17 @@ class DeploymentUnitDir {
             bpelc.setProcessWSDL(bpel11wsdl.toURI());
 
         bpelc.setCompileProperties(prepareCompileProperties(bpelFile));
-        bpelc.setExtensionValidators(_extensionValidators);
         bpelc.setBaseDirectory(_duDirectory);
-        try {
-            bpelc.compile(bpelFile);
-        } catch (IOException e) {
-            __log.error("Compile error in " + bpelFile, e);
-            throw new RuntimeException(e);
-        }
+        // Create process such that immutable objects are intern'ed.
+        InternPool.runBlock(new InternableBlock() {
+        	public void run() {
+                try {
+                    bpelc.compile(bpelFile, getVersion());
+                } catch (IOException e) {
+                    __log.error("Compile error in " + bpelFile, e);
+                }
+        	}
+        });
     }
 
     /**
@@ -184,7 +226,8 @@ class DeploymentUnitDir {
         try {
             is = new FileInputStream(f);
             Serializer ofh = new Serializer(is);
-            return new CBPInfo(ofh.getType(), ofh.getGuid(), f);
+            CBPInfo info = new CBPInfo(ofh.type, ofh.guid, f);
+            return info;
         } catch (Exception e) {
             throw new ContextException("Couldn't read compiled BPEL process " + f.getAbsolutePath(), e);
         } finally {
@@ -212,16 +255,15 @@ class DeploymentUnitDir {
     }
 
     /**
+     *
      * The list of endpoint configuration files contained in the deployment directory and its subdirectories.
      * Files are ordered lexicographically but for each directory, files come before its sudirectories.
      * <p>The list is built on each call to handle changes.
-     *
      * @see org.apache.ode.utils.fs.FileUtils#directoryEntriesInPath(java.io.File)
      */
     public List<File> getEndpointConfigFiles() {
-        return FileUtils.directoryEntriesInPath(getDeployDir(), _endpointFilter);
+        return FileUtils.directoryEntriesInPath(getDeployDir(),_endpointFilter);
     }
-
 
     public DeployDocument getDeploymentDescriptor() {
         if (_dd == null) {
@@ -313,7 +355,7 @@ class DeploymentUnitDir {
         return result;
     }
 
-    public static final class CBPInfo {
+    public final class CBPInfo {
         final QName processName;
         final String guid;
         final File cbp;
@@ -332,7 +374,7 @@ class DeploymentUnitDir {
                 continue;
 
             if (bpelFile.getName().equals(process.getFileName())) {
-                Map<QName, Node> props = ProcessStoreImpl.calcInitialProperties(process);
+                Map<QName, Node> props = ProcessStoreImpl.calcInitialProperties(_properties, process);
                 Map<String, Object> result = new HashMap<String, Object>();
                 result.put(BpelC.PROCESS_CUSTOM_PROPERTIES, props);
                 return result;
@@ -366,12 +408,19 @@ class DeploymentUnitDir {
     public long getVersion() {
         return _version;
     }
+    
+    /**
+     * @return Static DU version number generated from DU name. -1 when package doesn't use versioning.
+     */
+    public long getStaticVersion() {
+        return BpelCompiler.getVersion(getName());
+    }
 
     public void setVersion(long version) {
         _version = version;
     }
 
-    public void setExtensionValidators(Map<QName, ExtensionValidator> extensionValidators) {
-    	_extensionValidators = extensionValidators;
+    public Properties getProperties() {
+        return _properties;
     }
 }

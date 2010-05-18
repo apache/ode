@@ -98,6 +98,7 @@ public class OdeJbiComponentLifeCycleTest extends TestCase {
         container.stop();
     }
 
+
     public void testHelloWorld() throws Exception {
         activateComponent();
         container.start();

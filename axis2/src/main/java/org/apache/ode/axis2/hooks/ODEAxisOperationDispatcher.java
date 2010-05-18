@@ -55,7 +55,7 @@ public class ODEAxisOperationDispatcher extends AbstractDispatcher {
         // way to identify the operation.
         String action = messageContext.getWSAAction();
         if (action != null) {
-            if(log.isDebugEnabled()) log.debug(Messages.getMessage("checkingoperation", action));
+            log.debug(Messages.getMessage("checkingoperation", action));
             operation = service.getOperationByAction(action);
             if (operation != null)
                 return operation;
@@ -67,11 +67,11 @@ public class ODEAxisOperationDispatcher extends AbstractDispatcher {
         OMElement bodyFirstChild = messageContext.getEnvelope().getBody().getFirstElement();
         if (bodyFirstChild != null) {
             String localName = bodyFirstChild.getLocalName();
-            if(log.isDebugEnabled()) log.debug("Checking for Operation using SOAP message body's first child's local name : "
+            log.debug("Checking for Operation using SOAP message body's first child's local name : "
                             + localName);
             operation = service.getOperation(new QName(localName));
             if (operation != null) {
-                if(log.isDebugEnabled()) log.debug("Found operation " + operation);
+                log.debug("Found operation " + operation);
                 return operation;
             }
 
@@ -97,7 +97,7 @@ public class ODEAxisOperationDispatcher extends AbstractDispatcher {
                 return operation;
             }
         }
-        if(log.isWarnEnabled()) log.warn("No operation has been found!");
+        log.warn("No operation has been found!");
         return null;
     }
 

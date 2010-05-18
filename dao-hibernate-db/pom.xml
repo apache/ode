@@ -21,109 +21,110 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.ode</groupId>
-    <artifactId>ode-dao-hib-db</artifactId>
+    <artifactId>ode-dao-hibernate-db</artifactId>
     <name>ODE :: Hibernate DAO DDL Generation</name>
 
     <parent>
         <groupId>org.apache.ode</groupId>
         <artifactId>ode</artifactId>
-        <version>2.0-SNAPSHOT</version>
+        <version>1.3.4-SNAPSHOT</version>
     </parent>
 
     <dependencies>
         <dependency>
-            <groupId>javassist</groupId>
-            <artifactId>javassist</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
+            <artifactId>hibernate</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-        <dependency>
+	<dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-        </dependency>
-        <dependency>
+	</dependency>
+	<dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.derby</groupId>
-            <artifactId>derby</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.derby</groupId>
-            <artifactId>derbytools</artifactId>
-        </dependency>
+	</dependency>
+	<dependency>
+	    <groupId>org.apache.derby</groupId>
+	    <artifactId>derby</artifactId>
+	</dependency>
+	<dependency>
+	    <groupId>org.apache.derby</groupId>
+	    <artifactId>derbytools</artifactId>
+	</dependency> 
+	<dependency>
+	    <groupId>org.apache.ode</groupId>
+	    <artifactId>ode-dao-hibernate</artifactId>
+	</dependency> 
     </dependencies>
     <build>
 
-        <plugins>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>create-db-schemas</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <property name="maven.runtime.classpath" refid="maven.compile.classpath"/>
-                                <ant antfile="build.xml" target="create-schema" inheritRefs="true"/>
-                            </tasks>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>sql-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>create-derby-db</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
-                        <configuration>
-                            <driver>org.apache.derby.jdbc.EmbeddedDriver</driver>
-                            <url>jdbc:derby:${basedir}/target/ode-db-hib;create=true</url>
-                            <username>sa</username>
-                            <password />
-                            <autocommit>true</autocommit>
-                            <onError>continue</onError>
-                            <srcFiles>
-                                <srcFile>target/scripts/derby-hib.sql</srcFile>
-                            </srcFiles>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>ode-db-derby-hib-${project.version}</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <descriptors>
-                                <descriptor>src/main/assembly/bin.xml</descriptor>
-                            </descriptors>
-                            <tarLongFileMode>gnu</tarLongFileMode>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>1.0</version>
+          <executions>
+            <execution>
+              <id>schemagen</id>
+              <phase>generate-sources</phase>
+              <configuration>
+                <tasks>
+		  <property name="maven.runtime.classpath" refid="maven.compile.classpath"/>
+                  <ant antfile="build.xml" target="create-schema" inheritRefs="true"/>
+                </tasks>
+              </configuration>
+              <goals>
+                <goal>run</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>sql-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>create-derby-db</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>execute</goal>
+            </goals>
+            <configuration>
+	      <driver>org.apache.derby.jdbc.EmbeddedDriver</driver>
+              <url>jdbc:derby:${basedir}/target/derby/hibdb;create=true</url>
+              <username>sa</username>
+              <password />
+              <autocommit>true</autocommit>
+              <onError>continue</onError>
+              <srcFiles>
+                <srcFile>target/derby.sql</srcFile>
+              </srcFiles>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>zip-derby-db</id>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+	        <property name="ode.version" value="${project.version}"/>
+		<ant antfile="build.xml" target="zip-derby-db" />
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
         </plugins>
-    </build>
+      </build>
 </project>

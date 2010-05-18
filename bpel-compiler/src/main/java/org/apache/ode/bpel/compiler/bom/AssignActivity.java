@@ -18,7 +18,6 @@
  */
 package org.apache.ode.bpel.compiler.bom;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.w3c.dom.Element;
@@ -27,9 +26,6 @@ import org.w3c.dom.Element;
  * BOM representation of the BPEL <code>&lt;assign&gt;</code> activity. The
  * <code>&lt;assign&gt;</code> activity is simply a collection of
  * <code>&lt;copy&gt;</code> entries ({@link Copy}).
- * 
- * @author Ode team
- * @author Tammo van Lessen (University of Stuttgart)
  */
 public class AssignActivity extends Activity {
 
@@ -45,38 +41,4 @@ public class AssignActivity extends Activity {
     public List<Copy> getCopies() {
         return getChildren(Copy.class);
     }
-
-    /**
-     * Get the list of <code>&lt;extensionAssignOperation&gt;</code> entries for this activity.
-     * 
-     * @return extensionAssignOperation entries
-     */
-    public List<ExtensionAssignOperation> getExtensionAssignOperations() {
-        return getChildren(ExtensionAssignOperation.class);
-    }
-
-    /**
-     * Get the list of all assign operation entries (<code>copy</code> 
-     * and <code>extensionAssignOperation</code>) for this activity.
-     * 
-     * @return assign operation entries
-     */
-    public List<AssignOperation> getOperations() {
-    	//all children objects
-    	List<BpelObject> children = getChildren(BpelObject.class);
-    	
-    	//aggregate only copy and extensionAssignOperation entries
-    	List<AssignOperation> ops = new ArrayList<AssignOperation>();
-    	for (BpelObject bo: children) {
-    		if ((bo instanceof Copy)
-    				||(bo instanceof ExtensionAssignOperation)) {
-    			ops.add((AssignOperation)bo);				
-			}
-    	}    	
-
-    	return ops;
-    }
-
-    /** Marker interface for assign operations */
-    public static interface AssignOperation {}
 }

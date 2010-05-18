@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<bpel:process xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:NPGData="http://www.ode.apache.org/NPG/v1" xmlns:this="http://ode.apache.org/test4/process" xmlns:NPGServices_Abstract="http://www.ode.apache.org/NPG/v1/wsdl" xmlns:diag="http://ode.apache.org/test4" xmlns:Pool="http://ode.apache.org/test4/Pool" xmlns:bpmn="http://www.intalio.com/bpms" xmlns:atomic="http://ode.apache.org/atomicScope" queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" bpmn:label="process" bpmn:id="_Ef3rkFmMEd2BsZsV-epWfA" name="process" targetNamespace="http://ode.apache.org/test4/process">
+  <bpel:import namespace="http://ode.apache.org/test4" location="test4.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:import namespace="http://ode.apache.org/test4/process" location="test4-process.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:partnerLinks>
+    <bpel:partnerLink name="processAndPoolPlkVar" partnerLinkType="diag:processAndPool" myRole="process_for_Pool"/>
+  </bpel:partnerLinks>
+  <bpel:correlationSets>
+    <bpel:correlationSet name="portIdCorr" properties="this:portIdProp"/>
+  </bpel:correlationSets>
+  <bpel:variables>
+    <bpel:variable name="thisReceiveNPRRequestMsg" messageType="this:receiveNPRRequest"/>
+  </bpel:variables>
+  <bpel:sequence>
+    <bpel:receive partnerLink="processAndPoolPlkVar" portType="this:ForPool" operation="receiveNPR" variable="thisReceiveNPRRequestMsg" createInstance="yes">
+      <bpel:correlations>
+        <bpel:correlation set="portIdCorr" initiate="join"/>
+      </bpel:correlations>
+    </bpel:receive>
+
+    <bpel:scope name="SubProcess_C81ZcFm2Ed2BsZsV-epWfA" bpmn:label="SubProcess" bpmn:id="_C81ZcFm2Ed2BsZsV-epWfA">
+      <bpel:variables>
+        <bpel:variable name="thisReceive3RequestMsg" messageType="this:receive3Request"/>
+        <bpel:variable name="thisReceive2RequestMsg" messageType="this:receive2Request"/>
+      </bpel:variables>
+      <bpel:faultHandlers>
+        <bpel:catch faultName="this:cancel">
+          <bpel:scope name="SubProcess_eO1BoFnPEd2xsdtTaIB7mA" bpmn:label="SubProcess" bpmn:id="_eO1BoFnPEd2xsdtTaIB7mA">
+            <bpel:sequence>
+              <bpel:empty bpmn:label="stop" bpmn:id="_sR3bYFnLEd2xsdtTaIB7mA"/>
+            </bpel:sequence>
+          </bpel:scope>
+        </bpel:catch>
+      </bpel:faultHandlers>
+      <bpel:eventHandlers>
+        <bpel:onEvent partnerLink="processAndPoolPlkVar" portType="this:ForPool" operation="receiveCancel" messageType="this:receiveCancelRequest" variable="thisReceiveCancelRequestMsg" bpmn:label="receiveCancel" bpmn:id="_x9bsgFnKEd2xsdtTaIB7mA">
+            <bpel:correlations>
+              <bpel:correlation set="portIdCorr" initiate="join"></bpel:correlation>
+            </bpel:correlations>
+          <bpel:scope name="cancel_8YLNEFnKEd2xsdtTaIB7mA" bpmn:label="cancel" bpmn:id="_8YLNEFnKEd2xsdtTaIB7mA">
+            <bpel:sequence>
+              <bpel:empty bpmn:label="handleCancel" bpmn:id="_8YjAgFnKEd2xsdtTaIB7mA"/>
+            </bpel:sequence>
+          </bpel:scope>
+        </bpel:onEvent>
+        <!--bpel:onAlarm>
+          <bpel:for>"PT30S"</bpel:for>
+          <bpel:scope name="SubProcess_RM2fcFnXEd2xsdtTaIB7mA" bpmn:label="SubProcess" bpmn:id="_RM2fcFnXEd2xsdtTaIB7mA">
+            <bpel:sequence>
+              <bpel:throw faultName="this:cancel"/>
+            </bpel:sequence>
+          </bpel:scope>
+        </bpel:onAlarm-->
+      </bpel:eventHandlers>
+      <bpel:repeatUntil>
+        <bpel:pick bpmn:label="GatewayEventBasedExclusive" bpmn:id="_iIpO0FmuEd2BsZsV-epWfA">
+          <bpel:onMessage partnerLink="processAndPoolPlkVar" portType="this:ForPool" operation="receive2" variable="thisReceive2RequestMsg" bpmn:label="receive2" bpmn:id="_lHOf0FmuEd2BsZsV-epWfA">
+<!--
+            <bpel:correlations>
+              <bpel:correlation set="portIdCorr" initiate="join"></bpel:correlation>
+            </bpel:correlations>
+-->
+            <bpel:sequence>
+              <bpel:empty name="firstOnMessage"/>
+            </bpel:sequence>
+          </bpel:onMessage>
+          <bpel:onMessage partnerLink="processAndPoolPlkVar" portType="this:ForPool" operation="receive3" variable="thisReceive3RequestMsg" bpmn:label="receive3" bpmn:id="_mcnlcFmuEd2BsZsV-epWfA">
+<!--
+            <bpel:correlations>
+              <bpel:correlation set="portIdCorr" initiate="join"></bpel:correlation>
+            </bpel:correlations>
+-->
+            <bpel:sequence>
+              <bpel:empty name="secondOnMessage"/>
+            </bpel:sequence>
+          </bpel:onMessage>
+        </bpel:pick>
+        <bpel:condition>false()</bpel:condition>
+      </bpel:repeatUntil>
+    </bpel:scope>
+    <bpel:exit bpmn:label="EventEndTerminate" bpmn:id="_5XCLkFmvEd2BsZsV-epWfA"/>
+  </bpel:sequence>
+</bpel:process>

@@ -251,4 +251,18 @@ public final class GUID implements Cloneable, Comparable, java.io.Serializable {
 			super("Malformed guid: " + guid);
 		}
 	}
+	
+	public static String makeGUID(String digest) {
+	    String val = "0";
+	    int maxlen = 32;
+	    int base = 34;
+	    int prime = 31;
+	    for (int i = 0; i < digest.length(); i++) {
+	        char c = digest.charAt(i);
+	        val = new BigInteger(val, base).add(BigInteger.valueOf((long) c)).multiply(BigInteger.valueOf(prime)).toString(base);
+	        if (val.length() > maxlen) val = val.substring(0, maxlen);
+	    }
+	    
+	    return val;
+	}
 }

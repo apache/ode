@@ -50,7 +50,7 @@ else if (typeof org.apache.ode != "object") {
 }
 
 if(org.apache.ode.XHRObject){
-    throw new Error("org.apache.ode.XHRObject already exists");	
+    throw new Error("org.apache.ode.XHRObject already exists"); 
 }
 
 org.apache.ode.XHRObject = {};
@@ -66,7 +66,7 @@ org.apache.ode.XHRObject = {};
         try
         {
             // Instantiates XMLHttpRequest in non-IE browsers and assigns to http.
-            xhr = new XMLHttpRequest();		
+            xhr = new XMLHttpRequest();     
         }
         catch(e)
         {
@@ -74,7 +74,7 @@ org.apache.ode.XHRObject = {};
                 try
                 {
                     // Instantiates XMLHttpRequest for IE and assign to http
-                    xhr = new ActiveXObject(msxml_progid[i]);				
+                    xhr = new ActiveXObject(msxml_progid[i]);               
                     break;
                 }
                 catch(e){}
@@ -96,7 +96,7 @@ org.apache.ode.XHRObject = {};
                 return request.responseText;
             }
             if (request.getResponseHeader("Content-Type").match(/text\/xml/) != null || request.getResponseHeader("Content-Type").match(/application\/xml/) != null) { 
-                return request.responseXML;		        
+                return request.responseXML;             
             }else{
                 return request.responseText;
             } 
@@ -104,7 +104,7 @@ org.apache.ode.XHRObject = {};
         }else {
             aler("Error occurred during the GET request");
             return null;
-        }	
+        }   
     }
     var ns = org.apache.ode.XHRObject;
     ns.xhrSyncGetRequest = xhrSyncGetRequest;
@@ -228,7 +228,7 @@ org.apache.ode.Widgets = {};
         
         simpleAlert.setHeader('Apache ODE');
         simpleAlert.render('content');
-        simpleAlert.show();		
+        simpleAlert.show();     
     }
     
     var ns = org.apache.ode.Widgets;
@@ -310,9 +310,9 @@ org.apache.ode.ProcessHandling = {};
         //                        </ns:document>
         //                    </ns:documents>
         //                </ns:process-info>
-        //			</process-info-list>
-        //		</axis2ns8:listAllProcessesResponse>
-        //	</soapenv:Body>
+        //          </process-info-list>
+        //      </axis2ns8:listAllProcessesResponse>
+        //  </soapenv:Body>
         //</soapenv:Envelope>
         
         try {
@@ -349,7 +349,7 @@ org.apache.ode.ProcessHandling = {};
         this.processName = processName;
         this.urlOfName = urlOfName;
         this.prefixOfName = prefixOfName;
-        this.instanceSummary = instanceSummary;		
+        this.instanceSummary = instanceSummary;     
     }
     
     function processProcessInfoList(listAllProcessesRes){
@@ -393,12 +393,12 @@ org.apache.ode.ProcessHandling = {};
                 var len = pid.length;
                 var endPos = pid.indexOf('}');
                 var startPos = pid.indexOf('{');
-                var nameWithVersion = pid.substr(++endPos, len);	
+                var nameWithVersion = pid.substr(++endPos, len);    
                 var indexOfColon = processName.indexOf(':');
                 var prefixOfName = processName.substring(0, indexOfColon);
-                var urlOfName = pid.substr(++startPos, (endPos - 2));		
+                var urlOfName = pid.substr(++startPos, (endPos - 2));       
                 
-                var instanceSummaryEle = org.apache.ode.DOMHelper.getElementsByTagName("instance-summary", processInfoNS, processInfoNSPrefix, scopeEle)[0];	
+                var instanceSummaryEle = org.apache.ode.DOMHelper.getElementsByTagName("instance-summary", processInfoNS, processInfoNSPrefix, scopeEle)[0];    
                 
                 for(var m = instanceSummaryEle.firstChild; m != null; m = m.nextSibling){
                     var state = m.getAttribute("state");
@@ -415,7 +415,7 @@ org.apache.ode.ProcessHandling = {};
                         suspendedInstances = parseInt(count);
                     }else if (state == 'TERMINATED') {
                         terminatedInstances = parseInt(count);
-                    }					
+                    }                   
                 } 
                 
                 var instanceSummary = new InstanceSummary(
@@ -436,7 +436,7 @@ org.apache.ode.ProcessHandling = {};
                                         prefixOfName, 
                                         instanceSummary);
                 
-                returnInfoArray[i] = processInfo;				
+                returnInfoArray[i] = processInfo;               
             }
         }
         
@@ -497,12 +497,12 @@ org.apache.ode.ProcessHandling = {};
              
               'var ' + retierBtnVar + '=new YAHOO.widget.Button("'+ retireBtnID +'");'+
               retierBtnVar + '.addListener("click", '+retierBtnVar+'retireProcess); '+
-              retierBtnVar+'.set("disabled",'+retire+');'+			  
-              'var ' + activateVar + '=new YAHOO.widget.Button("'+ activateBtnID + '");'	+
-              activateVar+'.addListener("click", '+activateVar+'activateProcess); '	+
-              activateVar+'.set("disabled",'+active+');'+			  
-              'var ' + viewProDetVar + '=new YAHOO.widget.Button("'+ viewProDetID + '");'	+
-              viewProDetVar+'.addListener("click", '+viewProDetVar+'viewProcessDetails); '	+	  	  
+              retierBtnVar+'.set("disabled",'+retire+');'+            
+              'var ' + activateVar + '=new YAHOO.widget.Button("'+ activateBtnID + '");'    +
+              activateVar+'.addListener("click", '+activateVar+'activateProcess); ' +
+              activateVar+'.set("disabled",'+active+');'+             
+              'var ' + viewProDetVar + '=new YAHOO.widget.Button("'+ viewProDetID + '");'   +
+              viewProDetVar+'.addListener("click", '+viewProDetVar+'viewProcessDetails); '  +         
               '</script>'+
               '</div> <div class="actions"><a href="#" class="accordionToggleItem">&nbsp;</a>'+
               '</div><div class="actions"><a href="#" class="accordionToggleItem">&nbsp;</a>'+
@@ -532,9 +532,9 @@ org.apache.ode.ProcessHandling = {};
         innerDiv.innerHTML = contentHTML;
         newDiv.appendChild(innerDiv);
         if(content.firstChild){
-            content.replaceChild(newDiv, content.firstChild);	
+            content.replaceChild(newDiv, content.firstChild);   
         }else{
-            content.appendChild(newDiv);	
+            content.appendChild(newDiv);    
         }
                 
     }
@@ -616,10 +616,10 @@ org.apache.ode.ProcessHandling = {};
             }
             
             function handleNo(){
-                org.apache.ode.Widgets.alert('Retiring cancelled!', YAHOO.widget.SimpleDialog.ICON_INFO);	
+                org.apache.ode.Widgets.alert('Retiring cancelled!', YAHOO.widget.SimpleDialog.ICON_INFO);  
             }
             var msg = 'Do you want to retire the process '+ processName + '?';
-            org.apache.ode.Widgets.operationConfirm(msg, handleYes, handleNo);	       
+            org.apache.ode.Widgets.operationConfirm(msg, handleYes, handleNo);         
         } 
         catch (e) {
             if (typeof(e) == "string") {
@@ -658,11 +658,11 @@ org.apache.ode.ProcessHandling = {};
                             org.apache.ode.ProcessHandling.populateContent();
                         }else{
                             org.apache.ode.Widgets.alert('Error occurred while activating process!');
-                        }		
+                        }       
                     } 
                 }else{
                     org.apache.ode.Widgets.alert('Error occurred while activating process!');
-                }				
+                }               
             }
             
             function handleNo(){
@@ -715,7 +715,7 @@ org.apache.ode.ProcessHandling = {};
                                 visible:true, 
                                 draggable: true, 
                                 zindex:4,
-                                modal:true} );	
+                                modal:true} );  
                         
                         myPanel.setHeader("Process Details: " + processName);
             
@@ -739,7 +739,7 @@ org.apache.ode.ProcessHandling = {};
                         var proDefTab = new YAHOO.widget.Tab({
                             label: 'Process Definition',
                             content:'<textarea id="prodef" class="codepress html" style="width: 568px; height: 570px;"></textarea>',
-                            active: true		        
+                            active: true                
                         });
                         
                         detailsTabs.addTab(proDefTab);
@@ -759,7 +759,7 @@ org.apache.ode.ProcessHandling = {};
                     }
                     
                     var handleFailureIn = function(o){
-                        org.apache.ode.Widgets.alert("Request Failed: Getting Process Definition.");	
+                        org.apache.ode.Widgets.alert("Request Failed: Getting Process Definition.");    
                     }
                     
                     var callbackIn = {
@@ -780,7 +780,7 @@ org.apache.ode.ProcessHandling = {};
                 failure: handleFailure
             } 
             
-            var request = YAHOO.util.Connect.asyncRequest('GET', urlRequestURL, callback);						
+            var request = YAHOO.util.Connect.asyncRequest('GET', urlRequestURL, callback);                      
             
         }catch(e){
             if (typeof(e) == "string") {
@@ -788,7 +788,7 @@ org.apache.ode.ProcessHandling = {};
             }
             else {
                 org.apache.ode.Widgets.alert("Exception occurred in viewProcessDetails !");
-            }	
+            }   
         }
         return false;
     }
@@ -830,7 +830,7 @@ org.apache.ode.InstanceHandling = {};
         }        
     }
     
-    function InstanceInfo(iid, pid,	rootScope, siid, statusR, nameR, modelID, statusI, dateStarted, dateLastActive){
+    function InstanceInfo(iid, pid, rootScope, siid, statusR, nameR, modelID, statusI, dateStarted, dateLastActive){
         this.iid = iid;
         this.pid = pid;
         this.rootScope = rootScope;
@@ -840,7 +840,7 @@ org.apache.ode.InstanceHandling = {};
         this.modelID = modelID;
         this.statuI = statusI;
         this.dateStarted = dateStarted;
-        this.dateLastActive = dateLastActive;		
+        this.dateLastActive = dateLastActive;       
     }
     
     function processInstanceInfo(instanceInfoDoc){
@@ -885,7 +885,7 @@ org.apache.ode.InstanceHandling = {};
                 
                 var instance = new InstanceInfo(iid, pid, rootScopeEle, siid, statusR, nameR, modelID, statusI, dateStarted, lastActive);
                 
-                returnInstanceArray[i] = instance;				
+                returnInstanceArray[i] = instance;              
             }
         }
         
@@ -944,11 +944,11 @@ org.apache.ode.InstanceHandling = {};
               'var ' + terminateBtnVar + '=new YAHOO.widget.Button("'+ terminateBtnID + '");'+
               terminateBtnVar + '.addListener("click", '+terminateBtnVar+'terminateIns); '+
               terminateBtnVar+ '.set("disabled",' + _term + ');'+
-              'var ' + suspenBtnVar + '=new YAHOO.widget.Button("'+ suspendBtnID + '");'	+
-              suspenBtnVar+'.addListener("click", '+suspenBtnVar+'suspendIns); '	+
+              'var ' + suspenBtnVar + '=new YAHOO.widget.Button("'+ suspendBtnID + '");'    +
+              suspenBtnVar+'.addListener("click", '+suspenBtnVar+'suspendIns); '    +
              suspenBtnVar+ '.set("disabled",' + _susp + ');' +
-              'var ' + resumeBtnVar + '=new YAHOO.widget.Button("'+ resumeBtnID + '");'	+
-              resumeBtnVar+'.addListener("click", '+resumeBtnVar+'resumeIns); '	+				  
+              'var ' + resumeBtnVar + '=new YAHOO.widget.Button("'+ resumeBtnID + '");' +
+              resumeBtnVar+'.addListener("click", '+resumeBtnVar+'resumeIns); ' +                 
               resumeBtnVar+ '.set("disabled",' + _resu + ');' +
               '</script>'+
               '</div> <div class="actions"><a href="#" class="accordionToggleItem">&nbsp;</a>'+
@@ -978,9 +978,9 @@ org.apache.ode.InstanceHandling = {};
         innerDiv.innerHTML = contentHTML;
         newDiv.appendChild(innerDiv);
         if(content.firstChild){
-            content.replaceChild(newDiv, content.firstChild);	
+            content.replaceChild(newDiv, content.firstChild);   
         }else{
-            content.appendChild(newDiv);	
+            content.appendChild(newDiv);    
         }
                 
     }
@@ -1142,7 +1142,7 @@ org.apache.ode.InstanceHandling = {};
 })();
 
 if(org.apache.ode.DeploymentHandling){
-    throw new Error("org.apache.ode.DeploymentHandling already exists");	
+    throw new Error("org.apache.ode.DeploymentHandling already exists");    
 }
 
 org.apache.ode.DeploymentHandling = {};
@@ -1156,7 +1156,7 @@ org.apache.ode.DeploymentHandling = {};
     function loadDeployedPackages(){
         try{
             var response = DeploymentService.listDeployedPackages();
-            return response;	
+            return response;    
         }catch(e){
             if(typeof e == 'string'){
                 org.apache.ode.Widgets.alert("Exception occured:\n" + e.toString());
@@ -1201,7 +1201,7 @@ org.apache.ode.DeploymentHandling = {};
                 org.apache.ode.Widgets.alert("Exception occured:\n" + e.toString());
             }else{
                 org.apache.ode.Widgets.alert("Exception occurred in getProcesses.");
-            }	
+            }   
         }
     }
     function getPackageContents(packageName){
@@ -1218,15 +1218,15 @@ org.apache.ode.DeploymentHandling = {};
             var processEle = response.getElementsByTagName('process')[0];
             for(var m = processEle.firstChild; m != null; m = m.nextSibling){
                 if(m.localName != 'pid'){
-                    contents[i] = org.apache.ode.DOMHelper.getText(m);	
+                    contents[i] = org.apache.ode.DOMHelper.getText(m);  
                     i++;
                 }
                 
             }
-            return contents;			
+            return contents;            
         }else{
             return null;
-        }		
+        }       
     }
     
     function populateDeployedPackages(){
@@ -1266,7 +1266,7 @@ org.apache.ode.DeploymentHandling = {};
                         'name" value="Undeploy"></span></span>'+
                         '<span id="'+ packageDetailsId +
                         '" class="yui-button yui-push-button"><span class="first-child">'+
-                        '<input type="button" name="'+ packageDetailsVar +'name" value="Details"></span></span>'+			
+                        '<input type="button" name="'+ packageDetailsVar +'name" value="Details"></span></span>'+           
                         '<script type="text/javascript">'+
                         'function '+ packageundepVar + 
                         'undeployPackage(){org.apache.ode.DeploymentHandling.undeployPackage("'+ 
@@ -1276,8 +1276,8 @@ org.apache.ode.DeploymentHandling = {};
                         deployedPacks[i] +'"'+ ');}' +
                         'var ' + packageundepVar + '=new YAHOO.widget.Button("'+ packageundepId + '");'+
                         packageundepVar + '.addListener("click", ' + packageundepVar + 'undeployPackage); '+
-                        'var ' + packageDetailsVar + '=new YAHOO.widget.Button("'+ packageDetailsId + '");'	+
-                        packageDetailsVar +'.addListener("click", ' + packageDetailsVar + 'viewDetails); '	+
+                        'var ' + packageDetailsVar + '=new YAHOO.widget.Button("'+ packageDetailsId + '");' +
+                        packageDetailsVar +'.addListener("click", ' + packageDetailsVar + 'viewDetails); '  +
                         '</script>'+
                         '</div> <div class="actions"><a href="#" class="accordionToggleItem">&nbsp;</a>'+
                         '</div></div>'

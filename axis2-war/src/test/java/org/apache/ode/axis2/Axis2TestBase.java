@@ -1,3 +1,22 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.apache.ode.axis2;
 
 import org.apache.axis2.AxisFault;
@@ -10,6 +29,7 @@ import org.apache.axis2.engine.AxisServer;
 import org.apache.axis2.engine.MessageReceiver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.util.Axis2UriResolver;
 import org.apache.ode.axis2.util.Axis2WSDLLocator;
@@ -18,6 +38,7 @@ import org.apache.ode.tools.sendsoap.cline.HttpSoapSender;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
+
 
 import javax.servlet.ServletException;
 import javax.wsdl.WSDLException;
@@ -35,23 +56,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import org.apache.axis2.deployment.DeploymentConstants;
-import org.apache.axis2.deployment.FileSystemConfigurator;
-import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.axis2.engine.AxisConfigurator;
 
 /**
  * @author Matthieu Riou <mriou@apache.org>
  */
 public abstract class Axis2TestBase {
+    private static final int DEFAULT_TEST_PORT_0 = 8888;
+    private static final int DEFAULT_TEST_PORT_1 = 7070;
+    private static final String DEFAULT_TEST_PORTS = DEFAULT_TEST_PORT_0+","+DEFAULT_TEST_PORT_1;
 
-    private static final int DEFAULT_TEST_PORT = 8888;
     private static final Log log = LogFactory.getLog(Axis2TestBase.class);
 
     protected ODEAxis2Server server;
 
     protected String config;
-    protected String odeRootAbsolutePath;
     
     protected static final String DO_NOT_OVERRIDE_CONFIG = "<DO_NOT_OVERRIDE_CONFIG>";
 
@@ -61,6 +79,23 @@ public abstract class Axis2TestBase {
     static {
         // disable deferred process instance cleanup for faster testing
         System.setProperty(BpelServerImpl.DEFERRED_PROCESS_INSTANCE_CLEANUP_DISABLED_NAME, "true");
+        /*
+         The property "test.ports" receives a coma-separated list of available ports.
+         Base on this list, a set of properties is created:
+            test.port.0, test.port.1, test.port.2, ...
+         These properties might then be used by test cases using #getTestPort(int) or from endpoint property files using ${system.test.port.0} for instance.
+          */
+        if(StringUtils.isBlank(System.getProperty("test.ports"))) System.setProperty("test.ports", DEFAULT_TEST_PORTS);
+        log.info("test.ports="+System.getProperty("test.ports"));
+        String[] ports = System.getProperty("test.ports").split(",");
+        for (int i = 0; i < ports.length; i++) {
+            String port = ports[i].trim();
+            System.setProperty("test.port."+i, port);
+        }
+    }
+
+    public int getTestPort(int index){
+        return Integer.parseInt(System.getProperty("test.port."+index));
     }
 
     @DataProvider(name = "configs")
@@ -112,32 +147,26 @@ public abstract class Axis2TestBase {
             }
         }
     }
-
-    // Provide standard constructors to accommodate creation of test suites
-    public Axis2TestBase(String name) {
-    }
     
-    public Axis2TestBase() {
-        this(null);
-    }
-
     public void startServer() throws Exception {
         startServer("webapp/WEB-INF", "webapp/WEB-INF/conf/axis2.xml");
     }
 
     public void startServer(String axis2RepoDir, String axis2ConfLocation) throws Exception {
-        odeRootAbsolutePath = getClass().getClassLoader().getResource("webapp/WEB-INF").getFile();
+        String odeRootAbsolutePath = getClass().getClassLoader().getResource("webapp/WEB-INF").getFile();
         String axis2RepoAbsolutePath = getClass().getClassLoader().getResource(axis2RepoDir).getFile();
         String axis2ConfAbsolutePath = axis2ConfLocation == null ? null : getClass().getClassLoader().getResource(axis2ConfLocation).getFile();
         server = new ODEAxis2Server(odeRootAbsolutePath, axis2RepoAbsolutePath, axis2ConfAbsolutePath);
         server.start();
     }
+
     public void stopServer() throws AxisFault {
         server.stop();
     }
 
     @BeforeMethod
     protected void setUp() throws Exception {
+        log.debug("##### Running "+getClass().getName());
         /**
          * 1. If no settings are given from buildr, the test runs with the default config directory.
          * 2. If no settings are given from buildr and if the test implements ODEConfigDirAware, the test runs with
@@ -193,7 +222,7 @@ public abstract class Axis2TestBase {
         }
     }
 
-    protected static class ODEAxis2Server extends AxisServer {
+    protected class ODEAxis2Server extends AxisServer {
 
         ODEServer _ode;
         String odeRootDir;
@@ -207,10 +236,9 @@ public abstract class Axis2TestBase {
                 log.info("Axis2 Repo dir: " + axis2RepoDir);
             }
 
-            configContext = ConfigurationContextFactory.createConfigurationContext(new TestConfigurator(odeRootDir,axis2RepoDir, axis2ConfLocation));
-
-            // do not use 8080 for tests
-            configContext.getAxisConfiguration().getTransportIn("http").addParameter(new Parameter("port", ""+DEFAULT_TEST_PORT));
+            configContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem(axis2RepoDir, axis2ConfLocation);
+            // do not use 8080 for tests, and make sure to pass a string, not an int
+            configContext.getAxisConfiguration().getTransportIn("http").addParameter(new Parameter("port", ""+getTestPort(0)));
         }
 
         protected void start() throws AxisFault {
@@ -225,16 +253,15 @@ public abstract class Axis2TestBase {
 
         public void stop() throws AxisFault {
             _ode.shutDown();
-            _ode = null;
             super.stop();
         }
 
         public Collection<QName> deployProcess(String bundleName) {
-            return _ode.getProcessStore().deploy(new File(getBundleDir(bundleName)));
+            return _ode.getProcessStore().deploy(new File(getResource(bundleName)));
         }
 
         public void undeployProcess(String bundleName) {
-            _ode.getProcessStore().undeploy(new File(getBundleDir(bundleName)));
+            _ode.getProcessStore().undeploy(new File(getResource(bundleName)));
         }
 
         public boolean isDeployed(String bundleName) {
@@ -247,7 +274,7 @@ public abstract class Axis2TestBase {
          */
         protected void deployService(String bundleName, String defFile, QName serviceName, String port,
                                      MessageReceiver receiver) throws WSDLException, IOException, URISyntaxException {
-            URI wsdlUri = new File(getBundleDir(bundleName) + "/" + defFile).toURI();
+            URI wsdlUri = new File(getResource(bundleName) + "/" + defFile).toURI();
 
             InputStream is = wsdlUri.toURL().openStream();
             WSDL11ToAxisServiceBuilder serviceBuilder = new ODEAxisService.WSDL11ToAxisPatchedBuilder(is, serviceName, port);
@@ -273,15 +300,24 @@ public abstract class Axis2TestBase {
         }
 
         public String sendRequestFile(String endpoint, String bundleName, String filename) {
+            return sendRequestFile(endpoint, bundleName + "/" + filename);
+        }
+        
+        public String sendRequestFile(String endpoint, String filename) {
             try {
-                return HttpSoapSender.doSend(new URL(endpoint),
-                        new FileInputStream(getBundleDir(bundleName) + "/" + filename), null, 0, null, null, null);
+                URL url = new URL(endpoint);
+                // override the port if necessary but only if the given port is the default one
+                if(url.getPort()==DEFAULT_TEST_PORT_0 && url.getPort()!=getTestPort(0)){
+                    url=  new URL(url.getProtocol()+"://"+url.getHost()+":"+getTestPort(0)+url.getPath()+(url.getQuery()!=null?"?"+url.getQuery():""));
+                }
+                return HttpSoapSender.doSend(url,
+                        new FileInputStream(getResource(filename)), null, 0, null, null, null);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        protected String getBundleDir(String bundleName) {
+        protected String getResource(String bundleName) {
             return getClass().getClassLoader().getResource(bundleName).getFile();
         }
 
@@ -308,20 +344,4 @@ public abstract class Axis2TestBase {
             return _ode;
         }
     }
-
-    public static class TestConfigurator extends FileSystemConfigurator implements AxisConfigurator {
-
-        String _serviceDir;
-
-        public TestConfigurator(String webRoot, String serviceDir, String axis2xml) throws AxisFault {
-            super(webRoot,axis2xml);
-            _serviceDir=serviceDir;
-        }
-
-        public synchronized AxisConfiguration getAxisConfiguration() throws AxisFault {
-            servicesPath = _serviceDir + File.separator +  DeploymentConstants.SERVICE_PATH;
-            return super.getAxisConfiguration();
-        }
-    }
-
 }

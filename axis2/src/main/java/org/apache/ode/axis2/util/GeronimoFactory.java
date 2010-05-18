@@ -19,23 +19,7 @@
 
 package org.apache.ode.axis2.util;
 
-import org.apache.geronimo.gbean.AbstractName;
-import org.apache.geronimo.gbean.AbstractNameQuery;
-import org.apache.geronimo.kernel.GBeanNotFoundException;
-import org.apache.geronimo.kernel.Kernel;
-import org.apache.geronimo.kernel.KernelRegistry;
-import org.apache.geronimo.kernel.config.MultiParentClassLoader;
-import org.apache.geronimo.kernel.repository.Artifact;
-import org.apache.geronimo.kernel.repository.Repository;
-
 import javax.transaction.TransactionManager;
-import java.io.File;
-import java.net.MalformedURLException;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Set;
-import org.apache.geronimo.transaction.context.TransactionContextManager;
-import org.apache.geronimo.transaction.context.GeronimoTransactionManager;
 
 public class GeronimoFactory {
 
@@ -44,36 +28,11 @@ public class GeronimoFactory {
     }
 
     public TransactionManager getTransactionManager() {
-        Kernel kernel = KernelRegistry.getSingleKernel();
-        TransactionContextManager ctxManager = null;
-
         try {
-            ctxManager = (TransactionContextManager) kernel.getGBean(TransactionContextManager.class);
-        } catch (GBeanNotFoundException except) {
-            throw new RuntimeException( "Can't lookup GBean: " + TransactionContextManager.class, except);
+            return new org.apache.geronimo.transaction.manager.GeronimoTransactionManager();
+        } catch (Exception e) {
+            throw new RuntimeException("Can't instantiate GeronimoTransactionManager", e);
         }
-
-        MultiParentClassLoader loader = (MultiParentClassLoader) ctxManager.getClass().getClassLoader();
-
-        // Add Jencks to Geronimo's root classloader to avoid InvalidAccessError
-        AbstractNameQuery abstractNameQuery = new AbstractNameQuery(null, Collections.EMPTY_MAP, Repository.class.getName());
-        Set set = kernel.listGBeans(abstractNameQuery);
-        for (Iterator iterator = set.iterator(); iterator.hasNext();) {
-            AbstractName abstractName = (AbstractName) iterator.next();
-            File f = null;
-            try {
-                Repository repo = (Repository) kernel.getGBean(abstractName);
-                f = repo.getLocation(new Artifact("org.jencks", "jencks", "1.3", "jar"));
-                loader.addURL(f.toURL());
-            } catch (GBeanNotFoundException except) {
-                throw new RuntimeException("Can't lookup GBean: " + abstractName, except);
-            } catch (MalformedURLException except) {
-                throw new RuntimeException("Invalid URL for jencks: " + f, except);
-            }
-        }
-
-        // Use Jenck to wrap TransactionContextManager back to TransactionManager
-        return new GeronimoTransactionManager(ctxManager);
     }
 
 }

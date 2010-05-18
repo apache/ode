@@ -36,6 +36,9 @@
             <wsdl:input message="tns:HelloMessage" name="TestIn"/>
             <wsdl:output message="tns:HelloMessage" name="TestOut"/>
         </wsdl:operation>    
+        <wsdl:operation name="ping">
+            <wsdl:input message="tns:HelloMessage" name="TestIn"/>
+        </wsdl:operation>    
     </wsdl:portType>
     
      <wsdl:binding name="HelloSoapBinding" type="tns:HelloPortType">
@@ -53,6 +56,14 @@
                     use="literal"/>
             </wsdl:output>
         </wsdl:operation>
+        <wsdl:operation name="ping">
+            <soap:operation soapAction="" style="rpc"/>
+            <wsdl:input>
+                <soap:body
+                    namespace="http://ode/bpel/unit-test.wsdl"
+                    use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="HelloService">
 		<wsdl:port name="HelloPort" binding="tns:HelloSoapBinding">
@@ -65,3 +76,4 @@
        <plnk:role name="you" portType="tns:HelloPortType"/>
    </plnk:partnerLinkType>
 </wsdl:definitions>
+

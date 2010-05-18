@@ -24,8 +24,13 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-import junit.framework.TestCase;
 
+import org.apache.ode.scheduler.simple.SchedulerThread;
+import org.apache.ode.scheduler.simple.Task;
+import org.apache.ode.scheduler.simple.TaskRunner;
+
+
+import junit.framework.TestCase;
 
 /**
  * Test of SchedulerThread. 
@@ -39,7 +44,6 @@ public class SchedulerThreadTest extends TestCase implements TaskRunner {
     
     List<TR> _tasks = new ArrayList<TR>(100); 
     
-    @Override
     public void setUp() throws Exception {
         _st = new SchedulerThread(this);
     }
@@ -48,7 +52,7 @@ public class SchedulerThreadTest extends TestCase implements TaskRunner {
         _st.start();
         long schedtime = System.currentTimeMillis() + 300;
         _st.enqueue(new Task(schedtime));
-        Thread.sleep(600);
+        Thread.sleep(1000);
         assertEquals(1,_tasks.size());
         assertTrue(_tasks.get(0).time < schedtime + SCHED_TOLERANCE / 2);
         assertTrue(_tasks.get(0).time > schedtime - SCHED_TOLERANCE / 2);
@@ -103,7 +107,7 @@ public class SchedulerThreadTest extends TestCase implements TaskRunner {
     }
     
     
-    static class TR {
+    class TR {
         long time;
         Task task;
         TR(long time, Task task) {

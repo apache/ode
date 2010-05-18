@@ -1,7 +1,0 @@
-
-alias.myns=http://ode/bpel/test/properties
-
-myns.PropertiesService.ode.http.default-headers.header_B=from_deployment_unit_directory_only
-myns.PropertiesService.ode.http.default-headers.header_BC=from_deployment_unit_directory_BC
-myns.PropertiesService.ode.http.default-headers.header_AB=from_deployment_unit_directory_AB
-myns.PropertiesService.ode.http.default-headers.header_ABC=from_deployment_unit_directory_ABC

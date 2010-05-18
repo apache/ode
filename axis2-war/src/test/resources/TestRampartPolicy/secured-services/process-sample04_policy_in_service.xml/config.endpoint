@@ -1,2 +1,5 @@
-#sample04 tends to time out
-sample-ns.sample04-policy.ode.mex.timeout=120000
+
+
+alias.sample-ns=http://sample04.policy.samples.rampart.apache.org
+sample-ns.sample04-policy.ode.address=http://localhost:${system.test.port.0}/axis2/processes/sample04-policy
+

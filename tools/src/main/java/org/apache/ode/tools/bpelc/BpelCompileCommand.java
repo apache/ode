@@ -20,6 +20,7 @@
 package org.apache.ode.tools.bpelc;
 
 import org.apache.ode.bpel.compiler.BpelC;
+import org.apache.ode.bpel.compiler.BpelCompiler;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
@@ -118,7 +119,7 @@ public class BpelCompileCommand implements Command {
 
       try {
         long start = System.currentTimeMillis();
-        compiler.compile(bpelFile);
+        compiler.compile(bpelFile, BpelCompiler.getVersion(_outputDir.getAbsolutePath()));
         long t = System.currentTimeMillis() - start;
         _cc.info("Compilation completed in " + t + "ms");
       }

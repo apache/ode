@@ -18,17 +18,21 @@
  */
 package org.apache.ode.bpel.compiler.bom;
 
-import java.util.Collections;
+import org.w3c.dom.Element;
+
 import java.util.List;
 import java.util.Set;
-
-import org.w3c.dom.Element;
-import org.apache.ode.bpel.compiler.BpelCompiler;
 
 /**
  * BPEL Object Model (BOM) representation of a BPEL process.
  */
 public class Process extends Scope {
+
+    public enum Version {
+        BPEL11,
+        BPEL20_DRAFT,
+        BPEL20
+    }
 
     public Process(Element el) {
         super(el);
@@ -46,10 +50,10 @@ public class Process extends Scope {
     /**
      * Get the BPEL version of this process.
      */
-    public BpelCompiler.Version getBpelVersion() {
-        if (is11()) return BpelCompiler.Version.BPEL11;
-        if (is20Draft()) return BpelCompiler.Version.BPEL20_DRAFT;
-        return BpelCompiler.Version.BPEL20;
+    public Version getBpelVersion() {
+        if (is11()) return Version.BPEL11;
+        if (is20Draft()) return Version.BPEL20_DRAFT;
+        return Version.BPEL20;
     }
 
     /**
@@ -107,16 +111,4 @@ public class Process extends Scope {
         return getChildren(Import.class);
     }
 
-    /**
-     * Get the <code>&lt;extensions&gt;</code>(s) of the process.
-     * 
-     * @return {@link Set} of {@link Extension}s
-     */
-    public List<Extension> getExtensions() {
-        Extensions extensions = getFirstChild(Extensions.class);
-        if (extensions == null)
-            return Collections.emptyList();
-        return extensions.getChildren(Extension.class);
-
-    }
 }

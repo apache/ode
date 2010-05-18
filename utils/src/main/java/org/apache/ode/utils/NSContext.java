@@ -23,15 +23,24 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.apache.ode.utils.stl.*;
+import org.apache.ode.utils.stl.CollectionsX;
+import org.apache.ode.utils.stl.CompositeUnaryFunction;
+import org.apache.ode.utils.stl.EqualsUnaryFunction;
+import org.apache.ode.utils.stl.FilterIterator;
+import org.apache.ode.utils.stl.TransformIterator;
 
 /**
  * A simple in-memory implementation of the {@link NamespaceContext} interface
@@ -48,8 +57,15 @@ public class NSContext implements NamespaceContext, Externalizable {
     private static final Log __log = LogFactory.getLog(NSContext.class);
 
     /** Prefix-to-URI map. */
-    private HashMap<String, String> _prefixToUriMap = new HashMap<String, String>();
-
+    private HashMap<String, String> _prefixToUriMap = new HashMap<String, String>() {
+    	@Override
+    	public String put(String prefix, String uri) {
+            prefix = (String) InternPool.intern("namespace.prefixes", prefix);
+            uri = (String) InternPool.intern("namespace.uris", uri);
+            return super.put(prefix, uri);
+    	}
+    };
+    
     public NSContext() {
     }
 
@@ -123,7 +139,7 @@ public class NSContext implements NamespaceContext, Externalizable {
             __log.trace("readExternal: contents=" + _prefixToUriMap);
         }
     }
-
+    
     /**
      * Add a prefix to URI mapping to this context.
      * 

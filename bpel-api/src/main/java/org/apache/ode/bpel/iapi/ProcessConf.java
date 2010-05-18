@@ -20,7 +20,6 @@ package org.apache.ode.bpel.iapi;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
@@ -33,8 +32,8 @@ import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.evt.BpelEvent;
+import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
-import org.apache.ode.bpel.rapi.ProcessModel;
 import org.apache.ode.utils.CronExpression;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -42,9 +41,22 @@ import org.w3c.dom.Node;
 /**
  * Deployed process configuration. IMPORTANT: Implementations of this class <em>MUST BE IMMUTABLE</em>,
  * otherwise the engine will get confused.  
+ * 
+ * @author mriou <mriou at apache dot org>
  */
 public interface ProcessConf {
 
+    public static class PartnerRoleConfig {
+        public final OFailureHandling failureHandling;
+        public final boolean usePeer2Peer;
+        
+        public PartnerRoleConfig(OFailureHandling failureHandling, boolean usePeer2Peer) {
+            super();
+            this.failureHandling = failureHandling;
+            this.usePeer2Peer = usePeer2Peer;
+        }
+    }
+    
     /**
      * Get the process id, generally the same as the type.
      * @return process id.
@@ -68,26 +80,19 @@ public interface ProcessConf {
      * @return <code>true</code> if this is a transient process.
      */
     boolean isTransient();
-
-    /**
-     * Indicates whether this process implements REST-style resources.
-     */
-    boolean isRestful();
-
+    
     /**
      * Get the CBP stream. 
      * @return new stream to the CBP file.
      */
     InputStream getCBPInputStream();
-
+   
     /**
-     * Returns the process model is it's already been loaded. Implementations of ProcessConf aren't required to
-     * implement this method, it's only present for optimization purposes. Users should default to getCBPInputStream()
-     * when this method isn't supported.
-     * @throw UnsupportedOperationException
+     * Get the CBP file size. 
+     * @return size of the CBP file.
      */
-    ProcessModel getProcessModel();
-
+    long getCBPFileSize();
+    
     /**
      * Get the path of the BPEL document, relative to its deployment unit 
      * @return Relative path of BPEL document
@@ -106,11 +111,18 @@ public interface ProcessConf {
     Date getDeployDate();
 
     /**
+     * Get the userid of the deployer.
+     * @return
+     */
+    String getDeployer();
+
+    /**
      * Get the state of the process. 
      * @return process state.
      */
     ProcessState getState();
     
+
     /**
      * Get the files associated with the deployment.
      * @return
@@ -131,22 +143,38 @@ public interface ProcessConf {
     
     /**
      * Gets the WSDL definition used in a process into which a service is defined.
+     * @param processId
      * @param serviceName
      * @return definition
      */
     Definition getDefinitionForService(QName serviceName);
 
     /**
+     * Gets the WSDL definition used in a process into which a PortType is defined.
+     * @param portTypeName
+     * @return definition
+     */
+    Definition getDefinitionForPortType(QName portTypeName);
+
+    /**
      * Gets the list of endpoints a process should provide.
+     * @param processId
      * @return map of partner link names and associated enpoints
      */
     Map<String, Endpoint> getProvideEndpoints();
 
     /**
      * Gets the list of endpoints a process invokes.
+     * @param processId
      * @return map of partner link names and associated enpoints
      */
     Map<String, Endpoint> getInvokeEndpoints();
+
+    /**
+     * Returns failure handling info for invokes.
+     * @return
+     */
+    public Map<String, PartnerRoleConfig> getPartnerRoleConfig();
     
     /**
      * Tells if the service is shareable
@@ -161,30 +189,9 @@ public interface ProcessConf {
      * @return list of extension elements 
      */
     List<Element> getExtensionElement(QName qname);
-    
-    /**
-     * Returns the context propagation rules defined in the DD.
-     * @return list of context propagation rules
-     */
-    List<PropagationRule> getPropagationRules();
-    
-    /**
-     * Gets the list of context interceptors defined in the DD.
-     * The key is the full qualified class name of the interceptor to
-     * be loaded, the value is an element containing custom configuration
-     * properties.
-     * 
-     * @return list of context interceptors
-     */
-    Map<String, Element> getContextInterceptors();
 
     boolean isEventEnabled(List<String> scopeNames, BpelEvent.TYPE type);
 
-    /**
-     * Returns a list of properties associtated to this endpoint.
-     * @param epr
-     * @return map of property/value pairs
-     */
     public Map<String, String> getEndpointProperties(EndpointReference epr);
 
     boolean isCleanupCategoryEnabled(boolean instanceSucceeded, CLEANUP_CATEGORY category);
@@ -192,7 +199,7 @@ public interface ProcessConf {
     Set<CLEANUP_CATEGORY> getCleanupCategories(boolean instanceSucceeded);
 
     List<CronJob> getCronJobs();
-
+    
     public enum CLEANUP_CATEGORY {
         INSTANCE,
         VARIABLES,
@@ -204,7 +211,7 @@ public interface ProcessConf {
             return valueOf(CLEANUP_CATEGORY.class, lowerCase.toUpperCase());
         }
     }
-
+    
     public class CronJob {
         private CronExpression _cronExpression;
         
@@ -234,7 +241,7 @@ public interface ProcessConf {
         }
     }
     
-    public class CleanupInfo implements Serializable {
+    public class CleanupInfo implements java.io.Serializable {
         private List<String> _filters = new ArrayList<String>();
         
         private final Set<CLEANUP_CATEGORY> _categories = EnumSet.noneOf(CLEANUP_CATEGORY.class);
@@ -260,32 +267,6 @@ public interface ProcessConf {
             buf.append(_categories);
             
             return buf.toString();
-        }
-    }
-    
-    public class PropagationRule implements Serializable {
-        private static final long serialVersionUID = 5496856170262204149L;
-
-        private String fromPL;
-        private String toPL;
-        private List<String> contexts = new ArrayList<String>();
-        public String getFromPL() {
-            return fromPL;
-        }
-        public void setFromPL(String fromPL) {
-            this.fromPL = fromPL;
-        }
-        public String getToPL() {
-            return toPL;
-        }
-        public void setToPL(String toPL) {
-            this.toPL = toPL;
-        }
-        public List<String> getContexts() {
-            return contexts;
-        }
-        public void setContexts(List<String> contexts) {
-            this.contexts = contexts;
         }
     }
 }

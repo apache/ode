@@ -114,6 +114,16 @@ public class DeploymentWebService {
                 if (operation.equals("deploy")) {
                     OMElement deployElement = messageContext.getEnvelope().getBody().getFirstElement();
                     OMElement namePart = deployElement.getFirstChildWithName(new QName(null, "name"));
+                    // "be liberal in what you accept from others"
+                    if (namePart == null) {
+                       namePart = OMUtils.getFirstChildWithName(deployElement, "name");
+                       if( namePart == null ) {
+                               throw new OdeFault("The name part is missing");
+                       } else if (__log.isWarnEnabled()) {
+                            __log.warn("Invalid incoming request detected for operation " + messageContext.getAxisOperation().getName() + ". Name part should have no namespace but has " + namePart.getQName().getNamespaceURI());
+                        }
+                    }
+
                     OMElement packagePart = deployElement.getFirstChildWithName(new QName(null, "package"));
 
                     // "be liberal in what you accept from others"

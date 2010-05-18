@@ -49,6 +49,8 @@ public class RmiTransportServerImpl implements OdeRemote {
 
     private String _id;
 
+    private Registry _registry;
+
     public RmiTransportServerImpl() {
     }
 
@@ -79,7 +81,7 @@ public class RmiTransportServerImpl implements OdeRemote {
 
         // Bind the RMI-server to the registry, creating one if necessary
         try {
-            LocateRegistry.createRegistry(_port);
+            _registry = LocateRegistry.createRegistry(_port);
             __log.debug("Created registry on port " + _port);
         } catch (Exception ex) {
             __log.debug("Could not create registry on port " + _port + " (perhaps it's already there)");
@@ -94,7 +96,13 @@ public class RmiTransportServerImpl implements OdeRemote {
     }
 
     public synchronized void stop() throws RemoteException {
-        UnicastRemoteObject.unexportObject(this, false);
+        for (RmiPipeServerImpl pipe: _pipes) {
+            unexport(pipe);
+        }
+        if (_registry != null) {
+            unexport(_registry);
+        }
+        unexport(this);
     }
 
     public synchronized OdeTransportPipeRemote newPipe() throws RemoteException {
@@ -109,18 +117,18 @@ public class RmiTransportServerImpl implements OdeRemote {
     void pipeClosed(RmiPipeServerImpl pipe) {
         if (__log.isDebugEnabled())
             __log.debug("Closing RMI pipe " + pipe);
-            
-        try {
-            UnicastRemoteObject.unexportObject(pipe.remote, false);
-        } catch (RemoteException re) {
-            // ignore
-        }
-
+        unexport(pipe);
         synchronized (this) {
             _pipes.remove(pipe);
         }
-
         _connProvider.destroyConnectionObject(pipe.target);
+    }
 
+    void unexport(Remote remote) {
+        try {
+            UnicastRemoteObject.unexportObject(remote, false);
+        } catch (Exception e) {
+            // ignore
+        }
     }
 }

@@ -19,7 +19,6 @@
 
 package org.apache.ode.scheduler.simple;
 
-
 /**
  * The thing that runs the scheduled tasks.
  * 
@@ -28,5 +27,6 @@ package org.apache.ode.scheduler.simple;
  */
 interface TaskRunner {
 
+    
     public void runTask(Task task);
 }

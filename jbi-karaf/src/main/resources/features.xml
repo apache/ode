@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+     Licensed to the Apache Software Foundation (ASF) under one or more
+     contributor license agreements.  See the NOTICE file distributed with
+     this work for additional information regarding copyright ownership.
+     The ASF licenses this file to You under the Apache License, Version 2.0
+     (the "License"); you may not use this file except in compliance with
+     the License.  You may obtain a copy of the License at
+
+     http///www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+  -->
+<features>
+    <feature name="ode-core-deps" version="${ode.version}">
+        <feature>transaction</feature>
+        <bundle>mvn:commons-collections/commons-collections/${commons.collections.version}</bundle>
+        <bundle>mvn:commons-beanutils/commons-beanutils/1.8.2</bundle>
+        <bundle>mvn:commons-io/commons-io/1.4</bundle>
+        <bundle>wrap:mvn:jaxen/jaxen/1.1.1</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.saxon/9.1.0.8_1-SNAPSHOT</bundle>
+    </feature>
+    <feature name="ode-core" version="${ode.version}">
+        <bundle>mvn:org.apache.ode/ode-jbi-bundle/${ode.version}</bundle>
+    </feature>
+    <feature name="ode-hib-deps" version="${project.version}">
+        <bundle>wrap:mvn:dom4j/dom4j/1.6.1</bundle>
+        <bundle>wrap:mvn:org.hibernate/hibernate/3.2.5.ga</bundle>
+    </feature>
+    <feature name="ode-jpa-deps" version="${project.version}">
+        <bundle>mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.java-persistence-api-1.1.1/1.4.0</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.serp/1.13.1_2</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.openjpa/1.2.1_2</bundle>
+    </feature>
+    <feature name="ode-derby-deps" version="${project.version}">
+        <bundle>wrap:mvn:org.tranql/tranql-connector/1.4</bundle>
+        <bundle>mvn:org.apache.derby/derby/${derby.version}</bundle>
+    </feature>
+    <feature name="ode-sqlserver-deps" version="${project.version}">
+        <bundle>wrap:mvn:com.microsoft.sqlserver/sqljdbc/1.2</bundle>
+        <bundle>wrap:mvn:org.tranql/tranql-connector/1.4</bundle>
+        <bundle>wrap:mvn:org.tranql/tranql-connector-sqlserver2005-common/1.1</bundle>
+    </feature>
+    <feature name="ode-oracle-deps" version="${project.version}">
+        <bundle>wrap:mvn:oracle/ojdbc5/11.1.0.6.0</bundle>
+        <bundle>wrap:mvn:org.tranql/tranql-connector/1.4</bundle>
+        <bundle>wrap:mvn:org.tranql/tranql-connector-oracle-common/1.4</bundle>
+    </feature>
+    <feature name="ode" version="${project.version}">
+        <feature version="${project.version}">ode-derby-deps</feature>
+        <feature version="${project.version}">ode-jpa-deps</feature>
+        <feature version="${project.version}">ode-core-deps</feature>
+        <feature version="${project.version}">ode-core</feature>
+    </feature>
+    <feature name="ode-hib-oracle" version="${project.version}">
+        <feature version="${project.version}">ode-oracle-deps</feature>
+        <feature version="${project.version}">ode-hib-deps</feature>
+        <feature version="${project.version}">ode-core-deps</feature>
+        <feature version="${project.version}">ode-core</feature>
+    </feature>
+    <feature name="ode-hib-sqlserver" version="${project.version}">
+        <feature version="${project.version}">ode-sqlserver-deps</feature>
+        <feature version="${project.version}">ode-hib-deps</feature>
+        <feature version="${project.version}">ode-core-deps</feature>
+        <feature version="${project.version}">ode-core</feature>
+    </feature>
+    <feature name="examples-ode-ping-pong" version="${project.version}">
+        <feature version="${project.version}">ode</feature>
+        <bundle>mvn:org.apache.ode.examples/ping-pong-bundle/${project.version}</bundle>
+    </feature>
+</features>

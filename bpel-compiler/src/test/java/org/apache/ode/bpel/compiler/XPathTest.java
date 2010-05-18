@@ -20,8 +20,8 @@ package org.apache.ode.bpel.compiler;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,16 +32,35 @@ import javax.xml.transform.Source;
 import junit.framework.TestCase;
 
 import org.apache.ode.bpel.compiler.api.CompilationException;
-import org.apache.ode.bpel.compiler.v2.CompilerContext;
-import org.apache.ode.bpel.compiler.v2.ExpressionCompiler;
-import org.apache.ode.bpel.extension.ExtensionValidator;
-import org.apache.ode.bpel.compiler.bom.*;
-import org.apache.ode.bpel.compiler.v2.xpath10.XPath10ExpressionCompilerBPEL11;
-import org.apache.ode.bpel.compiler.v2.xpath10.XPath10ExpressionCompilerBPEL20;
-import org.apache.ode.bpel.compiler.v2.xpath10.XPath10ExpressionCompilerBPEL20Draft;
-import org.apache.ode.bpel.compiler.v2.xpath20.XPath20ExpressionCompilerBPEL20;
-import org.apache.ode.bpel.compiler.v2.xpath20.XPath20ExpressionCompilerBPEL20Draft;
-import org.apache.ode.bpel.rtrep.v2.*;
+import org.apache.ode.bpel.compiler.api.CompilerContext;
+import org.apache.ode.bpel.compiler.api.ExpressionCompiler;
+import org.apache.ode.bpel.compiler.api.SourceLocation;
+import org.apache.ode.bpel.compiler.bom.Activity;
+import org.apache.ode.bpel.compiler.bom.BpelObject;
+import org.apache.ode.bpel.compiler.bom.Expression;
+import org.apache.ode.bpel.compiler.bom.ScopeLikeActivity;
+import org.apache.ode.bpel.elang.xpath10.compiler.XPath10ExpressionCompilerBPEL11;
+import org.apache.ode.bpel.elang.xpath10.compiler.XPath10ExpressionCompilerBPEL20;
+import org.apache.ode.bpel.elang.xpath10.compiler.XPath10ExpressionCompilerBPEL20Draft;
+import org.apache.ode.bpel.elang.xpath20.compiler.XPath20ExpressionCompilerBPEL20;
+import org.apache.ode.bpel.elang.xpath20.compiler.XPath20ExpressionCompilerBPEL20Draft;
+import org.apache.ode.bpel.o.OActivity;
+import org.apache.ode.bpel.o.OElementVarType;
+import org.apache.ode.bpel.o.OExpression;
+import org.apache.ode.bpel.o.OLValueExpression;
+import org.apache.ode.bpel.o.OLink;
+import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OVarType;
+import org.apache.ode.bpel.o.OXsdTypeVarType;
+import org.apache.ode.bpel.o.OXslSheet;
+import org.apache.ode.bpel.o.OMessageVarType.Part;
+import org.apache.ode.bpel.o.OProcess.OProperty;
+import org.apache.ode.bpel.o.OProcess.OPropertyAlias;
+import org.apache.ode.bpel.o.OScope.CorrelationSet;
+import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.NSContext;
 import org.w3c.dom.Element;
@@ -102,7 +121,7 @@ public class XPathTest extends TestCase {
 class MockCompilerContext implements CompilerContext {
 	private OProcess _oprocess = new OProcess("20");
 
-	private Map<String, OScope.Variable> _vars = new HashMap<String, OScope.Variable>();
+	private Map<String, Variable> _vars = new HashMap<String, Variable>();
 
 	public OExpression constantExpr(boolean value) {
 		return null;
@@ -131,29 +150,29 @@ class MockCompilerContext implements CompilerContext {
 		return null;
 	}
 
-	public OProcess.OProperty resolveProperty(QName name) throws CompilationException {
+	public OProperty resolveProperty(QName name) throws CompilationException {
 		return null;
 	}
 
-	public OScope.Variable resolveVariable(String name) throws CompilationException {
+	public Variable resolveVariable(String name) throws CompilationException {
 		return _vars.get(name);
 	}
 
-	public List<OScope.Variable> getAccessibleVariables() {
-		return new ArrayList<OScope.Variable>(_vars.values());
+	public List<Variable> getAccessibleVariables() {
+		return new ArrayList<Variable>(_vars.values());
 	}
 
-	public OScope.Variable resolveMessageVariable(String inputVar)
+	public Variable resolveMessageVariable(String inputVar)
 			throws CompilationException {
 		return _vars.get(inputVar);
 	}
 
-	public OScope.Variable resolveMessageVariable(String inputVar, QName messageType)
+	public Variable resolveMessageVariable(String inputVar, QName messageType)
 			throws CompilationException {
 		return _vars.get(inputVar);
 	}
 
-	public OMessageVarType.Part resolvePart(OScope.Variable variable, String partname)
+	public Part resolvePart(Variable variable, String partname)
 			throws CompilationException {
 		return ((OMessageVarType) variable.type).parts.get(partname);
 	}
@@ -186,7 +205,7 @@ class MockCompilerContext implements CompilerContext {
 		return null;
 	}
 
-	public OProcess.OPropertyAlias resolvePropertyAlias(OScope.Variable variable, QName property)
+	public OPropertyAlias resolvePropertyAlias(Variable variable, QName property)
 			throws CompilationException {
 		// TODO Auto-generated method stub
 		return null;
@@ -209,7 +228,7 @@ class MockCompilerContext implements CompilerContext {
 		return _oprocess;
 	}
 
-	public OScope.CorrelationSet resolveCorrelationSet(String csetName)
+	public CorrelationSet resolveCorrelationSet(String csetName)
 			throws CompilationException {
 		return null;
 	}
@@ -244,7 +263,7 @@ class MockCompilerContext implements CompilerContext {
 		return null;
 	}
 
-	public OScope compileSLC(ScopeLikeActivity child, OScope.Variable[] variables) {
+	public OScope compileSLC(ScopeLikeActivity child, Variable[] variables) {
 		return null;
 	}
 
@@ -252,23 +271,30 @@ class MockCompilerContext implements CompilerContext {
 			CompilationException error) {
 	}
 
-	public boolean isExtensionDeclared(String namespace) {
-		return false;
-	}
-
-	public ExtensionValidator getExtensionValidator(QName extensionElementName) {
-		return null;
-	}
-
-    public OMessageVarType.Part resolveHeaderPart(OScope.Variable variable, String partname) throws CompilationException {
+    public Part resolveHeaderPart(Variable variable, String partname) throws CompilationException {
         return null;
     }
     
     public Map<URI, Source> getSchemaSources() {
+    	return null;
+    }
+
+	public URI getBaseResourceURI() {
+		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public URI getBaseResourceURI() {
+	public OExpression compileExpr(Expression expr, OVarType rootNodeType,
+			Object requestedResultType, Object[] resultType)
+			throws CompilationException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public OLValueExpression compileLValueExpr(Expression expr,
+			OVarType rootNodeType, Object requestedResultType,
+			Object[] resultType) throws CompilationException {
+		// TODO Auto-generated method stub
 		return null;
 	}
 }

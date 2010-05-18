@@ -65,7 +65,7 @@
             </copy>
         </assign>
 
-        <invoke partnerLink="dummyPartnerLink" portType="dummy:DummyServicePortType"
+        <invoke partnerLink="dummyPartnerLink" portType="test:DummyServicePortType"
                 operation="longOperation" inputVariable="input" outputVariable="output"/>
 
         <assign>

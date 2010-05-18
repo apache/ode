@@ -17,7 +17,7 @@ CREATE TABLE ode_job (
   type varchar(255),
   channel varchar(255),
   correlatorId varchar(255),
-  correlationKey varchar(255),
+  correlationKeySet varchar(255),
   retryCount int,
   inMem int,
   detailsExt blob(4096),

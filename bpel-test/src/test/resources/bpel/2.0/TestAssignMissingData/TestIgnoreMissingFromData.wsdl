@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<definitions name="TestIgnoreMissingFromData"
+        targetNamespace="test:test"
+        xmlns:tns="test:test"
+        xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
+        >
+
+    <types>
+        <schema attributeFormDefault="unqualified" elementFormDefault="qualified" 
+                targetNamespace="test:test" 
+                xmlns="http://www.w3.org/2001/XMLSchema">
+
+            <element name="Input" type="string" />
+            <element name="Output" type="string" />
+        
+            <element name="TestElement">
+            	<complexType>
+            		<sequence>
+            			<element name="OptionalElement" type="string" minOccurs="0" maxOccurs="1"></element>
+            		</sequence>
+            	</complexType>
+            </element>
+        </schema>
+    </types>
+
+    <message name="InputMessage">
+        <part name="payload" element="tns:Input"/>
+    </message>
+    <message name="OutputMessage">
+        <part name="payload" element="tns:Output"/>
+    </message>
+
+    <portType name="ServicePortType">
+        <operation name="process">
+            <input  message="tns:InputMessage" />
+            <output message="tns:OutputMessage"/>
+        </operation>
+    </portType>
+     
+    <plnk:partnerLinkType name="ServicePartnerLinkType">
+        <plnk:role name="ServiceProvider" portType="tns:ServicePortType"/>
+    </plnk:partnerLinkType>
+    
+    <binding name="ServiceBinding" type="tns:ServicePortType">
+    	<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+    	<operation name="process">
+    		<soap:operation soapAction="test:test/process" />
+    		<input>
+    			<soap:body use="literal" />
+    		</input>
+    		<output>
+    			<soap:body use="literal" />
+    		</output>
+    	</operation>
+    </binding>
+    
+    <service name="TestIgnoreMissingFromDataService">
+        <port name="TestIgnoreMissingFromDataPort" binding="tns:ServiceBinding">
+        	<soap:address location="http://[server]:[port]/ode/processes/TestIgnoreMissingFromData" />
+        </port>
+    </service>
+</definitions>
+

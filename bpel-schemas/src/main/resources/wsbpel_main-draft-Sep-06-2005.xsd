@@ -247,7 +247,7 @@
     </complexType>
     <complexType name="tOnEvent">
         <complexContent>
-            <extension base="bpws:tOnMsgCommon">				
+            <extension base="bpws:tOnMsgCommon">                
                 <sequence>
                     <group ref="bpws:activity"/>
                 </sequence>
@@ -341,8 +341,8 @@
                 <attribute name="type" type="QName" use="optional"/>
                 <attribute name="element" type="QName" use="optional"/>
             </extension>
-        </complexContent>	
-    </complexType>	
+        </complexContent>   
+    </complexType>  
     <complexType name="tCorrelationSets">
         <complexContent>
             <extension base="bpws:tExtensibleElements">
@@ -884,7 +884,7 @@
     <element name="propertyAlias">
         <complexType>
             <complexContent>
-                <extension base="bpws:tExtensibleElements"> 	
+                <extension base="bpws:tExtensibleElements">     
                     <sequence>
                         <element name="query" minOccurs="0" type="bpws:tQuery" />
                     </sequence>
