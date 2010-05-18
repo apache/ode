@@ -80,13 +80,13 @@
     <include>org.apache.ode:ode-agents</include>
     <include>org.apache.ode:ode-bpel-obj</include>
 	<include>org.apache.ode:ode-dao-jpa</include>
+	<include>org.apache.ode:ode-bpel-ql</include>
 	<include>annogen:annogen</include>
 	<include>antlr:antlr</include>
 	<include>javax.activation:activation</include>
 	<include>org.apache.axis2:axis2-adb</include>
 	<include>org.apache.axis2:axis2-adb-codegen</include>
 	<include>org.apache.axis2:axis2-codegen</include>
-	<include>org.apache.axis2:axis2-corba</include>
 	<include>org.apache.axis2:axis2-fastinfoset</include>
 	<include>org.apache.axis2:axis2-java2wsdl</include>
 	<include>org.apache.axis2:axis2-jaxbri</include>

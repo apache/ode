@@ -30,7 +30,6 @@
     </parent>
     
     <properties>
-	<rampart.version>1.4</rampart.version>
         <servlet.version>2.4</servlet.version>
     </properties>
      

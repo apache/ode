@@ -32,9 +32,7 @@
     </parent>
     
     <properties>
-       <rampart.version>1.4</rampart.version>
        <mex.version>1.41</mex.version>
-       <axis2.version>1.4.1</axis2.version>
        <jibx.version>1.1.5</jibx.version>
        <tranql.version>1.1</tranql.version>
        <opensaml.version>1.1</opensaml.version>
@@ -91,12 +89,11 @@
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
-            <artifactId>ode-axis2</artifactId>
+            <artifactId>ode-bpel-ql</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.axis2</groupId>
-            <artifactId>axis2-corba</artifactId>
-            <version>${axis2.version}</version>
+            <groupId>org.apache.ode</groupId>
+            <artifactId>ode-axis2</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.axis2</groupId>
@@ -176,6 +173,11 @@
             <version>${geronimo-spec-jms.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-ejb_2.1_spec</artifactId>
+            <version>1.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.geronimo.modules</groupId>
             <artifactId>geronimo-kernel</artifactId>
         </dependency>
@@ -183,6 +185,7 @@
             <groupId>xml-apis</groupId>
             <artifactId>xml-apis</artifactId>
         </dependency>
+        <!--
         <dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart</artifactId>
@@ -207,6 +210,7 @@
             <type>mar</type>
             <version>${mex.version}</version>
         </dependency>
+        -->
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>mex</artifactId>
