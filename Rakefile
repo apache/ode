@@ -26,7 +26,7 @@ require File.join(File.dirname(__FILE__), 'repositories.rb')
 require File.join(File.dirname(__FILE__), 'dependencies.rb')
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "1.3.4-SNAPSHOT"
+VERSION_NUMBER = "1.3.5-SNAPSHOT"
 
 BUNDLE_VERSIONS = {
   "ode.version" => VERSION_NUMBER,
