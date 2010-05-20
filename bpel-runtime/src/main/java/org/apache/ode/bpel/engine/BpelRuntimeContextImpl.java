@@ -226,6 +226,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
      * @see BpelRuntimeContext#completedFault(org.apache.ode.bpel.runtime.channels.FaultData)
      */
     public void completedFault(FaultData faultData) {
+        BpelProcess.__log.error("Instance " + _dao.getInstanceId() + " of " + _bpelProcess.getPID() + " has completed with fault: " + faultData);
         if (BpelProcess.__log.isDebugEnabled()) {
             BpelProcess.__log.debug("ProcessImpl completed with fault '" + faultData.getFaultName() + "'");
         }
