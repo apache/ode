@@ -87,6 +87,19 @@ public class InstanceManagementTest extends Axis2TestBase implements ODEConfigDi
         assertTrue(instanceNb(result) == 0);
     }
 
+   @Test
+     public void testListInstancesWithGarbageFilter() throws Exception {
+         OMElement listRoot = _client.buildMessage("listInstances", new String[] {"filter", "order", "limit"},
+                 new String[] {"", "", "10"});
+         OMElement result = sendToIM(listRoot);
+         assertTrue("Ensures that there are process instances: " + instanceNb(result), instanceNb(result) >0);
+ 
+         listRoot = _client.buildMessage("listInstances", new String[] {"filter", "order", "limit"},
+                 new String[] {"blah", "", "10"});
+         result = sendToIM(listRoot);
+         assertTrue("Ensures that there are no process instances: " + instanceNb(result), instanceNb(result) ==0);
+     }
+
     @Test
     public void testListAllInstances() throws Exception {
         OMElement root = _client.buildMessage("listAllInstancesWithLimit", new String[] {"limit"}, new String[] {"1"});
