@@ -218,6 +218,10 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         return listProcessesCustom(null, null, ProcessInfoCustomizer.SUMMARYONLY);
     }
 
+    public ProcessInfoListDocument listProcessesSummaryAndProperties() {
+        return listProcessesCustom(null, null, ProcessInfoCustomizer.SUMMARY_PROPERTIES);
+    }
+
     public ProcessInfoDocument getProcessInfoCustom(final QName pid, final ProcessInfoCustomizer custom) {
         try {
             return _db.exec(new BpelDatabase.Callable<ProcessInfoDocument>() {

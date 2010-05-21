@@ -31,6 +31,7 @@ public class ProcessInfoCustomizer {
 
   public static final ProcessInfoCustomizer ALL = new ProcessInfoCustomizer(Item.ENDPOINTS,Item.PROPERTIES,Item.DOCUMENTS,Item.SUMMARY);
   public static final ProcessInfoCustomizer SUMMARYONLY = new ProcessInfoCustomizer(Item.SUMMARY);
+  public static final ProcessInfoCustomizer SUMMARY_PROPERTIES = new ProcessInfoCustomizer(Item.SUMMARY,Item.PROPERTIES);
   public static final ProcessInfoCustomizer NONE = new ProcessInfoCustomizer();
 
   private HashSet<Item> _includes = new HashSet<Item>();
