@@ -33,6 +33,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.namespace.QName;
@@ -337,9 +338,23 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         return ret;
     }
 
+    private boolean garbage(String filter) {
+    	if(filter == null) {
+    		return false;
+    	}
+        Matcher expressionMatcher = Filter.__comparatorPattern.matcher(filter);        
+        if(!filter.trim().equals("") && !expressionMatcher.find()) {
+        	return true;
+        }
+        return false;
+    }
+        
     public InstanceInfoListDocument listInstances(String filter, String order, int limit) {
         InstanceInfoListDocument ret = InstanceInfoListDocument.Factory.newInstance();
         final TInstanceInfoList infolist = ret.addNewInstanceInfoList();
+        if(garbage(filter)) {
+        	return ret;
+        }
         final InstanceFilter instanceFilter = new InstanceFilter(filter, order, limit);
         try {
             _db.exec(new BpelDatabase.Callable<Object>() {
@@ -361,6 +376,9 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
     public InstanceInfoListDocument listInstancesSummary(String filter, String order, int limit) {
         InstanceInfoListDocument ret = InstanceInfoListDocument.Factory.newInstance();
         final TInstanceInfoList infolist = ret.addNewInstanceInfoList();
+        if(garbage(filter)) {
+        	return ret;
+        }
         final InstanceFilter instanceFilter = new InstanceFilter(filter, order, limit);
         try {
             _db.exec(new BpelDatabase.Callable<Object>() {
@@ -519,6 +537,9 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
     public Collection<Long> delete(String filter) {
         final InstanceFilter instanceFilter = new InstanceFilter(filter);
         final List<Long> ret = new LinkedList<Long>();
+        if(garbage(filter)) {
+        	return ret;
+        }
         try {
             _db.exec(new BpelDatabase.Callable<Object>() {
                 public Object run(BpelDAOConnection conn) {

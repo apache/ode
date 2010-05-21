@@ -49,7 +49,7 @@ public abstract class Filter<FKEY extends Enum> implements Serializable {
    *  The not-equal op, '<>' works only with pids.
    *  </p>
    */
-  private static final Pattern __comparatorPattern = 
+  public static final Pattern __comparatorPattern = 
     Pattern.compile("([^=<> ]*) *(<>|<=|>=|<|>|=) *([^=<> ]*)");
 
   protected Map<FKEY, Restriction<String>> _criteria = new HashMap<FKEY,Restriction<String>>();
