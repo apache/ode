@@ -41,6 +41,8 @@
         
     <variables>
         <variable name="myVar" messageType="test:HelloXQueryMessage"/>
+        <variable name="tab" element="xsd:any"/>
+        <variable name="tabel" type="xsd:string"/>
         <variable name="otherVar" type="xsd:string"/>
         <variable name="tempVar" element="test:content"/>
         <variable name="stringVar" type="xsd:string"/>
@@ -64,6 +66,22 @@
             operation="HelloXQuery"
             variable="myVar"
             createInstance="yes"/>
+        
+        <bpws:assign>
+          <copy>
+            <from><literal><tns:tab><tns:a>1</tns:a><tns:a>2</tns:a></tns:tab></literal></from>
+            <to variable="tab"/>
+          </copy>
+          <copy>
+            <from>$tab/tns:a[2]</from>
+            <to variable="tabel"/>
+          </copy>
+        </bpws:assign>
+
+        <if>
+            <condition>$tabel != '2'</condition>
+            <throw faultName="error"/>
+        </if>
             
         <bpws:assign>
           <copy>
