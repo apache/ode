@@ -33,7 +33,7 @@
     <dependencies>
         <dependency>
             <groupId>org.hibernate</groupId>
-            <artifactId>hibernate</artifactId>
+            <artifactId>hibernate-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -73,7 +73,7 @@
               <phase>generate-sources</phase>
               <configuration>
                 <tasks>
-		  <property name="maven.runtime.classpath" refid="maven.compile.classpath"/>
+		  		  <property name="maven.runtime.classpath" refid="maven.compile.classpath"/>
                   <ant antfile="build.xml" target="create-schema" inheritRefs="true"/>
                 </tasks>
               </configuration>
@@ -93,38 +93,39 @@
             <goals>
               <goal>execute</goal>
             </goals>
-            <configuration>
-	      <driver>org.apache.derby.jdbc.EmbeddedDriver</driver>
-              <url>jdbc:derby:${basedir}/target/derby/hibdb;create=true</url>
-              <username>sa</username>
-              <password />
-              <autocommit>true</autocommit>
-              <onError>continue</onError>
-              <srcFiles>
-                <srcFile>target/derby.sql</srcFile>
-              </srcFiles>
-            </configuration>
+               <configuration>
+                   <driver>org.apache.derby.jdbc.EmbeddedDriver</driver>
+                   <url>jdbc:derby:${basedir}/target/ode-db-hib;create=true</url>
+                   <username>sa</username>
+                   <password />
+                   <autocommit>true</autocommit>
+                   <onError>continue</onError>
+                   <srcFiles>
+                       <srcFile>target/scripts/derby-hib.sql</srcFile>
+                   </srcFiles>
+               </configuration>
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>zip-derby-db</id>
-            <phase>package</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <tasks>
-	        <property name="ode.version" value="${project.version}"/>
-		<ant antfile="build.xml" target="zip-derby-db" />
-              </tasks>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+        <plugin>
+           <artifactId>maven-assembly-plugin</artifactId>
+           <executions>
+               <execution>
+                   <phase>package</phase>
+                   <goals>
+                       <goal>single</goal>
+                   </goals>
+                   <configuration>
+                       <finalName>ode-db-derby-hib-${project.version}</finalName>
+                       <appendAssemblyId>false</appendAssemblyId>
+                       <descriptors>
+                           <descriptor>src/main/assembly/bin.xml</descriptor>
+                       </descriptors>
+                       <tarLongFileMode>gnu</tarLongFileMode>
+                   </configuration>
+               </execution>
+           </executions>
+        </plugin>
         </plugins>
       </build>
 </project>

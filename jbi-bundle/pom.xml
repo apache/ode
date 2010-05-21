@@ -77,7 +77,7 @@
 <Include-Resource>
 src/main/resources,
 @../dao-jpa-ojpa-derby/target/ode-dao-jpa-ojpa-derby-${project.version}.zip,
-@../dao-hibernate-db/target/ode-dao-hibernate-db-${project.version}.zip,
+@../dao-hibernate-db/target/ode-db-derby-hib-${project.version}.zip,
 </Include-Resource>
 
                     </instructions>

@@ -22,12 +22,15 @@ package org.apache.ode.test;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
 import javax.sql.DataSource;
 import javax.xml.namespace.QName;
 
-import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
+
 import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
+import org.apache.ode.il.config.OdeConfigProperties;
+import org.apache.ode.il.dbutil.Database;
 import org.junit.Test;
 
 /**
@@ -37,21 +40,20 @@ public class ExternalVariableTest extends BPELTestAbstract {
 
     private JdbcExternalVariableModule _jdbcext;
 
-    private DataSource _ds;
+    private Database _db;
 
     public void setUp() throws Exception {
         super.setUp();
         
-        EmbeddedConnectionPoolDataSource ds = new EmbeddedConnectionPoolDataSource();
-        ds.setCreateDatabase("create");
-        ds.setDatabaseName("target/ExternalVariableTest");
-        _ds = ds;
+        OdeConfigProperties props = new OdeConfigProperties(new Properties(),"");
+		_db = new Database(props);
+        _db.start();
 
         _jdbcext = new JdbcExternalVariableModule();
-        _jdbcext.registerDataSource("testds", _ds);
+        _jdbcext.registerDataSource("testds", _db.getDataSource());
         _server.registerExternalVariableEngine(_jdbcext);
 
-        Connection conn = _ds.getConnection();
+        Connection conn = _db.getDataSource().getConnection();
         Statement s = conn.createStatement();
         
         dropTable(s, "extvartable1");

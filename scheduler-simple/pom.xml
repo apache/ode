@@ -57,8 +57,8 @@
 	  <scope>test</scope>
         </dependency>
         <dependency>
-          <groupId>hsqldb</groupId>
-          <artifactId>hsqldb</artifactId>
+          <groupId>com.h2database</groupId>
+          <artifactId>h2</artifactId>
 	  <scope>test</scope>
         </dependency>
         <dependency>
@@ -81,10 +81,10 @@
           <artifactId>geronimo-connector</artifactId>
 	  <scope>test</scope>
         </dependency>
-            <dependency>
-                <groupId>tranql</groupId>
-                <artifactId>tranql-connector</artifactId>
-            </dependency>
+        <dependency>
+          <groupId>tranql</groupId>
+          <artifactId>tranql-connector</artifactId>
+        </dependency>
         <dependency>
           <groupId>org.apache.geronimo.specs</groupId>
           <artifactId>geronimo-j2ee-connector_1.5_spec</artifactId>

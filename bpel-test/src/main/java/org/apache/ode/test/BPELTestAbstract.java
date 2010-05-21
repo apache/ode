@@ -25,7 +25,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
@@ -35,12 +37,12 @@ import java.util.regex.Pattern;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.common.evt.DebugBpelEventListener;
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
@@ -50,8 +52,11 @@ import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
+import org.apache.ode.dao.bpel.BpelDAOConnectionFactory;
+import org.apache.ode.dao.store.ConfStoreDAOConnectionFactory;
 import org.apache.ode.il.MockScheduler;
 import org.apache.ode.il.config.OdeConfigProperties;
+import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.store.ProcessConfImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.DOMUtils;
@@ -78,7 +83,9 @@ public abstract class BPELTestAbstract {
 
     protected MockScheduler scheduler;
 
-    protected BpelDAOConnectionFactory _cf;
+    protected BpelDAOConnectionFactory _bcf;
+    
+    protected ConfStoreDAOConnectionFactory _scf;
 
     /** Failures that have been detected. */
     protected List<Failure> _failures;
@@ -91,6 +98,10 @@ public abstract class BPELTestAbstract {
 
     /** What's actually been deployed. */
     private List<Deployment> _deployed;
+    
+    private MockTransactionManager _txm;
+    
+    private Database _db;
 
     @Before
     public void setUp() throws Exception {
@@ -100,12 +111,17 @@ public abstract class BPELTestAbstract {
         _deployments = new ArrayList<Deployment>();
         _invocations = new ArrayList<Invocation>();
         _deployed = new ArrayList<Deployment>();
+        
+        _txm = new MockTransactionManager();
+        Properties props = new Properties();
+        props.setProperty(OdeConfigProperties.PROP_DAOCF_STORE, System.getProperty(OdeConfigProperties.PROP_DAOCF_STORE,OdeConfigProperties.DEFAULT_DAOCF_STORE_CLASS));
+         OdeConfigProperties odeProps = new OdeConfigProperties(props,"");
+		_db = new Database(odeProps);
+        _db.setTransactionManager(_txm);
+        _db.start();
 
         if (Boolean.getBoolean("org.apache.ode.test.persistent")) {
-            emf = Persistence.createEntityManagerFactory("ode-unit-test-embedded");
-            em = emf.createEntityManager();
-            _cf = new org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl();
-            _server.setDaoConnectionFactory(_cf);
+        	_server.setDaoConnectionFactory(_bcf);
             scheduler = new MockScheduler() {
                 @Override
                 public void beginTransaction() {
@@ -127,16 +143,32 @@ public abstract class BPELTestAbstract {
 
             };
         } else {
-            scheduler = new MockScheduler();
-            _cf = new BpelDAOConnectionFactoryImpl(scheduler);
-            _server.setDaoConnectionFactory(_cf);
+            scheduler = new MockScheduler(_txm);
+            _bcf = new BpelDAOConnectionFactoryImpl(scheduler);
+            _bcf.init(null, _txm, _txm);
+            _server.setDaoConnectionFactory(_bcf);
         }
         _server.setInMemDaoConnectionFactory(new BpelDAOConnectionFactoryImpl(scheduler));
         _server.setScheduler(scheduler);
         _server.setBindingContext(new BindingContextImpl());
         _server.setMessageExchangeContext(mexContext);
         scheduler.setJobProcessor(_server);
-        store = new ProcessStoreImpl(null, null, "hibernate", new OdeConfigProperties(new Properties(), ""), true);
+        final EndpointReferenceContext eprContext = new EndpointReferenceContext() {
+            public EndpointReference resolveEndpointReference(Element epr) {
+                return null;
+            }
+
+            public EndpointReference convertEndpoint(QName targetType, Element sourceEndpoint) {
+                return null;
+            }
+
+            public Map getConfigLookup(EndpointReference epr) {
+                return Collections.EMPTY_MAP;
+            }
+        };
+        
+        _scf = _db.createDaoStoreCF();
+        store = new ProcessStoreImpl(eprContext, _txm, _scf);
         store.registerListener(new ProcessStoreListener() {
             public void onProcessStoreEvent(ProcessStoreEvent event) {
                 // bounce the process

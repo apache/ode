@@ -8,8 +8,8 @@ import java.util.concurrent.TimeoutException;
 import javax.transaction.TransactionManager;
 
 import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.engine.MyRoleMessageExchangeImpl.ResponseCallback;
+import org.apache.ode.dao.bpel.MessageExchangeDAO;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
 import org.jmock.Mock;
 import org.jmock.MockObjectTestCase;

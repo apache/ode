@@ -19,8 +19,8 @@
 
 package org.apache.ode.bpel.memdao;
 
-import org.apache.ode.bpel.dao.MessageDAO;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.dao.bpel.MessageDAO;
+import org.apache.ode.dao.bpel.MessageExchangeDAO;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 

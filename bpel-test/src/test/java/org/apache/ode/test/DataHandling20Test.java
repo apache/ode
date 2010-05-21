@@ -18,6 +18,7 @@
  */
 package org.apache.ode.test;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class DataHandling20Test extends BPELTestAbstract {
@@ -60,7 +61,8 @@ public class DataHandling20Test extends BPELTestAbstract {
     public void testAssignActivity1() throws Throwable {
         go("/bpel/2.0/TestAssignActivity1");
     }
-
+    
+    @Ignore
     @Test
     public void testAssignActivity2() throws Throwable {
         go("/bpel/2.0/TestAssignActivity2");
