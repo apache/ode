@@ -19,24 +19,25 @@
 
 package org.apache.ode.daohib.bpel;
 
+import java.util.Properties;
+
 import javax.resource.spi.ConnectionManager;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.derby.jdbc.EmbeddedXADataSource;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.il.EmbeddedGeronimoFactory;
 import org.hibernate.cfg.Environment;
 
-import java.util.Properties;
-
 /**
- * Testing BpelDAOConnectionImpl.listInstance. We're just producing a lot
- * of different filter combinations and test if they execute ok. To really
- * test that the result is the one expected would take a huge test database
- * (with at least a process and an instance for every possible combination).
+ * Testing BpelDAOConnectionImpl.listInstance. We're just producing a lot of
+ * different filter combinations and test if they execute ok. To really test
+ * that the result is the one expected would take a huge test database (with at
+ * least a process and an instance for every possible combination).
  */
 public abstract class BaseTestDAO extends TestCase {
 
@@ -44,6 +45,11 @@ public abstract class BaseTestDAO extends TestCase {
     protected TransactionManager txm;
     protected ConnectionManager connectionManager;
     private DataSource ds;
+    /*
+     * Make this true and change the getDataSource
+     * method to point to correct driver , database and userid \ password
+     */
+    private static boolean  externalDB = false;
 
     protected void initTM() throws Exception {
         EmbeddedGeronimoFactory factory = new EmbeddedGeronimoFactory();
@@ -67,6 +73,19 @@ public abstract class BaseTestDAO extends TestCase {
     }
 
     protected DataSource getDataSource() {
+        if (externalDB) {
+            BasicDataSource ds = new BasicDataSource();
+            try {
+                ds.setDriverClassName("com.mysql.jdbc.Driver");
+                ds.setUsername("sa");
+                ds.setPassword("sa");
+                ds.setUrl("jdbc:mysql://localhost/bpmsdbJunit");
+                this.ds = ds;
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                System.out.println("######### Couldn't get External connection! #############");
+            }
+        }
         if (ds == null) {
             EmbeddedXADataSource ds = new EmbeddedXADataSource();
             ds.setCreateDatabase("create");
