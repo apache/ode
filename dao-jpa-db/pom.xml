@@ -83,6 +83,7 @@
             <groupId>org.apache.ode</groupId>
             <artifactId>ode-dao-jpa</artifactId>
             <classifier>openjpa</classifier>
+            <version>${ode.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>

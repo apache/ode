@@ -443,7 +443,7 @@
                 <artifactId>ode-dao-jpa</artifactId>
                 <version>${ode.version}</version>
             </dependency>
-	    <dependency>
+            <dependency>
               <groupId>org.apache.ode</groupId>
               <artifactId>ode-dao-jpa</artifactId>
               <version>${ode.version}</version>
