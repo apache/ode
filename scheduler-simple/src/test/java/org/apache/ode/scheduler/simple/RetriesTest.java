@@ -70,7 +70,7 @@ public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
         }
 
         Thread.sleep(10000);
-        assertEquals(4, _tried);
+        assertEquals(6, _tried);
     }
 
     public void testExecTransaction() throws Exception {
