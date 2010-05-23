@@ -15,27 +15,36 @@
 
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
+BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:3.0"
 AXIOM               = [ group("axiom-api", "axiom-impl", "axiom-dom",
-                        :under=>"org.apache.ws.commons.axiom", :version=>"1.2.5") ]
-AXIS2_ALL           = group("axis2-adb", "axis2-codegen", "axis2-kernel",
-                        "axis2-java2wsdl", "axis2-jibx", "axis2-saaj", "axis2-xmlbeans",
-                        :under=>"org.apache.axis2", :version=>"1.3")
-AXIS2_TEST          = group("httpcore", "httpcore-nio", "httpcore-niossl", 
-                           :under=>"org.apache.httpcomponents", :version=>"4.0-alpha5")
+                        :under=>"org.apache.ws.commons.axiom", :version=>"1.2.8") ]
+AXIS2_ALL           = [group("axis2-transport-http", "axis2-transport-local", "axis2-kernel", "axis2-adb", "axis2-codegen", "axis2-java2wsdl",
+                             "axis2-jibx", "axis2-saaj", "axis2-xmlbeans",
+                            :under=>"org.apache.axis2",
+                            :version=>"1.5"),
+                      group("woden-api", "woden-impl-dom",
+                              :under=>"org.apache.woden",
+                              :version=>"1.0M8"),
+                       "org.apache.axis2:axis2-transports:jar:1.0-i6",
+                        "org.apache.axis2:axis2-jaxws-api:jar:1.2",
+                        "org.apache.httpcomponents:httpcore:jar:4.0"
+                      ]
 AXIS2_MODULES        = struct(
- :mods              => ["org.apache.rampart:rampart:mar:1.3", 
-                         "org.apache.rampart:rahas:mar:1.3",
-                         "org.apache.axis2:addressing:mar:1.3"],
+ :mods              => ["org.apache.rampart:rampart:mar:1.4",
+                         "org.apache.rampart:rahas:mar:1.4",
+                         "org.apache.axis2:addressing:mar:1.4",
+                         "org.apache.axis2:mex:mar:1.41"],
  :libs              => [group("rampart-core", "rampart-policy", "rampart-trust",
                               :under=>"org.apache.rampart",
-                              :version=>"1.3"), 
-                        "org.apache.ws.security:wss4j:jar:1.5.3", 
-                        "org.apache.santuario:xmlsec:jar:1.4.0",
-                        "org.opensaml:opensaml:jar:1.1",
-                        "bouncycastle:bcprov-jdk15:jar:140"] 
+                              :version=>"1.4"),
+                        "org.apache.ws.security:wss4j:jar:1.5.4",
+                        "org.apache.santuario:xmlsec:jar:1.4.1",
+                        "org.apache.axis2:mex:jar:impl:1.41", #1.41 is not a typo!
+                        "opensaml:opensaml:jar:1.1",
+                        "bouncycastle:bcprov-jdk15:jar:132",
+                        BACKPORT]
 )
-AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.3"
-BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:3.0"
+AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.5"
 COMMONS             = struct(
   :codec            =>"commons-codec:commons-codec:jar:1.3",
   :collections      =>"commons-collections:commons-collections:jar:3.2.1",

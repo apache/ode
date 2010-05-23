@@ -102,6 +102,9 @@
 	<include>org.apache.axis2:axis2-saaj-api</include>
 	<include>org.apache.axis2:axis2-spring</include>
 	<include>org.apache.axis2:axis2-xmlbeans</include>
+	<include>org.apache.axis2:axis2-transport-http</include>
+	<include>org.apache.axis2:axis2-transport-local</include>
+	<include>org.apache.axis2:axis2-transports</include>
 	<include>org.apache.ws.commons.axiom:axiom-api</include>  
 	<include>org.apache.ws.commons.axiom:axiom-impl</include>
 	<include>org.apache.ws.commons.axiom:axiom-dom</include>

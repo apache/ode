@@ -52,7 +52,7 @@
         <passwordCallbackClass>org.apache.rampart.samples.sample06.PWCBHandler</passwordCallbackClass>
         <signaturePropFile>service.properties</signaturePropFile>
         <signatureKeyIdentifier>DirectReference</signatureKeyIdentifier>
-        <encryptionKeyIdentifier>SKIKeyIdentifier</encryptionKeyIdentifier>
+        <encryptionKeyIdentifier>DirectReference</encryptionKeyIdentifier>
         <encryptionUser>useReqSigCert</encryptionUser>
       </action>
     </parameter>

@@ -191,7 +191,7 @@ public class Properties {
                 if (log.isWarnEnabled()) log.warn("Property Not Supported: " + PROP_HTTP_MAX_REDIRECTS);
             }
             if (properties.containsKey(PROP_JMS_REPLY_DESTINATION)) {
-                options.setProperty(JMSConstants.REPLY_PARAM, properties.get(PROP_JMS_REPLY_DESTINATION));
+                options.setProperty(JMSConstants.PARAM_REPLY_DESTINATION, properties.get(PROP_JMS_REPLY_DESTINATION));
             }
             if (properties.containsKey(PROP_JMS_REPLY_TIMEOUT)) {
                 String value = properties.get(PROP_JMS_REPLY_TIMEOUT);
@@ -207,7 +207,7 @@ public class Properties {
             if (properties.containsKey(PROP_JMS_DESTINATION_TYPE)) {
                 String value = properties.get(PROP_JMS_DESTINATION_TYPE);
                 try {
-                    options.setProperty(JMSConstants.DEST_TYPE_PARAM, Long.valueOf(value));
+                    options.setProperty(JMSConstants.PARAM_DEST_TYPE, Long.valueOf(value));
                 } catch (NumberFormatException e) {
                     if (log.isWarnEnabled())
                         log.warn("Mal-formatted Property: [" + Properties.PROP_JMS_DESTINATION_TYPE + "=" + value + "]. Long expected. Property will be skipped.");
