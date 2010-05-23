@@ -122,6 +122,22 @@
 	  </excludes>
 	</configuration>
        </plugin>
+       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <classifier>wsdl</classifier>
+              <classesDirectory>src/main/wsdl</classesDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
      </plugins>
    </build>
 

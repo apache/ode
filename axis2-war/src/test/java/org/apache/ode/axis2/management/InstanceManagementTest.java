@@ -81,7 +81,7 @@ public class InstanceManagementTest extends Axis2TestBase implements ODEConfigDi
         notSoLongAgo.add(Calendar.MINUTE, -2);
         String notSoLongAgoStr = xsdDF.format(notSoLongAgo.getTime());
         listRoot = _client.buildMessage("listInstances", new String[] {"filter", "order", "limit"},
-                new String[] {"name=DynPartnerResponder namespace=http://ode/bpel/responder " +
+                new String[] {"name=DynPartnerMain namespace=http://ode/bpel/unit-test " +
                         "started>=" + notSoLongAgoStr, "", "10"});
         result = sendToIM(listRoot);
         assertTrue(instanceNb(result) == 0);

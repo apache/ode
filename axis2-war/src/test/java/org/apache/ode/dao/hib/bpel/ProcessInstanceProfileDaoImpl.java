@@ -17,31 +17,31 @@
  * under the License.
  */
 
-package org.apache.ode.daohib.bpel;
+package org.apache.ode.dao.hib.bpel;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
-import org.apache.ode.bpel.dao.CorrelationSetDAO;
-import org.apache.ode.bpel.dao.FaultDAO;
-import org.apache.ode.bpel.dao.MessageDAO;
-import org.apache.ode.bpel.dao.MessageExchangeDAO;
-import org.apache.ode.bpel.dao.MessageRouteDAO;
-import org.apache.ode.bpel.dao.PartnerLinkDAO;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceProfileDAO;
-import org.apache.ode.bpel.dao.ScopeDAO;
-import org.apache.ode.bpel.dao.XmlDataDAO;
-import org.apache.ode.daohib.SessionManager;
-import org.apache.ode.daohib.bpel.hobj.HActivityRecovery;
-import org.apache.ode.daohib.bpel.hobj.HCorrelationSet;
-import org.apache.ode.daohib.bpel.hobj.HCorrelatorSelector;
-import org.apache.ode.daohib.bpel.hobj.HFaultData;
-import org.apache.ode.daohib.bpel.hobj.HMessage;
-import org.apache.ode.daohib.bpel.hobj.HMessageExchange;
-import org.apache.ode.daohib.bpel.hobj.HPartnerLink;
-import org.apache.ode.daohib.bpel.hobj.HScope;
-import org.apache.ode.daohib.bpel.hobj.HXmlData;
+import org.apache.ode.dao.bpel.ActivityRecoveryDAO;
+import org.apache.ode.dao.bpel.CorrelationSetDAO;
+import org.apache.ode.dao.bpel.FaultDAO;
+import org.apache.ode.dao.bpel.MessageDAO;
+import org.apache.ode.dao.bpel.MessageExchangeDAO;
+import org.apache.ode.dao.bpel.MessageRouteDAO;
+import org.apache.ode.dao.bpel.PartnerLinkDAO;
+import org.apache.ode.dao.bpel.ProcessDAO;
+import org.apache.ode.dao.bpel.ScopeDAO;
+import org.apache.ode.dao.bpel.XmlDataDAO;
+import org.apache.ode.dao.bpel.ProcessInstanceProfileDAO;
+import org.apache.ode.dao.hib.SessionManager;
+import org.apache.ode.dao.hib.bpel.hobj.HActivityRecovery;
+import org.apache.ode.dao.hib.bpel.hobj.HCorrelationSet;
+import org.apache.ode.dao.hib.bpel.hobj.HCorrelatorSelector;
+import org.apache.ode.dao.hib.bpel.hobj.HFaultData;
+import org.apache.ode.dao.hib.bpel.hobj.HMessage;
+import org.apache.ode.dao.hib.bpel.hobj.HMessageExchange;
+import org.apache.ode.dao.hib.bpel.hobj.HPartnerLink;
+import org.apache.ode.dao.hib.bpel.hobj.HScope;
+import org.apache.ode.dao.hib.bpel.hobj.HXmlData;
 import org.hibernate.Query;
 
 import java.lang.reflect.Constructor;

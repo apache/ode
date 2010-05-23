@@ -48,9 +48,9 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactory {
 
     protected SessionManager _sessionManager;
 
-    private DataSource _ds;
+    protected DataSource _ds;
 
-    private TransactionManager _tm;
+    protected TransactionManager _txm;
 
     /**
      * Constructor.
@@ -72,12 +72,12 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactory {
      */
     @SuppressWarnings("unchecked")
     public void init(Properties initialProps, TransactionManager mgr, Object env) {
-      _tm=mgr;
+      _txm=mgr;
       _ds=(DataSource)env;
-      if (_tm == null){
+      if (_txm == null){
           __log.error("Hibernate BpelDAOConnectionFactoryImpl requires a JTA Transaction Manager to be set.");
       }
-      _sessionManager = setupSessionManager(initialProps, _tm, _ds);
+      _sessionManager = setupSessionManager(initialProps, _txm, _ds);
 
 
     }
@@ -198,7 +198,7 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactory {
     }
 
     public void setTransactionManager(Object tm) {
-        _tm = (TransactionManager) tm;
+        _txm = (TransactionManager) tm;
     }
 
     public void setUnmanagedDataSource(DataSource ds) {

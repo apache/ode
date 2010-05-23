@@ -278,7 +278,7 @@ public class OdeConfigProperties {
     }
 
     public int getPoolMaxSize() {
-        return Integer.valueOf(getProperty(OdeConfigProperties.PROP_POOL_MAX, "10"));
+        return Integer.valueOf(getProperty(OdeConfigProperties.PROP_POOL_MAX, "15"));
     }
 
     public int getPoolMinSize() {

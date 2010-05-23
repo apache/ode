@@ -19,25 +19,29 @@
 
 package org.apache.ode.axis2.instancecleanup;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceProfileDAO;
-import org.apache.ode.bpel.dao.ProcessProfileDAO;
-import org.apache.ode.daohib.SessionManager;
-import org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl;
-import org.apache.ode.daohib.bpel.BpelDAOConnectionImpl;
-import org.apache.ode.daohib.bpel.ProcessDaoImpl;
-import org.apache.ode.daohib.bpel.ProcessInstanceDaoImpl;
-import org.apache.ode.daohib.bpel.ProcessInstanceProfileDaoImpl;
-import org.apache.ode.daohib.bpel.ProcessProfileDaoImpl;
-import org.apache.ode.daohib.bpel.hobj.HProcess;
-import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
+import org.apache.ode.dao.bpel.CorrelationSetDAO;
+import org.apache.ode.bpel.evt.BpelEvent;
+import org.apache.ode.dao.bpel.BpelDAOConnection;
+import org.apache.ode.dao.bpel.ProcessDAO;
+import org.apache.ode.dao.bpel.ProcessInstanceDAO;
+import org.apache.ode.dao.bpel.ProcessInstanceProfileDAO;
+import org.apache.ode.dao.bpel.ProcessProfileDAO;
+import org.apache.ode.dao.hib.SessionManager;
+import org.apache.ode.dao.hib.bpel.BpelDAOConnectionFactoryImpl;
+import org.apache.ode.dao.hib.bpel.BpelDAOConnectionImpl;
+import org.apache.ode.dao.hib.bpel.ProcessDaoImpl;
+import org.apache.ode.dao.hib.bpel.ProcessInstanceDaoImpl;
+import org.apache.ode.dao.hib.bpel.ProcessInstanceProfileDaoImpl;
+import org.apache.ode.dao.hib.bpel.ProcessProfileDaoImpl;
+import org.apache.ode.dao.hib.bpel.hobj.HProcess;
+import org.apache.ode.dao.hib.bpel.hobj.HProcessInstance;
 import org.hibernate.MappingException;
 import org.hibernate.Session;
 import org.hibernate.cfg.Configuration;
@@ -51,17 +55,13 @@ public class HibDaoConnectionFactoryImpl extends BpelDAOConnectionFactoryImpl im
     private static ProcessDaoImpl process;
     
     @Override
-    protected SessionManager createSessionManager(Properties properties, DataSource ds, TransactionManager tm) {
-        _staticSessionManager = new SessionManager(properties, ds, tm) {
-            @Override
-            public Configuration getDefaultConfiguration() throws MappingException {
-                Configuration conf = super.getDefaultConfiguration();
-                conf.setListener("post-insert", HibDaoConnectionFactoryImpl.this);
-                return conf;
-            }
-        };
-        
-        return _staticSessionManager;
+    public void init(Properties initialProps, TransactionManager mgr, Object env) {
+        _ds = (DataSource) env;
+        _txm = mgr;
+        Configuration conf = SessionManager.getDefaultConfiguration();
+        conf.setListener("post-insert", HibDaoConnectionFactoryImpl.this);
+        _sessionManager = setupSessionManager(conf, initialProps, _txm, _ds);
+        _staticSessionManager = _sessionManager;
     }
 
     public BpelDAOConnection getConnection() {
@@ -89,7 +89,7 @@ public class HibDaoConnectionFactoryImpl extends BpelDAOConnectionFactoryImpl im
     }
 
     public static class ProfilingBpelDAOConnectionImpl extends BpelDAOConnectionImpl implements ProfilingBpelDAOConnection {
-        ProfilingBpelDAOConnectionImpl(SessionManager sm) {
+        public ProfilingBpelDAOConnectionImpl(SessionManager sm) {
             super(sm);
         }
         
@@ -100,5 +100,6 @@ public class HibDaoConnectionFactoryImpl extends BpelDAOConnectionFactoryImpl im
         public ProcessInstanceProfileDAO createProcessInstanceProfile(ProcessInstanceDAO instance) {
             return new ProcessInstanceProfileDaoImpl(_sm, (ProcessInstanceDaoImpl)instance);
         }
+
     }
 }

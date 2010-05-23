@@ -21,7 +21,7 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.ode</groupId>
-    <artifactId>ode-dao-hibernate-db</artifactId>
+    <artifactId>ode-dao-hib-db</artifactId>
     <name>ODE :: Hibernate DAO DDL Generation</name>
 
     <parent>

@@ -48,6 +48,7 @@ import java.io.FileFilter;
  *
  *
  */
+@Test(suiteName="SecuredProcessesTest-Policy")
 public class SecuredProcessesTest extends Axis2TestBase {
 
     private String testDir = "TestRampartPolicy/secured-processes";
@@ -58,7 +59,7 @@ public class SecuredProcessesTest extends Axis2TestBase {
     public Object[][] testPolicySamples() throws Exception {
         File[] samples = new File(getClass().getClassLoader().getResource(testDir).getFile()).listFiles(new FileFilter() {
             public boolean accept(File pathname) {
-                return pathname.isDirectory() && pathname.getName().matches("process-sample\\d*");
+                return pathname.isDirectory() && pathname.getName().matches("process-sample\\d+");
             }
         });
         Object[][] bundles = new Object[samples.length][];
@@ -91,7 +92,7 @@ public class SecuredProcessesTest extends Axis2TestBase {
         }
         server.deployProcess(bundleName);
         try {
-            ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(clientRepo, null);
+        	ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContext(new TestConfigurator(odeRootAbsolutePath,clientRepo, null));
             ServiceClient client = new ServiceClient(ctx, null);
             Options options = new Options();
             // Rampart SymetricBinding (sample04) blows up if not provided with a soap action
