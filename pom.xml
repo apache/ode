@@ -66,7 +66,7 @@
 	<javax.mail.version>1.4</javax.mail.version>
         <hibernate.version>3.3.2.GA</hibernate.version>
 	<hibernate.entitymanager.version>3.4.0.GA</hibernate.entitymanager.version>
-        <javassist.version>3.4.GA</javassist.version>
+        <javassist.version>3.9.0.GA</javassist.version>
 	<spring.version>2.5.6</spring.version>
         <geronimo.specs.version>1.0</geronimo.specs.version>
         <geronimo.version>2.0.1</geronimo.version>
@@ -139,7 +139,7 @@
       <module>jbi-bundle</module>
       <module>jbi-karaf</module>
       <module>distro/src/examples-jbi/maven2/ping-pong-osgi</module>
-      <module>axis2-war</module>
+      <!--module>axis2-war</module-->
       <module>distro</module>
     </modules>
 
