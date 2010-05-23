@@ -1074,21 +1074,46 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
             TScopeInfo.Activities activities = scopeInfo.addNewActivities();
             List<BpelEvent> events = scope.listEvents();
-            ActivityStateDocumentBuilder b = new ActivityStateDocumentBuilder();
-            for (BpelEvent e : events)
-                b.onEvent(e);
-            for (ActivityInfoDocument ai : b.getActivities()) {
-                for (ActivityRecoveryDAO recovery : recoveries) {
-                    if (String.valueOf(recovery.getActivityId()).equals(ai.getActivityInfo().getAiid())) {
-                        TFailureInfo failure = ai.getActivityInfo().addNewFailure();
-                        failure.setReason(recovery.getReason());
-                        failure.setDtFailure(toCalendar(recovery.getDateTime()));
-                        failure.setActions(recovery.getActions());
-                        failure.setRetries(recovery.getRetries());
-                        ai.getActivityInfo().setStatus(TActivityStatus.FAILURE);
-                    }
-                }
-                activities.addNewActivityInfo().set(ai.getActivityInfo());
+
+            // if event generation was enabled
+            if(events!=null && events.size() >0) {
+            	ActivityStateDocumentBuilder b = new ActivityStateDocumentBuilder();
+            	for (BpelEvent e : events)
+            		b.onEvent(e);
+            	for (ActivityInfoDocument ai : b.getActivities()) {
+            		for (ActivityRecoveryDAO recovery : recoveries) {
+            			if (String.valueOf(recovery.getActivityId()).equals(ai.getActivityInfo().getAiid())) {
+            				TFailureInfo failure = ai.getActivityInfo().addNewFailure();
+            				failure.setReason(recovery.getReason());
+            				failure.setDtFailure(toCalendar(recovery.getDateTime()));
+            				failure.setActions(recovery.getActions());
+            				failure.setRetries(recovery.getRetries());
+            				ai.getActivityInfo().setStatus(TActivityStatus.FAILURE);
+            			}
+            		}
+            		activities.addNewActivityInfo().set(ai.getActivityInfo());
+            	}
+            }
+            
+            // otherwise at least try to get the information about failed activities
+            // TODO: we are losing information about which scope does failed activities belong to
+            // as failure table does not have scope id, we would attach every failed activity to process scope
+            else {
+            	if(scope.getParentScope() == null) {
+            		for (ActivityRecoveryDAO recovery : recoveries) {
+            			ActivityInfoDocument ai = ActivityInfoDocument.Factory.newInstance();
+            			ai.addNewActivityInfo().setAiid(String.valueOf(recovery.getActivityId()));
+            			ai.getActivityInfo().setType("OActivity");
+            			ai.getActivityInfo().setScope(TScopeRef.Factory.newInstance());
+            			TFailureInfo failure = ai.getActivityInfo().addNewFailure();
+            			failure.setReason(recovery.getReason());
+            			failure.setDtFailure(toCalendar(recovery.getDateTime()));
+            			failure.setActions(recovery.getActions());
+            			failure.setRetries(recovery.getRetries());
+            			ai.getActivityInfo().setStatus(TActivityStatus.FAILURE);
+            			activities.addNewActivityInfo().set(ai.getActivityInfo());
+            		}            	
+            	}
             }
         }
 
@@ -1210,7 +1235,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             info.setVariableName(((VariableEvent) event).getVarName());
         }
         if(event instanceof VariableModificationEvent) {
-        	info.setNewValue(DOMUtils.domToString(((VariableModificationEvent) event).getNewValue()));
+        	if(((VariableModificationEvent) event).getNewValue()!=null)
+        		info.setNewValue(DOMUtils.domToString(((VariableModificationEvent) event).getNewValue()));
         }
     }
 
