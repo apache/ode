@@ -284,6 +284,7 @@ public class BpelProcess {
                       return true;
                   } else if (routing.messageRoute != null) {
                       // Found a route, hitting it
+                      _engine.acquireInstanceLock(routing.messageRoute.getTargetInstance().getInstanceId());
                       target.invokeInstance(mex, routing);
                       return true;
                   }

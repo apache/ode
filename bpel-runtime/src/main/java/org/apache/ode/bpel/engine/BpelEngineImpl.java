@@ -372,31 +372,36 @@ public class BpelEngineImpl implements BpelEngine {
         if (process == null) return null;
         return process.getOProcess();
     }
+    
+    public void acquireInstanceLock(final Long iid) {
+        // We lock the instance to prevent concurrent transactions and prevent unnecessary rollbacks,
+        // Note that we don't want to wait too long here to get our lock, since we are likely holding
+        // on to scheduler's locks of various sorts.
+        try {
+            _instanceLockManager.lock(iid, 1, TimeUnit.MICROSECONDS);
+            _contexts.scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
+                public void afterCompletion(boolean success) {
+                    _instanceLockManager.unlock(iid);
+                }
+                public void beforeCompletion() { }
+            });
+        } catch (InterruptedException e) {
+            // Retry later.
+            __log.debug("Thread interrupted, job will be rescheduled");
+            throw new Scheduler.JobProcessorException(true);
+        } catch (org.apache.ode.bpel.engine.InstanceLockManager.TimeoutException e) {
+            __log.debug("Instance " + iid + " is busy, rescheduling job.");
+            throw new Scheduler.JobProcessorException(true);
+        }
+    }
 
     public void onScheduledJob(Scheduler.JobInfo jobInfo) throws Scheduler.JobProcessorException {
         final JobDetails we = jobInfo.jobDetail;
 
         if( __log.isTraceEnabled() ) __log.trace("[JOB] onScheduledJob " + jobInfo + "" + we.getInstanceId());
         
-        // We lock the instance to prevent concurrent transactions and prevent unnecessary rollbacks,
-        // Note that we don't want to wait too long here to get our lock, since we are likely holding
-        // on to scheduler's locks of various sorts.
-        try {
-            _instanceLockManager.lock(we.getInstanceId(), 1, TimeUnit.MICROSECONDS);
-            _contexts.scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
-                public void afterCompletion(boolean success) {
-                    _instanceLockManager.unlock(we.getInstanceId());
-                }
-                public void beforeCompletion() { }
-            });
-        } catch (InterruptedException e) {
-            // Retry later.
-            __log.debug("Thread interrupted, job will be rescheduled: " + jobInfo);
-            throw new Scheduler.JobProcessorException(true);
-        } catch (org.apache.ode.bpel.engine.InstanceLockManager.TimeoutException e) {
-            __log.debug("Instance " + we.getInstanceId() + " is busy, rescheduling job.");
-            throw new Scheduler.JobProcessorException(true);
-        }
+        acquireInstanceLock(we.getInstanceId());
+        
         // DONT PUT CODE HERE-need this method real tight in a try/catch block, we need to handle
         // all types of failure here, the scheduler is not going to know how to handle our errors,
         // ALSO we have to release the lock obtained above (IMPORTANT), lest the whole system come
@@ -457,6 +462,8 @@ public class BpelEngineImpl implements BpelEngine {
             } finally {
                 Thread.currentThread().setContextClassLoader(cl);
             }
+        } catch (Scheduler.JobProcessorException e) {
+            throw e;
         } catch (BpelEngineException bee) {
             __log.error(__msgs.msgScheduledJobFailed(we), bee);
             throw new Scheduler.JobProcessorException(bee, checkRetry(we));
