@@ -151,10 +151,10 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO, Deferred
     @SuppressWarnings("unchecked")
     public void deleteProcessAndRoutes() {
         // delete routes
-        deleteByIds(HCorrelatorSelector.class, getSession().getNamedQuery(HCorrelatorSelector.SELECT_MESSAGE_ROUTE_IDS_BY_PROCESS).setParameter("process", _process).list());
+//        deleteByIds(HCorrelatorSelector.class, getSession().getNamedQuery(HCorrelatorSelector.SELECT_MESSAGE_ROUTE_IDS_BY_PROCESS).setParameter("process", _process).list());
 
         // delete process dao
-        deleteByIds(HCorrelator.class, getSession().getNamedQuery(HCorrelator.SELECT_CORRELATOR_IDS_BY_PROCESS).setParameter("process", _process).list());
+  //      deleteByIds(HCorrelator.class, getSession().getNamedQuery(HCorrelator.SELECT_CORRELATOR_IDS_BY_PROCESS).setParameter("process", _process).list());
         try {
             getSession().refresh(_process);
             getSession().delete(_process); // this deletes HCorrelator -> HCorrelatorSelector
@@ -296,4 +296,5 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO, Deferred
     public String getGuid() {
         return _process.getGuid();
     }
+    
 }

@@ -273,7 +273,7 @@ public class ReplayerContext {
                                     }
                                     return false;
                                 }
-                            });
+                            }, true);
 
                     for (int i = 1; i < exchangeList.size(); i++) {
                         Exchange e2 = exchangeList.get(i);

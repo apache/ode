@@ -295,7 +295,7 @@ public interface Scheduler {
      * processing.
      * @author mszefler
      */
-    public class JobProcessorException extends Exception {
+    public class JobProcessorException extends RuntimeException {
         private static final long serialVersionUID = 1L;
         public final boolean retry;
 

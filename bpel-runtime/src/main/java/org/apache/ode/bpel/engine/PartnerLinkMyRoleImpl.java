@@ -85,6 +85,9 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 
     public boolean isCreateInstance(MyRoleMessageExchangeImpl mex) {
         Operation operation = getMyRoleOperation(mex.getOperationName());
+        if(operation == null) {
+        	return false;
+        }
         return _plinkDef.isCreateInstanceOperation(operation);
     }
 
@@ -98,8 +101,8 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 
         Operation operation = getMyRoleOperation(mex.getOperationName());
         if (operation == null) {
-            __log.error(__msgs.msgUnknownOperation(mex.getOperationName(), _plinkDef.myRolePortType.getQName()));
-            mex.setFailure(MessageExchange.FailureType.UNKNOWN_OPERATION, mex.getOperationName(), null);
+//            __log.error(__msgs.msgUnknownOperation(mex.getOperationName(), _plinkDef.myRolePortType.getQName()));
+  //          mex.setFailure(MessageExchange.FailureType.UNKNOWN_OPERATION, mex.getOperationName(), null);
             return null;
         }
         setMexRole(mex);

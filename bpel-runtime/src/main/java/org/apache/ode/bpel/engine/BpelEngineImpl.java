@@ -372,31 +372,52 @@ public class BpelEngineImpl implements BpelEngine {
         if (process == null) return null;
         return process.getOProcess();
     }
+    
+    private List<BpelProcess> getAllProcesses(QName processId) {
+    	String qName =  processId.toString();
+    	if(qName.lastIndexOf("-") > 0) {
+    		qName = qName.substring(0, qName.lastIndexOf("-"));
+    	}
+    	List<BpelProcess> ret = new ArrayList<BpelProcess>();
+    	Iterator<Map.Entry<QName, BpelProcess>> it = _activeProcesses.entrySet().iterator();
+    	while (it.hasNext()) {
+    		Map.Entry<QName, BpelProcess> pairs = it.next();
+    		if(pairs.getKey().toString().startsWith(qName)) {
+    			ret.add(pairs.getValue());
+    		}
+    	}
+    	return ret;
+    }
+
+    public void acquireInstanceLock(final Long iid) {
+        // We lock the instance to prevent concurrent transactions and prevent unnecessary rollbacks,
+        // Note that we don't want to wait too long here to get our lock, since we are likely holding
+        // on to scheduler's locks of various sorts.
+        try {
+            _instanceLockManager.lock(iid, 1, TimeUnit.MICROSECONDS);
+            _contexts.scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
+                public void afterCompletion(boolean success) {
+                    _instanceLockManager.unlock(iid);
+                }
+                public void beforeCompletion() { }
+            });
+        } catch (InterruptedException e) {
+            // Retry later.
+            __log.debug("Thread interrupted, job will be rescheduled");
+            throw new Scheduler.JobProcessorException(true);
+        } catch (org.apache.ode.bpel.engine.InstanceLockManager.TimeoutException e) {
+            __log.debug("Instance " + iid + " is busy, rescheduling job.");
+            throw new Scheduler.JobProcessorException(true);
+        }
+    }
 
     public void onScheduledJob(Scheduler.JobInfo jobInfo) throws Scheduler.JobProcessorException {
         final JobDetails we = jobInfo.jobDetail;
 
         if( __log.isTraceEnabled() ) __log.trace("[JOB] onScheduledJob " + jobInfo + "" + we.getInstanceId());
         
-        // We lock the instance to prevent concurrent transactions and prevent unnecessary rollbacks,
-        // Note that we don't want to wait too long here to get our lock, since we are likely holding
-        // on to scheduler's locks of various sorts.
-        try {
-            _instanceLockManager.lock(we.getInstanceId(), 1, TimeUnit.MICROSECONDS);
-            _contexts.scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
-                public void afterCompletion(boolean success) {
-                    _instanceLockManager.unlock(we.getInstanceId());
-                }
-                public void beforeCompletion() { }
-            });
-        } catch (InterruptedException e) {
-            // Retry later.
-            __log.debug("Thread interrupted, job will be rescheduled: " + jobInfo);
-            throw new Scheduler.JobProcessorException(true);
-        } catch (org.apache.ode.bpel.engine.InstanceLockManager.TimeoutException e) {
-            __log.debug("Instance " + we.getInstanceId() + " is busy, rescheduling job.");
-            throw new Scheduler.JobProcessorException(true);
-        }
+        acquireInstanceLock(we.getInstanceId());
+        
         // DONT PUT CODE HERE-need this method real tight in a try/catch block, we need to handle
         // all types of failure here, the scheduler is not going to know how to handle our errors,
         // ALSO we have to release the lock obtained above (IMPORTANT), lest the whole system come
@@ -452,11 +473,27 @@ public class BpelEngineImpl implements BpelEngine {
                         }
                     }
                 }
-                process.handleJobDetails(jobInfo.jobDetail);
+                if (we.getType().equals(JobType.INVOKE_INTERNAL)) {
+                	List<BpelProcess> processes = getAllProcesses(we.getProcessId());
+                	boolean routed = false;
+                	jobInfo.jobDetail.detailsExt.put("enqueue", false);
+                	for(BpelProcess proc : processes) {
+                        routed = routed || proc.handleJobDetails(jobInfo.jobDetail);                		
+                	}
+                	if(!routed) {
+                    	jobInfo.jobDetail.detailsExt.put("enqueue", true);
+                        process.handleJobDetails(jobInfo.jobDetail);                		
+                	}
+                }
+                else {
+                    process.handleJobDetails(jobInfo.jobDetail);
+                }
                 debuggingDelay();
             } finally {
                 Thread.currentThread().setContextClassLoader(cl);
             }
+        } catch (Scheduler.JobProcessorException e) {
+            throw e;
         } catch (BpelEngineException bee) {
             __log.error(__msgs.msgScheduledJobFailed(we), bee);
             throw new Scheduler.JobProcessorException(bee, checkRetry(we));
