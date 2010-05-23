@@ -28,12 +28,12 @@ import java.util.concurrent.TimeoutException;
 import javax.wsdl.Operation;
 import javax.wsdl.PortType;
 
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessState;
-import org.apache.ode.dao.bpel.MessageExchangeDAO;
 
 
 /**

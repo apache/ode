@@ -50,7 +50,6 @@
 		<configuration>
 		   <schemaDirectory>src/main/xsd</schemaDirectory>
                    <sourceGenerationDirectory>target/generated/xmlbeans</sourceGenerationDirectory>
-                   <classGenerationDirectory>target/generated/xmlbeans</classGenerationDirectory>
                    <xmlConfigs>
                        <xmlConfig implementation="java.io.File">src/main/xsd/dd.xsdconfig</xmlConfig>
                        <xmlConfig implementation="java.io.File">src/main/xsd/pmapi.xsdconfig</xmlConfig>
@@ -66,25 +65,6 @@
 		   </execution>
 	        </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <classifier>xsd</classifier>
-                            <classesDirectory>src/main/xsd</classesDirectory>
-                            <includes>
-                                <include>*.xsd</include>
-                            </includes>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>            
         </plugins>
     </build>
 

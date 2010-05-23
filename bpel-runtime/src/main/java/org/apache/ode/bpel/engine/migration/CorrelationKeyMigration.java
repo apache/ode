@@ -19,28 +19,24 @@
 
 package org.apache.ode.bpel.engine.migration;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
-
-import javax.wsdl.Operation;
-import javax.xml.namespace.QName;
-
+import org.apache.ode.bpel.engine.BpelProcess;
+import org.apache.ode.bpel.engine.ReplacementMapImpl;
+import org.apache.ode.bpel.engine.OutstandingRequestManager;
+import org.apache.ode.bpel.dao.*;
+import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.o.*;
+import org.apache.ode.bpel.runtime.Selector;
+import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.engine.BpelProcess;
-import org.apache.ode.bpel.o.OBase;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.dao.bpel.BpelDAOConnection;
-import org.apache.ode.dao.bpel.CorrelationSetDAO;
-import org.apache.ode.dao.bpel.CorrelatorDAO;
-import org.apache.ode.dao.bpel.CorrelatorMessageDAO;
-import org.apache.ode.dao.bpel.MessageRouteDAO;
-import org.apache.ode.dao.bpel.ProcessDAO;
-import org.apache.ode.dao.bpel.ProcessInstanceDAO;
+
+import javax.xml.namespace.QName;
+import javax.wsdl.Operation;
+import java.util.*;
+import java.io.ObjectStreamClass;
+import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
 /**
  * Migrates the correlation key values to a scheme containing the OModel correlation

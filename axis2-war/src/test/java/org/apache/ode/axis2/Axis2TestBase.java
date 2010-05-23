@@ -21,14 +21,10 @@ package org.apache.ode.axis2;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContextFactory;
-import org.apache.axis2.deployment.DeploymentConstants;
-import org.apache.axis2.deployment.FileSystemConfigurator;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.WSDL11ToAxisServiceBuilder;
-import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.axis2.engine.AxisConfigurator;
 import org.apache.axis2.engine.AxisServer;
 import org.apache.axis2.engine.MessageReceiver;
 import org.apache.commons.logging.Log;
@@ -74,7 +70,6 @@ public abstract class Axis2TestBase {
     protected ODEAxis2Server server;
 
     protected String config;
-    protected String odeRootAbsolutePath;
     
     protected static final String DO_NOT_OVERRIDE_CONFIG = "<DO_NOT_OVERRIDE_CONFIG>";
 
@@ -158,7 +153,7 @@ public abstract class Axis2TestBase {
     }
 
     public void startServer(String axis2RepoDir, String axis2ConfLocation) throws Exception {
-    	odeRootAbsolutePath = getClass().getClassLoader().getResource("webapp/WEB-INF").getFile();
+        String odeRootAbsolutePath = getClass().getClassLoader().getResource("webapp/WEB-INF").getFile();
         String axis2RepoAbsolutePath = getClass().getClassLoader().getResource(axis2RepoDir).getFile();
         String axis2ConfAbsolutePath = axis2ConfLocation == null ? null : getClass().getClassLoader().getResource(axis2ConfLocation).getFile();
         server = new ODEAxis2Server(odeRootAbsolutePath, axis2RepoAbsolutePath, axis2ConfAbsolutePath);
@@ -349,19 +344,4 @@ public abstract class Axis2TestBase {
             return _ode;
         }
     }
-    
-    public static class TestConfigurator extends FileSystemConfigurator implements AxisConfigurator {
-
-        String _serviceDir;
-
-        public TestConfigurator(String webRoot, String serviceDir, String axis2xml) throws AxisFault {
-            super(webRoot,axis2xml);
-            _serviceDir=serviceDir;
-        }
-
-        public synchronized AxisConfiguration getAxisConfiguration() throws AxisFault {
-            servicesPath = _serviceDir + File.separator +  DeploymentConstants.SERVICE_PATH;
-            return super.getAxisConfiguration();
-        }
-    }   
 }

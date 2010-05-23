@@ -44,7 +44,6 @@ import java.io.FileFilter;
  *
  *
  */
-@Test(suiteName="SecuredProcessesTest-Basic")
 public class SecuredProcessesTest extends Axis2TestBase {
     
     private String testDir = "TestRampartBasic/secured-processes";
@@ -87,7 +86,7 @@ public class SecuredProcessesTest extends Axis2TestBase {
         }
         server.deployProcess(bundleName);
         try {
-            ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContext(new TestConfigurator(odeRootAbsolutePath,clientRepo, clientConfigFile));
+            ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(clientRepo, clientConfigFile);
             ServiceClient client = new ServiceClient(ctx, null);
             Options options = new Options();
             options.setTo(new EndpointReference("http://localhost:"+getTestPort(0)+"/processes/helloWorld"));

@@ -26,9 +26,9 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.dao.bpel.BpelDAOConnection;
 
 /**
  * Manages events invocation in sorted order during replaying. 

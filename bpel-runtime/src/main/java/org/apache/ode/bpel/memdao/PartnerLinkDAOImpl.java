@@ -19,14 +19,14 @@
 
 package org.apache.ode.bpel.memdao;
 
-import org.apache.ode.dao.bpel.PartnerLinkDAO;
+import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.w3c.dom.Element;
 
 import javax.xml.namespace.QName;
 
 /**
  * A very simple, in-memory implementation of the
- * {@link org.apache.ode.dao.bpel.PartnerLinkDAO} interface.
+ * {@link org.apache.ode.bpel.dao.PartnerLinkDAO} interface.
  */
 public class PartnerLinkDAOImpl extends DaoBaseImpl implements PartnerLinkDAO {
 

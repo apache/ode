@@ -81,37 +81,19 @@
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
-            <artifactId>ode-bpel-schemas</artifactId>
-            <version>${project.version}</version>
-            <classifier>xsd</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ode</groupId>
             <artifactId>ode-utils</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
             <artifactId>ode-dao-jpa</artifactId>
-            <classifier>openjpa</classifier>
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
-            <artifactId>ode-dao-jpa-ojpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ode</groupId>
-            <artifactId>ode-axis2</artifactId>
+            <artifactId>ode-bpel-ql</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
             <artifactId>ode-axis2</artifactId>
-            <classifier>wsdl</classifier>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.axis2</groupId>
-            <artifactId>axis2-corba</artifactId>
-            <version>${axis2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.axis2</groupId>
@@ -163,23 +145,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.derby</groupId>
-            <artifactId>derby</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.derby</groupId>
             <artifactId>derbytools</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ode</groupId>
-            <artifactId>ode-dao-jpa-db</artifactId>
-            <version>${project.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ode</groupId>
-            <artifactId>ode-dao-hib-db</artifactId>
-            <version>${project.version}</version>
-            <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.jibx</groupId>
@@ -207,6 +173,11 @@
             <version>${geronimo-spec-jms.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-ejb_2.1_spec</artifactId>
+            <version>1.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.geronimo.modules</groupId>
             <artifactId>geronimo-kernel</artifactId>
         </dependency>
@@ -214,6 +185,7 @@
             <groupId>xml-apis</groupId>
             <artifactId>xml-apis</artifactId>
         </dependency>
+        <!--
         <dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart</artifactId>
@@ -238,6 +210,7 @@
             <type>mar</type>
             <version>${mex.version}</version>
         </dependency>
+        -->
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>mex</artifactId>
@@ -245,146 +218,120 @@
             <version>${mex.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>${testng.version}</version>
-            <classifier>jdk15</classifier>
-            <scope>test</scope>
+          <groupId>org.testng</groupId>
+          <artifactId>testng</artifactId>
+          <version>${testng.version}</version>
+          <classifier>jdk15</classifier>
+	      <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.mortbay.jetty</groupId>
-            <artifactId>jetty</artifactId>
-            <version>${jetty.version}</version>
-            <scope>test</scope>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>jetty</artifactId>
+          <version>${jetty.version}</version>
+	      <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.mortbay.jetty</groupId>
-            <artifactId>jetty-util</artifactId>
-            <version>${jetty.version}</version>
-            <scope>test</scope>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>jetty-util</artifactId>
+          <version>${jetty.version}</version>
+	      <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.mortbay.jetty</groupId>
-            <artifactId>servlet-api-2.5</artifactId>
-            <version>${jetty.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ode</groupId>
-            <artifactId>ode-dao-hibernate</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>servlet-api-2.5</artifactId>
+          <version>${jetty.version}</version>
+	      <scope>test</scope>
+        </dependency>      
     </dependencies>
 
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>war-package</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <finalName>ode-axis2-war-${project.version}</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <descriptors>
-                                <descriptor>src/main/assembly/bin.xml</descriptor>
-                            </descriptors>
-                            <tarLongFileMode>gnu</tarLongFileMode>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>compiler-it</id>
+   <build>
+     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>war-package</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <finalName>ode-axis2-war-${project.version}</finalName>
+              <appendAssemblyId>false</appendAssemblyId>
+              <descriptors>
+                <descriptor>src/main/assembly/bin.xml</descriptor>
+              </descriptors>
+              <tarLongFileMode>gnu</tarLongFileMode>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!--plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>maven-jetty-plugin</artifactId>
+        <version>6.1.10</version>
+        <configuration>
+                <scanIntervalSeconds>10</scanIntervalSeconds>
+                <stopKey>foo</stopKey>
+                <stopPort>9999</stopPort>
+                <webApp>${basedir}/target/ode-axis2-war-${project.version}.war</webApp>
+        </configuration>
+        <executions>
+                <execution>
+                        <id>start-jetty</id>
                         <phase>pre-integration-test</phase>
                         <goals>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>resources-it</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>testResources</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <!--doclet does not support not-found="ignore" -->
-                <groupId>org.codehaus.groovy.maven</groupId>
-                <artifactId>gmaven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>prepare-itests</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>execute</goal>
+                                <goal>run-war</goal>
                         </goals>
                         <configuration>
-                            <source>${pom.basedir}/itest_setup.groovy</source>
+                                <scanIntervalSeconds>0</scanIntervalSeconds>
+                                <daemon>true</daemon>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>test-axis2-web</id>
-                        <phase>integration-test</phase>
+                </execution>
+                <execution>
+                        <id>stop-jetty</id>
+                        <phase>post-integration-test</phase>
                         <goals>
-                            <goal>test</goal>
+                                <goal>stop</goal>
                         </goals>
-                        <configuration>
-                            <forkMode>always</forkMode>
-                            <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                            <additionalClasspathElements>
-                                <additionalClasspathElement>${project.build.directory}</additionalClasspathElement>
-                            </additionalClasspathElements>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>bpel-tests</id>
-                        <phase>process-test-resources</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.apache.ode</groupId>
-                                    <artifactId>ode-bpel-test</artifactId>
-                                    <classifier>tests</classifier>
-                                    <outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+                </execution>
+        </executions>
+      </plugin>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<executions>
+				<execution>
+					<id>compiler-it</id>
+					<phase>pre-integration-test</phase>
+					<goals>
+						<goal>testCompile</goal>
+					</goals>
+				</execution>
+			</executions>
+		</plugin-->
+		<!-- FIXME: temporary commented out -->      
+		<plugin>
+			<artifactId>maven-surefire-plugin</artifactId>
+			<configuration>
+				<includes>
+					<include>**/*TestCase.java</include>
+					<include>**/Test.java</include>
+				</includes>
+			</configuration>
+			<executions>
+				<execution>
+					<id>test-axis2-web</id>
+					<phase>integration-test</phase>
+					<goals>
+						<goal>test</goal>
+					</goals>
+				</execution>
+			</executions>
+		</plugin>      
+     </plugins>
+   </build>
 
 </project>

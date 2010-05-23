@@ -85,9 +85,9 @@
     </dependency>
     <dependency>
       <groupId>org.apache.ode</groupId>
-      <artifactId>ode-dao-jpa-ojpa</artifactId>
+      <artifactId>ode-dao-hibernate</artifactId>
       <scope>test</scope>
-    </dependency>   
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -99,8 +99,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
+      <groupId>hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -116,6 +116,27 @@
         <dependency>
             <groupId>org.apache.ode</groupId>
             <artifactId>ode-agents</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.ode</groupId>
+            <artifactId>ode-jacob</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ode</groupId>
+            <artifactId>ode-jacob-ap</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ode</groupId>
+            <artifactId>ode-utils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ode</groupId>
+            <artifactId>ode-bpel-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ode</groupId>
+            <artifactId>ode-bpel-dao</artifactId>
         </dependency>
         <dependency>
           <groupId>commons-collections</groupId>
@@ -181,25 +202,15 @@
         <dependency>
           <groupId>junit</groupId>
           <artifactId>junit</artifactId>
-	  	  <scope>test</scope>
+	  <scope>test</scope>
         </dependency>
- 		<dependency>
-          <groupId>org.apache.ode</groupId>
-          <artifactId>ode-dao-hibernate</artifactId>
-	  	  <scope>test</scope>
-        </dependency>
+
        <dependency>
           <groupId>tranql</groupId>
           <artifactId>tranql-connector-derby-common</artifactId>
           <version>1.1</version>
           <scope>test</scope>
-       </dependency>
-       
-       <dependency>
-          <groupId>org.apache.geronimo.components</groupId>
-          <artifactId>geronimo-transaction</artifactId>
-          <scope>test</scope>
-       </dependency>        
+       </dependency>       
 
 
    </dependencies>
@@ -221,22 +232,14 @@
 		    </goals>
 		   </execution>
 	        </executions>
-			<dependencies>
-			   <dependency>
-			      <groupId>org.apache.ode</groupId>
-			      <artifactId>ode-jacob-ap</artifactId>
-			      <version>${project.version}</version>
-			   </dependency>
-			 </dependencies>
-         </plugin>
-      	<plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <excludes>
-            <exclude>**/ActivityRecoveryTest.java</exclude>
-          </excludes>
-        </configuration>
-    	</plugin>
+		<dependencies>
+		   <dependency>
+		      <groupId>org.apache.ode</groupId>
+		      <artifactId>ode-jacob-ap</artifactId>
+		      <version>${project.version}</version>
+		   </dependency>
+		 </dependencies>
+            </plugin>
         </plugins>
     </build>
 </project>

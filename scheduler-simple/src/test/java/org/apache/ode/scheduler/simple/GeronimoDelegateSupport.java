@@ -27,7 +27,7 @@ public class GeronimoDelegateSupport extends DelegateSupport {
 
     @Override
     protected void initialize(TransactionManager txm) throws Exception {
-    	_ds = createGeronimoDataSource(txm, "jdbc:h2:mem:" + new GUID().toString(), org.h2.Driver.class.getName(), "sa", "");
+        _ds = createGeronimoDataSource(txm, "jdbc:hsqldb:mem:" + new GUID().toString(), "org.hsqldb.jdbcDriver", "sa", "");
         setup();
         _del = new JdbcDelegate(_ds);
     }

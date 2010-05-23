@@ -24,14 +24,14 @@ import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.Filter;
 import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.bpel.common.ProcessFilter;
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.CorrelationSetDAO;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.dao.bpel.BpelDAOConnection;
-import org.apache.ode.dao.bpel.CorrelationSetDAO;
-import org.apache.ode.dao.bpel.MessageExchangeDAO;
-import org.apache.ode.dao.bpel.ProcessDAO;
-import org.apache.ode.dao.bpel.ProcessInstanceDAO;
-import org.apache.ode.dao.bpel.ScopeDAO;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.UnaryFunction;
@@ -332,7 +332,7 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
     }
 
     /**
-     * @see org.apache.ode.dao.bpel.BpelDAOConnection#instanceQuery(String)
+     * @see org.apache.ode.bpel.dao.BpelDAOConnection#instanceQuery(String)
      */
     public Collection<ProcessInstanceDAO> instanceQuery(String expression) {
         //TODO
@@ -388,8 +388,4 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
     public ProcessManagementDaoImpl getProcessManagement() {
         return new ProcessManagementDaoImpl();
     }
-
-	public boolean isClosed() {
-		return false;
-	}
 }

@@ -20,29 +20,27 @@
 <persistence xmlns="http://java.sun.com/xml/ns/persistence"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              version="1.0">
-    <persistence-unit name="ode-bpel" transaction-type="JTA">
-        <class>org.apache.ode.dao.jpa.bpel.ActivityRecoveryDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.bpel.CorrelationSetDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.bpel.CorrelatorDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.bpel.EventDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.bpel.FaultDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.bpel.MessageDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.bpel.MessageExchangeDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.bpel.MessageRouteDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.bpel.PartnerLinkDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.bpel.ProcessDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.bpel.ProcessInstanceDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.bpel.ScopeDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.bpel.XmlDataDAOImpl</class>
-        <class>org.apache.ode.dao.jpa.bpel.CorrSetProperty</class>
-        <class>org.apache.ode.dao.jpa.bpel.MexProperty</class>
-        <class>org.apache.ode.dao.jpa.bpel.XmlDataProperty</class>
+    <persistence-unit name="ode-dao">
+        <!-- 
+            This properties file is used specifically by the
+            OpenJPA Enhancer.
+         -->
+        <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
+        <class>org.apache.ode.dao.jpa.ActivityRecoveryDAOImpl</class>
+        <class>org.apache.ode.dao.jpa.CorrelationSetDAOImpl</class>
+        <class>org.apache.ode.dao.jpa.CorrelatorDAOImpl</class>
+        <class>org.apache.ode.dao.jpa.EventDAOImpl</class>
+        <class>org.apache.ode.dao.jpa.FaultDAOImpl</class>
+        <class>org.apache.ode.dao.jpa.MessageDAOImpl</class>
+        <class>org.apache.ode.dao.jpa.MessageExchangeDAOImpl</class>
+        <class>org.apache.ode.dao.jpa.MessageRouteDAOImpl</class>
+        <class>org.apache.ode.dao.jpa.PartnerLinkDAOImpl</class>
+        <class>org.apache.ode.dao.jpa.ProcessDAOImpl</class>
+        <class>org.apache.ode.dao.jpa.ProcessInstanceDAOImpl</class>
+        <class>org.apache.ode.dao.jpa.ScopeDAOImpl</class>
+        <class>org.apache.ode.dao.jpa.XmlDataDAOImpl</class>
+        <class>org.apache.ode.dao.jpa.CorrSetProperty</class>
+        <class>org.apache.ode.dao.jpa.MexProperty</class>
+        <class>org.apache.ode.dao.jpa.XmlDataProperty</class>
     </persistence-unit>
-    <persistence-unit name="ode-store" transaction-type="JTA">
-	    <class>org.apache.ode.dao.jpa.store.ProcessConfDaoImpl</class>
-	    <class>org.apache.ode.dao.jpa.store.ProcessConfPropertyDaoImpl</class>
-	    <class>org.apache.ode.dao.jpa.store.DeploymentUnitDaoImpl</class>
-	    <class>org.apache.ode.dao.jpa.store.VersionTrackerDAOImpl</class>
-    </persistence-unit>
-    
 </persistence>

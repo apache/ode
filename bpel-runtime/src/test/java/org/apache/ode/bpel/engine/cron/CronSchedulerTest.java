@@ -1,5 +1,7 @@
 package org.apache.ode.bpel.engine.cron;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -10,10 +12,13 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.ode.bpel.engine.Contexts;
+import org.apache.ode.bpel.engine.cron.CronScheduler;
+import org.apache.ode.bpel.engine.cron.RuntimeDataCleanupRunnable;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.iapi.ProcessConf.CleanupInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
+import org.apache.ode.daohib.bpel.BpelDAOConnectionImpl;
 import org.apache.ode.utils.CronExpression;
 import org.jmock.Mock;
 import org.jmock.MockObjectTestCase;
@@ -29,6 +34,7 @@ public class CronSchedulerTest extends MockObjectTestCase {
         BasicConfigurator.configure();
         LogManager.getRootLogger().setLevel(Level.DEBUG);
         LogManager.getLogger(RuntimeDataCleanupRunnable.class).setLevel(Level.DEBUG);
+        LogManager.getLogger(BpelDAOConnectionImpl.class).setLevel(Level.DEBUG);
         LogManager.getLogger("org.apache.ode").setLevel(Level.DEBUG);
     }
     

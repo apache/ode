@@ -37,6 +37,8 @@ import net.sf.saxon.xqj.SaxonXQDataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.engine.BpelEngineImpl;
 import org.apache.ode.bpel.engine.BpelProcess;
 import org.apache.ode.bpel.engine.MyRoleMessageExchangeImpl;
@@ -51,8 +53,6 @@ import org.apache.ode.bpel.pmapi.ResponseType;
 import org.apache.ode.bpel.pmapi.CommunicationType.Exchange;
 import org.apache.ode.bpel.pmapi.CommunicationType.ServiceConfig;
 import org.apache.ode.bpel.runtime.PROCESS;
-import org.apache.ode.dao.bpel.ProcessDAO;
-import org.apache.ode.dao.bpel.ProcessInstanceDAO;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.xmlbeans.XmlAnySimpleType;
 import org.apache.xmlbeans.XmlObject;

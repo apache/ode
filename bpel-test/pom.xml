@@ -142,118 +142,28 @@
           <groupId>xerces</groupId>
           <artifactId>xercesImpl</artifactId>
         </dependency>
-	    <dependency>
-	      <groupId>org.apache.geronimo.components</groupId>
-	      <artifactId>geronimo-transaction</artifactId>
-	    </dependency>       
         <dependency>
           <groupId>junit</groupId>
           <artifactId>junit</artifactId>
         </dependency>
-	    <dependency>
-	      <groupId>com.h2database</groupId>
-	      <artifactId>h2</artifactId>
-	      <scope>test</scope>
-	    </dependency>
-	    <!-- for the integration tests - seems to work with the openjpa enhanced enities -->
-	    <dependency>
-	      <groupId>org.apache.ode</groupId>
-	      <artifactId>ode-dao-jpa-hibernate</artifactId>
-	      <scope>test</scope>
-	    </dependency>
-	    <dependency>
-	      <groupId>org.apache.ode</groupId>
-	      <artifactId>ode-dao-jpa-ojpa</artifactId>
-	      <scope>test</scope>
-	    </dependency>	    
-	    <dependency>
-	      <groupId>org.apache.ode</groupId>
-	      <artifactId>ode-dao-hibernate</artifactId>
-	      <scope>test</scope>
-	    </dependency>
     </dependencies>
 
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <!-- FIXME: temporary skip it, 3 failed test cases (2 in JDK6, 3 in JDK5): testIMA, testRetireOld, testIsolated**-->
-          <excludes>
-            <exclude>**/MessageRouting20Test.java</exclude>
-            <exclude>**/VersionedRedeployTest.java</exclude>
-            <exclude>**/StructuredActivities20Test.java</exclude>
-            <exclude>**/ProcessManagementDaoTest.java</exclude>
-            <exclude>**/SelectObjectTest.java</exclude>
-          </excludes>
-        </configuration>
-        <executions>
-          <execution>
-            <id>hibernate-jpa</id>
-            <phase>integration-test</phase>
-            <goals>
-              <goal>test</goal>
-            </goals>
-            <configuration>
-              <reportsDirectory>${project.build.directory}/surefire-reports/hibernate-jpa</reportsDirectory>
-              <systemProperties>
-                <property>
-                  <name>dao.factory</name>
-                  <value>org.apache.ode.dao.jpa.hibernate.BpelDAOConnectionFactoryImpl</value>
-                </property>
-                <property>
-                  <name>dao.factory.store</name>
-                  <value>org.apache.ode.dao.jpa.hibernate.ConfStoreDAOConnectionFactoryImpl</value>
-                </property>
-              </systemProperties>
-              <includes>
-                <include>**/dao/bpel/*Test.java</include>
-                <include>**/dao/bpel/*Test.java</include>
-              </includes>
-            </configuration>
-          </execution>
-          <execution>
-            <id>hibernate</id>
-            <phase>integration-test</phase>
-            <goals>
-              <goal>test</goal>
-            </goals>
-            <configuration>
-              <reportsDirectory>${project.build.directory}/surefire-reports/hibernate</reportsDirectory>
-              <systemProperties>
-                <property>
-                  <name>dao.factory</name>
-                  <value>org.apache.ode.dao.hib.bpel.BpelDAOConnectionFactoryImpl</value>
-                </property>
-                <property>
-                  <name>dao.factory.store</name>
-                  <value>org.apache.ode.dao.hib.store.ConfStoreDAOConnectionFactoryImpl</value>
-                </property>
-              </systemProperties>
-              <includes>
-                <include>**/dao/bpel/*Test.java</include>
-                <include>**/dao/bpel/*Test.java</include>
-              </includes>
-            </configuration>
-          </execution>
-        </executions>
-    </plugin>
-    <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-            <execution>
-                <phase>package</phase>
-                <goals>
-                    <goal>test-jar</goal>
-                </goals>
-                <configuration>
-                    <testClassesDirectory>src/test/resources/bpel/2.0</testClassesDirectory>
-                </configuration>
-            </execution>
-        </executions>
-    </plugin>
-  </plugins>
- </build>
+   <build>
+     <plugins>
+       <plugin>
+	<artifactId>maven-surefire-plugin</artifactId>
+	<configuration>
+           <!-- FIXME: temporary skip it, 3 failed test cases (2 in JDK6, 3 in JDK5): testIMA, testRetireOld, testIsolated**-->
+	  <excludes>
+          <!--
+        <exclude>**/MessageRouting20Test.java</exclude>
+	    <exclude>**/VersionedRedeployTest.java</exclude>
+		<exclude>**/StructuredActivities20Test.java</exclude>
+        -->
+	  </excludes>
+	</configuration>
+       </plugin>
+     </plugins>
+   </build>
 
 </project>

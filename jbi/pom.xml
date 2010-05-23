@@ -129,8 +129,8 @@
                <artifactId>hibernate-core</artifactId>
              </exclusion>
              <exclusion>
-               <groupId>com.h2database</groupId>
-               <artifactId>h2</artifactId>
+               <groupId>hsqldb</groupId>
+               <artifactId>hsqldb</artifactId>
              </exclusion>
              <exclusion>
                <groupId>org.apache.geronimo.specs</groupId>
@@ -234,7 +234,7 @@
         </dependency>
         <dependency>
           <groupId>org.hibernate</groupId>
-          <artifactId>hibernate-core</artifactId>
+          <artifactId>hibernate</artifactId>
           <scope>provided</scope>
         </dependency>
         <dependency>
@@ -320,15 +320,6 @@
            <groupId>org.apache.geronimo.specs</groupId>
            <artifactId>geronimo-javamail_1.4_spec</artifactId>
            <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-        </dependency>
-        <dependency>
-         <groupId>org.apache.ode</groupId>
-         <artifactId>ode-dao-jpa-ojpa</artifactId>
-         <scope>test</scope>
         </dependency>
 
        <!-- for JBI packaging -->
@@ -485,7 +476,10 @@
               <outputDirectory>target/test/smx/ode</outputDirectory>
               <resources>          
                 <resource>
-                  <directory>${basedir}/../dao-jpa-db/target/ode-db</directory>
+                  <directory>${basedir}/../dao-jpa-ojpa-derby/target/derby</directory>
+                </resource>
+                <resource>
+                  <directory>${basedir}/../dao-hibernate-db/target/derby</directory>
                 </resource>
               </resources>              
             </configuration>            
@@ -501,21 +495,6 @@
               <resources>          
                 <resource>
                   <directory>src/test/resources</directory>
-                </resource>
-              </resources>              
-            </configuration>            
-          </execution>
-          <execution>
-            <id>copy-resources3</id>
-            <phase>process-test-resources</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>target/test/smx/ode/hibdb</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>${basedir}/../dao-hibernate-db/target/ode-db-hib</directory>
                 </resource>
               </resources>              
             </configuration>            

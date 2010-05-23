@@ -26,7 +26,7 @@ import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
 import org.apache.ode.utils.GUID;
-import org.h2.jdbcx.JdbcDataSource;
+import org.hsqldb.jdbc.jdbcDataSource;
 
 
 /**
@@ -48,8 +48,8 @@ public class DelegateSupport {
     }
 
     protected void initialize(TransactionManager txm) throws Exception {
-        JdbcDataSource ds = new JdbcDataSource();
-        ds.setURL("jdbc:h2:mem:" + new GUID().toString() + ";DB_CLOSE_DELAY=-1");
+        jdbcDataSource ds = new jdbcDataSource();
+        ds.setDatabase("jdbc:hsqldb:mem:" + new GUID().toString());
         ds.setUser("sa");
         ds.setPassword("");
         _ds = ds;
@@ -75,7 +75,7 @@ public class DelegateSupport {
                 }
             }
             
-            //c.createStatement().executeUpdate("CREATE ALIAS MOD FOR \"org.apache.ode.scheduler.simple.DelegateSupport.mod\";");
+            c.createStatement().executeUpdate("CREATE ALIAS MOD FOR \"org.apache.ode.scheduler.simple.DelegateSupport.mod\";");
             c.createStatement().executeUpdate(sql.toString());
         } finally {
             c.close();

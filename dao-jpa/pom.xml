@@ -21,7 +21,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.ode</groupId>
   <artifactId>ode-dao-jpa</artifactId>
-  <name>ODE :: JPA DAO Impl</name>
+  <name>ODE :: OpenJPA DAO Impl</name>
 
   <parent>
     <groupId>org.apache.ode</groupId>
@@ -37,6 +37,10 @@
     </dependency>
     <dependency>
       <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-j2ee-connector_1.5_spec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
       <artifactId>geronimo-jta_1.1_spec</artifactId>
     </dependency>
     <dependency>
@@ -48,6 +52,10 @@
       <artifactId>commons-logging</artifactId>
     </dependency>
     <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.apache.ode</groupId>
       <artifactId>ode-bpel-api</artifactId>
     </dependency>
@@ -56,15 +64,24 @@
       <artifactId>ode-bpel-dao</artifactId>
     </dependency>
     <dependency>
-       <groupId>org.apache.ode</groupId>
-       <artifactId>ode-bpel-epr</artifactId>
+      <groupId>org.apache.ode</groupId>
+      <artifactId>ode-utils</artifactId>
     </dependency>
-     <!-- we can't add this as a plugin dependency since OpenJPA needs to be loaded
-    in the same class loader as the persistence.xml. (see ant faq "ignores my classpath" -->
+    <dependency>
+      <groupId>xerces</groupId>
+      <artifactId>xercesImpl</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>xerces</groupId>
+        <artifactId>xmlParserAPIs</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.apache.openjpa</groupId>
       <artifactId>openjpa</artifactId>
-      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.serp</groupId>
+      <artifactId>serp</artifactId>
     </dependency>
   </dependencies>
 
@@ -81,46 +98,27 @@
             </goals>
             <configuration>
               <tasks>
-                <copy todir="${basedir}/target/classes-openjpa">
-                  <fileset dir="${basedir}/target/classes" includes="**/*"/>
-                </copy>
-                <property name="maven.compile.classpath" refid="maven.compile.classpath"/>
+                <property name="maven.runtime.classpath" refid="maven.compile.classpath"/>
                 <path id="classpath">
-                  <pathelement location="${basedir}/target/classes-openjpa"/>
-                  <pathelement path="${maven.compile.classpath}"/>
-                </path>
-                <taskdef name="openjpac" classname="org.apache.openjpa.ant.PCEnhancerTask" classpathref="classpath"/>
-                <openjpac directory="${basedir}/target/classes-openjpa">
-                  <fileset dir="${basedir}/src/main">
-                    <include name="**/*.java" />                    
-                  </fileset>
-                  <classpath refid="classpath"/>
-                </openjpac>
+		   <pathelement path="${maven.runtime.classpath}"/>
+		</path>
+		<taskdef name="openjpac" classname="org.apache.openjpa.ant.PCEnhancerTask" classpathref="classpath"/>
+                <openjpac>
+		    <fileset dir="${basedir}/src/main">
+		      <include name="**/*.java" />
+		    </fileset>
+		    <classpath>
+		     <pathelement location="${basedir}/target/classes"/>
+		     <pathelement path="${maven.runtime.classpath}"/>
+		    </classpath>
+		 </openjpac>
               </tasks>
             </configuration>
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>openjpa-enhancer-package</id>
-            <phase>package</phase>
-            <configuration>
-              <classifier>openjpa</classifier>
-              <classesDirectory>${project.build.directory}/classes-openjpa</classesDirectory>
-            </configuration>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
-  </build>
+   </build>
   
 
 </project>

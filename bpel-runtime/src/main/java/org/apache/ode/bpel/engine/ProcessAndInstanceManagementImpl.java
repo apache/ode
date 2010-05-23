@@ -45,6 +45,16 @@ import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.Filter;
 import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.bpel.common.ProcessFilter;
+import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.CorrelationSetDAO;
+import org.apache.ode.bpel.dao.PartnerLinkDAO;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.ScopeDAO;
+import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.bpel.dao.ProcessManagementDAO.FailedSummaryValue;
+import org.apache.ode.bpel.dao.ProcessManagementDAO.InstanceSummaryKey;
 import org.apache.ode.bpel.engine.replayer.Replayer;
 import org.apache.ode.bpel.evt.ActivityEvent;
 import org.apache.ode.bpel.evt.BpelEvent;
@@ -125,16 +135,6 @@ import org.apache.ode.bpel.pmapi.TScopeRef;
 import org.apache.ode.bpel.pmapi.TVariableInfo;
 import org.apache.ode.bpel.pmapi.TVariableRef;
 import org.apache.ode.bpel.pmapi.VariableInfoDocument;
-import org.apache.ode.dao.bpel.ActivityRecoveryDAO;
-import org.apache.ode.dao.bpel.BpelDAOConnection;
-import org.apache.ode.dao.bpel.CorrelationSetDAO;
-import org.apache.ode.dao.bpel.PartnerLinkDAO;
-import org.apache.ode.dao.bpel.ProcessDAO;
-import org.apache.ode.dao.bpel.ProcessInstanceDAO;
-import org.apache.ode.dao.bpel.ScopeDAO;
-import org.apache.ode.dao.bpel.XmlDataDAO;
-import org.apache.ode.dao.bpel.ProcessManagementDAO.FailedSummaryValue;
-import org.apache.ode.dao.bpel.ProcessManagementDAO.InstanceSummaryKey;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.msg.MessageBundle;
@@ -1074,46 +1074,21 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
             TScopeInfo.Activities activities = scopeInfo.addNewActivities();
             List<BpelEvent> events = scope.listEvents();
-
-            // if event generation was enabled
-            if(events!=null && events.size() >0) {
-            	ActivityStateDocumentBuilder b = new ActivityStateDocumentBuilder();
-            	for (BpelEvent e : events)
-            		b.onEvent(e);
-            	for (ActivityInfoDocument ai : b.getActivities()) {
-            		for (ActivityRecoveryDAO recovery : recoveries) {
-            			if (String.valueOf(recovery.getActivityId()).equals(ai.getActivityInfo().getAiid())) {
-            				TFailureInfo failure = ai.getActivityInfo().addNewFailure();
-            				failure.setReason(recovery.getReason());
-            				failure.setDtFailure(toCalendar(recovery.getDateTime()));
-            				failure.setActions(recovery.getActions());
-            				failure.setRetries(recovery.getRetries());
-            				ai.getActivityInfo().setStatus(TActivityStatus.FAILURE);
-            			}
-            		}
-            		activities.addNewActivityInfo().set(ai.getActivityInfo());
-            	}
-            }
-            
-            // otherwise at least try to get the information about failed activities
-            // TODO: we are losing information about which scope does failed activities belong to
-            // as failure table does not have scope id, we would attach every failed activity to process scope
-            else {
-            	if(scope.getParentScope() == null) {
-            		for (ActivityRecoveryDAO recovery : recoveries) {
-            			ActivityInfoDocument ai = ActivityInfoDocument.Factory.newInstance();
-            			ai.addNewActivityInfo().setAiid(String.valueOf(recovery.getActivityId()));
-            			ai.getActivityInfo().setType("OActivity");
-            			ai.getActivityInfo().setScope(TScopeRef.Factory.newInstance());
-            			TFailureInfo failure = ai.getActivityInfo().addNewFailure();
-            			failure.setReason(recovery.getReason());
-            			failure.setDtFailure(toCalendar(recovery.getDateTime()));
-            			failure.setActions(recovery.getActions());
-            			failure.setRetries(recovery.getRetries());
-            			ai.getActivityInfo().setStatus(TActivityStatus.FAILURE);
-            			activities.addNewActivityInfo().set(ai.getActivityInfo());
-            		}            	
-            	}
+            ActivityStateDocumentBuilder b = new ActivityStateDocumentBuilder();
+            for (BpelEvent e : events)
+                b.onEvent(e);
+            for (ActivityInfoDocument ai : b.getActivities()) {
+                for (ActivityRecoveryDAO recovery : recoveries) {
+                    if (String.valueOf(recovery.getActivityId()).equals(ai.getActivityInfo().getAiid())) {
+                        TFailureInfo failure = ai.getActivityInfo().addNewFailure();
+                        failure.setReason(recovery.getReason());
+                        failure.setDtFailure(toCalendar(recovery.getDateTime()));
+                        failure.setActions(recovery.getActions());
+                        failure.setRetries(recovery.getRetries());
+                        ai.getActivityInfo().setStatus(TActivityStatus.FAILURE);
+                    }
+                }
+                activities.addNewActivityInfo().set(ai.getActivityInfo());
             }
         }
 
@@ -1235,8 +1210,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             info.setVariableName(((VariableEvent) event).getVarName());
         }
         if(event instanceof VariableModificationEvent) {
-        	if(((VariableModificationEvent) event).getNewValue()!=null)
-        		info.setNewValue(DOMUtils.domToString(((VariableModificationEvent) event).getNewValue()));
+        	info.setNewValue(DOMUtils.domToString(((VariableModificationEvent) event).getNewValue()));
         }
     }
 

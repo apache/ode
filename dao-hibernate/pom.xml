@@ -43,14 +43,8 @@
     <dependency>
       <groupId>org.apache.ode</groupId>
       <artifactId>ode-bpel-epr</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javassist</groupId>
-      <artifactId>javassist</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>commons-pool</groupId>
@@ -63,8 +57,14 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-core</artifactId>
+      <artifactId>hibernate</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -79,53 +79,53 @@
     </dependency>
    </dependencies>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>xdoclet-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>xdoclet</goal>
-            </goals>
-            <configuration>
-              <tasks>
-                <hibernatedoclet excludedTags="@version,@author,@todo" verbose="true"
-                                 destdir="${project.build.outputDirectory}" force="true">
-                  <hibernate version="3.0"/>
-                  <fileset dir="${project.build.sourceDirectory}" includes="org/apache/ode/dao/hib/bpel/hobj/*.java,org/apache/ode/dao/hib/store/hobj/*.java"/>
-                </hibernatedoclet>
-              </tasks>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <!--doclet does not support not-found="ignore" -->
-        <groupId>org.codehaus.groovy.maven</groupId>
-        <artifactId>gmaven-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>process-sources</phase>
-            <goals>
-              <goal>execute</goal>
-            </goals>
-            <configuration>
-              <source>
-                import java.io.File
-                def process_instance_hbm_file = new File(project.build.outputDirectory, 'org/apache/ode/dao/hib/bpel/hobj/HProcessInstance.hbm.xml')
-                def contents = process_instance_hbm_file.text
-                if (!contents.contains('not-found="ignore"')) {
-                process_instance_hbm_file.text = contents.replace('class="org.apache.ode.dao.hib.bpel.hobj.HProcess"',
-                'not-found="ignore" class="org.apache.ode.dao.hib.bpel.hobj.HProcess"')
-                }
-              </source>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+   <build>
+     <plugins>
+       <plugin>
+         <groupId>org.codehaus.mojo</groupId>
+         <artifactId>xdoclet-maven-plugin</artifactId>
+         <executions>
+           <execution>
+             <phase>generate-sources</phase>
+             <goals>
+               <goal>xdoclet</goal>
+             </goals>
+             <configuration>
+               <tasks>
+                 <hibernatedoclet excludedTags="@version,@author,@todo" verbose="true"
+                   destdir="${project.build.outputDirectory}" force="true">
+                   <hibernate version="3.0"/>
+                   <fileset dir="${project.build.sourceDirectory}" includes="org/apache/ode/daohib/bpel/hobj/*.java"/>
+                 </hibernatedoclet>
+               </tasks>
+             </configuration>
+           </execution>
+         </executions>
+       </plugin>
+       <plugin>
+         <!--doclet does not support not-found="ignore" -->
+         <groupId>org.codehaus.groovy.maven</groupId>
+         <artifactId>gmaven-plugin</artifactId>
+         <executions>
+           <execution>
+             <phase>process-sources</phase>
+             <goals>
+               <goal>execute</goal>
+             </goals>
+             <configuration>
+               <source>
+                 import java.io.File
+                 def process_instance_hbm_file = new File(project.build.outputDirectory, 'org/apache/ode/daohib/bpel/hobj/HProcessInstance.hbm.xml')
+                 def contents = process_instance_hbm_file.text
+                 if (!contents.contains('not-found="ignore"')) {
+                     process_instance_hbm_file.text = contents.replace('class="org.apache.ode.daohib.bpel.hobj.HProcess"',
+                         'not-found="ignore" class="org.apache.ode.daohib.bpel.hobj.HProcess"')
+                 }
+               </source>
+             </configuration>
+           </execution>
+         </executions>
+       </plugin>
+     </plugins>
+   </build>
 </project>

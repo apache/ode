@@ -45,52 +45,32 @@
       <artifactId>ode-bpel-api</artifactId>
     </dependency>
 
-   <dependency>
+    <dependency>
       <groupId>org.apache.derby</groupId>
       <artifactId>derby</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.geronimo.specs</groupId>
       <artifactId>geronimo-jta_1.1_spec</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.geronimo.components</groupId>
       <artifactId>geronimo-connector</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.geronimo.components</groupId>
       <artifactId>geronimo-transaction</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>commons-beanutils</groupId>
-      <artifactId>commons-beanutils</artifactId>
-      <version>1.8.2</version>
     </dependency>
     <dependency>
       <groupId>org.jencks</groupId>
       <artifactId>jencks</artifactId>
       <version>${jencks.version}</version>
       <classifier>all</classifier>
-      <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>geronimo</groupId>
-          <artifactId>geronimo-connector</artifactId>
-        </exclusion>
-        <exclusion>
-          <artifactId>geronimo-jta_1.0.1B_spec</artifactId>
-          <groupId>org.apache.geronimo.specs</groupId>
-        </exclusion>
-      </exclusions>
-     </dependency>
+    </dependency>
+    <dependency>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+      <version>1.8.2</version>
+    </dependency>
    </dependencies>
 </project>

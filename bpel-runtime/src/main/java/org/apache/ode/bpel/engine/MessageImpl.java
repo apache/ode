@@ -31,8 +31,8 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Document;
 
+import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.dao.bpel.MessageDAO;
 import org.apache.ode.utils.DOMUtils;
 
 public class MessageImpl implements Message {

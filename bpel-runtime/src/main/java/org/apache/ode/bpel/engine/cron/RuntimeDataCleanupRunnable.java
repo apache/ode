@@ -10,14 +10,14 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.InstanceFilter;
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.FilteredInstanceDeletable;
 import org.apache.ode.bpel.engine.Contexts;
 import org.apache.ode.bpel.engine.BpelServerImpl.ContextsAware;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.iapi.ProcessConf.CleanupInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.MapSerializableRunnable;
-import org.apache.ode.dao.bpel.BpelDAOConnection;
-import org.apache.ode.dao.bpel.FilteredInstanceDeletable;
 
 public class RuntimeDataCleanupRunnable implements MapSerializableRunnable, ContextsAware {
     private final Log _log = LogFactory.getLog(RuntimeDataCleanupRunnable.class);

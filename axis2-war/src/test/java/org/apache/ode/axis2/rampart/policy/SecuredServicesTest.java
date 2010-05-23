@@ -33,7 +33,6 @@ import java.io.FileFilter;
  *
  *
  */
-@Test(suiteName="SecuredServicesTest-Policy")
 public class SecuredServicesTest extends Axis2TestBase {
 
     private String testDir = "TestRampartPolicy/secured-services";
@@ -42,7 +41,7 @@ public class SecuredServicesTest extends Axis2TestBase {
     public Object[][] testPolicySamples() throws Exception {
         File[] policies = new File(getClass().getClassLoader().getResource(testDir).getFile()).listFiles(new FileFilter() {
             public boolean accept(File pathname) {
-                return pathname.isDirectory() && pathname.getName().matches("process-sample\\d+\\-policy");
+                return pathname.isDirectory() && pathname.getName().matches("process-sample\\d*\\-policy");
             }
         });
         Object[][] bundles = new Object[policies.length][];

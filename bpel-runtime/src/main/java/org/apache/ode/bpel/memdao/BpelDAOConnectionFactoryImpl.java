@@ -18,14 +18,12 @@
  */
 package org.apache.ode.bpel.memdao;
 
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.dao.bpel.BpelDAOConnection;
-import org.apache.ode.dao.bpel.BpelDAOConnectionFactory;
 
 import javax.xml.namespace.QName;
 import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -52,7 +50,7 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactory {
     }
 
     /**
-     * @see org.apache.ode.dao.bpel.BpelDAOConnectionFactory#init(java.util.Properties)
+     * @see org.apache.ode.bpel.dao.BpelDAOConnectionFactory#init(java.util.Properties)
      */
     public void init(Properties properties) {
     }
@@ -63,9 +61,4 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactory {
     public DataSource getDataSource() {
         return null;
     }
-    
-	public void init(Properties p, TransactionManager txm, Object envCtx) {
-		
-	}
-	
 }

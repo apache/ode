@@ -41,11 +41,12 @@
         <annogen.version>0.1.0</annogen.version>
 	<antlr.version>2.7.7</antlr.version>
 	<axiom.version>1.2.7</axiom.version>
-	<axis2.version>1.4.1</axis2.version>
+	<axis2.version>1.3</axis2.version>
+        <rampart.version>1.3</rampart.version>
         <commons.codec.version>1.3</commons.codec.version>
 	<backport.concurrent.version>3.1</backport.concurrent.version>
         <commons.fileupload.version>1.2</commons.fileupload.version>
-        <commons.collections.version>3.1</commons.collections.version>
+        <commons.collections.version>3.2.1</commons.collections.version>
         <commons.httpclient.version>3.1</commons.httpclient.version>
 	<commons.io.version>1.4</commons.io.version>
         <commons.lang.version>2.4</commons.lang.version>
@@ -64,9 +65,7 @@
         <wsdl4j.version>1.6.2</wsdl4j.version>
 	<woodstox.version>3.2.4</woodstox.version>
 	<javax.mail.version>1.4</javax.mail.version>
-        <hibernate.version>3.3.2.GA</hibernate.version>
-	<hibernate.entitymanager.version>3.4.0.GA</hibernate.entitymanager.version>
-        <javassist.version>3.9.0.GA</javassist.version>
+        <hibernate.version>3.2.5.ga</hibernate.version>
 	<spring.version>2.5.6</spring.version>
         <geronimo.specs.version>1.0</geronimo.specs.version>
         <geronimo.version>2.0.1</geronimo.version>
@@ -89,7 +88,7 @@
         <xmlbeans.version>2.3.0</xmlbeans.version>
         <xstream.version>1.2</xstream.version>
 	<junit.version>4.4</junit.version>
-        <h2.version>1.2.131</h2.version>
+        <hsqldb.version>1.8.0.7</hsqldb.version>
 	<persistence-api.version>1.0</persistence-api.version>
 	<xalan.version>2.7.1</xalan.version>
         <ant.version>1.6.5</ant.version>
@@ -102,7 +101,6 @@
         <activemq.version>4.1.1</activemq.version>
         <xml-apis.version>1.3.04</xml-apis.version>
         <servicemix.nmr.version>1.1.0-SNAPSHOT</servicemix.nmr.version>
-        <rampart.version>1.4</rampart.version>
     </properties>
 
 
@@ -126,21 +124,19 @@
       <module>bpel-ql</module>
       <module>dao-hibernate</module>
       <module>tools</module>
-      <module>dao-jpa-hibernate</module>
-      <module>dao-jpa-ojpa</module>
-      <module>dao-jpa-db</module>
-      <module>dao-hibernate-db</module>
       <module>bpel-store</module>
+	  <module>dao-jpa-ojpa-derby</module>
+      <module>dao-hibernate-db</module>
       <module>bpel-runtime</module>
       <module>bpel-connector</module>
-      <module>bpel-test</module>
-      <module>axis2</module>
-      <module>jbi</module>
-      <module>jbi-bundle</module>
-      <module>jbi-karaf</module>
+	  <module>bpel-test</module>
+	  <module>axis2</module>
+	  <module>jbi</module>
+	  <module>jbi-bundle</module>
+	  <module>jbi-karaf</module>
       <module>distro/src/examples-jbi/maven2/ping-pong-osgi</module>
-      <!--module>axis2-war</module-->
-      <module>distro</module>
+	  <module>axis2-war</module>
+	  <module>distro</module>
     </modules>
 
     <build>
@@ -395,16 +391,6 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.ode</groupId>
-                <artifactId>ode-dao-jpa-hibernate</artifactId>
-                <version>${ode.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.ode</groupId>
-                <artifactId>ode-dao-jpa-ojpa</artifactId>
-                <version>${ode.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-bpel-store</artifactId>
                 <version>${ode.version}</version>
             </dependency>
@@ -442,12 +428,6 @@
                 <groupId>org.apache.ode</groupId>
                 <artifactId>ode-dao-jpa</artifactId>
                 <version>${ode.version}</version>
-            </dependency>
-            <dependency>
-              <groupId>org.apache.ode</groupId>
-              <artifactId>ode-dao-jpa</artifactId>
-              <version>${ode.version}</version>
-              <classifier>openjpa</classifier>
             </dependency>
             <dependency>
                 <groupId>org.apache.ode</groupId>
@@ -757,31 +737,18 @@
 
             <dependency>
                 <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-core</artifactId>
+                <artifactId>hibernate</artifactId>
                 <version>${hibernate.version}</version>
+                <!--
                 <exclusions>
                     <exclusion>
                         <artifactId>jta</artifactId>
                         <groupId>javax.transaction</groupId>
                     </exclusion>
                 </exclusions>
+                -->
             </dependency>
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-entitymanager</artifactId>
-                <version>${hibernate.entitymanager.version}</version>
-		<exclusions>
-                    <exclusion>
-                        <artifactId>jta</artifactId>
-                        <groupId>javax.transaction</groupId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>javassist</groupId>
-                <artifactId>javassist</artifactId>
-                <version>${javassist.version}</version>
-            </dependency>
+ 
             <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
@@ -874,9 +841,9 @@
                 <version>${derby.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.h2database</groupId>
-                <artifactId>h2</artifactId>
-                <version>${h2.version}</version>
+                <groupId>hsqldb</groupId>
+                <artifactId>hsqldb</artifactId>
+                <version>${hsqldb.version}</version>
             </dependency>
 
             <!-- AXIS2 dependencies -->

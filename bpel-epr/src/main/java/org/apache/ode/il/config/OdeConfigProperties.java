@@ -45,10 +45,6 @@ public class OdeConfigProperties {
     public static final String PROP_DB_EXTERNAL_DS = "db.ext.dataSource";
 
     public static final String PROP_DB_EMBEDDED_NAME = "db.emb.name";
-    
-    public static final String PROP_DB_EMBEDDED_TYPE = "db.emb.type";
-
-    public static final String PROP_DB_EMBEDDED_CREATE = "db.emb.create";
 
     public static final String PROP_DB_INTERNAL_URL = "db.int.jdbcurl";
 
@@ -101,10 +97,6 @@ public class OdeConfigProperties {
     public static final String PROP_PROCESS_INSTANCE_THROTTLED_MAXIMUM_COUNT = "process.instance.throttled.maximum.count";
     
     public static final String PROP_DAOCF = "dao.factory";
-
-    public static final String PROP_DAOCF_STORE = "dao.factory.store";
-
-    public static final String PROP_DAOCF_SCHEDULER = "dao.factory.scheduler";
     
     public static final String PROP_MIGRATION_TRANSACTION_TIMEOUT = "migration.transaction.timeout";
     
@@ -119,12 +111,6 @@ public class OdeConfigProperties {
     /** Default defaults for the database embedded name and dao connection factory class. */
     private static String __dbEmbName = "jpadb";
     private static String __daoCfClass = "org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl";
-    
-    /** Default defaults for the database embedded name and dao connection factory class. */
-    public static String DEFAULT_DB_EMB_NAME = "ode-db";
-    public static String DEFAULT_DB_EMB_TYPE = "h2";
-    public static String DEFAULT_DAOCF_CLASS = "org.apache.ode.dao.jpa.openjpa.BpelDAOConnectionFactoryImpl";
-    public static String DEFAULT_DAOCF_STORE_CLASS = "org.apache.ode.dao.jpa.openjpa.ConfStoreDAOConnectionFactoryImpl";
 
     static {
         String odep = System.getProperty("ode.persistence");
@@ -148,18 +134,6 @@ public class OdeConfigProperties {
 
         /** Embedded database (Ode provides default embedded database with connection pool) */
         EMBEDDED
-    }
-    
-    /**
-     * Possible database implementation.
-     */
-    public enum EmbeddedDbType {
-        
-        DERBY,
-        
-        H2,
-
-        HSQL
     }
 
     public OdeConfigProperties(File cfgFile, String prefix) {
@@ -214,27 +188,14 @@ public class OdeConfigProperties {
 
     }
 
-    public EmbeddedDbType getDbEmbeddedType() {
-        return EmbeddedDbType.valueOf(getProperty(OdeConfigProperties.PROP_DB_EMBEDDED_TYPE, DEFAULT_DB_EMB_TYPE).trim().toUpperCase());
-    }
-
-    public boolean isDbEmbeddedCreate() {
-        return Boolean.valueOf(getProperty(OdeConfigProperties.PROP_DB_EMBEDDED_CREATE, "true"));
-    }
-
     public DatabaseMode getDbMode() {
         return DatabaseMode.valueOf(getProperty(OdeConfigProperties.PROP_DB_MODE, DatabaseMode.EMBEDDED.toString()).trim()
                 .toUpperCase());
     }
 
     public String getDAOConnectionFactory() {
-        return getProperty(PROP_DAOCF, DEFAULT_DAOCF_CLASS);
+        return getProperty(PROP_DAOCF, __daoCfClass);
     }
-
-    public String getDAOConfStoreConnectionFactory() {
-        return getProperty(PROP_DAOCF_STORE, DEFAULT_DAOCF_STORE_CLASS);
-    }
-
 
     public String getDbDataSource() {
         return getProperty(OdeConfigProperties.PROP_DB_EXTERNAL_DS, "java:comp/env/jdbc/ode-ds");
@@ -278,7 +239,7 @@ public class OdeConfigProperties {
     }
 
     public int getPoolMaxSize() {
-        return Integer.valueOf(getProperty(OdeConfigProperties.PROP_POOL_MAX, "15"));
+        return Integer.valueOf(getProperty(OdeConfigProperties.PROP_POOL_MAX, "10"));
     }
 
     public int getPoolMinSize() {
