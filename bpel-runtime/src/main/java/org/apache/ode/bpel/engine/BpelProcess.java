@@ -211,9 +211,9 @@ public class BpelProcess {
             _hydrationLatch.latch(1);
             List<PartnerLinkMyRoleImpl> targets = getMyRolesForService(mex.getServiceName());
             if (targets.isEmpty()) {
-                String errmsg = __msgs.msgMyRoleRoutingFailure(mex.getMessageExchangeId());
-                __log.error(errmsg);
-                mex.setFailure(MessageExchange.FailureType.UNKNOWN_ENDPOINT, errmsg, null);
+//                String errmsg = __msgs.msgMyRoleRoutingFailure(mex.getMessageExchangeId());
+//                __log.error(errmsg);
+//                mex.setFailure(MessageExchange.FailureType.UNKNOWN_ENDPOINT, errmsg, null);
                 return false;
             }
 
