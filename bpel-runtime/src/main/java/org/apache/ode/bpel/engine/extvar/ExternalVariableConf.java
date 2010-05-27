@@ -29,14 +29,14 @@ import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 
 public class ExternalVariableConf {
-    public final static QName EXTVARCONF_ELEMENT = new QName("http://ode.apache.org/externalVariables", 
+    public final static QName EXTVARCONF_ELEMENT = new QName("http://ode.apache.org/externalVariables",
             "externalVariable");
-    
-    
+
+
     private final HashMap<String,Variable> _vars = new HashMap<String, Variable>();
-    
+
     public ExternalVariableConf(List<Element> els) {
-        
+
         for (Element el : els) {
             String varId = el.getAttribute("id");
             if (varId == null || "".equals(varId))
@@ -48,26 +48,26 @@ public class ExternalVariableConf {
             Element child = DOMUtils.getFirstChildElement(el);
             if (child == null)
                 throw new BpelEngineException("Invalid external variable configuration for id \"" + varId + "\"; no engine configuration!");
-            
+
             QName engineQName = new QName(child.getNamespaceURI(), child.getLocalName());
-            
+
             Variable var = new Variable(varId, engineQName, child);
             _vars.put(varId,var);
         }
-        
+
     }
 
-    
+
     public class Variable {
         public final String extVariableId;
         public final QName engineQName;
-        public final Element configuration; 
-        
+        public final Element configuration;
+
         Variable(String id, QName engine, Element config) {
             this.extVariableId = id;
             this.engineQName = engine;
             this.configuration = config;
-            
+
         }
     }
 
@@ -75,7 +75,7 @@ public class ExternalVariableConf {
     public Variable getVariable(String id) {
         return _vars.get(id);
     }
-    
+
     public Collection<Variable> getVariables() {
         return _vars.values();
     }

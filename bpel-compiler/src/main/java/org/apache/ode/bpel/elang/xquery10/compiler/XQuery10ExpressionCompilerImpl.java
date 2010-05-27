@@ -150,8 +150,8 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
         if (node == null) {
             throw new CompilationException(__msgs.errEmptyExpression(source.getURI(), new QName(source.getElement().getNamespaceURI(), source.getElement().getNodeName())));
         }
-        if (node.getNodeType() != Node.TEXT_NODE && 
-                node.getNodeType() != Node.ELEMENT_NODE && 
+        if (node.getNodeType() != Node.TEXT_NODE &&
+                node.getNodeType() != Node.ELEMENT_NODE &&
                 node.getNodeType() != Node.CDATA_SECTION_NODE) {
             throw new CompilationException(__msgs.errUnexpectedNodeTypeForXPath(DOMUtils.domToString(node)));
         }
@@ -164,7 +164,7 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
         try {
             XQDataSource xqds = new SaxonXQDataSource(new Configuration());
             XQConnection xqconn = xqds.getConnection();
-            
+
             __log.debug("Compiling expression " + xqueryStr);
             Configuration configuration = ((SaxonXQConnection) xqconn).getConfiguration();
             configuration.setAllNodesUntyped(true);
@@ -174,9 +174,9 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
             JaxpFunctionResolver funcResolver = new JaxpFunctionResolver(
                     _compilerContext, out, source.getNamespaceContext(), _bpelNS);
             JaxpVariableResolver variableResolver = new JaxpVariableResolver(
-                    _compilerContext, out); 
+                    _compilerContext, out);
 
-            XQueryDeclarations declarations = new XQueryDeclarations();            
+            XQueryDeclarations declarations = new XQueryDeclarations();
             NSContext nsContext = source.getNamespaceContext();
             Set<String> prefixes = nsContext.getPrefixes();
             if (!nsContext.getUriSet().contains(Namespaces.ODE_EXTENSION_NS)) {
@@ -194,12 +194,12 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
                 }
             }
             declarations.declareVariable(
-                    getQName(nsContext, Namespaces.ODE_EXTENSION_NS, "pid"), 
+                    getQName(nsContext, Namespaces.ODE_EXTENSION_NS, "pid"),
                     getQName(nsContext, Namespaces.XML_SCHEMA, "integer"));
 //            Map<URI, Source> schemaDocuments = _compilerContext.getSchemaSources();
 //            for (URI schemaUri : schemaDocuments.keySet()) {
 //            	Source schemaSource = schemaDocuments.get(schemaUri);
-//            	// Don't add schema sources, since our Saxon library is not schema-aware. 
+//            	// Don't add schema sources, since our Saxon library is not schema-aware.
 //            	// configuration.addSchemaSource(schemaSource);
 //            }
             configuration.setSchemaValidationMode(Validation.SKIP);
@@ -222,16 +222,16 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
                 // declarations.declareVariable(variable.name, typeQName);
                 declarations.declareVariable(variableName);
             }
-            
+
             // Add implicit declarations as prolog to the user-defined XQuery
             out.xquery = declarations.toString() + xqueryStr;
 
-            // Check the XQuery for compilation errors 
-            xqconn.setStaticContext(staticContext);            
+            // Check the XQuery for compilation errors
+            xqconn.setStaticContext(staticContext);
             XQPreparedExpression exp = xqconn.prepareExpression(out.xquery);
-            
-            // Pre-evaluate variables and functions by executing query  
-            node.setUserData(XQuery10BpelFunctions.USER_DATA_KEY_FUNCTION_RESOLVER, 
+
+            // Pre-evaluate variables and functions by executing query
+            node.setUserData(XQuery10BpelFunctions.USER_DATA_KEY_FUNCTION_RESOLVER,
                     funcResolver, null);
             exp.bindItem(XQConstants.CONTEXT_ITEM,
                     xqconn.createItemFromNode(node, xqconn.createNodeType()));
@@ -241,7 +241,7 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
                 Object value = variableResolver.resolveVariable(variable);
                 if (typeQName != null) {
                     if (value.getClass().getName().startsWith("java.lang")) {
-                        exp.bindAtomicValue(variable, value.toString(), 
+                        exp.bindAtomicValue(variable, value.toString(),
                                 xqconn.createAtomicType(XQItemType.XQBASETYPE_ANYATOMICTYPE));
                     } else if (value instanceof Node) {
                         exp.bindNode(variable, (Node) value, xqconn.createNodeType());
@@ -257,12 +257,12 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
                 }
             }
             // evaluate the expression so as to initialize the variables
-            try { 
+            try {
                 exp.executeQuery();
-            } catch (XQException xpee) { 
-                // swallow errors caused by uninitialized variables 
+            } catch (XQException xpee) {
+                // swallow errors caused by uninitialized variables
             } finally {
-                // reset the expression's user data, in order to avoid 
+                // reset the expression's user data, in order to avoid
                 // serializing the function resolver in the compiled bpel file.
                 if (node != null) {
                     node.setUserData(XQuery10BpelFunctions.USER_DATA_KEY_FUNCTION_RESOLVER, null, null);
@@ -280,16 +280,16 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
             throw wre;
         }
     }
-    
+
     public Map<String, String> getProperties() {
         return _properties;
     }
-    
+
     private String getQName(NSContext nsContext, String uri, String localPart) {
         String prefix = getPrefixForUri(nsContext, uri);
         return (prefix == null ? localPart : (prefix + ":" + localPart));
     }
-    
+
     private String getPrefixForUri(NSContext nsContext, String uri) {
         Set<String> prefixes = nsContext.getPrefixes();
         for (String prefix : prefixes) {
@@ -300,7 +300,7 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
         }
         return null;
     }
-    
+
     protected static Collection<String> getVariableNames(String xquery) {
         Collection<String> variableNames = new LinkedHashSet<String>();
         for (int index = xquery.indexOf("$"); index != -1; index = xquery.indexOf("$")) {
@@ -314,7 +314,7 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
         }
         return variableNames;
     }
-    
+
     private OScope.Variable getVariable(List<OScope.Variable> variables, String variableName) {
         String declaredVariable = getVariableDeclaredName(variableName);
         for (OScope.Variable variable : variables) {
@@ -324,17 +324,17 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
         }
         return null;
     }
-    
+
     private String getVariableDeclaredName(String variableReference) {
         int dotIndex = variableReference.indexOf(".");
         return dotIndex >= 0 ? variableReference.substring(0, dotIndex) : variableReference;
     }
-    
+
     private String getVariablePartName(String variableReference) {
         int dotIndex = variableReference.indexOf(".");
-        return dotIndex >= 0 ? variableReference.substring(dotIndex + 1) : "";    	
+        return dotIndex >= 0 ? variableReference.substring(dotIndex + 1) : "";
     }
-    
+
     private QName getNameQName(String variableName) {
         String prefix = null, localName = null;;
         int colonIndex = variableName.indexOf(":");
@@ -347,7 +347,7 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
         }
         return new QName(prefix, localName);
     }
-    
+
     private QName getTypeQName(String variableName, OVarType type) {
         QName typeQName = null;
         if (type instanceof OConstantVarType) {
@@ -367,13 +367,13 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
 
     private static class XQueryDeclarations {
         StringBuffer declarations = new StringBuffer();
-        
+
         public XQueryDeclarations() {}
-        
+
         public void declareVariable(String name, QName type) {
-            declareVariable(name, type.getPrefix() + ":" + type.getLocalPart());    
+            declareVariable(name, type.getPrefix() + ":" + type.getLocalPart());
         }
-        
+
         public void declareVariable(String name, String type) {
             declarations.append("declare variable ")
                 .append("$")
@@ -383,7 +383,7 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
                 .append(" external ")
                 .append(";\n");
         }
-        
+
         public void declareVariable(String name) {
             declarations.append("declare variable ")
                 .append("$")
@@ -391,7 +391,7 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
                 .append(" external ")
                 .append(";\n");
         }
-        
+
         public void declareNamespace(String prefix, String uri) {
             declarations.append("declare namespace ")
                 .append(prefix)
@@ -399,7 +399,7 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
                 .append("\"" + uri + "\"")
                 .append(";\n");
         }
-                
+
         public void declareDefaultElementNamespace(String uri) {
             declarations.append("declare default element namespace ")
                 .append("\"" + uri + "\"")
@@ -408,6 +408,6 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
 
         public String toString() {
             return declarations.toString();
-        }    	
+        }
     }
 }

@@ -26,19 +26,19 @@ import java.util.StringTokenizer;
 
 public class RelativeDateParser {
     private static final char YEAR_TEMPLATE_MODIFIER = 'y';
-    
+
     private static final char MONTH_TEMPLATE_MODIFIER = 'M';
-   
+
     private static final char WEEK_TEMPLATE_MODIFIER = 'w';
-   
+
     private static final char DAY_TEMPLATE_MODIFIER = 'd';
-   
+
     private static final char HOUR_TEMPLATE_MODIFIER = 'h';
-   
+
     private static final char MINUTE_TEMPLATE_MODIFIER = 'm';
-   
+
     private static final char SECOND_TEMPLATE_MODIFIER = 's';
-   
+
     /**
      * This array of strings contains all supported "modifiers" for method <code>parseRelativeDate</code>.
      * NOTE: An order of elements in this array is important and used in algorithm of above method!
@@ -48,7 +48,7 @@ public class RelativeDateParser {
         WEEK_TEMPLATE_MODIFIER, DAY_TEMPLATE_MODIFIER,
         HOUR_TEMPLATE_MODIFIER, MINUTE_TEMPLATE_MODIFIER,
         SECOND_TEMPLATE_MODIFIER, };
-  
+
     /**
      * Returns a date which is less than current system date/time on a specified number of days, years, minutes, weeks
      * etc.<p/>
@@ -83,7 +83,7 @@ public class RelativeDateParser {
         throws java.text.ParseException {
       int[] agoValues = new int[TEMPLATE_MODIFIERS_LIST.length];
       int currentModifierPointer = 0;
-   
+
       StringTokenizer tokens = new StringTokenizer(dateTemplate.trim());
       while (tokens.hasMoreTokens()) {
         String token = tokens.nextToken();
@@ -91,7 +91,7 @@ public class RelativeDateParser {
           throw new ParseException("Invalid token length. Token: "
               + token, dateTemplate.indexOf(token));
         }
-   
+
         int modValue;
         try {
           modValue = Integer.parseInt(token.substring(0,
@@ -105,7 +105,7 @@ public class RelativeDateParser {
           throw new ParseException("Can't parse integer value. Token: "
               + token, dateTemplate.indexOf(token));
         }
-   
+
         char mod = token.charAt(token.length() - 1);
         while (true) {
           if (currentModifierPointer >= TEMPLATE_MODIFIERS_LIST.length) {
@@ -126,7 +126,7 @@ public class RelativeDateParser {
           }
         }
       }//while (tokens)
-   
+
       final Calendar calendar = GregorianCalendar.getInstance();
       for (int i = 0; i < agoValues.length; i++) {
         if (agoValues[i] == 0) {
@@ -135,10 +135,10 @@ public class RelativeDateParser {
         int calendarField = templateModifierIndexToCalendarField(i);
         calendar.add(calendarField, 0 - agoValues[i]);
       }
-   
+
       return calendar.getTime();
     }
-   
+
     private static int templateModifierIndexToCalendarField(int modifierIndex)
         throws IllegalArgumentException {
       switch (modifierIndex) {

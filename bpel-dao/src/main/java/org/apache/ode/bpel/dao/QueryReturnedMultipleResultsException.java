@@ -20,7 +20,7 @@ package org.apache.ode.bpel.dao;
 
 /**
  * Thrown when a query returns multiple results.
- * 
+ *
  * <p>
  * Created on Mar 9, 2004 at 1:51:09 PM.
  * </p>

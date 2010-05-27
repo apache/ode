@@ -56,11 +56,11 @@
       variable="var1"/>
     <scope>
       <faultHandlers>
-        <catch faultVariable="faultVar" 
+        <catch faultVariable="faultVar"
                faultElement="test:TestElement">
-        <!-- 
-            we want to be here; the fault data is actually 
-            a message type, but b/c it's a single part with 
+        <!--
+            we want to be here; the fault data is actually
+            a message type, but b/c it's a single part with
             a matching element, we should match this catch
          -->
          <assign>

@@ -32,11 +32,11 @@
             2004-07-19: YIU-OSS: Alex Yiu: Adding "service-ref" element and its definition for issue 34
             2004-07-21: YIU-OSS: Alex Yiu: Applying Issue 43 and 44
             2004-09-01: YIU-OSS: Alex Yiu: Applying Issue 146: Making tVariable Extensible
-            2004-09-01: YIU-OSS: Alex Yiu: Applying Issue 149: Adding formal documentation support to BPEL 
+            2004-09-01: YIU-OSS: Alex Yiu: Applying Issue 149: Adding formal documentation support to BPEL
             2004-09-01: YIU-OSS: Alex Yiu: A bunch of misc cleanup for Issue 13
             2004-10-20: YIU-OSS: Alex Yiu: Fixing schema problems discovered by Dieter Koenig
             2004-10-20: YIU-OSS: Alex Yiu: Applying Issue 123
-            2004-10-20: YIU-OSS: Alex Yiu: Applying some non-normative changes suggested by Paul Brown 
+            2004-10-20: YIU-OSS: Alex Yiu: Applying some non-normative changes suggested by Paul Brown
             2004-11-30: YIU-OSS: Alex Yiu: Applying Issue 152 and 165
             2004-12-02: YIU-OSS: Alex Yiu: Applying Issue 135 (TerminationHandler changes from Satish)
             2005-04-02: curbera-oss: Paco Curbera: Applying Issue 93
@@ -54,12 +54,12 @@
             2005-07-25: Rev 1.21: YIU-OSS: Alex Yiu: Applying Issue 103, 199, 203 and Issue 196
             2005-08-14: Rev 1.22: curbera-oss: Paco Curbera: Applying Issue 139.1, 147
             2005-08-20: Rev 1.23: assaf-oss: Assaf Arkin: fixed issues 202, 206, 209, 214 and 132. (this comment is added by alex)
-            2005-08-29: Rev 1.24: YIU-OSS: Alex Yiu: rectify the definition of "forEach" (issue 147) according to the issue 204 by adding "scope" (note: we still need to apply the rest of issue 204.  
-            2005-08-30: Rev 1.25: YIU-OSS: Alex Yiu: 
-                Apply XSD changes for Issue 190, Issue 136, Issue 213. 
+            2005-08-29: Rev 1.24: YIU-OSS: Alex Yiu: rectify the definition of "forEach" (issue 147) according to the issue 204 by adding "scope" (note: we still need to apply the rest of issue 204.
+            2005-08-30: Rev 1.25: YIU-OSS: Alex Yiu:
+                Apply XSD changes for Issue 190, Issue 136, Issue 213.
                 Apply XSD Changes for Issue 111 and 11.1
                 Apply XSD Changes for Issue 192 by merging wsbpel_msgprop.xsd into this wsbpel_main.xsd
-                XSD Changes in Issue 145 was missing. Re-apply it here. 
+                XSD Changes in Issue 145 was missing. Re-apply it here.
 
         </documentation>
     </annotation>
@@ -115,10 +115,10 @@
         <annotation>
             <documentation>
                 Addtional constraint:
-                 - rethrow activity can be used ONLY within a fault handler 
-                   (i.e. "catch" element of bpws:tCatch type and 
+                 - rethrow activity can be used ONLY within a fault handler
+                   (i.e. "catch" element of bpws:tCatch type and
                    "catchAll" element of bpws:tActivityOrCompensateContainer type )
-                 - compensate activity can be used ONLY within a fault handler or a compensation handler 
+                 - compensate activity can be used ONLY within a fault handler or a compensation handler
                    (i.e. bpws:tActivityOrCompensateContainer type)
             </documentation>
         </annotation>
@@ -134,7 +134,7 @@
             <element ref="bpws:rethrow"/>
             <element ref="bpws:exit"/>
             <element ref="bpws:flow"/>
-            <element ref="bpws:if"/> 
+            <element ref="bpws:if"/>
             <element ref="bpws:while"/>
             <element ref="bpws:repeatUntil"/>
             <element ref="bpws:sequence"/>
@@ -142,7 +142,7 @@
             <element ref="bpws:scope"/>
             <element ref="bpws:compensate"/>
             <element ref="bpws:forEach"/>
-            <element ref="bpws:extensionActivity"/> 
+            <element ref="bpws:extensionActivity"/>
         </choice>
     </group>
 
@@ -165,7 +165,7 @@
     <element name="scope" type="bpws:tScope"/>
     <element name="compensate" type="bpws:tCompensate"/>
     <element name="forEach" type="bpws:tForEach"/>
-    <element name="extensionActivity" type="bpws:tExtensionActivity"/> 
+    <element name="extensionActivity" type="bpws:tExtensionActivity"/>
 
     <complexType name="tImport">
         <complexContent>
@@ -247,7 +247,7 @@
     </complexType>
     <complexType name="tOnEvent">
         <complexContent>
-            <extension base="bpws:tOnMsgCommon">                
+            <extension base="bpws:tOnMsgCommon">
                 <sequence>
                     <group ref="bpws:activity"/>
                 </sequence>
@@ -296,21 +296,21 @@
         <complexContent>
             <extension base="bpws:tOnAlarmCommon">
                 <sequence>
-                    <group ref="bpws:activity"/> 
-                </sequence> 
-            </extension> 
-        </complexContent> 
-    </complexType> 
+                    <group ref="bpws:activity"/>
+                </sequence>
+            </extension>
+        </complexContent>
+    </complexType>
     <complexType name="tOnAlarmEvent">
         <complexContent>
             <extension base="bpws:tOnAlarmCommon">
                 <sequence>
                     <element name="repeatEvery" type="bpws:tDuration-expr" minOccurs="0"/>
-                    <group ref="bpws:activity"/> 
-                </sequence> 
-            </extension> 
+                    <group ref="bpws:activity"/>
+                </sequence>
+            </extension>
         </complexContent>
-    </complexType> 
+    </complexType>
     <complexType name="tCompensationHandler">
         <complexContent>
             <extension base="bpws:tActivityOrCompensateContainer"/>
@@ -341,8 +341,8 @@
                 <attribute name="type" type="QName" use="optional"/>
                 <attribute name="element" type="QName" use="optional"/>
             </extension>
-        </complexContent>   
-    </complexType>  
+        </complexContent>
+    </complexType>
     <complexType name="tCorrelationSets">
         <complexContent>
             <extension base="bpws:tExtensibleElements">
@@ -465,7 +465,7 @@
                             <enumeration value="request"/>
                             <enumeration value="response"/>
                             <enumeration value="request-response"/>
-                            
+
                         </restriction>
                     </simpleType>
                 </attribute>
@@ -535,17 +535,17 @@
         <complexContent>
             <extension base="bpws:tActivity">
                 <sequence>
-                    <choice maxOccurs="unbounded"> 
+                    <choice maxOccurs="unbounded">
                         <element ref="bpws:copy"/>
                         <element ref="bpws:extensibleAssign"/>
-                    </choice> 
+                    </choice>
                 </sequence>
                 <attribute name="validate" type="bpws:tBoolean" use="optional" default="no"/>
             </extension>
         </complexContent>
     </complexType>
     <element name="copy" type="bpws:tCopy" />
-    <element name="extensibleAssign" type="bpws:tExtensibleAssign" /> 
+    <element name="extensibleAssign" type="bpws:tExtensibleAssign" />
 
     <complexType name="tValidate">
         <complexContent>
@@ -569,7 +569,7 @@
         <complexContent>
             <extension base="bpws:tExtensibleElements" />
         </complexContent>
-    </complexType> 
+    </complexType>
 
     <element name="from" type="bpws:tFrom"/>
     <complexType name="tFrom" mixed="true">
@@ -678,23 +678,23 @@
             <extension base="bpws:tActivity">
                 <sequence>
                     <element name="condition" type="bpws:tBoolean-expr" />
-                    <element name="then" type="bpws:tActivityContainer" /> 
+                    <element name="then" type="bpws:tActivityContainer" />
                     <element name="elseif" minOccurs="0" maxOccurs="unbounded" >
                         <complexType>
                             <complexContent>
                                 <extension base="bpws:tExtensibleElements" >
                                     <sequence>
                                         <element name="condition" type="bpws:tBoolean-expr" />
-                                        <group ref="bpws:activity" /> 
-                                    </sequence> 
+                                        <group ref="bpws:activity" />
+                                    </sequence>
                                 </extension>
                             </complexContent>
                         </complexType>
                     </element>
-                    <element name="else" minOccurs="0" type="bpws:tActivityContainer"/> 
-                </sequence> 
+                    <element name="else" minOccurs="0" type="bpws:tActivityContainer"/>
+                </sequence>
             </extension>
-        </complexContent> 
+        </complexContent>
     </complexType>
     <complexType name="tWhile">
         <complexContent>
@@ -785,8 +785,8 @@
                    <sequence>
                        <element name="startCounterValue" type="bpws:tExpression"/>
                        <element name="finalCounterValue" type="bpws:tExpression"/>
-                       <element name="scope" type="bpws:tScope" /> 
-                   </sequence>              
+                       <element name="scope" type="bpws:tScope" />
+                   </sequence>
                    <attribute name="counterName" type="NCName"
                             use="required"/>
                    <attribute name="parallel" type="bpws:tBoolean"
@@ -807,7 +807,7 @@
             <enumeration value="http://schemas.xmlsoap.org/wsdl/"/>
         </restriction>
     </simpleType>
-    
+
     <complexType name="tBoolean-expr">
         <complexContent mixed="true">
             <extension base="bpws:tExpression" />
@@ -823,7 +823,7 @@
             <extension base="bpws:tExpression" />
         </complexContent>
     </complexType>
-    
+
     <simpleType name="tBoolean">
         <restriction base="string">
             <enumeration value="yes"/>
@@ -839,19 +839,19 @@
     <element name="service-ref" type="bpws:ServiceRefType">
         <annotation>
             <documentation>
-                This element can be used within a from-spec. 
+                This element can be used within a from-spec.
             </documentation>
         </annotation>
     </element>
     <complexType name="ServiceRefType">
         <annotation>
             <documentation>
-                This type definition is for service reference container. 
-                This container is used as envelope to wrap around the actual endpoint reference value, 
-                when a BPEL process interacts the endpoint reference of a partnerLink. 
-                It provides pluggability of different versions of service referencing schemes 
-                being used within a BPEL program. The design pattern here is similar to those of 
-                expression language. 
+                This type definition is for service reference container.
+                This container is used as envelope to wrap around the actual endpoint reference value,
+                when a BPEL process interacts the endpoint reference of a partnerLink.
+                It provides pluggability of different versions of service referencing schemes
+                being used within a BPEL program. The design pattern here is similar to those of
+                expression language.
             </documentation>
         </annotation>
         <sequence>
@@ -859,7 +859,7 @@
         </sequence>
         <attribute name="reference-scheme" type="anyURI" use="optional"/>
     </complexType>
-    
+
     <simpleType name="tNCNames">
         <restriction>
             <simpleType>
@@ -877,14 +877,14 @@
         <attribute name="type" type="QName"/>
         <attribute name="element" type="QName"/>
                 </extension>
-            </complexContent> 
+            </complexContent>
        </complexType>
     </element>
-    
+
     <element name="propertyAlias">
         <complexType>
             <complexContent>
-                <extension base="bpws:tExtensibleElements">     
+                <extension base="bpws:tExtensibleElements">
                     <sequence>
                         <element name="query" minOccurs="0" type="bpws:tQuery" />
                     </sequence>
@@ -898,5 +898,5 @@
         </complexType>
     </element>
 
-    
+
 </schema>

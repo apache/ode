@@ -23,9 +23,9 @@ import javax.xml.namespace.QName;
 
 public class Property implements Identifier {
     private static final long serialVersionUID = -6249689910742825036L;
-    
+
     private final QName name;
-    
+
     /**
      * @param name
      */
@@ -43,5 +43,5 @@ public class Property implements Identifier {
     public String getName() {
         return name.getLocalPart();
     }
-    
+
 }

@@ -26,7 +26,7 @@ import javax.wsdl.WSDLException;
  * is invalid (from a schema perspective).
  */
 public class InvalidBpelPropertyAliasException extends WSDLException {
-  
+
   private static final long serialVersionUID = 1L;
     /**
    * Construct a new instance with the specified explanatory message.

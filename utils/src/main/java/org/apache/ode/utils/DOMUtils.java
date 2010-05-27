@@ -355,7 +355,7 @@ public class DOMUtils {
                 }
             }
             n = n.getParentNode();
-        } 
+        }
         return pref;
     }
 
@@ -710,7 +710,7 @@ public class DOMUtils {
         }
         return new QName(namespaceUri, localName);
     }
-    
+
     public static QName getNodeQName(String qualifiedName) {
         int index = qualifiedName.indexOf(":");
         if (index >= 0) {
@@ -1053,7 +1053,7 @@ public class DOMUtils {
                 ret.add((Element)c);
         }
 
-        
+
         return ret;
     }
 
@@ -1081,18 +1081,18 @@ public class DOMUtils {
         String prefix = qName.getPrefix(), localPart = qName.getLocalPart();
         return (prefix == null || "".equals(prefix)) ? localPart : (prefix + ":" + localPart);
     }
-    
+
     /**
-     * Deep clone, but don't fry, the given node in the context of the given document. 
-     * For all intents and purposes, the clone is the exact same copy of the node, 
-     * except that it might have a different owner document. 
-     * 
+     * Deep clone, but don't fry, the given node in the context of the given document.
+     * For all intents and purposes, the clone is the exact same copy of the node,
+     * except that it might have a different owner document.
+     *
      * This method is fool-proof, unlike the <code>adoptNode</code> or <code>adoptNode</code> methods,
      * in that it doesn't assume that the given node has a parent or a owner document.
-     * 
+     *
      * @param document
      * @param sourceNode
-     * @return a clone of node 
+     * @return a clone of node
      */
     public static Node cloneNode(Document document, Node sourceNode) {
         Node clonedNode = null;
@@ -1101,12 +1101,12 @@ public class DOMUtils {
         QName sourceQName = getNodeQName(sourceNode);
         String nodeName = sourceQName.getLocalPart();
         String namespaceURI = sourceQName.getNamespaceURI();
-        
+
         // if the node is unqualified, don't assume that it inherits the WS-BPEL target namespace
         if (Namespaces.WSBPEL2_0_FINAL_EXEC.equals(namespaceURI)) {
             namespaceURI = null;
         }
-        
+
         switch (sourceNode.getNodeType()) {
         case Node.ATTRIBUTE_NODE:
             if (namespaceURI == null) {
@@ -1146,7 +1146,7 @@ public class DOMUtils {
             if (namespaceURI == null) {
                 clonedNode = document.createElement(nodeName);
             } else {
-                String prefix = namespaceURI.equals(Namespaces.XMLNS_URI) ? 
+                String prefix = namespaceURI.equals(Namespaces.XMLNS_URI) ?
                         "xmlns" : ((Element) sourceNode).lookupPrefix(namespaceURI);
                 if (prefix != null && !"".equals(prefix)) {
                     nodeName = prefix + ":" + nodeName;
@@ -1185,7 +1185,7 @@ public class DOMUtils {
         default:
             break;
         }
-                
+
         // clone children of element and attribute nodes
         NodeList sourceChildren = sourceNode.getChildNodes();
         if (sourceChildren != null) {
@@ -1194,7 +1194,7 @@ public class DOMUtils {
                 Node clonedChild = cloneNode(document, sourceChild);
                 clonedNode.appendChild(clonedChild);
                 // if the child has a textual value, parse it for any embedded prefixes
-                if (clonedChild.getNodeType() == Node.TEXT_NODE || 
+                if (clonedChild.getNodeType() == Node.TEXT_NODE ||
                         clonedChild.getNodeType() == Node.CDATA_SECTION_NODE) {
                     parseEmbeddedPrefixes(sourceNode, clonedNode, clonedChild);
                 }
@@ -1205,7 +1205,7 @@ public class DOMUtils {
 
     /**
      * Parse the text in the cloneChild for any embedded prefixes, and define it in it's parent element
-     *  
+     *
      * @param sourceNode
      * @param clonedNode
      * @param clonedChild
@@ -1221,14 +1221,14 @@ public class DOMUtils {
             // couldn't find an element to set prefixes on, so bail out
             return;
         }
-        
+
         String text = ((Text) clonedChild).getNodeValue();
         if (text != null && text.indexOf(":") > 0) {
             Name11Checker nameChecker = Name11Checker.getInstance();
             for (int colonIndex = text.indexOf(":"); colonIndex != -1 && colonIndex < text.length(); colonIndex = text.indexOf(":", colonIndex +  1)) {
                 StringBuffer prefixString = new StringBuffer();
-                for (int prefixIndex = colonIndex - 1; 
-                        prefixIndex >= 0 && nameChecker.isNCNameChar(text.charAt(prefixIndex)); 
+                for (int prefixIndex = colonIndex - 1;
+                        prefixIndex >= 0 && nameChecker.isNCNameChar(text.charAt(prefixIndex));
                         prefixIndex--) {
                     prefixString.append(text.charAt(prefixIndex));
                 }

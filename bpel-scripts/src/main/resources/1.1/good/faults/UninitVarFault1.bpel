@@ -18,24 +18,24 @@
   -->
 
 <process name="UninitVarFault1"
-    targetNamespace="http://ode/bpel/unit-test" 
+    targetNamespace="http://ode/bpel/unit-test"
     xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
     xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:test="uri:testing">
    <partnerLinks>
-      <partnerLink name="testPartnerLink" 
+      <partnerLink name="testPartnerLink"
          partnerLinkType="test:PartnerLinkType1"
          myRole="me" />
    </partnerLinks>
-    
+
    <variables>
      <variable name="var1" messageType="test:Message1"/>
      <variable name="var2" type="xsd:string"/>
    </variables>
-    
-   <sequence>   
-       <receive 
+
+   <sequence>
+       <receive
           createInstance="yes"
           name="startReceive"
           partnerLink="testPartnerLink"
@@ -64,7 +64,7 @@
              </copy>
           </assign>
       </scope>
-       <reply name="endReply" 
+       <reply name="endReply"
               operation="opTwoWay"
               partnerLink="testPartnerLink"
               portType="test:PortType1"

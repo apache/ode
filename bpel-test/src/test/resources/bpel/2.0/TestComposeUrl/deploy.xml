@@ -17,7 +17,7 @@
   ~ under the License.
   -->
 <deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
-    xmlns:pns="http://ode/bpel/unit-test" 
+    xmlns:pns="http://ode/bpel/unit-test"
     xmlns:wns="http://ode/bpel/unit-test.wsdl">
 
 

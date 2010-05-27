@@ -25,8 +25,8 @@ import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
 
 /**
- * Example JACOB process illustrating the use of {@link SynchPrint} 
- * 
+ * Example JACOB process illustrating the use of {@link SynchPrint}
+ *
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
 public class SynchPrinter {

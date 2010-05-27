@@ -60,7 +60,7 @@ import org.w3c.dom.Element;
  */
 class SCOPE extends ACTIVITY {
     private static final long serialVersionUID = 6111903798996023525L;
-    
+
     private static final Log __log = LogFactory.getLog(SCOPE.class);
 
     private OScope _oscope;
@@ -75,7 +75,7 @@ class SCOPE extends ACTIVITY {
     }
 
     public void run() {
-        
+
         // Start the child activity.
         _child = new ActivityInfo(genMonotonic(),
             _oscope.activity,
@@ -92,7 +92,7 @@ class SCOPE extends ACTIVITY {
                 _eventHandlers.add(ehi);
                 instance(new EH_ALARM(ehi.psc,ehi.tc, ehi.cc, alarm, _scopeFrame));
             }
-            
+
             for (Iterator<OEventHandler.OEvent> i = _oscope.eventHandler.onMessages.iterator(); i.hasNext(); ) {
                 OEventHandler.OEvent event = i.next();
                 EventHandlerInfo ehi = new EventHandlerInfo(event,
@@ -104,7 +104,7 @@ class SCOPE extends ACTIVITY {
             }
         }
 
-        getBpelRuntimeContext().initializePartnerLinks(_scopeFrame.scopeInstanceId, 
+        getBpelRuntimeContext().initializePartnerLinks(_scopeFrame.scopeInstanceId,
             _oscope.partnerLinks.values());
 
         sendEvent(new ScopeStartEvent());
@@ -354,7 +354,7 @@ class SCOPE extends ACTIVITY {
                     }
                 } else /* completed ok */ {
                     sendEvent(new ScopeCompletionEvent());
-                    
+
                     if (_oscope.compensationHandler != null) {
                         CompensationHandler compensationHandler = new CompensationHandler(
                             _scopeFrame,
@@ -444,7 +444,7 @@ class SCOPE extends ACTIVITY {
                 bestMatch = c;
             } else {
                 // Otherwise we prefer name and variable matches but prefer name-only matches to
-                // variable-only matches. 
+                // variable-only matches.
                 int existingScore = (bestMatch.faultName == null ? 0 : 2) + (bestMatch.faultVariable == null ? 0 : 1);
                 int currentScore = (c.faultName == null ? 0 : 2) + (c.faultVariable == null ? 0 : 1);
                 if (currentScore > existingScore) {

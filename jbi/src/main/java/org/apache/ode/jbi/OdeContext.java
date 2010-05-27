@@ -70,7 +70,7 @@ final public class OdeContext {
 
     public static final QName IM_SERVICE_NAME = new QName("http://www.apache.org/ode/pmapi", "InstanceManagementService");
     public static final String IM_PORT_NAME = "InstanceManagementPort";
-    
+
     /** static singleton */
     private static OdeContext __self;
 
@@ -106,10 +106,10 @@ final public class OdeContext {
 
     ProcessStoreImpl _store;
 
-    ServiceEndpoint _processManagementEndpoint;    
+    ServiceEndpoint _processManagementEndpoint;
     ServiceEndpoint _instanceManagementEndpoint;
 
-    JbiMessageExchangeProcessor _processManagementProcessor;    
+    JbiMessageExchangeProcessor _processManagementProcessor;
     JbiMessageExchangeProcessor _instanceManagementProcessor;
 
     ProcessManagement _processManagement;
@@ -179,7 +179,7 @@ final public class OdeContext {
             __log.debug("Activate endpoint: " + endpoint);
         }
 
-        
+
         OdeService service=_activeOdeServices.get(endpoint);
         if(service == null)
             service = new OdeService(this, endpoint);
@@ -191,7 +191,7 @@ final public class OdeContext {
                 Serializer ofh = new Serializer(is);
                 compiledProcess = ofh.readOProcess();
             } finally {
-                is.close();            	
+                is.close();
             }
             QName portType = null;
             for (Map.Entry<String, Endpoint> provide : pc.getProvideEndpoints().entrySet()) {
@@ -231,7 +231,7 @@ final public class OdeContext {
 
         if (svc != null) {
             _serviceEprMap.remove(svc);
-            svc.deactivate();        
+            svc.deactivate();
             if(svc.getCount() < 1 ) {
             _activeOdeServices.remove(endpoint);
             }
@@ -288,7 +288,7 @@ final public class OdeContext {
     public Mapper getDefaultMapper() {
         return _mappers.get(0);
     }
-    
+
     void activatePMAPIs() throws JBIException {
         ProcessAndInstanceManagementImpl pm = new ProcessAndInstanceManagementImpl(_server, _store);
         _processManagement = pm;
@@ -315,7 +315,7 @@ final public class OdeContext {
             }
         }
     }
-    
+
     public long calculateSizeOfService(EndpointReference epr) {
         if (epr != null) {
             for (OdeService odeService : _serviceEprMap.keySet()) {

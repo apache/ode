@@ -28,5 +28,5 @@
             <xs:import namespace="missing_import.xsd" schemaLocation="missing_import.xsd"/>
         </xs:schema>
     </types>
-    
+
 </definitions>

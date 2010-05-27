@@ -23,7 +23,7 @@ import java.io.Serializable;
 /**
  * This hibernate entity enables using the BPEL_MEX_PROPS table in HQL. This entity
  * is excluded from schema export.
- * 
+ *
  * @hibernate.class table="BPEL_MEX_PROPS" lazy="true"
  * @hibernate.query name="SELECT_MEX_PROPS_IDS_BY_INSTANCES" query="select p.id from HMessageExchangeProperty p, HMessageExchange e where p.mex = e and e.instance in (:instances)"
  */
@@ -48,7 +48,7 @@ public class HMessageExchangeProperty implements Serializable {
 
     public void setKey(HMessageExchangeProperty property) {
     }
-    
+
     /**
      * @hibernate.many-to-one column="MEX" insert="false" update="false"
      */
@@ -66,7 +66,7 @@ public class HMessageExchangeProperty implements Serializable {
     public String getName() {
         return _name;
     }
-    
+
     public void setName(String name) {
         _name = name;
     }
@@ -83,14 +83,14 @@ public class HMessageExchangeProperty implements Serializable {
     }
 
     public boolean equals(Object another) {
-        // fake implementation to suppress hibernate warning on key not hash-searchable; 
-        // actually HMessageExchangePropery is never retrieved by the id 
+        // fake implementation to suppress hibernate warning on key not hash-searchable;
+        // actually HMessageExchangePropery is never retrieved by the id
         return super.equals(another);
     }
-    
+
     public int hashCode() {
         // fake implementation to suppress hibernate warning on key not hash-searchable
-        // actually HMessageExchangePropery is never retrieved by the id 
+        // actually HMessageExchangePropery is never retrieved by the id
         return _mex.hashCode() * 29 + _name.hashCode() * 13;
     }
 }

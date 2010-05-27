@@ -217,7 +217,7 @@ class WSDLRegistry {
                     ((List<ExtensibilityElement>)def.getTypes().getExtensibilityElements()).iterator();
                  iter.hasNext();) {
                 ExtensibilityElement ee = iter.next();
-                
+
                 if (ee instanceof XMLSchemaType) {
                     byte[] schema = ((XMLSchemaType)ee).getXMLSchema();
                     WsdlFinderXMLEntityResolver resolver = new WsdlFinderXMLEntityResolver(rf, defuri, _internalSchemas, false);
@@ -333,7 +333,7 @@ class WSDLRegistry {
         for (URI uri : _schemas.keySet()) {
             schemaSources.put(uri, new StreamSource(new ByteArrayInputStream(_schemas.get(uri))));
         }
-        
+
         return schemaSources;
     }
 }

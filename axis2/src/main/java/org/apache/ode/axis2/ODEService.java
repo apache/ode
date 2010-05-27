@@ -91,11 +91,11 @@ public class ODEService {
         _converter = new SoapMessageConverter(_wsdlDef, serviceName, portName);
 
     }
-    
+
     public String getName() {
         return _axisService.getName();
     }
-    
+
     public void onAxisMessageExchange(MessageContext msgContext, MessageContext outMsgContext, SOAPFactory soapFactory)
             throws AxisFault {
         boolean success = true;
@@ -293,7 +293,7 @@ public class ODEService {
                 odeMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, endpoint.getSessionId());
             }
         }
-        
+
         Object ocse = msgContext.getProperty("callbackSessionEndpoint");
         if (ocse != null) {
             Element serviceEpr = (Element) ocse;
@@ -322,7 +322,7 @@ public class ODEService {
         // endpoint in this case, except that it is updated with session
         // information (if available).
         if (odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID) != null) {
-            WSAEndpoint sessionAwareEndPoint = new WSAEndpoint(_serviceRef); 
+            WSAEndpoint sessionAwareEndPoint = new WSAEndpoint(_serviceRef);
             sessionAwareEndPoint.setSessionId(odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID));
             msgContext.setProperty("callbackSessionEndpoint", sessionAwareEndPoint);
         }

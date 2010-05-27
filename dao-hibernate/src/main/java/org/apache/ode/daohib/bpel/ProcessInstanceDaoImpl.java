@@ -78,7 +78,7 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
   private static final Log __log = LogFactory.getLog(ProcessInstanceDaoImpl.class);
 
   /** Query for removing selectors. */
-  private static final String QRY_DELSELECTORS = "delete from "  + 
+  private static final String QRY_DELSELECTORS = "delete from "  +
     HCorrelatorSelector.class.getName() + " where instance = ?";
 
   private static final String QRY_VARIABLES = "from " + HXmlData.class.getName()
@@ -90,7 +90,7 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
   private HProcessInstance _instance;
 
   private ScopeDAO _root;
-  
+
   public ProcessInstanceDaoImpl(SessionManager sm, HProcessInstance instance) {
     super(sm, instance);
     entering("ProcessInstanceDaoImpl.ProcessInstanceDaoImpl");
@@ -103,12 +103,12 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
   public Date getCreateTime() {
     return _instance.getCreated();
   }
-  
+
   public void setFault(FaultDAO fault) {
       entering("ProcessInstanceDaoImpl.setFault");
     _instance.setFault(((FaultDAOImpl)fault)._self);
     getSession().update(_instance);
-    
+
   }
 
 
@@ -150,7 +150,7 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
     if (_instance.getJacobState() == null) return null;
     return _instance.getJacobState();
   }
-    
+
   /**
    * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#setExecutionState(byte[])
    */
@@ -169,13 +169,13 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
     entering("ProcessInstanceDaoImpl.getProcess");
     return new ProcessDaoImpl(_sm, _instance.getProcess());
   }
-  
+
   /**
    * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getRootScope()
    */
   public ScopeDAO getRootScope() {
         entering("ProcessInstanceDaoImpl.getRootScope");
-    if (_root != null) 
+    if (_root != null)
       return _root;
     Query rootQry = getSession().createFilter(_instance.getScopes(),
         "where this.parentScope is null");
@@ -203,7 +203,7 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
   public short getState() {
     return _instance.getState();
   }
-    
+
   /**
    * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getPreviousState()
    */
@@ -211,7 +211,7 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
     return _instance.getPreviousState();
   }
 
-  
+
   public ScopeDAO createScope(ScopeDAO parentScope, String name, int scopeModelId) {
     entering("ProcessInstanceDaoImpl.createScope");
     HScope scope = new HScope();
@@ -244,7 +244,7 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
             ? new ScopeDaoImpl(_sm, scope)
             : null;
   }
-  
+
   /**
    * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getScopes(java.lang.String)
    */
@@ -271,7 +271,7 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
   public Collection<ScopeDAO> getScopes() {
     return getScopes(null);
   }
-  
+
   /**
    * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getInstantiatingCorrelator()
    */
@@ -286,7 +286,7 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
   public Date getLastActiveTime() {
     return _instance.getLastActiveTime();
   }
-  
+
   /**
    * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#setLastActiveTime(java.util.Date)
    */
@@ -353,21 +353,21 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
   public void delete(Set<CLEANUP_CATEGORY> cleanupCategories) {
       delete(cleanupCategories, true);
   }
-  
+
   public void delete(Set<CLEANUP_CATEGORY> cleanupCategories, boolean deleteMyRoleMex) {
     entering("ProcessInstanceDaoImpl.delete");
     if(__log.isDebugEnabled()) __log.debug("Cleaning up instance data with categories = " + cleanupCategories);
-      
+
     if( _instance.getJacobState() != null ) {
         _instance.setJacobState(null);
     }
 
     HProcessInstance[] instances = new HProcessInstance[] {_instance};
-    
+
     if( cleanupCategories.contains(CLEANUP_CATEGORY.EVENTS) ) {
       deleteEvents(instances);
     }
-      
+
     if( cleanupCategories.contains(CLEANUP_CATEGORY.CORRELATIONS) ) {
       deleteCorrelations(instances);
     }
@@ -375,20 +375,20 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
     if( cleanupCategories.contains(CLEANUP_CATEGORY.MESSAGES) ) {
       deleteMessages(instances, deleteMyRoleMex);
     }
-      
+
     if( cleanupCategories.contains(CLEANUP_CATEGORY.VARIABLES) ) {
       deleteVariables(instances);
     }
-      
+
     if( cleanupCategories.contains(CLEANUP_CATEGORY.INSTANCE) ) {
       deleteInstances(instances);
     }
 
     getSession().flush();
-      
+
     if(__log.isDebugEnabled()) __log.debug("Instance data cleaned up and flushed.");
   }
-  
+
   @SuppressWarnings("unchecked")
   private void deleteInstances(HProcessInstance[] instances) {
     deleteByIds(HFaultData.class, getSession().getNamedQuery(HFaultData.SELECT_FAULT_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
@@ -418,7 +418,7 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
       if( deleteMyRoleMex ) { // Delete my role mex and partner role mexes
           // delete messages
           deleteByIds(HMessage.class, getSession().getNamedQuery(HMessage.SELECT_MESSAGE_IDS_BY_INSTANCES).setParameterList("instances", instances).list());
-          
+
           // delete all mexes
           deleteByIds(HMessageExchange.class, allMexes);
       } else { // Delete only the unmatched mexes, there are chances that some unmatched messages are still there
@@ -464,7 +464,7 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
     c.setProjection(Projections.projectionList().add(Projections.min("tstamp"))
                                                 .add(Projections.max("tstamp"))
                                                 .add(Projections.count("tstamp")));
-    
+
     Object[] ret = (Object[]) c.uniqueResult();
     EventsFirstLastCountTuple flc = new EventsFirstLastCountTuple();
     flc.first = (Date) ret[0];
@@ -475,26 +475,26 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
 
   public Collection<MessageExchangeDAO> getMessageExchanges() {
     Collection<MessageExchangeDAO> exchanges = new ArrayList<MessageExchangeDAO>();
-  
+
     for( HMessageExchange exchange : _instance.getMessageExchanges() ) {
       exchanges.add(new MessageExchangeDaoImpl(_sm, exchange));
     }
 
     return exchanges;
   }
-  
+
   public long genMonotonic() {
       entering("ProcessInstanceDaoImpl.genMonotonic");
     long seq = _instance.getSequence()+1;
     _instance.setSequence(seq);
     return seq;
   }
-  
+
   protected void clearSelectors() {
       entering("ProcessInstanceDaoImpl.clearSelectors");
     Query q = getSession().createQuery(QRY_DELSELECTORS);
     q.setEntity(0, _instance);
-    q.executeUpdate();    
+    q.executeUpdate();
   }
 
   public int getActivityFailureCount() {
@@ -556,12 +556,12 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
       }
     }
   }
-  
+
   public BpelDAOConnection getConnection() {
       entering("ProcessInstanceDaoImpl.getConnection");
     return new BpelDAOConnectionImpl(_sm);
   }
- 
+
    public Collection<String> getMessageExchangeIds() {
         Collection<String> c = new HashSet<String>();
         for (HMessageExchange m : _instance.getMessageExchanges()) {

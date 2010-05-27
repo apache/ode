@@ -28,8 +28,8 @@ import org.w3c.dom.Node;
 
 
 /**
- * A representation of a WSDL-typed message. The implementation of this 
- * interface is provided by the integration layer. 
+ * A representation of a WSDL-typed message. The implementation of this
+ * interface is provided by the integration layer.
  */
 public interface Message {
 

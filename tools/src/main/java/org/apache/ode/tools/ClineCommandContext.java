@@ -23,11 +23,11 @@ import org.apache.commons.logging.Log;
 public class ClineCommandContext implements CommandContext {
 
   private Log _log;
-  
+
   public ClineCommandContext(Log l) {
     _log = l;
   }
-  
+
   public void outln(String s) {
     System.out.println(s);
   }
@@ -35,11 +35,11 @@ public class ClineCommandContext implements CommandContext {
   public void out(String s) {
     System.out.print(s);
   }
-  
+
   public void errln(String s) {
     System.err.println(s);
   }
-  
+
   public void error(String s) {
     _log.error(s);
   }
@@ -63,11 +63,11 @@ public class ClineCommandContext implements CommandContext {
   public void debug(String s) {
     _log.debug(s);
   }
-  
+
   public void warn(String s) {
     _log.warn(s);
   }
-  
+
   public void warn(String s, Throwable t) {
     _log.warn(s,t);
   }

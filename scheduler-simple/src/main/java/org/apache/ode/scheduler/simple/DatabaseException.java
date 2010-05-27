@@ -21,7 +21,7 @@ package org.apache.ode.scheduler.simple;
 
 /**
  * Exception class thrown by {@link DatabaseDelegate} implementations.
- * 
+ *
  * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
  *
  */

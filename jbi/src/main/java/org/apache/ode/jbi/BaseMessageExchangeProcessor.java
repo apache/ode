@@ -37,7 +37,7 @@ public abstract class BaseMessageExchangeProcessor implements JbiMessageExchange
     final Log LOG = LogFactory.getLog(getClass());
 
     DeliveryChannel _channel;
-    
+
     public BaseMessageExchangeProcessor(DeliveryChannel channel) {
         _channel = channel;
     }
@@ -91,14 +91,14 @@ public abstract class BaseMessageExchangeProcessor implements JbiMessageExchange
                 LOG.error("Unexpected error invoking ODE.", t);
                 err = new RuntimeException(t);
             } finally {
-                // If we got an error that wasn't sent.  
+                // If we got an error that wasn't sent.
                 if (jbiMex.getStatus() == ExchangeStatus.ACTIVE && !success) {
                     if (err != null && jbiMex.getError() == null)  {
                         jbiMex.setError(err);
                     }
-                    jbiMex.setStatus(ExchangeStatus.ERROR);     
+                    jbiMex.setStatus(ExchangeStatus.ERROR);
                     _channel.send(jbiMex);
-                }       
+                }
             }
         } else {
             LOG.error("JBI MessageExchange " + jbiMex.getExchangeId() + " is of an unsupported pattern "
@@ -110,7 +110,7 @@ public abstract class BaseMessageExchangeProcessor implements JbiMessageExchange
     }
 
     /**
-     * Invoke with an In-Out message exchange pattern. 
+     * Invoke with an In-Out message exchange pattern.
      */
     public abstract NormalizedMessage invoke(InOut mex) throws MessagingException;
 
@@ -118,5 +118,5 @@ public abstract class BaseMessageExchangeProcessor implements JbiMessageExchange
      * Invoke with an In-Only message exchange pattern.
      */
     public abstract void invoke(InOnly mex) throws MessagingException;
-    
+
 }

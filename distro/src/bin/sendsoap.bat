@@ -36,7 +36,7 @@ set JAVACMD="%JAVA_HOME%\bin\java.exe"
 set LOCALCLASSPATH=%ODE_CLASSPATH%;%ODE_LIB%
 FOR %%c in (%ODE_LIB%\*.jar) DO (call :append_cp %%c)
 
-%JAVACMD% %ODE_JAVAOPTS% -cp "%LOCALCLASSPATH%" org.apache.ode.tools.sendsoap.cline.HttpSoapSender %* 
+%JAVACMD% %ODE_JAVAOPTS% -cp "%LOCALCLASSPATH%" org.apache.ode.tools.sendsoap.cline.HttpSoapSender %*
 goto end
 
 :append_cp

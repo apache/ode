@@ -61,12 +61,12 @@ public class DeploymentUnitDaoImpl extends HibObj implements DeploymentUnitDAO {
     public Collection<? extends ProcessConfDAO> getProcesses() {
         return _processes;
     }
-    
-   
+
+
     public void setProcesses(Collection<ProcessConfDaoImpl> processes) {
         _processes = processes;
     }
-    
+
     /**
      * The user that deployed the process.
      * @hibernate.property
@@ -104,14 +104,14 @@ public class DeploymentUnitDaoImpl extends HibObj implements DeploymentUnitDAO {
     public void setName(String name) {
         _name = name;
     }
-    
+
     /**
      * @hibernate.property column="DIR"
      */
     public String getDeploymentUnitDir() {
         return _dir;
     }
-    
+
     public void setDeploymentUnitDir(String dir) {
         _dir = dir;
     }
@@ -119,7 +119,7 @@ public class DeploymentUnitDaoImpl extends HibObj implements DeploymentUnitDAO {
     public void delete() {
         super.delete();
     }
-    
+
     public ProcessConfDAO createProcess(QName pid, QName type, long version) {
         ProcessConfDaoImpl p = new ProcessConfDaoImpl();
         p.setPID(pid);
@@ -138,7 +138,7 @@ public class DeploymentUnitDaoImpl extends HibObj implements DeploymentUnitDAO {
             public boolean isMember(ProcessConfDAO o) {
                 return o.getPID().equals(pid);
             }
-            
+
         });
     }
  }

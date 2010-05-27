@@ -23,7 +23,7 @@ package org.apache.ode.bpel.evt;
  * Base class for process instances events.
  */
 public abstract class ProcessInstanceEvent extends ProcessEvent {
-  
+
   private Long _pid;
 
   public ProcessInstanceEvent() {

@@ -26,7 +26,7 @@ import javax.xml.namespace.QName;
 
 
 /**
- * Jaxen-based compiled-xpath representation for XPATH 1.0 expression language. 
+ * Jaxen-based compiled-xpath representation for XPATH 1.0 expression language.
  */
 public class OXPath10ExpressionBPEL20 extends OXPath10Expression
         implements Serializable {

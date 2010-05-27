@@ -26,7 +26,7 @@ import org.junit.*;
 
 
 public class XPath20ExpressionCompilerImplTest {
-    
+
     private static final String TEST_NAMESPACE = "http://www.example.com/";
     private static final String EXTRACT_FUNCTION_EXPRS = "extractFunctionExprs";
 
@@ -45,7 +45,7 @@ public class XPath20ExpressionCompilerImplTest {
             }
         }
     }
-    
+
     @Test
     public void testTimeStampInFunction() throws Exception {
         XPath20ExpressionCompilerImpl xp20Exp = new XPath20ExpressionCompilerImpl(TEST_NAMESPACE);
@@ -62,7 +62,7 @@ public class XPath20ExpressionCompilerImplTest {
         }
 
     }
-    
+
     @Test
     public void testresolvedFunctionsTimeStamp() throws Exception {
         XPath20ExpressionCompilerImpl xp20Exp = new XPath20ExpressionCompilerImpl(TEST_NAMESPACE);
@@ -79,8 +79,8 @@ public class XPath20ExpressionCompilerImplTest {
             }
         }
     }
-    
-    
-    
+
+
+
 
 }

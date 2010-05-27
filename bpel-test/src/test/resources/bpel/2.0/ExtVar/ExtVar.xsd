@@ -17,9 +17,9 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<schema 
-    xmlns="http://www.w3.org/2001/XMLSchema" 
-    targetNamespace="http://foo/extvar" 
+<schema
+    xmlns="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://foo/extvar"
     xmlns:tns="http://foo/extvar" elementFormDefault="qualified">
 
     <complexType name="tRow">
@@ -33,6 +33,6 @@
             <element name="bar" type="string"/>
         </sequence>
     </complexType>
-    
+
     <element name="row" type="tns:tRow" />
 </schema>

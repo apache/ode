@@ -22,7 +22,7 @@ import org.apache.ode.utils.Namespaces;
 
 
 /**
- * XPath 2.0 compiler for the BPEL 2.0 final spec. 
+ * XPath 2.0 compiler for the BPEL 2.0 final spec.
  * @author mriou <mriou at apache dot org>
  */
 public class XPath20ExpressionCompilerBPEL20 extends XPath20ExpressionCompilerImpl {

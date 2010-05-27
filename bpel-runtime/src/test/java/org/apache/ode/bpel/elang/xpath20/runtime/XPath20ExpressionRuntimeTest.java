@@ -43,7 +43,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class XPath20ExpressionRuntimeTest extends TestCase implements EvaluationContext {
-    
+
     private XPath20ExpressionRuntime _runtime;
     private Map<String, Node> _vars;
     private XPath20ExpressionCompilerBPEL20 _compiler;
@@ -51,16 +51,16 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
     private MockCompilerContext _cc;
     private Document _vardoc;
     public XPath20ExpressionRuntimeTest() {}
-    
+
     @Override
     public void setUp() throws Exception {
         _vars = new HashMap<String, Node>();
         _cc = new MockCompilerContext();
-        _runtime = new XPath20ExpressionRuntime();       
+        _runtime = new XPath20ExpressionRuntime();
         _runtime.initialize(new HashMap());
         _compiler = new XPath20ExpressionCompilerBPEL20();
         _compiler.setCompilerContext(_cc);
-        
+
         _vardoc = DOMUtils.parse(getClass().getResourceAsStream("/xpath20/variables.xml"));
         NodeList variables = _vardoc.getDocumentElement().getChildNodes();
         for (int i = 0; i < variables.getLength(); ++i) {
@@ -84,7 +84,7 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
     public void testCompilation() throws Exception {
         compile("$foo");
     }
-    
+
     public void testVariableSelection() throws Exception {
         OXPath20ExpressionBPEL20 exp = compile("$foo");
         Node retVal = _runtime.evaluateNode(exp, this);
@@ -146,7 +146,7 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
     public boolean narrowTypes() {
         return true;
     }
-    
+
     private OXPath20ExpressionBPEL20 compile(String xpath) {
         Document doc = DOMUtils.newDocument();
         Element e = doc.createElementNS(null, "expression");
@@ -155,7 +155,7 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
         Expression exp = new Expression(e);
         return (OXPath20ExpressionBPEL20)_compiler.compileLValue(exp);
     }
-    
+
     public URI getBaseResourceURI() {
         return null;
     }

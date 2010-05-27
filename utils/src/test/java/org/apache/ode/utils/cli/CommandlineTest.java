@@ -34,7 +34,7 @@ public class CommandlineTest extends TestCase {
   public CommandlineTest(String arg0) {
     super(arg0);
   }
-  
+
   public void testUserOrder() {
     LastArgument last = new LastArgument("foo", "bar", false);
     Argument first = new Argument("baz", "qux", false);
@@ -56,7 +56,7 @@ public class CommandlineTest extends TestCase {
     assertTrue(cf[2].getDescription(),cf[2] == secondtolast);
     assertTrue(cf[3].getDescription(),cf[3] == last);
   }
-  
+
   public void testLastArgument() {
     String[] args = new String[] {"a", "b", "c", "d"};
     LastArgument la = new LastArgument("should be d", "", false);
@@ -70,9 +70,9 @@ public class CommandlineTest extends TestCase {
     assertTrue(mav.length == 3);
     assertTrue(mav[0].equals("a"));
     assertTrue(mav[1].equals("b"));
-    assertTrue(mav[2].equals("c"));    
+    assertTrue(mav[2].equals("c"));
   }
-  
+
   public void testXorGroup() {
     XorGroup xog = BaseCommandlineTool.LOGGING;
     Fragments logging = new Fragments(new CommandlineFragment[] {xog});
@@ -80,8 +80,8 @@ public class CommandlineTest extends TestCase {
     assertTrue(xog.didMatch());
     assertTrue(xog.getMatched() == BaseCommandlineTool.VERBOSE_F);
   }
-  
-  private void doFlag(Flag f, List<List<String>> tests, boolean[] good, boolean[] set, 
+
+  private void doFlag(Flag f, List<List<String>> tests, boolean[] good, boolean[] set,
       List<List<String>> post)
   {
     for (int i=0; i < tests.size(); ++i) {
@@ -109,9 +109,9 @@ public class CommandlineTest extends TestCase {
       }
       f.reset();
       assertFalse(i + " should not have been set after reset.",f.isSet());
-    }    
+    }
   }
-  
+
   private void doFlagWithArgument(FlagWithArgument f, List<List<String>> tests, List<String> values,
       boolean[] good, boolean[] set, List<List<String>> post)
   {
@@ -141,9 +141,9 @@ public class CommandlineTest extends TestCase {
       }
       f.reset();
       assertFalse(i + " should not have been set after reset.",f.isSet());
-    }    
-  }  
-  
+    }
+  }
+
   public void testOptionalArgument() {
     Argument f = new Argument("x", "foo", true);
 
@@ -167,9 +167,9 @@ public class CommandlineTest extends TestCase {
         Arrays.asList(new String[]{}),
         Arrays.asList(new String[]{}));
 
-    doArgument(f,tests,values,good,set,post);    
+    doArgument(f,tests,values,good,set,post);
   }
-  
+
   public void testRequiredArgument() {
     Argument f = new Argument("x", "foo", false);
 
@@ -193,9 +193,9 @@ public class CommandlineTest extends TestCase {
         Arrays.asList(EMPTY_STRING_ARRAY),
         null);
 
-    doArgument(f, tests, values, good, set, post);    
-  }  
-  
+    doArgument(f, tests, values, good, set, post);
+  }
+
   public void testOptionalMultiArgument() {
     MultiArgument f = new MultiArgument("x", "foo", true);
 
@@ -214,20 +214,20 @@ public class CommandlineTest extends TestCase {
     boolean[] good = new boolean[] {
         true,true,true
     };
-    
+
     boolean[] set = new boolean[] {
         true,true,false
     };
-    
+
     List<List<String>> post = Arrays.asList(
         Arrays.asList(EMPTY_STRING_ARRAY),
         Arrays.asList(EMPTY_STRING_ARRAY),
         Arrays.asList(EMPTY_STRING_ARRAY)
     );
 
-    doMultiArgument(f, tests, values, good, set, post);    
-  }  
-  
+    doMultiArgument(f, tests, values, good, set, post);
+  }
+
   public void testRequiredMultiArgument() {
     MultiArgument f = new MultiArgument("x", "foo", false);
 
@@ -257,9 +257,9 @@ public class CommandlineTest extends TestCase {
         Arrays.asList(EMPTY_STRING_ARRAY)
     );
 
-    doMultiArgument(f, tests, values, good, set, post);    
-  }    
-  
+    doMultiArgument(f, tests, values, good, set, post);
+  }
+
   private void doArgument(Argument f, List<List<String>> tests, String[] values,
       boolean[] good, boolean[] set, List<List<String>> post)
   {
@@ -289,9 +289,9 @@ public class CommandlineTest extends TestCase {
       }
       f.reset();
       assertFalse(i + " should not have been set after reset.",f.isSet());
-    }    
-  }    
-  
+    }
+  }
+
   private void doMultiArgument(MultiArgument f, List<List<String>> tests, List<List<String>> values,
       boolean[] good, boolean[] set, List<List<String>> post)
   {
@@ -322,9 +322,9 @@ public class CommandlineTest extends TestCase {
       }
       f.reset();
       assertFalse(i + " should not have been set after reset.",f.isSet());
-    }    
-  }      
-  
+    }
+  }
+
   public void testOptionalFlagWithArgument() {
     FlagWithArgument f = new FlagWithArgument("x", "foo", "", true);
 
@@ -363,8 +363,8 @@ public class CommandlineTest extends TestCase {
     );
 
     doFlagWithArgument(f, tests, values, good, set, post);
-  }  
-  
+  }
+
   public void testRequiredFlagWithArgument() {
     FlagWithArgument f = new FlagWithArgument("x", "foo", "", false);
     List<List<String>> tests = Arrays.asList(
@@ -398,8 +398,8 @@ public class CommandlineTest extends TestCase {
     );
 
     doFlagWithArgument(f, tests, values, good, set, post);
-  }    
-  
+  }
+
   public void testOptionalFlag() {
     Flag f = new Flag("x", "", true);
 
@@ -433,7 +433,7 @@ public class CommandlineTest extends TestCase {
 
     doFlag(f, tests, good, set, post);
   }
-  
+
   public void testRequiredFlag() {
     Flag f = new Flag("x", "", false);
 
@@ -465,9 +465,9 @@ public class CommandlineTest extends TestCase {
         null
     );
 
-    doFlag(f, tests, good, set, post);    
+    doFlag(f, tests, good, set, post);
   }
-  
+
   public void testExtraStuff() {
     Fragments f = new Fragments(new CommandlineFragment[] {});
     String[] args = new String[] {"a", "b"};

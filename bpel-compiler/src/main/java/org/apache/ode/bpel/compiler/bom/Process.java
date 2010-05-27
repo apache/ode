@@ -40,7 +40,7 @@ public class Process extends Scope {
 
     /**
      * Get the name of the process.
-     * 
+     *
      * @return name of the process
      */
     public String getName() {
@@ -58,7 +58,7 @@ public class Process extends Scope {
 
     /**
      * Get the root, process-level activity.
-     * 
+     *
      * @return root process-level activity
      */
     public Activity getRootActivity() {
@@ -68,7 +68,7 @@ public class Process extends Scope {
 
     /**
      * Get the URL of the BPEL source document as a String.
-     * 
+     *
      * @return BPEL source URL.
      */
     public String getSource() {
@@ -77,7 +77,7 @@ public class Process extends Scope {
 
     /**
      * Get the process' target namespace.
-     * 
+     *
      * @return process' target namespace
      */
     public String getTargetNamespace() {
@@ -86,7 +86,7 @@ public class Process extends Scope {
 
     /**
      * Get the default query language.
-     * 
+     *
      * @return the default query language.
      */
     public String getQueryLanguage() {
@@ -95,7 +95,7 @@ public class Process extends Scope {
 
     /**
      * Get the default expression language.
-     * 
+     *
      * @return default expression language
      */
     public String getExpressionLanguage() {
@@ -104,7 +104,7 @@ public class Process extends Scope {
 
     /**
      * Get the <code>&lt;import&gt;</code>(s) of the process.
-     * 
+     *
      * @return {@link Set} of {@link Import}s
      */
     public List<Import> getImports() {

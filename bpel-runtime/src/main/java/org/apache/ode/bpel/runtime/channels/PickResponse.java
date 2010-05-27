@@ -22,7 +22,7 @@ import org.apache.ode.jacob.ap.ChannelType;
 
 /**
  * Response channel for pick requests.
- * @jacob.kind 
+ * @jacob.kind
  * @jacob.parent TimerResponseChannel
  */
 @ChannelType

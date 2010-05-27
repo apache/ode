@@ -55,7 +55,7 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
     protected ScopeFrame _scopeFrame;
 
     protected LinkFrame _linkFrame;
-    
+
     public ACTIVITY(ActivityInfo self, ScopeFrame scopeFrame, LinkFrame linkFrame) {
         assert self != null;
         assert scopeFrame != null;
@@ -70,13 +70,13 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
         return new Key(_self.o,_self.aId);
     }
 
-    
+
     protected void sendVariableReadEvent(VariableInstance var) {
         VariableReadEvent vre = new VariableReadEvent();
         vre.setVarName(var.declaration.name);
         sendEvent(vre);
     }
-    
+
     protected void sendEvent(ActivityEvent event) {
         event.setActivityName(_self.o.name);
         event.setActivityType(_self.o.getType());
@@ -116,7 +116,7 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
             _linkFrame.resolve(link).pub.linkStatus(false);
         }
     }
-    
+
     protected OConstants getConstants() {
         return _self.o.getOwner().constants;
     }
@@ -124,7 +124,7 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
     /**
      * Perform dead-path elimination on an activity that was
      * <em>not started</em>.
-     * 
+     *
      * @param activity
      */
     protected void dpe(OActivity activity) {
@@ -145,28 +145,28 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
     }
 
     //
-    // Syntactic sugar for methods that used to be on BpelRuntimeContext.. 
+    // Syntactic sugar for methods that used to be on BpelRuntimeContext..
     //
-    
-    Node fetchVariableData(VariableInstance variable, boolean forWriting) 
+
+    Node fetchVariableData(VariableInstance variable, boolean forWriting)
         throws FaultException
     {
         return _scopeFrame.fetchVariableData(getBpelRuntimeContext(), variable, forWriting);
     }
 
     Node fetchVariableData(VariableInstance var, OMessageVarType.Part part, boolean forWriting)
-        throws FaultException 
+        throws FaultException
     {
       return _scopeFrame.fetchVariableData(getBpelRuntimeContext(), var, part, forWriting);
     }
-    
-    Node initializeVariable(VariableInstance lvar, Node val) 
+
+    Node initializeVariable(VariableInstance lvar, Node val)
         throws ExternalVariableModuleException
     {
         return _scopeFrame.initializeVariable(getBpelRuntimeContext(), lvar, val);
     }
 
-    void commitChanges(VariableInstance lval, Node lvalue) 
+    void commitChanges(VariableInstance lval, Node lvalue)
         throws ExternalVariableModuleException
     {
         _scopeFrame.commitChanges(getBpelRuntimeContext(),lval, lvalue);
@@ -176,11 +176,11 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
         return _scopeFrame.getPartData(message, part);
     }
 
-    
+
     //
     // End syntactic sugar.
     //
-    
+
     public static final class Key implements Serializable {
         private static final long serialVersionUID = 1L;
 

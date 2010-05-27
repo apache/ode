@@ -42,17 +42,17 @@ import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 class OdeConsumerAsync extends OdeConsumer {
     private static final Log __log = LogFactory.getLog(OdeConsumerAsync.class);
 
-    /** 
+    /**
      * We create an executor to handle all the asynchronous invocations/timeouts. Note, we don't need a lot of threads
      * here, the operations are all async, using single-thread executor avoids any possible problems in concurrent
      * use of delivery channel.
-     * 
-     * WARNING:  Canceling tasks does not immediately release them, so we don't use the schedule-cancel pattern here.  
+     *
+     * WARNING:  Canceling tasks does not immediately release them, so we don't use the schedule-cancel pattern here.
      */
     private ScheduledExecutorService _executor;
 
     private Map<String, Long> _mexTimeouts = new ConcurrentHashMap<String, Long>();
-    
+
     OdeConsumerAsync(OdeContext ode) {
         super(ode);
        _executor = Executors.newSingleThreadScheduledExecutor();

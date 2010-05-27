@@ -19,7 +19,7 @@
 package org.apache.ode.bpel.compiler.api;
 
 /**
- * Exception indicating a compilation error. 
+ * Exception indicating a compilation error.
  */
 public class CompilationException extends RuntimeException {
   private static final long serialVersionUID = -4683674811787611083L;

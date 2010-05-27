@@ -42,7 +42,7 @@ public class CorrelatorsMigration implements Migration {
         for (BpelProcess process : registeredProcesses) {
             __log.debug("Migrating correlators for process " + process.getConf().getProcessId());
             ProcessDAO processDao = connection.getProcess(process.getConf().getProcessId());
-            
+
             for (OPartnerLink plink : process.getOProcess().getAllPartnerLinks()) {
                 if (plink.hasMyRole()) {
                     for (Iterator opI = plink.myRolePortType.getOperations().iterator(); opI.hasNext();) {

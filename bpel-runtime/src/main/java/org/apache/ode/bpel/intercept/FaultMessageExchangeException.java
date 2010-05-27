@@ -36,15 +36,15 @@ public final class FaultMessageExchangeException extends AbortMessageExchangeExc
 
     public FaultMessageExchangeException(String errmsg, QName faultName, Message faultData) {
         super(errmsg);
-        
+
         _faultName = faultName;
         _faultData = faultData;
     }
-    
+
     public QName getFaultName() {
         return _faultName;
     }
-    
+
     public Message getFaultData() {
         return _faultData;
     }

@@ -22,8 +22,8 @@
 
   <xb:namespace uri="http://www.apache.org/ode/schemas/schedules/2009/05">
     <xb:package>org.apache.ode.bpel.schedules</xb:package>
-  </xb:namespace> 
-  
+  </xb:namespace>
+
   <xb:namespace uri="##any">
     <xb:prefix></xb:prefix>
     <xb:suffix></xb:suffix>

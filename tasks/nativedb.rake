@@ -32,7 +32,7 @@ module NativeDB
 
         settings().each do |name, dbprops|
           if dbprops[:db] != "derby"
-            buildr.build create_hib_db(name, "#{base}/target/#{name}"=>dbprops) if orm == :hib and dbprops[:dao].downcase.include? "hib" 
+            buildr.build create_hib_db(name, "#{base}/target/#{name}"=>dbprops) if orm == :hib and dbprops[:dao].downcase.include? "hib"
             buildr.build create_jpa_db(base, name, "#{base}/target/#{name}"=>dbprops) if orm == :jpa and !dbprops[:dao].downcase.include? "hib"
           end
         end
@@ -53,7 +53,7 @@ module NativeDB
             ant.get :src=>"http://release.intalio.com/m2repo/ci-resources/ode-schema-5.2.x/package/#{dbprops[:db]}/ode_tables.sql",
                     :dest=> create_tables_sql
             sqls = prepare_sqls(task, ant, [], :hib, dbprops[:db], drop_tables_sql, create_tables_sql)
-            
+
             # Apply the sql scripts to the database
             ant.sql :driver=>dbprops[:driver], :url=>dbprops[:url], :userid=>dbprops[:userid], :password=>dbprops[:password], :autocommit=>dbprops[:autocommit] do
               sqls.each { |sql| ant.transaction :src=>sql }
@@ -76,7 +76,7 @@ module NativeDB
             create_tables_sql = "#{base}/target/#{dbprops[:db]}.sql"
             drop_tables_sql = "#{task.name}/drop-#{dbprops[:db]}.sql"
             sqls = prepare_sqls(task, ant, [], :jpa, dbprops[:db], drop_tables_sql, create_tables_sql)
-                        
+
             # Apply the sql scripts to the database
             ant.sql :driver=>dbprops[:driver], :url=>dbprops[:url], :userid=>dbprops[:userid], :password=>dbprops[:password], :autocommit=>dbprops[:autocommit] do
               sqls.each { |sql| ant.transaction :src=>sql }
@@ -88,7 +88,7 @@ module NativeDB
     end
 
     def prepare_configs(test, base)
-      test.setup task("prepare_configs") do |task| 
+      test.setup task("prepare_configs") do |task|
         if File.exist? SETTINGS
           require SETTINGS
 
@@ -101,7 +101,7 @@ module NativeDB
               dbs <<= (dbs == jpadbs ? "<jpa>" : "<hib>")
             else
               test.with REQUIRES
-  
+
               prepare_config(name, dbprops, "#{base}/target/conf.#{name}", "#{base}/src/test/webapp/WEB-INF/conf.template")
               dbs <<= ", " if dbs.length > 0
               dbs <<= "#{base}/target/conf.#{name}"
@@ -112,11 +112,11 @@ module NativeDB
         end
       end
     end
-    
+
     def prepare_config(name, dbprops, db, template)
       rm_rf db if File.exist?(db)
       Dir.mkdir(db)
-      
+
       Buildr.ant(name) do |ant|
         ant.copy :todir=>db do
           ant.fileset :dir=>template
@@ -127,20 +127,20 @@ module NativeDB
         ant.replace :file=>"#{db}/ode-axis2.properties", :token=>"@url@", :value=>dbprops[:url]
         ant.replace :file=>"#{db}/ode-axis2.properties", :token=>"@userid@", :value=>dbprops[:userid]
         ant.replace :file=>"#{db}/ode-axis2.properties", :token=>"@password@", :value=>dbprops[:password]
-        
+
         puts "Created config directory: #{db}."
       end
     end
-    
+
     def prepare_sqls(task, ant, sql_files, orm, db, drop_tables_sql, create_tables_sql)
       # read the create table sql into a string
       create_tables = ""
-      File.open(create_tables_sql, "r") do |f1|  
+      File.open(create_tables_sql, "r") do |f1|
         while line = f1.gets
           create_tables <<= line
         end
       end
-    
+
       # create the drop table sql file from the create table sql
       if orm == :hib and db == "sqlserver"
         File.open(drop_tables_sql, "w") do |f2|
@@ -161,7 +161,7 @@ module NativeDB
         # add in the drop table sql file
         sql_files |= [drop_tables_sql]
       end
-      
+
       # add in the create table sql file
       if orm == :hib and db != "sqlserver"
         ant.copy :file=>create_tables_sql, :tofile=>"#{task.name}/#{db}.sql"
@@ -170,10 +170,10 @@ module NativeDB
         ant.copy :file=>create_tables_sql, :tofile=>"#{task.name}/#{db}.sql"
         sql_files |= ["#{task.name}/#{db}.sql"]
       end
-      
+
       sql_files
     end
-    
+
   protected
 
     # This will download all the required artifacts before returning a classpath, and we want to do this only once.

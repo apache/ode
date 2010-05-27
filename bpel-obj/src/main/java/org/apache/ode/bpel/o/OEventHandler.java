@@ -51,10 +51,10 @@ public class OEventHandler extends OAgent {
             super(owner);
         }
     }
-    
+
     public static class OEvent extends OScope {
         static final long serialVersionUID = -1L  ;
-        
+
         /** Correlations to initialize. */
         public final List <OScope.CorrelationSet> initCorrelations = new ArrayList<OScope.CorrelationSet>();
 
@@ -72,7 +72,7 @@ public class OEventHandler extends OAgent {
 
         /** OASIS addition for disambiguating receives (optional). */
         public String messageExchangeId = "";
-        
+
         public String route = "one";
 
         public String getCorrelatorId() {

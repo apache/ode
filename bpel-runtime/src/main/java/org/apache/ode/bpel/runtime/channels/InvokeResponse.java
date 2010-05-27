@@ -31,5 +31,5 @@ public interface InvokeResponse {
   void onFault();
 
   void onFailure();
-  
+
 }

@@ -32,7 +32,7 @@
         <wsdl:part name="TestPart" type="xs:string"/>
     </wsdl:message>
     <wsdl:message name="helloResponse">
-        <wsdl:part name="TestPart" type="xs:string"/>        
+        <wsdl:part name="TestPart" type="xs:string"/>
     </wsdl:message>
     <wsdl:portType name="DummyServicePortType">
         <wsdl:operation name="hello">
@@ -62,8 +62,8 @@
             <wsdl:output>
                 <mime:content type="text/xml" part="hello"/>
                 <!-- dummy headers to test getHeaders() -->
-                <odex:header name="Age" part="age_part"/>                
-                <odex:foo name="Age" part="age_part"/>                
+                <odex:header name="Age" part="age_part"/>
+                <odex:foo name="Age" part="age_part"/>
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>

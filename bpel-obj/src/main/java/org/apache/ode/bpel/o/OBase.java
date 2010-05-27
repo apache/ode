@@ -25,9 +25,9 @@ import java.io.Serializable;
  * Base class for compiled BPEL objects.
  */
 public class OBase implements Serializable {
-  
+
     static final long serialVersionUID = -1L  ;
-    
+
     /** Our identifier, in terms of our parent. */
     private final int       _id;
     private final OProcess  _owner;
@@ -56,7 +56,7 @@ public class OBase implements Serializable {
     public boolean equals(Object obj) {
         if(!(obj instanceof OBase))
             return false;
-      
+
         OBase other = (OBase) obj;
         return (_id == 0 && other._id == 0) || _id == other._id && other._owner.equals(_owner);
     }
@@ -71,7 +71,7 @@ public class OBase implements Serializable {
         buf.append(_id);
         return buf.toString();
     }
-    
+
     public void dehydrate() {
         if (debugInfo != null) {
             debugInfo.description = null;
@@ -79,7 +79,7 @@ public class OBase implements Serializable {
             debugInfo = null;
         }
     }
-        
+
     public String digest() {
         return "";
     }

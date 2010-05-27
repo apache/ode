@@ -18,14 +18,14 @@
   ~ under the License.
   -->
 <dd:deploy xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd">
-    <dd:process xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd" 
-                xmlns:diag="http://example.com/process/ExtVar3" 
-                xmlns:tns="http://www.example.org/TestSchema" 
-                xmlns:external="http://example.com/process/ExtVar3/external" 
-                xmlns:bamtest="http://test.com/xvar/example" 
-                xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-                xmlns:this="http://example.com/process/ExtVar3/EmptyValues" 
-                name="this:EmptyValues" 
+    <dd:process xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd"
+                xmlns:diag="http://example.com/process/ExtVar3"
+                xmlns:tns="http://www.example.org/TestSchema"
+                xmlns:external="http://example.com/process/ExtVar3/external"
+                xmlns:bamtest="http://test.com/xvar/example"
+                xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                xmlns:this="http://example.com/process/ExtVar3/EmptyValues"
+                name="this:EmptyValues"
                 fileName="process/ExtVar3-EmptyValues.bpel">
       <xvar:externalVariable xmlns:xvar="http://ode.apache.org/externalVariables" id="DataTypesTest-_X6kAaANuEd23JYbph3XjSA">
         <xjdbc:jdbc xmlns:xjdbc="http://ode.apache.org/externalVariables/jdbc">

@@ -41,7 +41,7 @@ public class ExternalVariableTest extends BPELTestAbstract {
 
     public void setUp() throws Exception {
         super.setUp();
-        
+
         EmbeddedConnectionPoolDataSource ds = new EmbeddedConnectionPoolDataSource();
         ds.setCreateDatabase("create");
         ds.setDatabaseName("target/ExternalVariableTest");
@@ -53,7 +53,7 @@ public class ExternalVariableTest extends BPELTestAbstract {
 
         Connection conn = _ds.getConnection();
         Statement s = conn.createStatement();
-        
+
         dropTable(s, "extvartable1");
         s.execute("create table extvartable1 (" + "id1 VARCHAR(200) PRIMARY KEY," +  " \"_id2_\" VARCHAR(200)," +  "pid VARCHAR(250), " + "iid INT,"
                 + "cts TIMESTAMP," + "uts TIMESTAMP," + "foo VARCHAR(250)," + "bar VARCHAR(250))");
@@ -64,9 +64,9 @@ public class ExternalVariableTest extends BPELTestAbstract {
 
         dropTable(s, "costPerCustomer");
         s.execute("CREATE TABLE costPerCustomer (value0 varchar(250), key1 varchar(250) primary key)");
-        
+
         dropTable(s, "DataTypesTest");
-        s.execute("CREATE TABLE DataTypesTest (KEYSTRING VARCHAR(255), STRINGCOL VARCHAR(255), FLOATCOL FLOAT, " 
+        s.execute("CREATE TABLE DataTypesTest (KEYSTRING VARCHAR(255), STRINGCOL VARCHAR(255), FLOATCOL FLOAT, "
                 + "INTCOL INTEGER, NUMBERCOL NUMERIC, TIMESTAMPCOL TIMESTAMP, BOOLEANCOL SMALLINT)");
 
         dropTable(s, "GenKey");
@@ -74,7 +74,7 @@ public class ExternalVariableTest extends BPELTestAbstract {
 
         conn.close();
     }
-    
+
     private static void dropTable(Statement s, String name) {
         try {
             s.execute("drop table "+name);
@@ -82,7 +82,7 @@ public class ExternalVariableTest extends BPELTestAbstract {
             // ignore
         }
     }
-    
+
     @Test
     public void testHelloWorld2() throws Throwable {
         go("/bpel/2.0/ExtVar");

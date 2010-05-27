@@ -42,7 +42,7 @@ public class Scope extends JoinFailureSuppressor {
 
     /**
      * Get the compensation handler for this scope.
-     * 
+     *
      * @return the compensation handler
      */
     public CompensationHandler getCompensationHandler() {
@@ -51,7 +51,7 @@ public class Scope extends JoinFailureSuppressor {
 
     /**
      * Gets the termination handler for this scope.
-     * 
+     *
      * @return terminationHandler
      */
     public TerminationHandler getTerminationHandler() {
@@ -60,7 +60,7 @@ public class Scope extends JoinFailureSuppressor {
 
     /**
      * Get the fault handler for this scope.
-     * 
+     *
      * @return the fault handler
      */
     public FaultHandler getFaultHandler() {
@@ -69,7 +69,7 @@ public class Scope extends JoinFailureSuppressor {
 
     /**
      * Get correlation sets for this scope.
-     * 
+     *
      * @return correlation sets for this scope.
      */
     public List<CorrelationSet> getCorrelationSetDecls() {
@@ -81,7 +81,7 @@ public class Scope extends JoinFailureSuppressor {
 
     /**
      * Get a correlation set decleration.
-     * 
+     *
      * @param setName
      *            name of correlation set
      * @return {@link CorrelationSet} of the fiven name.
@@ -100,7 +100,7 @@ public class Scope extends JoinFailureSuppressor {
 
     /**
      * DOCUMENTME
-     * 
+     *
      * @param varName
      *            DOCUMENTME
      * @return DOCUMENTME
@@ -127,7 +127,7 @@ public class Scope extends JoinFailureSuppressor {
 
     /**
      * Get an array of <code>OnAlarmEventHandler</code>s for this scope.
-     * 
+     *
      * @return the <code>OnAlarmEventHandler</code>s
      */
     public List<OnAlarm> getAlarms() {
@@ -165,7 +165,7 @@ public class Scope extends JoinFailureSuppressor {
 
     /**
      * Get a partnerLink declared in this scope.
-     * 
+     *
      * @param partnerLinkName
      *            name of partner link
      */
@@ -183,7 +183,7 @@ public class Scope extends JoinFailureSuppressor {
 
     /**
      * Get all partnerLinks delcared in this scope.
-     * 
+     *
      * @return set of declared {@link PartnerLink}s.
      */
     public List<PartnerLink> getPartnerLinks() {

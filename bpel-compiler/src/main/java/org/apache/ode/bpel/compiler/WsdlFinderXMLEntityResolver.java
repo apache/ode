@@ -37,7 +37,7 @@ import org.apache.xerces.xni.parser.XMLInputSource;
  * Xerces {@link XMLEntityResolver} implementation that defers to  our own
  * {@link ResourceFinder} interface for loading resources. This class is
  * used for XSD-Schema capture which uses the Xerces schema model.
- * 
+ *
  * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
  *
  */
@@ -57,12 +57,12 @@ public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
     private ResourceFinder _wsdlFinder;
     private Map<URI, byte[]> _internalSchemas = new HashMap<URI, byte[]>();
     private URI _baseURI;
-    
+
     /**
      * Constructor.
      * @param finder {@link ResourceFinder} implementation.
      * @param baseURI the base URI against which all relative URIs are to be resolved;
-     *                typically this is the system URI of the WSDL containing an 
+     *                typically this is the system URI of the WSDL containing an
      *                embedded schema
      */
     public WsdlFinderXMLEntityResolver(ResourceFinder finder, URI baseURI, Map<URI, byte[]> internalSchemas,

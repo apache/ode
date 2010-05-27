@@ -28,18 +28,18 @@ import org.apache.ode.jca.server.ConnectionProvider;
 /**
  * Implementation of the {@link org.apache.ode.jca.server.ConnectionProvider}
  * interface: provides {@link org.apache.ode.bpel.pmapi.BpelManagementFacade}
- * objects. 
+ * objects.
  */
 class ConnectionProviderImpl implements ConnectionProvider {
 
   private BpelServer _server;
   private ProcessStore _store;
-  
+
   ConnectionProviderImpl(BpelServer server, ProcessStore store) {
     _server = server;
     _store = store;
   }
-  
+
   public String [] getConnectionIntefaces() {
     return new String[] { "org.apache.ode.bpel.jca.clientapi.ProcessManagementConnection" };
   }

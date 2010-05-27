@@ -29,18 +29,18 @@ import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 
 /**
- * Base-class for classes providing JBI-ODE translation services. 
- * 
+ * Base-class for classes providing JBI-ODE translation services.
+ *
  * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
  *
  */
 public class ServiceBridge {
-    
+
     private static final Log __log = LogFactory.getLog(ServiceBridge.class);
 
     /**
      * Transfer message properties from the ODE message exchange to the JBI message exchange object.
-     * 
+     *
      * @param jbiMex destination JBI message-exchange
      * @param odeMex source ODE message-exchange
      */
@@ -58,10 +58,10 @@ public class ServiceBridge {
         in.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, odeMex.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID));
         in.setProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID, odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID));
     }
-    
+
     /**
      * Transfer message properties from the JBI message exchange to the ODE message exchange object.
-     * 
+     *
      * @param odeMex destination ODE message-exchange
      * @param jbiMex source JBI message-exchange
      */

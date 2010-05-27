@@ -48,10 +48,10 @@
     <plnk:partnerLinkType name="PongPartnerLinkType">
         <plnk:role name="Provider" portType="tns:PongPortType"/>
     </plnk:partnerLinkType>
-    
+
     <!--
-    
-    This is an abstract interface/portType definition.  Note the lack of 
+
+    This is an abstract interface/portType definition.  Note the lack of
     binding and service.  Since Pong is only exposed on the JBI bus, the
     JBI endpoint is defined in Pong.dd.
 

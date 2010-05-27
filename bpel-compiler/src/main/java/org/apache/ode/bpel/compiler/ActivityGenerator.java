@@ -24,7 +24,7 @@ import org.apache.ode.bpel.o.OActivity;
 
 
 /**
- * Interface implemented by classes providing activity-generating logic. 
+ * Interface implemented by classes providing activity-generating logic.
  * Implementations of this interface are used to convert an
  * activity description object ({@link org.apache.ode.bom.impl.nodes.ActivityImpl})
  * into a <em>compiled</em> BPEL representation.

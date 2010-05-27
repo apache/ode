@@ -115,7 +115,7 @@ public class ProcessFilter extends Filter<ProcessFilter.FilterKeysOp> implements
   /**
    * Initializes properly the ProcessFilter attributes by pre-parsing the filter
    * and orderKeys strings.
-   * 
+   *
    * @param filter
    * @param orderKeys
    */

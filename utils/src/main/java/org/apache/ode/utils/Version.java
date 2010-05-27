@@ -76,7 +76,7 @@ public class Version {
 
   /**
    * Get the full name of the version, e.g., &quot;1.0B15&quot;.
-   * 
+   *
    * @return the full version name or an empty String if not available.
    */
   public static String getVersionName() {
@@ -85,7 +85,7 @@ public class Version {
 
   /**
    * Get the full name of the version, e.g., &quot;1.0B15&quot;.
-   * 
+   *
    * @return the build number.
    */
   public static String getBuildNumber() {
@@ -94,7 +94,7 @@ public class Version {
 
   /**
    * Get the build date.
-   * 
+   *
    * @return the build date as a string of the form yyyyMMdd
    */
   public static String getBuildDate() {
@@ -104,7 +104,7 @@ public class Version {
   /**
    * Get the major version number, i.e., the <code>x</code> in version
    * <code>x.y</code>.
-   * 
+   *
    * @return the minor version number or <code>-1</code> for a development
    *         build
    */
@@ -116,7 +116,7 @@ public class Version {
   /**
    * Get the minor version number, i.e., the <code>y</code> in version
    * <code>x.y</code>.
-   * 
+   *
    * @return the minor version number or <code>-1</code> for a development
    *         build
    */
@@ -127,7 +127,7 @@ public class Version {
 
   /**
    * Print the full version number and licensing information to the console.
-   * 
+   *
    * @param argv
    *          command-line arguments (ignored)
    */

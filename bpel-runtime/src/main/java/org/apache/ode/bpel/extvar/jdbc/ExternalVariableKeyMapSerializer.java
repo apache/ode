@@ -28,8 +28,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * Provides methods to serialize (into XML) the name-value pairs of an external-variable key map. 
- * 
+ * Provides methods to serialize (into XML) the name-value pairs of an external-variable key map.
+ *
  * @author Maciej Szefler <mszefler at gmail dot com>
  *
  */
@@ -51,9 +51,9 @@ public class ExternalVariableKeyMapSerializer {
             el.appendChild(nvel);
         }
         return el;
-        
+
     }
-    
+
     /**
      * Convert to map from XML.
      * @param el

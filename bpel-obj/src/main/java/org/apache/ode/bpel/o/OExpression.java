@@ -24,7 +24,7 @@ package org.apache.ode.bpel.o;
  */
 public abstract class OExpression extends OBase {
     static final long serialVersionUID = -1L  ;
-    
+
     public OExpressionLanguage expressionLanguage;
 
     public OExpression(OProcess owner) {

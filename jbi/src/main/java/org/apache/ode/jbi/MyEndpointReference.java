@@ -32,12 +32,12 @@ import org.apache.ode.utils.DOMUtils;
  */
 class MyEndpointReference implements EndpointReference {
   private OdeService _service;
- 
+
   MyEndpointReference(OdeService service) {
     _service = service;
-    
+
   }
-  
+
   @Override
   public boolean equals(Object obj) {
     if (obj instanceof MyEndpointReference)
@@ -54,17 +54,17 @@ class MyEndpointReference implements EndpointReference {
 
   public Document toXML() {
     Document xml = DOMUtils.newDocument();
-    
+
     // Prefer to use the external endpoint as our EPR,
     // but if we dont find one, use the internal endpoint.
     ServiceEndpoint se = _service.getExternalServiceEndpoint();
     if (se == null)
       se = _service.getInternalServiceEndpoint();
-    
+
     Element root = xml.createElementNS(EndpointReference.SERVICE_REF_QNAME.getNamespaceURI(),
         EndpointReference.SERVICE_REF_QNAME.getLocalPart());
     xml.appendChild(root);
-    
+
     // TODO: handle the operation name problem.
     DocumentFragment fragment = se.getAsReference(null);
     root.appendChild(xml.importNode(fragment,true));

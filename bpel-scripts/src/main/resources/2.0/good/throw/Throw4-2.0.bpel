@@ -42,7 +42,7 @@
   </variables>
     <faultHandlers>
         <catch faultName="test:testFault1"
-               faultVariable="faultVar" 
+               faultVariable="faultVar"
                faultMessageType="test:TestMessage1">
          <sequence>
              <assign>
@@ -58,7 +58,7 @@
               variable="faultVar"
               faultName="test:testFault1"/>
           </sequence>
-        </catch>  
+        </catch>
      </faultHandlers>
   <sequence>
     <receive
@@ -69,7 +69,7 @@
       operation="testOperation"
       variable="var1"/>
     <throw faultName="test:testFault1" faultVariable="var1"/>
-    
+
     <!-- we shouldn't be here -->
     <reply name="endReply"
       operation="testOperation"

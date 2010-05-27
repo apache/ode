@@ -27,10 +27,10 @@
     <util:map id="jndiEntries">
         <entry key="java:comp/env/jdbc/ode" value-ref="odeDS"/>
     </util:map>
-    
-    <sm:container 
-        id="jbi" 
-        embedded="true" 
+
+    <sm:container
+        id="jbi"
+        embedded="true"
         rootDir="target/test/smx"
         transactionManager="#transactionManager"
         depends-on="jndi"
@@ -40,13 +40,13 @@
                 <sm:component>
                     <http:component>
                         <http:endpoints>
-                            <http:endpoint 
+                            <http:endpoint
                                 service="hello:HelloService"
-                                endpoint="http" 
+                                endpoint="http"
                                 defaultOperation="Hello"
-                                role="consumer" 
+                                role="consumer"
                                 locationURI="http://localhost:8198/HelloHttp/"
-                                defaultMep="http://www.w3.org/2004/08/wsdl/in-out" 
+                                defaultMep="http://www.w3.org/2004/08/wsdl/in-out"
                                 soap="true" />
                         </http:endpoints>
                     </http:component>

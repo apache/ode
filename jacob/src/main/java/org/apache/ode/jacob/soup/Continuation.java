@@ -26,7 +26,7 @@ import java.lang.reflect.Method;
 /**
  * DOCUMENTME.
  * <p>Created on Feb 16, 2004 at 9:23:40 PM.</p>
- * 
+ *
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
 public class Continuation extends ExecutionQueueObject {

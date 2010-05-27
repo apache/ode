@@ -16,29 +16,29 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
 -->
-<wsdl:definitions 
+<wsdl:definitions
   targetNamespace="http://ode/bpel/unit-test/TestInsertMissingData.wsdl"
   xmlns:tns="http://ode/bpel/unit-test/TestInsertMissingData.wsdl"
   xmlns:typens="http://ode/bpel/unit-test/TestInsertMissingData.wsdl.types"
   xmlns="http://ode/bpel/unit-test/TestInsertMissingData.wsdl"
   xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-  xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"      
+  xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop">
 
    <wsdl:types>
- 
+
      <xsd:schema
        targetNamespace="http://ode/bpel/unit-test/TestInsertMissingData.wsdl.types"
        xmlns="http://ode/bpel/unit-test/TestInsertMissingData.wsdl.types"
                 xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-      
+
       <xsd:element name="aTestMessage" type="testMessage"></xsd:element>
       <xsd:element name="indicator" type="xsd:string" abstract="true"/>
       <xsd:element name="indicatorOne" type="xsd:string" substitutionGroup="indicator"/>
       <xsd:element name="indicatorTwo" type="xsd:string" substitutionGroup="indicator"/>
-      
+
       <xsd:complexType name="typeIndicator">
         <xsd:sequence>
              <xsd:element ref="indicatorOne"/>
@@ -59,19 +59,19 @@
   <wsdl:message name="requestMessage">
     <wsdl:part name="requestMessageData" element="typens:aTestMessage"/>
   </wsdl:message>
-   
+
   <wsdl:message name="replyMessage">
     <wsdl:part name="replyID" type="xsd:string"/>
     <wsdl:part name="replyText" type="xsd:string"/>
   </wsdl:message>
-   
+
   <wsdl:portType name="TestInsertMissingDataPT">
     <wsdl:operation name="request">
       <wsdl:input message="requestMessage"/>
       <wsdl:output message="replyMessage"/>
     </wsdl:operation>
   </wsdl:portType>
-  
+
   <wsdl:binding name="TestInsertMissingDataBinding" type="tns:TestInsertMissingDataPT">
     <wsdl:operation name="request">
     </wsdl:operation>
@@ -88,15 +88,15 @@
    <plnk:partnerLinkType name="probeRequest">
     <plnk:role name="probeService" portType="prb:probeMessagePT"/>
    </plnk:partnerLinkType>
-   
+
   <vprop:property name="testProbeID" type="xsd:string"/>
   <vprop:propertyAlias propertyName="tns:testProbeID" messageType="tns:requestMessage"/>
-  
+
   <vprop:property name="testPath" type="xsd:string"/>
   <vprop:propertyAlias propertyName="tns:testPath" messageType="tns:requestMessage" part="requestMessageData">
     <vprop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
       typeIndicators/typens:indicatorTwo
-    </vprop:query> 
+    </vprop:query>
   </vprop:propertyAlias>
 
 </wsdl:definitions>

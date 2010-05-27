@@ -29,11 +29,11 @@ import org.xml.sax.XMLReader;
 import java.net.URL;
 
 public class XMLParserUtilsTest extends TestCase {
-  
+
   public void testXMLReaderConfigurationGoodValidation() throws Exception {
     doParse(TestResources.getRetailerWSDL(),DOMUtils.WSDL_NS,TestResources.getWsdlSchema(),true);
   }
-  
+
   public void testMultiSchemaGoodValidation() throws Exception {
     doParse(TestResources.getBpelExampleWsdl1(),
         new String[] {DOMUtils.WSDL_NS,
@@ -45,7 +45,7 @@ public class XMLParserUtilsTest extends TestCase {
           TestResources.getBpelPropertySchema()},
           true);
   }
-  
+
   public void testMultiSchemaBadValidation() throws Exception {
     doParse(TestResources.getBpelExampleWsdl1BadPLink(),
         new String[] {DOMUtils.WSDL_NS,
@@ -56,27 +56,27 @@ public class XMLParserUtilsTest extends TestCase {
           TestResources.getBpelPartnerLinkSchema(),
           TestResources.getBpelPropertySchema()},
           false);  }
-  
+
   public void testXMLReaderConfigurationBadValidation() throws Exception {
     doParse(TestResources.getInvalidButWellFormedWsdl(),DOMUtils.WSDL_NS,TestResources.getWsdlSchema(),
         false);
   }
-  
+
   public void testXMLReaderConfigurationWrongDocumentType() throws Exception {
     doParse(TestResources.getWsdlSchema(),DOMUtils.WSDL_NS,TestResources.getWsdlSchema(),false);
   }
-  
+
   public void testXMLReaderConfigurationNoNamespaceWrongDocumentType()
     throws Exception
   {
     doParse(TestResources.getPlainOldXmlDocument(),DOMUtils.WSDL_NS,TestResources.getWsdlSchema(),
         false);
   }
-    
+
   private void doParse(URL doc, String ns, URL schema, boolean succeed) throws Exception {
     doParse(doc, new String[] {ns}, new URL[] {schema}, succeed);
   }
-  
+
   private void doParse(URL doc, String[] ns, URL[] schema, boolean succeed) throws Exception {
     XMLReader xr = XMLParserUtils.getXMLReader();
     DOMParser dp = XMLParserUtils.getDOMParser();
@@ -115,6 +115,6 @@ public class XMLParserUtilsTest extends TestCase {
       fail("DOM validation of " + doc.toExternalForm() + " should have failed.");
     }
   }
-  
-  
+
+
 }

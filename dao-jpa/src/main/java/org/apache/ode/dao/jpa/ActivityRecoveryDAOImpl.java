@@ -49,7 +49,7 @@ import java.util.Date;
 public class ActivityRecoveryDAOImpl implements ActivityRecoveryDAO {
     public final static String DELETE_ACTIVITY_RECOVERIES_BY_IDS = "DELETE_ACTIVITY_RECOVERIES_BY_IDS";
     public final static String COUNT_ACTIVITY_RECOVERIES_BY_INSTANCES = "COUNT_ACTIVITY_RECOVERIES_BY_INSTANCES";
-    
+
     @Id @Column(name="ID")
     @GeneratedValue(strategy= GenerationType.AUTO)
     @SuppressWarnings("unused")
@@ -79,7 +79,7 @@ public class ActivityRecoveryDAOImpl implements ActivityRecoveryDAO {
     @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="INSTANCE_ID")
     private ProcessInstanceDAOImpl _instance;
 
-    
+
     public ActivityRecoveryDAOImpl() {}
     public ActivityRecoveryDAOImpl(String channel, long activityId,
             String reason, Date dateTime, Element data, String[] actions,
@@ -90,15 +90,15 @@ public class ActivityRecoveryDAOImpl implements ActivityRecoveryDAO {
         _dateTime = dateTime;
 
         if (data != null) _details = DOMUtils.domToString(data);
-        
+
         String alist = actions[0];
         for (int i = 1; i < actions.length; ++i)
             alist += " " + actions[i];
         _actions = alist;
-        
-        _retries = retries;		
+
+        _retries = retries;
     }
-    
+
     public String getActions() {
         return _actions;
     }

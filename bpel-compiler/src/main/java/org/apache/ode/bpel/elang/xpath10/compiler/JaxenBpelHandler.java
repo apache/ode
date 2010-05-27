@@ -92,7 +92,7 @@ class JaxenBpelHandler extends JaxenHandler {
             }
         }
     }
-  
+
   public void endXPath() throws JaxenException {
     super.endXPath();
   }

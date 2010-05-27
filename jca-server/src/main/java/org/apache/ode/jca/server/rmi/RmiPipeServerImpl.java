@@ -52,15 +52,15 @@ class RmiPipeServerImpl implements OdeTransportPipeRemote {
   public RmiPipeServerImpl(RmiTransportServerImpl server, Object target, String[] connectionClass) {
     _server = server;
     _connectionClass = connectionClass;
-    
+
     ArrayList<String> connectionClassNames = new ArrayList<String>();
     for (String cn : connectionClass)
       connectionClassNames.add(cn);
-    
+
     for (Class i : target.getClass().getInterfaces()) {
 //      if (!connectionClassNames.contains(i.getName()))
 //        continue;
-      for (Method m : i.getMethods()) 
+      for (Method m : i.getMethods())
         _methodMap.put(Reflect.generateMethodSignature(m),m);
     }
     this.target = target;
@@ -81,7 +81,7 @@ class RmiPipeServerImpl implements OdeTransportPipeRemote {
 
     if (m == null)
       throw new RemoteException("Unknown method: " + name);
-    
+
     ClassLoader old = Thread.currentThread().getContextClassLoader();
     Thread.currentThread()
           .setContextClassLoader(getClass().getClassLoader());

@@ -19,5 +19,5 @@
 package org.apache.ode.utils.stl;
 
 public interface UnaryFunction<E,V> extends UnaryFunctionEx<E,V> {
-  V apply(E x); 
+  V apply(E x);
 }

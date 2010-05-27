@@ -35,7 +35,7 @@ public class AssignActivity extends Activity {
 
     /**
      * Get the list of <code>&lt;copy&gt;</code> entries for this activity.
-     * 
+     *
      * @return copy entries
      */
     public List<Copy> getCopies() {

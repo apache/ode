@@ -41,7 +41,7 @@ public class JoinFailureSuppressor extends BpelObject {
         __suppressJoinFailure.put("no", SuppressJoinFailure.NO);
         __suppressJoinFailure.put("",SuppressJoinFailure.NOTSET);
     }
-    
+
     public enum SuppressJoinFailure {
         /**
          * Model element does not specify a <code>suppressJoinFailure</code>
@@ -61,12 +61,12 @@ public class JoinFailureSuppressor extends BpelObject {
          */
         YES
     }
-    
-    
+
+
 
     /**
      * Get the suppress join failure flag.
-     * 
+     *
      * @return suppress join failure flag code
      */
     public SuppressJoinFailure getSuppressJoinFailure() {

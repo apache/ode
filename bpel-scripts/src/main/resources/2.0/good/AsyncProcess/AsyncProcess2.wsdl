@@ -34,7 +34,7 @@
       </schema>
    </types>
 
-   <import namespace="uri:com.bptest.responder" 
+   <import namespace="uri:com.bptest.responder"
            location="responder.wsdl"/>
 
    <message name="ProcessInputMessage">

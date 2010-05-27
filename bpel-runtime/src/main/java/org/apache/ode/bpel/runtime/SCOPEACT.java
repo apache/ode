@@ -22,7 +22,7 @@ import org.apache.ode.bpel.o.OScope;
 
 /**
  * A scope activity. The scope activity creates a new scope frame and proceeeds
- * using the {@link SCOPE} template. 
+ * using the {@link SCOPE} template.
  */
 public class SCOPEACT extends ACTIVITY {
   private static final long serialVersionUID = -4593029783757994939L;

@@ -21,7 +21,7 @@ package org.apache.ode.utils;
 import java.lang.reflect.Method;
 
 public class Reflect {
-  
+
   /**
    * Generates a unique method signature string for a java.lang.reflect.Method.
    * Necessary b/c Method is not Serializable.

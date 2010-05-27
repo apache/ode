@@ -98,9 +98,9 @@ public class MessageRouting20Test extends BPELTestAbstract {
          * <receive> and a subsequent <pick> that does not define a correlation
          * key. The BPEL compiler should throw an exception indicating
          * the BPEL code error ( verify with spec ).
-         * 
+         *
          * See JIRA ODE-64
-         * 
+         *
          */
         // TODO fix the bug first
         negative("target/test-classes/bpel/2.0/NegativeCorrelationTest");
@@ -114,11 +114,11 @@ public class MessageRouting20Test extends BPELTestAbstract {
          * compiler should throw an exception indicating
          * the BPEL error ( verify with spec ) or at runtime
          * a clear initialization exception should be thrown.
-         * 
+         *
          * See JIRA ODE-61.
-         * 
+         *
          * The message exchange should return with a Fault/Failure.
-         * 
+         *
          */
         // TODO fix the bug first
         negative("target/test-classes/bpel/2.0/NegativeInitializationTest");
@@ -127,7 +127,7 @@ public class MessageRouting20Test extends BPELTestAbstract {
     @Test public void testConcurrentSyncMex() throws Throwable {
         go("/bpel/2.0/TestConcurrentSyncMex");
     }
-    
+
     @Test public void testIMA() throws Throwable {
         go("/bpel/2.0/TestIMA");
     }

@@ -50,9 +50,9 @@ public class ProcessManagementDaoImpl extends DaoBaseImpl implements ProcessMana
 
         return new Object[] {failureInstances, lastFailureDt};
     }
-    
+
     public void prefetchActivityFailureCounts(Collection<ProcessInstanceDAO> instances) {
-        // do nothing 
+        // do nothing
     }
 
     public int countInstancesByPidAndString(BpelDAOConnection conn, QName pid, String status) {
@@ -61,7 +61,7 @@ public class ProcessManagementDaoImpl extends DaoBaseImpl implements ProcessMana
         // TODO: this is grossly inefficient
         return conn.instanceQuery(instanceFilter).size();
     }
-    
+
     public Map<InstanceSummaryKey, Long> countInstancesSummary(Set<String> pids) {
         return new HashMap<InstanceSummaryKey, Long>();
     }

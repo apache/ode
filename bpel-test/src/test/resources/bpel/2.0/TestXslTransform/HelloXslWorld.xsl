@@ -36,7 +36,7 @@
       </xsl:element>
     </xsl:element>
   </xsl:template>
-  
+
   <xsl:template match="content">
         <xsl:value-of select="concat(text(), $middle, ' World')"/>
   </xsl:template>
@@ -44,5 +44,5 @@
   <!-- The nilled() function does not work if your Saxon parser is not schema-aware -->
   <!--<xsl:template match="*[nilled(current())]"/>-->
   <!-- As a workaround, you may use boolean(@xsi:nil) instead of nilled(current()) -->
-  <xsl:template match="*[boolean(@xsi:nil)]"/> 
+  <xsl:template match="*[boolean(@xsi:nil)]"/>
 </xsl:stylesheet>

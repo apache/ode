@@ -35,7 +35,7 @@
     <import location="../ProbeService/probeService.wsdl"
         namespace="http://ode/bpel/unit-test/ProbeService.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/"/>
-    
+
 
 <!-- This is a negative unit test for the ODE compiler. The compiler should
      throw an exception because the <pick> does not contain a correlation set. -->
@@ -46,11 +46,11 @@
   </partnerLinks>
 
   <variables>
-    <variable name="request" 
+    <variable name="request"
                messageType="wns:requestMessage"/>
-    <variable name="probeInput" 
+    <variable name="probeInput"
                messageType="prb:probeMessage"/>
-    <variable name="reply" 
+    <variable name="reply"
                messageType="wns:replyMessage"/>
   </variables>
 
@@ -60,7 +60,7 @@
 
     <sequence>
         <receive name="receive1" partnerLink="request1"
-            portType="wns:NegativeCorrelationTestPT" 
+            portType="wns:NegativeCorrelationTestPT"
                  operation="request" variable="request"
                  createInstance="yes">
             <correlations>
@@ -77,7 +77,7 @@
             <from variable="request" part="requestText"/>
             <to variable="probeInput" part="probeData"/>
           </copy>
-        </assign>   
+        </assign>
 
 
       <assign>
@@ -87,12 +87,12 @@
                 </from>
                     <to variable="probeInput" part="probeName"/>
             </copy>
-      </assign> 
+      </assign>
 
        <invoke name="probe" partnerLink="probe"
-                portType="prb:probeMessagePT" 
+                portType="prb:probeMessagePT"
                 operation="probe"
-                inputVariable="probeInput"  
+                inputVariable="probeInput"
                 outputVariable="probeInput">
        </invoke>
 
@@ -112,15 +112,15 @@
                             </from>
                             <to variable="probeInput" part="probeName"/>
                         </copy>
-                        </assign> 
+                        </assign>
 
                         <invoke name="probe" partnerLink="probe"
-                            portType="prb:probeMessagePT" 
+                            portType="prb:probeMessagePT"
                             operation="probe"
-                            inputVariable="probeInput"  
+                            inputVariable="probeInput"
                             outputVariable="probeInput">
                         </invoke>
-                    
+
                         <assign>
                         <copy>
                             <from>
@@ -128,12 +128,12 @@
                             </from>
                             <to variable="probeInput" part="probeName"/>
                         </copy>
-                        </assign> 
+                        </assign>
 
                         <invoke name="probe" partnerLink="probe"
-                            portType="prb:probeMessagePT" 
+                            portType="prb:probeMessagePT"
                             operation="probe"
-                            inputVariable="probeInput"  
+                            inputVariable="probeInput"
                             outputVariable="probeInput">
                         </invoke>
 
@@ -146,10 +146,10 @@
                                 <from variable="probeInput" part="probeData"/>
                                 <to variable="reply" part="replyText"/>
                         </copy>
-                    </assign> 
-        
-                    <reply name="reply" partnerLink="request1" portType="wns:NegativeCorrelationTestPT" 
-                            operation="continue1" variable="reply"> 
+                    </assign>
+
+                    <reply name="reply" partnerLink="request1" portType="wns:NegativeCorrelationTestPT"
+                            operation="continue1" variable="reply">
                     </reply>
 
                 </sequence>
@@ -169,15 +169,15 @@
                             </from>
                             <to variable="probeInput" part="probeName"/>
                         </copy>
-                        </assign> 
+                        </assign>
 
                         <invoke name="probe" partnerLink="probe"
-                            portType="prb:probeMessagePT" 
+                            portType="prb:probeMessagePT"
                             operation="probe"
-                            inputVariable="probeInput"  
+                            inputVariable="probeInput"
                             outputVariable="probeInput">
                         </invoke>
-                    
+
                         <assign>
                         <copy>
                             <from>
@@ -185,12 +185,12 @@
                             </from>
                             <to variable="probeInput" part="probeName"/>
                         </copy>
-                        </assign> 
+                        </assign>
 
                         <invoke name="probe" partnerLink="probe"
-                            portType="prb:probeMessagePT" 
+                            portType="prb:probeMessagePT"
                             operation="probe"
-                            inputVariable="probeInput"  
+                            inputVariable="probeInput"
                             outputVariable="probeInput">
                         </invoke>
                     <assign name="assign2">
@@ -202,10 +202,10 @@
                                 <from variable="probeInput" part="probeData"/>
                                 <to variable="reply" part="replyText"/>
                         </copy>
-                    </assign> 
-        
-                    <reply name="reply" partnerLink="request1" portType="wns:NegativeCorrelationTestPT" 
-                            operation="continue2" variable="reply"> 
+                    </assign>
+
+                    <reply name="reply" partnerLink="request1" portType="wns:NegativeCorrelationTestPT"
+                            operation="continue2" variable="reply">
                     </reply>
 
                 </sequence>

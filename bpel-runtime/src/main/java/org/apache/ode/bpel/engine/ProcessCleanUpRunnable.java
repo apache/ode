@@ -38,13 +38,13 @@ public class ProcessCleanUpRunnable implements MapSerializableRunnable, Contexts
     private static final Log __log = LogFactory.getLog(ProcessCleanUpRunnable.class);
 
     public final static int PROCESS_CLEANUP_TRANSACTION_SIZE = Integer.getInteger("org.apache.ode.processInstanceDeletion.transactionSize", 10);
-    
+
     private transient Contexts _contexts;
     private transient Serializable _pid;
 
     public ProcessCleanUpRunnable() {
     }
-    
+
     public ProcessCleanUpRunnable(Serializable pid) {
         _pid = pid;
     }
@@ -52,7 +52,7 @@ public class ProcessCleanUpRunnable implements MapSerializableRunnable, Contexts
     public void storeToDetails(JobDetails details) {
         details.getDetailsExt().put("pid", _pid);
     }
-    
+
     public void restoreFromDetails(JobDetails details) {
         _pid = (Serializable) details.getDetailsExt().get("pid");
     }
@@ -60,11 +60,11 @@ public class ProcessCleanUpRunnable implements MapSerializableRunnable, Contexts
     public void setContexts(Contexts contexts) {
         _contexts = contexts;
     }
-    
+
     public void run() {
         if(__log.isDebugEnabled()) __log.debug("Deleting runtime data for old process: " + _pid + "...");
         try {
-            // deleting of a process may involve hours' of database transaction, 
+            // deleting of a process may involve hours' of database transaction,
             // we need to break it down to smaller transactions
             int transactionResultSize = 0;
             do {

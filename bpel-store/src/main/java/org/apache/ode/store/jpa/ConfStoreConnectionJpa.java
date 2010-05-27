@@ -34,7 +34,7 @@ import java.util.List;
  */
 public class ConfStoreConnectionJpa implements ConfStoreConnection {
     private static Log LOG = LogFactory.getLog(ConfStoreConnectionJpa.class);
-    
+
     private EntityManager _em;
     static final ThreadLocal<EntityManager> _current = new ThreadLocal<EntityManager>();
 

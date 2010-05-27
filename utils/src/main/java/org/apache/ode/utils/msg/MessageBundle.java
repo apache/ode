@@ -49,7 +49,7 @@ public abstract class MessageBundle extends ResourceBundle {
     ex.fillInStackTrace();
     return ex.getStackTrace()[1].getMethodName() + ": NO MESSAGE (TODO)";
   }
-  
+
   protected Object handleGetObject(String key) {
     throw new UnsupportedOperationException();
   }

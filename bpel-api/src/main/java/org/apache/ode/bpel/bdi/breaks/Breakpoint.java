@@ -26,7 +26,7 @@ public interface Breakpoint {
 
   /**
    * Enable or disable the break point.
-   * 
+   *
    * @param enabled
    *          if <code>true</code> enable, otherwise disable
    */
@@ -34,7 +34,7 @@ public interface Breakpoint {
 
   /**
    * Test whether the break point is enabled.
-   * 
+   *
    * @return <code>true</code> if break-point is enabled, <code>false</code>
    *         otherwise
    */

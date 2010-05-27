@@ -42,7 +42,7 @@ public interface ExpressionCompiler {
    */
   OExpression compile(Object source)
           throws CompilationException;
-  
+
   /**
    * Compile an lvalue (the 'to' of an assignment) into a {@link org.apache.ode.bpel.o.OLValueExpression} object.
    * @param source
@@ -51,7 +51,7 @@ public interface ExpressionCompiler {
    */
   OLValueExpression compileLValue(Object source)
              throws CompilationException;
-  
+
   /**
    * Compile a join condition into a {@link org.apache.ode.bpel.o.OExpression} object.
    * @param source

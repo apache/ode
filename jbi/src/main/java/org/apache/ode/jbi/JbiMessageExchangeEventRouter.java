@@ -57,7 +57,7 @@ class JbiMessageExchangeEventRouter implements JbiMessageExchangeProcessor {
                 _ode._instanceManagementProcessor.onJbiMessageExchange(mex);
                 return;
             }
-            
+
             Endpoint endpoint = new Endpoint(mex.getEndpoint().getServiceName(), mex.getEndpoint().getEndpointName());
             OdeService svc = _ode.getService(endpoint);
             if (svc == null) {

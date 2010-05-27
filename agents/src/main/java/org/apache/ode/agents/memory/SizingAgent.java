@@ -30,7 +30,7 @@ import java.util.Stack;
 
 
 /**
- * Class 
+ * Class
  *
  * @author $author$
  * @version $Revision$
@@ -41,18 +41,18 @@ public class SizingAgent {
     /**
      * $method$
      *
-     * @param options options 
-     * @param instrumentation instrumentation 
+     * @param options options
+     * @param instrumentation instrumentation
      */
     public static void premain(String options, Instrumentation instrumentation) {
         SizingAgent.instrumentation = instrumentation;
         Class[] loaded = instrumentation.getAllLoadedClasses();
     }
-    
+
     /**
      * $method$
      *
-     * @param args args 
+     * @param args args
      */
     public static void main(String[] args) {
         System.out.println("Size of Object: " + sizeOf(new Object()));
@@ -84,7 +84,7 @@ public class SizingAgent {
         if (instrumentation == null) {
             return 0;
         }
-        
+
         Map visited = new IdentityHashMap();
         Stack stack = new Stack();
         stack.push(obj);
@@ -130,8 +130,8 @@ public class SizingAgent {
     /**
      * $method$
      *
-     * @param obj obj 
-     * @param visited visited 
+     * @param obj obj
+     * @param visited visited
      *
      * @return type
      */
@@ -143,9 +143,9 @@ public class SizingAgent {
     /**
      * $method$
      *
-     * @param obj obj 
-     * @param stack stack 
-     * @param visited visited 
+     * @param obj obj
+     * @param stack stack
+     * @param visited visited
      *
      * @return type
      */
@@ -188,9 +188,9 @@ public class SizingAgent {
     /**
      * $method$
      *
-     * @param clazz clazz 
-     * @param obj obj 
-     * @param stack stack 
+     * @param clazz clazz
+     * @param obj obj
+     * @param stack stack
      */
     private static void addArrayElementsToStack(Class clazz, Object obj,
         Stack stack) {

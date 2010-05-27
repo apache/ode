@@ -21,7 +21,7 @@ package org.apache.ode.bpel.compiler.bom;
 import org.w3c.dom.Element;
 
 /**
- * BOM representation of an RDF label. 
+ * BOM representation of an RDF label.
  * @author mszefler
  */
 public class RdfLabel extends BpelObject {
@@ -29,7 +29,7 @@ public class RdfLabel extends BpelObject {
     public RdfLabel(Element el) {
         super(el);
     }
-    
+
     /**
      * Retrieve the text of the label.
      * @return

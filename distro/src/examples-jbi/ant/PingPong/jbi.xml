@@ -35,7 +35,7 @@
          <component-name>servicemix-http</component-name>
       </target>
     </service-unit>
-    
+
     <service-unit>
        <identification>
          <name>Pong-process</name>

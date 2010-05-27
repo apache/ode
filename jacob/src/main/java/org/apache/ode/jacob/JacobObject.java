@@ -50,7 +50,7 @@ public abstract class JacobObject implements Serializable {
     /**
      * Instantiation; the Java code <code>instance(new F(x,y,z))</code> is
      * equivalent to <code>F(x,y,z)</code> in the process calculus.
-     * 
+     *
      * @param concretion the concretion of a process template
      */
     protected static void instance(JacobRunnable concretion) {
@@ -77,7 +77,7 @@ public abstract class JacobObject implements Serializable {
     /**
      * Object; the Java code "object(x, ChannelListener)" is equivalent to
      * <code>x ? ChannelListener</code> in the process algebra.
-     * 
+     *
      * @param methodList method list for the communication reduction
      * @see JacobThread#object
      */
@@ -106,7 +106,7 @@ public abstract class JacobObject implements Serializable {
 
     /**
      * Obtain a replicated channel broadcaster.
-     * 
+     *
      * @param channel target channel
      * @return replicated channel broadcaster
      */

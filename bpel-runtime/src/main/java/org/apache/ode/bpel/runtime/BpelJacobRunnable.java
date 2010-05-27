@@ -52,11 +52,11 @@ public abstract class BpelJacobRunnable extends JacobRunnable {
     protected Log log() {
         return __log;
     }
-    
+
     protected final FaultData createFault(QName fault, Element faultMsg, OVarType faultType, OBase location){
         return new FaultData(fault, faultMsg, faultType, location);
     }
-    
+
     protected final FaultData createFault(QName fault, OBase location, String faultExplanation) {
         return new FaultData(fault, location,faultExplanation);
     }
@@ -64,7 +64,7 @@ public abstract class BpelJacobRunnable extends JacobRunnable {
     protected final FaultData createFault(QName fault, OBase location){
         return createFault(fault, location, null);
     }
-    
+
 
     protected JacobRunnable createChild(ActivityInfo childInfo, ScopeFrame scopeFrame, LinkFrame linkFrame) {
         return new ACTIVITYGUARD(childInfo, scopeFrame, linkFrame);
@@ -100,7 +100,7 @@ public abstract class BpelJacobRunnable extends JacobRunnable {
         CorrelationKey ckeyVal = new CorrelationKey(cset.declaration.name, propValues);
         getBpelRuntimeContext().writeCorrelation(cset,ckeyVal);
     }
-    
+
     protected long genMonotonic() {
         return getBpelRuntimeContext().genId();
     }

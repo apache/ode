@@ -249,7 +249,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         if (timeout < 0) {
            throw new IllegalArgumentException("Timeout must be positive, received: "+timeout);
         }
-        
+
         boolean existingTransaction = false;
         try {
             existingTransaction = txm.getTransaction() != null;
@@ -266,7 +266,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         // run in new transaction
         Exception ex = null;
         int immediateRetryCount = _immediateTransactionRetryLimit;
-        
+
         _txm.setTransactionTimeout(timeout);
         if(__log.isDebugEnabled() && timeout!=0) __log.debug("Custom transaction timeout: "+timeout);
         try {
@@ -278,7 +278,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
                     String errmsg = "Internal Error, could not begin transaction.";
                     throw new ContextException(errmsg, e);
                 }
-    
+
                 try {
                     ex = null;
                     return transaction.call();
@@ -296,7 +296,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
                         if (__log.isDebugEnabled()) __log.debug("Rollbacking on " + txm + "...");
                         txm.rollback();
                     }
-                    
+
                     if( ex != null && immediateRetryCount > 0 ) {
                         if (__log.isDebugEnabled())  __log.debug("Will retry the transaction in " + _immediateTransactionRetryInterval + " msecs on " + _txm + " for error: ", ex);
                         Thread.sleep(_immediateTransactionRetryInterval);
@@ -307,7 +307,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
             // 0 restores the default value
             _txm.setTransactionTimeout(0);
         }
-        
+
         throw ex;
     }
 
@@ -316,7 +316,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         if( txm == null ) {
             throw new ContextException("Cannot locate the transaction manager; the server might be shutting down.");
         }
-        
+
         txm.setRollbackOnly();
     }
 
@@ -325,7 +325,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         if( txm == null ) {
             throw new ContextException("Cannot locate the transaction manager; the server might be shutting down.");
         }
-        
+
         try {
             txm.getTransaction().registerSynchronization(new Synchronization() {
 
@@ -362,7 +362,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         JobDetails jobDetails = new JobDetails();
         jobDetails.getDetailsExt().put("runnable", runnable);
         runnable.storeToDetails(jobDetails);
-        
+
         if (__log.isDebugEnabled())
             __log.debug("scheduling " + jobDetails + " for " + when);
 
@@ -580,7 +580,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
             }
         }
     }
-    
+
     /**
      * Run a job in the current thread.
      *
@@ -634,7 +634,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         if( txm == null ) {
             throw new ContextException("Cannot locate the transaction manager; the server might be shutting down.");
         }
-        
+
         try {
             Transaction tx = txm.getTransaction();
             return (tx != null && tx.getStatus() != Status.STATUS_NO_TRANSACTION);

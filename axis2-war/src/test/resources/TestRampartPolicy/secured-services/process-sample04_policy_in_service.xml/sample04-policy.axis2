@@ -128,11 +128,11 @@
                 <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
                     <sp:Body/>
                 </sp:EncryptedParts>
-                <ramp:RampartConfig xmlns:ramp="http://ws.apache.org/rampart/policy"> 
+                <ramp:RampartConfig xmlns:ramp="http://ws.apache.org/rampart/policy">
                     <ramp:user>client</ramp:user>
                     <ramp:encryptionUser>service</ramp:encryptionUser>
                     <ramp:passwordCallbackClass>org.apache.rampart.samples.policy.sample04.PWCBHandler</ramp:passwordCallbackClass>
-                
+
                     <ramp:signatureCrypto>
                         <ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin">
                             <ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type">JKS</ramp:property>
@@ -147,7 +147,7 @@
                             <ramp:property name="org.apache.ws.security.crypto.merlin.keystore.password">apache</ramp:property>
                         </ramp:crypto>
                     </ramp:encryptionCypto>
-                
+
                 </ramp:RampartConfig>
             </wsp:All>
         </wsp:ExactlyOne>

@@ -20,7 +20,7 @@
 <wsdl:definitions xmlns:tns="http://ode.apache.org/example"
                   xmlns:bpdm="http://www.intalio/designer/business-process-data-modeling"
                   xmlns:Client="http://example.com/HandleTimer/Client"
-                  xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" 
+                  xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
                   xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
                   xmlns:xs="http://www.w3.org/2001/XMLSchema"
                   xmlns:root="http://example.com/HandleTimer"

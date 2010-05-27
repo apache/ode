@@ -18,7 +18,7 @@
 -->
 
 <deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
-    xmlns:pns="http://ode/bpel/unit-test/testCorrelationOpaque" 
+    xmlns:pns="http://ode/bpel/unit-test/testCorrelationOpaque"
     xmlns:wns="http://ode/bpel/unit-test/testCorrelationOpaque.wsdl">
 
 

@@ -35,31 +35,31 @@ public class ProcessStoreTest extends TestCase {
 
     ProcessStoreImpl _ps;
     private File _testdd;
-    
+
     public void setUp() throws Exception {
         System.setProperty("openjpa.properties", "/openjpa.xml");
         _ps = new ProcessStoreImpl();
         _ps.loadAll();
         URI tdd= getClass().getResource("/testdd/deploy.xml").toURI();
         _testdd = new File(tdd.getPath()).getParentFile();
-    } 
-    
+    }
+
     public void tearDown() throws Exception {
         _ps.shutdown();
     }
-     
+
     public void testSanity() {
         assertEquals(0,_ps.getProcesses().size());
         assertEquals(0,_ps.getPackages().size());
         assertNull(_ps.listProcesses("foobar"));
     }
-    
+
     public void testDeploy() {
         Collection<QName> deployed = _ps.deploy(_testdd);
         assertNotNull(deployed);
         assertEquals(1,deployed.size());
     }
-    
+
     public void testGetProcess() {
         Collection<QName> deployed = _ps.deploy(_testdd);
         QName pname = deployed.iterator().next();
@@ -69,8 +69,8 @@ public class ProcessStoreTest extends TestCase {
         assertNotNull(pconf);
         assertEquals(_testdd.getName(),pconf.getPackage());
         assertEquals(pname, pconf.getProcessId());
-    } 
-    
+    }
+
     public void testGetProcesses() {
         Collection<QName> deployed = _ps.deploy(_testdd);
         QName pname = deployed.iterator().next();
@@ -79,7 +79,7 @@ public class ProcessStoreTest extends TestCase {
         List<QName> pconfs = _ps.getProcesses();
         assertEquals(pname,pconfs.get(0));
     }
-    
+
     public void testCleanupConfigurations() {
         Collection<QName> deployed = _ps.deploy(_testdd);
         QName pname = deployed.iterator().next();
@@ -89,10 +89,10 @@ public class ProcessStoreTest extends TestCase {
         assertNotNull(pconf);
         assertEquals(_testdd.getName(),pconf.getPackage());
         assertEquals(pname, pconf.getProcessId());
-        
+
         assertEquals(EnumSet.allOf(CLEANUP_CATEGORY.class), pconf.getCleanupCategories(true));
         assertEquals(EnumSet.of(CLEANUP_CATEGORY.MESSAGES, CLEANUP_CATEGORY.EVENTS), pconf.getCleanupCategories(false));
-        
+
         assertTrue(pconf.isCleanupCategoryEnabled(true, CLEANUP_CATEGORY.INSTANCE));
         assertTrue(pconf.isCleanupCategoryEnabled(true, CLEANUP_CATEGORY.VARIABLES));
         assertTrue(pconf.isCleanupCategoryEnabled(true, CLEANUP_CATEGORY.MESSAGES));
@@ -103,9 +103,9 @@ public class ProcessStoreTest extends TestCase {
         assertTrue(pconf.isCleanupCategoryEnabled(false, CLEANUP_CATEGORY.MESSAGES));
         assertFalse(pconf.isCleanupCategoryEnabled(false, CLEANUP_CATEGORY.CORRELATIONS));
         assertTrue(pconf.isCleanupCategoryEnabled(false, CLEANUP_CATEGORY.EVENTS));
-        
+
         assertEquals(2, pconf.getCronJobs().size());
         assertNotNull(pconf.getCronJobs().get(0).getCronExpression());
         assertEquals(3, pconf.getCronJobs().get(0).getRunnableDetailList().size());
-    } 
+    }
 }

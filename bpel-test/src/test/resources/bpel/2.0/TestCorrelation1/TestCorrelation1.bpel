@@ -28,11 +28,11 @@
   queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
   expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
   suppressJoinFailure="yes">
-  
+
   <bpel:import location="TestCorrelation1.wsdl"
     namespace="http://ode/bpel/unit-test/testCorrelation1.wsdl"
     importType="http://schemas.xmlsoap.org/wsdl/" />
-  
+
   <bpel:partnerLinks>
     <bpel:partnerLink name="testCorrelation1PL" partnerLinkType="wns:testCorrelation1Request" myRole="testCorrelation1Service"/>
   </bpel:partnerLinks>

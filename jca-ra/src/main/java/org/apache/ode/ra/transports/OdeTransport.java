@@ -26,7 +26,7 @@ import java.util.Properties;
  * Interface implemented communication transports for the ODE JCA adapter.
  */
 public interface OdeTransport {
-  
+
   /**
    * Create a new communication pipe.
    * @param url connection URL

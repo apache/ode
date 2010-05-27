@@ -27,7 +27,7 @@ import org.apache.ode.utils.GUID;
 
 /**
  * Like a task, but a little bit better.
- * 
+ *
  * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
  */
 class Job extends Task {
@@ -58,7 +58,7 @@ class Job extends Task {
     public boolean equals(Object obj) {
         return obj instanceof Job && jobId.equals(((Job) obj).jobId);
     }
-    
+
     @Override
     public String toString() {
         SimpleDateFormat f = (SimpleDateFormat) DATE_FORMAT.clone();

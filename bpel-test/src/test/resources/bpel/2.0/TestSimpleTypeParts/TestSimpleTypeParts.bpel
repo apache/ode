@@ -35,26 +35,26 @@
     <import location="../ProbeService/probeService.wsdl"
         namespace="http://ode/bpel/unit-test/ProbeService.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/"/>
-    
+
 
   <partnerLinks>
     <partnerLink name="request" partnerLinkType="wns:TestSimpleTypePartsRequest" myRole="TestSimpleTypePartsService"/>
   </partnerLinks>
 
   <variables>
-    <variable name="request" 
+    <variable name="request"
                messageType="wns:requestMessage"/>
-    <variable name="reply" 
+    <variable name="reply"
                messageType="wns:replyMessage"/>
   </variables>
 
   <sequence>
         <receive name="receive1" partnerLink="request"
-            portType="wns:TestSimpleTypePartsPT" 
+            portType="wns:TestSimpleTypePartsPT"
                  operation="request" variable="request"
                  createInstance="yes">
         </receive>
-    
+
         <assign name="assign1">
           <copy>
             <from variable="request" property="wns:testProbeID"/>
@@ -64,12 +64,12 @@
             <from variable="request" part="requestText"/>
             <to variable="reply" part="replyText"/>
           </copy>
-        </assign>   
-    
-    <reply name="reply" partnerLink="request" portType="wns:TestSimpleTypePartsPT" 
-               operation="request" variable="reply"> 
+        </assign>
+
+    <reply name="reply" partnerLink="request" portType="wns:TestSimpleTypePartsPT"
+               operation="request" variable="reply">
       </reply>
 
-  
+
   </sequence>
 </process>

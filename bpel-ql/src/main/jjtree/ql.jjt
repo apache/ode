@@ -47,9 +47,9 @@ TOKEN :
   < ORDER_BY: "order" (<WHITESPACE>)+ "by" (<WHITESPACE>)+ >
 |
   < ORDER_TYPE: "asc" | "desc" >
-|  
+|
   < PARAMETER_CHAR: "?" >
-|  
+|
   < LIMIT: "limit" (<WHITESPACE>)+ >
 |
   < NUMBER: (["0"-"9"])+ >
@@ -57,9 +57,9 @@ TOKEN :
   < PROPERTY: ("$")("{"<NAMESPACE>"}")?(<QNAME_NAME>) >
 |
   < #NAMESPACE: <LETTER>(<LETTER> | <DIGIT>)* >
-|  
+|
   < #QNAME_NAME: <LETTER>(<LETTER> | <DIGIT>)* >
-|  
+|
   < FIELD: <LETTER>(<LETTER> | <DIGIT>)* >
 |
   < VALUE: "\"" (~["\""])* "\"" >
@@ -76,8 +76,8 @@ TOKEN :
 
 ASTStart start() #Start : {}
 {
-    
-  Query() 
+
+  Query()
   { return jjtThis; }
 }
 
@@ -85,7 +85,7 @@ void Query() : {}
 {
     [LogicExpression()] [OrderByExpression()] [Limit()]<EOF>
 }
-void Limit() #Limit : 
+void Limit() #Limit :
 {
     Token t;
 }
@@ -133,7 +133,7 @@ void ANDExpression() : {}
 
 void CompareExpression() : {}
 {
-    Identifier() 
+    Identifier()
     (
             Equal()
         |
@@ -190,7 +190,7 @@ void Identifier() : {}
     Field() | Property()
 }
 
-void Field() #Field : 
+void Field() #Field :
 {
   Token t;
 }
@@ -199,18 +199,18 @@ void Field() #Field :
     {
         jjtn000.setName(t.image);
     }
-    
+
 }
-void Property() #Property : 
+void Property() #Property :
 {
   Token t;
 }
 {
     t=<PROPERTY>{
             jjtn000.setName(t.image);
-        } 
+        }
 }
-void Value() #Value : 
+void Value() #Value :
 {
   Token t;
 }

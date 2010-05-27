@@ -31,7 +31,7 @@ import org.hsqldb.jdbc.jdbcDataSource;
 
 /**
  * Support class for creating a JDBC delegate (using in-mem HSQL db).
- * 
+ *
  * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
  */
 public class DelegateSupport {
@@ -53,15 +53,15 @@ public class DelegateSupport {
         ds.setUser("sa");
         ds.setPassword("");
         _ds = ds;
-        
+
         setup();
         _del = new JdbcDelegate(_ds);
     }
-    
+
     public DatabaseDelegate delegate() {
         return _del;
     }
-    
+
     public void setup() throws Exception {
         Connection c = _ds.getConnection();
         try {
@@ -74,15 +74,15 @@ public class DelegateSupport {
                     sql.append((char) v);
                 }
             }
-            
+
             c.createStatement().executeUpdate("CREATE ALIAS MOD FOR \"org.apache.ode.scheduler.simple.DelegateSupport.mod\";");
             c.createStatement().executeUpdate(sql.toString());
         } finally {
             c.close();
         }
-        
+
     }
-    
+
     public static long mod(long a, long b) {
         return a % b;
     }

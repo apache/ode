@@ -107,7 +107,7 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
     public List evaluate(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
         List result;
         Object someRes = null;
-        try { 
+        try {
             someRes = evaluate(cexp, ctx, XPathConstants.NODESET);
         } catch (Exception e) {
             someRes = evaluate(cexp, ctx, XPathConstants.STRING);
@@ -187,7 +187,7 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             return cal;
         }
         if (date instanceof Element) date = ((Element) date).getTextContent();
-        
+
         if (date instanceof Text) date = ((Text) date).getTextContent();
 
         try {
@@ -219,13 +219,13 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
                     ctx, oxpath20);
             JaxpVariableResolver varResolver = new JaxpVariableResolver(ctx, oxpath20, ((XPathFactoryImpl) xpf).getConfiguration());
             xpf.setXPathFunctionResolver(funcResolver);
-            xpf.setXPathVariableResolver(varResolver);            
+            xpf.setXPathVariableResolver(varResolver);
             XPath xpe = xpf.newXPath();
             xpe.setNamespaceContext(oxpath20.namespaceCtx);
             String xpath = ((OXPath10Expression)cexp).xpath;
             XPathExpression expr = xpe.compile(xpath);
             Node contextNode = ctx.getRootNode() == null ? DOMUtils.newDocument() : ctx.getRootNode();
-            // Create step nodes in XPath in case it is incompletely instantiated 
+            // Create step nodes in XPath in case it is incompletely instantiated
             if (oxpath20.insertMissingData) {
                 XPath20ExpressionModifier modifier = new XPath20ExpressionModifier(oxpath20.namespaceCtx, ((XPathFactoryImpl) xpf).getConfiguration().getNamePool());
                 modifier.insertMissingData(expr, ctx.getRootNode());

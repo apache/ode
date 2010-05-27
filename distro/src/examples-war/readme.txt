@@ -21,7 +21,7 @@ process with the command:
 
 sendsoap http://localhost:8080/ode/processes/helloWorld testRequest.soap
 
-Please make sure that you execute the command from the example 
+Please make sure that you execute the command from the example
 directory. The response should be a SOAP message containing the
 'hello world' string.
 
@@ -38,7 +38,7 @@ After deployment, start a process with the command:
 
 sendsoap http://localhost:8080/ode/processes/DynMainService testRequest.soap
 
-Please make sure that you execute the command from the example 
+Please make sure that you execute the command from the example
 directory. The response should be an 'OK' SOAP message, showing
 that all invocations have been successful.
 
@@ -54,6 +54,6 @@ After deployment, start a process with the command:
 
 sendsoap http://localhost:8080/ode/processes/MSMainExecuteService testRequest.soap
 
-Please make sure that you execute the command from the example 
+Please make sure that you execute the command from the example
 directory. The response should be an 'OK' SOAP message, showing
 that all invocations have been successful.

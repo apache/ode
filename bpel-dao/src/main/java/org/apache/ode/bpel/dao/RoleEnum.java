@@ -52,10 +52,10 @@ public class RoleEnum {
 
   /**
    * DOCUMENTME
-   * 
+   *
    * @param code
    *          DOCUMENTME
-   * 
+   *
    * @return DOCUMENTME
    */
   public static RoleEnum fromCode(short code) {
@@ -71,7 +71,7 @@ public class RoleEnum {
 
   /**
    * DOCUMENTME
-   * 
+   *
    * @return DOCUMENTME
    */
   public short toCode() {

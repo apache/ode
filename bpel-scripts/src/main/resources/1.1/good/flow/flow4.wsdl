@@ -23,11 +23,11 @@
     targetNamespace="http://ode/bpel/unit-test.wsdl"
     xmlns="http://schemas.xmlsoap.org/wsdl/"
     xmlns:tns="http://ode/bpel/unit-test.wsdl"
-    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
     xmlns:plnk="http://schemas.xmlsoap.org/ws/2003/05/partner-link/">
-  
+
     <wsdl:message name="TestMessage1">
         <wsdl:part name="TestPart" type="xsd:string"/>
     </wsdl:message>
@@ -38,9 +38,9 @@
         <wsdl:operation name="testOperation">
             <wsdl:input message="tns:TestMessage1" name="TestIn"/>
             <wsdl:output message="tns:TestMessage1" name="TestOut"/>
-        </wsdl:operation>    
-    </wsdl:portType> 
-   
+        </wsdl:operation>
+    </wsdl:portType>
+
    <bpws:property name="testProp"
                    type="xsd:string"/>
    <plnk:partnerLinkType name="TestPartnerLinkType">
@@ -51,6 +51,6 @@
            <plnk:portType name="tns:TestPortType"/>
        </plnk:role>
     </plnk:partnerLinkType>
-   
+
 </wsdl:definitions>
 

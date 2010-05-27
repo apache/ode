@@ -1,7 +1,7 @@
-SecureConversation 
+SecureConversation
 
 The secure session is bootstrapped using a SymetricBinding which uses
-derived keys based on an ephemeral key. 
+derived keys based on an ephemeral key.
 
 Messages in the secure conversation :
     - Includes a timestamp

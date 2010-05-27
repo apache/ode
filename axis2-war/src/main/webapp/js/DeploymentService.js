@@ -34,14 +34,14 @@ DeploymentService.undeploy =
     function undeploy(/* QName */ _packageName)
     {
         var isAsync, request, response, resultValue;
-        
+
         this._options = new Array();
         isAsync = (this.undeploy.callback != null && typeof(this.undeploy.callback) == 'function');
-        request = 
+        request =
             '<p:undeploy xmlns:p="http://www.apache.org/ode/pmapi">' +
                 (_packageName == null ? '' : '<packageName>' + this._encodeXML(_packageName) + '</packageName>') +
             '</p:undeploy>' ;
-        
+
         if (isAsync) {
             try {
                 this._call(
@@ -94,13 +94,13 @@ DeploymentService.listDeployedPackages =
     function listDeployedPackages()
     {
         var isAsync, request, response, resultValue;
-        
+
         this._options = new Array();
         isAsync = (this.listDeployedPackages.callback != null && typeof(this.listDeployedPackages.callback) == 'function');
-        request = 
+        request =
             '<p:listDeployedPackages xmlns:p="http://www.apache.org/ode/pmapi">' +
             '</p:listDeployedPackages>' ;
-        
+
         if (isAsync) {
             try {
                 this._call(
@@ -151,14 +151,14 @@ DeploymentService.getProcessPackage =
     function getProcessPackage(/* QName */ _processName)
     {
         var isAsync, request, response, resultValue;
-        
+
         this._options = new Array();
         isAsync = (this.getProcessPackage.callback != null && typeof(this.getProcessPackage.callback) == 'function');
-        request = 
+        request =
             '<p:getProcessPackage xmlns:p="http://www.apache.org/ode/pmapi">' +
                 (_processName == null ? '' : '<processName>' + this._encodeXML(_processName) + '</processName>') +
             '</p:getProcessPackage>' ;
-        
+
         if (isAsync) {
             try {
                 this._call(
@@ -211,14 +211,14 @@ DeploymentService.listProcesses =
     function listProcesses(/* string */ _packageName)
     {
         var isAsync, request, response, resultValue;
-        
+
         this._options = new Array();
         isAsync = (this.listProcesses.callback != null && typeof(this.listProcesses.callback) == 'function');
-        request = 
+        request =
             '<p:listProcesses xmlns:p="http://www.apache.org/ode/pmapi">' +
                 (_packageName == null ? '' : '<packageName>' + this._encodeXML(_packageName) + '</packageName>') +
             '</p:listProcesses>' ;
-        
+
         if (isAsync) {
             try {
                 this._call(
@@ -270,13 +270,13 @@ function WebService(endpointName)
 {
     this.readyState = 0;
     this.onreadystatechange = null;
-    
+
     //public accessors for manually intervening in setting the address (e.g. supporting tcpmon)
     this.getAddress = function (endpointName)
     {
         return this._endpointDetails[endpointName].address;
     }
-    
+
     this.setAddress = function (endpointName, address)
     {
         this._endpointDetails[endpointName].address = address;
@@ -302,8 +302,8 @@ function WebService(endpointName)
         }
         return wsrequest;
     }
-        
-    this._endpointDetails = 
+
+    this._endpointDetails =
         {
             "DeploymentPort": {
                 "type" : "SOAP11",
@@ -346,25 +346,25 @@ function WebService(endpointName)
             this._options.useWSA = false;
             this._options.action = undefined;
         }
-        
+
         if (details["httpmethod"] != null) {
             this._options.HTTPMethod = details.httpmethod[opName];
         } else {
             this._options.HTTPMethod = null;
         }
-        
+
         if (details["httpinputSerialization"] != null) {
             this._options.HTTPInputSerialization = details.httpinputSerialization[opName];
         } else {
             this._options.HTTPInputSerialization= null;
         }
-        
+
         if (details["httplocation"] != null) {
             this._options.HTTPLocation = details.httplocation[opName];
         } else {
             this._options.HTTPLocation = null;
         }
-        
+
         if (details["httpignoreUncited"] != null) {
             this._options.HTTPLocationIgnoreUncited = details.httpignoreUncited[opName];
         } else {
@@ -376,13 +376,13 @@ function WebService(endpointName)
         } else {
             this._options.HTTPQueryParameterSeparator = null;
         }
-        
+
         var isAsync = (typeof(callback) == 'function');
-        
+
         var thisRequest = this._getWSRequest();
         if (isAsync) {
             thisRequest._userdata = userdata;
-            thisRequest.onreadystatechange = 
+            thisRequest.onreadystatechange =
                 function() {
                     if (thisRequest.readyState == 4) {
                         callback(thisRequest, userdata);
@@ -396,7 +396,7 @@ function WebService(endpointName)
         } else {
             try {
                 var resultContent = thisRequest.responseText;
-                if (resultContent == "") { 
+                if (resultContent == "") {
                     throw new WebServiceError("No response", "WebService._call() did not recieve a response to a synchronous request.");
                 }
                 var resultXML = thisRequest.responseXML;
@@ -405,7 +405,7 @@ function WebService(endpointName)
             }
             return resultXML;
         }
-    }               
+    }
 }
 WebService.visible = false;
 
@@ -467,7 +467,7 @@ function xs_dateTime_to_date(dateTime)
     var p = 0; // pointer to current parse location in buffer.
 
     var era, year, month, day, hour, minute, second, millisecond;
-    
+
     // parse date, if there is one.
     if (buffer.substr(p,1) == '-')
     {
@@ -476,7 +476,7 @@ function xs_dateTime_to_date(dateTime)
     } else {
         era = 1;
     }
-    
+
     if (buffer.charAt(p+2) != ':')
     {
         year = era * buffer.substr(p,4);
@@ -490,7 +490,7 @@ function xs_dateTime_to_date(dateTime)
         month = 1;
         day = 1;
     }
-    
+
     // parse time, if there is one
     if (buffer.charAt(p) != '+' && buffer.charAt(p) != '-')
     {
@@ -503,7 +503,7 @@ function xs_dateTime_to_date(dateTime)
         if (buffer.charAt(p) == '.')
         {
             millisecond = parseFloat(buffer.substr(p))*1000;
-            // Note that JS fractional seconds are significant to 3 places - xs:time is significant to more - 
+            // Note that JS fractional seconds are significant to 3 places - xs:time is significant to more -
             // though implementations are only required to carry 3 places.
             p++;
             while (buffer.charCodeAt(p) >= 48 && buffer.charCodeAt(p) <= 57) p++;
@@ -516,7 +516,7 @@ function xs_dateTime_to_date(dateTime)
         second = 0;
         millisecond = 0;
     }
-    
+
     var tzhour = 0;
     var tzminute = 0;
     // parse time zone
@@ -527,7 +527,7 @@ function xs_dateTime_to_date(dateTime)
         p += 3;
         tzminute = sign * buffer.substr(p,2);
     }
-    
+
     var thisDate = new Date();
     thisDate.setUTCFullYear(year);
     thisDate.setUTCMonth(month-1);
@@ -535,7 +535,7 @@ function xs_dateTime_to_date(dateTime)
     thisDate.setUTCHours(hour);
     thisDate.setUTCMinutes(minute);
     thisDate.setUTCSeconds(second);
-    thisDate.setUTCMilliseconds(millisecond);    
+    thisDate.setUTCMilliseconds(millisecond);
     thisDate.setUTCHours(thisDate.getUTCHours() - tzhour);
     thisDate.setUTCMinutes(thisDate.getUTCMinutes() - tzminute);
     return thisDate;
@@ -587,4 +587,4 @@ try {
         }
     }
 } catch (e) { }
-        
+

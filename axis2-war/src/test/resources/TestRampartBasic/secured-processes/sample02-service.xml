@@ -36,7 +36,7 @@
 <!-- services.xml of sample-2 : Timestamp and UsernameToken-->
 <service>
     <module ref="rampart" />
-    
+
     <parameter name="InflowSecurity">
       <action>
         <items>UsernameToken Timestamp</items>

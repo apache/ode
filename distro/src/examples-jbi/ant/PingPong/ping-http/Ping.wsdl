@@ -76,7 +76,7 @@
         <port name="PingPort" binding="tns:PingSoapBinding">
             <soap:address location="http://localhost:8080/ping"/>
 
-            <!-- Connect this external HTTP endpoint to the process internal 
+            <!-- Connect this external HTTP endpoint to the process internal
                  JBI endpoint defined in ping/Ping.dd -->
             <smix:endpoint role="consumer" defaultMep="in-out"/>
 

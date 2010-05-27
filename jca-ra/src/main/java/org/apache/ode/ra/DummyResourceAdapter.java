@@ -31,7 +31,7 @@ import javax.transaction.xa.XAResource;
  */
 public class DummyResourceAdapter implements ResourceAdapter {
     /**
-     * 
+     *
      */
     public DummyResourceAdapter() {
         super();

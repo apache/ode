@@ -24,7 +24,7 @@ import org.apache.ode.bpel.o.*;
  * Factory for creating activity template objects.
  */
 public class ActivityTemplateFactory {
-  
+
   public ACTIVITY createInstance(OActivity type, ActivityInfo ai, ScopeFrame scopeFrame, LinkFrame linkFrame) {
     if (type instanceof OThrow) return new THROW(ai, scopeFrame, linkFrame);
     if (type instanceof OEmpty) return new EMPTY(ai, scopeFrame, linkFrame);

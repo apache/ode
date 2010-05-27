@@ -30,20 +30,20 @@ import org.apache.ode.ql.tree.BuilderFactory;
 public class SyntaxTest extends TestCase {
 
   private final static String TESTS_DIR = "target/test-classes";
-  
+
   private File[] casesFiles = new File(TESTS_DIR).listFiles();
-  
+
   /**
    * @see junit.framework.TestCase#setUp()
    */
   @Override
   protected void setUp() throws Exception {
       super.setUp();
-      
+
       casesFiles = new File(System.getProperty("baseDir")).listFiles();
       //casesFiles = new File(TESTS_DIR).listFiles();
   }
-  
+
   public void test() throws Exception {
       for(File caseFile : casesFiles) {
       if (caseFile.isFile()) {
@@ -51,7 +51,7 @@ public class SyntaxTest extends TestCase {
         }
       }
   }
-  
+
   public void doTestCaseFile(File caseFile) throws Exception {
     BufferedReader reader = new BufferedReader(new FileReader(caseFile));
     try {
@@ -68,11 +68,11 @@ public class SyntaxTest extends TestCase {
       reader.close();
     }
   }
-  
+
   public void doTest(String query) throws Exception {
     Builder<String> builder = BuilderFactory.getInstance().createBuilder();
     @SuppressWarnings("unused")
     final org.apache.ode.ql.tree.nodes.Node rootNode = builder.build(query);
   }
-  
+
 }

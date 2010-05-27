@@ -33,7 +33,7 @@
         </dd:provide>
         <dd:invoke partnerLink="timeServerAndFirstProcessForPortTimeServiceSoapPlkVar">
             <dd:service name="TimeService:TimeService" port="TimeServiceSoap"></dd:service>
-        </dd:invoke>        
+        </dd:invoke>
         <dd:cleanup on="always" />
     </dd:process>
 </dd:deploy>

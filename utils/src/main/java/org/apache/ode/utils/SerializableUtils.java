@@ -29,12 +29,12 @@ public class SerializableUtils {
   /**
    * Clone a <code>Serializable</code> object; for use when a
    * <code>clone()</code> method is not available.
-   * 
+   *
    * @param obj
    *          object to clone
-   * 
+   *
    * @return clone object
-   * 
+   *
    * @throws RuntimeException
    */
   public static Object cloneSerializable(Object obj) {

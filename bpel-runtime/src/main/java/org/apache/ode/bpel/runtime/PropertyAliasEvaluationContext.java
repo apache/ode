@@ -95,7 +95,7 @@ public class PropertyAliasEvaluationContext implements EvaluationContext {
     public boolean narrowTypes() {
         return true;
     }
-    
+
     public URI getBaseResourceURI() {
         return null;
     }

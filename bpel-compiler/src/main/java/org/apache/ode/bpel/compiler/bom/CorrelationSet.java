@@ -40,7 +40,7 @@ public class CorrelationSet extends BpelObject {
 
     /**
      * Get the name of this correlation set.
-     * 
+     *
      * @return correlation set name
      */
     public String getName() {
@@ -50,7 +50,7 @@ public class CorrelationSet extends BpelObject {
     /**
      * Get the (ordered) set of properties that define this correlation set.
      * Properties are returned by their qualified name.
-     * 
+     *
      * @return set of defining properties
      */
     public QName[] getProperties() {

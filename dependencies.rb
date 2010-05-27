@@ -89,7 +89,7 @@ JIBX                = "jibx:jibx-run:jar:1.1-beta3"
 KARAF               = [
                         "org.apache.felix:org.osgi.core:jar:1.4.0",
                         "org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.console:jar:1.0.0",
-                        group("org.apache.felix.gogo.commands","org.apache.felix.gogo.runtime", 
+                        group("org.apache.felix.gogo.commands","org.apache.felix.gogo.runtime",
                           :under=>"org.apache.felix.gogo", :version=>"0.2.0")
                       ]
 LOG4J               = "log4j:log4j:jar:1.2.13"
@@ -98,13 +98,13 @@ OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.2.1",
 
 SAXON               = group("saxon", "saxon-xpath", "saxon-dom", "saxon-xqj", :under=>"net.sf.saxon", :version=>"9.1.0.8")
 SERVICEMIX          = [
-                        group("servicemix-core", 
-                            :under=>"org.apache.servicemix", :version=>"3.3"), 
+                        group("servicemix-core",
+                            :under=>"org.apache.servicemix", :version=>"3.3"),
                         group("servicemix-soap", "servicemix-common", "servicemix-shared", "servicemix-http", "servicemix-eip",
-                            :under=>"org.apache.servicemix", :version=>"2008.01"), 
-                        group("servicemix-utils", 
+                            :under=>"org.apache.servicemix", :version=>"2008.01"),
+                        group("servicemix-utils",
                             :under=>"org.apache.servicemix", :version=>"1.0.0"),
-                        "commons-httpclient:commons-httpclient:jar:3.0", 
+                        "commons-httpclient:commons-httpclient:jar:3.0",
                         "commons-codec:commons-codec:jar:1.2",
                         "org.mortbay.jetty:jetty:jar:6.1.12rc1",
                         "org.mortbay.jetty:jetty-client:jar:6.1.12rc1",
@@ -124,7 +124,7 @@ SERVICEMIX          = [
                         "commons-beanutils:commons-beanutils:jar:1.7.0",
                         "tranql:tranql-connector-derby-common:jar:1.1"
                         ]
-SLF4J = group(%w{ slf4j-api slf4j-log4j12 jcl104-over-slf4j }, :under=>"org.slf4j", :version=>"1.4.3")                        
+SLF4J = group(%w{ slf4j-api slf4j-log4j12 jcl104-over-slf4j }, :under=>"org.slf4j", :version=>"1.4.3")
 SPRING              = ["org.springframework:spring:jar:2.5.6"]
 TRANQL              = [ "tranql:tranql-connector:jar:1.1", COMMONS.primitives ]
 WOODSTOX            = "woodstox:wstx-asl:jar:3.2.1"

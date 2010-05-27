@@ -26,7 +26,7 @@
    <elementVar name="reallyEmptyVar"  xmlns:tns="http://foobar" >
                     <tns:ApplicationData/>
     </elementVar>
-    
+
     <elementVar name="foo"  xmlns:tns="http://foobar" >
                     <tns:ApplicationData>
                              <tns:ApplicationInfo>

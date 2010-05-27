@@ -18,10 +18,10 @@ version: 2.5.2
      * @class TabView
      * @extends YAHOO.util.Element
      * @constructor
-     * @param {HTMLElement | String | Object} el(optional) The html 
-     * element that represents the TabView, or the attribute object to use. 
+     * @param {HTMLElement | String | Object} el(optional) The html
+     * element that represents the TabView, or the attribute object to use.
      * An element will be created if none provided.
-     * @param {Object} attr (optional) A key map of the tabView's 
+     * @param {Object} attr (optional) A key map of the tabView's
      * initial attributes.  Ignored if first arg is attributes object.
      */
     YAHOO.widget.TabView = function(el, attr) {
@@ -30,59 +30,59 @@ version: 2.5.2
             attr = el; // treat first arg as attr object
             el = attr.element || null;
         }
-        
+
         if (!el && !attr.element) { // create if we dont have one
             el = _createTabViewElement.call(this, attr);
         }
-        YAHOO.widget.TabView.superclass.constructor.call(this, el, attr); 
+        YAHOO.widget.TabView.superclass.constructor.call(this, el, attr);
     };
 
     YAHOO.extend(YAHOO.widget.TabView, YAHOO.util.Element);
-    
+
     var proto = YAHOO.widget.TabView.prototype;
     var Dom = YAHOO.util.Dom;
     var Event = YAHOO.util.Event;
     var Tab = YAHOO.widget.Tab;
-    
-    
+
+
     /**
-     * The className to add when building from scratch. 
+     * The className to add when building from scratch.
      * @property CLASSNAME
      * @default "navset"
      */
     proto.CLASSNAME = 'yui-navset';
-    
+
     /**
      * The className of the HTMLElement containing the TabView's tab elements
      * to look for when building from existing markup, or to add when building
-     * from scratch. 
+     * from scratch.
      * All childNodes of the tab container are treated as Tabs when building
      * from existing markup.
      * @property TAB_PARENT_CLASSNAME
      * @default "nav"
      */
     proto.TAB_PARENT_CLASSNAME = 'yui-nav';
-    
+
     /**
      * The className of the HTMLElement containing the TabView's label elements
      * to look for when building from existing markup, or to add when building
-     * from scratch. 
+     * from scratch.
      * All childNodes of the content container are treated as content elements when
      * building from existing markup.
      * @property CONTENT_PARENT_CLASSNAME
      * @default "nav-content"
      */
     proto.CONTENT_PARENT_CLASSNAME = 'yui-content';
-    
+
     proto._tabParent = null;
-    proto._contentParent = null; 
-    
+    proto._contentParent = null;
+
     /**
-     * Adds a Tab to the TabView instance.  
+     * Adds a Tab to the TabView instance.
      * If no index is specified, the tab is added to the end of the tab list.
      * @method addTab
      * @param {YAHOO.widget.Tab} tab A Tab instance to add.
-     * @param {Integer} index The position to add the tab. 
+     * @param {Integer} index The position to add the tab.
      * @return void
      */
     proto.addTab = function(tab, index) {
@@ -91,11 +91,11 @@ version: 2.5.2
             this._queue[this._queue.length] = ['addTab', arguments];
             return false;
         }
-        
+
         index = (index === undefined) ? tabs.length : index;
-        
+
         var before = this.getTab(index);
-        
+
         var self = this;
         var el = this.get('element');
         var tabParent = this._tabParent;
@@ -113,12 +113,12 @@ version: 2.5.2
         if ( contentEl && !Dom.isAncestor(contentParent, contentEl) ) {
             contentParent.appendChild(contentEl);
         }
-        
+
         if ( !tab.get('active') ) {
             tab.set('contentVisible', false, true); /* hide if not active */
         } else {
             this.set('activeTab', tab, true);
-            
+
         }
 
         var activate = function(e) {
@@ -130,16 +130,16 @@ version: 2.5.2
             }
             self.set('activeTab', this, silent);
         };
-        
+
         tab.addListener( tab.get('activationEvent'), activate);
-        
+
         tab.addListener('activationEventChange', function(e) {
             if (e.prevValue != e.newValue) {
                 tab.removeListener(e.prevValue, activate);
                 tab.addListener(e.newValue, activate);
             }
         });
-        
+
         tabs.splice(index, 0, tab);
     };
 
@@ -153,7 +153,7 @@ version: 2.5.2
         var el = this.get('element');
         var target = YAHOO.util.Event.getTarget(e);
         var tabParent = this._tabParent;
-        
+
         if (Dom.isAncestor(tabParent, target) ) {
             var tabEl;
             var tab = null;
@@ -168,14 +168,14 @@ version: 2.5.2
                     tab = tabs[i];
                     break; // note break
                 }
-            } 
-            
+            }
+
             if (tab) {
                 tab.fireEvent(e.type, e);
             }
         }
     };
-    
+
     /**
      * Returns the Tab instance at the specified index.
      * @method getTab
@@ -185,7 +185,7 @@ version: 2.5.2
     proto.getTab = function(index) {
         return this.get('tabs')[index];
     };
-    
+
     /**
      * Returns the index of given tab.
      * @method getTabIndex
@@ -201,10 +201,10 @@ version: 2.5.2
                 break;
             }
         }
-        
+
         return index;
     };
-    
+
     /**
      * Removes the specified Tab from the TabView.
      * @method removeTab
@@ -225,13 +225,13 @@ version: 2.5.2
                 }
             }
         }
-        
+
         this._tabParent.removeChild( tab.get('element') );
         this._contentParent.removeChild( tab.get('contentEl') );
         this._configs.tabs.value.splice(index, 1);
-        
+
     };
-    
+
     /**
      * Provides a readable name for the TabView instance.
      * @method toString
@@ -239,9 +239,9 @@ version: 2.5.2
      */
     proto.toString = function() {
         var name = this.get('id') || this.get('tagName');
-        return "TabView " + name; 
+        return "TabView " + name;
     };
-    
+
     /**
      * The transiton to use when switching between tabs.
      * @method contentTransition
@@ -250,7 +250,7 @@ version: 2.5.2
         newTab.set('contentVisible', true);
         oldTab.set('contentVisible', false);
     };
-    
+
     /**
      * setAttributeConfigs TabView specific properties.
      * @method initAttributes
@@ -258,17 +258,17 @@ version: 2.5.2
      */
     proto.initAttributes = function(attr) {
         YAHOO.widget.TabView.superclass.initAttributes.call(this, attr);
-        
+
         if (!attr.orientation) {
             attr.orientation = 'top';
         }
-        
+
         var el = this.get('element');
 
         if (!YAHOO.util.Dom.hasClass(el, this.CLASSNAME)) {
-            YAHOO.util.Dom.addClass(el, this.CLASSNAME);        
+            YAHOO.util.Dom.addClass(el, this.CLASSNAME);
         }
-        
+
         /**
          * The Tabs belonging to the TabView instance.
          * @attribute tabs
@@ -285,20 +285,20 @@ version: 2.5.2
          * @private
          * @type HTMLElement
          */
-        this._tabParent = 
+        this._tabParent =
                 this.getElementsByClassName(this.TAB_PARENT_CLASSNAME,
                         'ul' )[0] || _createTabParent.call(this);
-            
+
         /**
          * The container of the tabView's content elements.
          * @property _contentParent
          * @type HTMLElement
          * @private
          */
-        this._contentParent = 
+        this._contentParent =
                 this.getElementsByClassName(this.CONTENT_PARENT_CLASSNAME,
                         'div')[0] ||  _createContentParent.call(this);
-        
+
         /**
          * How the Tabs should be oriented relative to the TabView.
          * @attribute orientation
@@ -310,11 +310,11 @@ version: 2.5.2
             method: function(value) {
                 var current = this.get('orientation');
                 this.addClass('yui-navset-' + value);
-                
+
                 if (current != value) {
                     this.removeClass('yui-navset-' + current);
                 }
-                
+
                 switch(value) {
                     case 'bottom':
                     this.appendChild(this._tabParent);
@@ -322,7 +322,7 @@ version: 2.5.2
                 }
             }
         });
-        
+
         /**
          * The index of the tab currently active.
          * @attribute activeIndex
@@ -337,7 +337,7 @@ version: 2.5.2
                 return !this.getTab(value).get('disabled'); // cannot activate if disabled
             }
         });
-        
+
         /**
          * The tab currently active.
          * @attribute activeTab
@@ -347,16 +347,16 @@ version: 2.5.2
             value: attr.activeTab,
             method: function(tab) {
                 var activeTab = this.get('activeTab');
-                
-                if (tab) {  
+
+                if (tab) {
                     tab.set('active', true);
                     this._configs['activeIndex'].value = this.getTabIndex(tab); // keep in sync
                 }
-                
+
                 if (activeTab && activeTab != tab) {
                     activeTab.set('active', false);
                 }
-                
+
                 if (activeTab && tab != activeTab) { // no transition if only 1
                     this.contentTransition(tab, activeTab);
                 } else if (tab) {
@@ -371,7 +371,7 @@ version: 2.5.2
         if ( this._tabParent ) {
             _initTabs.call(this);
         }
-        
+
         // Due to delegation we add all DOM_EVENTS to the TabView container
         // but IE will leak when unsupported events are added, so remove these
         this.DOM_EVENTS.submit = false;
@@ -384,7 +384,7 @@ version: 2.5.2
             }
         }
     };
-    
+
     /**
      * Creates Tab instances from a collection of HTMLElements.
      * @method initTabs
@@ -395,72 +395,72 @@ version: 2.5.2
         var tab,
             attr,
             contentEl;
-            
-        var el = this.get('element');   
+
+        var el = this.get('element');
         var tabs = _getChildNodes(this._tabParent);
         var contentElements = _getChildNodes(this._contentParent);
 
         for (var i = 0, len = tabs.length; i < len; ++i) {
             attr = {};
-            
+
             if (contentElements[i]) {
                 attr.contentEl = contentElements[i];
             }
 
             tab = new YAHOO.widget.Tab(tabs[i], attr);
             this.addTab(tab);
-            
+
             if (tab.hasClass(tab.ACTIVE_CLASSNAME) ) {
                 this._configs.activeTab.value = tab; // dont invoke method
                 this._configs.activeIndex.value = this.getTabIndex(tab);
             }
         }
     };
-    
+
     var _createTabViewElement = function(attr) {
         var el = document.createElement('div');
 
         if ( this.CLASSNAME ) {
             el.className = this.CLASSNAME;
         }
-        
+
         return el;
     };
-    
+
     var _createTabParent = function(attr) {
         var el = document.createElement('ul');
 
         if ( this.TAB_PARENT_CLASSNAME ) {
             el.className = this.TAB_PARENT_CLASSNAME;
         }
-        
+
         this.get('element').appendChild(el);
-        
+
         return el;
     };
-    
+
     var _createContentParent = function(attr) {
         var el = document.createElement('div');
 
         if ( this.CONTENT_PARENT_CLASSNAME ) {
             el.className = this.CONTENT_PARENT_CLASSNAME;
         }
-        
+
         this.get('element').appendChild(el);
-        
+
         return el;
     };
-    
+
     var _getChildNodes = function(el) {
         var nodes = [];
         var childNodes = el.childNodes;
-        
+
         for (var i = 0, len = childNodes.length; i < len; ++i) {
             if (childNodes[i].nodeType == 1) {
                 nodes[nodes.length] = childNodes[i];
             }
         }
-        
+
         return nodes;
     };
 })();
@@ -468,14 +468,14 @@ version: 2.5.2
 (function() {
     var Dom = YAHOO.util.Dom,
         Event = YAHOO.util.Event;
-    
+
     /**
      * A representation of a Tab's label and content.
      * @namespace YAHOO.widget
      * @class Tab
      * @extends YAHOO.util.Element
      * @constructor
-     * @param element {HTMLElement | String} (optional) The html element that 
+     * @param element {HTMLElement | String} (optional) The html element that
      * represents the TabView. An element will be created if none provided.
      * @param {Object} properties A key map of initial properties
      */
@@ -497,15 +497,15 @@ version: 2.5.2
             failure: function(o) {
             }
         };
-        
+
         Tab.superclass.constructor.call(this, el, attr);
-        
+
         this.DOM_EVENTS = {}; // delegating to tabView
     };
 
     YAHOO.extend(Tab, YAHOO.util.Element);
     var proto = Tab.prototype;
-    
+
     /**
      * The default tag name for a Tab's inner element.
      * @property LABEL_INNER_TAGNAME
@@ -513,7 +513,7 @@ version: 2.5.2
      * @default "em"
      */
     proto.LABEL_TAGNAME = 'em';
-    
+
     /**
      * The class name applied to active tabs.
      * @property ACTIVE_CLASSNAME
@@ -521,7 +521,7 @@ version: 2.5.2
      * @default "selected"
      */
     proto.ACTIVE_CLASSNAME = 'selected';
-    
+
     /**
      * The title applied to active tabs.
      * @property ACTIVE_TITLE
@@ -537,7 +537,7 @@ version: 2.5.2
      * @default "disabled"
      */
     proto.DISABLED_CLASSNAME = 'disabled';
-    
+
     /**
      * The class name applied to dynamic tabs while loading.
      * @property LOADING_CLASSNAME
@@ -553,7 +553,7 @@ version: 2.5.2
      * @type Object
      */
     proto.dataConnection = null;
-    
+
     /**
      * Object containing success and failure callbacks for loading data.
      * @property loadHandler
@@ -562,7 +562,7 @@ version: 2.5.2
     proto.loadHandler = null;
 
     proto._loading = false;
-    
+
     /**
      * Provides a readable name for the tab.
      * @method toString
@@ -571,9 +571,9 @@ version: 2.5.2
     proto.toString = function() {
         var el = this.get('element');
         var id = el.id || el.tagName;
-        return "Tab " + id; 
+        return "Tab " + id;
     };
-    
+
     /**
      * setAttributeConfigs TabView specific properties.
      * @method initAttributes
@@ -582,9 +582,9 @@ version: 2.5.2
     proto.initAttributes = function(attr) {
         attr = attr || {};
         Tab.superclass.initAttributes.call(this, attr);
-        
+
         var el = this.get('element');
-        
+
         /**
          * The event that triggers the tab's activation.
          * @attribute activationEvent
@@ -592,7 +592,7 @@ version: 2.5.2
          */
         this.setAttributeConfig('activationEvent', {
             value: attr.activationEvent || 'click'
-        });        
+        });
 
         /**
          * The element that contains the tab's label.
@@ -608,14 +608,14 @@ version: 2.5.2
                     if (current == value) {
                         return false; // already set
                     }
-                    
+
                     this.replaceChild(value, current);
                 } else if (el.firstChild) { // ensure label is firstChild by default
                     this.insertBefore(value, el.firstChild);
                 } else {
                     this.appendChild(value);
-                }  
-            } 
+                }
+            }
         });
 
         /**
@@ -630,11 +630,11 @@ version: 2.5.2
                 if (!labelEl) { // create if needed
                     this.set('labelEl', _createlabelEl.call(this));
                 }
-                
+
                 _setLabel.call(this, value);
             }
         });
-        
+
         /**
          * The HTMLElement that contains the tab's content.
          * @attribute contentEl
@@ -653,7 +653,7 @@ version: 2.5.2
                 }
             }
         });
-        
+
         /**
          * The tab's content.
          * @attribute content
@@ -667,7 +667,7 @@ version: 2.5.2
         });
 
         var _dataLoaded = false;
-        
+
         /**
          * The tab's data source, used for loading content dynamically.
          * @attribute dataSrc
@@ -676,7 +676,7 @@ version: 2.5.2
         this.setAttributeConfig('dataSrc', {
             value: attr.dataSrc
         });
-        
+
         /**
          * Whether or not content should be reloaded for every view.
          * @attribute cacheData
@@ -687,7 +687,7 @@ version: 2.5.2
             value: attr.cacheData || false,
             validator: YAHOO.lang.isBoolean
         });
-        
+
         /**
          * The method to use for the data request.
          * @attribute loadMethod
@@ -703,13 +703,13 @@ version: 2.5.2
          * Whether or not any data has been loaded from the server.
          * @attribute dataLoaded
          * @type Boolean
-         */        
+         */
         this.setAttributeConfig('dataLoaded', {
             value: false,
             validator: YAHOO.lang.isBoolean,
             writeOnce: true
         });
-        
+
         /**
          * Number if milliseconds before aborting and calling failure handler.
          * @attribute dataTimeout
@@ -720,7 +720,7 @@ version: 2.5.2
             value: attr.dataTimeout || null,
             validator: YAHOO.lang.isNumber
         });
-        
+
         /**
          * Whether or not the tab is currently active.
          * If a dataSrc is set for the tab, the content will be loaded from
@@ -743,7 +743,7 @@ version: 2.5.2
                 return YAHOO.lang.isBoolean(value) && !this.get('disabled') ;
             }
         });
-        
+
         /**
          * Whether or not the tab is disabled.
          * @attribute disabled
@@ -760,7 +760,7 @@ version: 2.5.2
             },
             validator: YAHOO.lang.isBoolean
         });
-        
+
         /**
          * The href of the tab's anchor element.
          * @attribute href
@@ -775,7 +775,7 @@ version: 2.5.2
             },
             validator: YAHOO.lang.isString
         });
-        
+
         /**
          * The Whether or not the tab's content is visible.
          * @attribute contentVisible
@@ -787,7 +787,7 @@ version: 2.5.2
             method: function(value) {
                 if (value) {
                     this.get('contentEl').style.display = 'block';
-                    
+
                     if ( this.get('dataSrc') ) {
                      // load dynamic content unless already loading or loaded and caching
                         if ( !this._loading && !(this.get('dataLoaded') && this.get('cacheData')) ) {
@@ -797,23 +797,23 @@ version: 2.5.2
                 } else {
                     this.get('contentEl').style.display = 'none';
                 }
-                
+
             },
             validator: YAHOO.lang.isBoolean
         });
     };
-    
+
     var _createTabElement = function(attr) {
         var el = document.createElement('li');
         var a = document.createElement('a');
-        
+
         a.href = attr.href || '#';
-        
+
         el.appendChild(a);
-        
+
         var label = attr.label || null;
         var labelEl = attr.labelEl || null;
-        
+
         if (labelEl) { // user supplied labelEl
             if (!label) { // user supplied label
                 label = _getLabel.call(this, labelEl);
@@ -821,47 +821,47 @@ version: 2.5.2
         } else {
             labelEl = _createlabelEl.call(this);
         }
-        
+
         a.appendChild(labelEl);
-        
+
         return el;
     };
-    
+
     var _getlabelEl = function() {
         return this.getElementsByTagName(this.LABEL_TAGNAME)[0];
     };
-    
+
     var _createlabelEl = function() {
         var el = document.createElement(this.LABEL_TAGNAME);
         return el;
     };
-    
+
     var _setLabel = function(label) {
         var el = this.get('labelEl');
         el.innerHTML = label;
     };
-    
+
     var _getLabel = function() {
         var label,
             el = this.get('labelEl');
-            
+
             if (!el) {
                 return undefined;
             }
-        
+
         return el.innerHTML;
     };
-    
+
     var _dataConnect = function() {
         if (!YAHOO.util.Connect) {
             return false;
         }
 
         Dom.addClass(this.get('contentEl').parentNode, this.LOADING_CLASSNAME);
-        this._loading = true; 
+        this._loading = true;
         this.dataConnection = YAHOO.util.Connect.asyncRequest(
             this.get('loadMethod'),
-            this.get('dataSrc'), 
+            this.get('dataSrc'),
             {
                 success: function(o) {
                     this.loadHandler.success.call(this, o);
@@ -883,7 +883,7 @@ version: 2.5.2
             }
         );
     };
-    
+
     YAHOO.widget.Tab = Tab;
 })();
 

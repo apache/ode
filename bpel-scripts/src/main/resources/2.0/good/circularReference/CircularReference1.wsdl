@@ -17,14 +17,14 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
-xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" 
-xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" 
-xmlns:xml="http://www.w3.org/XML/1998/namespace" 
-xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
-xmlns:this="http://example.com/CircularReference1" 
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+xmlns:xs="http://www.w3.org/2001/XMLSchema"
+xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop"
+xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+xmlns:xml="http://www.w3.org/XML/1998/namespace"
+xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+xmlns:this="http://example.com/CircularReference1"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 targetNamespace="http://example.com/CircularReference1">
     <wsdl:types>
         <xs:schema elementFormDefault="qualified" targetNamespace="urn:targetnm">

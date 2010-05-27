@@ -36,7 +36,7 @@ public class Retire2Test extends Axis2TestBase {
         System.out.println("=> " + server.getODEServer().getProcessStore().getPackages());
         if (server.isDeployed("1")) server.undeployProcess(bundleName + "/1");
         if (server.isDeployed("2")) server.undeployProcess(bundleName + "/2");
-        
+
         QName deployedQName = server.deployProcess(bundleName + "/1").iterator().next();
 
         String response = server.sendRequestFile("http://localhost:8888/processes/testretire",
@@ -45,7 +45,7 @@ public class Retire2Test extends Axis2TestBase {
 
         server.getODEServer().getProcessManagement().setRetired(deployedQName, true);
         server.deployProcess(bundleName + "/2");
-        
+
         response = server.sendRequestFile("http://localhost:8888/processes/testretire",
                 bundleName + "/1", "testRequest2.soap");
 

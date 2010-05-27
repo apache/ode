@@ -35,7 +35,7 @@
 
     <bpws:receive createInstance="yes" operation="opInOut" partnerLink="client" portType="tns:OnEventCorrelation" variable="input">
     </bpws:receive>
-    
+
     <bpws:assign>
       <bpws:copy>
         <bpws:from>$input.payload</bpws:from>

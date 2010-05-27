@@ -30,5 +30,5 @@ public class Greater extends IdentifierToValueCMP {
         super(identifier, value);
     }
 
-    
+
 }

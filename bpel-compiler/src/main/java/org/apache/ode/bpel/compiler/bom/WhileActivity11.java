@@ -34,9 +34,9 @@ public class WhileActivity11 extends WhileActivity {
     @Override
     public Expression getCondition() {
         // BPEL 1.1 has the condition in an attribute, not an element.
-        return isAttributeSet("condition") ? 
+        return isAttributeSet("condition") ?
                 new Expression11(getElement(), getElement().getAttributeNode("condition")) : null;
     }
 
-    
+
 }

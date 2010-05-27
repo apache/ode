@@ -116,5 +116,5 @@ class StaticCheckTCase extends TestCase implements CompileListener {
 
   public void setBaseURI(URI u) {
   }
-  
+
 }

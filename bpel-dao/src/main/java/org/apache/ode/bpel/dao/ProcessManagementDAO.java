@@ -30,9 +30,9 @@ import javax.xml.namespace.QName;
  * This DAO handles any process and instance management related database
  * operations. The idea is to separate out the operational side of database
  * tasks from core engine.
- * 
+ *
  * @author sean
- * 
+ *
  */
 public interface ProcessManagementDAO {
     public static class InstanceSummaryKey {
@@ -83,9 +83,9 @@ public interface ProcessManagementDAO {
                 return false;
             return true;
         }
-        
+
     }
-    
+
     public static class FailedSummaryValue {
         public final Long count;
         public final Date lastFailed;
@@ -97,6 +97,6 @@ public interface ProcessManagementDAO {
     }
 
     public Map<InstanceSummaryKey, Long> countInstancesSummary(Set<String> pids);
-    
+
     public Map<String, FailedSummaryValue> findFailedCountAndLastFailedDateForProcessIds(Set<String> pids);
 }

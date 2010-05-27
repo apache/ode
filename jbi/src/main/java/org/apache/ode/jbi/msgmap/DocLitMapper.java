@@ -77,7 +77,7 @@ public class DocLitMapper extends BaseXmlMapper implements Mapper {
   public void toNMS(NormalizedMessage nmsMsg,
       org.apache.ode.bpel.iapi.Message odeMsg, Message msgdef, QName fault)
       throws MessagingException, MessageTranslationException {
-      
+
     // If this is an unkown fault, just return an empty element
     // built with the fault name
     if (msgdef == null && fault != null) {
@@ -102,14 +102,14 @@ public class DocLitMapper extends BaseXmlMapper implements Mapper {
         __log.debug(errmsg);
         throw new MessageTranslationException(errmsg);
     }
-    
+
     Element part = DOMUtils.findChildByName(odeMsg.getMessage(),new QName(null, partdef.getName()));
     if (part == null) {
       String errmsg = "ODE message did not contain expected part: " +  partdef.getName();
       __log.debug(errmsg);
       throw new MessageTranslationException(errmsg);
     }
-    
+
     Element content = DOMUtils.findChildByName(part, partdef.getElementName());
     if (content == null) {
       String errmsg = "ODE message did not contain element " + partdef.getElementName() + " in part: " +  partdef.getName();
@@ -128,14 +128,14 @@ public class DocLitMapper extends BaseXmlMapper implements Mapper {
     assert msgdef.getParts().size() == 1 : "multi part!";
     Part partdef = (Part) msgdef.getParts().values().iterator().next();
     assert partdef.getElementName() != null : "non-element part!";
-    
+
     Element el = parse(nmsMsg.getContent());
     if (!DOMUtils.getNodeQName(el).equals(partdef.getElementName())) {
       String errmsg = "NMS message did not contain element "  + partdef.getElementName();
       __log.debug(errmsg);
       throw new MessageTranslationException(errmsg);
     }
-    
+
 
     Document doc = newDocument();
     Element msgel = doc.createElement("message");
@@ -144,7 +144,7 @@ public class DocLitMapper extends BaseXmlMapper implements Mapper {
     msgel.appendChild(pel);
     pel.appendChild(doc.importNode(el,true));
     odeMsg.setMessage(msgel);
-    
+
   }
 
 
@@ -160,7 +160,7 @@ public class DocLitMapper extends BaseXmlMapper implements Mapper {
           if (pdef.getElementName().equals(elQname))
               return f;
       }
-      
+
       return null;
   }
 
@@ -168,7 +168,7 @@ public class DocLitMapper extends BaseXmlMapper implements Mapper {
    * Check if a message definition is compatible with doc-lit mapping. For
    * WSDL1.1 this means that the message definition needs to have exactly one
    * element part.
-   * 
+   *
    * @param msg
    *          message definition to check
    * @return true if compatible, false otherwise
@@ -177,17 +177,17 @@ public class DocLitMapper extends BaseXmlMapper implements Mapper {
     // Null messages are acceptable.
     if (msg == null)
       return true;
-  
+
     // If we are non-empty, we need to have exactly one part.
     if (msg.getParts().size() != 1)
       return false;
-  
+
     // The single part must also be an "element" typed part.
     if (((Part) msg.getParts().values().iterator().next()).getElementName() == null)
       return false;
-  
+
     return true;
-  
+
   }
 
 }

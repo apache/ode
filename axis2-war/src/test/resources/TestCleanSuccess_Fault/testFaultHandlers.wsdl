@@ -17,11 +17,11 @@
    ~ under the License.
 -->
 
-<wsdl:definitions 
+<wsdl:definitions
    targetNamespace="http://ode/bpel/unit-test/testFaultHandlers.wsdl"
    xmlns:tns="http://ode/bpel/unit-test/testFaultHandlers.wsdl"
    xmlns="http://ode/bpel/unit-test/testFaultHandlers.wsdl"
-   xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"      
+   xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
    xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
@@ -32,7 +32,7 @@
      <wsdl:part name="faultIndicator1" type="xsd:string"/>
      <wsdl:part name="faultIndicator2" type="xsd:string"/>
    </wsdl:message>
-   
+
    <wsdl:message name="replyMessage">
       <wsdl:part name="replyID" type="xsd:string"/>
       <wsdl:part name="replyText" type="xsd:string"/>
@@ -45,7 +45,7 @@
          <wsdl:output message="replyMessage"/>
       </wsdl:operation>
    </wsdl:portType>
-   
+
    <wsdl:binding name="testFaultHandlersBinding" type="tns:testFaultHandlersPT">
       <wsdl:operation name="request">
       </wsdl:operation>

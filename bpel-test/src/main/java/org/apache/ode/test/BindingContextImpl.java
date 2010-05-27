@@ -49,7 +49,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class BindingContextImpl implements BindingContext {
-    
+
 
     public EndpointReference activateMyRoleEndpoint(QName processId, Endpoint myRoleEndpoint) {
         final Document doc = DOMUtils.newDocument();

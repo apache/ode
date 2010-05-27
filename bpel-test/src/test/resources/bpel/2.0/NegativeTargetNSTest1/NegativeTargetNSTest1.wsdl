@@ -20,10 +20,10 @@
 <wsdl:definitions targetNamespace="http://ode/bpel/unit-test/NegativeTargetNSTest.wsdl"
     xmlns:tns="http://ode/bpel/unit-test/NegativeTargetNSTest1.wsdl"
     xmlns="http://ode/bpel/unit-test/NegativeTargetNSTest1.wsdl"
-    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"      
+    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
-    
+
     <wsdl:message name="requestMessage">
         <wsdl:part name="requestID" type="xsd:string"/>
         <wsdl:part name="requestText" type="xsd:string"/>
@@ -46,8 +46,8 @@
     <wsdl:service name="NegativeTargetNSTest1Service">
         <wsdl:port name="NegativeTargetNSTest1Port" binding="tns:NegativeTargetNSTest1Binding">
         </wsdl:port>
-    </wsdl:service>	
-    
+    </wsdl:service>
+
     <plnk:partnerLinkType name="NegativeTargetNSTest1Request">
         <plnk:role name="NegativeTargetNSTest1Service" portType="NegativeTargetNSTest1PT"/>
     </plnk:partnerLinkType>

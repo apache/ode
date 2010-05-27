@@ -59,8 +59,8 @@ public class XmlDataDAOImpl implements XmlDataDAO {
     public final static String SELECT_XMLDATA_IDS_BY_PROCESS = "SELECT_XMLDATA_IDS_BY_PROCESS";
     public final static String SELECT_XMLDATA_IDS_BY_INSTANCE = "SELECT_XMLDATA_IDS_BY_INSTANCE";
     public final static String DELETE_XMLDATA_BY_SCOPE_IDS = "DELETE_XMLDATA_BY_SCOPE_IDS";
-    
-    @Id @Column(name="XML_DATA_ID") 
+
+    @Id @Column(name="XML_DATA_ID")
     @GeneratedValue(strategy=GenerationType.AUTO)
     @SuppressWarnings("unused")
     private Long _id;
@@ -81,7 +81,7 @@ public class XmlDataDAOImpl implements XmlDataDAO {
     private Long _scopeId;
     @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="SCOPE_ID")
     private ScopeDAOImpl _scope;
-    
+
     public XmlDataDAOImpl() {}
     public XmlDataDAOImpl(ScopeDAOImpl scope, String name){
         _scope = scope;
@@ -108,7 +108,7 @@ public class XmlDataDAOImpl implements XmlDataDAO {
               }
            }
         }
-        
+
         return _node;
     }
 

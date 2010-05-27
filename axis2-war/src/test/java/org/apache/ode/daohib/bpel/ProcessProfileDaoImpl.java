@@ -59,7 +59,7 @@ import java.util.List;
 public class ProcessProfileDaoImpl extends HibernateDao implements ProcessProfileDAO {
     @SuppressWarnings("unused")
     private static final Log __log = LogFactory.getLog(ProcessProfileDaoImpl.class);
-    
+
     protected ProcessDaoImpl process;
 
     public ProcessProfileDaoImpl(SessionManager sm, ProcessDaoImpl process) {
@@ -67,24 +67,24 @@ public class ProcessProfileDaoImpl extends HibernateDao implements ProcessProfil
         entering("ProcessProfileDaoImpl.ProcessProfileDaoImpl");
         this.process = process;
     }
-    
+
     public SessionManager getSessionManager() {
         return _sm;
     }
-    
+
     @SuppressWarnings("unchecked")
     public boolean doesProcessExist() {
         boolean exists = false;
-        
+
         Query query = getSession().createQuery("select count(id) from HProcess as p where p.guid = :guid");
         query.setParameter("guid", ((HProcess)process._hobj).getGuid());
         for( Long cnt : (List<Long>)query.list()) {
             exists = cnt.intValue() > 0;
         }
-        
+
         return exists;
     }
-    
+
     public List<ProcessInstanceDAO> findInstancesByProcess() {
         return findByProcess("from HProcessInstance as i where i.process = :process)", ProcessInstanceDaoImpl.class, HProcessInstance.class);
     }
@@ -112,7 +112,7 @@ public class ProcessProfileDaoImpl extends HibernateDao implements ProcessProfil
     public List<XmlDataDAO> findXmlDataByProcess() {
         return findByProcess("from HXmlData as x where x.instance.process = :process", XmlDataDaoImpl.class, HXmlData.class);
     }
-    
+
     public List<ActivityRecoveryDAO> findActivityRecoveriesByProcess() {
         return findByProcess("from HActivityRecovery as a where a.instance.process = :process", ActivityRecoveryDaoImpl.class, HActivityRecovery.class);
     }
@@ -135,7 +135,7 @@ public class ProcessProfileDaoImpl extends HibernateDao implements ProcessProfil
 
         return ((Long)query.uniqueResult()).intValue();
     }
-    
+
     @SuppressWarnings("unchecked")
     protected <D, H> List<D> findByProcess(String queryString, Class daoClass, Class hibClass) {
         List<D> results = new ArrayList<D>();

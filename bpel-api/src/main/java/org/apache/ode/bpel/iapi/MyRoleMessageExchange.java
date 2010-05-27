@@ -52,7 +52,7 @@ public interface MyRoleMessageExchange extends MessageExchange {
      * either create a new process instance, match an existing instance, or be
      * queued for consumption by an instance in the future (see
      * {@link CorrelationType} for details).
-     * 
+     *
      * @return correlation state of the invocation
      */
     CorrelationStatus getCorrelationStatus();
@@ -80,25 +80,25 @@ public interface MyRoleMessageExchange extends MessageExchange {
 
     /**
      * Associate a client key with this message exchange.
-     * 
+     *
      * @param clientKey
      */
     void setClientId(String clientKey);
 
     /**
      * Get the previously associated client key for this exchange.
-     * 
+     *
      * @return
      */
     String getClientId();
 
     /**
      * Get the name of the service targetted in this message exchange.
-     * 
+     *
      * @return service name
      */
     QName getServiceName();
-    
+
     /**
      * Should be called by the external partner when it's done with the
      * message exchange. Ncessary for a better resource management and

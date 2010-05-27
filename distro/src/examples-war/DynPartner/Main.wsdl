@@ -75,6 +75,6 @@
   <prop:propertyAlias propertyName="tns:dummyProp" messageType="resp:DummyMessage"
                       part="payload"/>
   <prop:propertyAlias propertyName="tns:dummyProp" messageType="resp:Dummy2Message"
-                      part="payload"/> 
+                      part="payload"/>
 
 </wsdl:definitions>

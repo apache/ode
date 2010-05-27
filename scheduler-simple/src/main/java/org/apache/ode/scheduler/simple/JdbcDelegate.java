@@ -39,7 +39,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
-import org.apache.ode.utils.DbIsolation;                                                                                                                                 
+import org.apache.ode.utils.DbIsolation;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,9 +47,9 @@ import org.apache.ode.utils.DbIsolation;
 import org.apache.ode.utils.StreamUtils;
 
 /**
- * JDBC-based implementation of the {@link DatabaseDelegate} interface. Should work with most 
- * reasonably behaved databases. 
- * 
+ * JDBC-based implementation of the {@link DatabaseDelegate} interface. Should work with most
+ * reasonably behaved databases.
+ *
  * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
  */
 public class JdbcDelegate implements DatabaseDelegate {
@@ -67,7 +67,7 @@ public class JdbcDelegate implements DatabaseDelegate {
 
     private static final String UPGRADE_JOB_DB2 = "update ODE_JOB set nodeid = ? where nodeid is null "
             + "and mod(ts,CAST(? AS BIGINT)) = ? and ts < ?";
-    
+
     private static final String UPGRADE_JOB_SQLSERVER = "update ODE_JOB set nodeid = ? where nodeid is null "
             + "and (ts % ?) = ? and ts < ?";
 
@@ -76,7 +76,7 @@ public class JdbcDelegate implements DatabaseDelegate {
 
     private static final String UPGRADE_JOB_SYBASE12 = "update ODE_JOB set nodeid = ? where nodeid is null "
             + "and -1 <> ? and -1 <> ? and ts < ?";
-    
+
     private static final String SAVE_JOB = "insert into ODE_JOB "
             + " (jobid, nodeid, ts, scheduled, transacted, "
             + "instanceId,"
@@ -127,8 +127,8 @@ public class JdbcDelegate implements DatabaseDelegate {
 //  public String correlationKeySet;
 //  public Integer retryCount;
 //  public Boolean inMem;
-//  public Map<String, Object> detailsExt = new HashMap<String, Object>();    
-    
+//  public Map<String, Object> detailsExt = new HashMap<String, Object>();
+
     private static final String UPDATE_SCHEDULED = "update ODE_JOB set scheduled = 1 where jobid in (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final int UPDATE_SCHEDULED_SLOTS = 10;
@@ -136,7 +136,7 @@ public class JdbcDelegate implements DatabaseDelegate {
     private DataSource _ds;
 
     private Dialect _dialect;
-    
+
     public JdbcDelegate(DataSource ds) {
         _ds = ds;
         _dialect = guessDialect();
@@ -201,7 +201,7 @@ public class JdbcDelegate implements DatabaseDelegate {
             ps.setLong(i++, job.schedDate);
             ps.setInt(i++, asInteger(loaded));
             ps.setInt(i++, asInteger(job.transacted));
-            
+
             JobDetails details = job.detail;
             ps.setObject(i++, details.instanceId, Types.BIGINT);
             ps.setObject(i++, details.mexId, Types.VARCHAR);
@@ -212,7 +212,7 @@ public class JdbcDelegate implements DatabaseDelegate {
             ps.setObject(i++, details.correlationKeySet, Types.VARCHAR);
             ps.setObject(i++, details.retryCount, Types.INTEGER);
             ps.setObject(i++, details.inMem, Types.INTEGER);
-            
+
             if (details.detailsExt == null || details.detailsExt.size() == 0) {
                 ps.setObject(i++, null, Types.BLOB);
             } else {
@@ -225,7 +225,7 @@ public class JdbcDelegate implements DatabaseDelegate {
                 }
                 ps.setBytes(i++, bos.toByteArray());
             }
-            
+
             return ps.executeUpdate() == 1;
         } catch (SQLException se) {
             throw new DatabaseException(se);
@@ -282,7 +282,7 @@ public class JdbcDelegate implements DatabaseDelegate {
             ps.setString(1, nodeId);
             ps.setLong(2, maxtime);
             ps.setMaxRows(maxjobs);
-            
+
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Scheduler.JobDetails details = new Scheduler.JobDetails();
@@ -304,7 +304,7 @@ public class JdbcDelegate implements DatabaseDelegate {
                         throw new DatabaseException("Error deserializing job detailsExt", e);
                     }
                 }
-                
+
                 {
                     //For compatibility reasons, we check whether there are entries inside
                     //jobDetailsExt blob, which correspond to extracted entries. If so, we
@@ -339,7 +339,7 @@ public class JdbcDelegate implements DatabaseDelegate {
                         details.retryCount = Integer.parseInt((String) detailsExt.get("retryCount"));
                     }
                 }
-                
+
                 Job job = new Job(rs.getLong("ts"), rs.getString("jobid"), asBoolean(rs.getInt("transacted")), details);
                 ret.add(job);
             }
@@ -477,7 +477,7 @@ public class JdbcDelegate implements DatabaseDelegate {
     }
 
     enum Dialect {
-        DB2, DERBY, FIREBIRD, HSQL, MYSQL, ORACLE, SQLSERVER, SYBASE, SYBASE12, UNKNOWN 
+        DB2, DERBY, FIREBIRD, HSQL, MYSQL, ORACLE, SQLSERVER, SYBASE, SYBASE12, UNKNOWN
     }
-    
+
 }

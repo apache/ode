@@ -57,7 +57,7 @@ public class CompilationMessage {
     __commonMsgs.strWarning().toLowerCase() + ": ",
     __commonMsgs.strError().toLowerCase() + ": "
   };
-  
+
   public CompilationMessage setSource(SourceLocation source) {
     this.source = source;
     return this;

@@ -171,7 +171,7 @@ public class XslTransformHandler {
   public void setErrorListener(ErrorListener l) {
     _transformerFactory.setErrorListener(l);
   }
-  
+
   public void clearXSLSheets(QName processQName) {
     synchronized (_templateCache) {
           _templateCache.removeAll(processQName);

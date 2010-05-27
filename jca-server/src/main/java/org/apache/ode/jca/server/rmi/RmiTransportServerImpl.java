@@ -89,9 +89,9 @@ public class RmiTransportServerImpl implements OdeRemote {
         }
 
         Registry registry = LocateRegistry.getRegistry(_port);
-        
+
         registry.rebind(_id, _remote);
-        
+
         __log.debug("Bound JCA server as \"" + _id + "\" on registry port " + _port);
     }
 

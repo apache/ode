@@ -31,28 +31,28 @@ import java.util.Collection;
 public interface ProcessDAO {
     /**
      * Get the unique process identifier.
-     * 
+     *
      * @return process identifier
      */
     QName getProcessId();
 
     /**
      * Get the BPEL process name.
-     * 
+     *
      * @return qualified BPEL process name.
      */
     QName getType();
 
     /**
      * Get the process version
-     * 
+     *
      * @return version
      */
     long getVersion();
 
     /**
      * Get a message correlator instance.
-     * 
+     *
      * @param correlatorId
      *            correlator identifier
      * @return correlator corresponding to the given identifier
@@ -61,7 +61,7 @@ public interface ProcessDAO {
 
     /**
      * Create a new process instance object.
-     * 
+     *
      * @param instantiatingCorrelator
      *            instantiating {@link CorrelatorDAO}
      * @return newly generated instance DAO
@@ -70,7 +70,7 @@ public interface ProcessDAO {
 
     /**
      * Get a process instance (by identifier).
-     * 
+     *
      * @param iid
      *            unique instance identifier.
      * @return DAO corresponding to the process instance
@@ -79,7 +79,7 @@ public interface ProcessDAO {
 
     /**
      * Locates a process instance based on a correlation key.
-     * 
+     *
      * @param cckey
      *            correlation key
      * @return collection of {@link ProcessInstanceDAO} that match correlation key, ordered by date
@@ -88,7 +88,7 @@ public interface ProcessDAO {
 
     /**
      * Remove the routes with the given Id for all the correlators in the process.
-     * 
+     *
      * @todo remove this method.
      * @param routeId
      */
@@ -96,18 +96,18 @@ public interface ProcessDAO {
 
     /**
      * Callback indicating that a process instance has completed its duties.
-     * 
+     *
      * @param instance
      *            the completed {@link ProcessInstanceDAO}
      */
     void instanceCompleted(ProcessInstanceDAO instance);
 
     /**
-     * Deletes only the process and routes without instances. This also deletes any static data to 
+     * Deletes only the process and routes without instances. This also deletes any static data to
      * the process: correlators.
      */
     void deleteProcessAndRoutes();
-    
+
     CorrelatorDAO addCorrelator(String correlator);
 
     String getGuid();
@@ -115,7 +115,7 @@ public interface ProcessDAO {
     int getNumInstances();
 
     /**
-     * @return all instances that haven't completed, use with care as there could be a lot of them 
+     * @return all instances that haven't completed, use with care as there could be a lot of them
      */
     Collection<ProcessInstanceDAO> getActiveInstances();
 }

@@ -39,8 +39,8 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Manages hibernate sessions, and their association with 
- * a transaction thread.  Uses a ThreadLocal strategy for 
+ * Manages hibernate sessions, and their association with
+ * a transaction thread.  Uses a ThreadLocal strategy for
  * managing sessions.
  */
 public class SessionManager {

@@ -46,17 +46,17 @@ import com.ibm.wsdl.extensions.schema.SchemaImpl;
 public class WSDLFlattener {
 
     private static Log __log = LogFactory.getLog(WSDLFlattener.class);
-    
+
     private Definition _definition;
     private SchemaCollection _schemas;
     private Map<QName, Definition> _flattened;
     private boolean _initialized;
-    
+
 
     public WSDLFlattener(Definition definition) {
         this(definition, null);
     }
-        
+
     public WSDLFlattener(Definition definition, SchemaCollection schemas) {
         if (definition == null)
             throw new NullPointerException("Null definition!");
@@ -64,7 +64,7 @@ public class WSDLFlattener {
         this._flattened = new ConcurrentHashMap<QName, Definition>();
         this._schemas = schemas;
     }
-    
+
     /**
      * Parse the schemas referenced by the definition.
      * @throws Exception if an error occurs
@@ -78,7 +78,7 @@ public class WSDLFlattener {
             _initialized = true;
         }
     }
-    
+
     /**
      * Retrieve a flattened definition for a given port type name.
      * @param portType the port type to create a flat definition for
@@ -121,7 +121,7 @@ public class WSDLFlattener {
     public void setSchemas(SchemaCollection schemas) {
         this._schemas = schemas;
     }
-    
+
     private Definition flattenDefinition(QName name) throws Exception {
         // Check that schemas have been loaded
         initialize();
@@ -174,7 +174,7 @@ public class WSDLFlattener {
             }
             flatPort.addOperation(flatOper);
         }
-        
+
         // Import schemas in definition
         if (_schemas.getSize() > 0) {
            Types types = flat.createTypes();
@@ -186,11 +186,11 @@ public class WSDLFlattener {
            }
            flat.setTypes(types);
         }
-        
+
         flat.addPortType(flatPort);
         return flat;
     }
-    
+
     private void parseSchemas(Definition def) throws Exception {
         if (def.getTypes() != null && def.getTypes().getExtensibilityElements() != null) {
             for (Iterator iter = def.getTypes().getExtensibilityElements().iterator(); iter.hasNext();) {
@@ -235,7 +235,7 @@ public class WSDLFlattener {
             flat.addNamespace(key, val);
         }
     }
-    
+
     private Message copyMessage(Message defMessage, Definition flat) {
         Message flatMsg = flat.createMessage();
         flatMsg.setUndefined(false);

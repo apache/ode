@@ -28,20 +28,20 @@
     queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
     expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
     suppressJoinFailure="yes">
- 
+
     <import location="TestTimer.wsdl"
         namespace="http://ode/bpel/unit-test/testTimer.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/" />
     <import location="../ProbeService/probeService.wsdl"
         namespace="http://ode/bpel/unit-test/ProbeService.wsdl"
-        importType="http://schemas.xmlsoap.org/wsdl/"/> 
- 
+        importType="http://schemas.xmlsoap.org/wsdl/"/>
+
     <!-- Unit test Timer Service Test -->
     <partnerLinks>
         <partnerLink name="request" partnerLinkType="wns:testTimerRequest" myRole="testTimerService"/>
         <partnerLink name="probe" partnerLinkType="wns:probeRequest" partnerRole="probeService" initializePartnerRole="yes"/>
     </partnerLinks>
-    
+
     <variables>
         <variable name="request" messageType="wns:requestMessage"/>
         <variable name="probeInput" messageType="prb:probeMessage"/>
@@ -60,15 +60,15 @@
                 <to variable="probeInput" part="probeData"/>
             </copy>
         </assign>
-        
+
         <invoke name="probe1" partnerLink="probe" portType="prb:probeMessagePT" operation="probe" inputVariable="probeInput" outputVariable="probeInput"/>
-        
+
         <wait>
             <for>'PT10S'</for>
         </wait>
-        
+
         <invoke name="probe2" partnerLink="probe" portType="prb:probeMessagePT" operation="probe" inputVariable="probeInput" outputVariable="probeInput"/>
-        
+
         <!-- Copy input variables to internal accumulators -->
         <assign name="assign2">
             <copy>
@@ -76,11 +76,11 @@
                 <to variable="probeInput" part="probeName"/>
             </copy>
         </assign>
-        
+
         <invoke name="probe3" partnerLink="probe" portType="prb:probeMessagePT" operation="probe" inputVariable="probeInput" outputVariable="probeInput"/>
-        
+
         <!-- copy internal accumulators to the reply message -->
-        
+
         <assign name="assign3">
             <copy>
                 <from variable="probeInput" part="probeName"/>
@@ -91,7 +91,7 @@
                 <to variable="reply" part="replyText"/>
             </copy>
         </assign>
-        
+
         <reply name="reply" partnerLink="request" portType="wns:testTimerPT" operation="request" variable="reply"/>
     </sequence>
 </process>

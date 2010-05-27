@@ -56,7 +56,7 @@ public class Serializer  {
 //    public OProcess _oprocess;
 
     public QName type;
-    
+
 
   // END PERSISTED FIELDS
 
@@ -80,7 +80,7 @@ public class Serializer  {
         oin.read(magic, 0, magic.length);
 
         if (Arrays.equals(MAGIC_NUMBER_OFH_20040908, magic)) {
-            // Old format requires us to read the OModel to get the type and guid. 
+            // Old format requires us to read the OModel to get the type and guid.
             this.format = oin.readShort();
             this.compileTime = oin.readLong();
             oin.readInt();
@@ -93,7 +93,7 @@ public class Serializer  {
             }
             this.type  = new QName(oprocess.targetNamespace, oprocess.processName);
             this.guid = "OLD-FORMAT-NO-GUID";
-            
+
             return;
         }
         // The current (most recent) scheme
@@ -109,7 +109,7 @@ public class Serializer  {
 
         throw new IOException("Unrecognized file format (bad magic number).");
     }
- 
+
     public void writeOProcess(OProcess process, OutputStream os) throws IOException {
         DataOutputStream out = new DataOutputStream(os);
 
@@ -128,7 +128,7 @@ public class Serializer  {
     public OProcess readOProcess() throws IOException, ClassNotFoundException {
 //        if (_oprocess != null)
 //            return _oprocess;
-        
+
         ObjectInputStream ois = new CustomObjectInputStream(_inputStream);
         OProcess oprocess;
         try {
@@ -136,10 +136,10 @@ public class Serializer  {
         } catch (ClassNotFoundException e) {
             throw new IOException("DataStream Error");
         }
-            
+
         return oprocess;
     }
-  
+
     static class CustomObjectOutputStream extends ObjectOutputStream {
 
         /**
@@ -150,7 +150,7 @@ public class Serializer  {
             super(out);
             enableReplaceObject(true);
         }
-        
+
         protected Object replaceObject(Object obj) throws IOException{
             if(obj instanceof QName){
                 QName q = (QName)obj;
@@ -158,9 +158,9 @@ public class Serializer  {
             }
             return super.replaceObject(obj);
         }
-      
+
     }
-  
+
     static class CustomObjectInputStream extends ObjectInputStream {
 
         /**
@@ -171,7 +171,7 @@ public class Serializer  {
             super(in);
             enableResolveObject(true);
         }
-        
+
         protected Object resolveObject(Object obj) throws IOException {
             if(obj instanceof OQName){
                 OQName q = (OQName)obj;
@@ -195,17 +195,17 @@ public class Serializer  {
             }
             return read;
         }
-      
+
     }
-  
+
     static class OQName implements Serializable{
-       
-        private static final long serialVersionUID = 1L; 
-        
+
+        private static final long serialVersionUID = 1L;
+
         final String local;
         final String uri;
         final String prefix;
-        
+
         OQName(String uri, String local, String prefix){
             this.uri = uri;
             this.local = local;

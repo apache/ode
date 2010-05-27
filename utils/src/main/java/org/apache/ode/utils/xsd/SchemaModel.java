@@ -25,7 +25,7 @@ public interface SchemaModel {
    * <p>
    * Determines if two types are compatible using the following logic:
    * </p>
-   * 
+   *
    * <ul>
    * <li>
    * if type a is Element, and type b is Element, they must be identical
@@ -36,7 +36,7 @@ public interface SchemaModel {
    * they  are compatible if one is derived from the other
    * </li>
    * </ul>
-   * 
+   *
    *
    * @return
    */

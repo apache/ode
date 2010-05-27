@@ -32,10 +32,10 @@ import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 
 public class ProcessCleanupConfImpl {
     protected static Log __log = LogFactory.getLog(ProcessCleanupConfImpl.class);
-    
+
     private final Set<CLEANUP_CATEGORY> successCategories = EnumSet.noneOf(CLEANUP_CATEGORY.class);
     private final Set<CLEANUP_CATEGORY> failureCategories = EnumSet.noneOf(CLEANUP_CATEGORY.class);
-    
+
     // package default
     ProcessCleanupConfImpl(TDeployment.Process pinfo) {
         for( TCleanup cleanup : pinfo.getCleanupList() ) {
@@ -46,7 +46,7 @@ public class ProcessCleanupConfImpl {
                 processACleanup(failureCategories, cleanup.getCategoryList());
             }
         }
-        
+
         // validate configurations
         Set<CLEANUP_CATEGORY> categories = getCleanupCategories(true);
         if( categories.contains(CLEANUP_CATEGORY.INSTANCE) && !categories.containsAll(EnumSet.of(CLEANUP_CATEGORY.CORRELATIONS, CLEANUP_CATEGORY.VARIABLES))) {
@@ -73,7 +73,7 @@ public class ProcessCleanupConfImpl {
             }
         }
     }
-    
+
     // package default
     boolean isCleanupCategoryEnabled(boolean instanceSucceeded, CLEANUP_CATEGORY category) {
         if( instanceSucceeded ) {
@@ -82,7 +82,7 @@ public class ProcessCleanupConfImpl {
             return failureCategories.contains(category);
         }
     }
-    
+
     // package default
     Set<CLEANUP_CATEGORY> getCleanupCategories(boolean instanceSucceeded) {
         return instanceSucceeded ? successCategories : failureCategories;

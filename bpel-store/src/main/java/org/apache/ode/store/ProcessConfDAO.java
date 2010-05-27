@@ -24,11 +24,11 @@ import javax.xml.namespace.QName;
 import java.util.Collection;
 
 /**
- * DAO interface for a process configuration. 
+ * DAO interface for a process configuration.
  * @author mriou <mriou at apache dot org>
  */
 public interface ProcessConfDAO {
-    
+
     QName getPID();
 
     QName getType();
@@ -36,7 +36,7 @@ public interface ProcessConfDAO {
     long getVersion();
 
     DeploymentUnitDAO getDeploymentUnit();
-    
+
     ProcessState getState();
 
     void setState(ProcessState state);
@@ -44,8 +44,8 @@ public interface ProcessConfDAO {
     void setProperty(QName name, String content);
 
     String getProperty(QName name);
-    
+
     Collection<QName> getPropertyNames();
-    
+
     void delete();
 }

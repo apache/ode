@@ -54,7 +54,7 @@ public class HXmlData extends HObject {
     public void setData(byte[] data) {
         _data = data;
     }
-    
+
     /**
      * @hibernate.property
      *    column="NAME"
@@ -97,7 +97,7 @@ public class HXmlData extends HObject {
     public Collection<HVariableProperty> getProperties() {
         return _properties;
     }
-    
+
     public void setProperties(Collection<HVariableProperty> properties) {
         _properties = properties;
     }

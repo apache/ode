@@ -34,7 +34,7 @@ public class ResumeWork implements Serializable{
     public ResumeWork(Long pid) {
         _pid = pid;
     }
-  
+
   public Long getPID(){
     return _pid;
   }

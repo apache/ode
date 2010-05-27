@@ -17,19 +17,19 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<bpel:process xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" 
-            xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
-            xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-            xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" 
-            xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" 
-            xmlns:extvar3="http://test.com/xvar/example" 
-            xmlns:this="http://example.com/process/ExtVar3/EmptyValues" 
-            xmlns:tns="http://www.example.org/TestSchema" 
-            xmlns:external="http://example.com/process/ExtVar3/external" 
-            xmlns:diag="http://example.com/process/ExtVar3" 
-            xmlns:atomic="http://ode.apache.org/atomicScope" 
-            queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" 
-            expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" 
+<bpel:process xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+            xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+            xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop"
+            xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+            xmlns:extvar3="http://test.com/xvar/example"
+            xmlns:this="http://example.com/process/ExtVar3/EmptyValues"
+            xmlns:tns="http://www.example.org/TestSchema"
+            xmlns:external="http://example.com/process/ExtVar3/external"
+            xmlns:diag="http://example.com/process/ExtVar3"
+            xmlns:atomic="http://ode.apache.org/atomicScope"
+            queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+            expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
             name="EmptyValues" targetNamespace="http://example.com/process/ExtVar3/EmptyValues">
   <bpel:import namespace="http://example.com/process/ExtVar3" location="ExtVar3.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
   <bpel:import namespace="http://example.com/process/ExtVar3/EmptyValues" location="ExtVar3-EmptyValues.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
@@ -42,10 +42,10 @@
     <bpel:variable name="DataTypesTest" element="extvar3:DataTypesTest" xmlns:xvar="http://ode.apache.org/externalVariables" xvar:id="DataTypesTest-_X6kAaANuEd23JYbph3XjSA" xvar:relates-to="DataTypesTest-keys"/>
   </bpel:variables>
   <bpel:sequence>
-    <bpel:receive partnerLink="EmptyValuesAndExternalPlkVar" 
-                  portType="this:Forexternal" 
-                  operation="EventStartMessage" 
-                  variable="thisEventStartMessageRequest" 
+    <bpel:receive partnerLink="EmptyValuesAndExternalPlkVar"
+                  portType="this:Forexternal"
+                  operation="EventStartMessage"
+                  variable="thisEventStartMessageRequest"
                   createInstance="yes" />
     <bpel:assign name="init-variables-EmptyValues">
       <bpel:copy>
@@ -91,9 +91,9 @@
         <bpel:to>$DataTypesTest/extvar3:booleanCol</bpel:to>
       </bpel:copy>
     </bpel:assign>
-    <bpel:reply partnerLink="EmptyValuesAndExternalPlkVar" 
-                portType="this:Forexternal" 
-                operation="EventStartMessage" 
+    <bpel:reply partnerLink="EmptyValuesAndExternalPlkVar"
+                portType="this:Forexternal"
+                operation="EventStartMessage"
                 variable="thisEventStartMessageRequest" />
   </bpel:sequence>
 </bpel:process>

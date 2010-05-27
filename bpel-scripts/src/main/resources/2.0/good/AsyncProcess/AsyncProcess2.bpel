@@ -23,16 +23,16 @@
  xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
  targetNamespace="uri:com.bptest.process"
  xmlns:proc="uri:com.bptest.process"
- xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+ xmlns:xs="http://www.w3.org/2001/XMLSchema"
  xmlns:typ="uri:com.bptest.types"
  xmlns:resp="uri:com.bptest.responder"
- xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/" 
+ xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
  expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
 
  <import location="AsyncProcess2.wsdl"
       namespace="uri:com.bptest.process"
       importType="http://schemas.xmlsoap.org/wsdl/" />
-             
+
  <partnerLinks>
 
   <partnerLink

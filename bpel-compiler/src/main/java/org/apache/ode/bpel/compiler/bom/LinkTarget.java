@@ -32,7 +32,7 @@ public class LinkTarget extends BpelObject {
 
     /**
      * Get the name of the refernced link.
-     * 
+     *
      * @return link name
      */
     public String getLinkName() {

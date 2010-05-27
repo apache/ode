@@ -18,11 +18,11 @@
   ~ under the License.
   -->
 
-<wsdl:definitions 
+<wsdl:definitions
     targetNamespace="http://ode/bpel/unit-test.wsdl"
     xmlns="http://schemas.xmlsoap.org/wsdl/"
     xmlns:tns="http://ode/bpel/unit-test.wsdl"
-    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:types="http://ode/bpel/types"
     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
@@ -48,7 +48,7 @@
         <wsdl:operation name="helloXsl">
             <wsdl:input message="tns:HelloXslMessage" name="TestIn"/>
             <wsdl:output message="tns:HelloXslMessage" name="TestOut"/>
-        </wsdl:operation>    
+        </wsdl:operation>
     </wsdl:portType>
 
     <wsdl:binding name="HelloXslSoapBinding" type="tns:HelloXslPortType">
@@ -72,7 +72,7 @@
                 <soap:address location="http://localhost:8080/ode/processes/helloXslWorld"/>
                 </wsdl:port>
     </wsdl:service>
-    
+
     <plnk:partnerLinkType name="HelloXslPartnerLinkType">
         <plnk:role name="me" portType="tns:HelloXslPortType"/>
         <plnk:role name="you" portType="tns:HelloXslPortType"/>

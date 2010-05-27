@@ -238,7 +238,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                     // Implicit scope can tell the difference between cancelled and completed.
                     _self.parent.cancelled();
                 }
-                
+
                 private OFailureHandling getFailureHandling() {
                     if (_oactivity instanceof OInvoke) {
                         OInvoke _oinvoke = (OInvoke) _oactivity;
@@ -268,10 +268,10 @@ class ACTIVITYGUARD extends ACTIVITY {
                         requireRecovery();
                         return;
                     }
-        
+
                     if (__log.isDebugEnabled())
                         __log.debug("ActivityRecovery: Retrying activity " + _self.aId);
-                    Date future = new Date(new Date().getTime() + 
+                    Date future = new Date(new Date().getTime() +
                         (failureHandling == null ? 0L : failureHandling.retryDelay * 1000));
                     final TimerResponseChannel timerChannel = newChannel(TimerResponseChannel.class);
                     getBpelRuntimeContext().registerTimer(timerChannel, future);
@@ -345,5 +345,5 @@ class ACTIVITYGUARD extends ACTIVITY {
         Element data;
         int     retryCount;
     }
-    
+
 }

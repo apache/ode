@@ -110,9 +110,9 @@ public class BpelEngineImpl implements BpelEngine {
     /** Mapping from myrole service name to active process. */
     private final HashMap<QName, List<BpelProcess>> _serviceMap = new HashMap<QName, List<BpelProcess>>();
 
-    /** Mapping from a potentially shared endpoint to its EPR */ 
-    private SharedEndpoints _sharedEps;     
-    
+    /** Mapping from a potentially shared endpoint to its EPR */
+    private SharedEndpoints _sharedEps;
+
     /** Manage instance-level locks. */
     private final InstanceLockManager _instanceLockManager = new InstanceLockManager();
 
@@ -120,7 +120,7 @@ public class BpelEngineImpl implements BpelEngine {
 
     private final Map<QName, Long> _hydratedSizes = new HashMap<QName, Long>();
     private final Map<QName, Long> _unhydratedSizes = new HashMap<QName, Long>();
-    
+
     public BpelEngineImpl(Contexts contexts) {
         _contexts = contexts;
         _sharedEps = new SharedEndpoints();
@@ -130,7 +130,7 @@ public class BpelEngineImpl implements BpelEngine {
     public SharedEndpoints getSharedEndpoints() {
         return _sharedEps;
     }
-    
+
     public MyRoleMessageExchange createMessageExchange(String clientKey, QName targetService,
                                                        String operation, String pipedMexId)
             throws BpelEngineException {
@@ -145,7 +145,7 @@ public class BpelEngineImpl implements BpelEngine {
 
         if (targets == null || targets.size() == 0)
             throw new BpelEngineException("NoSuchService: " + targetService);
-        
+
         if (targets.size() == 1 || activeTargets.size() == 1) {
             // If the number of targets is one, create and return a simple MEX
             BpelProcess target;
@@ -163,10 +163,10 @@ public class BpelEngineImpl implements BpelEngine {
             for (BpelProcess target : activeTargets) {
                 meps.add(createNewMyRoleMex(target, clientKey, targetService, operation, pipedMexId));
             }
-            return createNewMyRoleMex(template, meps);  
+            return createNewMyRoleMex(template, meps);
         }
     }
-    
+
     private MyRoleMessageExchange createNewMyRoleMex(BpelProcess target, String clientKey, QName targetService, String operation, String pipedMexId) {
         MessageExchangeDAO dao;
         if (target == null || target.isInMemory()) {
@@ -192,22 +192,22 @@ public class BpelEngineImpl implements BpelEngine {
     /**
      * Return a brokered MEX that delegates invocations to each of the embedded
      * MEXs contained in the <code>meps</code> list, using the appropriate style.
-     * 
+     *
      * @param target
      * @param meps
      * @return
      * @throws BpelEngineException
      */
-    private MyRoleMessageExchange createNewMyRoleMex(BpelProcess target, List<MyRoleMessageExchange> meps) 
+    private MyRoleMessageExchange createNewMyRoleMex(BpelProcess target, List<MyRoleMessageExchange> meps)
             throws BpelEngineException {
         MyRoleMessageExchangeImpl templateMex = (MyRoleMessageExchangeImpl) meps.get(0);
         MessageExchangeDAO templateMexDao = templateMex.getDAO();
         return new BrokeredMyRoleMessageExchangeImpl(target, this, meps, templateMexDao, templateMex);
     }
-    
-        
+
+
     public MyRoleMessageExchange createMessageExchange(String clientKey, QName targetService, String operation) {
-        return createMessageExchange(clientKey, targetService, operation, null);        
+        return createMessageExchange(clientKey, targetService, operation, null);
     }
 
     private void setMessageExchangeProcess(String mexId, ProcessDAO processDao) {
@@ -216,7 +216,7 @@ public class BpelEngineImpl implements BpelEngine {
         if (mexdao != null)
             mexdao.setProcess(processDao);
     }
-    
+
     public MessageExchange getMessageExchange(String mexId) {
         MessageExchangeDAO mexdao = _contexts.inMemDao.getConnection().getMessageExchange(mexId);
         if (mexdao == null) mexdao = _contexts.dao.getConnection().getMessageExchange(mexId);
@@ -264,7 +264,7 @@ public class BpelEngineImpl implements BpelEngine {
 
         return mex;
     }
-    
+
     // enable extensibility
     protected PartnerRoleMessageExchangeImpl createPartnerRoleMessageExchangeImpl(
             MessageExchangeDAO mexdao, PortType ptype, Operation op, OPartnerLink plink, BpelProcess process) {
@@ -291,7 +291,7 @@ public class BpelEngineImpl implements BpelEngine {
             }
 
             // unregister the services provided by the process
-            p.deactivate();            
+            p.deactivate();
             // release the resources held by this process
             p.dehydrate();
             // update the process footprints list
@@ -303,7 +303,7 @@ public class BpelEngineImpl implements BpelEngine {
     boolean isProcessRegistered(QName pid) {
         return _activeProcesses.containsKey(pid);
     }
-    
+
     public BpelProcess getProcess(QName pid) {
         return _activeProcesses.get(pid);
     }
@@ -345,7 +345,7 @@ public class BpelEngineImpl implements BpelEngine {
         }
         process.activate(this);
     }
-    
+
     /**
      * Route to a process using the service id. Note, that we do not need the endpoint name here, we are assuming that two processes
      * would not be registered under the same service qname but different endpoint.
@@ -372,7 +372,7 @@ public class BpelEngineImpl implements BpelEngine {
         if (process == null) return null;
         return process.getOProcess();
     }
-    
+
     private List<BpelProcess> getAllProcesses(QName processId) {
         String qName =  processId.toString();
         if(qName.lastIndexOf("-") > 0) {
@@ -415,9 +415,9 @@ public class BpelEngineImpl implements BpelEngine {
         final JobDetails we = jobInfo.jobDetail;
 
         if( __log.isTraceEnabled() ) __log.trace("[JOB] onScheduledJob " + jobInfo + "" + we.getInstanceId());
-        
+
         acquireInstanceLock(we.getInstanceId());
-        
+
         // DONT PUT CODE HERE-need this method real tight in a try/catch block, we need to handle
         // all types of failure here, the scheduler is not going to know how to handle our errors,
         // ALSO we have to release the lock obtained above (IMPORTANT), lest the whole system come
@@ -433,7 +433,7 @@ public class BpelEngineImpl implements BpelEngine {
 
                 if (instance == null) {
                     __log.debug(__msgs.msgScheduledJobReferencesUnknownInstance(we.getInstanceId()));
-                    // nothing we can do, this instance is not in the database, it will always fail, not 
+                    // nothing we can do, this instance is not in the database, it will always fail, not
                     // exactly an error since can occur in normal course of events.
                     return;
                 }
@@ -449,10 +449,10 @@ public class BpelEngineImpl implements BpelEngine {
 
             ClassLoader cl = Thread.currentThread().getContextClassLoader();
             try {
-                Thread.currentThread().setContextClassLoader(process._classLoader);            
+                Thread.currentThread().setContextClassLoader(process._classLoader);
                 if (we.getType().equals(JobType.INVOKE_CHECK)) {
                     if (__log.isDebugEnabled()) __log.debug("handleJobDetails: InvokeCheck event for mexid " + we.getMexId());
-               
+
                     sendPartnerRoleFailure(we, MessageExchange.FailureType.COMMUNICATION_ERROR);
                     return;
                 } else if (we.getType().equals(JobType.INVOKE_INTERNAL)) {
@@ -465,7 +465,7 @@ public class BpelEngineImpl implements BpelEngine {
                         if (isTwoWay) {
                             String causeCodeValue = mex.getProperty("causeCode");
                             mex.getDAO().setProcess(process.getProcessDAO());
-                            sendMyRoleFault(process, we, causeCodeValue != null ? 
+                            sendMyRoleFault(process, we, causeCodeValue != null ?
                                 Integer.valueOf(causeCodeValue) : InvalidProcessException.DEFAULT_CAUSE_CODE);
                             return;
                         } else {
@@ -478,11 +478,11 @@ public class BpelEngineImpl implements BpelEngine {
                     boolean routed = false;
                     jobInfo.jobDetail.detailsExt.put("enqueue", false);
                     for(BpelProcess proc : processes) {
-                        routed = routed || proc.handleJobDetails(jobInfo.jobDetail);                		
+                        routed = routed || proc.handleJobDetails(jobInfo.jobDetail);
                     }
                     if(!routed) {
                         jobInfo.jobDetail.detailsExt.put("enqueue", true);
-                        process.handleJobDetails(jobInfo.jobDetail);                		
+                        process.handleJobDetails(jobInfo.jobDetail);
                     }
                 }
                 else {
@@ -560,15 +560,15 @@ public class BpelEngineImpl implements BpelEngine {
         return _contexts.globalInterceptors;
     }
 
-    
+
     public void registerMessageExchangeInterceptor(MessageExchangeInterceptor interceptor) {
         _contexts.globalInterceptors.add(interceptor);
     }
-    
+
     public void unregisterMessageExchangeInterceptor(MessageExchangeInterceptor interceptor) {
         _contexts.globalInterceptors.remove(interceptor);
     }
-    
+
     public void unregisterMessageExchangeInterceptor(Class interceptorClass) {
         MessageExchangeInterceptor candidate = null;
         for (MessageExchangeInterceptor interceptor : _contexts.globalInterceptors) {
@@ -581,7 +581,7 @@ public class BpelEngineImpl implements BpelEngine {
             _contexts.globalInterceptors.remove(candidate);
         }
     }
-    
+
     public long getTotalBpelFootprint() {
         long bpelFootprint = 0;
         for (BpelProcess process : _activeProcesses.values()) {
@@ -612,12 +612,12 @@ public class BpelEngineImpl implements BpelEngine {
         }
         return hydratedFootprint;
     }
-    
+
     public long getHydratedProcessSize(QName processName) {
         return getHydratedProcessSize(_activeProcesses.get(processName));
     }
-    
-    private long getHydratedProcessSize(BpelProcess process) {      
+
+    private long getHydratedProcessSize(BpelProcess process) {
         long potentialGrowth = 0;
         if (!process.hintIsHydrated()) {
             Long mySize = _hydratedSizes.get(process.getPID());
@@ -630,13 +630,13 @@ public class BpelEngineImpl implements BpelEngine {
         }
         return getHydratedProcessSize(potentialGrowth);
     }
-    
+
     private long getHydratedProcessSize(long potentialGrowth) {
-        long processMemory = (long) 
+        long processMemory = (long)
             ((getHydratedFootprint() + potentialGrowth) *
                     PROCESS_OVERHEAD_MEMORY_FACTOR);
-        return processMemory;   
-    }   
+        return processMemory;
+    }
 
     public int getHydratedProcessCount(QName processName) {
         int processCount = 0;
@@ -644,9 +644,9 @@ public class BpelEngineImpl implements BpelEngine {
             if (process.hintIsHydrated() || process.getPID().equals(processName)) {
                 processCount++;
             }
-        }       
+        }
         return processCount;
-    }   
+    }
 
     private long _processThrottledMaximumSize = Long.MAX_VALUE;
     private int _processThrottledMaximumCount = Integer.MAX_VALUE;
@@ -657,11 +657,11 @@ public class BpelEngineImpl implements BpelEngine {
             int instanceThrottledMaximumCount) {
         this._instanceThrottledMaximumCount = instanceThrottledMaximumCount;
     }
-    
+
     public int getInstanceThrottledMaximumCount() {
         return _instanceThrottledMaximumCount;
     }
-    
+
     public void setProcessThrottledMaximumCount(
             int hydrationThrottledMaximumCount) {
         this._processThrottledMaximumCount = hydrationThrottledMaximumCount;
@@ -671,7 +671,7 @@ public class BpelEngineImpl implements BpelEngine {
             unregisterMessageExchangeInterceptor(ProcessCountThrottler.class);
         }
     }
-    
+
     public int getProcessThrottledMaximumCount() {
         return _processThrottledMaximumCount;
     }
@@ -689,7 +689,7 @@ public class BpelEngineImpl implements BpelEngine {
     public long getProcessThrottledMaximumSize() {
         return _processThrottledMaximumSize;
     }
-    
+
     public void setProcessSize(QName processId, boolean hydratedOnce) {
         BpelProcess process = _activeProcesses.get(processId);
         long processSize = process.sizeOf();
@@ -698,7 +698,7 @@ public class BpelEngineImpl implements BpelEngine {
             _unhydratedSizes.remove(process.getPID());
         } else {
             _hydratedSizes.remove(process.getPID());
-            _unhydratedSizes.put(process.getPID(), new Long(processSize));          
+            _unhydratedSizes.put(process.getPID(), new Long(processSize));
         }
     }
 
@@ -709,8 +709,8 @@ public class BpelEngineImpl implements BpelEngine {
         BpelProcess lastUnusedProcess = null;
         long lastUsedMinimum = Long.MAX_VALUE;
         for (BpelProcess process : _activeProcesses.values()) {
-            if (process.hintIsHydrated() 
-                    && process.getLastUsed() < lastUsedMinimum 
+            if (process.hintIsHydrated()
+                    && process.getLastUsed() < lastUsedMinimum
                     && process.getInstanceInUseCount() == 0) {
                 lastUsedMinimum = process.getLastUsed();
                 lastUnusedProcess = process;
@@ -771,7 +771,7 @@ public class BpelEngineImpl implements BpelEngine {
             MexDaoUtil.setFaulted((MessageExchangeImpl) mex, faultQName, faultElement);
         }
     }
-    
+
     private void sendPartnerRoleFailure(JobDetails we, FailureType failureType) {
         MessageExchange mex = (MessageExchange) getMessageExchange(we.getMexId());
         if (mex instanceof PartnerRoleMessageExchange) {

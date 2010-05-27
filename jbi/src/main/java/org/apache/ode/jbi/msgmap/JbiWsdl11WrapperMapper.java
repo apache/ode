@@ -67,7 +67,7 @@ public class JbiWsdl11WrapperMapper extends BaseXmlMapper implements Mapper {
     }
 
     /**
-     * 
+     *
      * Convert ODE normalized message to JBI normalized "WSDL 1.1 Wrapper"
      * format.
      */
@@ -158,12 +158,12 @@ public class JbiWsdl11WrapperMapper extends BaseXmlMapper implements Mapper {
         if (__log.isTraceEnabled())
             __log.trace("toFaultType(jbiFlt=" + jbiFlt + ")");
 
-        
+
         final QName partElName = new QName(URI_WSDL11_WRAPPER, "part");
         List<QName> eltypes = new LinkedList<QName>();
-        
+
         // Figure out what we have in the message we just got.
-        Element srcel = parse(jbiFlt.getContent()); 
+        Element srcel = parse(jbiFlt.getContent());
         Node n = srcel.getFirstChild();
         while (n != null) {
             if (n.getNodeType() == Node.ELEMENT_NODE) {
@@ -186,10 +186,10 @@ public class JbiWsdl11WrapperMapper extends BaseXmlMapper implements Mapper {
         fltiter:for (Fault f : faults) {
             if (f.getMessage() == null && eltypes.isEmpty())
                 return f;
-            
+
             if (f.getMessage().getParts().size() != eltypes.size())
                 continue;
-            
+
             List<Part> expectedParts = f.getMessage().getOrderedParts(null);
 
             int i = 0;
@@ -197,22 +197,22 @@ public class JbiWsdl11WrapperMapper extends BaseXmlMapper implements Mapper {
                 if (eltypes.size() <= i)
                     continue fltiter;
                 QName etype = eltypes.get(i++);
-                
+
                 if ((p.getElementName() == null) ^ (etype == null))
                     continue fltiter;
-                
+
                 if (etype == null && p.getElementName() == null)
                     continue;
 
                 if (!etype.equals(p.getElementName()))
                     continue fltiter;
             }
-            
+
             return f;
-            
+
         }
-        
-        // None of the faults has been recognized. 
+
+        // None of the faults has been recognized.
         return null;
     }
 

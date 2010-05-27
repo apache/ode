@@ -29,7 +29,7 @@ import java.util.Map;
 
 /**
  * Message bundle used by the BPEL provider implementation.
- * 
+ *
  * @author mszefler
  */
 public class Messages extends MessageBundle {

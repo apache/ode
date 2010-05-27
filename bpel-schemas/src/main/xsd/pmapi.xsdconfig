@@ -22,8 +22,8 @@
 
   <xb:namespace uri="http://www.apache.org/ode/pmapi/types/2006/08/02/">
     <xb:package>org.apache.ode.bpel.pmapi</xb:package>
-  </xb:namespace> 
-  
+  </xb:namespace>
+
   <xb:namespace uri="##any">
     <xb:prefix></xb:prefix>
     <xb:suffix></xb:suffix>

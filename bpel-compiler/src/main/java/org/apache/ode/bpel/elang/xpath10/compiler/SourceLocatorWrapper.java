@@ -31,7 +31,7 @@ public class SourceLocatorWrapper implements SourceLocation {
     public SourceLocatorWrapper(SourceLocator sloc) {
         _sloc = sloc;
     }
-    
+
     public int getColumnNo() {
         return _sloc.getColumnNumber();
     }

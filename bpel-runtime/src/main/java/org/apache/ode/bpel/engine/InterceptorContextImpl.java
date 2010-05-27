@@ -56,11 +56,11 @@ public class InterceptorContextImpl implements InterceptorContext{
     public ProcessConf getProcessConf() {
         return _pconf;
     }
-    
+
     public BpelEngine getBpelEngine() {
         return _bpelEngine;
     }
-    
+
     public BpelProcess getBpelProcess() {
         return _bpelProcess;
     }

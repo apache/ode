@@ -20,7 +20,7 @@ package org.apache.ode.jacob.soup;
 
 /**
  * Base class for items we find in the {@link ExecutionQueue}.
- * 
+ *
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
 public class ExecutionQueueObject {
@@ -30,7 +30,7 @@ public class ExecutionQueueObject {
      */
     private Object _id;
 
-    /** 
+    /**
      * A human-readable description of the object.
      */
     private String _description;

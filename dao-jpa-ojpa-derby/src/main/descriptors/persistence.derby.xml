@@ -33,7 +33,7 @@
         <class>org.apache.ode.dao.jpa.ProcessInstanceDAOImpl</class>
         <class>org.apache.ode.dao.jpa.ScopeDAOImpl</class>
         <class>org.apache.ode.dao.jpa.XmlDataDAOImpl</class>
-        
+
         <class>org.apache.ode.store.jpa.ProcessConfDaoImpl</class>
         <class>org.apache.ode.store.jpa.ProcessConfPropertyDaoImpl</class>
         <class>org.apache.ode.store.jpa.DeploymentUnitDaoImpl</class>

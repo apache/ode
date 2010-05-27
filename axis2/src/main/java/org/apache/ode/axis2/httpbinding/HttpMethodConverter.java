@@ -93,7 +93,7 @@ public class HttpMethodConverter {
     public HttpMethod createHttpRequest(PartnerRoleMessageExchange odeMex, HttpParams params) throws UnsupportedEncodingException {
         return createHttpRequest(odeMex, params, ((MutableEndpoint) odeMex.getEndpointReference()).getUrl());
     }
-    
+
     public HttpMethod createHttpRequest(PartnerRoleMessageExchange odeMex, HttpParams params, String baseUrl) throws UnsupportedEncodingException {
         Operation operation = odeMex.getOperation();
         BindingOperation bindingOperation = binding.getBindingOperation(operation.getName(), operation.getInput().getName(), operation.getOutput().getName());
@@ -437,7 +437,7 @@ public class HttpMethodConverter {
             Part part = messageDef.getPart(partName);
             if (StringUtils.isNotEmpty(partName)) {
                 Header responseHeader = method.getResponseHeader(headerName);
-                // if the response header is not set, just skip it. no need to fail. 
+                // if the response header is not set, just skip it. no need to fail.
                 if (responseHeader != null) {
                     odeMessage.setPart(partName, createPartElement(part, responseHeader.getValue()));
                 }

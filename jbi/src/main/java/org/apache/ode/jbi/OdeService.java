@@ -63,7 +63,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
     private Element _serviceref;
 
     private Endpoint _endpoint;
-    
+
     private int count;
 
     public OdeService(OdeContext odeContext, Endpoint endpoint) throws Exception {
@@ -76,7 +76,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
     }
     /**
      * Do the JBI endpoint activation.
-     * 
+     *
      * @throws JBIException
      */
     public void activate() throws JBIException {
@@ -101,7 +101,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
      */
     public void deactivate() throws JBIException {
         count--;
-        if(count != 0) 
+        if(count != 0)
             return;
         _ode.getContext().deactivateEndpoint(_internal);
         __log.debug("Dectivated endpoint " + _endpoint);
@@ -167,14 +167,14 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
                 __log.error("Unexpected error invoking ODE.", t);
                 err = new RuntimeException(t);
             } finally {
-                // If we got an error that wasn't sent.  
+                // If we got an error that wasn't sent.
                 if (jbiMex.getStatus() == ExchangeStatus.ACTIVE && !success) {
                     if (err != null && jbiMex.getError() == null)  {
                         jbiMex.setError(err);
                     }
-                    jbiMex.setStatus(ExchangeStatus.ERROR);     
-                    _ode.getChannel().send(jbiMex);         
-                }       
+                    jbiMex.setStatus(ExchangeStatus.ERROR);
+                    _ode.getChannel().send(jbiMex);
+                }
             }
         } else {
             __log.error("JBI MessageExchange " + jbiMex.getExchangeId() + " is of an unsupported pattern "
@@ -188,7 +188,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
     /**
      * Called from
      * {@link MessageExchangeContextImpl#onAsyncReply(MyRoleMessageExchange)}
-     * 
+     *
      * @param mex
      *            message exchange
      */
@@ -216,7 +216,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
         default:
             __log.warn("Received ODE message exchange in unexpected state: " + mex.getStatus() + " mexId: " + mexId + " clientId: " + clientId);
         }
-        
+
         mex.release(mex.getStatus() == MessageExchange.Status.RESPONSE);
         _ode._scheduler.registerSynchronizer(new Synchronizer() {
             public void afterCompletion(boolean success) {
@@ -242,7 +242,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
 
     /**
      * Forward a JBI input message to ODE.
-     * 
+     *
      * @param jbiMex
      */
     private void invokeOde(javax.jbi.messaging.MessageExchange jbiMex, NormalizedMessage request) throws Exception {
@@ -371,7 +371,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
             setError(jbiMex, mte);
         }
     }
-    
+
     private void setError(javax.jbi.messaging.MessageExchange jbiMex, Exception error) throws MessagingException {
         jbiMex.setError(error);
         jbiMex.setStatus(ExchangeStatus.ERROR);

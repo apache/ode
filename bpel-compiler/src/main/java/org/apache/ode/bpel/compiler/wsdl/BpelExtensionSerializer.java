@@ -79,9 +79,9 @@ public class BpelExtensionSerializer implements ExtensionDeserializer, Extension
       } catch (URISyntaxException e) {
           throw new RuntimeException(e);
       }
-      
+
       obj.setElementType(eltype);
-      obj.setRequired(false);  // ? what does this do 
+      obj.setRequired(false);  // ? what does this do
       obj.setTargetNamespace(def.getTargetNamespace());
       return obj;
   }

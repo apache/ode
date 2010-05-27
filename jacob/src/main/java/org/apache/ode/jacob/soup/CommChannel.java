@@ -22,7 +22,7 @@ import org.apache.ode.utils.ObjectPrinter;
 
 /**
  * DOCUMENTME.
- * 
+ *
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
 

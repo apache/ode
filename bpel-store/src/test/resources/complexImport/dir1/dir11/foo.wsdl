@@ -18,21 +18,21 @@
   ~ under the License.
   -->
 
-<wsdl:definitions 
+<wsdl:definitions
     targetNamespace="http://ode/bpel/unit-test.wsdl"
     xmlns="http://schemas.xmlsoap.org/wsdl/"
     xmlns:tns="http://ode/bpel/unit-test.wsdl"
-    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
     xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
     xmlns:plnk="http://schemas.xmlsoap.org/ws/2004/03/partner-link/">
-     
-    <wsdl:import 
+
+    <wsdl:import
       namespace="http://ode/bpel/unit-test.wsdl"
       location="../../bar.wsdl"/>
-      
-      
+
+
     <wsdl:types>
      <xsd:schema targetNamespace="http://foo/bar" >
        <xsd:import namespace="http://foo.xsd"

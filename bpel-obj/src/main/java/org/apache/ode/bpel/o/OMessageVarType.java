@@ -34,7 +34,7 @@ import org.w3c.dom.Node;
  */
 public class OMessageVarType extends OVarType {
     private static final long serialVersionUID = 256680050844726425L;
-    
+
     public QName messageType;
     public final Map<String, Part> parts = new LinkedHashMap<String,Part>();
 
@@ -74,11 +74,11 @@ public class OMessageVarType extends OVarType {
         buf.append(this.messageType.toString());
         buf.append(')');
         return buf.toString();
-    } 
+    }
 
     public static class Part extends OBase {
         private static final long serialVersionUID = -2356665271228433779L;
-        
+
         public String name;
         public OVarType type;
 

@@ -41,7 +41,7 @@ public interface XmlDataDAO {
    */
   public boolean isNull();
 
-  
+
   /**
    * Retreive the variable data.
    *
@@ -64,19 +64,19 @@ public interface XmlDataDAO {
   /**
    * Return the value of a property.  Properties are useful
    * for extracting simple type data which can be used for querying
-   * and identifying process instances. 
+   * and identifying process instances.
    * @param propertyName
    * @return value of property or <b>null</b> if not set.
    */
   public String getProperty(String propertyName);
-    
+
   /**
    * Sets the value of a property
    * @param pname
    * @param pvalue
    */
   public void setProperty(String pname, String pvalue);
-  
+
   /**
    * Gets the scope associated with this xml data.
    * @return scope

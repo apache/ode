@@ -119,7 +119,7 @@
                     <to>1</to>
                 </copy>
             </assign>
-        </scope>     
+        </scope>
         <reply name="end" partnerLink="TestAssignPartnerLink" portType="test:TestAssignPortType"
                operation="testAssign" variable="otherMsgVar"/>
     </sequence>

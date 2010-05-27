@@ -157,7 +157,7 @@ class ScopeFrame implements Serializable {
     //
     // Move all the external variable stuff in here so that it can be used by the expr-lang evaluation
     // context.
-    // 
+    //
 
     Node fetchVariableData(BpelRuntimeContext brc, VariableInstance variable, boolean forWriting)
             throws FaultException

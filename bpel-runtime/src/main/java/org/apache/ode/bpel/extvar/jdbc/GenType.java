@@ -20,32 +20,32 @@ package org.apache.ode.bpel.extvar.jdbc;
 
 /**
  * Generator type enumaration.
- * 
+ *
  * @author Maciej Szefler <mszefler at gmail dot com>
  *
  */
 enum GenType {
     /** plain old column */
     none,
-    
+
     /** sequence column */
     sequence,
-    
+
     /** SQL expression column */
     expression,
-    
+
     /** server-generated uuid column */
-    uuid, 
-    
+    uuid,
+
     /** process-id column */
-    pid, 
-    
+    pid,
+
     /** instance-id column */
-    iid, 
-    
+    iid,
+
     /** create timestamp */
-    ctimestamp, 
-    
+    ctimestamp,
+
     /** update timestamp */
     utimestamp
 }

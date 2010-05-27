@@ -25,7 +25,7 @@ import javax.xml.namespace.QName;
  */
 public class ScopeFaultEvent
   extends ScopeEvent {
-  
+
     private static final long serialVersionUID = 1L;
     private QName _faultType;
   private int _faultLineNo = -1;

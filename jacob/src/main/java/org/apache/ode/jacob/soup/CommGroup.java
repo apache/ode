@@ -23,15 +23,15 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * 
+ *
  * DOCUMENTME.
- * 
+ *
  * <p>
  * Created on Feb 16, 2004 at 9:13:39 PM.
  * </p>
- * 
+ *
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
- * 
+ *
  */
 
 public class CommGroup extends ExecutionQueueObject {
@@ -47,7 +47,7 @@ public class CommGroup extends ExecutionQueueObject {
     /**
      * Read the value of the replication operator flag. CommRecv (channel reads)
      * with the replication flag set are left in the queue indefinately.
-     * 
+     *
      * @return true or false
      */
     public boolean isReplicated() {

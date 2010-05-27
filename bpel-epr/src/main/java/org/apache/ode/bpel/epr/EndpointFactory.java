@@ -52,7 +52,7 @@ public class EndpointFactory {
     /**
      * Creates a ServiceEndpoint using the provided Node. The actual endpoint
      * type is detected using the endpoint node (text or element qname).
-     * 
+     *
      * @param endpointElmt
      * @return the new ServiceEndpoint
      */
@@ -81,7 +81,7 @@ public class EndpointFactory {
      * The target type is actually the qualified name of the root element for
      * the target EPR (i.e wsa:MutableEndpoint, wsdl:service) or null to convert
      * to a simple URL.
-     * 
+     *
      * @param targetElmtType
      *            QName to convert to
      * @param sourceEndpoint
@@ -118,10 +118,10 @@ public class EndpointFactory {
     public static WSAEndpoint convertToWSA(MutableEndpoint source) {
         if (source == null)
             return null;
-        
-        if (source instanceof WSAEndpoint) 
+
+        if (source instanceof WSAEndpoint)
             return (WSAEndpoint) source;
-        
+
         return new WSAEndpoint(source.toMap());
     }
 }

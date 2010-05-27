@@ -36,18 +36,18 @@ import org.apache.ode.utils.DOMUtils;
 
 public class JbiWsdl11WrapperMapperTest extends junit.framework.TestCase {
     private static Log __log = LogFactory.getLog(JbiWsdl11WrapperMapperTest.class);
-    
+
     public static class MockJbiFault implements javax.jbi.messaging.Fault {
         private String resourceName;
-        
+
         public MockJbiFault(String resourceName) {
             this.resourceName = resourceName;
         }
-        
+
         public void addAttachment(String id, DataHandler content) throws MessagingException {
             // TODO Auto-generated method stub
             __log.debug("addAttachment");
-            
+
         }
 
         public DataHandler getAttachment(String id) {
@@ -91,29 +91,29 @@ public class JbiWsdl11WrapperMapperTest extends junit.framework.TestCase {
         public void removeAttachment(String id) throws MessagingException {
             // TODO Auto-generated method stub
             __log.debug("removeAttachment");
-            
+
         }
 
         public void setContent(Source content) throws MessagingException {
             // TODO Auto-generated method stub
             __log.debug("setContent");
-            
+
         }
 
         public void setProperty(String name, Object value) {
             // TODO Auto-generated method stub
             __log.debug("setProperty");
-            
+
         }
 
         public void setSecuritySubject(Subject subject) {
             // TODO Auto-generated method stub
             __log.debug("setSecuritySubject");
-            
+
         }
-        
-    }; 
-    
+
+    };
+
     public void testFault() throws Exception {
         JbiWsdl11WrapperMapper m = new JbiWsdl11WrapperMapper();
         Definition w = javax.wsdl.factory.WSDLFactory.newInstance().newWSDLReader().readWSDL(getClass().getResource("/test.wsdl").getFile());

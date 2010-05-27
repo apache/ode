@@ -46,7 +46,7 @@ import org.apache.ode.utils.NSContext;
 
 /**
  * Interface providing access to the compiler.
- * 
+ *
  * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
  */
 public interface CompilerContext {
@@ -58,18 +58,18 @@ public interface CompilerContext {
 
     OExpression compileExpr(Expression expr)
     throws CompilationException;
-    
+
     OExpression compileExpr(Expression expr, OVarType rootNodeType, Object requestedResultType, Object[] resultType)
             throws CompilationException;
 
     OLValueExpression compileLValueExpr(Expression expr)
     throws CompilationException;
-    
+
     OLValueExpression compileLValueExpr(Expression expr, OVarType rootNodeType, Object requestedResultType, Object[] resultType)
             throws CompilationException;
 
     /**
-     * BPEL 1.1 legacy. 
+     * BPEL 1.1 legacy.
      * @param locationstr
      * @param nsContext
      * @return
@@ -143,12 +143,12 @@ public interface CompilerContext {
     List<OActivity> getActivityStack();
 
     OActivity getCurrent();
-    
+
     Map<URI, Source> getSchemaSources();
 
     /**
      * Retrieves the base URI that the BPEL Process execution contextis running relative to.
-     * 
+     *
      * @return URI - the URI representing the absolute physical file path location that this process is defined within.
      */
     URI getBaseResourceURI();

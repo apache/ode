@@ -33,12 +33,12 @@ import org.apache.ode.jacob.vpu.JacobVPU;
  * </em></pre>
  *
  * <p>Created on Feb 12, 2004 at 6:32:49 PM.</p>
- * 
+ *
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
 public class Sieve extends JacobRunnable {
   private static final long serialVersionUID = -1303509567096202776L;
-  
+
   private static int _cnt = 0;
   private static int _last = 0;
 
@@ -60,7 +60,7 @@ public class Sieve extends JacobRunnable {
    */
   private static class Counter extends JacobRunnable {
     private static final long serialVersionUID = 4739323750438991003L;
-    
+
     private NaturalNumberStreamChannel _out;
     private int _n;
 
@@ -92,7 +92,7 @@ public class Sieve extends JacobRunnable {
    */
   private static final class Head extends JacobRunnable {
     private static final long serialVersionUID = 1791641314141082728L;
-    
+
     NaturalNumberStreamChannel _in;
     NaturalNumberStreamChannel _primes;
 
@@ -123,7 +123,7 @@ public class Sieve extends JacobRunnable {
 
   private static final class Print extends JacobRunnable {
     private static final long serialVersionUID = -3134193737519487672L;
-    
+
     private NaturalNumberStreamChannel _in;
     public Print(NaturalNumberStreamChannel in) {
       _in = in;
@@ -152,7 +152,7 @@ public class Sieve extends JacobRunnable {
    */
   private static class PrimeFilter extends JacobRunnable {
     private static final long serialVersionUID = 1569523200422202448L;
-    
+
     private int _prime;
     private NaturalNumberStreamChannel _in;
     private NaturalNumberStreamChannel _out;

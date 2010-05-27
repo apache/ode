@@ -47,11 +47,11 @@
   </partnerLinks>
 
   <variables>
-    <variable name="request" 
+    <variable name="request"
                messageType="wns:requestMessage"/>
-    <variable name="probeInput" 
+    <variable name="probeInput"
                messageType="prb:probeMessage"/>
-    <variable name="reply" 
+    <variable name="reply"
                messageType="wns:replyMessage"/>
   </variables>
 
@@ -65,11 +65,11 @@
                     </from>
                     <to variable="probeInput" part="probeName"/>
                 </copy>
-            </assign> 
-            <invoke name="allFaultProbe" partnerLink="probe" 
-                    portType="prb:probeMessagePT" 
+            </assign>
+            <invoke name="allFaultProbe" partnerLink="probe"
+                    portType="prb:probeMessagePT"
                     operation="probe"
-                    inputVariable="probeInput"  
+                    inputVariable="probeInput"
                     outputVariable="probeInput">
             </invoke>
 
@@ -84,25 +84,25 @@
                     <from variable="probeInput" part="probeData"/>
                     <to variable="reply" part="replyText"/>
             </copy>
-        </assign> 
-        
-        <reply name="allFaultReply" partnerLink="request" portType="wns:testFaultHandlersPT" 
-               operation="request" variable="reply"> 
+        </assign>
+
+        <reply name="allFaultReply" partnerLink="request" portType="wns:testFaultHandlersPT"
+               operation="request" variable="reply">
         </reply>
        </sequence>
     </catchAll>
   </faultHandlers>
 
   <sequence>
-        
+
         <receive name="receive1" partnerLink="request"
-            portType="wns:testFaultHandlersPT" 
+            portType="wns:testFaultHandlersPT"
                  operation="request" variable="request"
                  createInstance="yes">
         </receive>
-    
+
         <!-- Copy input variables to internal accumulators -->
-     
+
         <assign name="assign1">
           <copy>
             <from variable="request" part="requestID"/>
@@ -112,13 +112,13 @@
             <from variable="request" part="requestText"/>
             <to variable="probeInput" part="probeData"/>
           </copy>
-        </assign>   
-    
+        </assign>
+
       <scope name="scopeOne">
         <faultHandlers>
             <catch faultName="tns:testFault">
                 <sequence>
-                
+
                       <assign>
                         <copy>
                             <from>
@@ -126,11 +126,11 @@
                             </from>
                             <to variable="probeInput" part="probeName"/>
                         </copy>
-                      </assign> 
-                        <invoke name="testFaultProbe" partnerLink="probe" 
-                            portType="prb:probeMessagePT" 
+                      </assign>
+                        <invoke name="testFaultProbe" partnerLink="probe"
+                            portType="prb:probeMessagePT"
                             operation="probe"
-                            inputVariable="probeInput"  
+                            inputVariable="probeInput"
                             outputVariable="probeInput">
                         </invoke>
 
@@ -145,8 +145,8 @@
                                 <from variable="probeInput" part="probeData"/>
                                 <to variable="reply" part="replyText"/>
                         </copy>
-                    </assign> 
-        
+                    </assign>
+
                 </sequence>
             </catch>
         </faultHandlers>
@@ -162,11 +162,11 @@
                         </from>
                         <to variable="probeInput" part="probeName"/>
                     </copy>
-            </assign> 
-            <invoke name="probe1" partnerLink="probe" 
-                        portType="prb:probeMessagePT" 
+            </assign>
+            <invoke name="probe1" partnerLink="probe"
+                        portType="prb:probeMessagePT"
                         operation="probe"
-                        inputVariable="probeInput"  
+                        inputVariable="probeInput"
                         outputVariable="probeInput">
             </invoke>
             <throw faultName="tns:testFault"/>
@@ -182,14 +182,14 @@
                         </from>
                         <to variable="probeInput" part="probeName"/>
                     </copy>
-                </assign> 
-                <invoke name="probe1" partnerLink="probe" 
-                    portType="prb:probeMessagePT" 
+                </assign>
+                <invoke name="probe1" partnerLink="probe"
+                    portType="prb:probeMessagePT"
                     operation="probe"
-                    inputVariable="probeInput"  
+                    inputVariable="probeInput"
                     outputVariable="probeInput">
                 </invoke>
-                
+
                 <throw faultName="tns:unknownFault"/>
             </sequence>
         </elseif>
@@ -203,12 +203,12 @@
                             </from>
                             <to variable="probeInput" part="probeName"/>
                         </copy>
-                </assign> 
+                </assign>
 
        <invoke name="probe2" partnerLink="probe"
-                portType="prb:probeMessagePT" 
+                portType="prb:probeMessagePT"
                 operation="probe"
-                inputVariable="probeInput"  
+                inputVariable="probeInput"
                 outputVariable="probeInput">
        </invoke>
 
@@ -223,12 +223,12 @@
             <from variable="probeInput" part="probeData"/>
             <to variable="reply" part="replyText"/>
           </copy>
-      </assign> 
-        
-    <reply name="reply" partnerLink="request" portType="wns:testFaultHandlersPT" 
-               operation="request" variable="reply"> 
+      </assign>
+
+    <reply name="reply" partnerLink="request" portType="wns:testFaultHandlersPT"
+               operation="request" variable="reply">
       </reply>
 
-  
+
   </sequence>
 </process>

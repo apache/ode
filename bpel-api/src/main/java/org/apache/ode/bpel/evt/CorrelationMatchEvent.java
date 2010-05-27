@@ -48,7 +48,7 @@ public class CorrelationMatchEvent extends ProcessMessageExchangeEvent {
                 _correlationKeySet.add(_correlationKey);
             }
         }
-        
+
         return _correlationKeySet;
     }
 

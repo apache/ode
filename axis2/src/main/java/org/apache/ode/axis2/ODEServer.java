@@ -113,7 +113,7 @@ public class ODEServer {
     protected ExecutorService _executorService;
 
     protected Scheduler _scheduler;
-    
+
     protected CronScheduler _cronScheduler;
 
     protected Database _db;
@@ -123,12 +123,12 @@ public class ODEServer {
     private BpelServerConnector _connector;
 
     private ManagementService _mgtService;
-    
+
     protected ClusterUrlTransformer _clusterUrlTransformer;
 
     protected MultiThreadedHttpConnectionManager httpConnectionManager;
     protected IdleConnectionTimeoutThread idleConnectionTimeoutThread;
-    
+
     public void init(ServletConfig config, AxisConfiguration axisConf) throws ServletException {
         init(config.getServletContext().getRealPath("/WEB-INF"), axisConf);
     }
@@ -174,7 +174,7 @@ public class ODEServer {
         initDataSource();
         __log.debug("Starting DAO.");
         initDAO();
-        EndpointReferenceContextImpl eprContext = new EndpointReferenceContextImpl(this);            
+        EndpointReferenceContextImpl eprContext = new EndpointReferenceContextImpl(this);
         __log.debug("Initializing BPEL process store.");
         initProcessStore(eprContext);
         __log.debug("Initializing BPEL server.");
@@ -226,7 +226,7 @@ public class ODEServer {
     @SuppressWarnings("unchecked")
     private DeploymentPoller getDeploymentPollerExt() {
         DeploymentPoller poller = null;
-        
+
         InputStream is = null;
         try {
             is = ODEServer.class.getResourceAsStream("/deploy-ext.properties");
@@ -257,7 +257,7 @@ public class ODEServer {
 
         return poller;
     }
-    
+
     private void initDataSource() throws ServletException {
         _db = new Database(_odeConfig);
         _db.setTransactionManager(_txMgr);
@@ -311,7 +311,7 @@ public class ODEServer {
                     __log.debug("Cron scheduler couldn't be shutdown.", ex);
                 }
             }
-            
+
             if (_scheduler != null)
                 try {
                     __log.debug("shutting down scheduler.");
@@ -457,7 +457,7 @@ public class ODEServer {
     }
 
     protected Scheduler createScheduler() {
-        SimpleScheduler scheduler = new SimpleScheduler(new GUID().toString(), 
+        SimpleScheduler scheduler = new SimpleScheduler(new GUID().toString(),
                 new JdbcDelegate(_db.getDataSource()), _odeConfig.getProperties());
         scheduler.setExecutorService(_executorService);
         scheduler.setTransactionManager(_txMgr);
@@ -482,7 +482,7 @@ public class ODEServer {
             _executorService = Executors.newCachedThreadPool(threadFactory);
         else
             _executorService = Executors.newFixedThreadPool(_odeConfig.getThreadPoolMaxSize(), threadFactory);
-        
+
         {
             List<String> targets = new ArrayList<String>();
             Collections.addAll(targets, _odeConfig.getProperty("cluster.localRoute.targets", "").split(","));
@@ -491,12 +491,12 @@ public class ODEServer {
         _bpelServer = new BpelServerImpl();
         _scheduler = createScheduler();
         _scheduler.setJobProcessor(_bpelServer);
-        
+
         BpelServerImpl.PolledRunnableProcessor polledRunnableProcessor = new BpelServerImpl.PolledRunnableProcessor();
         polledRunnableProcessor.setPolledRunnableExecutorService(_executorService);
         polledRunnableProcessor.setContexts(_bpelServer.getContexts());
         _scheduler.setPolledRunnableProcesser(polledRunnableProcessor);
-        
+
         _cronScheduler = new CronScheduler();
         _cronScheduler.setScheduledTaskExec(_executorService);
         _cronScheduler.setContexts(_bpelServer.getContexts());
@@ -582,7 +582,7 @@ public class ODEServer {
     public File getConfigRoot() {
         return _configRoot;
     }
-    
+
     private void registerEventListeners() {
         String listenersStr = _odeConfig.getEventListeners();
         if (listenersStr != null) {
@@ -640,7 +640,7 @@ public class ODEServer {
                 if (pconf != null) {
                     /*
                      * If and only if an old process exists with the same pid, the old process is cleaned up.
-                     * The following line is IMPORTANT and used for the case when the deployment and store 
+                     * The following line is IMPORTANT and used for the case when the deployment and store
                      * do not have the process while the process itself exists in the BPEL_PROCESS table.
                      * Notice that the new process is actually created on the 'ACTIVATED' event.
                      */
@@ -653,21 +653,21 @@ public class ODEServer {
                 if (pconf != null) {
                     _bpelServer.register(pconf);
                 } else {
-                    __log.debug("slighly odd: recevied event " + 
+                    __log.debug("slighly odd: recevied event " +
                             pse + " for process not in store!");
                 }
                 break;
             case RETIRED:
-                // are there are instances of this process running? 
+                // are there are instances of this process running?
                 boolean instantiated = _bpelServer.hasActiveInstances(pse.pid);
                 // remove the process
                 _bpelServer.unregister(pse.pid);
-                // bounce the process if necessary  
+                // bounce the process if necessary
                 if (instantiated) {
                     if (pconf != null) {
                         _bpelServer.register(pconf);
                     } else {
-                        __log.debug("slighly odd: recevied event " + 
+                        __log.debug("slighly odd: recevied event " +
                                 pse + " for process not in store!");
                     }
                 } else {
@@ -688,7 +688,7 @@ public class ODEServer {
             default:
                 __log.debug("Ignoring store event: " + pse);
         }
-        
+
         if( pconf != null ) {
             if( pse.type == ProcessStoreEvent.Type.UNDEPLOYED) {
                 __log.debug("Cancelling all cron scheduled jobs on store event: " + pse);
@@ -702,7 +702,7 @@ public class ODEServer {
             }
         }
     }
-    
+
     // Transactional debugging stuff, to track down all these little annoying bugs.
     private class DebugTxMgr implements TransactionManager {
         private TransactionManager _tm;

@@ -47,7 +47,7 @@ import org.w3c.dom.Element;
  * <code>!</code> operator in the pi-calculus, so there may be multiple
  * instances of an <code>onMessage</code> handler around simultaneously.
  * </p>
- * 
+ *
  * @see org.apache.ode.bpel.compiler.bom.PickActivity
  * @see org.apache.ode.bpel.compiler.bom.OnEvent
  */
@@ -61,13 +61,13 @@ public class OnMessage extends BpelObject implements Communication {
 
     /**
      * Get the optional message exchange identifier.
-     * 
+     *
      * @return
      */
     public String getMessageExchangeId() {
         return getAttribute("messageExchange", null);
     }
-    
+
     public String getRoute() {
         return getAttribute("route", "one");
     }
@@ -75,7 +75,7 @@ public class OnMessage extends BpelObject implements Communication {
     /**
      * Get the activity associated with the event (i.e. the activity that is
      * activated).
-     * 
+     *
      * @return activity activated when message event occurs
      */
     public Activity getActivity() {
@@ -84,7 +84,7 @@ public class OnMessage extends BpelObject implements Communication {
 
     /**
      * Get the input message variable for the event.
-     * 
+     *
      * @return input message variable
      */
     public String getVariable() {

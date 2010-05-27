@@ -99,13 +99,13 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
         __log.debug("Recognizing RPC style content");
         for (String pname : ((Set<String>) op.getInput().getMessage().getParts().keySet())) {
             Part part = op.getInput().getMessage().getPart(pname);
-            
+
             if (part.getElementName() != null) {
                 //RPC style invocation doesn't allow element parts, so we don't accept it
                 __log.debug("Part " + part.getName() + " has element content " + part.getElementName() + ". It's not allowed for RPC style.");
                 return Recognized.FALSE;
             }
-            
+
             // with RPC semantic the body is wrapped by a partName which is same as bodyElementName
             Element pdata = DOMUtils.findChildByName(msg, new QName(null, part.getName()));
             if (pdata == null) {
@@ -121,20 +121,20 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
             MessageTranslationException {
         if (msgdef == null)
             throw new NullPointerException("msdef must not be null.");
-        
+
         Map<String, Node> headers = odeMsg.getHeaderParts();
         if (headers != null) {
             for (String header : headers.keySet()) {
                 if (__log.isDebugEnabled()) {
                     __log.debug("toNMS() header " + header + " := " + DOMUtils.domToString(headers.get(header)) );
                 }
-                
+
                 Map<QName, DocumentFragment> headers2 = (Map<QName, DocumentFragment>) nmsMsg.getProperty("org.apache.servicemix.soap.headers");
                 if (headers2 == null) {
                     headers2 = new HashMap<QName, DocumentFragment>();
                     nmsMsg.setProperty("org.apache.servicemix.soap.headers", headers2);
                 }
-                
+
                 Node v = headers.get(header);
                 DocumentFragment f = v.getOwnerDocument().createDocumentFragment();
                 f.appendChild(v);
@@ -142,8 +142,8 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
             }
         }
 
-        
-        
+
+
         Element ode = odeMsg == null ? null : odeMsg.getMessage();
         Element part = ode == null ? null : DOMUtils.getFirstChildElement(ode);
         Element firstPartEl = part == null ? null : DOMUtils.getFirstChildElement(part);
@@ -210,7 +210,7 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
             }
             return;
         }
-        
+
         if (__log.isDebugEnabled()) {
             __log.debug("toODE() normalized message:\n" + prettyPrint(nms));
         }
@@ -247,7 +247,7 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
             }
             odeMsg.setMessage(nms);
         }
-        
+
         Map<QName, DocumentFragment> headers = (Map<QName, DocumentFragment>) nmsMsg.getProperty("org.apache.servicemix.soap.headers");
         if (headers != null) {
             for (QName header : headers.keySet()) {

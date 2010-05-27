@@ -36,14 +36,14 @@ import org.apache.ode.utils.CollectionUtils;
  * <pre>
  * public class Cell extends JacobRunnable {
  *     private CellChannel s;
- * 
+ *
  *     private Object v;
- * 
+ *
  *     public Cell(CellChannel s, Object v) {
  *         this.s = s;
  *         this.v = v;
  *     }
- * 
+ *
  *     public void run() {
  *      object(new CellChannelListener(s) { read(...) {...}
  *                             write(...) {...} } );
@@ -63,12 +63,12 @@ import org.apache.ode.utils.CollectionUtils;
  *    .
  * </pre>
  * </code>
- * 
+ *
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com" />
  */
 public abstract class JacobRunnable extends JacobObject {
     private static final Set<Method> IMPLEMENTED_METHODS;
-    
+
     static {
         try {
             Method m = JacobRunnable.class.getMethod("run", CollectionUtils.EMPTY_CLASS_ARRAY);

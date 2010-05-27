@@ -23,7 +23,7 @@ import java.util.Collection;
 
 public class AbstractLogicExpr implements LogicExprNode, LogicNode {
     private static final long serialVersionUID = -626046952079668882L;
-    
+
     private final Collection<LogicNode> childs;
 
     /**

@@ -17,7 +17,7 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<definitions targetNamespace="http://ode.apache.org/bpel/unit-test" 
+<definitions targetNamespace="http://ode.apache.org/bpel/unit-test"
              xmlns="http://schemas.xmlsoap.org/wsdl/"
              xmlns:tns="http://ode.apache.org/bpel/unit-test"
              xmlns:xsd="http://www.w3.org/2001/XMLSchema"

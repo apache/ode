@@ -54,7 +54,7 @@ public class GeronimoDelegateSupport extends DelegateSupport {
         TransactionSupport transactionSupport = LocalTransactions.INSTANCE;
         ConnectionTracker connectionTracker = new ConnectionTrackingCoordinator();
 
-        PoolingSupport poolingSupport = new SinglePool(1, 1, 
+        PoolingSupport poolingSupport = new SinglePool(1, 1,
                 CONNECTION_MAX_WAIT_MILLIS,
                 CONNECTION_MAX_IDLE_MINUTES,
                 true, // match one

@@ -27,11 +27,11 @@
   queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
   expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
   suppressJoinFailure="yes">
-  
+
   <bpel:import location="TestCatchFaultInFaultHandler.wsdl"
     namespace="http://ode/bpel/unit-test/TestCatchFaultInFaultHandler.wsdl"
     importType="http://schemas.xmlsoap.org/wsdl/" />
-  
+
   <bpel:partnerLinks>
     <bpel:partnerLink name="TestCatchFaultInFaultHandlerPL" partnerLinkType="wns:TestCatchFaultInFaultHandlerRequest" myRole="TestCatchFaultInFaultHandlerService"/>
   </bpel:partnerLinks>

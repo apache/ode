@@ -33,7 +33,7 @@ public class FlagWithArgument implements CommandlineFragment {
   private String _description;
   private String _arg;
   private boolean _isOptional;
-  
+
   /**
    * Construct a new fragment holder.
    * @param name the name of the flag, as it will be used on the commandline
@@ -48,15 +48,15 @@ public class FlagWithArgument implements CommandlineFragment {
     _argName = argName;
     _isOptional = optional;
   }
-  
+
   public boolean isOptional() {
     return _isOptional;
   }
-  
+
   public void setOptional(boolean o) {
     _isOptional = o;
   }
-  
+
   public List<String> consume(List<String> s) throws CommandlineSyntaxException {
     if (!s.contains(_name)) {
       if (!_isOptional) {
@@ -81,15 +81,15 @@ public class FlagWithArgument implements CommandlineFragment {
   public void reset() {
     _arg = null;
   }
-  
+
   public boolean isSet() {
     return _arg != null;
   }
-  
+
   public String getValue() {
     return _arg;
   }
-  
+
   public String getUsage() {
     return _name + " <" + _argName + ">";
   }

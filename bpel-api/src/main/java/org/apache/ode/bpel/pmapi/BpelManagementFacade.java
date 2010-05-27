@@ -49,15 +49,15 @@ public interface BpelManagementFacade extends ProcessManagement, InstanceManagem
    * @return time the instance was started
    */
   Date getStartTime(Long iid) throws ManagementException;
-  
+
   /**
    * Get the state of a process instance.
    * @param iid process instance identifier
    * @return state of the instance
    */
   short getState(Long iid) throws ManagementException;
-  
- 
+
+
   /**
    * Get the process instance with the given correlation correlationKey.
    *
@@ -66,7 +66,7 @@ public interface BpelManagementFacade extends ProcessManagement, InstanceManagem
    * @return process instance identifier of instance matching the given correlationKey
    */
   Long getProcessInstance(String pid, CorrelationKey ckey) throws ManagementException;
-  
+
   /**
    * Get exeuction event history for a process instance.
    * @param iid process instance identifier
@@ -75,21 +75,21 @@ public interface BpelManagementFacade extends ProcessManagement, InstanceManagem
    * @return array of {@link ProcessInstanceEvent}s.
    */
   EventInfoListDocument getEvents(Long iid, int startIdx, int count) throws ManagementException;
-  
+
   /**
    * Get the current number of events for an instance.
    * @param iid process instance identifier
    * @return number of events in event history
    */
   int getEventCount(Long iid) throws ManagementException;
-  
-  /** 
+
+  /**
    * Returns all the scope instance ids for a given instance and scope name.
    * Multiple scopes instances are only possible due to a BPEL 'while' activity.
-   *  
+   *
    * */
   public Long[] getScopeInstancesForScope(Long iid, String scopeName) throws ManagementException;
-  
+
   /**
    * Gets variable data.
    * @param iid
@@ -98,7 +98,7 @@ public interface BpelManagementFacade extends ProcessManagement, InstanceManagem
    * @return
    */
   String getVariable(Long iid, Long scopeId, String varName) throws ManagementException;
-  
+
   /**
    * Sets a variable
    * @param iid
@@ -107,7 +107,7 @@ public interface BpelManagementFacade extends ProcessManagement, InstanceManagem
    * @param data
    */
   void setVariable(Long iid, Long scopeId, String varName, String data);
-  
+
   /**
    * Sets a correlation.
    * @param iid
@@ -117,7 +117,7 @@ public interface BpelManagementFacade extends ProcessManagement, InstanceManagem
    * @param values property values as a CorrelationKey object
    */
   void setCorrelation(Long iid, Long scopeId, String correlationSet, QName[] propertyNames, CorrelationKey values) throws ManagementException;
-  
+
   /**
    * Gets a correlation.
    * @param iid
@@ -126,7 +126,7 @@ public interface BpelManagementFacade extends ProcessManagement, InstanceManagem
    * @return
    */
   CorrelationKey getCorrelation(Long iid, Long scopeId, String correlationSet) throws ManagementException;
-  
+
   /**
    * Return the process model.
    * @return
@@ -139,17 +139,17 @@ public interface BpelManagementFacade extends ProcessManagement, InstanceManagem
    * @param iid
    */
   void step(Long iid) throws ManagementException;
-  
+
   /**
    * Gets the fault associated with a completed process instance.
    * @param iid
    * @return
    */
   QName getCompletedFault(Long iid) throws ManagementException;
-  
+
   /**
    * Returns the breakpoints registered with the process instance.
-   * 
+   *
    * @param iid process instance identifier
    * @return array of {@link Breakpoint}s.
    */
@@ -157,26 +157,26 @@ public interface BpelManagementFacade extends ProcessManagement, InstanceManagem
 
   /**
    * Returns the global breakpoints registered with the process instance.
-   * 
+   *
    * @param procId
    * @return array of {@link Breakpoint}s.
    */
   Breakpoint[] getGlobalBreakpoints(String procId) throws ManagementException;
-  
+
   /**
    * Removes a breakpoint
    * @param iid a iid of null removes a global breakpoint.
    * @param sp
    */
   void removeBreakpoint(Long iid, Breakpoint sp) throws ManagementException;
-  
+
   /**
    * Removes a global breakpoint
    * @param procId
    * @param sp
    */
   void removeGlobalBreakpoint(String procId, Breakpoint sp) throws ManagementException;
-  
+
   /**
    * Adds an activity breakpoint.
    * @param iid a iid of null adds a global activity breakpoint.
@@ -184,7 +184,7 @@ public interface BpelManagementFacade extends ProcessManagement, InstanceManagem
    * @return
    */
   ActivityBreakpoint addActivityBreakpoint(Long iid, String activity) throws ManagementException;
-  
+
   /**
    * Adds an global activity breakpoint.
    * @param procId
@@ -192,7 +192,7 @@ public interface BpelManagementFacade extends ProcessManagement, InstanceManagem
    * @return
    */
   ActivityBreakpoint addGlobalActivityBreakpoint(String procId, String activity) throws ManagementException;
-  
+
   /**
    * Adds a variable modification breakpoint.
    * @param iid
@@ -201,5 +201,5 @@ public interface BpelManagementFacade extends ProcessManagement, InstanceManagem
    * @return
    */
   VariableModificationBreakpoint addVariableModificationBreakpoint(Long iid, String scopeName, String variable);
-  
+
 }

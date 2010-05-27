@@ -41,11 +41,11 @@ import org.apache.ode.bpel.pmapi.TScopeRef;
  * objects.
  */
 public class ActivityStateDocumentBuilder implements BpelEventListener {
-  
-  private HashMap<Long, ActivityInfoDocument> _activities = 
+
+  private HashMap<Long, ActivityInfoDocument> _activities =
     new HashMap<Long,ActivityInfoDocument>();
 
-  /** 
+  /**
    * Keep a list of the activity info objects, so we can return
    * them in the order of creation.
    */
@@ -54,11 +54,11 @@ public class ActivityStateDocumentBuilder implements BpelEventListener {
 
   private boolean _removeCompleted = false;
   private Long _scope;
-  
-  
+
+
     public ActivityStateDocumentBuilder() {
     }
-    
+
   public List<ActivityInfoDocument> getActivities() {
     return _activitiesOrdered;
   }
@@ -126,7 +126,7 @@ public class ActivityStateDocumentBuilder implements BpelEventListener {
 
   /**
    * Fill the common activity info from an event.
-   * @param info 
+   * @param info
    * @param event
    */
   private void fill(TActivityInfo info, ActivityEvent event) {
@@ -142,7 +142,7 @@ public class ActivityStateDocumentBuilder implements BpelEventListener {
     public void shutdown() {
         // do nothing
     }
-    
+
     public void startup(Properties configProperties) {
         // do nothing
     }

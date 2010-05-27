@@ -23,12 +23,12 @@
     xmlns:tns2="http://www.product.org"
     xmlns:tns3="http://www.company.org"
     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"      
+    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable">
-    
+
     <wsdl:types>
-        <xsd:schema elementFormDefault="unqualified" targetNamespace="http://www.person.org" xmlns="http://www.person.org" 
+        <xsd:schema elementFormDefault="unqualified" targetNamespace="http://www.person.org" xmlns="http://www.person.org"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema">
             <xsd:complexType name="PersonType">
                 <xsd:sequence>
@@ -37,7 +37,7 @@
                 </xsd:sequence>
             </xsd:complexType>
         </xsd:schema>
-        <xsd:schema elementFormDefault="unqualified" targetNamespace="http://www.product.org" xmlns="http://www.product.org" 
+        <xsd:schema elementFormDefault="unqualified" targetNamespace="http://www.product.org" xmlns="http://www.product.org"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema">
             <xsd:complexType name="ProductType">
                 <xsd:sequence>
@@ -59,7 +59,7 @@
             </xsd:element>
         </xsd:schema>
     </wsdl:types>
-    
+
     <wsdl:message name="operation1Request">
         <wsdl:part name="newParameter1" element="tns3:Company"/>
     </wsdl:message>
@@ -72,20 +72,20 @@
             <wsdl:output name="operation1Response" message="tns:operation1Response"/>
         </wsdl:operation>
     </wsdl:portType>
-    
+
     <wsdl:binding name="TestXPathNamespace2Binding" type="tns:TestXPathNamespace2PT">
         <wsdl:operation name="operation1">
-            <wsdl:input name="operation1Request"/> 
-            <wsdl:output name="operation1Response"/> 
+            <wsdl:input name="operation1Request"/>
+            <wsdl:output name="operation1Response"/>
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="TestXPathNamespace2Service">
         <wsdl:port name="TestXPathNamespace2Port" binding="tns:TestXPathNamespace2Binding">
         </wsdl:port>
     </wsdl:service>
-    
+
     <plnk:partnerLinkType name="TestXPathNamespace2Request">
         <plnk:role name="TestXPathNamespace2Service" portType="tns:TestXPathNamespace2PT"/>
     </plnk:partnerLinkType>
-    
+
 </wsdl:definitions>

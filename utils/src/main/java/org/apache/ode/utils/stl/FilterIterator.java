@@ -24,7 +24,7 @@ import java.util.NoSuchElementException;
 
 /**
  * Filtering {@link Iterator} implementation.
- * 
+ *
  * <p>
  * Created on Feb 4, 2004 at 4:48:14 PM.
  * </p>

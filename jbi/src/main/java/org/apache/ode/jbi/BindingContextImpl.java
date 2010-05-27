@@ -35,15 +35,15 @@ import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 /**
  * JBI Implementation of ODE's {@link org.apache.ode.bpel.iapi.BindingContext}
  * interface.
- * 
+ *
  * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
- * 
+ *
  */
 class BindingContextImpl implements BindingContext {
     private static final Log __log = LogFactory.getLog(BindingContextImpl.class);
 
     private final OdeContext _ode;
-    
+
     BindingContextImpl(OdeContext ode) {
         _ode = ode;
     }
@@ -77,15 +77,15 @@ class BindingContextImpl implements BindingContext {
         }
     }
 
-    
+
     private class PartnerRoleChannelImpl implements PartnerRoleChannel {
-        
+
         private final JbiEndpointReference _initialEPR;
 
         PartnerRoleChannelImpl(JbiEndpointReference epr) {
             _initialEPR = epr;
         }
-        
+
         PartnerRoleChannelImpl() {
             _initialEPR = null;
         }
@@ -97,7 +97,7 @@ class BindingContextImpl implements BindingContext {
         public void close() {
             ; // noop
         }
-        
+
     }
 
 

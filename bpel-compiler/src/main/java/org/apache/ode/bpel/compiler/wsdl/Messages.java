@@ -54,13 +54,13 @@ public class Messages extends MessageBundle {
   /**
    * Format an error message about the <code>&lt;X&gt;</code> element
    * requiring the <code>Y</code> attribute.
-   * 
+   *
    * @param element
    *          the <code>QName</code> of the element
    * @param attribute
    *          the name of the attribute
    * @return the formatted error message
-   * 
+   *
    * The {1} attribute is required by the {0} element.
    */
   public String msgElementRequiresAttr(String element, String attribute) {
@@ -71,11 +71,11 @@ public class Messages extends MessageBundle {
   /**
    * Format an error message about the <code>&lt;X&gt;</code> element having
    * content when it should be empty.
-   * 
+   *
    * @param element
    *          the <code>QName</code> of the element
    * @return the formatted error message
-   * 
+   *
    * The schema for {0} prohibits child elements or non-whitespace characters as
    * content.
    */
@@ -87,13 +87,13 @@ public class Messages extends MessageBundle {
   /**
    * Format an error message about a named <code>&lt;role&gt;</code> already
    * being declared within a <code>&lt;partnerLink&gt;</code>.
-   * 
+   *
    * @param linkName
    *          the <code>QName</code> of the <code>&lt;partnerLink&gt;</code>
    * @param roleName
    *          the name of the <code>&lt;role&gt;</code>
    * @return the formatted message
-   * 
+   *
    * The role {1} is already defined for the partnerLink {2}.
    */
   public String msgRoleAlreadyDefined(QName linkName, String roleName) {
@@ -104,7 +104,7 @@ public class Messages extends MessageBundle {
   /**
    * Format an error message that at most <code>n</code> things of type
    * <code>x</code> may be defined with each <code>y</code>.
-   * 
+   *
    * @param n
    *          the maximum number of things.
    * @param x
@@ -112,7 +112,7 @@ public class Messages extends MessageBundle {
    * @param y
    *          the thing that contains the things.
    * @return the formatted message
-   * 
+   *
    * No more than {0} {1} item(s) may be defined within one {2}.
    */
   public String msgNoMoreThanNumberOfElements(int n, String x, String y) {
@@ -122,13 +122,13 @@ public class Messages extends MessageBundle {
 
   /**
    * Format an error message about a child element being required.
-   * 
+   *
    * @param element
    *          the <code>QName</code> of the parent element
    * @param child
    *          the <code>QName</code> of the child element
    * @return the formatted message.
-   * 
+   *
    * The element {0} requires a child element with name {1}.
    */
   public String msgElementRequiresChild(String element, String child) {
@@ -139,13 +139,13 @@ public class Messages extends MessageBundle {
   /**
    * Format an error message about a <code>&lt;role&gt;</code> referring to a
    * <code>portType</code> that can't be dereferenced.
-   * 
+   *
    * @param roleName
    *          the name of the <code>&lt;role&gt;</code>
    * @param portType
    *          the <code>QName</code> of the <code>portType</code>
    * @return the formatted message
-   * 
+   *
    * The referenced portType {1} for role {0} is not defined in this definition
    * or an import.
    */
@@ -157,11 +157,11 @@ public class Messages extends MessageBundle {
   /**
    * Format a message about a <code>&lt;propertyAlias&gt;</code> referring to
    * a non-existent WSDL message type.
-   * 
+   *
    * @param messageType
    *          the non-existent WSDL message type name
    * @return the formatted message
-   * 
+   *
    * A propertyAlias refers to the non-existent WSDL message type {0}.
    */
   public String msgNoSuchMessageTypeForPropertyAlias(String messageType) {
@@ -172,11 +172,11 @@ public class Messages extends MessageBundle {
   /**
    * Format an error message about an element not being permissable as the root
    * element in a WSDL document.
-   * 
+   *
    * @param qname
    *          the stringified <code>QName</code> of the element
    * @return the formatted message
-   * 
+   *
    * The element {0} is not permitted as the root element in a WSDL definition.
    */
   public String msgCannotBeDocumentRootElement(String qname) {
@@ -187,11 +187,11 @@ public class Messages extends MessageBundle {
   /**
    * Format an error message about a WSDL extensibility element requiring to be
    * a first level child of the definition element.
-   * 
+   *
    * @param qname
    *          the stringified <code>QName</code> of the element
    * @return the formatted message.
-   * 
+   *
    * The element {0} must be a child of the WSDL definitions element.
    */
   public String msgMustBeChildOfDef(String qname) {
@@ -202,11 +202,11 @@ public class Messages extends MessageBundle {
   /**
    * Format an error message about an extensibility element occurring out of
    * order with respect to other WSDL elements.
-   * 
+   *
    * @param qname
    *          the stringified <code>QName</code> of the element
    * @return the formatted message
-   * 
+   *
    * The WSDL extensibility element {0} must occur after all core WSDL
    * declarations in the same WSDL document.
    */
@@ -218,13 +218,13 @@ public class Messages extends MessageBundle {
   /**
    * Format a message about a <code>&lt;propertyAlias&gt;</code> referring to
    * a non-existent part of a a WSDL message type.
-   * 
+   *
    * @param message
    *          the stringified <code>QName</code> of the message
    * @param part
    *          the name of the part
    * @return the formatted message
-   * 
+   *
    * A propertyAlias refers to the non-existent part {1} on the WSDL message
    * type {0}.
    */
@@ -236,7 +236,7 @@ public class Messages extends MessageBundle {
   /**
    * Format an error message about a <code>thing</code> being
    * (inappropriately) redefined.
-   * 
+   *
    * @param thing
    *          the thing, e.g., a message, a port type, etc.
    * @param name
@@ -246,7 +246,7 @@ public class Messages extends MessageBundle {
    * @param redef
    *          where it was redefined
    * @return the formatted message
-   * 
+   *
    * The {0} {1} defined in {3} was already defined in {2}.
    */
   public String msgAlreadyDefinedIn(String thing, String name, String origin, String redef) {
@@ -257,13 +257,13 @@ public class Messages extends MessageBundle {
   /**
    * Format an error message about a reference to a
    * <code>&lt;property&gt;</code> that does not exist.
-   * 
+   *
    * @param name
    *          the stringified <code>QName</code> of the property
    * @param documentBaseURI
    *          the URI of the WSDL that contains the reference.
    * @return the formatted message
-   * 
+   *
    * A property alias in {1} refers to the property {0}, which is not defined.
    */
   public String msgNoSuchProperty(String name, String documentBaseURI) {

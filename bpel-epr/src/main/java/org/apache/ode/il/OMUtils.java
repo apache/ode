@@ -68,10 +68,10 @@ public class OMUtils {
         return toDOM(element, DOMUtils.newDocument());
     }
 
-    public static Element toDOM(OMElement element, Document doc) { 
+    public static Element toDOM(OMElement element, Document doc) {
         return toDOM(element,doc,true);
     }
-    
+
     @SuppressWarnings("unchecked")
     public static Element toDOM(OMElement element, Document doc, boolean deepNS) {
         final Element domElement = doc.createElementNS(element.getQName().getNamespaceURI(), element.getQName().getLocalPart());
@@ -89,10 +89,10 @@ public class OMUtils {
                     else
                         domElement.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns:"+ omns.getPrefix(), omns.getNamespaceURI());
                 }
-    
+
             }
         }
-            
+
         for (Iterator i = element.getAllAttributes(); i.hasNext();) {
             final OMAttribute attr = (OMAttribute) i.next();
             Attr newAttr;
@@ -108,7 +108,7 @@ public class OMUtils {
                 OMNamespace attrValNs = element.findNamespaceURI(attr.getAttributeValue().substring(0, colonIdx));
                 if (attrValNs != null)
                     domElement.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns:"+ attrValNs.getPrefix(), attrValNs.getNamespaceURI());
-            }                
+            }
         }
 
         for (Iterator<OMNode> i = element.getChildren(); i.hasNext();) {
@@ -125,27 +125,27 @@ public class OMUtils {
                 domElement.appendChild(toDOM((OMElement)omn,doc, false));
                 break;
             }
-            
+
         }
-        
+
         return domElement;
-        
+
     }
 
     @SuppressWarnings("unchecked")
     private static void buildNScontext(NSContext nscontext, OMElement element) {
         if (element == null)
             return;
-        
+
         if (element.getParent() instanceof OMElement)
             buildNScontext(nscontext, (OMElement) element.getParent());
-        
+
         if (element.getAllDeclaredNamespaces() != null)
             for (Iterator<OMNamespace> i=element.getAllDeclaredNamespaces(); i.hasNext(); ){
                 OMNamespace omn = i.next();
                 nscontext.register(omn.getPrefix(), omn.getNamespaceURI());
             }
-        
+
         if (element.getDefaultNamespace() != null)
             nscontext.register("", element.getDefaultNamespace().getNamespaceURI());
     }
@@ -162,7 +162,7 @@ public class OMUtils {
                 omElement.setNamespace(omf.createOMNamespace(src.getNamespaceURI(), src.getPrefix()));
             else omElement.declareDefaultNamespace(src.getNamespaceURI());
         }
-        
+
         if (parent == null) {
             NSContext nscontext = DOMUtils.getMyNSContext(src);
             injectNamespaces(omElement,nscontext.toMap());
@@ -170,11 +170,11 @@ public class OMUtils {
             Map<String,String> nss = DOMUtils.getMyNamespaces(src);
             injectNamespaces(omElement, nss);
         }
-        
+
         NamedNodeMap attrs = src.getAttributes();
         for (int i = 0; i <attrs.getLength(); ++i) {
             Attr attr = (Attr)attrs.item(i);
-            if (attr.getLocalName().equals("xmlns") 
+            if (attr.getLocalName().equals("xmlns")
                     || (attr.getNamespaceURI() != null && attr.getNamespaceURI().equals(DOMUtils.NS_URI_XMLNS)))
                 continue;
             OMNamespace attrOmNs = null;
@@ -202,9 +202,9 @@ public class OMUtils {
                 toOM((Element)n,omf,omElement);
                 break;
             }
-            
+
         }
-        
+
         return omElement;
     }
 
@@ -222,7 +222,7 @@ public class OMUtils {
     /**
      * Axiom is supposed to handle this properly however this method is buggy and doesn't work (whereas setting a QName as text
      * works).
-     * 
+     *
      * @param elmt
      * @return text qname
      */

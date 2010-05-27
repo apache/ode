@@ -33,36 +33,36 @@ public class Activity extends JoinFailureSuppressor {
     public Activity(Element el) {
         super(el);
     }
-    
+
     public String getName() {
         return getAttribute("name", null);
     }
 
     /**
      * Get the join condition.
-     * 
+     *
      * @return the join condition
      */
     public Expression getJoinCondition() {
         if (is11()) {
-            return isAttributeSet("joinCondition") 
+            return isAttributeSet("joinCondition")
                 ? new Expression11(getElement(),getElement().getAttributeNode("joinCondition")) : null;
         }
-        
+
         Targets targets = getFirstChild(Targets.class);
         return targets == null ? null : (Expression) targets.getFirstChild(Expression.class);
     }
 
     /**
      * Get the {@link LinkSource}s for this activity.
-     * 
+     *
      * @return set of {@link LinkSource}s
      */
     public List<LinkSource> getLinkSources() {
         if (is11()) {
             return getChildren(LinkSource.class);
         }
-        
+
         Sources sources = getFirstChild(Sources.class);
         if (sources == null)
             return Collections.emptyList();
@@ -71,7 +71,7 @@ public class Activity extends JoinFailureSuppressor {
 
     /**
      * Get the {@link LinkTarget}s for this activity.
-     * 
+     *
      * @return set of {@link LinkTarget}s
      */
     public List<LinkTarget> getLinkTargets() {
@@ -82,8 +82,8 @@ public class Activity extends JoinFailureSuppressor {
         Targets targets = getFirstChild(Targets.class);
         if (targets == null )
             return  Collections.emptyList() ;
-        
+
         return targets.getChildren(LinkTarget.class);
-        
+
     }
 }

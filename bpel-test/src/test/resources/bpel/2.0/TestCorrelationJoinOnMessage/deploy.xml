@@ -20,7 +20,7 @@
 <dd:deploy xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd">
     <dd:process xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd" xmlns:Pool="http://ode.apache.org/test4/Pool"
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:diag="http://ode.apache.org/test4"
-                xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:this="http://ode.apache.org/test4/process" 
+                xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:this="http://ode.apache.org/test4/process"
                 xmlns:NPGServices_Abstract="http://www.ode.apache.org/NPG/v1/wsdl"
                 xmlns:NPGData="http://www.ode.apache.org/NPG/v1" name="this:process" fileName="test4-process.bpel">
   <dd:property name="PATH">test4</dd:property>

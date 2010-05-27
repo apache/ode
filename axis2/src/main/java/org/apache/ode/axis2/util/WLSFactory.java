@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
- 
+
 package org.apache.ode.axis2.util;
 
 import java.util.Hashtable;

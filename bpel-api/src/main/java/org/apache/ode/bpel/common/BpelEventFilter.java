@@ -69,7 +69,7 @@ public class BpelEventFilter extends Filter<BpelEventFilter.Criteria> implements
    * Initializes properly the InstanceFilter attributes by pre-parsing the
    * filter and orderKeys strings and setting the limit. A limit inferior than
    * or equal to 0 is ignored.
-   * 
+   *
    * @param filter
    */
   public BpelEventFilter(String filter, int limit) {

@@ -32,7 +32,7 @@ public class OdeConfigProperties extends org.apache.ode.il.config.OdeConfigPrope
     private static final String PROP_NAMESPACE = "pidNamespace";
 
     private static final String PROP_ALLOW_INCOMPLETE_DEPLOYMENT = "allowIncompleteDeployment";
-   
+
     private static final String PROP_MSGMAPPER = "messageMapper";
 
     public OdeConfigProperties(File cfgFile) {
@@ -47,7 +47,7 @@ public class OdeConfigProperties extends org.apache.ode.il.config.OdeConfigPrope
     /**
      * Get the namespace that should be used to generate process identifiers
      * (PIDs). The local part of the PID will be the service unit id.
-     * 
+     *
      * @return
      */
     public String getPidNamespace() {
@@ -60,7 +60,7 @@ public class OdeConfigProperties extends org.apache.ode.il.config.OdeConfigPrope
 
     /**
      * Get the mapper to use for converting message to/from NMS format.
-     * 
+     *
      * @return
      */
     public String[] getMessageMappers() {

@@ -40,7 +40,7 @@ public class ProcessManagementTest extends TestCase {
     BpelManagementFacade  _management;
     QName                 _processQName;
 
-  
+
     public void testFilterProcessesByName() throws Exception {
 
         List<TProcessInfo> pilist = _management.listProcesses(null,null).getProcessInfoList().getProcessInfoList();
@@ -48,10 +48,10 @@ public class ProcessManagementTest extends TestCase {
 
         pilist = _management.listProcesses("name=FailureInh*",null).getProcessInfoList().getProcessInfoList();
         assertEquals(1,pilist.size());
-        
+
         pilist = _management.listProcesses("name=FailureToRecovery*",null).getProcessInfoList().getProcessInfoList();
         assertEquals(1,pilist.size());
-        
+
         pilist = _management.listProcesses("name=foobaz*",null).getProcessInfoList().getProcessInfoList();
         assertEquals(0,pilist.size());
 
@@ -60,13 +60,13 @@ public class ProcessManagementTest extends TestCase {
 
         pilist = _management.listProcesses("namespace=http:*",null).getProcessInfoList().getProcessInfoList();
         assertEquals(6,pilist.size());
-        
+
         pilist = _management.listProcesses("namespace=foo:*",null).getProcessInfoList().getProcessInfoList();
         assertEquals(0,pilist.size());
     }
 
     public void testListProcessesOrder() {
-        List<TProcessInfo> pilist = 
+        List<TProcessInfo> pilist =
             _management.listProcesses(null,"name").getProcessInfoList().getProcessInfoList();
 
         for (int i = 1 ; i <  pilist.size(); ++i) {
@@ -75,7 +75,7 @@ public class ProcessManagementTest extends TestCase {
             assertTrue(0<=qname.getLocalPart().compareTo(qnamePrev.getLocalPart()));
         }
 
-        pilist = 
+        pilist =
             _management.listProcesses(null,"-name").getProcessInfoList().getProcessInfoList();
 
         for (int i = 1 ; i <  pilist.size(); ++i) {
@@ -84,15 +84,15 @@ public class ProcessManagementTest extends TestCase {
             assertTrue(0>=qname.getLocalPart().compareTo(qnamePrev.getLocalPart()));
         }
     }
-    
+
     public void testListProcessCustom() {
-        List<TProcessInfo> pilist = 
+        List<TProcessInfo> pilist =
             _management.listProcessesCustom(null,"name", ProcessInfoCustomizer.ALL).getProcessInfoList().getProcessInfoList();
         assertEquals(6,pilist.size());
     }
-    
+
     protected void setUp() throws Exception {
-        
+
         _server = new MockBpelServer();
         _server.deploy(new File(new URI(this.getClass().getResource("/recovery").toString())));
         _management = new BpelManagementFacadeImpl(_server._server,_server._store);

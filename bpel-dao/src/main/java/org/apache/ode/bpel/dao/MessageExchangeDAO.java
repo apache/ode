@@ -237,12 +237,12 @@ public interface MessageExchangeDAO {
 
     /**
      * Gets the mex id for the message exchange that has been piped with
-     * this one in a process to process interaction. 
+     * this one in a process to process interaction.
      * @return
      */
     String getPipedMessageExchangeId();
     void setPipedMessageExchangeId(String mexId);
-    
+
     int getSubscriberCount();
     void setSubscriberCount(int subscriberCount);
 

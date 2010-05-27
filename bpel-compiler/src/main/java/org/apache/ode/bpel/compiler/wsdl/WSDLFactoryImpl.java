@@ -49,7 +49,7 @@ abstract class WSDLFactoryImpl extends WSDLFactory implements WSDLFactory4BPEL {
     } catch (WSDLException e) {
       throw new AssertionError("Unable to load WSDL4J!");
     }
-    
+
     _bpwsNS = bpwsNS;
     _plnkNS = plnkNS;
     _propNS = propNS;
@@ -90,9 +90,9 @@ abstract class WSDLFactoryImpl extends WSDLFactory implements WSDLFactory4BPEL {
 
   public ExtensionRegistry newPopulatedExtensionRegistry() {
     ExtensionRegistry extRegistry = _wsdlFactory.newPopulatedExtensionRegistry();
-    extRegistry.registerExtensionAttributeType(Operation.class, 
+    extRegistry.registerExtensionAttributeType(Operation.class,
             new QName("http://www.w3.org/ns/wsdl-extensions","safe"), AttributeExtensible.STRING_TYPE);
-    
+
     return extRegistry;
 
   }

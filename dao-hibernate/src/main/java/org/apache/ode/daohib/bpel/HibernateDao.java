@@ -33,7 +33,7 @@ import java.util.List;
  * <p>
  * All subclass methods that might trigger SQL queries should log a message in the log category 'org.apache.ode.bpel.DAO' when entered.
  * A typical message could be "className.methodName". <br/>
- * Typical candidates are setters, finders and getters of entities. Getters of simple properties won't provide relevant information. 
+ * Typical candidates are setters, finders and getters of entities. Getters of simple properties won't provide relevant information.
  */
 public abstract class HibernateDao {
 
@@ -50,7 +50,7 @@ public abstract class HibernateDao {
     }
 
     void entering(String msg){
-        // add a prefix to be parser friendly 
+        // add a prefix to be parser friendly
         if(logDao.isDebugEnabled()) logDao.debug("entering "+msg);
     }
 
@@ -64,7 +64,7 @@ public abstract class HibernateDao {
     public Serializable getDHandle() {
         return new HibernateHandle(getClass(), _hobj.getClass(), getSession().getIdentifier(_hobj));
     }
-  
+
     protected Session getSession() {
         return _sm.getSession();
     }
@@ -79,7 +79,7 @@ public abstract class HibernateDao {
         }
         return null;
     }
-    
+
     public boolean equals(Object obj) {
         assert obj instanceof HibernateDao;
         return _hobj.getId().equals(((HibernateDao) obj)._hobj.getId());
@@ -107,7 +107,7 @@ public abstract class HibernateDao {
             // so we delete in batches.  Oracle 9i, for instance, doesn't support
             // more than 1000 -- we opt to be conservative.
             final int batchSize = 100;
-            
+
             int index = 0;
             while (index < values.size()) {
                 List<Long> subList = values.subList(index, Math.min(index+batchSize, values.size()));
@@ -117,5 +117,5 @@ public abstract class HibernateDao {
                 index += batchSize;
             }
         }
-    }    
+    }
 }

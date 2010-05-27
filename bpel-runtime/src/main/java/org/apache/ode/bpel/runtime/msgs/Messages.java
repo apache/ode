@@ -28,14 +28,14 @@ public class Messages extends MessageBundle {
 
   /**
    * Format a message about being unable to compile an XPath expression.
-   * 
+   *
    * @param expr
    *          the expression in error
    * @param lineNo
    *          the line number for the expression
    * @param reason
    *          the reason that compilation failed.
-   * 
+   *
    * Unable to compile XPath expression {0} (line#{1}): {2}
    */
   public String msgUnableToCompileXPath(String expr, int lineNo, String reason) {
@@ -46,14 +46,14 @@ public class Messages extends MessageBundle {
   /**
    * Format a message about passing a non-static location path where one is
    * expected.
-   * 
+   *
    * @param pathString
    *          the errant XPath expression
    * @param lineNo
    *          the line number where the expression occurs
    * @param type
    *          the type of the expression
-   * 
+   *
    * Non-static string values for location paths are not allowed; the expression
    * {0} at line {1} evaluates to type {2}.
    */

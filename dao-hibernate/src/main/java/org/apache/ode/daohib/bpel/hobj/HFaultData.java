@@ -57,7 +57,7 @@ public class HFaultData extends HObject {
     public void setData(byte[] data) {
         _data = data;
     }
-    
+
     /**
      * @hibernate.property column="EXPLANATION" length="4000"
      */

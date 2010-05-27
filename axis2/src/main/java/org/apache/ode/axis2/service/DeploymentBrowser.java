@@ -38,7 +38,7 @@ import java.util.ArrayList;
 
 /**
  * handles a set of URLs all starting with /deployment to publish all files in
- * deployed bundles, services and processes. 
+ * deployed bundles, services and processes.
  */
 public class DeploymentBrowser {
 
@@ -58,7 +58,7 @@ public class DeploymentBrowser {
         final String requestURI = request.getRequestURI();
         final int deplUri = requestURI.indexOf("/deployment");
         if (deplUri > 0) {
-            final String root = request.getScheme() + "://" + request.getServerName() + 
+            final String root = request.getScheme() + "://" + request.getServerName() +
                     ":" + request.getServerPort() + requestURI.substring(0, deplUri);
             int offset = requestURI.length() > (deplUri + 11) ? 1 : 0;
             final String[] segments = requestURI.substring(deplUri + 11 + offset).split("/");
@@ -206,7 +206,7 @@ public class DeploymentBrowser {
                                     out.write("<getBundleDocsResponse><name>"+ bundleName +"</name>");
                                     //final List<File> files = _store.getProcessConfiguration(processes.get(0)).getFiles();
                                     //final String pid = _store.getProcessConfiguration(processes.get(0)).getProcessId().toString();
-                            
+
                                     for (final QName process: processes) {
                                         List<File> files = _store.getProcessConfiguration(process).getFiles();
                                         String pid = _store.getProcessConfiguration(process).getProcessId().toString();
@@ -214,20 +214,20 @@ public class DeploymentBrowser {
                                         for (final File file : files) {
                                             if (file.getPath().endsWith(".wsdl")) {
                                                 String relativePath = file.getPath().substring(_store.getDeployDir().getCanonicalPath().length() + 1);
-                                                out.write("<wsdl>"+ relativePath + "</wsdl>");                                      
+                                                out.write("<wsdl>"+ relativePath + "</wsdl>");
                                             }
-                                            if (file.getPath().endsWith(".bpel")) { 
+                                            if (file.getPath().endsWith(".bpel")) {
                                                 String relativePath = file.getPath().substring(_store.getDeployDir().getCanonicalPath().length() + 1);
                                                 out.write("<bpel>"+ relativePath + "</bpel>");
                                             }
-                                            
+
                                         }
                                         out.write("</process>");
-                                    }                                   
+                                    }
                                     out.write("</getBundleDocsResponse>");
                                 }
                             });
-                            
+
                         }
                     }
                 } else if ("getProcessDefinition".equals(segments[0])) {
@@ -240,7 +240,7 @@ public class DeploymentBrowser {
                             }
                         });
                     } else if (segments.length == 2) {
-                        String processName = segments[1]; 
+                        String processName = segments[1];
                         for (QName process :_store.getProcesses()) {
                             String[] nameVer = process.getLocalPart().split("-");
                             if(processName.equals(nameVer[0])) {
@@ -254,7 +254,7 @@ public class DeploymentBrowser {
                                 });
                             }
                         }
-                        
+
                     }
                 }
             }
@@ -276,7 +276,7 @@ public class DeploymentBrowser {
         out.write("</body></html>");
     }
     private void renderXml(HttpServletResponse response, DocBody docBody) throws IOException {
-        response.setContentType("application/xml; charset=utf-8");  
+        response.setContentType("application/xml; charset=utf-8");
         //response.setContentType("application/xml");
         //response.setCharacterEncoding("UTF-8");
 

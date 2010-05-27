@@ -151,14 +151,14 @@ public class MockScheduler implements Scheduler {
             return scheduleVolatileJob(true, new JobDetails());
         }
     }
-    
+
     public void cancelJob(String arg0) throws ContextException {
     }
 
     public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
         return execTransaction(transaction, 0);
     }
-    
+
     public <T> T execTransaction(Callable<T> transaction, int timeout) throws Exception, ContextException {
         if (timeout > 0) {
             _txm.setTransactionTimeout(timeout);

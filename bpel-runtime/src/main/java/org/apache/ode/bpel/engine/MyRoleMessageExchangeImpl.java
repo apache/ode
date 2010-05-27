@@ -74,13 +74,13 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
 
     /**
      * Process the message-exchange interceptors.
-     * 
+     *
      * @param mex
      *            message exchange
      * @return <code>true</code> if execution should continue, <code>false</code> otherwise
      */
     private boolean processInterceptors(MyRoleMessageExchangeImpl mex, InterceptorInvoker invoker) {
-        InterceptorContextImpl ictx = new InterceptorContextImpl(_engine._contexts.dao.getConnection(), 
+        InterceptorContextImpl ictx = new InterceptorContextImpl(_engine._contexts.dao.getConnection(),
                 mex._dao.getProcess(), null, _engine, _process);
 
         for (MessageExchangeInterceptor i : _engine.getGlobalInterceptors())
@@ -196,7 +196,7 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
 
     /**
      * Return a deep clone of the given message
-     * 
+     *
      * @param message
      * @return
      */
@@ -205,15 +205,15 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
         clone.setMessage((Element) message.getMessage().cloneNode(true));
         Map<String, Node> headerParts = message.getHeaderParts();
         for (String partName : headerParts.keySet()) {
-            clone.setHeaderPart(partName, (Element) headerParts.get(partName).cloneNode(true)); 
+            clone.setHeaderPart(partName, (Element) headerParts.get(partName).cloneNode(true));
         }
         Map<String, Node> parts = message.getHeaderParts();
         for (String partName : parts.keySet()) {
-            clone.setHeaderPart(partName, (Element) parts.get(partName).cloneNode(true)); 
+            clone.setHeaderPart(partName, (Element) parts.get(partName).cloneNode(true));
         }
         return clone;
     }
-    
+
     @SuppressWarnings("unchecked")
     static class ResponseFuture implements Future {
         private String _clientId;

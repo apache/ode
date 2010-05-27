@@ -33,8 +33,8 @@ import org.apache.ode.utils.DOMUtils;
 
 /**
  * JBI-based implementation of the ODE {@link org.apache.ode.bpel.iapi.EndpointReference}
- * interface. This is basically a wrapper around the 
- * {@link javax.jbi.servicedesc.ServiceEndpoint} interface. 
+ * interface. This is basically a wrapper around the
+ * {@link javax.jbi.servicedesc.ServiceEndpoint} interface.
  */
 class JbiEndpointReference implements EndpointReference {
 
@@ -42,19 +42,19 @@ class JbiEndpointReference implements EndpointReference {
   private Endpoint _initialPartnerEndpoint;
   private ServiceEndpoint _se;
   private QName _type;
-  
+
   JbiEndpointReference(Endpoint initialPartnerEndpoint, OdeContext ode) {
     _initialPartnerEndpoint = initialPartnerEndpoint;
     _ode = ode;
   }
-  
+
 
   JbiEndpointReference(ServiceEndpoint se) {
     if (se == null)
       throw new NullPointerException("Null ServiceEndpoint");
     _se = se;
   }
-  
+
   public JbiEndpointReference(ServiceEndpoint se, QName eprType) {
       this(se);
       _type = eprType;
@@ -79,11 +79,11 @@ public Document toXML() {
       return getServiceEndpoint().getServiceName().equals(((JbiEndpointReference)other).getServiceEndpoint().getServiceName());
     return false;
   }
-  
+
   public int hashCode() {
     return getServiceEndpoint().getServiceName().hashCode();
   }
-  
+
   public String toString() {
       if (_se != null) {
           return "JbiEndpointReference[" + _se.getServiceName() + ":" + _se.getEndpointName() + "]";

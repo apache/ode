@@ -31,7 +31,7 @@ import java.net.URISyntaxException;
 public class WSDLLocatorImpl implements WSDLLocator {
 
     private static final Log __log = LogFactory.getLog(WSDLLocatorImpl.class);
-    
+
     private ResourceFinder _resourceFinder;
     private URI _base;
     private String _latest;
@@ -40,7 +40,7 @@ public class WSDLLocatorImpl implements WSDLLocator {
         _resourceFinder = resourceFinder;
         _base = base;
     }
-    
+
     public InputSource getBaseInputSource() {
         try {
             InputSource is = new InputSource();

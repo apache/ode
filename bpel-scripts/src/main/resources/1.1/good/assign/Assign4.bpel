@@ -20,7 +20,7 @@
 <!--
 
 THIS IS A BAD BPEL DUE TO AN ILLEGAL ASSIGNMENT (first copy)
-        
+
 <assign> Test Case
 - FROM: Complex Type Part (no XPATH)
 - TO: Complex Element Variable
@@ -40,12 +40,12 @@ THIS IS A BAD BPEL DUE TO AN ILLEGAL ASSIGNMENT (first copy)
       partnerLinkType="test:PartnerLinkType1"
       myRole="me" />
   </partnerLinks>
-  
+
   <variables>
     <variable name="var1" messageType="test:Message1"/>
     <variable name="var2" element="test:Complex1"/>
   </variables>
-  
+
   <sequence>
     <receive
       createInstance="yes"

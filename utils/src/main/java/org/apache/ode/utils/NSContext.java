@@ -47,7 +47,7 @@ import org.apache.ode.utils.stl.TransformIterator;
  * with fairly generic applicability. This class allows clients to manipulate
  * the context through publicly accessible methods, and provides serialization
  * support.
- * 
+ *
  * @see NamespaceContext
  */
 public class NSContext implements NamespaceContext, Externalizable {
@@ -65,7 +65,7 @@ public class NSContext implements NamespaceContext, Externalizable {
             return super.put(prefix, uri);
         }
     };
-    
+
     public NSContext() {
     }
 
@@ -105,7 +105,7 @@ public class NSContext implements NamespaceContext, Externalizable {
 
     /**
      * Get all the prefixes with a URI mapping in this context
-     * 
+     *
      * @return{@link Set} of prefix {@link String}s with a URI mapping in this
      *         context
      */
@@ -115,7 +115,7 @@ public class NSContext implements NamespaceContext, Externalizable {
 
     /**
      * Get all the URIs with a prefix mapping in this context
-     * 
+     *
      * @return{@link Set} of URI {@link String}s with a prefix mapping in this
      *         context
      */
@@ -139,10 +139,10 @@ public class NSContext implements NamespaceContext, Externalizable {
             __log.trace("readExternal: contents=" + _prefixToUriMap);
         }
     }
-    
+
     /**
      * Add a prefix to URI mapping to this context.
-     * 
+     *
      * @param prefix
      *            prefix
      * @param uri
@@ -153,7 +153,7 @@ public class NSContext implements NamespaceContext, Externalizable {
             uri = "";
         if (prefix == null)
             prefix = "";
-        
+
         if (__log.isTraceEnabled()) {
             __log.trace("register(prefix=" + prefix + ", uri=" + uri + ")");
         }
@@ -163,7 +163,7 @@ public class NSContext implements NamespaceContext, Externalizable {
 
     /**
      * Register a set of URI mappings at once.
-     * 
+     *
      * @param prefixMapping
      *            set (map rather) of prefix-to-URI mappings.
      */

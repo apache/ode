@@ -45,7 +45,7 @@ public class CommRecv extends Comm {
      * JACOB VPU to determine what is placed here, but it will generally consist
      * of some serialized representation of an appropriate ChannelListener
      * object (see {@link ChannelListener}.
-     * 
+     *
      * @return byte array representing the serialized form of the continuation
      */
     public ChannelListener getContinuation() {

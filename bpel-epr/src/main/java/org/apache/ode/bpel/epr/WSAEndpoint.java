@@ -48,7 +48,7 @@ public class WSAEndpoint implements MutableEndpoint {
     public WSAEndpoint(WSAEndpoint prototype) {
         _eprElmt = (Element)DOMUtils.newDocument().importNode(prototype._eprElmt, true);
     }
-    
+
     public WSAEndpoint(Map map) {
         this();
         fromMap(map);
@@ -63,7 +63,7 @@ public class WSAEndpoint implements MutableEndpoint {
             idNodes = _eprElmt.getElementsByTagNameNS(Namespaces.INTALIO_SESSION_NS, "session");
             if (idNodes.getLength() > 0) {
                 return idNodes.item(0).getTextContent();
-            } 
+            }
             return null;
         }
     }

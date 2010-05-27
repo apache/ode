@@ -51,7 +51,7 @@ public interface Communication {
    */
   QName getPortType();
 
-  
+
   List<Correlation> getCorrelations();
 
 }

@@ -36,7 +36,7 @@ public class StreamUtils {
 
   /**
    * Read the contents of the given URL into a byte array.
-   * 
+   *
    * @param input
    *          the URL to read
    * @return an array of bytes.
@@ -51,7 +51,7 @@ public class StreamUtils {
 
   /**
    * Read the contents of the given InputStream into a byte array.
-   * 
+   *
    * @param input
    *          the InputStream to read
    * @return an array of bytes.
@@ -69,7 +69,7 @@ public class StreamUtils {
    * end-of-stream is reached on the source {@link InputStream}. This method
    * does <em>not</em> attempt to close either the source or the destination
    * stream.
-   * 
+   *
    * @param dest
    *          destination {@link OutputStream}
    * @param source
@@ -93,7 +93,7 @@ public class StreamUtils {
    * end-of-stream is reached on the source {@link Reader}. This method does
    * <em>not</em> attempt to close either the source or the destination
    * stream.
-   * 
+   *
    * @param dest
    *          destination {@link Writer}
    * @param source
@@ -113,7 +113,7 @@ public class StreamUtils {
 
   /**
    * Copy with default buffer size.
-   * 
+   *
    * @see #copy(java.io.OutputStream, java.io.InputStream)
    * @see #DEFAULT_BUFFER_SIZE
    */
@@ -123,7 +123,7 @@ public class StreamUtils {
 
   /**
    * Copy from {@link URL} stream.
-   * 
+   *
    * @see #copy(java.io.OutputStream, java.io.InputStream, int)
    * @param dest
    *          destination {@link OutputStream}
@@ -139,7 +139,7 @@ public class StreamUtils {
   /**
    * Write a {@link Serializable} object to an output stream using the
    * {@link ObjectOutputStream} mechanism.
-   * 
+   *
    * @param dest
    *          destination {@link OutputStream}
    * @param src
@@ -156,7 +156,7 @@ public class StreamUtils {
       ObjectInputStream iis = new ObjectInputStream(is);
       return iis.readObject();
   }
-  
+
   /**
    * Expand a Jar input stream.
    */

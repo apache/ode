@@ -43,13 +43,13 @@
     <plnk:partnerLinkType name="HelloPartnerLinkType">
         <plnk:role name="Provider" portType="tns:HelloPortType"/>
     </plnk:partnerLinkType>
-    
+
     <!--
-    
-    This is an abstract interface/portType definition.  Note the lack of 
+
+    This is an abstract interface/portType definition.  Note the lack of
     binding and service: these are defined by the HTTP binding component.
     See HelloWorld2-RPC-http/HelloWorld2-RPC.wsdl for details.
-    
+
     -->
 
 </definitions>

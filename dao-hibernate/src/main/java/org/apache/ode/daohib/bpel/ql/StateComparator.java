@@ -27,7 +27,7 @@ import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
 
 class StateComparator implements Comparator<HProcessInstance> {
-  
+
   private static final short[] order = {
     //"active" status
     ProcessState.STATE_ACTIVE,
@@ -44,12 +44,12 @@ class StateComparator implements Comparator<HProcessInstance> {
     ProcessState.STATE_SUSPENDED,
     //"terminated"
     ProcessState.STATE_TERMINATED};
-  
+
   private final int multiplier;
-  
+
   public final static StateComparator ASC = new StateComparator(true);
   public final static StateComparator DESC = new StateComparator(false);
-  
+
   protected StateComparator(boolean asc) {
     multiplier = asc?1:-1;
   }

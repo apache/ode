@@ -31,7 +31,7 @@ import javax.xml.namespace.QName;
  * Compiled representation of the BPEL <code>&lt;reply&gt;</code> activity.
  */
 public class OReply extends OActivity {
-  
+
     static final long serialVersionUID = -1L  ;
 
     /** Is this a Fault reply? */

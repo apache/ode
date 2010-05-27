@@ -40,7 +40,7 @@ import org.apache.openjpa.persistence.OpenJPAEntityManagerFactorySPI;
 public class JpaDaoConnectionFactoryImpl extends BPELDAOConnectionFactoryImpl implements PersistListener {
     private static ProcessInstanceDAO instance;
     private static ProcessDAO process;
-    
+
     public static ProcessInstanceDAO getInstance() {
         return instance;
     }
@@ -56,7 +56,7 @@ public class JpaDaoConnectionFactoryImpl extends BPELDAOConnectionFactoryImpl im
             ((OpenJPAEntityManagerFactorySPI)_emf).addLifecycleListener(this, ProcessInstanceDAOImpl.class, ProcessDAOImpl.class);
         }
     }
-    
+
     @Override
     protected BPELDAOConnectionImpl createBPELDAOConnection(EntityManager em) {
         return new ProfilingBPELDAOConnectionImpl(em);
@@ -72,12 +72,12 @@ public class JpaDaoConnectionFactoryImpl extends BPELDAOConnectionFactoryImpl im
 
     public void beforePersist(LifecycleEvent event) {
     }
-    
+
     public static class ProfilingBPELDAOConnectionImpl extends BPELDAOConnectionImpl implements ProfilingBpelDAOConnection {
         public ProfilingBPELDAOConnectionImpl(EntityManager em) {
             super(em);
         }
-        
+
         public ProcessProfileDAO createProcessProfile(ProcessDAO process) {
             return new ProcessProfileDAOImpl(_em, (ProcessDAOImpl)process);
         }

@@ -53,13 +53,13 @@ public class DynamicService<T> {
 
     T _service;
     Class<T> _clazz;
-    
+
     @SuppressWarnings("unchecked")
     public DynamicService(T service) {
         _clazz = (Class<T>) service.getClass();
         _service = service;
     }
-    
+
     public OMElement invoke(String operation, OMElement payload) {
         if (__log.isDebugEnabled())
             __log.debug("Invoke: operation "+operation+" on "+_clazz + ":\n" + payload);
@@ -196,5 +196,5 @@ public class DynamicService<T> {
         if (clazz.equals(String.class)) return str;
         return null;
     }
-    
+
 }

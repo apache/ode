@@ -26,10 +26,10 @@ import javax.xml.namespace.QName;
  */
 public class Namespaces {
 
-    /** XML namespaces */	
+    /** XML namespaces */
     public static final String XML_URI = "http://www.w3.org/XML/1998/namespace".intern();
     public static final String XMLNS_URI = "http://www.w3.org/2000/xmlns/".intern();
-    
+
     /** BPEL 2.0 Final namespaces */
     public static final String WSBPEL2_0_FINAL_ABSTRACT = "http://docs.oasis-open.org/wsbpel/2.0/process/abstract".intern();
     public static final String WSBPEL2_0_FINAL_EXEC = "http://docs.oasis-open.org/wsbpel/2.0/process/executable".intern();
@@ -61,7 +61,7 @@ public class Namespaces {
 
     /* ODE stuff */
     /**
-     * @deprecated use #ODE_PMAPI_TYPES_NS 
+     * @deprecated use #ODE_PMAPI_TYPES_NS
      */
     public static final String ODE_PMAPI = "http://www.apache.org/ode/pmapi/types/2006/08/02/".intern();
     public static final String ODE_PMAPI_TYPES_NS = "http://www.apache.org/ode/pmapi/types/2006/08/02/".intern();

@@ -110,7 +110,7 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
             properties.put(Environment.HBM2DDL_AUTO, "create-drop");
         }
 
-        
+
         // Note that we don't allow the following properties to be overriden by the client.
         if (properties.containsKey(Environment.CONNECTION_PROVIDER))
             __log.warn("Ignoring user-specified Hibernate property: " + Environment.CONNECTION_PROVIDER);

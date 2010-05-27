@@ -26,7 +26,7 @@ import javax.xml.namespace.QName;
  * Process Management API
  */
 public interface ProcessManagement {
-  
+
   /**
    * List the processes known to the engine (including instance summaries).
    * @param filter selection filter or <code>null</code> (for no filtering).
@@ -49,19 +49,19 @@ public interface ProcessManagement {
    * @return list of {@link ProcessInfoDocument}s (including instance summaries)
    */
   ProcessInfoListDocument listAllProcesses();
-  
+
   /**
    * List the processes known to the engine, excluding the document list, properties and end point configs.
    * @return list of {@link ProcessInfoDocument}s (including instance summaries)
    */
   ProcessInfoListDocument listProcessesSummaryOnly();
-  
+
   /**
-   * List the processes known to the engine, excluding the document list, and end point configs but including properties 
+   * List the processes known to the engine, excluding the document list, and end point configs but including properties
    * @return list of {@link ProcessInfoDocument}s (including instance summaries)
    */
   ProcessInfoListDocument listProcessesSummaryAndProperties();
-  
+
   /**
    * Get the process info for a process.
    * @param pid name of the process
@@ -71,7 +71,7 @@ public interface ProcessManagement {
   ProcessInfoDocument getProcessInfoCustom(QName pid, ProcessInfoCustomizer custom) throws ManagementException;
 
   /**
-   * Get the process info for a process (includingthe instance summary). 
+   * Get the process info for a process (includingthe instance summary).
    * @param pid name of the process
    * @return {@link ProcessInfoDocument} with all details.
    */
@@ -95,7 +95,7 @@ public interface ProcessManagement {
    * @return {@link ProcessInfoDocument} reflecting the modification
    */
   ProcessInfoDocument setProcessPropertyNode(QName pid, QName propertyName, Node value)
-          throws ManagementException; 
+          throws ManagementException;
 
   /**
    * Set a process property as a simple type.

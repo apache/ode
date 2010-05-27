@@ -25,7 +25,7 @@ public class ToFrom extends BpelObject {
     public ToFrom(Element el) {
         super(el);
     }
-    
+
     public VariableVal getAsVariableVal() {
         if (getAttribute("variable", null) != null) {
             if (is11()) return new VariableVal11(getElement());
@@ -33,12 +33,12 @@ public class ToFrom extends BpelObject {
         }
         return null;
     }
-    
+
     /**
-     * Cast this tofrom to an "extension" to/from. This is NOT part of the BPEL spec, and 
+     * Cast this tofrom to an "extension" to/from. This is NOT part of the BPEL spec, and
      * is used to provide access to custom extensions (for example reading/writing SOAP
-     * message headers)... Yes. it's evil. 
-     * 
+     * message headers)... Yes. it's evil.
+     *
      * @author mszefler
      * @return the object cast to {@link ExtensionVal} if appropriate, null otherwise.
      */
@@ -47,10 +47,10 @@ public class ToFrom extends BpelObject {
             return new ExtensionVal(getElement());
         return null;
     }
-    
+
     /**
-     * Test whether this to/from is an "extension" to-from (i.e. does it have the "extension" 
-     * attribute). 
+     * Test whether this to/from is an "extension" to-from (i.e. does it have the "extension"
+     * attribute).
      * @return
      */
     public boolean isExtensionVal() {
@@ -60,13 +60,13 @@ public class ToFrom extends BpelObject {
     public boolean isVariableVal() {
         return getAsVariableVal() != null;
     }
-    
+
     public PartnerLinkVal getAsPartnerLinkVal() {
         if (getAttribute("partnerLink",null) != null)
             return new PartnerLinkVal(getElement());
         return null;
     }
-    
+
     public boolean isPartnerLinkVal() {
         return getAsPartnerLinkVal() != null;
     }
@@ -80,12 +80,12 @@ public class ToFrom extends BpelObject {
             return new PropertyVal(getElement());
         return null;
     }
-    
+
     public Expression getAsExpression() {
         // BPEL 1.1 will have an expression only for the /from/ nodes.
-        if (is11()) 
+        if (is11())
             return null;
-        
+
         return new Expression(getElement());
     }
 

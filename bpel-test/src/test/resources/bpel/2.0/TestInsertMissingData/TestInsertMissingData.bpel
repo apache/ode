@@ -32,14 +32,14 @@
  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
  expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
  suppressJoinFailure="yes">
-    
+
     <import location="TestInsertMissingData.wsdl"
         namespace="http://ode/bpel/unit-test/TestInsertMissingData.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/" />
     <import location="../ProbeService/probeService.wsdl"
         namespace="http://ode/bpel/unit-test/ProbeService.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/"/>
-    
+
     <partnerLinks>
         <partnerLink name="request" partnerLinkType="wns:TestInsertMissingDataRequest" myRole="TestInsertMissingDataService"/>
     </partnerLinks>
@@ -50,9 +50,9 @@
     </variables>
     <sequence>
         <receive name="receive1" partnerLink="request" portType="wns:TestInsertMissingDataPT" operation="request" variable="request" createInstance="yes"/>
- 
+
         <!-- test cases for ignore missing to data -->
-        <assign name="assign1">			
+        <assign name="assign1">
             <copy insertMissingToData="yes">
                 <from>$request.requestMessageData/typeIndicators/types:indicatorTwo</from>
                 <to>$testType/@xsi:nil</to>
@@ -86,8 +86,8 @@
                 <to variable="testType">/typeIndicators/child::types:indicatorTwo</to>
             </copy>
         </assign>
-        
-        <assign name="assign3">			
+
+        <assign name="assign3">
             <copy>
                 <from>$request.requestMessageData/requestID</from>
                 <to variable="reply" part="replyID"/>
@@ -99,7 +99,7 @@
                 <to>$reply.replyText</to>
             </copy>
         </assign>
-        
+
         <reply name="reply" partnerLink="request" portType="wns:TestInsertMissingDataPT" operation="request" variable="reply"/>
     </sequence>
  </process>

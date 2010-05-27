@@ -87,7 +87,7 @@ public abstract class BaseCommandlineTool {
    * be limited to error messages on standard error, unless user-specified
    * logging options are present. Among other things, this method looks for the
    * <code>-v</code> option and configures logging verbosity appropriately
-   * 
+   *
    * @param level
    */
   protected static void initLogging(int level) {

@@ -71,12 +71,12 @@ public class CapturingXMLEntityResolver implements XMLEntityResolver {
 
     XMLInputSource src = _resolver.resolveEntity(resourceIdentifier);
     InputStream is = src.getByteStream();
-    
+
     if (is == null) {
       __log.debug("resolveEntity: stream not available for: " + src);
       throw new IOException("Unable to locate resource for namespace " + resourceIdentifier.getNamespace());
     }
-    
+
     byte[] data;
     try {
       data = StreamUtils.read(is);
@@ -95,7 +95,7 @@ public class CapturingXMLEntityResolver implements XMLEntityResolver {
       __log.error("Invalid URI: " + resourceIdentifier.getLiteralSystemId());
       throw new XNIException(use);
     }
-    
+
 
     // re-create the InputSource since reading exhausted the XML stream
     return _resolver.resolveEntity(resourceIdentifier);

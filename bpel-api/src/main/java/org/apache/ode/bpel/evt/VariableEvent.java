@@ -29,7 +29,7 @@ public abstract class VariableEvent extends ScopeEvent {
     super();
     _varName = varName;
   }
-  
+
   public String getVarName() {
     return _varName;
   }

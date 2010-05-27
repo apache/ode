@@ -27,7 +27,7 @@ public class ODEConfigProperties extends OdeConfigProperties {
 
     private static final long serialVersionUID = 1L;
     private static final String CONFIG_FILE_NAME = "ode-axis2.properties";
-        
+
 
     public ODEConfigProperties(File installRoot) {
         super(new File(installRoot, ODEConfigProperties.CONFIG_FILE_NAME),"ode-axis2.");

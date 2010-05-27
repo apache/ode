@@ -36,7 +36,7 @@ import org.apache.ode.il.OMUtils;
 public class DynamicMessageExchangeProcessor<T> extends BaseMessageExchangeProcessor {
 
     T _service;
-    
+
     public DynamicMessageExchangeProcessor(T service, DeliveryChannel channel) {
         super(channel);
         _service = service;

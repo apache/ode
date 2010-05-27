@@ -29,11 +29,11 @@ public class IfActivity extends Activity {
     public IfActivity(Element el) {
         super(el);
     }
-    
+
     public Expression getCondition() {
         return getFirstChild(Expression.class);
     }
-    
+
     /**
      * Get the activity for this if. BPEL 2.0 draft mandated the inclusion of the
      * condition success activity in a <then> element. In that case this will be
@@ -47,7 +47,7 @@ public class IfActivity extends Activity {
 
     /**
      * Get the cases for this switch.
-     * 
+     *
      * @return the cases
      */
     public List<Case> getCases() {
@@ -65,7 +65,7 @@ public class IfActivity extends Activity {
 
         /**
          * Get the activity for this case.
-         * 
+         *
          * @return activity enabled when case is satisfied
          */
         public Activity getActivity() {
@@ -74,7 +74,7 @@ public class IfActivity extends Activity {
 
         /**
          * Get the condition associated with this case.
-         * 
+         *
          * @return the condition
          */
         public Expression getCondition() {

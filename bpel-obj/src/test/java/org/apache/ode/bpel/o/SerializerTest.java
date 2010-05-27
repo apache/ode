@@ -51,17 +51,17 @@ public class SerializerTest {
         Field joinCorrelationField = OPickReceive.OnMessage.class.getDeclaredField("joinCorrelation");
         joinCorrelationField.setAccessible(true);
         joinCorrelationField.set(onMessage, cset2);
-        
+
         ObjectOutputStream os = null;
         ObjectInputStream is = null;
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             os = new ObjectOutputStream(baos);
             os.writeObject(onMessage);
-    
+
             is = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
             onMessage = (OPickReceive.OnMessage)is.readObject();
-            assertEquals("The value in 'matchCorrelation' member should've been transferred to 'matchCorrelations'", 
+            assertEquals("The value in 'matchCorrelation' member should've been transferred to 'matchCorrelations'",
                     "cset1", onMessage.matchCorrelations.get(0).name);
             assertNotNull("'joinCorrelations' member cannot be null", onMessage.joinCorrelations);
             assertEquals("The value in 'joinCorrelation' member should've been transferred to 'joinCorrelations'",
@@ -75,7 +75,7 @@ public class SerializerTest {
     @Test
     public void testOEventBackwardCompatibility() throws Exception {
         OEventHandler.OEvent oEvent = new OEventHandler.OEvent(null, null);
-        
+
         OScope.CorrelationSet cset1 = new OScope.CorrelationSet(null);
         cset1.name = "cset1";
         Field matchCorrelationField = OEventHandler.OEvent.class.getDeclaredField("matchCorrelation");
@@ -91,14 +91,14 @@ public class SerializerTest {
         Field joinCorrelationField = OEventHandler.OEvent.class.getDeclaredField("joinCorrelation");
         joinCorrelationField.setAccessible(true);
         joinCorrelationField.set(oEvent, cset2);
-        
+
         ObjectOutputStream os = null;
         ObjectInputStream is = null;
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             os = new ObjectOutputStream(baos);
             os.writeObject(oEvent);
-    
+
             is = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
             oEvent = (OEventHandler.OEvent)is.readObject();
             assertEquals("The value in 'matchCorrelation' member should've been transferred to 'matchCorrelations'",
@@ -115,18 +115,18 @@ public class SerializerTest {
     @Test
     public void testOReplyBackwardCompatibility() throws Exception {
         OReply reply = new OReply(null, null);
-        
+
         Field joinCorrelationsField = OReply.class.getDeclaredField("joinCorrelations");
         joinCorrelationsField.setAccessible(true);
         joinCorrelationsField.set(reply, null);
-        
+
         ObjectOutputStream os = null;
         ObjectInputStream is = null;
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             os = new ObjectOutputStream(baos);
             os.writeObject(reply);
-    
+
             is = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
             reply = (OReply)is.readObject();
             assertNotNull("'joinCorrelations' member cannot be null", reply.joinCorrelations);
@@ -139,21 +139,21 @@ public class SerializerTest {
     @Test
     public void testOInvokeBackwardCompatibility() throws Exception {
         OInvoke invoke = new OInvoke(null, null);
-        
+
         Field joinCorrelationsField = OInvoke.class.getDeclaredField("joinCorrelationsInput");
         joinCorrelationsField.setAccessible(true);
         joinCorrelationsField.set(invoke, null);
         joinCorrelationsField = OInvoke.class.getDeclaredField("joinCorrelationsOutput");
         joinCorrelationsField.setAccessible(true);
         joinCorrelationsField.set(invoke, null);
-        
+
         ObjectOutputStream os = null;
         ObjectInputStream is = null;
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             os = new ObjectOutputStream(baos);
             os.writeObject(invoke);
-    
+
             is = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
             invoke = (OInvoke)is.readObject();
             assertNotNull("'joinCorrelationsInput' member cannot be null", invoke.joinCorrelationsInput);

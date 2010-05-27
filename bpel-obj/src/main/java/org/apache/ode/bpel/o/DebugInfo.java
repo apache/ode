@@ -62,7 +62,7 @@ public class DebugInfo implements Serializable {
     /**
      * Do not load the description and extensibilityElements fields,
      * as they may be big and are not really required at run-time.
-     * 
+     *
      * @param ois
      * @throws IOException
      * @throws ClassNotFoundException

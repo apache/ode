@@ -18,27 +18,27 @@
   ~ under the License.
   -->
 
-<wsdl:definitions 
+<wsdl:definitions
     targetNamespace="http://ode/bpel/unit-test.wsdl"
     xmlns="http://schemas.xmlsoap.org/wsdl/"
     xmlns:tns="http://ode/bpel/unit-test.wsdl"
-    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
     xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
     xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
-    
+
     <wsdl:message name="TestSplitMessage">
         <wsdl:part name="TestPart" type="xsd:string"/>
     </wsdl:message>
-    
+
     <wsdl:portType name="TestSplitPortType">
         <wsdl:operation name="split">
             <wsdl:input message="tns:TestSplitMessage" name="TestIn"/>
             <wsdl:output message="tns:TestSplitMessage" name="TestOut"/>
-        </wsdl:operation>    
+        </wsdl:operation>
     </wsdl:portType>
-    
+
      <wsdl:binding name="TestSplitSoapBinding" type="tns:TestSplitPortType">
         <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
         <wsdl:operation name="split">
@@ -50,7 +50,7 @@
             </wsdl:input>
             <wsdl:output>
                 <soap:body
-                    namespace="http://ode/bpel/unit-test.wsdl" 
+                    namespace="http://ode/bpel/unit-test.wsdl"
                     use="literal"/>
             </wsdl:output>
         </wsdl:operation>
@@ -60,7 +60,7 @@
             <soap:address location="http://localhost:8080/ode/processes/testSplit"/>
         </wsdl:port>
     </wsdl:service>
-    
+
    <plnk:partnerLinkType name="TestSplitPartnerLinkType">
        <plnk:role name="me" portType="tns:TestSplitPortType"/>
        <plnk:role name="you" portType="tns:TestSplitPortType"/>

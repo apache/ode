@@ -29,14 +29,14 @@ public class CommandLineMessages extends MessageBundle {
 
   /**
    * Format a header for display by a commandline tool at startup.
-   * 
+   *
    * @param cmd
    *          the name of the command or class with <code>main(...)</code>
    * @param version
    *          the full version name, e.g., <code>2.0B101</code>
    * @param date
    *          the build date
-   * 
+   *
    * {0} - FiveSight ODE v{1} ({2})\nCopyright (c) 2003-2005 FiveSight
    * Technologies, Inc.
    */
@@ -47,7 +47,7 @@ public class CommandLineMessages extends MessageBundle {
 
   /**
    * Format the description of the commandline help option.
-   * 
+   *
    * print detailed help information to the console
    */
   public String msgHelp() {
@@ -56,7 +56,7 @@ public class CommandLineMessages extends MessageBundle {
 
   /**
    * Format the description of the verbose option.
-   * 
+   *
    * provide verbose logging information to the console (on standard error)
    */
   public String msgVerbose() {
@@ -66,7 +66,7 @@ public class CommandLineMessages extends MessageBundle {
 
   /**
    * Format the description of the very verbose option.
-   * 
+   *
    */
   public String msgVeryVerbose() {
     return this.format("provide very verbose logging information to the console"
@@ -75,7 +75,7 @@ public class CommandLineMessages extends MessageBundle {
 
   /**
    * Format the description of the version information option.
-   * 
+   *
    * display version information and exit
    */
   public String msgVersion() {
@@ -84,7 +84,7 @@ public class CommandLineMessages extends MessageBundle {
 
   /**
    * Format the description of the quiet option.
-   * 
+   *
    * do not output the program name and version header to standard out at
    * startup
    */
@@ -95,10 +95,10 @@ public class CommandLineMessages extends MessageBundle {
 
   /**
    * Format an error message about an option missing a required argument.
-   * 
+   *
    * @param opt
    *          the name of the option missing the argument
-   * 
+   *
    * the option {0} requires an agument.
    */
   public String msgMissingArgument(String opt) {
@@ -107,10 +107,10 @@ public class CommandLineMessages extends MessageBundle {
 
   /**
    * Format an error message about a missing required option.
-   * 
+   *
    * @param opt
    *          the name of the the option
-   * 
+   *
    * the option {0} is required.
    */
   public String msgMissingOption(String opt) {
@@ -119,10 +119,10 @@ public class CommandLineMessages extends MessageBundle {
 
   /**
    * Format an error message about an unrecognized commandline option.
-   * 
+   *
    * @param opt
    *          the unrecognized option
-   * 
+   *
    * the option {0} is not recognized.
    */
   public String msgUnrecognizedOption(String opt) {
@@ -131,10 +131,10 @@ public class CommandLineMessages extends MessageBundle {
 
   /**
    * Format an error message about a repeated option.
-   * 
+   *
    * @param opt
    *          the name of the option
-   * 
+   *
    * the option {0} was already specified.
    */
   public String msgAlreadySelectedOption(String opt) {
@@ -143,7 +143,7 @@ public class CommandLineMessages extends MessageBundle {
 
   /**
    * Format a generic error about an unparseable commandline.
-   * 
+   *
    * unable to parse commandline.
    */
   public String msgCommandLineError() {

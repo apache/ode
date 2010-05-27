@@ -21,7 +21,7 @@
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              version="1.0">
     <persistence-unit name="ode-dao">
-        <!-- 
+        <!--
             This properties file is used specifically by the
             OpenJPA Enhancer.
          -->

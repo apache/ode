@@ -22,15 +22,15 @@ package org.apache.ode.scheduler.simple;
 import java.util.List;
 
 /**
- * Database abstraction; provides all database access for the simple scheduler. 
- * 
+ * Database abstraction; provides all database access for the simple scheduler.
+ *
  * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
  *
  */
 public interface DatabaseDelegate {
     /**
-     * Save the job in the database. 
-     * @param job the job 
+     * Save the job in the database.
+     * @param job the job
      * @param nodeId node assigned to the job (or null if no node has been asssigned)
      * @param loaded whether the job has been loaded into memory (i.e. in preperation for execution)
      * @throws DatabaseException in case of error
@@ -47,12 +47,12 @@ public interface DatabaseDelegate {
 
     /**
      * Delete a job from the database.
-     * @param jobid job identifier 
+     * @param jobid job identifier
      * @param nodeId node identifier
      * @throws DatabaseException in case of error
      */
     boolean deleteJob(String jobid, String nodeId) throws DatabaseException;
-    
+
     /**
      * Return a list of unique nodes identifiers found in the database. This is used
      * to initialize the list of known nodes when a new node starts up.
@@ -62,10 +62,10 @@ public interface DatabaseDelegate {
 
     /**
      * "Dequeue" jobs from the database that are ready for immediate execution; this basically
-     * is a select/delete operation with constraints on the nodeId and scheduled time. 
-     * 
+     * is a select/delete operation with constraints on the nodeId and scheduled time.
+     *
      * @param nodeId node identifier of the jobs
-     * @param maxtime only jobs with scheduled time earlier than this will be dequeued 
+     * @param maxtime only jobs with scheduled time earlier than this will be dequeued
      * @param maxjobs maximum number of jobs to deqeue
      * @return list of jobs that met the criteria and were deleted from the database
      * @throws DatabaseException in case of error
@@ -73,20 +73,20 @@ public interface DatabaseDelegate {
     List<Job> dequeueImmediate(String nodeId, long maxtime, int maxjobs) throws DatabaseException ;
 
     /**
-     * Assign a particular node identifier to a fraction of jobs in the database that do not have one, 
+     * Assign a particular node identifier to a fraction of jobs in the database that do not have one,
      * and are up for execution within a certain time. Only a fraction of the jobs found are assigned
      * the node identifier. This fraction is determined by the "y" parameter, while membership in the
      * group (of jobs that get the nodeId) is determined by the "x" parameter. Essentially the logic is:
      * <code>
      *  UPDATE jobs AS job
-     *      WHERE job.scheduledTime before :maxtime 
+     *      WHERE job.scheduledTime before :maxtime
      *            AND job.nodeId is null
-     *            AND job.scheduledTime MOD :y == :x 
+     *            AND job.scheduledTime MOD :y == :x
      *      SET job.nodeId = :nodeId
-     * </code> 
-     * 
+     * </code>
+     *
      * @param nodeId node identifier to assign to jobs
-     * @param x the result of the mod-division  
+     * @param x the result of the mod-division
      * @param y the dividend of the mod-division
      * @param maxtime only jobs with scheduled time earlier than this will be updated
      * @return number of jobs updated
@@ -96,8 +96,8 @@ public interface DatabaseDelegate {
 
     /**
      * Reassign jobs from one node to another.
-     * 
-     * @param oldnode node assigning from 
+     *
+     * @param oldnode node assigning from
      * @param newnode new node asssigning to
      * @return number of rows changed
      * @throws DatabaseException

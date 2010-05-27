@@ -23,7 +23,7 @@
     xmlns:tns="http://jlo/test/compile"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <variables>
-        <variable name="var1" 
+        <variable name="var1"
             type="xsd:string" />
     </variables>
     <flow>

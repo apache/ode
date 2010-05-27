@@ -33,7 +33,7 @@ public class Copy extends BpelObject {
 
     /**
      * Get the L-value.
-     * 
+     *
      * @return the L-value.
      */
     public To getTo() {
@@ -42,7 +42,7 @@ public class Copy extends BpelObject {
 
     /**
      * Get the R-value.
-     * 
+     *
      * @return the R-value.
      */
     public From getFrom() {
@@ -60,7 +60,7 @@ public class Copy extends BpelObject {
     public boolean isIgnoreUninitializedFromVariable() {
         return getAttribute("ignoreUninitializedFromVariable", "no").equals("yes");
     }
-    
+
     public boolean isInsertMissingToData() {
         return getAttribute("insertMissingToData", "no").equals("yes");
     }

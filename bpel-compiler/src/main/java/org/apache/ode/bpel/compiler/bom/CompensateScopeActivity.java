@@ -32,7 +32,7 @@ public class CompensateScopeActivity extends Activity {
     /**
      * Get the name of the compensate scope: the scope which is compensated by
      * this activity.
-     * 
+     *
      * @return scope compensated by this activity
      */
     public String getScopeToCompensate() {

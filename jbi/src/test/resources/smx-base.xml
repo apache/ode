@@ -27,30 +27,30 @@
   <bean id="transactionManager" class="org.apache.geronimo.transaction.manager.GeronimoTransactionManager"/>
 
   <jencks:connectionTracker id="connectionTracker" geronimoTransactionManager="#transactionManager" />
-    
+
   <jencks:workManager
             id="workManager"
             threadPoolSize="200"
             transactionManager="#transactionManager" />
-  
+
   <jencks:bootstrapContext
             id="bootstrapContext"
             workManager="#workManager"
             transactionManager="#transactionManager" />
-  
-  <jencks:poolingSupport 
-            id="poolingSupport" 
+
+  <jencks:poolingSupport
+            id="poolingSupport"
             connectionMaxIdleMinutes="5"
             poolMaxSize="20"
             />
-  
+
   <jencks:connectionManager
             id="connectionManager"
             containerManagedSecurity="false"
             transaction="local"
             transactionManager="#transactionManager"
             poolingSupport="#poolingSupport"
-            connectionTracker="#connectionTracker" 
+            connectionTracker="#connectionTracker"
             />
 
     <bean id="odeMCF" class="org.tranql.connector.derby.EmbeddedLocalMCF">
@@ -59,7 +59,7 @@
     <property name="userName" value = "sa"/>
         <property name="password" value = ""/>
   </bean>
-    <!-- 
+    <!--
    <bean id="odeMCF" class="org.tranql.connector.oracle.LocalMCF">
     <property name="databaseName" value="XE"/>
     <property name="userName" value="ode12"/>
@@ -69,14 +69,14 @@
     <property name="driverType" value="thin"/>
   </bean>
    -->
-   
+
   <bean id="odeDS" class="org.jencks.factory.ConnectionFactoryFactoryBean">
       <property name="managedConnectionFactory" ref="odeMCF"/>
       <property name="connectionManager" ref="connectionManager"/>
   </bean>
-  
+
   <bean id="jndi"
-        class="org.apache.xbean.spring.jndi.SpringInitialContextFactory" 
+        class="org.apache.xbean.spring.jndi.SpringInitialContextFactory"
         factory-method="makeInitialContext"
         singleton="true"
         depends-on="bootstrapContext"

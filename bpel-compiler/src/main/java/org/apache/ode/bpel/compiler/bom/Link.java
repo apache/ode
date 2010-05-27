@@ -32,7 +32,7 @@ public class Link extends BpelObject {
 
     /**
      * Get this link's name.
-     * 
+     *
      * @return name.
      */
     public String getLinkName() {

@@ -62,11 +62,11 @@ public class OutstandingRequestsMigration implements Migration {
                         Object data = soup.getGlobalData();
                         if (data instanceof OutstandingRequestManager) {
                             OutstandingRequestManager orm = (OutstandingRequestManager) data;
-        
+
                             IMAManager imaManager = new IMAManager();
                             imaManager.migrateRids(orm.getRids());
                             soup.setGlobalData(imaManager);
-                            
+
                             ByteArrayOutputStream bos = new ByteArrayOutputStream();
                             soup.write(bos);
                             instance.setExecutionState(bos.toByteArray());
@@ -80,7 +80,7 @@ public class OutstandingRequestsMigration implements Migration {
                 }
             }
         }
-        
+
         return migrationResult;
     }
 }

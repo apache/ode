@@ -47,8 +47,8 @@
           </bpws:copy>
         </bpws:assign>
         <bpws:reply operation="initiate" partnerLink="client" variable="output"/>
-            
-        
+
+
         <bpws:receive operation="complete" partnerLink="client" portType="tns:OnEventCorrelation" variable="input">
               <bpws:correlations>
                 <bpws:correlation initiate="no" set="CorrelationSet"/>

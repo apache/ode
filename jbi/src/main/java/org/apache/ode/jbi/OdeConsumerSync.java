@@ -29,19 +29,19 @@ import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 
 /**
  * Completes {@link OdeConsumer} implementation using the synchronous invocation style (sendSync).
- * 
+ *
  * @author Maciej Szefler
  *
  */
 class OdeConsumerSync extends OdeConsumer {
     private static final Log __log = LogFactory.getLog(OdeConsumerSync.class);
-    
+
 
     OdeConsumerSync(OdeContext ode) {
         super(ode);
     }
 
-    
+
     protected void doSendTwoWay(final PartnerRoleMessageExchange odeMex, final InOut inout) {
         _ode._executorService.submit(new Runnable() {
             public void run() {

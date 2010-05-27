@@ -246,7 +246,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _bpelProcess._engine._contexts.scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
             public void afterCompletion(boolean success) {
             }
-            public void beforeCompletion() { 
+            public void beforeCompletion() {
                 _dao.delete(_bpelProcess.getCleanupCategories(false), false);
             }
         });
@@ -275,7 +275,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _bpelProcess._engine._contexts.scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
             public void afterCompletion(boolean success) {
             }
-            public void beforeCompletion() { 
+            public void beforeCompletion() {
                 _dao.delete(_bpelProcess.getCleanupCategories(true), false);
             }
         });
@@ -418,7 +418,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         CorrelationSetDAO cs = scopeDAO.getCorrelationSet(cset.declaration.name);
         return cs.getValue();
     }
-  
+
 
     public Element fetchPartnerRoleEndpointReferenceData(PartnerLinkInstance pLink) throws FaultException {
         PartnerLinkDAO pl = fetchPartnerLinkDAO(pLink);
@@ -504,7 +504,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         XmlDataDAO var = scopedao.getVariable(varname);
         return (var == null || var.isNull()) ? null : var.get();
     }
-    
+
     public Node writeVariable(VariableInstance variable, Node changes) {
         ScopeDAO scopeDAO = _dao.getScope(variable.scopeInstance);
         XmlDataDAO dataDAO = scopeDAO.getVariable(variable.declaration.name);
@@ -517,7 +517,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
     public void cancelOutstandingRequests(String channelId) {
         _imaManager.cancel(channelId, false);
     }
-    
+
     public void processOutstandingRequest(PartnerLinkInstance partnerLink, String opName, String bpelMexId, String odeMexId) throws FaultException {
         String mexRef = _imaManager.processOutstandingRequest(partnerLink, opName, bpelMexId, odeMexId);
         if (mexRef != null) {
@@ -732,7 +732,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     /**
      * Called back when the process executes an invokation.
-     * 
+     *
      * @param activityId The activity id in the process definition (id of OInvoke)
      * @param partnerLinkInstance The partner link variable instance
      * @param operation The wsdl operation.
@@ -774,7 +774,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         MessageExchangeDAO mexDao = _dao.getConnection().createMessageExchange(
                 MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE);
-        mexDao.setCreateTime(getCurrentEventDateTime()); 
+        mexDao.setCreateTime(getCurrentEventDateTime());
         mexDao.setStatus(MessageExchange.Status.NEW.toString());
         mexDao.setOperation(operation.getName());
         mexDao.setPortType(partnerLink.partnerLink.partnerRolePortType.getQName());
@@ -807,13 +807,13 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         // (for callback mechanism).
         EndpointReference myRoleEndpoint = partnerLink.partnerLink.hasMyRole() ? _bpelProcess
                 .getInitialMyRoleEPR(partnerLink.partnerLink) : null;
-        PartnerRoleMessageExchangeImpl mex = 
+        PartnerRoleMessageExchangeImpl mex =
             createPartnerRoleMessageExchangeImpl(mexDao, partnerLink,
                     operation, partnerEpr, myRoleEndpoint);
         mex.setProperty("activityId", ""+aid);
-        
+
         List<BpelProcess> p2pProcesses = null;
-        
+
         Endpoint partnerEndpoint = _bpelProcess.getInitialPartnerRoleEndpoint(partnerLink.partnerLink);
         if (getConfigForPartnerLink(partnerLink.partnerLink).usePeer2Peer && partnerEndpoint != null)
             p2pProcesses = _bpelProcess.getEngine().route(partnerEndpoint.serviceName, mex.getRequest());
@@ -823,7 +823,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             MyRoleMessageExchange myRoleMex = _bpelProcess.getEngine().createMessageExchange(
                     mex.getMessageExchangeId(), partnerEndpoint.serviceName,
                     operation.getName(), mex.getMessageExchangeId());
-            
+
             if (myRoleMex instanceof BrokeredMyRoleMessageExchangeImpl) {
                 mex.setSubscriberCount(((BrokeredMyRoleMessageExchangeImpl) myRoleMex).getSubscriberCount());
             }
@@ -874,7 +874,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (mexDao.getPattern().equals(MessageExchangePattern.REQUEST_ONLY.toString())) {
             mexDao.setStatus(MessageExchange.Status.ASYNC.toString());
             // This mex can now be released
-            boolean succeeded = mex.getStatus() != MessageExchange.Status.FAILURE && mex.getStatus() != MessageExchange.Status.FAULT; 
+            boolean succeeded = mex.getStatus() != MessageExchange.Status.FAILURE && mex.getStatus() != MessageExchange.Status.FAULT;
             mexDao.release(_bpelProcess.isCleanupCategoryEnabled(succeeded, CLEANUP_CATEGORY.MESSAGES));
         }
         // Check if there is a synchronous response, if so, we need to inject the
@@ -897,16 +897,16 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         return mexDao.getMessageExchangeId();
     }
-    
+
     // enable extensibility
     protected PartnerRoleMessageExchangeImpl createPartnerRoleMessageExchangeImpl(MessageExchangeDAO mexDao,
-                PartnerLinkInstance partnerLink, Operation operation, EndpointReference partnerEpr, 
+                PartnerLinkInstance partnerLink, Operation operation, EndpointReference partnerEpr,
                 EndpointReference myRoleEndpoint) {
         return new PartnerRoleMessageExchangeImpl(getBpelProcess().getEngine(), mexDao,
                 partnerLink.partnerLink.partnerRolePortType, operation, partnerEpr, myRoleEndpoint,
                 getBpelProcess().getPartnerRoleChannel(partnerLink.partnerLink));
     }
-    
+
     protected BpelProcess getBpelProcess() {
         return _bpelProcess;
     }
@@ -931,7 +931,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     protected void buildOutgoingMessage(MessageDAO message, Element outgoingElmt) {
         if (outgoingElmt == null) return;
-        
+
         Document doc = DOMUtils.newDocument();
         Element header = doc.createElement("header");
         NodeList parts = outgoingElmt.getChildNodes();
@@ -940,7 +940,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 Element part = (Element) parts.item(m);
                 if (part.getAttribute("headerPart") != null && part.getAttribute("headerPart").length() > 0) {
                     header.appendChild(doc.importNode(part, true));
-                    // remove the element from the list AND decrement the index to avoid skipping the next element!! 
+                    // remove the element from the list AND decrement the index to avoid skipping the next element!!
                     outgoingElmt.removeChild(part);
                     m--;
                 }
@@ -1127,7 +1127,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         ScopeDAO scope = _dao.getScope(scopeId);
         scope.setState(scopeState);
     }
-    
+
     /**
      * @see BpelRuntimeContext#sendEvent(org.apache.ode.bpel.evt.ProcessInstanceEvent)
      */
@@ -1142,9 +1142,9 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         List<String> scopeNames = null;
         if (event instanceof ScopeEvent) {
             ScopeEvent sevent = (ScopeEvent) event;
-            
+
             scopeNames = sevent.getParentScopesNames();
-            
+
             if (sevent instanceof ScopeStartEvent) {
                 saveScopeState(sevent.getScopeId(), ScopeStateEnum.ACTIVE);
             } else if (sevent instanceof ScopeCompletionEvent) {
@@ -1266,7 +1266,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         switch (status) {
             case ASYNC:
             case REQUEST:
-            // In the case of pub-sub, the status may already be OK. 
+            // In the case of pub-sub, the status may already be OK.
             case COMPLETED_OK:
                 MessageDAO request = dao.getRequest();
                 if (request == null) {
@@ -1480,7 +1480,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             if( MessageExchangePattern.REQUEST_RESPONSE.toString().equals(mexdao.getPattern())) {
                 __log.warn("A message arrived before a receive is ready for a request/response pattern. This may be processed to success. However, you should consider revising your process since a TCP port and a container thread will be held for a longer time and the process will not scale under heavy load.");
             }
-            
+
             for (MessageRouteDAO mroute : mroutes) {
                 // We have a match, so we can get rid of the routing entries.
                 correlator.removeRoutes(mroute.getGroupId(), _dao);
@@ -1516,18 +1516,18 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     public ValueReferencePair writeExtVar(Variable variable, Node reference, Node value) throws ExternalVariableModuleException {
         ValueReferencePair vrp = new ValueReferencePair();
-        
+
         Value val = _bpelProcess.getEVM().write(variable, reference, value, _iid);
         vrp.reference = val.locator.reference;
         vrp.value = val.value;
-        
+
         return vrp;
     }
 
     public URI getBaseResourceURI() {
         return _bpelProcess.getBaseResourceURI();
     }
-    
+
     public Node getProcessProperty(QName propertyName) {
         return _bpelProcess.getProcessProperty(propertyName);
     }
@@ -1540,7 +1540,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (_currentEventDateTime == null)
             return Calendar.getInstance().getTime();
         else
-            return _currentEventDateTime; 
+            return _currentEventDateTime;
     }
 
     public void setCurrentEventDateTime(Date eventDateTime) {

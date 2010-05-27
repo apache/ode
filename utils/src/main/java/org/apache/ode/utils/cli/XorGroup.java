@@ -29,32 +29,32 @@ public class XorGroup implements CommandlineFragment {
   private CommandlineFragment _matched;
   private boolean _isOptional;
   private String _description;
-  
+
   public XorGroup(String description, boolean optional) {
     _frags = new ArrayList<CommandlineFragment>();
     _description = description;
     _isOptional = optional;
   }
-  
+
   public void reset() {
     _matched = null;
     for (Iterator<CommandlineFragment> it = _frags.iterator(); it.hasNext();) {
       it.next().reset();
     }
   }
-  
+
   public void addFragment(CommandlineFragment frag) {
     _frags.add(frag);
   }
-  
+
   public boolean didMatch() {
     return _matched != null;
   }
-  
+
   public CommandlineFragment getMatched() {
     return _matched;
   }
-  
+
   public List<String> consume(List<String> s) throws CommandlineSyntaxException {
     List<String> l = null;
     for (Iterator<CommandlineFragment> it = _frags.iterator(); it.hasNext();) {

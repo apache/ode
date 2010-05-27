@@ -230,7 +230,7 @@ body {
     padding-left:20px;
 }
 #content_index #main_img #nav{
-   
+
 }
 
 /* Table style */
@@ -248,7 +248,7 @@ th {
     color: #6D929B;
     letter-spacing: 2px;
     text-align: left;
-    padding: 6px 6px 6px 12px;      
+    padding: 6px 6px 6px 12px;
 }
 
 th.nobg {
@@ -283,7 +283,7 @@ td {
 
 td.alt {
     font: italic 14px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
-    text-align: left;    
+    text-align: left;
     color: #B4AA9D;
 }
 
@@ -306,7 +306,7 @@ tr.alt {
     padding-top:5px;
     background: #ffc;
     padding-right:5px;
-    border-bottom:1px solid #B4AA9D;         
+    border-bottom:1px solid #B4AA9D;
 }
 
 .process h3 img{

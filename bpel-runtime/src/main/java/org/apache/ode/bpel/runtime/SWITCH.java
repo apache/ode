@@ -45,7 +45,7 @@ class SWITCH extends ACTIVITY {
     OSwitch oswitch = (OSwitch)_self.o;
     OSwitch.OCase matchedOCase = null;
     FaultData faultData = null;
-    
+
     EvaluationContext evalCtx = getEvaluationContext();
     for (Iterator i = oswitch.getCases().iterator(); i.hasNext();) {
       OSwitch.OCase ocase = (OSwitch.OCase) i.next();

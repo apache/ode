@@ -29,7 +29,7 @@ public class ClusterUrlTransformer {
 
     private final List<String> targets;
     private final String base;
-    
+
     public ClusterUrlTransformer(List<String> targets, String base) {
         super();
         this.targets = targets;

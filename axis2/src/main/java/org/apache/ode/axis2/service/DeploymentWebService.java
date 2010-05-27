@@ -78,8 +78,8 @@ public class DeploymentWebService {
     private File _deployPath;
     private DeploymentPoller _poller;
     private ProcessStore _store;
-   
-    
+
+
     public DeploymentWebService() {
         _pmapi = OMAbstractFactory.getOMFactory().createOMNamespace("http://www.apache.org/ode/pmapi","pmapi");
         _deployapi = OMAbstractFactory.getOMFactory().createOMNamespace("http://www.apache.org/ode/deployapi","deployapi");
@@ -148,7 +148,7 @@ public class DeploymentWebService {
                     }
 
                     if (zip == null || packagePart == null)
-                        throw new OdeFault("Your message should contain an element named 'package' with a 'zip' element"); 
+                        throw new OdeFault("Your message should contain an element named 'package' with a 'zip' element");
 
                     String bundleName = namePart.getText().trim();
                     if (!validBundleName(namePart.getText()))

@@ -66,14 +66,14 @@
                 <to>$pongRequest.parameters</to>
             </copy>
         </assign>
-        
+
         <invoke name="invokePong"
                 operation="Pong"
                 inputVariable="pongRequest"
                 outputVariable="pongResponse"
                 partnerLink="PongPartnerLink"
                 portType="tns:PingPongPortType"/>
-        
+
         <assign name="assignPingResponse">
             <copy>
                 <from>

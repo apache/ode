@@ -53,7 +53,7 @@ public class HCorrelatorMessage extends HObject {
      * @hibernate.property column="CORRELATION_KEY"
      * @hibernate.column name="CORRELATION_KEY"
      *                   index="IDX_UNMATCHED_CKEY"
-     *                   
+     *
      */
     public String getCorrelationKey() {
         return _correlationKey;

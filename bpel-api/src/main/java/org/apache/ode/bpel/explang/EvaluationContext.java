@@ -102,23 +102,23 @@ public interface EvaluationContext {
      * @return process name
      */
     QName getProcessQName();
-    
+
     /**
      * Indicates whether simple types should be narrowed to a Java type when
      * using this evaluation context.
      */
     boolean narrowTypes();
-    
+
     /**
      * Retrieves the base URI that the BPEL Process execution contextis running relative to.
-     * 
+     *
      * @return URI - the URI representing the absolute physical file path location that this process is defined within.
      */
     URI getBaseResourceURI();
-    
+
     /**
      * Retrieves the property value that has been defined for this BPEL Process type.
-     * 
+     *
      * @return propertyValue - the value corresponding to the process property name.
      */
     Node getPropertyValue(QName propertyName);

@@ -78,7 +78,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     private OdeConfigProperties _config;
 
     public OdeLifeCycle() {
-        
+
     }
 
     public OdeLifeCycle(OdeConfigProperties config) {
@@ -194,7 +194,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
 
         _ode._dataSource = _db.getDataSource();
     }
-    
+
     /**
      * Load the "ode-jbi.properties" file from the install directory.
      *

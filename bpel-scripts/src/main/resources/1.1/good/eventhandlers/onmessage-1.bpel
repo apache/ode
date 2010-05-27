@@ -26,23 +26,23 @@ Test the onAlarm functionality of eventHandlers
   targetNamespace="http://www.fivesight.com/tests/1.1/eventHandlers/onalarm-1-1.1"
   xmlns:foo="http://test.ns"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  
+
   <bp11:partnerLinks>
-    <bp11:partnerLink name="harness" 
+    <bp11:partnerLink name="harness"
       partnerLinkType="foo:outcomePartnerType"
       myRole="outcomeRole"/>
   </bp11:partnerLinks>
-  
+
   <bp11:variables>
     <bp11:variable name="v" messageType="foo:stringWrapperMessage" />
     <bp11:variable name="bucket" messageType="foo:stringWrapperMessage" />
     <bp11:variable name="v2" type="xsd:int" />
   </bp11:variables>
-  
+
   <bp11:correlationSets>
     <bp11:correlationSet properties="foo:y" name="cset"/>
   </bp11:correlationSets>
-  
+
   <bp11:sequence>
     <bp11:receive partnerLink="harness"
       createInstance="yes"

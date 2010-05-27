@@ -28,10 +28,10 @@
     <util:map id="jndiEntries">
         <entry key="java:comp/env/jdbc/ode" value-ref="odeDS"/>
     </util:map>
-    
-    <sm:container 
-        id="jbi" 
-        embedded="true" 
+
+    <sm:container
+        id="jbi"
+        embedded="true"
         rootDir="target/test/smx"
         transactionManager="#transactionManager"
         depends-on="jndi"
@@ -58,15 +58,15 @@
                 <sm:component>
                     <http:component>
                         <http:endpoints>
-                            <http:endpoint 
+                            <http:endpoint
                                 service="ping:PingService"
-                                endpoint="http" 
+                                endpoint="http"
                 targetService="ping:PingService"
                 targetEndpoint="PingPort"
                                 defaultOperation="Ping"
                                 role="consumer"
                                 locationURI="http://localhost:8198/PingHttp/"
-                                defaultMep="http://www.w3.org/2004/08/wsdl/in-out" 
+                                defaultMep="http://www.w3.org/2004/08/wsdl/in-out"
                 wsdlResource="classpath:EmptyRespJbiTest/Ping.wsdl"
                 soapVersion="1.1"
                                 soap="true" />

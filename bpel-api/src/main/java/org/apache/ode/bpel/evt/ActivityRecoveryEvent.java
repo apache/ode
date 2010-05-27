@@ -24,7 +24,7 @@ package org.apache.ode.bpel.evt;
 public class ActivityRecoveryEvent extends ActivityEvent {
 
     private static final long serialVersionUID = 1L;
-  
+
   private String _action;
 
   public ActivityRecoveryEvent () {

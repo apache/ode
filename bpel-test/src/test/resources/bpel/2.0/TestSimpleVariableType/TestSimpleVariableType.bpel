@@ -29,7 +29,7 @@
     queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
     expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
     suppressJoinFailure="yes">
-    
+
     <import location="TestSimpleVariableType.wsdl"
         namespace="http://ode/bpel/unit-test/TestSimpleVariableType.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/" />
@@ -42,22 +42,22 @@
   </partnerLinks>
 
   <variables>
-    <variable name="request" 
+    <variable name="request"
                messageType="wns:requestMessage"/>
     <variable name="testType" type="xsd:string"/>
-    <variable name="reply" 
+    <variable name="reply"
                messageType="wns:replyMessage"/>
   </variables>
 
   <sequence>
         <receive name="receive1" partnerLink="request"
-            portType="wns:TestSimpleVariableTypePT" 
+            portType="wns:TestSimpleVariableTypePT"
                  operation="request" variable="request"
                  createInstance="yes">
         </receive>
-    
+
         <!-- Copy input variables to internal accumulators -->
-     
+
         <assign name="assign1">
           <copy>
             <from variable="request" property="wns:testProbeID"/>
@@ -71,12 +71,12 @@
             <from variable="request" part="requestText"/>
             <to variable="reply" part="replyText"/>
           </copy>
-        </assign>   
-    
-    <reply name="reply" partnerLink="request" portType="wns:TestSimpleVariableTypePT" 
-               operation="request" variable="reply"> 
+        </assign>
+
+    <reply name="reply" partnerLink="request" portType="wns:TestSimpleVariableTypePT"
+               operation="request" variable="reply">
       </reply>
 
-  
+
   </sequence>
 </process>

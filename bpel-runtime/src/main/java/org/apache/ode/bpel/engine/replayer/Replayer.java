@@ -61,9 +61,9 @@ import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
 
 /**
- * Main class used for replaying. It's invoked from InstanceManagement API. 
- * Receives request and sets up replaying contexts for each instance to replay. 
- * 
+ * Main class used for replaying. It's invoked from InstanceManagement API.
+ * Receives request and sets up replaying contexts for each instance to replay.
+ *
  * @author Rafal Rusin
  *
  */
@@ -80,21 +80,21 @@ public class Replayer {
             replayer.set(this);
             this.engine = (BpelEngineImpl) engine;
             this.conn = conn;
-            
+
             Date startDate = Calendar.getInstance().getTime();
             contexts = new ArrayList<ReplayerContext>();
             {
                 List<Long> toDelete = new ArrayList<Long>();
                 List<CommunicationType> toRestore = new ArrayList<CommunicationType>();
-    
+
                 toDelete.addAll(request.getReplaceInstanceList());
-    
+
                 for (Long iid : request.getUpgradeInstanceList()) {
                     toDelete.add(iid);
                     toRestore.add(CommunicationType.Factory.parse(getCommunication(iid, conn).toString()));
                 }
                 toRestore.addAll(request.getRestoreInstanceList());
-    
+
                 {
                     Set<CLEANUP_CATEGORY> cleanupCategory = new HashSet<CLEANUP_CATEGORY>();
                     cleanupCategory.add(CLEANUP_CATEGORY.INSTANCE);
@@ -102,12 +102,12 @@ public class Replayer {
                     cleanupCategory.add(CLEANUP_CATEGORY.VARIABLES);
                     cleanupCategory.add(CLEANUP_CATEGORY.CORRELATIONS);
                     cleanupCategory.add(CLEANUP_CATEGORY.EVENTS);
-    
+
                     for (Long l : toDelete) {
                         conn.getInstance(l).delete(cleanupCategory);
                     }
                 }
-    
+
                 for (CommunicationType r : toRestore) {
                     ReplayerContext context = new ReplayerContext(startDate);
                     context.bpelEngine = (BpelEngineImpl) engine;
@@ -115,11 +115,11 @@ public class Replayer {
                     contexts.add(context);
                 }
             }
-    
+
             scheduler.startReplaying(this);
             {
                 List<Exchange> remainingExchanges = new ArrayList<Exchange>();
-    
+
                 for (ReplayerContext c : contexts) {
                     c.answers.remainingExchanges(remainingExchanges);
                 }
@@ -127,12 +127,12 @@ public class Replayer {
                     throw new RemainingExchangesException(remainingExchanges);
                 }
             }
-    
+
             List<Long> r = new ArrayList<Long>();
             for (ReplayerContext c : contexts) {
                 r.add(c.runtimeContext.getPid());
             }
-    
+
             return r;
         } finally {
             replayer.set(null);
@@ -213,7 +213,7 @@ public class Replayer {
         }
         return result;
     }
-    
+
     public ReplayerContext findReplayedInstance(long iid) {
         for (ReplayerContext r : contexts) {
             if (r.runtimeContext.getPid() == iid) {
@@ -222,7 +222,7 @@ public class Replayer {
         }
         return null;
     }
-    
+
     public void handleJobDetails(JobDetails jobDetail, final Date when) {
         JobDetails we = jobDetail;
         __log.debug("handleJobDetails " + jobDetail + " " + when);
@@ -260,7 +260,7 @@ public class Replayer {
                                     throw new IllegalStateException("Trying to hit existing instance via live communication, but there's no such instance mex:" + mex + " iid:" + iid);
                                 }
                                 __log.debug("hitting existing instance via live communication mex:" + mex + " iid:" + iid);
-                                
+
                                 ctx.runtimeContext.inputMsgMatch(routing.messageRoute.getGroupId(), routing.messageRoute.getIndex(), mex);
                                 routing.correlator.removeRoutes(routing.messageRoute.getGroupId(), ctx.runtimeContext.getDAO());
 

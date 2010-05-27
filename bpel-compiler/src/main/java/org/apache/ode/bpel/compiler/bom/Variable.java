@@ -37,7 +37,7 @@ public class Variable extends BpelObject {
 
     /**
      * Get the name of the variable.
-     * 
+     *
      * @return variable name
      */
     public String getName() {
@@ -46,7 +46,7 @@ public class Variable extends BpelObject {
 
     /**
      * Get the type name of this variable.
-     * 
+     *
      * @return an XML element, XML schema type, or WSDL message type name.
      */
     public QName getTypeName() {
@@ -72,7 +72,7 @@ public class Variable extends BpelObject {
     /**
      * Get the type of declaration; one of: {@link #TYPE_SCHEMA},
      * {@link #TYPE_ELEMENT}, or {@link #TYPE_MESSAGE}.
-     * 
+     *
      * @return type of variable decleration
      */
     public Kind getKind() {
@@ -90,7 +90,7 @@ public class Variable extends BpelObject {
     //
     // Stuff related to external variables.
     //
-    
+
     /**
      * Get the external variable identifier (each one will be defined in the deployment descriptor)
      */
@@ -105,7 +105,7 @@ public class Variable extends BpelObject {
     public boolean isExternal() {
         return null != getExternalId();
     }
-    
+
     /**
      * External variable support - get the "related" variable name.
      * @return

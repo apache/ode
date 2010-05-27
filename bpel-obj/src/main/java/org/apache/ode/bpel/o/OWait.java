@@ -22,7 +22,7 @@ package org.apache.ode.bpel.o;
  * Wait object
  */
 public class OWait extends OActivity {
-  
+
     static final long serialVersionUID = -1L  ;
 
     public OExpression forExpression;
@@ -37,9 +37,9 @@ public class OWait extends OActivity {
      * @return
      */
     public boolean hasFor() { return forExpression != null; }
-    
+
     /**
-     * Is wait an until? 
+     * Is wait an until?
      * @return
      */
     public boolean hasUntil() { return untilExpression != null; }

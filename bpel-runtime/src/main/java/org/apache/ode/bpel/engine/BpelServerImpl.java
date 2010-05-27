@@ -91,13 +91,13 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
     public final static String DEFERRED_PROCESS_INSTANCE_CLEANUP_DISABLED_NAME =
         "org.apache.ode.disable.deferredProcessInstanceCleanup";
-    
-    private static boolean DEFERRED_PROCESS_INSTANCE_CLEANUP_DISABLED = 
+
+    private static boolean DEFERRED_PROCESS_INSTANCE_CLEANUP_DISABLED =
         Boolean.getBoolean(DEFERRED_PROCESS_INSTANCE_CLEANUP_DISABLED_NAME);
-    
-    /** 
+
+    /**
      * Set of processes that are registered with the server. Includes hydrated and dehydrated processes.
-     * Guarded by _mngmtLock.writeLock(). 
+     * Guarded by _mngmtLock.writeLock().
      */
     private final Set<BpelProcess> _registeredProcesses = new HashSet<BpelProcess>();
 
@@ -109,10 +109,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     private int _hydrationLazyMinimumSize;
     private int _migrationTransactionTimeout;
     private Thread processDefReaper;
-    
+
     BpelEngineImpl _engine;
     protected BpelDatabase _db;
-    
+
     /**
      * Management lock for synchronizing management operations and preventing
      * processing (transactions) from occuring while management operations are
@@ -147,7 +147,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     public Contexts getContexts() {
         return _contexts;
     }
-    
+
     public void start() {
         _mngmtLock.writeLock().lock();
         try {
@@ -173,7 +173,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             _mngmtLock.writeLock().unlock();
         }
     }
-    
+
     public void registerExternalVariableEngine(ExternalVariableModule eve) {
         _contexts.externalVariableEngines.put(eve.getName(), eve);
     }
@@ -204,7 +204,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             _contexts.eventListeners.remove(listener);
         }
     }
-    
+
     private void unregisterBpelEventListeners() {
         for (BpelEventListener l : _contexts.eventListeners) {
             unregisterBpelEventListener(l);
@@ -244,7 +244,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             _db = new BpelDatabase(_contexts.dao, _contexts.scheduler);
             _state = State.INIT;
-            
+
             _engine = createBpelEngineImpl(_contexts);
         } finally {
             _mngmtLock.writeLock().unlock();
@@ -255,7 +255,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     protected BpelEngineImpl createBpelEngineImpl(Contexts contexts) {
         return new BpelEngineImpl(contexts);
     }
-    
+
     public void shutdown() throws BpelEngineException {
         _mngmtLock.writeLock().lock();
         try {
@@ -331,7 +331,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             _mngmtLock.writeLock().unlock();
         }
     }
-    
+
     private boolean isLazyHydratable(BpelProcess process) {
         if (process.isHydrationLazySet()) {
             return process.isHydrationLazy();
@@ -346,7 +346,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     protected BpelProcess createBpelProcess(ProcessConf conf) {
         return new BpelProcess(conf);
     }
-    
+
     public void unregister(QName pid) throws BpelEngineException {
         if (__log.isTraceEnabled())
             __log.trace("unregister: " + pid);
@@ -423,7 +423,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             throw new RuntimeException(e);
         }
     }
-    
+
     private boolean deleteProcessDAO(BpelDAOConnection conn, QName pid) {
         final ProcessDAO proc = conn.getProcess(pid);
         if (proc != null) {
@@ -443,13 +443,13 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             return true;
         }
         return false;
-        
+
     }
 
     public void onScheduledJob(JobInfo jobInfo) throws JobProcessorException {
         getEngine().onScheduledJob(jobInfo);
     }
-    
+
     private class ProcessDefReaper implements Runnable {
         public void run() {
             __log.debug("Starting process definition reaper thread.");
@@ -458,7 +458,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 while (true) {
                     Thread.sleep(pollingTime);
                     if (!_mngmtLock.writeLock().tryLock(100L, TimeUnit.MILLISECONDS)) continue;
-                    try { 
+                    try {
                         __log.debug("Kicking reaper, OProcess instances: " + OProcess.instanceCount);
                         // Copying the runnning process list to avoid synchronization
                         // problems and a potential mess if a policy modifies the list
@@ -467,7 +467,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                             public boolean isMember(BpelProcess o) {
                                 return !o.hintIsHydrated();
                             }
-                            
+
                         });
 
                         // And the happy winners are...
@@ -494,7 +494,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     public void setConfigProperties(Properties configProperties) {
         _configProperties = configProperties;
     }
-    
+
     public void setMessageExchangeContext(MessageExchangeContext mexContext) throws BpelEngineException {
         _contexts.mexContext = mexContext;
     }
@@ -556,7 +556,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             long hydrationThrottledMaximumSize) {
         _engine.setProcessThrottledMaximumSize(hydrationThrottledMaximumSize);
     }
-    
+
     public void setProcessThrottledMaximumCount(
             int hydrationThrottledMaximumCount) {
         _engine.setProcessThrottledMaximumCount(hydrationThrottledMaximumCount);
@@ -572,9 +572,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     }
 
     /**
-     * A polled runnable instance that implements this interface will be set 
+     * A polled runnable instance that implements this interface will be set
      * with the contexts before the run() method is called.
-     * 
+     *
      * @author sean
      *
      */
@@ -584,14 +584,14 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
     /**
      * This wraps up the executor service for polled runnables.
-     * 
+     *
      * @author sean
      *
      */
     public static class PolledRunnableProcessor implements Scheduler.JobProcessor {
         private ExecutorService _polledRunnableExec;
         private Contexts _contexts;
-        
+
         // this map contains all polled runnable results that are not completed.
         // keep an eye on this one, since if we re-use this polled runnable and
         // generate too many entries in this map, this becomes a memory leak(
@@ -601,7 +601,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         public void setContexts(Contexts contexts) {
             _contexts = contexts;
         }
-        
+
         public void setPolledRunnableExecutorService(ExecutorService polledRunnableExecutorService) {
             _polledRunnableExec = polledRunnableExecutorService;
         }
@@ -610,9 +610,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             JOB_STATUS statusOfPriorTry = JOB_STATUS.PENDING;
             Exception exceptionThrownOnPriorTry = null;
             boolean toRetry = false;
-            
+
             synchronized( resultsByJobId ) {
-                PolledRunnableResults results = resultsByJobId.get(jobInfo.jobName);        
+                PolledRunnableResults results = resultsByJobId.get(jobInfo.jobName);
                 if( results != null ) {
                     statusOfPriorTry = results._status;
                     exceptionThrownOnPriorTry = results._exception;
@@ -627,7 +627,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                     toRetry = true;
                 }
             }
-            
+
             if( toRetry ) {
                 // re-try
                 _polledRunnableExec.submit(new Runnable() {
@@ -652,21 +652,21 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                     }
                 });
             }
-            
+
             jobInfo.jobDetail.getDetailsExt().put("runnable_status", JOB_STATUS.IN_PROGRESS);
             if( exceptionThrownOnPriorTry != null ) {
                 throw new Scheduler.JobProcessorException(exceptionThrownOnPriorTry, true);
             }
         }
-        
+
         private static enum JOB_STATUS {
             PENDING, IN_PROGRESS, FAILED, COMPLETED
         }
-        
+
         private class PolledRunnableResults {
             private JOB_STATUS _status = JOB_STATUS.PENDING;
             private Exception _exception;
-            
+
             public PolledRunnableResults(JOB_STATUS status, Exception exception) {
                 _status = status;
                 _exception = exception;

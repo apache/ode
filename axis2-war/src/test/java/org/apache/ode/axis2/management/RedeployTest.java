@@ -36,7 +36,7 @@ public class RedeployTest extends Axis2TestBase {
         String bundleName = "TestInstanceRetire";
         System.out.println("=> " + server.getODEServer().getProcessStore().getPackages());
         if (server.isDeployed("withVar")) server.undeployProcess(bundleName + "/withVar");
-        
+
         QName deployedQName = server.deployProcess(bundleName + "/withVar").iterator().next();
 
         server.sendRequestFile("http://localhost:8888/processes/testretire",
@@ -44,7 +44,7 @@ public class RedeployTest extends Axis2TestBase {
 
         server.undeployProcess(bundleName + "/withVar");
         server.deployProcess(bundleName + "/withVar").iterator().next();
-        
+
         String response = server.sendRequestFile("http://localhost:8888/processes/testretire",
                 bundleName + "/1", "testRequest2.soap");
     }

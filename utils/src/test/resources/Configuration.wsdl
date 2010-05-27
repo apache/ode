@@ -19,10 +19,10 @@
   ~ under the License.
   -->
 
-<wsdl:definitions 
-   xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-   xmlns:configurationType="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Configuration.xsd" 
-   targetNamespace="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Configuration.wsdl" 
+<wsdl:definitions
+   xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns:configurationType="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Configuration.xsd"
+   targetNamespace="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Configuration.wsdl"
    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
     <wsdl:documentation>
       This WSDL document describes the configuration header to be used by all services except the Logger. This header

@@ -49,7 +49,7 @@ class FLOW extends ACTIVITY {
         super(self,frame, linkFrame);
         _oflow = (OFlow) self.o;
     }
-    
+
     public void run() {
         LinkFrame myLinkFrame = new LinkFrame(_linkFrame);
         for (Iterator<OLink> i = _oflow.localLinks.iterator(); i.hasNext(); ) {

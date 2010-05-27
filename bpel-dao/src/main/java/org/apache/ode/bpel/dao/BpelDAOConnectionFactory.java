@@ -33,7 +33,7 @@ public interface BpelDAOConnectionFactory {
    *         store.
    */
   public BpelDAOConnection getConnection();
-  
+
   /**
    * Initializes connection factory with properties required to establish a
    * connection.
@@ -41,7 +41,7 @@ public interface BpelDAOConnectionFactory {
    * @param properties
    */
   public void init(Properties properties);
-  
+
   public void shutdown();
 
     public DataSource getDataSource();

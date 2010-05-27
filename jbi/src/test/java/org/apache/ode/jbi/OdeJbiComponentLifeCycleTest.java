@@ -59,7 +59,7 @@ public class OdeJbiComponentLifeCycleTest extends TestCase {
         container.start();
 
         component = new OdeComponent();
-        
+
     }
 
     protected void tearDown() throws Exception {

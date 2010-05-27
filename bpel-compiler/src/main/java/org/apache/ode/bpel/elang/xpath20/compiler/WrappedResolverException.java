@@ -26,7 +26,7 @@ import org.apache.ode.bpel.compiler.api.CompilationMessage;
  */
 public class WrappedResolverException extends RuntimeException {
     private static final long serialVersionUID = -2677245631724501573L;
-    
+
     public CompilationMessage _compilationMsg;
 
     public WrappedResolverException(String message) {

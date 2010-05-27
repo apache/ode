@@ -188,11 +188,11 @@ public abstract class Bpel20QNames {
     public static final QName RDF_LABEL = new QName(NS_RDF, "label");
 
 
-    
+
     //
     // utility functions
     //
-    
+
     private static QName newQName(String localname) {
         return new QName(NS_WSBPEL2_0, localname);
     }

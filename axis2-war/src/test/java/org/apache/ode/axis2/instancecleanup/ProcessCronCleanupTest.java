@@ -34,7 +34,7 @@ public class ProcessCronCleanupTest extends CleanTestBase {
         ProcessDAO process = null;
         try {
             initialLargeDataCount = getLargeDataCount(0);
-            
+
             server.sendRequestFile("http://localhost:8888/processes/FirstProcess/FirstProcess/FirstProcess/Client", bundleName, "testRequest.soap");
             // every second, clean up cron job kicks in
             Thread.sleep(2000);
@@ -48,7 +48,7 @@ public class ProcessCronCleanupTest extends CleanTestBase {
     public String getODEConfigDir() {
         return HIB_DERBY_CONF_DIR;
     }
-    
+
     protected ProcessInstanceDAO getInstance() {
         return HibDaoConnectionFactoryImpl.getInstance();
     }

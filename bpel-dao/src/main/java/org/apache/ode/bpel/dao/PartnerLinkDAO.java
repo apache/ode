@@ -38,11 +38,11 @@ public interface PartnerLinkDAO {
    * @return
    */
   public int getPartnerLinkModelId();
-  
+
   public String getMyRoleName();
 
   public String getPartnerRoleName();
-  
+
   public String getPartnerLinkName();
 
   /**
@@ -52,7 +52,7 @@ public interface PartnerLinkDAO {
   public QName getMyRoleServiceName();
 
   public void setMyRoleServiceName(QName svcName);
-  
+
   public Element getMyEPR();
 
   public void setMyEPR(Element val);

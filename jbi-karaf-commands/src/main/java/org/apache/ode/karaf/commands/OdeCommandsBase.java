@@ -50,7 +50,7 @@ public abstract class OdeCommandsBase extends OsgiCommandSupport {
 
     /**
      * Invokes an operation on the ODE MBean server
-     * 
+     *
      * @param <T>
      * @param operationName
      * @param args

@@ -49,13 +49,13 @@ public class Correlation extends BpelObject {
 
     public enum CorrelationPattern {
         IN, OUT, INOUT, UNSET;
-        
+
         private static final Map<String, CorrelationPattern> __map = new HashMap<String, CorrelationPattern>();
         static {
             __map.put("in", IN);
             __map.put("response", IN);
             __map.put("out", OUT);
-            __map.put("request", OUT); 
+            __map.put("request", OUT);
             __map.put("in-out", INOUT);
             __map.put("out-in", INOUT);
             __map.put("request-response", INOUT);
@@ -63,11 +63,11 @@ public class Correlation extends BpelObject {
         }
     }
 
-    
+
 
     /**
      * Get the name of the referenced correlation set.
-     * 
+     *
      * @return correlation set
      */
     public String getCorrelationSet() {
@@ -76,7 +76,7 @@ public class Correlation extends BpelObject {
 
     /**
      * Get the value of the initiate flag.
-     * 
+     *
      * @return one of <code>{@link Correlation}.INITATE_XXX</code> constants
      */
     public Initiate getInitiate() {
@@ -85,7 +85,7 @@ public class Correlation extends BpelObject {
 
     /**
      * Get the correlation pattern.
-     * 
+     *
      * @return the correlation pattern, one of:
      *         <ul>
      *         <li>{@link #CORRPATTERN_IN}</li>
@@ -95,7 +95,7 @@ public class Correlation extends BpelObject {
      */
     public CorrelationPattern getPattern() {
         return getAttribute("pattern", CorrelationPattern.__map, CorrelationPattern.UNSET);
-        
+
     }
 
 }

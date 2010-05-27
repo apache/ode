@@ -28,7 +28,7 @@ import org.w3c.dom.Element;
  */
 public class OnEvent extends OnMessage {
 
-  
+
   public OnEvent(Element el) {
         super(el);
     }
@@ -41,7 +41,7 @@ public class OnEvent extends OnMessage {
   public QName getMessageType() {
       return getNamespaceContext().derefQName(getAttribute("messageType"));
   }
-  
+
   /**
    * @return the element type to be used for the incoming message body or
    * <code>null</code> if a WSDL message type is to be used instead.
@@ -50,5 +50,5 @@ public class OnEvent extends OnMessage {
   public QName getElementType() {
       return getNamespaceContext().derefQName(getAttribute("element",null));
   }
-  
+
 }

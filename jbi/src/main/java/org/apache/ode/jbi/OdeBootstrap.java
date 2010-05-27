@@ -28,10 +28,10 @@ import javax.management.ObjectName;
 /**
  * ODE Implementation of the JBI {@link  javax.jbi.component.Bootstrap}
  * interface. This is just a place-holder, nothing gets done in the
- * bootstrap at this point. 
+ * bootstrap at this point.
  */
 public class OdeBootstrap implements Bootstrap {
-  
+
   @SuppressWarnings("unused")
   private InstallationContext _installContext;
 
@@ -91,7 +91,7 @@ public class OdeBootstrap implements Bootstrap {
      *           terminated.
      */
     public void onUninstall() throws JBIException {
-    
+
     }
 
 }

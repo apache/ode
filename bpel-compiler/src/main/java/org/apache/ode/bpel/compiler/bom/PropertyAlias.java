@@ -29,7 +29,7 @@ import org.w3c.dom.Element;
 /**
  * WSDL extension element for a BPEL <code>&lt;propertyAlias&gt;</code>
  * element.
- * 
+ *
  * @see org.apache.ode.bpel.compiler.wsdl.PropertyAliasSerializer_11
  */
 public class PropertyAlias extends BpelObject4WSDL implements ExtensibilityElement, Serializable {
@@ -43,7 +43,7 @@ public class PropertyAlias extends BpelObject4WSDL implements ExtensibilityEleme
     /**
      * Get the name of the WSDL <code>message</code> type that this alias it
      * to apply to.
-     * 
+     *
      * @return the <code>QName</code> for the <code>messageType</code>
      */
     public QName getMessageType() {
@@ -53,7 +53,7 @@ public class PropertyAlias extends BpelObject4WSDL implements ExtensibilityEleme
     /**
      * Get the name of the WSDL <code>part</code> that this alias is to apply
      * to (within the specified <code>message</code>).
-     * 
+     *
      * @return the name of the part
      * @see #getMessageType()
      */
@@ -63,7 +63,7 @@ public class PropertyAlias extends BpelObject4WSDL implements ExtensibilityEleme
 
     /**
      * Get the <code>QName</code> of the property that this alias applies to.
-     * 
+     *
      * @return the property <code>QName</code>
      */
     public QName getPropertyName() {
@@ -73,7 +73,7 @@ public class PropertyAlias extends BpelObject4WSDL implements ExtensibilityEleme
     /**
      * Get the location path query for the <code>OPropertyAlias</code> as
      * originally specified in the WSDL.
-     * 
+     *
      * @return the query
      */
     public Expression getQuery() {
@@ -83,7 +83,7 @@ public class PropertyAlias extends BpelObject4WSDL implements ExtensibilityEleme
     /**
      * Get the namespace context for the <code>&lt;propertyAlias&gt;</code>
      * element that created this object.
-     * 
+     *
      * @return the <code>NSContext</code> the encapsulates the namespace
      *         context
      */

@@ -29,5 +29,5 @@ public class Like extends IdentifierToValueCMP {
     public Like(Identifier identifier, Value value) {
         super(identifier, value);
     }
-    
+
 }

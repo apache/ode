@@ -45,7 +45,7 @@ import java.io.FileFilter;
  *
  */
 public class SecuredProcessesTest extends Axis2TestBase {
-    
+
     private String testDir = "TestRampartBasic/secured-processes";
 
 

@@ -44,18 +44,18 @@ import javax.persistence.Query;
 public class ProcessInstanceProfileDAOImpl extends ProcessProfileDAOImpl implements ProcessInstanceProfileDAO {
     @SuppressWarnings("unused")
     private static final Log __log = LogFactory.getLog(ProcessInstanceProfileDAOImpl.class);
-    
+
     private ProcessInstanceDAOImpl instance;
 
     public ProcessInstanceProfileDAOImpl(EntityManager em, ProcessInstanceDAOImpl instance) {
         super(em, (ProcessDAOImpl)instance.getProcess());
         this.instance = instance;
     }
-    
+
     public ProcessDAO getProcess() {
         return process;
     }
-    
+
     public List<MessageExchangeDAO> findMessageExchangesByInstance() {
         return findByInstance("select x from MessageExchangeDAOImpl as x where x._processInst = :instance");
     }
@@ -95,15 +95,15 @@ public class ProcessInstanceProfileDAOImpl extends ProcessProfileDAOImpl impleme
     public int countEventsByInstance() {
         Query query = em.createQuery("select count(e._id) from EventDAOImpl as e where e._instance = :instance");
         query.setParameter("instance", instance);
-        
+
         return ((Long)query.getSingleResult()).intValue();
     }
-    
+
     @SuppressWarnings("unchecked")
     protected <D> List<D> findByInstance(String queryString) {
         Query query = em.createQuery(queryString);
         query.setParameter("instance", instance);
-        
+
         return query.getResultList();
     }
 }

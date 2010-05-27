@@ -165,7 +165,7 @@ class DeploymentUnitDir {
             throw new IllegalArgumentException("Directory " + _duDirectory.getName() + " does not contain any process!");
         for (File bpel : bpels) {
             String b = bpel.getAbsolutePath();
-            File cbp = new File(b.substring(0,b.lastIndexOf(".bpel")) + ".cbp"); 
+            File cbp = new File(b.substring(0,b.lastIndexOf(".bpel")) + ".cbp");
             if (!cbp.exists()) {
                 __log.debug("compiling " + bpel);
                 compile(bpel);
@@ -408,7 +408,7 @@ class DeploymentUnitDir {
     public long getVersion() {
         return _version;
     }
-    
+
     /**
      * @return Static DU version number generated from DU name. -1 when package doesn't use versioning.
      */

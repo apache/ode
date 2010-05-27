@@ -31,8 +31,8 @@ import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Scheduler;
 
 /**
- * Manages events invocation in sorted order during replaying. 
- *  
+ * Manages events invocation in sorted order during replaying.
+ *
  * @author Rafal Rusin
  *
  */
@@ -40,9 +40,9 @@ public class ReplayerScheduler implements Scheduler {
     private static final Log __log = LogFactory.getLog(ReplayerScheduler.class);
 
     public Replayer replayer;
-    
+
     public static ThreadLocal<TaskElement> currentTaskElement = new ThreadLocal<TaskElement>();
-    
+
     private PriorityQueue<TaskElement> taskQueue = new PriorityQueue<TaskElement>();
 
     private static class TaskElement implements Comparable<TaskElement> {
@@ -77,7 +77,7 @@ public class ReplayerScheduler implements Scheduler {
     public <T> T execTransaction(Callable<T> transaction, int timeout) throws Exception, ContextException {
         throw new IllegalStateException();
     }
-    
+
     public boolean isTransacted() {
         return true;
     }
@@ -101,7 +101,7 @@ public class ReplayerScheduler implements Scheduler {
         this.replayer = replayer;
         while (!taskQueue.isEmpty()) {
             TaskElement taskElement = taskQueue.remove();
-            
+
             try {
                 currentTaskElement.set(taskElement);
                 __log.debug("executing action at time " + taskElement.when);
@@ -138,7 +138,7 @@ public class ReplayerScheduler implements Scheduler {
                 return null;
             }
         }, when, null);
-        
+
         return null;
     }
 

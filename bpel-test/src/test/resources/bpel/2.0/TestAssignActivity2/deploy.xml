@@ -25,7 +25,7 @@
     <process name="pns:TestAssign">
         <property name="punctuation">!</property>
         <property name="epr">
-            <sref:service-ref 
+            <sref:service-ref
                 xmlns:sref=" http://docs.oasis-open.org/wsbpel/2.0/serviceref"
                 xmlns:addr="http://example.com/addressing"
                 xmlns:as="http://example.com/auction/wsdl/auctionService/">

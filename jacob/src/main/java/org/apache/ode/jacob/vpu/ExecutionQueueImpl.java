@@ -423,7 +423,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
     /**
      * Verify that a {@link ExecutionQueueObject} is new, that is it has not
      * already been added to the soup.
-     * 
+     *
      * @param so object to check.
      * @throws IllegalArgumentException in case the object is not new
      */
@@ -585,7 +585,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
 
     private static class ObjectFrame extends CommFrame implements Externalizable {
         private static final long serialVersionUID = -7212430608484116919L;
-        
+
         ChannelListener _continuation;
 
         public ObjectFrame() {
@@ -649,7 +649,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
      * <p>
      * Created on Feb 16, 2004 at 8:09:48 PM.
      * </p>
-     * 
+     *
      * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
      */
     private class ExecutionQueueOutputStream extends ObjectOutputStream {
@@ -677,7 +677,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         /**
          * Use this method to spy on any channels that are being serialized to
          * this stream.
-         * 
+         *
          * @param obj
          * @return
          * @throws IOException

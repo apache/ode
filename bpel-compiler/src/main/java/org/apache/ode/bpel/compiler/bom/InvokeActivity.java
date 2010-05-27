@@ -32,7 +32,7 @@ public class InvokeActivity extends ScopeLikeActivity implements Communication {
 
     /** Mix-In for handling the {@link Communication} interface methods. */
     private CommunicationHelper _commHelper;
-    
+
     @Override
     public Scope getScope() {
         return new BastardScope(getElement());
@@ -40,14 +40,14 @@ public class InvokeActivity extends ScopeLikeActivity implements Communication {
 
     public InvokeActivity(Element el) {
         super(el);
-        
+
         // One of the few times where multiple inheritence would come in handy.
         _commHelper = new CommunicationHelper(el);
     }
 
     /**
      * Get the input variable.
-     * 
+     *
      * @return name of input variable
      */
     public String getInputVar() {
@@ -56,7 +56,7 @@ public class InvokeActivity extends ScopeLikeActivity implements Communication {
 
     /**
      * The output variable.
-     * 
+     *
      * @return output variable name
      */
     public String getOutputVar() {
@@ -80,7 +80,7 @@ public class InvokeActivity extends ScopeLikeActivity implements Communication {
         return _commHelper.getCorrelations();
     }
 
-    
+
     /**
      * Bastardized scope for invokes. Only supports catches/compensation handlers.
      * @author mszefler
@@ -94,7 +94,7 @@ public class InvokeActivity extends ScopeLikeActivity implements Communication {
 
         @Override
         public FaultHandler getFaultHandler() {
-            // Note, in <invoke> unlike <scope> the catches are NOT in an <faultHandler> element. 
+            // Note, in <invoke> unlike <scope> the catches are NOT in an <faultHandler> element.
             return new FaultHandler(getElement());
         }
 
@@ -125,7 +125,7 @@ public class InvokeActivity extends ScopeLikeActivity implements Communication {
 
         @Override
         public Variable getVariableDecl(String varName) {
-            return null; 
+            return null;
         }
 
         @Override
@@ -134,6 +134,6 @@ public class InvokeActivity extends ScopeLikeActivity implements Communication {
 
         }
 
-        
+
     }
 }

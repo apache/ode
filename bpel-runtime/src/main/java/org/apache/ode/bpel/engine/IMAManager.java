@@ -36,8 +36,8 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * <p>
- * This class handles behaviour of IMAs (Inbound Message Activities) as specified in WS BPEL. 
- * This includes detecting conflictingReceive and conflictingRequest faults. 
+ * This class handles behaviour of IMAs (Inbound Message Activities) as specified in WS BPEL.
+ * This includes detecting conflictingReceive and conflictingRequest faults.
  * </p>
  */
 public class IMAManager implements Serializable {
@@ -53,7 +53,7 @@ public class IMAManager implements Serializable {
 
     /**
      * finds conflictingReceive
-     * 
+     *
      * @param selectors
      * @return
      */
@@ -75,7 +75,7 @@ public class IMAManager implements Serializable {
 
     /**
      * Register IMA
-     * 
+     *
      * @param pickResponseChannel
      *            response channel associated with this receive/pick
      * @param selectors
@@ -109,7 +109,7 @@ public class IMAManager implements Serializable {
     /**
      * Registers Open IMA.
      * It doesn't open IMA for non two way operations.
-     * 
+     *
      * @param partnerLink
      * @param opName
      * @param mexId
@@ -134,7 +134,7 @@ public class IMAManager implements Serializable {
 
     /**
      * This is used to remove IMA from registered state.
-     * 
+     *
      * @see #register(String, Selector[])
      * @param pickResponseChannel
      */
@@ -154,7 +154,7 @@ public class IMAManager implements Serializable {
 
     /**
      * Release Open IMA.
-     * 
+     *
      * @param plinkInstnace
      *            partner link
      * @param opName
@@ -177,7 +177,7 @@ public class IMAManager implements Serializable {
         }
         return mexRef;
     }
-    
+
     public void migrateRids(Map<OutstandingRequestManager.RequestIdTuple, OutstandingRequestManager.Entry> oldRids) {
         for (OutstandingRequestManager.RequestIdTuple oldRid : oldRids.keySet()) {
             OutstandingRequestManager.Entry oldEntry = oldRids.get(oldRid);
@@ -187,7 +187,7 @@ public class IMAManager implements Serializable {
                 _byOrid.put(orid, oldEntry.mexRef);
             } else {
                 //registered IMA
-                RequestIdTuple rid = new RequestIdTuple(oldRid.partnerLink, oldRid.opName); 
+                RequestIdTuple rid = new RequestIdTuple(oldRid.partnerLink, oldRid.opName);
                 Entry entry = new Entry(oldEntry.pickResponseChannel, (Selector[]) oldEntry.selectors);
                 _byRid.put(rid, entry);
                 _byChannel.put(entry.pickResponseChannel, entry);
@@ -197,7 +197,7 @@ public class IMAManager implements Serializable {
 
     /**
      * "Release" all Open IMAs
-     * 
+     *
      * @return a list of message exchange identifiers for message exchanges that were begun (receive/pick got a message) but not yet completed (reply not yet sent)
      */
     public String[] releaseAll() {

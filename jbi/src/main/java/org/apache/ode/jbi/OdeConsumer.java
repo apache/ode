@@ -39,7 +39,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Bridge between ODE (consumers) and JBI (providers). An single object of this type handles all communications initiated by ODE
- * that is destined for other JBI providers. 
+ * that is destined for other JBI providers.
  */
 abstract class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
     private static final Log __log = LogFactory.getLog(OdeConsumer.class);

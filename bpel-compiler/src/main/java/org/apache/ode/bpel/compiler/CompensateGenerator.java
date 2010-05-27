@@ -27,7 +27,7 @@ import org.apache.ode.bpel.o.OCompensate;
  * Generates code for the <code>&lt;compensate&gt;</code> activities.
  */
 class CompensateGenerator extends DefaultActivityGenerator {
-    
+
     public void compile(OActivity output, Activity src) {
     }
 

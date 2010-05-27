@@ -17,7 +17,7 @@
   ~ under the License.
   -->
 <process name="HelloWorld2"
-    targetNamespace="http://ode/bpel/unit-test" 
+    targetNamespace="http://ode/bpel/unit-test"
     xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
     xmlns:tns="http://ode/bpel/unit-test"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
@@ -31,12 +31,12 @@
      importType="http://schemas.xmlsoap.org/wsdl/" />
 
    <partnerLinks>
-      <partnerLink name="helloPartnerLink" 
+      <partnerLink name="helloPartnerLink"
          partnerLinkType="test:HelloPartnerLinkType" myRole="me" />
       <partnerLink name="samplePartnerLink"
          partnerLinkType="test:samplePartnerLinkType" partnerRole="you" />
    </partnerLinks>
-    
+
    <variables>
      <variable name="myVar" messageType="test:HelloMessage"/>
      <variable name="req" messageType="dummy:echoRequest"/>

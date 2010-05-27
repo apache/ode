@@ -18,11 +18,11 @@
   ~ under the License.
   -->
 
-<wsdl:definitions 
+<wsdl:definitions
     targetNamespace="http://ode/bpel/test/retire/responder.wsdl"
     xmlns="http://schemas.xmlsoap.org/wsdl/"
     xmlns:tns="http://ode/bpel/test/retire/responder.wsdl"
-    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
     xmlns:dummy="http://axis2.ode.apache.org"
@@ -32,18 +32,18 @@
     <wsdl:message name="TestRetireMessage">
         <wsdl:part name="TestPart" type="xsd:string"/>
     </wsdl:message>
-    
+
     <wsdl:portType name="TestRetirePortType">
         <wsdl:operation name="first">
             <wsdl:input message="tns:TestRetireMessage" name="TestIn"/>
             <wsdl:output message="tns:TestRetireMessage" name="TestOut"/>
-        </wsdl:operation>    
+        </wsdl:operation>
         <wsdl:operation name="second">
             <wsdl:input message="tns:TestRetireMessage" name="TestIn"/>
             <wsdl:output message="tns:TestRetireMessage" name="TestOut"/>
         </wsdl:operation>
     </wsdl:portType>
-    
+
      <wsdl:binding name="TestRetireSoapBinding" type="tns:TestRetirePortType">
         <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
         <wsdl:operation name="first">
@@ -62,7 +62,7 @@
             <soap:address location="http://localhost:8888/ode/processes/testretire"/>
         </wsdl:port>
     </wsdl:service>
-    
+
     <plnk:partnerLinkType name="TestRetirePartnerLinkType">
         <plnk:role name="responder" portType="tns:TestRetirePortType"/>
     </plnk:partnerLinkType>

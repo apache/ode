@@ -47,8 +47,8 @@ import javax.xml.namespace.QName;
 })
 public class PartnerLinkDAOImpl implements PartnerLinkDAO {
     public final static String DELETE_PARTNER_LINKS_BY_SCOPE_IDS = "DELETE_PARTNER_LINKS_BY_SCOPE_IDS";
-    
-    @Id @Column(name="PARTNER_LINK_ID") 
+
+    @Id @Column(name="PARTNER_LINK_ID")
     @GeneratedValue(strategy=GenerationType.AUTO)
     @SuppressWarnings("unused")
     private Long _id;
@@ -96,9 +96,9 @@ public class PartnerLinkDAOImpl implements PartnerLinkDAO {
                 _myEPRElement = DOMUtils.stringToDOM(_myEPR);
             } catch (Exception e) {
                 throw new RuntimeException(e);
-            }	
+            }
         }
-        
+
         return _myEPRElement;
     }
 
@@ -120,7 +120,7 @@ public class PartnerLinkDAOImpl implements PartnerLinkDAO {
                 _partnerEPRElement = DOMUtils.stringToDOM(_partnerEPR);
             } catch (Exception e) {
                 throw new RuntimeException(e);
-            }	
+            }
         }
         return _partnerEPRElement;
     }

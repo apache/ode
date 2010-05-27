@@ -29,7 +29,7 @@ import org.apache.ode.bpel.iapi.MessageExchange;
 import org.junit.Test;
 
 public class BasicActivities20Test extends BPELTestAbstract {
-    
+
     @Test public void testHelloWorld2() throws Throwable {
         go("/bpel/2.0/HelloWorld2");
     }
@@ -41,7 +41,7 @@ public class BasicActivities20Test extends BPELTestAbstract {
          */
         Deployment deployment = addDeployment("/bpel/2.0/NegativeTargetNSTest1");
         deployment.expectedException = ContextException.class;
-        
+
         go();
     }
 
@@ -52,24 +52,24 @@ public class BasicActivities20Test extends BPELTestAbstract {
     @Test public void testIf() throws Throwable {
         go("/bpel/2.0/TestIf");
     }
-    
+
     /**
      * Tests the wait "for" syntax.
      * @throws Throwable
      */
     @Test public void testWaitFor() throws Throwable {
         deploy("/bpel/2.0/TestWait1");
-        Invocation inv = addInvoke("Wait1#1", new QName("http://ode/bpel/unit-test.wsdl", "testService"), "testOperation", 
+        Invocation inv = addInvoke("Wait1#1", new QName("http://ode/bpel/unit-test.wsdl", "testService"), "testOperation",
             "<message><TestPart/><Time/></message>",
             null);
         inv.minimumWaitMs=5*1000L;
         inv.maximumWaitMs=7*1000L;
         inv.expectedStatus = MessageExchange.Status.ASYNC;
         inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
-        
+
         go();
     }
-    
+
     /**
      * Test the wait "until" syntax.
      */
@@ -77,14 +77,14 @@ public class BasicActivities20Test extends BPELTestAbstract {
         deploy("/bpel/2.0/TestWaitUntil");
         DateFormat idf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
         String isountil = idf.format(new Date(System.currentTimeMillis()+5000));
-        Invocation inv = addInvoke("WaitUntil", new QName("http://ode/bpel/unit-test.wsdl", "testService"), "testOperation", 
+        Invocation inv = addInvoke("WaitUntil", new QName("http://ode/bpel/unit-test.wsdl", "testService"), "testOperation",
             "<message><TestPart/><Time>"+isountil+"</Time></message>",
             null);
         inv.minimumWaitMs=4*1000L;
         inv.maximumWaitMs=7*1000L;
         inv.expectedStatus = MessageExchange.Status.ASYNC;
         inv.expectedFinalStatus = MessageExchange.Status.RESPONSE;
-        
+
         go();
     }
 

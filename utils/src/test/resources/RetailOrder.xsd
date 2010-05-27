@@ -24,11 +24,11 @@
     (c) Copyright 2002, The Web Services-Interoperability Organization (WS-I)
     Download or use of this file is governed by the Policies and Bylaws of WS-I.
 
-    For more information, send email info@ws-i.org. 	
+    For more information, send email info@ws-i.org.
 -->
 
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
-      xmlns:tns="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/RetailOrder.xsd" 
+      xmlns:tns="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/RetailOrder.xsd"
 targetNamespace="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/RetailOrder.xsd">
     <xsd:annotation>
         <xsd:documentation xml:lang="en">Definition of PartsOrder types for Retailer component of WS-I</xsd:documentation>
@@ -81,7 +81,7 @@ targetNamespace="http://www.ws-i.org/SampleApplications/SupplyChainManagement/20
             <xsd:maxLength value="20"/>
             <xsd:pattern value="[A-D][0-9]{5}-[0-9A-Z]{7}-[a-z]{3}#*"/>
         </xsd:restriction>
-    </xsd:simpleType>	
+    </xsd:simpleType>
     <xsd:element name="InvalidProductCode" type="tns:InvalidProductCodeType"/>
     <xsd:complexType name="InvalidProductCodeType">
         <xsd:sequence>

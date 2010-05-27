@@ -76,7 +76,7 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
         boolean routed = false;
         for (MessageRouteDaoImpl route : _routes) {
             assert route._ckeySet != null;
-            
+
             if(keySet.isRoutableTo(route._ckeySet, "all".equals(route.getRoute()))) {
                 if ("all".equals(route.getRoute()))  {
                     routes.add(route);

@@ -17,21 +17,21 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<wsdl:definitions name="TestCase"  
-                  xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"  
-                  xmlns:saw="workflowns"  
-                  xmlns:wsa="http://schemas.xmlsoap.org/ws/2003/03/addressing"  
-                  xmlns:xs="http://www.w3.org/2001/XMLSchema"  
-                  xmlns="http://schemas.xmlsoap.org/wsdl/"  
+<wsdl:definitions name="TestCase"
+                  xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+                  xmlns:saw="workflowns"
+                  xmlns:wsa="http://schemas.xmlsoap.org/ws/2003/03/addressing"
+                  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                  xmlns="http://schemas.xmlsoap.org/wsdl/"
                   targetNamespace="workflowns"
-                  xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/" 
+                  xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
                   xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
-                  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
                   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
   <wsdl:types>
-    <xsd:schema attributeFormDefault="unqualified" elementFormDefault="qualified" 
-        xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+    <xsd:schema attributeFormDefault="unqualified" elementFormDefault="qualified"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
         targetNamespace="workflowns">
         <xsd:element name="ExecuteWorkflow">
             <xsd:complexType>
@@ -72,7 +72,7 @@
     <soap:body xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" use="literal"/>
       </wsdl:output>
     </wsdl:operation>
-  </wsdl:binding> 
+  </wsdl:binding>
   <wsdl:service name="TestCase">
     <wsdl:port name="Workflow" binding="saw:WorkflowSOAP">
         <soap:address location="http://localhost:8080/ode/processes/TestCase"/>
@@ -80,5 +80,5 @@
   </wsdl:service>
   <plnk:partnerLinkType name="TestCase">
     <plnk:role name="WorkflowRole" portType="saw:Workflow"/>
-  </plnk:partnerLinkType>  
+  </plnk:partnerLinkType>
 </wsdl:definitions>

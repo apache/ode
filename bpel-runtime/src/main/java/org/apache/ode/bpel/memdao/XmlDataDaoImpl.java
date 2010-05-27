@@ -55,7 +55,7 @@ class XmlDataDaoImpl extends DaoBaseImpl implements XmlDataDAO {
      */
     public Node get() {
         if (_data == null) return null;
-        
+
         Document doc = DOMUtils.newDocument();
         Node copy = doc.importNode(_data, true);
         if (_data instanceof Element) doc.appendChild(copy);

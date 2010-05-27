@@ -28,5 +28,5 @@
             <xs:import namespace="bar://baz/qux" schemaLocation="good_import.xsd"/>
         </xs:schema>
     </types>
-    
+
 </definitions>

@@ -24,9 +24,9 @@ import javax.xml.namespace.QName;
 import java.util.Set;
 
 /**
- * A representation of a communication (message-exchange) between the BPEL 
+ * A representation of a communication (message-exchange) between the BPEL
  * BPEL engine and an  external "partner".
- * 
+ *
  * @author mszefler
  */
 public interface MessageExchange {

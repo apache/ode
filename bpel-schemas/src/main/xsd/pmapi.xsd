@@ -76,13 +76,13 @@
             <element name="failure" type="pmapi:FailureType" />
         </choice>
     </xs:complexType>
-    
+
     <complexType name="GetCommunication">
         <xs:sequence>
             <xs:element name="iid" type="long" maxOccurs="unbounded"></xs:element>
         </xs:sequence>
     </complexType>
-    
+
     <xs:complexType name="GetCommunicationResponse">
         <xs:sequence>
             <element name="restoreInstance" minOccurs="0" maxOccurs="unbounded" type="pmapi:CommunicationType"/>
@@ -151,7 +151,7 @@
             <element name="restoredIID" type="long" minOccurs="0" maxOccurs="unbounded"/>
         </sequence>
     </complexType>
-    
+
     <element name="replayResponse" type="pmapi:ReplayResponse"/>
 
     <complexType name="tProcessInfo">

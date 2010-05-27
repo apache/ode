@@ -33,7 +33,7 @@ public class NewProcessInstanceEvent extends ProcessMessageExchangeEvent {
   public NewProcessInstanceEvent() {
     super();
   }
-  
+
   public NewProcessInstanceEvent(
     QName processName, QName processId, Long processInstanceId) {
     super(PROCESS_INPUT,processName,processId, processInstanceId);
@@ -58,5 +58,5 @@ public class NewProcessInstanceEvent extends ProcessMessageExchangeEvent {
   public TYPE getType() {
     return TYPE.instanceLifecycle;
   }
-  
+
 }

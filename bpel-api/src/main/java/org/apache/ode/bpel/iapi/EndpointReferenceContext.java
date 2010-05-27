@@ -56,7 +56,7 @@ public interface EndpointReferenceContext {
     EndpointReference convertEndpoint(QName targetType, Element sourceEndpoint);
 
     /**
-     * 
+     *
      * @param epr
      * @return
      */

@@ -35,9 +35,9 @@ import org.apache.ode.bpel.common.CorrelationKeySet;
  */
 public interface Scheduler {
     void setJobProcessor(JobProcessor processor) throws ContextException;
-    
+
     void setPolledRunnableProcesser(JobProcessor polledRunnableProcessor);
-    
+
     /**
      * Schedule a persisted job. Persisted jobs MUST survive system failure.
      * They also must not be scheduled unless the transaction associated with
@@ -101,8 +101,8 @@ public interface Scheduler {
     /**
      * Execute a {@link Callable} in a transactional context. If the callable
      * throws an exception, then the transaction will be rolled back, otherwise
-     * the transaction will commit. Also, modify the value of the timeout value 
-     * that is associated with the transactions started by the current thread. 
+     * the transaction will commit. Also, modify the value of the timeout value
+     * that is associated with the transactions started by the current thread.
      *
      * @param <T> return type
      * @param transaction transaction to execute
@@ -112,7 +112,7 @@ public interface Scheduler {
      */
     <T> T execTransaction(Callable<T> transaction, int timeout)
             throws Exception, ContextException;
-    
+
     void setRollbackOnly() throws Exception;
 
     /**
@@ -171,14 +171,14 @@ public interface Scheduler {
     }
 
     public enum JobType {
-        TIMER, 
-        RESUME, 
-        INVOKE_INTERNAL, 
-        INVOKE_RESPONSE, 
-        MATCHER, 
+        TIMER,
+        RESUME,
+        INVOKE_INTERNAL,
+        INVOKE_RESPONSE,
+        MATCHER,
         INVOKE_CHECK
     }
-    
+
     public static class JobDetails {
         public Long instanceId;
         public String mexId;
@@ -190,7 +190,7 @@ public interface Scheduler {
         public Integer retryCount;
         public Boolean inMem;
         public Map<String, Object> detailsExt = new HashMap<String, Object>();
-        
+
         public Boolean getInMem() {
             return inMem == null ? false : inMem;
         }
@@ -251,7 +251,7 @@ public interface Scheduler {
         public void setDetailsExt(Map<String, Object> detailsExt) {
             this.detailsExt = detailsExt;
         }
-        
+
         @Override
         public String toString() {
             return "JobDetails("
@@ -268,7 +268,7 @@ public interface Scheduler {
             + ")";
         }
     }
-    
+
     /**
      * Wrapper containing information about a scheduled job.
      * @author mszefler

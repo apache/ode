@@ -20,46 +20,46 @@
 <!--
     Pick will be used to create process instance.
 -->
-<process name="pick2_pickCreateInstance" 
-    targetNamespace="http://ode/bpel/unit-test" 
+<process name="pick2_pickCreateInstance"
+    targetNamespace="http://ode/bpel/unit-test"
     xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
     xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
     xmlns:tns="http://ode/bpel/unit-test"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    xmlns:test="http://ode/bpel/unit-test.wsdl" 
+    xmlns:test="http://ode/bpel/unit-test.wsdl"
     suppressJoinFailure="yes">
    <partnerLinks>
-      <partnerLink name="testPartnerLink" 
-         partnerLinkType="test:TestPartnerLinkType" 
+      <partnerLink name="testPartnerLink"
+         partnerLinkType="test:TestPartnerLinkType"
          myRole="me" />
    </partnerLinks>
-    
+
    <variables>
      <variable name="var1" messageType="test:PickMessage"/>
    </variables>
-   
-   <sequence>   
+
+   <sequence>
        <pick name="pick1" createInstance="yes">
-          <onMessage 
+          <onMessage
             partnerLink="testPartnerLink"
             portType="test:TestPortType"
             operation="pickOp1"
             variable="var1">
-            <reply name="endReply" 
-              operation="pickOp1" 
+            <reply name="endReply"
+              operation="pickOp1"
               partnerLink="testPartnerLink"
-              portType="test:TestPortType" 
-              variable="var1"/>  
+              portType="test:TestPortType"
+              variable="var1"/>
          </onMessage>
-         <onMessage 
+         <onMessage
             partnerLink="testPartnerLink"
             portType="test:TestPortType"
             operation="pickOp2"
             variable="var1">
-            <reply name="endReply" 
-              operation="pickOp2" 
+            <reply name="endReply"
+              operation="pickOp2"
               partnerLink="testPartnerLink"
-              portType="test:TestPortType" 
+              portType="test:TestPortType"
               variable="var1"/>
          </onMessage>
        </pick>

@@ -27,13 +27,13 @@ import java.util.Set;
 /**
  * This class is used to generate globally unique IDs. The requirements for
  * global uniqueness are as follows:
- * 
+ *
  * <pre>
  *     1) The time on any machine is never set back.
  *     2) Each machine has a unique IP address.
  *     3) Each process has the 'org.apache.ode.uid.port' property set to the
  *        same non-zero value.
- * 
+ *
  *    byte:    0   1   2   3   4  5  6  7  8  9  10  11   12  13
  *             [ IPADDRESS ]  [   START TIME IN MS     ] [ count]
  *    This format allow more compact string representation.
@@ -56,7 +56,7 @@ public final class GUID implements Cloneable, Comparable, java.io.Serializable {
     static String PROP_PORT = "org.apache.ode.uid.port";
 
     static int port = Integer.getInteger(PROP_PORT, 33666);
-    
+
     // 32 bits
     private static final byte[] ipadd = {127,0,0,1};
 
@@ -100,10 +100,10 @@ public final class GUID implements Cloneable, Comparable, java.io.Serializable {
 
     /**
      * Reconstitute a GUID from it's string representation
-     * 
+     *
      * @param str
      *            DOCUMENTME
-     * 
+     *
      * @throws MalformedGuidException
      *             DOCUMENTME
      */
@@ -193,7 +193,7 @@ public final class GUID implements Cloneable, Comparable, java.io.Serializable {
     /**
      * Convert a GUID to it's string representation. This will return a string
      * of at most 32 bytes.
-     * 
+     *
      * @return DOCUMENTME
      */
     public String toString() {
@@ -251,7 +251,7 @@ public final class GUID implements Cloneable, Comparable, java.io.Serializable {
             super("Malformed guid: " + guid);
         }
     }
-    
+
     public static String makeGUID(String digest) {
         String val = "0";
         int maxlen = 32;
@@ -262,7 +262,7 @@ public final class GUID implements Cloneable, Comparable, java.io.Serializable {
             val = new BigInteger(val, base).add(BigInteger.valueOf((long) c)).multiply(BigInteger.valueOf(prime)).toString(base);
             if (val.length() > maxlen) val = val.substring(0, maxlen);
         }
-        
+
         return val;
     }
 }

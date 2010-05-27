@@ -21,21 +21,21 @@ package org.apache.ode.bpel.o;
 
 /**
  * Compiled representation of an external variable declaration.
- * 
+ *
  * @author Maciej Szefler <mszefler at gmail dot com>
  *
  */
 public class OExtVar extends OBase {
     private static final long serialVersionUID = 1L;
 
-    /** 
+    /**
      * Unique identifier for the external variable. Will be referenced in the deployment descriptor.
      */
     public String externalVariableId;
-    
+
     /** Related variable containing the identifying information. */
-    public OScope.Variable related; 
-      
+    public OScope.Variable related;
+
     public OExtVar(OProcess owner) {
         super(owner);
     }

@@ -23,9 +23,9 @@ import javax.xml.namespace.QName;
 /**
  * Concrete representation of service endpoint. This consists of a service
  * qualified name and port name per WSDL specification.
- * 
+ *
  * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
- * 
+ *
  */
 public class Endpoint {
     /** Service QName */
@@ -45,7 +45,7 @@ public class Endpoint {
     /**
      * Equality operator, check whether service name and port name are both equal.
      */
-    @Override 
+    @Override
     public boolean equals(Object other) {
         if (!(other instanceof Endpoint)) {
             return false;
@@ -58,7 +58,7 @@ public class Endpoint {
     public int hashCode() {
         return serviceName.hashCode() ^ portName.hashCode();
     }
-    
+
     /**
      * Print object in the form <em>serviceQName</em>:<em>port</em>
      */

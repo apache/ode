@@ -67,19 +67,19 @@
                 Fixing XSD to allow: (a) other URI in importType (b) repeatEvery to be used standalone
                 Applied Issue 204 and 6.2
                         2006-02-14: Rev 1.29: Alex Alves: Issue 110
-            2006-02-21: Rev 1.30: YIU-OSS: Alex Yiu:  
+            2006-02-21: Rev 1.30: YIU-OSS: Alex Yiu:
                 Apply Issue 217: changing "compensate" activity and adding "compensateScope" activity
             2006-03-07: Rev 1.31: Danny van der Rijn: Action Item 21:
                 Remove WSDL namespace declaration and import
-            2006-03-20: Rev 1.32: YIU-OSS: Alex Yiu: 
+            2006-03-20: Rev 1.32: YIU-OSS: Alex Yiu:
                 Making namespace and location optional in tImport
                 (Corresponding to action item #26)
-            2006-03-21: Rev 1.33: YIU-OSS: Alex Yiu: 
-                Removing "iterator" element from "forEach" 
+            2006-03-21: Rev 1.33: YIU-OSS: Alex Yiu:
+                Removing "iterator" element from "forEach"
             2006-03-23: Rev 1.34: YIU-OSS: Alex Yiu:
                 Adding keepSrcElementName to copy
             2006-04-05: Rev 1.35: YIU-OSS: Alex Yiu:
-                Applying Issue 248: restricting "any" under "extensionActivity" 
+                Applying Issue 248: restricting "any" under "extensionActivity"
                 to "##other" namespace
         </documentation>
     </annotation>
@@ -326,7 +326,7 @@
             <element name="for" type="bpws:tDuration-expr"/>
             <element name="until" type="bpws:tDeadline-expr"/>
         </choice>
-    </group> 
+    </group>
     <complexType name="tOnAlarmPick">
         <complexContent>
             <extension base="bpws:tExtensibleElements">
@@ -342,12 +342,12 @@
             <extension base="bpws:tExtensibleElements">
                 <sequence>
                     <choice>
-                        <sequence> 
+                        <sequence>
                             <group ref="bpws:forOrUntilGroup" />
                             <element name="repeatEvery" type="bpws:tDuration-expr" minOccurs="0"/>
                         </sequence>
                         <element name="repeatEvery" type="bpws:tDuration-expr" />
-                    </choice> 
+                    </choice>
                     <element ref="bpws:scope"/>
                 </sequence>
             </extension>
@@ -602,7 +602,7 @@
                     <element ref="bpws:from"/>
                     <element ref="bpws:to"/>
                 </sequence>
-                <attribute name="keepSrcElementName" type="bpws:tBoolean" 
+                <attribute name="keepSrcElementName" type="bpws:tBoolean"
                            use="optional" default="no" />
             </extension>
         </complexContent>
@@ -847,18 +847,18 @@
                <extension base="bpws:tExtensibleElements">
                    <sequence>
                        <element name="branches">
-                   <complexType> 
+                   <complexType>
                      <complexContent>
                     <extension base="bpws:tExpression">
-                    <attribute name="countCompletedBranchesOnly" type="bpws:tBoolean" /> 
-                </extension> 
-                 </complexContent> 
-               </complexType> 
-               </element> 
+                    <attribute name="countCompletedBranchesOnly" type="bpws:tBoolean" />
+                </extension>
+                 </complexContent>
+               </complexType>
+               </element>
                    </sequence>
                </extension>
            </complexContent>
-    </complexType> 
+    </complexType>
 
     <complexType name="tExtensionActivity">
         <sequence>

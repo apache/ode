@@ -49,7 +49,7 @@ public class WSDL20Endpoint implements MutableEndpoint {
           idNodes = endpointElmt.getElementsByTagNameNS(Namespaces.INTALIO_SESSION_NS, "session");
           if (idNodes.getLength() > 0) {
               return idNodes.item(0).getTextContent();
-          } 
+          }
           return null;
       }
   }

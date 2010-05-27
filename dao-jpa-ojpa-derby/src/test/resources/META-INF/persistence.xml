@@ -35,10 +35,10 @@
         <class>org.apache.ode.dao.jpa.XmlDataDAOImpl</class>
 
         <properties>
-            <!-- Properties for an embedded Derby connection 
+            <!-- Properties for an embedded Derby connection
             <property name="openjpa.ConnectionDriverName" value="org.apache.commons.dbcp.BasicDataSource"/>
             <property name="openjpa.jdbc.DBDictionary" value="org.apache.openjpa.jdbc.sql.DerbyDictionary"/>
-             
+
             <property name="openjpa.ConnectionProperties"
                 value="DriverClassName=org.apache.derby.jdbc.EmbeddedDriver,Url=jdbc:derby:target/database/derby/ode-test-db;userid=sa;create=false,MaxActive=100,MaxWait=10000,TestOnBorrow=true"/>
             -->

@@ -44,5 +44,5 @@ public abstract class CorrelationSetEvent extends ScopeEvent {
   public TYPE getType() {
     return TYPE.dataHandling;
   }
-  
+
 }

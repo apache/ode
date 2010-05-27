@@ -27,13 +27,13 @@
         >
 
     <types>
-        <schema attributeFormDefault="unqualified" elementFormDefault="qualified" 
-                targetNamespace="test:test" 
+        <schema attributeFormDefault="unqualified" elementFormDefault="qualified"
+                targetNamespace="test:test"
                 xmlns="http://www.w3.org/2001/XMLSchema">
 
             <element name="Input" type="string" />
             <element name="Output" type="string" />
-        
+
             <element name="TestElement">
                 <complexType>
                     <sequence>
@@ -57,11 +57,11 @@
             <output message="tns:OutputMessage"/>
         </operation>
     </portType>
-     
+
     <plnk:partnerLinkType name="ServicePartnerLinkType">
         <plnk:role name="ServiceProvider" portType="tns:ServicePortType"/>
     </plnk:partnerLinkType>
-    
+
     <binding name="ServiceBinding" type="tns:ServicePortType">
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
         <operation name="process">
@@ -74,7 +74,7 @@
             </output>
         </operation>
     </binding>
-    
+
     <service name="TestIgnoreMissingFromDataService">
         <port name="TestIgnoreMissingFromDataPort" binding="tns:ServiceBinding">
             <soap:address location="http://[server]:[port]/ode/processes/TestIgnoreMissingFromData" />

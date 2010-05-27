@@ -26,11 +26,11 @@ import org.apache.commons.logging.Log;
 public class LogErrorListener implements ErrorListener {
 
   private Log _log;
-  
+
   public LogErrorListener(Log log) {
     _log = log;
   }
-  
+
   public void warning(TransformerException exception)
       throws TransformerException {
     _log.warn(exception.getMessageAndLocation(),exception);

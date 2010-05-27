@@ -63,12 +63,12 @@ public class CollectionsX {
      * given in the form of a unary function which returns a non-<code>false</code>
      * value when the condition is satisfied. The first object in the collection
      * matching the condition is returned.
-     * 
+     *
      * @param coll
      *            the collection to search through
      * @param f
      *            the test to apply to the collection elements
-     * 
+     *
      * @return the first object in the collection (coll) which, satisfies the
      *         condition (f)
      */
@@ -78,15 +78,15 @@ public class CollectionsX {
 
     /**
      * Find an element in a collection satisfying a condition.
-     * 
+     *
      * @param i
      *            the iterator to iterate with
      * @param f
      *            the test to apply to the elements
-     * 
+     *
      * @return the first object enumerated by the iterator (i) which satisfies
      *         the condition (f)
-     * 
+     *
      * @see #find_if(java.util.Collection,
      *      org.apache.ode.utils.stl.MemberOfFunction)
      */
@@ -126,12 +126,12 @@ public class CollectionsX {
      * </code>
      * returns <code>true</code>. So: <em>coll' = { x : x el-of coll
      * AND f(x) == false }</em>
-     * 
+     *
      * @param coll
      *            the collection from which to remove elements
      * @param f
      *            the function to apply
-     * 
+     *
      * @return coll, for convenience
      */
     public static <T> Collection<T> remove_if(Collection<T> coll, MemberOfFunction<T> f) {
@@ -149,14 +149,14 @@ public class CollectionsX {
     /**
      * Transform a collection with a unary function. Roughly speaking dest = {
      * f(a) : a el-of src }
-     * 
+     *
      * @param dest
      *            the empty (mutable) collection to transform into
      * @param src
      *            the collection to transform from
      * @param f
      *            the unary function to apply
-     * 
+     *
      * @return dest, for convenience
      */
     public static <C extends Collection<T>, T, V extends T, E> C transform(C dest, Collection<E> src,
@@ -221,7 +221,7 @@ public class CollectionsX {
 
     /**
      * Filter a collection by member class.
-     * 
+     *
      * @param src
      *            source collection
      * @param aClass

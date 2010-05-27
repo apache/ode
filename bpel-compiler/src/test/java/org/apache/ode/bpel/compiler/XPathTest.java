@@ -274,7 +274,7 @@ class MockCompilerContext implements CompilerContext {
     public Part resolveHeaderPart(Variable variable, String partname) throws CompilationException {
         return null;
     }
-    
+
     public Map<URI, Source> getSchemaSources() {
         return null;
     }

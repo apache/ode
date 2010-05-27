@@ -26,4 +26,3 @@ public class MessageBundleTestMessages_de extends MessageBundleTestMessages {
   }
 
 }
- 

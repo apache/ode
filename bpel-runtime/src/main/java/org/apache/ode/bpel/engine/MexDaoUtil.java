@@ -31,7 +31,7 @@ import org.w3c.dom.Element;
 
 /**
  * Some handy utilities methods for dealing with MEX impls.
- *  
+ *
  */
 class MexDaoUtil {
 

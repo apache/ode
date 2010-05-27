@@ -35,7 +35,7 @@ import junit.framework.TestCase;
  */
 public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
     private static final Log __log = LogFactory.getLog(RetriesTest.class);
-    
+
     DelegateSupport _ds;
     SimpleScheduler _scheduler;
     ArrayList<Scheduler.JobInfo> _jobs;
@@ -43,7 +43,7 @@ public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
     TransactionManager _txm;
     int _tried = 0;
     Scheduler.JobInfo _jobInfo = null;
-    
+
     public void setUp() throws Exception {
         _txm = new GeronimoTransactionManager();
         _ds = new GeronimoDelegateSupport(_txm);
@@ -56,7 +56,7 @@ public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
     public void tearDown() throws Exception {
         _scheduler.shutdown();
     }
-    
+
     public void testRetries() throws Exception {
         // speed things up a bit to hit the right code paths
         _scheduler.setNearFutureInterval(5000);
@@ -76,7 +76,7 @@ public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
     public void testExecTransaction() throws Exception {
         final int[] tryCount = new int[1];
         tryCount[0] = 0;
-        
+
         Callable<Void> transaction = new Callable<Void>() {
             public Void call() throws Exception {
                 tryCount[0]++;
@@ -85,7 +85,7 @@ public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
                 } else {
                     return null;
                 }
-            }            
+            }
         };
 
         _scheduler.execTransaction(transaction);
@@ -94,7 +94,7 @@ public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
 
     public void onScheduledJob(Scheduler.JobInfo jobInfo) throws Scheduler.JobProcessorException {
         _jobInfo = jobInfo;
-        
+
         _tried++;
         throw new Scheduler.JobProcessorException(jobInfo.retryCount < 1);
     }

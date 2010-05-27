@@ -27,7 +27,7 @@ import org.apache.ode.bpel.o.OProcess;
  * @author jguinney
  */
 public interface ProcessMonitor {
-  
+
   /**
    * Returns the process object to be monitored.  Special care should be taken
    * to insure that the compiled instance classes  specific for this
@@ -39,7 +39,7 @@ public interface ProcessMonitor {
 
   /**
    * Return a list of process instances.
-   * @param filter process instance filter 
+   * @param filter process instance filter
    * @return process instances
    * @throws MonitorException
    */

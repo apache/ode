@@ -31,5 +31,5 @@ public class Conjunction extends AbstractLogicExpr {
     public Conjunction(final Collection<LogicNode> childs) {
         super(childs);
     }
-    
+
 }

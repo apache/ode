@@ -83,7 +83,7 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
 
         return process;
     }
-    
+
     public ProcessDAO createProcess(QName pid, QName type, String guid, long version) {
         ProcessDaoImpl process = new ProcessDaoImpl(this,_store,pid,type, guid,version);
         _store.put(pid,process);

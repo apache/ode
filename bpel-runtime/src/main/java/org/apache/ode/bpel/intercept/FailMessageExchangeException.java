@@ -30,9 +30,9 @@ public final class FailMessageExchangeException extends AbortMessageExchangeExce
     protected FailMessageExchangeException(String msg) {
         super(msg);
     }
-    
+
     protected FailMessageExchangeException(String msg, Throwable cause) {
         super(msg,cause);
     }
-    
+
 }

@@ -27,12 +27,12 @@ import java.util.List;
  * </p>
  */
 public interface CommandlineFragment {
-  
+
   /**
    * The prefix (&quot;-&quot;) that signifies that an argument is a flag.
    */
   public static String COMMAND_PREFIX = "-";
-  
+
   /**
    * <p>
    * Reset the fragment to its initial state.  This is useful for reusing fragments
@@ -40,7 +40,7 @@ public interface CommandlineFragment {
    * </p>
    */
   public void reset();
-  
+
   /**
    * <p>
    * Grab the pieces of the commandline relevant to this argument, configure the
@@ -52,16 +52,16 @@ public interface CommandlineFragment {
    * @throws CommandlineSyntaxException if the commandline is <em>structurally</em> invalid.
    */
   public List<String> consume(List<String> s) throws CommandlineSyntaxException;
-  
+
   /**
    * <p>
    * Construct a usage string for this commandline fragment.  The usage string is
    * used when constructing a strawman commandline example and when formatting help.
    * </p>
-   * @return the usage string 
+   * @return the usage string
    */
   public String getUsage();
-  
+
   /**
    * <p>
    * Return a description of this commandline fragment.  The description should be a
@@ -71,10 +71,10 @@ public interface CommandlineFragment {
    * @return the description
    */
   public String getDescription();
-  
+
   /**
    * @return <code>true</code> if this fragment is optional.
    */
   public boolean isOptional();
-  
+
 }

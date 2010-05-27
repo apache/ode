@@ -19,7 +19,7 @@
 <project name="base-su" >
 
     <import file="base.xml" />
-    
+
     <property name="sufilename" value="${ant.project.name}.zip" />
 
     <property name="stage.dir" location="${build.dir}/stage" />
@@ -29,7 +29,7 @@
         <delete dir="${build.dir}"/>
     </target>
 
-    
+
     <target name="build" depends="init" >
         <copy todir="${stage.dir}">
            <fileset dir="${basedir}" includes="*" excludes="build.xml,build" />

@@ -21,9 +21,9 @@
 <xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' targetNamespace="http://test.ns" >
 
   <xs:element name="int" type="xs:int" />
-  
+
   <xs:element name="string" type="xs:string" />
-  
+
   <xs:element name="boolean" type="xs:boolean" />
-  
+
 </xs:schema>

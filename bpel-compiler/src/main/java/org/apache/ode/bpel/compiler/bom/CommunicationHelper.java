@@ -26,7 +26,7 @@ import javax.xml.namespace.QName;
 import org.w3c.dom.Element;
 
 public final class CommunicationHelper extends BpelObject implements Communication  {
-    
+
     public CommunicationHelper(Element el) {
         super(el);
     }
@@ -48,7 +48,7 @@ public final class CommunicationHelper extends BpelObject implements Communicati
         Correlations correlations = getFirstChild(Correlations.class);
         if (correlations == null)
             return Collections.emptyList();
-        
+
         return correlations.getChildren(Correlation.class);
     }
 

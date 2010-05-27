@@ -170,7 +170,7 @@ public class HttpExternalService implements ExternalService {
             }
 
             baseUrl = clusterUrlTransformer.rewriteOutgoingClusterURL(baseUrl);
-            
+
             // build the http method
             final HttpMethod method = httpMethodConverter.createHttpRequest(odeMex, params, baseUrl);
 

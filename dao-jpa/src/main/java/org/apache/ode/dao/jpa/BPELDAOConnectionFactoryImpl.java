@@ -87,7 +87,7 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
     protected BPELDAOConnectionImpl createBPELDAOConnection(EntityManager em) {
         return new BPELDAOConnectionImpl(em);
     }
-    
+
     @SuppressWarnings("unchecked")
     public void init(Properties properties) {
         HashMap<String, Object> propMap = new HashMap<String,Object>();

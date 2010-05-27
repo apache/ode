@@ -17,20 +17,20 @@
   ~ under the License.
 -->
 
-<wsdl:definitions 
+<wsdl:definitions
   targetNamespace="http://ode/bpel/unit-test/TestXPathNamespace1.wsdl"
   xmlns:tns="http://ode/bpel/unit-test/TestXPathNamespace1.wsdl"
   xmlns:types1="http://ode/bpel/unit-test/TestXPathNamespace1.wsdl.types1"
   xmlns="http://ode/bpel/unit-test/TestXPathNamespace1.wsdl"
   xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-  xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"      
+  xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable">
-    
+
   <!-- type defs -->
   <wsdl:types>
- 
+
      <xsd:schema
        targetNamespace="http://ode/bpel/unit-test/TestXPathNamespace1.wsdl.types1"
        xmlns="http://ode/bpel/unit-test/TestXPathNamespace1.wsdl.types1"
@@ -56,12 +56,12 @@
   <wsdl:message name="requestMessage1">
      <wsdl:part name="requestMessageData" type="types1:testMessage"/>
   </wsdl:message>
-   
+
   <wsdl:message name="replyMessage1">
     <wsdl:part name="replyID" type="xsd:string"/>
     <wsdl:part name="replyText" type="xsd:string"/>
   </wsdl:message>
-   
+
 
    <!-- portType supported by the test2 process -->
 
@@ -71,7 +71,7 @@
       <wsdl:output message="replyMessage1"/>
     </wsdl:operation>
   </wsdl:portType>
-  
+
   <wsdl:binding name="TestXPathNamespace1Binding" type="tns:TestXPathNamespace1PT">
     <wsdl:operation name="request">
     </wsdl:operation>

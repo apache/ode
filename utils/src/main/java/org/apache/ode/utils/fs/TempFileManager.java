@@ -34,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
  * Convenience class for managing temporary files and cleanup on JVM exit.
  */
 public class TempFileManager {
-  
+
   private static final Log __log = LogFactory.getLog(TempFileManager.class);
 
   private static TempFileManager __singleton;
@@ -90,7 +90,7 @@ public class TempFileManager {
       throw new IllegalStateException("The security configuration is preventing the creation of a "
           + "temporary working directory.", se);
     }
-  
+
   }
 
   /**
@@ -129,14 +129,14 @@ public class TempFileManager {
       throw new IllegalStateException(msg);
     }
   }
-  
+
   /**
    * <p>
    * Get a temporary file, if possible, and register it for cleanup later.  In the
    * event that a temporary file cannot be created, the method will attempt to
    * create a file in the current working directory instead.
    * </p>
-   * 
+   *
    * @param handle a prefix to use in naming the file; probably only useful for
    * debugging.
    * @return the temporary file.
@@ -164,7 +164,7 @@ public class TempFileManager {
       tmp = File.createTempFile(handle + Long.toHexString(System.currentTimeMillis()), ".tmp", parent);
     } catch (IOException ioe) {
       __log.error("Unable to create temporary file in working directory " +
-          (parent == null ? "<null>; " : (parent.getPath() + "; ")) + 
+          (parent == null ? "<null>; " : (parent.getPath() + "; ")) +
           "falling back to current working directory.", ioe);
       tmp = new File(handle + new GUID().toString());
     }
@@ -172,12 +172,12 @@ public class TempFileManager {
     registerTemporaryFile(tmp);
     return tmp;
   }
-  
+
   /**
    * <p>
    * Get a temporary working directory.
    * </p>
-   * 
+   *
    * @param handle a prefix to use in naming the directory.
    * @return the temp directory.
    * @see #getTemporaryFile(String)

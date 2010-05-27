@@ -74,9 +74,9 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
     }
 
     public Serializable getId() {
-        return _id; 
+        return _id;
     }
-    
+
     public void setId(Long id) {
         _id = id;
     }
@@ -136,12 +136,12 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
         getEM().createNamedQuery(CorrelatorDAOImpl.DELETE_CORRELATORS_BY_PROCESS).setParameter("process", this).executeUpdate();
 
         deleteInstances(Integer.MAX_VALUE);
-        
+
         // delete process dao
         getEM().remove(this); // This deletes CorrelatorDAO
         getEM().flush();
     }
-    
+
     private int deleteInstances(int transactionSize) {
         if(__log.isDebugEnabled()) __log.debug("Cleaning up process data.");
 
@@ -150,7 +150,7 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
         deleteMessages();
         deleteVariables();
         deleteProcessInstances();
-        
+
         return 0;
     }
 

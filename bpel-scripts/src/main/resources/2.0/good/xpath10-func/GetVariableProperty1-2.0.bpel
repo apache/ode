@@ -28,11 +28,11 @@ bpws:getVariableProperty Test Case
   xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   xmlns:test="uri:testing">
-  
+
   <import importType="http://schemas.xmlsoap.org/wsdl/"
       location="../test.wsdl"
       namespace="uri:testing" />
-      
+
   <partnerLinks>
     <partnerLink name="testPartnerLink"
       partnerLinkType="test:PartnerLinkType1"

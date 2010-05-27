@@ -23,7 +23,7 @@
        xmlns:util="http://www.springframework.org/schema/util"
        xmlns:jencks="http://jencks.org/2.0"
        xmlns:mws="http://ode/bpel/unit-test.wsdl"
-       xmlns:ws="http://playmobile.pl/process/mnpm/portIn" 
+       xmlns:ws="http://playmobile.pl/process/mnpm/portIn"
        xmlns:sem="http://playmobile.pl/service/mnpm"
        xmlns:bpel="http://sample.bpel.org/bpel/sample"
        >
@@ -32,9 +32,9 @@
         <entry key="java:comp/env/jdbc/ode" value-ref="odeDS"/>
     </util:map>
 
-    <sm:container 
-        id="jbi" 
-        embedded="true" 
+    <sm:container
+        id="jbi"
+        embedded="true"
         rootDir="target/test/smx"
         transactionManager="#transactionManager"
         depends-on="jndi"
@@ -93,10 +93,10 @@
                 <sm:component>
                     <http:component>
                         <http:endpoints>
-                            <http:endpoint 
+                            <http:endpoint
                                 service="bpel:EPRTest2"
-                                endpoint="http" 
-                                role="consumer" 
+                                endpoint="http"
+                                role="consumer"
                                 locationURI="http://localhost:8198/EPRTest2/"
                                 defaultMep="http://www.w3.org/2004/08/wsdl/in-out"
                                 defaultOperation="opInOut"

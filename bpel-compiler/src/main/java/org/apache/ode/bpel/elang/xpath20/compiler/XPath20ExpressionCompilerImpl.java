@@ -141,8 +141,8 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
         }
 
         out.xpath = xpathStr;
-        try {        	
-            __log.debug("Compiling expression " + xpathStr);            
+        try {
+            __log.debug("Compiling expression " + xpathStr);
             XPathFactory xpf = new XPathFactoryImpl();
             JaxpFunctionResolver funcResolver = new JaxpFunctionResolver(
                     _compilerContext, out, source.getNamespaceContext(), _bpelNS);
@@ -150,20 +150,20 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
             XPath xpe = xpf.newXPath();
             xpe.setXPathFunctionResolver(funcResolver);
             xpe.setXPathVariableResolver(varResolver);
-            xpe.setNamespaceContext(source.getNamespaceContext());            
+            xpe.setNamespaceContext(source.getNamespaceContext());
             XPathExpression expr = xpe.compile(xpathStr);
             // evaluate the expression so as to initialize the variables
-            try { 
-                expr.evaluate(node);            	
-            } catch (XPathExpressionException xpee) { 
-                // swallow errors caused by uninitialized variable 
+            try {
+                expr.evaluate(node);
+            } catch (XPathExpressionException xpee) {
+                // swallow errors caused by uninitialized variable
             }
             for (String varExpr : extractVariableExprs(xpathStr)) {
                 expr = xpe.compile(varExpr);
                 try {
                     expr.evaluate(node);
                 } catch (XPathExpressionException xpee) {
-                    // swallow errors caused by uninitialized variable 
+                    // swallow errors caused by uninitialized variable
                 }
             }
             for (String functionExpr : extractFunctionExprs(xpathStr)) {
@@ -171,7 +171,7 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
                 try {
                     expr.evaluate(node);
                 } catch (XPathExpressionException xpee) {
-                    // swallow errors caused by uninitialized variable 
+                    // swallow errors caused by uninitialized variable
                 }
             }
         } catch (XPathExpressionException e) {
@@ -188,21 +188,21 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
 
     /**
      * Returns the list of variable references in the given XPath expression
-     * that may not have been resolved properly, which is the case especially 
+     * that may not have been resolved properly, which is the case especially
      * if the expression contains a function, which short circuited the evaluation.
-     *  
+     *
      * @param xpathStr
      * @return list of variable expressions that may not have been resolved properly
      */
-    private List<String> extractVariableExprs(String xpathStr) {    	
+    private List<String> extractVariableExprs(String xpathStr) {
         ArrayList<String> variableExprs = new ArrayList<String>();
-        int firstVariable = xpathStr.indexOf("$"), 
+        int firstVariable = xpathStr.indexOf("$"),
             lastVariable = xpathStr.lastIndexOf("$"),
-            firstFunction = xpathStr.indexOf("("); 
+            firstFunction = xpathStr.indexOf("(");
         StringBuffer variableExpr = new StringBuffer();
         if ((firstVariable > 0 && // the xpath references a variable
                 firstFunction > 0) || // the xpath contains a function
-            (firstVariable < lastVariable)) { // the xpath references multiple variables  
+            (firstVariable < lastVariable)) { // the xpath references multiple variables
             // most likely, the variable reference has not been resolved, so make that happen
             boolean quoted = false, doubleQuoted = false, variable = false;
             Name11Checker nameChecker = Name11Checker.getInstance();
@@ -228,7 +228,7 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
                         if (ch == ':') {
                             continue;
                         }
-                        if (index == xpathStr.length() || 
+                        if (index == xpathStr.length() ||
                                 !nameChecker.isQName(variableExpr.substring(1))) {
                             variable = false;
                             variableExpr.setLength(variableExpr.length() - 1);
@@ -247,22 +247,22 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
 
     /**
      * Returns the list of function references in the given XPath expression
-     * that may not have been resolved properly, which is the case especially 
+     * that may not have been resolved properly, which is the case especially
      * if the expression contains a preceding function, which short circuited the evaluation.
-     *  
+     *
      * @param xpathStr
      * @return list of function expressions that may not have been resolved properly
      */
-    private List<String> extractFunctionExprs(String xpathStr) {    	
-        ArrayList<String> functionExprs = new ArrayList<String>(); 
+    private List<String> extractFunctionExprs(String xpathStr) {
+        ArrayList<String> functionExprs = new ArrayList<String>();
         // Match the prefix : function name ( all contents except the ) and the closing )'s that may occur
         final String FUNCTION_REGEX = "\\w+:\\w+\\([.[^\\)]]*\\)*";
-        int firstFunction = xpathStr.indexOf("("), 
-            lastFunction = xpathStr.lastIndexOf("("); 
+        int firstFunction = xpathStr.indexOf("("),
+            lastFunction = xpathStr.lastIndexOf("(");
         if ((firstFunction > 0 && firstFunction < lastFunction)) {
             Pattern regex = Pattern.compile(FUNCTION_REGEX);
             Matcher matcher = regex.matcher(xpathStr);
-            
+
             while (matcher.find()) {
                 String function = matcher.group();
                 functionExprs.add(function);
@@ -270,7 +270,7 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
         }
         return functionExprs;
     }
-    
+
     public Map<String, String> getProperties() {
         return _properties;
     }

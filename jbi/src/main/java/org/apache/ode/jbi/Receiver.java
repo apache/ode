@@ -62,7 +62,7 @@ public class Receiver implements Runnable {
 
     /**
      * Constructor for creating instance of this class.
-     * 
+     *
      * @param context
      *            for receiving environment parameters.
      */

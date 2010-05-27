@@ -51,25 +51,25 @@ public class CronScheduler {
     private final long TOLERABLE_SCHEDULE_DELAY = 0;
 
     private ExecutorService _scheduledTaskExec;
-    
+
     private Contexts _contexts;
-    
+
     private final Timer _schedulerTimer = new Timer("CronScheduler", true);
 
     private final Collection<TerminationListener> _systemTerminationListeners = new ArrayList<TerminationListener>();
-    
+
     private final Map<QName, Collection<TerminationListener>> _terminationListenersByPid = new HashMap<QName, Collection<CronScheduler.TerminationListener>>();
-    
+
     private volatile boolean _shuttingDown = false;
-    
+
     public void setScheduledTaskExec(ExecutorService taskExec) {
         _scheduledTaskExec = taskExec;
     }
-    
+
     public void setContexts(Contexts _contexts) {
         this._contexts = _contexts;
     }
-    
+
     public void shutdown() {
         _shuttingDown = true;
         _schedulerTimer.cancel();
@@ -86,10 +86,10 @@ public class CronScheduler {
         }
         _terminationListenersByPid.clear();
     }
-    
+
     public void cancelProcessCronJobs(QName pid, boolean undeployed) {
         assert pid != null;
-        
+
         if( __log.isInfoEnabled() ) __log.info("Cancelling PROCESS CRON jobs for: " + pid);
         Collection<TerminationListener> listenersToTerminate = new ArrayList<TerminationListener>();
 
@@ -103,7 +103,7 @@ public class CronScheduler {
                 _terminationListenersByPid.remove(pid);
             }
         }
-        
+
         // terminate existing cron jobs if there are
         synchronized( pid ) {
             for( TerminationListener listener : listenersToTerminate ) {
@@ -111,19 +111,19 @@ public class CronScheduler {
             }
         }
     }
-    
+
     public void scheduleProcessCronJobs(QName pid, ProcessConf pconf) {
         if( _shuttingDown ) {
             return;
         }
         assert pid != null;
-        
+
         cancelProcessCronJobs(pid, false);
         Collection<TerminationListener> newListeners = new ArrayList<TerminationListener>();
-        
+
         synchronized( pid ) {
             if( __log.isInfoEnabled() ) __log.info("Scheduling PROCESS CRON jobs for: " + pid);
-            
+
             // start new cron jobs
             for( final CronJob job : pconf.getCronJobs() ) {
                 if( __log.isDebugEnabled() ) __log.debug("Scheduling PROCESS CRON job: " + job.getCronExpression() + " for: " + pid);
@@ -149,8 +149,8 @@ public class CronScheduler {
                 newListeners.add(schedule(job.getCronExpression(), runnable, null, null));
             }
         }
-        
-        // make sure the pid does not get into the terminationListener map if no cron is setup 
+
+        // make sure the pid does not get into the terminationListener map if no cron is setup
         if( !newListeners.isEmpty() ) {
             synchronized( _terminationListenersByPid ) {
                 Collection<TerminationListener> oldListeners = _terminationListenersByPid.get(pid);
@@ -162,7 +162,7 @@ public class CronScheduler {
             }
         }
     }
-    
+
     public void refreshSystemCronJobs(SystemSchedulesConfig systemSchedulesConf) {
         if( _shuttingDown ) {
             return;
@@ -174,13 +174,13 @@ public class CronScheduler {
             try {
                 // if error thrown on reading the schedules.xml, do not cancel existing cron jobs
                 List<CronJob> systemCronJobs = systemSchedulesConf.getSystemCronJobs();
-                
+
                 // cancel cron jobs
                 for( TerminationListener listener : _systemTerminationListeners ) {
                     listener.terminate();
                 }
                 _systemTerminationListeners.clear();
-                
+
                 // start new cron jobs
                 for( final CronJob job : systemCronJobs ) {
                     if( __log.isDebugEnabled() ) __log.debug("Scheduling SYSTEM CRON job:" + job);
@@ -215,8 +215,8 @@ public class CronScheduler {
         }
     }
 
-    public TerminationListener schedule(final CronExpression cronExpression, 
-            final Runnable runnable, final JobDetails runnableDetails, 
+    public TerminationListener schedule(final CronExpression cronExpression,
+            final Runnable runnable, final JobDetails runnableDetails,
             TerminationListener terminationListener) {
         if( _shuttingDown ) {
             __log.info("CRON Scheduler is being shut down. This new scheduling request is ignored.");
@@ -226,23 +226,23 @@ public class CronScheduler {
                 }
             };
         }
-        
+
         assert cronExpression != null;
         assert runnable != null;
-        
+
         final Date nextScheduleTime = cronExpression.getNextValidTimeAfter(new Date(
                 System.currentTimeMillis() + MIN_INTERVAL));
         final CronScheduledJob job = new CronScheduledJob(nextScheduleTime, runnable, runnableDetails, cronExpression, terminationListener);
         if( __log.isDebugEnabled() ) __log.debug("CRON will run in " + (nextScheduleTime.getTime() - System.currentTimeMillis()) + "ms.");
-        
+
         try {
             _schedulerTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     __log.debug("Cron scheduling timer kicked in: " + cronExpression);
-                    // run only if the current node is the coordinator, 
+                    // run only if the current node is the coordinator,
                     // with the SimpleScheduler, the node is always the coordinator
-                    if( !(_contexts.scheduler instanceof ClusterAware) 
+                    if( !(_contexts.scheduler instanceof ClusterAware)
                             || ((ClusterAware)_contexts.scheduler).amICoordinator() ) {
                         // do not hold the timer thread too long, submit the work to an executorService
                         _scheduledTaskExec.submit(job);
@@ -260,11 +260,11 @@ public class CronScheduler {
 
         return job.terminationListener;
     }
-    
+
     public interface TerminationListener {
         void terminate();
     }
-    
+
     private class CronScheduledJob implements Callable<TerminationListener> {
         private volatile boolean terminated = false;
         private Date nextScheduleTime;
@@ -272,7 +272,7 @@ public class CronScheduler {
         private JobDetails runnableDetails;
         private CronExpression cronExpression;
         private TerminationListener terminationListener;
-        
+
         public CronScheduledJob(Date nextScheduleTime,
                 Runnable runnable, JobDetails runnableDetails,
                 CronExpression cronExpression, TerminationListener terminationListener) {
@@ -294,7 +294,7 @@ public class CronScheduler {
             try {
                 if( TOLERABLE_SCHEDULE_DELAY == 0 ||
                     nextScheduleTime.getTime() < System.currentTimeMillis() + TOLERABLE_SCHEDULE_DELAY) {
-                    if( runnableDetails != null && 
+                    if( runnableDetails != null &&
                             runnable instanceof MapSerializableRunnable ) {
                         ((MapSerializableRunnable)runnable).restoreFromDetails(runnableDetails);
                     }
@@ -321,7 +321,7 @@ public class CronScheduler {
                     schedule(cronExpression, runnable, runnableDetails, terminationListener);
                 }
             }
-            
+
             return terminationListener;
         }
     }

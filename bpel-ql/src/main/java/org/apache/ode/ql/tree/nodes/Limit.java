@@ -21,7 +21,7 @@ package org.apache.ode.ql.tree.nodes;
 
 public class Limit implements Node {
     private static final long serialVersionUID = -2717124113311491484L;
-    
+
     private int number;
 
     /**
@@ -45,6 +45,6 @@ public class Limit implements Node {
     public void setNumber(int number) {
         this.number = number;
     }
-    
-    
+
+
 }

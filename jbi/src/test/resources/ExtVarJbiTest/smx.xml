@@ -23,19 +23,19 @@
        xmlns:util="http://www.springframework.org/schema/util"
        xmlns:jencks="http://jencks.org/2.0"
        >
-  <jencks:poolingSupport 
-            id="poolingSupport2" 
+  <jencks:poolingSupport
+            id="poolingSupport2"
             connectionMaxIdleMinutes="5"
             poolMaxSize="20"
             />
-  
+
   <jencks:connectionManager
             id="connectionManager2"
             containerManagedSecurity="false"
             transaction="local"
             transactionManager="#transactionManager"
             poolingSupport="#poolingSupport2"
-            connectionTracker="#connectionTracker" 
+            connectionTracker="#connectionTracker"
             />
     <bean id="localDerbyMCF" class="org.tranql.connector.derby.EmbeddedLocalMCF">
         <property name="databaseName" value="target/test/testdb"/>
@@ -47,15 +47,15 @@
         <property name="managedConnectionFactory" ref="localDerbyMCF"/>
         <property name="connectionManager" ref="connectionManager2"/>
     </bean>
-    
+
     <util:map id="jndiEntries">
         <entry key="java:comp/env/jdbc/ode" value-ref="odeDS"/>
         <entry key="testds" value-ref="localDerbyDataSource"/>
     </util:map>
-    
-    <sm:container 
-        id="jbi" 
-        embedded="true" 
+
+    <sm:container
+        id="jbi"
+        embedded="true"
         rootDir="target/test/smx"
         transactionManager="#transactionManager"
         depends-on="jndi"

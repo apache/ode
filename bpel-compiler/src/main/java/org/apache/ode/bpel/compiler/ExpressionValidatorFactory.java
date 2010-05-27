@@ -45,11 +45,11 @@ public class ExpressionValidatorFactory {
             }
         }
     }
-    
+
     public ExpressionValidator getValidator() {
         return _validator;
     }
-    
+
     private static class EmptyValidator implements ExpressionValidator {
         public void bpelImportsLoaded(Process source, CompilerContext compilerContext) throws CompilationException {}
         public void bpelCompilationCompleted(Process source) throws CompilationException {}

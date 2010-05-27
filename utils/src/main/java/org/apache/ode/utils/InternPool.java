@@ -30,8 +30,8 @@ import org.apache.commons.collections.map.MultiKeyMap;
 
 
 /**
- * A key value based cache that internalizes immutable values 
- * so that they can be shared across various BPEL objects. 
+ * A key value based cache that internalizes immutable values
+ * so that they can be shared across various BPEL objects.
  *
   */
 public class InternPool {
@@ -47,9 +47,9 @@ public class InternPool {
     /**
      * Runs the given block in the context of a cache.
      * If you do not run your block this way, the caching
-     * mechanism will be disabled.    
+     * mechanism will be disabled.
      *
-     * @param block block 
+     * @param block block
      */
     public static void runBlock(InternableBlock block) {
         String processId = getProcessId();
@@ -62,7 +62,7 @@ public class InternPool {
     /**
      * Returns an internalized value if it already exists in the cache
      *
-     * @param value value 
+     * @param value value
      *
      * @return the internalized value
      */
@@ -72,7 +72,7 @@ public class InternPool {
         if (!cachedBlocks.contains(processId)) {
             return value;
         }
-        
+
         synchronized (cachedValues) {
             List values = (List) cachedValues.get(processId, key);
             if (values == null) {
@@ -83,7 +83,7 @@ public class InternPool {
             if (values.contains(value)) {
                 intern = values.get(values.indexOf(value));
             } else {
-                values.add(intern = value);            	
+                values.add(intern = value);
             }
 
             return intern;
@@ -93,7 +93,7 @@ public class InternPool {
     /**
      * Clears all the values corresponding to the given process
      *
-     * @param processId processId 
+     * @param processId processId
      */
     protected static void clearAll(String processId) {
         synchronized (cachedValues) {
@@ -112,7 +112,7 @@ public class InternPool {
 
     /**
      * An interface that clients should implement to run their
-     * blocks of code in the context of this caching mechanism. 
+     * blocks of code in the context of this caching mechanism.
      */
     public interface InternableBlock {
         /**

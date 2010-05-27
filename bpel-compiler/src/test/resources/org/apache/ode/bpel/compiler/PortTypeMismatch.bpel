@@ -23,30 +23,30 @@
     xmlns:tns="http://ode/test/compile"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:test="http://ode/test/compile.wsdl">
-    
+
     <partnerLinks>
-        <partnerLink name="testPartnerLink" 
-            partnerLinkType="test:TestPartnerLinkType" 
+        <partnerLink name="testPartnerLink"
+            partnerLinkType="test:TestPartnerLinkType"
             myRole="me" />
     </partnerLinks>
     <variables>
-        <variable name="var1" 
+        <variable name="var1"
             messageType="test:TestMessage1" />
-        <variable name="var2" 
+        <variable name="var2"
             messageType="test:TestMessage2" />
     </variables>
     <flow>
        <sequence>
-           <receive 
+           <receive
                   name="testReceive"
                   partnerLink="testPartnerLink"
                   portType="test:BogusPortType"
                   operation="testOperation"
                   variable="var1"/>
-           <reply name="testReply" 
+           <reply name="testReply"
                   operation="testOperation"
                   partnerLink="testPartnerLink"
-                  portType="test:TestPortType" 
+                  portType="test:TestPortType"
                   variable="var2"/>
        </sequence>
     </flow>

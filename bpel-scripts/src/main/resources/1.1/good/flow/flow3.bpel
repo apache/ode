@@ -33,7 +33,7 @@
     </variables>
     <sequence>
         <receive name="startReceive" partnerLink="testPartnerLink" portType="test:TestPortType"
-          createInstance="yes" 
+          createInstance="yes"
             operation="testOperation" variable="var1"/>
         <flow>
             <links>

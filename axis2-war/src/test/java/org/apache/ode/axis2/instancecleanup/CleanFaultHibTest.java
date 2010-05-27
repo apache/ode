@@ -24,9 +24,9 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 public class CleanFaultHibTest extends CleanFaultTest {
     @Override
     public String getODEConfigDir() {
-        return HIB_DERBY_CONF_DIR; 
+        return HIB_DERBY_CONF_DIR;
     }
-    
+
     @Override
     protected ProcessInstanceDAO getInstance() {
         return HibDaoConnectionFactoryImpl.getInstance();

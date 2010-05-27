@@ -34,7 +34,7 @@ import org.apache.ode.bpel.pmapi.TScopeStatus;
  */
 class ProcessStatusConverter {
 
-  /** 
+  /**
    * A mapping from the interface status codes, to the internal ODE status codes.
    */
   private final Map<TInstanceStatus.Enum, BitSet> __interfaceStatusCodeToInternalStatusCodeMap =
@@ -44,11 +44,11 @@ class ProcessStatusConverter {
    * One-to-one map between internal/external representation of the scope
    * status codes.
    */
-  private final Map<ScopeStateEnum, TScopeStatus.Enum> __scopeStateMap = 
+  private final Map<ScopeStateEnum, TScopeStatus.Enum> __scopeStateMap =
     new HashMap<ScopeStateEnum, TScopeStatus.Enum>();
-  
+
   ProcessStatusConverter() {
-    
+
     for (int i = 0 ; i < ProcessState.ALL_STATES.length; ++i){
         short pistate = ProcessState.ALL_STATES[i];
         TInstanceStatus.Enum intstc = cvtInstanceStatus(pistate);
@@ -59,14 +59,14 @@ class ProcessStatusConverter {
         }
         bset.set(pistate);
     }
-  
+
     __scopeStateMap.put(ScopeStateEnum.ACTIVE, TScopeStatus.ACTIVE);
     __scopeStateMap.put(ScopeStateEnum.COMPLETED,TScopeStatus.COMPLETED);
     __scopeStateMap.put(ScopeStateEnum.FAULT,TScopeStatus.FAULTED);
-    
+
   }
-  
-  
+
+
   /**
    * Convert instance status from the internal database representation to
    * the process management API enumerations.
@@ -94,20 +94,20 @@ class ProcessStatusConverter {
     // The above should have been exhaustive.
     throw new ProcessingException("Encountered unexpected instance state: " + instancestate);
   }
-  
 
-  
+
+
   /**
-   * The inverse of the above function. The above is not one-to-one, so this 
-   * functions returns a set. 
-   * @param status instance status (interface representation) 
+   * The inverse of the above function. The above is not one-to-one, so this
+   * functions returns a set.
+   * @param status instance status (interface representation)
    * @return internal states corresponding to the requested interface representation.
    */
   short[] cvtInstanceStatus(TInstanceStatus.Enum status) {
     BitSet bset = __interfaceStatusCodeToInternalStatusCodeMap.get(status);
     if (bset == null)
         return new short[0];
-    
+
     short ret[] = new short[bset.cardinality()];
     for (int i = 0; i < ret.length; ++i) {
         ret[i] = (short)bset.nextSetBit(i==0?0:ret[i-1]+1);
@@ -115,10 +115,10 @@ class ProcessStatusConverter {
 
     return ret;
   }
-  
-  
+
+
   /**
-   * Convert the internal scope state to the external representation. 
+   * Convert the internal scope state to the external representation.
    * @param status
    * @return
    */

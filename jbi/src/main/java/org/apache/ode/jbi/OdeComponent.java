@@ -34,12 +34,12 @@ public class OdeComponent implements Component {
     private OdeLifeCycle _lifeCycle;
 
     public OdeComponent() {
-        this(new OdeLifeCycle());        
+        this(new OdeLifeCycle());
     }
 
     public OdeComponent(OdeLifeCycle lifeCycle) {
         _lifeCycle = lifeCycle;
-    }   
+    }
 
     public ComponentLifeCycle getLifeCycle() {
         return _lifeCycle;
@@ -50,9 +50,9 @@ public class OdeComponent implements Component {
     }
 
     /**
-     * 
+     *
      * @param ref ServiceEndpoint object
-     * 
+     *
      * @return Descriptor Object implementing
      *         {@link javax.jbi.servicedesc.Descriptor} interface.
      */
@@ -72,7 +72,7 @@ public class OdeComponent implements Component {
      * Note that JBI assures matches on capability names only; it is the
      * responsibility of this method to examine capability values to ensure a
      * match with the consumer.
-     * 
+     *
      * @param endpoint
      *          the endpoint to be used by the consumer
      * @param exchange
@@ -96,7 +96,7 @@ public class OdeComponent implements Component {
      * Note that JBI assures matches on capability names only; it is the
      * responsibility of this method to examine capability values to ensure a
      * match with the provider.
-     * 
+     *
      * @param exchange
      *          the proposed message exchange to be performed
      * @return true if this consumer component can interact with the described
@@ -110,7 +110,7 @@ public class OdeComponent implements Component {
      * Resolve the given endpoint reference, given the capabilities of the given
      * consumer. This is called by JBI when it is attempting to resolve the given
      * endpoint reference on behalf of a component.
-     * 
+     *
      * @param epr
      *          the endpoint reference, in some XML dialect understood by the
      *          appropriate component (usually a Binding Component).

@@ -37,7 +37,7 @@
     <import location="../ProbeService/probeService.wsdl"
         namespace="http://ode/bpel/unit-test/ProbeService.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/"/>
-    
+
 
   <partnerLinks>
     <partnerLink name="request1" partnerLinkType="wns:NegativeInitializationTestRequest" myRole="NegativeInitializationTestService"/>
@@ -45,11 +45,11 @@
   </partnerLinks>
 
   <variables>
-    <variable name="request" 
+    <variable name="request"
                messageType="wns:requestMessage"/>
-    <variable name="probeInput" 
+    <variable name="probeInput"
                messageType="prb:probeMessage"/>
-    <variable name="reply" 
+    <variable name="reply"
                messageType="wns:replyMessage"/>
   </variables>
 
@@ -58,7 +58,7 @@
   </correlationSets>
 
   <sequence>
-    
+
   <scope name="scopeOne">
     <eventHandlers>
 
@@ -78,12 +78,12 @@
                             </from>
                             <to variable="probeInput" part="probeName"/>
                         </copy>
-                    </assign> 
+                    </assign>
 
                     <invoke name="probe" partnerLink="probe"
-                            portType="prb:probeMessagePT" 
+                            portType="prb:probeMessagePT"
                             operation="probe"
-                            inputVariable="probeInput"  
+                            inputVariable="probeInput"
                             outputVariable="probeInput">
                     </invoke>
                 </sequence>
@@ -105,12 +105,12 @@
                             </from>
                             <to variable="probeInput" part="probeName"/>
                         </copy>
-                    </assign> 
+                    </assign>
 
                     <invoke name="probe" partnerLink="probe"
-                            portType="prb:probeMessagePT" 
+                            portType="prb:probeMessagePT"
                             operation="probe"
-                            inputVariable="probeInput"  
+                            inputVariable="probeInput"
                             outputVariable="probeInput">
                     </invoke>
                 </sequence>
@@ -121,18 +121,18 @@
     </eventHandlers>
 
   <sequence>
-        
+
     <receive name="receive1" partnerLink="request1"
-        portType="wns:NegativeInitializationTestPT" 
+        portType="wns:NegativeInitializationTestPT"
         operation="request" variable="request"
         createInstance="yes">
         <correlations>
             <correlation set="testCorr1" initiate="yes"/>
         </correlations>
     </receive>
-    
+
         <!-- Copy input variables to internal accumulators -->
-     
+
         <assign name="assign1">
           <copy>
             <from variable="request" property="wns:testProbeID"/>
@@ -142,8 +142,8 @@
             <from variable="request" property="wns:testProbeData"/>
             <to variable="probeInput" part="probeData"/>
           </copy>
-        </assign>   
-    
+        </assign>
+
 
       <assign>
             <copy>
@@ -152,19 +152,19 @@
                 </from>
                     <to variable="probeInput" part="probeName"/>
             </copy>
-      </assign> 
+      </assign>
 
        <invoke name="probe" partnerLink="probe"
-                portType="prb:probeMessagePT" 
+                portType="prb:probeMessagePT"
                 operation="probe"
-                inputVariable="probeInput"  
+                inputVariable="probeInput"
                 outputVariable="probeInput">
        </invoke>
-       
+
     <!-- block the process here while test messages are sent to the eventHandlers -->
-       
+
         <receive name="receive2" partnerLink="request1"
-            portType="wns:NegativeInitializationTestPT" 
+            portType="wns:NegativeInitializationTestPT"
                  operation="continue1" variable="request">
         <correlations>
             <correlation set="testCorr1"/>
@@ -181,17 +181,17 @@
                 </from>
                 <to variable="probeInput" part="probeName"/>
             </copy>
-      </assign> 
+      </assign>
 
        <invoke name="probe" partnerLink="probe"
-                portType="prb:probeMessagePT" 
+                portType="prb:probeMessagePT"
                 operation="probe"
-                inputVariable="probeInput"  
+                inputVariable="probeInput"
                 outputVariable="probeInput">
        </invoke>
 
         <receive name="receive3" partnerLink="request1"
-            portType="wns:NegativeInitializationTestPT" 
+            portType="wns:NegativeInitializationTestPT"
                  operation="continue2" variable="request">
         <correlations>
             <correlation set="testCorr1"/>
@@ -205,12 +205,12 @@
                 </from>
                 <to variable="probeInput" part="probeName"/>
             </copy>
-        </assign> 
+        </assign>
 
        <invoke name="probe" partnerLink="probe"
-                portType="prb:probeMessagePT" 
+                portType="prb:probeMessagePT"
                 operation="probe"
-                inputVariable="probeInput"  
+                inputVariable="probeInput"
                 outputVariable="probeInput">
        </invoke>
       <assign name="assign2">
@@ -222,11 +222,11 @@
             <from variable="probeInput" part="probeData"/>
             <to variable="reply" part="replyText"/>
           </copy>
-      </assign> 
-        
-    <reply name="reply" partnerLink="request1" portType="wns:NegativeInitializationTestPT" 
-               operation="continue2" variable="reply"> 
+      </assign>
+
+    <reply name="reply" partnerLink="request1" portType="wns:NegativeInitializationTestPT"
+               operation="continue2" variable="reply">
       </reply>
-  
+
   </sequence>
 </process>

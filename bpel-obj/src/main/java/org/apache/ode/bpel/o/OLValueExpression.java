@@ -19,9 +19,9 @@
 package org.apache.ode.bpel.o;
 
 public abstract class OLValueExpression extends OExpression {
-    
+
     private static final long serialVersionUID = 1L;
-    
+
     /**
      * Indicates whether the expression, if it is a simple path, must
      * be created if missing By a simple path, we mean a path expression whose
@@ -29,14 +29,14 @@ public abstract class OLValueExpression extends OExpression {
      * the steps in the simple path is non-existent, then we must create it.
      */
     public boolean insertMissingData;
-    
+
     /**
      * @param owner
      */
     public OLValueExpression(OProcess owner) {
         super(owner);
     }
-    
+
     public abstract OScope.Variable getVariable();
 
 }

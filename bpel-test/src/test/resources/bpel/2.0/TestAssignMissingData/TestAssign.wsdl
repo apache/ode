@@ -28,10 +28,10 @@
     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
     xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
     xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
-    
+
     <types>
         <xsd:schema
-            targetNamespace="http://ode/bpel/unit-testAssign1.wsdl">		
+            targetNamespace="http://ode/bpel/unit-testAssign1.wsdl">
                 <xsd:complexType name="foo">
                     <xsd:sequence minOccurs="0">
                         <xsd:element name="bar" type="xsd:string"/>
@@ -47,7 +47,7 @@
     <wsdl:message name="TestAssignMessageOut">
         <wsdl:part name="TestPart" element="xsd:string"/>
     </wsdl:message>
-    
+
     <wsdl:portType name="TestAssignPortType">
         <wsdl:operation name="testAssign">
             <wsdl:input message="tns:TestAssignMessageIn" name="TestIn"/>

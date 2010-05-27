@@ -61,12 +61,12 @@
                 <sp:UsernameToken sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient" />
           </wsp:Policy>
         </sp:SignedSupportingTokens>
-        
-        <ramp:RampartConfig xmlns:ramp="http://ws.apache.org/rampart/policy"> 
+
+        <ramp:RampartConfig xmlns:ramp="http://ws.apache.org/rampart/policy">
             <ramp:user>alice</ramp:user>
             <ramp:passwordCallbackClass>org.apache.rampart.samples.policy.sample01.PWCBHandler</ramp:passwordCallbackClass>
         </ramp:RampartConfig>
-        
+
       </wsp:All>
     </wsp:ExactlyOne>
 </wsp:Policy>

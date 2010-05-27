@@ -203,7 +203,7 @@ class MockBpelServer {
                     getClass().getName(),
                     getClass().getClassLoader());
 
-        
+
             EmbeddedLocalMCF mcf = new org.tranql.connector.derby.EmbeddedLocalMCF();
             mcf.setCreateDatabase(true);
             mcf.setDatabaseName("target/testdb");
@@ -211,8 +211,8 @@ class MockBpelServer {
             mcf.setPassword("");
             _dataSource = (DataSource) mcf.createConnectionFactory(connectionManager);
             return _dataSource;
-        
-        
+
+
 //        d = org.tranql.connector.jdbc.JDBCDriverMCF();
 //        EmbeddedXADataSource ds = new EmbeddedXADataSource();
 //        ds.setCreateDatabase("create");
@@ -240,7 +240,7 @@ class MockBpelServer {
         if (_dataSource == null)
             throw new RuntimeException("No data source");
 
-//        
+//
 //        BpelDAOConnectionFactoryJDBC daoCF = new BPELDAOConnectionFactoryImpl();
 //        daoCF.setDataSource(_dataSource);
 //        daoCF.setTransactionManager(_txManager);
@@ -372,7 +372,7 @@ class MockBpelServer {
         public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
             return _scheduler.execTransaction(transaction, 0);
         }
-        
+
         public <T> T execTransaction(Callable<T> transaction, int timeout) throws Exception, ContextException {
             return _scheduler.execTransaction(transaction, timeout);
         }

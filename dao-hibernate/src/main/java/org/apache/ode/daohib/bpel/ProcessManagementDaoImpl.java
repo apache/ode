@@ -52,7 +52,7 @@ public class ProcessManagementDaoImpl extends HibernateDao implements ProcessMan
         }
         return result;
     }
-    
+
     public Map<String, FailedSummaryValue> findFailedCountAndLastFailedDateForProcessIds(Set<String> pids) {
         Map<String, FailedSummaryValue> result = new HashMap<String, FailedSummaryValue>();
         if (!pids.isEmpty()) {

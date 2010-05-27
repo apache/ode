@@ -25,7 +25,7 @@ import java.util.Date;
 /**
  * DAO interface for a "deployment unit", a collection of processes deployed as a single
  * unit.
- * 
+ *
  * @author mszefler
  *
  */
@@ -36,16 +36,16 @@ public interface DeploymentUnitDAO {
      * @return du name
      */
     String getName();
-    
+
     /**
-     * Get the deployment unit directory path. 
+     * Get the deployment unit directory path.
      * @return deployment unit directory path
      */
     String getDeploymentUnitDir();
-    
-    
+
+
     void setDeploymentUnitDir(String dir);
-    
+
     /**
      * Get the collection of processes that are deployed as part of this deployment unit.
      * @return
@@ -64,7 +64,7 @@ public interface DeploymentUnitDAO {
      */
     String getDeployer();
 
-    
+
     /**
      * Delete this deployment unit (deletes all the children).
      */
@@ -73,5 +73,5 @@ public interface DeploymentUnitDAO {
     ProcessConfDAO createProcess(QName pid, QName type, long version);
 
     ProcessConfDAO getProcess(QName pid);
-    
+
 }

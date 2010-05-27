@@ -20,7 +20,7 @@ package org.apache.ode.utils.stl;
 
 /**
  * Equality comparison unary function, compares against a constant value.
- * 
+ *
  * <p>
  * Created on Feb 4, 2004 at 5:15:38 PM.
  * </p>

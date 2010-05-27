@@ -63,7 +63,7 @@ import org.w3c.dom.Element;
 
 public abstract class BPELTestAbstract {
     public static final long WAIT_BEFORE_INVOKE_TIMEOUT = 2000;
-    
+
     private static final String SHOW_EVENTS_ON_CONSOLE = "no";
 
     protected BpelServerImpl _server;
@@ -234,7 +234,7 @@ public abstract class BPELTestAbstract {
             final String operation = testProps.getProperty("operation");
 
             Boolean sequential = Boolean.parseBoolean(testProps.getProperty("sequential", "false"));
-            
+
             Invocation last = null;
             for (int i = 1; testProps.getProperty("request" + i) != null; i++) {
                 final String in = testProps.getProperty("request" + i);
@@ -250,7 +250,7 @@ public abstract class BPELTestAbstract {
     protected Invocation addInvoke(String id, QName target, String operation, String request, String responsePattern) throws Exception {
         return addInvoke(id, target, operation, request, responsePattern, null);
     }
-    
+
     protected Invocation addInvoke(String id, QName target, String operation, String request, String responsePattern, Invocation synchronizeWith)
             throws Exception {
 
@@ -374,7 +374,7 @@ public abstract class BPELTestAbstract {
             testThread.join();
 
     }
-    
+
     protected long getWaitBeforeInvokeTimeout() {
         return WAIT_BEFORE_INVOKE_TIMEOUT;
     }
@@ -415,7 +415,7 @@ public abstract class BPELTestAbstract {
     }
 
     /**
-     * Override this to provide configuration properties for Ode extensions 
+     * Override this to provide configuration properties for Ode extensions
      * like BpelEventListeners.
      *
      * @return
@@ -495,10 +495,10 @@ public abstract class BPELTestAbstract {
 
         /** for sync invocations */
         public Invocation synchronizeWith;
-        
+
         /** checking completion */
         public boolean done = false;
-        
+
         /** Name of the operation to invoke. */
         public String operation;
 
@@ -569,7 +569,7 @@ public abstract class BPELTestAbstract {
                 }
             }
         }
-        
+
         public void run2() {
             final MyRoleMessageExchange mex;
             final Future<MessageExchange.Status> running;
@@ -579,7 +579,7 @@ public abstract class BPELTestAbstract {
                 Thread.sleep(_invocation.invokeDelayMs);
             } catch (Exception ex) {
             }
-            
+
             if (_invocation.synchronizeWith != null) {
                 synchronized (_invocation.synchronizeWith) {
                     while (!_invocation.synchronizeWith.done) {

@@ -75,9 +75,9 @@ public interface BpelDAOConnection {
      * Insert a BPEL event into the database.
      * @param event a BPEL event
      * @param process associated process (optional)
-     * @param instance associated instance (optional) 
+     * @param instance associated instance (optional)
      */
-    void insertBpelEvent(BpelEvent event, ProcessDAO process, 
+    void insertBpelEvent(BpelEvent event, ProcessDAO process,
             ProcessInstanceDAO instance);
 
     /**
@@ -87,7 +87,7 @@ public interface BpelDAOConnection {
      * @return List of event timestamps of events matching the criteria
      */
     List<Date> bpelEventTimelineQuery(InstanceFilter ifilter, BpelEventFilter efilter);
-    
+
     /**
      * Execute a query to retrieve the BPEL events matching the criteria.
      * @param ifilter instance filter
@@ -103,7 +103,7 @@ public interface BpelDAOConnection {
     Collection<CorrelationSetDAO> getActiveCorrelationSets();
 
     ProcessDAO createTransientProcess(Serializable id);
-    
+
     ProcessDAO createProcess(QName pid, QName type, String guid, long version);
 
     /**
@@ -117,7 +117,7 @@ public interface BpelDAOConnection {
 
     /**
      * Returns an interface for process and instance management.
-     * 
+     *
      * @return a ProcessManagement DAO
      */
     ProcessManagementDAO getProcessManagement();

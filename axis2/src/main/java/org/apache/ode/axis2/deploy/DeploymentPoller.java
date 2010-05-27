@@ -71,9 +71,9 @@ public class DeploymentPoller {
     protected ODEServer _odeServer;
 
     private boolean _onHold = false;
-    
+
     private SystemSchedulesConfig _systemSchedulesConf;
-    
+
     @SuppressWarnings("unchecked")
     private Map<String, WatchDog> dDWatchDogsByPath = new HashMap<String, WatchDog>();
     @SuppressWarnings("unchecked")
@@ -137,25 +137,25 @@ public class DeploymentPoller {
                 }
 
                 WatchDog ddWatchDog = ensureDeployXmlWatchDog(file, deployXml);
-                
+
                 if (deployedMarker.exists()) {
                     checkDeployXmlWatchDog(ddWatchDog);
                     continue;
                 }
-    
+
                 try {
                     deployedMarker.createNewFile();
                 } catch (IOException e1) {
                     __log.error("Error creating deployed marker file, " + file + " will not be deployed");
                     continue;
                 }
-    
+
                 try {
                     _odeServer.getProcessStore().undeploy(file);
                 } catch (Exception ex) {
                     __log.error("Error undeploying " + file.getName());
                 }
-    
+
                 try {
                     Collection<QName> deployed = _odeServer.getProcessStore().deploy(file);
                     __log.info("Deployment of artifact " + file.getName() + " successful: " + deployed );
@@ -178,7 +178,7 @@ public class DeploymentPoller {
                     __log.info("Successfully undeployed " + pkg);
             }
         }
-        
+
         checkSystemCronConfigWatchDog(_systemCronConfigWatchDog);
     }
 
@@ -189,7 +189,7 @@ public class DeploymentPoller {
             ddWatchDog = WatchDog.watchFile(deployXml, new DDWatchDogObserver(deployFolder.getName()));
             dDWatchDogsByPath.put(deployXml.getAbsolutePath(), ddWatchDog);
         }
-        
+
         return ddWatchDog;
     }
 
@@ -205,17 +205,17 @@ public class DeploymentPoller {
     protected SystemSchedulesConfig createSystemSchedulesConfig(File configRoot) {
         return new SystemSchedulesConfig(configRoot);
     }
-    
+
     @SuppressWarnings("unchecked")
     protected WatchDog createSystemCronConfigWatchDog(final CronScheduler cronScheduler) {
-        return WatchDog.watchFile(_systemSchedulesConf.getSchedulesFile(), 
+        return WatchDog.watchFile(_systemSchedulesConf.getSchedulesFile(),
             new WatchDog.DefaultObserver() {
                 public void init() {
                     cronScheduler.refreshSystemCronJobs(_systemSchedulesConf);
                 }
             });
     }
-    
+
     @SuppressWarnings("unchecked")
     protected void checkSystemCronConfigWatchDog(WatchDog ddWatchDog) {
         ddWatchDog.check();
@@ -230,7 +230,7 @@ public class DeploymentPoller {
         public PollingThread() {
             setName("DeploymentPoller");
         }
-        
+
         /** Stop this poller, and block until it terminates. */
         void kill() {
             synchronized (this) {
@@ -287,11 +287,11 @@ public class DeploymentPoller {
     @SuppressWarnings("unchecked")
     protected class DDWatchDogObserver extends WatchDog.DefaultObserver {
         private String deploymentPakage;
-        
+
         public DDWatchDogObserver(String deploymentPakage) {
             this.deploymentPakage = deploymentPakage;
         }
-        
+
         public void init() {
             _odeServer.getProcessStore().refreshSchedules(deploymentPakage);
         }

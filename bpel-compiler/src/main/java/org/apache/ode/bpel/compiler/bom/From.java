@@ -24,7 +24,7 @@ import org.w3c.dom.Element;
  * Marker interface for assignment R-values.
  */
 public class From extends ToFrom {
-    
+
     public From(Element el) {
         super(el);
     }
@@ -44,9 +44,9 @@ public class From extends ToFrom {
             String expr = getAttribute("expression" , null);
             return expr == null  ? null : new Expression11(getElement(),getElement().getAttributeNode("expression"));
         }
-        
+
         return super.getAsExpression();
     }
 
-    
+
 }

@@ -27,17 +27,17 @@
     queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
     expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
     suppressJoinFailure="yes">
-    
+
     <!-- test pick with blocking dynamic key -->
-    
+
     <import location="TestDynamicPick.wsdl"
         namespace="http://ode/bpel/unit-test/TestDynamicPick.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/" />
     <import location="../ProbeService/probeService.wsdl"
         namespace="http://ode/bpel/unit-test/ProbeService.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/"/>
-    
-    
+
+
     <partnerLinks>
         <partnerLink name="request" partnerLinkType="wns:TestDynamicPickRequest" myRole="TestDynamicPickService"/>
         <partnerLink name="probe" partnerLinkType="wns:probeRequest" partnerRole="probeService"  initializePartnerRole="yes"/>

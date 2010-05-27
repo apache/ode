@@ -45,7 +45,7 @@ public class CompensationHandler implements Serializable, Comparable<Compensatio
 
   CompensationHandler(ScopeFrame compensated, CompensationChannel compChannel, long scopeStartTime, long scopeEndTime) {
     assert compChannel != null;
-    
+
     this.compensated = compensated;
     this.compChannel = compChannel;
     this.scopeEndTime = scopeEndTime;

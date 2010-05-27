@@ -68,15 +68,15 @@ public class VersionedRedeployTest extends BPELTestAbstract {
         // clean up deployment and invocations
         _deployments.clear();
         _invocations.clear();
-        
+
         go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-2");
         Assert.assertEquals(1, _cf.getConnection().getProcess(qName1).getNumInstances());
         Assert.assertEquals(1, _cf.getConnection().getProcess(qName2).getNumInstances());
-        
+
         // clean up deployment and invocations
         _deployments.clear();
         _invocations.clear();
-        
+
         go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-3");
         Assert.assertEquals(1, _cf.getConnection().getProcess(qName1).getNumInstances());
         Assert.assertEquals(1, _cf.getConnection().getProcess(qName2).getNumInstances());
@@ -94,7 +94,7 @@ public class VersionedRedeployTest extends BPELTestAbstract {
         // We should have a brand new version 1 with no version 2
         Assert.assertNull(store.getProcessConfiguration(qName1));
         Assert.assertNull(store.getProcessConfiguration(qName3));
-        
+
         Assert.assertEquals(1, _cf.getConnection().getProcess(qName2).getNumInstances());
     }
 

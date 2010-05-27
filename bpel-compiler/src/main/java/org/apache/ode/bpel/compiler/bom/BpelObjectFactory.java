@@ -40,16 +40,16 @@ public class BpelObjectFactory {
 
     private static final Log __log = LogFactory.getLog(BpelObjectFactory.class);
     private static BpelObjectFactory __instance = new BpelObjectFactory();
-    
+
     public static final String WSDL = "http://schemas.xmlsoap.org/wsdl/";
     public static final String XML = "http://www.w3.org/2001/xml.xsd";
-    
+
     private final Map<QName, Class<? extends BpelObject>> _mappings = new HashMap<QName, Class<? extends BpelObject>>();
 
     private Class[] __CTOR = { Element.class };
 
     public BpelObjectFactory() {
-        
+
         //
         // BPEL 2.0 Final Mappings
         //
@@ -247,7 +247,7 @@ public class BpelObjectFactory {
         _mappings.put(Bpel11QNames.QUERY, Query.class);
         _mappings.put(Bpel11QNames.CORRELATIONS, Correlations.class);
         _mappings.put(Bpel11QNames.EVENTHANDLERS, BpelObject.class);
-        
+
         //
         // Extensibility Elements Mappings
         //
@@ -255,7 +255,7 @@ public class BpelObjectFactory {
         _mappings.put(ExtensibilityQNames.FAILURE_HANDLING_RETRY_FOR, FailureHandling.RetryFor.class);
         _mappings.put(ExtensibilityQNames.FAILURE_HANDLING_RETRY_DELAY, FailureHandling.RetryDelay.class);
         _mappings.put(ExtensibilityQNames.FAILURE_HANDLING_FAULT_ON, FailureHandling.FaultOnFailure.class);
-        
+
     }
 
     public static BpelObjectFactory getInstance() {
@@ -275,7 +275,7 @@ public class BpelObjectFactory {
             bo.setURI(uri);
             return bo;
         } catch (Exception ex) {
-            throw new RuntimeException("Internal compiler error", ex); 
+            throw new RuntimeException("Internal compiler error", ex);
         }
     }
 
@@ -283,7 +283,7 @@ public class BpelObjectFactory {
      * Parse a BPEL process found at the input source.
      * @param isrc input source.
      * @return
-     * @throws SAXException 
+     * @throws SAXException
      */
     public Process parse(InputSource isrc, URI systemURI) throws IOException, SAXException {
         XMLReader _xr = XMLParserUtils.getXMLReader();
@@ -297,7 +297,7 @@ public class BpelObjectFactory {
         resolver.register(Bpel20QNames.NS_WSBPEL2_0_FINAL_VARPROP, getClass().getResource("/ws-bpel_varprop.xsd"));
         resolver.register(XML, getClass().getResource("/xml.xsd"));
         resolver.register(WSDL,getClass().getResource("/wsdl.xsd"));
-        resolver.register(Bpel20QNames.NS_WSBPEL_PARTNERLINK_2004_03, 
+        resolver.register(Bpel20QNames.NS_WSBPEL_PARTNERLINK_2004_03,
                 getClass().getResource("/wsbpel_plinkType-draft-Apr-29-2006.xsd"));
         _xr.setEntityResolver(resolver);
         Document doc = DOMUtils.newDocument();
@@ -307,5 +307,5 @@ public class BpelObjectFactory {
         _xr.parse(isrc);
         return (Process) createBpelObject(doc.getDocumentElement(), systemURI);
     }
-   
+
 }

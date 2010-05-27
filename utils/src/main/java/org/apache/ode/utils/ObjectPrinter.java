@@ -21,7 +21,7 @@ package org.apache.ode.utils;
 
 /**
  * Helper class for printing/formatting arbitrary objects.
- * 
+ *
  * <p>
  * Created on Feb 17, 2004 at 3:53:54 PM.
  * </p>

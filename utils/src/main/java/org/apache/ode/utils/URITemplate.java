@@ -196,7 +196,7 @@ public class URITemplate {
     private static String expand(String uriTemplate, Map<String, String> nameValuePairs, boolean preserveUndefinedVar) throws URIException, UnsupportedOperationException {
         Matcher m = PATTERN.matcher(uriTemplate);
         // Strings are immutable in java
-        // so let's use a buffer, and append all substrings between 2 matches and the replacement value for each match 
+        // so let's use a buffer, and append all substrings between 2 matches and the replacement value for each match
         StringBuilder sb = new StringBuilder(uriTemplate.length());
         int prevEnd = 0;
         while (m.find()) {

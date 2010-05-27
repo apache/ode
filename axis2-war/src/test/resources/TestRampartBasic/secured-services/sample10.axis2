@@ -20,7 +20,7 @@
     <module ref="rampart" />
 
     <!-- sample-10 : MTOM optimize encrypted content -->
-    
+
     <parameter name="OutflowSecurity">
       <action>
         <items>Timestamp Signature Encrypt</items>
@@ -30,9 +30,9 @@
         <signatureKeyIdentifier>DirectReference</signatureKeyIdentifier>
         <encryptionKeyIdentifier>DirectReference</encryptionKeyIdentifier>
         <encryptionUser>service</encryptionUser>
-        
+
         <optimizeParts>//xenc:EncryptedData/xenc:CipherData/xenc:CipherValue</optimizeParts>
-        
+
       </action>
     </parameter>
 

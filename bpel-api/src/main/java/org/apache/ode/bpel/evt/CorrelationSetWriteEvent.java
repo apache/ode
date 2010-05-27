@@ -22,7 +22,7 @@ import org.apache.ode.bpel.common.CorrelationKey;
 
 /**
  * Correlation was set event.
- * 
+ *
  */
 public class CorrelationSetWriteEvent extends CorrelationSetEvent {
   private static final long serialVersionUID = 1L;
@@ -35,7 +35,7 @@ public class CorrelationSetWriteEvent extends CorrelationSetEvent {
 
   /**
    * Correlation key.
-   * 
+   *
    * @return Returns the key.
    */
   public CorrelationKey getKey() {

@@ -25,9 +25,9 @@ import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
  * No-Op implementation of the
  * {@link org.apache.ode.bpel.intercept.MessageExchangeInterceptor interface;
  * good for sub-classing.
- * 
+ *
  * @author mszefler
- * 
+ *
  */
 public class NoOpInterceptor implements MessageExchangeInterceptor {
 
@@ -35,7 +35,7 @@ public class NoOpInterceptor implements MessageExchangeInterceptor {
             InterceptorContext ic) throws FailMessageExchangeException,
             FaultMessageExchangeException {
     }
-    
+
     public void onBpelServerInvoked(MyRoleMessageExchange mex,
             InterceptorContext ic) throws FailMessageExchangeException,
             FaultMessageExchangeException {

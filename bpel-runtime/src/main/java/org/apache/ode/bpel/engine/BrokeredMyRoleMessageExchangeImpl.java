@@ -37,7 +37,7 @@ import org.apache.ode.bpel.iapi.ProcessState;
 
 
 /**
- * A reliable MEP that delegates messages to a list of subscribers  
+ * A reliable MEP that delegates messages to a list of subscribers
  *
  * @author $author$
  * @version $Revision$
@@ -50,11 +50,11 @@ public class BrokeredMyRoleMessageExchangeImpl
     /**
      * Creates a new BrokeredReliableMyRoleMessageExchangeImpl object.
      *
-     * @param process 
-     * @param subscribers 
-     * @param mexId 
-     * @param oplink 
-     * @param template 
+     * @param process
+     * @param subscribers
+     * @param mexId
+     * @param oplink
+     * @param template
      */
     public BrokeredMyRoleMessageExchangeImpl(BpelProcess process, BpelEngineImpl engine,
         List<MyRoleMessageExchange> subscribers, MessageExchangeDAO mexDao, MyRoleMessageExchange template) {
@@ -79,13 +79,13 @@ public class BrokeredMyRoleMessageExchangeImpl
         }
         return myFuture;
     }
-    
+
     /**
      * Use the EPR of one of the subscribers as my EPR
      *
      * @return type
      *
-     * @throws BpelEngineException BpelEngineException 
+     * @throws BpelEngineException BpelEngineException
      */
     @Override
     public EndpointReference getEndpointReference() throws BpelEngineException {
@@ -93,7 +93,7 @@ public class BrokeredMyRoleMessageExchangeImpl
     }
 
     /**
-     * Use the response from one of the subscribers as my response 
+     * Use the response from one of the subscribers as my response
      *
      * @return type
      */
@@ -101,34 +101,34 @@ public class BrokeredMyRoleMessageExchangeImpl
     public Message getResponse() {
         return template.getResponse();
     }
-    
+
     @Override
     public Status getStatus() {
         return template.getStatus();
     }
-    
+
     @Override
     public CorrelationStatus getCorrelationStatus() {
         return template.getCorrelationStatus();
     }
-    
+
     @Override
     public int getSubscriberCount() {
         return subscribers != null ? subscribers.size() : 0;
     }
-    
+
     @Override
     public void setSubscriberCount(int subscriberCount) {
         for (MyRoleMessageExchange subscriber : subscribers) {
             ((MyRoleMessageExchangeImpl) subscriber).setSubscriberCount(subscriberCount);
         }
     }
-    
+
     @Override
     public PortType getPortType() {
         return template.getPortType();
     }
-    
+
     @Override
     public Operation getOperation() {
         return template.getOperation();

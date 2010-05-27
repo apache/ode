@@ -139,7 +139,7 @@ public class OPartnerLink extends OBase {
     @SuppressWarnings("unchecked")
     public Set<OScope.CorrelationSet> getJoinningCorrelationSetsForOperation(Operation operation) {
         if (_joiningCorrelationSets == null) return new HashSet();
-        
+
         Set<OScope.CorrelationSet> ret = _joiningCorrelationSets.get(operation.getName());
         if (ret == null) {
             return Collections.EMPTY_SET;
@@ -149,15 +149,15 @@ public class OPartnerLink extends OBase {
 
     @SuppressWarnings("unchecked")
     public Operation getMyRoleOperation(String name) {
-        for (Operation op : (List<Operation>)myRolePortType.getOperations()) 
+        for (Operation op : (List<Operation>)myRolePortType.getOperations())
             if (op.getName().equals(name))
                 return op;
         return null;
     }
-    
+
     @SuppressWarnings("unchecked")
     public Operation getPartnerRoleOperation(String name) {
-        for (Operation op : (List<Operation>)partnerRolePortType.getOperations()) 
+        for (Operation op : (List<Operation>)partnerRolePortType.getOperations())
             if (op.getName().equals(name))
                 return op;
         return null;
@@ -172,6 +172,6 @@ public class OPartnerLink extends OBase {
     public boolean equals(Object obj) {
         if(!(obj instanceof OPartnerLink)) return false;
         OPartnerLink other = (OPartnerLink) obj;
-        return (name == null && other.name == null && super.equals(obj)) || name.equals(other.name);        
+        return (name == null && other.name == null && super.equals(obj)) || name.equals(other.name);
     }
 }

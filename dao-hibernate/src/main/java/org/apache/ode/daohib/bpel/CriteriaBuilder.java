@@ -47,16 +47,16 @@ import org.hibernate.criterion.Restrictions;
  */
 class CriteriaBuilder {
     static final Log __log = LogFactory.getLog(CriteriaBuilder.class);
-    
+
     /**
      * Build a HQL query from an instance filter.
      * @param filter filter
      */
     Query buildHQLQuery(Session session, InstanceFilter filter) {
         Map<String, Object> parameters = new HashMap<String, Object>();
-        
+
         StringBuffer query = new StringBuffer();
-                
+
         query.append("select pi from HProcessInstance as pi left join fetch pi.fault ");
 
         if (filter != null) {
@@ -146,13 +146,13 @@ class CriteriaBuilder {
                     // join to props for each prop
                     query.append(" inner join cs.properties as csp"+i);
                     // add clause for prop key and value
-                    
+
                     // spaces have to be escaped, might be better handled in InstanceFilter
                     String value = props.get(propKey).replaceAll("&#32;", " ");
                     if (propKey.startsWith("{")) {
                         String namespace = propKey.substring(1, propKey.lastIndexOf("}"));
                         clauses.add(" csp" + i + ".name = :cspname" + i +
-                                " and csp" + i + ".namespace = :cspnamespace" + i + 
+                                " and csp" + i + ".namespace = :cspnamespace" + i +
                                 " and csp" + i + ".value = :cspvalue" + i);
 
                         parameters.put("cspname" + i, propKey.substring(propKey.lastIndexOf("}") + 1, propKey.length()));
@@ -219,9 +219,9 @@ class CriteriaBuilder {
         if (__log.isDebugEnabled()) {
             __log.debug(query.toString());
         }
-        
+
         Query q = session.createQuery(query.toString());
-        
+
         for (String p : parameters.keySet()) {
             q.setParameter(p, parameters.get(p));
         }
@@ -232,7 +232,7 @@ class CriteriaBuilder {
 
         return q;
     }
-    
+
     private static String dateFilter(String filter) {
         String date = Filter.getDateWithoutOp(filter);
         String op = filter.substring(0,filter.indexOf(date));
@@ -246,8 +246,8 @@ class CriteriaBuilder {
         return op + " '" + ts.toString() + "'";
     }
 
-    
-    
+
+
   /**
    * Build a Hibernate {@link Criteria} from an instance filter.
    * @param crit target (destination) criteria
@@ -269,7 +269,7 @@ class CriteriaBuilder {
         }
         processCrit.add(disj);
     }
-    
+
     List<String> iids = filter.getIidFilter();
     if (iids != null && iids.size() > 0) {
         Disjunction disj = Restrictions.disjunction();
@@ -278,7 +278,7 @@ class CriteriaBuilder {
         }
         crit.add(disj);
     }
-    
+
     // Filtering on name and namespace
     if (filter.getNameFilter() != null) {
       processCrit.add(Restrictions.like("typeName", filter.getNameFilter().replaceAll("\\*", "%")));
@@ -373,7 +373,7 @@ class CriteriaBuilder {
   void buildCriteria(Criteria crit, BpelEventFilter efilter) {
     if (efilter.getTypeFilter() != null)
       crit.add(Restrictions.like("type", efilter.getTypeFilter().replace('*','%')));
-      
+
     // Specific filter for started and last active dates.
     if (efilter.getTimestampFilter() != null) {
       for (Filter.Restriction<Date> sdf : efilter.getTimestampFilter()) {
@@ -383,11 +383,11 @@ class CriteriaBuilder {
 
     if (efilter.limit > 0) crit.setMaxResults(efilter.limit);
   }
-  
+
   void addScopeFilter(Criteria crit, String scopeId) {
     crit.add(Restrictions.eq("",scopeId));
   }
-  
+
   static void addFilterOnPrefixedDate(Criteria crit, String prefixedDate, String dateAttribute) {
     Date realDate = null;
     try {
@@ -397,7 +397,7 @@ class CriteriaBuilder {
     }
     addFilterOnPrefixedDate(crit,prefixedDate,realDate,dateAttribute);
   }
-  
+
   private static Date parseDateExpression(String date) throws ParseException {
       if( date.toLowerCase().startsWith("-") && date.length() > 1 ) {
           return RelativeDateParser.parseRelativeDate(date.substring(1));

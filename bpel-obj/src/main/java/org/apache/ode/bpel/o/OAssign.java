@@ -30,7 +30,7 @@ import org.w3c.dom.Document;
 
 public class OAssign extends OActivity {
     static final long serialVersionUID = -1L  ;
-    
+
     public final List<Copy> copy = new ArrayList<Copy>();
 
     public OAssign(OProcess owner, OActivity parent) {
@@ -61,7 +61,7 @@ public class OAssign extends OActivity {
         public String toString() {
             return "{OCopy " + to + "=" + from + "}";
         }
-        
+
         @Override
         public void dehydrate() {
             super.dehydrate();
@@ -138,7 +138,7 @@ public class OAssign extends OActivity {
         public void setInsertMissingToData(boolean insertMissingToData) {
             expression.insertMissingData = insertMissingToData;
         }
-      
+
     }
     public static class Expression extends OBase implements RValue {
         private static final long serialVersionUID = 1L;
@@ -156,7 +156,7 @@ public class OAssign extends OActivity {
 
 
     /**
-     * Direct reference: selects named child of the message document element. 
+     * Direct reference: selects named child of the message document element.
      * This is used for access to extensions (SOAP headers for example).
      * @author mszefler
      */
@@ -168,7 +168,7 @@ public class OAssign extends OActivity {
 
         /** Referenced Variable */
         public OScope.Variable variable;
-        
+
         /** Name of the element referenced. */
         public QName elName;
 
@@ -176,7 +176,7 @@ public class OAssign extends OActivity {
             return variable;
         }
     }
-    
+
     public static class VariableRef extends OBase implements RValue, LValue {
         private static final long serialVersionUID = 1L;
         public OScope.Variable variable;
@@ -196,18 +196,18 @@ public class OAssign extends OActivity {
          * Report whether this is a reference to a whole "message"
          * @return <code>true</code> if whole-message reference
          */
-        public boolean isMessageRef() { 
+        public boolean isMessageRef() {
             return variable.type instanceof OMessageVarType && part == null && headerPart == null && location == null;
         }
-        
+
         /**
-         * Report whether this is a reference to a message part. 
+         * Report whether this is a reference to a message part.
          * @return <code>true</code> if reference to a message part
          */
         public boolean isPartRef() {
             return variable.type instanceof OMessageVarType && part != null && location == null;
         }
-        
+
         public boolean isHeaderRef() {
             return variable.type instanceof OMessageVarType && headerPart != null && location == null;
         }
@@ -251,7 +251,7 @@ public class OAssign extends OActivity {
               return "{PLinkRef " + partnerLink + "!" + isMyEndpointReference + "}";
           }
     }
-    
+
     @Override
     public void dehydrate() {
         super.dehydrate();

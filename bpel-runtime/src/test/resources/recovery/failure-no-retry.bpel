@@ -18,7 +18,7 @@
   ~ under the License.
   -->
 <process name="FailureNoRetry"
-         targetNamespace="http://ode.apache.org/bpel/unit-test" 
+         targetNamespace="http://ode.apache.org/bpel/unit-test"
          xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
          xmlns:tns="http://ode.apache.org/bpel/unit-test"
          xmlns:xsd="http://www.w3.org/2001/XMLSchema"
@@ -29,20 +29,20 @@
           importType="http://schemas.xmlsoap.org/wsdl/"/>
 
   <partnerLinks>
-    <partnerLink name="instantiatingPartnerLink" 
-                 partnerLinkType="tns:InstantiatingPartnerLinkType" 
+    <partnerLink name="instantiatingPartnerLink"
+                 partnerLinkType="tns:InstantiatingPartnerLinkType"
                  myRole="me" partnerRole="partner" initializePartnerRole="yes"/>
-    <partnerLink name="failingPartnerLink" 
-                 partnerLinkType="tns:FailingPartnerLinkType" 
+    <partnerLink name="failingPartnerLink"
+                 partnerLinkType="tns:FailingPartnerLinkType"
                  partnerRole="partner" initializePartnerRole="yes"/>
   </partnerLinks>
-    
+
   <variables>
     <variable name="request" messageType="tns:Request"/>
     <variable name="response" messageType="tns:Response"/>
   </variables>
 
-  <sequence>   
+  <sequence>
     <receive name="start"
              partnerLink="instantiatingPartnerLink"
              portType="tns:InstantiatingPortType"

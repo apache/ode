@@ -31,7 +31,7 @@ import java.util.Set;
  */
 public abstract class OActivity extends OAgent {
     static final long serialVersionUID = -1L  ;
-    
+
     public OExpression joinCondition;
     public boolean suppressJoinFailure;
     public final Set<OLink>sourceLinks = new HashSet<OLink>();
@@ -60,7 +60,7 @@ public abstract class OActivity extends OAgent {
             while (parent != null && handling == null) {
                 handling = parent.failureHandling;
                 parent = parent.parent;
-            } 
+            }
         }
         return handling;
     }
@@ -91,12 +91,12 @@ public abstract class OActivity extends OAgent {
             private String key(OAgent o) {
                 return o.getClass().getSimpleName() + "#" + o.getId();
             }
-            
+
             public int compare(OAgent o1, OAgent o2) {
                 return key(o1).compareTo(key(o2));
             }
         });
-        
+
         for (OAgent child : l) {
             buf.append(child.digest());
             buf.append(";");

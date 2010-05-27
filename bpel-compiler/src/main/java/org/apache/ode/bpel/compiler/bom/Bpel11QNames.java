@@ -26,12 +26,12 @@ public abstract class Bpel11QNames {
      * BPEL Namespace, 03/2003
      */
     public static final String NS_BPEL4WS_2003_03 = "http://schemas.xmlsoap.org/ws/2003/03/business-process/";
-    
+
     /**
      * BPEL Partnerlink Namespace, 05/2003
      */
     public static final String NS_BPEL4WS_PARTNERLINK_2003_05 = "http://schemas.xmlsoap.org/ws/2003/05/partner-link/";
-    
+
     public static final QName PROCESS = newQName("process");
 
     public static final QName SOURCE = newQName("source");

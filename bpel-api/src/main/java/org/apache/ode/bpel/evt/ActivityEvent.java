@@ -25,10 +25,10 @@ package org.apache.ode.bpel.evt;
 public abstract class ActivityEvent extends ScopeEvent {
   private String _activityName;
   private String _activityType;
-  
+
   /** Activity declaration id. */
   private int _declarationId;
-  
+
   /** Activity Id, unique for each activity <em>instance</em>. */
   private long _aid;
 
@@ -38,7 +38,7 @@ public abstract class ActivityEvent extends ScopeEvent {
 
   /**
    * Gets activity name
-   * 
+   *
    * @return name of activity
    */
   public String getActivityName() {
@@ -72,7 +72,7 @@ public abstract class ActivityEvent extends ScopeEvent {
   public void setActivityId(long id) {
     _aid = id;
   }
-  
+
   public long getActivityId() {
     return _aid;
   }

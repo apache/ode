@@ -28,7 +28,7 @@
     queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
     expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
     suppressJoinFailure="yes">
-    
+
 
     <import location="NegativeTargetNSTest1.wsdl"
         namespace="http://ode/bpel/unit-test/NegativeTargetNSTest1.wsdl"

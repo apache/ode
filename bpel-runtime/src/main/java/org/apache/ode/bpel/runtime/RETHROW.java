@@ -40,7 +40,7 @@ class RETHROW extends ACTIVITY {
     if(fault == null){
       String msg = "Attempting to execute 'rethrow' activity with no visible fault in scope.";
       __log.error(msg);
-      throw new InvalidProcessException(msg); 
+      throw new InvalidProcessException(msg);
     }
 
     _self.parent.completed(fault,CompensationHandler.emptySet());

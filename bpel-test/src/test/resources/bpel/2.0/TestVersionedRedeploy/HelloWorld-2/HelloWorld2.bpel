@@ -17,7 +17,7 @@
   ~ under the License.
   -->
 <process name="HelloWorld2"
-    targetNamespace="http://ode/bpel/unit-test" 
+    targetNamespace="http://ode/bpel/unit-test"
     xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
     xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
     xmlns:tns="http://ode/bpel/unit-test"
@@ -29,18 +29,18 @@
      importType="http://schemas.xmlsoap.org/wsdl/" />
 
    <partnerLinks>
-      <partnerLink name="helloPartnerLink" 
-         partnerLinkType="test:HelloPartnerLinkType" 
+      <partnerLink name="helloPartnerLink"
+         partnerLinkType="test:HelloPartnerLinkType"
          myRole="me" />
    </partnerLinks>
-    
+
    <variables>
      <variable name="myVar" messageType="test:HelloMessage"/>
      <variable name="tmpVar" type="xsd:string"/>
    </variables>
-        
-   <sequence>   
-       <receive 
+
+   <sequence>
+       <receive
           name="start"
           partnerLink="helloPartnerLink"
           portType="test:HelloPortType"
@@ -58,9 +58,9 @@
              <to variable="myVar" part="TestPart"/>
          </copy>
       </assign>
-       <reply name="end"  
+       <reply name="end"
               partnerLink="helloPartnerLink"
-              portType="test:HelloPortType" 
+              portType="test:HelloPortType"
               operation="hello"
               variable="myVar"/>
    </sequence>

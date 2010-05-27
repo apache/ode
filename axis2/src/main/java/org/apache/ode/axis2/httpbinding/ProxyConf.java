@@ -77,7 +77,7 @@ public class ProxyConf {
 
     /**
      * @return true if a proxy is set in the params, or in the system property "http.proxyHost"
-     * and the host is not mentionnned in the system property "http.nonProxyHosts"  
+     * and the host is not mentionnned in the system property "http.nonProxyHosts"
      * @see Properties#PROP_HTTP_PROXY_PREFIX
      */
     public static boolean isProxyEnabled(HttpParams params, String targetHost) throws URIException {

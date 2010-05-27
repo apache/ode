@@ -36,7 +36,7 @@ import java.util.Map;
 public class ProcessConfDaoImpl extends HibObj implements ProcessConfDAO {
 
     private DeploymentUnitDaoImpl _du;
-    
+
     private Map<String,String> _properties = new HashMap<String,String>();
 
     /** Simple name of the process. */
@@ -45,7 +45,7 @@ public class ProcessConfDaoImpl extends HibObj implements ProcessConfDAO {
     /** Process type. */
     private String _type;
 
-    
+
     /** Process version. */
     private long _version;
 
@@ -60,14 +60,14 @@ public class ProcessConfDaoImpl extends HibObj implements ProcessConfDAO {
     public DeploymentUnitDaoImpl getDeploymentUnit() {
         return _du;
     }
-    
+
     public void setDeploymentUnit(DeploymentUnitDaoImpl du) {
         _du = du;
     }
     /**
      * @hibernate.map table="STORE_PROCESS_PROP" role="properties_"
      * @hibernate.collection-key column="propId" foreign-key="none"
-     * @hibernate.collection-index column="name" type="string" 
+     * @hibernate.collection-index column="name" type="string"
      * @hibernate.collection-element column="value" type="string"
      */
     public Map<String,String> getProperties_() {
@@ -142,7 +142,7 @@ public class ProcessConfDaoImpl extends HibObj implements ProcessConfDAO {
     public void setPID(QName pid) {
         setPID_(pid.toString());
     }
-    
+
     public void setState(ProcessState state) {
         setState_(state.toString());
     }
@@ -166,7 +166,7 @@ public class ProcessConfDaoImpl extends HibObj implements ProcessConfDAO {
     public ProcessState getState() {
         return ProcessState.valueOf(getState_());
     }
-   
+
     public String getProperty(QName name) {
         return _properties.get(name.toString());
     }
@@ -176,7 +176,7 @@ public class ProcessConfDaoImpl extends HibObj implements ProcessConfDAO {
             public QName apply(String x) {
                 return QName.valueOf(x);
             }
-            
+
         });
     }
 

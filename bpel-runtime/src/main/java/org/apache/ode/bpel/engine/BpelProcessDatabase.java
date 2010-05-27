@@ -47,7 +47,7 @@ class BpelProcessDatabase extends BpelDatabase {
     super(sscf,scheduler);
     _processId = processId;
     }
-  
+
   QName getProcessId() {
     return _processId;
   }

@@ -133,16 +133,16 @@
     <include>org.apache.ode:ode-bpel-schemas</include>
     <include>commons-logging:commons-logging</include>
     <include>org.apache.ode:ode-utils</include>
-    <include>commons-codec:commons-codec</include> 
-    <include>commons-collections:commons-collections</include> 
-    <include>commons-httpclient:commons-httpclient</include> 
+    <include>commons-codec:commons-codec</include>
+    <include>commons-collections:commons-collections</include>
+    <include>commons-httpclient:commons-httpclient</include>
     <include>commons-pool:commons-pool</include>
     <include>net.sf.saxon:saxon</include>
     <include>net.sf.saxon:saxon-xpath</include>
     <include>net.sf.saxon:saxon-dom</include>
     <include>net.sf.saxon:saxon-xqj</include>
-    <include>jaxen:jaxen</include>  
-    <include>log4j:log4j</include> 
+    <include>jaxen:jaxen</include>
+    <include>log4j:log4j</include>
     <include>wsdl4j:wsdl4j</include>
     <include>xalan:xalan</include>
     <include>xerces:xercesImpl</include>

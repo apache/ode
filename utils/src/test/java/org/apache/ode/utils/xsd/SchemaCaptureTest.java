@@ -55,11 +55,11 @@ public class SchemaCaptureTest extends TestCase {
         public XMLInputSource resolveEntity(XMLResourceIdentifier resourceIdentifier) throws XNIException, IOException {
             XMLInputSource src = new XMLInputSource(resourceIdentifier);
             String literalUri = resourceIdentifier.getLiteralSystemId();
-        
+
             if (literalUri != null) {
               src.setByteStream(getClass().getClassLoader().getResourceAsStream(literalUri));
             }
-            
+
             return src;
         }
     });

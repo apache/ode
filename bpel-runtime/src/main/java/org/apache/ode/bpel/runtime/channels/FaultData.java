@@ -72,7 +72,7 @@ public class FaultData implements Serializable {
            ? null
            : _faultMsg.getElement();
   }
-  
+
   /**
    * The message type of the fault message data.  Null if no fault data.
    * @return fault type
@@ -89,11 +89,11 @@ public class FaultData implements Serializable {
   public QName getFaultName() {
     return _faultName;
   }
-  
+
   public int getFaultLineNo(){
     return findLineNo(_location);
   }
-  
+
   public String getExplanation() {
     return _explanation;
   }
@@ -129,7 +129,7 @@ public class FaultData implements Serializable {
         sb.append(_explanation);
         sb.append(")");
     }
-    
+
     sb.append("] @");
     sb.append(findLineNo(_location));
     return sb.toString();

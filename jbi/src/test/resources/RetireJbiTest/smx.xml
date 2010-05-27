@@ -29,9 +29,9 @@
         <entry key="java:comp/env/jdbc/ode" value-ref="odeDS"/>
     </util:map>
 
-    <sm:container 
-        id="jbi" 
-        embedded="true" 
+    <sm:container
+        id="jbi"
+        embedded="true"
         rootDir="target/test/smx"
         transactionManager="#transactionManager"
         depends-on="jndi"

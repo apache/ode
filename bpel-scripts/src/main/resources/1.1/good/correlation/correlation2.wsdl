@@ -24,12 +24,12 @@
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
   xmlns:plnk="http://schemas.xmlsoap.org/ws/2003/05/partner-link/"
-  xmlns:foo="http://test.ns" 
+  xmlns:foo="http://test.ns"
   targetNamespace="http://test.ns">
- 
-  
 
-  
+
+
+
   <message name="booleanWrapperMessage">
     <part name="result" element="foo:boolean"/>
   </message>

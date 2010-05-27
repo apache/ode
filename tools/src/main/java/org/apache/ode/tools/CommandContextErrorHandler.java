@@ -25,10 +25,10 @@ import org.xml.sax.SAXParseException;
 public class CommandContextErrorHandler implements ErrorHandler {
 
   private CommandContext _cc;
-  
+
   private boolean _err;
   /**
-   * 
+   *
    */
   public CommandContextErrorHandler(CommandContext cc) {
     _cc = cc;
@@ -38,7 +38,7 @@ public class CommandContextErrorHandler implements ErrorHandler {
   public boolean hadError() {
     return _err;
   }
-  
+
   /* (non-Javadoc)
    * @see org.xml.sax.ErrorHandler#warning(org.xml.sax.SAXParseException)
    */
@@ -51,7 +51,7 @@ public class CommandContextErrorHandler implements ErrorHandler {
    */
   public void error(SAXParseException exception) throws SAXException {
     _err = true;
-    _cc.errln(formatMessage(exception));    
+    _cc.errln(formatMessage(exception));
   }
 
   /* (non-Javadoc)
@@ -62,7 +62,7 @@ public class CommandContextErrorHandler implements ErrorHandler {
     _cc.error(formatMessage(exception),exception);
     throw exception;
   }
-  
+
   private String formatMessage(SAXParseException e) {
     StringBuffer sb = new StringBuffer();
     sb.append('[');
@@ -79,5 +79,5 @@ public class CommandContextErrorHandler implements ErrorHandler {
     sb.append(e.getMessage());
     return sb.toString();
   }
-  
+
 }

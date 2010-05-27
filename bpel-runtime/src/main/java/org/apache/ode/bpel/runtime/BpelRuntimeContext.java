@@ -50,7 +50,7 @@ import org.w3c.dom.Node;
  * some sort), the communication activities pick/receive/invoke (i.e. there
  * are no JACOB channels representing partnerLink links), and correlation (i.e.
  * the JACOB objects do not match message to process instances, this happens
- * in this <em>native</em> layer).</p>  
+ * in this <em>native</em> layer).</p>
  */
 public interface BpelRuntimeContext {
 
@@ -89,7 +89,7 @@ public interface BpelRuntimeContext {
     Node readVariable(Long scopeInstanceId, String varname, boolean forWriting)
             throws FaultException;
 
-  
+
     /**
      * Fetches the my-role endpoint reference data.
      * @param pLink
@@ -206,7 +206,7 @@ public interface BpelRuntimeContext {
 
     /**
      * Called back when the process executes an invokation.
-     * 
+     *
      * @param activityId The activity id in the process definition (id of OInvoke)
      * @param partnerLinkInstance The partner link variable instance
      * @param operation The wsdl operation.
@@ -273,30 +273,30 @@ public interface BpelRuntimeContext {
     void releasePartnerMex(String mexId, boolean instanceSucceeded);
 
     /**
-     * Read an external variable. 
+     * Read an external variable.
      */
     Node readExtVar(Variable variable, Node reference) throws ExternalVariableModuleException;
-     
+
     /**
-     * Write an external variable. 
+     * Write an external variable.
      */
     ValueReferencePair writeExtVar(Variable variable, Node reference, Node value) throws ExternalVariableModuleException ;
-    
+
     public class ValueReferencePair {
         public Node value;
         public Node reference;
     }
-    
+
     /**
      * Retrieves the base URI that this BPEL Process instance is running relative to.
-     * 
+     *
      * @return URI - the URI representing the absolute physical file path location that this process is defined within.
      */
     URI getBaseResourceURI();
-    
+
     /**
      * Retrieves the property value that has been defined for this BPEL Process type.
-     * 
+     *
      * @return propertyValue - the value corresponding to the process property name.
      */
     Node getProcessProperty(QName propertyName);

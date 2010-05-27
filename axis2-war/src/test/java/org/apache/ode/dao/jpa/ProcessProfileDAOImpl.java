@@ -45,7 +45,7 @@ import javax.persistence.Query;
 public class ProcessProfileDAOImpl extends OpenJPADAO implements ProcessProfileDAO {
     @SuppressWarnings("unused")
     private static final Log __log = LogFactory.getLog(ProcessProfileDAOImpl.class);
-    
+
     protected EntityManager em;
     protected ProcessDAOImpl process;
 
@@ -53,14 +53,14 @@ public class ProcessProfileDAOImpl extends OpenJPADAO implements ProcessProfileD
         this.process = process;
         this.em = em;
     }
-    
+
     public boolean doesProcessExist() {
         Query query = em.createQuery("select count(p._id) from ProcessDAOImpl as p where p._guid = :guid");
         query.setParameter("guid", process.getGuid());
-        
+
         return ((Long)query.getSingleResult()) > 0;
     }
-    
+
     public List<ProcessInstanceDAO> findInstancesByProcess() {
         return findByProcess("select i from ProcessInstanceDAOImpl as i where i._process = :process");
     }
@@ -88,7 +88,7 @@ public class ProcessProfileDAOImpl extends OpenJPADAO implements ProcessProfileD
     public List<XmlDataDAO> findXmlDataByProcess() {
         return findByProcess("select x from XmlDataDAOImpl as x where x._scope._processInstance._process = :process");
     }
-    
+
     public List<ActivityRecoveryDAO> findActivityRecoveriesByProcess() {
         return findByProcess("select a from ActivityRecoveryDAOImpl as a where a._instance._process = :process");
     }
@@ -108,15 +108,15 @@ public class ProcessProfileDAOImpl extends OpenJPADAO implements ProcessProfileD
     public int countEventsByProcess() {
         Query query = em.createQuery("select count(e._id) from EventDAOImpl as e where e._instance._process = :process");
         query.setParameter("process", process);
-        
+
         return ((Long)query.getSingleResult()).intValue();
     }
-    
+
     @SuppressWarnings("unchecked")
     protected <D> List<D> findByProcess(String queryString) {
         Query query = em.createQuery(queryString);
         query.setParameter("process", process);
-        
+
         return query.getResultList();
     }
 }

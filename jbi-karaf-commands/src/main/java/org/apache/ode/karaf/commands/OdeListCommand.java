@@ -33,7 +33,7 @@ import org.apache.ode.bpel.pmapi.TProcessInfo;
 
 /**
  * Lists the deployed process as well as the active instances
- * 
+ *
  * @author daniel
  */
 @Command(scope = "ode", name = "list", description = "Lists ode processes and active instances")

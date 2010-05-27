@@ -92,7 +92,7 @@ public abstract class ChannelListener<CT extends Channel> extends JacobObject {
 
     /**
      * Get a description of the object for debugging purposes.
-     * 
+     *
      * @return human-readable description.
      */
     public String toString() {

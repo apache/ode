@@ -38,11 +38,11 @@ import org.apache.commons.logging.LogFactory;
  * reached in the script) and their association with a message exchange (for those receive/picks that have received
  * a message). The purpose of this class is to 1) enable matching a reply activity to the corresponding receive/pick
  * activity and 2) allow us to fault out message exchanges that have not been replied to when they go out of scope.
- * </p> 
+ * </p>
  * <p>
  * Note, this class is only used for INBOUND synchronous (request-response) operations. None of this is necessary
- * for asynchronous messages. 
- * </p> 
+ * for asynchronous messages.
+ * </p>
  */
 @Deprecated
 public class OutstandingRequestManager implements Serializable {
@@ -73,8 +73,8 @@ public class OutstandingRequestManager implements Serializable {
   }
 
   /**
-   * Register a receive/pick with the manager. This occurs when the receive/pick is encountered in the processing of 
-   * the BPEL script.   
+   * Register a receive/pick with the manager. This occurs when the receive/pick is encountered in the processing of
+   * the BPEL script.
    * @param pickResponseChannel response channel associated with this receive/pick
    * @param selectors selectors for this receive/pick
    */
@@ -97,7 +97,7 @@ public class OutstandingRequestManager implements Serializable {
       if (selectors[i].oneWay) {
         continue;
       }
-      
+
       final RequestIdTuple rid = new RequestIdTuple(selectors[i].plinkInstance,selectors[i].opName, selectors[i].messageExchangeId);
       if (_byRid.containsKey(rid)) {
         String errmsg = "INTERNAL ERROR: Duplicate ENTRY for RID " + rid;
@@ -111,7 +111,7 @@ public class OutstandingRequestManager implements Serializable {
   }
 
   /**
-   * Cancel a previous registration. 
+   * Cancel a previous registration.
    * @see #register(String, Selector[])
    * @param pickResponseChannel
    */
@@ -129,7 +129,7 @@ public class OutstandingRequestManager implements Serializable {
 
   /**
    * Associate a message exchange with a registered receive/pick. This happens when a message corresponding to the
-   * receive/pick is received by the system. 
+   * receive/pick is received by the system.
    * @param pickResponseChannel
    * @param mexRef
    */
@@ -160,9 +160,9 @@ public class OutstandingRequestManager implements Serializable {
 
   /**
    * Release the registration. This method is called when the reply activity sends a reply corresponding to the
-   * registration.  
-   * @param plinkInstnace partner link 
-   * @param opName operation  
+   * registration.
+   * @param plinkInstnace partner link
+   * @param opName operation
    * @param mexId message exchange identifier IN THE BPEL SENSE OF THE TERM (i.e. a receive/reply disambiguator).
    * @return message exchange identifier associated with the registration that matches the parameters
    */
@@ -190,8 +190,8 @@ public class OutstandingRequestManager implements Serializable {
   /**
    * "Release" all outstanding incoming messages exchanges. Makes the object forget about
    * the previous registrations
-   * @return a list of message exchange identifiers for message exchanges that were begun (receive/pick got a message) 
-   *            but not yet completed (reply not yet sent) 
+   * @return a list of message exchange identifiers for message exchanges that were begun (receive/pick got a message)
+   *            but not yet completed (reply not yet sent)
    */
   public String[] releaseAll() {
     if (__log.isTraceEnabled())
@@ -213,7 +213,7 @@ public class OutstandingRequestManager implements Serializable {
       "byChannel", _byChannel
     });
   }
-  
+
   public Map<RequestIdTuple, Entry> getRids() {
       return _byRid;
   }

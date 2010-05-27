@@ -68,7 +68,7 @@ public class WSDLRegistryTest extends TestCase {
     // load & register wsdl
     WSDLFactory4BPEL factory = (WSDLFactory4BPEL)WSDLFactoryBPEL11.newInstance();
     WSDLReader reader = factory.newWSDLReader();
-    
+
     //ResourceFinder finder = new DefaultResourceFinder(new File(wsd.getPath()).getParentFile());
     File parent = new File(wsd.toURI().getPath()).getParentFile();
     ResourceFinder finder = new DefaultResourceFinder(parent, parent);
@@ -82,8 +82,8 @@ public class WSDLRegistryTest extends TestCase {
 
     assertTrue("WSDL-Define type not visible.",m.knowsSchemaType(new QName("uri:testing", "TComplex1")));
     assertTrue("Type from import not visible.",m.knowsSchemaType(new QName("uri:test1", "TComplex2")));
-    
-    
+
+
   }
-  
+
 }

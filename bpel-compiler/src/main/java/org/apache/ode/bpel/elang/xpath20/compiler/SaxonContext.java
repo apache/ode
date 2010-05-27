@@ -35,7 +35,7 @@ import net.sf.saxon.xpath.XPathFunctionLibrary;
  */
 public class SaxonContext extends JAXPXPathStaticContext {
 
-  
+
     private static final long serialVersionUID = 2460900369574468960L;
     private transient JaxpVariableResolver _varResolver;
     private transient JaxpFunctionResolver _funcResolver;
@@ -58,14 +58,14 @@ public class SaxonContext extends JAXPXPathStaticContext {
 
         oxpfl.setXPathFunctionResolver(_funcResolver);
         ((FunctionLibraryList)getFunctionLibrary()).addFunctionLibrary(oxpfl);
-        
+
         setXPathFunctionResolver(funcResolver);
         setXPathVariableResolver(varResolver);
 
         _varResolver = varResolver;
         _funcResolver = funcResolver;
     }
-    
+
     // The following methods don't apply to the JAXPXPathStaticContext interface.
 
 //    public Variable declareVariable(String qname, Object initialValue) throws XPathException {
@@ -104,7 +104,7 @@ public class SaxonContext extends JAXPXPathStaticContext {
 ////        return super.bindVariable(fingerprint);
 //        return null;
 //    }
-    
+
 //   public VariableReference bindVariable(StructuredQName qName) {
 //	   // The prefix is lost by compilation, hardcoding it from the ns.
 //	   String prefix = qName.getPrefix();

@@ -17,7 +17,7 @@
   ~ under the License.
   -->
 <process name="HelloWorld2"
-    targetNamespace="http://ode/bpel/unit-test" 
+    targetNamespace="http://ode/bpel/unit-test"
     xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
     xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
     xmlns:tns="http://ode/bpel/unit-test"

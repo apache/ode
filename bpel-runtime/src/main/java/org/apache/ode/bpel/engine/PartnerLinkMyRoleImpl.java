@@ -93,7 +93,7 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 
     public List<RoutingInfo> findRoute(MyRoleMessageExchangeImpl mex) {
         List<RoutingInfo> routingInfos = new ArrayList<RoutingInfo>();
-        
+
         if (__log.isTraceEnabled()) {
             __log.trace(ObjectPrinter.stringifyMethodEnter(this + ":inputMsgRcvd", new Object[] {
                     "messageExchange", mex }));
@@ -130,7 +130,7 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
             mex.setFailure(MessageExchange.FailureType.FORMAT_ERROR, ime.getMessage(), null);
             return null;
         }
-        
+
         String mySessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
         String partnerSessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
         if (__log.isDebugEnabled()) {
@@ -149,7 +149,7 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
                 routingInfos.add(new RoutingInfo(messageRoute, messageRoute.getCorrelationKeySet(), correlator, keySet));
             }
         }
-        
+
         if (routingInfos.size() == 0) {
             routingInfos.add(new RoutingInfo(null, null, correlator, keySet));
         }
@@ -206,8 +206,8 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.CREATE_INSTANCE);
         mex.getDAO().setInstance(newInstance);
         if (mex.getDAO().getCreateTime() == null)
-            mex.getDAO().setCreateTime(instance.getCurrentEventDateTime()); 
-        
+            mex.getDAO().setCreateTime(instance.getCurrentEventDateTime());
+
         instance.execute();
     }
 
@@ -244,8 +244,8 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.MATCHED);
         mex.getDAO().setInstance(routing.messageRoute.getTargetInstance());
         if (mex.getDAO().getCreateTime() == null)
-            mex.getDAO().setCreateTime(instance.getCurrentEventDateTime()); 
-        
+            mex.getDAO().setCreateTime(instance.getCurrentEventDateTime());
+
         instance.execute();
     }
 
@@ -254,8 +254,8 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
             mex.setFailure(MessageExchange.FailureType.NOMATCH, "No process instance matching correlation keys.", null);
         } else {
             // enqueue message with the last message route, as per the comments in caller (@see BpelProcess.invokeProcess())
-            RoutingInfo routing = 
-                (routings != null && routings.size() > 0) ? 
+            RoutingInfo routing =
+                (routings != null && routings.size() > 0) ?
                         routings.get(routings.size() - 1) : null;
             if (routing != null) {
                 if (__log.isDebugEnabled()) {
@@ -265,13 +265,13 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
                 // send event
                 CorrelationNoMatchEvent evt = new CorrelationNoMatchEvent(mex.getPortType().getQName(), mex
                         .getOperation().getName(), mex.getMessageExchangeId(), routing.wholeKeySet);
-    
+
                 evt.setProcessId(_process.getProcessDAO().getProcessId());
                 evt.setProcessName(new QName(_process.getOProcess().targetNamespace, _process.getOProcess().getName()));
                 _process._debugger.onEvent(evt);
-    
+
                 mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.QUEUED);
-    
+
                 // No match, means we add message exchange to the queue.
                 routing.correlator.enqueueMessage(mex.getDAO(), routing.wholeKeySet);
             }
@@ -323,7 +323,7 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
     private CorrelationKey computeCorrelationKey(OScope.CorrelationSet cset, OMessageVarType messagetype,
             Element msg) {
         CorrelationKey key = null;
-        
+
         String[] values = new String[cset.properties.size()];
 
         int jIdx = 0;
@@ -354,10 +354,10 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         } else {
             key = new CorrelationKey(cset.name, values);
         }
-        
+
         return key;
     }
-    
+
     @SuppressWarnings("unchecked")
     public boolean isOneWayOnly() {
         PortType portType = _plinkDef.myRolePortType;
@@ -370,5 +370,5 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
             }
         }
         return true;
-    }    
+    }
 }

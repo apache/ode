@@ -38,5 +38,5 @@ public class ASTOrderBy extends SimpleNode {
     public void setName(String name) {
         this.name = name;
     }
-    
+
 }

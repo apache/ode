@@ -30,7 +30,7 @@
     </condition>
 
     <property file="${basedir}/../example.properties"/>
-  
+
     <!-- pick up environmental ode.xxx properties -->
     <property file="${ode.home}/etc/ode.properties"/>
 
@@ -58,9 +58,9 @@
             <os family="unix"/>
         </condition>
     </target>
-  
+
   <!-- if example.properties has ode.java.home assigned it has highest priority
-       and overrides the system environment JAVA_HOME 
+       and overrides the system environment JAVA_HOME
 
        if ode.java.home not set in example.properties and system environment
        JAVA_HOME is set then ode.java.home becomes JAVA_HOME -->
@@ -103,12 +103,12 @@
     <target name="init" depends="init-extensions,fail-invalid-ode-home,fail-invalid-ode-java-home">
         <echo message="ode.home = ${ode.home}"/>
         <echo message="ode.java.home = ${ode.java.home}"/>
-    
+
         <!-- Ant Env Takes gets first crack at basic ode properties override -->
         <!-- example.properties gets second crack at basic ode properties override -->
         <!-- ode.properties is default authority  -->
         <property file="${ode.home}/etc/ode.properties"/>
-    
+
         <property name="ode.default.javaopts"
                 value=""/>
 

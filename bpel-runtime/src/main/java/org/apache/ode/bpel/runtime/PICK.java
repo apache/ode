@@ -133,7 +133,7 @@ class PICK extends ACTIVITY {
     /**
      * Resolves the correlation key from the given PartnerLinkInstance and a match type correlation(non-initiate or
      * already initialized join correlation).
-     * 
+     *
      * @param pLinkInstance the partner link instance
      * @param matchCorrelations the match type correlation
      * @return returns the resolved CorrelationKey
@@ -150,7 +150,7 @@ class PICK extends ACTIVITY {
         } else if (!matchCorrelations.isEmpty()) {
             for( OScope.CorrelationSet cset : matchCorrelations ) {
                 CorrelationKey key = null;
-                
+
                 if(!getBpelRuntimeContext().isCorrelationInitialized(
                     _scopeFrame.resolve(cset))) {
                     if (!_opick.createInstanceFlag) {
@@ -161,16 +161,16 @@ class PICK extends ACTIVITY {
                     key = getBpelRuntimeContext().readCorrelation(_scopeFrame.resolve(cset));
                     assert key != null;
                 }
-                
+
                 if( key != null ) {
                     keySet.add(key);
                 }
             }
         }
-        
+
         return keySet;
     }
-    
+
     /**
      * Calculate a duration offset from right now.
      *
@@ -204,8 +204,8 @@ class PICK extends ACTIVITY {
         Collection<String> partNames = (Collection<String>) onMessage.operation.getInput().getMessage().getParts().keySet();
 
         // Let's do some sanity checks here so that we don't get weird errors in assignment later.
-        // The engine should have checked to make sure that the messages that are  delivered conform 
-        // to the correct format; but you know what they say, don't trust anyone.  
+        // The engine should have checked to make sure that the messages that are  delivered conform
+        // to the correct format; but you know what they say, don't trust anyone.
         if (!(onMessage.variable.type instanceof OMessageVarType)) {
             String errmsg = "Non-message variable for receive: should have been picked up by static analysis.";
             __log.fatal(errmsg);
@@ -214,7 +214,7 @@ class PICK extends ACTIVITY {
 
         OMessageVarType vartype = (OMessageVarType) onMessage.variable.type;
 
-        // Check that each part contains what we expect. 
+        // Check that each part contains what we expect.
         for (String pName : partNames) {
             QName partName = new QName(null, pName);
             Element msgPart = DOMUtils.findChildByName(msgEl, partName);
@@ -334,9 +334,9 @@ class PICK extends ACTIVITY {
 
                         }
                         // this request is now waiting for a reply
-                        getBpelRuntimeContext().processOutstandingRequest(_scopeFrame.resolve(onMessage.partnerLink), 
+                        getBpelRuntimeContext().processOutstandingRequest(_scopeFrame.resolve(onMessage.partnerLink),
                                 onMessage.operation.getName(), onMessage.messageExchangeId, mexId);
-                        
+
                     } catch (FaultException e) {
                         __log.error(e);
                         fault = createFault(e.getQName(), onMessage);

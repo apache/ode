@@ -46,7 +46,7 @@ public abstract class ProcessEvent extends BpelEvent {
 
   /**
    * Gets process name.
-   * 
+   *
    * @return the process name
    */
   public QName getProcessName() {

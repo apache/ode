@@ -35,7 +35,7 @@ public class ProcessInfoCustomizer {
   public static final ProcessInfoCustomizer NONE = new ProcessInfoCustomizer();
 
   private HashSet<Item> _includes = new HashSet<Item>();
-  
+
   public ProcessInfoCustomizer(String value) {
     StringTokenizer stok = new StringTokenizer(value,",",false);
     while (stok.hasMoreTokens()) {
@@ -44,7 +44,7 @@ public class ProcessInfoCustomizer {
       _includes.add(i);
     }
   }
-  
+
   public String toString() {
     StringBuilder buf = new StringBuilder();
     boolean first = false;
@@ -57,7 +57,7 @@ public class ProcessInfoCustomizer {
     }
     return buf.toString();
   }
-  
+
   public ProcessInfoCustomizer(Item... items) {
     for (Item i : items)
       _includes.add(i);

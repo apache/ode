@@ -54,11 +54,11 @@
     <dependency>
         <groupId>org.apache.derby</groupId>
         <artifactId>derbytools</artifactId>
-    </dependency> 
+    </dependency>
     <dependency>
         <groupId>org.apache.ode</groupId>
         <artifactId>ode-dao-hibernate</artifactId>
-    </dependency> 
+    </dependency>
     </dependencies>
     <build>
 

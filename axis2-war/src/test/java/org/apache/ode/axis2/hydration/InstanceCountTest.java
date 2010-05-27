@@ -51,7 +51,7 @@ import javax.xml.namespace.QName;
 
 
 /**
- * Test the limit on the number of process instances. 
+ * Test the limit on the number of process instances.
  *
  * @author $author$
  * @version $Revision$
@@ -65,7 +65,7 @@ public class InstanceCountTest extends Axis2TestBase {
     /**
      * test case set up
      *
-     * @throws Exception Exception 
+     * @throws Exception Exception
      */
     @BeforeMethod
     protected void setUp() throws Exception {
@@ -82,28 +82,28 @@ public class InstanceCountTest extends Axis2TestBase {
     /**
      * test case tear down
      *
-     * @throws Exception Exception 
+     * @throws Exception Exception
      */
     @AfterMethod
     protected void tearDown() throws Exception {
         super.tearDown();
     }
-    
+
     /**
      * Tests rendezvous
-     * 
+     *
      * @throws Exception
      */
     String firstResponse, secondResponse;
     boolean secondStarted;
-    
+
     @Test(dataProvider="configs")
     public void testCorrelationJoin() throws Exception {
         final String bundleName = "TestCorrelationJoin";
-        
+
         firstResponse = secondResponse = null;
         secondStarted = true;
-        
+
         server.getODEServer().getBpelServer().setInstanceThrottledMaximumCount(1);
         // deploy the required service
         server.deployService(DummyService.class.getCanonicalName());
@@ -120,8 +120,8 @@ public class InstanceCountTest extends Axis2TestBase {
                     fail(e.getMessage());
                 }
             }
-        }.start();        
-        
+        }.start();
+
         Thread processOne = new Thread() {
             public void run() {
                 try {
@@ -134,7 +134,7 @@ public class InstanceCountTest extends Axis2TestBase {
             }
         };
         processOne.start();
-        
+
         Thread processTwo = new Thread() {
             public void run() {
                 try {
@@ -155,7 +155,7 @@ public class InstanceCountTest extends Axis2TestBase {
             server.undeployProcess(bundleName);
             fail("The second instance was allowed to start");
         }
-        
+
         new Thread() {
             public void run() {
                 try {
@@ -169,7 +169,7 @@ public class InstanceCountTest extends Axis2TestBase {
         }.start();
 
         try {
-            processOne.join();        
+            processOne.join();
             assertTrue(firstResponse.contains(">1;2;3;<"));
         } finally {
             server.undeployProcess(bundleName);
@@ -177,6 +177,6 @@ public class InstanceCountTest extends Axis2TestBase {
     }
 
     public String getODEConfigDir() {
-        return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby"; 
-    }    
+        return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby";
+    }
 }

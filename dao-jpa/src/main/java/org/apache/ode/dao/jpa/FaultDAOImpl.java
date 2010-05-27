@@ -43,8 +43,8 @@ import javax.xml.namespace.QName;
 })
 public class FaultDAOImpl implements FaultDAO {
     public final static String DELETE_FAULTS_BY_IDS = "DELETE_FAULTS_BY_IDS";
-    
-    @Id @Column(name="FAULT_ID") 
+
+    @Id @Column(name="FAULT_ID")
     @GeneratedValue(strategy=GenerationType.AUTO)
     @SuppressWarnings("unused")
     private Long _id;
@@ -68,20 +68,20 @@ public class FaultDAOImpl implements FaultDAO {
         _activityId = activityId;
         _data = (faultMessage == null)?null:DOMUtils.domToString(faultMessage);
     }
-    
+
     public int getActivityId() {
         return _activityId;
     }
 
     public Element getData() {
         Element ret = null;
-        
+
         try {
             ret = (_data == null)?null:DOMUtils.stringToDOM(_data);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        
+
         return ret;
     }
 

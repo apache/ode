@@ -25,7 +25,7 @@ import java.util.Map;
 
 /**
  * Hibernate-managed table for keeping track of message exchanges.
- * 
+ *
  * @hibernate.class table="BPEL_MESSAGE_EXCHANGE" dynamic-update="true"
  * @hibernate.query name="SELECT_MEX_IDS_BY_INSTANCES" query="select id from HMessageExchange as m where m.instance in (:instances)"
  * @hibernate.query name="SELECT_UNMATCHED_MEX_BY_INSTANCES" query="from HMessageExchange as m where m in(select cm.messageExchange from HCorrelatorMessage as cm where cm.messageExchange.instance in (:instances))"
@@ -45,13 +45,13 @@ public class HMessageExchange extends HObject {
     private String _portType;
 
     private byte[] _endpoint;
-    
+
     private byte[] _callbackEndpoint;
-    
+
     private HMessage _request;
 
     private HMessage _response;
-    
+
     private HPartnerLink _partnerLink;
 
     private String _clientKey;
@@ -75,13 +75,13 @@ public class HMessageExchange extends HObject {
     private String _callee;
 
     private String _pipedMessageExchangeId;
-    
+
     private int _subscriberCount;
 
     private Map<String, String> _properties = new HashMap<String, String>();
 
     /**
-     * 
+     *
      */
     public HMessageExchange() {
         super();
@@ -343,18 +343,18 @@ public class HMessageExchange extends HObject {
     public void setPipedMessageExchangeId(String pipedMessageExchangeId) {
         _pipedMessageExchangeId = pipedMessageExchangeId;
     }
-    
+
     /**
      * @hibernate.property column="SUBSCRIBER_COUNT"
      */
     public int getSubscriberCount() {
         return _subscriberCount;
     }
-    
+
     public void setSubscriberCount(int subscriberCount) {
         this._subscriberCount = subscriberCount;
     }
-    
+
     public void incrementSubscriberCount() {
         setSubscriberCount(getSubscriberCount() + 1);
     }

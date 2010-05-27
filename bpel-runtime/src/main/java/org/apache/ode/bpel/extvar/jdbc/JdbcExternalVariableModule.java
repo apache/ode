@@ -52,7 +52,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
     private static final Log __log = LogFactory.getLog(JdbcExternalVariableModule.class);
 
     public static final String JDBC_NS = "http://ode.apache.org/externalVariables/jdbc";
-    
+
     /** Unique QName for the engine, this should be the element used for the external-variable configuration. */
     public static final QName NAME = new QName(JDBC_NS, "jdbc");
 
@@ -93,7 +93,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
             } finally {
                 try {
                     ctx.close();
-                } catch (NamingException e) { /* ignore */ } 
+                } catch (NamingException e) { /* ignore */ }
             }
 
             if (dsCandidate == null)
@@ -122,7 +122,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
             }
             throw new ExternalVariableModuleException("Unable to open database connection for external variable " + evarId, ex);
         }
-        
+
 
         try {
             DbExternalVariable dbev = new DbExternalVariable(evarId, ds);
@@ -278,7 +278,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
                         + " key.isEmpty: " + evar._keycolumns.isEmpty()
                         + " key.missingValues: " + key.missingValues()
                         + " key.missingDBValues: " + key.missingDatabaseGeneratedValues());
-        
+
         try {
             if (tryupdatefirst)
                 insert = execUpdate(evar, key, val) == 0;
@@ -299,7 +299,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
         DbExternalVariable evar = _vars.get(evarId);
         if (evar == null)
             throw new ExternalVariableModuleException("No such variable: "+evarId);
-        
+
         Element val;
         try {
             RowVal rowval = execSelect(evar, locator);
@@ -313,7 +313,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
 
     /**
      * Manually register a data source. Handy if you don't want to use JNDI to look these up.
-     * 
+     *
      * @param dsName
      * @param ds
      */
@@ -367,7 +367,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
         }
         // Try down casting the value as per its column type.
         try {
-            // Some JDBC 4.0 types have been ignored to avoid compilation errors 
+            // Some JDBC 4.0 types have been ignored to avoid compilation errors
             switch (dataType) {
             case Types.ARRAY:
                 break;
@@ -396,7 +396,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
                 break;
             case Types.DATALINK:
                 break;
-            case Types.DATE:    		
+            case Types.DATE:
                 break;
             case Types.DECIMAL:
                 if (!(value instanceof BigDecimal)) {
@@ -472,7 +472,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
                 break;
             case Types.VARCHAR:
                 break;
-            default:    	
+            default:
                 break;
             }
         } catch (Exception e) {
@@ -484,15 +484,15 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
     RowVal execSelect(DbExternalVariable dbev, Locator locator) throws SQLException, ExternalVariableModuleException {
         RowKey rowkey = dbev.keyFromLocator(locator);
         if (__log.isDebugEnabled()) __log.debug("execSelect: " + rowkey);
-        
+
         if (rowkey.missingDatabaseGeneratedValues()) {
             return null;
         }
-        
+
         if (rowkey.missingValues()) {
             throw new IncompleteKeyException(rowkey.getMissing());
         }
-        
+
         RowVal ret = dbev.new RowVal();
         Connection conn = dbev.dataSource.getConnection();
         PreparedStatement stmt = null;
@@ -540,7 +540,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
 
     RowKey execInsert(DbExternalVariable dbev, Locator locator, RowKey keys, RowVal values) throws SQLException {
         Connection conn = dbev.dataSource.getConnection();
-        PreparedStatement stmt = null; 
+        PreparedStatement stmt = null;
         try {
             if (__log.isDebugEnabled()) {
                 __log.debug("execInsert: keys=" + keys + " values=" + values);
@@ -549,8 +549,8 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
                 __log.debug("_autoColNames: " + ObjectPrinter.stringifyNvList(dbev._autoColNames));
             }
 
-            stmt = keys.missingDatabaseGeneratedValues() 
-                ? conn.prepareStatement(dbev.insert, dbev._autoColNames) 
+            stmt = keys.missingDatabaseGeneratedValues()
+                ? conn.prepareStatement(dbev.insert, dbev._autoColNames)
                 : conn.prepareStatement(dbev.insert);
 
             int idx = 1;
@@ -560,7 +560,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
                 if (__log.isDebugEnabled()) __log.debug("Set parameter "+idx+": "+val);
                 if (val == null)
                     stmt.setNull(idx, c.dataType);
-                else 
+                else
                     stmt.setObject(idx, val);
                 idx++;
             }
@@ -577,7 +577,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
                 // With JDBC 3, we can get the values of the key columns (if the db supports it)
                 ResultSet keyRS = stmt.getGeneratedKeys();
                 try {
-                    if (keyRS == null) 
+                    if (keyRS == null)
                         throw new SQLException("Database did not return generated keys");
                     keyRS.next();
                     for (Column ck : keys._columns) {
@@ -588,7 +588,7 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
                 } finally {
                     keyRS.close();
                 }
-            } 
+            }
             return keys;
         } finally {
             if (stmt != null) stmt.close();

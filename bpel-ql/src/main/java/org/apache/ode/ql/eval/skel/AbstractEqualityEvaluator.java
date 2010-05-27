@@ -27,6 +27,6 @@ public abstract class AbstractEqualityEvaluator<ID, R, PARAMC>  extends Abstract
     public AbstractEqualityEvaluator(ID identifier) {
         super(identifier);
     }
-    
+
 
 }

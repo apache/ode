@@ -94,7 +94,7 @@ public class MessageDAOImpl implements MessageDAO {
             return;
         }
         _data = DOMUtils.domToString(value);
-        
+
         if (__log.isDebugEnabled()) {
             __log.debug("setData " + _id + " " + _data);
         }

@@ -33,7 +33,7 @@ public class OdeConnectionException extends ResourceException {
   OdeConnectionException(String message) {
     super(message);
   }
-  
+
   /**
    * Constructor.
    * @param message the message

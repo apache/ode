@@ -18,11 +18,11 @@
   ~ under the License.
   -->
 
-<wsdl:definitions 
+<wsdl:definitions
     targetNamespace="http://ode/bpel/unit-test.wsdl"
     xmlns="http://schemas.xmlsoap.org/wsdl/"
     xmlns:tns="http://ode/bpel/unit-test.wsdl"
-    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop"
     xmlns:types="http://ode/bpel/types"
@@ -48,7 +48,7 @@
         <wsdl:operation name="HelloXQuery">
             <wsdl:input message="tns:HelloXQueryMessage" name="TestIn"/>
             <wsdl:output message="tns:HelloXQueryMessage" name="TestOut"/>
-        </wsdl:operation>    
+        </wsdl:operation>
     </wsdl:portType>
 
     <wsdl:binding name="HelloXQuerySoapBinding" type="tns:HelloXQueryPortType">
@@ -72,20 +72,20 @@
                 <soap:address location="http://localhost:8080/ode/processes/HelloXQueryWorld"/>
                 </wsdl:port>
     </wsdl:service>
-    
+
     <plnk:partnerLinkType name="HelloXQueryPartnerLinkType">
         <plnk:role name="me" portType="tns:HelloXQueryPortType"/>
         <plnk:role name="you" portType="tns:HelloXQueryPortType"/>
     </plnk:partnerLinkType>
-    
+
   <vprop:property name="content" type="xsd:string"/>
   <vprop:propertyAlias propertyName="tns:content" messageType="tns:HelloXQueryMessage" part="TestPart">
 
     <vprop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
       content
-    </vprop:query>  
-   
+    </vprop:query>
+
   </vprop:propertyAlias>
-    
+
 </wsdl:definitions>
 

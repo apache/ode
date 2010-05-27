@@ -29,5 +29,5 @@ public class Disjunction extends AbstractLogicExpr {
     public Disjunction(Collection<LogicNode> childs) {
         super(childs);
     }
-    
+
 }

@@ -133,7 +133,7 @@ public class SoapMessageConverterTest extends TestCase {
         odeMsg1.setHeaderPart("DocumentumRequestHeader", DOMUtils.findChildByName(req1.getDocumentElement(),
                 new QName("http://documentum.com/ws/2005/services", "DocumentumSecurityToken")));
         portmapper.createSoapRequest(msgCtx, odeMsg1, op1);
-        
+
         SOAPEnvelope env = msgCtx.getEnvelope();
         System.out.println("testParseRequest: " + env);
         Element odeMsgElmt = DOMUtils.stringToDOM("<message/>");

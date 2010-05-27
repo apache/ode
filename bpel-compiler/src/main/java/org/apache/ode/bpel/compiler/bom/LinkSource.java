@@ -22,7 +22,7 @@ import org.w3c.dom.Element;
 
 /**
  * BOM representation of a "link source" (i.e. a <code>&lt;source...&gt;</code>
- * element) declaration. 
+ * element) declaration.
  */
 public class LinkSource extends BpelObject {
 
@@ -30,11 +30,11 @@ public class LinkSource extends BpelObject {
         super(el);
     }
 
-   
+
 
     /**
      * Get the refernced link.
-     * 
+     *
      * @return name of referenced link
      */
     public String getLinkName() {
@@ -43,15 +43,15 @@ public class LinkSource extends BpelObject {
 
     /**
      * Get the link transition condition.
-     * 
+     *
      * @return transition condition {@link Expression}
      */
     public Expression getTransitionCondition() {
         if (is11()){
-            return isAttributeSet("transitionCondition") ? new Expression11(getElement(), 
-                    getElement().getAttributeNode("transitionCondition")) : null; 
+            return isAttributeSet("transitionCondition") ? new Expression11(getElement(),
+                    getElement().getAttributeNode("transitionCondition")) : null;
         }
-        
+
         return getFirstChild(Expression.class);
     }
 

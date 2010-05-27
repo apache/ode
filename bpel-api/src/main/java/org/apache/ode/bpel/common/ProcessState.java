@@ -22,12 +22,12 @@ package org.apache.ode.bpel.common;
  * Convenience class for working with process states.
  */
 public class ProcessState {
-  
+
     /** <em>NEW</em> state: instance has not been reduced. */
   public static final short STATE_NEW = 0;
 
   /**
-   * <em>READY</em> state: instance is waiting for a <code>&lt;receive&gt;</code> 
+   * <em>READY</em> state: instance is waiting for a <code>&lt;receive&gt;</code>
    * or <code>&lt;pick&gt;</code> with <code>createInstance="true"</code>.
    */
   public static final short STATE_READY = 10;
@@ -43,26 +43,26 @@ public class ProcessState {
    * (normally).
    */
   public static final short STATE_COMPLETED_OK = 30;
-  
+
   /**
    * <em>COMPLETED WITH FAULT</em> state: instance has reached the end of its execution
    * due to an uncaught fault.
    */
   public static final short STATE_COMPLETED_WITH_FAULT = 40;
-  
+
   /**
    * <em>SUSPENDED</em> state: instance was suspended via a breakpoint or user
    * intervention.
    */
   public static final short STATE_SUSPENDED = 50;
-  
+
   /**
    * <em>TERMINATED</em> state: instance was terminated, either via the
    * <code>&lt;terminate&gt;</code> or through manual intervention.
    * @see org.apache.ode.bpel.bdi.InstanceReference#terminate()
    */
   public static final short STATE_TERMINATED = 60;
-  
+
   /**
    * An array containing the possible states.
    */
@@ -75,12 +75,12 @@ public class ProcessState {
     STATE_SUSPENDED,
     STATE_TERMINATED
   };
-  
+
   /*
    * No instance for you.
    */
   private ProcessState(){}
-    
+
   /**
    * Test whether a process state is one where the process can execute, i.e.,
    * not {@link #STATE_SUSPENDED} and not one of the completed or terminated states.
@@ -92,12 +92,12 @@ public class ProcessState {
         ||  state == STATE_ACTIVE
         || state == STATE_NEW;
   }
-  
-  
+
+
   /**
-   * Test whether a process state is one of the completed states, e.g., 
+   * Test whether a process state is one of the completed states, e.g.,
    * {@link #STATE_COMPLETED_OK} or {@link #STATE_COMPLETED_WITH_FAULT}.
-   * 
+   *
    * @param state the state of the process
    * @return <code>true</code> if the process is finished.
    */
@@ -111,7 +111,7 @@ public class ProcessState {
    */
   public static String stateToString(short state) {
     switch (state) {
-    
+
       case STATE_NEW:
         return "New";
 
@@ -123,16 +123,16 @@ public class ProcessState {
 
       case STATE_COMPLETED_OK:
         return "Completed Ok";
-        
+
       case STATE_COMPLETED_WITH_FAULT:
         return "Completed Fault";
-        
+
       case STATE_SUSPENDED:
         return "Suspended";
-  
+
       case STATE_TERMINATED:
         return "Terminated";
-  
+
       default:
         throw new IllegalStateException("unknown state: " + state);
     }

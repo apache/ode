@@ -16,11 +16,11 @@
  ! limitations under the License.
  !-->
 <service>
-    
+
     <!--Signature and Encryption : Using the request's certificate-->
-    
+
     <module ref="rampart" />
-    
+
     <parameter name="OutflowSecurity">
       <action>
         <items>Timestamp Signature Encrypt</items>
@@ -40,5 +40,5 @@
         <signaturePropFile>TestRampartBasic/secured-services/client.properties</signaturePropFile>
       </action>
     </parameter>
-    
+
  </service>

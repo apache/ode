@@ -35,8 +35,8 @@ public class Property extends BpelObject4WSDL {
 
 
     /**
-     * Get the name of the property; note that this name is in the target-namespace of the WSDL. 
-     * 
+     * Get the name of the property; note that this name is in the target-namespace of the WSDL.
+     *
      * @return the <code>QName</code> of the property.
      */
     public QName getName() {
@@ -45,7 +45,7 @@ public class Property extends BpelObject4WSDL {
 
     /**
      * Get the name of the schema type for this property
-     * 
+     *
      * @return the <code>QName</code> for the schema type of this property.
      */
     public QName getPropertyType() {

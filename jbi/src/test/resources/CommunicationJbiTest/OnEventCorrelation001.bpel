@@ -37,7 +37,7 @@
         <bpws:correlation initiate="yes" set="CorrelationSet"/>
       </bpws:correlations>
     </bpws:receive>
-    
+
     <bpws:assign>
       <bpws:copy>
         <bpws:from>concat($input.payload, '-b')</bpws:from>
@@ -50,7 +50,7 @@
     </bpws:assign>
 
     <bpws:invoke partnerLink="client" operation="opIn" inputVariable="input"/>
-    
+
 
     <bpws:assign>
       <bpws:copy>

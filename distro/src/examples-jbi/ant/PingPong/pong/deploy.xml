@@ -27,5 +27,5 @@
             <service name="pong:PongService" port="PongPort"/>
         </provide>
     </process>
-    
+
 </deploy>

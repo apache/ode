@@ -38,29 +38,29 @@
         <bpws:correlation initiate="yes" set="CorrelationSet"/>
       </bpws:correlations>
     </bpws:receive>
-    
+
     <bpws:assign>
       <bpws:copy>
         <bpws:from>$input.data</bpws:from>
         <bpws:to>$s</bpws:to>
       </bpws:copy>
     </bpws:assign>
-    
+
     <bpws:wait><bpws:for>'PT1S'</bpws:for></bpws:wait>
-    
+
     <bpws:receive createInstance="no" operation="opIn" partnerLink="client" portType="tns:OnEventCorrelation" variable="input">
       <bpws:correlations>
         <bpws:correlation initiate="no" set="CorrelationSet"/>
       </bpws:correlations>
     </bpws:receive>
-    
+
     <bpws:assign>
       <bpws:copy>
         <bpws:from>concat($s, $input.data)</bpws:from>
         <bpws:to>$s</bpws:to>
       </bpws:copy>
     </bpws:assign>
-    
+
     <bpws:wait><bpws:for>'PT1S'</bpws:for></bpws:wait>
 
     <bpws:receive createInstance="no" operation="opInOut" partnerLink="client" portType="tns:OnEventCorrelation" variable="input" messageExchange="mex1">
@@ -85,7 +85,7 @@
       </bpws:copy>
     </bpws:assign>
     <bpws:reply operation="opInOut" partnerLink="client" variable="output" messageExchange="mex1"/>
-    
+
     <bpws:wait><bpws:for>'PT1S'</bpws:for></bpws:wait>
 
     <bpws:receive createInstance="no" operation="opInOut" partnerLink="client" portType="tns:OnEventCorrelation" variable="input" messageExchange="mex2">

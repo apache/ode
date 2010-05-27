@@ -44,7 +44,7 @@ public class CompensationHandling20Test extends BPELTestAbstract {
          * Message exchange
          * org.apache.ode.bpel.engine.MyRoleMessageExchangeImpl$ResponseFuture@ab6dcb
          * timed out when waiting for a response!
-         * 
+         *
          * at
          * org.apache.ode.test.BPELTestAbstract.checkFailure(BPELTestAbstract.java:278)
          * at org.apache.ode.test.BPELTestAbstract.go(BPELTestAbstract.java:267)
@@ -53,7 +53,7 @@ public class CompensationHandling20Test extends BPELTestAbstract {
          */
         deploy("/bpel/2.0/TestImplicitFaultHandler");
         Invocation inv = addInvoke("Invoke#1", new QName("http://ode/bpel/unit-test/testImplicitFaultHandler.wsdl",
-                        "testImplicitFaultHandlerService"), "request", 
+                        "testImplicitFaultHandlerService"), "request",
                         "<message><requestID>Start TestImplicitFaultHandler</requestID><requestText>Event TestImplicitFaultHandler</requestText><faultIndicator1>yes</faultIndicator1><faultIndicator2>no</faultIndicator2></message>",
                         null);
         inv.expectedFinalStatus = MessageExchange.Status.FAULT;

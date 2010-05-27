@@ -55,7 +55,7 @@ public class LoggingErrorHandler implements ErrorHandler {
   /**
    * Construct a new instance that dumps messages onto a specific logging
    * channel.
-   * 
+   *
    * @param log
    *          the <code>Log</code> on which to dump messages.
    */

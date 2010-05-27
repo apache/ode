@@ -21,7 +21,7 @@
         xmlns:pns="urn:/HelloWorld2-RPC.bpel"
         xmlns:sns="urn:/HelloWorld2-RPC.wsdl">
 
-    
+
     <process name="pns:HelloWorld2-RPC">
         <active>true</active>
         <provide partnerLink="helloPartnerLink">

@@ -26,7 +26,7 @@ public class HibObj  {
     Session getSession() {
         return ConfStoreConnectionHib._current.get();
     }
-    
+
     protected void delete() {
         getSession().delete(this);
     }

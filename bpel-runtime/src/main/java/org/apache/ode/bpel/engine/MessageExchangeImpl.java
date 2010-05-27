@@ -51,7 +51,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
     protected EndpointReference _epr;
 
     protected MessageExchangeDAO _dao;
-    
+
     /**
      * Constructor: requires the minimal information for a message exchange.
      */
@@ -158,7 +158,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
         setStatus(Status.FAULT);
         getDAO().setFault(faultType);
         getDAO().setResponse(((MessageImpl)outputFaultMessage)._dao);
-        
+
         responseReceived();
     }
 
@@ -230,13 +230,13 @@ abstract class MessageExchangeImpl implements MessageExchange {
     }
 
     public int getSubscriberCount() {
-        return getDAO().getSubscriberCount();    	
+        return getDAO().getSubscriberCount();
     }
-    
+
     public void setSubscriberCount(int subscriberCount) {
         getDAO().setSubscriberCount(subscriberCount);
     }
-    
+
     public void release() {
         __log.debug("Releasing mex " + getMessageExchangeId());
         // for a one-way, message exchanges are always deleted

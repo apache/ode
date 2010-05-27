@@ -165,7 +165,7 @@
             <dd:service name="bpel:EPRTest" port="default" />
         </dd:provide>
     </dd:process>
-    
+
     <dd:process name="bpel:EPRTest2" fileName="EPRTest2.bpel">
         <dd:provide partnerLink="client">
             <dd:service name="bpel:EPRTest2" port="default" />

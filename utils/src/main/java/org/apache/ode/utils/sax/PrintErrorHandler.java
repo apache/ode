@@ -28,12 +28,12 @@ public class PrintErrorHandler implements ErrorHandler {
 
   private ErrorHandler _child;
   private PrintStream _out;
-  
+
   public PrintErrorHandler(ErrorHandler eh,PrintStream ps) {
     _child = eh;
     _out = ps;
   }
-  
+
   public PrintErrorHandler(PrintStream pw) {
     this(new IgnoreAllErrorHandler(),pw);
   }
@@ -61,7 +61,7 @@ public class PrintErrorHandler implements ErrorHandler {
     _out.println(formatMessage(exception));
     _child.fatalError(exception);
   }
-  
+
   private String formatMessage(SAXParseException spe) {
     StringBuffer sb = new StringBuffer();
     sb.append('[');

@@ -43,16 +43,16 @@ import org.w3c.dom.NodeList;
 
 /**
  * Test for the JDBC external variable engine.
- * 
+ *
  * @author Maciej Szefler <mszefler at gmail dot com>
  *
  */
 public class JdbcExternalVariableEngineTest extends TestCase {
-    
+
     final Long _iid = 123L;
     final QName _pid = new QName("foo", "pid");
     final QName _varType = new QName("foo", "foobar");
-    
+
     ExternalVariableConf _econf;
     jdbcDataSource _ds;
     JdbcExternalVariableModule _engine;
@@ -62,7 +62,7 @@ public class JdbcExternalVariableEngineTest extends TestCase {
         _ds = new org.hsqldb.jdbc.jdbcDataSource();
         _ds.setDatabase("jdbc:hsqldb:mem:" + new GUID().toString());
         _ds.setUser("sa");
-       
+
         Connection conn = _ds.getConnection();
         Statement s = conn.createStatement();
         s.execute("create table extvartable1 (" +
@@ -74,42 +74,42 @@ public class JdbcExternalVariableEngineTest extends TestCase {
                 "uts DATETIME," +
                 "foo VARCHAR," +
                 "bar VARCHAR );");
-        
+
         _engine = new JdbcExternalVariableModule();
         _engine.registerDataSource("testds",_ds);
-        
+
         _el1=DOMUtils.stringToDOM("<foobar><id2>ignored</id2><foo>foo</foo><bar>bar</bar></foobar>");
     }
-    
+
     @Test
     public void testConfigurationParsing() throws Exception {
         Document deploydoc = DOMUtils.parse(getClass().getResourceAsStream("evardeploy.xml"));
-        NodeList nl = deploydoc.getElementsByTagNameNS(ExternalVariableConf.EXTVARCONF_ELEMENT.getNamespaceURI(), 
+        NodeList nl = deploydoc.getElementsByTagNameNS(ExternalVariableConf.EXTVARCONF_ELEMENT.getNamespaceURI(),
                 ExternalVariableConf.EXTVARCONF_ELEMENT.getLocalPart());
 
         ArrayList<Element> al = new ArrayList<Element>();
         for (int i = 0; i < nl.getLength(); ++i) {
             al.add((Element)nl.item(i));
         }
-        
+
         assertTrue(al.size() >= 1);
         _econf = new ExternalVariableConf(al);
         assertEquals(al.size(), _econf.getVariables().size());
     }
 
-    
+
     @Test
     public void testConfigure() throws Exception {
         testConfigurationParsing();
         for (Variable v :_econf.getVariables())
             _engine.configure(_pid, v.extVariableId, v.configuration);
     }
-    
-    
+
+
     @Test
     public void testInitWriteValue() throws Exception {
         testConfigure();
-        
+
         Locator locator = new Locator("evar1",_pid,_iid);
         Value value = new Value(locator, _el1, null);
         value = _engine.writeValue(_varType, value);
@@ -123,7 +123,7 @@ public class JdbcExternalVariableEngineTest extends TestCase {
     @Test
     public void testWriteUpdate() throws Exception {
         testConfigure();
-        
+
         Locator locator = new Locator("evar1",_pid,_iid);
         Value value = new Value(locator, _el1, null);
         value = _engine.writeValue(_varType, value);
@@ -136,21 +136,21 @@ public class JdbcExternalVariableEngineTest extends TestCase {
         assertTrue(domstr.contains("boohoo"));
         assertFalse(domstr.contains(">bar<"));
     }
-    
+
     @Test
     public void testRead() throws Exception {
         testConfigure();
         Locator locator = new Locator("evar1",_pid,_iid);
         Value value = new Value(locator, _el1, null);
         value = _engine.writeValue(_varType, value);
-        
+
         Value readVal = _engine.readValue(_varType, value.locator);
-        
+
         assertEquals(_iid,readVal.locator.iid);
         assertEquals(_pid,readVal.locator.pid);
         assertEquals(2, DOMUtils.countKids((Element)readVal.locator.reference, Node.ELEMENT_NODE));
         assertEquals(DOMUtils.domToString(value.locator.reference), DOMUtils.domToString(readVal.locator.reference));
-        
+
 
     }
 }

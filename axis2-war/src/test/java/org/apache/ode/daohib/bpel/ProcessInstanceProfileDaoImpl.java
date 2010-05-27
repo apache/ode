@@ -55,7 +55,7 @@ import java.util.List;
 public class ProcessInstanceProfileDaoImpl extends ProcessProfileDaoImpl implements ProcessInstanceProfileDAO {
     @SuppressWarnings("unused")
     private static final Log __log = LogFactory.getLog(ProcessInstanceProfileDaoImpl.class);
-    
+
     private ProcessInstanceDaoImpl instance;
 
     public ProcessInstanceProfileDaoImpl(SessionManager sm, ProcessInstanceDaoImpl instance) {
@@ -63,15 +63,15 @@ public class ProcessInstanceProfileDaoImpl extends ProcessProfileDaoImpl impleme
         entering("ProcessInstanceProfileDaoImpl.ProcessInstanceProfileDaoImpl");
         this.instance = instance;
     }
-    
+
     public SessionManager getSessionManager() {
         return _sm;
     }
-    
+
     public ProcessDAO getProcess() {
         return process;
     }
-    
+
     public List<MessageExchangeDAO> findMessageExchangesByInstance() {
         return findByInstance("from HMessageExchange as x where x.instance = :instance)", MessageExchangeDaoImpl.class, HMessageExchange.class);
     }
@@ -111,10 +111,10 @@ public class ProcessInstanceProfileDaoImpl extends ProcessProfileDaoImpl impleme
     public int countEventsByInstance() {
         Query query = getSession().createQuery("select count(id) from HBpelEvent as e where e.instance = :instance");
         query.setParameter("instance", instance._hobj);
-        
+
         return ((Long)query.uniqueResult()).intValue();
     }
-    
+
     @SuppressWarnings("unchecked")
     protected <D, H> List<D> findByInstance(String queryString, Class daoClass, Class hibClass) {
         List<D> results = new ArrayList<D>();

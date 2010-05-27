@@ -55,7 +55,7 @@ public class CorrelationKey implements Serializable {
 
     /**
      * Constructor.
-     * 
+     *
      * @param csetName
      *            correlation set identifier
      * @param keyValues
@@ -105,10 +105,10 @@ public class CorrelationKey implements Serializable {
 
     /**
      * Check if this key matches any member in a set of keys.
-     * 
+     *
      * @param keys
      *            set of keys to match against
-     * 
+     *
      * @return <code>true</code> if one of the keys in the set
      *         <code>equals(..)</code> this key, <code>false</code>
      *         otherwise
@@ -124,17 +124,17 @@ public class CorrelationKey implements Serializable {
 
     /**
      * Equals comperator method.
-     * 
+     *
      * @param o
      *            <code>CorrelationKey</code> object to compare with
-     * 
+     *
      * @return <code>true</code> if the given object
      */
     public boolean equals(Object o) {
         if (!(o instanceof CorrelationKey)) {
             return false;
         }
-        
+
         CorrelationKey okey = (CorrelationKey) o;
 
         if (okey == null || !okey._csetName.equals(_csetName) || okey._keyValues.length != _keyValues.length)
@@ -149,7 +149,7 @@ public class CorrelationKey implements Serializable {
 
     /**
      * Generate a hash code from the hash codes of the elements.
-     * 
+     *
      * @see HashMap#hashCode
      * @see Object#hashCode
      */

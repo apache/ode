@@ -30,13 +30,13 @@ public class CorrelationJoinLazyTest extends Axis2TestBase implements ODEConfigD
     /**
      * Tests a message being saved by no instance waiting for it. The saved message is picked up
      * when the third message arrives, and is consumed.
-     * 
+     *
      * @throws Exception
      */
     @Test(dataProvider="configs")
     public void testCorrelationJoin() throws Exception {
         final String bundleName = "TestCorrelationJoinLazy";
-        
+
         // deploy the required service
         server.deployService(DummyService.class.getCanonicalName());
         if (server.isDeployed(bundleName)) server.undeployProcess(bundleName);
@@ -53,7 +53,7 @@ public class CorrelationJoinLazyTest extends Axis2TestBase implements ODEConfigD
                 }
             }
         }.start();
-        
+
         new Thread() {
             public void run() {
                 try {
@@ -65,7 +65,7 @@ public class CorrelationJoinLazyTest extends Axis2TestBase implements ODEConfigD
                 }
             }
         }.start();
-        
+
         try {
             String response = server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                     bundleName, "testRequest.soap");
@@ -79,6 +79,6 @@ public class CorrelationJoinLazyTest extends Axis2TestBase implements ODEConfigD
     }
 
     public String getODEConfigDir() {
-        return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby"; 
+        return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby";
     }
 }

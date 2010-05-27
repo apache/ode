@@ -35,7 +35,7 @@ public class SwitchActivity extends Activity {
 
     /**
      * Get the cases for this switch.
-     * 
+     *
      * @return the cases
      */
     public List<Case> getCases() {
@@ -43,8 +43,8 @@ public class SwitchActivity extends Activity {
     }
 
     /**
-     * BPEL object model representation of <code>&lt;case&gt;</code> and 
-     * <code>&lt;otherwise&gt;</code> elements. Note that the 
+     * BPEL object model representation of <code>&lt;case&gt;</code> and
+     * <code>&lt;otherwise&gt;</code> elements. Note that the
      * <code>&lt;otherwise&gt;</code> elements simply return null for
      * the {@link #getCondition()}.
      */
@@ -56,7 +56,7 @@ public class SwitchActivity extends Activity {
 
         /**
          * Get the activity for this case.
-         * 
+         *
          * @return activity enabled when case is satisfied
          */
         public Activity getActivity() {
@@ -65,15 +65,15 @@ public class SwitchActivity extends Activity {
 
         /**
          * Get the condition associated with this case.
-         * 
+         *
          * @return the condition
          */
         public Expression getCondition() {
-            return isAttributeSet("condition") 
-                ? new Expression11(getElement(),getElement().getAttributeNode("condition")) 
+            return isAttributeSet("condition")
+                ? new Expression11(getElement(),getElement().getAttributeNode("condition"))
                     : null;
         }
 
     }
-    
+
 }

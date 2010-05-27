@@ -70,12 +70,12 @@ public abstract class Axis2TestBase {
     protected ODEAxis2Server server;
 
     protected String config;
-    
+
     protected static final String DO_NOT_OVERRIDE_CONFIG = "<DO_NOT_OVERRIDE_CONFIG>";
 
     private static String originalOdePersistence = System.getProperty("ode.persistence");
     private static String originalOdeConfigDir = System.getProperty("org.apache.ode.configDir");
-    
+
     static {
         // disable deferred process instance cleanup for faster testing
         System.setProperty(BpelServerImpl.DEFERRED_PROCESS_INSTANCE_CLEANUP_DISABLED_NAME, "true");
@@ -118,7 +118,7 @@ public abstract class Axis2TestBase {
         } else {
             System.out.println("Java system properties have been set to override ode configuration: " + configDirList);
         }
-        
+
         final Iterator<String> itr = configDirList.iterator();
         return new Iterator<Object[]>() {
             public boolean hasNext() {
@@ -147,7 +147,7 @@ public abstract class Axis2TestBase {
             }
         }
     }
-    
+
     public void startServer() throws Exception {
         startServer("webapp/WEB-INF", "webapp/WEB-INF/conf/axis2.xml");
     }
@@ -216,7 +216,7 @@ public abstract class Axis2TestBase {
             System.clearProperty("org.apache.ode.configDir");
         }
         if( originalOdeConfigDir != null ) {
-            System.setProperty("ode.persistence", originalOdePersistence);      
+            System.setProperty("ode.persistence", originalOdePersistence);
         } else {
             System.clearProperty("ode.persistence");
         }
@@ -302,7 +302,7 @@ public abstract class Axis2TestBase {
         public String sendRequestFile(String endpoint, String bundleName, String filename) {
             return sendRequestFile(endpoint, bundleName + "/" + filename);
         }
-        
+
         public String sendRequestFile(String endpoint, String filename) {
             try {
                 URL url = new URL(endpoint);

@@ -23,7 +23,7 @@ import org.w3c.dom.Node;
 
 /**
  * A BPEL 1.1 Query, extends the 1.1 version of expression: {@link org.apache.ode.bpel.compiler.bom.Expression11}.
- * 
+ *
  * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
  *
  */
@@ -32,5 +32,5 @@ public class Query11 extends Expression11 {
     public Query11(Element el, Node expression) {
         super(el, expression);
     }
-    
+
 }

@@ -18,7 +18,7 @@
   -->
 
 <process
-    name="InvalidBpelFunction" suppressJoinFailure="yes" 
+    name="InvalidBpelFunction" suppressJoinFailure="yes"
     targetNamespace="http://ode/test/compile"
     xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
     xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
@@ -26,12 +26,12 @@
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:test="http://ode/test/compile.wsdl">
     <variables>
-        <variable name="var1" 
+        <variable name="var1"
             messageType="test:TestMessage" />
     </variables>
     <flow>
        <sequence>
-           <assign>		
+           <assign>
              <copy>
                  <from expression="'yes'"/>
                  <to variable="var1" property="test:testProp"/>

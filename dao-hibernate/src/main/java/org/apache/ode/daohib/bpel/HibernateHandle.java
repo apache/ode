@@ -30,22 +30,22 @@ class HibernateHandle implements Serializable{
     private Class _hibCls;
   private Serializable _id;
   /**
-     * 
+     *
      */
     public HibernateHandle(Class daoCls, Class hibCls, Serializable id) {
         _daoCls = daoCls;
     _hibCls = hibCls;
     _id = id;
     }
-  
+
   public Class getHibernateClass(){
     return _hibCls;
   }
-  
+
   public Class getDAOClass(){
     return _daoCls;
   }
-  
+
   public Serializable getId(){
     return _id;
   }

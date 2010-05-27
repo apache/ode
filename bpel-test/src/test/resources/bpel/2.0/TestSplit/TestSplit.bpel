@@ -17,7 +17,7 @@
   ~ under the License.
   -->
 <process name="TestSplit"
-    targetNamespace="http://ode/bpel/unit-test" 
+    targetNamespace="http://ode/bpel/unit-test"
     xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
     xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
     xmlns:tns="http://ode/bpel/unit-test"
@@ -37,13 +37,13 @@
          partnerLinkType="test:TestSplitPartnerLinkType"
          myRole="me" />
    </partnerLinks>
-    
+
    <variables>
      <variable name="myVar" messageType="test:TestSplitMessage"/>
      <variable name="tmpVar" type="xsd:string"/>
    </variables>
-        
-   <sequence>   
+
+   <sequence>
        <receive name="start" partnerLink="testSplitPartnerLink" portType="test:TestSplitPortType"
           operation="split" variable="myVar" createInstance="yes"/>
 

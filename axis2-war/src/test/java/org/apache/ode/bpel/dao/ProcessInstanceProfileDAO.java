@@ -23,7 +23,7 @@ import java.util.List;
 
 public interface ProcessInstanceProfileDAO extends ProcessProfileDAO {
     ProcessDAO getProcess();
-    
+
     List<ActivityRecoveryDAO> findActivityRecoveriesByInstance();
 
     List<CorrelationSetDAO> findCorrelationSetsByInstance();
@@ -41,6 +41,6 @@ public interface ProcessInstanceProfileDAO extends ProcessProfileDAO {
     List<ScopeDAO> findScopesByInstance();
 
     List<XmlDataDAO> findXmlDataByInstance();
-    
+
     int countEventsByInstance();
 }

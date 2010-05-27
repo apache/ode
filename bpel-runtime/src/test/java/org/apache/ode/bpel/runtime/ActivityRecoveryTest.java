@@ -61,7 +61,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
     static final int MAX_WAIT = 10000;
     // poll interval
     static final int DELAY = 100;
-    
+
     static final String   NAMESPACE = "http://ode.apache.org/bpel/unit-test";
     static final String[] ACTIONS = new String[]{ "retry", "cancel", "fault" };
     MockBpelServer        _server;
@@ -81,7 +81,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
      * If the process completes, it calls the completed method.
      */
     interface TestService {
-        public boolean invoke(); 
+        public boolean invoke();
         public void completed();
     }
 
@@ -263,7 +263,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
                 return null;
             }
         });
-        
+
         _server = new MockBpelServer() {
             protected MessageExchangeContext createMessageExchangeContext() {
                 return (MessageExchangeContext) partner.proxy();
@@ -327,7 +327,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
     /**
      * Blocks until the last instance reaches the desired status or throws an
      * exception if MAX_WAIT is exceeded.
-     * 
+     *
      * @param expected
      * @throws Exception
      */
@@ -347,7 +347,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
         } while (true);
     }
     /**
-     * get the instance info for the last instance 
+     * get the instance info for the last instance
      */
     private TInstanceInfo getInstanceInfo() {
         TInstanceInfoList instances = _management.listInstances("", "", 1000).getInstanceInfoList();
@@ -360,7 +360,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
 
     /**
      * Asserts that the process has one activity in the recovery state.
-     * @throws Exception 
+     * @throws Exception
      */
     protected void assertRecovery(int invoked, String[] actions) throws Exception {
         // Process is still active, none of the completed states.

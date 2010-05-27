@@ -17,7 +17,7 @@
   ~ under the License.
   -->
 
-<process name="PickProcess" suppressJoinFailure="yes" exitOnStandardFault="no" 
+<process name="PickProcess" suppressJoinFailure="yes" exitOnStandardFault="no"
   xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"

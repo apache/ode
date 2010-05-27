@@ -170,7 +170,7 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO, Deferred
             // don't sweat, they already deleted by another thread or process
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     public int deleteInstances(int transactionSize) {
         entering("ProcessDaoImpl.delete");
@@ -244,7 +244,7 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO, Deferred
         deleteByColumn(HMessageExchangeProperty.class, "mex.id", mex);
         deleteByIds(HMessageExchange.class, mex);
     }
-    
+
     @SuppressWarnings("unchecked")
     private void deleteCorrelations(Collection<HProcessInstance> instances) {
         deleteByIds(HCorrelationProperty.class, getSession().getNamedQuery(HCorrelationProperty.SELECT_CORPROP_IDS_BY_INSTANCES).setParameterList ("instances", instances).list());
@@ -296,5 +296,5 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO, Deferred
     public String getGuid() {
         return _process.getGuid();
     }
-    
+
 }

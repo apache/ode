@@ -20,30 +20,30 @@
 <!--
   Pick with two 'onMessage'.  2nd 'onMessage' is expected to match correlation.
 -->
-<process name="pick1" 
-    targetNamespace="http://ode/bpel/unit-test" 
+<process name="pick1"
+    targetNamespace="http://ode/bpel/unit-test"
     xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
     xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
     xmlns:tns="http://ode/bpel/unit-test"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    xmlns:test="http://ode/bpel/unit-test.wsdl" 
+    xmlns:test="http://ode/bpel/unit-test.wsdl"
     suppressJoinFailure="yes">
    <partnerLinks>
-      <partnerLink name="testPartnerLink" 
-         partnerLinkType="test:TestPartnerLinkType" 
+      <partnerLink name="testPartnerLink"
+         partnerLinkType="test:TestPartnerLinkType"
          myRole="me" />
    </partnerLinks>
-    
+
    <variables>
      <variable name="var1" messageType="test:PickMessage"/>
    </variables>
-   
+
    <correlationSets>
       <correlationSet name="PickCorrelator" properties="test:Id"/>
    </correlationSets>
-        
-   <sequence>   
-       <receive 
+
+   <sequence>
+       <receive
           name="startReceive"
           partnerLink="testPartnerLink"
           portType="test:TestPortType"
@@ -55,32 +55,32 @@
           </correlations>
        </receive>
        <pick name="pick1">
-          <onMessage 
+          <onMessage
             partnerLink="testPartnerLink"
             portType="test:TestPortType"
             operation="pickOp"
             variable="var1">
             <correlations>
                 <correlation set="PickCorrelator" initiate="no"/>
-            </correlations>      
-            <empty name="doNothing1"/>    
+            </correlations>
+            <empty name="doNothing1"/>
          </onMessage>
-         <onMessage 
+         <onMessage
             partnerLink="testPartnerLink"
             portType="test:TestPortType"
             operation="pickOp"
             variable="var1">
             <correlations>
                 <correlation set="PickCorrelator" initiate="no"/>
-            </correlations>         
-            <empty name="doNothing2"/> 
+            </correlations>
+            <empty name="doNothing2"/>
          </onMessage>
        </pick>
-            
-       <reply name="endReply" 
-              operation="receiveOp" 
+
+       <reply name="endReply"
+              operation="receiveOp"
               partnerLink="testPartnerLink"
-              portType="test:TestPortType" 
+              portType="test:TestPortType"
               variable="var1"/>
    </sequence>
 </process>

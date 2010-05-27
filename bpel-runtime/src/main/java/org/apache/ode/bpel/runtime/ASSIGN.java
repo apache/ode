@@ -345,7 +345,7 @@ class ASSIGN extends ACTIVITY {
 
         if (__log.isDebugEnabled())
             __log.debug("Assign.copy(" + ocopy + ")");
-        
+
         ScopeEvent se;
 
         // Check for message to message - copy, we can do this efficiently in
@@ -468,7 +468,7 @@ class ASSIGN extends ACTIVITY {
             throw fe;
         }
     }
-    
+
     private void replaceEndpointRefence(PartnerLinkInstance plval, Node rvalue) throws FaultException {
       if (rvalue.getNodeType() == Node.ATTRIBUTE_NODE){
           rvalue = rvalue.getOwnerDocument().createTextNode(((Attr) rvalue).getValue());
@@ -518,7 +518,7 @@ class ASSIGN extends ACTIVITY {
         }
         parent.replaceChild(replacement, ptr);
         DOMUtils.copyNSContext(ptr, replacement);
-        
+
         return (lval == ptr) ? replacement :  lval;
     }
 
@@ -652,14 +652,14 @@ class ASSIGN extends ACTIVITY {
         private Node _rootNode;
 
         private EvaluationContext _ctx;
-        
+
 
         private EvaluationContextProxy(Variable var, Node varNode) {
             _var = var;
             _varNode = varNode;
             _ctx = getEvaluationContext();
         }
-        
+
         public Node readVariable(OScope.Variable variable, OMessageVarType.Part part) throws FaultException {
             if (variable.name.equals(_var.name)) {
                 if (part == null) return _varNode;
@@ -732,7 +732,7 @@ class ASSIGN extends ACTIVITY {
         }
 
         public Date getCurrentEventDateTime() {
-            return Calendar.getInstance().getTime(); 
+            return Calendar.getInstance().getTime();
         }
     }
 

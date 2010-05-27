@@ -37,19 +37,19 @@ import java.util.regex.Pattern;
  */
 public abstract class Filter<FKEY extends Enum> implements Serializable {
   private static final long serialVersionUID = 9999;
-  
-  
+
+
   /** Internationalization. */
   protected static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
   /**
-   *  Pattern that matches anything like 'abcde <  fgh' or 'ijklm  =nop' using 
+   *  Pattern that matches anything like 'abcde <  fgh' or 'ijklm  =nop' using
    *  supported comparators
    *  <p>
    *  The not-equal op, '<>' works only with pids.
    *  </p>
    */
-  public static final Pattern __comparatorPattern = 
+  public static final Pattern __comparatorPattern =
     Pattern.compile("([^=<> ]*) *(<>|<=|>=|<|>|=) *([^=<> ]*)");
 
   protected Map<FKEY, Restriction<String>> _criteria = new HashMap<FKEY,Restriction<String>>();
@@ -58,7 +58,7 @@ public abstract class Filter<FKEY extends Enum> implements Serializable {
     public final String originalKey;
     public final String op;
     public final V value;
-    
+
     public Restriction(String originalKey, String op, V value) {
       this.originalKey=originalKey;
       this.op=op;
@@ -80,10 +80,10 @@ public abstract class Filter<FKEY extends Enum> implements Serializable {
           String errmsg = __msgs.msgUnrecognizedFilterKey(filterKey, getFilterKeysStr());
           throw new IllegalArgumentException(errmsg, ex);
         }
-        
+
         Restriction<String> restriction = new Restriction<String>(filterKey,op,value);
         _criteria.put(keyval, restriction);
-        
+
         process(keyval, restriction);
       }
     }
@@ -110,19 +110,19 @@ public abstract class Filter<FKEY extends Enum> implements Serializable {
       }
     }
     return null;
- 
+
   }
 
   /**
    * Parse the string representation of a key into an
-   * enumeration value. 
+   * enumeration value.
    * @param keyVal string representation
    * @return enumeration value
    */
   protected abstract FKEY parseKey(String keyVal);
 
   /**
-   * Get the list of known (recognized) filter keys. 
+   * Get the list of known (recognized) filter keys.
    * @return recognized filter keys
    */
   protected abstract FKEY[] getFilterKeys();
@@ -142,7 +142,7 @@ public abstract class Filter<FKEY extends Enum> implements Serializable {
             return x.name();
           }
         });
-    
+
   }
 }
 

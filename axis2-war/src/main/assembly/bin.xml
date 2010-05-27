@@ -58,7 +58,7 @@
   </fileSets>
 
   <dependencySets>
-    
+
     <dependencySet>
       <outputDirectory>/WEB-INF/lib</outputDirectory>
       <includes>
@@ -105,55 +105,55 @@
     <include>org.apache.axis2:axis2-transport-http</include>
     <include>org.apache.axis2:axis2-transport-local</include>
     <include>org.apache.axis2:axis2-transports</include>
-    <include>org.apache.ws.commons.axiom:axiom-api</include>  
+    <include>org.apache.ws.commons.axiom:axiom-api</include>
     <include>org.apache.ws.commons.axiom:axiom-impl</include>
     <include>org.apache.ws.commons.axiom:axiom-dom</include>
     <include>backport-util-concurrent:backport-util-concurrent</include>
-    <include>commons-codec:commons-codec</include> 
+    <include>commons-codec:commons-codec</include>
     <include>commons-collections:commons-collections</include>
-    <include>commons-lang:commons-lang</include> 
+    <include>commons-lang:commons-lang</include>
     <include>commons-pool:commons-pool</include>
     <include>commons-io:commons-io</include>
     <include>commons-beanutils:commons-beanutils</include>
     <include>commons-httpclient:commons-httpclient</include>
-    <include>commons-logging:commons-logging</include> 
+    <include>commons-logging:commons-logging</include>
     <include>commons-fileupload:commons-fileupload</include>
-    <include>commons-primitives:commons-primitives</include> 
+    <include>commons-primitives:commons-primitives</include>
     <include>org.apache.derby:derby</include>
-    <include>org.apache.derby:derbytools</include>  
-    <include>org.apache.geronimo.specs:geronimo-ejb_2.1_spec</include> 
-    <include>org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec</include> 
-    <include>org.apache.geronimo.specs:geronimo-jta_1.1_spec</include> 
-    <include>org.apache.geronimo.specs:geronimo-activation_1.1_spec</include> 
+    <include>org.apache.derby:derbytools</include>
+    <include>org.apache.geronimo.specs:geronimo-ejb_2.1_spec</include>
+    <include>org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec</include>
+    <include>org.apache.geronimo.specs:geronimo-jta_1.1_spec</include>
+    <include>org.apache.geronimo.specs:geronimo-activation_1.1_spec</include>
     <include>org.apache.geronimo.specs:geronimo-stax-api_1.0_spec</include>
     <include>org.apache.geronimo.specs:geronimo-javamail_1.4_spec</include>
     <include>org.apache.geronimo.specs:geronimo-annotation_1.0_spec</include>
     <include>geronimo-spec:geronimo-spec-jms</include>
     <include>org.apache.geronimo.modules:geronimo-kernel</include>
     <include>org.apache.geronimo.components:geronimo-transaction</include>
-    <include>org.apache.geronimo.components:geronimo-connector</include>  
-    <include>org.apache.woden:woden-api</include> 
-    <include>org.apache.woden:woden-impl-dom</include> 
-    <include>woodstox:wstx-asl</include> 
-    <include>org.apache.neethi:neethi</include> 
+    <include>org.apache.geronimo.components:geronimo-connector</include>
+    <include>org.apache.woden:woden-api</include>
+    <include>org.apache.woden:woden-impl-dom</include>
+    <include>woodstox:wstx-asl</include>
+    <include>org.apache.neethi:neethi</include>
     <include>org.apache.ws.commons.schema:XmlSchema</include>
     <include>xerces:xercesImpl</include>
     <include>org.apache.rampart:rampart-core</include>
     <include>org.apache.rampart:rampart-policy</include>
     <include>org.apache.rampart:rampart-trust</include>
-    <include>org.apache.ws.security:wss4j</include> 
-    <include>org.apache.santuario:xmlsec</include> 
-    <include>org.apache.axis2:mex:jar:impl</include> 
-    <include>org.opensaml:opensaml</include> 
+    <include>org.apache.ws.security:wss4j</include>
+    <include>org.apache.santuario:xmlsec</include>
+    <include>org.apache.axis2:mex:jar:impl</include>
+    <include>org.opensaml:opensaml</include>
     <include>bouncycastle:bcprov-jdk15</include>
     <include>org.jibx:jibx-run</include>
     <include>org.jibx:jibx-bind</include>
     <include>org.codehaus.jettison:jettison</include>
-    <include>jaxen:jaxen</include>  
-    <include>log4j:log4j</include> 
-    <include>org.apache.openjpa:openjpa</include> 
-    <include>javax.persistence:persistence-api</include> 
-    <include>net.sourceforge.serp:serp</include> 
+    <include>jaxen:jaxen</include>
+    <include>log4j:log4j</include>
+    <include>org.apache.openjpa:openjpa</include>
+    <include>javax.persistence:persistence-api</include>
+    <include>net.sourceforge.serp:serp</include>
     <include>net.sf.saxon:saxon</include>
     <include>net.sf.saxon:saxon-xpath</include>
     <include>net.sf.saxon:saxon-dom</include>
@@ -170,8 +170,8 @@
     <include>xml-resolver:xml-resolver</include>
     <include>xml-apis:xml-apis</include>
     <include>javax.mail:mail</include>
-    <include>axion:axion</include>    
-    <include>org.springframework:spring</include>    
+    <include>axion:axion</include>
+    <include>org.springframework:spring</include>
    </includes>
     </dependencySet>
 
@@ -181,7 +181,7 @@
     <include>org.apache.rampart:rampart:mar</include>
     <include>org.apache.rampart:rahas:mar</include>
     <include>org.apache.axis2:addressing:mar</include>
-    <include>org.apache.axis2:mex:mar</include>  
+    <include>org.apache.axis2:mex:mar</include>
       </includes>
     </dependencySet>
 

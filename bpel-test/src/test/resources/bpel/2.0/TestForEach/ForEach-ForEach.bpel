@@ -34,7 +34,7 @@
     <bpel:partnerLinks>
         <bpel:partnerLink name="poolAndForEachPlkVar" partnerLinkType="diag:PoolAndForEach" myRole="ForEach_for_Pool"/>
     </bpel:partnerLinks>
-    
+
     <bpel:variables>
         <bpel:variable name="thisStartRequestMsg" messageType="this:startRequest"/>
         <bpel:variable name="thisStartResponseMsg" messageType="this:startResponse"/>

@@ -22,7 +22,7 @@ import javax.xml.namespace.QName;
 
 /**
  * Signals completion of the process.
- * 
+ *
  */
 public class ProcessCompletionEvent extends ProcessInstanceEvent {
   private static final long serialVersionUID = 1L;
@@ -41,7 +41,7 @@ public class ProcessCompletionEvent extends ProcessInstanceEvent {
   /**
    * if the process finished with a fault, this will return the fault name,
    * otherwise this will be <code>null</code>
-   * 
+   *
    * @return
    */
   public QName getFault() {

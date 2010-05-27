@@ -39,6 +39,6 @@ public class ASTOrderType extends SimpleNode {
     public void setValue(String value) {
         this.value = value;
     }
-    
-    
+
+
 }

@@ -27,6 +27,6 @@ import org.apache.ode.bpel.dao.ProcessProfileDAO;
 
 public interface ProfilingBpelDAOConnection extends BpelDAOConnection {
       ProcessProfileDAO createProcessProfile(ProcessDAO instance);
-      
+
       ProcessInstanceProfileDAO createProcessInstanceProfile(ProcessInstanceDAO instance);
 }

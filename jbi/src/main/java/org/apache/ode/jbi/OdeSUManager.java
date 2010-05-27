@@ -41,7 +41,7 @@ public class OdeSUManager implements ServiceUnitManager {
   private static final Messages __msgs = Messages.getMessages(Messages.class);
 
   private static final String XMLNS_JBI_MGMT = "http://java.sun.com/xml/ns/jbi/management-message";
-  
+
   private OdeContext _ode;
 
   /** All the service units that have been "init"ed. */

@@ -38,7 +38,7 @@ import org.apache.ode.utils.NSContext;
 
 
 /**
- * Jaxen-based compiled-xpath representation for XPATH 1.0 expression language. 
+ * Jaxen-based compiled-xpath representation for XPATH 1.0 expression language.
  */
 public class OXPath10Expression extends OLValueExpression implements Serializable {
     private static final long serialVersionUID = -1L;
@@ -102,7 +102,7 @@ public class OXPath10Expression extends OLValueExpression implements Serializabl
   public void addGetVariableDataSig(String varname, String partname, String location, OSigGetVariableData compiled) {
     _getVariableDataSigs.put(new SigGetVariableData(varname,  partname, location), compiled);
   }
-  
+
   public void setXslSheet(URI projectRelativeXslUri, OXslSheet xslSheet) {
       xslSheets.put(projectRelativeXslUri, xslSheet);
   }
@@ -110,7 +110,7 @@ public class OXPath10Expression extends OLValueExpression implements Serializabl
   public OXslSheet getXslSheet(URI projectRelativeXslUri) {
       return xslSheets.get(projectRelativeXslUri);
   }
-  
+
   public String toString() {
     return "{OXPath10Expression " + xpath + "}";
   }

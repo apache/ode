@@ -346,13 +346,13 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         if(filter == null) {
             return false;
         }
-        Matcher expressionMatcher = Filter.__comparatorPattern.matcher(filter);        
+        Matcher expressionMatcher = Filter.__comparatorPattern.matcher(filter);
         if(!filter.trim().equals("") && !expressionMatcher.find()) {
             return true;
         }
         return false;
     }
-        
+
     public InstanceInfoListDocument listInstances(String filter, String order, int limit) {
         InstanceInfoListDocument ret = InstanceInfoListDocument.Factory.newInstance();
         final TInstanceInfoList infolist = ret.addNewInstanceInfoList();
@@ -809,12 +809,12 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         if (custom.includeInstanceSummary()) {
             Set<String> pids = new HashSet<String>();
             for (TProcessInfo i : infos) {
-               pids.add(i.getPid()); 
+               pids.add(i.getPid());
             }
 
             Map<InstanceSummaryKey, Long> m = conn.getProcessManagement().countInstancesSummary(pids);
             Map<String, FailedSummaryValue> f = conn.getProcessManagement().findFailedCountAndLastFailedDateForProcessIds(pids);
-            
+
             for (TProcessInfo info : infos) {
                 TInstanceSummary isum = info.addNewInstanceSummary();
                 genInstanceSummaryEntry(isum.addNewInstances(), TInstanceStatus.ACTIVE, info.getPid(), m);
@@ -827,7 +827,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             }
         }
     }
-    
+
     /**
      * Fill in the <code>process-info</code> element of the transfer object.
      *
@@ -908,7 +908,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
         // TODO: add documents to the above data structure.
     }
-    
+
     String findVersionStringFromNodeToken(String packageName) {
         int i = packageName.length() - 1;
         while( i > 0 && Character.isDigit(packageName.charAt(i)) ) {
@@ -917,10 +917,10 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         if( i < packageName.length() - 1 && packageName.charAt(i) == '-') {
             return packageName.substring(i + 1);
         }
-        
+
         return null;
     }
-        
+
     /**
      * Generate document information elements for a set of files.
      *
@@ -962,7 +962,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                                          TInstanceStatus.Enum state, String pid, Map<InstanceSummaryKey, Long> summary)
     {
         instances.setState(state);
-        Long count = summary.get(new InstanceSummaryKey(pid, state.toString())); 
+        Long count = summary.get(new InstanceSummaryKey(pid, state.toString()));
         instances.setCount(count == null ? 0 : count.intValue());
     }
 
@@ -1094,7 +1094,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                     activities.addNewActivityInfo().set(ai.getActivityInfo());
                 }
             }
-            
+
             // otherwise at least try to get the information about failed activities
             // TODO: we are losing information about which scope does failed activities belong to
             // as failure table does not have scope id, we would attach every failed activity to process scope
@@ -1112,7 +1112,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                         failure.setRetries(recovery.getRetries());
                         ai.getActivityInfo().setStatus(TActivityStatus.FAILURE);
                         activities.addNewActivityInfo().set(ai.getActivityInfo());
-                    }            	
+                    }
                 }
             }
         }

@@ -69,16 +69,16 @@ public class SessionOutHandler extends AbstractHandler {
             if (header == null) {
                 header = factory.createSOAPHeader(messageContext.getEnvelope());
             }
-            
+
             if (otargetSession != null && otargetSession instanceof MutableEndpoint) {
 
                 WSAEndpoint targetEpr = EndpointFactory.convertToWSA((MutableEndpoint) otargetSession);
-                
+
                 OMElement to = factory.createSOAPHeaderBlock("To", wsAddrNS);
                 header.addChild(to);
                 to.setText(targetEpr.getUrl());
 
-                String action = messageContext.getSoapAction(); 
+                String action = messageContext.getSoapAction();
                 OMElement wsaAction = factory.createSOAPHeaderBlock("Action", wsAddrNS);
                 header.addChild(wsaAction);
                 wsaAction.setText(action);
@@ -91,13 +91,13 @@ public class SessionOutHandler extends AbstractHandler {
                     replyTo.addChild(address);
                     header.addChild(replyTo);
                     address.setText(replyToEpr.getAddress());
-                    
+
                     String messageId = messageContext.getMessageID();
                     OMElement messageIdElem = factory.createSOAPHeaderBlock("MessageID", wsAddrNS);
                     header.addChild(messageIdElem);
-                    messageIdElem.setText(messageId);                
+                    messageIdElem.setText(messageId);
                 }
-                
+
                 if (targetEpr.getSessionId() != null) {
                     OMElement session = factory.createSOAPHeaderBlock("session", odeSessNS);
                     header.addChild(session);

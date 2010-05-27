@@ -38,5 +38,5 @@ public class ASTField extends SimpleNode {
     public void setName(String name) {
         this.name = name;
     }
-    
+
 }

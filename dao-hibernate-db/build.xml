@@ -27,10 +27,10 @@
     <path id="classpath">
       <pathelement path="${maven.runtime.classpath}"/>
     </path>
-    
+
   <target name="create-schema">
-    
-    <taskdef name="schemaexport" classname="org.hibernate.tool.hbm2ddl.SchemaExportTask" 
+
+    <taskdef name="schemaexport" classname="org.hibernate.tool.hbm2ddl.SchemaExportTask"
          classpathref="classpath"/>
 
     <mkdir dir="target"/>
@@ -47,7 +47,7 @@
 
     <!-- PostgreSQL -->
     <create-ddl db="postgres"/>
-    
+
     <!-- Sybase -->
     <create-ddl db="hsql" />
 

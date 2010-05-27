@@ -41,8 +41,8 @@ public class WSDL11EndpointTest extends TestCase {
         node.appendChild(doc.createTextNode("http://example.com/hello"));
         assertTrue(endpoint.accept(node));
     }
-    
-    
+
+
     public void testAcceptServiceRefElement() {
         WSDL11Endpoint endpoint = new WSDL11Endpoint();
         Document doc = DOMUtils.newDocument();
@@ -52,8 +52,8 @@ public class WSDL11EndpointTest extends TestCase {
         child.appendChild(doc.createTextNode("http://example.com/hello"));
         assertTrue(endpoint.accept(node));
     }
-    
-    
+
+
     public void testAcceptServiceWithRandomElement() {
         WSDL11Endpoint endpoint = new WSDL11Endpoint();
         Document doc = DOMUtils.newDocument();
@@ -61,11 +61,11 @@ public class WSDL11EndpointTest extends TestCase {
         child.appendChild(doc.createTextNode("http://example.com/hello"));
         assertFalse("The endpoint should accept a random element", endpoint.accept(child));
     }
-    
+
     public void testAcceptServiceWithTextNode() {
         WSDL11Endpoint endpoint = new WSDL11Endpoint();
         Document doc = DOMUtils.newDocument();
-        assertFalse("The endpoint should accept a text node", 
+        assertFalse("The endpoint should accept a text node",
                 endpoint.accept(doc.createTextNode("http://example.com/hello")));
     }
 }

@@ -26,7 +26,7 @@ import org.w3c.dom.Element;
  * Reperesentation of a BPEL <code>&lt;pick&gt;</code> activity.
  */
 public class PickActivity extends CreateInstanceActivity {
- 
+
 
   public PickActivity(Element el) {
         super(el);

@@ -23,7 +23,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Hibernate table representing a BPEL scope instance. 
+ * Hibernate table representing a BPEL scope instance.
  * @hibernate.class table="BPEL_SCOPE"
  * @hibernate.query name="SELECT_SCOPE_IDS_BY_INSTANCES" query="select id from HScope as s where s.instance in (:instances)"
  */
@@ -50,9 +50,9 @@ public class HScope extends HObject{
 
     /** Scope type / name. */
     private String _name;
-    
+
     private int _scopeModelId;
-    
+
     public HScope() {}
 
     /**
@@ -136,7 +136,7 @@ public class HScope extends HObject{
     public Set<HXmlData> getVariables() {
         return _variables;
     }
-    
+
     public void setVariables(Set<HXmlData> variables){
         _variables = variables;
     }
@@ -163,7 +163,7 @@ public class HScope extends HObject{
     public int getScopeModelId() {
         return _scopeModelId;
     }
-    
+
     public void setScopeModelId(int scopeModelId) {
         _scopeModelId = scopeModelId;
     }

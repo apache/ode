@@ -27,11 +27,11 @@
     xmlns:dummy="http://axis2.ode.apache.org"
     queryLanguage="urn:oasis:names:tc:ws2.0:sublang:xpath2.0"
     expressionLanguage="urn:oasis:names:tc:ws2.0:sublang:xpath2.0">
-  
+
   <import location="TestCorrelation1.wsdl"
     namespace="http://ode/bpel/unit-test/testCorrelation1.wsdl"
     importType="http://schemas.xmlsoap.org/wsdl/" />
-  
+
   <partnerLinks>
     <partnerLink name="testCorrelation1PL" partnerLinkType="test:testCorrelation1Request" myRole="testCorrelation1Service"/>
   </partnerLinks>

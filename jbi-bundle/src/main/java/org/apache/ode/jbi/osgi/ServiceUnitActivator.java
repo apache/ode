@@ -36,7 +36,7 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * @author mproch
- * 
+ *
  */
 public class ServiceUnitActivator implements BundleActivator {
 

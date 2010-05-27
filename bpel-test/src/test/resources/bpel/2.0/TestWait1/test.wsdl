@@ -23,11 +23,11 @@
     targetNamespace="http://ode/bpel/unit-test.wsdl"
     xmlns="http://schemas.xmlsoap.org/wsdl/"
     xmlns:tns="http://ode/bpel/unit-test.wsdl"
-    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
     xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
-   
+
     <wsdl:message name="TestMessage">
         <wsdl:part name="TestPart" type="xsd:int"/>
         <wsdl:part name="Time" type="xsd:string"/>
@@ -36,21 +36,21 @@
         <wsdl:operation name="testOperation">
             <wsdl:input message="tns:TestMessage" name="TestIn"/>
             <wsdl:output message="tns:TestMessage" name="TestOut"/>
-        </wsdl:operation>    
-    </wsdl:portType> 
+        </wsdl:operation>
+    </wsdl:portType>
    <plnk:partnerLinkType name="TestPartnerLinkType">
        <plnk:role name="me" portType="tns:TestPortType"/>
     </plnk:partnerLinkType>
-    
+
     <wsdl:binding name="TestBinding" type="tns:TestPortType">
         <wsdl:operation name="testOperation">
         </wsdl:operation>
     </wsdl:binding>
-    
+
     <wsdl:service name="TestService">
         <wsdl:port name="TestPort" binding="tns:TestBinding">
         </wsdl:port>
     </wsdl:service>
-   
+
 </wsdl:definitions>
 

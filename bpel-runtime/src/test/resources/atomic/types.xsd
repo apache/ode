@@ -17,10 +17,10 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<schema targetNamespace="http://ode.apache.org/bpel/unit-test" 
+<schema targetNamespace="http://ode.apache.org/bpel/unit-test"
         xmlns:tns="http://ode.apache.org/bpel/unit-test"
-        elementFormDefault="qualified" 
-        attributeFormDefault="qualified" 
+        elementFormDefault="qualified"
+        attributeFormDefault="qualified"
         xmlns="http://www.w3.org/2001/XMLSchema"
         xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 

@@ -32,7 +32,7 @@ public abstract class Sequence extends JacobRunnable {
 
     /**
      * Create a {@link Sequence} with a number of steps.
-     * 
+     *
      * @param steps number of steps
      * @param done synchronous callback
      */

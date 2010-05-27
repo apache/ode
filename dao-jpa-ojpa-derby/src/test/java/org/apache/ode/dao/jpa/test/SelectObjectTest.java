@@ -50,7 +50,7 @@ import java.util.Properties;
 import java.util.List;
 
 public class SelectObjectTest extends TestCase {
-    
+
     private EntityManager em;
     private static final String TEST_NS = "http://org.apache.ode.jpa.test";
     private String[] correlationKeys = { "key1", "key2" };
@@ -82,15 +82,15 @@ public class SelectObjectTest extends TestCase {
 
         _txm.begin();
     }
-    
+
     public void testGetObject() throws Exception {
         new InsertObjectTest().createStuff(factory);
 
         _txm.commit();
-        _txm.begin();        
+        _txm.begin();
 
         BpelDAOConnection conn = factory.getConnection();
-        
+
         // Assert the ProcessDAO
         ProcessDAO p = conn.getProcess(new QName(TEST_NS,"testPID1"));
         assertNotNull( p );
@@ -100,12 +100,12 @@ public class SelectObjectTest extends TestCase {
         assertNotNull(p.getType());
         assertNotNull(p.getProcessId());
         assertEquals( p.getVersion() , 1 );
-        
+
         // Assert the CorrelatorDAO
         CorrelatorDAO corr = p.getCorrelator(CORRELATOR_ID1);
         assertNotNull( corr );
         assertEquals(corr.getCorrelatorId(),CORRELATOR_ID1);
-        
+
         // Assert the MessageRouteDAO
         List<MessageRouteDAO> routes = corr.findRoute(new CorrelationKeySet().add(key1));
         MessageRouteDAO route = null;
@@ -121,13 +121,13 @@ public class SelectObjectTest extends TestCase {
         for ( ProcessInstanceDAO inst : insts ) {
             Long id = inst.getInstanceId();
             assertNotNull( id );
-            
+
             ProcessInstanceDAO inst2 = conn.getInstance(id);
             assertSame(inst2,inst);
-            
+
             ProcessInstanceDAO inst3 = p.getInstance(id);
             assertSame( inst3 , inst );
-            
+
             Long mon = inst.genMonotonic();
             assertEquals(inst.getActivityFailureCount() , 2);
             assertNotNull(inst.getActivityFailureDateTime() );
@@ -137,7 +137,7 @@ public class SelectObjectTest extends TestCase {
             assertSame(inst.getProcess() , p );
             assertEquals(inst.getPreviousState() , 0);
             assertEquals(inst.getState() , 1);
-            
+
             // Assert the Root ScopeDAO
             ScopeDAO rs = inst.getRootScope();
             assertNotNull( rs );
@@ -160,8 +160,8 @@ public class SelectObjectTest extends TestCase {
             assertEquals(rs.getState(),ScopeStateEnum.ACTIVE);
             assertNotNull(rs.getVariables());
             assertEquals(rs.getVariables().size(),0);
-            
-        
+
+
             // Assert the ActivityRecoveryDAO
             assertNotNull(inst.getActivityRecoveries());
             ActivityRecoveryDAO rec1 = null;
@@ -179,7 +179,7 @@ public class SelectObjectTest extends TestCase {
 //			assertNotNull(rec1.getDetails());
             assertEquals(rec1.getReason(),"testReason1");
             assertEquals(rec1.getRetries(),2);
-            
+
             // Assert the CorrelationSetDAO
             //assertNotNull(inst.getCorrelationSets());
             //CorrelationSetDAO cs1 = null;
@@ -188,7 +188,7 @@ public class SelectObjectTest extends TestCase {
             //	break;
             //}
             //assertNotNull(cs1);
-            
+
             // Assert the FaultDAO
             FaultDAO fault = inst.getFault();
             assertNotNull(fault);
@@ -197,7 +197,7 @@ public class SelectObjectTest extends TestCase {
             assertEquals(fault.getExplanation(),"testExplanation");
             assertEquals(fault.getLineNo(),1);
             assertEquals(fault.getName(),new QName(TEST_NS,"testFault"));
-            
+
             // Assert MessageExchangeDAO
             CorrelatorDAO ic = inst.getInstantiatingCorrelator();
             assertNotNull(ic);
@@ -225,14 +225,14 @@ public class SelectObjectTest extends TestCase {
             assertNotNull(me.getRequest());
             assertNotNull(me.getResponse());
             assertEquals(me.getStatus(),"testStatus");
-            
+
             // Assert MessageDAO
             MessageDAO m = me.getRequest();
             assertNotNull(m.getData());
             assertSame(m.getMessageExchange(),me);
             assertEquals(m.getType(),new QName(TEST_NS,"testRequest"));
-            
-            
+
+
             //Assert Child ScopeDAO
             assertNotNull(inst.getScopes());
             assertTrue(inst.getScopes().size() > 0);
@@ -255,7 +255,7 @@ public class SelectObjectTest extends TestCase {
             assertNotNull(childS.getCorrelationSets());
             assertTrue(childS.getCorrelationSets().size() > 0);
             assertNotNull(childS.getCorrelationSet("TestCorrelationSet1"));
-            
+
             // Assert CorrelationSetDAO
             CorrelationSetDAO cs = childS.getCorrelationSet("TestCorrelationSet1");
             assertEquals(cs.getName(),"TestCorrelationSet1");
@@ -264,8 +264,8 @@ public class SelectObjectTest extends TestCase {
             assertSame(cs.getScope(),childS);
             assertNotNull(cs.getValue());
             assertEquals(cs.getProperties().get(new QName(TEST_NS,"name1")),"key1");
-            
-            
+
+
             // Assert PartnerLinkDAO
             assertNotNull(spl.getMyEPR());
             assertEquals(spl.getMyRoleName(),"MyRole1");
@@ -276,7 +276,7 @@ public class SelectObjectTest extends TestCase {
             assertEquals(spl.getPartnerLinkName(),"Test PartnerLink1");
             assertEquals(spl.getPartnerRoleName(),"PartnerRole1");
             assertEquals(spl.getPartnerSessionId(),"TestPartnerSessionID");
-            
+
             // Assert Variables
             assertNotNull(inst.getVariables("var1", 2));
             assertEquals(inst.getVariables("var1", 2).length,1);
@@ -286,7 +286,7 @@ public class SelectObjectTest extends TestCase {
             assertEquals(vars[0].getName(),"var1");
             // assertEquals(vars[0].getProperty("key1"),"prop1");
             assertSame(vars[0].getScopeDAO(),childS);
-            
+
         }
     }
 
@@ -296,5 +296,5 @@ public class SelectObjectTest extends TestCase {
         _txm = null;
         _ds = null;
     }
-    
+
 }

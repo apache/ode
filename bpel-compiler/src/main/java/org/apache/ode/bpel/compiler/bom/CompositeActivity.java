@@ -35,7 +35,7 @@ public class CompositeActivity extends Activity {
 
     /**
      * Get the (ordered) list of child activities.
-     * 
+     *
      * @return immutable list of child {@link Activity} objects
      */
     public List<Activity> getActivities() {

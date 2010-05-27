@@ -100,7 +100,7 @@ public class DaoTest extends TestCase {
             cf.commitTransaction();
         }
     }
-    
+
     public void testGetDeploymentUnits() {
         cf.beginTransaction();
         ConfStoreConnection conn = cf.getConnection();
@@ -125,7 +125,7 @@ public class DaoTest extends TestCase {
             cf.commitTransaction();
         }
     }
-    
+
     public void testCreateProcess() {
         QName foobar = new QName("foo","bar");
         cf.beginTransaction();
@@ -140,7 +140,7 @@ public class DaoTest extends TestCase {
         } finally {
             cf.commitTransaction();
         }
-        
+
         cf.beginTransaction();
         conn = cf.getConnection();
         try {
@@ -148,14 +148,14 @@ public class DaoTest extends TestCase {
             ProcessConfDAO p = du.getProcess(foobar);
             assertNotNull(p);
             assertNotNull(du.getProcesses());
-            
+
             assertEquals(foobar,p.getPID());
             assertEquals(foobar,p.getType());
         } finally {
             cf.commitTransaction();
         }
     }
-    
+
     public void testProcessProperties() {
         QName foobar = new QName("foo","bar");
         cf.beginTransaction();
@@ -167,7 +167,7 @@ public class DaoTest extends TestCase {
         } finally {
             cf.commitTransaction();
         }
-        
+
         cf.beginTransaction();
         conn = cf.getConnection();
         try {
@@ -180,5 +180,5 @@ public class DaoTest extends TestCase {
         } finally {
             cf.commitTransaction();
         }
-    }    
+    }
 }

@@ -133,7 +133,7 @@ public class BpelC {
     }
 
     /**
-     * Compilation properties eventually retrieved by the compiler 
+     * Compilation properties eventually retrieved by the compiler
      * @param compileProperties
      */
     public void setCompileProperties(Map<String, Object> compileProperties) {
@@ -166,7 +166,7 @@ public class BpelC {
         if (!baseDir.exists()) throw new IllegalArgumentException("Directory "+baseDir+" does not exist");
         _suDir = baseDir;
     }
-    
+
     /**
      * <p>
      * Compile a BPEL process from a BOM {@link Process} object.
@@ -193,7 +193,7 @@ public class BpelC {
         if (_wsdlFinder != null) {
             wf = _wsdlFinder;
         } else {
-            File suDir = _suDir != null ? _suDir : _bpelFile.getParentFile(); 
+            File suDir = _suDir != null ? _suDir : _bpelFile.getParentFile();
             wf = new DefaultResourceFinder(_bpelFile.getAbsoluteFile().getParentFile(), suDir.getAbsoluteFile());
         }
 

@@ -62,7 +62,7 @@ import org.w3c.dom.Node;
 
 /**
  * Context holding replayer state (eg. invoke answers) for single instance during replaying.
- * 
+ *
  * @author Rafal Rusin
  *
  */
@@ -73,7 +73,7 @@ public class ReplayerContext {
 
     public BpelEngineImpl bpelEngine;
     public ReplayerBpelRuntimeContextImpl runtimeContext;
-    
+
     public Map<QName, ServiceConfig> servicesConfig = new HashMap<QName, ServiceConfig>();
     public CommunicationType replayerConfig;
 
@@ -103,9 +103,9 @@ public class ReplayerContext {
 
         public AnswerResult fetchAnswer(QName service, String operation, Element outgoingMessage, Date currentEventDateTime) {
             __log.debug("fetching answer for " + service + " " + operation);
-            
+
             ServiceConfig cfg = getServiceConfig(service);
-            
+
             if (cfg.getReplayType().isSetMock()) {
                 String key = getAnswersKey(service, operation);
                 AnswersForKey v = answersMap.get(key);
@@ -129,16 +129,16 @@ public class ReplayerContext {
                 v.remainingExchanges(e);
             }
         }
-        
+
         private Exchange fetchMockQuery(QName service, String operation, Element outgoingMessage, org.apache.ode.bpel.pmapi.CommunicationType.ServiceConfig serviceConfig) {
             try {
                 MockQueryRequestDocument request = MockQueryRequestDocument.Factory.newInstance();
                 request.addNewMockQueryRequest().addNewIn().set(XmlObject.Factory.parse(outgoingMessage));
                 String xquery = serviceConfig.getReplayType().getMockQuery();
-                
+
                 XQDataSource xqds = new SaxonXQDataSource();
                 XQConnection xqconn = xqds.getConnection();
-    
+
                 net.sf.saxon.Configuration configuration = ((SaxonXQConnection) xqconn).getConfiguration();
                 configuration.setHostLanguage(net.sf.saxon.Configuration.XQUERY);
 //                XQStaticContext staticEnv = xqconn.getStaticContext();
@@ -160,12 +160,12 @@ public class ReplayerContext {
                     }
                 }
                 ResponseType response2 = response.getMockQueryResponse();
-                
+
                 if (__log.isDebugEnabled()) {
                     __log.debug("mockQuery result " + response);
                 }
-                
-                
+
+
                 Exchange answer = Exchange.Factory.newInstance();
                 {
                     if (response2.isSetOut()) {
@@ -178,7 +178,7 @@ public class ReplayerContext {
                         answer.setFailure(response2.getFailure());
                     }
                 }
-                
+
                 return answer;
             } catch (Exception e) {
                 __log.error("", e);
@@ -222,13 +222,13 @@ public class ReplayerContext {
 
     public void init(final CommunicationType r, ReplayerScheduler scheduler) throws Exception {
         this.scheduler = scheduler;
-        
+
         replayerConfig = r;
-        
+
         for (ServiceConfig s : r.getServiceConfigList()) {
             servicesConfig.put(s.getService(), s);
         }
-        
+
         final List<Exchange> exchangeList = r.getExchangeList();
 
         for (int i = 1; i < exchangeList.size(); i++) {
@@ -294,7 +294,7 @@ public class ReplayerContext {
         super();
         this.replayStartDate = replayStartDate;
     }
-    
+
     public ServiceConfig getServiceConfig(QName service) {
         ServiceConfig c = servicesConfig.get(service);
         if (c == null) {
@@ -304,7 +304,7 @@ public class ReplayerContext {
             return c;
         } else return c;
     }
-    
+
     public void checkRollbackOnFault() {
         if (replayerConfig.getRollbackOnFault()) {
             RuntimeException e = new RuntimeException("Process instance run into fault.");
@@ -314,7 +314,7 @@ public class ReplayerContext {
             throw e;
         }
     }
-    
+
     public static class AnswerResult {
         public final boolean isLive;
         public final Exchange e;

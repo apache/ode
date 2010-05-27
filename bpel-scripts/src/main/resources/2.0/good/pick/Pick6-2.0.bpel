@@ -21,30 +21,30 @@
 <!--
     Pick will be used to create process instance.
 -->
-<process name="pick6_onAlarm-2.0" 
-     targetNamespace="http://ode/bpel/unit-test" 
+<process name="pick6_onAlarm-2.0"
+     targetNamespace="http://ode/bpel/unit-test"
      xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
      xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
      xmlns:tns="http://ode/bpel/unit-test"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-     xmlns:test="http://ode/bpel/unit-test.wsdl" 
+     xmlns:test="http://ode/bpel/unit-test.wsdl"
      suppressJoinFailure="yes">
 
   <import namespace="http://ode/bpel/unit-test.wsdl"
       importType="http://schemas.xmlsoap.org/wsdl/"
       location="Pick6-2.0.wsdl" />
-  
+
   <partnerLinks>
-    <partnerLink name="testPartnerLink" 
-         partnerLinkType="test:TestPartnerLinkType" 
+    <partnerLink name="testPartnerLink"
+         partnerLinkType="test:TestPartnerLinkType"
          myRole="me" />
   </partnerLinks>
-  
+
    <variables>
      <variable name="var1" messageType="test:PickMessage"/>
   </variables>
-  
-  <sequence>   
+
+  <sequence>
     <receive name="startReceive"
          partnerLink="testPartnerLink"
          portType="test:TestPortType"
@@ -61,7 +61,7 @@
             <from>'onMessage'</from>
             <to>$var1/DataPart</to>
           </copy>
-        </assign>  	  
+        </assign>
       </onMessage>
       <onAlarm>
         <until>$var1/DataPart</until>
@@ -73,10 +73,10 @@
         </assign>
       </onAlarm>
     </pick>
-    <reply name="endReply" 
-       operation="pickOp1" 
+    <reply name="endReply"
+       operation="pickOp1"
        partnerLink="testPartnerLink"
-       portType="test:TestPortType" 
+       portType="test:TestPortType"
        variable="var1"/>
   </sequence>
 </process>

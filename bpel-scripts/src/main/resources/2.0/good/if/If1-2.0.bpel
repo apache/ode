@@ -35,12 +35,12 @@
          partnerLinkType="test:TestPartnerLinkType"
          myRole="me" />
   </partnerLinks>
-  
+
   <variables>
     <variable name="var1" messageType="test:TestMessage1"/>
     <variable name="var2" type="xsd:string"/>
   </variables>
-  
+
   <sequence>
     <receive
      createInstance="yes"

@@ -23,7 +23,7 @@ import java.util.List;
 
 public interface ProcessProfileDAO {
     boolean doesProcessExist();
-    
+
     List<ProcessInstanceDAO> findInstancesByProcess();
 
     List<ActivityRecoveryDAO> findActivityRecoveriesByProcess();

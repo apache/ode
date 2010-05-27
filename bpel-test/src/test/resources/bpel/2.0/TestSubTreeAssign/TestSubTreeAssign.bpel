@@ -32,14 +32,14 @@
  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
  expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
  suppressJoinFailure="yes">
-    
+
     <import location="TestSubTreeAssign.wsdl"
         namespace="http://ode/bpel/unit-test/TestSubTreeAssign.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/" />
     <import location="../ProbeService/probeService.wsdl"
         namespace="http://ode/bpel/unit-test/ProbeService.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/"/>
-    
+
     <partnerLinks>
         <partnerLink name="request" partnerLinkType="wns:TestSubTreeAssignRequest" myRole="TestSubTreeAssignService"/>
     </partnerLinks>
@@ -53,7 +53,7 @@
     </variables>
     <sequence>
         <receive name="receive1" partnerLink="request" portType="wns:TestSubTreeAssignPT" operation="request" variable="request" createInstance="yes"/>
- 
+
         <assign name="assign1">
             <!-- copy a tree to a tree -->
             <copy>
@@ -78,9 +78,9 @@
                     <literal><![CDATA[pass]]></literal>
                 </from>
                 <to>$testType1/typeIndicators/types:indicatorTwo</to>
-            </copy>		
+            </copy>
         </assign>
-    
+
         <assign name="assign2">
             <!-- copy subtree to tree -->
             <copy>
@@ -88,8 +88,8 @@
                 <to>$testType2/typeIndicators</to>
             </copy>
         </assign>
-        
-        <assign name="assign3">			
+
+        <assign name="assign3">
             <copy>
                 <from>$testType2/requestID</from>
                 <to variable="reply" part="replyID"/>
@@ -99,10 +99,10 @@
                 <to>$reply.replyText</to>
             </copy>
         </assign>
- 
+
         <!-- test update functions -->
         <!-- delete and insert as last into -->
-        <assign name="assign4">			
+        <assign name="assign4">
             <copy>
                 <from variable="request" part="requestMessageData"/>
                 <to variable="testType1"/>
@@ -120,14 +120,14 @@
                 <to>$testType1/typeIndicators</to>
             </copy>
         </assign>
-        
+
         <if>
             <condition>fn:not(fn:deep-equal($testType1, $testType2))</condition>
             <throw faultName="selectionFailure"/>
         </if>
-        
+
         <!-- delete and insert as first into -->
-        <assign name="assign5">			
+        <assign name="assign5">
             <copy>
                 <from variable="request" part="requestMessageData"/>
                 <to variable="testType1"/>
@@ -145,14 +145,14 @@
                 <to>$testType1/typeIndicators</to>
             </copy>
         </assign>
-        
+
         <if>
             <condition>fn:not(fn:deep-equal($testType1, $testType2))</condition>
             <throw faultName="selectionFailure"/>
         </if>
-        
+
         <!-- delete and insert before -->
-        <assign name="assign6">			
+        <assign name="assign6">
             <copy>
                 <from variable="request" part="requestMessageData"/>
                 <to variable="testType1"/>
@@ -170,14 +170,14 @@
                 <to>$testType1/typeIndicators</to>
             </copy>
         </assign>
-        
+
         <if>
             <condition>fn:not(fn:deep-equal($testType1, $testType2))</condition>
             <throw faultName="selectionFailure"/>
         </if>
-        
+
         <!-- delete and insert after -->
-        <assign name="assign7">			
+        <assign name="assign7">
             <copy>
                 <from variable="request" part="requestMessageData"/>
                 <to variable="testType1"/>
@@ -195,14 +195,14 @@
                 <to>$testType1/typeIndicators</to>
             </copy>
         </assign>
-        
+
         <if>
             <condition>fn:not(fn:deep-equal($testType1, $testType2))</condition>
             <throw faultName="selectionFailure"/>
         </if>
-        
+
         <!-- rename twice -->
-        <assign name="assign7">			
+        <assign name="assign7">
             <copy>
                 <from variable="request" part="requestMessageData"/>
                 <to variable="testType1"/>
@@ -228,12 +228,12 @@
                 <to>$testType1/typeIndicators</to>
             </copy>
         </assign>
-        
+
         <if>
             <condition>fn:not(fn:deep-equal($testType1, $testType2))</condition>
             <throw faultName="selectionFailure"/>
         </if>
-        
+
         <reply name="reply" partnerLink="request" portType="wns:TestSubTreeAssignPT" operation="request" variable="reply"/>
     </sequence>
  </process>

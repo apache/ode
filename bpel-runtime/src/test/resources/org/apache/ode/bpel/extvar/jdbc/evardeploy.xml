@@ -18,7 +18,7 @@
   ~ under the License.
   -->
 <deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
-    xmlns:pns="http://ode/bpel/unit-test" 
+    xmlns:pns="http://ode/bpel/unit-test"
     xmlns:wns="http://ode/bpel/unit-test.wsdl"
     xmlns:xvar="http://ode.apache.org/externalVariables"
     xmlns:jdbc="http://ode.apache.org/externalVariables/jdbc" >
@@ -28,14 +28,14 @@
         <provide partnerLink="helloPartnerLink">
             <service name="wns:HelloService" port="HelloPort"/>
         </provide>
-        
-        <xvar:externalVariable id="evar1" > 
-            <jdbc:jdbc>                        
+
+        <xvar:externalVariable id="evar1" >
+            <jdbc:jdbc>
                 <jdbc:datasource-ref>testds</jdbc:datasource-ref>
                 <jdbc:table>extvartable1</jdbc:table>
-                <jdbc:init mode="insert"/> 
-                <jdbc:column name="id1" key="yes" generator="uuid" /> 
-                <jdbc:column name="id2" column-name="_id2_" key="yes" generator="uuid" />     
+                <jdbc:init mode="insert"/>
+                <jdbc:column name="id1" key="yes" generator="uuid" />
+                <jdbc:column name="id2" column-name="_id2_" key="yes" generator="uuid" />
                 <jdbc:column name="pid" generator="pid" />
                 <jdbc:column name="iid" generator="iid" />
                 <jdbc:column name="cts" generator="ctimestamp" />
@@ -44,6 +44,6 @@
                 <jdbc:column name="bar" />
             </jdbc:jdbc>
         </xvar:externalVariable>
-        
+
     </process>
 </deploy>

@@ -32,7 +32,7 @@ import org.w3c.dom.Element;
 /**
  * WSDL4J representation of a BPEL <code>&lt;partnerLink&gt;</code>
  * declaration.
- * 
+ *
  * @see org.apache.ode.bom.wsdl.PartnerLinkTypeSerializer
  */
 public class PartnerLinkType extends BpelObject4WSDL implements ExtensibilityElement, Serializable {
@@ -69,10 +69,10 @@ public class PartnerLinkType extends BpelObject4WSDL implements ExtensibilityEle
                     x.setTargetNamespace(getTargetNamespace());
                     return null;
                 }
-                
+
             });
         }
-        
+
         return _roles;
     }
 
@@ -88,7 +88,7 @@ public class PartnerLinkType extends BpelObject4WSDL implements ExtensibilityEle
 
         /**
          * Get the portName of the role (e.g. "Buyer", "Seller").
-         * 
+         *
          * @return role portName
          */
         public String getName() {
@@ -98,7 +98,7 @@ public class PartnerLinkType extends BpelObject4WSDL implements ExtensibilityEle
         /**
          * Get the WSDL portType of the role (i.e. the interface implemented by
          * the object acting in the role).
-         * 
+         *
          * @return role portType
          */
         public QName getPortType() {
@@ -106,7 +106,7 @@ public class PartnerLinkType extends BpelObject4WSDL implements ExtensibilityEle
         }
 
     }
-    
+
     /**
      * BPEL 1.1 nonsense.
      * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
@@ -122,15 +122,15 @@ public class PartnerLinkType extends BpelObject4WSDL implements ExtensibilityEle
         /**
          * Get the WSDL portType of the role (i.e. the interface implemented by
          * the object acting in the role).
-         * 
+         *
          * @return role portType
          */
         public QName getPortType() {
             PortType11 pt11 = getFirstChild(PortType11.class);
             return pt11 == null ? null : pt11.getName();
         }
-        
-        
+
+
         public static class PortType11 extends BpelObject4WSDL {
             private static final long serialVersionUID = 8174002706633806360L;
 

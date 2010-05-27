@@ -23,9 +23,9 @@ import org.apache.ode.jacob.Val;
 
 /**
  * Cell process template Java representation. This class is equivalent to the
- * following process calculus expression: 
- * <code> 
- * Cell(self, val) = self ? [ read(r) = { Cell(self, val) | r ! val(val) } & write(newVal) = { Cell(self, newVal) } ] 
+ * following process calculus expression:
+ * <code>
+ * Cell(self, val) = self ? [ read(r) = { Cell(self, val) | r ! val(val) } & write(newVal) = { Cell(self, newVal) } ]
  * </code>
  */
 public class CELL_<T> extends JacobRunnable {

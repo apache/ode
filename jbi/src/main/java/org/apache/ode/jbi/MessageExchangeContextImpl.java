@@ -33,7 +33,7 @@ import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
  * Implementation of the ODE {@link org.apache.ode.bpel.iapi.MessageExchangeContext}
  * interface. This class is used by the ODE engine to make invocation on JBI
  * services provided by other engines (i.e. the BPEL engine is acting as
- * client/consumer of services). 
+ * client/consumer of services).
  */
 public class MessageExchangeContextImpl implements MessageExchangeContext {
 

@@ -30,18 +30,18 @@
   <documentation>Silly WSDL for testing BPEL processes.</documentation>
   <types>
     <xsd:schema targetNamespace="http://test.ns">
-      
+
       <xsd:element name="int" type="xsd:int" />
-      
+
       <xsd:element name="string" type="xsd:string" />
-      
+
       <xsd:element name="boolean" type="xsd:boolean" />
-      
+
     </xsd:schema>
         </types>
-  
 
-  
+
+
   <message name="booleanWrapperMessage">
     <part name="result" element="foo:boolean"/>
   </message>

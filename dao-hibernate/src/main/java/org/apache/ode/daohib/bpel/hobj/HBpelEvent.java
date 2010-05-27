@@ -24,7 +24,7 @@ import java.sql.Timestamp;
 
 
 /**
- * Row representation of a BPEL event. 
+ * Row representation of a BPEL event.
  *
  * @hibernate.class table="BPEL_EVENT"
  * @hibernate.query name="SELECT_EVENT_IDS_BY_INSTANCES" query="select id from HBpelEvent as e where e.instance in (:instances)"
@@ -121,10 +121,10 @@ public class HBpelEvent extends HObject {
     }
 
     /**
-     * Get the scope identifier of the scope associated with this event. 
+     * Get the scope identifier of the scope associated with this event.
      * Note, that this is not implemented as a many-to-one relationship
-     * because when scopes are deleted from the database we do not want 
-     * their events to suffer the same fate. 
+     * because when scopes are deleted from the database we do not want
+     * their events to suffer the same fate.
      * @hibernate.property
      *        column="SID"
      */

@@ -33,14 +33,14 @@ import org.xml.sax.SAXException;
  * This is a utility for a SAX <code>ContentHandler</code> implementation to use in
  * tracking namespace declarations during a parse.  The assumption is that the
  * handler has access to the full stream of events relevant to managing the
- * declarations.  The primary use case is the resolution of <code>String</code>s, 
+ * declarations.  The primary use case is the resolution of <code>String</code>s,
  * e.g., from attribute values or element content, to <code>QName</code> objects.
  * </p>
  */
 public class NamespaceStack {
 
   private Frame _current;
-  
+
   /**
    * <p>
    * Construct a new instance with the bare minimum bindings for the
@@ -66,7 +66,7 @@ public class NamespaceStack {
      */
     _current.declarePrefix("","");
   }
-  
+
   /**
    * <p>
    * Convert the current stack of contexts into a single <code>NSContext</code>.
@@ -86,7 +86,7 @@ public class NamespaceStack {
     }
     return n;
   }
-  
+
   /**
    * <p>
    * Push a fresh context onto the stack.  This method should be called somewhere in
@@ -99,7 +99,7 @@ public class NamespaceStack {
   public void pushNewContext() {
     _current = new Frame(_current);
   }
-  
+
   /**
    * <p>
    * Pop a context from the stack.  This method should be called somewhere in the
@@ -114,7 +114,7 @@ public class NamespaceStack {
     }
     _current = _current._parent;
   }
-  
+
   /**
    * <p>
    * Declare a new prefix binding.  This binding will supercede a binding with the
@@ -129,7 +129,7 @@ public class NamespaceStack {
   public void declarePrefix(String prefix, String uri) {
     _current.declarePrefix(prefix==null?"":prefix, uri==null?"":uri);
   }
-  
+
   /**
    * <p>
    * Retrieve the URI bound to the supplied prefix or <code>null</code> if no URI
@@ -142,10 +142,10 @@ public class NamespaceStack {
   public String getNamespaceUri(String prefix) {
     return _current.getNamespaceURI(prefix==null?"":prefix);
   }
-  
+
   /**
    * <p>
-   * Fire the events for the current frame's prefixes into a <code>ContentHandler</code>. 
+   * Fire the events for the current frame's prefixes into a <code>ContentHandler</code>.
    * </p>
    * @param ch the target <code>ContentHandler</code>
    * @throws SAXException if the target method does.
@@ -153,7 +153,7 @@ public class NamespaceStack {
   public void startPrefixMappings(ContentHandler ch) throws SAXException {
     _current.startPrefixMappings(ch);
   }
-  
+
   /**
    * <p>
    * Fire the events for the current frame's prefixes into a <code>ContentHandler</code>.
@@ -164,7 +164,7 @@ public class NamespaceStack {
   public void endPrefixMappings(ContentHandler ch) throws SAXException {
     _current.endPrefixMappings(ch);
   }
-  
+
   /**
    * <p>
    * Allocate and declare a new namespace prefix for the current context that uses
@@ -193,11 +193,11 @@ public class NamespaceStack {
     }
     return pfx;
   }
-  
+
   public String getPrefix(String uri) {
     return toNSContext().getPrefix(uri);
   }
-  
+
   /**
    * <p>
    * Derference the prefix on a QName in <code>String</code> form and return a Java
@@ -229,21 +229,21 @@ public class NamespaceStack {
     }
     return qn;
   }
-  
+
   private class Frame {
-    
+
     Frame _parent;
-    
+
     HashMap<String,String> _bindings;
-    
+
     Frame() {
       // This space intentionally left blank.
     }
-    
+
     Frame(Frame parent) {
       _parent = parent;
     }
-   
+
     void startPrefixMappings(ContentHandler ch) throws SAXException {
       if (_bindings != null) {
         for(Iterator it = _bindings.keySet().iterator();it.hasNext();) {
@@ -252,7 +252,7 @@ public class NamespaceStack {
         }
       }
     }
-    
+
     void endPrefixMappings(ContentHandler ch) throws SAXException {
       if (_bindings != null) {
         for (Iterator it = _bindings.keySet().iterator();it.hasNext();) {
@@ -260,19 +260,19 @@ public class NamespaceStack {
         }
       }
     }
-    
+
     void declarePrefix(String prefix, String uri) {
       if (_bindings == null) {
         _bindings = new HashMap<String,String>();
       }
       _bindings.put(prefix,uri);
     }
-    
+
     String getPrefix(String uri) {
       return "";
     }
 
-    
+
     String getNamespaceURI(String prefix) {
       String uri = null;
       if (_bindings != null) {
@@ -283,6 +283,6 @@ public class NamespaceStack {
       }
       return uri;
     }
-    
+
   }
 }

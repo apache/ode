@@ -49,12 +49,12 @@ import javax.xml.namespace.QName;
  *
  */
 public interface BindingContext {
-    
+
     /**
      * Activate a "myRole" endpoint. This is a notifaction to the integration
      * layer that the BPEL engine is interested in receiving requests for the
      * given endpoint and that the IL should establish the communication mechanisms
-     * that would make this happen. 
+     * that would make this happen.
      * @param processId
      * @param myRoleEndpoint endpoint identifer (service qname + port)
      * @returns an endpoint reference in XML  format.
@@ -69,25 +69,25 @@ public interface BindingContext {
      * @param myRoleEndpoint
      */
     void deactivateMyRoleEndpoint(Endpoint myRoleEndpoint);
-    
+
     /**
      * Create a communication channel for communicating with a partner. A default or
-     * initial value for the partner endpoint may be given. 
+     * initial value for the partner endpoint may be given.
      * @param processId process identifier of the process requesting this channel
-     * @param portType type of the port 
+     * @param portType type of the port
      * @param initialPartnerEndpoint endpoint identifer (service qname + port) of the partner
      *                               that we will communicate with on the link by default (i.e.
      *                               if the partner link is not assigned to)
      */
     PartnerRoleChannel createPartnerRoleChannel(QName processId, PortType portType,
             Endpoint initialPartnerEndpoint);
-    
+
     /**
      * Calculate the size of the service that this endpoint references.
      * @param epr the endpoint reference for the service
      * @returns the size of the service
      */
     long calculateSizeofService(EndpointReference epr);
-    
-    
+
+
 }

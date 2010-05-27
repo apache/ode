@@ -41,7 +41,7 @@ import org.w3c.dom.Node;
 
 /**
  * Manager for external variable instances; used by {@link BpelProcess} to manage external variables.
- * 
+ *
  * @author Maciej Szefler <mszefler at gmail dot com>
  *
  */
@@ -62,8 +62,8 @@ public class ExternalVariableManager {
     private QName _pid;
 
     public ExternalVariableManager(QName pid,
-            ExternalVariableConf evconf, 
-            Map<QName, ExternalVariableModule> engines, 
+            ExternalVariableConf evconf,
+            Map<QName, ExternalVariableModule> engines,
             OProcess oprocess)
             throws BpelEngineException {
         _pid = pid;
@@ -76,13 +76,13 @@ public class ExternalVariableManager {
         for (ExternalVariableConf.Variable var : _extVarConf.getVariables()) {
             EVar evar = new EVar(var.extVariableId, _engines.get(var.engineQName), var.configuration);
             if (evar._engine == null) {
-                __log.error("External variable engine \"" + var.engineQName 
+                __log.error("External variable engine \"" + var.engineQName
                         + "\" referenced by external variable \"" + var.extVariableId
                         + "\" not registered.");
                 fatal = true;
                 continue;
             }
-            
+
             try {
                 evar._engine.configure(_pid, evar._extVarId, evar._config);
             } catch (ExternalVariableModuleException eve) {
@@ -133,7 +133,7 @@ public class ExternalVariableManager {
             // Should not happen if constructor is working.
             throw new BpelEngineException("InternalError: reference to unknown external variable " + variable.extVar.externalVariableId);
         }
-        
+
         Locator locator = new Locator(variable.extVar.externalVariableId, _pid,iid, reference);
         Value newval;
         newval = evar._engine.readValue(((OElementVarType) variable.type).elementType, locator );
@@ -142,14 +142,14 @@ public class ExternalVariableManager {
         return newval;
     }
 
-    
+
     public Value write(Variable variable, Node reference, Node val, Long iid) throws ExternalVariableModuleException  {
         EVar evar = _externalVariables.get(variable.extVar.externalVariableId);
         if (evar == null) {
             // Should not happen if constructor is working.
             throw new BpelEngineException("InternalError: reference to unknown external variable " + variable.extVar.externalVariableId);
         }
-        
+
         Locator locator = new Locator(variable.extVar.externalVariableId,_pid,iid,reference);
         Value newval = new Value(locator,val,null);
         newval = evar._engine.writeValue(((OElementVarType) variable.type).elementType, newval);
@@ -157,7 +157,7 @@ public class ExternalVariableManager {
         return newval;
     }
 
-   
+
     static final class EVar {
         final ExternalVariableModule _engine;
 

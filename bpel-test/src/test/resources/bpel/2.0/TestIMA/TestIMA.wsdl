@@ -61,7 +61,7 @@
             <output message="tns:TestIMAMessage"></output>
         </operation>
     </portType>
-  
+
     <plnk:partnerLinkType name="TestIMAPL">
         <plnk:role name="TestIMAProvider" portType="tns:TestIMA"/>
     </plnk:partnerLinkType>

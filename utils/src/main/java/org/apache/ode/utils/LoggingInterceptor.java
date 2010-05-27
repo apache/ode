@@ -64,21 +64,21 @@ public class LoggingInterceptor<T> implements InvocationHandler {
         _log = log;
         _delegate = delegate;
     }
-    
+
     public Object invoke(Object proxy, Method method, Object[] args)
             throws Throwable {
         try {
-            if (method.getDeclaringClass() == DataSource.class 
+            if (method.getDeclaringClass() == DataSource.class
                     && "getConnection".equals(method.getName())) {
                 Connection conn = (Connection)method.invoke(_delegate, args);
                 print("getConnection (tx=" + conn.getTransactionIsolation() + ")");
-                return Proxy.newProxyInstance(_delegate.getClass().getClassLoader(), 
+                return Proxy.newProxyInstance(_delegate.getClass().getClassLoader(),
                         new Class[] {Connection.class}, new LoggingInterceptor<Connection>(conn, _log));
-            } else if (method.getDeclaringClass() == Connection.class 
+            } else if (method.getDeclaringClass() == Connection.class
                     && Statement.class.isAssignableFrom(method.getReturnType())) {
                 Statement stmt = (Statement)method.invoke(_delegate, args);
                 print(method, args);
-                return Proxy.newProxyInstance(_delegate.getClass().getClassLoader(), 
+                return Proxy.newProxyInstance(_delegate.getClass().getClassLoader(),
                         new Class[] {method.getReturnType()}, new LoggingInterceptor<Statement>(stmt, _log));
             } else {
                 print(method, args);
@@ -104,7 +104,7 @@ public class LoggingInterceptor<T> implements InvocationHandler {
                 print("rollback()");
             } else if ("setTransactionIsolation".equals(method.getName())) {
                 print("Set isolation level to " + args[0]);
-            } 
+            }
             // JDBC Statement
             else if (method.getName().startsWith("execute")) {
                 print(method.getName() + ", " + getParams());
@@ -163,9 +163,9 @@ public class LoggingInterceptor<T> implements InvocationHandler {
             _log.debug(str);
         else System.out.println(str);
     }
-    
+
     public static DataSource createLoggingDS(DataSource ds, Log log) {
-        return (DataSource)Proxy.newProxyInstance(ds.getClass().getClassLoader(), 
+        return (DataSource)Proxy.newProxyInstance(ds.getClass().getClassLoader(),
                 new Class[] {DataSource.class}, new LoggingInterceptor<DataSource>(ds,log));
     }
 }

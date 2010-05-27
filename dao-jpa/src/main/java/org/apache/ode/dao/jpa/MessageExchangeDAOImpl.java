@@ -57,11 +57,11 @@ import java.util.Set;
 })
 public class MessageExchangeDAOImpl extends OpenJPADAO implements MessageExchangeDAO, CorrelatorMessageDAO {
     private static final Log __log = LogFactory.getLog(MessageExchangeDAOImpl.class);
-    
+
     public final static String DELETE_MEXS_BY_PROCESS = "DELETE_MEXS_BY_PROCESS";
     public final static String SELECT_MEX_IDS_BY_PROCESS = "SELECT_MEX_IDS_BY_PROCESS";
-    
-    @Id @Column(name="MESSAGE_EXCHANGE_ID") 
+
+    @Id @Column(name="MESSAGE_EXCHANGE_ID")
     private String _id;
     @Basic @Column(name="CALLEE")
     private String _callee;
@@ -120,12 +120,12 @@ public class MessageExchangeDAOImpl extends OpenJPADAO implements MessageExchang
 
     public MessageExchangeDAOImpl() {
     }
-    
+
     public MessageExchangeDAOImpl(char direction){
         _direction = direction;
         _id = new UUID().toString();
     }
-    
+
     public MessageDAO createMessage(QName type) {
         MessageDAOImpl ret = new MessageDAOImpl(type,this);
         return ret ;
@@ -351,7 +351,7 @@ public class MessageExchangeDAOImpl extends OpenJPADAO implements MessageExchang
 
     public void deleteMessages() {
         if( __log.isDebugEnabled() ) __log.debug("Deleting message on MEX release.");
-        
+
         getEM().remove(this); // This deletes MexProperty, REQUEST MessageDAO, RESPONSE MessageDAO
     }
 
@@ -366,7 +366,7 @@ public class MessageExchangeDAOImpl extends OpenJPADAO implements MessageExchang
     public int getSubscriberCount() {
         return _subscriberCount;
     }
-    
+
     public void setSubscriberCount(int subscriberCount) {
         this._subscriberCount = subscriberCount;
     }
@@ -374,7 +374,7 @@ public class MessageExchangeDAOImpl extends OpenJPADAO implements MessageExchang
     public void incrementSubscriberCount() {
         ++_subscriberCount;
     }
-    
+
     public void release() {
         // no-op for now, could be used to do some cleanup
     }

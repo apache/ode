@@ -30,7 +30,7 @@
     queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
     expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
     suppressJoinFailure="yes">
-    
+
     <!-- Unit test external fault handlers with variable input -->
     <!--	throw 					-->
     <!--	catch 					-->
@@ -44,7 +44,7 @@
     <import location="../FaultService/faultService.wsdl"
         namespace="http://ode/bpel/unit-test/FaultService.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/"/>
-    
+
 
     <partnerLinks>
         <partnerLink name="request" partnerLinkType="wns:TestFaultWithVariableRequest" myRole="TestFaultWithVariableService"/>

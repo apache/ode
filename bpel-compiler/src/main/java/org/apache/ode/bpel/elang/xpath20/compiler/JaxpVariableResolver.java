@@ -64,7 +64,7 @@ public class JaxpVariableResolver implements XPathVariableResolver {
                 || Namespaces.ODE_EXTENSION_NS.equals(variableName.getNamespaceURI())) {
             if ("pid".equals(variableName.getLocalPart()) || "processQName".equals(variableName.getLocalPart()))
                 return "";
-            if ("currentEventDateTime".equals(variableName.getLocalPart())) 
+            if ("currentEventDateTime".equals(variableName.getLocalPart()))
                 return new Date(1L);
         }
 

@@ -30,7 +30,7 @@
         <artifactId>ode</artifactId>
         <version>1.3.5-SNAPSHOT</version>
     </parent>
-    
+
     <properties>
        <mex.version>1.41</mex.version>
        <jibx.version>1.1.5</jibx.version>
@@ -41,7 +41,7 @@
        <jetty.version>6.1.3</jetty.version>
        <testng.version>5.8</testng.version>
     </properties>
-     
+
     <dependencies>
         <dependency>
             <groupId>org.apache.ode</groupId>
@@ -241,7 +241,7 @@
           <artifactId>servlet-api-2.5</artifactId>
           <version>${jetty.version}</version>
           <scope>test</scope>
-        </dependency>      
+        </dependency>
     </dependencies>
 
 
@@ -312,7 +312,7 @@
                 </execution>
             </executions>
         </plugin-->
-        <!-- FIXME: temporary commented out -->      
+        <!-- FIXME: temporary commented out -->
         <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
@@ -330,7 +330,7 @@
                     </goals>
                 </execution>
             </executions>
-        </plugin>      
+        </plugin>
      </plugins>
    </build>
 

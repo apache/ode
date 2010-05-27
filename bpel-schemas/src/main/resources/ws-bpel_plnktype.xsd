@@ -25,7 +25,7 @@
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             elementFormDefault="qualified"
             blockDefault="#all">
-    
+
     <xsd:annotation>
         <xsd:documentation>
             Partner Link Type Schema for WS-BPEL 2.0
@@ -41,9 +41,9 @@
                 Moved minOccurs="0" maxOccurs="unbounded" in element documentation from sequence to any.
                 Added GED for role.
                 Changed prefix "tns:" to "plnk:".
-                
+
             *****************************************
-                
+
             2006-08-08: Rev 1.1: Alex Yiu
                 Rename the file from wsbpel_plinkType.xsd (rev 1.5) to ws-bpel_plinktype.xsd
                 Change the targetNamespace URI to:
@@ -57,12 +57,12 @@
                 Add a copyright statement.
             2006-08-17: Rev 1.4: Alex Yiu
                 Adding last modified date and small reformatting for copyright statement
-            
+
         </xsd:documentation>
     </xsd:annotation>
-    
+
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="http://www.w3.org/2001/xml.xsd"/>
-    
+
     <xsd:element name="partnerLinkType" type="plnk:tPartnerLinkType"/>
     <xsd:complexType name="tPartnerLinkType">
         <xsd:complexContent>
@@ -74,7 +74,7 @@
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
-    
+
     <xsd:complexType name="tExtensibleElements">
         <xsd:annotation>
             <xsd:documentation>
@@ -88,7 +88,7 @@
         </xsd:sequence>
         <xsd:anyAttribute namespace="##other" processContents="lax"/>
     </xsd:complexType>
-    
+
     <xsd:element name="documentation">
         <xsd:complexType mixed="true">
             <xsd:sequence>
@@ -98,7 +98,7 @@
             <xsd:attribute ref="xml:lang"/>
         </xsd:complexType>
     </xsd:element>
-    
+
     <xsd:element name="role" type="plnk:tRole"/>
     <xsd:complexType name="tRole">
         <xsd:complexContent>
@@ -108,5 +108,5 @@
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
-    
+
 </xsd:schema>

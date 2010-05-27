@@ -29,46 +29,46 @@ This process is intended to FAIL by attempting to use a non-initialized correlat
 <bpws:process
   xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:foo="http://test.ns" 
-  targetNamespace="http://test.ns" 
+  xmlns:foo="http://test.ns"
+  targetNamespace="http://test.ns"
   name="correlation2">
-  
+
   <bpws:partnerLinks>
-    <bpws:partnerLink name="harness" 
+    <bpws:partnerLink name="harness"
                       partnerLinkType="foo:outcomePartnerType"
                       myRole="outcomeRole"/>
   </bpws:partnerLinks>
-  
+
   <bpws:variables>
     <bpws:variable name="OUTCOME" messageType="foo:stringWrapperMessage"/>
   </bpws:variables>
-  
+
   <bpws:correlationSets>
     <bpws:correlationSet properties="foo:y" name="initCorSet"/>
   </bpws:correlationSets>
-  
-  
-  
+
+
+
   <bpws:sequence>
-    <bpws:receive partnerLink="harness" 
-                  portType="foo:testPort" 
-                  operation="testOperation" 
+    <bpws:receive partnerLink="harness"
+                  portType="foo:testPort"
+                  operation="testOperation"
                   variable="OUTCOME"
                   createInstance="yes">
       <bpws:correlations>
         <bpws:correlation set="initCorSet" initiate="yes"/>
       </bpws:correlations>
     </bpws:receive>
-    <bpws:receive partnerLink="harness" 
-                  portType="foo:testPort" 
-                  operation="oneWayOperation" 
+    <bpws:receive partnerLink="harness"
+                  portType="foo:testPort"
+                  operation="oneWayOperation"
                   variable="OUTCOME">
       <bpws:correlations>
         <bpws:correlation set="initCorSet"/>
       </bpws:correlations>
     </bpws:receive>
-    <bpws:reply partnerLink="harness" 
-                portType="foo:testPort" 
+    <bpws:reply partnerLink="harness"
+                portType="foo:testPort"
                 operation="testOperation"
                 variable="OUTCOME"/>
   </bpws:sequence>

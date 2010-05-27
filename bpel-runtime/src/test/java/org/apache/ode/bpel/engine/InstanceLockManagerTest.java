@@ -24,7 +24,7 @@ import junit.framework.TestCase;
 
 /**
  * Test case for {@link InstanceLockManager}.
- * 
+ *
  * @author mszefler
  */
 public class InstanceLockManagerTest extends TestCase {
@@ -60,26 +60,26 @@ public class InstanceLockManagerTest extends TestCase {
         Thread t2 = new TThread();
         Thread t3 = new TThread();
         Thread t4 = new TThread();
-       
+
         t1.start();
         t2.start();
         t3.start();
         t4.start();
-        
+
         Thread.sleep(100);
         _ilm.unlock(1L);
-                
+
         t1.join(2000);
         t2.join(2000);
         t3.join(2000);
         t4.join(2000);
-        
+
         assertFalse(t1.isAlive());
         assertFalse(t2.isAlive());
         assertFalse(t3.isAlive());
         assertFalse(t4.isAlive());
-        
-        
+
+
     }
 
     private class TThread extends Thread {

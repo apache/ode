@@ -35,7 +35,7 @@ public class DocumentRegistry {
 
     private final ArrayList<Definition4BPEL> _definitions = new ArrayList<Definition4BPEL>();
 
-    
+
     /**
      * Obtains an WSDL definition based on its target namespace.
      *

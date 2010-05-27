@@ -26,7 +26,7 @@ public abstract class AbortMessageExchangeException extends Exception {
     protected AbortMessageExchangeException(String msg, Throwable cause) {
         super(msg, cause);
     }
-    
+
     protected AbortMessageExchangeException(String msg) {
         super(msg);
     }

@@ -17,15 +17,15 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<process name="ExtVar2" targetNamespace="http://ode/bpel/unit-test" 
-    xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable" 
-    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable" 
-    xmlns:tns="http://ode/bpel/unit-test" 
-    xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-    xmlns:test="http://ode/bpel/unit-test.wsdl" 
-    xmlns:foo="http://foo/extvar" 
-    xmlns:xvar="http://ode.apache.org/externalVariables" 
-    queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" 
+<process name="ExtVar2" targetNamespace="http://ode/bpel/unit-test"
+    xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:tns="http://ode/bpel/unit-test"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:test="http://ode/bpel/unit-test.wsdl"
+    xmlns:foo="http://foo/extvar"
+    xmlns:xvar="http://ode.apache.org/externalVariables"
+    queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
     expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
 
     <import namespace="http://foo/extvar" location="ExtVar2.xsd" importType="http://www.w3.org/2001/XMLSchema"/>
@@ -40,17 +40,17 @@
     <variables>
         <variable name="myVar" messageType="test:ExtVarMessage"/>
         <variable name="costPerCustomer-keys" element="foo:costPerCustomer-keys"/>
-        <variable name="costPerCustomer"      element="foo:costPerCustomer" 
+        <variable name="costPerCustomer"      element="foo:costPerCustomer"
                   xvar:id="costPerCustomer"   xvar:relates-to="costPerCustomer-keys"/>
     </variables>
 
     <sequence>
-        <receive name="start" partnerLink="ExtVarPartnerLink" portType="test:ExtVarPortType" 
+        <receive name="start" partnerLink="ExtVarPartnerLink" portType="test:ExtVarPortType"
             operation="extvar" variable="myVar" createInstance="yes"/>
 
-          
+
         <!-- insert new row by assigning directly into the external variable -->
-        
+
         <assign name="insertNewRow">
             <copy>
                 <from>
@@ -110,7 +110,7 @@
         </if>
 
         <!-- update row by assigning into extvar -->
-        
+
         <assign name="updateRow">
             <copy>
                 <from>
@@ -149,7 +149,7 @@
             </copy>
         </assign>
 
-        
+
         <!-- insert a new row -->
 
         <assign name="insertRow">
@@ -183,7 +183,7 @@
             </else>
         </if>
 
-        
+
         <!-- go back to first row -->
 
         <assign name="goBack1">

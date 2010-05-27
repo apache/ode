@@ -19,11 +19,11 @@
   -->
 <dd:deploy xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd">
 
-    <dd:process xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd" 
-                xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-                xmlns:this="http://example.com/process/ExtVar/GenKey" 
+    <dd:process xmlns:dd="http://ode.fivesight.com/schemas/2006/06/27/dd"
+                xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                xmlns:this="http://example.com/process/ExtVar/GenKey"
                 name="this:ExtVar-GenKey">
-                
+
       <xvar:externalVariable xmlns:xvar="http://ode.apache.org/externalVariables" id="extvar">
         <xjdbc:jdbc xmlns:xjdbc="http://ode.apache.org/externalVariables/jdbc">
           <xjdbc:datasource-ref>testds</xjdbc:datasource-ref>
@@ -33,10 +33,10 @@
           <xjdbc:init mode="update-insert" />
         </xjdbc:jdbc>
       </xvar:externalVariable>
-      
+
       <dd:provide partnerLink="client">
         <dd:service name="this:TestService" port="TestPort" />
       </dd:provide>
     </dd:process>
-    
+
 </dd:deploy>

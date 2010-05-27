@@ -21,12 +21,12 @@ package org.apache.ode.jacob;
 import java.lang.reflect.Method;
 
 /**
- * Class exposing the JACOB operations. 
+ * Class exposing the JACOB operations.
  * <p>
- * Note: these operations represent a subset of a process algebra mapped into 
+ * Note: these operations represent a subset of a process algebra mapped into
  * Java invocations; other aspects of the syntax are represented natively in Java.
- * In particular, parallel composition is modelled as sequential Java invocation 
- * and if-else are modelled using Java's if-else statement. Note also that the 
+ * In particular, parallel composition is modelled as sequential Java invocation
+ * and if-else are modelled using Java's if-else statement. Note also that the
  * scoping rules for channel names are simply the Java object visibility rules.
  */
 public interface JacobThread {
@@ -44,7 +44,7 @@ public interface JacobThread {
     /**
      * Send a message (object invocation). This method shouldn't really be used
      * as {@link Channel} objects may be used as proxies in this respect.
-     * 
+     *
      * @param channel
      *            channel on which to send the message
      * @param method
@@ -68,7 +68,7 @@ public interface JacobThread {
      * messages on the channel (depending on the value of the
      * <code>replicate</code> argument.
      * </p>
-     * 
+     *
      * <p>
      * With respect to process terms, the Java expression <code>object(false, x,
      * ChannelListener)</code>
@@ -77,7 +77,7 @@ public interface JacobThread {
      * were instead set to <code>true</code>, corresponding term would be
      * <code> ! x ? { ChannelListener }</code>.
      * </p>
-     * 
+     *
      * @param replicate
      *            if set the a replication operator is present
      * @param methodList

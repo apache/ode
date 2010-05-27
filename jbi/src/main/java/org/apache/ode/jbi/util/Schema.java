@@ -24,7 +24,7 @@ import org.w3c.dom.Element;
 
 /**
  * Contains informations related to a schema.
- *  
+ *
  * @author gnodet
  */
 public class Schema {
@@ -33,7 +33,7 @@ public class Schema {
     private String namespace;
     private List imports;
     private URI sourceUri;
-    
+
     /**
      * Add a reference to an imported namespace.
      * @param namespace the namespace to reference
@@ -44,7 +44,7 @@ public class Schema {
         }
         imports.add(namespace);
     }
-    
+
     /**
      * @return Returns the imports.
      */

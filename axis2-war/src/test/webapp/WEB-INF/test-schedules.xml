@@ -18,7 +18,7 @@
   ~ under the License.
   -->
 
-<sched:schedules 
+<sched:schedules
         xmlns:sched="http://www.apache.org/ode/schemas/schedules/2009/05"
         xmlns:dd="http://www.apache.org/ode/schemas/dd/2007/03">
     <sched:schedule when="* * * * * ?">

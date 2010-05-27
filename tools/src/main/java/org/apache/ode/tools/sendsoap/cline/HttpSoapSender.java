@@ -107,7 +107,7 @@ public class HttpSoapSender extends BaseCommandlineTool {
             m.appendReplacement(sb, now + "-" + c++);
         }
         m.appendTail(sb);
-        SimpleHttpConnectionManager mgr = new SimpleHttpConnectionManager();  
+        SimpleHttpConnectionManager mgr = new SimpleHttpConnectionManager();
         mgr.getParams().setConnectionTimeout(60000);
         mgr.getParams().setSoTimeout(60000);
         HttpClient httpClient = new HttpClient(mgr);

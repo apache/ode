@@ -30,7 +30,7 @@ import org.w3c.dom.Element;
  * See {@link CompositeActivity} for methods used to manipulate child activities.
  */
 public class FlowActivity extends CompositeActivity {
-  
+
   public FlowActivity(Element el) {
         super(el);
     }

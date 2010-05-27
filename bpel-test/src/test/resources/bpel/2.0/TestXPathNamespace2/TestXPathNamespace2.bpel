@@ -29,12 +29,12 @@
   queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
   expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
   targetNamespace="http://ode/bpel/unit-test/TestXPathNamespace2">
- 
- 
+
+
   <bpel:import location="TestXPathNamespace2.wsdl"
     namespace="http://ode/bpel/unit-test/TestXPathNamespace2.wsdl"
     importType="http://schemas.xmlsoap.org/wsdl/" />
- 
+
   <bpel:partnerLinks>
     <bpel:partnerLink name="request" partnerLinkType="wns:TestXPathNamespace2Request" myRole="TestXPathNamespace2Service"/>
   </bpel:partnerLinks>
@@ -55,7 +55,7 @@
         </bpel:assign>
         <bpel:assign name="BP112533401973410">
           <bpel:copy>
-            <bpel:from> 
+            <bpel:from>
               <bpel:literal>Foo Name</bpel:literal>
             </bpel:from>
             <bpel:to>$newVariable1/ns0:Person/ns1:Name</bpel:to>

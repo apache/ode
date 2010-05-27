@@ -28,12 +28,12 @@ import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
 import org.apache.ode.bpel.o.OProcess;
 
 /**
- * A representation of an XQuery expression 
+ * A representation of an XQuery expression
  */
 public class OXQuery10ExpressionBPEL20 extends OXPath20ExpressionBPEL20 {
 
     private static final long serialVersionUID = -1L;
-    
+
     public String xquery;
 
     public OXQuery10ExpressionBPEL20(OProcess owner, QName qname_getVariableData,

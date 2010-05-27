@@ -29,17 +29,17 @@ class ActivityInfo implements Serializable {
     private static final long serialVersionUID = 1L;
     /** Activity instance identifier */
     long aId;
-    
+
     /** Activity definition. */
     OActivity o;
     TerminationChannel self;
     ParentScopeChannel parent;
-    
+
     ActivityInfo(long aid, OActivity o, TerminationChannel self, ParentScopeChannel parent) {
         assert o != null;
         assert self != null;
         assert parent != null;
-        
+
         this.o = o;
         this.self = self;
         this.parent = parent;
@@ -56,7 +56,7 @@ class ActivityInfo implements Serializable {
         buf.append(')');
         return buf.toString();
     }
-    
+
     public int hashCode() {
         return (int)aId;
     }

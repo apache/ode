@@ -133,20 +133,20 @@ public class BpelProcess {
 
     private ExternalVariableManager _evm;
 
-    public static final QName PROP_PATH = new QName("PATH"); 
-    public static final QName PROP_SVG = new QName("SVG"); 
+    public static final QName PROP_PATH = new QName("PATH");
+    public static final QName PROP_SVG = new QName("SVG");
     public static final QName PROP_LAZY_HYDRATE = new QName("process.hydration.lazy");
     public static final QName PROP_MAX_INSTANCES = new QName("process.instance.throttled.maximum.count");
-    
+
     // The ratio of in-memory vs serialized size of compiled bpel object.
     private static final int PROCESS_MEMORY_TO_SERIALIZED_SIZE_RATIO = 5;
-    
+
     public BpelProcess(ProcessConf conf) {
         _pid = conf.getProcessId();
         _pconf = conf;
         _hydrationLatch = new HydrationLatch();
     }
-    
+
 
     /**
      * Retrives the base URI to use for local resource resolution.
@@ -158,7 +158,7 @@ public class BpelProcess {
     }
 
     /**
-     * Intiialize the external variable configuration/engine manager. This is called from hydration logic, so it 
+     * Intiialize the external variable configuration/engine manager. This is called from hydration logic, so it
      * is possible to change the external variable configuration at runtime.
      *
      */
@@ -184,11 +184,11 @@ public class BpelProcess {
         BpelRuntimeContextImpl processInstance = createRuntimeContext(instanceDAO, null, null);
         processInstance.recoverActivity(channel, activityId, action, fault);
     }
-    
+
     protected DebuggerSupport createDebuggerSupport() {
         return new DebuggerSupport(this);
     }
-    
+
     protected DebuggerSupport getDebuggerSupport() {
         return _debugger;
     }
@@ -203,7 +203,7 @@ public class BpelProcess {
     public interface InvokeHandler {
         boolean invoke(PartnerLinkMyRoleImpl target, PartnerLinkMyRoleImpl.RoutingInfo routingInfo, boolean createInstance);
     }
-    
+
     public boolean invokeProcess(MyRoleMessageExchangeImpl mex, InvokeHandler invokeHandler, boolean enqueue) {
         boolean routed = false;
 
@@ -270,11 +270,11 @@ public class BpelProcess {
         }
         return routed;
     }
-    
+
     private boolean isActive() {
         return _pconf.getState() == org.apache.ode.bpel.iapi.ProcessState.ACTIVE;
     }
-    
+
     /**
      * Entry point for message exchanges aimed at the my role.
      *
@@ -465,7 +465,7 @@ public class BpelProcess {
                         if (__log.isDebugEnabled()) {
                             __log.debug("Matcher event for iid " + we.getInstanceId());
                         }
-                        if( procInstance.getState() == ProcessState.STATE_COMPLETED_OK 
+                        if( procInstance.getState() == ProcessState.STATE_COMPLETED_OK
                                 || procInstance.getState() == ProcessState.STATE_COMPLETED_WITH_FAULT ) {
                             __log.debug("A matcher event was aborted. The process is already completed.");
                             return true;
@@ -573,7 +573,7 @@ public class BpelProcess {
 
         if (getInstanceMaximumCount() < Integer.MAX_VALUE)
             registerMessageExchangeInterceptor(new InstanceCountThrottler());
-        
+
         __log.debug("Activating " + _pid);
         // Activate all the my-role endpoints.
         for (Map.Entry<String, Endpoint> entry : _pconf.getProvideEndpoints().entrySet()) {
@@ -862,7 +862,7 @@ public class BpelProcess {
                 __log.error(errmsg, e);
                 throw new BpelEngineException(errmsg, e);
             }
-            
+
             if (_partnerRoles == null) {
                 _partnerRoles = new HashMap<OPartnerLink, PartnerLinkPartnerRoleImpl>();
             }
@@ -881,7 +881,7 @@ public class BpelProcess {
             if (_partnerEprs == null) {
                 _partnerEprs = new HashMap<Endpoint, EndpointReference>();
             }
-            
+
             _replacementMap = new ReplacementMapImpl(_oprocess);
 
             // Create an expression language registry for this process
@@ -950,7 +950,7 @@ public class BpelProcess {
             }
         }
     }
-    
+
     private void bounceProcessDAOInMemory(BpelDAOConnection conn, final QName pid, final long version, final OProcess oprocess) {
         if(__log.isInfoEnabled()) __log.info("Creating new process DAO[mem] for " + pid + " (guid=" + oprocess.guid + ").");
         createProcessDAO(conn, pid, version, oprocess);
@@ -1035,10 +1035,10 @@ public class BpelProcess {
     public boolean hasActiveInstances() {
         try {
             _hydrationLatch.latch(1);
-            if (isInMemory() || _engine._contexts.scheduler.isTransacted()) { 
+            if (isInMemory() || _engine._contexts.scheduler.isTransacted()) {
                 return hasActiveInstances(getProcessDAO());
             } else {
-                // If we do not have a transaction we need to create one. 
+                // If we do not have a transaction we need to create one.
                 try {
                     return (Boolean) _engine._contexts.scheduler.execTransaction(new Callable<Object>() {
                         public Object call() throws Exception {
@@ -1055,9 +1055,9 @@ public class BpelProcess {
             _hydrationLatch.release(1);
         }
     }
-    
+
     private boolean hasActiveInstances(ProcessDAO processDAO) {
-        // Select count of instances instead of all active instances 
+        // Select count of instances instead of all active instances
         // Collection<ProcessInstanceDAO> activeInstances = processDAO.getActiveInstances();
         // return (activeInstances != null && activeInstances.size() > 0);
         return processDAO.getNumInstances() > 0;
@@ -1066,11 +1066,11 @@ public class BpelProcess {
     public void registerMessageExchangeInterceptor(MessageExchangeInterceptor interceptor) {
         _mexInterceptors.add(interceptor);
     }
-    
+
     public void unregisterMessageExchangeInterceptor(MessageExchangeInterceptor interceptor) {
         _mexInterceptors.remove(interceptor);
     }
-    
+
     public long sizeOf() {
         // try to get actual size from sizing agent, if enabled
         long footprint = SizingAgent.deepSizeOf(this);
@@ -1085,7 +1085,7 @@ public class BpelProcess {
         // return the total footprint
         return footprint;
     }
-    
+
     public String getProcessProperty(QName property, String defaultValue) {
         Text text = (Text) getProcessProperty(property);
         if (text == null) {
@@ -1098,7 +1098,7 @@ public class BpelProcess {
     public boolean isHydrationLazy() {
         return Boolean.valueOf(getProcessProperty(PROP_LAZY_HYDRATE, "true"));
     }
-    
+
     public boolean isHydrationLazySet() {
         return getProcessProperty(PROP_LAZY_HYDRATE) != null;
     }
@@ -1108,7 +1108,7 @@ public class BpelProcess {
     }
 
     public long getEstimatedHydratedSize() {
-        return _pconf.getCBPFileSize() * 
+        return _pconf.getCBPFileSize() *
                     PROCESS_MEMORY_TO_SERIALIZED_SIZE_RATIO;
     }
 

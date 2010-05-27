@@ -69,7 +69,7 @@ public class ODEAxisServiceDispatcher extends AbstractDispatcher {
             // HACK: Redirect legacy endpoints
             String address = toEPR.getAddress();
             if (address != null) address = address.replace("/ode/services/", "/ode/processes/");
-            
+
             // The only thing we understand if a service name that
             // follows /processes/ in the request URL.
             String path = parseRequestURLForService(address);

@@ -68,19 +68,19 @@ class JBITask < Buildr::ZipTask
   def initialize(*args)
     super
     prepare { path("lib").include((component.libs + bootstrap.libs).flatten.uniq) }
-      
+
     enhance do
       case jbi_xml
       when String
-        path("META-INF").include jbi_xml.path, :as=>"jbi.xml" 
+        path("META-INF").include jbi_xml.path, :as=>"jbi.xml"
       when nil, true
         # Tempfiles gets deleted on garbage collection, so we're going to hold on to it
         # through instance variable not closure variable.
         Tempfile.open("MANIFEST.MF") { |@jbi_xml_tmp| @jbi_xml_tmp.write descriptor }
-        path("META-INF").include @jbi_xml_tmp.path, :as=>"jbi.xml" 
+        path("META-INF").include @jbi_xml_tmp.path, :as=>"jbi.xml"
       when Proc, Method
         Tempfile.open("MANIFEST.MF") { |@jbi_xml_tmp| @jbi_xml_tmp.write jbi_xml.call.to_s }
-        path("META-INF").include @jbi_xml_tmp.path, :as=>"jbi.xml" 
+        path("META-INF").include @jbi_xml_tmp.path, :as=>"jbi.xml"
       end
     end
   end

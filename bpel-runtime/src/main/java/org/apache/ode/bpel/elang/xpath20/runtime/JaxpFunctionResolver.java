@@ -315,7 +315,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             return result;
         }
     }
-    
+
     public class DomToString implements XPathFunction {
         public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 1)
@@ -324,7 +324,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             if (__log.isDebugEnabled()) {
                 __log.debug("domToString call(context=" + _ectx + " args=" + args + ")");
             }
-            
+
             Element varElmt;
             try {
                 if (args.get(0) instanceof List) {
@@ -346,8 +346,8 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                         new FaultException(_oxpath.getOwner().constants.qnXsltInvalidSource,
                                 "The bpws:domToString function MUST be passed a single " +
                                         "element node."));
-            }    
-            String result= DOMUtils.domToString(varElmt); 
+            }
+            String result= DOMUtils.domToString(varElmt);
             return result;
         }
     }
@@ -462,7 +462,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
         }
 
         public Object evaluate(List args) throws XPathFunctionException {
-            // prepare these 2 arguments 
+            // prepare these 2 arguments
             String uriTemplate;
             Map<String, String> pairs;
 
@@ -524,7 +524,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             if (__log.isDebugEnabled()) {
                 __log.debug("insertInto call(context=" + _ectx + " args=" + args + ")");
             }
-            
+
             Element parentElmt;
             int position;
             List childNodes;
@@ -586,7 +586,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             return clonedElmt;
         }
     }
-    
+
     public class InsertAfter implements XPathFunction {
         public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() < 2 || args.size() > 3)
@@ -595,7 +595,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             if (__log.isDebugEnabled()) {
                 __log.debug("insertAfter call(context=" + _ectx + " args=" + args + ")");
             }
-            
+
             Element targetElmt;
             List<Node> siblingNodes;
             Object childArg = null, siblingsArg = null;
@@ -663,7 +663,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             return clonedElmt;
         }
     }
-    
+
     public class InsertBefore implements XPathFunction {
         public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() < 2 || args.size() > 3)
@@ -672,7 +672,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             if (__log.isDebugEnabled()) {
                 __log.debug("insertBefore call(context=" + _ectx + " args=" + args + ")");
             }
-            
+
             Element targetElmt;
             List<Node> siblingNodes;
             Object childArg = null, siblingsArg = null;
@@ -749,7 +749,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             if (__log.isDebugEnabled()) {
                 __log.debug("insertAsFirstInto call(context=" + _ectx + " args=" + args + ")");
             }
-            
+
             Element targetElmt;
             List siblingNodes;
             try {
@@ -808,7 +808,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             if (__log.isDebugEnabled()) {
                 __log.debug("insertAsLastInto call(context=" + _ectx + " args=" + args + ")");
             }
-            
+
             Element targetElmt;
             List siblingNodes;
             try {
@@ -866,7 +866,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             if (__log.isDebugEnabled()) {
                 __log.debug("delete call(context=" + _ectx + " args=" + args + ")");
             }
-            
+
             List<Node> targetNodes = new ArrayList();
             List siblingNodes;
             Object delete = args.size() == 2 ? delete = args.get(1) : args.get(0);
@@ -933,7 +933,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             return clonedElmt;
         }
     }
-    
+
     public class Rename implements XPathFunction {
         public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() < 2)
@@ -942,7 +942,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             if (__log.isDebugEnabled()) {
                 __log.debug("rename call(context=" + _ectx + " args=" + args + ")");
             }
-            
+
             Element targetElmt;
             QName elementQName = null, elementTypeQName = null;
             try {
@@ -1063,7 +1063,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             Element renamedElmt = targetElmt
                                     .getOwnerDocument()
                                     .createElementNS(
-                                            elementQName.getNamespaceURI(), 
+                                            elementQName.getNamespaceURI(),
                                             elementQName.getPrefix() + ":" + elementQName.getLocalPart());
             Element originalElmt = (Element) children.item(position - 1);
             children = originalElmt.getChildNodes();
@@ -1073,13 +1073,13 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             clonedElmt.replaceChild(renamedElmt, originalElmt);
             if (elementTypeQName != null) {
                 renamedElmt.setAttributeNS(
-                        Namespaces.XML_INSTANCE, "xsi:type", 
+                        Namespaces.XML_INSTANCE, "xsi:type",
                         elementTypeQName.getPrefix() + ":" + elementTypeQName.getLocalPart());
             }
             return clonedElmt;
         }
     }
-    
+
     public class ProcessProperty implements XPathFunction {
         public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 1)
@@ -1143,7 +1143,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             return _ectx.getPropertyValue(propertyName);
         }
     }
-    
+
     public class DayTimeDuration implements XPathFunction {
         public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 1)
@@ -1194,7 +1194,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             return DayTimeDurationValue.makeDayTimeDurationValue(argument);
         }
     }
-    
+
     public class YearMonthDuration implements XPathFunction {
         public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 1)
@@ -1245,7 +1245,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             return YearMonthDurationValue.makeYearMonthDurationValue(argument);
         }
     }
-    
+
     public static class Helper {
         /**
          * Extract a string from the given parameter.<br/>
@@ -1354,7 +1354,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
         }
 
         /**
-         * Same as {@link #buildNameValueMap(java.util.List, int)} but index equals zero. 
+         * Same as {@link #buildNameValueMap(java.util.List, int)} but index equals zero.
          * @see #buildNameValueMap(java.util.List, int)
          */
         public static Map<String, String> buildNameValueMap(List args) {
@@ -1364,10 +1364,10 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
         /**
          * {@linkplain #extractString(Object) Extract a string} from each list element and build a map with them.
          * <br/>Elements at even indices would be the keys, Elements at odd indices the values.
-         * 
+         *
          * @param args the list containing a serie of name, value, name, value, and so on
          * @param begin index of the first name to include in the map, (args.size - begin) must be an even number
-         * or an IndexOutOfBoundsException will be thrown 
+         * or an IndexOutOfBoundsException will be thrown
          * @return a Map of name/value pairs
          * @throws IndexOutOfBoundsException
          * @see #extractString(Object)

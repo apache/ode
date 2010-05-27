@@ -31,7 +31,7 @@ public class MessageDAOImpl extends DaoBaseImpl implements MessageDAO {
     private Element data;
     private Element header;
     private MessageExchangeDAO messageExchange;
-    
+
     public MessageDAOImpl(MessageExchangeDAO messageExchange) {
         this.messageExchange = messageExchange;
     }

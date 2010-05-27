@@ -474,12 +474,12 @@ public class SoapMessageConverter {
         return ee.isEmpty() ? null : ee.iterator().next();
 
     }
-    
+
     /**
      * Attempts to extract the WS-Addressing "Action" attribute value from the operation definition.
-     * When WS-Addressing is being used by a service provider, the "Action" is specified in the 
-     * portType->operation instead of the SOAP binding->operation.  
-     * 
+     * When WS-Addressing is being used by a service provider, the "Action" is specified in the
+     * portType->operation instead of the SOAP binding->operation.
+     *
      * @param operation The name of the operation to extract the SOAP Action from
      * @return the SOAPAction value if one is specified, otherwise empty string
      */
@@ -512,7 +512,7 @@ public class SoapMessageConverter {
 
         return "";
     }
-    
+
     public Fault parseSoapFault(Element odeMsgEl, SOAPEnvelope envelope, Operation operation) throws AxisFault {
         SOAPFault flt = envelope.getBody().getFault();
         SOAPFaultDetail detail = flt.getDetail();

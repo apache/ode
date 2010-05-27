@@ -105,9 +105,9 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
     /**
      * Initialize XSL Transformer
      *
-     * @param properties properties 
+     * @param properties properties
      *
-     * @throws ConfigurationException ConfigurationException 
+     * @throws ConfigurationException ConfigurationException
      */
     public void initialize(Map properties) throws ConfigurationException {
         TransformerFactory trsf = new net.sf.saxon.TransformerFactoryImpl();
@@ -115,7 +115,7 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
     }
 
     /**
-     * 
+     *
      * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluateAsString(org.apache.ode.bpel.o.OExpression,
      *      org.apache.ode.bpel.explang.EvaluationContext)
      */
@@ -125,7 +125,7 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
     }
 
     /**
-     * 
+     *
      * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluateAsBoolean(org.apache.ode.bpel.o.OExpression,
      *      org.apache.ode.bpel.explang.EvaluationContext)
      */
@@ -137,13 +137,13 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
     /**
      * Evaluate expression and return a number
      *
-     * @param cexp cexp 
-     * @param ctx ctx 
+     * @param cexp cexp
+     * @param ctx ctx
      *
      * @return type
      *
-     * @throws FaultException FaultException 
-     * @throws EvaluationException EvaluationException 
+     * @throws FaultException FaultException
+     * @throws EvaluationException EvaluationException
      */
     public Number evaluateAsNumber(OExpression cexp, EvaluationContext ctx)
         throws FaultException, EvaluationException {
@@ -151,7 +151,7 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
     }
 
     /**
-     * 
+     *
      * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluate(org.apache.ode.bpel.o.OExpression,
      *      org.apache.ode.bpel.explang.EvaluationContext)
      */
@@ -213,13 +213,13 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
     /**
      * Evaluate expression and return a node
      *
-     * @param cexp cexp 
-     * @param ctx ctx 
+     * @param cexp cexp
+     * @param ctx ctx
      *
      * @return type
      *
-     * @throws FaultException FaultException 
-     * @throws EvaluationException EvaluationException 
+     * @throws FaultException FaultException
+     * @throws EvaluationException EvaluationException
      */
     public Node evaluateNode(OExpression cexp, EvaluationContext ctx)
         throws FaultException, EvaluationException {
@@ -241,13 +241,13 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
     /**
      * Evaluate expression and return a date
      *
-     * @param cexp cexp 
-     * @param context context 
+     * @param cexp cexp
+     * @param context context
      *
      * @return type
      *
-     * @throws FaultException FaultException 
-     * @throws EvaluationException EvaluationException 
+     * @throws FaultException FaultException
+     * @throws EvaluationException EvaluationException
      */
     public Calendar evaluateAsDate(OExpression cexp, EvaluationContext context)
         throws FaultException, EvaluationException {
@@ -294,13 +294,13 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
     /**
      * Evaluate expression and return duration
      *
-     * @param cexp cexp 
-     * @param context context 
+     * @param cexp cexp
+     * @param context context
      *
      * @return type
      *
-     * @throws FaultException FaultException 
-     * @throws EvaluationException EvaluationException 
+     * @throws FaultException FaultException
+     * @throws EvaluationException EvaluationException
      */
     public Duration evaluateAsDuration(OExpression cexp,
         EvaluationContext context) throws FaultException, EvaluationException {
@@ -319,14 +319,14 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
     /**
      * Evaluate expression and return opaque type
      *
-     * @param cexp cexp 
-     * @param ctx ctx 
-     * @param type type 
+     * @param cexp cexp
+     * @param ctx ctx
+     * @param type type
      *
      * @return type
      *
-     * @throws FaultException FaultException 
-     * @throws EvaluationException EvaluationException 
+     * @throws FaultException FaultException
+     * @throws EvaluationException EvaluationException
      */
     private Object evaluate(OExpression cexp, EvaluationContext ctx, QName type)
         throws FaultException, EvaluationException {
@@ -366,7 +366,7 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
             for (QName variable : exp.getAllUnboundExternalVariables()) {
                 // Evaluate referenced variable
                 Object value = variableResolver.resolveVariable(variable);
-                
+
                  if (value instanceof Value) {
                      SaxonXQConnection saxonConn = (SaxonXQConnection) xqconn;
                      try {
@@ -381,15 +381,15 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
                          __log.warn("", e);
                      }
                  } else {
-                     
+
                      if (value instanceof Date) {
                          Date d = (Date) value;
                          value = org.apache.ode.utils.ISO8601DateParser.format(d);
                      }
- 
+
                      // Figure out type of variable
                      XQSequenceType xqType = getItemType(xqconn, value);
- 
+
                      // Saxon doesn't like binding sequences to variables
                      if (value instanceof Node) {
                          // a node is a node-list, but the inverse isn't true.
@@ -403,7 +403,7 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
                          }
                          value = xqconn.createSequence(nodeArray.iterator());
                      }
- 
+
                      // Bind value with external variable
                      if (value != null && xqType != null) {
                          if (value instanceof XQSequence) {
@@ -470,11 +470,11 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
     /**
      * Return opaque object embedded in XQuery Item
      *
-     * @param item item 
+     * @param item item
      *
      * @return type
      *
-     * @throws XQException XQException 
+     * @throws XQException XQException
      */
     private Object getItemValue(XQItem item) throws XQException {
         XQItemType itemType = item.getItemType();
@@ -532,21 +532,21 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
             itemValue = item.getAtomicValue();
 
             break;
-            
+
         }
 
         return itemValue;
     }
-    
+
     /**
      * Return XQuery type corresponding to given value
      *
-     * @param xqconn XQuery connection 
-     * @param value value 
+     * @param xqconn XQuery connection
+     * @param value value
      *
      * @return type
      *
-     * @throws XQException XQException 
+     * @throws XQException XQException
      */
     private XQSequenceType getItemType(XQConnection xqconn, Object value) throws XQException {
         XQSequenceType xqType = null;
@@ -582,16 +582,16 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
         }
         return xqType;
     }
-    
+
     /**
-     * Cast XQuery sequence into an opaque list 
+     * Cast XQuery sequence into an opaque list
      *
-     * @param type type 
-     * @param result result 
+     * @param type type
+     * @param result result
      *
      * @return value
      *
-     * @throws XQException XQException 
+     * @throws XQException XQException
      */
     private Object getResultValue(QName type, XQResultSequence result) throws XQException {
         Document document = DOMUtils.newDocument();
@@ -624,7 +624,7 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
             if (item != null) {
                 resultValue = getItemValue(item);
                 if (resultValue instanceof Node) {
-                    resultValue = DOMUtils.cloneNode(document, (Node) resultValue); 
+                    resultValue = DOMUtils.cloneNode(document, (Node) resultValue);
                 }
             }
         } else if (XPathConstants.STRING.equals(type)) {

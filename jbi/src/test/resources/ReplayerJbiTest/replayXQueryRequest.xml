@@ -37,7 +37,7 @@
                                 &lt;/message&gt;
                             &lt;/ns:out&gt;
                         &lt;/ns:mockQueryResponse&gt;
-                    <!-- 
+                    <!--
                     <![CDATA[
                         <ns:mockQueryResponse xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/">
                             <ns:out>

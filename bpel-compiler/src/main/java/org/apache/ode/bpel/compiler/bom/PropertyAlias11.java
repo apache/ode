@@ -22,7 +22,7 @@ import org.w3c.dom.Element;
 
 /**
  * A BPEL 1.1 - implementation. Basically, the only difference is that the query is in an attribute.
- * 
+ *
  * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
  *
  */

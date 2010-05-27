@@ -76,7 +76,7 @@ public class CleanSuccessTest extends CleanTestBase {
         ProcessDAO process = null;
         try {
             initialLargeDataCount = getLargeDataCount(0);
-            
+
             server.sendRequestFile("http://localhost:8888/processes/FirstProcess/FirstProcess/FirstProcess/Client", bundleName, "testRequest.soap");
             process = assertInstanceCleanup(instances, activityRecoveries, correlationSets, faults, exchanges, routes, messsages, partnerLinks, scopes, variables, events, largeData);
         } finally {
@@ -92,11 +92,11 @@ public class CleanSuccessTest extends CleanTestBase {
     public String getODEConfigDir() {
         return JPA_DERBY_CONF_DIR;
     }
-    
+
     protected ProcessInstanceDAO getInstance() {
         return JpaDaoConnectionFactoryImpl.getInstance();
     }
-    
+
     @Override
     protected int getLargeDataCount(int echoCount) throws Exception {
         return echoCount;

@@ -35,7 +35,7 @@ import org.apache.ode.utils.StreamUtils;
 /**
  * JUnit {@link TestCase} of the ODE BPEL compiler. This test case provides
  * is not very complex, it simply ensures that the given BPEL input compiles
- * succesfully. These test cases are intended to be run as part of a suite. 
+ * succesfully. These test cases are intended to be run as part of a suite.
  */
 class GoodCompileTCase extends TestCase implements CompileListener {
 

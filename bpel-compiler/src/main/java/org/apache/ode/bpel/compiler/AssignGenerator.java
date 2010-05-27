@@ -45,8 +45,8 @@ import org.w3c.dom.Element;
 import javax.xml.namespace.QName;
 
 /**
- * Generates code for <code>&lt;assign&gt;</code> activities. 
- * 
+ * Generates code for <code>&lt;assign&gt;</code> activities.
+ *
  * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
  */
 class AssignGenerator extends DefaultActivityGenerator {
@@ -80,7 +80,7 @@ class AssignGenerator extends DefaultActivityGenerator {
                 if (scopy.getFrom() == null)
                     throw new CompilationException(__cmsgs.errMissingFromSpec().setSource(scopy));
                 ocopy.from = compileFrom(scopy.getFrom(), toResultType[0]);
-                
+
                 verifyCopy(ocopy);
                 oassign.copy.add(ocopy);
 
@@ -92,7 +92,7 @@ class AssignGenerator extends DefaultActivityGenerator {
 
     /**
      * Verify that a copy follows the correct form.
-     * 
+     *
      * @param ocopy
      */
     private void verifyCopy(OAssign.Copy ocopy) {
@@ -204,9 +204,9 @@ class AssignGenerator extends DefaultActivityGenerator {
     }
 
     /**
-     * Compile an extension to/from-spec. Extension to/from-specs are compiled into 
-     * "DirectRef"s. 
-     * 
+     * Compile an extension to/from-spec. Extension to/from-specs are compiled into
+     * "DirectRef"s.
+     *
      * @param extVal source representation
      * @return compiled representation
      */

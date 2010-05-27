@@ -149,7 +149,7 @@ public class HibernateInstancesQueryCompiler extends Compiler<List, Session> {
   //Whether ordering by status used
   private boolean orderByStatus;
   private boolean orderByStatusDesc;
-  
+
   static {
     nodeIdentifierToDBField.put(INSTANCE_ID_FIELD, INSTANCE_ID_DB_FIELD);
     nodeIdentifierToDBField.put(INSTANCE_ID_FIELD, INSTANCE_ID_DB_FIELD);
@@ -175,24 +175,24 @@ public class HibernateInstancesQueryCompiler extends Compiler<List, Session> {
     orderByStatus = false;
     orderByStatusDesc = false;
   }
-  
+
   @Override
   public CommandEvaluator<List, Session> compile(final Query node) {
     init();
-    
+
     final OrderByEvaluator<Collection<Order>, Object> orderEvaluator = (node.getOrder() != null) ? compileOrderBy(node
         .getOrder()) : null;
 
     final CommandEvaluator<Criterion, Object> selectionEvaluator = node.getChilds().size() == 0 ? null
         : compileEvaluator(node.getChilds().iterator().next());
-    
+
     final boolean joinCorrelationSet = propertyInQuery;
     final boolean sortByStatus = orderByStatus;
     final boolean sortByStatusDesc = orderByStatusDesc;
     final Limit limit = node.getLimit();
-    
+
     return new CommandEvaluator<List, Session>() {
-      public List evaluate(Session session) { 
+      public List evaluate(Session session) {
         Criteria criteria = session.createCriteria(HProcessInstance.class).createAlias("process", "process");
         if(joinCorrelationSet) {
             criteria = criteria.createAlias("correlationSets", "property");
@@ -216,7 +216,7 @@ public class HibernateInstancesQueryCompiler extends Compiler<List, Session> {
         if(sortByStatus) {
           Collections.sort(result, sortByStatusDesc?StateComparator.DESC:StateComparator.ASC);
         }
-          
+
         return result;
       };
     };
@@ -309,7 +309,7 @@ public class HibernateInstancesQueryCompiler extends Compiler<List, Session> {
 
   public CommandEvaluator compileEvaluator(Object node) {
     /*
-     * 
+     *
      */
     if (node instanceof In) {
       return compileIn((In) node);
@@ -496,7 +496,7 @@ public class HibernateInstancesQueryCompiler extends Compiler<List, Session> {
         }
         if (values.contains(STATUS_FAULTED)) {
           disj.add(Restrictions.eq(INSTANCE_STATUS_DB_FIELD, ProcessState.STATE_COMPLETED_WITH_FAULT));
-        } 
+        }
         return new INEvaluator<String, Criterion, Object>() {
           public Criterion evaluate(Object paramValue) {
             return disj;

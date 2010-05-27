@@ -42,7 +42,7 @@ import javax.persistence.Table;
 })
 public class XmlDataProperty {
     public final static String DELETE_XML_DATA_PROPERTIES_BY_XML_DATA_IDS = "DELETE_XML_DATA_PROPERTIES_BY_XML_DATA_IDS";
-    
+
     @Id @Column(name="ID")
     @GeneratedValue(strategy= GenerationType.AUTO)
     @SuppressWarnings("unused")
@@ -51,7 +51,7 @@ public class XmlDataProperty {
     private String propertyKey;
     @Basic @Column(name="PROP_VALUE")
     private String propertyValue;
-    
+
     @SuppressWarnings("unused")
     @Basic @Column(name="XML_DATA_ID", insertable=false, updatable=false, nullable=true)
     private Long _xmlDataId;

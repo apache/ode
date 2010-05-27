@@ -50,7 +50,7 @@ else if (typeof org.apache.ode != "object") {
 }
 
 if(org.apache.ode.XHRObject){
-    throw new Error("org.apache.ode.XHRObject already exists"); 
+    throw new Error("org.apache.ode.XHRObject already exists");
 }
 
 org.apache.ode.XHRObject = {};
@@ -66,7 +66,7 @@ org.apache.ode.XHRObject = {};
         try
         {
             // Instantiates XMLHttpRequest in non-IE browsers and assigns to http.
-            xhr = new XMLHttpRequest();     
+            xhr = new XMLHttpRequest();
         }
         catch(e)
         {
@@ -74,7 +74,7 @@ org.apache.ode.XHRObject = {};
                 try
                 {
                     // Instantiates XMLHttpRequest for IE and assign to http
-                    xhr = new ActiveXObject(msxml_progid[i]);               
+                    xhr = new ActiveXObject(msxml_progid[i]);
                     break;
                 }
                 catch(e){}
@@ -85,30 +85,30 @@ org.apache.ode.XHRObject = {};
             return xhr;
         }
     }
-    
+
     function xhrSyncGetRequest(url, text){
         var request = createXhrObject();
         request.open('GET', url, false);
         request.send(null);
-        
-        if (request.status == 200) {  // Make sure there were no errors     // Make sure the response is an XML document 
+
+        if (request.status == 200) {  // Make sure there were no errors     // Make sure the response is an XML document
             if(text == true){
                 return request.responseText;
             }
-            if (request.getResponseHeader("Content-Type").match(/text\/xml/) != null || request.getResponseHeader("Content-Type").match(/application\/xml/) != null) { 
-                return request.responseXML;             
+            if (request.getResponseHeader("Content-Type").match(/text\/xml/) != null || request.getResponseHeader("Content-Type").match(/application\/xml/) != null) {
+                return request.responseXML;
             }else{
                 return request.responseText;
-            } 
-            
+            }
+
         }else {
             aler("Error occurred during the GET request");
             return null;
-        }   
+        }
     }
     var ns = org.apache.ode.XHRObject;
     ns.xhrSyncGetRequest = xhrSyncGetRequest;
-    
+
 })();
 
 if (org.apache.ode.DOMHelper) {
@@ -119,7 +119,7 @@ if (org.apache.ode.DOMHelper) {
 org.apache.ode.DOMHelper = {};
 
 (function(){
-    
+
     function getElementsByTagName(tagName, ns, prefix, scope){
         var elementListForReturn = scope.getElementsByTagName(prefix+":"+tagName);
         if(elementListForReturn.length == 0){
@@ -130,20 +130,20 @@ org.apache.ode.DOMHelper = {};
                     elementListForReturn = scope.getElementsByTagNameNS(ns, tagName);
                 }
             }
-        }     
-        
+        }
+
         return elementListForReturn;
     }
-    
-    // Find all Text nodes at or beneath the node n. 
-    // Concatenate their content and return it as a string. 
-    function getText(n){ 
+
+    // Find all Text nodes at or beneath the node n.
+    // Concatenate their content and return it as a string.
+    function getText(n){
         var strings = [];
         getStrings(n, strings);
         return strings.join("");
-        
+
         function getStrings(n, strings){
-            if (n.nodeType == 3 /* Node.TEXT_NODE */) 
+            if (n.nodeType == 3 /* Node.TEXT_NODE */)
                 strings.push(n.data);
             else if (n.nodeType == 1 /* Node.ELEMENT_NODE */) {
                     for (var m = n.firstChild; m != null; m = m.nextSibling) {
@@ -152,7 +152,7 @@ org.apache.ode.DOMHelper = {};
             }
         }
     }
-    
+
     var ns = org.apache.ode.DOMHelper;
     ns.getElementsByTagName = getElementsByTagName;
     ns.getText = getText;
@@ -166,19 +166,19 @@ org.apache.ode.Widgets = {};
 
 (function(){
     function operationConfirmation(msg, handleYes, handleNo){
-        
+
         var handleYesWrapper= function(){
             this.hide();
             handleYes();
-            
+
         }
-        
+
         var handleNoWrapper = function(){
             this.hide();
             handleNo();
-            
+
         }
-        
+
         var simpleDiag = new YAHOO.widget.SimpleDialog('confimationdialogue',{
             width:'350px',
             fixedcenter:true,
@@ -197,21 +197,21 @@ org.apache.ode.Widgets = {};
                 handler:handleNoWrapper
             }]
         });
-        
+
         simpleDiag.setHeader('Apache ODE');
         simpleDiag.render('content');
         simpleDiag.show();
-        
+
     }
-    
+
     function alert(msg, iconT){
         if(iconT == 'undefined')
             iconT = YAHOO.widget.SimpleDialog.ICON_INFO;
-        
+
         var handleOK = function(){
             this.hide();
         }
-        
+
         var simpleAlert = new YAHOO.widget.SimpleDialog('alertbox',{
             width:'350px',
             fixedcenter:true,
@@ -225,12 +225,12 @@ org.apache.ode.Widgets = {};
             handler:handleOK,
             isDefault:true}]
         });
-        
+
         simpleAlert.setHeader('Apache ODE');
         simpleAlert.render('content');
-        simpleAlert.show();     
+        simpleAlert.show();
     }
-    
+
     var ns = org.apache.ode.Widgets;
     ns.operationConfirm = operationConfirmation;
     ns.alert = alert;
@@ -239,7 +239,7 @@ org.apache.ode.Widgets = {};
 
 
 // Definition of Process Information processing class start from here.
-// This class will be used to get the details of processes from ODE 
+// This class will be used to get the details of processes from ODE
 // process management service and visualize them in Web interface.
 // Process retiring, activation is also handle from this class.
 if (org.apache.ode.ProcessHandling) {
@@ -252,7 +252,7 @@ org.apache.ode.ProcessHandling = {};
     var processInfoNS = "http://www.apache.org/ode/pmapi/types/2006/08/02/";
     var processInfoNSPrefix = "ns";
     var processInfoTagName = "process-info";
-    
+
     function loadProcessInfo(){
         // Use ProcessManagementService to get the details about currently available
         // processes in the engine. This method returns a XML document like following:
@@ -314,11 +314,11 @@ org.apache.ode.ProcessHandling = {};
         //      </axis2ns8:listAllProcessesResponse>
         //  </soapenv:Body>
         //</soapenv:Envelope>
-        
+
         try {
             var listAllProcessesRes = ProcessManagementService.listAllProcesses();
             return listAllProcessesRes;
-        } 
+        }
         catch (e) {
             if (typeof e == "string") {
                 alert("Exception Occurred " + e.toString());
@@ -329,7 +329,7 @@ org.apache.ode.ProcessHandling = {};
             return null;
         }
     }
-    
+
     function InstanceSummary(activeIns, completedIns, errorIns, failedIns, suspendedIns, terminatedIns){
         this.activeInstances = activeIns;
         this.completedInstances = completedIns;
@@ -338,7 +338,7 @@ org.apache.ode.ProcessHandling = {};
         this.suspendedInstances = suspendedIns;
         this.terminatedInstances = terminatedIns;
     }
-    
+
     function Process(
         pid, version, status, depDate, nameWithVer, processName, urlOfName, prefixOfName, instanceSummary){
         this.pid = pid;
@@ -349,20 +349,20 @@ org.apache.ode.ProcessHandling = {};
         this.processName = processName;
         this.urlOfName = urlOfName;
         this.prefixOfName = prefixOfName;
-        this.instanceSummary = instanceSummary;     
+        this.instanceSummary = instanceSummary;
     }
-    
+
     function processProcessInfoList(listAllProcessesRes){
         var returnInfoArray = [];
         var processInfoList = org.apache.ode.DOMHelper.getElementsByTagName(
-            processInfoTagName, 
-            processInfoNS, 
-            processInfoNSPrefix, 
+            processInfoTagName,
+            processInfoNS,
+            processInfoNSPrefix,
             listAllProcessesRes);
         if(processInfoList.length == 0){
             return 0;
         }else{
-            
+
             for(var i = 0; i < processInfoList.length; i++){
                 var activeInstances = 0;
                 var completedInstances = 0;
@@ -370,22 +370,22 @@ org.apache.ode.ProcessHandling = {};
                 var failedInstances = 0;
                 var suspendedInstances = 0;
                 var terminatedInstances = 0;
-    
+
                 var scopeEle = processInfoList[i];
-                
+
                 var pidEle = org.apache.ode.DOMHelper.getElementsByTagName("pid", processInfoNS, processInfoNSPrefix, scopeEle)[0];
                 var pid = org.apache.ode.DOMHelper.getText(pidEle);
-                
+
                 var versionEle = org.apache.ode.DOMHelper.getElementsByTagName('version', processInfoNS, processInfoNSPrefix, scopeEle)[0];
                 var version = org.apache.ode.DOMHelper.getText(versionEle);
-                
+
                 var statusEle = org.apache.ode.DOMHelper.getElementsByTagName('status', processInfoNS, processInfoNSPrefix, scopeEle)[0];
                 var status = org.apache.ode.DOMHelper.getText(statusEle);
-                
+
                 var depInfoEle = org.apache.ode.DOMHelper.getElementsByTagName("deployment-info", processInfoNS, processInfoNSPrefix, scopeEle)[0];
                 var depDateEle = org.apache.ode.DOMHelper.getElementsByTagName("deploy-date", processInfoNS, processInfoNSPrefix, scopeEle)[0];
                 var depDate = org.apache.ode.DOMHelper.getText(depDateEle);
-                
+
                 var defInfoEle = org.apache.ode.DOMHelper.getElementsByTagName("definition-info", processInfoNS, processInfoNSPrefix, scopeEle)[0];
                 var processNameEle = org.apache.ode.DOMHelper.getElementsByTagName("process-name", processInfoNS, processInfoNSPrefix, scopeEle)[0];
                 var processName = org.apache.ode.DOMHelper.getText(processNameEle);
@@ -393,13 +393,13 @@ org.apache.ode.ProcessHandling = {};
                 var len = pid.length;
                 var endPos = pid.indexOf('}');
                 var startPos = pid.indexOf('{');
-                var nameWithVersion = pid.substr(++endPos, len);    
+                var nameWithVersion = pid.substr(++endPos, len);
                 var indexOfColon = processName.indexOf(':');
                 var prefixOfName = processName.substring(0, indexOfColon);
-                var urlOfName = pid.substr(++startPos, (endPos - 2));       
-                
-                var instanceSummaryEle = org.apache.ode.DOMHelper.getElementsByTagName("instance-summary", processInfoNS, processInfoNSPrefix, scopeEle)[0];    
-                
+                var urlOfName = pid.substr(++startPos, (endPos - 2));
+
+                var instanceSummaryEle = org.apache.ode.DOMHelper.getElementsByTagName("instance-summary", processInfoNS, processInfoNSPrefix, scopeEle)[0];
+
                 for(var m = instanceSummaryEle.firstChild; m != null; m = m.nextSibling){
                     var state = m.getAttribute("state");
                     var count = m.getAttribute("count");
@@ -415,34 +415,34 @@ org.apache.ode.ProcessHandling = {};
                         suspendedInstances = parseInt(count);
                     }else if (state == 'TERMINATED') {
                         terminatedInstances = parseInt(count);
-                    }                   
-                } 
-                
+                    }
+                }
+
                 var instanceSummary = new InstanceSummary(
-                                        activeInstances, 
-                                        completedInstances, 
-                                        errorInstances, 
-                                        failedInstances, 
-                                        suspendedInstances, 
+                                        activeInstances,
+                                        completedInstances,
+                                        errorInstances,
+                                        failedInstances,
+                                        suspendedInstances,
                                         terminatedInstances);
-                
-                var processInfo = new Process(pid, 
-                                        version, 
-                                        status, 
-                                        depDate, 
-                                        nameWithVersion, 
-                                        processName, 
-                                        urlOfName, 
-                                        prefixOfName, 
+
+                var processInfo = new Process(pid,
+                                        version,
+                                        status,
+                                        depDate,
+                                        nameWithVersion,
+                                        processName,
+                                        urlOfName,
+                                        prefixOfName,
                                         instanceSummary);
-                
-                returnInfoArray[i] = processInfo;               
+
+                returnInfoArray[i] = processInfo;
             }
         }
-        
+
         return returnInfoArray;
     }
-    
+
     function createProcessWidget(process, i){
         var retireBtnID = 'retire' + i;
         var retierBtnVar = 'retireBtn' + i;
@@ -494,28 +494,28 @@ org.apache.ode.ProcessHandling = {};
               'function '+retierBtnVar+'retireProcess(){org.apache.ode.ProcessHandling.retireProcess("'+ process.nameWithVer +'","'+ process.urlOfName +'","'+process.prefixOfName+'");}'+
               'function '+activateVar+'activateProcess(){org.apache.ode.ProcessHandling.activateProcess("'+ process.nameWithVer +'","'+ process.urlOfName +'","'+process.prefixOfName+'");}'+
               'function '+viewProDetVar+'viewProcessDetails(){org.apache.ode.ProcessHandling.viewProcessDetails("'+ process.nameWithVer +'","'+ process.urlOfName +'","'+process.prefixOfName+'");}'+
-             
+
               'var ' + retierBtnVar + '=new YAHOO.widget.Button("'+ retireBtnID +'");'+
               retierBtnVar + '.addListener("click", '+retierBtnVar+'retireProcess); '+
-              retierBtnVar+'.set("disabled",'+retire+');'+            
+              retierBtnVar+'.set("disabled",'+retire+');'+
               'var ' + activateVar + '=new YAHOO.widget.Button("'+ activateBtnID + '");'    +
               activateVar+'.addListener("click", '+activateVar+'activateProcess); ' +
-              activateVar+'.set("disabled",'+active+');'+             
+              activateVar+'.set("disabled",'+active+');'+
               'var ' + viewProDetVar + '=new YAHOO.widget.Button("'+ viewProDetID + '");'   +
-              viewProDetVar+'.addListener("click", '+viewProDetVar+'viewProcessDetails); '  +         
+              viewProDetVar+'.addListener("click", '+viewProDetVar+'viewProcessDetails); '  +
               '</script>'+
               '</div> <div class="actions"><a href="#" class="accordionToggleItem">&nbsp;</a>'+
               '</div><div class="actions"><a href="#" class="accordionToggleItem">&nbsp;</a>'+
               '</div></div>'
-              
+
         return str;
     }
-    
+
     function populateContentArea(){
-        
-        var contentHTML = '<h2>Currently Deployed Processes</h2>'; 
+
+        var contentHTML = '<h2>Currently Deployed Processes</h2>';
         var processesInfo = loadProcessInfo();
-        
+
         var processArray = processProcessInfoList(processesInfo);
         if (processArray != 0 ) {
             for (var i = 0; i < processArray.length; i++) {
@@ -532,11 +532,11 @@ org.apache.ode.ProcessHandling = {};
         innerDiv.innerHTML = contentHTML;
         newDiv.appendChild(innerDiv);
         if(content.firstChild){
-            content.replaceChild(newDiv, content.firstChild);   
+            content.replaceChild(newDiv, content.firstChild);
         }else{
-            content.appendChild(newDiv);    
+            content.appendChild(newDiv);
         }
-                
+
     }
 
     function getStatistics(){
@@ -574,14 +574,14 @@ org.apache.ode.ProcessHandling = {};
         }
         return stat;
     }
-    
+
     function _populateContentArea(){
         setTimeout("populateContentArea()", 5000);
-    } 
-    
+    }
+
     function retireProcess(processName, url, prefix){
         try {
-            
+
             function handleYes(){
                 var response;
                 try{
@@ -596,7 +596,7 @@ org.apache.ode.ProcessHandling = {};
                 }
                 var prefixWithName = prefix + ':' + processName;
                 var defInfoEle = org.apache.ode.DOMHelper.getElementsByTagName('definition-info', 'http://www.apache.org/ode/pmapi/types/2006/08/02/', 'ns', response)[0];
-                
+
                 if (defInfoEle) {
                     var processNameEle = org.apache.ode.DOMHelper.getElementsByTagName('process-name', 'http://www.apache.org/ode/pmapi/types/2006/08/02/', 'ns', defInfoEle)[0];
                     if (processNameEle) {
@@ -612,15 +612,15 @@ org.apache.ode.ProcessHandling = {};
                     org.apache.ode.Widgets.alert('Error occurred during retiring the process!', YAHOO.widget.SimpleDialog.ICON_ALARM);
                 }
                 return true;
-                
+
             }
-            
+
             function handleNo(){
-                org.apache.ode.Widgets.alert('Retiring cancelled!', YAHOO.widget.SimpleDialog.ICON_INFO);  
+                org.apache.ode.Widgets.alert('Retiring cancelled!', YAHOO.widget.SimpleDialog.ICON_INFO);
             }
             var msg = 'Do you want to retire the process '+ processName + '?';
-            org.apache.ode.Widgets.operationConfirm(msg, handleYes, handleNo);         
-        } 
+            org.apache.ode.Widgets.operationConfirm(msg, handleYes, handleNo);
+        }
         catch (e) {
             if (typeof(e) == "string") {
                 org.apache.ode.Widgets.alert("Exception occured:\n" + e.toString());
@@ -628,7 +628,7 @@ org.apache.ode.ProcessHandling = {};
             else {
                 org.apache.ode.Widgets.alert("Exception occurred!");
             }
-            
+
         }
         return false;
     }
@@ -651,27 +651,27 @@ org.apache.ode.ProcessHandling = {};
                 var defInfoEle = org.apache.ode.DOMHelper.getElementsByTagName('definition-info', 'http://www.apache.org/ode/pmapi/types/2006/08/02/', 'ns', response)[0];
                 if (defInfoEle) {
                     var processNameEle = org.apache.ode.DOMHelper.getElementsByTagName('process-name', 'http://www.apache.org/ode/pmapi/types/2006/08/02/', 'ns', defInfoEle)[0];
-                    
+
                     if(processNameEle){
                         var proNameFromRes = org.apache.ode.DOMHelper.getText(processNameEle);
                         if (prefixWithName == proNameFromRes) {
                             org.apache.ode.ProcessHandling.populateContent();
                         }else{
                             org.apache.ode.Widgets.alert('Error occurred while activating process!');
-                        }       
-                    } 
+                        }
+                    }
                 }else{
                     org.apache.ode.Widgets.alert('Error occurred while activating process!');
-                }               
+                }
             }
-            
+
             function handleNo(){
                 org.apache.ode.Widgets.alert('Process Activation Cancelled!');
             }
-            
+
             var msg = 'Do you want to activate the process '+ processName+'?';
             org.apache.ode.Widgets.operationConfirm(msg, handleYes, handleNo);
-            
+
         }catch (e) {
             if (typeof(e) == "string") {
                 org.apache.ode.Widgets.alert("Exception occured:\n" + e.toString());
@@ -682,73 +682,73 @@ org.apache.ode.ProcessHandling = {};
         }
         return false;
     }
-    
+
     function viewProcessDetails(processName, url, prefix){
         var proPID = 'prodet'+processName;
         var processDefURL = '';
         var processN = processName.substring(0, (processName.indexOf('-')));
-        
+
         //var urlRequestURL = 'http://localhost:8080/ode/deployment/getProcessDefinition/' + processN ;
         var urlRequestURL = baseDirectoryURL + '/deployment/getProcessDefinition/' + processN ;
 
         try{
             var response = ProcessManagementService.getProcessInfo(processName, url, prefix);
             var processInfoEle = org.apache.ode.DOMHelper.getElementsByTagName(
-            processInfoTagName, 
-            processInfoNS, 
-            processInfoNSPrefix, 
+            processInfoTagName,
+            processInfoNS,
+            processInfoNSPrefix,
             response)[0];
-            
-            
-                
+
+
+
             var handleSuccess = function(o){
                 if(o.responseXML){
                     var proDefURLEle = o.responseXML.getElementsByTagName('url')[0];
                     var proDefURL = org.apache.ode.DOMHelper.getText(proDefURLEle);
-                    
+
                     var handleSuccessIn = function(o){
                         var myPanel = new YAHOO.widget.Panel(proPID, {
-                                width:"600px", 
-                                fixedcenter: true, 
-                                underlay:"shadow", 
-                                close:true, 
-                                visible:true, 
-                                draggable: true, 
+                                width:"600px",
+                                fixedcenter: true,
+                                underlay:"shadow",
+                                close:true,
+                                visible:true,
+                                draggable: true,
                                 zindex:4,
-                                modal:true} );  
-                        
+                                modal:true} );
+
                         myPanel.setHeader("Process Details: " + processName);
-            
+
                         var processInfoStr = ProcessManagementService.text.replace(/>/g, '>\n');
                         processInfoStr = processInfoStr.replace(/<\//g, '\n</');
                         processInfoStr = processInfoStr.replace(/>\n>\n<\//g, '>\n</');
-                        
+
                         var processDefStr = o.responseText;
                         processDefStr = processDefStr.replace(/<\//g, '\n</');
                         processDefStr = processDefStr.replace(/>\n>\n<\//g, '>\n</');
-                        
+
                         var detailsTabs = new YAHOO.widget.TabView();
-    
+
                         var proInfoTab = new YAHOO.widget.Tab( {
                             label: 'Process Info',
                             content:'<textarea id="proinfo" class="codepress html" style="width: 568px; height: 570px;"></textarea>'
-                            
+
                         });
                         detailsTabs.addTab(proInfoTab);
-                        
+
                         var proDefTab = new YAHOO.widget.Tab({
                             label: 'Process Definition',
                             content:'<textarea id="prodef" class="codepress html" style="width: 568px; height: 570px;"></textarea>',
-                            active: true                
+                            active: true
                         });
-                        
+
                         detailsTabs.addTab(proDefTab);
-                        
-                            
+
+
                         var tabDiv = document.createElement('div');
                         detailsTabs.appendTo(tabDiv);
-            
-                        
+
+
                         myPanel.setBody(tabDiv);
                         myPanel.cfg.setProperty("underlay","matte");
                         myPanel.render("content");
@@ -757,42 +757,42 @@ org.apache.ode.ProcessHandling = {};
                         var proDefEle = document.getElementById('prodef');
                         proDefEle.appendChild(document.createTextNode(processDefStr));
                     }
-                    
+
                     var handleFailureIn = function(o){
-                        org.apache.ode.Widgets.alert("Request Failed: Getting Process Definition.");    
+                        org.apache.ode.Widgets.alert("Request Failed: Getting Process Definition.");
                     }
-                    
+
                     var callbackIn = {
                         success: handleSuccessIn,
                         failure: handleFailureIn
                     }
-                    
+
                     var requestIn = YAHOO.util.Connect.asyncRequest('GET', proDefURL, callbackIn);
                 }
             }
-            
+
             var handleFailure = function(o){
                 org.apache.ode.Widgets.alert("Request failed: Geting process definition URL");
             }
-            
+
             var callback = {
                 success: handleSuccess,
                 failure: handleFailure
-            } 
-            
-            var request = YAHOO.util.Connect.asyncRequest('GET', urlRequestURL, callback);                      
-            
+            }
+
+            var request = YAHOO.util.Connect.asyncRequest('GET', urlRequestURL, callback);
+
         }catch(e){
             if (typeof(e) == "string") {
                 org.apache.ode.Widgets.alert("Exception occured in viewProcessDetails :\n" + e.toString());
             }
             else {
                 org.apache.ode.Widgets.alert("Exception occurred in viewProcessDetails !");
-            }   
+            }
         }
         return false;
     }
-    
+
     var ns = org.apache.ode.ProcessHandling;
     ns.loadProcessInfo = loadProcessInfo;
     ns.processInfo = processProcessInfoList;
@@ -801,7 +801,7 @@ org.apache.ode.ProcessHandling = {};
     ns.populateContent = populateContentArea;
     ns.viewProcessDetails = viewProcessDetails;
     ns.stats = getStatistics;
-    
+
 })();
 
 if (org.apache.ode.InstanceHandling) {
@@ -814,12 +814,12 @@ org.apache.ode.InstanceHandling = {};
     var instanceInfoNS = "http://www.apache.org/ode/pmapi/types/2006/08/02/";
     var instanceInfoNSPrefix = "ns";
     var instanceInfoTagName = "instance-info";
-    
+
     function loadInstanceInfo(){
         try {
             var responseDoc = InstanceManagementService.listAllInstances();
-            return responseDoc;            
-        } 
+            return responseDoc;
+        }
         catch (e) {
             if (typeof(e) == "string") {
                 org.apache.ode.Widgets.alert("Exception occured in loadInstanceInfo():\n" + e.toString());
@@ -827,9 +827,9 @@ org.apache.ode.InstanceHandling = {};
             else {
                 org.apache.ode.Widgets.alert("Exception occurred in loadInstanceInfo()!");
             }
-        }        
+        }
     }
-    
+
     function InstanceInfo(iid, pid, rootScope, siid, statusR, nameR, modelID, statusI, dateStarted, dateLastActive){
         this.iid = iid;
         this.pid = pid;
@@ -840,9 +840,9 @@ org.apache.ode.InstanceHandling = {};
         this.modelID = modelID;
         this.statuI = statusI;
         this.dateStarted = dateStarted;
-        this.dateLastActive = dateLastActive;       
+        this.dateLastActive = dateLastActive;
     }
-    
+
     function processInstanceInfo(instanceInfoDoc){
         var returnInstanceArray = [];
         var instanceInfoList = org.apache.ode.DOMHelper.getElementsByTagName(
@@ -857,10 +857,10 @@ org.apache.ode.InstanceHandling = {};
                 var scopeEle = instanceInfoList[i];
                 var iidEle = org.apache.ode.DOMHelper.getElementsByTagName('iid', instanceInfoNS, instanceInfoNSPrefix, scopeEle)[0];
                 var iid = org.apache.ode.DOMHelper.getText(iidEle);
-                
+
                 var pidEle = org.apache.ode.DOMHelper.getElementsByTagName('pid', instanceInfoNS, instanceInfoNSPrefix, scopeEle)[0];
                 var pid = org.apache.ode.DOMHelper.getText(pidEle);
-                
+
                 var rootScopeEle = null;          //this element is "minOccurs=0"
                 var siid = 'not defined';
                 var statusR = 'not defined';
@@ -873,25 +873,25 @@ org.apache.ode.InstanceHandling = {};
                     nameR = rootScopeEle.getAttribute('name');
                     modelID = rootScopeEle.getAttribute('modelId');
                 }
-                
+
                 var statusIEle = org.apache.ode.DOMHelper.getElementsByTagName('status', instanceInfoNS, instanceInfoNSPrefix, scopeEle)[0];
                 var statusI = org.apache.ode.DOMHelper.getText(statusIEle);
-                
+
                 var dateSEle = org.apache.ode.DOMHelper.getElementsByTagName('dt-started', instanceInfoNS, instanceInfoNSPrefix, scopeEle)[0];
                 var dateStarted = org.apache.ode.DOMHelper.getText(dateSEle);
-                
+
                 var lastAEle = org.apache.ode.DOMHelper.getElementsByTagName('dt-last-active', instanceInfoNS, instanceInfoNSPrefix, scopeEle)[0];
                 var lastActive = org.apache.ode.DOMHelper.getText(lastAEle);
-                
+
                 var instance = new InstanceInfo(iid, pid, rootScopeEle, siid, statusR, nameR, modelID, statusI, dateStarted, lastActive);
-                
-                returnInstanceArray[i] = instance;              
+
+                returnInstanceArray[i] = instance;
             }
         }
-        
+
         return returnInstanceArray;
     }
-    
+
     function createInstanceWidget(instance, i){
         var terminateBtnID = 'terminateIns'+i;
         var terminateBtnVar = 'terminateVar'+i;
@@ -920,7 +920,7 @@ org.apache.ode.InstanceHandling = {};
             _susp = "true";
             _resu = "true";
         }
-        
+
         str = '<div class="yui-cms-item yui-panel selected"><div class="hd">Instance ID: '+
               instance.iid +
               '</div><div class="bd"><div class="fixed">'+
@@ -928,7 +928,7 @@ org.apache.ode.InstanceHandling = {};
               'Process:</th><td>' + instance.pid + '</td><th>Status:</th><td>' +
               instance.statuI + '</td></tr><tr><th>Date Started:</th><td>' +
               instance.dateStarted + '</td><th>Date Last Active</th><td>' +
-              instance.dateLastActive + '</td></tr></table>' + 
+              instance.dateLastActive + '</td></tr></table>' +
               '</div></div><div class="ft">'+
               '<span id="'+ terminateBtnID +
               '" class="yui-button yui-push-button"><span class="first-child"><input type="button" name="'+ terminateBtnID +'name" value="Terminate"></span></span>'+
@@ -940,7 +940,7 @@ org.apache.ode.InstanceHandling = {};
               'function '+terminateBtnVar+'terminateIns(){org.apache.ode.InstanceHandling.terminateInstance("'+instance.iid +'");}'+
               'function '+suspenBtnVar+'suspendIns(){org.apache.ode.InstanceHandling.suspendInstance("'+instance.iid +'");}'+
               'function '+resumeBtnVar+'resumeIns(){org.apache.ode.InstanceHandling.resumeInstance("'+instance.iid +'");}'+
-              
+
               'var ' + terminateBtnVar + '=new YAHOO.widget.Button("'+ terminateBtnID + '");'+
               terminateBtnVar + '.addListener("click", '+terminateBtnVar+'terminateIns); '+
               terminateBtnVar+ '.set("disabled",' + _term + ');'+
@@ -948,20 +948,20 @@ org.apache.ode.InstanceHandling = {};
               suspenBtnVar+'.addListener("click", '+suspenBtnVar+'suspendIns); '    +
              suspenBtnVar+ '.set("disabled",' + _susp + ');' +
               'var ' + resumeBtnVar + '=new YAHOO.widget.Button("'+ resumeBtnID + '");' +
-              resumeBtnVar+'.addListener("click", '+resumeBtnVar+'resumeIns); ' +                 
+              resumeBtnVar+'.addListener("click", '+resumeBtnVar+'resumeIns); ' +
               resumeBtnVar+ '.set("disabled",' + _resu + ');' +
               '</script>'+
               '</div> <div class="actions"><a href="#" class="accordionToggleItem">&nbsp;</a>'+
               '</div></div>'
-              
+
         return str;
     }
-    
+
     function populateContentArea(){
-        
-        var contentHTML = '<h2>Currently Available Instances</h2>'; 
+
+        var contentHTML = '<h2>Currently Available Instances</h2>';
         var instanceInfo = loadInstanceInfo();
-        
+
         var instanceArray = processInstanceInfo(instanceInfo);
         if (instanceArray != 0 ) {
             for (var i = 0; i < instanceArray.length; i++) {
@@ -978,13 +978,13 @@ org.apache.ode.InstanceHandling = {};
         innerDiv.innerHTML = contentHTML;
         newDiv.appendChild(innerDiv);
         if(content.firstChild){
-            content.replaceChild(newDiv, content.firstChild);   
+            content.replaceChild(newDiv, content.firstChild);
         }else{
-            content.appendChild(newDiv);    
+            content.appendChild(newDiv);
         }
-                
+
     }
-    
+
     function terminateInstance(instanceID){
         try {
 
@@ -1016,14 +1016,14 @@ org.apache.ode.InstanceHandling = {};
                 }else{
                     org.apache.ode.Widgets.alert('Error occurred during instance termination!');
                 }
-                
+
             }
             function handleNo(){
                 org.apache.ode.Widgets.alert('Instance terminating cancelled!');
             }
 
             var msg = 'Do you want to terminate instance '+ instanceID + '?';
-            org.apache.ode.Widgets.operationConfirm(msg, handleYes, handleNo);            
+            org.apache.ode.Widgets.operationConfirm(msg, handleYes, handleNo);
         } catch (e) {
             if (typeof(e) == "string") {
                 org.apache.ode.Widgets.alert("Exception occured:\n" + e.toString());
@@ -1034,7 +1034,7 @@ org.apache.ode.InstanceHandling = {};
         }
         return false;
     }
-    
+
     function suspendInstance(instanceID){
         try {
             function handleYes(){
@@ -1080,9 +1080,9 @@ org.apache.ode.InstanceHandling = {};
                 org.apache.ode.Widgets.alert("Exception occurred!");
             }
         }
-        
+
     }
-    
+
     function resumeInstance(instanceID){
         try {
             function handleYes(){
@@ -1097,7 +1097,7 @@ org.apache.ode.InstanceHandling = {};
                         org.apache.ode.Widgets.alert("Exception occurred!");
                     }
                 }
-                    
+
                 var insEle = org.apache.ode.DOMHelper.getElementsByTagName('instance-info', 'http://www.apache.org/ode/pmapi/types/2006/08/02/', 'ns', response)[0];
                  if(insEle){
                     var iidEle = org.apache.ode.DOMHelper.getElementsByTagName('iid', 'http://www.apache.org/ode/pmapi/types/2006/08/02/', 'ns', insEle)[0];
@@ -1133,16 +1133,16 @@ org.apache.ode.InstanceHandling = {};
         }
         return false;
     }
-    
+
     var ns = org.apache.ode.InstanceHandling;
     ns.terminateInstance = terminateInstance;
     ns.suspendInstance = suspendInstance;
     ns.resumeInstance = resumeInstance;
-    ns.populateContent = populateContentArea;    
+    ns.populateContent = populateContentArea;
 })();
 
 if(org.apache.ode.DeploymentHandling){
-    throw new Error("org.apache.ode.DeploymentHandling already exists");    
+    throw new Error("org.apache.ode.DeploymentHandling already exists");
 }
 
 org.apache.ode.DeploymentHandling = {};
@@ -1152,11 +1152,11 @@ org.apache.ode.DeploymentHandling = {};
     //var packageDocsUrl = 'http://localhost:8080/ode/deployment/getBundleDocs/';
     var bundleDataUrl = baseDirectoryURL + '/deployment/bundles/';
     var packageDocsUrl = baseDirectoryURL + '/deployment/getBundleDocs/';
-    
+
     function loadDeployedPackages(){
         try{
             var response = DeploymentService.listDeployedPackages();
-            return response;    
+            return response;
         }catch(e){
             if(typeof e == 'string'){
                 org.apache.ode.Widgets.alert("Exception occured:\n" + e.toString());
@@ -1165,7 +1165,7 @@ org.apache.ode.DeploymentHandling = {};
             }
         }
     }
-    
+
     function getDeployedPackages(){
         var packageNames = [];
         var response = loadDeployedPackages();
@@ -1179,9 +1179,9 @@ org.apache.ode.DeploymentHandling = {};
         }else{
             return 0;
         }
-        
+
     }
-    
+
     function getProcesses(packageName){
         try{
             var processes = [];
@@ -1195,13 +1195,13 @@ org.apache.ode.DeploymentHandling = {};
             }else{
                 return 0;
             }
-            
+
         }catch(e){
             if(typeof e == 'string'){
                 org.apache.ode.Widgets.alert("Exception occured:\n" + e.toString());
             }else{
                 org.apache.ode.Widgets.alert("Exception occurred in getProcesses.");
-            }   
+            }
         }
     }
     function getPackageContents(packageName){
@@ -1218,17 +1218,17 @@ org.apache.ode.DeploymentHandling = {};
             var processEle = response.getElementsByTagName('process')[0];
             for(var m = processEle.firstChild; m != null; m = m.nextSibling){
                 if(m.localName != 'pid'){
-                    contents[i] = org.apache.ode.DOMHelper.getText(m);  
+                    contents[i] = org.apache.ode.DOMHelper.getText(m);
                     i++;
                 }
-                
+
             }
-            return contents;            
+            return contents;
         }else{
             return null;
-        }       
+        }
     }
-    
+
     function populateDeployedPackages(){
         var contentHtml = '';
         var deployedPacks = getDeployedPackages();
@@ -1266,13 +1266,13 @@ org.apache.ode.DeploymentHandling = {};
                         'name" value="Undeploy"></span></span>'+
                         '<span id="'+ packageDetailsId +
                         '" class="yui-button yui-push-button"><span class="first-child">'+
-                        '<input type="button" name="'+ packageDetailsVar +'name" value="Details"></span></span>'+           
+                        '<input type="button" name="'+ packageDetailsVar +'name" value="Details"></span></span>'+
                         '<script type="text/javascript">'+
-                        'function '+ packageundepVar + 
-                        'undeployPackage(){org.apache.ode.DeploymentHandling.undeployPackage("'+ 
+                        'function '+ packageundepVar +
+                        'undeployPackage(){org.apache.ode.DeploymentHandling.undeployPackage("'+
                         deployedPacks[i] +'");}' +
-                        'function '+ packageDetailsVar + 
-                        'viewDetails(){org.apache.ode.DeploymentHandling.viewPackDetails("'+ 
+                        'function '+ packageDetailsVar +
+                        'viewDetails(){org.apache.ode.DeploymentHandling.viewPackDetails("'+
                         deployedPacks[i] +'"'+ ');}' +
                         'var ' + packageundepVar + '=new YAHOO.widget.Button("'+ packageundepId + '");'+
                         packageundepVar + '.addListener("click", ' + packageundepVar + 'undeployPackage); '+
@@ -1282,7 +1282,7 @@ org.apache.ode.DeploymentHandling = {};
                         '</div> <div class="actions"><a href="#" class="accordionToggleItem">&nbsp;</a>'+
                         '</div></div>'
             //alert(contentHtml);
-                                            
+
         }
         var deployed = document.getElementById('deployed');
         var newDiv = document.createElement('div');
@@ -1305,7 +1305,7 @@ org.apache.ode.DeploymentHandling = {};
         var bundleDocs = [];
 
         bundleDocs = getPackageContents(packageName);
-        
+
         var packPanel = new YAHOO.widget.Panel(winID, {
                             width:"600px",
                             fixedcenter:true,
@@ -1402,7 +1402,7 @@ org.apache.ode.DeploymentHandling = {};
             }
         }
     }
-    
+
     var ns = org.apache.ode.DeploymentHandling;
     ns.getDeployedPackages = getDeployedPackages;
     ns.undeployPackage = undeployPackage;

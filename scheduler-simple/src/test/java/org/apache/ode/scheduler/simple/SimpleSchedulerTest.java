@@ -68,7 +68,7 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
                 Thread.sleep(100);
                 // we're using transacted jobs which means it will commit at the end
                 // if the job is scheduled, the following assert is not valid @seanahn
-                // assertEquals(jobs, _jobs.size());            
+                // assertEquals(jobs, _jobs.size());
             } finally {
                 _txm.commit();
             }
@@ -80,7 +80,7 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
             assertEquals(_jobs.size(), _commit.size());
         }
     }
-    
+
     public void testImmediateScheduling() throws Exception {
         _scheduler.start();
         _txm.begin();
@@ -89,7 +89,7 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
             Thread.sleep(100);
             // we're using transacted jobs which means it will commit at the end
             // if the job is scheduled, the following assert is not valid @seanahn
-            // assertEquals(jobs, _jobs.size());        
+            // assertEquals(jobs, _jobs.size());
         } finally {
             _txm.commit();
         }
@@ -212,20 +212,20 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
         synchronized (_jobs) {
             _jobs.add(jobInfo);
         }
-        
+
         try {
             _txm.getTransaction().registerSynchronization(new Synchronization() {
 
                 public void afterCompletion(int arg0) {
-                    if (arg0 == Status.STATUS_COMMITTED) 
+                    if (arg0 == Status.STATUS_COMMITTED)
                         _commit.add(jobInfo);
                 }
 
                 public void beforeCompletion() {
                     // TODO Auto-generated method stub
-                    
+
                 }
-                
+
             });
         } catch (IllegalStateException e) {
             // TODO Auto-generated catch block
@@ -252,5 +252,5 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
         scheduler.setTransactionManager(_txm);
         return scheduler;
     }
-    
+
 }

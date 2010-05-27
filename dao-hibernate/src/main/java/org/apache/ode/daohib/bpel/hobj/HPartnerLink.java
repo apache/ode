@@ -26,7 +26,7 @@ import java.util.Set;
  * to a scope instance, for example because it has been assigned during the
  * instance execution) or to a process definition (general endpoint
  * configuration).
- * 
+ *
  * @hibernate.class table="BPEL_PLINK_VAL"
  * @hibernate.query name="SELECT_PARTNER_LINK_IDS_BY_INSTANCES" query="select l.id from HPartnerLink l, HScope s where l.scope = s and s.instance in (:instances)"
  */
@@ -42,9 +42,9 @@ public class HPartnerLink extends HObject {
     private String _svcName;
 
     private byte[] _myEPR;
-    
+
     private byte[] _partnerEPR;
-    
+
     private HScope _scope;
 
     private HProcess _process;

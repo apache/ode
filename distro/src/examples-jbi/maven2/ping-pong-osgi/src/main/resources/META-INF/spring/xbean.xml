@@ -27,18 +27,18 @@
          http://www.springframework.org/schema/beans/spring-beans.xsd
          http://servicemix.apache.org/http/1.0
          http://servicemix.apache.org/http/1.0/servicemix-http.xsd">
-    <http:endpoint 
+    <http:endpoint
         service="ping:PingService"
-        endpoint="http" 
+        endpoint="http"
     targetService="ping:PingService"
     targetEndpoint="PingPort"
         defaultOperation="Ping"
         role="consumer"
         locationURI="http://localhost:8192/PingHttp/"
-        defaultMep="http://www.w3.org/2004/08/wsdl/in-out" 
+        defaultMep="http://www.w3.org/2004/08/wsdl/in-out"
     wsdlResource="classpath:Ping.wsdl"
     soapVersion="1.1"
         soap="true" />
-    
+
     <bean class="org.apache.servicemix.common.osgi.EndpointExporter" />
 </beans>

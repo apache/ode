@@ -42,7 +42,7 @@ import org.jmock.Mock;
 import org.jmock.MockObjectTestCase;
 
 public class CronSchedulerTest extends MockObjectTestCase {
-    
+
     private Contexts contexts;
     private Mock scheduler;
     private CronScheduler cronScheduler;
@@ -55,12 +55,12 @@ public class CronSchedulerTest extends MockObjectTestCase {
         LogManager.getLogger(BpelDAOConnectionImpl.class).setLevel(Level.DEBUG);
         LogManager.getLogger("org.apache.ode").setLevel(Level.DEBUG);
     }
-    
+
     protected void setUp() throws Exception {
         contexts = new Contexts();
         scheduler = mock(Scheduler.class);
         contexts.scheduler = (Scheduler)scheduler.proxy();
-        
+
         cronScheduler = new CronScheduler();
         cronScheduler.setContexts(contexts);
         execService = Executors.newCachedThreadPool(new ThreadFactory() {
@@ -74,22 +74,22 @@ public class CronSchedulerTest extends MockObjectTestCase {
         });
         cronScheduler.setScheduledTaskExec(execService);
     }
-    
+
     private class NotifyingTerminationListener implements CronScheduler.TerminationListener {
         boolean finished = false;
-        
+
         public synchronized void terminate() {
             finished = true;
             notify();
         }
     }
-    
+
     public void testNull() throws Exception {}
-    
+
     public void _testCleanup() throws Exception {
         CronExpression cronExpr = new CronExpression("* * * * * ?");
         RuntimeDataCleanupRunnable runnable = new RuntimeDataCleanupRunnable();
-        
+
         JobDetails details = new JobDetails();
         details.setProcessId(new QName("test"));
         details.getDetailsExt().put("transactionSize", 10);
@@ -99,7 +99,7 @@ public class CronSchedulerTest extends MockObjectTestCase {
         details.getDetailsExt().put("cleanupInfo", cleanupInfo);
         runnable.restoreFromDetails(details);
         runnable.setContexts(contexts);
-        
+
         NotifyingTerminationListener listener = new NotifyingTerminationListener();
         cronScheduler.schedule(cronExpr, runnable, null, listener);
         while( !listener.finished ) {

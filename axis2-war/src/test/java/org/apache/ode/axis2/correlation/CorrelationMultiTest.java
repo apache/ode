@@ -30,7 +30,7 @@ public class CorrelationMultiTest extends Axis2TestBase implements ODEConfigDirA
     @Test(dataProvider="configs")
     public void testCorrelationMulti() throws Exception {
         final String bundleName = "TestCorrelationMulti";
-        
+
         // deploy the required service
         server.deployService(DummyService.class.getCanonicalName());
         if (server.isDeployed(bundleName)) server.undeployProcess(bundleName);
@@ -60,6 +60,6 @@ public class CorrelationMultiTest extends Axis2TestBase implements ODEConfigDirA
     }
 
     public String getODEConfigDir() {
-        return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby"; 
+        return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby";
     }
 }

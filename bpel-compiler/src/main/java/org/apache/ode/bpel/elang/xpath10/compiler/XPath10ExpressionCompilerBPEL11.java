@@ -32,14 +32,14 @@ public class XPath10ExpressionCompilerBPEL11 extends XPath10ExpressionCompilerIm
   public XPath10ExpressionCompilerBPEL11() {
     super(Namespaces.BPEL11_NS);
   }
-  
+
   /**
    * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compileJoinCondition(java.lang.Object)
    */
   public OExpression compileJoinCondition(Object source) throws CompilationException {
     return compile(source);
   }
-  
+
   public OLValueExpression compileLValue(Object source) throws CompilationException {
     throw new UnsupportedOperationException("Not supported for bpel 1.1");
   }

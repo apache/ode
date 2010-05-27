@@ -23,7 +23,7 @@ import org.apache.ode.utils.msg.MessageBundle;
 
 /**
  * Messages for the Jacob VPU.
- * 
+ *
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
 public class JacobMessages extends MessageBundle {
@@ -31,12 +31,12 @@ public class JacobMessages extends MessageBundle {
   /**
    * Error indicating that client-code (i.e. not the VPU kernel) threw an
    * unexpected exception.
-   * 
+   *
    * @param methodName
    *          name of offending method
    * @param className
    *          name of offending class
-   * 
+   *
    * Method "{0}" in class "{1}" threw an unexpected exception.
    */
   public String msgClientMethodException(String methodName, String className) {
@@ -52,12 +52,12 @@ public class JacobMessages extends MessageBundle {
   /**
    * Error indicating that a re-hydration of a saved _continuation object could
    * not be completed.
-   * 
+   *
    * @param channel
    *          channel with the dangling _continuation
    * @param mlClassName
    *          name of de-hydrated {@link org.apache.ode.jacob.ChannelListener} object
-   * 
+   *
    */
   public String msgContHydrationErr(String channel, String mlClassName) {
     throw new UnsupportedOperationException();
@@ -67,7 +67,7 @@ public class JacobMessages extends MessageBundle {
    * Internal error indicating that a required client method was not accessible
    * due to security protections errors. This may be caused by a change to the
    * client class definitions.
-   * 
+   *
    * Method "{0}" in class "{1}" is not accessible.
    */
   public String msgMethodNotAccessible(String methodName, String className) {

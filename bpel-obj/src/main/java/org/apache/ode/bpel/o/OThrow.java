@@ -24,7 +24,7 @@ import javax.xml.namespace.QName;
  * Compiled representation of the BPEL <code>&lt;throw&gt;</code> activity.
  */
 public class OThrow extends OActivity {
-    
+
     static final long serialVersionUID = -1L  ;
     public OScope.Variable faultVariable;
     public QName faultName;

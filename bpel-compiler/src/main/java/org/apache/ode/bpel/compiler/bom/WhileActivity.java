@@ -30,7 +30,7 @@ public class WhileActivity extends Activity {
 
     /**
      * Get the child (repeated) activity.
-     * 
+     *
      * @return repeated activity
      */
     public Activity getActivity() {
@@ -39,7 +39,7 @@ public class WhileActivity extends Activity {
 
     /**
      * Get the while condition.
-     * 
+     *
      * @return the while condition
      */
     public Expression getCondition() {

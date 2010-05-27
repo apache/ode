@@ -30,7 +30,7 @@ import junit.framework.TestCase;
 
 /**
  * Test of {@link NamespaceContextImpl}
- * 
+ *
  * <p>
  * Created on Feb 4, 2004 at 6:08:26 PM.
  * </p>

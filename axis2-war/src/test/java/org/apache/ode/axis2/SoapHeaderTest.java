@@ -47,7 +47,7 @@ public class SoapHeaderTest extends Axis2TestBase {
     @Test(dataProvider="configs")
     public void testSimplePassing() throws Exception {
         server.deployService("TestSoapHeader", "dummy-service.wsdl",
-                new QName("http://axis2.ode.apache.org", "DummyService"), "DummyServiceSOAP11port_http", 
+                new QName("http://axis2.ode.apache.org", "DummyService"), "DummyServiceSOAP11port_http",
                 new MessageReceiver() {
             @SuppressWarnings("deprecation")
             public void receive(MessageContext messageCtx) throws AxisFault {
@@ -87,5 +87,5 @@ public class SoapHeaderTest extends Axis2TestBase {
 
         server.undeployProcess("TestStructuredFault");
     }
-    
+
 }

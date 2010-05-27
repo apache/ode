@@ -41,7 +41,7 @@ import javax.persistence.Table;
 })
 public class CorrSetProperty {
     public final static String DELETE_CORSET_PROPERTIES_BY_PROPERTY_IDS = "DELETE_CORSET_PROPERTIES_BY_PROPERTY_IDS";
-    
+
     @Id @Column(name="ID")
     @GeneratedValue(strategy=GenerationType.AUTO)
     @SuppressWarnings("unused")
@@ -54,7 +54,7 @@ public class CorrSetProperty {
     @SuppressWarnings("unused")
     @Basic @Column(name="CORRSET_ID", insertable=false, updatable=false, nullable=true)
     private Long corrSetId;
-    
+
     @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="CORRSET_ID")
     private CorrelationSetDAOImpl _corrSet;
 

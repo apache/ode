@@ -17,9 +17,9 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<xs:schema targetNamespace="http://bpms.intalio.com/FirstProcess/Time" 
-           xmlns:ns="http://bpms.intalio.com/FirstProcess/Time" 
-           xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+<xs:schema targetNamespace="http://bpms.intalio.com/FirstProcess/Time"
+           xmlns:ns="http://bpms.intalio.com/FirstProcess/Time"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
            elementFormDefault="qualified">
 
 
@@ -30,7 +30,7 @@
             </xs:sequence>
         </xs:complexType>
     </xs:element>
-    
+
     <xs:element name="TimeResponse">
         <xs:complexType>
             <xs:sequence>
@@ -39,6 +39,6 @@
             </xs:sequence>
         </xs:complexType>
     </xs:element>
-    
+
 </xs:schema>
 

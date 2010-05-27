@@ -66,13 +66,13 @@ public class Constants {
     public static final String NON_STDRD_FUNCTION_DELETE = "delete";
     public static final String NON_STDRD_FUNCTION_RENAME = "rename";
     public static final String NON_STDRD_FUNCTION_PROCESS_PROPERTY = "process-property";
-    
+
     /**
      * Non standard extension functions in the deprecated "xdt" namespace
      */
     public static final String NON_STDRD_FUNCTION_DAY_TIME_DURATION = "dayTimeDuration";
     public static final String NON_STDRD_FUNCTION_YEAR_MONTH_DURATION = "yearMonthDuration";
-    
+
     public static final String XQUERY_FUNCTION_HANDLER_COMPILER = "org.apache.ode.bpel.elang.xquery10.compiler.XQuery10BpelFunctions";
     public static final String XQUERY_FUNCTION_HANDLER_RUNTIME = "org.apache.ode.bpel.elang.xquery10.runtime.XQuery10BpelFunctions";
 

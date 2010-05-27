@@ -206,7 +206,7 @@
     </complexContent>
   </complexType>
   <complexType name="tVariable">
-    <!-- variable does not allow extensibility elements                              
+    <!-- variable does not allow extensibility elements
 because otherwise its content model would be non-deterministic -->
     <attribute name="name" type="NCName" use="required"/>
     <attribute name="messageType" type="QName" use="optional"/>

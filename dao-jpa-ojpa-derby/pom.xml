@@ -53,7 +53,7 @@
     <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
@@ -121,11 +121,11 @@
     <dependency>
       <groupId>org.apache.derby</groupId>
       <artifactId>derbytools</artifactId>
-    </dependency>  
+    </dependency>
     <dependency>
       <groupId>org.apache.geronimo.modules</groupId>
       <artifactId>geronimo-kernel</artifactId>
-    </dependency>  
+    </dependency>
     <dependency>
       <groupId>org.apache.geronimo.components</groupId>
       <artifactId>geronimo-transaction</artifactId>
@@ -133,7 +133,7 @@
     <dependency>
       <groupId>org.apache.geronimo.components</groupId>
       <artifactId>geronimo-connector</artifactId>
-    </dependency> 
+    </dependency>
     <dependency>
         <groupId>backport-util-concurrent</groupId>
         <artifactId>backport-util-concurrent</artifactId>
@@ -145,7 +145,7 @@
     <dependency>
         <groupId>commons-pool</groupId>
         <artifactId>commons-pool</artifactId>
-    </dependency>  
+    </dependency>
   </dependencies>
 
   <build>

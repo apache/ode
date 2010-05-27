@@ -184,7 +184,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             }
             return "";
         }
-    }    
+    }
 
     public static class DomToString implements XPathFunction {
         public Object evaluate(List args) throws XPathFunctionException {
@@ -204,7 +204,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             return "";
         }
     }
-    
+
     public static class InsertInto implements XPathFunction {
         public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 3) {
@@ -213,7 +213,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             return "";
         }
     }
-    
+
     public static class InsertAfter implements XPathFunction {
         public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() < 2 || args.size() > 3) {
@@ -222,7 +222,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             return "";
         }
     }
-    
+
     public static class InsertBefore implements XPathFunction {
         public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() < 2 || args.size() > 3) {
@@ -258,7 +258,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             return "";
         }
     }
-    
+
     public static class Rename implements XPathFunction {
         public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() < 2) {
@@ -267,7 +267,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             return "";
         }
     }
-    
+
     public static class ProcessProperty implements XPathFunction {
         public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 1) {

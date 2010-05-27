@@ -28,15 +28,15 @@ import org.apache.ode.bpel.iapi.BpelEventListener;
 
 /**
  * Example implementation of the {@link BpelEventListener} interface.
- * 
+ *
  * Dumps navigation events to a logging appender and optionally to stdout.
- * To use the DebugBpelEventListener add the following lines to your 
+ * To use the DebugBpelEventListener add the following lines to your
  * ode-xxx.properties file:
  * <code>
  * ode-jbi.event.listeners=org.apache.ode.bpel.common.evt.DebugBpelEventListener
  * debugeventlistener.dumpToStdOut=on/off
  * </code>
- * 
+ *
  * @author Tammo van Lessen (University of Stuttgart)
  */
 public class DebugBpelEventListener implements BpelEventListener {
@@ -44,12 +44,12 @@ public class DebugBpelEventListener implements BpelEventListener {
 
     private static final String SYSOUT_KEY = "debugeventlistener.dumpToStdOut";
     private boolean _dumpToStdOut = false;
-    
+
     public void onEvent(BpelEvent bpelEvent) {
         if (__log.isDebugEnabled()) {
             __log.debug(bpelEvent.toString());
         }
-    
+
         if (_dumpToStdOut) {
             System.out.println(bpelEvent.toString());
         }

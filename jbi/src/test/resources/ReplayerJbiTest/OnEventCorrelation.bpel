@@ -54,7 +54,7 @@
             <bpws:to>$i</bpws:to>
           </bpws:copy>
         </bpws:assign>
-        
+
         <bpws:if>
             <bpws:condition>$input.payload2 = 'livetest'</bpws:condition>
             <bpws:sequence>
@@ -67,7 +67,7 @@
                 </bpws:assign>
             </bpws:sequence>
         </bpws:if>
-            
+
         <bpws:reply operation="initiate" partnerLink="client" variable="output" messageExchange="mex1"/>
         <bpws:if>
           <bpws:condition>$input.payload2 = 'rollbackOnFault'</bpws:condition>
@@ -112,8 +112,8 @@
         </bpws:pick>
       </bpws:sequence>
     </bpws:while>
-        
-    
+
+
     <bpws:receive createInstance="no" operation="initiate" partnerLink="client" portType="tns:OnEventCorrelation" variable="input" messageExchange="mex3">
           <bpws:correlations>
             <bpws:correlation initiate="no" set="CorrelationSet"/>

@@ -24,7 +24,7 @@ import java.util.List;
 
 /**
  * <p>
- * Models an argument, e.g., the <code>baz</code> in <code>foo baz</code>, 
+ * Models an argument, e.g., the <code>baz</code> in <code>foo baz</code>,
  * where <code>foo</code> is the command.
  * </p>
  */
@@ -34,18 +34,18 @@ public class Argument implements CommandlineFragment {
   private String _description;
   private boolean _isOptional;
   private String _value;
-  
-  
+
+
   public Argument(String argName, String description, boolean optional) {
     _argName = argName;
     _description = description;
     _isOptional = optional;
   }
-  
+
   public void reset() {
     _value = null;
   }
-  
+
   public List<String> consume(List<String> s) throws CommandlineSyntaxException {
     if (s.size() == 0) {
       if (_isOptional) {
@@ -64,15 +64,15 @@ public class Argument implements CommandlineFragment {
   public boolean isOptional() {
     return _isOptional;
   }
-  
+
   public boolean isSet() {
     return _value != null;
   }
-  
+
   public String getValue() {
     return _value;
   }
-  
+
   public String getUsage() {
     return "<" + _argName + ">";
   }

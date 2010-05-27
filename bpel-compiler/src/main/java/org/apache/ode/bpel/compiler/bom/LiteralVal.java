@@ -32,7 +32,7 @@ public class LiteralVal extends BpelObject {
 
     /**
      * Get the literal XML value.
-     * 
+     *
      * @return an XML {@link Element}
      */
     public Element getLiteral() {

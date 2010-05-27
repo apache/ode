@@ -50,7 +50,7 @@ public class DataHandling20Test extends BPELTestAbstract {
     public void testToQuery() throws Throwable {
         go("/bpel/2.0/TestToQuery");
     }
-    
+
     @Test
     public void testSubTreeAssign() throws Throwable {
         go("/bpel/2.0/TestSubTreeAssign");

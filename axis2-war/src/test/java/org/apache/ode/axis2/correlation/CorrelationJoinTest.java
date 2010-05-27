@@ -29,13 +29,13 @@ import static org.testng.Assert.*;
 public class CorrelationJoinTest extends Axis2TestBase implements ODEConfigDirAware {
     /**
      * Tests rendezvous
-     * 
+     *
      * @throws Exception
      */
     @Test(dataProvider="configs")
     public void testCorrelationJoin() throws Exception {
         final String bundleName = "TestCorrelationJoin";
-        
+
         // deploy the required service
         server.deployService(DummyService.class.getCanonicalName());
         if (server.isDeployed(bundleName)) server.undeployProcess(bundleName);
@@ -52,7 +52,7 @@ public class CorrelationJoinTest extends Axis2TestBase implements ODEConfigDirAw
                 }
             }
         }.start();
-        
+
         new Thread() {
             public void run() {
                 try {
@@ -64,7 +64,7 @@ public class CorrelationJoinTest extends Axis2TestBase implements ODEConfigDirAw
                 }
             }
         }.start();
-        
+
         try {
             String response = server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                     bundleName, "testRequest.soap");
@@ -78,6 +78,6 @@ public class CorrelationJoinTest extends Axis2TestBase implements ODEConfigDirAw
     }
 
     public String getODEConfigDir() {
-        return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby"; 
+        return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby";
     }
 }

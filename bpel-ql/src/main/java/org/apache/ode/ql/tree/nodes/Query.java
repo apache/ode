@@ -26,8 +26,8 @@ public class Query implements Node {
     private final Collection<Object> childs;
     private final OrderBy order;
     private Limit limit;
-    
-    
+
+
     /**
      * @param childs
      * @param order

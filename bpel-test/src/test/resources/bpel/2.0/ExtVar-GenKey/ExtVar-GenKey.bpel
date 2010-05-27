@@ -18,33 +18,33 @@
   ~ under the License.
   -->
 <bpel:process name="ExtVar-GenKey" targetNamespace="http://example.com/process/ExtVar/GenKey"
-              xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" 
-              xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
-              xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-              xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" 
-              xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" 
-              xmlns:this="http://example.com/process/ExtVar/GenKey" 
+              xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+              xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+              xmlns:xs="http://www.w3.org/2001/XMLSchema"
+              xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop"
+              xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+              xmlns:this="http://example.com/process/ExtVar/GenKey"
               xmlns:xvar="http://ode.apache.org/externalVariables"
-              queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" 
+              queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
               expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" >
-            
+
   <bpel:import namespace="http://example.com/process/ExtVar/GenKey" location="ExtVar-GenKey.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
-  
+
   <bpel:partnerLinks>
     <bpel:partnerLink name="client" partnerLinkType="this:TestPLT" myRole="process"/>
   </bpel:partnerLinks>
-  
+
   <bpel:variables>
     <bpel:variable name="StartRequest" messageType="this:StartRequest"/>
     <bpel:variable name="keys"   element="this:keys"/>
     <bpel:variable name="extvar" element="this:extvar" xvar:id="extvar" xvar:relates-to="keys"/>
   </bpel:variables>
-  
+
   <bpel:sequence>
-    <bpel:receive partnerLink="client" 
-                  portType="this:Test" 
-                  operation="Start" 
-                  variable="StartRequest" 
+    <bpel:receive partnerLink="client"
+                  portType="this:Test"
+                  operation="Start"
+                  variable="StartRequest"
                   createInstance="yes" />
     <bpel:assign name="init-variables-GenKey">
       <bpel:copy>
@@ -62,7 +62,7 @@
       </bpel:copy>
     </bpel:assign>
 
-    <!-- Build response -->    
+    <!-- Build response -->
     <bpel:assign>
       <bpel:copy>
         <bpel:from>
@@ -80,9 +80,9 @@
       </bpel:copy>
     </bpel:assign>
 
-    <bpel:reply partnerLink="client" 
-                portType="this:Test" 
-                operation="Start" 
+    <bpel:reply partnerLink="client"
+                portType="this:Test"
+                operation="Start"
                 variable="StartRequest" />
   </bpel:sequence>
 </bpel:process>

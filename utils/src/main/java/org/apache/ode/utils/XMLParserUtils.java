@@ -37,8 +37,8 @@ import java.util.StringTokenizer;
  * A collection of utility methods for the Apache Xerces XML parser.
  */
 public class XMLParserUtils {
-  
-  public static final String NAMESPACES_SAXF = 
+
+  public static final String NAMESPACES_SAXF =
     "http://xml.org/sax/features/namespaces";
   public static final String VALIDATION_SAXF =
     "http://xml.org/sax/features/validation";
@@ -46,9 +46,9 @@ public class XMLParserUtils {
     "http://apache.org/xml/features/validation/schema";
   private static final String XERCES_P_ROOT =
     "http://apache.org/xml/properties/schema/";
-  private static final String EXTERNAL_SCHEMA_LOC_XERCESP = 
+  private static final String EXTERNAL_SCHEMA_LOC_XERCESP =
     XERCES_P_ROOT + "external-schemaLocation";
-  private static final String EXTERNAL_SCHEMA_NNS_LOC_XERCESP = 
+  private static final String EXTERNAL_SCHEMA_NNS_LOC_XERCESP =
     XERCES_P_ROOT + "external-noNamespaceSchemaLocation";
 
   /**
@@ -62,7 +62,7 @@ public class XMLParserUtils {
   public static SAXParserFactory getSAXParserFactory() {
     return new SAXParserFactoryImpl();
   }
-  
+
   /**
    * <p>
    * Get the 'correct' implementation of a JAXP <code>DocumentBuilderFactory</code>;
@@ -74,7 +74,7 @@ public class XMLParserUtils {
   public static DocumentBuilderFactory getDocumentBuilderFactory() {
     return new DocumentBuilderFactoryImpl();
   }
-  
+
   /**
    * Set the <code>namespaces</code> SAX property on the supplied
    * <code>XMLReader</code>.
@@ -87,21 +87,21 @@ public class XMLParserUtils {
       throw new SystemConfigurationException(snse);
     }
   }
-  
+
   /**
    * @return a Xerces-specific <code>XMLReader</code> instance.
    */
   public static XMLReader getXMLReader() {
     return new SAXParser();
   }
-  
+
   /**
    * @return a Xerces-specific DOM parser.
    */
   public static DOMParser getDOMParser() {
     return new DOMParser();
   }
-  
+
   /**
    * <p>
    * Specify an external schema location and turn on validation via setting features
@@ -126,9 +126,9 @@ public class XMLParserUtils {
       xr.setProperty(EXTERNAL_SCHEMA_NNS_LOC_XERCESP, u);
     }
     xr.setFeature(VALIDATION_SAXF,true);
-    xr.setFeature(SCHEMA_V_XERCESF,true);    
+    xr.setFeature(SCHEMA_V_XERCESF,true);
   }
-  
+
   /**
    * <p>
    * Specify an external schema location and turn on validation via setting features
@@ -142,7 +142,7 @@ public class XMLParserUtils {
    * settings does.
    * @throws SAXNotRecognizedException if one of the underlying feature/property
    * settings does.
-   */  
+   */
   public static void setExternalSchemaURL(DOMParser dp, String namespace, String u)
       throws SAXNotRecognizedException, SAXNotSupportedException
   {
@@ -154,7 +154,7 @@ public class XMLParserUtils {
       dp.setProperty(EXTERNAL_SCHEMA_NNS_LOC_XERCESP, u);
     }
   }
-  
+
   /**
    * <p>
    * Add a namespace/URL pair to the mapping between namespaces and the schemas used
@@ -175,7 +175,7 @@ public class XMLParserUtils {
     if (namespace == null || namespace.length() == 0) {
       setExternalSchemaURL(xr,namespace,u);
       return;
-    }    
+    }
     String s = (String) xr.getProperty(EXTERNAL_SCHEMA_LOC_XERCESP);
     if (s == null) {
       setExternalSchemaURL(xr,namespace,u);
@@ -206,9 +206,9 @@ public class XMLParserUtils {
     }
     xr.setProperty(EXTERNAL_SCHEMA_LOC_XERCESP,sb.toString());
     xr.setFeature(VALIDATION_SAXF,true);
-    xr.setFeature(SCHEMA_V_XERCESF,true);     
+    xr.setFeature(SCHEMA_V_XERCESF,true);
   }
-  
+
   /**
    * <p>
    * Add a namespace/URL pair to the mapping between namespaces and the schemas used
@@ -263,7 +263,7 @@ public class XMLParserUtils {
     }
     dp.setProperty(EXTERNAL_SCHEMA_LOC_XERCESP,sb.toString());
     dp.setFeature(VALIDATION_SAXF,true);
-    dp.setFeature(SCHEMA_V_XERCESF,true);     
+    dp.setFeature(SCHEMA_V_XERCESF,true);
   }
 
 

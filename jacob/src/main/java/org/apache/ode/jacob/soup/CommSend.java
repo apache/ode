@@ -26,7 +26,7 @@ import java.lang.reflect.Method;
  * structure consists of a label identifying the method that should be applied
  * to the object once it is available, and the arguments that should be applied
  * to said method.
- * 
+ *
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
 public class CommSend extends Comm {

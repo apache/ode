@@ -33,7 +33,7 @@ public class Catch extends Scope {
     /**
      * Get the activity for this catch block. This is the activity that is
      * activated if this catch block is enabled.
-     * 
+     *
      * @return catch activity fault handling activity
      */
     public Activity getActivity() {
@@ -42,7 +42,7 @@ public class Catch extends Scope {
 
     /**
      * Get the name of the fault. May be <code>null</code>.
-     * 
+     *
      * @return fault name or <code>null</code>
      */
     public QName getFaultName() {
@@ -51,7 +51,7 @@ public class Catch extends Scope {
 
     /**
      * Get the fault variable. May be <code>null</code>
-     * 
+     *
      * @return name of the fault variable
      */
     public String getFaultVariable() {
@@ -61,7 +61,7 @@ public class Catch extends Scope {
     /**
      * Get the fault variable type. The fault variable type must be specified in
      * BPEL 2.0 if the fault variable is set.
-     * 
+     *
      * @return fault variable type or <code>null</code> if none specified.
      */
     public QName getFaultVariableMessageType() {
@@ -71,7 +71,7 @@ public class Catch extends Scope {
     /**
      * Get the fault variable type. The fault variable type must be specified in
      * BPEL 2.0 if the fault variable is set.
-     * 
+     *
      * @return fault variable type or <code>null</code> if none specified.
      */
     public QName getFaultVariableElementType() {

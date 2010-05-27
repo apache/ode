@@ -38,7 +38,7 @@ public class WSDLFactoryBPEL11 extends WSDLFactoryImpl implements WSDLFactory4BP
     private BpelExtensionSerializer _bs;
 
     public WSDLFactoryBPEL11() {
-        super(Bpel11QNames.NS_BPEL4WS_2003_03, 
+        super(Bpel11QNames.NS_BPEL4WS_2003_03,
                 Bpel11QNames.NS_BPEL4WS_PARTNERLINK_2003_05,
                 Bpel11QNames.NS_BPEL4WS_2003_03);
         _bomf = BpelObjectFactory.getInstance();
@@ -57,7 +57,7 @@ public class WSDLFactoryBPEL11 extends WSDLFactoryImpl implements WSDLFactory4BP
         extRegistry.registerDeserializer(Types.class, XMLSchemaType.QNAME, new XMLSchemaTypeSerializer());
         extRegistry.registerDeserializer(Definition.class, new QName(Bpel11QNames.NS_BPEL4WS_PARTNERLINK_2003_05,
                 "partnerLinkType"), _bs);
-        
+
         return extRegistry;
 
     }

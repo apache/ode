@@ -49,11 +49,11 @@ public class MessageExchangeDaoImpl extends HibernateDao implements
         MessageExchangeDAO {
     @SuppressWarnings("unused")
     private static final Log __log = LogFactory.getLog(MessageExchangeDaoImpl.class);
-    
+
     private HMessageExchange _hself;
 
     // Used when provided process and instance aren't hibernate implementations. The relation
-    // therefore can't be persisted. Used for in-mem DAOs so that doesn't matter much. 
+    // therefore can't be persisted. Used for in-mem DAOs so that doesn't matter much.
     private ProcessDAO _externalProcess;
     private ProcessInstanceDAO _externalInstance;
 
@@ -350,11 +350,11 @@ public class MessageExchangeDaoImpl extends HibernateDao implements
     public int getSubscriberCount() {
         return _hself.getSubscriberCount();
     }
-    
+
     public void setSubscriberCount(int subscriberCount) {
-        _hself.setSubscriberCount(subscriberCount);        
+        _hself.setSubscriberCount(subscriberCount);
     }
-    
+
     public void release(boolean doClean) {
         if( doClean ) {
             deleteMessages();
@@ -369,13 +369,13 @@ public class MessageExchangeDaoImpl extends HibernateDao implements
     public void incrementSubscriberCount() {
         _hself.incrementSubscriberCount();
     }
-    
+
     @SuppressWarnings("unchecked")
     public void deleteMessages() {
         deleteByIds(HCorrelatorMessage.class, getSession().getNamedQuery(HCorrelatorMessage.SELECT_CORMESSAGE_IDS_BY_MEX).setParameter("mex", _hself).list());
-          
+
         getSession().delete(_hself);
-        // This deletes endpoint LData, callbackEndpoint LData, request HMessage, response HMessage, HMessageExchangeProperty 
+        // This deletes endpoint LData, callbackEndpoint LData, request HMessage, response HMessage, HMessageExchangeProperty
     }
-    
+
 }

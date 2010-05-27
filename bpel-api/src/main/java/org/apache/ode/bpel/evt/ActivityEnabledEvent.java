@@ -24,5 +24,5 @@ package org.apache.ode.bpel.evt;
 public class ActivityEnabledEvent extends ActivityEvent {
 
     private static final long serialVersionUID = 1L;
-  
+
 }

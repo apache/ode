@@ -21,7 +21,7 @@ package org.apache.ode.ql.tree.nodes;
 
 public class Value<V> implements Node {
     private static final long serialVersionUID = -533404312907890996L;
-    
+
     private V value;
 
     /**
@@ -34,7 +34,7 @@ public class Value<V> implements Node {
 
 
     /**
-     * 
+     *
      */
     public Value() {
         super();
@@ -55,7 +55,7 @@ public class Value<V> implements Node {
     public void setValue(V value) {
         this.value = value;
     }
-    
 
-    
+
+
 }

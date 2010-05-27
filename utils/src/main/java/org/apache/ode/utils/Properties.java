@@ -196,7 +196,7 @@ public class Properties {
             if (properties.containsKey(PROP_JMS_REPLY_TIMEOUT)) {
                 String value = properties.get(PROP_JMS_REPLY_TIMEOUT);
                 options.setProperty(JMSConstants.JMS_WAIT_REPLY, value);
-                // The value of this property must be a string object, not a long object. 
+                // The value of this property must be a string object, not a long object.
 //                try {
 //                    options.setProperty(JMSConstants.JMS_WAIT_REPLY, Long.valueOf(value));
 //                } catch (NumberFormatException e) {
@@ -218,7 +218,7 @@ public class Properties {
                 options.setProperty(AddressingConstants.DISABLE_ADDRESSING_FOR_OUT_MESSAGES, !Boolean.parseBoolean(value));
             }
             if (properties.containsKey("ws-adddressing.headers")) {
-                if(log.isWarnEnabled())log.warn("Deprecated property: ws-adddressing.headers (Mind the 3 d's). Use ws-addressing.headers");                
+                if(log.isWarnEnabled())log.warn("Deprecated property: ws-adddressing.headers (Mind the 3 d's). Use ws-addressing.headers");
                 String value = properties.get("ws-adddressing.headers");
                 options.setProperty(AddressingConstants.DISABLE_ADDRESSING_FOR_OUT_MESSAGES, !Boolean.parseBoolean(value));
             }
@@ -298,7 +298,7 @@ public class Properties {
                 } catch (ProtocolException e) {
                     if (log.isWarnEnabled())
 
-                    
+
                         log.warn("Mal-formatted Property: [" + PROP_HTTP_PROTOCOL_VERSION + "]", e);
                 }
             }

@@ -17,7 +17,7 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-  
+
 <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://ode.apache.org/activityRecovery" xmlns:ext="http://ode.apache.org/activityRecovery" elementFormDefault="qualified">
   <element name="failureHandling">
     <complexType>

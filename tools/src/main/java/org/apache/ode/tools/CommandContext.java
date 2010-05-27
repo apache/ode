@@ -44,13 +44,13 @@ public interface CommandContext {
    * @param s the content to send.
    */
   public void out(String s);
-  
+
   /**
    * Send a line of output to the equivalent of standard error.
    * @param s the content to send.
    */
   public void errln(String s);
-  
+
   /**
    * Log an error.
    * @param s a descriptive message.
@@ -103,5 +103,5 @@ public interface CommandContext {
    * @param s a descriptive message.
    */
   public void debug(String s);
-  
+
 }

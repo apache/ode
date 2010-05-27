@@ -49,7 +49,7 @@ public class HibDaoConnectionFactoryImpl extends BpelDAOConnectionFactoryImpl im
     private static SessionManager _staticSessionManager;
     private static ProcessInstanceDaoImpl instance;
     private static ProcessDaoImpl process;
-    
+
     @Override
     protected SessionManager createSessionManager(Properties properties, DataSource ds, TransactionManager tm) {
         _staticSessionManager = new SessionManager(properties, ds, tm) {
@@ -60,22 +60,22 @@ public class HibDaoConnectionFactoryImpl extends BpelDAOConnectionFactoryImpl im
                 return conf;
             }
         };
-        
+
         return _staticSessionManager;
     }
 
     public BpelDAOConnection getConnection() {
         return new ProfilingBpelDAOConnectionImpl(_sessionManager);
     }
-    
+
     public static Session getSession() {
         return _staticSessionManager.getSession();
     }
-    
+
     public static ProcessInstanceDAO getInstance() {
         return instance;
     }
-    
+
     public static ProcessDaoImpl getProcess() {
         return process;
     }
@@ -92,7 +92,7 @@ public class HibDaoConnectionFactoryImpl extends BpelDAOConnectionFactoryImpl im
         ProfilingBpelDAOConnectionImpl(SessionManager sm) {
             super(sm);
         }
-        
+
         public ProcessProfileDAO createProcessProfile(ProcessDAO process) {
             return new ProcessProfileDaoImpl(_sm, (ProcessDaoImpl)process);
         }

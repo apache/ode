@@ -41,19 +41,19 @@ public abstract class CleanTestBase extends Axis2TestBase implements ODEConfigDi
     protected ProfilingBpelDAOConnection daoConn;
     protected TransactionManager txm;
     protected int initialLargeDataCount = 0;
-    
+
     @AfterMethod
     protected void tearDown() throws Exception {
         stopTM();
         super.tearDown();
     }
-    
+
     protected void initTM() throws Exception {
         if( txm != null ) {
             try {
                 txm.commit();
             } catch( Exception e ) {
-                //ignore 
+                //ignore
             }
         }
         EmbeddedGeronimoFactory factory = new EmbeddedGeronimoFactory();
@@ -70,8 +70,8 @@ public abstract class CleanTestBase extends Axis2TestBase implements ODEConfigDi
         if( txm != null ) {
             try {
                 txm.commit();
-            } catch( Exception e ) { 
-                //ignore 
+            } catch( Exception e ) {
+                //ignore
             }
             txm = null;
         }
@@ -91,7 +91,7 @@ public abstract class CleanTestBase extends Axis2TestBase implements ODEConfigDi
         Database db = new Database(odeProps);
         String webappPath = getClass().getClassLoader().getResource("webapp").getFile();
         db.setWorkRoot(new File(webappPath, "/WEB-INF"));
-        
+
         return db;
     }
 
@@ -141,9 +141,9 @@ public abstract class CleanTestBase extends Axis2TestBase implements ODEConfigDi
     }
 
     protected abstract ProcessInstanceDAO getInstance();
-    
+
     protected int getLargeDataCount(int echoCount) throws Exception {
         return echoCount;
     }
-    
+
 }

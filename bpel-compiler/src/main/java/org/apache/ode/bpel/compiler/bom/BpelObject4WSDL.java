@@ -31,7 +31,7 @@ public abstract class BpelObject4WSDL extends BpelObject  implements Extensibili
     private QName _elType;
     private Boolean _required;
     private String _targetNamespace;
-    
+
 
 
     public BpelObject4WSDL(Element el) {
@@ -58,7 +58,7 @@ public abstract class BpelObject4WSDL extends BpelObject  implements Extensibili
     public void setTargetNamespace(String tns) {
         _targetNamespace = tns;
     }
-    
+
     public String getTargetNamespace() {
         return _targetNamespace;
     }

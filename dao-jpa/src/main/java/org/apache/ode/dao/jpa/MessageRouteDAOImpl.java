@@ -46,8 +46,8 @@ import javax.persistence.Table;
 public class MessageRouteDAOImpl implements MessageRouteDAO {
     public final static String DELETE_MESSAGE_ROUTES_BY_INSTANCE = "DELETE_MESSAGE_ROUTES_BY_INSTANCE";
     public final static String DELETE_MESSAGE_ROUTES_BY_INSTANCE_IDS = "DELETE_MESSAGE_ROUTES_BY_INSTANCE_IDS";
-    
-    @Id @Column(name="MESSAGE_ROUTE_ID") 
+
+    @Id @Column(name="MESSAGE_ROUTE_ID")
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long _id;
     @Basic @Column(name="GROUP_ID")
@@ -57,14 +57,14 @@ public class MessageRouteDAOImpl implements MessageRouteDAO {
     @Basic @Column(name="CORRELATION_KEY")
     private String _correlationKey;
     @Basic @Column(name="ROUTE_POLICY", length=16)
-    private String _routePolicy;	
+    private String _routePolicy;
 
     @SuppressWarnings("unused")
     @Basic @Column(name="PROCESS_INSTANCE_ID", insertable=false, updatable=false, nullable=true)
     private int _instanceId;
     @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROCESS_INSTANCE_ID")
     private ProcessInstanceDAOImpl _processInst;
-    
+
     @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="CORR_ID")
     @SuppressWarnings("unused")
     private CorrelatorDAOImpl _correlator;
@@ -87,7 +87,7 @@ public class MessageRouteDAOImpl implements MessageRouteDAO {
     public CorrelationKey getCorrelationKey() {
         return new CorrelationKey(_correlationKey);
     }
-    
+
     public void setCorrelationKey(CorrelationKey key) {
         _correlationKey = key.toCanonicalString();
     }
@@ -103,11 +103,11 @@ public class MessageRouteDAOImpl implements MessageRouteDAO {
     public ProcessInstanceDAO getTargetInstance() {
         return _processInst;
     }
-    
+
     public String getRoute() {
         return _routePolicy;
     }
-    
+
     public CorrelationKeySet getCorrelationKeySet() {
         return new CorrelationKeySet(_correlationKey);
     }

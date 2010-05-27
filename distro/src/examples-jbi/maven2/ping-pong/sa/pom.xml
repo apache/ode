@@ -23,13 +23,13 @@
     <artifactId>pom</artifactId>
     <version>1.0.0</version>
   </parent>
-  
+
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.ode.ping-pong</groupId>
   <artifactId>ping-pong-sa</artifactId>
   <packaging>jbi-service-assembly</packaging>
 
-  
+
   <dependencies>
     <dependency>
       <groupId>org.apache.ode.ping-pong</groupId>
@@ -42,7 +42,7 @@
       <version>${project.version}</version>
     </dependency>
   </dependencies>
-  
+
   <build>
     <plugins>
       <plugin>
@@ -61,5 +61,5 @@
       </plugin>
     </plugins>
   </build>
-  
+
 </project>

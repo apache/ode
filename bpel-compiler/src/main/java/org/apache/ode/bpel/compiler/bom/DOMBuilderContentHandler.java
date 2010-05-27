@@ -32,7 +32,7 @@ public class DOMBuilderContentHandler extends DOMBuilder {
 
     public DOMBuilderContentHandler(Document doc) {
         super(doc);
-       
+
     }
 
     @Override
@@ -54,9 +54,9 @@ public class DOMBuilderContentHandler extends DOMBuilder {
     public void endElement(String ns, String localName, String name) throws SAXException {
         if (_suppressLineNo > 0)
             --_suppressLineNo;
-        
+
         super.endElement(ns, localName, name);
-        
+
     }
 
     @Override

@@ -25,10 +25,10 @@ package org.apache.ode.bpel.iapi;
 public enum ProcessState {
     /** Process can create new instances and execute old instances. */
     ACTIVE,
-    
+
     /** Process can execute old instances, but cannot create new instances. */
     RETIRED,
-    
+
     /** Process cannot exeucte old nor create new instances. */
     DISABLED
 }

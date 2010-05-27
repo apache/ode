@@ -49,7 +49,7 @@ public class PWCBHandler implements CallbackHandler {
             UnsupportedCallbackException {
 
         for (int i = 0; i < callbacks.length; i++) {
-            
+
             //When the server side need to authenticate the user
             WSPasswordCallback pwcb = (WSPasswordCallback)callbacks[i];
             if (pwcb.getUsage() == WSPasswordCallback.USERNAME_TOKEN_UNKNOWN) {
@@ -60,8 +60,8 @@ public class PWCBHandler implements CallbackHandler {
                     throw new UnsupportedCallbackException(callbacks[i], "check failed");
                 }
             }
-            
-            //When the client requests for the password to be added in to the 
+
+            //When the client requests for the password to be added in to the
             //UT element
             pwcb.setPassword("bobPW");
         }

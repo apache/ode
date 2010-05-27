@@ -30,7 +30,7 @@ public class VariableVal extends ToFrom {
 
     /**
      * Get the name of the variable.
-     * 
+     *
      * @return variable name
      */
     public String getVariable() {

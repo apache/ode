@@ -24,7 +24,7 @@ import java.util.Iterator;
 /**
  * Transforming {@link Iterator} implementation; these iterators apply a unary
  * function to each object before it is returned.
- * 
+ *
  * <p>
  * Created on Feb 4, 2004 at 4:48:14 PM.
  * </p>

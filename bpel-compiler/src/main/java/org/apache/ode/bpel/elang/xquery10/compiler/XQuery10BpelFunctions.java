@@ -37,7 +37,7 @@ import org.w3c.dom.Node;
 
 
 /**
- * XQuery-Friendly definition of BPEL functions, which 
+ * XQuery-Friendly definition of BPEL functions, which
  * delegates calls to the JAXP-based function resolver
  */
 public class XQuery10BpelFunctions {
@@ -52,7 +52,7 @@ public class XQuery10BpelFunctions {
             Constants.EXT_FUNCTION_DOXSLTRANSFORM);
 
     /**
-     * WS-BPEL getVariableProperty function 
+     * WS-BPEL getVariableProperty function
      *
      * @param context context
      * @param variableName variableName
@@ -73,7 +73,7 @@ public class XQuery10BpelFunctions {
     }
 
     /**
-     * WS-BPEL getVariableData function 
+     * WS-BPEL getVariableData function
      *
      * @param context context
      * @param variableName variableName
@@ -97,7 +97,7 @@ public class XQuery10BpelFunctions {
     }
 
     /**
-     * WS-BPEL doXslTransform function 
+     * WS-BPEL doXslTransform function
      *
      * @param context context
      * @param xslUri xslUri
@@ -118,7 +118,7 @@ public class XQuery10BpelFunctions {
     }
 
     /**
-     * WS-BPEL getLinkStatus function 
+     * WS-BPEL getLinkStatus function
      *
      * @param context context
      * @param linkName linkName
@@ -164,7 +164,7 @@ public class XQuery10BpelFunctions {
     }
 
     /**
-     * Evaluates function against arguments passed by XQuery 
+     * Evaluates function against arguments passed by XQuery
      *
      * @param function function
      * @param arguments arguments

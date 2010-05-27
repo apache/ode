@@ -399,7 +399,7 @@ public class DebuggerSupport implements DebuggerContext {
 
 
     }
-    
+
     /**
      * @return the process model. Currently an {@link OProcess}
      * However it is not guaranteed that it will remain an OProcess

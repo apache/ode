@@ -57,11 +57,11 @@ public class ScopeDAOImpl extends OpenJPADAO implements ScopeDAO {
     public final static String SELECT_SCOPE_IDS_BY_PROCESS = "SELECT_SCOPE_IDS_BY_PROCESS";
     public final static String SELECT_SCOPE_IDS_BY_INSTANCE = "SELECT_SCOPE_IDS_BY_INSTANCE";
     public final static String DELETE_SCOPES_BY_SCOPE_IDS = "DELETE_SCOPES_BY_SCOPE_IDS";
-    
+
     @Id @Column(name="SCOPE_ID")
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long _scopeInstanceId;
-    
+
     @Basic @Column(name="MODEL_ID")
     private int _modelId;
     @Basic @Column(name="SCOPE_NAME")
@@ -72,7 +72,7 @@ public class ScopeDAOImpl extends OpenJPADAO implements ScopeDAO {
     @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
     @Column(name="PARENT_SCOPE_ID")
     private ScopeDAOImpl _parentScope;
-    
+
     @OneToMany(targetEntity=ScopeDAOImpl.class,mappedBy="_parentScope",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
     private Collection<ScopeDAO> _childScopes = new ArrayList<ScopeDAO>();
     @OneToMany(targetEntity=CorrelationSetDAOImpl.class,mappedBy="_scope",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
@@ -91,7 +91,7 @@ public class ScopeDAOImpl extends OpenJPADAO implements ScopeDAO {
         _modelId = scopeModelId;
         _processInstance = pi;
     }
-    
+
     public PartnerLinkDAO createPartnerLink(int plinkModelId, String pLinkName,
             String myRole, String partnerRole) {
         PartnerLinkDAOImpl pl = new PartnerLinkDAOImpl(plinkModelId, pLinkName, myRole, partnerRole);
@@ -109,7 +109,7 @@ public class ScopeDAOImpl extends OpenJPADAO implements ScopeDAO {
         for (CorrelationSetDAO csElement : _correlationSets) {
             if ( csElement.getName().equals(corrSetName)) ret = csElement;
         }
-        
+
         if ( ret == null ) {
             // Apparently the caller knows there should be a correlation set
             // in here. Create a new set if one does not exist.
@@ -121,7 +121,7 @@ public class ScopeDAOImpl extends OpenJPADAO implements ScopeDAO {
             getEM().persist(ret);
             _correlationSets.add(ret);
         }
-        
+
         return ret;
     }
 
@@ -168,14 +168,14 @@ public class ScopeDAOImpl extends OpenJPADAO implements ScopeDAO {
 
     public XmlDataDAO getVariable(String varName) {
         XmlDataDAO ret = null;
-        
+
         for (XmlDataDAO xmlElement : _variables) {
             if ( xmlElement.getName().equals(varName)) return xmlElement;
         }
-        
+
         ret = new XmlDataDAOImpl(this,varName);
         _variables.add(ret);
-        
+
         return ret;
     }
 

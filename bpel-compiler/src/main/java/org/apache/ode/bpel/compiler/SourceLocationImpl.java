@@ -32,7 +32,7 @@ class SourceLocationImpl implements SourceLocation {
     SourceLocationImpl(URI uri) {
         _uri = uri;
     }
-    
+
     public int getColumnNo() {
         return _col;
     }

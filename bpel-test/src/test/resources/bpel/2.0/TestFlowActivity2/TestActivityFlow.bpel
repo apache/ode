@@ -27,16 +27,16 @@
  name="TestActivityFlow"
     targetNamespace="http://ode/bpel/unit-test/testFlowActivity2"
  suppressJoinFailure="yes">
- 
+
  <!-- Test Flow using XPath 10 -->
- 
+
     <import location="TestActivityFlow.wsdl"
         namespace="http://ode/bpel/unit-test/testFlowActivity2.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/" />
     <import location="../ProbeService/probeService.wsdl"
         namespace="http://ode/bpel/unit-test/ProbeService.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/"/>
-        
+
     <!-- test control flow elements -->
     <!--	sequence 				-->
     <!--	flow ( links ) 			-->
@@ -246,7 +246,7 @@
                 </sequence>
             </else>
         </if>
-        
+
         <assign name="while-increment-initialize">
             <copy>
                 <from>0</from>

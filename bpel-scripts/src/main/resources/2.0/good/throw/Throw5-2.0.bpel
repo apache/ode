@@ -57,7 +57,7 @@
     <scope>
       <faultHandlers>
         <catch faultName="test:foo"
-               faultVariable="faultVar" 
+               faultVariable="faultVar"
                faultMessageType="test:TestMessage1">
         <!-- we do NOT want to be here -->
          <assign>
@@ -68,7 +68,7 @@
          </assign>
         </catch>
         <catch faultName="test:foo"
-               faultVariable="faultVar" 
+               faultVariable="faultVar"
                faultElement="test:TestElement">
         <!-- we want to be here -->
          <assign>

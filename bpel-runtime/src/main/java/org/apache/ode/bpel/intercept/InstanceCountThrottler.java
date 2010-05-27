@@ -26,9 +26,9 @@ import javax.xml.namespace.QName;
 import java.util.Map;
 
 /**
- * An example of a  simple interceptor providing a "throttling"  capability - that is an 
+ * An example of a  simple interceptor providing a "throttling"  capability - that is an
  * ability to limit the number of instances created for a given process.
- * 
+ *
  * @author Maciej Szefler
  */
 public class InstanceCountThrottler extends NoOpInterceptor {

@@ -40,5 +40,5 @@ public class ASTValue extends SimpleNode {
         //TODO
         this.value = value.substring(1, value.length()-1);
     }
-    
+
 }

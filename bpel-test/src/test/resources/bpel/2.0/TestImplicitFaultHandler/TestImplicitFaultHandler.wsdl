@@ -17,24 +17,24 @@
   ~ under the License.
 -->
 
-<wsdl:definitions 
+<wsdl:definitions
   targetNamespace="http://ode/bpel/unit-test/testImplicitFaultHandler.wsdl"
   xmlns:tns="http://ode/bpel/unit-test/testImplicitFaultHandler.wsdl"
   xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
   xmlns:flt="http://ode/bpel/unit-test/FaultService.wsdl"
   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-  xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"      
+  xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable">
 
-  
+
   <wsdl:message name="requestMessage">
     <wsdl:part name="requestID" type="xsd:string"/>
     <wsdl:part name="requestText" type="xsd:string"/>
     <wsdl:part name="faultIndicator1" type="xsd:string"/>
     <wsdl:part name="faultIndicator2" type="xsd:string"/>
   </wsdl:message>
-   
+
   <wsdl:message name="replyMessage">
     <wsdl:part name="replyText" type="xsd:string"/>
   </wsdl:message>
@@ -49,11 +49,11 @@
   <plnk:partnerLinkType name="testImplicitFaultHandlerRequest">
     <plnk:role name="testImplicitFaultHandlerService" portType="tns:testImplicitFaultHandlerPT"/>
   </plnk:partnerLinkType>
-  
+
   <plnk:partnerLinkType name="probeRequest">
     <plnk:role name="probeService" portType="prb:probeMessagePT"/>
   </plnk:partnerLinkType>
-  
+
   <plnk:partnerLinkType name="faultRequest">
     <plnk:role name="faultService" portType="flt:faultMessagePT"/>
   </plnk:partnerLinkType>

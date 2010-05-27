@@ -24,7 +24,7 @@ package org.apache.ode.bpel.runtime;
  * and the context does not oblige. These are what one might call "internal errors", for
  * example if a message is received and it does not have the required parts, this execption
  * is thrown, since the runtime expects received messages to be of the correct form.
- *  
+ *
  * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
  *
  */

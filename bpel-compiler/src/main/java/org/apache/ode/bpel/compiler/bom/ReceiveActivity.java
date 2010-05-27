@@ -29,7 +29,7 @@ import org.w3c.dom.Element;
  */
 public class ReceiveActivity extends CreateInstanceActivity implements Communication {
     private final CommunicationHelper _commHelper;
-    
+
     public ReceiveActivity(Element el) {
         super(el);
         _commHelper = new CommunicationHelper(el);
@@ -37,7 +37,7 @@ public class ReceiveActivity extends CreateInstanceActivity implements Communica
 
     /**
      * Get the optional message exchange identifier.
-     * 
+     *
      * @return
      */
     public String getMessageExchangeId() {
@@ -46,13 +46,13 @@ public class ReceiveActivity extends CreateInstanceActivity implements Communica
 
     /**
      * Get the name of the variable that will hold the input message.
-     * 
+     *
      * @return name of input message variable
      */
     public String getVariable() {
         return getAttribute("variable", null);
     }
-    
+
     public String getRoute() {
         return getAttribute("route", "one");
     }

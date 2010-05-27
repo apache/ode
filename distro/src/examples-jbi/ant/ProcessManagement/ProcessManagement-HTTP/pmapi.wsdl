@@ -29,14 +29,14 @@
         xmlns="http://schemas.xmlsoap.org/wsdl/">
 
     <types>
-    
+
         <!--
         <xsd:schema>
             <xsd:import namespace="http://www.apache.org/ode/pmapi/types/2006/08/02/" schemaLocation="pmapi.xsd"/>
         </xsd:schema>
         -->
 
-<!-- Note:  Schema is inlined because import does not resolve .xsd file from inside service unit's directory -->        
+<!-- Note:  Schema is inlined because import does not resolve .xsd file from inside service unit's directory -->
 <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:pmapi="http://www.apache.org/ode/pmapi/types/2006/08/02/"
         xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.apache.org/ode/pmapi/types/2006/08/02/"
         elementFormDefault="qualified">
@@ -738,9 +738,9 @@
         </sequence>
     </complexType>
 
-</xsd:schema>        
-        
-        
+</xsd:schema>
+
+
         <xsd:schema targetNamespace="http://www.apache.org/ode/pmapi">
             <xsd:complexType name="aidsType">
                 <xsd:all>
@@ -1397,7 +1397,7 @@
         <port name="ProcessManagementPort" binding="tns:ProcessManagementBinding">
             <soap:address location="http://localhost:8080/ode/processes/ProcessManagement"/>
             <smix:endpoint role="consumer" defaultMep="in-out"/>
-            
+
         </port>
     </service>
     <service name="InstanceManagementService">

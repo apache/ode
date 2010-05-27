@@ -32,7 +32,7 @@ import org.apache.ode.bpel.o.OScope.CorrelationSet;
  * Compiled rerpresentation of the BPEL <code>&lt;invoke&gt;</code> activity.
  */
 public class OInvoke extends OActivity {
-  
+
     static final long serialVersionUID = -1L  ;
     public OPartnerLink partnerLink;
     public OScope.Variable inputVar;

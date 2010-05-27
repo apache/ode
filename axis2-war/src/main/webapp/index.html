@@ -26,7 +26,7 @@
         </script>
     <script type="text/javascript" src="js/yui/charts-experimental-min.js">
         </script>
-            
+
         <script type="text/javascript" src="js/ODE.js">
         </script>
         <script type="text/javascript">
@@ -36,10 +36,10 @@
                 var html = '<table><tr><td class="bl">Total Number of Processes in the System: </td><td>'+
                     stat.numOfProcesses+ '</td><td class="bl">Total Number of Instances in the System:</td><td>'+
                     stat.totalInst+ '</td></tr></table>';
-                
+
                 var statEle = document.getElementById('summary_tb');
                 statEle.innerHTML = html;
-                var chart_data = 
+                var chart_data =
                     [
                         {instances: "Active", count:stat.activeInst},
                         {instances: "Completed", count:stat.completedInst},
@@ -72,14 +72,14 @@
                         }
                     });
             }
-            
+
             function init(){
                 populateStats();
                 setInterval("populateStats()", 10000);
             }
 
             YAHOO.util.Event.onDOMReady(init);
-            
+
         </script>
         <style type="text/css">
             #nav ul {
@@ -92,14 +92,14 @@
                 font-weight: bold;
                 font-style: normal;
             }
-            
+
             #nav ul li {
                 margin-left: 0;
                 /*padding: 3px 15px;*/
                 list-style: none;
                 display: inline;
             }
-            
+
             #nav ul li a {
                 background: transparent none no-repeat scroll left center;
                 /*line-height:80px;*/
@@ -108,19 +108,19 @@
                 padding-left: 50px;
                 padding-right: 5px;
             }
-            
+
             #nav ul li a:hover {
                 color: #000;
             }
-            
+
             #nav ul li a.home {
                 background-image: url(images/home.png);
             }
-            
+
             #nav ul li a.uguide {
                 background-image: url(images/guide.png);
             }
-            
+
             #nav ul li a.dguide {
                 background-image: url(images/dguide.png);
             }
@@ -134,14 +134,14 @@
                 border-top:#0099FF solid 1px;
                 border-bottom:#0099FF solid 1px;
                 line-height:25px;
-                font-style:normal;  
+                font-style:normal;
                 font-weight:normal;
-                color:  #006699;            
+                color:  #006699;
             }
             #summary_tb{
                 text-align:left;
                 font-family:Georgia;
-                font-style:normal;  
+                font-style:normal;
                 font-weight:normal;
                 font-size:1.5em;
             }

@@ -29,5 +29,5 @@ public class Equality extends IdentifierToValueCMP {
     public Equality(Identifier identifier, Value value) {
         super(identifier, value);
     }
-    
+
 }

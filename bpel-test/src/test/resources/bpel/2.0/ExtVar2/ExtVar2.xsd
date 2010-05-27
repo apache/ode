@@ -17,8 +17,8 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://foo/extvar" 
-    xmlns:tns="http://foo/extvar" 
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://foo/extvar"
+    xmlns:tns="http://foo/extvar"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
     elementFormDefault="qualified">
 
@@ -29,7 +29,7 @@
             </sequence>
         </complexType>
     </element>
-    
+
     <element name="costPerCustomer-keys">
         <complexType>
             <sequence>

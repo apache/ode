@@ -200,7 +200,7 @@ public class WatchDog<T, C extends WatchDog.Observer> implements Runnable {
         }
 
         public boolean hasChangedSince(Long since) {
-            // do use 'greater than' to handle file deletion. The timestamp of a non-exising file is 0L. 
+            // do use 'greater than' to handle file deletion. The timestamp of a non-exising file is 0L.
             return lastModified().longValue() != since.longValue();
         }
 

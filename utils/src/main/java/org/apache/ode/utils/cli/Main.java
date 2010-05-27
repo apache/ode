@@ -27,7 +27,7 @@ import java.util.Properties;
 
 /**
  * <p>
- * Class used for starting the <code>main(...)</code> method of command-line 
+ * Class used for starting the <code>main(...)</code> method of command-line
  * utilities. Provides a general startup mechanism.
  * </p>
  * <p>
@@ -69,7 +69,7 @@ public class Main {
     System.arraycopy(args, 1, realArgs, 0, realArgs.length);
 
     Class mainClass = Class.forName(mainClassName);
-    
+
     Method mainMethod = mainClass.getMethod("main",new Class[] { String[].class } );
 
     try {

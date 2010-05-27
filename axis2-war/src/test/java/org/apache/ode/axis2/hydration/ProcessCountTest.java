@@ -54,7 +54,7 @@ import javax.xml.namespace.QName;
 
 
 /**
- * Test the limit on the number of process instances. 
+ * Test the limit on the number of process instances.
  *
  * @author $author$
  * @version $Revision$
@@ -68,7 +68,7 @@ public class ProcessCountTest extends Axis2TestBase {
     /**
      * test case set up
      *
-     * @throws Exception Exception 
+     * @throws Exception Exception
      */
     @BeforeMethod
     protected void setUp() throws Exception {
@@ -85,29 +85,29 @@ public class ProcessCountTest extends Axis2TestBase {
     /**
      * test case tear down
      *
-     * @throws Exception Exception 
+     * @throws Exception Exception
      */
     @AfterMethod
     protected void tearDown() throws Exception {
         super.tearDown();
     }
-    
+
     /**
      * Tests rendezvous
-     * 
+     *
      * @throws Exception
      */
     String firstResponse, secondResponse;
     boolean secondStarted;
     String nsAttr;
-    
+
     @Test(dataProvider="configs")
     public void testCorrelationJoin() throws Exception {
         final String bundleOne = "TestCorrelationJoin", bundleTwo = "TestAttributeNamespaces";
-        
+
         firstResponse = secondResponse = null;
         secondStarted = true;
-        
+
         server.getODEServer().getBpelServer().setProcessThrottledMaximumCount(0);
 
         // deploy the first service
@@ -128,17 +128,17 @@ public class ProcessCountTest extends Axis2TestBase {
         };
         processOne.start();
         processOne.join();
-        
+
         try {
-            processOne.join();        
+            processOne.join();
             assertTrue(firstResponse.contains("tooManyProcesses"), firstResponse);
         } finally {
             server.undeployProcess(bundleOne);
         }
-        
+
     }
 
     public String getODEConfigDir() {
-        return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby"; 
-    }    
+        return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby";
+    }
 }

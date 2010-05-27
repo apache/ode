@@ -62,7 +62,7 @@ public final class JMXConstants {
    * Create a JMX name query to find ODE domain MBeans.
    * @return {@link ObjectName} pattern
    * @throws MalformedObjectNameException
-   */ 
+   */
   public static ObjectName createDomainObjectQuery()  throws MalformedObjectNameException {
     return new ObjectName(JMX_DOMAIN + ":type=" + TYPE_DOMAINMBEAN + ",*");
   }

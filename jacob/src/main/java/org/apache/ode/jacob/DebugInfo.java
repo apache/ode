@@ -24,7 +24,7 @@ import java.io.Serializable;
 /**
  * Standard debug information for channels, objects (channel reads), and
  * messages (channel writes).
- * 
+ *
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
 public class DebugInfo implements Serializable {

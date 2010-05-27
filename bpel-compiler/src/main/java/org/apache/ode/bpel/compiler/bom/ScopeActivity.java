@@ -32,7 +32,7 @@ public class ScopeActivity extends ScopeLikeActivity {
 
     /**
      * Get the child activity for this {@link ScopeActivity}
-     * 
+     *
      * @return the child {@link Activity}
      */
     public Activity getChildActivity() {

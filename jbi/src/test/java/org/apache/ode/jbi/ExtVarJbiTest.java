@@ -41,7 +41,7 @@ public class ExtVarJbiTest extends JbiTestBase {
         s.close();
         tm.commit();
     }
-    
+
     private static void dropTable(Connection c, String name) {
         try {
             Statement s = c.createStatement();
@@ -51,7 +51,7 @@ public class ExtVarJbiTest extends JbiTestBase {
             // ignore
         }
     }
-    
+
     public void testExtVar() throws Exception {
         initDb();
         go();

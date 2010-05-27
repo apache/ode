@@ -18,7 +18,7 @@
 <axisconfig name="AxisJava2.0">
 
     <module ref="rampart" />
-    
+
     <parameter name="OutflowSecurity">
       <action>
         <items>UsernameToken</items>
@@ -27,7 +27,7 @@
         <passwordType>PasswordText</passwordType>
       </action>
     </parameter>
-        
+
     <!-- ================================================= -->
     <!-- Parameters -->
     <!-- ================================================= -->

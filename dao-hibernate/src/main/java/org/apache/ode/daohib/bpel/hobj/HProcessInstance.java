@@ -26,7 +26,7 @@ import java.util.Set;
 
 /**
  * Hibernate table representing a BPEL process instance.
- * 
+ *
  * @hibernate.class table="BPEL_INSTANCE" dynamic-update="true" lazy="true"
  * @hibernate.query name="COUNT_FAILED_INSTANCES_BY_PROCESSES_IDS_AND_STATES" query="select i.process.processId as pid, count(i.id) as cnt, max(i.activityFailureDateTime) as lastFailureDt from HProcessInstance as i where i.process.processId in (:processIds) and i.state = 20 and i.activityFailureCount > 0 group by i.process.processId"
  * @hibernate.query name="SELECT_INSTANCES_BY_PROCESS" query="from HProcessInstance as i where i.process = :process)"
@@ -41,7 +41,7 @@ public class HProcessInstance extends HObject {
 
     /** Foreign key to owner {@link HProcess}. */
     private HProcess _process;
-    
+
     private Long _processId;
 
     /** Foreign key to the instantiating {@link HCorrelator}. */
@@ -62,7 +62,7 @@ public class HProcessInstance extends HObject {
     private HFaultData _fault;
 
     private byte[] _jacobState;
-    
+
     private short _previousState;
 
     private short _state;
@@ -174,7 +174,7 @@ public class HProcessInstance extends HObject {
     }
 
     /**
-     * 
+     *
      * @hibernate.many-to-one column="PROCESS_ID" lazy="true" outer-join="true" not-found="ignore" foreign-key="none"
      */
     public HProcess getProcess() {
@@ -195,7 +195,7 @@ public class HProcessInstance extends HObject {
     public void setProcessId(Long processId) {
         _processId = processId;
     }
-    
+
     /**
      * @hibernate.bag lazy="true" inverse="true"
      * @hibernate.collection-key column="PIID" foreign-key="none"

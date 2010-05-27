@@ -18,44 +18,44 @@
   -->
 
 <process name="extFunction1"
-    targetNamespace="http://ode/bpel/unit-test" 
+    targetNamespace="http://ode/bpel/unit-test"
     xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
     xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
     xmlns:tns="http://ode/bpel/unit-test"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    xmlns:test="http://ode/bpel/unit-test.wsdl" 
+    xmlns:test="http://ode/bpel/unit-test.wsdl"
     xmlns:ode="http://www.fivesight.com/ode/extensions"
     suppressJoinFailure="yes">
    <partnerLinks>
-      <partnerLink name="testPartnerLink" 
-         partnerLinkType="test:TestPartnerLinkType" 
+      <partnerLink name="testPartnerLink"
+         partnerLinkType="test:TestPartnerLinkType"
          myRole="me" />
    </partnerLinks>
-    
+
    <variables>
      <variable name="var1" messageType="test:TestMessage"/>
    </variables>
-        
-   <sequence>   
-       <receive 
+
+   <sequence>
+       <receive
           createInstance="yes"
           name="startReceive"
           partnerLink="testPartnerLink"
           portType="test:TestPortType"
           operation="testOperation"
           variable="var1"/>
-      
+
         <assign>
            <copy>
              <from expression="ode:myFunc(':', 'Foo','Bar','Baz')"/>
              <to variable="var1" part="TestPart"/>
           </copy>
         </assign>
-     
-       <reply name="endReply" 
-              operation="testOperation" 
+
+       <reply name="endReply"
+              operation="testOperation"
               partnerLink="testPartnerLink"
-              portType="test:TestPortType" 
+              portType="test:TestPortType"
               variable="var1"/>
    </sequence>
 

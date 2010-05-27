@@ -53,7 +53,7 @@ public class Import extends BpelObject {
 
     /**
      * Get the namesapce of the imported definitions.
-     * 
+     *
      * @todo change String to URI
      * @return namespace URI
      */
@@ -63,7 +63,7 @@ public class Import extends BpelObject {
 
     /**
      * Get the location URI of the imported resource.
-     * 
+     *
      * @return location URI of imported resource
      */
     public URI getLocation() {
@@ -79,7 +79,7 @@ public class Import extends BpelObject {
 
     /**
      * Get the encoding language.
-     * 
+     *
      * @todo change String to URI
      * @return URI of the encoding language
      */

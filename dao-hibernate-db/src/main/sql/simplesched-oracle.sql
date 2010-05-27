@@ -1,8 +1,8 @@
 -- Apache ODE - SimpleScheduler Database Schema
--- 
+--
 -- Apache Derby scripts by Maciej Szefler.
--- 
--- 
+--
+--
 
 DROP TABLE ode_job;
 
@@ -12,7 +12,7 @@ CREATE TABLE ode_job (
   nodeid varchar(64),
   scheduled int  NOT NULL,
   transacted int  NOT NULL,
-  
+
   instanceId number(37),
   mexId varchar(255),
   processId varchar(255),

@@ -205,7 +205,7 @@
              <goals>
                <goal>xdoclet</goal>
              </goals>
-         
+
              <configuration>
                <tasks>
                  <hibernatedoclet excludedTags="@version,@author,@todo" verbose="true"

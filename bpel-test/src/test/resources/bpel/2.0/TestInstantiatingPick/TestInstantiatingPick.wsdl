@@ -17,13 +17,13 @@
    ~ under the License.
 -->
 
-<wsdl:definitions 
+<wsdl:definitions
    targetNamespace="http://ode/bpel/unit-test/TestInstantiatingPick.wsdl"
    xmlns:tns="http://ode/bpel/unit-test/TestInstantiatingPick.wsdl"
    xmlns="http://ode/bpel/unit-test/TestInstantiatingPick.wsdl"
    xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-   xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"      
+   xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
    xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
    xmlns:prop="http://docs.oasis-open.org/wsbpel/2.0/varprop">
@@ -32,7 +32,7 @@
       <wsdl:part name="requestID" type="xsd:string"/>
       <wsdl:part name="requestText" type="xsd:string"/>
    </wsdl:message>
-   
+
    <wsdl:message name="replyMessage">
       <wsdl:part name="replyID" type="xsd:string"/>
       <wsdl:part name="replyText" type="xsd:string"/>
@@ -60,7 +60,7 @@
       <wsdl:port name="testInstPick1Port" binding="tns:testInstPick1Binding">
       </wsdl:port>
    </wsdl:service>
-   
+
    <wsdl:binding name="testInstPick2Binding" type="tns:testInstPick2PT">
       <wsdl:operation name="request">
       </wsdl:operation>

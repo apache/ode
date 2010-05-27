@@ -25,12 +25,12 @@
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             elementFormDefault="qualified"
             blockDefault="#all">
-    
+
     <xsd:annotation>
         <xsd:documentation>
             Service Reference Schema for WS-BPEL 2.0
             Last modified date: 17th August, 2006
-            
+
             2006-07-28: Rev 1.1: YIU-OSS: Alex Yiu:
                 Apply Issue a portion of Issue 294.1:
                 Create a schema of a separate namespace for "service-ref"
@@ -38,9 +38,9 @@
                 Minor formatting changes. Reviewed the comments.
                 Removed the default namespace.
                 Changed prefix "serviceref:" to "sref:".
-                
+
             *****************************************
-                
+
             2006-08-08: Rev 1.1: Alex Yiu
                 Rename the file from wsbpel_serviceref.xsd (rev 1.2) to ws-bpel_serviceref.xsd
                 Change the targetNamespace URI to:
@@ -54,10 +54,10 @@
                 Add a copyright statement.
             2006-08-17: Rev 1.4: Alex Yiu
                 Adding last modified date and small reformatting for copyright statement
-            
+
         </xsd:documentation>
     </xsd:annotation>
-    
+
     <xsd:element name="service-ref" type="sref:ServiceRefType">
         <xsd:annotation>
             <xsd:documentation>
@@ -81,5 +81,5 @@
         </xsd:sequence>
         <xsd:attribute name="reference-scheme" type="xsd:anyURI"/>
     </xsd:complexType>
-    
+
 </xsd:schema>

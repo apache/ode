@@ -29,9 +29,9 @@ public class ScopeLikeActivity extends Activity {
         _scope = new Scope(el);
     }
 
-    
+
     public Scope getScope() {
         return _scope;
     }
-    
+
 }

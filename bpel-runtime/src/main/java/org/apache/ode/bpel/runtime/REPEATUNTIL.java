@@ -50,7 +50,7 @@ public class REPEATUNTIL extends ACTIVITY {
         ActivityInfo child = new ActivityInfo(genMonotonic(),
                 getORepeatUntil().activity,
                 newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
-        instance(createChild(child, _scopeFrame, _linkFrame));  
+        instance(createChild(child, _scopeFrame, _linkFrame));
         instance(new WAITER(child));
     }
 

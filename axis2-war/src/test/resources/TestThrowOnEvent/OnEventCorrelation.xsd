@@ -17,12 +17,12 @@
   ~ under the License.
   -->
 
-<schema attributeFormDefault="unqualified" 
-        elementFormDefault="qualified" 
-        targetNamespace="http://sample.bpel.org/bpel/sample" 
+<schema attributeFormDefault="unqualified"
+        elementFormDefault="qualified"
+        targetNamespace="http://sample.bpel.org/bpel/sample"
         xmlns="http://www.w3.org/2001/XMLSchema"
         >
-        
+
     <element name="OnEventCorrelationRequest">
         <complexType>
             <sequence>
@@ -30,7 +30,7 @@
             </sequence>
         </complexType>
     </element>
-          
+
     <element name="OnEventCorrelationResponse">
         <complexType>
             <sequence>
@@ -38,5 +38,5 @@
             </sequence>
         </complexType>
     </element>
-    
+
 </schema>

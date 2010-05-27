@@ -78,7 +78,7 @@
             <xs:documentation>produit couvrant</xs:documentation>
         </xs:annotation>
     </xs:element>
-     <!-- 
+     <!--
         <xs:simpleType name="ReferenceProduitType2">
         <xs:restriction base="xs:string">
             <xs:minLength value="1"/>

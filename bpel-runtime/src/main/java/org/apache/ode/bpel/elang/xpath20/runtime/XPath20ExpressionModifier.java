@@ -58,8 +58,8 @@ public class XPath20ExpressionModifier {
     /**
      * Creates a new XPath20ExpressionModifier object.
      *
-     * @param contextUris 
-     * @param namePool 
+     * @param contextUris
+     * @param namePool
      */
     public XPath20ExpressionModifier(NSContext contextUris, NamePool namePool) {
         this.contextUris = contextUris;
@@ -68,11 +68,11 @@ public class XPath20ExpressionModifier {
 
     /**
      * Insert nodes into the specified XPath expression wherever
-     * required To be precise, an node is added to its parent if: 
-     * a) the node is an element... 
-     * b) that corresponds to an step... 
-     * c) that has a child axis... 
-     * d) whose parent had no children with its name... 
+     * required To be precise, an node is added to its parent if:
+     * a) the node is an element...
+     * b) that corresponds to an step...
+     * c) that has a child axis...
+     * d) whose parent had no children with its name...
      * e) and all preceding steps are element name tests.
      *
      * @param xpathExpr
@@ -120,12 +120,12 @@ public class XPath20ExpressionModifier {
 
                 QName childName = getQualifiedName(nameTest.getFingerprint(),
                         namePool, contextUris);
-                
+
                 if (Axis.CHILD == axisExpr.getAxis()) {
                     if (NodeKindTest.ELEMENT.getNodeKindMask() != nameTest.getNodeKindMask()) {
                         break;
                     }
-                    
+
                     NodeList children = ((Element) contextNode).getElementsByTagNameNS(childName.getNamespaceURI(),
                             childName.getLocalPart());
                     if ((children == null) || (children.getLength() == 0)) {
@@ -142,7 +142,7 @@ public class XPath20ExpressionModifier {
                     if (NodeKindTest.ATTRIBUTE.getNodeKindMask() != nameTest.getNodeKindMask()) {
                         break;
                     }
-                    
+
                     Attr attribute = ((Element) contextNode).getAttributeNodeNS(childName.getNamespaceURI(), childName.getLocalPart());
                     if (attribute == null) {
                         attribute = document.createAttributeNS(childName.getNamespaceURI(), childName.getLocalPart());
@@ -151,7 +151,7 @@ public class XPath20ExpressionModifier {
                     } else {
                         break;
                     }
-                    
+
                 } else {
                     break;
                 }

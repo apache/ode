@@ -172,7 +172,7 @@ public abstract class BpelCompiler implements CompilerContext {
     private final HashMap<String, ExpressionCompiler> _expLanguageCompilers = new HashMap<String, ExpressionCompiler>();
 
     private final HashMap<String, OExpressionLanguage> _expLanguages = new HashMap<String, OExpressionLanguage>();
-    
+
     private ExpressionValidatorFactory _expressionValidatorFactory = new ExpressionValidatorFactory(System.getProperties());
 
     private WSDLFactory4BPEL _wsdlFactory;
@@ -182,7 +182,7 @@ public abstract class BpelCompiler implements CompilerContext {
     private Map<QName, Node> _customProcessProperties;
 
     private URI _processURI;
-    
+
     BpelCompiler(WSDLFactory4BPEL wsdlFactory) {
         _wsdlFactory = wsdlFactory;
         _wsdlRegistry = new WSDLRegistry(this);
@@ -224,7 +224,7 @@ public abstract class BpelCompiler implements CompilerContext {
             } finally {
                 xsdStream.close();
             }
-            
+
             Map<URI, byte[]> schemas = XSUtils.captureSchema(resFrom, data, resolver);
             _wsdlRegistry.addSchemas(schemas);
         } catch (XsdException e) {
@@ -262,7 +262,7 @@ public abstract class BpelCompiler implements CompilerContext {
 
     /**
      * Get the process definition.
-     * 
+     *
      * @return the process definition
      */
     public Process getProcessDef() {
@@ -365,7 +365,7 @@ public abstract class BpelCompiler implements CompilerContext {
         if (scopeToComp == null)
             throw new CompilationException(__cmsgs.errCompensateOfInvalidScope(scopeToCompensate));
 
-        return scopeToComp; 
+        return scopeToComp;
     }
 
     public String getSourceLocation() {
@@ -425,7 +425,7 @@ public abstract class BpelCompiler implements CompilerContext {
             } catch (IllegalArgumentException iaa) { }
             if (model == null || !model.knowsSchemaType(typeName))
                 throw new CompilationException(__cmsgs.errUndeclaredXsdType(typeName));
-            
+
             type = new OXsdTypeVarType(_oprocess);
             type.debugInfo = createDebugInfo(_processDef, "XSD Type: " + typeName);
             type.xsdType = typeName;
@@ -522,7 +522,7 @@ public abstract class BpelCompiler implements CompilerContext {
     /**
      * Produce a boolean {@link OExpression} expression that returns a constant
      * value.
-     * 
+     *
      * @param value
      *            constant value to return
      * @return {@link OExpression} returning a constant value.
@@ -549,7 +549,7 @@ public abstract class BpelCompiler implements CompilerContext {
     public OExpression compileExpr(Expression expression) throws CompilationException {
         return compileExpr(expression, null, null, new Object[1]);
     }
-    
+
     public OExpression compileExpr(Expression expression, OVarType rootNodeType, Object requestedResultType, Object[] resultType) throws CompilationException {
         return compileExpr(expression, false, false, rootNodeType, requestedResultType, resultType);
     }
@@ -589,7 +589,7 @@ public abstract class BpelCompiler implements CompilerContext {
 
             // Cleaning up expression compiler for furter compilation
             ec.setCompilerContext(null);
-            
+
             return oexpr;
         } catch (CompilationException ce) {
             if (ce.getCompilationMessage().source == null)
@@ -640,14 +640,14 @@ public abstract class BpelCompiler implements CompilerContext {
             return 0;
         }
     }
-    
+
     /**
      * Compile a process.
      */
     public OProcess compile(final Process process, ResourceFinder rf, long version) throws CompilationException {
         if (process == null)
             throw new NullPointerException("Null process parameter");
-        
+
         setResourceFinder(rf);
         _processURI = process.getURI();
         _processDef = process;
@@ -673,21 +673,21 @@ public abstract class BpelCompiler implements CompilerContext {
         _oprocess.guid = null;
         _oprocess.constants = makeConstants();
         _oprocess.debugInfo = createDebugInfo(process, "process");
-        
+
         if (process.getTargetNamespace() == null) {
             _oprocess.targetNamespace = "--UNSPECIFIED--";
             recoveredFromError(process, new CompilationException(__cmsgs.errProcessNamespaceNotSpecified()));
         } else {
             _oprocess.targetNamespace = _processDef.getTargetNamespace();
         }
-        
+
         if (process.getName() == null) {
             _oprocess.processName = "--UNSPECIFIED--";
             recoveredFromError(process, new CompilationException(__cmsgs.errProcessNameNotSpecified()));
         } else {
             _oprocess.processName = _processDef.getName();
         }
-        
+
         _oprocess.compileDate = _generatedDate;
 
         _konstExprLang = new OExpressionLanguage(_oprocess, null);
@@ -710,7 +710,7 @@ public abstract class BpelCompiler implements CompilerContext {
         }
 
         _expressionValidatorFactory.getValidator().bpelImportsLoaded(_processDef, this);
-        
+
         switch (_processDef.getSuppressJoinFailure()) {
         case NO:
         case NOTSET:
@@ -773,15 +773,15 @@ public abstract class BpelCompiler implements CompilerContext {
                 sb.append('\n');
             }
         }
-        
+
         XslTransformHandler.getInstance().clearXSLSheets(_oprocess.getQName());
 
         _expressionValidatorFactory.getValidator().bpelCompilationCompleted(_processDef);
-        
+
         if (hasErrors) {
             throw new CompilationException(__cmsgs.errCompilationErrors(_errors.size(), sb.toString()));
         }
-        
+
         {
             String digest = "version:" + version + ";" + _oprocess.digest();
             _oprocess.guid = GUID.makeGUID(digest);
@@ -818,7 +818,7 @@ public abstract class BpelCompiler implements CompilerContext {
         constants.qnTooHugeProcesses = new QName(getOdeNamespace(), "tooHugeProcesses");
         return constants;
     }
-    
+
     private String getOdeNamespace() {
         return Namespaces.ODE_EXTENSION_NS;
     }
@@ -843,7 +843,7 @@ public abstract class BpelCompiler implements CompilerContext {
      * message properties and property aliases (defined later in this
      * specification) which are defined within WSDL 1.1 documents using the WSDL
      * 1.1 language extensibility feature.
-     * 
+     *
      * The &lt;import&gt; element is used within a BPEL4WSWS-BPEL process to
      * explicitly indicate a dependency on external XML Schema or WSDL
      * definitions. Any number of <import> elements may appear as initial
@@ -862,7 +862,7 @@ public abstract class BpelCompiler implements CompilerContext {
      * The value MUST be set to "http://www.w3.org/2001/XMLSchema" when
      * importing XML Schema 1.0 documents, and to
      * "http://schemas.xmlsoap.org/wsdl/" when importing WSDL 1.1 documents.
-     * 
+     *
      * @param imprt
      *            BOM representation of the import
      */
@@ -1160,7 +1160,7 @@ public abstract class BpelCompiler implements CompilerContext {
             boolean newValue = src.getAtomicScope().booleanValue();
             if (_atomicScope)
                 throw new CompilationException(__cmsgs.errAtomicScopeNesting(newValue));
-            
+
             oscope.atomicScope = _atomicScope = newValue;
         }
         try {
@@ -1369,7 +1369,7 @@ public abstract class BpelCompiler implements CompilerContext {
 
                     csetNames.add(correlation.getCorrelationSet());
                 }
-                
+
                 if (onEvent.getActivity() == null) throw new CompilationException(__cmsgs.errInvalidAlarm().setSource(onEvent));
                 oevent.activity = compile(onEvent.getActivity());
             }
@@ -1392,7 +1392,7 @@ public abstract class BpelCompiler implements CompilerContext {
 
         oscope.eventHandler.onMessages.add(oevent);
     }
-    
+
     private DebugInfo createDebugInfo(BpelObject bpelObject, String description) {
         int lineNo = bpelObject == null ? -1 : bpelObject.getLineNo();
         String str = description == null && bpelObject != null ? bpelObject.toString() : null;
@@ -1431,7 +1431,7 @@ public abstract class BpelCompiler implements CompilerContext {
         ovar.name = src.getName();
         ovar.declaringScope = oscope;
         ovar.debugInfo = createDebugInfo(src, null);
-        
+
         ovar.extVar = compileExtVar(src);
 
         oscope.addLocalVariable(ovar);
@@ -1581,7 +1581,7 @@ public abstract class BpelCompiler implements CompilerContext {
         } catch (URISyntaxException e) {
             throw new CompilationException(__cmsgs.errInvalidDocXsltUri(docStrUri));
         }
-        
+
         String sheetBody = loadXsltSheet(_processURI.resolve(docUri));
         if (sheetBody == null) {
             throw new CompilationException(__cmsgs.errCantFindXslt(docStrUri));
@@ -1718,27 +1718,27 @@ public abstract class BpelCompiler implements CompilerContext {
         Collections.reverse(rval);
         return rval;
     }
-    
-    public Map<URI, Source> getSchemaSources() {        
+
+    public Map<URI, Source> getSchemaSources() {
         return _wsdlRegistry.getSchemaSources();
     }
-    
+
     /**
      * Retrieves the base URI that the BPEL Process execution contextis running relative to.
-     * 
+     *
      * @return URI - the URI representing the absolute physical file path location that this process is defined within.
-     * @throws IOException 
-     * @throws MalformedURLException 
+     * @throws IOException
+     * @throws MalformedURLException
      */
      public URI getBaseResourceURI() {
         return _resourceFinder.getBaseResourceURI();
     }
-    
+
 
     /**
      * Compile external variable declaration.
      * @param src variable object
-     * @return compiled {@link OExtVar} representation. 
+     * @return compiled {@link OExtVar} representation.
      */
     private OExtVar compileExtVar(Variable src) {
         if (!src.isExternal())
@@ -1750,18 +1750,18 @@ public abstract class BpelCompiler implements CompilerContext {
 
         if (src.getExternalId() == null)
             throw new CompilationException(__cmsgs.errMustSpecifyExternalVariableId(src.getName()));
-            
+
         if (src.getRelated() == null)
             throw new CompilationException(__cmsgs.errMustSpecifyRelatedVariable(src.getName()));
         oextvar.related = resolveVariable(src.getRelated());
-        
+
         return oextvar;
     }
 
     private static class StructureStack {
         private Stack<OActivity> _stack = new Stack<OActivity>();
         private Map<OActivity,BpelObject> _srcMap = new HashMap<OActivity,BpelObject>();
-        
+
         public void push(OActivity act, BpelObject src) {
             _stack.push(act);
             _srcMap.put(act,src);

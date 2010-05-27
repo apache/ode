@@ -38,7 +38,7 @@ public class HCorrelatorSelector extends HObject {
     private String _correlationKey;
     private String _processType;
     private String _routePolicy;
-    
+
     /**
      * @hibernate.many-to-one column="PIID" not-null="true" foreign-key="none"
      */
@@ -72,11 +72,11 @@ public class HCorrelatorSelector extends HObject {
     public void setIndex(int idx) {
         _idx = idx;
     }
-    
-    
+
+
     @Override
     public String toString() {
-        return "{HCorrelatorSelector correlator=" + this.getCorrelator() + ", ckey=" + getCorrelationKey() + 
+        return "{HCorrelatorSelector correlator=" + this.getCorrelator() + ", ckey=" + getCorrelationKey() +
         ", groupId=" + getGroupId() + ", idx=" + getIndex() + ", iid=" + getInstance().getId() + "}";
     }
 
@@ -86,7 +86,7 @@ public class HCorrelatorSelector extends HObject {
      *                   index="IDX_SELECTOR_CKEY"
      *                   not-null="true"
      *                   unique-key="UNIQ_SELECTOR"
-     *                   
+     *
      */
     public String getCorrelationKey() {
         return _correlationKey;
@@ -120,7 +120,7 @@ public class HCorrelatorSelector extends HObject {
 
     /**
      * @hibernate.many-to-one not-null="true" foreign-key="none"
-     * @hibernate.column name="CORRELATOR" not-null="true" 
+     * @hibernate.column name="CORRELATOR" not-null="true"
      *          index="IDX_SELECTOR_CORRELATOR" unique-key="UNIQ_SELECTOR"
      */
     public HCorrelator getCorrelator() {

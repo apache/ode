@@ -28,14 +28,14 @@
  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
  expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
  suppressJoinFailure="yes">
-    
+
     <import location="../ProbeService/probeService.wsdl"
         namespace="http://ode/bpel/unit-test/ProbeService.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/"/>
     <import location="testCorrelation.wsdl"
         namespace="http://ode/bpel/unit-test/testCorrelation.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/" />
-    
+
     <!-- test correlated receive -->
     <partnerLinks>
         <partnerLink name="request" partnerLinkType="wns:testCorrelationRequest" myRole="testCorrelationService"/>
@@ -141,7 +141,7 @@
                         <to variable="reply" part="replyText"/>
                     </copy>
                 </assign>
-                
+
                 <assign name="assign5">
                     <copy>
                         <from>$request.requestMessageData/correlationID1</from>
@@ -152,7 +152,7 @@
                         <to variable="probeInput" part="probeData"/>
                     </copy>
                 </assign>
-                <invoke name="probe" partnerLink="probe" portType="prb:probeMessagePT" operation="probe" inputVariable="probeInput" outputVariable="probeInput"> 
+                <invoke name="probe" partnerLink="probe" portType="prb:probeMessagePT" operation="probe" inputVariable="probeInput" outputVariable="probeInput">
                     <correlations>
                         <correlation set="testCorr1" initiate="join"/>
                         <correlation set="testCorr2" initiate="join"/>
@@ -166,7 +166,7 @@
                         <to variable="reply" part="replyText"/>
                     </copy>
                 </assign>
-                
+
                 <reply name="reply" partnerLink="request" portType="wns:testCorrelationPT" operation="request" variable="reply">
                     <correlations>
                         <correlation set="testCorr4" initiate="join"/>

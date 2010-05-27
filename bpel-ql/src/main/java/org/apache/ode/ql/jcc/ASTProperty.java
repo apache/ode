@@ -38,5 +38,5 @@ public class ASTProperty extends SimpleNode {
     public QName getName() {
         return name;
     }
-   
+
 }

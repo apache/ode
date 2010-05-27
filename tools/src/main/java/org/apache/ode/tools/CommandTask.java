@@ -36,7 +36,7 @@ public abstract class CommandTask extends Task implements CommandContext {
   public void out(String s) {
     handleOutput(s);
   }
-  
+
   public void errln(String s) {
     handleErrorOutput(s);
   }
@@ -71,5 +71,5 @@ public abstract class CommandTask extends Task implements CommandContext {
 
   public void debug(String s) {
     log(s,Project.MSG_VERBOSE);
-  }  
+  }
 }

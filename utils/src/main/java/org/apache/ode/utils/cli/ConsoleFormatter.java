@@ -22,12 +22,12 @@ import java.util.StringTokenizer;
 
 
 public class ConsoleFormatter {
-  
+
   private static final int LINE_WIDTH = 76;
-  
+
   // for help
   private static final int LEFT_MARGIN = 20;
-  
+
   private static String spaces(int n) {
     StringBuffer sb = new StringBuffer(n);
     for (int i=0; i < n; ++i) {
@@ -35,7 +35,7 @@ public class ConsoleFormatter {
     }
     return sb.toString();
   }
-  
+
   // long command name is a pathological case, which we'll ignore.
   public static String formatUsage(String command, Fragments f) {
     StringBuffer sb = new StringBuffer(command + " ");
@@ -62,7 +62,7 @@ public class ConsoleFormatter {
     }
     return sb.toString();
   }
-  
+
   public static String formatHelp(Fragments f) {
     CommandlineFragment[] ff = f.getFragmentsInUserOrder();
     StringBuffer sb = new StringBuffer();
@@ -80,7 +80,7 @@ public class ConsoleFormatter {
     }
     return sb.toString();
   }
-  
+
   public static String rightPadToWidth(String s, int w) {
     if (s.length() > w) {
       return s;
@@ -88,7 +88,7 @@ public class ConsoleFormatter {
       return s + spaces(w-s.length());
     }
   }
-  
+
   public static String wrap(String s, int left) {
     String spaces = spaces(left);
     int cll = left;
@@ -109,7 +109,7 @@ public class ConsoleFormatter {
     sb.append('\n');
     return sb.toString();
   }
-  
+
   public static void printSynopsis(String command, String synposis, Fragments[] frags) {
     System.out.print(command + " - ");
     System.out.println(wrap(synposis, command.length() + 3));

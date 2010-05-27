@@ -23,11 +23,11 @@ package org.apache.ode.bpel.bdi.breaks;
  * activity completion.
  */
 public interface ActivityBreakpoint extends Breakpoint{
-  
+
   /**
    * Get the name of the activity that has been breakpointed.
    * @return the name of the activity
    */
   public String activityName();
-  
+
 }

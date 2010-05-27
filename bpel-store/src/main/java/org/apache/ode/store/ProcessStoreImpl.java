@@ -81,7 +81,7 @@ public class ProcessStoreImpl implements ProcessStore {
     private ConfStoreConnectionFactory _cf;
 
     private EndpointReferenceContext eprContext;
-    
+
     private boolean generateProcessEventsAll;
 
     protected File _deployDir;
@@ -182,7 +182,7 @@ public class ProcessStoreImpl implements ProcessStore {
             // Override the package name if given from the parameter
             du.setName(duName);
         }
-        
+
         long version;
         if (autoincrementVersion || du.getStaticVersion() == -1) {
             // Process and DU use a monotonically increased single version number by default.
@@ -195,7 +195,7 @@ public class ProcessStoreImpl implements ProcessStore {
             version = du.getStaticVersion();
         }
         du.setVersion(version);
-        
+
         try {
             du.compile();
         } catch (CompilationException ce) {
@@ -298,7 +298,7 @@ public class ProcessStoreImpl implements ProcessStore {
             }
 
         });
-        
+
         // We want the events to be fired outside of the bounds of the writelock.
         try {
             for (ProcessConfImpl process : processes) {
@@ -373,12 +373,12 @@ public class ProcessStoreImpl implements ProcessStore {
             if (du != null) {
                 undeployed = toPids(du.getProcessNames(), du.getVersion());
             }
-            
+
             for (QName pn : undeployed) {
                 fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.UNDEPLOYED, pn, du.getName()));
                 __log.info(__msgs.msgProcessUndeployed(pn));
             }
-            
+
             _processes.keySet().removeAll(undeployed);
         } finally {
             _rw.writeLock().unlock();
@@ -627,16 +627,16 @@ public class ProcessStoreImpl implements ProcessStore {
      */
     public static Map<QName, Node> calcInitialProperties(Properties properties, TDeployment.Process dd) {
         HashMap<QName, Node> ret = new HashMap<QName, Node>();
-        
+
         for (Object key1 : properties.keySet()) {
             String key = (String) key1;
             Document doc = DOMUtils.newDocument();
             doc.appendChild(doc.createElementNS(null, "temporary-simple-type-wrapper"));
             doc.getDocumentElement().appendChild(doc.createTextNode(properties.getProperty(key)));
-            
+
             ret.put(new QName(key), doc.getDocumentElement());
         }
-        
+
         if (dd.getPropertyList().size() > 0) {
             for (TDeployment.Process.Property property : dd.getPropertyList()) {
                 Element elmtContent = DOMUtils.getElementContent(property.getDomNode());
@@ -731,7 +731,7 @@ public class ProcessStoreImpl implements ProcessStore {
             try {
                 dudao.setDeploymentUnitDir(f.getCanonicalPath());
             } catch (IOException e) {
-                __log.warn("Could not update deployment unit directory for " + dudao.getName(), e); 
+                __log.warn("Could not update deployment unit directory for " + dudao.getName(), e);
             }
             return f;
         }
@@ -813,7 +813,7 @@ public class ProcessStoreImpl implements ProcessStore {
                 throw new IllegalArgumentException("Deploy directory is not a directory:  " + depDir);
             }
         }
-        
+
         _deployDir = depDir;
     }
 

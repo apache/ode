@@ -18,7 +18,7 @@
 <service>
 
     <module ref="rampart" />
-    
+
     <parameter name="OutflowSecurity">
       <action>
         <items>Timestamp Signature</items>
@@ -35,5 +35,5 @@
         <signaturePropFile>TestRampartBasic/secured-services/client.properties</signaturePropFile>
       </action>
     </parameter>
-    
+
  </service>

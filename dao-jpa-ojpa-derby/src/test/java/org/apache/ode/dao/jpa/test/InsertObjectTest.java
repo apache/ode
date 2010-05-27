@@ -49,7 +49,7 @@ import java.util.GregorianCalendar;
 import java.util.Properties;
 
 public class InsertObjectTest extends TestCase {
-    
+
     private static final String TEST_NS = "http://org.apache.ode.jpa.test";
     private static final String CORRELATOR_ID1 = "testCorrelator1";
     private static final String CORRELATOR_ID2 = "testCorrelator2";
@@ -79,7 +79,7 @@ public class InsertObjectTest extends TestCase {
 
         _txm.begin();
     }
-    
+
     public void testStart() throws Exception {
         createStuff(factory);
     }
@@ -97,10 +97,10 @@ public class InsertObjectTest extends TestCase {
         _ds = null;
         _txm = null;
     }
-    
+
     private MessageExchangeDAO createMessageExchange(ProcessDAO p, ProcessInstanceDAO pi, PartnerLinkDAO pl ) throws SAXException, IOException {
         MessageExchangeDAO me = pi.getConnection().createMessageExchange('0');
-        
+
         me.setCallee(new QName(TEST_NS,"testCallee"));
         me.setChannel("testChannel");
         me.setCorrelationId("testCorrelationId");
@@ -120,45 +120,45 @@ public class InsertObjectTest extends TestCase {
         me.setRequest(createMessage(me,"testRequest"));
         me.setResponse(createMessage(me,"testResponse"));
         me.setStatus("testStatus");
-        
+
         return me;
     }
-    
+
     private MessageDAO createMessage(MessageExchangeDAO me, String name) throws SAXException, IOException {
         MessageDAO m = me.createMessage(new QName(TEST_NS,name));
-        
+
         m.setType(new QName(TEST_NS,name));
         m.setData(DOMUtils.stringToDOM("<testData>some test data</testData>"));
-        
+
         return m;
     }
-    
+
     private CorrelatorDAO createProcess(BpelDAOConnection conn, String pid, String type) {
         _process = conn.createProcess(new QName(TEST_NS,pid), new QName(TEST_NS,type),"GUID1",1);
         CorrelatorDAO corr = _process.addCorrelator(CORRELATOR_ID1);
         _process.addCorrelator(CORRELATOR_ID2);
         return corr;
     }
-    
+
     private ProcessInstanceDAO createProcessInstance(ProcessDAO process, CorrelatorDAO corr) throws SAXException, IOException {
         ProcessInstanceDAO pi = null;
         String[] actions = { "action1","action2" };
         String[] correlationKeys = { "key1", "key2" };
         CorrelationKey key1 = new CorrelationKey("key1",correlationKeys);
         CorrelationKey key2 = new CorrelationKey("key2",correlationKeys);
-        CorrelationKey[] corrkeys = {key1,key2}; 
+        CorrelationKey[] corrkeys = {key1,key2};
         QName[] names = { new QName(TEST_NS,"name1"), new QName(TEST_NS,"name2") };
 
         pi = process.createInstance(corr);
-        
+
         pi.setExecutionState(new String("test execution state").getBytes());
         pi.setFault(new QName(TEST_NS,"testFault"), "testExplanation", 1, 1, DOMUtils.stringToDOM("<testFaultMessage>testMessage</testFaultMessage>"));
         pi.setLastActiveTime(cal.getTime());
         pi.setState((short) 1);
-        
+
         pi.createActivityRecovery("testChannel1", 3, "testReason1", cal.getTime(), DOMUtils.stringToDOM("<testData>testData1</testData>"), actions, 2);
         pi.createActivityRecovery("testChannel2", 4, "testReason2", cal.getTime(), DOMUtils.stringToDOM("<testData>testData2</testData>"), actions, 2);
-        
+
         ScopeDAO root = pi.createScope(null, "Root", 1);
         root.setState(ScopeStateEnum.ACTIVE);
         ScopeDAO child1 = pi.createScope(root, "Child1", 2);
@@ -171,22 +171,22 @@ public class InsertObjectTest extends TestCase {
         var2.set(DOMUtils.stringToDOM("<testData>testData</testData>"));
         var2.setProperty("key1", "prop1");
         var2.setProperty("key2", "prop2");
-        
+
         CorrelationSetDAO cs1 = child1.getCorrelationSet("TestCorrelationSet1");
         cs1.setValue(names,key1);
-        
+
         PartnerLinkDAO pl1 = child1.createPartnerLink(1, "Test PartnerLink1", "MyRole1", "PartnerRole1");
         pl1.setMyEPR(DOMUtils.stringToDOM("<testEPR>testMyEPR</testEPR>"));
         pl1.setMyRoleServiceName(new QName(TEST_NS,"testRoleService"));
         pl1.setMySessionId("TestMySessionID");
         pl1.setPartnerEPR(DOMUtils.stringToDOM("<testEPR>testPartnerEPR</testEPR>"));
         pl1.setPartnerSessionId("TestPartnerSessionID");
-        
+
         MessageExchangeDAO mex = createMessageExchange(process,pi,pl1);
-        
+
         corr.addRoute("testRoute", pi, 1, new CorrelationKeySet().add(key1), "one");
         corr.enqueueMessage(mex, new CorrelationKeySet().add(corrkeys[0]).add(corrkeys[1]));
-        
+
         return pi;
     }
 

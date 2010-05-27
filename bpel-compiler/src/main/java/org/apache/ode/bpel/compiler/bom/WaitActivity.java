@@ -24,7 +24,7 @@ import org.w3c.dom.Element;
  * Representation of the BPEL <code>&lt;wait&gt;</code> activity.
  */
 public class WaitActivity extends Activity {
- 
+
   public WaitActivity(Element el) {
         super(el);
     }

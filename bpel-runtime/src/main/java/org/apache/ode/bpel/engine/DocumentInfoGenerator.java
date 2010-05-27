@@ -27,12 +27,12 @@ import java.util.Map;
 
 
 /**
- * Class for generating information about a document resource.  
+ * Class for generating information about a document resource.
  */
 class DocumentInfoGenerator {
   private final File _file;
   private String _type;
-  
+
   private static final Map<String, String> __extToTypeMap = new HashMap<String,String>();
   static {
     // Assume WSDL is 1.1 for now...
@@ -44,11 +44,11 @@ class DocumentInfoGenerator {
     // Assume BPEL is 2.0 for now...
     __extToTypeMap.put(".bpel", "http://schemas.xmlsoap.org/ws/2004/03/business-process/");
   }
-  
-  
+
+
   DocumentInfoGenerator(File f) {
     _file = f;
-    
+
     recognize();
   }
 
@@ -79,7 +79,7 @@ class DocumentInfoGenerator {
 
   private void recognize() {
     String fname = _file.getName().toLowerCase();
-    
+
     for (Map.Entry<String,String>i:__extToTypeMap.entrySet()) {
       if (fname.endsWith(i.getKey().toLowerCase())) {
         _type = i.getValue();

@@ -43,14 +43,14 @@ public class ActivityBreakpointImpl extends BreakpointImpl implements ActivityBr
      * @see org.apache.ode.bpel.runtime.breaks.BreakpointImpl#checkBreak(org.apache.ode.bpel.evt.BpelEvent)
      */
     public boolean checkBreak(BpelEvent event) {
-        return isEnabled() 
+        return isEnabled()
         && (event instanceof ActivityExecStartEvent
           && ((ActivityExecStartEvent)event).getActivityName() != null
           && ((ActivityExecStartEvent)event).getActivityName().equals(_activityName))
-          || 
+          ||
                     ((event instanceof ScopeCompletionEvent)
               && ((ScopeCompletionEvent)event).getScopeName() != null
                             && ((ScopeCompletionEvent)event).getScopeName().equals(_activityName));
     }
-    
+
 }

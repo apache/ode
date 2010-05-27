@@ -50,7 +50,7 @@ public class EventDAOImpl extends OpenJPADAO {
     public final static String SELECT_EVENT_IDS_BY_PROCESS = "SELECT_EVENT_IDS_BY_PROCESS";
     public final static String DELETE_EVENTS_BY_IDS = "DELETE_EVENTS_BY_IDS";
     public final static String DELETE_EVENTS_BY_INSTANCE = "DELETE_EVENTS_BY_INSTANCE";
-    
+
     @Id @Column(name="EVENT_ID")
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long _id;

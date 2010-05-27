@@ -46,7 +46,7 @@ public class XsdMessages extends MessageBundle {
 
   /**
    * Format a log message about an XSD-related warning or error.
-   * 
+   *
    * @param type
    *          the type of occurrence (e.g., warning, error, fatal)
    * @param msg
@@ -58,7 +58,7 @@ public class XsdMessages extends MessageBundle {
    * @param col
    *          the column number where the event occurred, or -1
    * @return the formatted message
-   * 
+   *
    * {0}: [{2} @ L{3}:C{4}]: {1}
    */
   public String msgXsdMessage(String type, String msg, String systemId, int line, int col) {
@@ -67,11 +67,11 @@ public class XsdMessages extends MessageBundle {
 
   /**
    * Format a debug message about processing an XML Schema document.
-   * 
+   *
    * @param systemId
    *          the System ID of the schema being processed
    * @return the formatted message
-   * 
+   *
    * Processing schema with URI {0}.
    */
   public String msgProcessingSchema(String systemId) {
@@ -81,7 +81,7 @@ public class XsdMessages extends MessageBundle {
   /**
    * Format a message about an exception that occurred while processing an XML
    * Schema.
-   * 
+   *
    * @param message
    *          the detailed message about the exception
    * @param systemId
@@ -91,7 +91,7 @@ public class XsdMessages extends MessageBundle {
    * @param columnNumber
    *          the column number where the exception occurred, or -1
    * @return the formatted message
-   * 
+   *
    * Unable to process XML Schema from {1} [@L{2}:C{3}]: {0}
    */
   public String msgXsdExceptionMessage(String message, String systemId, int lineNumber,

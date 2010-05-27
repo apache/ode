@@ -42,7 +42,7 @@ import org.apache.ode.ql.tree.nodes.Query;
 import org.apache.ode.ql.tree.nodes.Value;
 
 public class TreeBuilder extends Builder<String> {
-    
+
     public org.apache.ode.ql.tree.nodes.Node build(String query) {
       try {
         org.apache.ode.ql.jcc.ASTStart start = new Parser(query).start();
@@ -55,10 +55,10 @@ public class TreeBuilder extends Builder<String> {
     private org.apache.ode.ql.tree.nodes.Node build(Node node) {
         if(node instanceof ASTAnd) {
             return createConjunction(node);
-        } 
+        }
         if(node instanceof ASTOr) {
             return createDisjunction(node);
-        } 
+        }
         if(node instanceof ASTLess) {
             return createLess(node);
         }
@@ -85,7 +85,7 @@ public class TreeBuilder extends Builder<String> {
         }
         throw new IllegalArgumentException("Unsupported node type "+node.getClass());
     }
-    
+
     private Query createSelection(ASTStart node) {
         Collection<Object> childs = new ArrayList<Object>(node.jjtGetNumChildren());
         OrderBy orderBy = null;
@@ -129,12 +129,12 @@ public class TreeBuilder extends Builder<String> {
         Collection<LogicNode> childs = extractLogicNodes(node);
         return new Conjunction(childs);
     }
-    
+
     private Disjunction createDisjunction(Node node) {
         Collection<LogicNode> childs = extractLogicNodes(node);
         return new Disjunction(childs);
     }
-    
+
     private LE createLE(Node node) {
         checkChildsNumber(node, 2);
         return new LE(createIdentifier(node, 0), createValue(node, 1));
@@ -149,7 +149,7 @@ public class TreeBuilder extends Builder<String> {
         }
         return new In(createIdentifier(node, 0), values);
     }
-    
+
     private GE createGE(Node node) {
         checkChildsNumber(node, 2);
         return new GE(createIdentifier(node, 0), createValue(node, 1));
@@ -170,7 +170,7 @@ public class TreeBuilder extends Builder<String> {
         checkChildsNumber(node, 2);
         return new Like(createIdentifier(node, 0), createValue(node, 1));
     }
-    
+
     private Value createValue(Node parentNode, int index) {
         return new Value<String>(extractValue(parentNode, index).value);
     }
@@ -191,7 +191,7 @@ public class TreeBuilder extends Builder<String> {
     private ASTValue extractValue(Node parentNode, int index) {
         return (ASTValue)extractChildNode(parentNode, index, ASTValue.class);
     }
-    
+
     @SuppressWarnings("unchecked")
     private Node extractChildNode(Node parentNode, int index, Class expected) {
         Node node = extractChildNode(parentNode, index);
@@ -208,7 +208,7 @@ public class TreeBuilder extends Builder<String> {
         }
         return parentNode.jjtGetChild(index);
     }
-    
+
     private Collection<LogicNode> extractLogicNodes(Node parentNode) {
         Collection<LogicNode> childs = new ArrayList<LogicNode>(parentNode.jjtGetNumChildren());
         for(int index = 0;index < parentNode.jjtGetNumChildren();index++) {

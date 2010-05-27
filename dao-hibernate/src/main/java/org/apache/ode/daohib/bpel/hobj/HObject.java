@@ -40,7 +40,7 @@ public class HObject {
 
     /**
      * Auto-gnerated creation timestamp.
-     * 
+     *
      * @hibernate.property column="INSERT_TIME" type="timestamp"
      */
     public Date getCreated() {
@@ -53,7 +53,7 @@ public class HObject {
 
     /**
      * Auto-generated primary key.
-     * 
+     *
      * @hibernate.id generator-class="org.apache.ode.daohib.NativeHiLoGenerator" column="ID"
      * @hibernate.generator-param name="sequence" value="hibernate_seqhilo"
      * @hibernate.generator-param name="max_lo" value="99"

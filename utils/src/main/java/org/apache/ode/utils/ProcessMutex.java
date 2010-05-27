@@ -28,7 +28,7 @@ import java.net.ServerSocket;
  * TCP port to synchronize multiple processes. The method of operation is
  * simple: by opening a port, a process prevents other processes on the local
  * machine from opening the same port.
- * 
+ *
  * @author Maciej Szefler  ( m s z e f l e r @ g m a i l . c o m)
  */
 public class ProcessMutex {

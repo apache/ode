@@ -24,7 +24,7 @@ import javax.xml.namespace.QName;
 /**
  * Interface implemented by the BPEL server. Provides methods for
  * life-cycle management.
- * 
+ *
  * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
  */
 public interface BpelServer {
@@ -111,14 +111,14 @@ public interface BpelServer {
     void register(ProcessConf conf) throws BpelEngineException;
 
     /**
-     * Unregister a process from the server. 
+     * Unregister a process from the server.
      * @param pid process to unregister
      * @throws BpelEngineException
      */
     void unregister(QName pid) throws BpelEngineException;
 
     void cleanupProcess(ProcessConf conf) throws BpelEngineException;
-    
+
     /**
      * @param pid The process definition QName
      * @return The debugger support.

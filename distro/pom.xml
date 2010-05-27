@@ -30,10 +30,10 @@
         <artifactId>ode</artifactId>
         <version>1.3.5-SNAPSHOT</version>
     </parent>
-    
+
     <properties>
     </properties>
-     
+
     <dependencies>
         <dependency>
             <groupId>org.apache.ode</groupId>
@@ -75,7 +75,7 @@
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>apache-activemq</artifactId>
-        </dependency> 
+        </dependency>
     </dependencies>
 
 

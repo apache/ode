@@ -48,19 +48,19 @@ public class SystemCronCleanupTest extends CleanTestBase {
         String customSchedulesFilePath = SystemCronCleanupTest.class.getClassLoader().getResource("webapp").getFile() + "/WEB-INF/test-schedules.xml";
         System.setProperty(SystemSchedulesConfig.SCHEDULE_CONFIG_FILE_PROP_KEY, customSchedulesFilePath);
     }
-    
+
     @AfterClass
     public void resetCustomCronSchedules() {
         System.getProperties().remove(SystemSchedulesConfig.SCHEDULE_CONFIG_FILE_PROP_KEY);
     }
-    
+
     protected void go(String bundleName, int instances, int activityRecoveries, int correlationSets, int faults, int exchanges, int routes, int messsages, int partnerLinks, int scopes, int variables, int events, int largeData) throws Exception {
         if (server.isDeployed(bundleName)) server.undeployProcess(bundleName);
         server.deployProcess(bundleName);
         ProcessDAO process = null;
         try {
             initialLargeDataCount = getLargeDataCount(0);
-            
+
             server.sendRequestFile("http://localhost:8888/processes/FirstProcess/FirstProcess/FirstProcess/Client", bundleName, "testRequest.soap");
             // every second, clean up cron job kicks in
             Thread.sleep(2000);
@@ -75,7 +75,7 @@ public class SystemCronCleanupTest extends CleanTestBase {
     public String getODEConfigDir() {
         return HIB_DERBY_CONF_DIR;
     }
-    
+
     protected ProcessInstanceDAO getInstance() {
         return HibDaoConnectionFactoryImpl.getInstance();
     }

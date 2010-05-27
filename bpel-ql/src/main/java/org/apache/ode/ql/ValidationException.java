@@ -23,7 +23,7 @@ public class ValidationException extends Exception {
     private static final long serialVersionUID = -6838858327728094014L;
 
     /**
-     * 
+     *
      */
     public ValidationException() {
         super();

@@ -56,8 +56,8 @@ define "ode" do
   define "axis2" do
     compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "bpel-epr", "bpel-runtime",
       "scheduler-simple", "bpel-schemas", "bpel-store", "utils", "agents"),
-      AXIOM, AXIS2_ALL, COMMONS.lang, COMMONS.logging, COMMONS.collections, COMMONS.httpclient, COMMONS.lang, 
-      DERBY, GERONIMO.kernel, GERONIMO.transaction, JAVAX.activation, JAVAX.servlet, JAVAX.stream, 
+      AXIOM, AXIS2_ALL, COMMONS.lang, COMMONS.logging, COMMONS.collections, COMMONS.httpclient, COMMONS.lang,
+      DERBY, GERONIMO.kernel, GERONIMO.transaction, JAVAX.activation, JAVAX.servlet, JAVAX.stream,
       JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS, XMLBEANS, AXIS2_MODULES.libs
 
     test.exclude 'org.apache.ode.axis2.management.*'
@@ -102,7 +102,7 @@ define "ode" do
         jetty.undeploy url
       end
     end
-    
+
     test.using :testng, :forkmode=>'perTest', :properties=>{ "log4j.debug" => true,  "log4j.configuration"=>"test-log4j.properties", "test.ports" => ENV['TEST_PORTS'] }, :java_args=>['-Xmx1024M', '-XX:MaxPermSize=256m']
         #:java_args=>['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6001', '-Xmx1024M', '-XX:MaxPermSize=1024m']
     test.with projects("tools"), libs, AXIS2_MODULES.mods, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, DOM4J, SLF4J, LOG4J
@@ -269,7 +269,7 @@ define "ode" do
 
     # doclet does not support not-found="ignore"
     task "hbm-hack" do |task|
-      process_instance_hbm_file = project.path_to("target/classes/org/apache/ode/daohib/bpel/hobj/HProcessInstance.hbm.xml") 
+      process_instance_hbm_file = project.path_to("target/classes/org/apache/ode/daohib/bpel/hobj/HProcessInstance.hbm.xml")
       process_instance_hbm = File.read(process_instance_hbm_file)
       if !process_instance_hbm.include? "not-found=\"ignore\""
         process_instance_hbm.insert(process_instance_hbm.index("class=\"org.apache.ode.daohib.bpel.hobj.HProcess\"") - 1, "not-found=\"ignore\" ")
@@ -302,11 +302,11 @@ define "ode" do
 
         class << task ; attr_accessor :ant ; end
         task.enhance { |task| task.ant = Buildr::Hibernate.schemaexport }
-       
+
         hibernate_schemaexport target do |task, ant|
           ant.schemaexport(:properties=>properties.to_s, :quiet=>"yes", :text=>"yes", :delimiter=>";",
                            :drop=>"no", :create=>"yes", :output=>target) do
-            ant.fileset(:dir=>source.to_s) { 
+            ant.fileset(:dir=>source.to_s) {
               ant.include :name=>"**/*.hbm.xml"
               ant.exclude :name=>"**/HMessageExchangeProperty.hbm.xml"}
           end
@@ -395,8 +395,8 @@ define "ode" do
         "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
         "jacob", "jacob-ap", "utils", "agents"),
         ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
-        COMMONS.primitives, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector, 
-        JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA, 
+        COMMONS.primitives, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector,
+        JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA,
         SAXON, TRANQL, XALAN, XERCES, XMLBEANS, WSDL4J)
 
       jbi.component :type=>:service_engine, :name=>"OdeBpelEngine", :description=>self.comment
@@ -413,7 +413,7 @@ define "ode" do
       BACKPORT, COMMONS.lang, COMMONS.io, COMMONS.collections, DERBY, GERONIMO.connector, GERONIMO.kernel,
       GERONIMO.transaction, JAVAX.connector, JAVAX.ejb, JAVAX.persistence, JAVAX.stream,
       JAVAX.transaction, JAXEN, JBI, OPENJPA, SAXON, SERVICEMIX, SPRING, TRANQL,
-      XALAN, XBEAN, XMLBEANS, 
+      XALAN, XBEAN, XMLBEANS,
       SLF4J,
       LOG4J,
       DOM4J,
@@ -448,8 +448,8 @@ define "ode" do
 #                                  "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
 #                                  "jacob", "jacob-ap", "utils", "agents"))
 #    libs = artifacts(ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
-#                     COMMONS.primitives, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector, 
-#                     JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA, 
+#                     COMMONS.primitives, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector,
+#                     JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA,
 #                     SAXON, TRANQL, XALAN, XERCES, XMLBEANS, WSDL4J)
 #    package(:bundle).tap do |bnd|
 #      bnd.bnd_file = _("bnd.bnd")
@@ -465,12 +465,12 @@ define "ode" do
 #      bnd.properties["inlines"] = inlines.join(', ')
 #
 #      # embed jars
-#      bnd_libs = ode_libs + artifacts(AXIOM, BACKPORT, GERONIMO.connector, JAXEN, 
-#                                      JAVAX.connector, JAVAX.persistence, JAVAX.ejb, 
-#                                      OPENJPA, SAXON, TRANQL, 
+#      bnd_libs = ode_libs + artifacts(AXIOM, BACKPORT, GERONIMO.connector, JAXEN,
+#                                      JAVAX.connector, JAVAX.persistence, JAVAX.ejb,
+#                                      OPENJPA, SAXON, TRANQL,
 #                                      XALAN, XERCES, XMLBEANS, WSDL4J)
-#      includes = bnd_libs.map{|item| File.basename(item.to_s)} 
-#      bnd.properties["includes"] = includes.join(', ') 
+#      includes = bnd_libs.map{|item| File.basename(item.to_s)}
+#      bnd.properties["includes"] = includes.join(', ')
 #    end
 #
 #    # Generate features.xml
@@ -513,7 +513,7 @@ define "ode" do
     test.exclude "*TestResources"
     package :jar
   end
-  
+
   desc "ODE Agents"
   define "agents" do
      compile

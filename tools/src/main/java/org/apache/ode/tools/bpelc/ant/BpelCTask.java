@@ -26,13 +26,13 @@ import org.apache.tools.ant.BuildException;
 import java.io.File;
 
 public class BpelCTask extends CommandTask {
-  
+
   BpelCompileCommand _bcc = new BpelCompileCommand();
 
   public void setTargetdir(File f) {
     _bcc.setOuputDirectory(f);
   }
-  
+
   public void addConfiguredBpel(BpelSrcElement bse) {
     if (bse.getUrl() == null || bse.getUrl().trim().length() == 0) {
       throw new BuildException("The url attribute is required.");
@@ -43,7 +43,7 @@ public class BpelCTask extends CommandTask {
   public void setWsdl(String uri) throws BuildException {
     _bcc.setWsdlImportUri(uri);
   }
-  
+
   /**
    * @see org.apache.tools.ant.Task#execute()
    */

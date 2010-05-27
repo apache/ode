@@ -43,9 +43,9 @@ public class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implemen
     private PartnerRoleChannel _channel;
     private EndpointReference _myRoleEPR;
     private int responsesReceived;
-    
+
     protected PartnerRoleMessageExchangeImpl(BpelEngineImpl engine, MessageExchangeDAO dao, PortType portType,
-            Operation operation, 
+            Operation operation,
             EndpointReference epr,
             EndpointReference myRoleEPR,
             PartnerRoleChannel channel) {
@@ -89,7 +89,7 @@ public class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implemen
             continueAsync();
 
     }
-    
+
     @Override
     void setResponse(Message outputMessage) throws BpelEngineException {
         // If pub-sub is enabled, we may receive multiple responses. In such cases,
@@ -119,7 +119,7 @@ public class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implemen
 
     /**
      * Continue from the ASYNC state.
-     * 
+     *
      */
     private void continueAsync() {
         // If there is no channel waiting for us, there is nothing to do.
@@ -129,7 +129,7 @@ public class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implemen
             }
             return;
         }
-        
+
         if (LOG.isDebugEnabled()) {
             LOG.debug("create work event for mex=" + getMessageExchangeId());
         }
@@ -152,7 +152,7 @@ public class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implemen
 
     /**
      * Check if we are in the ASYNC state.
-     * 
+     *
      * @return
      */
     private boolean isAsync() {

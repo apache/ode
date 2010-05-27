@@ -27,9 +27,9 @@ import org.apache.ode.utils.CollectionUtils;
 /**
  * An instance of this class represents a correlation key that has a 'join' use case in the process definition.
  * For instance, if a correlation set, 'orderId' is used as initiate="no" in 3 occurrences and initiate="join"
- * in 1 occurrence, any correlation keys that are derived from the correlation set, 'orderId' is an 
+ * in 1 occurrence, any correlation keys that are derived from the correlation set, 'orderId' is an
  * optional correlation key.
- * 
+ *
  * @author sean
  *
  */

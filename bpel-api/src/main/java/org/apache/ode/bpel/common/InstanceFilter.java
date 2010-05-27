@@ -248,7 +248,7 @@ public class InstanceFilter extends Filter<InstanceFilter.Criteria> implements S
             return ISO8601DateParser.parse(date);
         }
     }
-    
+
     /**
      * Converts the status filter value as given by a filter ('active',
      * 'suspended', ...) to an instance state as defined in the ProcessState
@@ -373,7 +373,7 @@ public class InstanceFilter extends Filter<InstanceFilter.Criteria> implements S
         buf.append("}");
         return buf.toString();
     }
-    
+
     private static List<String> parse(String pipeDelimited) {
         List<String> list = new ArrayList<String>();
         StringTokenizer tok = new StringTokenizer(pipeDelimited, "|");
@@ -381,5 +381,5 @@ public class InstanceFilter extends Filter<InstanceFilter.Criteria> implements S
             list.add(tok.nextToken());
         }
         return list;
-    }        
+    }
 }

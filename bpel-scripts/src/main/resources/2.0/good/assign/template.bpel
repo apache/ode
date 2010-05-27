@@ -46,7 +46,7 @@ DESCRIPTION
   </variables>
 
   <sequence>
-    <receive name="startReceive"     
+    <receive name="startReceive"
          createInstance="yes"
          partnerLink="testPartnerLink"
          portType="test:PortType1"

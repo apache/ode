@@ -38,7 +38,7 @@ public class FileUtils {
      * Test if the given path is absolute or not.
      * @param path
      * @return true is absolute
-     * @see java.io.File#isAbsolute() 
+     * @see java.io.File#isAbsolute()
      */
     public static boolean isAbsolute(String path){
         return new File(path).isAbsolute();
@@ -48,7 +48,7 @@ public class FileUtils {
      * Test if the given path is relative or absolute.
      * @param path
      * @return true is relative
-     * @see java.io.File#isAbsolute() 
+     * @see java.io.File#isAbsolute()
      */
     public static boolean isRelative(String path){
         return !isAbsolute(path);

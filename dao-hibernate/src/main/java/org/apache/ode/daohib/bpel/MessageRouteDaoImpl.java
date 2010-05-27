@@ -71,7 +71,7 @@ class MessageRouteDaoImpl extends HibernateDao implements MessageRouteDAO {
         entering("MessageRouteDaoImpl.getIndex");
         return _selector.getIndex();
     }
-    
+
     public String getRoute() {
         return _selector.getRoute();
     }

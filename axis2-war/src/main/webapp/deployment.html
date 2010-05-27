@@ -34,13 +34,13 @@
         <script type="text/javascript" src="js/yui/tabview.js">
         </script>
         <script type="text/javascript">
-            
+
             function init(){
                 org.apache.ode.DeploymentHandling.populateDeployedPacks();
                 setInterval('org.apache.ode.DeploymentHandling.populateDeployedPacks()', 15000);
                 var myTabs = new YAHOO.widget.TabView("tabt");
             }
-            
+
             YAHOO.util.Event.onDOMReady(init);
         </script>
         <style type="text/css">
@@ -48,26 +48,26 @@
                 background: transparent url(../button/assets/add.gif) no-repeat scroll 10% 50%;
                 padding-left: 2em;
             }
-            
+
             .link {
                 margin-left: 5px;
                 color: blue;
             }
-            
+
             .myAccordion .yui-cms-accordion .yui-cms-item {
                 margin-bottom: 10px;
             }
-            
+
             .bd {
                 background: #FFFFFF none repeat scroll 0 0;
             }
-            
+
             ul.deployed {
                 padding: 10px 0px;
                 list-style-image: url(images/process.png);
                 margin-left: 30px;
             }
-            
+
             ul.deployed li {
                 font-family: serif;
                 font-size: 1.2em;
@@ -75,7 +75,7 @@
                 padding: 5px 10px 5px 0px;
                 line-height: 20px;
             }
-            
+
             .depn, .createn{
                 margin-top:30px;
             }
@@ -111,12 +111,12 @@
             <dir id="insideW">
                 <div id="insideL">
                     <div id="content" class="yui-skin-sam">
-                        
+
                         <h2>Deployed Packages</h2>
                         <div id="deployed" class="yui-skin-sam">
-                            
+
                         </div>
-                        
+
                         <h2 class="depn">Deploy New Process</h2>
                         <script type="text/javascript">
                         // Removes leading whitespaces
@@ -134,7 +134,7 @@
                         // Removes leading and ending whitespaces
                         function trim( value ) {
                             return LTrim(RTrim(value));
-                        }   
+                        }
 
                         function clearOpstat(){
                             var opStatDiv = document.getElementById('opstat');
@@ -187,7 +187,7 @@
                             </table>
                             <br>
                             <input type="button" id="doUpload" name="doUpload" value="OK" onclick="submitFormAsync('formdep');" />
-                            
+
                         </form>
                         <div id="opstat" onload="clearOpstat();">
                         </div>

@@ -27,9 +27,9 @@ import java.util.List;
  * Compiled representation of a BPEL fault handler.
  */
 public class OFaultHandler extends OBase {
-  
+
     static final long serialVersionUID = -1L  ;
-    
+
     public final List<OCatch> catchBlocks = new ArrayList<OCatch>();
 
     public OFaultHandler(OProcess owner) {

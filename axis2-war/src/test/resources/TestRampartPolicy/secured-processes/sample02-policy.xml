@@ -82,11 +82,11 @@
                 <sp:Body/>
             </sp:SignedParts>
 
-            <ramp:RampartConfig xmlns:ramp="http://ws.apache.org/rampart/policy"> 
+            <ramp:RampartConfig xmlns:ramp="http://ws.apache.org/rampart/policy">
                 <ramp:user>client</ramp:user>
                 <ramp:encryptionUser>service</ramp:encryptionUser>
                 <ramp:passwordCallbackClass>org.apache.rampart.samples.policy.sample02.PWCBHandler</ramp:passwordCallbackClass>
-                
+
                 <ramp:signatureCrypto>
                     <ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin">
                         <ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type">JKS</ramp:property>

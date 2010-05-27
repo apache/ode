@@ -18,7 +18,7 @@
   ~ under the License.
   -->
 <process name="HelloWorld2"
-    targetNamespace="http://ode/bpel/unit-test" 
+    targetNamespace="http://ode/bpel/unit-test"
     xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
     xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
     xmlns:tns="http://ode/bpel/unit-test"
@@ -29,9 +29,9 @@
     queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
     expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
 
-  <import 
-    namespace="http://foo/extvar" 
-    location="ExtVar.xsd" 
+  <import
+    namespace="http://foo/extvar"
+    location="ExtVar.xsd"
     importType="http://www.w3.org/2001/XMLSchema"/>
 
   <import location="HelloWorld2.wsdl"
@@ -40,21 +40,21 @@
 
 
    <partnerLinks>
-      <partnerLink name="helloPartnerLink" 
-         partnerLinkType="test:HelloPartnerLinkType" 
+      <partnerLink name="helloPartnerLink"
+         partnerLinkType="test:HelloPartnerLinkType"
          myRole="me" />
    </partnerLinks>
-    
+
    <variables>
      <variable name="myVar" messageType="test:HelloMessage"/>
      <variable name="tmpVar" type="xsd:string"/>
-     <variable name="tmpDate" type="xsd:dateTime"/>     
+     <variable name="tmpDate" type="xsd:dateTime"/>
      <variable name="idx" type="xsd:string" />
      <variable name="external" element="foo:row" xvar:id="evar1" xvar:relates-to="idx"/>
    </variables>
-        
-   <sequence>   
-       <receive 
+
+   <sequence>
+       <receive
           name="start"
           partnerLink="helloPartnerLink"
           portType="test:HelloPortType"
@@ -71,7 +71,7 @@
             <element name="foo" type="string"/>
             <element name="bar" type="string"/>
           -->
-          
+
       <assign>
          <copy>
             <from>''</from>
@@ -88,9 +88,9 @@
              <to variable="myVar" part="TestPart"/>
          </copy>
       </assign>
-       <reply name="end"  
+       <reply name="end"
               partnerLink="helloPartnerLink"
-              portType="test:HelloPortType" 
+              portType="test:HelloPortType"
               operation="hello"
               variable="myVar"/>
    </sequence>

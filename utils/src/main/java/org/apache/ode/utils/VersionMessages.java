@@ -23,7 +23,7 @@ import org.apache.ode.utils.msg.MessageBundle;
 
 /**
  * Message bundle for the <code>Version</code> class.
- * 
+ *
  * @see org.apache.ode.utils.Version
  */
 public class VersionMessages extends MessageBundle {

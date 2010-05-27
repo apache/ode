@@ -152,7 +152,7 @@ class EH_ALARM extends BpelJacobRunnable {
             } else if (now.before(_alarm)) {
                 TimerResponseChannel trc = newChannel(TimerResponseChannel.class);
                 getBpelRuntimeContext().registerTimer(trc,_alarm.getTime());
-                
+
                 listeners.add(new TimerResponseChannelListener(trc){
                     private static final long serialVersionUID = 1110683632756756017L;
 

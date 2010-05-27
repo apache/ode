@@ -32,7 +32,7 @@ import org.apache.ode.utils.msg.MessageBundle;
  */
 class CompensateScopeGenerator extends DefaultActivityGenerator {
     private static final CompensateGeneratorMessages __cmsgs = MessageBundle.getMessages(CompensateGeneratorMessages.class);
-    
+
     public void compile(OActivity output, Activity src) {
         CompensateScopeActivity compSrc = (CompensateScopeActivity) src;
         if (compSrc.getScopeToCompensate() == null)

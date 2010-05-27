@@ -48,10 +48,10 @@ public class RuntimeDataCleanupRunnable implements MapSerializableRunnable, Cont
     private CleanupInfo _cleanupInfo;
     private QName _pid;
     private Set<QName> _pidsToExclude;
-    
+
     public RuntimeDataCleanupRunnable() {
     }
-    
+
     @SuppressWarnings("unchecked")
     public void restoreFromDetails(JobDetails details) {
         _cleanupInfo = (CleanupInfo)details.getDetailsExt().get("cleanupInfo");
@@ -67,7 +67,7 @@ public class RuntimeDataCleanupRunnable implements MapSerializableRunnable, Cont
     public void setContexts(Contexts contexts) {
         _contexts = contexts;
     }
-    
+
     public void run() {
         _log.info("CRON CLEAN.run().");
 
@@ -84,7 +84,7 @@ public class RuntimeDataCleanupRunnable implements MapSerializableRunnable, Cont
                 }
                 filter += " pid<>" + pids.toString();
             }
-            
+
             if( filter.trim().length() > 0 ) {
                 _log.info("CRON CLEAN.run(" + filter + ")");
                 long numberOfDeletedInstances = 0;
@@ -94,10 +94,10 @@ public class RuntimeDataCleanupRunnable implements MapSerializableRunnable, Cont
             }
         }
     }
-    
+
     int cleanInstances(String filter, final Set<CLEANUP_CATEGORY> categories, int limit) {
         _log.debug("CRON CLEAN using filter: " + filter + ", limit: " + limit);
-        
+
         final InstanceFilter instanceFilter = new InstanceFilter(filter, "", limit);
         try {
             if( _contexts.scheduler != null ) {

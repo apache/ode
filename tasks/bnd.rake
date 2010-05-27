@@ -15,14 +15,14 @@
 #    limitations under the License.
 #
 
-# This task creates an OSGi bundle package using the bnd tool. 
+# This task creates an OSGi bundle package using the bnd tool.
 #
-# The classpath and path to a bnd configuration file are required. 
+# The classpath and path to a bnd configuration file are required.
 # Additional properties can be specified using the bnd.properties
 # hash. Refer to the bnd documentation (http://www.aqute.biz/Code/Bnd)
-# for details on the supported properties. 
+# for details on the supported properties.
 #
-# The easiest way to use this task is through the Project#package method. 
+# The easiest way to use this task is through the Project#package method.
 # For example:
 #   package(:bundle).tap do |bnd|
 #     bnd.bnd_file = 'conf/foo.bnd'
@@ -41,7 +41,7 @@ class BndTask < Rake::FileTask
 
   # Path to bnd file
   attr_accessor :bnd_file
-  
+
   # Hash of properties passed to bnd
   attr_accessor :properties
 
@@ -52,23 +52,23 @@ class BndTask < Rake::FileTask
     # Make sure bnd tool is available
     Buildr.artifact(BND).invoke
 
-    enhance do 
+    enhance do
       Buildr.ant('bnd') do |project|
-        
+
         # pass properties to bnd as ant properties
         properties.each do |key, value|
           project.property(:name=>key, :value=>value)
         end
-        
+
         project.taskdef :name=>'bnd', :classname=>'aQute.bnd.ant.BndTask', :classpath=>Buildr.artifact(BND)
-        project.bnd(:classpath=>classpath, :sourcepath=>(sourcepath == nil) ? "" : File.expand_path(sourcepath), 
-                    :files=>File.expand_path(bnd_file), :output=>name, 
-                    :eclipse=>false, :failok=>false, :exceptions=>true) 
+        project.bnd(:classpath=>classpath, :sourcepath=>(sourcepath == nil) ? "" : File.expand_path(sourcepath),
+                    :files=>File.expand_path(bnd_file), :output=>name,
+                    :eclipse=>false, :failok=>false, :exceptions=>true)
       end
     end
   end
-  
-  
+
+
 end
 
 
@@ -77,9 +77,9 @@ class Project
   def package_as_bundle(file_name) #:nodoc
     BndTask.define_task(file_name)
   end
-  
+
   def package_as_bundle_spec(spec) #:nodoc
     spec.merge({ :type=>:jar, :classifier=>'bundle' })
   end
-  
+
 end

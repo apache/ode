@@ -96,7 +96,7 @@ version: 2.5.2
 .yui-navset-left .yui-nav,
 .yui-navset-right .yui-nav {
    position:absolute;
-   z-index:1; 
+   z-index:1;
 }
 
 .yui-navset-top .yui-nav,

@@ -29,13 +29,13 @@ import java.util.Set;
  * need to be matched up to a message, while the message set is the database
  * representation of the messages that have been received that need to be
  * matched up to a pcik/receive.
- * 
+ *
  * @hibernate.class table="BPEL_CORRELATOR"
  * @hibernate.query name="SELECT_CORRELATOR_IDS_BY_PROCESS" query="select id from HCorrelator as c where c.process = :process"
  */
 public class HCorrelator extends HObject {
     public final static String SELECT_CORRELATOR_IDS_BY_PROCESS = "SELECT_CORRELATOR_IDS_BY_PROCESS";
-    
+
     private HProcess _process;
 
     private String _correlatorId;
@@ -54,7 +54,7 @@ public class HCorrelator extends HObject {
     /**
      * Get the set of {@link HCorrelatorMessage} objects representing the
      * messages that need matching to a selector (i.e. pick/receive).
-     * 
+     *
      * @hibernate.set lazy="true" inverse="true"
      * @hibernate.collection-key column="CORRELATOR" foreign-key="none"
      * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HCorrelatorMessage"
@@ -96,7 +96,7 @@ public class HCorrelator extends HObject {
     /**
      * Get the set of {@link HCorrelatorSelector} objects representing the
      * selectors (i.e. pick/receive) that need matching to an input message.
-     * 
+     *
      * @hibernate.set lazy="true" inverse="true"
      * @hibernate.collection-key column="CORRELATOR" foreign-key="none"
      * @hibernate.collection-one-to-many class="org.apache.ode.daohib.bpel.hobj.HCorrelatorSelector"

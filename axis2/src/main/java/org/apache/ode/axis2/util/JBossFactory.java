@@ -26,7 +26,7 @@ import javax.transaction.TransactionManager;
 public class JBossFactory {
 
     public static final String JNDI_LOOKUP_PATH = "java:/TransactionManager";
-    
+
     /* Public no-arg contructor is required */
     public JBossFactory() {
     }

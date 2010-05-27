@@ -65,7 +65,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
         this.direction = direction;
         this.messageExchangeId = messageEchangeId;
     }
-    
+
     public String getMessageExchangeId() {
         return messageExchangeId;
     }
@@ -253,7 +253,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
 
     public void setPartnerLink(PartnerLinkDAO plinkDAO) {
         _plink = (PartnerLinkDAOImpl) plinkDAO;
-        
+
     }
 
     public PartnerLinkDAO getPartnerLink() {
@@ -279,7 +279,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
     public int getSubscriberCount() {
         return subscriberCount;
     }
-    
+
     public void setSubscriberCount(int subscriberCount) {
         this.subscriberCount = subscriberCount;
     }
@@ -287,7 +287,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
     public void incrementSubscriberCount() {
         ++subscriberCount;
     }
-    
+
     public void release(boolean doClean) {
         instance = null;
         process = null;
@@ -300,7 +300,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
     public void releasePremieMessages() {
         // do nothing; early messages are deleted during CorrelatorDaoImpl().dequeueMessage()
     }
-    
+
     public String toString() {
         return "mem.mex(direction=" + direction + " id=" + messageExchangeId + ")";
     }

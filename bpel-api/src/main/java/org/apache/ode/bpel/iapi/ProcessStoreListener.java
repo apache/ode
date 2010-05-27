@@ -19,11 +19,11 @@
 
 package org.apache.ode.bpel.iapi;
 
-/** 
- * Process configuration store listener interface. 
+/**
+ * Process configuration store listener interface.
  */
 public interface ProcessStoreListener {
-    
+
     public void onProcessStoreEvent(ProcessStoreEvent event);
 
 }

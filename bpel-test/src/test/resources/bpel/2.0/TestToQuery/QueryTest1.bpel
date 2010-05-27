@@ -91,7 +91,7 @@
                 <bpws:to variable="Record">
                     <bpws:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"><![CDATA[tns:SomeValue]]></bpws:query>
                 </bpws:to>
-                
+
                 <!-- <bpws:to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"><![CDATA[$Record/tns:SomeValue]]></bpws:to> -->
 
             </bpws:copy>

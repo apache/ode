@@ -27,18 +27,18 @@ public class Flag implements CommandlineFragment {
   private boolean _isSet;
   private String _description;
   private boolean _isOptional;
-  
+
   public Flag(String name, String description, boolean optional) {
     _name = COMMAND_PREFIX + name;
     _description = description;
     _isSet = false;
     _isOptional = optional;
   }
-  
+
   public void reset() {
     _isSet = false;
   }
-  
+
   public boolean isOptional() {
     return _isOptional;
   }
@@ -58,7 +58,7 @@ public class Flag implements CommandlineFragment {
   public boolean isSet() {
     return _isSet;
   }
-  
+
   public String getUsage() {
     return _name;
   }

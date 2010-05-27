@@ -25,7 +25,7 @@ import org.apache.ode.bpel.compiler.bom.Expression;
 public interface ExpressionValidator {
     /**
      * Notifies process compilation began
-     * 
+     *
      * @param compilerContext
      */
     void bpelImportsLoaded(Process source, CompilerContext compilerContext) throws CompilationException;
@@ -33,7 +33,7 @@ public interface ExpressionValidator {
     /**
      * Notifies process compilation completed.
      * Mainly for cleaning up resources.
-     * 
+     *
      * @param compilerContext
      */
     void bpelCompilationCompleted(Process source) throws CompilationException;
@@ -41,7 +41,7 @@ public interface ExpressionValidator {
     /**
      * Validate given expression.
      * @param source It's a Query or Expression
-     * @param requestedResultType It's OVarType or underlying Expression Validator's type. 
+     * @param requestedResultType It's OVarType or underlying Expression Validator's type.
      *     It may be null if there are no constrains for result type
      * @return Evaluated expression's type
      */

@@ -167,8 +167,8 @@ public class SoapExternalService implements ExternalService {
             }else{
                 if (__log.isDebugEnabled()) __log.debug("Endpoint URL overridden by process. "+endpointUrl+" => "+mexEndpointUrl);
             }
-            
-            
+
+
             axisEPR.setAddress(_clusterUrlTransformer.rewriteOutgoingClusterURL(axisEPR.getAddress()));
 
             if (__log.isDebugEnabled()) {

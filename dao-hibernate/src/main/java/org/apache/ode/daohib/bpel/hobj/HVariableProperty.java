@@ -23,7 +23,7 @@ package org.apache.ode.daohib.bpel.hobj;
  * Efficient storage of properties (bpel properties).
  * Useful for identification of process instances based
  * on indexed lookup of property values.
- * 
+ *
  * @hibernate.class table="VAR_PROPERTY"
  * @hibernate.query name="SELECT_VARIABLE_PROPERTY_IDS_BY_INSTANCES" query="select id from HVariableProperty as p where p.xmlData in(select x.id from HXmlData x where x.instance in (:instances))"
  */
@@ -33,20 +33,20 @@ public class HVariableProperty extends HObject{
     private String _propertyValue;
     private String _propertyName;
     private HXmlData _variable;
-    
+
     /**
      * Default constructor
      */
     public HVariableProperty() {
         super();
     }
-    
+
     public HVariableProperty(HXmlData var, String name, String value){
         _variable = var;
         _propertyName = name;
         _propertyValue = value;
     }
-    
+
     /**
      * @hibernate.many-to-one
      *    column="XML_DATA_ID" foreign-key="none"
@@ -54,11 +54,11 @@ public class HVariableProperty extends HObject{
     public HXmlData getXmlData(){
         return _variable;
     }
-    
+
     public void setXmlData(HXmlData xmldata){
         _variable = xmldata;
     }
-    
+
     /**
      * @hibernate.property
      *    column="PROP_VALUE"
@@ -67,7 +67,7 @@ public class HVariableProperty extends HObject{
     public String getValue() {
         return _propertyValue;
     }
-    
+
     public void setValue(String value) {
         _propertyValue = value;
     }
@@ -82,7 +82,7 @@ public class HVariableProperty extends HObject{
     public String getName() {
         return _propertyName;
     }
-    
+
     public void setName(String name) {
         _propertyName = name;
     }

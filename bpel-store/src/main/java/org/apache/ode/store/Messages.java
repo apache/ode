@@ -208,5 +208,5 @@ public class Messages extends MessageBundle {
             return format("Deploy failed; BPEL compilation errors." );
         }
     }
-    
+
 }

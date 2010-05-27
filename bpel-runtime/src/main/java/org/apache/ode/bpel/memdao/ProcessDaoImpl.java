@@ -77,7 +77,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     public Serializable getId() {
         return _guid;
     }
-    
+
     public QName getProcessId() {
         return _processId;
     }
@@ -92,17 +92,17 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
 
     public Collection<CorrelatorDAO> getCorrelators() {
         // Note: _correlators.values() is a Collection<CorrealatorDaoImpl>. We can't just return this object
-        // since Collection<CorrelatorDAO> is /not/ assignment compatible with Collection<CorrelatorDaoImpl>. 
+        // since Collection<CorrelatorDAO> is /not/ assignment compatible with Collection<CorrelatorDaoImpl>.
         // However, a immutable Collection<CorrelationDAO> is assignment compatible with Collection<CorrelatorDaoImpl>,
         // but.... we need to introduce some ambiguity into the type hierarchy so that Java will infer the correct type.
-        
+
         // Make an ambiguous collection.
         Collection<? extends CorrelatorDAO> foo =  _correlators.values();
 
-        // In order to get a collection of the super-type from a sub-type we must make the collection read-only. 
+        // In order to get a collection of the super-type from a sub-type we must make the collection read-only.
         return Collections.unmodifiableCollection(foo);
     }
-    
+
     public void removeRoutes(String routeId, ProcessInstanceDAO target) {
         for (CorrelatorDAO correlatorDAO : _correlators.values()) {
             correlatorDAO.removeRoutes(routeId, target);
@@ -119,7 +119,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
         });
 
         discardOldInstances();
-        
+
         // Removing right away on rollback
         final Long iid = newInstance.getInstanceId();
         _conn.onRollback(new Runnable() {
@@ -170,7 +170,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     public void deleteProcessAndRoutes() {
         _store.remove(_processId);
     }
-    
+
     public long getVersion() {
         return _version;
     }
@@ -206,7 +206,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     }
 
     public int getActivityFailureCount() {
-        return 0;  
+        return 0;
     }
 
     public Date getActivityFailureDateTime() {
@@ -216,7 +216,7 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
     public String getGuid() {
         return _guid;
     }
-    
+
     public void setGuid(String guid) {
         _guid = guid;
     }

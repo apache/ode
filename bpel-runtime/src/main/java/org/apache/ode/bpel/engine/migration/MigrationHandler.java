@@ -47,7 +47,7 @@ public class MigrationHandler {
 
     private Contexts _contexts;
     private List<MigrationLink> migrationLinks = new ArrayList<MigrationLink>() {{
-        add(new MigrationLink(1, 2, new Migration[] { new CorrelatorsMigration(), 
+        add(new MigrationLink(1, 2, new Migration[] { new CorrelatorsMigration(),
                                                         new CorrelationKeyMigration() } ));
         add(new MigrationLink(2, 3, new Migration[] { new CorrelationKeySetMigration() } ));
         add(new MigrationLink(4, 3, new Migration[] { new CorrelationKeySetMigration() } ));
@@ -79,7 +79,7 @@ public class MigrationHandler {
             return true;
         }
         if (version == CURRENT_SCHEMA_VERSION) return true;
-        
+
         try {
             boolean success = _contexts.scheduler.execTransaction(new Callable<Boolean>() {
                 public Boolean call() throws Exception {

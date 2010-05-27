@@ -18,29 +18,29 @@
   -->
 
 <process name="flow7-2.0"
-     targetNamespace="http://ode/bpel/unit-test" 
+     targetNamespace="http://ode/bpel/unit-test"
      xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
      xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
      xmlns:tns="http://ode/bpel/unit-test"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-     xmlns:test="http://ode/bpel/unit-test.wsdl" 
+     xmlns:test="http://ode/bpel/unit-test.wsdl"
      suppressJoinFailure="yes">
 
   <import importType="http://schemas.xmlsoap.org/wsdl/"
       location="test.wsdl"
       namespace="http://ode/bpel/unit-test.wsdl" />
-  
+
   <partnerLinks>
-      <partnerLink name="testPartnerLink" 
-           partnerLinkType="test:TestPartnerLinkType" 
+      <partnerLink name="testPartnerLink"
+           partnerLinkType="test:TestPartnerLinkType"
            myRole="me" />
   </partnerLinks>
-  
+
   <variables>
     <variable name="var1" messageType="test:TestMessage1"/>
   </variables>
-  
-  <sequence>                                        
+
+  <sequence>
     <flow name="F1">
       <links>
     <link name="link-a"/>
@@ -57,7 +57,7 @@
       <to>$var1/TestPart</to>
     </copy>
       </assign>
-      <flow name="F2">    
+      <flow name="F2">
     <sources>
       <!-- this refers to containing F1.link-a -->
       <source linkName="link-a" />
@@ -65,7 +65,7 @@
     <links>
       <link name="link-a"/>
     </links>
-    
+
     <assign name="firstAssign">
       <targets>
         <!-- F2.link-a -->
@@ -80,22 +80,22 @@
     </assign>
     <receive name="startReceive"
          createInstance="yes"
-         
+
          partnerLink="testPartnerLink"
          portType="test:TestPortType"
          operation="testOperation"
          variable="var1">
       <sources>
-        <!-- F2.link-a --> 
+        <!-- F2.link-a -->
         <source linkName="link-a"/>
-      </sources>        
+      </sources>
     </receive>
       </flow>
     </flow>
-    <reply name="endReply" 
-       operation="testOperation" 
+    <reply name="endReply"
+       operation="testOperation"
        partnerLink="testPartnerLink"
-       portType="test:TestPortType" 
+       portType="test:TestPortType"
        variable="var1"/>
   </sequence>
 </process>

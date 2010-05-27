@@ -27,11 +27,11 @@ import javax.xml.namespace.QName;
  * Extensibility element that contains the xml-schema text as a string.
  */
 public class XMLSchemaType implements ExtensibilityElement, Serializable {
-  
+
   private static final long serialVersionUID = -5826656164421594730L;
 
   private static final String NS_XSD_2001 = "http://www.w3.org/2001/XMLSchema";
-  
+
   /** WSDL QNAME identifier */
   public static final QName QNAME = new QName(NS_XSD_2001, "schema");
 

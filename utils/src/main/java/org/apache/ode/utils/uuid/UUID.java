@@ -60,7 +60,7 @@ public class UUID implements Serializable {
 
     /**
      * String form of a uuid.
-     * 
+     *
      * @param uuid
      *            convert the <code>uuid</code> to a string
      * @return string representation

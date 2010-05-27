@@ -201,7 +201,7 @@ public class Database {
                     getClass().getName(),
                     getClass().getClassLoader());
 
-        
+
         try {
             javax.resource.spi.ManagedConnectionFactory mcf = null;
             String mcfClass = _odeConfig.getDbInternalMCFClass();

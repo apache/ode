@@ -71,16 +71,16 @@ public interface ProcessStore {
      */
     ProcessConf getProcessConfiguration(QName processId);
 
-   
+
     /**
      * Register a configuration store listener.
-     * @param psl  {@link ProcessStoreListener} 
+     * @param psl  {@link ProcessStoreListener}
      */
     void registerListener(ProcessStoreListener psl);
-    
+
     /**
      * Unregister a configuration store listener.
-     * @param psl {@link ProcessStoreListener} 
+     * @param psl {@link ProcessStoreListener}
      */
     void unregisterListener(ProcessStoreListener psl);
 
@@ -88,13 +88,13 @@ public interface ProcessStore {
     /**
      * Set a process property.
      * @param pid
-     * @param propName 
+     * @param propName
      * @param value
      */
     void setProperty(QName pid, QName propName, String value);
-    
+
     void setProperty(QName pid, QName propName, Node value);
-    
+
     /**
      * Marks a process as active / retired or disabled
      * @param pid
@@ -114,6 +114,6 @@ public interface ProcessStore {
      * @return
      */
     long getCurrentVersion();
-    
+
     void refreshSchedules(String packageName);
 }

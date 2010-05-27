@@ -32,7 +32,7 @@ import org.apache.ode.bpel.common.CorrelationKeySet;
  */
 public class CorrelationNoMatchEvent extends CorrelationEvent {
     private static final long serialVersionUID = 1L;
-    
+
     // left out for backward-compatibility
     private final Set<CorrelationKey> _keys = new HashSet<CorrelationKey>();
     private CorrelationKeySet _keySet = null;
@@ -54,7 +54,7 @@ public class CorrelationNoMatchEvent extends CorrelationEvent {
                 _keySet.add(aKey);
             }
         }
-        
+
         return _keySet;
     }
 

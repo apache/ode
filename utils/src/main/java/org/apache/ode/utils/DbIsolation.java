@@ -33,7 +33,7 @@ public class DbIsolation {
     private static final Log __log = LogFactory.getLog(DbIsolation.class);
     private static int _isolationLevel;
 
-    // Read Ode-specific isolation level configuration 
+    // Read Ode-specific isolation level configuration
     static {
         try {
             _isolationLevel = Integer.parseInt(System.getProperty("ode.connection.isolation", "2"));
@@ -45,11 +45,11 @@ public class DbIsolation {
     public static int getOdeIsolationLevel() {
         return _isolationLevel;
     }
-    
+
     public static void setOdeIsolationLevel(int isolationLevel) {
         _isolationLevel = isolationLevel;
     }
-    
+
     /**
      * Set Ode-specific isolation level on the connection, if needed.
      */
@@ -60,7 +60,7 @@ public class DbIsolation {
                 c.setTransactionIsolation(_isolationLevel);
             }
         } catch (Exception e) {
-            if (__log.isDebugEnabled()) 
+            if (__log.isDebugEnabled())
                 __log.debug("Error while setting isolation level to "+_isolationLevel, e);
         }
     }

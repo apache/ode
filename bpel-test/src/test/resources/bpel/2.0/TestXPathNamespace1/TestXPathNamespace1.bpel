@@ -28,15 +28,15 @@
     queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
     expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
     suppressJoinFailure="yes">
-    
+
     <import location="TestXPathNamespace1.wsdl"
         namespace="http://ode/bpel/unit-test/TestXPathNamespace1.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/" />
     <import location="../ProbeService/probeService.wsdl"
         namespace="http://ode/bpel/unit-test/ProbeService.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/"/>
-    
-    
+
+
     <!-- test namespace syntax within XPATH expression -->
     <partnerLinks>
         <partnerLink name="request" partnerLinkType="wns:TestXPathNamespace1Request" myRole="TestXPathNamespace1Service"/>

@@ -34,7 +34,7 @@ public class ForEachActivity extends CompositeActivity {
 
     /**
      * Gets the counter variable name used for iteration.
-     * 
+     *
      * @return counter variable name
      */
     public String getCounterName() {
@@ -44,7 +44,7 @@ public class ForEachActivity extends CompositeActivity {
     /**
      * Returns whether this forEach executes iterations on nested scopes
      * parrallely or sequentially
-     * 
+     *
      * @return true if parrallel, false if sequential
      */
     public boolean isParallel() {
@@ -54,7 +54,7 @@ public class ForEachActivity extends CompositeActivity {
     /**\
      * Gets the expression that will be used as a start value for the iteration
      * counter.
-     * 
+     *
      * @return start iteration counter
      */
     public Expression getStartCounter() {
@@ -64,7 +64,7 @@ public class ForEachActivity extends CompositeActivity {
     /**
      * Sets the expression that will be used as a termination value for the
      * forEach iterations.
-     * 
+     *
      * @return final counter expression
      */
     public Expression getFinalCounter() {
@@ -74,7 +74,7 @@ public class ForEachActivity extends CompositeActivity {
     /**
      * Gets a completion condition defining how many child scope completions can
      * occur before the forEach completes.
-     * 
+     *
      * @return completion condition
      */
     public CompletionCondition getCompletionCondition() {
@@ -83,7 +83,7 @@ public class ForEachActivity extends CompositeActivity {
 
     /**
      * Gets the scope activity that we will iterate on.
-     * 
+     *
      * @return child scope activity
      */
     public ScopeActivity getChild() {

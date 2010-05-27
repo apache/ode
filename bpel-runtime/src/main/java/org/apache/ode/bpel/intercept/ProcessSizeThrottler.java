@@ -22,7 +22,7 @@ import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.runtime.InvalidProcessException;
 
 /**
- * An example of a  simple interceptor providing a "throttling"  capability - that is an 
+ * An example of a  simple interceptor providing a "throttling"  capability - that is an
  * ability to limit the size of processes created in a server.
  */
 public class ProcessSizeThrottler extends NoOpInterceptor {

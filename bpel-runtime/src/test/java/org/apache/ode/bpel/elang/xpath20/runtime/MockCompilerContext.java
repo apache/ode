@@ -57,7 +57,7 @@ import org.apache.ode.utils.NSContext;
 public class MockCompilerContext implements CompilerContext {
     private OProcess _oprocess = new OProcess("20");
     private Map<String , Variable> _vars =new  HashMap<String, Variable>();
-    
+
     public OExpression constantExpr(boolean value) {
         // TODO Auto-generated method stub
         return null;
@@ -144,7 +144,7 @@ public class MockCompilerContext implements CompilerContext {
 
     public void recoveredFromError(Object where, CompilationException bce) throws CompilationException {
         // TODO Auto-generated method stub
-        
+
     }
 
     public OLink resolveLink(String linkName) throws CompilationException {
@@ -173,7 +173,7 @@ public class MockCompilerContext implements CompilerContext {
 
     public void compile(OActivity context, BpelObject activity, Runnable run) {
         // TODO Auto-generated method stub
-        
+
     }
 
     public boolean isPartnerLinkAssigned(String plink) {
@@ -210,7 +210,7 @@ public class MockCompilerContext implements CompilerContext {
     public Part resolveHeaderPart(Variable variable, String partname) throws CompilationException {
         return null;
     }
-    
+
     public Map<URI, Source> getSchemaSources() {
         // TODO Auto-generated method stub
         return null;

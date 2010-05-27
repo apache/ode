@@ -29,11 +29,11 @@ import java.rmi.RemoteException;
 public interface OdeTransportPipe extends Remote {
 
   /**
-   * Get the names of the client-side connection interfaces. 
+   * Get the names of the client-side connection interfaces.
    * @return
    */
   String[] getConnectionClassNames() throws RemoteException;
-  
+
   /**
    * Invoke a method on a service provier session.
    * @return DOCUMENTME

@@ -18,27 +18,27 @@
   -->
 
 <process name="assign10"
-    targetNamespace="http://ode/bpel/unit-test" 
+    targetNamespace="http://ode/bpel/unit-test"
     xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
     xmlns="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
     xmlns:tns="http://ode/bpel/unit-test"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    xmlns:test="http://ode/bpel/unit-test.wsdl" 
+    xmlns:test="http://ode/bpel/unit-test.wsdl"
     xmlns:t="http://ode/bpel/unit-test.xsd"
     suppressJoinFailure="yes">
    <partnerLinks>
-      <partnerLink name="testPartnerLink" 
-         partnerLinkType="test:TestPartnerLinkType" 
+      <partnerLink name="testPartnerLink"
+         partnerLinkType="test:TestPartnerLinkType"
          myRole="me" />
    </partnerLinks>
-    
+
    <variables>
      <variable name="var1" messageType="test:TestMessage1"/>
      <variable name="var2" element="t:Foo"/>
    </variables>
-    
-   <sequence>   
-       <receive 
+
+   <sequence>
+       <receive
           createInstance="yes"
           name="startReceive"
           partnerLink="testPartnerLink"
@@ -57,12 +57,12 @@
              </copy>
           </assign>
       </scope>
-       <reply name="endReply" 
-              operation="testOperation" 
+       <reply name="endReply"
+              operation="testOperation"
               partnerLink="testPartnerLink"
-              portType="test:TestPortType" 
+              portType="test:TestPortType"
               variable="var1"/>
-          
+
     </sequence>
 
 </process>

@@ -53,10 +53,10 @@ public class OPickReceive extends OActivity{
             super(owner);
         }
     }
-    
+
     public static class OnMessage extends OBase {
         static final long serialVersionUID = -1L  ;
-        
+
         /** Correlations to initialize. */
         public final List<OScope.CorrelationSet> initCorrelations = new ArrayList<OScope.CorrelationSet>();
 
@@ -64,7 +64,7 @@ public class OPickReceive extends OActivity{
         public List<OScope.CorrelationSet> matchCorrelations = new ArrayList<OScope.CorrelationSet>();
         // left out for backward-compatibility, java serialization is lenient about scope
         private OScope.CorrelationSet matchCorrelation;
-        
+
         /** Correlations to join on. */
         public final List<OScope.CorrelationSet> joinCorrelations = new ArrayList<OScope.CorrelationSet>();
         // left out for backward-compatibility, java serialization is lenient about scope
@@ -77,7 +77,7 @@ public class OPickReceive extends OActivity{
 
         /** OASIS addition for disambiguating receives (optional). */
         public String messageExchangeId = "";
-        
+
         public String route = "one";
 
         public OnMessage(OProcess owner) {
@@ -87,7 +87,7 @@ public class OPickReceive extends OActivity{
         public String getCorrelatorId() {
             return partnerLink.getId() + "." + operation.getName();
         }
-        
+
         private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
             in.defaultReadObject();
 

@@ -34,15 +34,15 @@ import org.jmock.MockObjectTestCase;
 
 public class MyRoleMessageExchangeImplTest extends MockObjectTestCase {
     private Mock mexDao;
-    
+
     private TestMyRoleMessageExchangeImpl myRoleMexImpl;
     Contexts contexts;
     BpelEngineImpl engine;
     TransactionManager _txm;
-    
+
     public void testResponseReceived() throws Exception {
         mexDao.expects(exactly(3)).method("getCorrelationId").will(returnValue("corrId"));
-        
+
         final boolean[] responded = new boolean[1];
         myRoleMexImpl.callbacks().put("corrId", new ResponseCallback() {
             synchronized boolean responseReceived() {
@@ -53,22 +53,22 @@ public class MyRoleMessageExchangeImplTest extends MockObjectTestCase {
             synchronized void waitResponse(long timeout) {
             }
         });
-        
+
         _txm.begin();
         myRoleMexImpl.responseReceived();
         _txm.rollback();
-        
+
         _txm.begin();
         myRoleMexImpl.responseReceived();
         _txm.rollback();
-        
+
         _txm.begin();
         myRoleMexImpl.responseReceived();
         _txm.commit();
-        
+
         assertTrue(responded[0]);
     }
-    
+
     public void testResponseTimeout() throws Exception {
         mexDao.expects(atLeastOnce()).method("getCorrelationId").will(returnValue("corrId"));
         myRoleMexImpl.callbacks().put("corrId", new MyRoleMessageExchangeImpl.ResponseCallback());
@@ -82,14 +82,14 @@ public class MyRoleMessageExchangeImplTest extends MockObjectTestCase {
             fail("Should throw a TimeoutException!!");
         } catch( TimeoutException te ) {}
     }
-    
+
     protected void setUp() throws Exception {
         _txm = new GeronimoTransactionManager();
-        
+
         mexDao = new Mock(MessageExchangeDAO.class);
         SimpleScheduler scheduler = new SimpleScheduler("node", null, new Properties());
         scheduler.setTransactionManager(_txm);
-        
+
         contexts = new Contexts();
         contexts.scheduler = scheduler;
         engine = new BpelEngineImpl(contexts);
@@ -101,7 +101,7 @@ public class MyRoleMessageExchangeImplTest extends MockObjectTestCase {
         public TestMyRoleMessageExchangeImpl() {
             super(null, engine, (MessageExchangeDAO)mexDao.proxy());
         }
-        
+
         public Map<String, ResponseCallback> callbacks() {
             return _waitingCallbacks;
         }

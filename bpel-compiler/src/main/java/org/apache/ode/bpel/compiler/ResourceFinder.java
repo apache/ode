@@ -25,13 +25,13 @@ import java.net.URI;
 
 /**
  * General interace for retrieving resources identified by a URI.
- * 
+ *
  * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
  */
 public interface ResourceFinder {
-  
+
     /**
-     * Obtain an input stream to the resource at the given URI. 
+     * Obtain an input stream to the resource at the given URI.
      * @param uri resource URI
      * @return input stream or <code>null</code> if the resource is not found
      * @throws MalformedURLException in case of invalid URI
@@ -40,7 +40,7 @@ public interface ResourceFinder {
     InputStream openResource(URI uri) throws MalformedURLException, IOException;
 
     URI getBaseResourceURI();
-    
+
     URI resolve(URI parent, URI child);
 }
 

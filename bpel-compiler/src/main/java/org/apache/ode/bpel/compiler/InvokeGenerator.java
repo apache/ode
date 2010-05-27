@@ -67,7 +67,7 @@ class InvokeGenerator extends DefaultActivityGenerator {
         // throw new CompilationException(CMSGSG.errPortTypeMismatch(portType,
         // onMessage.partnerLink.myRolePortType.getQName()));
         if (oinvoke.operation.getInput() != null && oinvoke.operation.getInput().getMessage() != null) {
-            // Input var can be omitted if input message has no part 
+            // Input var can be omitted if input message has no part
             if (oinvoke.operation.getInput().getMessage().getParts().size() > 0) {
                 if (src.getInputVar() == null)
                     throw new CompilationException(__imsgs.errInvokeNoInputMessageForInputOp(oinvoke.operation.getName()));
@@ -118,11 +118,11 @@ class InvokeGenerator extends DefaultActivityGenerator {
             doCorrelations(inoutcorrelations, oinvoke.outputVar,
                     oinvoke.assertCorrelationsOutput, oinvoke.initCorrelationsOutput, oinvoke.joinCorrelationsOutput);
         }
-        
+
     }
 
     private void doCorrelations(List<Correlation> correlations, OScope.Variable var,
-            Collection<OScope.CorrelationSet> assertCorrelations, 
+            Collection<OScope.CorrelationSet> assertCorrelations,
             Collection<OScope.CorrelationSet> initCorrelations,
             Collection<OScope.CorrelationSet> joinCorrelations) {
         Set<String> csetNames = new HashSet<String>(); // prevents duplicate cset in on one set of correlations

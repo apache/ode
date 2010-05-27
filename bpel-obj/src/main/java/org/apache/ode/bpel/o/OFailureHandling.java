@@ -26,7 +26,7 @@ import java.io.Serializable;
  */
 public class OFailureHandling implements Serializable {
     private static final long serialVersionUID = 5637366976949702880L;
-    
+
     public static final String EXTENSION_NS_URI = "http://ode.apache.org/activityRecovery";
     public static final QName FAILURE_FAULT_NAME  = new QName(EXTENSION_NS_URI, "activityFailure");
     public static final QName FAILURE_EXT_ELEMENT = new QName(EXTENSION_NS_URI, "failureHandling");

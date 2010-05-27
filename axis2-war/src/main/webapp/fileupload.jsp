@@ -115,7 +115,7 @@ if (!isMultipart) {
                             }else{
                                 out.println("No package Name specified!");
                                 break;
-                            }                            
+                            }
                         }else{
                             out.println("TODO: Implement Base64 encoded string support!");
                         }

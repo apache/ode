@@ -21,7 +21,7 @@ package org.apache.ode.bpel.runtime.channels;
 import org.apache.ode.jacob.ap.ChannelType;
 
 /**
- * Channel for timer notification. 
+ * Channel for timer notification.
  */
 @ChannelType
 public interface TimerResponse {

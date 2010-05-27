@@ -40,8 +40,8 @@ import org.w3c.dom.Node;
 
 /**
  * Deployed process configuration. IMPORTANT: Implementations of this class <em>MUST BE IMMUTABLE</em>,
- * otherwise the engine will get confused.  
- * 
+ * otherwise the engine will get confused.
+ *
  * @author mriou <mriou at apache dot org>
  */
 public interface ProcessConf {
@@ -49,20 +49,20 @@ public interface ProcessConf {
     public static class PartnerRoleConfig {
         public final OFailureHandling failureHandling;
         public final boolean usePeer2Peer;
-        
+
         public PartnerRoleConfig(OFailureHandling failureHandling, boolean usePeer2Peer) {
             super();
             this.failureHandling = failureHandling;
             this.usePeer2Peer = usePeer2Peer;
         }
     }
-    
+
     /**
      * Get the process id, generally the same as the type.
      * @return process id.
      */
     QName getProcessId();
-    
+
     /**
      * Get the process type (BPEL definition name).
      * @return
@@ -80,30 +80,30 @@ public interface ProcessConf {
      * @return <code>true</code> if this is a transient process.
      */
     boolean isTransient();
-    
+
     /**
-     * Get the CBP stream. 
+     * Get the CBP stream.
      * @return new stream to the CBP file.
      */
     InputStream getCBPInputStream();
-   
+
     /**
-     * Get the CBP file size. 
+     * Get the CBP file size.
      * @return size of the CBP file.
      */
     long getCBPFileSize();
-    
+
     /**
-     * Get the path of the BPEL document, relative to its deployment unit 
+     * Get the path of the BPEL document, relative to its deployment unit
      * @return Relative path of BPEL document
      */
     String getBpelDocument();
-   
+
     /**
-     * Get the base URL for resolving resources.  
+     * Get the base URL for resolving resources.
      */
     URI getBaseURI();
-    
+
     /**
      * Get the date of deployment.
      * @return
@@ -117,11 +117,11 @@ public interface ProcessConf {
     String getDeployer();
 
     /**
-     * Get the state of the process. 
+     * Get the state of the process.
      * @return process state.
      */
     ProcessState getState();
-    
+
 
     /**
      * Get the files associated with the deployment.
@@ -130,7 +130,7 @@ public interface ProcessConf {
     List<File> getFiles();
 
     /**
-     * Get the process properties. 
+     * Get the process properties.
      * @return
      */
     Map<QName, Node> getProcessProperties();
@@ -140,7 +140,7 @@ public interface ProcessConf {
      * @return package name
      */
     String getPackage();
-    
+
     /**
      * Gets the WSDL definition used in a process into which a service is defined.
      * @param processId
@@ -175,18 +175,18 @@ public interface ProcessConf {
      * @return
      */
     public Map<String, PartnerRoleConfig> getPartnerRoleConfig();
-    
+
     /**
      * Tells if the service is shareable
      * @param serviceName
      * @return true if the given service can be shared by processes
      */
     boolean isSharedService(QName serviceName);
-    
+
     /**
-     * Generic facility to get additional stuff out of the process descriptor. 
+     * Generic facility to get additional stuff out of the process descriptor.
      * @param qname name of the extension element.
-     * @return list of extension elements 
+     * @return list of extension elements
      */
     List<Element> getExtensionElement(QName qname);
 
@@ -195,77 +195,77 @@ public interface ProcessConf {
     public Map<String, String> getEndpointProperties(EndpointReference epr);
 
     boolean isCleanupCategoryEnabled(boolean instanceSucceeded, CLEANUP_CATEGORY category);
-    
+
     Set<CLEANUP_CATEGORY> getCleanupCategories(boolean instanceSucceeded);
 
     List<CronJob> getCronJobs();
-    
+
     public enum CLEANUP_CATEGORY {
         INSTANCE,
         VARIABLES,
         MESSAGES,
         CORRELATIONS,
         EVENTS;
-        
+
         public static CLEANUP_CATEGORY fromString(String lowerCase) {
             return valueOf(CLEANUP_CATEGORY.class, lowerCase.toUpperCase());
         }
     }
-    
+
     public class CronJob {
         private CronExpression _cronExpression;
-        
+
         private final List<JobDetails> runnableDetailList = new ArrayList<JobDetails>();
-        
+
         public void setCronExpression(CronExpression _cronExpression) {
             this._cronExpression = _cronExpression;
         }
-        
+
         public CronExpression getCronExpression() {
             return _cronExpression;
         }
-        
+
         public List<JobDetails> getRunnableDetailList() {
             return runnableDetailList;
         }
-        
+
         public String toString() {
             StringBuffer buf = new StringBuffer();
-            
+
             buf.append("Cron[");
             buf.append(_cronExpression);
             buf.append("] ");
             buf.append(runnableDetailList);
-            
+
             return buf.toString();
         }
     }
-    
+
     public class CleanupInfo implements java.io.Serializable {
         private List<String> _filters = new ArrayList<String>();
-        
+
         private final Set<CLEANUP_CATEGORY> _categories = EnumSet.noneOf(CLEANUP_CATEGORY.class);
-        
+
         public void setFilters(List<String> filters) {
             _filters = filters;
         }
-        
+
         public List<String> getFilters() {
             return _filters;
         }
-        
+
         public Set<CLEANUP_CATEGORY> getCategories() {
             return _categories;
         }
-        
+
         public String toString() {
             StringBuffer buf = new StringBuffer();
-            
+
             buf.append("CleanupInfo: filters=");
             buf.append(_filters);
             buf.append(", categories=");
             buf.append(_categories);
-            
+
             return buf.toString();
         }
     }

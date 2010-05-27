@@ -29,7 +29,7 @@ public interface MessageDAO {
   void setType(QName type);
   QName getType();
 
-  void setData(Element value);  
+  void setData(Element value);
   Element getData();
 
   void setHeader(Element value);

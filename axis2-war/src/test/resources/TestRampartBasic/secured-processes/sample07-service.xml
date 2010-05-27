@@ -36,7 +36,7 @@
 <!-- services.xml of sample-7 : Encryption and Signature -->
 <service>
     <module ref="rampart" />
-    
+
     <parameter name="InflowSecurity">
       <action>
         <items>Timestamp Encrypt Signature</items>
@@ -44,7 +44,7 @@
         <signaturePropFile>service.properties</signaturePropFile>
       </action>
     </parameter>
-    
+
     <parameter name="OutflowSecurity">
       <action>
         <items>Timestamp Encrypt Signature</items>

@@ -294,7 +294,7 @@
         <!-- ############################################### -->
         <!-- 204_empty_body - Should pass -->
         <!-- ############################################### -->
-        <!-- 204/No Content status code explicitly states that there is no body, 
+        <!-- 204/No Content status code explicitly states that there is no body,
                 so we should not fail even if a part is bound to the body response -->
         <scope>
             <sequence>

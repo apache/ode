@@ -28,5 +28,5 @@ public abstract class AbstractConjunction<R, PARAMC> extends AbstractContainer i
         super(childs);
     }
 
-    
+
 }

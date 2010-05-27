@@ -38,20 +38,20 @@ import org.xml.sax.InputSource;
 
 /**
  * Collection of schemas.
- *  
+ *
  * @author gnodet
  */
 public class SchemaCollection {
 
     private static Log log = LogFactory.getLog(SchemaCollection.class);
-    
+
     private Map schemas;
     private URI baseUri;
-    
+
     public SchemaCollection() {
         this(null);
     }
-    
+
     public SchemaCollection(URI baseUri) {
         if (log.isDebugEnabled()) {
             log.debug("Initializing schema collection with baseUri: " + baseUri);
@@ -59,11 +59,11 @@ public class SchemaCollection {
         this.baseUri = baseUri;
         this.schemas = new HashMap();
     }
-    
+
     public Schema getSchema(String namespaceURI) {
         return (Schema) schemas.get(namespaceURI);
     }
-    
+
     public void read(Element elem, URI sourceUri) throws Exception {
         Schema schema = new Schema();
         schema.setSourceUri(sourceUri);
@@ -72,7 +72,7 @@ public class SchemaCollection {
         schemas.put(schema.getNamespace(), schema);
         handleImports(schema);
     }
-    
+
     public void read(String location, URI baseUri) throws Exception {
         if (log.isDebugEnabled()) {
             log.debug("Reading schema at '" + location + "' with baseUri '" + baseUri + "'");
@@ -97,16 +97,16 @@ public class SchemaCollection {
         inputSource.setSystemId(loc.toString());
         read(inputSource);
     }
-    
+
     public void read(InputSource inputSource) throws Exception {
-        DocumentBuilderFactory docFac = XMLParserUtils.getDocumentBuilderFactory(); // don't trust system provided parser! 
+        DocumentBuilderFactory docFac = XMLParserUtils.getDocumentBuilderFactory(); // don't trust system provided parser!
         docFac.setNamespaceAware(true);
         DocumentBuilder builder = docFac.newDocumentBuilder();
         Document doc = builder.parse(inputSource);
-        read(doc.getDocumentElement(), 
+        read(doc.getDocumentElement(),
              inputSource.getSystemId() != null ? new URI(inputSource.getSystemId()) : null);
     }
-    
+
     protected void handleImports(Schema schema) throws Exception {
         NodeList children = schema.getRoot().getChildNodes();
         List imports = new ArrayList();
@@ -133,7 +133,7 @@ public class SchemaCollection {
             schema.getRoot().removeChild(ce);
         }
     }
-    
+
     protected static URI resolve(URI base, String location) {
         if ("jar".equals(base.getScheme())) {
             String str = base.toString();
@@ -151,7 +151,7 @@ public class SchemaCollection {
            return 0;
         }
      }
-     
+
      public Collection getSchemas() {
         if (schemas != null) {
            return schemas.values();

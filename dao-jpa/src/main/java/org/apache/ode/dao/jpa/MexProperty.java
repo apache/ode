@@ -51,7 +51,7 @@ public class MexProperty {
     private String propertyKey;
     @Basic @Column(name="PROP_VALUE", length=2000)
     private String propertyValue;
-    
+
     @SuppressWarnings("unused")
     @Basic @Column(name="MEX_ID", insertable=false, updatable=false, nullable=true)
     private String _mexId;

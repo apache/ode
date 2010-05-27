@@ -18,7 +18,7 @@
  */
 
 /**
- * 
+ *
  */
 package org.apache.ode.bpel.extvar.jdbc;
 
@@ -39,11 +39,11 @@ class RowSubset extends ArrayList<Object> {
 
     /* Name --> Column mapping. */
     protected HashMap<String, Column> _colmap  = new HashMap<String,Column>();
-    
-    
+
+
     RowSubset(List<Column> columns) {
         _columns = columns;
-        
+
         for(Column c : columns) {
             add(null);
             _colmap.put(c.name,c);
@@ -59,7 +59,7 @@ class RowSubset extends ArrayList<Object> {
         }
         return false;
     }
-    
+
     /**
      * Return <code>true</code> if any database-generated values are missing
      */
@@ -70,8 +70,8 @@ class RowSubset extends ArrayList<Object> {
         }
         return false;
     }
-    
-    
+
+
     Column getColumn(String name) {
         return _colmap.get(name);
     }
@@ -79,7 +79,7 @@ class RowSubset extends ArrayList<Object> {
     Column getColumn(int idx) {
         return _columns.get(idx);
     }
-    
+
     Object get(String name) {
         Column c = _colmap.get(name);
         if (c == null)
@@ -96,7 +96,7 @@ class RowSubset extends ArrayList<Object> {
         int idx = _columns.indexOf(c);
         this.set(idx, val);
     }
-    
+
     public String toString() {
         StringBuffer buf = new StringBuffer(getClass().getSimpleName());
         buf.append("(");

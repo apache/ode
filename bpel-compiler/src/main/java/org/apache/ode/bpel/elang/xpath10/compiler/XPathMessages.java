@@ -92,7 +92,7 @@ public class XPathMessages extends CompilationMessageBundle {
         return super.formatCompilationMessage(
                 "The string \"{0}\" is not a valid XQuery 1.0 expression: {1}", xQueryString, message);
     }
-    
+
     /** The XPath node with value "{0}" was not a text node. */
     public CompilationMessage errUnexpectedNodeTypeForXPath(String string) {
         return super.formatCompilationMessage(

@@ -35,7 +35,7 @@
                 <bpel:correlation set="CorrelationSet" initiate="yes"></bpel:correlation>
             </bpel:correlations>
         </bpel:receive>
-        
+
         <bpel:scope name="ConflictingReceiveInOnly">
             <bpel:faultHandlers>
                 <bpel:catch faultName="bpel:conflictingReceive">
@@ -58,7 +58,7 @@
                 <bpel:throw faultName="error"/>
             </bpel:sequence>
         </bpel:scope>
-        
+
         <bpel:scope name="ConflictingReceiveInOut">
             <bpel:faultHandlers>
                 <bpel:catch faultName="bpel:conflictingReceive">
@@ -81,7 +81,7 @@
                 <bpel:throw faultName="error"/>
             </bpel:sequence>
         </bpel:scope>
-        
+
         <bpel:scope name="ConflictingReceiveInOutTwoMexes">
             <bpel:faultHandlers>
                 <bpel:catch faultName="bpel:conflictingReceive">
@@ -105,9 +105,9 @@
             </bpel:sequence>
         </bpel:scope>
 
-        <!-- 
+        <!--
            ~ This is correct path example, because it relies on sequential operations for the same mex1.
-           ~ No conflictingRequest is thrown here. 
+           ~ No conflictingRequest is thrown here.
          -->
         <bpel:scope name="NoConflictingRequest">
             <bpel:sequence>
@@ -176,7 +176,7 @@
                     </bpel:scope>
                 </bpel:flow>
                 <bpel:reply operation="inOut3" partnerLink="client" variable="input" messageExchange="mex1"/>
-                
+
                 <bpel:receive partnerLink="client" operation="inOut3" variable="input" messageExchange="mex1">
                     <bpel:correlations>
                         <bpel:correlation set="CorrelationSet" initiate="no"></bpel:correlation>
@@ -185,7 +185,7 @@
                 <bpel:reply operation="inOut3" partnerLink="client" variable="input" messageExchange="mex1"/>
             </bpel:sequence>
         </bpel:scope>
-        
+
         <bpel:scope name="TwoMexesInOut">
             <bpel:sequence>
                 <bpel:receive partnerLink="client" operation="inOut4" variable="input" messageExchange="mex2">
@@ -193,7 +193,7 @@
                         <bpel:correlation set="CorrelationSet" initiate="no"></bpel:correlation>
                     </bpel:correlations>
                 </bpel:receive>
-                
+
                 <bpel:receive partnerLink="client" operation="inOut4" variable="input" messageExchange="mex3">
                     <bpel:correlations>
                         <bpel:correlation set="CorrelationSet" initiate="no"></bpel:correlation>
@@ -204,7 +204,7 @@
                 <bpel:reply partnerLink="client" portType="wns:TestIMA" operation="inOut4" variable="input" messageExchange="mex3" />
             </bpel:sequence>
         </bpel:scope>
-        
+
         <bpel:reply partnerLink="client" portType="wns:TestIMA" operation="process" variable="input" />
     </bpel:sequence>
 </bpel:process>

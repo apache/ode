@@ -19,6 +19,6 @@
 package org.apache.ode.tools;
 
 public interface Command {
-  
+
   public void execute(CommandContext cc) throws ExecutionException;
 }

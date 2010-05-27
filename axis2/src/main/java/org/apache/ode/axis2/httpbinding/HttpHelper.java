@@ -64,8 +64,8 @@ public class HttpHelper {
         */
         client.getParams().setDefaults(params);
 
-        // Here we make sure HttpClient will not handle the default headers. 
-        // Actually HttpClient *appends* default headers while we want them to be ignored if the process assign them 
+        // Here we make sure HttpClient will not handle the default headers.
+        // Actually HttpClient *appends* default headers while we want them to be ignored if the process assign them
         client.getParams().setParameter(HostParams.DEFAULT_HEADERS, Collections.EMPTY_LIST);
 
         // proxy configuration

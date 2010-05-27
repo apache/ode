@@ -25,23 +25,23 @@
      xmlns:xsd="http://www.w3.org/2001/XMLSchema"
      xmlns:test="http://ode/bpel/unit-test.wsdl"
      suppressJoinFailure="yes">
-  
+
   <import importType="http://schemas.xmlsoap.org/wsdl/"
       location="test.wsdl"
       namespace="http://ode/bpel/unit-test.wsdl" />
-  
-  
+
+
   <partnerLinks>
     <partnerLink name="testPartnerLink"
          partnerLinkType="test:TestPartnerLinkType"
          myRole="me" />
   </partnerLinks>
-  
+
   <variables>
     <variable name="var1" messageType="test:TestMessage1"/>
     <variable name="var2" messageType="test:TestMessage1"/>
   </variables>
-  
+
   <sequence>
     <receive name="startReceive"
          createInstance="yes"
@@ -51,7 +51,7 @@
          variable="var1"/>
     <scope>
       <faultHandlers>
-    <catch faultVariable="faultVar" 
+    <catch faultVariable="faultVar"
            faultMessageType="test:TestMessage1">
       <assign>
         <copy>
@@ -81,5 +81,5 @@
        portType="test:TestPortType"
        variable="var2"/>
   </sequence>
-  
+
 </process>

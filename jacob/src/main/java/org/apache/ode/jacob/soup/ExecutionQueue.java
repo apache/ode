@@ -24,7 +24,7 @@ import java.io.PrintStream;
  * The soup, the reactive "broth" that underlies the JACOB system. The {@link ExecutionQueue}
  * implementation is responsible for implementing the JACOB reactive rules and
  * maintaining the state of the reactive broth.
- * 
+ *
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
 public interface ExecutionQueue {

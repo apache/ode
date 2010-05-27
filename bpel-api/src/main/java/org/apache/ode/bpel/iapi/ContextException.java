@@ -21,7 +21,7 @@ package org.apache.ode.bpel.iapi;
 
 /**
  * Exception thrown by the integration layer.
- * 
+ *
  */
 public class ContextException extends RuntimeException {
 

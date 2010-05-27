@@ -34,7 +34,7 @@ public class CompletionCondition extends Expression {
     /**
      * Gets whether the completion count should include all terminated children
      * or only successfully completed ones.
-     * 
+     *
      * @return counts completed
      */
     public boolean isSuccessfulBranchesOnly() {

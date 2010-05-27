@@ -22,7 +22,7 @@
            xmlns:tns="http://schemas.xmlsoap.org/soap/envelope/"
            targetNamespace="http://schemas.xmlsoap.org/soap/envelope/" >
 
-     
+
   <!-- Envelope, header and body -->
   <xs:element name="Envelope" type="tns:Envelope" />
   <xs:complexType name="Envelope" >
@@ -41,7 +41,7 @@
     </xs:sequence>
     <xs:anyAttribute namespace="##other" processContents="lax" />
   </xs:complexType>
-  
+
   <xs:element name="Body" type="tns:Body" />
   <xs:complexType name="Body" >
     <xs:sequence>
@@ -56,9 +56,9 @@
     </xs:anyAttribute>
   </xs:complexType>
 
-       
+
   <!-- Global Attributes.  The following attributes are intended to be usable via qualified attribute names on any complex type referencing them.  -->
-  <xs:attribute name="mustUnderstand" >	
+  <xs:attribute name="mustUnderstand" >
      <xs:simpleType>
      <xs:restriction base='xs:boolean'>
        <xs:pattern value='0|1' />
@@ -92,7 +92,7 @@
       <xs:element name="faultcode" type="xs:QName" />
       <xs:element name="faultstring" type="xs:string" />
       <xs:element name="faultactor" type="xs:anyURI" minOccurs="0" />
-      <xs:element name="detail" type="tns:detail" minOccurs="0" />      
+      <xs:element name="detail" type="tns:detail" minOccurs="0" />
     </xs:sequence>
   </xs:complexType>
 
@@ -100,7 +100,7 @@
     <xs:sequence>
       <xs:any namespace="##any" minOccurs="0" maxOccurs="unbounded" processContents="lax" />
     </xs:sequence>
-    <xs:anyAttribute namespace="##any" processContents="lax" /> 
+    <xs:anyAttribute namespace="##any" processContents="lax" />
   </xs:complexType>
 
 </xs:schema>

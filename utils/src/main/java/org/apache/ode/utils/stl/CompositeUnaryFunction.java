@@ -25,7 +25,7 @@ public class CompositeUnaryFunction<E,V,T> implements UnaryFunction<E,V> {
 
   public CompositeUnaryFunction(UnaryFunction<T,V> f, UnaryFunction<E,T> g) {
     _f = f;
-    _g = g; 
+    _g = g;
   }
 
   public V apply(E x) {

@@ -1,8 +1,8 @@
 -- Apache ODE - SimpleScheduler Database Schema
--- 
+--
 -- Apache Derby scripts by Maciej Szefler.
--- 
--- 
+--
+--
 
 CREATE TABLE ode_job (
   jobid CHAR(64)  NOT NULL DEFAULT '',

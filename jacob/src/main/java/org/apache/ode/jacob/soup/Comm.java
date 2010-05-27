@@ -25,7 +25,7 @@ import org.apache.ode.utils.ObjectPrinter;
  * <p>
  * Created on Feb 16, 2004 at 8:44:27 PM.
  * </p>
- * 
+ *
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
 public abstract class Comm extends ExecutionQueueObject {

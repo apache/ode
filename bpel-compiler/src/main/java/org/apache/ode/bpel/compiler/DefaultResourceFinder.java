@@ -72,16 +72,16 @@ public class DefaultResourceFinder implements ResourceFinder {
 
     public InputStream openResource(URI uri) throws MalformedURLException, IOException {
         uri = relativize(uri);
-        
+
         InputStream r = openFileResource(uri);
         if (r != null) {
             return r;
         }
-        
+
         if (__log.isDebugEnabled()) {
             __log.debug("trying classpath resource for " + uri);
         }
-        
+
         r = Thread.currentThread().getContextClassLoader().getResourceAsStream(uri.getPath());
         if (r != null) {
             return r;
@@ -91,7 +91,7 @@ public class DefaultResourceFinder implements ResourceFinder {
             }
             return null;
         }
-    
+
     }
 
     private InputStream openFileResource(URI uri) throws MalformedURLException, IOException {
@@ -127,7 +127,7 @@ public class DefaultResourceFinder implements ResourceFinder {
             return null;
         }
     }
-    
+
     public URI getBaseResourceURI() {
         return _absoluteDir.toURI();
     }
@@ -137,7 +137,7 @@ public class DefaultResourceFinder implements ResourceFinder {
             return _absoluteDir.toURI().relativize(u);
         } else return u;
     }
-    
+
     public URI resolve(URI parent, URI child) {
         parent = relativize(parent);
         child = relativize(child);
@@ -146,7 +146,7 @@ public class DefaultResourceFinder implements ResourceFinder {
         if (__log.isDebugEnabled()) {
             __log.debug("resolving URI: parent " + parent + " child " + child + " result " + result + " resultAbsolute:" + result2);
         }
-        
+
         return result2;
     }
 

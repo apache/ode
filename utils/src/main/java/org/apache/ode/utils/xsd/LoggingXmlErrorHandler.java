@@ -40,7 +40,7 @@ public class LoggingXmlErrorHandler implements XMLErrorHandler {
   /**
    * Create a new instance that will output to the specified {@link Log}
    * instance.
-   * 
+   *
    * @param log
    *          the target log, which much be non-<code>null</code>
    */

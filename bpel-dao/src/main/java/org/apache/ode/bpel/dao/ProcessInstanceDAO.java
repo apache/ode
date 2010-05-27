@@ -42,13 +42,13 @@ public interface ProcessInstanceDAO {
      * @return time of instance creation
      */
     public Date getCreateTime();
-    
+
     /**
      * Get the time when the process instance was last active (re-hydrated).
      * @return time of activity
      */
     public Date getLastActiveTime();
-    
+
     /**
      * Set last activity time for the process instance
      * @param dt tiem of activity
@@ -62,7 +62,7 @@ public interface ProcessInstanceDAO {
      * @param fault the fault
      */
     void setFault(FaultDAO fault);
-    
+
     void setFault(QName faultName, String explanation, int faultLineNo, int activityId, Element faultMessage);
 
     /**
@@ -103,7 +103,7 @@ public interface ProcessInstanceDAO {
     /**
      * Set the state of the process instance; one of the <code>STATE_XXX</code>
      * constants defined in ProcessState.
-     * 
+     *
      * This should automatically populate the previous state.
      *
      * @param state new state of the process instance
@@ -117,9 +117,9 @@ public interface ProcessInstanceDAO {
      * @return state of process instance
      */
     short getState();
-    
+
     /**
-     * Returns the next to last state. 
+     * Returns the next to last state.
      * @return
      */
     short getPreviousState();
@@ -147,27 +147,27 @@ public interface ProcessInstanceDAO {
      * @return
      */
     ScopeDAO getScope(Long scopeInstanceId);
-    
-    /** 
+
+    /**
      * Returns all the scopes with the associated name.
      * @param scopeName
      * @return
      */
     Collection<ScopeDAO> getScopes(String scopeName);
-    
-    /** 
+
+    /**
      * Returns all the scopes belonging to this isntance.
      * @param scopeName
      * @return
      */
     Collection<ScopeDAO> getScopes();
-    
+
     /**
      * Return the correlator which results in the instantiation of the process instance.
      * @return
      */
     CorrelatorDAO getInstantiatingCorrelator();
-    
+
     /**
      * Returns all variable instances matching the variable name for a specified scope.
      */
@@ -216,7 +216,7 @@ public interface ProcessInstanceDAO {
      */
     EventsFirstLastCountTuple getEventsFirstLastCount();
 
-    /** 
+    /**
      * Get the next number from a monotonically increasing sequence.
      * @return next number in seqeunce
      */

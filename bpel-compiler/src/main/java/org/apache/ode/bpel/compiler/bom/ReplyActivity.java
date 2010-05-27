@@ -37,7 +37,7 @@ public class ReplyActivity extends Activity implements Communication {
 
     /**
      * Get the optional message exchange identifier.
-     * 
+     *
      * @return
      */
     public String getMessageExchangeId() {
@@ -46,7 +46,7 @@ public class ReplyActivity extends Activity implements Communication {
 
     /**
      * Get the fault name with which to reply.
-     * 
+     *
      * @return the fault name
      */
     public QName getFaultName() {
@@ -55,7 +55,7 @@ public class ReplyActivity extends Activity implements Communication {
 
     /**
      * Get the variable containing the reply message.
-     * 
+     *
      * @return name of variable containing the reply message
      */
     public String getVariable() {

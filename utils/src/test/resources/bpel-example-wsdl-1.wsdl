@@ -23,7 +23,7 @@
       xmlns:pos="http://manufacturing.org/wsdl/purchase"
       xmlns:xsd="http://www.w3.org/2001/XMLSchema"
       xmlns="http://schemas.xmlsoap.org/wsdl/"
-      xmlns:plnk="http://schemas.xmlsoap.org/ws/2003/05/partner-link/"> 
+      xmlns:plnk="http://schemas.xmlsoap.org/ws/2003/05/partner-link/">
 
 <plnk:partnerLinkType name="purchasingLT">
    <plnk:role name="purchaseService">
@@ -84,7 +84,7 @@
    <operation name="sendPurchaseOrder">
       <input message="pos:POMessage"/>
       <output message="pos:InvMessage"/>
-      <fault name="cannotCompleteOrder" 
+      <fault name="cannotCompleteOrder"
              message="pos:orderFaultType"/>
    </operation>
 </portType>
@@ -116,7 +116,7 @@
    <operation name="requestShipping">
       <input message="pos:shippingRequestMessage"/>
       <output message="pos:shippingInfoMessage"/>
-      <fault name="cannotCompleteOrder" 
+      <fault name="cannotCompleteOrder"
              message="pos:orderFaultType"/>
    </operation>
 </portType>

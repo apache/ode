@@ -19,10 +19,10 @@
   -->
 
 <schema
-  targetNamespace="uri:com.bptest.types" 
+  targetNamespace="uri:com.bptest.types"
   xmlns:typ="uri:com.bptest.types"
-  elementFormDefault="qualified" 
-  attributeFormDefault="qualified" 
+  elementFormDefault="qualified"
+  attributeFormDefault="qualified"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns="http://www.w3.org/2001/XMLSchema">
 
@@ -156,7 +156,7 @@
    <!-- Datatypes for BPEL -->
    <complexType name="AllOrderCT">
       <sequence>
-         <element ref="typ:AllOrders" minOccurs="1" maxOccurs="1"/>      
+         <element ref="typ:AllOrders" minOccurs="1" maxOccurs="1"/>
     </sequence>
    </complexType>
 

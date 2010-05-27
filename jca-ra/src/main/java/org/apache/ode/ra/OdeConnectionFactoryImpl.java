@@ -32,7 +32,7 @@ import javax.resource.spi.ManagedConnectionFactory;
  */
 class OdeConnectionFactoryImpl implements OdeConnectionFactory {
   private static final long serialVersionUID = 1L;
-  
+
   private Reference _reference;
   private ConnectionManager _manager;
   private ManagedConnectionFactory _managedConnectionFactory;

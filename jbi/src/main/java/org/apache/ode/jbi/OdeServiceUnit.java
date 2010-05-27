@@ -53,9 +53,9 @@ class OdeServiceUnit {
     private String _serviceUnitID;
 
     private Collection<QName> _registered = new ArrayList<QName>();
-    
+
     private static final String LIB_DIR = "lib";
-    
+
     /** Ctor. */
     OdeServiceUnit(OdeContext ode, String serviceUnitID, String serviceUnitRootPath) {
         _ode = ode;
@@ -67,10 +67,10 @@ class OdeServiceUnit {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(getConfigurationClassLoader());
-            // JBI ServiceUnits don't use autoincrement version, 
+            // JBI ServiceUnits don't use autoincrement version,
             // because in ServiceMix redeploying component yields to redeploying dependent
-            // ServiceUnits, and we don't want to create new processes versions 
-            // on such redeployments 
+            // ServiceUnits, and we don't want to create new processes versions
+            // on such redeployments
             _ode._store.deploy(_serviceUnitRootPath, false);
         } catch (Exception ex) {
             String errmsg = __msgs.msgOdeProcessDeploymentFailed(_serviceUnitRootPath, _serviceUnitID);
@@ -147,11 +147,11 @@ class OdeServiceUnit {
             }
         }
     }
-    
+
     public ClassLoader getConfigurationClassLoader() throws DeploymentException {
         return new URLClassLoader(getDefaultLocations(), getClass().getClassLoader());
     }
-    
+
     protected URL[] getDefaultLocations() throws DeploymentException {
         try {
             File[] jars = new File(_serviceUnitRootPath, LIB_DIR).listFiles(new FilenameFilter() {

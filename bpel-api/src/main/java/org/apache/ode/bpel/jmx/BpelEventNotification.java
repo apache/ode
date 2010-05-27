@@ -32,7 +32,7 @@ public class BpelEventNotification extends Notification {
     /**
      * Constructor. Creates a JMX notification with a type matching the
      * <em>class name</em> of the passed-in {@link BpelEvent} object.
-     * 
+     *
      * @param source
      *            originating object/{@link javax.management.ObjectName}
      * @param sequence
@@ -48,7 +48,7 @@ public class BpelEventNotification extends Notification {
 
     /**
      * Get the {@link BpelEvent} payload.
-     * 
+     *
      * @return {@link BpelEvent} payload.
      */
     public BpelEvent getBpelEvent() {

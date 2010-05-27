@@ -35,11 +35,11 @@ public class HMessage extends HObject {
     private String _type;
     private byte[] _data;
     private byte[] _header;
-    
+
     public void setMessageExchange(HMessageExchange mex) {
         _mex = mex;
     }
-    
+
     /** @hibernate.many-to-one column="MEX" foreign-key="none"*/
     public HMessageExchange getMessageExchange() {
         return _mex;

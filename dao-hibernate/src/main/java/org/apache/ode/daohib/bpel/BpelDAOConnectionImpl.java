@@ -120,7 +120,7 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection, FilteredInstanc
 
         return new ProcessDaoImpl(_sm, process);
     }
-    
+
     public ProcessDAO getProcess(QName processId) {
         try {
             Criteria criteria = getSession().createCriteria(HProcess.class);
@@ -177,12 +177,12 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection, FilteredInstanc
 
         List<HProcessInstance> instances = _instanceQueryForList(getSession(), false, criteria);
         if( __log.isDebugEnabled() ) __log.debug("Collected " + instances.size() + " instances to delete.");
-        
+
         if( !instances.isEmpty() ) {
             ProcessDaoImpl process = (ProcessDaoImpl)createTransientProcess(instances.get(0).getProcessId());
             return process.deleteInstances(instances, categories);
         }
-        
+
         return 0;
     }
 
@@ -193,7 +193,7 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection, FilteredInstanc
     @SuppressWarnings("unchecked")
     private static List<HProcessInstance> _instanceQueryForList(Session session, boolean countOnly, InstanceFilter filter) {
         CriteriaBuilder cb = new CriteriaBuilder();
-        
+
         return cb.buildHQLQuery(session, filter).list();
     }
 

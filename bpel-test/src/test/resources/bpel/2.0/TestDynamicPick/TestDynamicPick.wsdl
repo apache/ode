@@ -17,19 +17,19 @@
   ~ under the License.
 -->
 
-<wsdl:definitions 
+<wsdl:definitions
   targetNamespace="http://ode/bpel/unit-test/TestDynamicPick.wsdl"
   xmlns:tns="http://ode/bpel/unit-test/TestDynamicPick.wsdl"
   xmlns:typens="http://ode/bpel/unit-test/TestDynamicPick.wsdl.types"
   xmlns="http://ode/bpel/unit-test/TestDynamicPick.wsdl"
   xmlns:prb="http://ode/bpel/unit-test/ProbeService.wsdl"
   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-  xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"      
+  xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
   xmlns:prop="http://docs.oasis-open.org/wsbpel/2.0/varprop">
 
-        
+
   <wsdl:types>
     <xsd:schema
       targetNamespace="http://ode/bpel/unit-test/TestDynamicPick.wsdl.types"
@@ -51,13 +51,13 @@
   <wsdl:message name="requestMessage">
     <wsdl:part name="requestMessageData" type="typens:testMessage"/>
   </wsdl:message>
-   
+
   <wsdl:message name="replyMessage">
     <wsdl:part name="replyID" type="xsd:string"/>
     <wsdl:part name="replyText" type="xsd:string"/>
   </wsdl:message>
 
- 
+
   <wsdl:portType name="TestDynamicPickPT">
     <wsdl:operation name="request">
       <wsdl:input message="requestMessage"/>
@@ -70,7 +70,7 @@
       <wsdl:input message="requestMessage"/>
     </wsdl:operation>
   </wsdl:portType>
-  
+
   <wsdl:binding name="TestDynamicPickBinding" type="tns:TestDynamicPickPT">
     <wsdl:operation name="request">
     </wsdl:operation>
@@ -91,28 +91,28 @@
    <plnk:partnerLinkType name="probeRequest">
     <plnk:role name="probeService" portType="prb:probeMessagePT"/>
    </plnk:partnerLinkType>
-   
+
   <prop:property name="testProbeKey1" type="xsd:string"/>
   <prop:propertyAlias propertyName="tns:testProbeKey1" messageType="tns:requestMessage" part="requestMessageData">
     <prop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
       requestKey1
     </prop:query>
   </prop:propertyAlias>
-  
+
   <prop:property name="testProbeKey2" type="xsd:string"/>
   <prop:propertyAlias propertyName="tns:testProbeKey2" messageType="tns:requestMessage" part="requestMessageData">
     <prop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
       requestKey2
     </prop:query>
   </prop:propertyAlias>
-  
+
   <prop:property name="testProbeID" type="xsd:string"/>
   <prop:propertyAlias propertyName="tns:testProbeID" messageType="tns:requestMessage" part="requestMessageData">
     <prop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
       requestID
     </prop:query>
   </prop:propertyAlias>
-  
+
   <prop:property name="testProbeData" type="xsd:string"/>
   <prop:propertyAlias propertyName="tns:testProbeData" messageType="tns:requestMessage" part="requestMessageData">
     <prop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">

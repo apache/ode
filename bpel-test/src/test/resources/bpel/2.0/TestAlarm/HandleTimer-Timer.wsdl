@@ -21,7 +21,7 @@
                   xmlns:Client="http://example.com/HandleTimer/Client"
                   xmlns:message="http://ode.apache.org/example"
                   xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
-                  xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" 
+                  xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
                   xmlns:xs="http://www.w3.org/2001/XMLSchema"
                   xmlns:root="http://example.com/HandleTimer"
                   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"

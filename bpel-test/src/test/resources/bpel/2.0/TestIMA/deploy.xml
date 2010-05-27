@@ -18,7 +18,7 @@
 -->
 
 <deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
-    xmlns:pns="http://ode/bpel/unit-test/TestIMA" 
+    xmlns:pns="http://ode/bpel/unit-test/TestIMA"
     xmlns:wns="http://ode/bpel/unit-test/TestIMA.wsdl">
 
     <process name="pns:TestIMAProcess">

@@ -146,7 +146,7 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
     public URI getBaseResourceURI() {
         return _native.getBaseResourceURI();
     }
-    
+
     public Node getPropertyValue(QName propertyName) {
         return _native.getProcessProperty(propertyName);
     }

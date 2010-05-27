@@ -32,10 +32,10 @@ import org.hibernate.connection.ConnectionProvider;
 public class DataSourceConnectionProvider implements ConnectionProvider {
 
   private Properties _props;
-  
+
   public DataSourceConnectionProvider() {
   }
-  
+
   public void configure(Properties props) throws HibernateException {
     _props = props;
   }

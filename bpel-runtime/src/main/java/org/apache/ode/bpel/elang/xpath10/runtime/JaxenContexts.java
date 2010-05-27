@@ -311,7 +311,7 @@ class JaxenContexts implements FunctionContext, VariableContext {
                     if (args.get(1) instanceof NodeWrapper)
                         varElmt = (Element) ((NodeWrapper)args.get(1)).getUnderlyingNode();
                     else varElmt = (Element) args.get(1);
-                    
+
 //                    varElmt = (Element) args.get(1);
                 }
             } catch (ClassCastException e) {

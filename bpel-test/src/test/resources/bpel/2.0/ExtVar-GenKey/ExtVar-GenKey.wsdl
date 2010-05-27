@@ -17,13 +17,13 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<wsdl:definitions xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" 
-                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
-                  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-                  xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" 
-                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
-                  xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" 
-                  xmlns:this="http://example.com/process/ExtVar/GenKey" 
+<wsdl:definitions xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                  xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+                  xmlns:this="http://example.com/process/ExtVar/GenKey"
                   targetNamespace="http://example.com/process/ExtVar/GenKey">
 
     <pnlk:partnerLinkType name="TestPLT">
@@ -65,5 +65,5 @@
             <soap:address location="http://localhost:8080/ode/processes/ExtVar/GenKey"/>
         </wsdl:port>
     </wsdl:service>
-    
+
 </wsdl:definitions>

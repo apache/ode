@@ -28,5 +28,5 @@ public abstract class AbstractDisjunction<R, PARAMC> extends AbstractContainer i
         super(childs);
     }
 
-    
+
 }

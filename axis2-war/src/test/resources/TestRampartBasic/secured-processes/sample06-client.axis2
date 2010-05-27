@@ -16,11 +16,11 @@
  ! limitations under the License.
  !-->
 <axisconfig name="AxisJava2.0">
-    
+
     <!--Signature and Encryption : Using the request's certificate-->
-    
+
     <module ref="rampart" />
-    
+
     <parameter name="OutflowSecurity">
       <action>
         <items>Timestamp Signature Encrypt</items>
@@ -40,7 +40,7 @@
         <signaturePropFile>TestRampartBasic/secured-processes/client.properties</signaturePropFile>
       </action>
     </parameter>
-    
+
     <!-- ================================================= -->
     <!-- Parameters -->
     <!-- ================================================= -->

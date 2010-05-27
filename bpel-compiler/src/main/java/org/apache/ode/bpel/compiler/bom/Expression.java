@@ -32,13 +32,13 @@ public class Expression extends BpelObject {
 
     /**
      * Get the expression language for this expression.
-     * 
+     *
      * @return expression langauge URI or <code>null</code> if none specified
      */
     public String getExpressionLanguage() {
         return getAttribute("expressionLanguage", null);
     }
-    
+
     public Node  getExpression(){
         getElement().normalize();
         for (Node n = getElement().getFirstChild(); n != null; n = n.getNextSibling())

@@ -203,7 +203,7 @@
               <groupId>org.apache.derby</groupId>
               <artifactId>derbytools</artifactId>
               <version>${derby.version}</version>
-            </dependency> 
+            </dependency>
         </dependencies>
           </plugin>
 
@@ -748,7 +748,7 @@
                 </exclusions>
                 -->
             </dependency>
- 
+
             <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>

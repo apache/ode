@@ -183,7 +183,7 @@ public class SchemaModelImpl implements SchemaModel {
         public void put(URI uri, byte[] bytes) {
             _schemas.put(uri.toASCIIString(), bytes);
         }
-        
+
         public XMLInputSource resolveEntity(XMLResourceIdentifier resourceIdentifier) throws XNIException, IOException {
             XMLInputSource src = new XMLInputSource(resourceIdentifier);
             String location = "";

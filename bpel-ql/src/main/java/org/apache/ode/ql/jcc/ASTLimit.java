@@ -21,7 +21,7 @@ package org.apache.ode.ql.jcc;
 
 public class ASTLimit extends SimpleNode {
     private int number;
-    
+
     public ASTLimit(int id) {
         super(id);
     }
@@ -39,12 +39,12 @@ public class ASTLimit extends SimpleNode {
     public void setNumber(int number) {
         this.number = number;
     }
-    
+
     /**
      * @param number the number to set
      */
     public void setNumber(String number) {
         this.number = Integer.parseInt(number);
     }
-    
+
 }

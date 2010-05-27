@@ -97,11 +97,11 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         _em.persist(ret);
         return ret;
     }
-    
+
     public ProcessDAO createTransientProcess(Serializable id) {
         ProcessDAOImpl ret = new ProcessDAOImpl(null, null, null, 0);
         ret.setId((Long)id);
-        
+
         return ret;
     }
 
@@ -119,7 +119,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
         if (process != null)
             return process.getNumInstances();
         else return -1;
-    }    
+    }
 
     public ScopeDAO getScope(Long siidl) {
         return _em.find(ScopeDAOImpl.class, siidl);
@@ -193,7 +193,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
                 }
                 //process type string begins with name space
                 //this could possibly match more than you want
-                //because the name space and name are stored together 
+                //because the name space and name are stored together
                 clauses.add(" pi._process._processType like '%" + val + "'");
             }
 

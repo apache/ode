@@ -91,7 +91,7 @@ public class ODEAxisService {
             axisService.setWsdlFound(true);
             axisService.setCustomWsdl(true);
             axisService.setClassLoader(axisConfig.getServiceClassLoader());
-        
+
             URL wsdlUrl = null;
             for (File file : pconf.getFiles()) {
                 if (file.getAbsolutePath().indexOf(wsdlDefinition.getDocumentBaseURI()) > 0)
@@ -99,7 +99,7 @@ public class ODEAxisService {
             }
             if (wsdlUrl != null) axisService.setFileName(wsdlUrl);
 
-            // axis2 service configuration  
+            // axis2 service configuration
             URL service_file = pconf.getBaseURI().resolve(wsdlServiceName.getLocalPart()+".axis2").toURL();
             LOG.debug("Looking for Axis2 service configuration file: "+service_file);
             try {
@@ -129,10 +129,10 @@ public class ODEAxisService {
                     operation.setMessageReceiver(msgReceiver);
                 }
             }
-            
+
             // Set the JMS destination name on the Axis Service
             if (isJmsEndpoint(pconf, wsdlServiceName, portName)) {
-                axisService.addParameter(new Parameter(JMSConstants.PARAM_DESTINATION, 
+                axisService.addParameter(new Parameter(JMSConstants.PARAM_DESTINATION,
                         extractJMSDestinationName(axisServiceName, deriveBaseServiceUri(pconf))));
             }
 
@@ -187,7 +187,7 @@ public class ODEAxisService {
         return axisService;
     }
 
-    private static String extractEndpointUri(ProcessConf pconf, QName wsdlServiceName, String portName) 
+    private static String extractEndpointUri(ProcessConf pconf, QName wsdlServiceName, String portName)
             throws AxisFault {
         Definition wsdlDefinition = pconf.getDefinitionForService(wsdlServiceName);
         String url = null;
@@ -207,16 +207,16 @@ public class ODEAxisService {
         if (url == null) {
             throw new OdeFault("Could not extract any soap:address from service WSDL definition " + wsdlServiceName
                     + " (necessary to establish the process target address)!");
-        }       
+        }
         return url;
     }
-    
-    private static boolean isJmsEndpoint(ProcessConf pconf, QName wsdlServiceName, String portName) 
+
+    private static boolean isJmsEndpoint(ProcessConf pconf, QName wsdlServiceName, String portName)
             throws AxisFault {
         String url = extractEndpointUri(pconf, wsdlServiceName, portName);
         return url.startsWith("jms:");
     }
-    
+
     private static String extractServiceName(ProcessConf pconf, QName wsdlServiceName, String portName)
             throws AxisFault {
         String endpointUri = extractEndpointUri(pconf, wsdlServiceName, portName);
@@ -236,7 +236,7 @@ public class ODEAxisService {
     protected static String parseURLForService(String path, String baseUri) {
         // Assume that path is HTTP-based, by default
         String servicePrefix = "/processes/";
-        // Don't assume JMS-based paths start the same way 
+        // Don't assume JMS-based paths start the same way
         if (path.startsWith("jms:/")) {
             servicePrefix = "jms:/";
         }
@@ -316,7 +316,7 @@ public class ODEAxisService {
      * Generates a URI of the following form:
      *     ${deploy_bundleNcName}/${diagram_relativeURL}/${process_relativeURL}
      * When a service name (local part only) is qualified (prefixed) with the above,
-     * it results in a unique identifier that may be used as that service's name.  
+     * it results in a unique identifier that may be used as that service's name.
      */
     public static String deriveBaseServiceUri(ProcessConf pconf) {
         if (pconf != null) {
@@ -330,7 +330,7 @@ public class ODEAxisService {
                         bpelDocumentName = bpelDocumentName.substring(0, bpelDocumentName.indexOf("."));
                     }
                     baseServiceUri.append(bpelDocumentName).append("/");
-                    String processName = pconf.getType() != null 
+                    String processName = pconf.getType() != null
                         ? pconf.getType().getLocalPart() : null;
                     if (processName != null) {
                         baseServiceUri.append(processName);
@@ -338,7 +338,7 @@ public class ODEAxisService {
                     }
                 }
             }
-            
+
         }
         return null;
     }

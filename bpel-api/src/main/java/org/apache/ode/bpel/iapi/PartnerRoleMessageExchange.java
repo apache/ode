@@ -37,17 +37,17 @@ public interface PartnerRoleMessageExchange extends MessageExchange {
    * @return
    */
   QName getCaller();
-  
+
   /**
    * Get the communication channel.
    * @return communication channel
    */
   PartnerRoleChannel getChannel();
-  
-  
+
+
   /**
    * Indicate that the partner faulted in processing the message exchange.
-   * 
+   *
    * @param faultType fault type
    * @param outputFaultMessage the input message
    *
@@ -59,7 +59,7 @@ public interface PartnerRoleMessageExchange extends MessageExchange {
 
   /**
    * Indicate that the partner has responded to the message exchange.
-   * 
+   *
    * @param response the response from the partner
    *
    * @throws IllegalStateException if delivering this type of message is
@@ -69,21 +69,21 @@ public interface PartnerRoleMessageExchange extends MessageExchange {
     throws BpelEngineException;
 
   /**
-   * Indicate that the partner has failed to process the message exchange. 
-   * 
+   * Indicate that the partner has failed to process the message exchange.
+   *
    * @param type type of failure
    * @param description description of failure
    */
-  void replyWithFailure(FailureType type, String description, Element details) 
-    throws BpelEngineException;  
-  
+  void replyWithFailure(FailureType type, String description, Element details)
+    throws BpelEngineException;
+
   /**
    * Indicate that the partner processed the one-way invocation successfully.
    */
   void replyOneWayOk();
-  
+
   /**
-   * Indicate that the response to the request/response operation 
+   * Indicate that the response to the request/response operation
    * is not yet available and that the response will be delivered
    * asynchronously.
    */
@@ -91,7 +91,7 @@ public interface PartnerRoleMessageExchange extends MessageExchange {
 
   /**
    * Get the {@link EndpointReference} associated with the my-role of the partner link to which this message
-   * exchange belongs. This method is typically used to provide protocol-specific "callback" mechanisms. 
+   * exchange belongs. This method is typically used to provide protocol-specific "callback" mechanisms.
    * @return endpoint reference associate with the corresponding my-role, or null if no my-role is defined
    */
   EndpointReference getMyRoleEndpointReference();

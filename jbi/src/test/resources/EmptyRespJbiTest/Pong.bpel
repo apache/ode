@@ -61,7 +61,7 @@
                 <to>$text</to>
             </copy>
         </assign>
-        
+
         <reply name="pongReply"
                 partnerLink="PongPartnerLink"
                 portType="pong:PongPortType"

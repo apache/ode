@@ -28,14 +28,14 @@
  queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
  expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
  suppressJoinFailure="yes">
-    
+
     <import location="testCorrelation.wsdl"
         namespace="http://ode/bpel/unit-test/testCorrelation.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/" />
     <import location="../ProbeService/probeService.wsdl"
         namespace="http://ode/bpel/unit-test/ProbeService.wsdl"
         importType="http://schemas.xmlsoap.org/wsdl/"/>
-    
+
     <!-- test correlated receive -->
     <partnerLinks>
         <partnerLink name="request" partnerLinkType="wns:testCorrelationRequest" myRole="testCorrelationService"/>

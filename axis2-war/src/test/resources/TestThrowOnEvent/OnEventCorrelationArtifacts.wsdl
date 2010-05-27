@@ -17,14 +17,14 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<definitions 
-    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" 
-    xmlns:tns="http://sample.bpel.org/bpel/sampleArtifacts" 
-    xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" 
-    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-    xmlns:bpel="http://sample.bpel.org/bpel/sample" 
-    name="OnEventCorrelationArtifacts" 
-    targetNamespace="http://sample.bpel.org/bpel/sampleArtifacts" 
+<definitions
+    xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+    xmlns:tns="http://sample.bpel.org/bpel/sampleArtifacts"
+    xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:bpel="http://sample.bpel.org/bpel/sample"
+    name="OnEventCorrelationArtifacts"
+    targetNamespace="http://sample.bpel.org/bpel/sampleArtifacts"
     xmlns="http://schemas.xmlsoap.org/wsdl/"
     >
 <vprop:property name="input" type="xs:string"/>

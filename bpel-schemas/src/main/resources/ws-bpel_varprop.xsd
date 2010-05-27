@@ -25,12 +25,12 @@
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             elementFormDefault="qualified"
             blockDefault="#all">
-    
+
     <xsd:annotation>
         <xsd:documentation>
             Variable Properties Schema for WS-BPEL 2.0
             Last modified date: 22th August, 2006
-            
+
             2004-03-24: YIU-OSS: Alex Yiu: Extracted from wsbpel-specification-draft.doc (Rev 1.22 - Modified on 24 March, 2004)
             2004-03-24: YIU-OSS: Alex Yiu: Updated targetNamespace with "2004/03"
             2004-03-24: YIU-OSS: Alex Yiu: Adding minOccurs="0" to query element; fix the syntax typo in "propertyAlias" definition (e.g remove complexContent)
@@ -44,17 +44,17 @@
                 Applied Issue 305, some formatting changes.
             2006-08-03: Rev 1.9: Alex Yiu:
                 Update one comment.
-                Additional note: 
-                  -- Thomas Schulze has made a normative change 
+                Additional note:
+                  -- Thomas Schulze has made a normative change
                      in Rev 1.8 by adding blockDefault="#all".
                   -- We may need to evaluate this blockDefault change comprehensively
             2006-08-07: Rev 1.10: Thomas Schulze
                 Removed the default namespace.
                 Moved minOccurs="0" maxOccurs="unbounded" in element documentation from sequence to any.
                 Changed prefix "prop:" to "vprop:".
-                
+
             *****************************************
-                
+
             2006-08-08: Rev 1.1: Alex Yiu
                 Rename the file from wsbpel_msgprop.xsd (rev 1.10) to ws-bpel_varprop.xsd
                 Change the targetNamespace URI to:
@@ -72,12 +72,12 @@
                 Added missing ":" in "urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0".
             2006-08-22: Rev 1.5: Thomas Schulze
                 Adapt Last modified date.
-                
+
         </xsd:documentation>
     </xsd:annotation>
-    
+
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="http://www.w3.org/2001/xml.xsd"/>
-    
+
     <xsd:element name="property">
         <xsd:complexType>
             <xsd:complexContent>
@@ -89,7 +89,7 @@
             </xsd:complexContent>
         </xsd:complexType>
     </xsd:element>
-    
+
     <xsd:complexType name="tExtensibleElements">
         <xsd:annotation>
             <xsd:documentation>
@@ -103,7 +103,7 @@
         </xsd:sequence>
         <xsd:anyAttribute namespace="##other" processContents="lax"/>
     </xsd:complexType>
-    
+
     <xsd:element name="documentation">
         <xsd:complexType mixed="true">
             <xsd:sequence>
@@ -113,7 +113,7 @@
             <xsd:attribute ref="xml:lang"/>
         </xsd:complexType>
     </xsd:element>
-    
+
     <xsd:element name="propertyAlias">
         <xsd:complexType>
             <xsd:complexContent>
@@ -130,7 +130,7 @@
             </xsd:complexContent>
         </xsd:complexType>
     </xsd:element>
-    
+
     <xsd:element name="query" type="vprop:tQuery"/>
     <xsd:complexType name="tQuery" mixed="true">
         <xsd:sequence>
@@ -139,5 +139,5 @@
         <xsd:attribute name="queryLanguage" type="xsd:anyURI" default="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"/>
         <xsd:anyAttribute namespace="##other" processContents="lax"/>
     </xsd:complexType>
-    
+
 </xsd:schema>

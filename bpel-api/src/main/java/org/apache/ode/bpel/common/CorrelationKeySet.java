@@ -29,51 +29,51 @@ import java.util.TreeSet;
 
 /**
  * This class implements a set of correlation keys.
- * 
+ *
  * The example of canonical forms of correlation key sets are:
- * 
+ *
  *  <ul>
  *  <li>@2</li>
  *  <li>@2[12~a~b]</li>
  *  <li>@2[12~a~b],[25~b~c]</li>
  *  </ul>
- *  
+ *
  *  The first example shows an empty correlation key set. The second shows a set with one correlation key inside.
  *  The third shows a set with two keys inside. The correlation keys are sorted by the correlation set ids.
- *  
+ *
  * @author sean
  *
  */
 public class CorrelationKeySet implements Serializable {
     private static final long serialVersionUID = 1L;
-    
+
     public final static String VERSION_1 = "1";
     public final static String VERSION_2 = "2";
 
     @SuppressWarnings("unused")
     private String version = VERSION_2;
-    
+
     private final Set<CorrelationKey> correlationKeys = new TreeSet<CorrelationKey>(new CorrelationKeyComparator());
-    
+
     /**
      * Default Constructor
      */
     public CorrelationKeySet() {
     }
-    
+
     /**
      * Restores the state by parsing the given canonical form of correlation key set.
-     * 
+     *
      * @param canonicalForm canonical form of correlation key set
      */
     public CorrelationKeySet(String canonicalForm) {
         restore(canonicalForm);
     }
-    
+
     /**
      * Adds a correlation key to this correlation key set. If a correlation key with the same correlation set id
      * already exists, the old one is replaced with the given new one.
-     * 
+     *
      * @param ck a correlation key to add
      * @return returns this correlation key set
      */
@@ -85,14 +85,14 @@ public class CorrelationKeySet implements Serializable {
             }
         }
         correlationKeys.add(ck);
-        
+
         return this;
     }
-    
+
     /**
-     * Checks if this correlation key set contains the opaque correlation key as the only key 
+     * Checks if this correlation key set contains the opaque correlation key as the only key
      * in this correlation key set.
-     * 
+     *
      * @return returns true if the correlation key set is opaque
      */
     public boolean isOpaque() {
@@ -100,26 +100,26 @@ public class CorrelationKeySet implements Serializable {
     }
 
     /**
-     * Checks if an incoming message with this correlation key set can be accepted by the given 
+     * Checks if an incoming message with this correlation key set can be accepted by the given
      * correlation key set.
-     * 
+     *
      * @param candidateKeySet a correlation key set stored in a route
      * @param isAllRoute use true if the route="all" is set
      * @return return true if routable
      */
     public boolean isRoutableTo(CorrelationKeySet candidateKeySet, boolean isAllRoute) {
         boolean isRoutable = containsAll(candidateKeySet);
-        
+
         if( isAllRoute ) {
             isRoutable = isRoutable || candidateKeySet.isOpaque() && isEmpty();
         }
-        
+
         return isRoutable;
     }
-    
+
     /**
      * Checks if this correlation key set contains all correlation keys from the given correlation key set.
-     * 
+     *
      * @param c a correlation key set
      * @return return true if this correlation key set is a superset
      */
@@ -130,21 +130,21 @@ public class CorrelationKeySet implements Serializable {
                 return false;
         return true;
     }
-    
+
     /**
      * Returns true if this correlation key set contains no correlation keys.
-     * 
+     *
      * @return returns true if empty
      */
     public boolean isEmpty() {
         return correlationKeys.isEmpty();
     }
-    
+
     /**
      * Returns true if this correlation key set contains the give correlation key.
-     * 
+     *
      * @param correlationKey a correlation key
-     * @return 
+     * @return
      */
     public boolean contains(CorrelationKey correlationKey) {
         Iterator<CorrelationKey> e = correlationKeys.iterator();
@@ -160,16 +160,16 @@ public class CorrelationKeySet implements Serializable {
         }
         return false;
     }
-    
+
     /**
      * Returns an iterator on the correlation keys that this correlation key set contains.
-     * 
+     *
      * @return an iterator
      */
     public Iterator<CorrelationKey> iterator() {
         return correlationKeys.iterator();
     }
-    
+
     /**
      * Removes all correlation keys in this correlation keys.
      */
@@ -183,7 +183,7 @@ public class CorrelationKeySet implements Serializable {
             return false;
         }
         CorrelationKeySet another = (CorrelationKeySet)o;
-        
+
         if( correlationKeys.size() != another.correlationKeys.size() ) {
             return false;
         }
@@ -193,12 +193,12 @@ public class CorrelationKeySet implements Serializable {
 
     /**
      * Finds all subsets of this correlation key set.
-     * 
+     *
      * @return a list of all subset correlation key sets
      */
     public List<CorrelationKeySet> findSubSets() {
         List<CorrelationKeySet> subSets = new ArrayList<CorrelationKeySet>();
-        
+
         // if the key set contains a opaque key and at least one non-opaque key, take out the opaque key
         CorrelationKey opaqueKey = null;
         boolean containsNonOpaque = false;
@@ -215,10 +215,10 @@ public class CorrelationKeySet implements Serializable {
         if( opaqueKey != null && containsNonOpaque ) {
             explicitKeySet.correlationKeys.remove(opaqueKey);
         }
-        
+
         // we are generating (2 powered by the number of correlation keys) number of sub-sets
         for( int setIndex = 0; setIndex < Math.pow(2, explicitKeySet.correlationKeys.size()); setIndex++ ) {
-            CorrelationKeySet subKeySet = new CorrelationKeySet(); 
+            CorrelationKeySet subKeySet = new CorrelationKeySet();
             int bitPattern = setIndex; // the bitPattern will be 0b0000, 0b0001, 0b0010 and so on
             Iterator<CorrelationKey> ckeys = explicitKeySet.iterator();
             while( ckeys.hasNext() && bitPattern > 0 ) { // bitPattern > 0 condition saves half of the iterations
@@ -233,38 +233,38 @@ public class CorrelationKeySet implements Serializable {
                 subSets.add(subKeySet);
             }
         }
-        
+
         if( subSets.isEmpty() ) {
             subSets.add(new CorrelationKeySet());
         }
-        
+
         return subSets;
     }
 
     /**
      * Returns a canonical form of this correlation key set.
-     * 
+     *
      * @return
      */
     public String toCanonicalString() {
         StringBuffer buf = new StringBuffer();
-        
+
         for( CorrelationKey ckey : correlationKeys ) {
             if( buf.length() > 0 ) {
                 buf.append(",");
             }
             buf.append("[").append(escapeRightBracket(ckey.toCanonicalString())).append("]");
         }
-        
+
         return "@" + VERSION_2 + buf.toString();
     }
-    
+
     private static String escapeRightBracket(String str) {
         if (str == null)
             return null;
 
         StringBuffer buf = new StringBuffer();
-        
+
         char[] chars = str.toCharArray();
         for (char achar : chars) {
             if (achar == ']') {
@@ -273,7 +273,7 @@ public class CorrelationKeySet implements Serializable {
                 buf.append(achar);
             }
         }
-        
+
         return buf.toString();
     }
 
@@ -284,7 +284,7 @@ public class CorrelationKeySet implements Serializable {
 
     /**
      * Restores the state of this correlation key set from a canonical form.
-     * 
+     *
      * @param canonicalForm a canonical form of correlation key set
      */
     public void restore(String canonicalForm) {
@@ -372,5 +372,5 @@ public class CorrelationKeySet implements Serializable {
             // used only in sorting the correlation keys in the CorrelationKeySet; does not matter with the values
             return o1.getCorrelationSetName().compareTo(o2.getCorrelationSetName());
         }
-    }    
+    }
 }

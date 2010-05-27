@@ -29,14 +29,14 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 
 
 /**
- * An in-memory map from the endpoints provided by various processes in 
- * the server to their corresponding endpoint references. 
+ * An in-memory map from the endpoints provided by various processes in
+ * the server to their corresponding endpoint references.
  *
  * @author $author$
  * @version $Revision$
  */
 public class SharedEndpoints {
-    // Map of every endpoint provided by the server 
+    // Map of every endpoint provided by the server
     private static Map<Endpoint, EndpointReference> _eprs = new HashMap<Endpoint, EndpointReference>();
     private static List<Endpoint> _referenceCounts = new ArrayList<Endpoint>();
 
@@ -67,8 +67,8 @@ public class SharedEndpoints {
 
     /**
      * Remove an endpoint along with its EPR
-     * This is called when there are no more references 
-     * to this endpoint from any BPEL process 
+     * This is called when there are no more references
+     * to this endpoint from any BPEL process
      * (which provides a service at this endpoint)
      *
      * @param endpoint endpoint
@@ -89,7 +89,7 @@ public class SharedEndpoints {
     }
 
     /**
-     * Increment the number of BPEL processes who provide 
+     * Increment the number of BPEL processes who provide
      * a service specifically at this endpoint.
      *
      * @param endpoint endpoint
@@ -99,7 +99,7 @@ public class SharedEndpoints {
     }
 
     /**
-     * Decrement the number of BPEL processes who provide 
+     * Decrement the number of BPEL processes who provide
      * a service specifically at this endpoint.
      *
      * @param endpoint endpoint
@@ -109,7 +109,7 @@ public class SharedEndpoints {
     public boolean decrementReferenceCount(Endpoint endpoint) {
         return _referenceCounts.remove(endpoint);
     }
-    
+
     public int getReferenceCount(EndpointReference epr) {
         int referenceCount = 0;
         for (Endpoint endpoint : _eprs.keySet()) {
@@ -121,6 +121,6 @@ public class SharedEndpoints {
                 }
             }
         }
-        return referenceCount;    	
+        return referenceCount;
     }
 }

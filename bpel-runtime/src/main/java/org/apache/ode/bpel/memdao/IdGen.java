@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Generates unique keys for process instances and scopes.
- * 
+ *
  */
 class IdGen {
   private static AtomicLong PROC_ID = new AtomicLong(0);

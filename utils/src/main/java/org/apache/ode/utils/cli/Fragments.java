@@ -29,10 +29,10 @@ import java.util.Iterator;
  * </p>
  */
 public class Fragments {
-  
+
   private CommandlineFragment[] _cl;
   private CommandlineSyntaxException _reason;
-  
+
   /**
    * <p>
    * Create a new instance.
@@ -42,7 +42,7 @@ public class Fragments {
   public Fragments(CommandlineFragment[] frags) {
     _cl = frags;
   }
-  
+
   /**
    * <p>
    * Reset the constituent fragments to their initial states.
@@ -53,7 +53,7 @@ public class Fragments {
       _cl[i].reset();
     }
   }
-  
+
   /**
    * <p>
    * Used after the {@link #matches(String[])} method, this returns the fragments
@@ -67,7 +67,7 @@ public class Fragments {
   public CommandlineFragment[] getFragments() {
     return _cl;
   }
-  
+
   /**
    * <p>
    * For use in formatting commandline help, this method orders the constituent
@@ -93,7 +93,7 @@ public class Fragments {
     }
     return cf;
   }
-  
+
   /**
    * <p>
    * Used after the {@link #matches(String[])} method, this returns the reason, if
@@ -105,7 +105,7 @@ public class Fragments {
   public CommandlineSyntaxException getReason() {
     return _reason;
   }
-  
+
   /**
    * <p>
    * Apply the {@link CommandlineFragment}s to the supplied arguments (after calling
@@ -131,7 +131,7 @@ public class Fragments {
           if (sb.length() != 0) {
             sb.append(' ');
           }
-          sb.append((String) it.next());          
+          sb.append((String) it.next());
         }
         _reason = new CommandlineSyntaxException(
             "Not sure what to do with the extra items: " + sb.toString());
@@ -144,5 +144,5 @@ public class Fragments {
       return false;
     }
   }
-  
+
 }

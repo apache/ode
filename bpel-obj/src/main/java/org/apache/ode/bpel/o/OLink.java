@@ -23,7 +23,7 @@ package org.apache.ode.bpel.o;
  */
 public class OLink extends OBase {
     static final long serialVersionUID = -1L  ;
-    
+
     /** The flow in which the link is declared. */
     public OFlow declaringFlow;
 

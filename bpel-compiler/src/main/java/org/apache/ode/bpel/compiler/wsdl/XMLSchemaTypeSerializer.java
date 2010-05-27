@@ -42,7 +42,7 @@ import org.w3c.dom.Element;
 public class XMLSchemaTypeSerializer implements ExtensionSerializer,
                                                 ExtensionDeserializer,
                                                 Serializable {
-    
+
   private static final long serialVersionUID = -870479908175017298L;
 
   public XMLSchemaTypeSerializer() {

@@ -59,8 +59,8 @@ public class CorrelationSetDAOImpl implements CorrelationSetDAO {
     public final static String SELECT_CORRELATION_SET_IDS_BY_PROCESS = "SELECT_CORRELATION_SET_IDS_BY_PROCESS";
     public final static String SELECT_CORRELATION_SET_IDS_BY_INSTANCE = "SELECT_CORRELATION_SET_IDS_BY_INSTANCE";
     public final static String SELECT_ACTIVE_SETS = "SELECT_ACTIVE_SETS";
-    
-    @Id @Column(name="CORRELATION_SET_ID") 
+
+    @Id @Column(name="CORRELATION_SET_ID")
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long _correlationSetId;
     @Basic @Column(name="NAME")
@@ -78,7 +78,7 @@ public class CorrelationSetDAOImpl implements CorrelationSetDAO {
         _name = name;
         _scope = scope;
     }
-    
+
     public Long getCorrelationSetId() {
         return _correlationSetId;
     }

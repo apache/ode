@@ -44,7 +44,7 @@ import org.w3c.dom.NodeList;
 
 /**
  * Configuration for an external variable.
- * 
+ *
  * @author Maciej Szefler <mszefler at gmail dot com>
  */
 class DbExternalVariable {
@@ -117,7 +117,7 @@ class DbExternalVariable {
     RowKey keyFromLocator(Locator locator) throws ExternalVariableModuleException {
         RowKey rc = new RowKey();
         parseXmlRow(rc, locator.reference);
-        
+
         // Put in the static goodies such as pid/iid
         for (Column c : rc._columns) {
             switch (c.genType) {
@@ -127,7 +127,7 @@ class DbExternalVariable {
                 break;
             }
         }
-        
+
         return rc;
     }
 
@@ -278,7 +278,7 @@ class DbExternalVariable {
         String strdat = c.toText(data);
         if (strdat != null) {
             cel.appendChild(doc.createTextNode(strdat));
-        } else if (c.nullok || c.isGenerated()) { 
+        } else if (c.nullok || c.isGenerated()) {
             cel.setAttributeNS(XSI_NS, "xsi:nil", "true");
         }
         parent.appendChild(cel);
@@ -288,7 +288,7 @@ class DbExternalVariable {
             throws ExternalVariableModuleException {
         if (rowel == null)
             return ret;
-        
+
         NodeList nl = rowel.getChildNodes();
         if (__log.isDebugEnabled()) __log.debug("parseXmlRow: element="+rowel.getLocalName());
         for (int i = 0; i < nl.getLength(); ++i) {
@@ -371,7 +371,7 @@ class DbExternalVariable {
         }
 
         boolean supportsEmptyValue() {
-            return (dataType == Types.VARCHAR || dataType == Types.LONGVARCHAR || dataType == Types.CLOB); 
+            return (dataType == Types.VARCHAR || dataType == Types.LONGVARCHAR || dataType == Types.CLOB);
         }
 
         /**
@@ -445,11 +445,11 @@ class DbExternalVariable {
             try {
                 if (val == null)
                     return null;
-                
+
                 if (!supportsEmptyValue() && val.trim().length() == 0) {
                     return null;
                 }
-                
+
                 // TODO: use xsd:date and xsd:time conversions
                 if (isDate())
                     return new java.sql.Date(ISO8601DateParser.parse(val).getTime());
@@ -486,11 +486,11 @@ class DbExternalVariable {
         public boolean isGenerated() {
             return (genType != null && !genType.equals(GenType.none));
         }
-        
+
         public boolean isDatabaseGenerated() {
             return isGenerated() && (genType.equals(GenType.sequence) || genType.equals(GenType.expression));
         }
-        
+
         public String toString() {
             return "Column {idx="+idx
                 +",name="+name

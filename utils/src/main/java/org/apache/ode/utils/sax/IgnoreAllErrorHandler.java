@@ -41,7 +41,7 @@ public class IgnoreAllErrorHandler implements ErrorHandler {
   public IgnoreAllErrorHandler() {
     // do nothing.
   }
-  
+
   /**
    * @see ErrorHandler#error(org.xml.sax.SAXParseException)
    */

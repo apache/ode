@@ -43,10 +43,10 @@ public class BpelDatabase {
       throw new NullPointerException("sscf is null!");
     if (scheduler == null)
       throw new NullPointerException("scheduler is null!");
-    
+
     _sscf = sscf;
     _scheduler = scheduler;
-    
+
   }
 
   /**

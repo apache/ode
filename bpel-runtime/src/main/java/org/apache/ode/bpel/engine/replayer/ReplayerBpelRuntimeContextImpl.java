@@ -61,10 +61,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * This class intercepts invocations on BpelRuntimeContextImpl and substitutes them as necessary during replaying. 
+ * This class intercepts invocations on BpelRuntimeContextImpl and substitutes them as necessary during replaying.
  * For exaple when INVOKE activity calls invoke on BpelRuntimeContextImpl then ReplayerBpelRuntimeContextImpl intercepts this call
  * and provides specific answer.
- * 
+ *
  * @author Rafal Rusin
  *
  */
@@ -83,8 +83,8 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
         __log.debug("cancel " + timerResponseChannel.export());
         super.cancel(timerResponseChannel);
     }
-    
-    
+
+
 
     @Override
     public void checkInvokeExternalPermission() {
@@ -121,9 +121,9 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
                 // }
                 mexDao.setRequest(request);
             }
-            
+
             Exchange answer = answerResult.e;
-    
+
             if (mexDao.getPattern().equals(MessageExchangePattern.REQUEST_RESPONSE.toString())) {
                 if (answer.isSetFault()) {
                     MessageDAO response = mexDao.createMessage(new QName("replayer", "replayer"));
@@ -136,7 +136,7 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
                     mexDao.setFault(answer.getFault().getType());
                     mexDao.setFaultExplanation(answer.getFault().getExplanation());
                     mexDao.setStatus(Status.FAULT.toString());
-    
+
                 } else if (answer.isSetOut()) {
                     MessageDAO response = mexDao.createMessage(new QName("replayer", "replayer"));
                     try {
@@ -154,7 +154,7 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
                     // replayer error to the top
                     throw new IllegalStateException("I don't have response for invoke " + answer);
                 }
-                
+
                 final String channel2 = channel.export();
                 final String mexid = mexDao.getMessageExchangeId();
                 replayerContext.scheduler.scheduleReplayerJob(new Callable() {
@@ -169,7 +169,7 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
                 // in only - continuing
                 mexDao.setStatus(Status.COMPLETED_OK.toString());
             }
-    
+
             return mexDao.getMessageExchangeId();
         }
     }
@@ -208,13 +208,13 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
         }
     }
 
-    
+
     @Override
     public void registerActivityForRecovery(ActivityRecoveryChannel channel, long activityId, String reason, Date dateTime, Element details, String[] actions, int retries) {
         super.registerActivityForRecovery(channel, activityId, reason, dateTime, details, actions, retries);
         replayerContext.checkRollbackOnFault();
     }
-    
+
     @Override
     public void completedFault(FaultData faultData) {
         super.completedFault(faultData);

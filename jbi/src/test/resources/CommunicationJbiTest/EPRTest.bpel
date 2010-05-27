@@ -34,7 +34,7 @@
   </bpws:correlationSets>
   <bpws:sequence name="main">
     <bpws:receive createInstance="yes" operation="opInOut" partnerLink="client" portType="tns:OnEventCorrelation" variable="input"/>
-    
+
     <bpws:assign>
       <bpws:copy>
         <bpws:from>
@@ -43,22 +43,22 @@
   <wsa:EndpointReference xmlns:wsa="http://www.w3.org/2005/08/addressing">
     <wsa:Address>http://localhost:8198/EPRTest2/?http.soap=true&amp;http.soapVersion=1.1</wsa:Address>
   </wsa:EndpointReference>
-</sref:service-ref> 
+</sref:service-ref>
             </bpws:literal>
          </bpws:from>
          <bpws:to partnerLink="client"/>
-      </bpws:copy> 
+      </bpws:copy>
     </bpws:assign>
 
     <bpws:invoke partnerLink="client" operation="opInOut" inputVariable="input" outputVariable="output"/>
-    
+
     <bpws:assign>
         <bpws:copy>
             <bpws:from>$output</bpws:from>
             <bpws:to>$output2</bpws:to>
         </bpws:copy>
     </bpws:assign>
-    
+
     <bpws:assign>
       <bpws:copy>
         <bpws:from>
@@ -67,7 +67,7 @@
 <jbi:end-point-reference jbi:end-point-name="default"
       jbi:service-name="bpel:EPRTest2"
       xmlns:jbi="http://java.sun.com/jbi/end-point-reference" xmlns:bpel="http://sample.bpel.org/bpel/sample"/>
-</sref:service-ref> 
+</sref:service-ref>
             </bpws:literal>
          </bpws:from>
          <bpws:to partnerLink="client"/>
@@ -77,7 +77,7 @@
             <bpws:to>$input.data</bpws:to>
         </bpws:copy>
     </bpws:assign>
-    
+
     <bpws:invoke partnerLink="client" operation="opInOut" inputVariable="input" outputVariable="output"/>
     <bpws:assign>
         <bpws:copy>

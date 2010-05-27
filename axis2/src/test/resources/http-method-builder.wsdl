@@ -66,7 +66,7 @@
             </wsdl:output>
         </wsdl:operation>
     </wsdl:binding>
-    
+
 
     <wsdl:types>
         <xsd:schema xmlns:ns="http://axis2.ode.apache.org" attributeFormDefault="qualified"

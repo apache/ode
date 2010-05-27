@@ -24,9 +24,9 @@ import org.apache.ode.bpel.pmapi.CommunicationType.Exchange;
 
 /**
  * It's raised when replayed invokes don't drain out all provided communication.
- * For example if there is invoke in process and two requests in provided communication, this 
- * exception occurs.   
- * 
+ * For example if there is invoke in process and two requests in provided communication, this
+ * exception occurs.
+ *
  * @author Rafal Rusin
  *
  */

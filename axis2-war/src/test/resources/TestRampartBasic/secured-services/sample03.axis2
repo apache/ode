@@ -17,7 +17,7 @@
  !-->
 <service>
     <module ref="rampart" />
-    
+
     <parameter name="OutflowSecurity">
       <action>
         <items>UsernameToken</items>
@@ -26,5 +26,5 @@
         <passwordType>PasswordText</passwordType>
       </action>
     </parameter>
-        
+
 </service>

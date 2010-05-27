@@ -30,5 +30,5 @@ public class GE extends IdentifierToValueCMP {
         super(identifier, value);
     }
 
-    
+
 }

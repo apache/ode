@@ -49,7 +49,7 @@ abstract class PickReceiveGenerator extends DefaultActivityGenerator {
 
     /**
      * Compile an On-Message or Receive block.
-     * 
+     *
      * @param varname
      *            name of variable to receive into
      * @param plink
@@ -89,7 +89,7 @@ abstract class PickReceiveGenerator extends DefaultActivityGenerator {
                 throw new CompilationException(__cmsgsGeneral.errDuplicateUseCorrelationSet(correlation
                         .getCorrelationSet()));
             }
-            
+
             OScope.CorrelationSet cset = _context.resolveCorrelationSet(correlation.getCorrelationSet());
 
             switch (correlation.getInitiate()) {

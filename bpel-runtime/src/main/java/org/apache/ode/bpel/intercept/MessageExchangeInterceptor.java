@@ -29,26 +29,26 @@ import org.apache.ode.bpel.iapi.ProcessConf;
 /**
  * Hook into the BPEL server that enables intercepting of message exchange
  * invocation.
- * 
+ *
  * @author Maciej Szefler
- * 
+ *
  */
 public interface MessageExchangeInterceptor {
 
     /**
      * Called when the message is scheduled, before any attempt to
      * invoke the BPEL server is made.
-     * 
+     *
      * @param mex
      *            message exchange
      */
     void onJobScheduled(MyRoleMessageExchange mex, InterceptorContext ic)
         throws FailMessageExchangeException, FaultMessageExchangeException;
-    
+
     /**
      * Called when the BPEL server is invoked, before any attempt to route the
      * message exchange to a process.
-     * 
+     *
      * @param mex
      *            message exchange
      */
@@ -58,7 +58,7 @@ public interface MessageExchangeInterceptor {
     /**
      * Called when the BPEL server is invoked, after the message exchange has
      * been routed to the process.
-     * 
+     *
      * @param mex
      *            message exchange
      */
@@ -69,7 +69,7 @@ public interface MessageExchangeInterceptor {
      * Called when the BPEL server is invoked, after the message exchange has
      * been routed to the process and it has been determined that a new instance
      * needs to be created.
-     * 
+     *
      * @param mex
      *            message exchange
      */
@@ -79,7 +79,7 @@ public interface MessageExchangeInterceptor {
     /**
      * Called when the BPEL server is invoked, before any attempt to route the
      * message exchange to a process.
-     * 
+     *
      * @param mex
      *            message exchange
      */
@@ -94,7 +94,7 @@ public interface MessageExchangeInterceptor {
         ProcessDAO getProcessDAO();
 
         ProcessConf getProcessConf();
-        
+
         BpelEngine getBpelEngine();
 
         BpelProcess getBpelProcess();

@@ -25,5 +25,5 @@
             <xsd:element name="IntElement" type="xsd:int" maxOccurs="1" minOccurs="0"/>
         </xsd:sequence>
     </xsd:complexType>
-    
+
 </xsd:schema>

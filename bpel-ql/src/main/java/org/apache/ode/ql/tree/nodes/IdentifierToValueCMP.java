@@ -22,8 +22,8 @@ package org.apache.ode.ql.tree.nodes;
 public abstract class IdentifierToValueCMP implements LogicNode {
     private final Identifier identifier;
     private final Value value;
-    
-    
+
+
     /**
      * @param identifier
      * @param value
@@ -45,6 +45,6 @@ public abstract class IdentifierToValueCMP implements LogicNode {
     public Value getValue() {
         return value;
     }
-    
+
 
 }

@@ -27,10 +27,10 @@ public class ActivityFailureEvent extends ActivityEvent {
 
     private String _reason;
 
-    public ActivityFailureEvent() { 
+    public ActivityFailureEvent() {
     }
-    
-    public ActivityFailureEvent(String reason) { 
+
+    public ActivityFailureEvent(String reason) {
       _reason = reason;
     }
 

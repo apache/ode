@@ -84,14 +84,14 @@
                 <to>$pongRequest.body/pong:text</to>
             </copy>
         </assign>
-        
+
         <invoke name="invokePong"
                 operation="Pong"
                 inputVariable="pongRequest"
                 outputVariable="pongResponse"
                 partnerLink="PongPartnerLink"
                 portType="pong:PongPortType"/>
-        
+
         <reply name="pingReply"
                 partnerLink="PingPartnerLink"
                 portType="ping:PingPortType"

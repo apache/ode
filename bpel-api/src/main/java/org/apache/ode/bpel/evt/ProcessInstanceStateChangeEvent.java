@@ -29,7 +29,7 @@ public class ProcessInstanceStateChangeEvent extends ProcessInstanceEvent {
   public ProcessInstanceStateChangeEvent() {
     super();
   }
-  
+
   public short getOldState() {
     return _oldState;
   }

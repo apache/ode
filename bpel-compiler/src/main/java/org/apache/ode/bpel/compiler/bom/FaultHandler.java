@@ -33,7 +33,7 @@ public class FaultHandler extends BpelObject {
 
     /**
      * Gets the {@link Catch} blocks for this fault handler.
-     * 
+     *
      * @return array of {@link Catch} blocks
      */
     public List<Catch> getCatches() {

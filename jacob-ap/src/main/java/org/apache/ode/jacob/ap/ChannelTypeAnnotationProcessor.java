@@ -34,12 +34,12 @@ class ChannelTypeAnnotationProcessor implements AnnotationProcessor {
 
     AnnotationProcessorEnvironment _env;
     AnnotationTypeDeclaration _atd;
-    
+
     ChannelTypeAnnotationProcessor(AnnotationTypeDeclaration atd, AnnotationProcessorEnvironment env) {
         _atd = atd;
-        _env = env; 
+        _env = env;
     }
-    
+
     public void process() {
         Collection<InterfaceDeclaration> channels = DeclarationFilter.getFilter(InterfaceDeclaration.class).filter(_env.getDeclarationsAnnotatedWith(_atd),InterfaceDeclaration.class);
         for (InterfaceDeclaration c : channels) {
@@ -53,7 +53,7 @@ class ChannelTypeAnnotationProcessor implements AnnotationProcessor {
                 if (pw != null) pw.close();
                 pw = null;
             }
-            
+
             try {
                 pw = _env.getFiler().createSourceFile(c.getQualifiedName() + "ChannelListener");
                 writeChannelListenerClass(pw, c);
@@ -63,11 +63,11 @@ class ChannelTypeAnnotationProcessor implements AnnotationProcessor {
                 if (pw != null) pw.close();
                 pw = null;
             }
-            
+
         }
     }
-    
-    
+
+
     private void writeChannelClass(PrintWriter pw, InterfaceDeclaration c) {
         pw.println("/*");
         pw.println(" * SOURCE FILE GENERATATED BY JACOB CHANNEL CLASS GENERATOR");
@@ -80,7 +80,7 @@ class ChannelTypeAnnotationProcessor implements AnnotationProcessor {
         pw.println();
         pw.println("package " + c.getPackage().getQualifiedName() + ";");
         pw.println();
-        
+
         pw.println("/**");
         pw.println(" * An auto-generated channel interface for the channel type");
         pw.println(" * {@link " + c.getQualifiedName() + "}.");
@@ -88,17 +88,17 @@ class ChannelTypeAnnotationProcessor implements AnnotationProcessor {
         pw.println(" * @see " + c.getQualifiedName() + "ChannelListener");
         pw.println(" */");
         pw.println("public interface " + c.getSimpleName() + "Channel");
-        
+
         Collection<InterfaceType> supers = c.getSuperinterfaces();
         if (supers.isEmpty()) {
             pw.println("    extends org.apache.ode.jacob.Channel, ");
         } else {
             pw.print("    extends ");
-            for (InterfaceType s : supers)  
+            for (InterfaceType s : supers)
                 pw.println("            "+ s.getDeclaration().getQualifiedName() + "Channel, ");
             pw.println    ("            org.apache.ode.jacob.Channel, ");
         }
-        
+
         pw.println("            " + c.getQualifiedName());
         pw.println("{}");
         pw.flush();

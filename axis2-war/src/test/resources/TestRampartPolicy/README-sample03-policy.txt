@@ -1,6 +1,6 @@
 Sign and Encrypt messages
 
-An AsymmetricBinding is used. Entire headers and body to be signed. 
+An AsymmetricBinding is used. Entire headers and body to be signed.
 EncryptionParts specifies the Body to be encrypted.
 
 Algorithm suite is TripleDesRsa15

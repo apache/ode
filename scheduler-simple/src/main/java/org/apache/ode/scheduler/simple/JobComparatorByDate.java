@@ -23,7 +23,7 @@ import java.util.Comparator;
 
 /**
  * Compare jobs, using scheduled date as sort criteria.
- * 
+ *
  * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
  */
 class JobComparatorByDate implements Comparator<Task> {

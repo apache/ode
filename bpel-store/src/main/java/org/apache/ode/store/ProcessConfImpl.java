@@ -106,7 +106,7 @@ public class ProcessConfImpl implements ProcessConf {
     private EndpointReferenceContext eprContext;
 
     private final ProcessCleanupConfImpl processCleanupConfImpl;
-    
+
     private final boolean generateProcessEventsAll;
 
     ProcessConfImpl(QName pid, QName type, long version, DeploymentUnitDir du, TDeployment.Process pinfo, Date deployDate,
@@ -131,7 +131,7 @@ public class ProcessConfImpl implements ProcessConf {
         initEventList();
 
         processCleanupConfImpl = new ProcessCleanupConfImpl(pinfo);
-        
+
         initSchedules();
     }
 
@@ -180,10 +180,10 @@ public class ProcessConfImpl implements ProcessConf {
                 __log.debug("Processing <invoke> element for process " + _pinfo.getName() + ": partnerlink " + plinkName + " --> "
                         + service);
                 _partnerRoleInitialValues.put(plinkName, new Endpoint(service.getName(), service.getPort()));
-                
+
                 {
                     OFailureHandling g = null;
-                    
+
                     if (invoke.isSetFailureHandling()) {
                         FailureHandling f = invoke.getFailureHandling();
                         g = new OFailureHandling();
@@ -191,7 +191,7 @@ public class ProcessConfImpl implements ProcessConf {
                         if (f.isSetRetryDelay()) g.retryDelay = f.getRetryDelay();
                         if (f.isSetRetryFor()) g.retryFor = f.getRetryFor();
                     }
-                    
+
                     PartnerRoleConfig c = new PartnerRoleConfig(g, invoke.getUsePeer2Peer());
                     __log.debug("PartnerRoleConfig for " + plinkName + " " + c.failureHandling + " usePeer2Peer: " + c.usePeer2Peer);
                     _partnerRoleConfig.put(plinkName, c);
@@ -269,7 +269,7 @@ public class ProcessConfImpl implements ProcessConf {
             throw new ContextException("CBP record not found for type " + getType());
         return cbpInfo.cbp.length();
     }
-    
+
     public String getBpelDocument() {
         CBPInfo cbpInfo = _du.getCBPInfo(getType());
         if (cbpInfo == null)
@@ -525,7 +525,7 @@ public class ProcessConfImpl implements ProcessConf {
     public Set<CLEANUP_CATEGORY> getCleanupCategories(boolean instanceSucceeded) {
         return processCleanupConfImpl.getCleanupCategories(instanceSucceeded);
     }
-    
+
     private void initSchedules() {
         for(TSchedule schedule : _pinfo.getScheduleList()) {
             for(TCleanup cleanup : schedule.getCleanupList()) {
@@ -533,10 +533,10 @@ public class ProcessConfImpl implements ProcessConf {
             }
         }
     }
-    
+
     public List<CronJob> getCronJobs() {
         List<CronJob> jobs = new ArrayList<CronJob>();
-        
+
         for(TSchedule schedule : _pinfo.getScheduleList()) {
             CronJob job = new CronJob();
             try {
@@ -546,7 +546,7 @@ public class ProcessConfImpl implements ProcessConf {
                     assert !aCleanup.getFilterList().isEmpty();
                     cleanupInfo.setFilters(aCleanup.getFilterList());
                     ProcessCleanupConfImpl.processACleanup(cleanupInfo.getCategories(), aCleanup.getCategoryList());
-                    
+
                     JobDetails runnableDetails = new JobDetails();
                     runnableDetails.getDetailsExt().put("cleanupInfo", cleanupInfo);
                     runnableDetails.getDetailsExt().put("pid", _pid);
@@ -558,7 +558,7 @@ public class ProcessConfImpl implements ProcessConf {
                 __log.error("Exception during parsing the schedule cron expression: " + schedule.getWhen() + ", skipped the scheduled job.", pe);
             }
         }
-        
+
         return jobs;
     }
 }

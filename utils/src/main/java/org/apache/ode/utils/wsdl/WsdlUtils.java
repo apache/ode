@@ -82,7 +82,7 @@ public class WsdlUtils {
         ExtensibilityElement element = getBindingExtension(binding);
         // with a fully wsdl-compliant document, this element cannot be null.
         // but ODE extends the HTTP binding and supports the HTTP verb at the operation level.
-        // A port using this extension may have no HTTPBinding at the port level.  
+        // A port using this extension may have no HTTPBinding at the port level.
         if (element == null) {
             // in this case, we check the binding information of one operation
             final BindingOperation anOperation = (BindingOperation) binding.getBindingOperations().get(0);

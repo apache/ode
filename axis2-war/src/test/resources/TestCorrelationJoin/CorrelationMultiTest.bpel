@@ -17,7 +17,7 @@
   ~ under the License.
   -->
 <process name="HeaderTest"
-    targetNamespace="http://ode/bpel/unit-test" 
+    targetNamespace="http://ode/bpel/unit-test"
     xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
     xmlns:tns="http://ode/bpel/unit-test"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
@@ -29,12 +29,12 @@
     <import location="CorrelationMultiTest.wsdl" namespace="http://ode/bpel/unit-test.wsdl" importType="http://schemas.xmlsoap.org/wsdl/" />
 
     <partnerLinks>
-      <partnerLink name="helloPartnerLink" 
+      <partnerLink name="helloPartnerLink"
          partnerLinkType="test:HeaderTestPartnerLinkType" myRole="me" />
       <partnerLink name="dummyPartnerLink"
          partnerLinkType="test:DummyPartnerLinkType" partnerRole="you" />
     </partnerLinks>
-    
+
     <variables>
      <variable name="myInVar" messageType="test:HeaderTestMessage"/>
      <variable name="myOutVar" messageType="test:HeaderTestMessage"/>
@@ -94,7 +94,7 @@
             <targets>
                 <target linkName="continue"/>
             </targets>
-            <receive name="receive3" partnerLink="helloPartnerLink" portType="test:HeaderTestPortType" 
+            <receive name="receive3" partnerLink="helloPartnerLink" portType="test:HeaderTestPortType"
                 operation="continue" variable="myInVar">
                 <correlations>
                     <correlation set="testCorr1" initiate="join"/>
@@ -110,7 +110,7 @@
                     <to>$myOutVar.TestPart</to>
                 </copy>
             </assign>
-    
+
             <reply name="end" partnerLink="helloPartnerLink" portType="test:HeaderTestPortType"
                   operation="hello1" variable="myOutVar"/>
         </sequence>

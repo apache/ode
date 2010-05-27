@@ -21,7 +21,7 @@ package org.apache.ode.bpel.evt;
 
 /**
  * Signals completion of the process.
- * 
+ *
  */
 public class ProcessTerminationEvent extends ProcessInstanceEvent {
 

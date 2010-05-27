@@ -17,8 +17,8 @@
   ~ under the License.
   -->
 
-<deploy xmlns="http://ode.fivesight.com/schemas/2006/06/27/dd" 
-    xmlns:pns="http://ode/bpel/unit-test" 
+<deploy xmlns="http://ode.fivesight.com/schemas/2006/06/27/dd"
+    xmlns:pns="http://ode/bpel/unit-test"
     xmlns:wns="http://ode/bpel/unit-test.wsdl">
 
 

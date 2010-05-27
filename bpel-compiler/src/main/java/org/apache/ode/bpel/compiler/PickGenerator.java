@@ -55,7 +55,7 @@ class PickGenerator extends PickReceiveGenerator {
           oOnMessage.activity = _context.compile(sOnMessage.getActivity());
           opick.onMessages.add(oOnMessage);
         }
-    
+
         try {
             for(OnAlarm onAlarmDef : pickDef.getOnAlarms()){
                 OPickReceive.OnAlarm oalarm = new OPickReceive.OnAlarm(_context.getOProcess());
@@ -67,10 +67,10 @@ class PickGenerator extends PickReceiveGenerator {
                 } else {
                     throw new CompilationException(__cmsgs.errForOrUntilMustBeGiven().setSource(onAlarmDef));
                 }
-    
+
                 if (pickDef.isCreateInstance())
                     throw new CompilationException(__cmsgs.errOnAlarmWithCreateInstance().setSource(onAlarmDef));
-    
+
                 opick.onAlarms.add(oalarm);
             }
         } catch (CompilationException ce) {

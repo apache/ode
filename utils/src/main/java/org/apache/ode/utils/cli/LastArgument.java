@@ -30,11 +30,11 @@ import java.util.List;
  * </p>
  */
 public class LastArgument extends Argument {
-  
+
   public LastArgument(String argName, String description, boolean optional) {
     super(argName, description, optional);
   }
-  
+
   public List<String> consume(List<String> s) throws CommandlineSyntaxException {
     // if there is only one item or there are no items, then the last item is
     // the same as the first.

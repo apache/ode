@@ -22,5 +22,5 @@
             xmlns:tns="http://ode.apache.org/example">
   <!-- Data types -->
   <xsd:element name="start" type="xsd:string"/>
-  
+
 </xsd:schema>

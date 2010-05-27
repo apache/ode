@@ -29,7 +29,7 @@ import junit.framework.TestCase;
 
 public class XsdTypesTest extends TestCase {
     private static Log __log = LogFactory.getLog(XsdTypesTest.class);
-    
+
     public void testDateTime() throws Exception {
         Object o = JaxpVariableResolver.getSimpleContent(DOMUtils.stringToDOM("<temporary-simple-type-wrapper>2010-01-25T15:38:54.82Z</temporary-simple-type-wrapper>"), QName.valueOf("{http://www.w3.org/2001/XMLSchema}dateTime"));
         __log.debug(o);
@@ -41,5 +41,5 @@ public class XsdTypesTest extends TestCase {
         __log.debug(o);
         assertTrue(o.toString().equals(""));
     }
-    
+
 }

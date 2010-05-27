@@ -52,23 +52,23 @@ public class BpelObject implements SourceLocation {
     private final NSContext _nsContext;
 
     private List<BpelObject> _children = null;
-    
-    /** URI of the source document. */ 
+
+    /** URI of the source document. */
     private URI _docURI;
-    
+
 
     public BpelObject(Element el) {
         _element = el;
         _type = new QName(el.getNamespaceURI(), el.getLocalName());
         _nsContext = new NSContext();
-        
+
         initNSContext(el);
     }
 
     public QName getType() {
         return _type;
     }
-    
+
     public Element getElement() {
         return _element;
     }
@@ -76,7 +76,7 @@ public class BpelObject implements SourceLocation {
     /**
      * Get the line number in the BPEL source document where this object is
      * defined.
-     * 
+     *
      * @return line number
      */
     public int getLineNo() {
@@ -86,32 +86,32 @@ public class BpelObject implements SourceLocation {
     /**
      * Get the namespace context for this BPEL object (i.e. prefix-to-namespace
      * mapping).
-     * 
+     *
      * @return namespace context
      */
     public NSContext getNamespaceContext() {
         return _nsContext;
     }
 
- 
+
     /**
      * Return the declared extensibility elements. The extensibility elements
      * declared as subelements of this BpelObject will be returned with a value
      * type of org.w3c.dom.Element. The ones declared as extensibility
      * attributes will be returned as a value type of String.
-     * 
+     *
      * @return extensibility qualified names and the full elements value (String
      *         or Element)
      */
     public Map<QName, Object> getExtensibilityElements() {
         // We consider anything that is not in the namespace of this element to be an
-        // extensibility element/attribute. 
+        // extensibility element/attribute.
         HashMap<QName, Object> ee = new HashMap<QName,Object>();
         for (BpelObject child  :getChildren()) {
             if (child.getType().getNamespaceURI() != null && !child.getType().getNamespaceURI().equals(getType().getNamespaceURI()))
                 ee.put(child.getType(), child.getElement());
         }
-        
+
         NamedNodeMap nnm = getElement().getAttributes();
         for (int i = 0; i < nnm.getLength(); ++i) {
             Node n = nnm.item(i);
@@ -119,7 +119,7 @@ public class BpelObject implements SourceLocation {
                 ee.put(new QName(n.getNamespaceURI(), n.getLocalName()), n.getTextContent());
         }
         return ee;
-        
+
     }
 
 
@@ -135,7 +135,7 @@ public class BpelObject implements SourceLocation {
         NodeList nl = getElement().getChildNodes();
         for (int i = 0; i < nl.getLength(); ++i) {
             Node node = nl.item(i);
-            if (node.getNodeType() == Node.ELEMENT_NODE && 
+            if (node.getNodeType() == Node.ELEMENT_NODE &&
                     !getType().getNamespaceURI().equals(node.getNamespaceURI())) {
                 child = (Element)node;
                 break;
@@ -143,27 +143,27 @@ public class BpelObject implements SourceLocation {
         }
         return child;
     }
-    
+
     /**
      * Is this a BPEL 1.1 object?
      * @return
      */
     public boolean is11() {
-        return getType().getNamespaceURI() != null && 
+        return getType().getNamespaceURI() != null &&
             (getType().getNamespaceURI().equals(Bpel11QNames.NS_BPEL4WS_2003_03)
-                    || getType().getNamespaceURI().equals(Bpel11QNames.NS_BPEL4WS_PARTNERLINK_2003_05)); 
+                    || getType().getNamespaceURI().equals(Bpel11QNames.NS_BPEL4WS_PARTNERLINK_2003_05));
     }
 
     public boolean is20Draft() {
         return getType().getNamespaceURI() != null &&
             (getType().getNamespaceURI().equals(Bpel20QNames.NS_WSBPEL2_0)
-                    || getType().getNamespaceURI().equals(Bpel20QNames.NS_WSBPEL_PARTNERLINK_2004_03)); 
+                    || getType().getNamespaceURI().equals(Bpel20QNames.NS_WSBPEL_PARTNERLINK_2004_03));
     }
 
     protected boolean isAttributeSet(String attrname) {
         return null != getAttribute(attrname, null);
     }
-    
+
     protected <T extends BpelObject> List<T> getChildren(Class<T> cls) {
         return CollectionsX.filter(new ArrayList<T>(), getChildren(), cls);
     }
@@ -174,7 +174,7 @@ public class BpelObject implements SourceLocation {
             return null;
         return children.get(0);
     }
-    
+
     protected List<BpelObject> getChildren(final QName type) {
         return CollectionsX.filter(new ArrayList<BpelObject>(), getChildren(), new MemberOfFunction<BpelObject>() {
             @Override
@@ -196,7 +196,7 @@ public class BpelObject implements SourceLocation {
     protected QName rewriteTargetNS(QName target) {
         return new QName(getType().getNamespaceURI(), target.getLocalPart());
     }
-    
+
     protected List<BpelObject> getChildren() {
         if (_children == null) {
             _children = new ArrayList<BpelObject>();
@@ -222,30 +222,30 @@ public class BpelObject implements SourceLocation {
             return dflt;
         return val;
     }
-    
+
     protected String getAttribute(String name, String dflt) {
         String val = _element.getAttribute(name);
         if (val == null || "".equals(val))
             return dflt;
         return val;
     }
-    
+
     protected String getAttribute(String name) {
         return getAttribute(name, null);
     }
-    
+
     protected <T> T getAttribute(String attrName, Map<String, T> suppressJoinFailure, T notset) {
         String val = getAttribute(attrName, null);
         if (val == null || "".equals(val))
             return notset;
         return suppressJoinFailure.get(val);
     }
-   
-    
-    
+
+
+
     /**
      * Initialize object's namespace context (recursively).
-     * 
+     *
      * @param el
      *            object's associated element.
      */
@@ -262,15 +262,15 @@ public class BpelObject implements SourceLocation {
 
             _nsContext.register(prefix, uri);
         }
-        
+
         Attr dflt = el.getAttributeNode("xmlns");
         if (dflt != null) {
             _nsContext.register("", dflt.getTextContent());
         }
-        
+
     }
-   
-    public String getTextValue() { 
+
+    public String getTextValue() {
         getElement().normalize();
         for (Node n = getElement().getFirstChild(); n != null; n = n.getNextSibling())
             switch (n.getNodeType()) {

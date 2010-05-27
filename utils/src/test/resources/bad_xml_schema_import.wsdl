@@ -28,5 +28,5 @@
             <xs:import namespace="foo://bar" schemaLocation="bad_xml.wsdl"/>
         </xs:schema>
     </types>
-    
+
 </definitions>

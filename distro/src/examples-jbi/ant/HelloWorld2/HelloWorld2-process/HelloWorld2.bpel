@@ -48,7 +48,7 @@
                 operation="Hello"
                 variable="request"
                 createInstance="yes"/>
-                
+
         <assign name="assign1">
             <copy>
                 <from>$request.body/hello:text</from>
@@ -69,7 +69,7 @@
                 <to>$response.body/hello:text</to>
             </copy>
         </assign>
-        
+
         <reply name="end"
                 partnerLink="helloPartnerLink"
                 portType="hello:HelloPortType"

@@ -47,7 +47,7 @@ class OdeManagedConnectionImpl implements ManagedConnection {
 
   OdeManagedConnectionImpl() {}
 
-  public OdeManagedConnectionImpl(OdeTransportPipe pipe, Subject subject, ConnectionRequestInfo connectionRequestInfo) 
+  public OdeManagedConnectionImpl(OdeTransportPipe pipe, Subject subject, ConnectionRequestInfo connectionRequestInfo)
   throws ResourceException {
     _transportPipe = pipe;
     String[] classNames;
