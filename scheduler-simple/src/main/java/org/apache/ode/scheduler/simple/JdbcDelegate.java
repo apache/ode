@@ -116,7 +116,7 @@ public class JdbcDelegate implements DatabaseDelegate {
         + "inMem,"
         + "detailsExt"
         + " from ODE_JOB "
-            + "where nodeid = ? and scheduled = 0 and ts < ? order by ts";
+            + "where nodeid = ? and ts < ? order by ts";
 
 //  public Long instanceId;
 //  public String mexId;

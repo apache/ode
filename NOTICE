@@ -20,6 +20,19 @@ This product includes software developed by Sybase.
 http://www.sybase.com
 
 =========================================================================
+==  Bubbling Notice                                                    ==
+=========================================================================
+
+This product includes software (Javascript Bubbling Library) under a 
+BSD license.
+
+Copyright (c) 2007, Caridy Patiño. All rights reserved.
+Portions Copyright (c) 2007, Yahoo!, Inc. All rights reserved.
+Code licensed under the BSD License:
+http://www.bubbling-library.com/eng/licence
+version: 1.5.0
+
+=========================================================================
 ==  Derby Notice                                                       ==
 =========================================================================
 
@@ -137,6 +150,16 @@ software also includes:
  - Piccolo XML Parser for Java from http://piccolo.sourceforge.net/,
    Copyright 2002 Yuval Oren under the terms of the Apache Software 
    License 2.0
+
+=========================================================================
+==  YUI Notice                                                         ==
+=========================================================================
+
+This product includes software developed by the Yahoo! Inc.
+Copyright (c) 2008, Yahoo! Inc. All rights reserved.
+Code licensed under the BSD License:
+http://developer.yahoo.net/yui/license.txt
+version: 2.5.2
 
 =========================================================================
 ==  OASIS Notice                                                       ==
