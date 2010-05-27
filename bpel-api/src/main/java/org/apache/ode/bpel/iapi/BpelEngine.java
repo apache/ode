@@ -58,14 +58,14 @@ public interface BpelEngine extends Scheduler.JobProcessor {
      */
     MessageExchange getMessageExchange(String mexId);
 
-	int getProcessThrottledMaximumCount();
-	
-	long getProcessThrottledMaximumSize();
-	
-	int getHydratedProcessCount(QName processName);
+    int getProcessThrottledMaximumCount();
+    
+    long getProcessThrottledMaximumSize();
+    
+    int getHydratedProcessCount(QName processName);
 
-	long getHydratedProcessSize(QName processName);
+    long getHydratedProcessSize(QName processName);
 
-	boolean dehydrateLastUnusedProcess();
+    boolean dehydrateLastUnusedProcess();
 
 }

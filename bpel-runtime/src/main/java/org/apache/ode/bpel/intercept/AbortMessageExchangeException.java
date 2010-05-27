@@ -23,11 +23,11 @@ package org.apache.ode.bpel.intercept;
  * @author mszefler
  */
 public abstract class AbortMessageExchangeException extends Exception {
-	protected AbortMessageExchangeException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
-	
-	protected AbortMessageExchangeException(String msg) {
-		super(msg);
-	}
+    protected AbortMessageExchangeException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
+    
+    protected AbortMessageExchangeException(String msg) {
+        super(msg);
+    }
 }

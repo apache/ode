@@ -25,9 +25,9 @@ import javax.transaction.TransactionManager;
 import javax.xml.namespace.QName;
 
 public class ExtVarJbiTest extends JbiTestBase {
-	private void initDb() throws Exception {
-		TransactionManager tm = (TransactionManager) getBean("transactionManager");
-		tm.begin();
+    private void initDb() throws Exception {
+        TransactionManager tm = (TransactionManager) getBean("transactionManager");
+        tm.begin();
         Connection conn = ((DataSource) getBean("localDerbyDataSource")).getConnection();
 
         dropTable(conn, "extvartable1");
@@ -40,20 +40,20 @@ public class ExtVarJbiTest extends JbiTestBase {
                 + "','thefoo')");
         s.close();
         tm.commit();
-	}
-	
+    }
+    
     private static void dropTable(Connection c, String name) {
         try {
-        	Statement s = c.createStatement();
+            Statement s = c.createStatement();
             s.execute("drop table "+name);
             s.close();
         } catch (SQLException e) {
             // ignore
         }
     }
-	
+    
     public void testExtVar() throws Exception {
-    	initDb();
+        initDb();
         go();
     }
 }

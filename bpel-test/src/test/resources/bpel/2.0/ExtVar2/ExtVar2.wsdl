@@ -57,9 +57,9 @@
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="ExtVarService">
-		<wsdl:port name="ExtVarPort" binding="tns:ExtVarSoapBinding">
-     		<soap:address location="http://localhost:8080/ode/processes/extvar2"/>
-		</wsdl:port>
+        <wsdl:port name="ExtVarPort" binding="tns:ExtVarSoapBinding">
+            <soap:address location="http://localhost:8080/ode/processes/extvar2"/>
+        </wsdl:port>
     </wsdl:service>
     
    <plnk:partnerLinkType name="ExtVarPartnerLinkType">

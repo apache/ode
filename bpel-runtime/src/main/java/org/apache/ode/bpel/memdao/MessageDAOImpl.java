@@ -27,43 +27,43 @@ import org.w3c.dom.Element;
 import javax.xml.namespace.QName;
 
 public class MessageDAOImpl extends DaoBaseImpl implements MessageDAO {
-	private QName type;
-	private Element data;
-	private Element header;
-	private MessageExchangeDAO messageExchange;
-	
-	public MessageDAOImpl(MessageExchangeDAO messageExchange) {
-		this.messageExchange = messageExchange;
-	}
+    private QName type;
+    private Element data;
+    private Element header;
+    private MessageExchangeDAO messageExchange;
+    
+    public MessageDAOImpl(MessageExchangeDAO messageExchange) {
+        this.messageExchange = messageExchange;
+    }
 
-	public void setType(QName type) {
-		this.type = type;
-	}
+    public void setType(QName type) {
+        this.type = type;
+    }
 
-	public QName getType() {
-		return type;
-	}
+    public QName getType() {
+        return type;
+    }
 
-	public void setData(Element value) {
-		this.data = value;
-	}
+    public void setData(Element value) {
+        this.data = value;
+    }
 
-	public Element getData() {
-		if (data == null) data = DOMUtils.newDocument().getDocumentElement();
-		return data;
-	}
+    public Element getData() {
+        if (data == null) data = DOMUtils.newDocument().getDocumentElement();
+        return data;
+    }
 
-	public void setHeader(Element value) {
-		this.header = value;
-	}
+    public void setHeader(Element value) {
+        this.header = value;
+    }
 
-	public Element getHeader() {
-		if ( header == null ) header = DOMUtils.newDocument().getDocumentElement();
-		return header;
-	}
+    public Element getHeader() {
+        if ( header == null ) header = DOMUtils.newDocument().getDocumentElement();
+        return header;
+    }
 
-	public MessageExchangeDAO getMessageExchange() {
-		return messageExchange;
-	}
+    public MessageExchangeDAO getMessageExchange() {
+        return messageExchange;
+    }
 
 }

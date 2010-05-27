@@ -64,9 +64,9 @@ public class OAssign extends OActivity {
         
         @Override
         public void dehydrate() {
-        	super.dehydrate();
-        	to = null;
-        	from = null;
+            super.dehydrate();
+            to = null;
+            from = null;
         }
     }
 
@@ -133,10 +133,10 @@ public class OAssign extends OActivity {
             return expression.getVariable();
         }
         public boolean isInsertMissingToData() {
-        	return expression.insertMissingData;
+            return expression.insertMissingData;
         }
         public void setInsertMissingToData(boolean insertMissingToData) {
-        	expression.insertMissingData = insertMissingToData;
+            expression.insertMissingData = insertMissingToData;
         }
       
     }
@@ -254,9 +254,9 @@ public class OAssign extends OActivity {
     
     @Override
     public void dehydrate() {
-    	super.dehydrate();
-    	for (Copy copy : this.copy) {
-    		copy.dehydrate();
-    	}
+        super.dehydrate();
+        for (Copy copy : this.copy) {
+            copy.dehydrate();
+        }
     }
 }

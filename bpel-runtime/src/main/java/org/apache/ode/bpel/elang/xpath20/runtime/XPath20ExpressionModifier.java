@@ -125,7 +125,7 @@ public class XPath20ExpressionModifier {
                     if (NodeKindTest.ELEMENT.getNodeKindMask() != nameTest.getNodeKindMask()) {
                         break;
                     }
-                	
+                    
                     NodeList children = ((Element) contextNode).getElementsByTagNameNS(childName.getNamespaceURI(),
                             childName.getLocalPart());
                     if ((children == null) || (children.getLength() == 0)) {
@@ -145,15 +145,15 @@ public class XPath20ExpressionModifier {
                     
                     Attr attribute = ((Element) contextNode).getAttributeNodeNS(childName.getNamespaceURI(), childName.getLocalPart());
                     if (attribute == null) {
-                    	attribute = document.createAttributeNS(childName.getNamespaceURI(), childName.getLocalPart());
-                    	((Element) contextNode).setAttributeNode(attribute);
-                    	contextNode = attribute;
+                        attribute = document.createAttributeNS(childName.getNamespaceURI(), childName.getLocalPart());
+                        ((Element) contextNode).setAttributeNode(attribute);
+                        contextNode = attribute;
                     } else {
-                    	break;
+                        break;
                     }
-                	
+                    
                 } else {
-                	break;
+                    break;
                 }
 
 

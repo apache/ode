@@ -81,7 +81,7 @@
       messageType="resp:ResponseMessage"
       part="payload">
       <bpws:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
-      	/typ:AsyncRequest/typ:Order/typ:OrderId
+        /typ:AsyncRequest/typ:Order/typ:OrderId
       </bpws:query>
     </bpws:propertyAlias>
 
@@ -90,7 +90,7 @@
       messageType="resp:AsyncRequestMessage"
       part="payload">
       <bpws:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
-      	/typ:AsyncRequest/typ:Order/typ:OrderId
+        /typ:AsyncRequest/typ:Order/typ:OrderId
       </bpws:query>
    </bpws:propertyAlias>
 

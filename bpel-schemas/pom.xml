@@ -38,32 +38,32 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-	    <scope>test</scope>
+        <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-		<groupId>org.codehaus.mojo</groupId>
-		<artifactId>xmlbeans-maven-plugin</artifactId>
-		<configuration>
-		   <schemaDirectory>src/main/xsd</schemaDirectory>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>xmlbeans-maven-plugin</artifactId>
+        <configuration>
+           <schemaDirectory>src/main/xsd</schemaDirectory>
                    <sourceGenerationDirectory>target/generated/xmlbeans</sourceGenerationDirectory>
                    <xmlConfigs>
                        <xmlConfig implementation="java.io.File">src/main/xsd/dd.xsdconfig</xmlConfig>
                        <xmlConfig implementation="java.io.File">src/main/xsd/pmapi.xsdconfig</xmlConfig>
                        <xmlConfig implementation="java.io.File">src/main/xsd/schedules.xsdconfig</xmlConfig>
                    </xmlConfigs>
-		   <javaSource>1.5</javaSource>
-		</configuration>
-		<executions>
-		   <execution>
-		    <goals>
-		       <goal>xmlbeans</goal>
-		    </goals>
-		   </execution>
-	        </executions>
+           <javaSource>1.5</javaSource>
+        </configuration>
+        <executions>
+           <execution>
+            <goals>
+               <goal>xmlbeans</goal>
+            </goals>
+           </execution>
+            </executions>
             </plugin>
         </plugins>
     </build>

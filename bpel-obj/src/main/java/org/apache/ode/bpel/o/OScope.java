@@ -197,32 +197,32 @@ public class OScope extends OActivity {
     
     @Override
     public void dehydrate() {
-    	super.dehydrate();
-    	this.activity = null;
-    	if (compensatable != null) {
-    		compensatable.clear();
-    	}
-    	if (compensationHandler != null) {
-    		compensationHandler.dehydrate();
-    		compensationHandler = null;
-    	}
-    	if (terminationHandler != null) {
-    		terminationHandler.dehydrate();
-    		terminationHandler = null;
-    	}
-    	if (eventHandler != null) {
-    		eventHandler.dehydrate();
-    		eventHandler = null;
-    	}
-    	if (variables != null) {
-    		variables.clear();
-    	}
-    	if (correlationSets != null) {
-    		correlationSets.clear();
-    	}
-    	if (partnerLinks != null) {
-    		partnerLinks.clear();
-    	}
+        super.dehydrate();
+        this.activity = null;
+        if (compensatable != null) {
+            compensatable.clear();
+        }
+        if (compensationHandler != null) {
+            compensationHandler.dehydrate();
+            compensationHandler = null;
+        }
+        if (terminationHandler != null) {
+            terminationHandler.dehydrate();
+            terminationHandler = null;
+        }
+        if (eventHandler != null) {
+            eventHandler.dehydrate();
+            eventHandler = null;
+        }
+        if (variables != null) {
+            variables.clear();
+        }
+        if (correlationSets != null) {
+            correlationSets.clear();
+        }
+        if (partnerLinks != null) {
+            partnerLinks.clear();
+        }
     }
 
 }

@@ -44,25 +44,25 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class PartnerRoleChannelImpl implements PartnerRoleChannel {
-	
-	public PartnerRoleChannelImpl() {
+    
+    public PartnerRoleChannelImpl() {
 
-	}
+    }
 
-	public void close() {
+    public void close() {
 
-	}
+    }
 
-	public EndpointReference getInitialEndpointReference() {
-		final Document doc = DOMUtils.newDocument();
-		Element serviceref = doc.createElementNS(EndpointReference.SERVICE_REF_QNAME.getNamespaceURI(),
+    public EndpointReference getInitialEndpointReference() {
+        final Document doc = DOMUtils.newDocument();
+        Element serviceref = doc.createElementNS(EndpointReference.SERVICE_REF_QNAME.getNamespaceURI(),
                 EndpointReference.SERVICE_REF_QNAME.getLocalPart());
         doc.appendChild(serviceref);
-		return new EndpointReference() {
+        return new EndpointReference() {
             public Document toXML() {
               return doc;
             }
         };
-	}
+    }
 }
 

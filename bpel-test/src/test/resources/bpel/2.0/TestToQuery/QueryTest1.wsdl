@@ -34,16 +34,16 @@
             <element name="QueryTest1Response" type="string" />
         
             <complexType name="RecordType">
-            	<sequence>
-            		<element name="SomeValue" type="string"></element>
-            		<element name="AnotherValue" type="string"></element>
-            	</sequence>
+                <sequence>
+                    <element name="SomeValue" type="string"></element>
+                    <element name="AnotherValue" type="string"></element>
+                </sequence>
             </complexType>
         
             <complexType name="RecordSetType">
-            	<sequence>
-            		<element ref="tns:Record" minOccurs="0" maxOccurs="unbounded"></element>
-            	</sequence>
+                <sequence>
+                    <element ref="tns:Record" minOccurs="0" maxOccurs="unbounded"></element>
+                </sequence>
             </complexType>
             
             <element name="Record" type="tns:RecordType"></element>
@@ -70,21 +70,21 @@
     </plnk:partnerLinkType>
     
     <binding name="QueryTest1Binding" type="tns:QueryTest1">
-    	<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
-    	<operation name="process">
-    		<soap:operation soapAction="mynamespace/process" />
-    		<input>
-    			<soap:body use="literal" />
-    		</input>
-    		<output>
-    			<soap:body use="literal" />
-    		</output>
-    	</operation>
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+        <operation name="process">
+            <soap:operation soapAction="mynamespace/process" />
+            <input>
+                <soap:body use="literal" />
+            </input>
+            <output>
+                <soap:body use="literal" />
+            </output>
+        </operation>
     </binding>
     
     <service name="QueryTest1Service">
         <port name="QueryTest1Port" binding="tns:QueryTest1Binding">
-        	<soap:address location="http://localhost:8888/ode/QueryTest1" />
+            <soap:address location="http://localhost:8888/ode/QueryTest1" />
         </port>
     </service>
 </definitions>

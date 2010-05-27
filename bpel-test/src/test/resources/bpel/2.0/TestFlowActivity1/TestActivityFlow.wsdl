@@ -34,18 +34,18 @@
       targetNamespace="http://ode/bpel/unit-test/testFlowActivity1.wsdl.types"
                 xmlns:xsd="http://www.w3.org/2001/XMLSchema">
       <xsd:complexType name="flowIndicator">
-	  <xsd:sequence>
-	    <xsd:element name="indicatorOne" type="xsd:boolean"/>
-	    <xsd:element name="indicatorTwo" type="xsd:boolean"/>
+      <xsd:sequence>
+        <xsd:element name="indicatorOne" type="xsd:boolean"/>
+        <xsd:element name="indicatorTwo" type="xsd:boolean"/>
         </xsd:sequence>
-	</xsd:complexType>
+    </xsd:complexType>
 
       <xsd:complexType name="testMessage">
         <xsd:sequence>
           <xsd:element name="requestID" type="xsd:string"/>
           <xsd:element name="requestText" type="xsd:string"/>
           <xsd:element name="flowIndicators" type="typens:flowIndicator"/>
-	    <xsd:element name="loopIndicator" type="xsd:string"/>
+        <xsd:element name="loopIndicator" type="xsd:string"/>
         </xsd:sequence>
       </xsd:complexType>
 
@@ -85,11 +85,11 @@
   </wsdl:service>
 
    <plnk:partnerLinkType name="testFlowActivityRequest">
-	<plnk:role name="testFlowActivityService" portType="tns:testFlowActivityPT"/>
+    <plnk:role name="testFlowActivityService" portType="tns:testFlowActivityPT"/>
    </plnk:partnerLinkType>
 
    <plnk:partnerLinkType name="probeRequest">
-	<plnk:role name="probeService" portType="prb:probeMessagePT"/>
+    <plnk:role name="probeService" portType="prb:probeMessagePT"/>
    </plnk:partnerLinkType>
    
   <vprop:property name="testProbeData" type="xsd:string"/>

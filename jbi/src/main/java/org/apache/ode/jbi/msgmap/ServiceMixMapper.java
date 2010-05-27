@@ -84,26 +84,26 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
 
         // servicemix-http has a (bad) habit of placing the SOAP body content directly in the normalized message.
         // We need to recognize it
-    	__log.debug("Recognizing document content");
+        __log.debug("Recognizing document content");
         if (op.getInput().getMessage().getParts().size() == 1) {
             Part part = (Part) op.getInput().getMessage().getParts().values().iterator().next();
             QName elementName = part.getElementName();
             if (elementName != null && elementName.getLocalPart().equals(msg.getLocalName())
                     && elementName.getNamespaceURI().equals(msg.getNamespaceURI())) {
-            	__log.debug("Recognized");
+                __log.debug("Recognized");
                 return Recognized.TRUE;
             }
         }
 
         // Recognize RPC style message
-    	__log.debug("Recognizing RPC style content");
+        __log.debug("Recognizing RPC style content");
         for (String pname : ((Set<String>) op.getInput().getMessage().getParts().keySet())) {
             Part part = op.getInput().getMessage().getPart(pname);
             
             if (part.getElementName() != null) {
                 //RPC style invocation doesn't allow element parts, so we don't accept it
-            	__log.debug("Part " + part.getName() + " has element content " + part.getElementName() + ". It's not allowed for RPC style.");
-            	return Recognized.FALSE;
+                __log.debug("Part " + part.getName() + " has element content " + part.getElementName() + ". It's not allowed for RPC style.");
+                return Recognized.FALSE;
             }
             
             // with RPC semantic the body is wrapped by a partName which is same as bodyElementName

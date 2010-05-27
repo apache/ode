@@ -479,20 +479,20 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
         return this.formatCompilationMessage("Empty scopes are forbidden.");
     }
 
-	public CompilationMessage errEmptyCatch() {
-		return this.formatCompilationMessage("Empty catch faut handlers are forbidden.");
-	}
+    public CompilationMessage errEmptyCatch() {
+        return this.formatCompilationMessage("Empty catch faut handlers are forbidden.");
+    }
 
-	public CompilationMessage errMustSpecifyRelatedVariable(String name) {
-		return this.formatCompilationMessage("The external variable declaration for \"{0}\" must specify a related variable.", name);
-	}
+    public CompilationMessage errMustSpecifyRelatedVariable(String name) {
+        return this.formatCompilationMessage("The external variable declaration for \"{0}\" must specify a related variable.", name);
+    }
 
-	public CompilationMessage errMustSpecifyExternalVariableId(String name) {
-		return this.formatCompilationMessage("The external variable declaration for \"{0}\" must specify an external variable identifier.", name);
-	}
+    public CompilationMessage errMustSpecifyExternalVariableId(String name) {
+        return this.formatCompilationMessage("The external variable declaration for \"{0}\" must specify an external variable identifier.", name);
+    }
 
-	public CompilationMessage errEmptySequence() {
-		return this.formatCompilationMessage("Empty sequences are forbidden.");
-	}
+    public CompilationMessage errEmptySequence() {
+        return this.formatCompilationMessage("Empty sequences are forbidden.");
+    }
 
 }

@@ -71,9 +71,9 @@
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="TestComposeUrlService">
-		<wsdl:port name="TestComposeUrlPort" binding="tns:TestComposeUrlSoapBinding">
-     		<soap:address location="http://localhost:8080/ode/processes/testComposeUrl"/>
-		</wsdl:port>
+        <wsdl:port name="TestComposeUrlPort" binding="tns:TestComposeUrlSoapBinding">
+            <soap:address location="http://localhost:8080/ode/processes/testComposeUrl"/>
+        </wsdl:port>
     </wsdl:service>
     
    <plnk:partnerLinkType name="TestComposeUrlPartnerLinkType">

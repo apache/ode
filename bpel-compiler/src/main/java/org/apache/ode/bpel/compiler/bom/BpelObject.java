@@ -131,12 +131,12 @@ public class BpelObject implements SourceLocation {
     }
 
     public Element getFirstExtensibilityElementElement() {
-    	Element child = null;
-    	NodeList nl = getElement().getChildNodes();
+        Element child = null;
+        NodeList nl = getElement().getChildNodes();
         for (int i = 0; i < nl.getLength(); ++i) {
             Node node = nl.item(i);
             if (node.getNodeType() == Node.ELEMENT_NODE && 
-            		!getType().getNamespaceURI().equals(node.getNamespaceURI())) {
+                    !getType().getNamespaceURI().equals(node.getNamespaceURI())) {
                 child = (Element)node;
                 break;
             }
@@ -194,7 +194,7 @@ public class BpelObject implements SourceLocation {
     }
 
     protected QName rewriteTargetNS(QName target) {
-    	return new QName(getType().getNamespaceURI(), target.getLocalPart());
+        return new QName(getType().getNamespaceURI(), target.getLocalPart());
     }
     
     protected List<BpelObject> getChildren() {

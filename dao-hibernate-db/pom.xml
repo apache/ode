@@ -39,26 +39,26 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-	<dependency>
+    <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-	</dependency>
-	<dependency>
+    </dependency>
+    <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-	</dependency>
-	<dependency>
-	    <groupId>org.apache.derby</groupId>
-	    <artifactId>derby</artifactId>
-	</dependency>
-	<dependency>
-	    <groupId>org.apache.derby</groupId>
-	    <artifactId>derbytools</artifactId>
-	</dependency> 
-	<dependency>
-	    <groupId>org.apache.ode</groupId>
-	    <artifactId>ode-dao-hibernate</artifactId>
-	</dependency> 
+    </dependency>
+    <dependency>
+        <groupId>org.apache.derby</groupId>
+        <artifactId>derby</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.derby</groupId>
+        <artifactId>derbytools</artifactId>
+    </dependency> 
+    <dependency>
+        <groupId>org.apache.ode</groupId>
+        <artifactId>ode-dao-hibernate</artifactId>
+    </dependency> 
     </dependencies>
     <build>
 
@@ -73,7 +73,7 @@
               <phase>generate-sources</phase>
               <configuration>
                 <tasks>
-		  <property name="maven.runtime.classpath" refid="maven.compile.classpath"/>
+          <property name="maven.runtime.classpath" refid="maven.compile.classpath"/>
                   <ant antfile="build.xml" target="create-schema" inheritRefs="true"/>
                 </tasks>
               </configuration>
@@ -94,7 +94,7 @@
               <goal>execute</goal>
             </goals>
             <configuration>
-	      <driver>org.apache.derby.jdbc.EmbeddedDriver</driver>
+          <driver>org.apache.derby.jdbc.EmbeddedDriver</driver>
               <url>jdbc:derby:${basedir}/target/derby/hibdb;create=true</url>
               <username>sa</username>
               <password />
@@ -118,8 +118,8 @@
             </goals>
             <configuration>
               <tasks>
-	        <property name="ode.version" value="${project.version}"/>
-		<ant antfile="build.xml" target="zip-derby-db" />
+            <property name="ode.version" value="${project.version}"/>
+        <ant antfile="build.xml" target="zip-derby-db" />
               </tasks>
             </configuration>
           </execution>

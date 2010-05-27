@@ -56,7 +56,7 @@ class MexDaoUtil {
         mex.setResponse(resp);
     }
 
-	public static void setFailure(PartnerRoleMessageExchangeImpl mex, FailureType type, String description, Element details) {
+    public static void setFailure(PartnerRoleMessageExchangeImpl mex, FailureType type, String description, Element details) {
         mex.replyWithFailure(type, description, details);
-	}
+    }
 }

@@ -59,7 +59,7 @@
         <sources>
           <source linkName="link-a">
             <transitionCondition>
-	      $var1/TestPart = '123'
+          $var1/TestPart = '123'
             </transitionCondition>
           </source>
         </sources>

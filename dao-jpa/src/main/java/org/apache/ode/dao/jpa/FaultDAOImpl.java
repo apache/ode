@@ -39,62 +39,62 @@ import javax.xml.namespace.QName;
 @Entity
 @Table(name="ODE_FAULT")
 @NamedQueries({
-	@NamedQuery(name=FaultDAOImpl.DELETE_FAULTS_BY_IDS, query="delete from FaultDAOImpl as f where f._id in(:ids)")
+    @NamedQuery(name=FaultDAOImpl.DELETE_FAULTS_BY_IDS, query="delete from FaultDAOImpl as f where f._id in(:ids)")
 })
 public class FaultDAOImpl implements FaultDAO {
-	public final static String DELETE_FAULTS_BY_IDS = "DELETE_FAULTS_BY_IDS";
-	
-	@Id @Column(name="FAULT_ID") 
-	@GeneratedValue(strategy=GenerationType.AUTO)
-	@SuppressWarnings("unused")
-	private Long _id;
-	@Basic @Column(name="NAME")
+    public final static String DELETE_FAULTS_BY_IDS = "DELETE_FAULTS_BY_IDS";
+    
+    @Id @Column(name="FAULT_ID") 
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    @SuppressWarnings("unused")
+    private Long _id;
+    @Basic @Column(name="NAME")
     private String _name;
-	@Basic @Column(name="MESSAGE", length=4000)
+    @Basic @Column(name="MESSAGE", length=4000)
     private String _explanation;
-	@Lob @Column(name="DATA")
+    @Lob @Column(name="DATA")
     private String _data;
-	@Basic @Column(name="LINE_NUMBER")
+    @Basic @Column(name="LINE_NUMBER")
     private int _lineNo;
-	@Basic @Column(name="ACTIVITY_ID")
+    @Basic @Column(name="ACTIVITY_ID")
     private int _activityId;
 
-	public FaultDAOImpl() {}
-	public FaultDAOImpl(QName faultName, String explanation, int faultLineNo,
-			int activityId, Element faultMessage) {
-		_name = faultName.toString();
-		_explanation = explanation;
-		_lineNo = faultLineNo;
-		_activityId = activityId;
-		_data = (faultMessage == null)?null:DOMUtils.domToString(faultMessage);
-	}
-	
-	public int getActivityId() {
-		return _activityId;
-	}
+    public FaultDAOImpl() {}
+    public FaultDAOImpl(QName faultName, String explanation, int faultLineNo,
+            int activityId, Element faultMessage) {
+        _name = faultName.toString();
+        _explanation = explanation;
+        _lineNo = faultLineNo;
+        _activityId = activityId;
+        _data = (faultMessage == null)?null:DOMUtils.domToString(faultMessage);
+    }
+    
+    public int getActivityId() {
+        return _activityId;
+    }
 
-	public Element getData() {
-		Element ret = null;
-		
-		try {
-			ret = (_data == null)?null:DOMUtils.stringToDOM(_data);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		
-		return ret;
-	}
+    public Element getData() {
+        Element ret = null;
+        
+        try {
+            ret = (_data == null)?null:DOMUtils.stringToDOM(_data);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        
+        return ret;
+    }
 
-	public String getExplanation() {
-		return _explanation;
-	}
+    public String getExplanation() {
+        return _explanation;
+    }
 
-	public int getLineNo() {
-		return _lineNo;
-	}
+    public int getLineNo() {
+        return _lineNo;
+    }
 
-	public QName getName() {
-		return _name == null ? null : QName.valueOf(_name);
-	}
+    public QName getName() {
+        return _name == null ? null : QName.valueOf(_name);
+    }
 
 }

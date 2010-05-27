@@ -25,8 +25,8 @@ import org.apache.ode.jacob.ap.ChannelType;
  */
 @ChannelType
 public interface TimerResponse {
-	/** timer event has occurred */
-	public void onTimeout();
+    /** timer event has occurred */
+    public void onTimeout();
 
   /** timer was cancelled. */
   public void onCancel();

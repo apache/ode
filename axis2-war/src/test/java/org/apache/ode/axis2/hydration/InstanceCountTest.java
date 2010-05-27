@@ -123,7 +123,7 @@ public class InstanceCountTest extends Axis2TestBase {
         }.start();        
         
         Thread processOne = new Thread() {
-        	public void run() {
+            public void run() {
                 try {
                     firstResponse = server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                             bundleName, "testRequest.soap");
@@ -131,7 +131,7 @@ public class InstanceCountTest extends Axis2TestBase {
                 } catch (Exception e) {
                     fail(e.getMessage());
                 }
-        	}
+            }
         };
         processOne.start();
         
@@ -150,12 +150,12 @@ public class InstanceCountTest extends Axis2TestBase {
         processTwo.join();
 
         try {
-	        assertTrue(secondResponse.contains("tooManyInstances"));
+            assertTrue(secondResponse.contains("tooManyInstances"));
         } catch (Exception e) {
             server.undeployProcess(bundleName);
-			fail("The second instance was allowed to start");
+            fail("The second instance was allowed to start");
         }
-		
+        
         new Thread() {
             public void run() {
                 try {
@@ -169,10 +169,10 @@ public class InstanceCountTest extends Axis2TestBase {
         }.start();
 
         try {
-	        processOne.join();        
-	        assertTrue(firstResponse.contains(">1;2;3;<"));
+            processOne.join();        
+            assertTrue(firstResponse.contains(">1;2;3;<"));
         } finally {
-	        server.undeployProcess(bundleName);
+            server.undeployProcess(bundleName);
         }
     }
 

@@ -49,7 +49,7 @@
           operation="hello"
           variable="myVar"
           createInstance="yes"
-		  messageExchange="hello2"/>
+          messageExchange="hello2"/>
 
        <receive
           name="ping"
@@ -70,15 +70,15 @@
               <to variable="myVar" part="TestPart"/>
           </copy>
       </assign>
-	  
-		<wait>
-			<for>'PT5S'</for>
-		</wait>
+      
+        <wait>
+            <for>'PT5S'</for>
+        </wait>
        <reply name="end"  
               partnerLink="helloPartnerLink"
               portType="test:HelloPortType" 
               operation="hello"
               variable="myVar"
-			  messageExchange="hello2"/>
+              messageExchange="hello2"/>
    </sequence>
 </process>

@@ -203,9 +203,9 @@ public class Messages extends MessageBundle {
 
     public String msgDeployFailCompileErrors(CompilationException ce) {
         if (ce != null) {
-        	return format("Deploy failed; {0}", ce.getMessage());
+            return format("Deploy failed; {0}", ce.getMessage());
         } else {
-        	return format("Deploy failed; BPEL compilation errors." );
+            return format("Deploy failed; BPEL compilation errors." );
         }
     }
     

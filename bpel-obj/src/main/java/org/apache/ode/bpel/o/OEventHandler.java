@@ -84,30 +84,30 @@ public class OEventHandler extends OAgent {
         }
 
         private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        	in.defaultReadObject();
+            in.defaultReadObject();
 
-        	// backward compatibility; matchCorrelation could have a value if read from old definition
+            // backward compatibility; matchCorrelation could have a value if read from old definition
             if (matchCorrelations == null) matchCorrelations = new ArrayList<OScope.CorrelationSet>();
-        	if( matchCorrelation != null ) {
-        		matchCorrelations.add(matchCorrelation);
-        	}
-        	// backward compatibility; joinCorrelations could be null if read from old definition
-        	if( joinCorrelations == null ) {
-        		try {
-        			Field field = OEvent.class.getDeclaredField("joinCorrelations");
-        			field.setAccessible(true);
-        			field.set(this, new ArrayList<CorrelationSet>());
-        		} catch( NoSuchFieldException nfe ) {
-        			throw new IOException(nfe.getMessage());
-        		} catch( IllegalAccessException iae ) {
-        			throw new IOException(iae.getMessage());
-        		}
-        	}
-        	// backward compatibility; joinCorrelation could have a value if read from old definition
-        	if( joinCorrelation != null ) {
-        		joinCorrelation.hasJoinUseCases = true;
-        		joinCorrelations.add(joinCorrelation);
-        	}
+            if( matchCorrelation != null ) {
+                matchCorrelations.add(matchCorrelation);
+            }
+            // backward compatibility; joinCorrelations could be null if read from old definition
+            if( joinCorrelations == null ) {
+                try {
+                    Field field = OEvent.class.getDeclaredField("joinCorrelations");
+                    field.setAccessible(true);
+                    field.set(this, new ArrayList<CorrelationSet>());
+                } catch( NoSuchFieldException nfe ) {
+                    throw new IOException(nfe.getMessage());
+                } catch( IllegalAccessException iae ) {
+                    throw new IOException(iae.getMessage());
+                }
+            }
+            // backward compatibility; joinCorrelation could have a value if read from old definition
+            if( joinCorrelation != null ) {
+                joinCorrelation.hasJoinUseCases = true;
+                joinCorrelations.add(joinCorrelation);
+            }
         }
     }
 }

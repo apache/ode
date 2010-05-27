@@ -22,7 +22,7 @@
   xmlns:wns="http://ode/bpel/unit-testAssign2.wsdl">
 
 
-	<process name="pns:TestAssign">
+    <process name="pns:TestAssign">
         <property name="punctuation">!</property>
         <property name="epr">
             <sref:service-ref 
@@ -35,10 +35,10 @@
                 </addr:EndpointReference>
             </sref:service-ref>
         </property>
-		<active>true</active>
-		<provide partnerLink="TestAssignPartnerLink">
-			<service name="wns:TestAssignService" port="TestAssignPort"/>
-			<service name="wns:TestAssignService" port="TestAssignPort"/>
-		</provide>
-	</process>
+        <active>true</active>
+        <provide partnerLink="TestAssignPartnerLink">
+            <service name="wns:TestAssignService" port="TestAssignPort"/>
+            <service name="wns:TestAssignService" port="TestAssignPort"/>
+        </provide>
+    </process>
 </deploy>

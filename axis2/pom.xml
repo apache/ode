@@ -106,7 +106,7 @@
         <dependency>
           <groupId>junit</groupId>
           <artifactId>junit</artifactId>
-	  <scope>test</scope>
+      <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -114,13 +114,13 @@
    <build>
      <plugins>
        <plugin>
-	<artifactId>maven-surefire-plugin</artifactId>
-	<configuration>
-	  <excludes>
-	    <exclude>**/ProcessManagementTest.java</exclude>
-	    <exclude>**/ExecutionPathTest.java</exclude>
-	  </excludes>
-	</configuration>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <configuration>
+      <excludes>
+        <exclude>**/ProcessManagementTest.java</exclude>
+        <exclude>**/ExecutionPathTest.java</exclude>
+      </excludes>
+    </configuration>
        </plugin>
      </plugins>
    </build>

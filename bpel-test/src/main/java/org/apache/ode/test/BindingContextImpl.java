@@ -49,11 +49,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class BindingContextImpl implements BindingContext {
-	
+    
 
-	public EndpointReference activateMyRoleEndpoint(QName processId, Endpoint myRoleEndpoint) {
-		final Document doc = DOMUtils.newDocument();
-		Element serviceref = doc.createElementNS(EndpointReference.SERVICE_REF_QNAME.getNamespaceURI(),
+    public EndpointReference activateMyRoleEndpoint(QName processId, Endpoint myRoleEndpoint) {
+        final Document doc = DOMUtils.newDocument();
+        Element serviceref = doc.createElementNS(EndpointReference.SERVICE_REF_QNAME.getNamespaceURI(),
                 EndpointReference.SERVICE_REF_QNAME.getLocalPart());
         serviceref.setNodeValue(myRoleEndpoint.serviceName +":" +myRoleEndpoint.portName);
         doc.appendChild(serviceref);
@@ -62,19 +62,19 @@ public class BindingContextImpl implements BindingContext {
               return doc;
             }
         };
-	}
+    }
 
-	public void deactivateMyRoleEndpoint(Endpoint myRoleEndpoint) {
+    public void deactivateMyRoleEndpoint(Endpoint myRoleEndpoint) {
 
-	}
+    }
 
-	public PartnerRoleChannel createPartnerRoleChannel(QName processId, PortType portType,
-			Endpoint initialPartnerEndpoint) {
-		return new PartnerRoleChannelImpl();
-	}
+    public PartnerRoleChannel createPartnerRoleChannel(QName processId, PortType portType,
+            Endpoint initialPartnerEndpoint) {
+        return new PartnerRoleChannelImpl();
+    }
 
-	public long calculateSizeofService(EndpointReference epr) {
-		return 0;
-	}
+    public long calculateSizeofService(EndpointReference epr) {
+        return 0;
+    }
 
 }

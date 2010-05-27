@@ -28,6 +28,6 @@
             type="xsd:string" />
     </variables>
     <sequence>
-		<compensate />
+        <compensate />
     </sequence>
 </process>

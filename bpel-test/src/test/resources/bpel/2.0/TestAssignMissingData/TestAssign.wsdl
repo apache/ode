@@ -28,17 +28,17 @@
     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
     xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
     xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
-	
-	<types>
-		<xsd:schema
-			targetNamespace="http://ode/bpel/unit-testAssign1.wsdl">		
-		        <xsd:complexType name="foo">
-		            <xsd:sequence minOccurs="0">
-		                <xsd:element name="bar" type="xsd:string"/>
-		            </xsd:sequence>
-		        </xsd:complexType>
-		</xsd:schema>
-	</types>
+    
+    <types>
+        <xsd:schema
+            targetNamespace="http://ode/bpel/unit-testAssign1.wsdl">		
+                <xsd:complexType name="foo">
+                    <xsd:sequence minOccurs="0">
+                        <xsd:element name="bar" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+        </xsd:schema>
+    </types>
 
     <wsdl:message name="TestAssignMessageIn">
         <wsdl:part name="TestPart" type="tns:foo"/>
@@ -47,7 +47,7 @@
     <wsdl:message name="TestAssignMessageOut">
         <wsdl:part name="TestPart" element="xsd:string"/>
     </wsdl:message>
-	
+    
     <wsdl:portType name="TestAssignPortType">
         <wsdl:operation name="testAssign">
             <wsdl:input message="tns:TestAssignMessageIn" name="TestIn"/>
@@ -68,9 +68,9 @@
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="TestAssignService">
-		<wsdl:port name="TestAssignPort" binding="tns:TestAssignSoapBinding">
-     		<soap:address location="http://localhost:8080/ode/processes/TestAssign"/>
-		</wsdl:port>
+        <wsdl:port name="TestAssignPort" binding="tns:TestAssignSoapBinding">
+            <soap:address location="http://localhost:8080/ode/processes/TestAssign"/>
+        </wsdl:port>
     </wsdl:service>
 
    <plnk:partnerLinkType name="TestAssignPartnerLinkType">

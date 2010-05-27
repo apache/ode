@@ -104,13 +104,13 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
      * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluate(org.apache.ode.bpel.o.OExpression, org.apache.ode.bpel.explang.EvaluationContext)
      */
     @SuppressWarnings("unchecked")
-	public List evaluate(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
+    public List evaluate(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
         List result;
         Object someRes = null;
         try { 
-        	someRes = evaluate(cexp, ctx, XPathConstants.NODESET);
+            someRes = evaluate(cexp, ctx, XPathConstants.NODESET);
         } catch (Exception e) {
-        	someRes = evaluate(cexp, ctx, XPathConstants.STRING);
+            someRes = evaluate(cexp, ctx, XPathConstants.STRING);
         }
         if (someRes instanceof List) {
             result = (List) someRes;
@@ -144,13 +144,13 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             for(int m = 0; m < retVal.getLength(); ++m) {
                 Node val = retVal.item(m);
                 if (val.getNodeType() == Node.DOCUMENT_NODE) {
-                	val = ((Document)val).getDocumentElement();
+                    val = ((Document)val).getDocumentElement();
                 }
                 result.add(val);
             }
         } else if (someRes instanceof String) {
             // Wrapping in a document
-        	Document document = DOMUtils.newDocument();
+            Document document = DOMUtils.newDocument();
             Element wrapper = document.createElement("wrapper");
             Text text = document.createTextNode((String) someRes);
             wrapper.appendChild(text);
@@ -227,7 +227,7 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             Node contextNode = ctx.getRootNode() == null ? DOMUtils.newDocument() : ctx.getRootNode();
             // Create step nodes in XPath in case it is incompletely instantiated 
             if (oxpath20.insertMissingData) {
-            	XPath20ExpressionModifier modifier = new XPath20ExpressionModifier(oxpath20.namespaceCtx, ((XPathFactoryImpl) xpf).getConfiguration().getNamePool());
+                XPath20ExpressionModifier modifier = new XPath20ExpressionModifier(oxpath20.namespaceCtx, ((XPathFactoryImpl) xpf).getConfiguration().getNamePool());
                 modifier.insertMissingData(expr, ctx.getRootNode());
             }
             Object evalResult = expr.evaluate(contextNode, type);
@@ -250,10 +250,10 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             }
             throw new EvaluationException("Error while executing an XPath expression: " + cause.toString(), cause);
         } catch (WrappedResolverException wre) {
-        	 __log.debug("Could not evaluate expression because of ", wre);
+             __log.debug("Could not evaluate expression because of ", wre);
             throw (FaultException)wre.getCause();
         } catch (Throwable t) {
-        	 __log.debug("Could not evaluate expression because of ", t);
+             __log.debug("Could not evaluate expression because of ", t);
             throw new EvaluationException("Error while executing an XPath expression: ", t);
         }
     }

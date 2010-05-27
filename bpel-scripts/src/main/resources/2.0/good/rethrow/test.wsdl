@@ -31,7 +31,7 @@
     <wsdl:types>
       <xsd:schema 
         xmlns="http://ode/bpel/unit-test.wsdl" 
-      	targetNamespace="http://ode/bpel/unit-test.wsdl">
+        targetNamespace="http://ode/bpel/unit-test.wsdl">
        <xsd:element name="TestElement" type="xsd:string"/>
       </xsd:schema>
   </wsdl:types>

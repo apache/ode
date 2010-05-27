@@ -54,136 +54,136 @@ import java.util.List;
     @NamedQuery(name=ScopeDAOImpl.DELETE_SCOPES_BY_SCOPE_IDS, query="delete from ScopeDAOImpl as s where s._scopeInstanceId in(:ids)")
 })
 public class ScopeDAOImpl extends OpenJPADAO implements ScopeDAO {
-	public final static String SELECT_SCOPE_IDS_BY_PROCESS = "SELECT_SCOPE_IDS_BY_PROCESS";
-	public final static String SELECT_SCOPE_IDS_BY_INSTANCE = "SELECT_SCOPE_IDS_BY_INSTANCE";
-	public final static String DELETE_SCOPES_BY_SCOPE_IDS = "DELETE_SCOPES_BY_SCOPE_IDS";
-	
+    public final static String SELECT_SCOPE_IDS_BY_PROCESS = "SELECT_SCOPE_IDS_BY_PROCESS";
+    public final static String SELECT_SCOPE_IDS_BY_INSTANCE = "SELECT_SCOPE_IDS_BY_INSTANCE";
+    public final static String DELETE_SCOPES_BY_SCOPE_IDS = "DELETE_SCOPES_BY_SCOPE_IDS";
+    
     @Id @Column(name="SCOPE_ID")
     @GeneratedValue(strategy= GenerationType.AUTO)
-	private Long _scopeInstanceId;
+    private Long _scopeInstanceId;
     
-	@Basic @Column(name="MODEL_ID")
+    @Basic @Column(name="MODEL_ID")
     private int _modelId;
-	@Basic @Column(name="SCOPE_NAME")
+    @Basic @Column(name="SCOPE_NAME")
     private String _name;
-	@Basic @Column(name="SCOPE_STATE")
+    @Basic @Column(name="SCOPE_STATE")
     private String _scopeState;
 
-	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
-	@Column(name="PARENT_SCOPE_ID")
-	private ScopeDAOImpl _parentScope;
-	
-	@OneToMany(targetEntity=ScopeDAOImpl.class,mappedBy="_parentScope",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
-	private Collection<ScopeDAO> _childScopes = new ArrayList<ScopeDAO>();
-	@OneToMany(targetEntity=CorrelationSetDAOImpl.class,mappedBy="_scope",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
-	private Collection<CorrelationSetDAO> _correlationSets = new ArrayList<CorrelationSetDAO>();
-	@OneToMany(targetEntity=PartnerLinkDAOImpl.class,mappedBy="_scope",fetch= FetchType.LAZY,cascade={CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
+    @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST})
+    @Column(name="PARENT_SCOPE_ID")
+    private ScopeDAOImpl _parentScope;
+    
+    @OneToMany(targetEntity=ScopeDAOImpl.class,mappedBy="_parentScope",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
+    private Collection<ScopeDAO> _childScopes = new ArrayList<ScopeDAO>();
+    @OneToMany(targetEntity=CorrelationSetDAOImpl.class,mappedBy="_scope",fetch=FetchType.LAZY,cascade={CascadeType.ALL})
+    private Collection<CorrelationSetDAO> _correlationSets = new ArrayList<CorrelationSetDAO>();
+    @OneToMany(targetEntity=PartnerLinkDAOImpl.class,mappedBy="_scope",fetch= FetchType.LAZY,cascade={CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
     private Collection<PartnerLinkDAO> _partnerLinks = new ArrayList<PartnerLinkDAO>();
-	@OneToMany(targetEntity=XmlDataDAOImpl.class,mappedBy="_scope",fetch=FetchType.LAZY,cascade={CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
-	private Collection<XmlDataDAO> _variables = new ArrayList<XmlDataDAO>();
-	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROCESS_INSTANCE_ID")
-	private ProcessInstanceDAOImpl _processInstance;
+    @OneToMany(targetEntity=XmlDataDAOImpl.class,mappedBy="_scope",fetch=FetchType.LAZY,cascade={CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
+    private Collection<XmlDataDAO> _variables = new ArrayList<XmlDataDAO>();
+    @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="PROCESS_INSTANCE_ID")
+    private ProcessInstanceDAOImpl _processInstance;
 
-	public ScopeDAOImpl() {}
-	public ScopeDAOImpl(ScopeDAOImpl parentScope, String name, int scopeModelId, ProcessInstanceDAOImpl pi) {
-		_parentScope = parentScope;
-		_name = name;
-		_modelId = scopeModelId;
-		_processInstance = pi;
+    public ScopeDAOImpl() {}
+    public ScopeDAOImpl(ScopeDAOImpl parentScope, String name, int scopeModelId, ProcessInstanceDAOImpl pi) {
+        _parentScope = parentScope;
+        _name = name;
+        _modelId = scopeModelId;
+        _processInstance = pi;
     }
-	
-	public PartnerLinkDAO createPartnerLink(int plinkModelId, String pLinkName,
-			String myRole, String partnerRole) {
-		PartnerLinkDAOImpl pl = new PartnerLinkDAOImpl(plinkModelId, pLinkName, myRole, partnerRole);
+    
+    public PartnerLinkDAO createPartnerLink(int plinkModelId, String pLinkName,
+            String myRole, String partnerRole) {
+        PartnerLinkDAOImpl pl = new PartnerLinkDAOImpl(plinkModelId, pLinkName, myRole, partnerRole);
         pl.setScope(this);
         _partnerLinks.add(pl);
         return pl;
-	}
+    }
 
-	public Collection<ScopeDAO> getChildScopes() {
-		return _childScopes;
-	}
+    public Collection<ScopeDAO> getChildScopes() {
+        return _childScopes;
+    }
 
-	public CorrelationSetDAO getCorrelationSet(String corrSetName) {
-		CorrelationSetDAO ret = null;
-		for (CorrelationSetDAO csElement : _correlationSets) {
-			if ( csElement.getName().equals(corrSetName)) ret = csElement;
-		}
-		
-		if ( ret == null ) {
-			// Apparently the caller knows there should be a correlation set
-			// in here. Create a new set if one does not exist.
-			// Not sure I understand this implied object creation and why
-			// an explicit create pattern isn't used ( i.e. similar to
-			// PartnerLink creation )
-			ret = new CorrelationSetDAOImpl(this,corrSetName);
-			// Persist the new correlation set to generate an ID
-			getEM().persist(ret);
-			_correlationSets.add(ret);
-		}
-		
-		return ret;
-	}
+    public CorrelationSetDAO getCorrelationSet(String corrSetName) {
+        CorrelationSetDAO ret = null;
+        for (CorrelationSetDAO csElement : _correlationSets) {
+            if ( csElement.getName().equals(corrSetName)) ret = csElement;
+        }
+        
+        if ( ret == null ) {
+            // Apparently the caller knows there should be a correlation set
+            // in here. Create a new set if one does not exist.
+            // Not sure I understand this implied object creation and why
+            // an explicit create pattern isn't used ( i.e. similar to
+            // PartnerLink creation )
+            ret = new CorrelationSetDAOImpl(this,corrSetName);
+            // Persist the new correlation set to generate an ID
+            getEM().persist(ret);
+            _correlationSets.add(ret);
+        }
+        
+        return ret;
+    }
 
-	public Collection<CorrelationSetDAO> getCorrelationSets() {
-		return _correlationSets;
-	}
+    public Collection<CorrelationSetDAO> getCorrelationSets() {
+        return _correlationSets;
+    }
 
-	public int getModelId() {
-		return _modelId;
-	}
+    public int getModelId() {
+        return _modelId;
+    }
 
-	public String getName() {
-		return _name;
-	}
+    public String getName() {
+        return _name;
+    }
 
-	public ScopeDAO getParentScope() {
-		return _parentScope;
-	}
+    public ScopeDAO getParentScope() {
+        return _parentScope;
+    }
 
-	public PartnerLinkDAO getPartnerLink(int plinkModelId) {
+    public PartnerLinkDAO getPartnerLink(int plinkModelId) {
         for (PartnerLinkDAO pLink : getPartnerLinks()) {
             if (pLink.getPartnerLinkModelId() == plinkModelId) {
                 return pLink;
             }
         }
         return null;
-	}
+    }
 
-	public Collection<PartnerLinkDAO> getPartnerLinks() {
-		return _partnerLinks;
-	}
+    public Collection<PartnerLinkDAO> getPartnerLinks() {
+        return _partnerLinks;
+    }
 
-	public ProcessInstanceDAO getProcessInstance() {
-		return _processInstance;
-	}
+    public ProcessInstanceDAO getProcessInstance() {
+        return _processInstance;
+    }
 
-	public Long getScopeInstanceId() {
-		return _scopeInstanceId;
-	}
+    public Long getScopeInstanceId() {
+        return _scopeInstanceId;
+    }
 
-	public ScopeStateEnum getState() {
-		return ScopeStateEnum.valueOf(_scopeState);
-	}
+    public ScopeStateEnum getState() {
+        return ScopeStateEnum.valueOf(_scopeState);
+    }
 
-	public XmlDataDAO getVariable(String varName) {
-		XmlDataDAO ret = null;
-		
-		for (XmlDataDAO xmlElement : _variables) {
-			if ( xmlElement.getName().equals(varName)) return xmlElement;
-		}
-		
-		ret = new XmlDataDAOImpl(this,varName);
-		_variables.add(ret);
-		
-		return ret;
-	}
+    public XmlDataDAO getVariable(String varName) {
+        XmlDataDAO ret = null;
+        
+        for (XmlDataDAO xmlElement : _variables) {
+            if ( xmlElement.getName().equals(varName)) return xmlElement;
+        }
+        
+        ret = new XmlDataDAOImpl(this,varName);
+        _variables.add(ret);
+        
+        return ret;
+    }
 
-	public Collection<XmlDataDAO> getVariables() {
-		return _variables;
-	}
+    public Collection<XmlDataDAO> getVariables() {
+        return _variables;
+    }
 
-	public List<BpelEvent> listEvents() {
+    public List<BpelEvent> listEvents() {
         List<BpelEvent> result = new ArrayList<BpelEvent>();
         Query qry = getEM().createNamedQuery("ScopeEvents");
         qry.setParameter("sid", _scopeInstanceId);
@@ -193,8 +193,8 @@ public class ScopeDAOImpl extends OpenJPADAO implements ScopeDAO {
         return result;
     }
 
-	public void setState(ScopeStateEnum state) {
-		_scopeState = state.toString();
-	}
+    public void setState(ScopeStateEnum state) {
+        _scopeState = state.toString();
+    }
 
 }

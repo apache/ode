@@ -92,14 +92,14 @@ public class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implemen
     
     @Override
     void setResponse(Message outputMessage) throws BpelEngineException {
-    	// If pub-sub is enabled, we may receive multiple responses. In such cases,
-    	// don't bail out if our status is already set to RESPONSE.
-		if (++responsesReceived > 1) {
-			if (getSubscriberCount() > 1 && getStatus() == Status.RESPONSE) {
-	    		return;
-	    	}
-		}
-    	super.setResponse(outputMessage);
+        // If pub-sub is enabled, we may receive multiple responses. In such cases,
+        // don't bail out if our status is already set to RESPONSE.
+        if (++responsesReceived > 1) {
+            if (getSubscriberCount() > 1 && getStatus() == Status.RESPONSE) {
+                return;
+            }
+        }
+        super.setResponse(outputMessage);
     }
 
     public void replyWithFailure(FailureType type, String description, Element details) throws BpelEngineException {

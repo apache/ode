@@ -30,9 +30,9 @@
     expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
 
   <import 
-  	namespace="http://foo/extvar" 
-  	location="ExtVar.xsd" 
-  	importType="http://www.w3.org/2001/XMLSchema"/>
+    namespace="http://foo/extvar" 
+    location="ExtVar.xsd" 
+    importType="http://www.w3.org/2001/XMLSchema"/>
 
   <import location="HelloWorld2.wsdl"
      namespace="http://ode/bpel/unit-test.wsdl"
@@ -72,12 +72,12 @@
             <element name="bar" type="string"/>
           -->
           
-	  <assign>
-	     <copy>
-	        <from><literal><whatever><foo:pid2>{http://ode/bpel/unit-test}HelloWorld2-1</foo:pid2></whatever></literal></from>
-	        <to variable="idx" />
-	     </copy>
-	  </assign>
+      <assign>
+         <copy>
+            <from><literal><whatever><foo:pid2>{http://ode/bpel/unit-test}HelloWorld2-1</foo:pid2></whatever></literal></from>
+            <to variable="idx" />
+         </copy>
+      </assign>
       <assign name="assign1">
          <copy>
             <from variable="myVar" part="TestPart"/>

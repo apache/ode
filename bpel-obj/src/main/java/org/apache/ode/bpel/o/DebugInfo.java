@@ -68,11 +68,11 @@ public class DebugInfo implements Serializable {
      * @throws ClassNotFoundException
      */
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-    	GetField getField = ois.readFields();
-    	sourceURI = (String) getField.get("sourceURI", null);
-    	startLine = (Integer) getField.get("startLine", 0);
-    	endLine = (Integer) getField.get("endLine", 0);
-    	extensibilityElements = (HashMap<QName, Object>) getField.get("extensibilityElements", null);
+        GetField getField = ois.readFields();
+        sourceURI = (String) getField.get("sourceURI", null);
+        startLine = (Integer) getField.get("startLine", 0);
+        endLine = (Integer) getField.get("endLine", 0);
+        extensibilityElements = (HashMap<QName, Object>) getField.get("extensibilityElements", null);
     }
 
 }

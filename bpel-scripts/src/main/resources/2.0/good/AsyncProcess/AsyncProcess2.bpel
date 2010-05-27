@@ -30,20 +30,20 @@
  expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
 
  <import location="AsyncProcess2.wsdl"
-	  namespace="uri:com.bptest.process"
-	  importType="http://schemas.xmlsoap.org/wsdl/" />
-	  		 
+      namespace="uri:com.bptest.process"
+      importType="http://schemas.xmlsoap.org/wsdl/" />
+             
  <partnerLinks>
 
   <partnerLink
-  	partnerLinkType="resp:AsyncCallerResponderLT"
+    partnerLinkType="resp:AsyncCallerResponderLT"
     name="AsyncResponder"
-  	myRole="Caller"
-  	partnerRole="Responder"
+    myRole="Caller"
+    partnerRole="Responder"
     initializePartnerRole="yes" />
 
   <partnerLink name="Client"
-  	partnerLinkType="proc:ProcessCallerLT"
+    partnerLinkType="proc:ProcessCallerLT"
     myRole="Process"/>
  </partnerLinks>
 
@@ -70,7 +70,7 @@
     <assign>
      <copy>
       <from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
-       	  count(bpws:getVariableData('Input', 'payload', '/typ:AllOrders')/typ:Order)
+          count(bpws:getVariableData('Input', 'payload', '/typ:AllOrders')/typ:Order)
       </from>
       <to variable="OrderCount"/>
      </copy>
@@ -123,31 +123,31 @@
          <to>$Request/payload/typ:AsyncRequest/typ:CallbackEndpoint</to>
         </copy>
        </assign>
-	   <if name="switch">
+       <if name="switch">
          <condition>bpws:getVariableData('Request', 'payload', '/typ:AsyncRequest/typ:Order/typ:OrderType/text()') = 'BookOrder'</condition>
-	       <invoke name="BookOrderInvoke"
-	        operation="BookOrder"
-	        inputVariable="Request"
-	        partnerLink="AsyncResponder"
-	        portType="resp:ResponderPT">
+           <invoke name="BookOrderInvoke"
+            operation="BookOrder"
+            inputVariable="Request"
+            partnerLink="AsyncResponder"
+            portType="resp:ResponderPT">
 
-	         <correlations>
-	          <correlation set="OrderCorrelator" initiate="yes" pattern="out" />
-	         </correlations>
-	       </invoke>
-	     <else>
-	       <invoke name="PaperOrderInvoke"
-	        operation="PaperOrder"
-	        inputVariable="Request"
-	        partnerLink="AsyncResponder"
-	        portType="resp:ResponderPT">
+             <correlations>
+              <correlation set="OrderCorrelator" initiate="yes" pattern="out" />
+             </correlations>
+           </invoke>
+         <else>
+           <invoke name="PaperOrderInvoke"
+            operation="PaperOrder"
+            inputVariable="Request"
+            partnerLink="AsyncResponder"
+            portType="resp:ResponderPT">
 
-	         <correlations>
-	          <correlation set="OrderCorrelator" initiate="yes" pattern="out" />
-	         </correlations>
-	       </invoke>
-	     </else>
-	   </if>
+             <correlations>
+              <correlation set="OrderCorrelator" initiate="yes" pattern="out" />
+             </correlations>
+           </invoke>
+         </else>
+       </if>
 
        <pick createInstance="no" name="pick">
         <onMessage

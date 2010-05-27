@@ -33,7 +33,7 @@
       location="../../bar.wsdl"/>
       
       
-	<wsdl:types>
+    <wsdl:types>
      <xsd:schema targetNamespace="http://foo/bar" >
        <xsd:import namespace="http://foo.xsd"
         schemaLocation="../foo.xsd"/>

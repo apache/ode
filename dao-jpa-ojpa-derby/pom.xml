@@ -54,7 +54,7 @@
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
     </dependency>    
-	<dependency>
+    <dependency>
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
     </dependency>
@@ -98,7 +98,7 @@
       <groupId>net.sourceforge.serp</groupId>
       <artifactId>serp</artifactId>
     </dependency>
-	<dependency>
+    <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
     </dependency>
@@ -180,7 +180,7 @@
               <goal>execute</goal>
             </goals>
             <configuration>
-	      <driver>org.apache.derby.jdbc.EmbeddedDriver</driver>
+          <driver>org.apache.derby.jdbc.EmbeddedDriver</driver>
               <url>jdbc:derby:${basedir}/target/derby/jpadb;create=true</url>
               <username>sa</username>
               <password />
@@ -204,8 +204,8 @@
             </goals>
             <configuration>
               <tasks>
-	        <property name="ode.version" value="${project.version}"/>
-		<ant antfile="build.xml" target="zip-derby-db" />
+            <property name="ode.version" value="${project.version}"/>
+        <ant antfile="build.xml" target="zip-derby-db" />
               </tasks>
             </configuration>
           </execution>

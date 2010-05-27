@@ -22,7 +22,7 @@ package org.apache.ode.ping;
 public class AttachPing {
 
   public static String attachPing(String ping) {
-	return "Java attached ping to: "+ping;
+    return "Java attached ping to: "+ping;
   }
 
 }

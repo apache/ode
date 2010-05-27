@@ -38,7 +38,7 @@ class ProcessStatusConverter {
    * A mapping from the interface status codes, to the internal ODE status codes.
    */
   private final Map<TInstanceStatus.Enum, BitSet> __interfaceStatusCodeToInternalStatusCodeMap =
-  	new HashMap<TInstanceStatus.Enum,BitSet>();
+    new HashMap<TInstanceStatus.Enum,BitSet>();
 
   /**
    * One-to-one map between internal/external representation of the scope
@@ -48,17 +48,17 @@ class ProcessStatusConverter {
     new HashMap<ScopeStateEnum, TScopeStatus.Enum>();
   
   ProcessStatusConverter() {
-  	
-  	for (int i = 0 ; i < ProcessState.ALL_STATES.length; ++i){
-  		short pistate = ProcessState.ALL_STATES[i];
-  		TInstanceStatus.Enum intstc = cvtInstanceStatus(pistate);
-  		BitSet bset = __interfaceStatusCodeToInternalStatusCodeMap.get(intstc);
-  		if (bset == null) {
-  			bset = new BitSet();
-  			__interfaceStatusCodeToInternalStatusCodeMap.put(intstc,bset);
-  		}
-  		bset.set(pistate);
-  	}
+    
+    for (int i = 0 ; i < ProcessState.ALL_STATES.length; ++i){
+        short pistate = ProcessState.ALL_STATES[i];
+        TInstanceStatus.Enum intstc = cvtInstanceStatus(pistate);
+        BitSet bset = __interfaceStatusCodeToInternalStatusCodeMap.get(intstc);
+        if (bset == null) {
+            bset = new BitSet();
+            __interfaceStatusCodeToInternalStatusCodeMap.put(intstc,bset);
+        }
+        bset.set(pistate);
+    }
   
     __scopeStateMap.put(ScopeStateEnum.ACTIVE, TScopeStatus.ACTIVE);
     __scopeStateMap.put(ScopeStateEnum.COMPLETED,TScopeStatus.COMPLETED);
@@ -104,16 +104,16 @@ class ProcessStatusConverter {
    * @return internal states corresponding to the requested interface representation.
    */
   short[] cvtInstanceStatus(TInstanceStatus.Enum status) {
-  	BitSet bset = __interfaceStatusCodeToInternalStatusCodeMap.get(status);
-  	if (bset == null)
-  		return new short[0];
-  	
-  	short ret[] = new short[bset.cardinality()];
-  	for (int i = 0; i < ret.length; ++i) {
-  		ret[i] = (short)bset.nextSetBit(i==0?0:ret[i-1]+1);
-  	}
+    BitSet bset = __interfaceStatusCodeToInternalStatusCodeMap.get(status);
+    if (bset == null)
+        return new short[0];
+    
+    short ret[] = new short[bset.cardinality()];
+    for (int i = 0; i < ret.length; ++i) {
+        ret[i] = (short)bset.nextSetBit(i==0?0:ret[i-1]+1);
+    }
 
-  	return ret;
+    return ret;
   }
   
   

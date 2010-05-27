@@ -80,14 +80,14 @@ class PICK extends ACTIVITY {
             selectors = new Selector[_opick.onMessages.size()];
             int idx = 0;
             for (OPickReceive.OnMessage onMessage : _opick.onMessages) {
-            	// collect all initiated correlations
-            	Set<OScope.CorrelationSet> matchCorrelations = new HashSet<OScope.CorrelationSet>();
-            	matchCorrelations.addAll(onMessage.matchCorrelations);
-            	for( OScope.CorrelationSet cset : onMessage.joinCorrelations ) {
-            		if(getBpelRuntimeContext().isCorrelationInitialized(_scopeFrame.resolve(cset))) {
-            			matchCorrelations.add(cset);
-            		}
-            	}
+                // collect all initiated correlations
+                Set<OScope.CorrelationSet> matchCorrelations = new HashSet<OScope.CorrelationSet>();
+                matchCorrelations.addAll(onMessage.matchCorrelations);
+                for( OScope.CorrelationSet cset : onMessage.joinCorrelations ) {
+                    if(getBpelRuntimeContext().isCorrelationInitialized(_scopeFrame.resolve(cset))) {
+                        matchCorrelations.add(cset);
+                    }
+                }
 
                 PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(onMessage.partnerLink);
                 CorrelationKeySet keySet = resolveCorrelationKey(pLinkInstance, matchCorrelations);
@@ -148,24 +148,24 @@ class PICK extends ACTIVITY {
             String sessionId = getBpelRuntimeContext().fetchMySessionId(pLinkInstance);
             keySet.add(new CorrelationKey("-1", new String[] { sessionId }));
         } else if (!matchCorrelations.isEmpty()) {
-    		for( OScope.CorrelationSet cset : matchCorrelations ) {
-    			CorrelationKey key = null;
-    			
-        		if(!getBpelRuntimeContext().isCorrelationInitialized(
+            for( OScope.CorrelationSet cset : matchCorrelations ) {
+                CorrelationKey key = null;
+                
+                if(!getBpelRuntimeContext().isCorrelationInitialized(
                     _scopeFrame.resolve(cset))) {
                     if (!_opick.createInstanceFlag) {
-	                    throw new FaultException(_opick.getOwner().constants.qnCorrelationViolation,
-	                    "Correlation not initialized.");
+                        throw new FaultException(_opick.getOwner().constants.qnCorrelationViolation,
+                        "Correlation not initialized.");
                     }
-        		} else {
-        			key = getBpelRuntimeContext().readCorrelation(_scopeFrame.resolve(cset));
+                } else {
+                    key = getBpelRuntimeContext().readCorrelation(_scopeFrame.resolve(cset));
                     assert key != null;
-        		}
-        		
-        		if( key != null ) {
-        			keySet.add(key);
-        		}
-    		}
+                }
+                
+                if( key != null ) {
+                    keySet.add(key);
+                }
+            }
         }
         
         return keySet;
@@ -306,8 +306,8 @@ class PICK extends ACTIVITY {
                             initializeCorrelation(_scopeFrame.resolve(cset), vinst);
                         }
                         for( OScope.CorrelationSet cset : onMessage.joinCorrelations ) {
-                        	// will be ignored if already initialized
-                        	initializeCorrelation(_scopeFrame.resolve(cset), vinst);
+                            // will be ignored if already initialized
+                            initializeCorrelation(_scopeFrame.resolve(cset), vinst);
                         }
                         if (onMessage.partnerLink.hasPartnerRole()) {
                             // Trying to initialize partner epr based on a

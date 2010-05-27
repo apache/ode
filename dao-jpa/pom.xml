@@ -100,18 +100,18 @@
               <tasks>
                 <property name="maven.runtime.classpath" refid="maven.compile.classpath"/>
                 <path id="classpath">
-		   <pathelement path="${maven.runtime.classpath}"/>
-		</path>
-		<taskdef name="openjpac" classname="org.apache.openjpa.ant.PCEnhancerTask" classpathref="classpath"/>
+           <pathelement path="${maven.runtime.classpath}"/>
+        </path>
+        <taskdef name="openjpac" classname="org.apache.openjpa.ant.PCEnhancerTask" classpathref="classpath"/>
                 <openjpac>
-		    <fileset dir="${basedir}/src/main">
-		      <include name="**/*.java" />
-		    </fileset>
-		    <classpath>
-		     <pathelement location="${basedir}/target/classes"/>
-		     <pathelement path="${maven.runtime.classpath}"/>
-		    </classpath>
-		 </openjpac>
+            <fileset dir="${basedir}/src/main">
+              <include name="**/*.java" />
+            </fileset>
+            <classpath>
+             <pathelement location="${basedir}/target/classes"/>
+             <pathelement path="${maven.runtime.classpath}"/>
+            </classpath>
+         </openjpac>
               </tasks>
             </configuration>
           </execution>

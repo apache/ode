@@ -370,43 +370,43 @@ public class SoapExternalService implements ExternalService {
                         + address);
             }
             if (address != null) {
-	            String url = address.getTextContent();
-	            String jmsDestination = (String) options.getProperty(JMSConstants.PARAM_REPLY_DESTINATION);
+                String url = address.getTextContent();
+                String jmsDestination = (String) options.getProperty(JMSConstants.PARAM_REPLY_DESTINATION);
                 if (__log.isDebugEnabled()) {
                     __log.debug("The user-defined JMS replyTo destination is: "
                             + jmsDestination);
                     __log.debug("The user-defined JMS wait timeout is: "
                             + options.getProperty(JMSConstants.JMS_WAIT_REPLY));
                 }
-	            if (jmsDestination == null || "".equals(jmsDestination.trim())) {
-	            	// If the REPLY_PARAM property is not user-defined, then use the default value from myRole EPR
-		            int startIndex = url.indexOf("jms:/");
-		            if (startIndex != -1) {
-		            	startIndex += "jms:/".length();
-		            	if (url.charAt(startIndex + 1) == '/') {
-		            		startIndex++;
-		            	}
-		            	if (url.startsWith("dynamic")) {
-		            		startIndex += "dynamicQueues".length();
-		            	}
-		            	int jmsEndIndex = url.indexOf("?", startIndex);
-		            	if (jmsEndIndex == -1) {
-		            		jmsEndIndex = url.length();
-		            	}
-		        		jmsDestination = url.substring(startIndex, jmsEndIndex);
-		                options.setProperty(JMSConstants.PARAM_REPLY_DESTINATION, jmsDestination);
-		            } else {
-			            startIndex = url.indexOf("http://");
-			            if (startIndex != -1) {
-			            	startIndex = url.indexOf("/processes/");
-			            	if (startIndex != -1) {
-			            		startIndex += "/processes/".length();
-			            		jmsDestination = url.substring(startIndex);
-				                options.setProperty(JMSConstants.PARAM_REPLY_DESTINATION, jmsDestination);
-			            	}
-			            }
-		            }
-	            }
+                if (jmsDestination == null || "".equals(jmsDestination.trim())) {
+                    // If the REPLY_PARAM property is not user-defined, then use the default value from myRole EPR
+                    int startIndex = url.indexOf("jms:/");
+                    if (startIndex != -1) {
+                        startIndex += "jms:/".length();
+                        if (url.charAt(startIndex + 1) == '/') {
+                            startIndex++;
+                        }
+                        if (url.startsWith("dynamic")) {
+                            startIndex += "dynamicQueues".length();
+                        }
+                        int jmsEndIndex = url.indexOf("?", startIndex);
+                        if (jmsEndIndex == -1) {
+                            jmsEndIndex = url.length();
+                        }
+                        jmsDestination = url.substring(startIndex, jmsEndIndex);
+                        options.setProperty(JMSConstants.PARAM_REPLY_DESTINATION, jmsDestination);
+                    } else {
+                        startIndex = url.indexOf("http://");
+                        if (startIndex != -1) {
+                            startIndex = url.indexOf("/processes/");
+                            if (startIndex != -1) {
+                                startIndex += "/processes/".length();
+                                jmsDestination = url.substring(startIndex);
+                                options.setProperty(JMSConstants.PARAM_REPLY_DESTINATION, jmsDestination);
+                            }
+                        }
+                    }
+                }
             }
         } else {
             __log.debug("My-Role EPR not specified, SEP will not be used.");

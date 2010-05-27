@@ -329,14 +329,14 @@ public class BpelEngineImpl implements BpelEngine {
                 if (cachedVersion.getProcessType().equals(process.getProcessType())) {
                     //Check for versions to retain newer one
                     if (cachedVersion.getVersion() > process.getVersion()) {
-                	    __log.debug("removing current version");
+                        __log.debug("removing current version");
                         process.activate(this);
                         process.deactivate();
                         return;
                     } else {
-                	    __log.debug("removing cached older version");
+                        __log.debug("removing cached older version");
                         processesIter.remove();
-                		cachedVersion.deactivate();
+                        cachedVersion.deactivate();
                     }
 
                 }
@@ -374,19 +374,19 @@ public class BpelEngineImpl implements BpelEngine {
     }
     
     private List<BpelProcess> getAllProcesses(QName processId) {
-    	String qName =  processId.toString();
-    	if(qName.lastIndexOf("-") > 0) {
-    		qName = qName.substring(0, qName.lastIndexOf("-"));
-    	}
-    	List<BpelProcess> ret = new ArrayList<BpelProcess>();
-    	Iterator<Map.Entry<QName, BpelProcess>> it = _activeProcesses.entrySet().iterator();
-    	while (it.hasNext()) {
-    		Map.Entry<QName, BpelProcess> pairs = it.next();
-    		if(pairs.getKey().toString().startsWith(qName)) {
-    			ret.add(pairs.getValue());
-    		}
-    	}
-    	return ret;
+        String qName =  processId.toString();
+        if(qName.lastIndexOf("-") > 0) {
+            qName = qName.substring(0, qName.lastIndexOf("-"));
+        }
+        List<BpelProcess> ret = new ArrayList<BpelProcess>();
+        Iterator<Map.Entry<QName, BpelProcess>> it = _activeProcesses.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<QName, BpelProcess> pairs = it.next();
+            if(pairs.getKey().toString().startsWith(qName)) {
+                ret.add(pairs.getValue());
+            }
+        }
+        return ret;
     }
 
     public void acquireInstanceLock(final Long iid) {
@@ -474,16 +474,16 @@ public class BpelEngineImpl implements BpelEngine {
                     }
                 }
                 if (we.getType().equals(JobType.INVOKE_INTERNAL)) {
-                	List<BpelProcess> processes = getAllProcesses(we.getProcessId());
-                	boolean routed = false;
-                	jobInfo.jobDetail.detailsExt.put("enqueue", false);
-                	for(BpelProcess proc : processes) {
+                    List<BpelProcess> processes = getAllProcesses(we.getProcessId());
+                    boolean routed = false;
+                    jobInfo.jobDetail.detailsExt.put("enqueue", false);
+                    for(BpelProcess proc : processes) {
                         routed = routed || proc.handleJobDetails(jobInfo.jobDetail);                		
-                	}
-                	if(!routed) {
-                    	jobInfo.jobDetail.detailsExt.put("enqueue", true);
+                    }
+                    if(!routed) {
+                        jobInfo.jobDetail.detailsExt.put("enqueue", true);
                         process.handleJobDetails(jobInfo.jobDetail);                		
-                	}
+                    }
                 }
                 else {
                     process.handleJobDetails(jobInfo.jobDetail);

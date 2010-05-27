@@ -58,11 +58,11 @@ public class InterceptorContextImpl implements InterceptorContext{
     }
     
     public BpelEngine getBpelEngine() {
-    	return _bpelEngine;
+        return _bpelEngine;
     }
     
     public BpelProcess getBpelProcess() {
-    	return _bpelProcess;
+        return _bpelProcess;
     }
 
 }

@@ -53,11 +53,11 @@ public class DOMUtilsTest extends TestCase {
   }
 
   public void testSerializeDom() throws Exception {
-  	Document doc = DOMUtils.newDocument();
-  	Element foo = doc.createElement("foo");
-  	Element bar = doc.createElement("bar");
-  	doc.appendChild(foo);
-  	foo.appendChild(bar);
+    Document doc = DOMUtils.newDocument();
+    Element foo = doc.createElement("foo");
+    Element bar = doc.createElement("bar");
+    doc.appendChild(foo);
+    foo.appendChild(bar);
 
     assertEquals(foo.toString(), DOMUtils.stringToDOM(DOMUtils.domToString(foo)).toString());
     assertEquals(bar.toString(), DOMUtils.stringToDOM(DOMUtils.domToString(bar)).toString());

@@ -29,23 +29,23 @@ import org.apache.ode.bpel.iapi.Message;
  * @author Maciej Szefler
  */
 public final class FaultMessageExchangeException extends AbortMessageExchangeException {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private QName _faultName;
-	private Message _faultData;
+    private QName _faultName;
+    private Message _faultData;
 
-	public FaultMessageExchangeException(String errmsg, QName faultName, Message faultData) {
-		super(errmsg);
-		
-		_faultName = faultName;
-		_faultData = faultData;
-	}
-	
-	public QName getFaultName() {
-		return _faultName;
-	}
-	
-	public Message getFaultData() {
-		return _faultData;
-	}
+    public FaultMessageExchangeException(String errmsg, QName faultName, Message faultData) {
+        super(errmsg);
+        
+        _faultName = faultName;
+        _faultData = faultData;
+    }
+    
+    public QName getFaultName() {
+        return _faultName;
+    }
+    
+    public Message getFaultData() {
+        return _faultData;
+    }
 }

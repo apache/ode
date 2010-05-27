@@ -27,8 +27,8 @@
   suppressJoinFailure="yes">
 
   <import importType="http://schemas.xmlsoap.org/wsdl/"
-	  location="test.wsdl"
-	  namespace="http://ode/bpel/unit-test.wsdl" />
+      location="test.wsdl"
+      namespace="http://ode/bpel/unit-test.wsdl" />
 
 
   <partnerLinks>
@@ -40,26 +40,26 @@
   <variables>
     <variable name="var1" messageType="test:TestMessage1"/>
   </variables>
- 	<faultHandlers>
-      	<catch faultName="test:testFault1"
-      		   faultVariable="faultVar" 
-      		   faultMessageType="test:TestMessage1">
+    <faultHandlers>
+        <catch faultName="test:testFault1"
+               faultVariable="faultVar" 
+               faultMessageType="test:TestMessage1">
          <sequence>
-	         <assign>
-	           <copy>
-	             <from>'success'</from>
-	             <to>$faultVar/TestPart</to>
-	           </copy>
-	         </assign>
-	         <reply name="endReply"
-		      operation="testOperation"
-		      partnerLink="testPartnerLink"
-		      portType="test:TestPortType"
-		      variable="faultVar"
-		      faultName="test:testFault1"/>
-		  </sequence>
+             <assign>
+               <copy>
+                 <from>'success'</from>
+                 <to>$faultVar/TestPart</to>
+               </copy>
+             </assign>
+             <reply name="endReply"
+              operation="testOperation"
+              partnerLink="testPartnerLink"
+              portType="test:TestPortType"
+              variable="faultVar"
+              faultName="test:testFault1"/>
+          </sequence>
         </catch>  
-   	 </faultHandlers>
+     </faultHandlers>
   <sequence>
     <receive
       createInstance="yes"

@@ -42,15 +42,15 @@
                 <sm:component>
                     <eip:component>
                         <eip:endpoints>
-			  <eip:content-based-router service="bpel:OnEventCorrelation2Fwd" endpoint="OnEventCorrelation2" forwardOperation="true">
-			    <eip:rules>
-			      <eip:routing-rule>
-				<eip:target>
-				  <eip:exchange-target service="bpel:OnEventCorrelation2"/>
-				</eip:target>
-			      </eip:routing-rule>
-			    </eip:rules>
-			  </eip:content-based-router>
+              <eip:content-based-router service="bpel:OnEventCorrelation2Fwd" endpoint="OnEventCorrelation2" forwardOperation="true">
+                <eip:rules>
+                  <eip:routing-rule>
+                <eip:target>
+                  <eip:exchange-target service="bpel:OnEventCorrelation2"/>
+                </eip:target>
+                  </eip:routing-rule>
+                </eip:rules>
+              </eip:content-based-router>
                         </eip:endpoints>
                     </eip:component>
                 </sm:component>

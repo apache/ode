@@ -25,58 +25,58 @@
   elementFormDefault="qualified">
   <xs:import namespace="http://schemas.xmlsoap.org/soap/envelope/" 
              schemaLocation="soap-envelope.xsd" />
-	<xs:annotation>
-	  <xs:documentation>
+    <xs:annotation>
+      <xs:documentation>
         This schema describes the types needed to describe the header common to all services. This
         header is used to pass the configuration of the demo to the various web services, and does not convey
         meaning required to implement a Supply Chain Management System.
-    	  </xs:documentation>
-	</xs:annotation>
-	<xs:simpleType name="ConfigurationEndpointRole">
-		<xs:restriction base="xs:NMTOKEN">
-			<xs:enumeration value="LoggingFacility"/>
-			<xs:enumeration value="Retailer"/>
-			<xs:enumeration value="WarehouseA"/>
-			<xs:enumeration value="WarehouseB"/>
-			<xs:enumeration value="WarehouseC"/>
-			<xs:enumeration value="ManufacturerA"/>
-			<xs:enumeration value="ManufacturerB"/>
-			<xs:enumeration value="ManufacturerC"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:complexType name="ConfigurationEndpointType">
-		<xs:simpleContent>
-			<xs:extension base="xs:anyURI">
-				<xs:attribute name="Role" type="tns:ConfigurationEndpointRole" use="required"/>
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:element name="Configuration" type="tns:ConfigurationType"/>
-	<xs:complexType name="ConfigurationType">
-		<xs:sequence>
-			<xs:annotation>
-	  		  <xs:documentation>
+          </xs:documentation>
+    </xs:annotation>
+    <xs:simpleType name="ConfigurationEndpointRole">
+        <xs:restriction base="xs:NMTOKEN">
+            <xs:enumeration value="LoggingFacility"/>
+            <xs:enumeration value="Retailer"/>
+            <xs:enumeration value="WarehouseA"/>
+            <xs:enumeration value="WarehouseB"/>
+            <xs:enumeration value="WarehouseC"/>
+            <xs:enumeration value="ManufacturerA"/>
+            <xs:enumeration value="ManufacturerB"/>
+            <xs:enumeration value="ManufacturerC"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:complexType name="ConfigurationEndpointType">
+        <xs:simpleContent>
+            <xs:extension base="xs:anyURI">
+                <xs:attribute name="Role" type="tns:ConfigurationEndpointRole" use="required"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+    <xs:element name="Configuration" type="tns:ConfigurationType"/>
+    <xs:complexType name="ConfigurationType">
+        <xs:sequence>
+            <xs:annotation>
+              <xs:documentation>
             It is left to the application to make sure that this array contains one of each of the
             role values enumerated in ConfigurationEndpointType.
-        		  </xs:documentation>
-			</xs:annotation>
-			<xs:element name="UserId" type="xs:string" nillable="false"/>
-			<xs:element name="ServiceUrl" type="tns:ConfigurationEndpointType" nillable="false" minOccurs="8" maxOccurs="8"/>
-		</xs:sequence>
-		<xs:attribute ref="s:mustUnderstand" use="optional"/>
-	</xs:complexType>
-	<xs:element name="ConfigurationFault" type="tns:ConfigurationFaultType" />
-	<xs:complexType name="ConfigurationFaultType">
-		<xs:sequence>
-			<xs:annotation>
-				<xs:documentation>
+                  </xs:documentation>
+            </xs:annotation>
+            <xs:element name="UserId" type="xs:string" nillable="false"/>
+            <xs:element name="ServiceUrl" type="tns:ConfigurationEndpointType" nillable="false" minOccurs="8" maxOccurs="8"/>
+        </xs:sequence>
+        <xs:attribute ref="s:mustUnderstand" use="optional"/>
+    </xs:complexType>
+    <xs:element name="ConfigurationFault" type="tns:ConfigurationFaultType" />
+    <xs:complexType name="ConfigurationFaultType">
+        <xs:sequence>
+            <xs:annotation>
+                <xs:documentation>
             It is required that every ServiceUrl that is missing, contains a duplicate, or does not resolve to a
             reachable service will be indicated in the ErroneousElement array.
-        			</xs:documentation>
-			</xs:annotation>
-			<xs:element name="Message" type="xs:string"/>
-			<xs:element name="ErroneousElement" type="tns:ConfigurationEndpointRole" minOccurs="0" maxOccurs="8"/>
-		</xs:sequence>
-		<xs:attribute ref="s:mustUnderstand"/>
-	</xs:complexType>
+                    </xs:documentation>
+            </xs:annotation>
+            <xs:element name="Message" type="xs:string"/>
+            <xs:element name="ErroneousElement" type="tns:ConfigurationEndpointRole" minOccurs="0" maxOccurs="8"/>
+        </xs:sequence>
+        <xs:attribute ref="s:mustUnderstand"/>
+    </xs:complexType>
 </xs:schema>

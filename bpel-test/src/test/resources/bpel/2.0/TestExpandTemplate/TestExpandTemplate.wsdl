@@ -71,9 +71,9 @@
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="TestExpandTemplateService">
-		<wsdl:port name="TestExpandTemplatePort" binding="tns:TestExpandTemplateSoapBinding">
-     		<soap:address location="http://localhost:8080/ode/processes/testExpandTemplate"/>
-		</wsdl:port>
+        <wsdl:port name="TestExpandTemplatePort" binding="tns:TestExpandTemplateSoapBinding">
+            <soap:address location="http://localhost:8080/ode/processes/testExpandTemplate"/>
+        </wsdl:port>
     </wsdl:service>
     
    <plnk:partnerLinkType name="TestExpandTemplatePartnerLinkType">

@@ -50,7 +50,7 @@ public final class JMXConstants {
    * @return JMX {@link ObjectName}
    */
   public static ObjectName createDomainObjectName(String domainId) throws MalformedObjectNameException {
-  	Hashtable<String, String> tbl = new Hashtable<String, String>();
+    Hashtable<String, String> tbl = new Hashtable<String, String>();
     tbl.put("domain", domainId);
     tbl.put("node", "node0");
     tbl.put("type", TYPE_DOMAINMBEAN);

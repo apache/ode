@@ -33,9 +33,9 @@ import java.io.Serializable;
  * Information about a BPEL fault.
  */
 public class FaultData implements Serializable {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	/** Name of the fault. */
+    /** Name of the fault. */
   private QName _faultName;
 
   /** MessageType of the fault. */
@@ -45,7 +45,7 @@ public class FaultData implements Serializable {
 
   private OBase _location;
 
-	private final String _explanation;
+    private final String _explanation;
 
   public FaultData(QName fault, OBase location, String explanation) {
     _faultName = fault;
@@ -78,7 +78,7 @@ public class FaultData implements Serializable {
    * @return fault type
    */
   public OVarType getFaultType(){
-  	return _faultVarType;
+    return _faultVarType;
   }
 
   /**
@@ -91,11 +91,11 @@ public class FaultData implements Serializable {
   }
   
   public int getFaultLineNo(){
-  	return findLineNo(_location);
+    return findLineNo(_location);
   }
   
   public String getExplanation() {
-  	return _explanation;
+    return _explanation;
   }
 
   public int getActivityId() {
@@ -108,11 +108,11 @@ public class FaultData implements Serializable {
    * @return line number
    */
   protected int findLineNo(OBase location) {
-  	if (location == null)
-  		return -1;
-  	if (location.debugInfo == null)
-  		return -1;
-  	return location.debugInfo.startLine;
+    if (location == null)
+        return -1;
+    if (location.debugInfo == null)
+        return -1;
+    return location.debugInfo.startLine;
   }
 
 
@@ -125,9 +125,9 @@ public class FaultData implements Serializable {
     sb.append(", faulType=");
     sb.append(_faultVarType);
     if (_explanation != null) {
-    	sb.append(" (");
-    	sb.append(_explanation);
-    	sb.append(")");
+        sb.append(" (");
+        sb.append(_explanation);
+        sb.append(")");
     }
     
     sb.append("] @");

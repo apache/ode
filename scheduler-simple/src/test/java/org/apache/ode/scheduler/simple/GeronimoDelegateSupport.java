@@ -40,8 +40,8 @@ public class GeronimoDelegateSupport extends DelegateSupport {
     private GenericConnectionManager _connectionManager;
 
     public GeronimoDelegateSupport(TransactionManager txm) throws Exception {
-    	super(txm);
-	}
+        super(txm);
+    }
 
     @Override
     protected void initialize(TransactionManager txm) throws Exception {

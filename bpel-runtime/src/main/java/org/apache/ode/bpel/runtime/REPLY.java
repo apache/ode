@@ -60,7 +60,7 @@ class REPLY extends ACTIVITY {
                         _scopeFrame.resolve(oreply.variable));
             }
             for (OScope.CorrelationSet aJoinCorrelation : oreply.joinCorrelations) {
-            	// will be ignored if already initialized
+                // will be ignored if already initialized
                 initializeCorrelation(_scopeFrame.resolve(aJoinCorrelation), _scopeFrame.resolve(oreply.variable));
             }
 

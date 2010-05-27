@@ -22,16 +22,16 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 public class PubSubTest extends BPELTestAbstract {
-	@Ignore @Test public void testPubSubInProc() throws Throwable {
+    @Ignore @Test public void testPubSubInProc() throws Throwable {
         go("/bpel/2.0/TestPubSubInProc");
     }
 
-	@Ignore @Test public void testPubSubOutOfProc() throws Throwable {
+    @Ignore @Test public void testPubSubOutOfProc() throws Throwable {
         go("/bpel/2.0/TestPubSubOutOfProc");
     }
 
-	@Override
-	protected long getWaitBeforeInvokeTimeout() {
-		return 10000;
-	}
+    @Override
+    protected long getWaitBeforeInvokeTimeout() {
+        return 10000;
+    }
 }

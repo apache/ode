@@ -32,7 +32,7 @@ public class RetireTestVar extends Axis2TestBase {
 
     @Test(dataProvider="configs")
     public void testRetiredInstance() throws Exception {
-    	String response = null;
+        String response = null;
         String bundleName = "TestInstanceRetire";
         System.out.println("=> " + server.getODEServer().getProcessStore().getPackages());
         if (server.isDeployed("withVar")) server.undeployProcess(bundleName + "/withVar");

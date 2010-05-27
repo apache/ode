@@ -27,16 +27,16 @@ import java.io.Serializable;
  *
  */
 public class ResumeWork implements Serializable{
-	static final long serialVersionUID = 1;
+    static final long serialVersionUID = 1;
 
   private Long _pid;
 
-	public ResumeWork(Long pid) {
-		_pid = pid;
-	}
+    public ResumeWork(Long pid) {
+        _pid = pid;
+    }
   
   public Long getPID(){
-  	return _pid;
+    return _pid;
   }
 
   public String toString() {

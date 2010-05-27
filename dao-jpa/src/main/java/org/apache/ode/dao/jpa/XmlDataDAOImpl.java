@@ -56,72 +56,72 @@ import java.util.Collection;
     @NamedQuery(name=XmlDataDAOImpl.DELETE_XMLDATA_BY_SCOPE_IDS, query="delete from XmlDataDAOImpl as x where x._scopeId in(:scopeIds)")
 })
 public class XmlDataDAOImpl implements XmlDataDAO {
-	public final static String SELECT_XMLDATA_IDS_BY_PROCESS = "SELECT_XMLDATA_IDS_BY_PROCESS";
-	public final static String SELECT_XMLDATA_IDS_BY_INSTANCE = "SELECT_XMLDATA_IDS_BY_INSTANCE";
-	public final static String DELETE_XMLDATA_BY_SCOPE_IDS = "DELETE_XMLDATA_BY_SCOPE_IDS";
-	
-	@Id @Column(name="XML_DATA_ID") 
-	@GeneratedValue(strategy=GenerationType.AUTO)
-	@SuppressWarnings("unused")
-	private Long _id;
-	@Lob @Column(name="DATA")
+    public final static String SELECT_XMLDATA_IDS_BY_PROCESS = "SELECT_XMLDATA_IDS_BY_PROCESS";
+    public final static String SELECT_XMLDATA_IDS_BY_INSTANCE = "SELECT_XMLDATA_IDS_BY_INSTANCE";
+    public final static String DELETE_XMLDATA_BY_SCOPE_IDS = "DELETE_XMLDATA_BY_SCOPE_IDS";
+    
+    @Id @Column(name="XML_DATA_ID") 
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    @SuppressWarnings("unused")
+    private Long _id;
+    @Lob @Column(name="DATA")
     private String _data;
-	@Transient
+    @Transient
     private Node _node;
-	@Basic @Column(name="IS_SIMPLE_TYPE")
+    @Basic @Column(name="IS_SIMPLE_TYPE")
     private boolean _isSimpleType;
-	@Basic @Column(name="NAME")
+    @Basic @Column(name="NAME")
     private String _name;
 
     @OneToMany(targetEntity=XmlDataProperty.class,mappedBy="_xmlData",fetch=FetchType.EAGER,cascade={CascadeType.ALL})
     private Collection<XmlDataProperty> _props = new ArrayList<XmlDataProperty>();
 
     @SuppressWarnings("unused")
-	@Basic @Column(name="SCOPE_ID", nullable=true, insertable=false, updatable=false)
+    @Basic @Column(name="SCOPE_ID", nullable=true, insertable=false, updatable=false)
     private Long _scopeId;
-	@ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="SCOPE_ID")
-	private ScopeDAOImpl _scope;
-	
-	public XmlDataDAOImpl() {}
-	public XmlDataDAOImpl(ScopeDAOImpl scope, String name){
-		_scope = scope;
-		_name = name;
-	}
+    @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="SCOPE_ID")
+    private ScopeDAOImpl _scope;
+    
+    public XmlDataDAOImpl() {}
+    public XmlDataDAOImpl(ScopeDAOImpl scope, String name){
+        _scope = scope;
+        _name = name;
+    }
 
-	public Node get() {
-		if ( _node == null && _data != null ) {
-		   if(_isSimpleType){
-		        Document d = DOMUtils.newDocument();
-		        // we create a dummy wrapper element
-		        // prevents some apps from complaining
-		        // when text node is not actual child of document
-		        Element e = d.createElement("text-node-wrapper");
-		        Text tnode = d.createTextNode(_data);
-		        d.appendChild(e);
-		        e.appendChild(tnode);
-		        _node = tnode;
-		   }else{
-		      try{
-		          _node = DOMUtils.stringToDOM(_data);
-		      }catch(Exception e){
-		          throw new RuntimeException(e);
-		      }
-		   }
-		}
-		
-		return _node;
-	}
+    public Node get() {
+        if ( _node == null && _data != null ) {
+           if(_isSimpleType){
+                Document d = DOMUtils.newDocument();
+                // we create a dummy wrapper element
+                // prevents some apps from complaining
+                // when text node is not actual child of document
+                Element e = d.createElement("text-node-wrapper");
+                Text tnode = d.createTextNode(_data);
+                d.appendChild(e);
+                e.appendChild(tnode);
+                _node = tnode;
+           }else{
+              try{
+                  _node = DOMUtils.stringToDOM(_data);
+              }catch(Exception e){
+                  throw new RuntimeException(e);
+              }
+           }
+        }
+        
+        return _node;
+    }
 
-	public String getName() {
-		return _name;
-	}
+    public String getName() {
+        return _name;
+    }
 
-	public String getProperty(String propertyName) {
+    public String getProperty(String propertyName) {
         for (XmlDataProperty prop : _props) {
             if (prop.getPropertyKey().equals(propertyName)) return prop.getPropertyValue();
         }
         return null;
-	}
+    }
 
     private XmlDataProperty getPropertyObject(String propertyName) {
         for (XmlDataProperty prop : _props) {
@@ -130,36 +130,36 @@ public class XmlDataDAOImpl implements XmlDataDAO {
         return null;
     }
 
-	public ScopeDAO getScopeDAO() {
-		return _scope;
-	}
+    public ScopeDAO getScopeDAO() {
+        return _scope;
+    }
 
-	public boolean isNull() {
-		return _data == null;
-	}
+    public boolean isNull() {
+        return _data == null;
+    }
 
-	public void remove() {
+    public void remove() {
 
-	}
+    }
 
-	public void set(Node val) {
-		_node = val;
-		if ( val instanceof Element ) {
-			_isSimpleType = false;
-			_data = DOMUtils.domToString(val);
-		} else if (_node != null) {
-			_isSimpleType = true;
-			_data = _node.getNodeValue();
-		}
-	}
+    public void set(Node val) {
+        _node = val;
+        if ( val instanceof Element ) {
+            _isSimpleType = false;
+            _data = DOMUtils.domToString(val);
+        } else if (_node != null) {
+            _isSimpleType = true;
+            _data = _node.getNodeValue();
+        }
+    }
 
-	public void setProperty(String pname, String pvalue) {
+    public void setProperty(String pname, String pvalue) {
         XmlDataProperty prop = getPropertyObject(pname);
         if (prop == null) {
             _props.add(new XmlDataProperty(pname, pvalue, this));
         } else {
             prop.setPropertyValue(pvalue);
         }
-	}
+    }
 
 }

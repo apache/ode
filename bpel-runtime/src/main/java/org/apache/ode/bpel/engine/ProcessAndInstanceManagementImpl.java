@@ -343,12 +343,12 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
     }
 
     private boolean garbage(String filter) {
-    	if(filter == null) {
-    		return false;
-    	}
+        if(filter == null) {
+            return false;
+        }
         Matcher expressionMatcher = Filter.__comparatorPattern.matcher(filter);        
         if(!filter.trim().equals("") && !expressionMatcher.find()) {
-        	return true;
+            return true;
         }
         return false;
     }
@@ -357,7 +357,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         InstanceInfoListDocument ret = InstanceInfoListDocument.Factory.newInstance();
         final TInstanceInfoList infolist = ret.addNewInstanceInfoList();
         if(garbage(filter)) {
-        	return ret;
+            return ret;
         }
         final InstanceFilter instanceFilter = new InstanceFilter(filter, order, limit);
         try {
@@ -381,7 +381,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         InstanceInfoListDocument ret = InstanceInfoListDocument.Factory.newInstance();
         final TInstanceInfoList infolist = ret.addNewInstanceInfoList();
         if(garbage(filter)) {
-        	return ret;
+            return ret;
         }
         final InstanceFilter instanceFilter = new InstanceFilter(filter, order, limit);
         try {
@@ -542,7 +542,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         final InstanceFilter instanceFilter = new InstanceFilter(filter);
         final List<Long> ret = new LinkedList<Long>();
         if(garbage(filter)) {
-        	return ret;
+            return ret;
         }
         try {
             _db.exec(new BpelDatabase.Callable<Object>() {
@@ -910,15 +910,15 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
     }
     
     String findVersionStringFromNodeToken(String packageName) {
-    	int i = packageName.length() - 1;
-    	while( i > 0 && Character.isDigit(packageName.charAt(i)) ) {
-    		i--;
-    	}
-    	if( i < packageName.length() - 1 && packageName.charAt(i) == '-') {
-    		return packageName.substring(i + 1);
-    	}
-    	
-    	return null;
+        int i = packageName.length() - 1;
+        while( i > 0 && Character.isDigit(packageName.charAt(i)) ) {
+            i--;
+        }
+        if( i < packageName.length() - 1 && packageName.charAt(i) == '-') {
+            return packageName.substring(i + 1);
+        }
+        
+        return null;
     }
         
     /**
@@ -1077,43 +1077,43 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
             // if event generation was enabled
             if(events!=null && events.size() >0) {
-            	ActivityStateDocumentBuilder b = new ActivityStateDocumentBuilder();
-            	for (BpelEvent e : events)
-            		b.onEvent(e);
-            	for (ActivityInfoDocument ai : b.getActivities()) {
-            		for (ActivityRecoveryDAO recovery : recoveries) {
-            			if (String.valueOf(recovery.getActivityId()).equals(ai.getActivityInfo().getAiid())) {
-            				TFailureInfo failure = ai.getActivityInfo().addNewFailure();
-            				failure.setReason(recovery.getReason());
-            				failure.setDtFailure(toCalendar(recovery.getDateTime()));
-            				failure.setActions(recovery.getActions());
-            				failure.setRetries(recovery.getRetries());
-            				ai.getActivityInfo().setStatus(TActivityStatus.FAILURE);
-            			}
-            		}
-            		activities.addNewActivityInfo().set(ai.getActivityInfo());
-            	}
+                ActivityStateDocumentBuilder b = new ActivityStateDocumentBuilder();
+                for (BpelEvent e : events)
+                    b.onEvent(e);
+                for (ActivityInfoDocument ai : b.getActivities()) {
+                    for (ActivityRecoveryDAO recovery : recoveries) {
+                        if (String.valueOf(recovery.getActivityId()).equals(ai.getActivityInfo().getAiid())) {
+                            TFailureInfo failure = ai.getActivityInfo().addNewFailure();
+                            failure.setReason(recovery.getReason());
+                            failure.setDtFailure(toCalendar(recovery.getDateTime()));
+                            failure.setActions(recovery.getActions());
+                            failure.setRetries(recovery.getRetries());
+                            ai.getActivityInfo().setStatus(TActivityStatus.FAILURE);
+                        }
+                    }
+                    activities.addNewActivityInfo().set(ai.getActivityInfo());
+                }
             }
             
             // otherwise at least try to get the information about failed activities
             // TODO: we are losing information about which scope does failed activities belong to
             // as failure table does not have scope id, we would attach every failed activity to process scope
             else {
-            	if(scope.getParentScope() == null) {
-            		for (ActivityRecoveryDAO recovery : recoveries) {
-            			ActivityInfoDocument ai = ActivityInfoDocument.Factory.newInstance();
-            			ai.addNewActivityInfo().setAiid(String.valueOf(recovery.getActivityId()));
-            			ai.getActivityInfo().setType("OActivity");
-            			ai.getActivityInfo().setScope(TScopeRef.Factory.newInstance());
-            			TFailureInfo failure = ai.getActivityInfo().addNewFailure();
-            			failure.setReason(recovery.getReason());
-            			failure.setDtFailure(toCalendar(recovery.getDateTime()));
-            			failure.setActions(recovery.getActions());
-            			failure.setRetries(recovery.getRetries());
-            			ai.getActivityInfo().setStatus(TActivityStatus.FAILURE);
-            			activities.addNewActivityInfo().set(ai.getActivityInfo());
-            		}            	
-            	}
+                if(scope.getParentScope() == null) {
+                    for (ActivityRecoveryDAO recovery : recoveries) {
+                        ActivityInfoDocument ai = ActivityInfoDocument.Factory.newInstance();
+                        ai.addNewActivityInfo().setAiid(String.valueOf(recovery.getActivityId()));
+                        ai.getActivityInfo().setType("OActivity");
+                        ai.getActivityInfo().setScope(TScopeRef.Factory.newInstance());
+                        TFailureInfo failure = ai.getActivityInfo().addNewFailure();
+                        failure.setReason(recovery.getReason());
+                        failure.setDtFailure(toCalendar(recovery.getDateTime()));
+                        failure.setActions(recovery.getActions());
+                        failure.setRetries(recovery.getRetries());
+                        ai.getActivityInfo().setStatus(TActivityStatus.FAILURE);
+                        activities.addNewActivityInfo().set(ai.getActivityInfo());
+                    }            	
+                }
             }
         }
 
@@ -1235,8 +1235,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             info.setVariableName(((VariableEvent) event).getVarName());
         }
         if(event instanceof VariableModificationEvent) {
-        	if(((VariableModificationEvent) event).getNewValue()!=null)
-        		info.setNewValue(DOMUtils.domToString(((VariableModificationEvent) event).getNewValue()));
+            if(((VariableModificationEvent) event).getNewValue()!=null)
+                info.setNewValue(DOMUtils.domToString(((VariableModificationEvent) event).getNewValue()));
         }
     }
 

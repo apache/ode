@@ -348,15 +348,15 @@ public class HMessageExchange extends HObject {
      * @hibernate.property column="SUBSCRIBER_COUNT"
      */
     public int getSubscriberCount() {
-    	return _subscriberCount;
+        return _subscriberCount;
     }
     
     public void setSubscriberCount(int subscriberCount) {
-    	this._subscriberCount = subscriberCount;
+        this._subscriberCount = subscriberCount;
     }
     
     public void incrementSubscriberCount() {
-    	setSubscriberCount(getSubscriberCount() + 1);
+        setSubscriberCount(getSubscriberCount() + 1);
     }
 
 }

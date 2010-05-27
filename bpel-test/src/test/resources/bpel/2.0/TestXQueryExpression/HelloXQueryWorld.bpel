@@ -25,7 +25,7 @@
     xmlns:types="http://ode/bpel/types"
     xmlns:test="http://ode/bpel/unit-test.wsdl"
     xmlns:wsa="http://www.w3.org/2005/08/addressing"
-	xmlns:ode="http://www.apache.org/ode/type/extension"
+    xmlns:ode="http://www.apache.org/ode/type/extension"
     queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
     expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
 
@@ -144,37 +144,37 @@
             </copy>
             <copy>
                 <from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
-					typeswitch ($myVar.TestPart) 
-				      case $a as xs:string return "test"
-					  default return "default"
-				</from>
+                    typeswitch ($myVar.TestPart) 
+                      case $a as xs:string return "test"
+                      default return "default"
+                </from>
                 <to variable="otherVar"/>
             </copy>
             <copy>
                 <from  expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0"><![CDATA[
-					typeswitch ($myVar.TestPart) 
-				      case $a as text() return <test:content/>
-					  default return <test:content/>
-					  ]]>
-				</from>
+                    typeswitch ($myVar.TestPart) 
+                      case $a as text() return <test:content/>
+                      default return <test:content/>
+                      ]]>
+                </from>
                 <to variable="otherVar"/>
             </copy>
-			<!-- this copy will fail since saxon is not schema-aware 
+            <!-- this copy will fail since saxon is not schema-aware 
             <copy>
                 <from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
-					typeswitch ($myVar.TestPart) 
-				      case $a as element(*, test:content) return "test"
-					  default return "default"
-				</from>
+                    typeswitch ($myVar.TestPart) 
+                      case $a as element(*, test:content) return "test"
+                      default return "default"
+                </from>
                 <to variable="otherVar"/>
             </copy>
-			-->
+            -->
             <copy>
                 <from  expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
-					for $loopOnce in (1) 
-					return 
-						concat(bpws:getVariableProperty("myVar", "test:content"), "XQuery World")
-				</from>
+                    for $loopOnce in (1) 
+                    return 
+                        concat(bpws:getVariableProperty("myVar", "test:content"), "XQuery World")
+                </from>
                 <to variable="myVar" part="TestPart"/>
             </copy>
         </assign>
@@ -216,26 +216,26 @@
                         </assign>
                     </else>
                 </if>
-				<!--
+                <!--
                 <assign>
                     <copy>
                         <from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
-        						if (boolean($stringVar)) then "trueValue" else "falseValue"
-        				</from>
+                                if (boolean($stringVar)) then "trueValue" else "falseValue"
+                        </from>
                         <to variable="otherVar"/>
                     </copy>
                 </assign>
-	           <if>
+               <if>
                     <condition>not($otherVar = concat($stringVar, "Value"))</condition>
                     <throw faultName="selectionFailure"/>
                 </if>
-    			-->
+                -->
      
-          	    <assign>
+                <assign>
                     <copy>
                         <from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
-        						if ($boolVar) then "trueValue" else "falseValue"
-        				</from>
+                                if ($boolVar) then "trueValue" else "falseValue"
+                        </from>
                         <to variable="otherVar"/>
                     </copy>
                 </assign>
@@ -244,12 +244,12 @@
                     <throw faultName="selectionFailure"/>
                 </if>
     
-				<!-- validate that you can invoke XSLT stylesheets from withing XQuery -->
+                <!-- validate that you can invoke XSLT stylesheets from withing XQuery -->
                 <if>
                     <condition expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">not(string-length(string(bpws:doXslTransform('HelloXQueryWorld.xsl', $myVar.TestPart))) > 0)</condition>
                     <throw faultName="selectionFailure"/>
                 </if>
-				
+                
                 <assign>
                     <copy>
                         <from>$i + 1</from>
@@ -266,15 +266,15 @@
             </faultHandlers>
             <assign>
               <copy>
-    	        <from variable="myVar" part="TestPart">
-    	          <query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
-    	             let $j := 10 div 0
-    	             return concat("abc", $j)
-    	          </query>
-    	        </from>
-    	        <to variable="myVar" part="TestPart"/>
-    	      </copy>
-    	    </assign>
+                <from variable="myVar" part="TestPart">
+                  <query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
+                     let $j := 10 div 0
+                     return concat("abc", $j)
+                  </query>
+                </from>
+                <to variable="myVar" part="TestPart"/>
+              </copy>
+            </assign>
         </scope>
         <reply name="end"  
                 partnerLink="HelloXQueryPartnerLink"

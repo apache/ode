@@ -55,9 +55,9 @@
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="HelloPubService">
-		<wsdl:port name="HelloPubPort" binding="tns:HelloSoapBinding">
-     		<soap:address location="http://localhost:8080/ode/processes/HelloPubWorld"/>
-		</wsdl:port>
+        <wsdl:port name="HelloPubPort" binding="tns:HelloSoapBinding">
+            <soap:address location="http://localhost:8080/ode/processes/HelloPubWorld"/>
+        </wsdl:port>
     </wsdl:service>
     
    <plnk:partnerLinkType name="HelloPartnerLinkType">

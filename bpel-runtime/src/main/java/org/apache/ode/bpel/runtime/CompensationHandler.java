@@ -29,9 +29,9 @@ import java.util.Set;
  * A handle to a compensation handler.
  */
 public class CompensationHandler implements Serializable, Comparable<CompensationHandler> {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	/** The scope to which this compensation handler belongs. */
+    /** The scope to which this compensation handler belongs. */
   final ScopeFrame compensated;
 
   /** Compensation activation channel. */
@@ -44,8 +44,8 @@ public class CompensationHandler implements Serializable, Comparable<Compensatio
   final long scopeEndTime;
 
   CompensationHandler(ScopeFrame compensated, CompensationChannel compChannel, long scopeStartTime, long scopeEndTime) {
-  	assert compChannel != null;
-  	
+    assert compChannel != null;
+    
     this.compensated = compensated;
     this.compChannel = compChannel;
     this.scopeEndTime = scopeEndTime;
@@ -66,7 +66,7 @@ public class CompensationHandler implements Serializable, Comparable<Compensatio
   }
 
   public int compareTo(CompensationHandler that) {
-	return (int) (that.scopeStartTime - this.scopeEndTime);
+    return (int) (that.scopeStartTime - this.scopeEndTime);
   }
 
 }

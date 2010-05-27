@@ -92,12 +92,12 @@ class ReplyGenerator extends DefaultActivityGenerator  {
 
         Set<String> csetNames = new HashSet<String>(); // prevents duplicate cset in on one set of correlations
         for (Correlation correlation  : replyDef.getCorrelations()) {
-        	if( csetNames.contains(correlation.getCorrelationSet() ) ) {
+            if( csetNames.contains(correlation.getCorrelationSet() ) ) {
                 throw new CompilationException(_cmsgsGeneral.errDuplicateUseCorrelationSet(correlation
                         .getCorrelationSet()));
-        	}
+            }
 
-        	OScope.CorrelationSet cset = _context.resolveCorrelationSet(correlation.getCorrelationSet());
+            OScope.CorrelationSet cset = _context.resolveCorrelationSet(correlation.getCorrelationSet());
 
             switch (correlation.getInitiate()) {
                 case UNSET:
@@ -108,9 +108,9 @@ class ReplyGenerator extends DefaultActivityGenerator  {
                     oreply.initCorrelations.add(cset);
                     break;
                 case JOIN:
-                	cset.hasJoinUseCases = true;
-                	oreply.joinCorrelations.add(cset);
-                	break;
+                    cset.hasJoinUseCases = true;
+                    oreply.joinCorrelations.add(cset);
+                    break;
                 default:
                     // TODO: Make error for this.
                     throw new AssertionError();

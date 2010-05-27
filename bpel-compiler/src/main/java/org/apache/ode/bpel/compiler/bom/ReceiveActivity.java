@@ -54,7 +54,7 @@ public class ReceiveActivity extends CreateInstanceActivity implements Communica
     }
     
     public String getRoute() {
-    	return getAttribute("route", "one");
+        return getAttribute("route", "one");
     }
 
     public String getOperation() {

@@ -40,11 +40,11 @@ public class DelegateSupport {
     protected JdbcDelegate _del;
 
     public DelegateSupport() throws Exception {
-    	this(null);
+        this(null);
     }
 
     public DelegateSupport(TransactionManager txm) throws Exception {
-    	initialize(txm);
+        initialize(txm);
     }
 
     protected void initialize(TransactionManager txm) throws Exception {

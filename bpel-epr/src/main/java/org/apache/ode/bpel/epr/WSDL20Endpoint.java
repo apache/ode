@@ -40,44 +40,44 @@ public class WSDL20Endpoint implements MutableEndpoint {
   }
 
   public String getSessionId() {
-	  Element endpointElmt = (Element)_serviceElmt.getElementsByTagNameNS(Namespaces.WSDL_20, "endpoint").item(0);
-	  NodeList idNodes = endpointElmt.getElementsByTagNameNS(Namespaces.ODE_SESSION_NS, "session");
-	  if (idNodes.getLength() > 0) {
-		  return idNodes.item(0).getTextContent();
-	  } else {
-		  // try the same with the intalio header
-		  idNodes = endpointElmt.getElementsByTagNameNS(Namespaces.INTALIO_SESSION_NS, "session");
-		  if (idNodes.getLength() > 0) {
-			  return idNodes.item(0).getTextContent();
-		  } 
-		  return null;
-	  }
+      Element endpointElmt = (Element)_serviceElmt.getElementsByTagNameNS(Namespaces.WSDL_20, "endpoint").item(0);
+      NodeList idNodes = endpointElmt.getElementsByTagNameNS(Namespaces.ODE_SESSION_NS, "session");
+      if (idNodes.getLength() > 0) {
+          return idNodes.item(0).getTextContent();
+      } else {
+          // try the same with the intalio header
+          idNodes = endpointElmt.getElementsByTagNameNS(Namespaces.INTALIO_SESSION_NS, "session");
+          if (idNodes.getLength() > 0) {
+              return idNodes.item(0).getTextContent();
+          } 
+          return null;
+      }
   }
 
   public void setSessionId(String sessionId) {
-	  Element endpointElmt = (Element)_serviceElmt.getElementsByTagNameNS(Namespaces.WSDL_20, "endpoint").item(0);
-	  NodeList idList = endpointElmt.getElementsByTagNameNS(Namespaces.ODE_SESSION_NS, "session");
-	  if (idList.getLength() > 0)
-		  idList.item(0).setTextContent(sessionId);
-	  else {
-		  Element sessElmt = endpointElmt.getOwnerDocument().createElementNS(Namespaces.ODE_SESSION_NS, "session");
-		  sessElmt.setTextContent(sessionId);
-		  endpointElmt.appendChild(sessElmt);
-	  }
+      Element endpointElmt = (Element)_serviceElmt.getElementsByTagNameNS(Namespaces.WSDL_20, "endpoint").item(0);
+      NodeList idList = endpointElmt.getElementsByTagNameNS(Namespaces.ODE_SESSION_NS, "session");
+      if (idList.getLength() > 0)
+          idList.item(0).setTextContent(sessionId);
+      else {
+          Element sessElmt = endpointElmt.getOwnerDocument().createElementNS(Namespaces.ODE_SESSION_NS, "session");
+          sessElmt.setTextContent(sessionId);
+          endpointElmt.appendChild(sessElmt);
+      }
 
-	  // and the same for the intalio header
-	  idList = endpointElmt.getElementsByTagNameNS(Namespaces.INTALIO_SESSION_NS, "session");
-	  if (idList.getLength() > 0)
-		  idList.item(0).setTextContent(sessionId);
-	  else {
-		  Element sessElmt = endpointElmt.getOwnerDocument().createElementNS(Namespaces.INTALIO_SESSION_NS, "session");
-		  sessElmt.setTextContent(sessionId);
-		  endpointElmt.appendChild(sessElmt);
-	  }
+      // and the same for the intalio header
+      idList = endpointElmt.getElementsByTagNameNS(Namespaces.INTALIO_SESSION_NS, "session");
+      if (idList.getLength() > 0)
+          idList.item(0).setTextContent(sessionId);
+      else {
+          Element sessElmt = endpointElmt.getOwnerDocument().createElementNS(Namespaces.INTALIO_SESSION_NS, "session");
+          sessElmt.setTextContent(sessionId);
+          endpointElmt.appendChild(sessElmt);
+      }
   }
 
   public String getUrl() {
-	  return ((Element)_serviceElmt.getElementsByTagNameNS(Namespaces.WSDL_20, "endpoint").item(0)).getAttribute("address");
+      return ((Element)_serviceElmt.getElementsByTagNameNS(Namespaces.WSDL_20, "endpoint").item(0)).getAttribute("address");
   }
 
   public void setUrl(String url) {
@@ -145,9 +145,9 @@ public class WSDL20Endpoint implements MutableEndpoint {
         session.setTextContent((String) eprMap.get(SESSION));
         endpoint.appendChild(session);
         // plus the deprecated intalio header
-    	session = doc.createElementNS(Namespaces.INTALIO_SESSION_NS, "session");
-    	session.setTextContent((String) eprMap.get(SESSION));
-    	endpoint.appendChild(session);
+        session = doc.createElementNS(Namespaces.INTALIO_SESSION_NS, "session");
+        session.setTextContent((String) eprMap.get(SESSION));
+        endpoint.appendChild(session);
     }
     _serviceElmt.appendChild(endpoint);
     doc.appendChild(_serviceElmt);

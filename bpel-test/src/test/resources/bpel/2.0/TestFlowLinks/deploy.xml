@@ -18,7 +18,7 @@
   ~ under the License.
   -->
 <deploy xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-		xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.apache.org/ode/schemas/dd/2007/03">
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.apache.org/ode/schemas/dd/2007/03">
   <process xmlns:q1="workflowns" name="q1:TestCase">
     <provide partnerLink="TestCase">
       <service name="q1:TestCase" port="Workflow" />

@@ -73,13 +73,13 @@ public class OBase implements Serializable {
     }
     
     public void dehydrate() {
-    	if (debugInfo != null) {
-    		debugInfo.description = null;
-    		debugInfo.extensibilityElements = null;
-    		debugInfo = null;
-    	}
+        if (debugInfo != null) {
+            debugInfo.description = null;
+            debugInfo.extensibilityElements = null;
+            debugInfo = null;
+        }
     }
-    	
+        
     public String digest() {
         return "";
     }

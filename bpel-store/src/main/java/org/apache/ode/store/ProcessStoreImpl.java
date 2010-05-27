@@ -161,7 +161,7 @@ public class ProcessStoreImpl implements ProcessStore {
      * Deploys a process.
      */
     public Collection<QName> deploy(final File deploymentUnitDirectory, boolean autoincrementVersion) {
-    	return deploy(deploymentUnitDirectory, true, null, autoincrementVersion);
+        return deploy(deploymentUnitDirectory, true, null, autoincrementVersion);
     }
 
     public Collection<QName> deploy(final File deploymentUnitDirectory) {
@@ -179,8 +179,8 @@ public class ProcessStoreImpl implements ProcessStore {
         // Create the DU and compile/scan it before acquiring lock.
         final DeploymentUnitDir du = new DeploymentUnitDir(deploymentUnitDirectory);
         if( duName != null ) {
-        	// Override the package name if given from the parameter
-        	du.setName(duName);
+            // Override the package name if given from the parameter
+            du.setName(duName);
         }
         
         long version;
@@ -348,10 +348,10 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     public Collection<QName> undeploy(final File dir) {
-    	return undeploy(dir.getName());
+        return undeploy(dir.getName());
     }
 
-   	public Collection<QName> undeploy(final String duName) {
+    public Collection<QName> undeploy(final String duName) {
         try {
             exec(new Callable<Collection<QName>>() {
                 public Collection<QName> call(ConfStoreConnection conn) {
@@ -728,11 +728,11 @@ public class ProcessStoreImpl implements ProcessStore {
             return f;
         f = new File(_deployDir, dudao.getName());
         if (f.exists()) {
-	        try {
-		        dudao.setDeploymentUnitDir(f.getCanonicalPath());
-	        } catch (IOException e) {
-		        __log.warn("Could not update deployment unit directory for " + dudao.getName(), e); 
-	        }
+            try {
+                dudao.setDeploymentUnitDir(f.getCanonicalPath());
+            } catch (IOException e) {
+                __log.warn("Could not update deployment unit directory for " + dudao.getName(), e); 
+            }
             return f;
         }
 
@@ -806,12 +806,12 @@ public class ProcessStoreImpl implements ProcessStore {
 
     public void setDeployDir(File depDir) {
         if (depDir != null) {
-        	if( !depDir.exists() ) {
-        		depDir.mkdirs();
-        		__log.warn("Deploy directory: " + depDir.getAbsolutePath() + " does not exist; created it.");
-        	} else if(!depDir.isDirectory()) {
+            if( !depDir.exists() ) {
+                depDir.mkdirs();
+                __log.warn("Deploy directory: " + depDir.getAbsolutePath() + " does not exist; created it.");
+            } else if(!depDir.isDirectory()) {
                 throw new IllegalArgumentException("Deploy directory is not a directory:  " + depDir);
-        	}
+            }
         }
         
         _deployDir = depDir;

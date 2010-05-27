@@ -167,34 +167,34 @@ public class JbiTestBase extends SpringTestSupport {
                     }
                 }
                 {
-        	        String httpUrl = testProperties.getProperty(prefix + "http.url");
-        	        if (httpUrl != null && request != null) {
+                    String httpUrl = testProperties.getProperty(prefix + "http.url");
+                    if (httpUrl != null && request != null) {
                         loop = true;
-        	            log.debug(getTestName() + " sending http request to " + httpUrl + " request: " + request);
-        	            URLConnection connection = new URL(httpUrl).openConnection();
-        	            connection.setDoOutput(true);
-        	            connection.setDoInput(true);
-        	            //Send request
-        	            OutputStream os = connection.getOutputStream();
-        	            PrintWriter wt = new PrintWriter(os);
-        	            wt.print(request);
-        	            wt.flush();
-        	            wt.close();
-        	            // Read the response.
-        	            String result = inputStreamToString(connection.getInputStream());
-        	            
-        	            log.debug(getTestName() + " have result: " + result);
-        	            matchResponse(expectedResponse, result, true);
-        	        }
+                        log.debug(getTestName() + " sending http request to " + httpUrl + " request: " + request);
+                        URLConnection connection = new URL(httpUrl).openConnection();
+                        connection.setDoOutput(true);
+                        connection.setDoInput(true);
+                        //Send request
+                        OutputStream os = connection.getOutputStream();
+                        PrintWriter wt = new PrintWriter(os);
+                        wt.print(request);
+                        wt.flush();
+                        wt.close();
+                        // Read the response.
+                        String result = inputStreamToString(connection.getInputStream());
+                        
+                        log.debug(getTestName() + " have result: " + result);
+                        matchResponse(expectedResponse, result, true);
+                    }
                 }
                 {
-        	        if (testProperties.getProperty(prefix + "nmr.service") != null && request != null) {
+                    if (testProperties.getProperty(prefix + "nmr.service") != null && request != null) {
                         loop = true;
-        	            InOut io = smxClient.createInOutExchange();
-        	            io.setService(QName.valueOf(testProperties.getProperty(prefix + "nmr.service")));
-        	            io.setOperation(QName.valueOf(testProperties.getProperty(prefix + "nmr.operation")));
-        	            io.getInMessage().setContent(new StreamSource(new ByteArrayInputStream(request.getBytes())));
-        	            smxClient.sendSync(io,20000);
+                        InOut io = smxClient.createInOutExchange();
+                        io.setService(QName.valueOf(testProperties.getProperty(prefix + "nmr.service")));
+                        io.setOperation(QName.valueOf(testProperties.getProperty(prefix + "nmr.operation")));
+                        io.getInMessage().setContent(new StreamSource(new ByteArrayInputStream(request.getBytes())));
+                        smxClient.sendSync(io,20000);
                         if (io.getStatus() == ExchangeStatus.ACTIVE) {
                             assertNotNull(io.getOutMessage());
                             String result = new SourceTransformer().contentToString(io.getOutMessage());
@@ -203,7 +203,7 @@ public class JbiTestBase extends SpringTestSupport {
                         } else {
                             matchResponse(expectedResponse, "", false);
                         }
-        	    }
+                }
                 }
                 
                 i++;

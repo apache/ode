@@ -28,9 +28,9 @@ import java.io.Serializable;
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
 public class DebugInfo implements Serializable {
-	private static final long serialVersionUID = -4877379887875005010L;
+    private static final long serialVersionUID = -4877379887875005010L;
 
-	/** Stringified representation of the instance. */
+    /** Stringified representation of the instance. */
     private String _creator = "unknown";
 
     /** Stack trace */

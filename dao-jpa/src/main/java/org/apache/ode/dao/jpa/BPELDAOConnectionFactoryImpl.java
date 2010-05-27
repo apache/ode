@@ -43,7 +43,7 @@ import java.util.Properties;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDBC {
-	static final Log __log = LogFactory.getLog(BPELDAOConnectionFactoryImpl.class);
+    static final Log __log = LogFactory.getLog(BPELDAOConnectionFactoryImpl.class);
 
     protected EntityManagerFactory _emf;
     private TransactionManager _tm;
@@ -85,7 +85,7 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
     }
 
     protected BPELDAOConnectionImpl createBPELDAOConnection(EntityManager em) {
-    	return new BPELDAOConnectionImpl(em);
+        return new BPELDAOConnectionImpl(em);
     }
     
     @SuppressWarnings("unchecked")

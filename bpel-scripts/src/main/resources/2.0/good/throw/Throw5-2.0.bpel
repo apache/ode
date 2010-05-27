@@ -18,8 +18,8 @@
   -->
 
 <!-- test intention
-	scenario: throws a fault with associated data of element type
-	outcome: catch with same variable element type should match fault
+    scenario: throws a fault with associated data of element type
+    outcome: catch with same variable element type should match fault
 -->
 
 <process name="throw5-2.0"
@@ -32,8 +32,8 @@
   suppressJoinFailure="yes">
 
   <import importType="http://schemas.xmlsoap.org/wsdl/"
-	  location="test.wsdl"
-	  namespace="http://ode/bpel/unit-test.wsdl" />
+      location="test.wsdl"
+      namespace="http://ode/bpel/unit-test.wsdl" />
 
   <partnerLinks>
     <partnerLink name="testPartnerLink"
@@ -56,10 +56,10 @@
       variable="var1"/>
     <scope>
       <faultHandlers>
-      	<catch faultName="test:foo"
-      		   faultVariable="faultVar" 
-      		   faultMessageType="test:TestMessage1">
-      	<!-- we do NOT want to be here -->
+        <catch faultName="test:foo"
+               faultVariable="faultVar" 
+               faultMessageType="test:TestMessage1">
+        <!-- we do NOT want to be here -->
          <assign>
            <copy>
              <from>'failure'</from>
@@ -68,9 +68,9 @@
          </assign>
         </catch>
         <catch faultName="test:foo"
-      		   faultVariable="faultVar" 
-      		   faultElement="test:TestElement">
-      	<!-- we want to be here -->
+               faultVariable="faultVar" 
+               faultElement="test:TestElement">
+        <!-- we want to be here -->
          <assign>
            <copy>
              <from>'success'</from>
@@ -86,15 +86,15 @@
            </copy>
          </assign>
         </catchAll>
-   	   </faultHandlers>
-   	   <sequence>
-   	    <assign>
-   	     <copy>
-   	      <from>$var1/ElementPart</from>
-   	      <to>$var2</to>
-   	     </copy>
-   	    </assign>
-      	<throw faultName="test:foo" faultVariable="var2"/>
+       </faultHandlers>
+       <sequence>
+        <assign>
+         <copy>
+          <from>$var1/ElementPart</from>
+          <to>$var2</to>
+         </copy>
+        </assign>
+        <throw faultName="test:foo" faultVariable="var2"/>
        </sequence>
     </scope>
     <reply name="endReply"

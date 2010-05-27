@@ -48,7 +48,7 @@ public class MigrationHandler {
     private Contexts _contexts;
     private List<MigrationLink> migrationLinks = new ArrayList<MigrationLink>() {{
         add(new MigrationLink(1, 2, new Migration[] { new CorrelatorsMigration(), 
-        												new CorrelationKeyMigration() } ));
+                                                        new CorrelationKeyMigration() } ));
         add(new MigrationLink(2, 3, new Migration[] { new CorrelationKeySetMigration() } ));
         add(new MigrationLink(4, 3, new Migration[] { new CorrelationKeySetMigration() } ));
         add(new MigrationLink(3, 5, new Migration[] { new CorrelationKeySetDataMigration() } ));

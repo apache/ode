@@ -66,7 +66,7 @@ public class SizingAgent {
      */
     public static long sizeOf(Object obj) {
         if (instrumentation == null) {
-        	return 0;
+            return 0;
         }
 
         if (isSharedFlyweight(obj)) {
@@ -82,7 +82,7 @@ public class SizingAgent {
      */
     public static long deepSizeOf(Object obj) {
         if (instrumentation == null) {
-        	return 0;
+            return 0;
         }
         
         Map visited = new IdentityHashMap();

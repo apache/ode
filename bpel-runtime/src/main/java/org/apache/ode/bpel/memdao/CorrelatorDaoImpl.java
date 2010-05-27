@@ -78,14 +78,14 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
             assert route._ckeySet != null;
             
             if(keySet.isRoutableTo(route._ckeySet, "all".equals(route.getRoute()))) {
-            	if ("all".equals(route.getRoute()))  {
-            		routes.add(route);
-            	} else {
-            		if (!routed) {
-            			routes.add(route);
-            		}
-            		routed = true;
-            	}
+                if ("all".equals(route.getRoute()))  {
+                    routes.add(route);
+                } else {
+                    if (!routed) {
+                        routes.add(route);
+                    }
+                    routed = true;
+                }
             }
         }
 

@@ -527,7 +527,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     protected void doAsyncReply(MyRoleMessageExchangeImpl m) {
-    	MessageExchangeDAO mex = m.getDAO();
+        MessageExchangeDAO mex = m.getDAO();
         PartnerRoleMessageExchange pmex = null;
 
         if (mex.getPipedMessageExchangeId() != null) {
@@ -548,16 +548,16 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
                             pmex.replyWithFailure(MessageExchange.FailureType.OTHER, "operation failed", null);
                             break;
                         case FAULT:
-                        	Fault fault = pmex.getOperation().getFault(m.getFault().getLocalPart());
-                        	if (fault == null) {
-                        		__log.error("process " + _bpelProcess + " instance " + _iid + " thrown unmapped fault in p2p communication " + m.getFault() + " " + m.getFaultExplanation() + " - converted to failure");
+                            Fault fault = pmex.getOperation().getFault(m.getFault().getLocalPart());
+                            if (fault == null) {
+                                __log.error("process " + _bpelProcess + " instance " + _iid + " thrown unmapped fault in p2p communication " + m.getFault() + " " + m.getFaultExplanation() + " - converted to failure");
                                 pmex.replyWithFailure(MessageExchange.FailureType.OTHER, "process thrown unmapped fault in p2p communication " + m.getFault() + " " + m.getFaultExplanation() + " - converted to failure", m.getFaultResponse().getMessage());
-                        	} else {
-    	                        Message faultRes = pmex.createMessage(pmex.getOperation().getFault(m.getFault().getLocalPart())
-    	                                .getMessage().getQName());
-    	                        faultRes.setMessage(m.getResponse().getMessage());
-    	                        pmex.replyWithFault(m.getFault(), faultRes);
-                        	}
+                            } else {
+                                Message faultRes = pmex.createMessage(pmex.getOperation().getFault(m.getFault().getLocalPart())
+                                        .getMessage().getQName());
+                                faultRes.setMessage(m.getResponse().getMessage());
+                                pmex.replyWithFault(m.getFault(), faultRes);
+                            }
                             break;
                         case RESPONSE:
                             Message response = pmex.createMessage(pmex.getOperation().getOutput().getMessage().getQName());
@@ -576,7 +576,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             }
         } else {
             checkInvokeExternalPermission();
-        	_bpelProcess._engine._contexts.mexContext.onAsyncReply(m);
+            _bpelProcess._engine._contexts.mexContext.onAsyncReply(m);
             //mex.release(_bpelProcess.isCleanupCategoryEnabled(m.getStatus() == MessageExchange.Status.RESPONSE, CLEANUP_CATEGORY.MESSAGES));
         }
     }
@@ -1203,7 +1203,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
                         }
                     default:
                         mex.setFailure(FailureType.OTHER, "No response.", null);
-                    	doAsyncReply(mex);
+                        doAsyncReply(mex);
                 }
             }
         }
@@ -1477,10 +1477,10 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         MessageExchangeDAO mexdao = correlator.dequeueMessage(ckeySet);
         if (mexdao != null) {
             __log.debug("MatcherEvent handling: found matching message in DB (i.e. message arrived before <receive>)");
-        	if( MessageExchangePattern.REQUEST_RESPONSE.toString().equals(mexdao.getPattern())) {
-        		__log.warn("A message arrived before a receive is ready for a request/response pattern. This may be processed to success. However, you should consider revising your process since a TCP port and a container thread will be held for a longer time and the process will not scale under heavy load.");
-        	}
-        	
+            if( MessageExchangePattern.REQUEST_RESPONSE.toString().equals(mexdao.getPattern())) {
+                __log.warn("A message arrived before a receive is ready for a request/response pattern. This may be processed to success. However, you should consider revising your process since a TCP port and a container thread will be held for a longer time and the process will not scale under heavy load.");
+            }
+            
             for (MessageRouteDAO mroute : mroutes) {
                 // We have a match, so we can get rid of the routing entries.
                 correlator.removeRoutes(mroute.getGroupId(), _dao);

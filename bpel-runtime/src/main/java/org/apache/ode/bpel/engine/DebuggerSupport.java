@@ -407,6 +407,6 @@ public class DebuggerSupport implements DebuggerContext {
      * of process lanaguage than BPEL.
      */
     public Object getProcessModel() {
-    	return _process.getOProcess();
+        return _process.getOProcess();
     }
 }

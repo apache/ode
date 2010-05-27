@@ -44,7 +44,7 @@ public abstract class ExtensibilityQNames {
     public static final QName EXTVAR_ATTR = new QName(EXTVAR_NS, "id");
     
     /** Attribute holding the name of the "related" variable. */
-	public static final QName EXTVAR_RELATED = new QName(EXTVAR_NS, "relates-to");
+    public static final QName EXTVAR_RELATED = new QName(EXTVAR_NS, "relates-to");
 
 }
 

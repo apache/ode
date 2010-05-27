@@ -212,23 +212,23 @@ public class MockCompilerContext implements CompilerContext {
     }
     
     public Map<URI, Source> getSchemaSources() {
-    	// TODO Auto-generated method stub
-    	return null;
+        // TODO Auto-generated method stub
+        return null;
     }
-	public URI getBaseResourceURI() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	public OExpression compileExpr(Expression expr, OVarType rootNodeType,
-			Object requestedResultType, Object[] resultType)
-			throws CompilationException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	public OLValueExpression compileLValueExpr(Expression expr,
-			OVarType rootNodeType, Object requestedResultType,
-			Object[] resultType) throws CompilationException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public URI getBaseResourceURI() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    public OExpression compileExpr(Expression expr, OVarType rootNodeType,
+            Object requestedResultType, Object[] resultType)
+            throws CompilationException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    public OLValueExpression compileLValueExpr(Expression expr,
+            OVarType rootNodeType, Object requestedResultType,
+            Object[] resultType) throws CompilationException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

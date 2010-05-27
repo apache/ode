@@ -35,16 +35,16 @@
                 xmlns:xsd="http://www.w3.org/2001/XMLSchema">
       
       <xsd:element name="aTestMessage" type="testMessage"></xsd:element>
-	  <xsd:element name="indicator" type="xsd:string" abstract="true"/>
-	  <xsd:element name="indicatorOne" type="xsd:string" substitutionGroup="indicator"/>
-	  <xsd:element name="indicatorTwo" type="xsd:string" substitutionGroup="indicator"/>
+      <xsd:element name="indicator" type="xsd:string" abstract="true"/>
+      <xsd:element name="indicatorOne" type="xsd:string" substitutionGroup="indicator"/>
+      <xsd:element name="indicatorTwo" type="xsd:string" substitutionGroup="indicator"/>
       
       <xsd:complexType name="typeIndicator">
-	    <xsd:sequence>
-	         <xsd:element ref="indicatorOne"/>
-	         <xsd:element ref="indicatorTwo"/>
+        <xsd:sequence>
+             <xsd:element ref="indicatorOne"/>
+             <xsd:element ref="indicatorTwo"/>
         </xsd:sequence>
-	  </xsd:complexType>
+      </xsd:complexType>
       <xsd:complexType name="testMessage">
         <xsd:sequence>
              <xsd:element name="requestID" type="xsd:string"/>
@@ -86,7 +86,7 @@
    </plnk:partnerLinkType>
 
    <plnk:partnerLinkType name="probeRequest">
-	<plnk:role name="probeService" portType="prb:probeMessagePT"/>
+    <plnk:role name="probeService" portType="prb:probeMessagePT"/>
    </plnk:partnerLinkType>
    
   <vprop:property name="testProbeID" type="xsd:string"/>

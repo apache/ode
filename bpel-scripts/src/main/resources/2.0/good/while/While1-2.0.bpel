@@ -27,8 +27,8 @@
     suppressJoinFailure="yes">
 
   <import importType="http://schemas.xmlsoap.org/wsdl/"
-	  location="While1-2.0.wsdl"
-	  namespace="http://ode/bpel/unit-test.wsdl" />
+      location="While1-2.0.wsdl"
+      namespace="http://ode/bpel/unit-test.wsdl" />
 
    <partnerLinks>
       <partnerLink name="testPartnerLink" 

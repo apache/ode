@@ -93,7 +93,7 @@ public class ODEService {
     }
     
     public String getName() {
-    	return _axisService.getName();
+        return _axisService.getName();
     }
     
     public void onAxisMessageExchange(MessageContext msgContext, MessageContext outMsgContext, SOAPFactory soapFactory)
@@ -141,7 +141,7 @@ public class ODEService {
             success = false;
             String message = e.getMessage();
             if (message == null) {
-            	message = "An exception occured while invoking ODE.";
+                message = "An exception occured while invoking ODE.";
             }
             throw new OdeFault(message, e);
         } finally {

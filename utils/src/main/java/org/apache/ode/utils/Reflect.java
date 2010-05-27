@@ -28,7 +28,7 @@ public class Reflect {
    * @param method
    * @return
    */
-	public static String generateMethodSignature(Method method) {
+    public static String generateMethodSignature(Method method) {
     StringBuffer sb = new StringBuffer(64);
 
     sb.append(method.getName());

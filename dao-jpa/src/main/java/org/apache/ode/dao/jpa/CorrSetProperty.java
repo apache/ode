@@ -37,11 +37,11 @@ import javax.persistence.Table;
 @Entity
 @Table(name="ODE_CORSET_PROP")
 @NamedQueries({
-	@NamedQuery(name=CorrSetProperty.DELETE_CORSET_PROPERTIES_BY_PROPERTY_IDS, query="delete from CorrSetProperty as p where p.corrSetId in(:corrSetIds)")
+    @NamedQuery(name=CorrSetProperty.DELETE_CORSET_PROPERTIES_BY_PROPERTY_IDS, query="delete from CorrSetProperty as p where p.corrSetId in(:corrSetIds)")
 })
 public class CorrSetProperty {
-	public final static String DELETE_CORSET_PROPERTIES_BY_PROPERTY_IDS = "DELETE_CORSET_PROPERTIES_BY_PROPERTY_IDS";
-	
+    public final static String DELETE_CORSET_PROPERTIES_BY_PROPERTY_IDS = "DELETE_CORSET_PROPERTIES_BY_PROPERTY_IDS";
+    
     @Id @Column(name="ID")
     @GeneratedValue(strategy=GenerationType.AUTO)
     @SuppressWarnings("unused")

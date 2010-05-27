@@ -21,8 +21,8 @@
         xmlns:tns="http://www.example.org/duration" elementFormDefault="qualified">
 
     <complexType name="Complext">
-    	<sequence>
-    		<element name="duration" type="duration"></element>
-    	</sequence>
+        <sequence>
+            <element name="duration" type="duration"></element>
+        </sequence>
     </complexType>
 </schema>

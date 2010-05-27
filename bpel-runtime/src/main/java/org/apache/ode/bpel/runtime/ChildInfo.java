@@ -24,9 +24,9 @@ import java.io.Serializable;
  * Infomration about a child.
  */
 class ChildInfo implements Serializable {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	/** Has it been completed? */
+    /** Has it been completed? */
   boolean completed;
 
   /** The child agent. */

@@ -272,7 +272,7 @@ public class BpelProcess {
     }
     
     private boolean isActive() {
-    	return _pconf.getState() == org.apache.ode.bpel.iapi.ProcessState.ACTIVE;
+        return _pconf.getState() == org.apache.ode.bpel.iapi.ProcessState.ACTIVE;
     }
     
     /**
@@ -413,7 +413,7 @@ public class BpelProcess {
      * @see org.apache.ode.bpel.engine.BpelProcess#handleJobDetails(java.util.Map<java.lang.String,java.lang.Object>)
      */
     public boolean handleJobDetails(JobDetails jobData) {
-    	boolean ret = true;
+        boolean ret = true;
         try {
             _hydrationLatch.latch(1);
             markused();

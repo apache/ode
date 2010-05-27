@@ -19,25 +19,25 @@
   -->
 
 <definitions
-	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-	xmlns:scm="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Warehouse.wsdl"
-	targetNamespace="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Warehouse.wsdl"
-	xmlns="http://schemas.xmlsoap.org/wsdl/">
-	<import
-		namespace="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Warehouse.wsdl"
-		location="Warehouse.wsdl"/>
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:scm="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Warehouse.wsdl"
+    targetNamespace="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Warehouse.wsdl"
+    xmlns="http://schemas.xmlsoap.org/wsdl/">
+    <import
+        namespace="http://www.ws-i.org/SampleApplications/SupplyChainManagement/2002-08/Warehouse.wsdl"
+        location="Warehouse.wsdl"/>
 
-	<types/>
-	<service name="WarehouseService">
-		<port name="WarehouseAPort" binding="scm:WarehouseSoapBinding">
-			<soap:address location="http://localhost:8080/wsi-server/scm/warehousea" />
-		</port>
-		<port name="WarehouseBPort" binding="scm:WarehouseSoapBinding">
-			<soap:address location="http://localhost:8080/wsi-server/scm/warehouseb" />
-		</port>
-		<port name="WarehouseCPort" binding="scm:WarehouseSoapBinding">
-			<soap:address location="http://localhost:8080/wsi-server/scm/warehousec" />
-		</port>
-	</service>
+    <types/>
+    <service name="WarehouseService">
+        <port name="WarehouseAPort" binding="scm:WarehouseSoapBinding">
+            <soap:address location="http://localhost:8080/wsi-server/scm/warehousea" />
+        </port>
+        <port name="WarehouseBPort" binding="scm:WarehouseSoapBinding">
+            <soap:address location="http://localhost:8080/wsi-server/scm/warehouseb" />
+        </port>
+        <port name="WarehouseCPort" binding="scm:WarehouseSoapBinding">
+            <soap:address location="http://localhost:8080/wsi-server/scm/warehousec" />
+        </port>
+    </service>
 </definitions>
 

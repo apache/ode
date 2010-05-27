@@ -149,7 +149,7 @@ class OdeServiceUnit {
     }
     
     public ClassLoader getConfigurationClassLoader() throws DeploymentException {
-    	return new URLClassLoader(getDefaultLocations(), getClass().getClassLoader());
+        return new URLClassLoader(getDefaultLocations(), getClass().getClassLoader());
     }
     
     protected URL[] getDefaultLocations() throws DeploymentException {
@@ -168,9 +168,9 @@ class OdeServiceUnit {
                 }
             }
             if (__log.isDebugEnabled()) {
-            	for (URL u : urls) {
-            		__log.debug("in classpath for "+_serviceUnitID+" using url: "+u);
-            	}
+                for (URL u : urls) {
+                    __log.debug("in classpath for "+_serviceUnitID+" using url: "+u);
+                }
             }
             return urls;
         } catch (MalformedURLException e) {

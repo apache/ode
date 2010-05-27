@@ -34,7 +34,7 @@ import java.util.List;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class OpenJPADAO {
-	private static final Log __log = LogFactory.getLog(OpenJPADAO.class);
+    private static final Log __log = LogFactory.getLog(OpenJPADAO.class);
 
     protected BPELDAOConnectionImpl getConn() {
         return BPELDAOConnectionFactoryImpl._connections.get();
@@ -59,20 +59,20 @@ public class OpenJPADAO {
     }
 
     protected <T> void batchUpdateByIds(Iterator<T> ids, Query query, String parameterName) {
-    	if( query instanceof OpenJPAQuery ) {
-    		OpenJPAQuery openJpaQuery = (OpenJPAQuery)query;
-    		int batchSize = openJpaQuery.getFetchPlan().getFetchBatchSize();
-    		if( __log.isTraceEnabled() ) __log.trace("BATCH fetchBatchSize = " + batchSize);
-    		List<T> batch = new ArrayList<T>();
-    		while( ids.hasNext() ) {
-	    		for( int i = 0; i < batchSize && ids.hasNext(); i++ ) {
-	    			batch.add(ids.next());
-	    		}
-	    		if( __log.isTraceEnabled() ) __log.trace("BATCH updating " + batch.size() + " objects.");
-	    		query.setParameter(parameterName, batch);
-	    		query.executeUpdate();
-	    		batch.clear();
-    		}
-    	}
+        if( query instanceof OpenJPAQuery ) {
+            OpenJPAQuery openJpaQuery = (OpenJPAQuery)query;
+            int batchSize = openJpaQuery.getFetchPlan().getFetchBatchSize();
+            if( __log.isTraceEnabled() ) __log.trace("BATCH fetchBatchSize = " + batchSize);
+            List<T> batch = new ArrayList<T>();
+            while( ids.hasNext() ) {
+                for( int i = 0; i < batchSize && ids.hasNext(); i++ ) {
+                    batch.add(ids.next());
+                }
+                if( __log.isTraceEnabled() ) __log.trace("BATCH updating " + batch.size() + " objects.");
+                query.setParameter(parameterName, batch);
+                query.executeUpdate();
+                batch.clear();
+            }
+        }
     }
 }

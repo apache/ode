@@ -56,12 +56,12 @@ import java.util.ArrayList;
  * Test activity recovery and failure handling.
  */
 public class ActivityRecoveryTest extends MockObjectTestCase {
-	// the maximum ammout of time to wait for an instance to reach a
-	// desired status or for an activity to become available for recovery
+    // the maximum ammout of time to wait for an instance to reach a
+    // desired status or for an activity to become available for recovery
     static final int MAX_WAIT = 10000;
     // poll interval
     static final int DELAY = 100;
-	
+    
     static final String   NAMESPACE = "http://ode.apache.org/bpel/unit-test";
     static final String[] ACTIONS = new String[]{ "retry", "cancel", "fault" };
     MockBpelServer        _server;
@@ -332,30 +332,30 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
      * @throws Exception
      */
     protected TInstanceInfo lastInstance(TInstanceStatus.Enum expected) throws Exception {
-    	int counter = 0;
-    	do {
-    		TInstanceInfo info = getInstanceInfo();
-    		if (info != null  && (expected == null || info.getStatus() == expected)) {
-    			return info;
-    		}
-    		if (counter * DELAY > MAX_WAIT) {
-    			throw new Exception("Timed out wait for instance to reach "+expected+
-    					" status. Actual status: "+(info==null?"missing instance" : info.getStatus()));
-    		}
-    		counter++;
-    		Thread.sleep(DELAY);
-    	} while (true);
+        int counter = 0;
+        do {
+            TInstanceInfo info = getInstanceInfo();
+            if (info != null  && (expected == null || info.getStatus() == expected)) {
+                return info;
+            }
+            if (counter * DELAY > MAX_WAIT) {
+                throw new Exception("Timed out wait for instance to reach "+expected+
+                        " status. Actual status: "+(info==null?"missing instance" : info.getStatus()));
+            }
+            counter++;
+            Thread.sleep(DELAY);
+        } while (true);
     }
     /**
      * get the instance info for the last instance 
      */
     private TInstanceInfo getInstanceInfo() {
-    	TInstanceInfoList instances = _management.listInstances("", "", 1000).getInstanceInfoList();
-		int size = instances.sizeOfInstanceInfoArray();
-		if (size > 0) {
-			return instances.getInstanceInfoArray(instances.sizeOfInstanceInfoArray() - 1);
-		}
-		return null;
+        TInstanceInfoList instances = _management.listInstances("", "", 1000).getInstanceInfoList();
+        int size = instances.sizeOfInstanceInfoArray();
+        if (size > 0) {
+            return instances.getInstanceInfoArray(instances.sizeOfInstanceInfoArray() - 1);
+        }
+        return null;
     }
 
     /**
@@ -401,7 +401,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
      * recovery channel for the activity in question.
      */
     protected void recover(String action) throws Exception {
-    	ArrayList<TActivityInfo> recoveries = getRecoveries();
+        ArrayList<TActivityInfo> recoveries = getRecoveries();
         assertTrue(recoveries.size() == 1);
         TActivityInfo activity = recoveries.get(0);
         assertNotNull(activity);
@@ -413,22 +413,22 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
      * if MAX_WAIT exceeded
      */
     private ArrayList<TActivityInfo> getRecoveries() throws Exception {
-    	TInstanceInfo instance = null;
-    	int counter = 0;
-    	do {
-    		instance = getInstanceInfo();
-    		if (instance != null) {
-    			ArrayList<TActivityInfo> recoveries = getRecoveriesInScope(instance, null, null);
-    			if (recoveries.size() > 0) {
-    				return recoveries;
-    			}
-    		}
-    		if (counter * DELAY > MAX_WAIT) {
-    			throw new Exception("Timed out wait for recovery activities");
-    		}
-    		Thread.sleep(DELAY);
-    		counter++;
-    	} while (true);
+        TInstanceInfo instance = null;
+        int counter = 0;
+        do {
+            instance = getInstanceInfo();
+            if (instance != null) {
+                ArrayList<TActivityInfo> recoveries = getRecoveriesInScope(instance, null, null);
+                if (recoveries.size() > 0) {
+                    return recoveries;
+                }
+            }
+            if (counter * DELAY > MAX_WAIT) {
+                throw new Exception("Timed out wait for recovery activities");
+            }
+            Thread.sleep(DELAY);
+            counter++;
+        } while (true);
     }
 
     protected ArrayList<TActivityInfo> getRecoveriesInScope(TInstanceInfo instance, TScopeInfo scope,

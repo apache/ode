@@ -45,10 +45,10 @@
       <directory>${basedir}/../dao-jpa-ojpa-derby/target/</directory>
       <outputDirectory>/sql</outputDirectory>
       <includes>
-      	<include>*.sql</include>
+        <include>*.sql</include>
       </includes>
       <excludes>
-      	<exclude>*partial*.sql</exclude>
+        <exclude>*partial*.sql</exclude>
       </excludes>
     </fileSet>
 
@@ -56,10 +56,10 @@
       <directory>${basedir}/../</directory>
       <outputDirectory>/</outputDirectory>
       <includes>
-      	<include>LICENSE</include>
-      	<include>README</include>
-      	<include>NOTICE</include>
-      	<include>RELEASE_NOTES</include>
+        <include>LICENSE</include>
+        <include>README</include>
+        <include>NOTICE</include>
+        <include>RELEASE_NOTES</include>
       </includes>
     </fileSet>
 
@@ -67,7 +67,7 @@
       <directory>${basedir}/license</directory>
       <outputDirectory>/lib</outputDirectory>
       <includes>
-      	<include>*LICENSE</include>
+        <include>*LICENSE</include>
       </includes>
     </fileSet>
 
@@ -75,7 +75,7 @@
       <directory>${basedir}/../extensions/e4x</directory>
       <outputDirectory>/extensions/ode-extensions-e4x</outputDirectory>
       <includes>
-      	<include>README</include>
+        <include>README</include>
       </includes>
     </fileSet>
 
@@ -83,7 +83,7 @@
       <directory>${basedir}/../extensions/e4x/target</directory>
       <outputDirectory>/extensions/ode-extensions-e4x</outputDirectory>
       <includes>
-      	<include>ode-extensions-e4x*.jar</include>
+        <include>ode-extensions-e4x*.jar</include>
       </includes>
     </fileSet>
 
@@ -91,7 +91,7 @@
       <directory>${basedir}/../extensions/jms-eventpublisher</directory>
       <outputDirectory>/extensions/ode-extensions-jms-eventpublisher</outputDirectory>
       <includes>
-      	<include>README</include>
+        <include>README</include>
       </includes>
     </fileSet>
 
@@ -99,7 +99,7 @@
       <directory>${basedir}/../extensions/jms-eventpublisher/target</directory>
       <outputDirectory>/extensions/ode-extensions-jms-eventpublisher</outputDirectory>
       <includes>
-      	<include>ode-extensions-jms*.jar</include>
+        <include>ode-extensions-jms*.jar</include>
       </includes>
     </fileSet>
 
@@ -107,7 +107,7 @@
       <directory>${basedir}/../extensions</directory>
       <outputDirectory>/extensions</outputDirectory>
       <includes>
-      	<include>README.extensions</include>
+        <include>README.extensions</include>
       </includes>
     </fileSet>
 
@@ -126,42 +126,42 @@
     <dependencySet>
       <outputDirectory>/lib</outputDirectory>
       <includes>
-	<include>org.apache.ode:ode-utils</include>
-	<include>org.apache.ode:ode-tools</include>
-	<include>org.apache.ode:ode-bpel-compiler</include>
-	<include>org.apache.ode:ode-bpel-api</include>
-	<include>org.apache.ode:ode-bpel-schemas</include>
-	<include>commons-logging:commons-logging</include>
-	<include>org.apache.ode:ode-utils</include>
-	<include>commons-codec:commons-codec</include> 
-	<include>commons-collections:commons-collections</include> 
-	<include>commons-httpclient:commons-httpclient</include> 
-	<include>commons-pool:commons-pool</include>
-	<include>net.sf.saxon:saxon</include>
-	<include>net.sf.saxon:saxon-xpath</include>
-	<include>net.sf.saxon:saxon-dom</include>
-	<include>net.sf.saxon:saxon-xqj</include>
-	<include>jaxen:jaxen</include>  
-	<include>log4j:log4j</include> 
-	<include>wsdl4j:wsdl4j</include>
-	<include>xalan:xalan</include>
-	<include>xerces:xercesImpl</include>
+    <include>org.apache.ode:ode-utils</include>
+    <include>org.apache.ode:ode-tools</include>
+    <include>org.apache.ode:ode-bpel-compiler</include>
+    <include>org.apache.ode:ode-bpel-api</include>
+    <include>org.apache.ode:ode-bpel-schemas</include>
+    <include>commons-logging:commons-logging</include>
+    <include>org.apache.ode:ode-utils</include>
+    <include>commons-codec:commons-codec</include> 
+    <include>commons-collections:commons-collections</include> 
+    <include>commons-httpclient:commons-httpclient</include> 
+    <include>commons-pool:commons-pool</include>
+    <include>net.sf.saxon:saxon</include>
+    <include>net.sf.saxon:saxon-xpath</include>
+    <include>net.sf.saxon:saxon-dom</include>
+    <include>net.sf.saxon:saxon-xqj</include>
+    <include>jaxen:jaxen</include>  
+    <include>log4j:log4j</include> 
+    <include>wsdl4j:wsdl4j</include>
+    <include>xalan:xalan</include>
+    <include>xerces:xercesImpl</include>
       </includes>
     </dependencySet>
 
     <dependencySet>
       <outputDirectory>/extensions/ode-extensions-e4x/lib</outputDirectory>
       <includes>
-	<include>rhino:js</include>
-	<include>commons-logging:commons-logging</include>
+    <include>rhino:js</include>
+    <include>commons-logging:commons-logging</include>
       </includes>
     </dependencySet>
 
     <dependencySet>
       <outputDirectory>/extensions/ode-extensions-jms-eventpublisher/lib</outputDirectory>
       <includes>
-	<include>org.apache.activemq:apache-activemq</include>
-	<include>org.apache.xmlbeans:xmlbeans</include>
+    <include>org.apache.activemq:apache-activemq</include>
+    <include>org.apache.xmlbeans:xmlbeans</include>
       </includes>
     </dependencySet>
 

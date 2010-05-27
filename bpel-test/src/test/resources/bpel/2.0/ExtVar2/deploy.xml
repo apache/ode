@@ -22,7 +22,7 @@
     xmlns:wns="http://ode/bpel/unit-test.wsdl" 
     xmlns:xvar="http://ode.apache.org/externalVariables" 
     xmlns:jdbc="http://ode.apache.org/externalVariables/jdbc">
-	
+    
     <process name="pns:ExtVar2">
         <active>true</active>
         <provide partnerLink="ExtVarPartnerLink">
@@ -31,7 +31,7 @@
 
         <xvar:externalVariable id="costPerCustomer">
             <jdbc:jdbc>
-				<jdbc:datasource-ref>testds</jdbc:datasource-ref>
+                <jdbc:datasource-ref>testds</jdbc:datasource-ref>
                 <jdbc:table>costPerCustomer</jdbc:table>
                 <jdbc:column name="key1" key="yes" sql-type="VARCHAR" xsd-type="xs:string" />
                 <jdbc:column name="value0" key="no" sql-type="VARCHAR" xsd-type="xs:string" />

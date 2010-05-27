@@ -137,18 +137,18 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
         return new ConfStoreConnectionHib(_sessionFactory.getCurrentSession());
     }
 
-	@SuppressWarnings("unchecked")
-	private void initTxMgr(String txFactoryClassName) {
-		__log.info("ProcessStore initializing transaction manager using " + txFactoryClassName);
-		try {
-			Class txFactClass = getClass().getClassLoader().loadClass(txFactoryClassName);
-			Object txFact = txFactClass.newInstance();
-			_txMgr = (TransactionManager) txFactClass.getMethod("getTransactionManager", (Class[]) null).invoke(txFact);
-		} catch (Exception e) {
-			__log.fatal("Couldn't initialize a transaction manager with factory: " + txFactoryClassName, e);
-			throw new RuntimeException("Couldn't initialize a transaction manager with factory: " + txFactoryClassName, e);
-		}
-	}
+    @SuppressWarnings("unchecked")
+    private void initTxMgr(String txFactoryClassName) {
+        __log.info("ProcessStore initializing transaction manager using " + txFactoryClassName);
+        try {
+            Class txFactClass = getClass().getClassLoader().loadClass(txFactoryClassName);
+            Object txFact = txFactClass.newInstance();
+            _txMgr = (TransactionManager) txFactClass.getMethod("getTransactionManager", (Class[]) null).invoke(txFact);
+        } catch (Exception e) {
+            __log.fatal("Couldn't initialize a transaction manager with factory: " + txFactoryClassName, e);
+            throw new RuntimeException("Couldn't initialize a transaction manager with factory: " + txFactoryClassName, e);
+        }
+    }
 
     private String guessDialect(DataSource dataSource) throws Exception {
 
@@ -186,28 +186,28 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
     }
 
     public void beginTransaction() {
-		try {
-			_txMgr.begin();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+        try {
+            _txMgr.begin();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-	public void commitTransaction() {
-		try {
-			_txMgr.commit();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+    public void commitTransaction() {
+        try {
+            _txMgr.commit();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-	public void rollbackTransaction() {
-		try {
-			_txMgr.rollback();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+    public void rollbackTransaction() {
+        try {
+            _txMgr.rollback();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     static Configuration getDefaultConfiguration() throws MappingException {
         return new Configuration().addClass(ProcessConfDaoImpl.class).addClass(DeploymentUnitDaoImpl.class)
@@ -221,7 +221,7 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
         }
 
         public void configure(Properties props) throws HibernateException {
-        	_guid = props.getProperty(SessionManager.PROP_GUID);
+            _guid = props.getProperty(SessionManager.PROP_GUID);
         }
 
         public Connection getConnection() throws SQLException {

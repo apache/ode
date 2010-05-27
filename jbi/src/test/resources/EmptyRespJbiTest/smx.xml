@@ -27,7 +27,7 @@
 
     <util:map id="jndiEntries">
         <entry key="java:comp/env/jdbc/ode" value-ref="odeDS"/>
-	</util:map>
+    </util:map>
     
     <sm:container 
         id="jbi" 
@@ -41,15 +41,15 @@
                 <sm:component>
                     <eip:component>
                         <eip:endpoints>
-			  <eip:content-based-router service="pong:PongServiceFwd" endpoint="PongPort" forwardOperation="true">
-			    <eip:rules>
-			      <eip:routing-rule>
-				<eip:target>
-				  <eip:exchange-target service="pong:PongService"/>
-				</eip:target>
-			      </eip:routing-rule>
-			    </eip:rules>
-			  </eip:content-based-router>
+              <eip:content-based-router service="pong:PongServiceFwd" endpoint="PongPort" forwardOperation="true">
+                <eip:rules>
+                  <eip:routing-rule>
+                <eip:target>
+                  <eip:exchange-target service="pong:PongService"/>
+                </eip:target>
+                  </eip:routing-rule>
+                </eip:rules>
+              </eip:content-based-router>
                         </eip:endpoints>
                     </eip:component>
                 </sm:component>
@@ -61,14 +61,14 @@
                             <http:endpoint 
                                 service="ping:PingService"
                                 endpoint="http" 
-				targetService="ping:PingService"
-				targetEndpoint="PingPort"
+                targetService="ping:PingService"
+                targetEndpoint="PingPort"
                                 defaultOperation="Ping"
                                 role="consumer"
                                 locationURI="http://localhost:8198/PingHttp/"
                                 defaultMep="http://www.w3.org/2004/08/wsdl/in-out" 
-				wsdlResource="classpath:EmptyRespJbiTest/Ping.wsdl"
-				soapVersion="1.1"
+                wsdlResource="classpath:EmptyRespJbiTest/Ping.wsdl"
+                soapVersion="1.1"
                                 soap="true" />
                         </http:endpoints>
                     </http:component>

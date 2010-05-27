@@ -34,8 +34,8 @@
   xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 
   <import location="../test.wsdl"
-	  importType="http://schemas.xmlsoap.org/wsdl/"
-	  namespace="uri:testing" />
+      importType="http://schemas.xmlsoap.org/wsdl/"
+      namespace="uri:testing" />
 
   <partnerLinks>
     <partnerLink name="testPartnerLink"

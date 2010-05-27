@@ -144,18 +144,18 @@ public class XslTransformHandler {
       }
       String method = tf.getOutputProperties().getProperty("method");
       if (method == null || "xml".equals(method)) {
-    	  DOMResult result = new DOMResult();
-    	  tf.transform(source, result);
-    	  Node node = result.getNode();
-    	  if(node.getNodeType() == Node.DOCUMENT_NODE)
-    		  node = ((Document)node).getDocumentElement();
+          DOMResult result = new DOMResult();
+          tf.transform(source, result);
+          Node node = result.getNode();
+          if(node.getNodeType() == Node.DOCUMENT_NODE)
+              node = ((Document)node).getDocumentElement();
           if(__log.isDebugEnabled()) __log.debug("Returned node: type="+node.getNodeType()+", "+ DOMUtils.domToString(node));
-    	  return node;
+          return node;
       } else {
           // text and html outputs are handled the same way
           StringWriter writerResult = new StringWriter();
           StreamResult result = new StreamResult(writerResult);
-    	  tf.transform(source, result);
+          tf.transform(source, result);
           writerResult.flush();
           String output = writerResult.toString();
           if(__log.isDebugEnabled()) __log.debug("Returned string: "+output);
@@ -173,9 +173,9 @@ public class XslTransformHandler {
   }
   
   public void clearXSLSheets(QName processQName) {
-	synchronized (_templateCache) {
-		  _templateCache.removeAll(processQName);
-	}
+    synchronized (_templateCache) {
+          _templateCache.removeAll(processQName);
+    }
   }
 
 }

@@ -41,12 +41,12 @@ class BpelProcessDatabase extends BpelDatabase {
    * @param txm JTA transaction manager
    * @param processId name of the process
    */
-	BpelProcessDatabase(BpelDAOConnectionFactory sscf,
+    BpelProcessDatabase(BpelDAOConnectionFactory sscf,
                       Scheduler scheduler,
                       QName processId) {
     super(sscf,scheduler);
     _processId = processId;
-	}
+    }
   
   QName getProcessId() {
     return _processId;

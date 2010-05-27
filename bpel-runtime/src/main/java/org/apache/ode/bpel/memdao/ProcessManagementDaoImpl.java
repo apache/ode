@@ -33,7 +33,7 @@ import org.apache.ode.bpel.dao.ProcessManagementDAO;
 import org.apache.ode.bpel.dao.ProcessManagementDAO.InstanceSummaryKey;
 
 public class ProcessManagementDaoImpl extends DaoBaseImpl implements ProcessManagementDAO {
-	public Object[] findFailedCountAndLastFailedDateForProcessId(BpelDAOConnection conn, String status, String processId) {
+    public Object[] findFailedCountAndLastFailedDateForProcessId(BpelDAOConnection conn, String status, String processId) {
         Date lastFailureDt = null;
         int failureInstances = 0;
 
@@ -49,11 +49,11 @@ public class ProcessManagementDaoImpl extends DaoBaseImpl implements ProcessMana
         }
 
         return new Object[] {failureInstances, lastFailureDt};
-	}
-	
-	public void prefetchActivityFailureCounts(Collection<ProcessInstanceDAO> instances) {
-		// do nothing 
-	}
+    }
+    
+    public void prefetchActivityFailureCounts(Collection<ProcessInstanceDAO> instances) {
+        // do nothing 
+    }
 
     public int countInstancesByPidAndString(BpelDAOConnection conn, QName pid, String status) {
         InstanceFilter instanceFilter = new InstanceFilter("status=" + status + " pid="+ pid);

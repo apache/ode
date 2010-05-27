@@ -27,7 +27,7 @@ import javax.wsdl.WSDLException;
  */
 public class InvalidBpelRoleException extends WSDLException {
   private static final long serialVersionUID = 1L;
-	/**
+    /**
    * Construct a new instance with the specified explanatory message.
    * @param msg an explanatory message.
    * @see WSDLException#WSDLException(java.lang.String, java.lang.String)

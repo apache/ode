@@ -62,31 +62,31 @@ public class OInvoke extends OActivity {
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-    	in.defaultReadObject();
+        in.defaultReadObject();
 
-    	// backward compatibility; joinCorrelationInput could be null if read from old definition
-    	if( joinCorrelationsInput == null ) {
-    		try {
-    			Field field = OInvoke.class.getDeclaredField("joinCorrelationsInput");
-    			field.setAccessible(true);
-    			field.set(this, new ArrayList<OScope.CorrelationSet>());
-    		} catch( NoSuchFieldException nfe ) {
-    			throw new IOException(nfe.getMessage());
-    		} catch( IllegalAccessException iae ) {
-    			throw new IOException(iae.getMessage());
-    		}
-    	}
-    	// backward compatibility; joinCorrelationOutput could be null if read from old definition
-    	if( joinCorrelationsOutput == null ) {
-    		try {
-    			Field field = OInvoke.class.getDeclaredField("joinCorrelationsOutput");
-    			field.setAccessible(true);
-    			field.set(this, new ArrayList<CorrelationSet>());
-    		} catch( NoSuchFieldException nfe ) {
-    			throw new IOException(nfe.getMessage());
-    		} catch( IllegalAccessException iae ) {
-    			throw new IOException(iae.getMessage());
-    		}
-    	}
+        // backward compatibility; joinCorrelationInput could be null if read from old definition
+        if( joinCorrelationsInput == null ) {
+            try {
+                Field field = OInvoke.class.getDeclaredField("joinCorrelationsInput");
+                field.setAccessible(true);
+                field.set(this, new ArrayList<OScope.CorrelationSet>());
+            } catch( NoSuchFieldException nfe ) {
+                throw new IOException(nfe.getMessage());
+            } catch( IllegalAccessException iae ) {
+                throw new IOException(iae.getMessage());
+            }
+        }
+        // backward compatibility; joinCorrelationOutput could be null if read from old definition
+        if( joinCorrelationsOutput == null ) {
+            try {
+                Field field = OInvoke.class.getDeclaredField("joinCorrelationsOutput");
+                field.setAccessible(true);
+                field.set(this, new ArrayList<CorrelationSet>());
+            } catch( NoSuchFieldException nfe ) {
+                throw new IOException(nfe.getMessage());
+            } catch( IllegalAccessException iae ) {
+                throw new IOException(iae.getMessage());
+            }
+        }
     }
 }

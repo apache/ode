@@ -52,7 +52,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
 
     protected MessageExchangeDAO _dao;
     
-	/**
+    /**
      * Constructor: requires the minimal information for a message exchange.
      */
     MessageExchangeImpl(BpelEngineImpl engine,
@@ -230,11 +230,11 @@ abstract class MessageExchangeImpl implements MessageExchange {
     }
 
     public int getSubscriberCount() {
-    	return getDAO().getSubscriberCount();    	
+        return getDAO().getSubscriberCount();    	
     }
     
     public void setSubscriberCount(int subscriberCount) {
-    	getDAO().setSubscriberCount(subscriberCount);
+        getDAO().setSubscriberCount(subscriberCount);
     }
     
     public void release() {

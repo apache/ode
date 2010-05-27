@@ -28,38 +28,38 @@ import org.junit.Test;
 
 public class CompensationHandling20Test extends BPELTestAbstract {
 
-	@Test
-	public void testCompensationHandlers() throws Throwable {
-		go("/bpel/2.0/TestCompensationHandlers");
-	}
+    @Test
+    public void testCompensationHandlers() throws Throwable {
+        go("/bpel/2.0/TestCompensationHandlers");
+    }
 
-	@Ignore("fix test bed for handling ASYNC mex") @Test public void testImplicitFaultHandler() throws Throwable {
-		/*
-		 * Failure report: Invocation#Invoke#1: Exception on future object.; got
-		 * exception msg: Message exchange
-		 * org.apache.ode.bpel.engine.MyRoleMessageExchangeImpl$ResponseFuture@ab6dcb
-		 * timed out when waiting for a response!
-		 * junit.framework.AssertionFailedError: Failure report:
-		 * Invocation#Invoke#1: Exception on future object.; got exception msg:
-		 * Message exchange
-		 * org.apache.ode.bpel.engine.MyRoleMessageExchangeImpl$ResponseFuture@ab6dcb
-		 * timed out when waiting for a response!
-		 * 
-		 * at
-		 * org.apache.ode.test.BPELTestAbstract.checkFailure(BPELTestAbstract.java:278)
-		 * at org.apache.ode.test.BPELTestAbstract.go(BPELTestAbstract.java:267)
-		 * at
-		 * org.apache.ode.test.CompensationHandling20Test.testImplicitFaultHandler(CompensationHandling20Test.java:45)
-		 */
-		deploy("/bpel/2.0/TestImplicitFaultHandler");
-		Invocation inv = addInvoke("Invoke#1", new QName("http://ode/bpel/unit-test/testImplicitFaultHandler.wsdl",
-						"testImplicitFaultHandlerService"), "request", 
-						"<message><requestID>Start TestImplicitFaultHandler</requestID><requestText>Event TestImplicitFaultHandler</requestText><faultIndicator1>yes</faultIndicator1><faultIndicator2>no</faultIndicator2></message>",
-						null);
-		inv.expectedFinalStatus = MessageExchange.Status.FAULT;
-		inv.expectedResponsePattern = Pattern.compile(".*Event TestFaultWithVariable1 -&gt; caught FaultMessage1 -&gt; Event TestFaultWithVariable1 -&gt; process complete.*");
+    @Ignore("fix test bed for handling ASYNC mex") @Test public void testImplicitFaultHandler() throws Throwable {
+        /*
+         * Failure report: Invocation#Invoke#1: Exception on future object.; got
+         * exception msg: Message exchange
+         * org.apache.ode.bpel.engine.MyRoleMessageExchangeImpl$ResponseFuture@ab6dcb
+         * timed out when waiting for a response!
+         * junit.framework.AssertionFailedError: Failure report:
+         * Invocation#Invoke#1: Exception on future object.; got exception msg:
+         * Message exchange
+         * org.apache.ode.bpel.engine.MyRoleMessageExchangeImpl$ResponseFuture@ab6dcb
+         * timed out when waiting for a response!
+         * 
+         * at
+         * org.apache.ode.test.BPELTestAbstract.checkFailure(BPELTestAbstract.java:278)
+         * at org.apache.ode.test.BPELTestAbstract.go(BPELTestAbstract.java:267)
+         * at
+         * org.apache.ode.test.CompensationHandling20Test.testImplicitFaultHandler(CompensationHandling20Test.java:45)
+         */
+        deploy("/bpel/2.0/TestImplicitFaultHandler");
+        Invocation inv = addInvoke("Invoke#1", new QName("http://ode/bpel/unit-test/testImplicitFaultHandler.wsdl",
+                        "testImplicitFaultHandlerService"), "request", 
+                        "<message><requestID>Start TestImplicitFaultHandler</requestID><requestText>Event TestImplicitFaultHandler</requestText><faultIndicator1>yes</faultIndicator1><faultIndicator2>no</faultIndicator2></message>",
+                        null);
+        inv.expectedFinalStatus = MessageExchange.Status.FAULT;
+        inv.expectedResponsePattern = Pattern.compile(".*Event TestFaultWithVariable1 -&gt; caught FaultMessage1 -&gt; Event TestFaultWithVariable1 -&gt; process complete.*");
 
-		go();
-	}
+        go();
+    }
 
 }

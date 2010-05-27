@@ -182,7 +182,7 @@ final public class OdeContext {
         
         OdeService service=_activeOdeServices.get(endpoint);
         if(service == null)
-        	service = new OdeService(this, endpoint);
+            service = new OdeService(this, endpoint);
         try {
             ProcessConf pc = _store.getProcessConfiguration(pid);
             InputStream is = pc.getCBPInputStream();
@@ -233,7 +233,7 @@ final public class OdeContext {
             _serviceEprMap.remove(svc);
             svc.deactivate();        
             if(svc.getCount() < 1 ) {
-        	_activeOdeServices.remove(endpoint);
+            _activeOdeServices.remove(endpoint);
             }
         }
     }
@@ -317,14 +317,14 @@ final public class OdeContext {
     }
     
     public long calculateSizeOfService(EndpointReference epr) {
-    	if (epr != null) {
-	    	for (OdeService odeService : _serviceEprMap.keySet()) {
-	    		EndpointReference serviceEpr = _serviceEprMap.get(odeService);
-	    		if (serviceEpr != null && epr.equals(serviceEpr)) {
-					return SizingAgent.deepSizeOf(odeService);
-	    		}
-	    	}
-    	}
-    	return 0;
+        if (epr != null) {
+            for (OdeService odeService : _serviceEprMap.keySet()) {
+                EndpointReference serviceEpr = _serviceEprMap.get(odeService);
+                if (serviceEpr != null && epr.equals(serviceEpr)) {
+                    return SizingAgent.deepSizeOf(odeService);
+                }
+            }
+        }
+        return 0;
     }
 }

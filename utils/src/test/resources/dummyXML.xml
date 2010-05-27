@@ -19,21 +19,21 @@
   -->
 
 <test>
-	<empty />
-	<empty>
-	
-	
-	</empty>
-	<non-empty>
-		Hello.
-	</non-empty>
-	<non-empty>
-		<![CDATA[Hello.]]>
-	</non-empty>
-	<empty>
-		<!-- this is empty -->
-	</empty>
-	<non-empty>
-		<foo />
-	</non-empty>
+    <empty />
+    <empty>
+    
+    
+    </empty>
+    <non-empty>
+        Hello.
+    </non-empty>
+    <non-empty>
+        <![CDATA[Hello.]]>
+    </non-empty>
+    <empty>
+        <!-- this is empty -->
+    </empty>
+    <non-empty>
+        <foo />
+    </non-empty>
 </test>

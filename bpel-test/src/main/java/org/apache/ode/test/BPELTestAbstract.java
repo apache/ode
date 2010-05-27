@@ -62,9 +62,9 @@ import org.junit.Before;
 import org.w3c.dom.Element;
 
 public abstract class BPELTestAbstract {
-	public static final long WAIT_BEFORE_INVOKE_TIMEOUT = 2000;
-	
-	private static final String SHOW_EVENTS_ON_CONSOLE = "no";
+    public static final long WAIT_BEFORE_INVOKE_TIMEOUT = 2000;
+    
+    private static final String SHOW_EVENTS_ON_CONSOLE = "no";
 
     protected BpelServerImpl _server;
 
@@ -376,7 +376,7 @@ public abstract class BPELTestAbstract {
     }
     
     protected long getWaitBeforeInvokeTimeout() {
-    	return WAIT_BEFORE_INVOKE_TIMEOUT;
+        return WAIT_BEFORE_INVOKE_TIMEOUT;
     }
 
     private void failure(Object where) {

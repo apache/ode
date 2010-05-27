@@ -65,7 +65,7 @@ public class LoggingInterceptor<T> implements InvocationHandler {
         _delegate = delegate;
     }
     
-	public Object invoke(Object proxy, Method method, Object[] args)
+    public Object invoke(Object proxy, Method method, Object[] args)
             throws Throwable {
         try {
             if (method.getDeclaringClass() == DataSource.class 
@@ -89,7 +89,7 @@ public class LoggingInterceptor<T> implements InvocationHandler {
         }
     }
 
-	private void print(Method method, Object[] args) {
+    private void print(Method method, Object[] args) {
         if (shouldPrint()) {
             // JDBC Connection
             if ("prepareStatement".equals(method.getName())) {
@@ -136,7 +136,7 @@ public class LoggingInterceptor<T> implements InvocationHandler {
                     buf.append("(").append(entry.getKey()).append(",").append(entry.getValue()).append(") ");
                 } catch (Throwable e) {
                     // We don't want to mess with the connection just for logging
-                	return "[e]";
+                    return "[e]";
                 }
             }
             for (Map.Entry<String, Object> entry : _paramsByName.entrySet()) {
@@ -152,7 +152,7 @@ public class LoggingInterceptor<T> implements InvocationHandler {
         return "w/o params";
     }
 
-	private boolean shouldPrint() {
+    private boolean shouldPrint() {
         if (_log != null)
             return _log.isDebugEnabled();
         else return true;

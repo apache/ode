@@ -27,8 +27,8 @@
     suppressJoinFailure="yes">
 
   <import importType="http://schemas.xmlsoap.org/wsdl/"
-	  location="test.wsdl"
-	  namespace="http://ode/bpel/unit-test.wsdl" />
+      location="test.wsdl"
+      namespace="http://ode/bpel/unit-test.wsdl" />
 
    <partnerLinks>
       <partnerLink name="testPartnerLink" 
@@ -52,7 +52,7 @@
         <wait>
           <until>$var1/Time</until>
         </wait>
-      	
+        
        <reply name="endReply" 
               operation="testOperation" 
               partnerLink="testPartnerLink"

@@ -28,10 +28,10 @@ import org.apache.openjpa.ee.ManagedRuntime;
 import org.apache.openjpa.util.GeneralException;
 
 public class JpaTxMgrProvider implements ManagedRuntime {
-	private TransactionManager _txMgr;
-	
+    private TransactionManager _txMgr;
+    
     public JpaTxMgrProvider(TransactionManager txMgr) {
-    	_txMgr = txMgr;
+        _txMgr = txMgr;
     }
     
     public TransactionManager getTransactionManager() throws Exception {

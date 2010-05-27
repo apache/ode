@@ -57,9 +57,9 @@
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="TestCombineUrlService">
-		<wsdl:port name="TestCombineUrlPort" binding="tns:TestCombineUrlSoapBinding">
-     		<soap:address location="http://localhost:8080/ode/processes/testCombineUrl"/>
-		</wsdl:port>
+        <wsdl:port name="TestCombineUrlPort" binding="tns:TestCombineUrlSoapBinding">
+            <soap:address location="http://localhost:8080/ode/processes/testCombineUrl"/>
+        </wsdl:port>
     </wsdl:service>
     
    <plnk:partnerLinkType name="TestCombineUrlPartnerLinkType">

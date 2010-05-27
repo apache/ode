@@ -38,11 +38,11 @@ import javax.persistence.Table;
 @Entity
 @Table(name="ODE_XML_DATA_PROP")
 @NamedQueries({
-	@NamedQuery(name=XmlDataProperty.DELETE_XML_DATA_PROPERTIES_BY_XML_DATA_IDS, query="delete from XmlDataProperty as p where p._xmlDataId in (:xmlDataIds)")
+    @NamedQuery(name=XmlDataProperty.DELETE_XML_DATA_PROPERTIES_BY_XML_DATA_IDS, query="delete from XmlDataProperty as p where p._xmlDataId in (:xmlDataIds)")
 })
 public class XmlDataProperty {
-	public final static String DELETE_XML_DATA_PROPERTIES_BY_XML_DATA_IDS = "DELETE_XML_DATA_PROPERTIES_BY_XML_DATA_IDS";
-	
+    public final static String DELETE_XML_DATA_PROPERTIES_BY_XML_DATA_IDS = "DELETE_XML_DATA_PROPERTIES_BY_XML_DATA_IDS";
+    
     @Id @Column(name="ID")
     @GeneratedValue(strategy= GenerationType.AUTO)
     @SuppressWarnings("unused")

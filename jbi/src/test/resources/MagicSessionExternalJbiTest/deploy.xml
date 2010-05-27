@@ -17,25 +17,25 @@
   ~ under the License.
   -->
 <deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
-	xmlns:main="http://ode/bpel/unit-test" 
-	xmlns:mws="http://ode/bpel/unit-test.wsdl"
-	xmlns:resp="http://ode/bpel/responder">
+    xmlns:main="http://ode/bpel/unit-test" 
+    xmlns:mws="http://ode/bpel/unit-test.wsdl"
+    xmlns:resp="http://ode/bpel/responder">
 
-	<process name="main:MagicSessionMain">
-		<provide partnerLink="executePartnerLink">
-			<service name="mws:MSMainExecuteService" port="MSExecutePort"/>
-		</provide>
-		<provide partnerLink="responderPartnerLink">
-			<service name="mws:MSMainService" port="MSMainPort"/>
-		</provide>
-		<invoke partnerLink="responderPartnerLink">
-			<service name="mws:MSResponderService2" port="MSResponderPort"/>
-		</invoke>
-	</process>
-	<process name="resp:MagicSessionResponder">
+    <process name="main:MagicSessionMain">
+        <provide partnerLink="executePartnerLink">
+            <service name="mws:MSMainExecuteService" port="MSExecutePort"/>
+        </provide>
+        <provide partnerLink="responderPartnerLink">
+            <service name="mws:MSMainService" port="MSMainPort"/>
+        </provide>
+        <invoke partnerLink="responderPartnerLink">
+            <service name="mws:MSResponderService2" port="MSResponderPort"/>
+        </invoke>
+    </process>
+    <process name="resp:MagicSessionResponder">
                 <type>resp:MagicSessionResponder</type>
-		<provide partnerLink="mainPartnerLink">
-			<service name="mws:MSResponderService" port="MSResponderPort"/>
-		</provide>
-	</process>
+        <provide partnerLink="mainPartnerLink">
+            <service name="mws:MSResponderService" port="MSResponderPort"/>
+        </provide>
+    </process>
 </deploy>

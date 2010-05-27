@@ -46,127 +46,127 @@ import javax.xml.namespace.QName;
     @NamedQuery(name=PartnerLinkDAOImpl.DELETE_PARTNER_LINKS_BY_SCOPE_IDS, query="delete from PartnerLinkDAOImpl as l where l._scopeId in (:scopeIds)")
 })
 public class PartnerLinkDAOImpl implements PartnerLinkDAO {
-	public final static String DELETE_PARTNER_LINKS_BY_SCOPE_IDS = "DELETE_PARTNER_LINKS_BY_SCOPE_IDS";
-	
-	@Id @Column(name="PARTNER_LINK_ID") 
-	@GeneratedValue(strategy=GenerationType.AUTO)
-	@SuppressWarnings("unused")
-	private Long _id;
-	@Lob @Column(name="MY_EPR")
+    public final static String DELETE_PARTNER_LINKS_BY_SCOPE_IDS = "DELETE_PARTNER_LINKS_BY_SCOPE_IDS";
+    
+    @Id @Column(name="PARTNER_LINK_ID") 
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    @SuppressWarnings("unused")
+    private Long _id;
+    @Lob @Column(name="MY_EPR")
     private String _myEPR;
-	@Transient
+    @Transient
     private Element _myEPRElement;
-	@Basic @Column(name="MY_ROLE_NAME")
+    @Basic @Column(name="MY_ROLE_NAME")
     private String _myRoleName;
-	@Basic @Column(name="MY_ROLE_SERVICE_NAME")
+    @Basic @Column(name="MY_ROLE_SERVICE_NAME")
     private String _myRoleServiceName;
-	@Basic @Column(name="MY_SESSION_ID")
+    @Basic @Column(name="MY_SESSION_ID")
     private String _mySessionId;
-	@Lob @Column(name="PARTNER_EPR")
+    @Lob @Column(name="PARTNER_EPR")
     private String _partnerEPR;
-	@Transient
+    @Transient
     private Element _partnerEPRElement;
-	@Basic @Column(name="PARTNER_LINK_MODEL_ID")
+    @Basic @Column(name="PARTNER_LINK_MODEL_ID")
     private int _partnerLinkModelId;
-	@Basic @Column(name="PARTNER_LINK_NAME")
+    @Basic @Column(name="PARTNER_LINK_NAME")
     private String _partnerLinkName;
-	@Basic @Column(name="PARTNER_ROLE_NAME")
+    @Basic @Column(name="PARTNER_ROLE_NAME")
     private String _partnerRoleName;
-	@Basic @Column(name="PARTNER_SESSION_ID")
+    @Basic @Column(name="PARTNER_SESSION_ID")
     private String _partnerSessionId;
 
-	@SuppressWarnings("unused")
-	@Basic @Column(name="SCOPE_ID", nullable=true, insertable=false, updatable=false)
+    @SuppressWarnings("unused")
+    @Basic @Column(name="SCOPE_ID", nullable=true, insertable=false, updatable=false)
     private Long _scopeId;
     @ManyToOne(fetch= FetchType.LAZY,cascade={CascadeType.PERSIST}) @Column(name="SCOPE_ID")
     @SuppressWarnings("unused")
     private ScopeDAOImpl _scope;
 
     public PartnerLinkDAOImpl() {}
-	public PartnerLinkDAOImpl(int modelId, String name, String myRole, String partnerRole) {
-		_partnerLinkModelId = modelId;
-		_partnerLinkName = name;
-		_myRoleName = myRole;
-		_partnerRoleName = partnerRole;
-	}
+    public PartnerLinkDAOImpl(int modelId, String name, String myRole, String partnerRole) {
+        _partnerLinkModelId = modelId;
+        _partnerLinkName = name;
+        _myRoleName = myRole;
+        _partnerRoleName = partnerRole;
+    }
 
-	public Element getMyEPR() {
-		if (_myEPRElement == null && _myEPR != null && !"".equals(_myEPR)) {
-			try {
-				_myEPRElement = DOMUtils.stringToDOM(_myEPR);
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}	
-		}
-		
-		return _myEPRElement;
-	}
+    public Element getMyEPR() {
+        if (_myEPRElement == null && _myEPR != null && !"".equals(_myEPR)) {
+            try {
+                _myEPRElement = DOMUtils.stringToDOM(_myEPR);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }	
+        }
+        
+        return _myEPRElement;
+    }
 
-	public String getMyRoleName() {
-		return _myRoleName;
-	}
+    public String getMyRoleName() {
+        return _myRoleName;
+    }
 
-	public QName getMyRoleServiceName() {
-		return _myRoleServiceName == null ? null : QName.valueOf(_myRoleServiceName);
-	}
+    public QName getMyRoleServiceName() {
+        return _myRoleServiceName == null ? null : QName.valueOf(_myRoleServiceName);
+    }
 
-	public String getMySessionId() {
-		return _mySessionId;
-	}
+    public String getMySessionId() {
+        return _mySessionId;
+    }
 
-	public Element getPartnerEPR() {
-		if ( _partnerEPRElement == null && _partnerEPR != null && !"".equals(_partnerEPR)) {
-			try {
-				_partnerEPRElement = DOMUtils.stringToDOM(_partnerEPR);
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}	
-		}
-		return _partnerEPRElement;
-	}
+    public Element getPartnerEPR() {
+        if ( _partnerEPRElement == null && _partnerEPR != null && !"".equals(_partnerEPR)) {
+            try {
+                _partnerEPRElement = DOMUtils.stringToDOM(_partnerEPR);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }	
+        }
+        return _partnerEPRElement;
+    }
 
-	public int getPartnerLinkModelId() {
-		return _partnerLinkModelId;
-	}
+    public int getPartnerLinkModelId() {
+        return _partnerLinkModelId;
+    }
 
-	public String getPartnerLinkName() {
-		return _partnerLinkName;
-	}
+    public String getPartnerLinkName() {
+        return _partnerLinkName;
+    }
 
-	public String getPartnerRoleName() {
-		return _partnerRoleName;
-	}
+    public String getPartnerRoleName() {
+        return _partnerRoleName;
+    }
 
-	public String getPartnerSessionId() {
-		return _partnerSessionId;
-	}
+    public String getPartnerSessionId() {
+        return _partnerSessionId;
+    }
 
-	public void setMyEPR(Element val) {
-		_myEPRElement = val;
-		_myEPR = DOMUtils.domToString(val);
+    public void setMyEPR(Element val) {
+        _myEPRElement = val;
+        _myEPR = DOMUtils.domToString(val);
 
-	}
+    }
 
-	public void setMyRoleServiceName(QName svcName) {
-		_myRoleServiceName = svcName.toString();
+    public void setMyRoleServiceName(QName svcName) {
+        _myRoleServiceName = svcName.toString();
 
-	}
+    }
 
-	public void setMySessionId(String sessionId) {
-		_mySessionId = sessionId;
+    public void setMySessionId(String sessionId) {
+        _mySessionId = sessionId;
 
-	}
+    }
 
-	public void setPartnerEPR(Element val) {
-		_partnerEPRElement = val;
-		_partnerEPR = DOMUtils.domToString(val);
+    public void setPartnerEPR(Element val) {
+        _partnerEPRElement = val;
+        _partnerEPR = DOMUtils.domToString(val);
 
-	}
+    }
 
-	public void setPartnerSessionId(String session) {
-		_partnerSessionId = session;
+    public void setPartnerSessionId(String session) {
+        _partnerSessionId = session;
 
-	}
+    }
 
     public void setScope(ScopeDAOImpl scope) {
         _scope = scope;

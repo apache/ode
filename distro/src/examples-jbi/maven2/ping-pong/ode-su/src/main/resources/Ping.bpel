@@ -25,7 +25,7 @@
         xmlns:tns="urn:/Ping.bpel"
         xmlns:ping="urn:/Ping.wsdl"
         xmlns:pong="urn:/Pong.wsdl"
-	    xmlns:fun="java:org.apache.ode.ping.AttachPing"
+        xmlns:fun="java:org.apache.ode.ping.AttachPing"
         expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
 
     <import location="common.wsdl"

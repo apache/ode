@@ -56,9 +56,9 @@
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="TestSplitService">
-		<wsdl:port name="TestSplitPort" binding="tns:TestSplitSoapBinding">
-     		<soap:address location="http://localhost:8080/ode/processes/testSplit"/>
-		</wsdl:port>
+        <wsdl:port name="TestSplitPort" binding="tns:TestSplitSoapBinding">
+            <soap:address location="http://localhost:8080/ode/processes/testSplit"/>
+        </wsdl:port>
     </wsdl:service>
     
    <plnk:partnerLinkType name="TestSplitPartnerLinkType">

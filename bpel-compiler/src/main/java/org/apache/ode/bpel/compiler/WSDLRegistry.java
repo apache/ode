@@ -134,20 +134,20 @@ class WSDLRegistry {
                 __log.info("WSDL at " + defuri + " is a duplicate import, your documents " +
                         "should all be in different namespaces (its's not nice but will still work).");
             }
-	        boolean alreadyProcessed = false;
-	        for (Definition4BPEL aDef : _definitions.get(def.getTargetNamespace())) {
-	            if (aDef.getDocumentBaseURI().equals(def.getDocumentBaseURI())) {
-	                alreadyProcessed = true;
-	                break;
-	            }
-	        }
-	        if (alreadyProcessed) {
-	            if (__log.isInfoEnabled()) {
-	                __log.info("WSDL at " + defuri + " is already imported, this denotes a circular reference.");
-	                // no need to keep going: either return or throw an error
-	            }
-	            return;
-	        }
+            boolean alreadyProcessed = false;
+            for (Definition4BPEL aDef : _definitions.get(def.getTargetNamespace())) {
+                if (aDef.getDocumentBaseURI().equals(def.getDocumentBaseURI())) {
+                    alreadyProcessed = true;
+                    break;
+                }
+            }
+            if (alreadyProcessed) {
+                if (__log.isInfoEnabled()) {
+                    __log.info("WSDL at " + defuri + " is already imported, this denotes a circular reference.");
+                    // no need to keep going: either return or throw an error
+                }
+                return;
+            }
         }
 
         ArrayList<Definition4BPEL> defs = null;
@@ -316,14 +316,14 @@ class WSDLRegistry {
     /**
      * @return All parsed schemas. This doesn't include schemas from bpel imports.
      */
-	Map<URI, Document> getSchemaDocuments() {
-		return _documentSchemas;
-	}
+    Map<URI, Document> getSchemaDocuments() {
+        return _documentSchemas;
+    }
 
-	/**
-	 * @return All captured schema sources including those from bpel imports.
-	 */
-	Map<URI, Source> getSchemaSources() {
+    /**
+     * @return All captured schema sources including those from bpel imports.
+     */
+    Map<URI, Source> getSchemaSources() {
         Map<URI, Source> schemaSources = new HashMap<URI, Source>();
         for (URI uri : _documentSchemas.keySet()) {
             Document document = _documentSchemas.get(uri);
@@ -335,5 +335,5 @@ class WSDLRegistry {
         }
         
         return schemaSources;
-	}
+    }
 }

@@ -31,28 +31,28 @@ import org.apache.ode.bpel.o.OVarType;
 
 public class ExpressionValidatorFactory {
     private static final Log __log = LogFactory.getLog(ExpressionValidatorFactory.class);
-	private ExpressionValidator _validator = new EmptyValidator();
+    private ExpressionValidator _validator = new EmptyValidator();
 
-	public ExpressionValidatorFactory(Properties config) {
-		String propertyName = "org.apache.ode.validator";
-		String validatorClass = (String) config.getProperty(propertyName, "");
-		__log.debug("Trying property " + propertyName + " got value: " + validatorClass);
-		if (!validatorClass.equals("")) {
-			try {
-				_validator = (ExpressionValidator) getClass().forName(validatorClass).newInstance();
-			} catch (Exception e) {
-				__log.warn("Cannot instantiate expression validator of class " + validatorClass);
-			}
-		}
-	}
-	
-	public ExpressionValidator getValidator() {
-		return _validator;
-	}
-	
-	private static class EmptyValidator implements ExpressionValidator {
+    public ExpressionValidatorFactory(Properties config) {
+        String propertyName = "org.apache.ode.validator";
+        String validatorClass = (String) config.getProperty(propertyName, "");
+        __log.debug("Trying property " + propertyName + " got value: " + validatorClass);
+        if (!validatorClass.equals("")) {
+            try {
+                _validator = (ExpressionValidator) getClass().forName(validatorClass).newInstance();
+            } catch (Exception e) {
+                __log.warn("Cannot instantiate expression validator of class " + validatorClass);
+            }
+        }
+    }
+    
+    public ExpressionValidator getValidator() {
+        return _validator;
+    }
+    
+    private static class EmptyValidator implements ExpressionValidator {
         public void bpelImportsLoaded(Process source, CompilerContext compilerContext) throws CompilationException {}
         public void bpelCompilationCompleted(Process source) throws CompilationException {}
         public Object validate(Expression source, OVarType rootNodeType, Object requestedResultType) throws CompilationException { return null; }
-	}
+    }
 }

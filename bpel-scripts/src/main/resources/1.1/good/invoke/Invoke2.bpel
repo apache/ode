@@ -45,7 +45,7 @@
   </correlationSets>
   
   <faultHandlers>
-		<catch faultName="test:generalFault" faultVariable="MyFaultVariable">
+        <catch faultName="test:generalFault" faultVariable="MyFaultVariable">
       <reply name="endReplyFH"
         operation="testOperation"
         partnerLink="testPartnerLink"

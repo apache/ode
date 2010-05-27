@@ -30,8 +30,8 @@
   xmlns:test="uri:testing">
 
   <import location="../test.wsdl"
-	  importType="http://schemas.xmlsoap.org/wsdl/"
-	  namespace="uri:testing" />
+      importType="http://schemas.xmlsoap.org/wsdl/"
+      namespace="uri:testing" />
 
   <partnerLinks>
     <partnerLink name="testPartnerLink"

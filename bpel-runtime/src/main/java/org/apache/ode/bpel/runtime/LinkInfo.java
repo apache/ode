@@ -27,9 +27,9 @@ import java.io.Serializable;
  * Run-time represetation of the link data.
  */
 class LinkInfo implements Serializable {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	final OLink olink;
+    final OLink olink;
 
   /** Channel to be used for link status publisher. */
   final LinkStatusChannel pub;

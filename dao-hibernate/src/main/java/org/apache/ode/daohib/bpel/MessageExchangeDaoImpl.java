@@ -194,7 +194,7 @@ public class MessageExchangeDaoImpl extends HibernateDao implements
         if (source == null)
             _hself.setCallbackEndpoint(null);
         else {
-        	_hself.setCallbackEndpoint(DOMUtils.domToBytes(source));
+            _hself.setCallbackEndpoint(DOMUtils.domToBytes(source));
         }
 
         getSession().saveOrUpdate(_hself);

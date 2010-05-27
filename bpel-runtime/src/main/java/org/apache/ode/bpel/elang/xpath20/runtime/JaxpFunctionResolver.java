@@ -102,34 +102,34 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
         } else if (functionName.getNamespaceURI().equals(Namespaces.ODE_EXTENSION_NS)) {
             String localName = functionName.getLocalPart();
             if (Constants.NON_STDRD_FUNCTION_SPLIT_TO_ELEMENTS.equals(localName) ||
-            		Constants.NON_STDRD_FUNCTION_DEPRECATED_SPLIT_TO_ELEMENTS.equals(localName)) {
+                    Constants.NON_STDRD_FUNCTION_DEPRECATED_SPLIT_TO_ELEMENTS.equals(localName)) {
                 return new SplitToElements();
             } else if (Constants.NON_STDRD_FUNCTION_COMBINE_URL.equals(localName) ||
-            		Constants.NON_STDRD_FUNCTION_DEPRECATED_COMBINE_URL.equals(localName)) {
+                    Constants.NON_STDRD_FUNCTION_DEPRECATED_COMBINE_URL.equals(localName)) {
                 return new CombineUrl();
             } else if (Constants.NON_STDRD_FUNCTION_COMPOSE_URL.equals(localName) ||
-            		Constants.NON_STDRD_FUNCTION_DEPRECATED_COMPOSE_URL.equals(localName)) {
+                    Constants.NON_STDRD_FUNCTION_DEPRECATED_COMPOSE_URL.equals(localName)) {
                 return new ComposeUrl();
             } else if (Constants.NON_STDRD_FUNCTION_EXPAND_TEMPLATE.equals(localName) ||
-            		Constants.NON_STDRD_FUNCTION_DEPRECATED_EXPAND_TEMPLATE.equals(localName)) {
+                    Constants.NON_STDRD_FUNCTION_DEPRECATED_EXPAND_TEMPLATE.equals(localName)) {
                 return new ComposeUrl(true, "expandTemplateInvalidSource");
             } else if (Constants.NON_STDRD_FUNCTION_DOM_TO_STRING.equals(localName) ||
-            		Constants.NON_STDRD_FUNCTION_DEPRECATED_DOM_TO_STRING.equals(localName)) {
-            	return new DomToString();
+                    Constants.NON_STDRD_FUNCTION_DEPRECATED_DOM_TO_STRING.equals(localName)) {
+                return new DomToString();
             } else if (Constants.NON_STDRD_FUNCTION_INSERT_AFTER.equals(localName)) {
-            	return new InsertAfter();
+                return new InsertAfter();
             } else if (Constants.NON_STDRD_FUNCTION_INSERT_AS_FIRST_INTO.equals(localName)) {
-            	return new InsertAsFirstInto();
+                return new InsertAsFirstInto();
             } else if (Constants.NON_STDRD_FUNCTION_INSERT_AS_LAST_INTO.equals(localName)) {
-            	return new InsertAsLastInto();
+                return new InsertAsLastInto();
             } else if (Constants.NON_STDRD_FUNCTION_INSERT_BEFORE.equals(localName)) {
-            	return new InsertBefore();
+                return new InsertBefore();
             } else if (Constants.NON_STDRD_FUNCTION_DELETE.equals(localName)) {
-            	return new Delete();
+                return new Delete();
             } else if (Constants.NON_STDRD_FUNCTION_RENAME.equals(localName)) {
-            	return new Rename();
+                return new Rename();
             } else if (Constants.NON_STDRD_FUNCTION_PROCESS_PROPERTY.equals(localName)) {
-            	return new ProcessProperty();
+                return new ProcessProperty();
             }
         } else if (functionName.getNamespaceURI().equals(Namespaces.DEPRECATED_XDT_NS)) {
             String localName = functionName.getLocalPart();
@@ -191,7 +191,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             } catch (EvaluationException e) {
                 __log.error("bpws:getVariableData(" + args + ") threw FaultException");
                 throw new XPathFunctionException(e);
-			}
+            }
         }
     }
 
@@ -219,7 +219,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
 
     public class DoXslTransform implements XPathFunction {
 
-		public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() < 2 || (args.size() % 2) != 0)
                 throw new XPathFunctionException(new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "doXslTransformInvalidSource"), "Invalid arguments"));
 
@@ -304,20 +304,20 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             try {
                 result = XslTransformHandler.getInstance().transform(_ectx.getProcessQName(), xslUri, source, parametersMap, resolver);
             } catch (Exception e) {
-            	__log.error("Could not transform XSL sheet " + args.get(0) + " on element " + DOMUtils.domToString(varElmt), e);
+                __log.error("Could not transform XSL sheet " + args.get(0) + " on element " + DOMUtils.domToString(varElmt), e);
                 e.printStackTrace();
                 throw new XPathFunctionException(
                         new FaultException(_oxpath.getOwner().constants.qnSubLanguageExecutionFault,
                                 e.toString()));
             }
             if(result instanceof Node)
-            	return ((Node)result).getChildNodes();
+                return ((Node)result).getChildNodes();
             return result;
         }
     }
     
     public class DomToString implements XPathFunction {
-    	public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 1)
                 throw new XPathFunctionException(new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "domToStringInvalidSource"), "Invalid arguments"));
 
@@ -349,7 +349,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             }    
             String result= DOMUtils.domToString(varElmt); 
             return result;
-    	}
+        }
     }
 
     /**
@@ -488,13 +488,13 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 }
             } else {
                 try {
-                	Element elt = null;
-                	if (args.get(1) instanceof List) {
-	                    List elmts = (List) args.get(1);
-	                    elt = (Element) elmts.get(0);
-                	} else if (args.get(1) instanceof Element) {
-                		elt = (Element) args.get(1);
-                	}
+                    Element elt = null;
+                    if (args.get(1) instanceof List) {
+                        List elmts = (List) args.get(1);
+                        elt = (Element) elmts.get(0);
+                    } else if (args.get(1) instanceof Element) {
+                        elt = (Element) args.get(1);
+                    }
                     pairs = Helper.extractNameValueMap(elt);
                 } catch (ClassCastException e) {
                     throw new XPathFunctionException(new FaultException(faultQName, "Expected an element similar too: <foo><name1>value1</name1><name2>value2</name2>...</foo>"));
@@ -517,7 +517,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
     }
 
     public class InsertInto implements XPathFunction {
-    	public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 3)
                 throw new XPathFunctionException(new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "insertIntoInvalidSource"), "Invalid arguments"));
 
@@ -559,8 +559,8 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
-                		new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
-                				"Invalid argument: URI Template expected. " + args.get(0), e));
+                        new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                                "Invalid argument: URI Template expected. " + args.get(0), e));
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
                         new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
@@ -572,23 +572,23 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             int childCount = children.getLength();
             Node refChild = null;
             if (position <= 1) {
-            	refChild = clonedElmt.getFirstChild();
+                refChild = clonedElmt.getFirstChild();
             } else if (position == childCount) {
-            	refChild = clonedElmt.getLastChild();
+                refChild = clonedElmt.getLastChild();
             } else if (position > childCount) {
-            	refChild = null;
+                refChild = null;
             } else {
-            	refChild = children.item(position + 1);
+                refChild = children.item(position + 1);
             }
             for (int i = 0; i < childNodes.size(); i++) {
-            	clonedElmt.insertBefore((Node) childNodes.get(i), refChild);
+                clonedElmt.insertBefore((Node) childNodes.get(i), refChild);
             }
             return clonedElmt;
-    	}
+        }
     }
     
     public class InsertAfter implements XPathFunction {
-    	public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() < 2 || args.size() > 3)
                 throw new XPathFunctionException(new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "insertAfterInvalidSource"), "Invalid arguments"));
 
@@ -598,15 +598,15 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             
             Element targetElmt;
             List<Node> siblingNodes;
-        	Object childArg = null, siblingsArg = null;
+            Object childArg = null, siblingsArg = null;
             try {
-            	if (args.size() == 2) {
-            		childArg = args.get(0);
-            		siblingsArg = args.get(1);
-            	} else {
-            		childArg = args.get(1);
-            		siblingsArg = args.get(2);
-            	}
+                if (args.size() == 2) {
+                    childArg = args.get(0);
+                    siblingsArg = args.get(1);
+                } else {
+                    childArg = args.get(1);
+                    siblingsArg = args.get(2);
+                }
                 if (childArg instanceof List) {
                     List elmts = (List) childArg;
                     // allow insertions after a sequence of node items
@@ -637,8 +637,8 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
-                		new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
-                				"Invalid argument: URI Template expected. " + siblingsArg, e));
+                        new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                                "Invalid argument: URI Template expected. " + siblingsArg, e));
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
                         new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
@@ -649,23 +649,23 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             NodeList children = parentElmt.getChildNodes();
             int position = 0;
             while (position < children.getLength()) {
-            	if (children.item(position++).isSameNode(targetElmt)) {
-            		break;
-            	}
+                if (children.item(position++).isSameNode(targetElmt)) {
+                    break;
+                }
             }
             Element clonedElmt = (Element) parentElmt.cloneNode(true);
             children = clonedElmt.getChildNodes();
             Node refChild = (position < children.getLength()) ? children.item(position) : null;
             Document clonedDocument = clonedElmt.getOwnerDocument();
             for (int i = 0; i < siblingNodes.size(); i++) {
-            	clonedElmt.insertBefore(clonedDocument.importNode((Node) siblingNodes.get(i), true), refChild);
+                clonedElmt.insertBefore(clonedDocument.importNode((Node) siblingNodes.get(i), true), refChild);
             }
             return clonedElmt;
-    	}
+        }
     }
     
     public class InsertBefore implements XPathFunction {
-    	public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() < 2 || args.size() > 3)
                 throw new XPathFunctionException(new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "insertBeforeInvalidSource"), "Invalid arguments"));
 
@@ -675,15 +675,15 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             
             Element targetElmt;
             List<Node> siblingNodes;
-        	Object childArg = null, siblingsArg = null;
+            Object childArg = null, siblingsArg = null;
             try {
-            	if (args.size() == 2) {
-            		childArg = args.get(0);
-            		siblingsArg = args.get(1);
-            	} else {
-            		childArg = args.get(1);
-            		siblingsArg = args.get(2);
-            	}
+                if (args.size() == 2) {
+                    childArg = args.get(0);
+                    siblingsArg = args.get(1);
+                } else {
+                    childArg = args.get(1);
+                    siblingsArg = args.get(2);
+                }
                 if (childArg instanceof List) {
                     List elmts = (List) childArg;
                     // allow insertions after a sequence of node items
@@ -714,8 +714,8 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
-                		new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
-                				"Invalid argument: URI Template expected. " + childArg, e));
+                        new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                                "Invalid argument: URI Template expected. " + childArg, e));
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
                         new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
@@ -726,23 +726,23 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             NodeList children = parentElmt.getChildNodes();
             int position = 0;
             while (position < children.getLength()) {
-            	if (children.item(position++).isSameNode(targetElmt)) {
-            		break;
-            	}
+                if (children.item(position++).isSameNode(targetElmt)) {
+                    break;
+                }
             }
             Element clonedElmt = (Element) parentElmt.cloneNode(true);
             children = clonedElmt.getChildNodes();
             Node refChild = (position <= children.getLength()) ? children.item(position - 1) : null;
             Document clonedDocument = clonedElmt.getOwnerDocument();
             for (int i = 0; i < siblingNodes.size(); i++) {
-            	clonedElmt.insertBefore(clonedDocument.importNode((Node) siblingNodes.get(i), true), refChild);
+                clonedElmt.insertBefore(clonedDocument.importNode((Node) siblingNodes.get(i), true), refChild);
             }
             return clonedElmt;
-    	}
+        }
     }
 
     public class InsertAsFirstInto implements XPathFunction {
-    	public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 2)
                 throw new XPathFunctionException(new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "insertAsFirstIntoInvalidSource"), "Invalid arguments"));
 
@@ -782,8 +782,8 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
-                		new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
-                				"Invalid argument: URI Template expected. " + args.get(0), e));
+                        new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                                "Invalid argument: URI Template expected. " + args.get(0), e));
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
                         new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
@@ -794,14 +794,14 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             Node refChild = clonedElmt.getFirstChild();
             Document clonedDocument = clonedElmt.getOwnerDocument();
             for (int i = 0; i < siblingNodes.size(); i++) {
-            	clonedElmt.insertBefore(clonedDocument.importNode((Node) siblingNodes.get(i), true), refChild);
+                clonedElmt.insertBefore(clonedDocument.importNode((Node) siblingNodes.get(i), true), refChild);
             }
             return clonedElmt;
-    	}
+        }
     }
 
     public class InsertAsLastInto implements XPathFunction {
-    	public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 2)
                 throw new XPathFunctionException(new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "insertAsLastIntoInvalidSource"), "Invalid arguments"));
 
@@ -841,8 +841,8 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
-                		new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
-                				"Invalid argument: URI Template expected. " + args.get(0), e));
+                        new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                                "Invalid argument: URI Template expected. " + args.get(0), e));
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
                         new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
@@ -852,14 +852,14 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             Element clonedElmt = (Element) targetElmt.cloneNode(true);
             Document clonedDocument = clonedElmt.getOwnerDocument();
             for (int i = 0; i < siblingNodes.size(); i++) {
-            	clonedElmt.appendChild(clonedDocument.importNode((Node) siblingNodes.get(i), true));
+                clonedElmt.appendChild(clonedDocument.importNode((Node) siblingNodes.get(i), true));
             }
             return clonedElmt;
-    	}
+        }
     }
 
     public class Delete implements XPathFunction {
-    	public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() < 1 || args.size() > 2)
                 throw new XPathFunctionException(new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "deleteInvalidSource"), "Invalid arguments"));
 
@@ -869,7 +869,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             
             List<Node> targetNodes = new ArrayList();
             List siblingNodes;
-        	Object delete = args.size() == 2 ? delete = args.get(1) : args.get(0);
+            Object delete = args.size() == 2 ? delete = args.get(1) : args.get(0);
             try {
                 if (delete instanceof List) {
                     List elmts = (List) delete;
@@ -888,8 +888,8 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
-                		new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
-                				"Invalid argument: URI Template expected. " + delete, e));
+                        new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                                "Invalid argument: URI Template expected. " + delete, e));
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
                         new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
@@ -898,44 +898,44 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             }
             Element parentElmt = null;
             for (Node targetNode : targetNodes) {
-            	if (parentElmt == null) {
-            		parentElmt = (Element) targetNode.getParentNode();
-            	} else if (!parentElmt.isSameNode((Element) targetNode.getParentNode())) {
+                if (parentElmt == null) {
+                    parentElmt = (Element) targetNode.getParentNode();
+                } else if (!parentElmt.isSameNode((Element) targetNode.getParentNode())) {
                     throw new XPathFunctionException(
                             new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
                                     "The bpws:delete function MUST be passed nodes that have " +
                                             "the same parent."));
-            	}
+                }
             }
             NodeList children = parentElmt.getChildNodes();
             int[] positions = new int[targetNodes.size()];
             for (int target = 0; target < positions.length; target++) {
-	            for (int position = 0; position < children.getLength(); position++) {
-	            	if (children.item(position).isSameNode(targetNodes.get(target))) {
-	            		positions[target] = position;
-		            }
-	            }
+                for (int position = 0; position < children.getLength(); position++) {
+                    if (children.item(position).isSameNode(targetNodes.get(target))) {
+                        positions[target] = position;
+                    }
+                }
             }
             final Element clonedElmt = (Element) parentElmt.cloneNode(true);
             children = clonedElmt.getChildNodes();
             for (int target = 0; target < positions.length; target++) {
-	            Element deleteElmt = (Element) children.item(positions[target]);
-	            clonedElmt.removeChild(deleteElmt);
+                Element deleteElmt = (Element) children.item(positions[target]);
+                clonedElmt.removeChild(deleteElmt);
             }
             // Saxon doesn't like clones with no children, so I'll oblige
             if (clonedElmt.getChildNodes().getLength() == 0) {
-            	try {
-	            	clonedElmt.appendChild(DOMUtils.toDOMDocument(parentElmt).createTextNode(""));
-            	} catch (TransformerException te) {
-            		throw new XPathFunctionException(te);
-            	}
+                try {
+                    clonedElmt.appendChild(DOMUtils.toDOMDocument(parentElmt).createTextNode(""));
+                } catch (TransformerException te) {
+                    throw new XPathFunctionException(te);
+                }
             }
             return clonedElmt;
-    	}
+        }
     }
     
     public class Rename implements XPathFunction {
-    	public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() < 2)
                 throw new XPathFunctionException(new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "renameInvalidSource"), "Invalid arguments"));
 
@@ -960,9 +960,9 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 } else {
                     throw new XPathFunctionException("Unexpected argument type: "+args.get(0).getClass());
                 }
-            	String localName = null, namespaceUri = null, prefix = null;
+                String localName = null, namespaceUri = null, prefix = null;
                 if (args.get(1) instanceof QNameValue) {
-                	QNameValue qNameValue = (QNameValue) args.get(1);
+                    QNameValue qNameValue = (QNameValue) args.get(1);
                     namespaceUri = qNameValue.getNamespaceURI();
                     localName = qNameValue.getLocalName();
                     prefix = qNameValue.getPrefix();
@@ -973,77 +973,77 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                                     "The bpws:rename function MUST be passed a single " +
                                             "element node."));
                     Element nameElmt = (Element) elmts.get(0);
-                	namespaceUri = nameElmt.getNamespaceURI();
-                	localName = nameElmt.getLocalName();
-                	prefix = nameElmt.getPrefix();
+                    namespaceUri = nameElmt.getNamespaceURI();
+                    localName = nameElmt.getLocalName();
+                    prefix = nameElmt.getPrefix();
                 } else if (args.get(1) instanceof NodeWrapper) {
-                	Element nameElmt = (Element) ((NodeWrapper) args.get(1)).getUnderlyingNode();
-                	namespaceUri = nameElmt.getNamespaceURI();
-                	localName = nameElmt.getLocalName();
-                	prefix = nameElmt.getPrefix();
+                    Element nameElmt = (Element) ((NodeWrapper) args.get(1)).getUnderlyingNode();
+                    namespaceUri = nameElmt.getNamespaceURI();
+                    localName = nameElmt.getLocalName();
+                    prefix = nameElmt.getPrefix();
                 } else if (args.get(1) instanceof Element) {
-                	Element nameElmt = (Element) args.get(1);
-                	namespaceUri = nameElmt.getNamespaceURI();
-                	localName = nameElmt.getLocalName();
-                	prefix = nameElmt.getPrefix();
+                    Element nameElmt = (Element) args.get(1);
+                    namespaceUri = nameElmt.getNamespaceURI();
+                    localName = nameElmt.getLocalName();
+                    prefix = nameElmt.getPrefix();
                 } else if (args.get(1) instanceof String)	{
-                	String qName = (String) args.get(1);
-                	if (qName.contains(":")) {
-                		int index = qName.indexOf(":");
-                		prefix = qName.substring(0, index);
-                		localName = qName.substring(index + 1);
-                	} else {
-                		localName = qName;
-                	}
+                    String qName = (String) args.get(1);
+                    if (qName.contains(":")) {
+                        int index = qName.indexOf(":");
+                        prefix = qName.substring(0, index);
+                        localName = qName.substring(index + 1);
+                    } else {
+                        localName = qName;
+                    }
                 } else if (args.get(1) instanceof QName) {
-                	QName qName = (QName) args.get(1);
-                	namespaceUri = qName.getNamespaceURI();
-                	localName = qName.getLocalPart();
-                	prefix = qName.getPrefix();
+                    QName qName = (QName) args.get(1);
+                    namespaceUri = qName.getNamespaceURI();
+                    localName = qName.getLocalPart();
+                    prefix = qName.getPrefix();
                 } else {
                     throw new XPathFunctionException("Unexpected argument type: "+args.get(1).getClass());
                 }
                 if (namespaceUri == null) {
-                	namespaceUri = targetElmt.lookupNamespaceURI(prefix);
+                    namespaceUri = targetElmt.lookupNamespaceURI(prefix);
                 }
-            	elementQName = new QName(namespaceUri, localName, prefix);
+                elementQName = new QName(namespaceUri, localName, prefix);
                 if (args.size() > 2) {
                     if (args.get(2) instanceof QNameValue) {
-                    	QNameValue qNameValue = (QNameValue) args.get(2);
+                        QNameValue qNameValue = (QNameValue) args.get(2);
                         namespaceUri = qNameValue.getNamespaceURI();
                         localName = qNameValue.getLocalName();
                         prefix = qNameValue.getPrefix();
                     } else if (args.get(2) instanceof NodeWrapper) {
-                    	Element nameElmt = (Element) ((NodeWrapper) args.get(2)).getUnderlyingNode();
-                    	namespaceUri = nameElmt.getNamespaceURI();
-                    	localName = nameElmt.getLocalName();
-                    	prefix = nameElmt.getPrefix();
+                        Element nameElmt = (Element) ((NodeWrapper) args.get(2)).getUnderlyingNode();
+                        namespaceUri = nameElmt.getNamespaceURI();
+                        localName = nameElmt.getLocalName();
+                        prefix = nameElmt.getPrefix();
                     } else if (args.get(2) instanceof Element) {
-                    	Element nameElmt = (Element) args.get(2);
-                    	namespaceUri = nameElmt.getNamespaceURI();
-                    	localName = nameElmt.getLocalName();
-                    	prefix = nameElmt.getPrefix();
+                        Element nameElmt = (Element) args.get(2);
+                        namespaceUri = nameElmt.getNamespaceURI();
+                        localName = nameElmt.getLocalName();
+                        prefix = nameElmt.getPrefix();
                     } else if (args.get(2) instanceof String)	{
-                    	String qName = (String) args.get(2);
-                    	if (qName.contains(":")) {
-                    		int index = qName.indexOf(":");
-                    		prefix = qName.substring(0, index);
-                    		localName = qName.substring(index + 1);
-                    	} else {
-                    		localName = qName;
-                    	}
+                        String qName = (String) args.get(2);
+                        if (qName.contains(":")) {
+                            int index = qName.indexOf(":");
+                            prefix = qName.substring(0, index);
+                            localName = qName.substring(index + 1);
+                        } else {
+                            localName = qName;
+                        }
                     } else {
                         throw new XPathFunctionException("Unexpected argument type: "+args.get(2).getClass());
                     }
                     if (namespaceUri == null) {
-                    	namespaceUri = targetElmt.lookupNamespaceURI(prefix);
+                        namespaceUri = targetElmt.lookupNamespaceURI(prefix);
                     }
                     elementTypeQName = new QName(namespaceUri, localName, prefix);;
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
-                		new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
-                				"Invalid argument: URI Template expected. " + args.get(0), e));
+                        new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                                "Invalid argument: URI Template expected. " + args.get(0), e));
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
                         new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
@@ -1054,34 +1054,34 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             NodeList children = parentElmt.getChildNodes();
             int position = 0;
             while (position < children.getLength()) {
-            	if (children.item(position++).isSameNode(targetElmt)) {
-            		break;
-            	}
+                if (children.item(position++).isSameNode(targetElmt)) {
+                    break;
+                }
             }
             Element clonedElmt = (Element) parentElmt.cloneNode(true);
             children = clonedElmt.getChildNodes();
             Element renamedElmt = targetElmt
-						        	.getOwnerDocument()
-						        	.createElementNS(
-						        			elementQName.getNamespaceURI(), 
-						        			elementQName.getPrefix() + ":" + elementQName.getLocalPart());
+                                    .getOwnerDocument()
+                                    .createElementNS(
+                                            elementQName.getNamespaceURI(), 
+                                            elementQName.getPrefix() + ":" + elementQName.getLocalPart());
             Element originalElmt = (Element) children.item(position - 1);
             children = originalElmt.getChildNodes();
             for (int i = 0; i < children.getLength(); i++) {
-            	renamedElmt.appendChild(children.item(i));
+                renamedElmt.appendChild(children.item(i));
             }
             clonedElmt.replaceChild(renamedElmt, originalElmt);
             if (elementTypeQName != null) {
-            	renamedElmt.setAttributeNS(
-            			Namespaces.XML_INSTANCE, "xsi:type", 
-            			elementTypeQName.getPrefix() + ":" + elementTypeQName.getLocalPart());
+                renamedElmt.setAttributeNS(
+                        Namespaces.XML_INSTANCE, "xsi:type", 
+                        elementTypeQName.getPrefix() + ":" + elementTypeQName.getLocalPart());
             }
             return clonedElmt;
-    	}
+        }
     }
     
     public class ProcessProperty implements XPathFunction {
-    	public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 1)
                 throw new XPathFunctionException(new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "processPropertyInvalidSource"), "Invalid arguments"));
 
@@ -1101,39 +1101,39 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                     if (elmts.get(0) instanceof Element) {
                         targetElmt = (Element) elmts.get(0);
                     } else if (elmts.get(0) instanceof String) {
-                    	propertyName = new QName((String) elmts.get(0));
+                        propertyName = new QName((String) elmts.get(0));
                     }
                 } else if (args.get(0) instanceof NodeWrapper) {
                     targetElmt = (Element) ((NodeWrapper) args.get(0)).getUnderlyingNode();
                 } else if (args.get(0) instanceof Element) {
                     targetElmt = (Element) args.get(0);
                 } else if (args.get(0) instanceof QNameValue) {
-                	QNameValue qNameValue = (QNameValue) args.get(0);
+                    QNameValue qNameValue = (QNameValue) args.get(0);
                     propertyName = new QName(qNameValue.getNamespaceURI(), qNameValue.getLocalName(), qNameValue.getPrefix());
                 } else if (args.get(0) instanceof String)	{
-                	String stringValue = (String) args.get(0);
-                	if (stringValue.indexOf(":") > 0) {
-                		String prefix = stringValue.substring(0, stringValue.indexOf(":"));
-                		String localPart = stringValue.substring(stringValue.indexOf(":") + 1);
-                		String namespaceUri = _oxpath.namespaceCtx.getNamespaceURI(prefix);
-                		propertyName = new QName(namespaceUri, localPart, prefix);
-                	} else {
-                    	propertyName = new QName(stringValue);
-                	}
+                    String stringValue = (String) args.get(0);
+                    if (stringValue.indexOf(":") > 0) {
+                        String prefix = stringValue.substring(0, stringValue.indexOf(":"));
+                        String localPart = stringValue.substring(stringValue.indexOf(":") + 1);
+                        String namespaceUri = _oxpath.namespaceCtx.getNamespaceURI(prefix);
+                        propertyName = new QName(namespaceUri, localPart, prefix);
+                    } else {
+                        propertyName = new QName(stringValue);
+                    }
                 } else if (args.get(0) instanceof QName) {
-                	propertyName = (QName) args.get(0);
+                    propertyName = (QName) args.get(0);
                 } else {
                     throw new XPathFunctionException("Unexpected argument type: "+args.get(0).getClass());
                 }
                 if (propertyName == null) {
-                	if (targetElmt != null) {
-                		propertyName = new QName(targetElmt.getTextContent());
-                	}
+                    if (targetElmt != null) {
+                        propertyName = new QName(targetElmt.getTextContent());
+                    }
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
-                		new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
-                				"Invalid argument: URI Template expected. " + args.get(0), e));
+                        new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                                "Invalid argument: URI Template expected. " + args.get(0), e));
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
                         new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
@@ -1141,11 +1141,11 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                                         "element node."));
             }
             return _ectx.getPropertyValue(propertyName);
-    	}
+        }
     }
     
     public class DayTimeDuration implements XPathFunction {
-    	public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 1)
                 throw new XPathFunctionException(new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "dayTimeDurationPropertyInvalidSource"), "Invalid arguments"));
 
@@ -1165,26 +1165,26 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                     if (elmts.get(0) instanceof Element) {
                         targetElmt = (Element) elmts.get(0);
                     } else if (elmts.get(0) instanceof String) {
-                    	argument = (String) elmts.get(0);
+                        argument = (String) elmts.get(0);
                     }
                 } else if (args.get(0) instanceof NodeWrapper) {
                     targetElmt = (Element) ((NodeWrapper) args.get(0)).getUnderlyingNode();
                 } else if (args.get(0) instanceof Element) {
                     targetElmt = (Element) args.get(0);
                 } else if (args.get(0) instanceof String)	{
-                	argument = (String) args.get(0);
+                    argument = (String) args.get(0);
                 } else {
                     throw new XPathFunctionException("Unexpected argument type: "+args.get(0).getClass());
                 }
                 if (argument == null) {
-                	if (targetElmt != null) {
-                		argument = targetElmt.getTextContent();
-                	}
+                    if (targetElmt != null) {
+                        argument = targetElmt.getTextContent();
+                    }
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
-                		new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
-                				"Invalid argument: URI Template expected. " + args.get(0), e));
+                        new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                                "Invalid argument: URI Template expected. " + args.get(0), e));
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
                         new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
@@ -1192,11 +1192,11 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                                         "element node."));
             }
             return DayTimeDurationValue.makeDayTimeDurationValue(argument);
-    	}
+        }
     }
     
     public class YearMonthDuration implements XPathFunction {
-    	public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 1)
                 throw new XPathFunctionException(new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "yearMonthDurationPropertyInvalidSource"), "Invalid arguments"));
 
@@ -1216,26 +1216,26 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                     if (elmts.get(0) instanceof Element) {
                         targetElmt = (Element) elmts.get(0);
                     } else if (elmts.get(0) instanceof String) {
-                    	argument = (String) elmts.get(0);
+                        argument = (String) elmts.get(0);
                     }
                 } else if (args.get(0) instanceof NodeWrapper) {
                     targetElmt = (Element) ((NodeWrapper) args.get(0)).getUnderlyingNode();
                 } else if (args.get(0) instanceof Element) {
                     targetElmt = (Element) args.get(0);
                 } else if (args.get(0) instanceof String)	{
-                	argument = (String) args.get(0);
+                    argument = (String) args.get(0);
                 } else {
                     throw new XPathFunctionException("Unexpected argument type: "+args.get(0).getClass());
                 }
                 if (argument == null) {
-                	if (targetElmt != null) {
-                		argument = targetElmt.getTextContent();
-                	}
+                    if (targetElmt != null) {
+                        argument = targetElmt.getTextContent();
+                    }
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
-                		new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
-                				"Invalid argument: URI Template expected. " + args.get(0), e));
+                        new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                                "Invalid argument: URI Template expected. " + args.get(0), e));
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
                         new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
@@ -1243,7 +1243,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                                         "element node."));
             }
             return YearMonthDurationValue.makeYearMonthDurationValue(argument);
-    	}
+        }
     }
     
     public static class Helper {
@@ -1314,19 +1314,19 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
          * @throws IllegalArgumentException if none of the conditions mentioned above are met
          */
         public static int extractInteger(Object arg) throws IllegalArgumentException {
-        	try {
-	    		return Integer.parseInt(extractString(arg));
+            try {
+                return Integer.parseInt(extractString(arg));
             } catch (ClassCastException cce) {
-        		try {
-					return (int) ((IntegerValue) arg).longValue();
-				} catch (XPathException xpe) {
-	                throw new IllegalArgumentException("Parameter MUST point to an integer, single element or text node.", xpe);
-				} catch (ClassCastException ccce) {
-	                throw new IllegalArgumentException("Parameter MUST point to an integer, single element or text node.", ccce);
-				}
-        	} catch (NumberFormatException nfe) {
+                try {
+                    return (int) ((IntegerValue) arg).longValue();
+                } catch (XPathException xpe) {
+                    throw new IllegalArgumentException("Parameter MUST point to an integer, single element or text node.", xpe);
+                } catch (ClassCastException ccce) {
+                    throw new IllegalArgumentException("Parameter MUST point to an integer, single element or text node.", ccce);
+                }
+            } catch (NumberFormatException nfe) {
                 throw new IllegalArgumentException("Parameter MUST point to an integer, single element or text node.", nfe);
-        	}
+            }
         }
         /**
          * Extract the name/value from an xml element similar too:

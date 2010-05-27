@@ -26,9 +26,9 @@ import java.io.Serializable;
  * Variable instance identifier.
  */
 public class VariableInstance implements Serializable {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public final OScope.Variable declaration;
+    public final OScope.Variable declaration;
   public final Long scopeInstance;
 
   VariableInstance(Long scopeInstance, OScope.Variable variable) {

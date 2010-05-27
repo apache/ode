@@ -111,6 +111,6 @@ public class Variable extends BpelObject {
      * @return
      */
     public String getRelated() {
-    	return  getAttribute(ExtensibilityQNames.EXTVAR_RELATED, null);
+        return  getAttribute(ExtensibilityQNames.EXTVAR_RELATED, null);
     }
 }

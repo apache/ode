@@ -58,12 +58,12 @@ public class NSContext implements NamespaceContext, Externalizable {
 
     /** Prefix-to-URI map. */
     private HashMap<String, String> _prefixToUriMap = new HashMap<String, String>() {
-    	@Override
-    	public String put(String prefix, String uri) {
+        @Override
+        public String put(String prefix, String uri) {
             prefix = (String) InternPool.intern("namespace.prefixes", prefix);
             uri = (String) InternPool.intern("namespace.uris", uri);
             return super.put(prefix, uri);
-    	}
+        }
     };
     
     public NSContext() {

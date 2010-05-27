@@ -45,7 +45,7 @@
           variable="var1"/>
         <!-- wait 5 seconds -->
         <wait for="'PT5S'"/>
-      	
+        
        <reply name="endReply" 
               operation="testOperation" 
               partnerLink="testPartnerLink"

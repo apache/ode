@@ -51,32 +51,32 @@
           variable="var1"
           createInstance="yes">
           <correlations>
-          	 <correlation set="PickCorrelator" initiate="yes"/>
+             <correlation set="PickCorrelator" initiate="yes"/>
           </correlations>
        </receive>
        <pick name="pick1">
-       	  <onMessage 
-          	partnerLink="testPartnerLink"
-          	portType="test:TestPortType"
-          	operation="pickOp"
-          	variable="var1">
-          	<correlations>
-          	 	<correlation set="PickCorrelator" initiate="no"/>
-          	</correlations>      
-          	<empty name="doNothing1"/>    
+          <onMessage 
+            partnerLink="testPartnerLink"
+            portType="test:TestPortType"
+            operation="pickOp"
+            variable="var1">
+            <correlations>
+                <correlation set="PickCorrelator" initiate="no"/>
+            </correlations>      
+            <empty name="doNothing1"/>    
          </onMessage>
          <onMessage 
-       	  	partnerLink="testPartnerLink"
-          	portType="test:TestPortType"
-          	operation="pickOp"
-          	variable="var1">
-          	<correlations>
-          	 	<correlation set="PickCorrelator" initiate="no"/>
-          	</correlations>         
-          	<empty name="doNothing2"/> 
+            partnerLink="testPartnerLink"
+            portType="test:TestPortType"
+            operation="pickOp"
+            variable="var1">
+            <correlations>
+                <correlation set="PickCorrelator" initiate="no"/>
+            </correlations>         
+            <empty name="doNothing2"/> 
          </onMessage>
        </pick>
-          	
+            
        <reply name="endReply" 
               operation="receiveOp" 
               partnerLink="testPartnerLink"

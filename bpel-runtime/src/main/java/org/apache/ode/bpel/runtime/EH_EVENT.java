@@ -117,15 +117,15 @@ class EH_EVENT extends BpelJacobRunnable {
                 CorrelationKeySet keySet = new CorrelationKeySet();
                 PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(_oevent.partnerLink);
                 for( OScope.CorrelationSet cset : _oevent.joinCorrelations ) {
-                	if(getBpelRuntimeContext().isCorrelationInitialized(_scopeFrame.resolve(cset))) {
-                		keySet.add(getBpelRuntimeContext().readCorrelation(_scopeFrame.resolve(cset)));
-                	}
+                    if(getBpelRuntimeContext().isCorrelationInitialized(_scopeFrame.resolve(cset))) {
+                        keySet.add(getBpelRuntimeContext().readCorrelation(_scopeFrame.resolve(cset)));
+                    }
                 }
                 for( OScope.CorrelationSet cset : _oevent.matchCorrelations ) {
                     if (!getBpelRuntimeContext().isCorrelationInitialized(_scopeFrame.resolve(cset))) {
                         throw new FaultException(_oevent.getOwner().constants.qnCorrelationViolation,"Correlation not initialized.");
                     }
-                	keySet.add(getBpelRuntimeContext().readCorrelation(_scopeFrame.resolve(cset)));
+                    keySet.add(getBpelRuntimeContext().readCorrelation(_scopeFrame.resolve(cset)));
                 }
                 if( keySet.isEmpty() ) {
                     // Adding a route for opaque correlation. In this case correlation is done on "out-of-band" session id.
@@ -260,7 +260,7 @@ class EH_EVENT extends BpelJacobRunnable {
                                     initializeCorrelation(ehScopeFrame.resolve(cset), ehScopeFrame.resolve(_oevent.variable));
                                 }
                                 for( OScope.CorrelationSet cset : _oevent.joinCorrelations ) {
-                                	// will be ignored if already initialized
+                                    // will be ignored if already initialized
                                     initializeCorrelation(ehScopeFrame.resolve(cset), ehScopeFrame.resolve(_oevent.variable));
                                 }
 

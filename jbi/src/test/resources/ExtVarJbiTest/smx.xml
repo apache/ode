@@ -18,11 +18,11 @@
 
 -->
 <beans xmlns:sm="http://servicemix.apache.org/config/1.0"
-	   xmlns:http="http://servicemix.apache.org/http/1.0"
-	   xmlns:eip="http://servicemix.apache.org/eip/1.0"
+       xmlns:http="http://servicemix.apache.org/http/1.0"
+       xmlns:eip="http://servicemix.apache.org/eip/1.0"
        xmlns:util="http://www.springframework.org/schema/util"
        xmlns:jencks="http://jencks.org/2.0"
-	   >
+       >
   <jencks:poolingSupport 
             id="poolingSupport2" 
             connectionMaxIdleMinutes="5"
@@ -38,27 +38,27 @@
             connectionTracker="#connectionTracker" 
             />
     <bean id="localDerbyMCF" class="org.tranql.connector.derby.EmbeddedLocalMCF">
-	    <property name="databaseName" value="target/test/testdb"/>
-	    <property name="createDatabase" value="true"/>
-		<property name="userName" value = "sa"/>
+        <property name="databaseName" value="target/test/testdb"/>
+        <property name="createDatabase" value="true"/>
+        <property name="userName" value = "sa"/>
         <property name="password" value = ""/>
-	</bean>
-	<bean id="localDerbyDataSource" class="org.jencks.factory.ConnectionFactoryFactoryBean">
-	    <property name="managedConnectionFactory" ref="localDerbyMCF"/>
-	    <property name="connectionManager" ref="connectionManager2"/>
-	</bean>
-	
+    </bean>
+    <bean id="localDerbyDataSource" class="org.jencks.factory.ConnectionFactoryFactoryBean">
+        <property name="managedConnectionFactory" ref="localDerbyMCF"/>
+        <property name="connectionManager" ref="connectionManager2"/>
+    </bean>
+    
     <util:map id="jndiEntries">
         <entry key="java:comp/env/jdbc/ode" value-ref="odeDS"/>
         <entry key="testds" value-ref="localDerbyDataSource"/>
-	</util:map>
-	
-	<sm:container 
-		id="jbi" 
-		embedded="true" 
-		rootDir="target/test/smx"
-		transactionManager="#transactionManager"
-		depends-on="jndi"
-		>
-	</sm:container>
+    </util:map>
+    
+    <sm:container 
+        id="jbi" 
+        embedded="true" 
+        rootDir="target/test/smx"
+        transactionManager="#transactionManager"
+        depends-on="jndi"
+        >
+    </sm:container>
 </beans>

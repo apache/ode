@@ -87,7 +87,7 @@ public class BindingContextImpl implements BindingContext {
     public void deactivateMyRoleEndpoint(Endpoint myRoleEndpoint) {
         ODEService service = destroyService(myRoleEndpoint.serviceName, myRoleEndpoint.portName);
         if (service != null) {
-	        _serviceEprMap.remove(service);
+            _serviceEprMap.remove(service);
         }
     }
 
@@ -104,17 +104,17 @@ public class BindingContextImpl implements BindingContext {
         return createExternalService(pconf, initialPartnerEndpoint.serviceName, initialPartnerEndpoint.portName);
     }
 
-	public long calculateSizeofService(EndpointReference epr) {
-		if (_server._odeConfig.isProcessSizeThrottled()) {
-			for (ODEService service : _serviceEprMap.keySet()) {
-				if (epr.equals(_serviceEprMap.get(epr))) {
-					return SizingAgent.deepSizeOf(service);
-				}
-			}
-		}
-		return 0;
-	}
-	
+    public long calculateSizeofService(EndpointReference epr) {
+        if (_server._odeConfig.isProcessSizeThrottled()) {
+            for (ODEService service : _serviceEprMap.keySet()) {
+                if (epr.equals(_serviceEprMap.get(epr))) {
+                    return SizingAgent.deepSizeOf(service);
+                }
+            }
+        }
+        return 0;
+    }
+    
     protected ODEService createService(ProcessConf pconf, QName serviceName, String portName) throws AxisFault {
         AxisService axisService = ODEAxisService.createService(_server._axisConfig, pconf, serviceName, portName);
         ODEService odeService = new ODEService(axisService, pconf, serviceName, portName, _server._bpelServer, _server._txMgr);

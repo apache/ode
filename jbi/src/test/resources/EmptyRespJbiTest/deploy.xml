@@ -23,20 +23,20 @@
         xmlns:ping="urn:/Ping.wsdl"
         xmlns:pong="urn:/Pong.wsdl">
 
-	<process name="pingProcess:Ping">
-		<active>true</active>
-		<provide partnerLink="PingPartnerLink">
-			<service name="ping:PingService" port="PingPort"/>
-		</provide>
-		<invoke partnerLink="PongPartnerLink">
-			<service name="pong:PongServiceFwd" port="PongPort"/>
-		</invoke>
-	</process>
-	<process name="pongProcess:Pong">
-		<active>true</active>
-		<provide partnerLink="PongPartnerLink">
-			<service name="pong:PongService" port="PongPort"/>
-		</provide>
-	</process>
+    <process name="pingProcess:Ping">
+        <active>true</active>
+        <provide partnerLink="PingPartnerLink">
+            <service name="ping:PingService" port="PingPort"/>
+        </provide>
+        <invoke partnerLink="PongPartnerLink">
+            <service name="pong:PongServiceFwd" port="PongPort"/>
+        </invoke>
+    </process>
+    <process name="pongProcess:Pong">
+        <active>true</active>
+        <provide partnerLink="PongPartnerLink">
+            <service name="pong:PongService" port="PongPort"/>
+        </provide>
+    </process>
     
 </deploy>

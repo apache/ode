@@ -64,10 +64,10 @@ public Document toXML() {
     Document doc = DOMUtils.newDocument();
     Element root = doc.createElementNS(SERVICE_REF_QNAME.getNamespaceURI(),SERVICE_REF_QNAME.getLocalPart());
     try {
-	    DocumentFragment fragment = getServiceEndpoint().getAsReference(_type);
-	    if (fragment != null) {
-	    	root.appendChild(doc.importNode(fragment,true));
-	    }
+        DocumentFragment fragment = getServiceEndpoint().getAsReference(_type);
+        if (fragment != null) {
+            root.appendChild(doc.importNode(fragment,true));
+        }
     } catch (Throwable t) {
     }
     doc.appendChild(root);

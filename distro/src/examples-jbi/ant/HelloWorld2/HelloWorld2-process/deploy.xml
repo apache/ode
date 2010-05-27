@@ -21,10 +21,10 @@
         xmlns:sns="urn:/HelloWorld2.wsdl" >
 
 
-	<process name="pns:HelloWorld2">
-		<active>true</active>
-		<provide partnerLink="helloPartnerLink">
-			<service name="sns:HelloService" port="HelloPort"/>
-		</provide>
-	</process>
+    <process name="pns:HelloWorld2">
+        <active>true</active>
+        <provide partnerLink="helloPartnerLink">
+            <service name="sns:HelloService" port="HelloPort"/>
+        </provide>
+    </process>
 </deploy>

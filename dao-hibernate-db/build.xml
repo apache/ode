@@ -19,19 +19,19 @@
 
 <project>
 
-	<property name="db.scripts.dir" value="${basedir}/target" />
-	<property name="sql.dir" value="${basedir}/src/main/sql"/>
+    <property name="db.scripts.dir" value="${basedir}/target" />
+    <property name="sql.dir" value="${basedir}/src/main/sql"/>
         <property name="dao-hibernate.classes" value="${basedir}/../dao-hibernate/target/classes" />
-	<property name="bpel-store.classes" value="${basedir}/../bpel-store/target/classes" />
+    <property name="bpel-store.classes" value="${basedir}/../bpel-store/target/classes" />
 
-	<path id="classpath">
-	  <pathelement path="${maven.runtime.classpath}"/>
-	</path>
-	
+    <path id="classpath">
+      <pathelement path="${maven.runtime.classpath}"/>
+    </path>
+    
   <target name="create-schema">
-  	
-	<taskdef name="schemaexport" classname="org.hibernate.tool.hbm2ddl.SchemaExportTask" 
-		 classpathref="classpath"/>
+    
+    <taskdef name="schemaexport" classname="org.hibernate.tool.hbm2ddl.SchemaExportTask" 
+         classpathref="classpath"/>
 
     <mkdir dir="target"/>
     <mkdir dir="${db.scripts.dir}" />
@@ -47,7 +47,7 @@
 
     <!-- PostgreSQL -->
     <create-ddl db="postgres"/>
-  	
+    
     <!-- Sybase -->
     <create-ddl db="hsql" />
 
@@ -77,21 +77,21 @@
       <echo></echo>
       <echo>=====================</echo>
       <echo>Create DDL @{db}</echo>
-	 <schemaexport
-		properties="${sql.dir}/ode.@{db}.properties"
-		quiet="yes"
-		text="yes"
-		create="yes"
-		delimiter=";"
-		output="${db.scripts.dir}/partial.@{db}.sql">
-		<fileset dir="${dao-hibernate.classes}/">
-		    <include name="**/*.hbm.xml"/>
+     <schemaexport
+        properties="${sql.dir}/ode.@{db}.properties"
+        quiet="yes"
+        text="yes"
+        create="yes"
+        delimiter=";"
+        output="${db.scripts.dir}/partial.@{db}.sql">
+        <fileset dir="${dao-hibernate.classes}/">
+            <include name="**/*.hbm.xml"/>
                     <exclude name="**/HMessageExchangeProperty.hbm.xml" />
-		</fileset>
-		<fileset dir="${bpel-store.classes}/">
-		    <include name="**/*.hbm.xml"/>
-		</fileset>
-	    </schemaexport>
+        </fileset>
+        <fileset dir="${bpel-store.classes}/">
+            <include name="**/*.hbm.xml"/>
+        </fileset>
+        </schemaexport>
         <concat destfile="${db.scripts.dir}/@{db}.sql">
           <fileset file="${sql.dir}/common.sql"/>
           <fileset file="${sql.dir}/simplesched-@{db}.sql"/>

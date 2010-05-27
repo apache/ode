@@ -24,16 +24,16 @@
        xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
        xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
-			   http://www.springframework.org/schema/beans
-			   http://www.springframework.org/schema/beans/spring-beans.xsd
-			   http://www.springframework.org/schema/context
-			   http://www.springframework.org/schema/context/spring-context.xsd
-			   http://www.springframework.org/schema/util
-			   http://www.springframework.org/schema/util/spring-util.xsd
-			   http://www.springframework.org/schema/osgi
-			   http://www.springframework.org/schema/osgi/spring-osgi.xsd
-			   http://www.springframework.org/schema/osgi-compendium
-			   http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd">
+               http://www.springframework.org/schema/beans
+               http://www.springframework.org/schema/beans/spring-beans.xsd
+               http://www.springframework.org/schema/context
+               http://www.springframework.org/schema/context/spring-context.xsd
+               http://www.springframework.org/schema/util
+               http://www.springframework.org/schema/util/spring-util.xsd
+               http://www.springframework.org/schema/osgi
+               http://www.springframework.org/schema/osgi/spring-osgi.xsd
+               http://www.springframework.org/schema/osgi-compendium
+               http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd">
 
     <bean id="ode-config-properties" class="org.apache.ode.jbi.OdeConfigProperties">
         <constructor-arg ref="cmProps"/>
@@ -48,10 +48,10 @@
     </bean>
 
     <osgi:service ref="ode-jbi-component" interface="javax.jbi.component.Component">
-	<osgi:service-properties>
-	    <entry key="NAME" value="OdeBpelEngine" />
-	    <entry key="TYPE" value="service-engine" />
-	</osgi:service-properties>
+    <osgi:service-properties>
+        <entry key="NAME" value="OdeBpelEngine" />
+        <entry key="TYPE" value="service-engine" />
+    </osgi:service-properties>
     </osgi:service>
 
     <osgix:cm-properties id="cmProps" persistent-id="org.apache.ode.jbi">

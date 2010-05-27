@@ -86,14 +86,14 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
     public boolean isCreateInstance(MyRoleMessageExchangeImpl mex) {
         Operation operation = getMyRoleOperation(mex.getOperationName());
         if(operation == null) {
-        	return false;
+            return false;
         }
         return _plinkDef.isCreateInstanceOperation(operation);
     }
 
     public List<RoutingInfo> findRoute(MyRoleMessageExchangeImpl mex) {
-    	List<RoutingInfo> routingInfos = new ArrayList<RoutingInfo>();
-    	
+        List<RoutingInfo> routingInfos = new ArrayList<RoutingInfo>();
+        
         if (__log.isTraceEnabled()) {
             __log.trace(ObjectPrinter.stringifyMethodEnter(this + ":inputMsgRcvd", new Object[] {
                     "messageExchange", mex }));
@@ -151,7 +151,7 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         }
         
         if (routingInfos.size() == 0) {
-        	routingInfos.add(new RoutingInfo(null, null, correlator, keySet));
+            routingInfos.add(new RoutingInfo(null, null, correlator, keySet));
         }
 
         return routingInfos;
@@ -219,7 +219,7 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         }
 
         ProcessInstanceDAO instanceDao = routing.messageRoute.getTargetInstance();
-    	BpelProcess process2 = _process._engine._activeProcesses.get(instanceDao.getProcess().getProcessId());
+        BpelProcess process2 = _process._engine._activeProcesses.get(instanceDao.getProcess().getProcessId());
 
         // Reload process instance for DAO.
         BpelRuntimeContextImpl instance = process2.createRuntimeContext(instanceDao, null, null);
@@ -231,7 +231,7 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 
         // send process instance event
         CorrelationMatchEvent evt = new CorrelationMatchEvent(new QName(process2.getOProcess().targetNamespace,
-        		process2.getOProcess().getName()), process2.getProcessDAO().getProcessId(),
+                process2.getOProcess().getName()), process2.getProcessDAO().getProcessId(),
                 instanceDao.getInstanceId(), routing.matchedKeySet);
         evt.setPortType(mex.getPortType().getQName());
         evt.setOperation(operation.getName());
@@ -253,28 +253,28 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         if (!mex.isAsynchronous()) {
             mex.setFailure(MessageExchange.FailureType.NOMATCH, "No process instance matching correlation keys.", null);
         } else {
-        	// enqueue message with the last message route, as per the comments in caller (@see BpelProcess.invokeProcess())
-        	RoutingInfo routing = 
-        		(routings != null && routings.size() > 0) ? 
-        				routings.get(routings.size() - 1) : null;
-        	if (routing != null) {
+            // enqueue message with the last message route, as per the comments in caller (@see BpelProcess.invokeProcess())
+            RoutingInfo routing = 
+                (routings != null && routings.size() > 0) ? 
+                        routings.get(routings.size() - 1) : null;
+            if (routing != null) {
                 if (__log.isDebugEnabled()) {
                     __log.debug("INPUTMSG: " + routing.correlator.getCorrelatorId() + ": SAVING to DB (no match) ");
                 }
 
-	            // send event
-	            CorrelationNoMatchEvent evt = new CorrelationNoMatchEvent(mex.getPortType().getQName(), mex
-	                    .getOperation().getName(), mex.getMessageExchangeId(), routing.wholeKeySet);
-	
-	            evt.setProcessId(_process.getProcessDAO().getProcessId());
-	            evt.setProcessName(new QName(_process.getOProcess().targetNamespace, _process.getOProcess().getName()));
-	            _process._debugger.onEvent(evt);
-	
-	            mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.QUEUED);
-	
-	            // No match, means we add message exchange to the queue.
-	            routing.correlator.enqueueMessage(mex.getDAO(), routing.wholeKeySet);
-        	}
+                // send event
+                CorrelationNoMatchEvent evt = new CorrelationNoMatchEvent(mex.getPortType().getQName(), mex
+                        .getOperation().getName(), mex.getMessageExchangeId(), routing.wholeKeySet);
+    
+                evt.setProcessId(_process.getProcessDAO().getProcessId());
+                evt.setProcessName(new QName(_process.getOProcess().targetNamespace, _process.getOProcess().getName()));
+                _process._debugger.onEvent(evt);
+    
+                mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.QUEUED);
+    
+                // No match, means we add message exchange to the queue.
+                routing.correlator.enqueueMessage(mex.getDAO(), routing.wholeKeySet);
+            }
         }
     }
 
@@ -322,8 +322,8 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
     @SuppressWarnings("unchecked")
     private CorrelationKey computeCorrelationKey(OScope.CorrelationSet cset, OMessageVarType messagetype,
             Element msg) {
-    	CorrelationKey key = null;
-    	
+        CorrelationKey key = null;
+        
         String[] values = new String[cset.properties.size()];
 
         int jIdx = 0;
@@ -350,9 +350,9 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         }
 
         if( cset.hasJoinUseCases ) {
-        	key = new OptionalCorrelationKey(cset.name, values);
+            key = new OptionalCorrelationKey(cset.name, values);
         } else {
-        	key = new CorrelationKey(cset.name, values);
+            key = new CorrelationKey(cset.name, values);
         }
         
         return key;
@@ -360,15 +360,15 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
     
     @SuppressWarnings("unchecked")
     public boolean isOneWayOnly() {
-		PortType portType = _plinkDef.myRolePortType;
-		if (portType == null) {
-			return false;
-		}
-    	for (Operation operation : (List<Operation>) portType.getOperations()) {
-	    	if (operation.getOutput() != null) {
-	    		return false;
-	    	}
-    	}
-    	return true;
+        PortType portType = _plinkDef.myRolePortType;
+        if (portType == null) {
+            return false;
+        }
+        for (Operation operation : (List<Operation>) portType.getOperations()) {
+            if (operation.getOutput() != null) {
+                return false;
+            }
+        }
+        return true;
     }    
 }

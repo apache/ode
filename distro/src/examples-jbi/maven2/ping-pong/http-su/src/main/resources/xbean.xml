@@ -24,13 +24,13 @@
     <http:endpoint 
         service="ping:PingService"
         endpoint="http" 
-	targetService="ping:PingService"
-	targetEndpoint="PingPort"
+    targetService="ping:PingService"
+    targetEndpoint="PingPort"
         defaultOperation="Ping"
         role="consumer"
         locationURI="http://localhost:8192/PingHttp/"
         defaultMep="http://www.w3.org/2004/08/wsdl/in-out" 
-	wsdlResource="classpath:Ping.wsdl"
-	soapVersion="1.1"
+    wsdlResource="classpath:Ping.wsdl"
+    soapVersion="1.1"
         soap="true" />
 </beans>

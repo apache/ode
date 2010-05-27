@@ -41,7 +41,7 @@ import org.apache.ode.utils.NSContext;
  * Jaxen-based compiled-xpath representation for XPATH 1.0 expression language. 
  */
 public class OXPath10Expression extends OLValueExpression implements Serializable {
-	private static final long serialVersionUID = -1L;
+    private static final long serialVersionUID = -1L;
 
   /** Map from query name to variable declaration. */
   public HashMap<String, OScope.Variable> vars =
@@ -104,11 +104,11 @@ public class OXPath10Expression extends OLValueExpression implements Serializabl
   }
   
   public void setXslSheet(URI projectRelativeXslUri, OXslSheet xslSheet) {
-	  xslSheets.put(projectRelativeXslUri, xslSheet);
+      xslSheets.put(projectRelativeXslUri, xslSheet);
   }
 
   public OXslSheet getXslSheet(URI projectRelativeXslUri) {
-	  return xslSheets.get(projectRelativeXslUri);
+      return xslSheets.get(projectRelativeXslUri);
   }
   
   public String toString() {
@@ -171,12 +171,12 @@ public class OXPath10Expression extends OLValueExpression implements Serializabl
     }
   }
 
-	/**
-	 * @see org.apache.ode.bpel.o.OLValueExpression#getVariable()
-	 */
-	public Variable getVariable() {
-		if(vars.size() == 0)
-			throw new IllegalStateException("LValue must have one variable reference.");
+    /**
+     * @see org.apache.ode.bpel.o.OLValueExpression#getVariable()
+     */
+    public Variable getVariable() {
+        if(vars.size() == 0)
+            throw new IllegalStateException("LValue must have one variable reference.");
         // We're interested in the first variable referenced by the LValue
         for (String varName : vars.keySet()) {
             if (xpath.substring(1, xpath.length()).startsWith(varName))
@@ -184,7 +184,7 @@ public class OXPath10Expression extends OLValueExpression implements Serializabl
         }
         throw new IllegalStateException("Either the expression doesn't start with a variable reference or " +
                 "the reference is unknow.");
-	}
+    }
 
 }
 

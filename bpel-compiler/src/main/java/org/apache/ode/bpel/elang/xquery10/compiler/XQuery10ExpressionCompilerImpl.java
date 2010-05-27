@@ -137,7 +137,7 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
      */
     private OExpression _compile(org.apache.ode.bpel.compiler.bom.Expression xquery, boolean isJoinCondition)
             throws CompilationException {
-    	OXQuery10ExpressionBPEL20 oexp = new OXQuery10ExpressionBPEL20(_compilerContext.getOProcess(), _qnVarData,
+        OXQuery10ExpressionBPEL20 oexp = new OXQuery10ExpressionBPEL20(_compilerContext.getOProcess(), _qnVarData,
                 _qnVarProp, _qnLinkStatus, _qnXslTransform, isJoinCondition);
         oexp.namespaceCtx = xquery.getNamespaceContext();
         doJaxpCompile(oexp, xquery);
@@ -151,8 +151,8 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
             throw new CompilationException(__msgs.errEmptyExpression(source.getURI(), new QName(source.getElement().getNamespaceURI(), source.getElement().getNodeName())));
         }
         if (node.getNodeType() != Node.TEXT_NODE && 
-        		node.getNodeType() != Node.ELEMENT_NODE && 
-        		node.getNodeType() != Node.CDATA_SECTION_NODE) {
+                node.getNodeType() != Node.ELEMENT_NODE && 
+                node.getNodeType() != Node.CDATA_SECTION_NODE) {
             throw new CompilationException(__msgs.errUnexpectedNodeTypeForXPath(DOMUtils.domToString(node)));
         }
         xqueryStr = DOMUtils.domToString(node);
@@ -162,7 +162,7 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
         }
 
         try {
-        	XQDataSource xqds = new SaxonXQDataSource(new Configuration());
+            XQDataSource xqds = new SaxonXQDataSource(new Configuration());
             XQConnection xqconn = xqds.getConnection();
             
             __log.debug("Compiling expression " + xqueryStr);
@@ -174,28 +174,28 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
             JaxpFunctionResolver funcResolver = new JaxpFunctionResolver(
                     _compilerContext, out, source.getNamespaceContext(), _bpelNS);
             JaxpVariableResolver variableResolver = new JaxpVariableResolver(
-            		_compilerContext, out); 
+                    _compilerContext, out); 
 
             XQueryDeclarations declarations = new XQueryDeclarations();            
             NSContext nsContext = source.getNamespaceContext();
-        	Set<String> prefixes = nsContext.getPrefixes();
-        	if (!nsContext.getUriSet().contains(Namespaces.ODE_EXTENSION_NS)) {
-        		nsContext.register("ode", Namespaces.ODE_EXTENSION_NS);
-        	}
-        	for (String prefix : prefixes) {
-        		String uri = nsContext.getNamespaceURI(prefix);
-        		staticContext.declareNamespace(prefix, uri);
-        		if ("".equals(prefix)) {
-        			declarations.declareDefaultElementNamespace(uri);
-        		} else if ("bpws".equals(prefix)) {
+            Set<String> prefixes = nsContext.getPrefixes();
+            if (!nsContext.getUriSet().contains(Namespaces.ODE_EXTENSION_NS)) {
+                nsContext.register("ode", Namespaces.ODE_EXTENSION_NS);
+            }
+            for (String prefix : prefixes) {
+                String uri = nsContext.getNamespaceURI(prefix);
+                staticContext.declareNamespace(prefix, uri);
+                if ("".equals(prefix)) {
+                    declarations.declareDefaultElementNamespace(uri);
+                } else if ("bpws".equals(prefix)) {
                     declarations.declareNamespace("bpws", "java:" + Constants.XQUERY_FUNCTION_HANDLER_COMPILER);
-        		} else {
-	        		declarations.declareNamespace(prefix, uri);
-        		}
-        	}
+                } else {
+                    declarations.declareNamespace(prefix, uri);
+                }
+            }
             declarations.declareVariable(
-            		getQName(nsContext, Namespaces.ODE_EXTENSION_NS, "pid"), 
-            		getQName(nsContext, Namespaces.XML_SCHEMA, "integer"));
+                    getQName(nsContext, Namespaces.ODE_EXTENSION_NS, "pid"), 
+                    getQName(nsContext, Namespaces.XML_SCHEMA, "integer"));
 //            Map<URI, Source> schemaDocuments = _compilerContext.getSchemaSources();
 //            for (URI schemaUri : schemaDocuments.keySet()) {
 //            	Source schemaSource = schemaDocuments.get(schemaUri);
@@ -206,17 +206,17 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
             List<OScope.Variable> variables = _compilerContext.getAccessibleVariables();
             Map<QName, QName> variableTypes = new HashMap<QName, QName>();
             for (String variableName : getVariableNames(xqueryStr)) {
-            	OScope.Variable variable = getVariable(variables, variableName);
-            	if (variable == null) {
-            		continue;
-            	}
+                OScope.Variable variable = getVariable(variables, variableName);
+                if (variable == null) {
+                    continue;
+                }
                 OVarType type = variable.type;
                 QName nameQName = getNameQName(variableName);
                 QName typeQName = getTypeQName(variableName, type);
                 variableTypes.put(nameQName, typeQName);
                 String prefix = typeQName.getPrefix();
                 if (prefix == null || "".equals(prefix.trim())) {
-                	prefix = getPrefixForUri(nsContext, typeQName.getNamespaceURI());
+                    prefix = getPrefixForUri(nsContext, typeQName.getNamespaceURI());
                 }
                 // don't declare typed variables, as our engine is not schema-aware
                 // declarations.declareVariable(variable.name, typeQName);
@@ -232,41 +232,41 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
             
             // Pre-evaluate variables and functions by executing query  
             node.setUserData(XQuery10BpelFunctions.USER_DATA_KEY_FUNCTION_RESOLVER, 
-            		funcResolver, null);
+                    funcResolver, null);
             exp.bindItem(XQConstants.CONTEXT_ITEM,
                     xqconn.createItemFromNode(node, xqconn.createNodeType()));
             // Bind external variables to dummy runtime values
             for (QName variable : exp.getAllUnboundExternalVariables()) {
-            	QName typeQName = variableTypes.get(variable);
+                QName typeQName = variableTypes.get(variable);
                 Object value = variableResolver.resolveVariable(variable);
-            	if (typeQName != null) {
-            		if (value.getClass().getName().startsWith("java.lang")) {
-    	                exp.bindAtomicValue(variable, value.toString(), 
-    	                		xqconn.createAtomicType(XQItemType.XQBASETYPE_ANYATOMICTYPE));
-            		} else if (value instanceof Node) {
-    	                exp.bindNode(variable, (Node) value, xqconn.createNodeType());
-            		} else if (value instanceof NodeList) {
-            			NodeList nodeList = (NodeList) value;
-            			ArrayList nodeArray = new ArrayList();
-            			for (int i = 0; i < nodeList.getLength(); i++) {
-            				nodeArray.add(nodeList.item(i));
-            			}
-            			XQSequence sequence = xqconn.createSequence(nodeArray.iterator());
-            			exp.bindSequence(variable, sequence);
-            		}
-            	}
+                if (typeQName != null) {
+                    if (value.getClass().getName().startsWith("java.lang")) {
+                        exp.bindAtomicValue(variable, value.toString(), 
+                                xqconn.createAtomicType(XQItemType.XQBASETYPE_ANYATOMICTYPE));
+                    } else if (value instanceof Node) {
+                        exp.bindNode(variable, (Node) value, xqconn.createNodeType());
+                    } else if (value instanceof NodeList) {
+                        NodeList nodeList = (NodeList) value;
+                        ArrayList nodeArray = new ArrayList();
+                        for (int i = 0; i < nodeList.getLength(); i++) {
+                            nodeArray.add(nodeList.item(i));
+                        }
+                        XQSequence sequence = xqconn.createSequence(nodeArray.iterator());
+                        exp.bindSequence(variable, sequence);
+                    }
+                }
             }
             // evaluate the expression so as to initialize the variables
             try { 
                 exp.executeQuery();
             } catch (XQException xpee) { 
-            	// swallow errors caused by uninitialized variables 
+                // swallow errors caused by uninitialized variables 
             } finally {
-            	// reset the expression's user data, in order to avoid 
-            	// serializing the function resolver in the compiled bpel file.
-            	if (node != null) {
-            		node.setUserData(XQuery10BpelFunctions.USER_DATA_KEY_FUNCTION_RESOLVER, null, null);
-            	}
+                // reset the expression's user data, in order to avoid 
+                // serializing the function resolver in the compiled bpel file.
+                if (node != null) {
+                    node.setUserData(XQuery10BpelFunctions.USER_DATA_KEY_FUNCTION_RESOLVER, null, null);
+                }
             }
         } catch (XQException xqe) {
             __log.debug(xqe);
@@ -286,128 +286,128 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
     }
     
     private String getQName(NSContext nsContext, String uri, String localPart) {
-    	String prefix = getPrefixForUri(nsContext, uri);
-    	return (prefix == null ? localPart : (prefix + ":" + localPart));
+        String prefix = getPrefixForUri(nsContext, uri);
+        return (prefix == null ? localPart : (prefix + ":" + localPart));
     }
     
     private String getPrefixForUri(NSContext nsContext, String uri) {
-    	Set<String> prefixes = nsContext.getPrefixes();
-    	for (String prefix : prefixes) {
-    		String anUri = (nsContext.getNamespaceURI(prefix));
-    		if (anUri != null && anUri.equals(uri)) {
-    			return prefix;
-    		}
-    	}
-    	return null;
+        Set<String> prefixes = nsContext.getPrefixes();
+        for (String prefix : prefixes) {
+            String anUri = (nsContext.getNamespaceURI(prefix));
+            if (anUri != null && anUri.equals(uri)) {
+                return prefix;
+            }
+        }
+        return null;
     }
     
     protected static Collection<String> getVariableNames(String xquery) {
-    	Collection<String> variableNames = new LinkedHashSet<String>();
-    	for (int index = xquery.indexOf("$"); index != -1; index = xquery.indexOf("$")) {
-    		StringBuilder variableName = new StringBuilder();
-    		index++;
-    		while(index < xquery.length() && XMLChar.isNCName(xquery.charAt(index))) {
-    		    variableName.append(xquery.charAt(index++));
-    		}
-        	variableNames.add(variableName.toString());
-        	xquery = xquery.substring(index);
-    	}
-    	return variableNames;
+        Collection<String> variableNames = new LinkedHashSet<String>();
+        for (int index = xquery.indexOf("$"); index != -1; index = xquery.indexOf("$")) {
+            StringBuilder variableName = new StringBuilder();
+            index++;
+            while(index < xquery.length() && XMLChar.isNCName(xquery.charAt(index))) {
+                variableName.append(xquery.charAt(index++));
+            }
+            variableNames.add(variableName.toString());
+            xquery = xquery.substring(index);
+        }
+        return variableNames;
     }
     
     private OScope.Variable getVariable(List<OScope.Variable> variables, String variableName) {
-    	String declaredVariable = getVariableDeclaredName(variableName);
-    	for (OScope.Variable variable : variables) {
-    		if (variable.name.equals(declaredVariable)) {
-    			return variable;
-    		}
-    	}
-    	return null;
+        String declaredVariable = getVariableDeclaredName(variableName);
+        for (OScope.Variable variable : variables) {
+            if (variable.name.equals(declaredVariable)) {
+                return variable;
+            }
+        }
+        return null;
     }
     
     private String getVariableDeclaredName(String variableReference) {
-    	int dotIndex = variableReference.indexOf(".");
-    	return dotIndex >= 0 ? variableReference.substring(0, dotIndex) : variableReference;
+        int dotIndex = variableReference.indexOf(".");
+        return dotIndex >= 0 ? variableReference.substring(0, dotIndex) : variableReference;
     }
     
     private String getVariablePartName(String variableReference) {
-    	int dotIndex = variableReference.indexOf(".");
-    	return dotIndex >= 0 ? variableReference.substring(dotIndex + 1) : "";    	
+        int dotIndex = variableReference.indexOf(".");
+        return dotIndex >= 0 ? variableReference.substring(dotIndex + 1) : "";    	
     }
     
     private QName getNameQName(String variableName) {
         String prefix = null, localName = null;;
-    	int colonIndex = variableName.indexOf(":");
+        int colonIndex = variableName.indexOf(":");
         if (colonIndex >= 0) {
-        	prefix = variableName.substring(0, colonIndex);
-        	localName = variableName.substring(colonIndex + 1);
+            prefix = variableName.substring(0, colonIndex);
+            localName = variableName.substring(colonIndex + 1);
         } else {
-        	prefix = "";
-        	localName = variableName;
+            prefix = "";
+            localName = variableName;
         }
         return new QName(prefix, localName);
     }
     
     private QName getTypeQName(String variableName, OVarType type) {
-    	QName typeQName = null;
+        QName typeQName = null;
         if (type instanceof OConstantVarType) {
-        	typeQName = new QName(Namespaces.XML_SCHEMA, "string", "xs");
+            typeQName = new QName(Namespaces.XML_SCHEMA, "string", "xs");
         } else if (type instanceof OElementVarType) {
-        	typeQName = ((OElementVarType) type).elementType;
+            typeQName = ((OElementVarType) type).elementType;
         } else if (type instanceof OMessageVarType) {
-        	Part part = ((OMessageVarType) type).parts.get(getVariablePartName(variableName));
-        	if (part != null) {
-            	typeQName = getTypeQName(variableName, part.type);
-        	}
+            Part part = ((OMessageVarType) type).parts.get(getVariablePartName(variableName));
+            if (part != null) {
+                typeQName = getTypeQName(variableName, part.type);
+            }
         } else if (type instanceof OXsdTypeVarType) {
-        	typeQName = ((OXsdTypeVarType) type).xsdType;
+            typeQName = ((OXsdTypeVarType) type).xsdType;
         }
-    	return typeQName;
+        return typeQName;
     }
 
     private static class XQueryDeclarations {
-    	StringBuffer declarations = new StringBuffer();
-    	
-    	public XQueryDeclarations() {}
-    	
-		public void declareVariable(String name, QName type) {
-    		declareVariable(name, type.getPrefix() + ":" + type.getLocalPart());    
-    	}
-    	
-    	public void declareVariable(String name, String type) {
-    		declarations.append("declare variable ")
-    			.append("$")
-	    		.append(name)
-	    		.append(" as ")
-	    		.append(type)
-	    		.append(" external ")
-	    		.append(";\n");
-    	}
-    	
-    	public void declareVariable(String name) {
-    		declarations.append("declare variable ")
-    			.append("$")
-	    		.append(name)
-	    		.append(" external ")
-	    		.append(";\n");
-    	}
-    	
-    	public void declareNamespace(String prefix, String uri) {
+        StringBuffer declarations = new StringBuffer();
+        
+        public XQueryDeclarations() {}
+        
+        public void declareVariable(String name, QName type) {
+            declareVariable(name, type.getPrefix() + ":" + type.getLocalPart());    
+        }
+        
+        public void declareVariable(String name, String type) {
+            declarations.append("declare variable ")
+                .append("$")
+                .append(name)
+                .append(" as ")
+                .append(type)
+                .append(" external ")
+                .append(";\n");
+        }
+        
+        public void declareVariable(String name) {
+            declarations.append("declare variable ")
+                .append("$")
+                .append(name)
+                .append(" external ")
+                .append(";\n");
+        }
+        
+        public void declareNamespace(String prefix, String uri) {
             declarations.append("declare namespace ")
-	            .append(prefix)
-	            .append("=")
-	            .append("\"" + uri + "\"")
-	            .append(";\n");
-    	}
-    	    	
-    	public void declareDefaultElementNamespace(String uri) {
+                .append(prefix)
+                .append("=")
+                .append("\"" + uri + "\"")
+                .append(";\n");
+        }
+                
+        public void declareDefaultElementNamespace(String uri) {
             declarations.append("declare default element namespace ")
-	            .append("\"" + uri + "\"")
-	            .append(";\n");
-		}
+                .append("\"" + uri + "\"")
+                .append(";\n");
+        }
 
-    	public String toString() {
-    		return declarations.toString();
-    	}    	
+        public String toString() {
+            return declarations.toString();
+        }    	
     }
 }

@@ -27,9 +27,9 @@ import javax.xml.namespace.QName;
 public class Namespaces {
 
     /** XML namespaces */	
-	public static final String XML_URI = "http://www.w3.org/XML/1998/namespace".intern();
-	public static final String XMLNS_URI = "http://www.w3.org/2000/xmlns/".intern();
-	
+    public static final String XML_URI = "http://www.w3.org/XML/1998/namespace".intern();
+    public static final String XMLNS_URI = "http://www.w3.org/2000/xmlns/".intern();
+    
     /** BPEL 2.0 Final namespaces */
     public static final String WSBPEL2_0_FINAL_ABSTRACT = "http://docs.oasis-open.org/wsbpel/2.0/process/abstract".intern();
     public static final String WSBPEL2_0_FINAL_EXEC = "http://docs.oasis-open.org/wsbpel/2.0/process/executable".intern();

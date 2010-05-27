@@ -38,10 +38,10 @@ import javax.persistence.Table;
 @Entity
 @Table(name="ODE_MEX_PROP")
 @NamedQueries({
-	@NamedQuery(name=MexProperty.DELETE_MEX_PROPERTIES_BY_MEX_IDS, query="delete from MexProperty as p where p._mexId in (:mexIds)")
+    @NamedQuery(name=MexProperty.DELETE_MEX_PROPERTIES_BY_MEX_IDS, query="delete from MexProperty as p where p._mexId in (:mexIds)")
 })
 public class MexProperty {
-	public final static String DELETE_MEX_PROPERTIES_BY_MEX_IDS = "DELETE_MEX_PROPERTIES_BY_MEX_IDS";
+    public final static String DELETE_MEX_PROPERTIES_BY_MEX_IDS = "DELETE_MEX_PROPERTIES_BY_MEX_IDS";
 
     @Id @Column(name="ID")
     @GeneratedValue(strategy=GenerationType.AUTO)

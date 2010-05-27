@@ -19,6 +19,6 @@
 
 <message xmlns:ns1="http://test.ns">
     <stringPart>
-    	<ns1:string>123456789</ns1:string>
+        <ns1:string>123456789</ns1:string>
     </stringPart>
 </message>

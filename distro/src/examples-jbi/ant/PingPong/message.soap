@@ -20,7 +20,7 @@
 
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
   <SOAP-ENV:Body>
-	<PingRequest xmlns="urn:/Ping.wsdl">
+    <PingRequest xmlns="urn:/Ping.wsdl">
         <text>hello</text>
     </PingRequest>
   </SOAP-ENV:Body>

@@ -35,11 +35,11 @@
             <element name="Output" type="string" />
         
             <element name="TestElement">
-            	<complexType>
-            		<sequence>
-            			<element name="OptionalElement" type="string" minOccurs="0" maxOccurs="1"></element>
-            		</sequence>
-            	</complexType>
+                <complexType>
+                    <sequence>
+                        <element name="OptionalElement" type="string" minOccurs="0" maxOccurs="1"></element>
+                    </sequence>
+                </complexType>
             </element>
         </schema>
     </types>
@@ -63,21 +63,21 @@
     </plnk:partnerLinkType>
     
     <binding name="ServiceBinding" type="tns:ServicePortType">
-    	<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
-    	<operation name="process">
-    		<soap:operation soapAction="test:test/process" />
-    		<input>
-    			<soap:body use="literal" />
-    		</input>
-    		<output>
-    			<soap:body use="literal" />
-    		</output>
-    	</operation>
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+        <operation name="process">
+            <soap:operation soapAction="test:test/process" />
+            <input>
+                <soap:body use="literal" />
+            </input>
+            <output>
+                <soap:body use="literal" />
+            </output>
+        </operation>
     </binding>
     
     <service name="TestIgnoreMissingFromDataService">
         <port name="TestIgnoreMissingFromDataPort" binding="tns:ServiceBinding">
-        	<soap:address location="http://[server]:[port]/ode/processes/TestIgnoreMissingFromData" />
+            <soap:address location="http://[server]:[port]/ode/processes/TestIgnoreMissingFromData" />
         </port>
     </service>
 </definitions>

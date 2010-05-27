@@ -18,20 +18,20 @@
   -->
 
 <process name="Assign8-2.0"
-	 targetNamespace="http://ode/bpel/unit-test"
-	 xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
-	 xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
-	 xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-	 xmlns:test="uri:testing" >
+     targetNamespace="http://ode/bpel/unit-test"
+     xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+     xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+     xmlns:test="uri:testing" >
 
   <import location="../test.wsdl"
-	  importType="http://schemas.xmlsoap.org/wsdl/"
-	  namespace="uri:testing" />
+      importType="http://schemas.xmlsoap.org/wsdl/"
+      namespace="uri:testing" />
 
   <partnerLinks>
     <partnerLink name="testPartnerLink"
-		 partnerLinkType="test:PartnerLinkType1"
-		 myRole="me" />
+         partnerLinkType="test:PartnerLinkType1"
+         myRole="me" />
   </partnerLinks>
 
   <variables>
@@ -50,7 +50,7 @@
     <assign name="assign">
       <copy>
         <from variable="var1"
-        	  property="test:testProp"/>
+              property="test:testProp"/>
         <to>$var1.StringPart2</to>
       </copy>
     </assign>

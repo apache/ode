@@ -67,15 +67,15 @@ public class BrokeredMyRoleMessageExchangeImpl
      * Propagate the invoke reliable call to each subscriber
      */
     public Future invoke(Message request) {
-    	Future myFuture = null;
+        Future myFuture = null;
         for (MyRoleMessageExchange subscriber : subscribers) {
-        	BpelProcess process = ((MyRoleMessageExchangeImpl) subscriber)._process;
-        	if (process.getConf().getState() == ProcessState.ACTIVE) {
-	            Future theirFuture = subscriber.invoke(request);
-	            if (myFuture == null) {
-	            	myFuture = theirFuture;
-	            }
-        	}
+            BpelProcess process = ((MyRoleMessageExchangeImpl) subscriber)._process;
+            if (process.getConf().getState() == ProcessState.ACTIVE) {
+                Future theirFuture = subscriber.invoke(request);
+                if (myFuture == null) {
+                    myFuture = theirFuture;
+                }
+            }
         }
         return myFuture;
     }
@@ -104,33 +104,33 @@ public class BrokeredMyRoleMessageExchangeImpl
     
     @Override
     public Status getStatus() {
-    	return template.getStatus();
+        return template.getStatus();
     }
     
     @Override
     public CorrelationStatus getCorrelationStatus() {
-    	return template.getCorrelationStatus();
+        return template.getCorrelationStatus();
     }
     
     @Override
     public int getSubscriberCount() {
-    	return subscribers != null ? subscribers.size() : 0;
+        return subscribers != null ? subscribers.size() : 0;
     }
     
     @Override
     public void setSubscriberCount(int subscriberCount) {
-    	for (MyRoleMessageExchange subscriber : subscribers) {
-	    	((MyRoleMessageExchangeImpl) subscriber).setSubscriberCount(subscriberCount);
-    	}
+        for (MyRoleMessageExchange subscriber : subscribers) {
+            ((MyRoleMessageExchangeImpl) subscriber).setSubscriberCount(subscriberCount);
+        }
     }
     
     @Override
     public PortType getPortType() {
-    	return template.getPortType();
+        return template.getPortType();
     }
     
     @Override
     public Operation getOperation() {
-    	return template.getOperation();
+        return template.getOperation();
     }
 }

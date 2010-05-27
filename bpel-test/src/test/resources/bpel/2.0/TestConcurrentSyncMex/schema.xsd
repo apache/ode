@@ -34,18 +34,18 @@
 </xsd:complexType>
 </xsd:element>
 <xsd:element name="RespOperation">
-	<xsd:complexType>
-		<xsd:sequence>
-			<xsd:element name="in" type="xsd:string"></xsd:element>
-			<xsd:element name="id" type="xsd:string"></xsd:element>
-		</xsd:sequence>
-	</xsd:complexType>
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element name="in" type="xsd:string"></xsd:element>
+            <xsd:element name="id" type="xsd:string"></xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
 </xsd:element>
 <xsd:element name="RespOperationResponse">
-	<xsd:complexType>
-		<xsd:sequence>
-			<xsd:element name="out" type="xsd:string"></xsd:element>
-		</xsd:sequence>
-	</xsd:complexType>
+    <xsd:complexType>
+        <xsd:sequence>
+            <xsd:element name="out" type="xsd:string"></xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
 </xsd:element>
 </xsd:schema>

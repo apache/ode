@@ -19,7 +19,7 @@
   -->
 
 <!--
-	
+    
 -->
 <process name="pick5_mesex-2.0" 
     targetNamespace="http://ode/bpel/unit-test" 

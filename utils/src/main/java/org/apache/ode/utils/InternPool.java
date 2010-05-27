@@ -70,20 +70,20 @@ public class InternPool {
         String processId = getProcessId();
 
         if (!cachedBlocks.contains(processId)) {
-        	return value;
+            return value;
         }
         
         synchronized (cachedValues) {
             List values = (List) cachedValues.get(processId, key);
             if (values == null) {
-            	cachedValues.put(processId, key, (values = new ArrayList()));
+                cachedValues.put(processId, key, (values = new ArrayList()));
             }
 
             Object intern;
             if (values.contains(value)) {
-            	intern = values.get(values.indexOf(value));
+                intern = values.get(values.indexOf(value));
             } else {
-            	values.add(intern = value);            	
+                values.add(intern = value);            	
             }
 
             return intern;

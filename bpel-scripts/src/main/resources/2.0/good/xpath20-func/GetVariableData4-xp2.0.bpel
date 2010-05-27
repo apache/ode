@@ -35,8 +35,8 @@ bpws:getVariableData(varname, partname,query) Test Case
   expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
 
   <import importType="http://schemas.xmlsoap.org/wsdl/"
-	  location="../test.wsdl"
-	  namespace="http://ode/bpel/unit-test.wsdl" />
+      location="../test.wsdl"
+      namespace="http://ode/bpel/unit-test.wsdl" />
 
   <partnerLinks>
     <partnerLink name="testPartnerLink"

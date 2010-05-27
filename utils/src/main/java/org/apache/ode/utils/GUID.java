@@ -51,218 +51,218 @@ import java.util.Set;
  * </pre>
  */
 public final class GUID implements Cloneable, Comparable, java.io.Serializable {
-	static final long serialVersionUID = -7977671257884186039L;
+    static final long serialVersionUID = -7977671257884186039L;
 
-	static String PROP_PORT = "org.apache.ode.uid.port";
+    static String PROP_PORT = "org.apache.ode.uid.port";
 
-	static int port = Integer.getInteger(PROP_PORT, 33666);
-	
-	// 32 bits
-	private static final byte[] ipadd = {127,0,0,1};
+    static int port = Integer.getInteger(PROP_PORT, 33666);
+    
+    // 32 bits
+    private static final byte[] ipadd = {127,0,0,1};
 
-	// 64 bits
-	private static byte[] baseId = getSystemUniqId();
+    // 64 bits
+    private static byte[] baseId = getSystemUniqId();
 
-	// 32 bits
-	private static short cnt = Short.MIN_VALUE;
+    // 32 bits
+    private static short cnt = Short.MIN_VALUE;
 
-	private static GUID _VM_GUID;
+    private static GUID _VM_GUID;
 
-	static {
-		_VM_GUID = new GUID();
-	}
-
-	private final byte[] id;
-
-	private transient String guidstring = null;
-
-	/**
-	 * Create a new unique GUID
-	 */
-	public GUID() {
-		short c;
-		byte[] b;
-
-		synchronized (GUID.class) {
-			c = ++cnt;
-			b = baseId;
-
-			if (cnt == Short.MAX_VALUE) {
-				cnt = Short.MIN_VALUE;
-				baseId = getSystemUniqId();
-			}
-		}
-
-		id = new byte[] { ipadd[0], ipadd[1], ipadd[2], ipadd[3], b[7], b[6],
-				b[5], b[4], b[3], b[2], b[1], b[0], (byte) ((c >>> 8) & 0xff),
-				(byte) (c & 0xff) };
-	}
-
-	/**
-	 * Reconstitute a GUID from it's string representation
-	 * 
-	 * @param str
-	 *            DOCUMENTME
-	 * 
-	 * @throws MalformedGuidException
-	 *             DOCUMENTME
-	 */
-	public GUID(String str) throws MalformedGuidException {
-		if (str == null) {
-			throw new MalformedGuidException(str);
-		}
-
-		id = new byte[14];
-		stringToBytes(str);
-	}
-
-	/**
-	 * Get the GUID bytes.
-	 */
-	public byte[] getGuid() {
-		return id;
-	}
-
-	public static GUID getVMGUID() {
-		return _VM_GUID;
-	}
-
-	public int compareTo(Object o) {
-		if (o == this) {
-
-			return 0;
-		}
-
-		GUID o1 = (GUID) o;
-
-		for (short i = 0; i < id.length; ++i) {
-			if (o1.id[i] < id[i]) {
-
-				return -1;
-			} else if (o1.id[i] > id[i]) {
-
-				return 1;
-			}
-		}
-
-		return 0;
-	}
-
-	public boolean equals(Object o) {
-		try {
-			return compareTo(o) == 0;
-		} catch (ClassCastException ce) {
-			return false;
-		}
-	}
-
-	public int hashCode() {
-		int ret = 0;
-
-		for (short i = 0; i < id.length; ++i) {
-			ret ^= (id[i] << (i % 4));
+    static {
+        _VM_GUID = new GUID();
     }
 
-		return ret;
-	}
+    private final byte[] id;
 
-	public static void main(String[] argv) throws Exception {
-		Set<GUID> set = new HashSet<GUID>();
+    private transient String guidstring = null;
 
-		for (int i = 0; i < 100000; ++i) {
-			GUID g = new GUID();
+    /**
+     * Create a new unique GUID
+     */
+    public GUID() {
+        short c;
+        byte[] b;
 
-			if (set.contains(g)) {
-				System.out.println("CONFLICT>>>");
-			}
+        synchronized (GUID.class) {
+            c = ++cnt;
+            b = baseId;
 
-			set.add(g);
+            if (cnt == Short.MAX_VALUE) {
+                cnt = Short.MIN_VALUE;
+                baseId = getSystemUniqId();
+            }
+        }
 
-			GUID ng = new GUID(g.toString());
+        id = new byte[] { ipadd[0], ipadd[1], ipadd[2], ipadd[3], b[7], b[6],
+                b[5], b[4], b[3], b[2], b[1], b[0], (byte) ((c >>> 8) & 0xff),
+                (byte) (c & 0xff) };
+    }
 
-			if (!ng.toString().equals(g.toString()) || !ng.equals(g)) {
-				System.out.println("INEQUALITY>>>");
-				System.out.println(ng.toString());
-				System.out.println(g.toString());
-			} else {
-				System.out.println(g.toString());
-			}
-		}
-	}
+    /**
+     * Reconstitute a GUID from it's string representation
+     * 
+     * @param str
+     *            DOCUMENTME
+     * 
+     * @throws MalformedGuidException
+     *             DOCUMENTME
+     */
+    public GUID(String str) throws MalformedGuidException {
+        if (str == null) {
+            throw new MalformedGuidException(str);
+        }
 
-	/**
-	 * Convert a GUID to it's string representation. This will return a string
-	 * of at most 32 bytes.
-	 * 
-	 * @return DOCUMENTME
-	 */
-	public String toString() {
-		if (guidstring == null) {
-			guidstring = mapBytesToChars();
-		}
+        id = new byte[14];
+        stringToBytes(str);
+    }
 
-		return guidstring;
-	}
+    /**
+     * Get the GUID bytes.
+     */
+    public byte[] getGuid() {
+        return id;
+    }
 
-	private static byte[] getSystemUniqId() {
-		ProcessMutex pm = new ProcessMutex(port);
+    public static GUID getVMGUID() {
+        return _VM_GUID;
+    }
 
-		try {
-			pm.lock();
-		} catch (InterruptedException ie) {
-			System.err
-					.println("ERROR: Could not establish unique starttime using\n"
-							+ "       TCP port "
-							+ port
-							+ " for synchronization. \n"
-							+ "       Perhaps this port is used by anotherprocess? \n"
-							+ "       Check the '"
-							+ PROP_PORT
-							+ "' JAVA system property. \n");
-			throw new RuntimeException("GUID.getSystemUniqId() FAILED!!!");
-		}
+    public int compareTo(Object o) {
+        if (o == this) {
 
-		long uid = System.currentTimeMillis();
-		pm.unlock();
+            return 0;
+        }
 
-		return new byte[] { (byte) (uid & 0xff), (byte) ((uid >>> 8) & 0xff),
-				(byte) ((uid >>> 16) & 0xff), (byte) ((uid >>> 24) & 0xff),
-				(byte) ((uid >>> 32) & 0xff), (byte) ((uid >>> 40) & 0xff),
-				(byte) ((uid >>> 48) & 0xff), (byte) ((uid >>> 56) & 0xff) };
-	}
+        GUID o1 = (GUID) o;
 
-	private String mapBytesToChars() {
-		BigInteger bigInt = new BigInteger(id);
-		return bigInt.toString(34);
-	}
+        for (short i = 0; i < id.length; ++i) {
+            if (o1.id[i] < id[i]) {
 
-	private void stringToBytes(String s) {
-		BigInteger bigInt = new BigInteger(s, 34);
-		byte[] bytes = bigInt.toByteArray();
-		for (int i = 0; i < id.length; ++i)
-			id[i] = bytes[i];
-	}
+                return -1;
+            } else if (o1.id[i] > id[i]) {
 
-	public static class MalformedGuidException extends Exception {
+                return 1;
+            }
+        }
 
-		private static final long serialVersionUID = -8922336058603571809L;
+        return 0;
+    }
 
-		public MalformedGuidException(String guid) {
-			super("Malformed guid: " + guid);
-		}
-	}
-	
-	public static String makeGUID(String digest) {
-	    String val = "0";
-	    int maxlen = 32;
-	    int base = 34;
-	    int prime = 31;
-	    for (int i = 0; i < digest.length(); i++) {
-	        char c = digest.charAt(i);
-	        val = new BigInteger(val, base).add(BigInteger.valueOf((long) c)).multiply(BigInteger.valueOf(prime)).toString(base);
-	        if (val.length() > maxlen) val = val.substring(0, maxlen);
-	    }
-	    
-	    return val;
-	}
+    public boolean equals(Object o) {
+        try {
+            return compareTo(o) == 0;
+        } catch (ClassCastException ce) {
+            return false;
+        }
+    }
+
+    public int hashCode() {
+        int ret = 0;
+
+        for (short i = 0; i < id.length; ++i) {
+            ret ^= (id[i] << (i % 4));
+    }
+
+        return ret;
+    }
+
+    public static void main(String[] argv) throws Exception {
+        Set<GUID> set = new HashSet<GUID>();
+
+        for (int i = 0; i < 100000; ++i) {
+            GUID g = new GUID();
+
+            if (set.contains(g)) {
+                System.out.println("CONFLICT>>>");
+            }
+
+            set.add(g);
+
+            GUID ng = new GUID(g.toString());
+
+            if (!ng.toString().equals(g.toString()) || !ng.equals(g)) {
+                System.out.println("INEQUALITY>>>");
+                System.out.println(ng.toString());
+                System.out.println(g.toString());
+            } else {
+                System.out.println(g.toString());
+            }
+        }
+    }
+
+    /**
+     * Convert a GUID to it's string representation. This will return a string
+     * of at most 32 bytes.
+     * 
+     * @return DOCUMENTME
+     */
+    public String toString() {
+        if (guidstring == null) {
+            guidstring = mapBytesToChars();
+        }
+
+        return guidstring;
+    }
+
+    private static byte[] getSystemUniqId() {
+        ProcessMutex pm = new ProcessMutex(port);
+
+        try {
+            pm.lock();
+        } catch (InterruptedException ie) {
+            System.err
+                    .println("ERROR: Could not establish unique starttime using\n"
+                            + "       TCP port "
+                            + port
+                            + " for synchronization. \n"
+                            + "       Perhaps this port is used by anotherprocess? \n"
+                            + "       Check the '"
+                            + PROP_PORT
+                            + "' JAVA system property. \n");
+            throw new RuntimeException("GUID.getSystemUniqId() FAILED!!!");
+        }
+
+        long uid = System.currentTimeMillis();
+        pm.unlock();
+
+        return new byte[] { (byte) (uid & 0xff), (byte) ((uid >>> 8) & 0xff),
+                (byte) ((uid >>> 16) & 0xff), (byte) ((uid >>> 24) & 0xff),
+                (byte) ((uid >>> 32) & 0xff), (byte) ((uid >>> 40) & 0xff),
+                (byte) ((uid >>> 48) & 0xff), (byte) ((uid >>> 56) & 0xff) };
+    }
+
+    private String mapBytesToChars() {
+        BigInteger bigInt = new BigInteger(id);
+        return bigInt.toString(34);
+    }
+
+    private void stringToBytes(String s) {
+        BigInteger bigInt = new BigInteger(s, 34);
+        byte[] bytes = bigInt.toByteArray();
+        for (int i = 0; i < id.length; ++i)
+            id[i] = bytes[i];
+    }
+
+    public static class MalformedGuidException extends Exception {
+
+        private static final long serialVersionUID = -8922336058603571809L;
+
+        public MalformedGuidException(String guid) {
+            super("Malformed guid: " + guid);
+        }
+    }
+    
+    public static String makeGUID(String digest) {
+        String val = "0";
+        int maxlen = 32;
+        int base = 34;
+        int prime = 31;
+        for (int i = 0; i < digest.length(); i++) {
+            char c = digest.charAt(i);
+            val = new BigInteger(val, base).add(BigInteger.valueOf((long) c)).multiply(BigInteger.valueOf(prime)).toString(base);
+            if (val.length() > maxlen) val = val.substring(0, maxlen);
+        }
+        
+        return val;
+    }
 }

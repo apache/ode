@@ -31,30 +31,30 @@ import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
  */
 public class NoOpInterceptor implements MessageExchangeInterceptor {
 
-	public void onJobScheduled(MyRoleMessageExchange mex,
-			InterceptorContext ic) throws FailMessageExchangeException,
-			FaultMessageExchangeException {
-	}
-	
-	public void onBpelServerInvoked(MyRoleMessageExchange mex,
-			InterceptorContext ic) throws FailMessageExchangeException,
-			FaultMessageExchangeException {
-	}
+    public void onJobScheduled(MyRoleMessageExchange mex,
+            InterceptorContext ic) throws FailMessageExchangeException,
+            FaultMessageExchangeException {
+    }
+    
+    public void onBpelServerInvoked(MyRoleMessageExchange mex,
+            InterceptorContext ic) throws FailMessageExchangeException,
+            FaultMessageExchangeException {
+    }
 
-	public void onProcessInvoked(MyRoleMessageExchange mex,
-			InterceptorContext ic) throws FailMessageExchangeException,
-			FaultMessageExchangeException {
-	}
+    public void onProcessInvoked(MyRoleMessageExchange mex,
+            InterceptorContext ic) throws FailMessageExchangeException,
+            FaultMessageExchangeException {
+    }
 
-	public void onPartnerInvoked(PartnerRoleMessageExchange mex,
-			InterceptorContext ic) throws FailMessageExchangeException,
-			FaultMessageExchangeException {
-	}
+    public void onPartnerInvoked(PartnerRoleMessageExchange mex,
+            InterceptorContext ic) throws FailMessageExchangeException,
+            FaultMessageExchangeException {
+    }
 
-	public void onNewInstanceInvoked(MyRoleMessageExchange mex,
-			InterceptorContext ic) throws FailMessageExchangeException,
-			FaultMessageExchangeException {
+    public void onNewInstanceInvoked(MyRoleMessageExchange mex,
+            InterceptorContext ic) throws FailMessageExchangeException,
+            FaultMessageExchangeException {
 
-	}
+    }
 
 }

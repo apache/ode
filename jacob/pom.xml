@@ -46,35 +46,35 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-	    <scope>test</scope>
+        <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-		<groupId>org.codehaus.mojo</groupId>
-		<artifactId>apt-maven-plugin</artifactId>
-		<version>1.0-alpha-3</version>
-		<configuration>
-		  <factory>org.apache.ode.jacob.ap.JacobAnnotationProcessorFactory</factory>
-		  <outputDirectory>target/generated/apt</outputDirectory>
-		</configuration>
-		<executions>
-		   <execution>
-		    <goals>
-		       <goal>process</goal>
-		       <goal>test-process</goal>
-		    </goals>
-		   </execution>
-	        </executions>
-		<dependencies>
-		   <dependency>
-		      <groupId>org.apache.ode</groupId>
-		      <artifactId>ode-jacob-ap</artifactId>
-		      <version>${project.version}</version>
-		   </dependency>
-		 </dependencies>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>apt-maven-plugin</artifactId>
+        <version>1.0-alpha-3</version>
+        <configuration>
+          <factory>org.apache.ode.jacob.ap.JacobAnnotationProcessorFactory</factory>
+          <outputDirectory>target/generated/apt</outputDirectory>
+        </configuration>
+        <executions>
+           <execution>
+            <goals>
+               <goal>process</goal>
+               <goal>test-process</goal>
+            </goals>
+           </execution>
+            </executions>
+        <dependencies>
+           <dependency>
+              <groupId>org.apache.ode</groupId>
+              <artifactId>ode-jacob-ap</artifactId>
+              <version>${project.version}</version>
+           </dependency>
+         </dependencies>
             </plugin>
         </plugins>
     </build>

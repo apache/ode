@@ -44,7 +44,7 @@ public class SharedEndpoints {
      * Creates a new SharedEndpoints object.
      */
     public SharedEndpoints() {
-    	init();
+        init();
     }
 
     /**
@@ -111,16 +111,16 @@ public class SharedEndpoints {
     }
     
     public int getReferenceCount(EndpointReference epr) {
-    	int referenceCount = 0;
-    	for (Endpoint endpoint : _eprs.keySet()) {
-    		if (_eprs.get(endpoint).equals(epr)) {
-    			for (Endpoint reference : _referenceCounts) {
-    				if (reference.equals(endpoint)) {
-    					++referenceCount;
-    				}
-    			}
-    		}
-    	}
-    	return referenceCount;    	
+        int referenceCount = 0;
+        for (Endpoint endpoint : _eprs.keySet()) {
+            if (_eprs.get(endpoint).equals(epr)) {
+                for (Endpoint reference : _referenceCounts) {
+                    if (reference.equals(endpoint)) {
+                        ++referenceCount;
+                    }
+                }
+            }
+        }
+        return referenceCount;    	
     }
 }

@@ -79,7 +79,7 @@
         <port name="ProcessPORT" binding="proc:ProcessBIND">
             <soap:address location="http://localhost:8080/ode/soap/async2/invoke"/>
         </port>
-	<port name="CallbackPORT" binding="proc:CallbackBIND">
+    <port name="CallbackPORT" binding="proc:CallbackBIND">
             <soap:address location="http://localhost:8080/ode/soap/async2/callback"/>
         </port>
 

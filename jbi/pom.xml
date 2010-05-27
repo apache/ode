@@ -30,13 +30,13 @@
     </parent>
     
     <properties>
-	<jbi.version>1.1.0</jbi.version>
+    <jbi.version>1.1.0</jbi.version>
         <spring.version>2.5.6</spring.version>
         <servicemix.core.version>3.3</servicemix.core.version>
         <servicemix.component.version>2008.01</servicemix.component.version>
         <servicemix.utils.version>1.0.0</servicemix.utils.version>
         <tranql.version>1.1</tranql.version>
-	<geronimo.specs.jms.version>1.1-rc4</geronimo.specs.jms.version>
+    <geronimo.specs.jms.version>1.1-rc4</geronimo.specs.jms.version>
     </properties>
      
     <dependencies>
@@ -260,61 +260,61 @@
         <dependency>
           <groupId>junit</groupId>
           <artifactId>junit</artifactId>
-	  <scope>test</scope>
+      <scope>test</scope>
         </dependency>
         <dependency>
           <groupId>commons-io</groupId>
           <artifactId>commons-io</artifactId>
-	  <scope>test</scope>
+      <scope>test</scope>
         </dependency>
         <dependency>
           <groupId>org.springframework</groupId>
           <artifactId>spring</artifactId>
           <version>${spring.version}</version>
-	  <scope>test</scope>
+      <scope>test</scope>
         </dependency>
 
         <dependency>
           <groupId>org.apache.servicemix</groupId>
           <artifactId>servicemix-core</artifactId>
           <version>${servicemix.core.version}</version>
-	  <scope>test</scope>
+      <scope>test</scope>
         </dependency>
         <dependency>
           <groupId>org.apache.servicemix</groupId>
           <artifactId>servicemix-soap</artifactId>
           <version>${servicemix.component.version}</version>
-	  <scope>test</scope>
+      <scope>test</scope>
         </dependency>
         <dependency>
           <groupId>org.apache.servicemix</groupId>
           <artifactId>servicemix-common</artifactId>
           <version>${servicemix.component.version}</version>
-	  <scope>test</scope>
+      <scope>test</scope>
         </dependency>
         <dependency>
           <groupId>org.apache.servicemix</groupId>
           <artifactId>servicemix-shared</artifactId>
           <version>${servicemix.component.version}</version>
-	  <scope>test</scope>
+      <scope>test</scope>
         </dependency>
         <dependency>
           <groupId>org.apache.servicemix</groupId>
           <artifactId>servicemix-http</artifactId>
           <version>${servicemix.component.version}</version>
-	  <scope>test</scope>
+      <scope>test</scope>
         </dependency>
         <dependency>
           <groupId>org.apache.servicemix</groupId>
           <artifactId>servicemix-eip</artifactId>
           <version>${servicemix.component.version}</version>
-	  <scope>test</scope>
+      <scope>test</scope>
         </dependency>
         <dependency>
           <groupId>org.apache.servicemix</groupId>
           <artifactId>servicemix-utils</artifactId>
           <version>${servicemix.utils.version}</version>
-	  <scope>test</scope>
+      <scope>test</scope>
         </dependency>
         <dependency>
            <groupId>org.apache.geronimo.specs</groupId>
@@ -403,7 +403,7 @@
       <plugin>
         <groupId>org.apache.servicemix.tooling</groupId>
         <artifactId>jbi-maven-plugin</artifactId>
-		<version>3.2.3</version>
+        <version>3.2.3</version>
         <extensions>true</extensions>
         <executions>
           <execution>
@@ -426,19 +426,19 @@
       </plugin>
            
       <plugin>
-		<artifactId>maven-surefire-plugin</artifactId>
-		<configuration>
-       		<!-- FIXME: temporary skip it -->
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+            <!-- FIXME: temporary skip it -->
             <!--
             <skipTests>true</skipTests>
             -->
-			<systemProperties>
-				<property>
-					<name>java.naming.factory.initial</name>
-					<value>org.apache.xbean.spring.jndi.SpringInitialContextFactory</value>
-				</property>
-			</systemProperties>	   		
-		</configuration>
+            <systemProperties>
+                <property>
+                    <name>java.naming.factory.initial</name>
+                    <value>org.apache.xbean.spring.jndi.SpringInitialContextFactory</value>
+                </property>
+            </systemProperties>	   		
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

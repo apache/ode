@@ -17,9 +17,9 @@
 
 var baseURL;
 if (location.host.indexOf('/') == -1 && location.protocol.indexOf('/') == -1) {
-	baseURL = location.protocol + "//" + location.host + "/";
+    baseURL = location.protocol + "//" + location.host + "/";
 }else if(location.host.indexOf('/') != -1 && location.protocol.indexOf('/') == -1){
-	baseURL = location.protocol + "//" + location.host;
+    baseURL = location.protocol + "//" + location.host;
 }
 var baseDirectoryName = location.pathname.substring(0,location.pathname.indexOf('/',1));
 if(baseDirectoryName.indexOf('/') == 0){
@@ -1151,7 +1151,7 @@ org.apache.ode.DeploymentHandling = {};
     //var bundleDataUrl = 'http://localhost:8080/ode/deployment/bundles/';
     //var packageDocsUrl = 'http://localhost:8080/ode/deployment/getBundleDocs/';
     var bundleDataUrl = baseDirectoryURL + '/deployment/bundles/';
-	var packageDocsUrl = baseDirectoryURL + '/deployment/getBundleDocs/';
+    var packageDocsUrl = baseDirectoryURL + '/deployment/getBundleDocs/';
     
     function loadDeployedPackages(){
         try{

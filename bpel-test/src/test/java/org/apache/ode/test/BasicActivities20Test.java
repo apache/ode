@@ -29,12 +29,12 @@ import org.apache.ode.bpel.iapi.MessageExchange;
 import org.junit.Test;
 
 public class BasicActivities20Test extends BPELTestAbstract {
-	
-	@Test public void testHelloWorld2() throws Throwable {
-		go("/bpel/2.0/HelloWorld2");
+    
+    @Test public void testHelloWorld2() throws Throwable {
+        go("/bpel/2.0/HelloWorld2");
     }
 
-	@Test public void testNegativeTargetNS1() throws Throwable {
+    @Test public void testNegativeTargetNS1() throws Throwable {
         /**
          * Test for an invalid targetNamespace has been entered into the WSDL. See JIRA ODE-67 Test for a specific exception
          * message.
@@ -45,11 +45,11 @@ public class BasicActivities20Test extends BPELTestAbstract {
         go();
     }
 
-	@Test public void testTimer() throws Throwable {
+    @Test public void testTimer() throws Throwable {
         go("/bpel/2.0/TestTimer");
     }
 
-	@Test public void testIf() throws Throwable {
+    @Test public void testIf() throws Throwable {
         go("/bpel/2.0/TestIf");
     }
     
@@ -57,7 +57,7 @@ public class BasicActivities20Test extends BPELTestAbstract {
      * Tests the wait "for" syntax.
      * @throws Throwable
      */
-	@Test public void testWaitFor() throws Throwable {
+    @Test public void testWaitFor() throws Throwable {
         deploy("/bpel/2.0/TestWait1");
         Invocation inv = addInvoke("Wait1#1", new QName("http://ode/bpel/unit-test.wsdl", "testService"), "testOperation", 
             "<message><TestPart/><Time/></message>",
@@ -73,7 +73,7 @@ public class BasicActivities20Test extends BPELTestAbstract {
     /**
      * Test the wait "until" syntax.
      */
-	@Test public void testWaitUntil() throws Throwable {
+    @Test public void testWaitUntil() throws Throwable {
         deploy("/bpel/2.0/TestWaitUntil");
         DateFormat idf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
         String isountil = idf.format(new Date(System.currentTimeMillis()+5000));
@@ -91,7 +91,7 @@ public class BasicActivities20Test extends BPELTestAbstract {
     /**
      * Test the wait "until" syntax.
      */
-	@Test public void testWaitUntilPast() throws Throwable {
+    @Test public void testWaitUntilPast() throws Throwable {
         deploy("/bpel/2.0/TestWaitUntil");
         DateFormat idf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
         String isountil = idf.format(new Date(System.currentTimeMillis()-5000));
@@ -109,7 +109,7 @@ public class BasicActivities20Test extends BPELTestAbstract {
      * Tests the wait "for" syntax.
      * @throws Throwable
      */
-	@Test public void testOnAlarm() throws Throwable {
+    @Test public void testOnAlarm() throws Throwable {
         deploy("/bpel/2.0/TestAlarm");
         Invocation inv = addInvoke("Wait1#1", new QName("http://ode.apache.org/example", "CanonicServiceForClient"), "receive",
             "<message><body><start xmlns=\"http://ode.apache.org/example\">start</start></body></message>",

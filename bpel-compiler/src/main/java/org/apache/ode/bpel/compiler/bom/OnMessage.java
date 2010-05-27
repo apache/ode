@@ -69,7 +69,7 @@ public class OnMessage extends BpelObject implements Communication {
     }
     
     public String getRoute() {
-    	return getAttribute("route", "one");
+        return getAttribute("route", "one");
     }
 
     /**

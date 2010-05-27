@@ -53,9 +53,9 @@
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="TestAssignService">
-		<wsdl:port name="TestAssignPort" binding="tns:TestAssignSoapBinding">
-     		<soap:address location="http://localhost:8080/ode/processes/TestAssign"/>
-		</wsdl:port>
+        <wsdl:port name="TestAssignPort" binding="tns:TestAssignSoapBinding">
+            <soap:address location="http://localhost:8080/ode/processes/TestAssign"/>
+        </wsdl:port>
     </wsdl:service>
 
    <plnk:partnerLinkType name="TestAssignPartnerLinkType">

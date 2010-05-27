@@ -20,10 +20,10 @@
 <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/Assignment" xmlns:tns="http://www.example.org/Assignment" elementFormDefault="qualified">
 
     <complexType name="AssignTask">
-    	<sequence>
-    		<element name="Name" type="string"></element>
-    		<element name="JobProfile" type="string"></element>
-    		<element name="Status" type="string"></element>
-    	</sequence>
+        <sequence>
+            <element name="Name" type="string"></element>
+            <element name="JobProfile" type="string"></element>
+            <element name="Status" type="string"></element>
+        </sequence>
     </complexType>
 </schema>

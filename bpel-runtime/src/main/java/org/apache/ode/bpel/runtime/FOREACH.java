@@ -214,7 +214,7 @@ public class FOREACH extends ACTIVITY {
         try {
         initializeVariable(vinst, counterNode);
         } catch (ExternalVariableModuleException e) {
-        	__log.error("Exception while initializing external variable", e);
+            __log.error("Exception while initializing external variable", e);
             _self.parent.failure(e.toString(), null);
             return;
         }

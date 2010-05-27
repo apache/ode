@@ -32,19 +32,19 @@ import org.hibernate.transaction.TransactionManagerLookup;
  */
 public class HibernateTransactionManagerLookup implements TransactionManagerLookup {
 
-	/** Constructor. */
-	public HibernateTransactionManagerLookup() {
-		super();
-	}
+    /** Constructor. */
+    public HibernateTransactionManagerLookup() {
+        super();
+    }
 
-	public TransactionManager getTransactionManager(Properties props)
-			throws HibernateException {
-		return SessionManager.getTransactionManager(props);
-	}
+    public TransactionManager getTransactionManager(Properties props)
+            throws HibernateException {
+        return SessionManager.getTransactionManager(props);
+    }
 
-	public String getUserTransactionName() {
-		return null;
-	}
+    public String getUserTransactionName() {
+        return null;
+    }
 
     public Object getTransactionIdentifier(Transaction transaction) {
         return transaction;

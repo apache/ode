@@ -19,7 +19,7 @@
   -->
 
 <!--
-	Pick will be used to create process instance. Very basic test.
+    Pick will be used to create process instance. Very basic test.
 -->
 <process name="pick3_CreateInstance"
   targetNamespace="http://ode/bpel/unit-test"

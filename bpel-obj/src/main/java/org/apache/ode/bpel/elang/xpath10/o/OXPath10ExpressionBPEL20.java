@@ -30,7 +30,7 @@ import javax.xml.namespace.QName;
  */
 public class OXPath10ExpressionBPEL20 extends OXPath10Expression
         implements Serializable {
-	private static final long serialVersionUID = -1L;
+    private static final long serialVersionUID = -1L;
 
   /** QName of the <code>bpws:getVariableData</code> function. */
   public final QName qname_doXslTransform;
@@ -44,7 +44,7 @@ public class OXPath10ExpressionBPEL20 extends OXPath10Expression
       QName qname_getLinkStatus,
       QName qname_doXslTransform,
       boolean isJoinExpression) {
-  	super(owner, qname_getVariableData, qname_getVariableProperty, qname_getLinkStatus);
+    super(owner, qname_getVariableData, qname_getVariableProperty, qname_getLinkStatus);
     this.qname_doXslTransform = qname_doXslTransform;
     this.isJoinExpression = isJoinExpression;
   }

@@ -101,7 +101,7 @@ public class HPartnerLink extends HObject {
      *
      * @hibernate.column name="PARTNERROLE_EPR_DATA" sql-type="blob(2G)"
      */
-	public byte[] getPartnerEPR() {
+    public byte[] getPartnerEPR() {
         return _partnerEPR;
     }
 

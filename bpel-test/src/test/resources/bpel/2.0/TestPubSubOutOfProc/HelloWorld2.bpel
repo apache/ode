@@ -49,7 +49,7 @@
           operation="hello"
           variable="myVar"
           createInstance="yes"
-		  messageExchange="hello2"/>
+          messageExchange="hello2"/>
 
        <receive
           name="ping"
@@ -75,6 +75,6 @@
               portType="test:HelloPortType" 
               operation="hello"
               variable="myVar"
-			  messageExchange="hello2"/>
+              messageExchange="hello2"/>
    </sequence>
 </process>

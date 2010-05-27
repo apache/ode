@@ -88,10 +88,10 @@
                     <bpws:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"><![CDATA[tns:Record[number($input.payload)]/tns:SomeValue]]></bpws:query>
                 </bpws:from>
 
-				<bpws:to variable="Record">
-					<bpws:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"><![CDATA[tns:SomeValue]]></bpws:query>
-				</bpws:to>
-				
+                <bpws:to variable="Record">
+                    <bpws:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"><![CDATA[tns:SomeValue]]></bpws:query>
+                </bpws:to>
+                
                 <!-- <bpws:to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"><![CDATA[$Record/tns:SomeValue]]></bpws:to> -->
 
             </bpws:copy>
@@ -100,9 +100,9 @@
                     <bpws:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"><![CDATA[tns:Record[number($input.payload)]/tns:AnotherValue]]></bpws:query>
                 </bpws:from>
 
-				<bpws:to variable="Record">
-					<bpws:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"><![CDATA[tns:AnotherValue]]></bpws:query>
-				</bpws:to>
+                <bpws:to variable="Record">
+                    <bpws:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"><![CDATA[tns:AnotherValue]]></bpws:query>
+                </bpws:to>
 
                 <!-- <bpws:to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"><![CDATA[$Record/tns:AnotherValue]]></bpws:to> -->
 

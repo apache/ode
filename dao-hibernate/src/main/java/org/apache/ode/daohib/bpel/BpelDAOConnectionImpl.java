@@ -86,7 +86,7 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection, FilteredInstanc
     }
 
     protected Session getSession(){
-    	return _sm.getSession();
+        return _sm.getSession();
     }
 
     public MessageExchangeDAO createMessageExchange(char dir) {
@@ -337,7 +337,7 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection, FilteredInstanc
     }
 
     @SuppressWarnings("unchecked")
-	public Collection<CorrelationSetDAO> getActiveCorrelationSets() {
+    public Collection<CorrelationSetDAO> getActiveCorrelationSets() {
         ArrayList<CorrelationSetDAO> csetDaos = new ArrayList<CorrelationSetDAO>();
         Collection<HCorrelationSet> csets = getSession().getNamedQuery(HCorrelationSet.SELECT_CORSETS_BY_PROCESS_STATES).setParameter("states", ProcessState.STATE_ACTIVE).list();
         for (HCorrelationSet cset : csets)

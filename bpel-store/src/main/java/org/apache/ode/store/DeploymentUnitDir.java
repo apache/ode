@@ -146,8 +146,8 @@ class DeploymentUnitDir {
     }
 
     void setName(String name) {
-    	// supports extensibility
-    	_name = name;
+        // supports extensibility
+        _name = name;
     }
 
     CBPInfo getCBPInfo(QName typeName) {
@@ -164,14 +164,14 @@ class DeploymentUnitDir {
         if (bpels.size() == 0)
             throw new IllegalArgumentException("Directory " + _duDirectory.getName() + " does not contain any process!");
         for (File bpel : bpels) {
-        	String b = bpel.getAbsolutePath();
-        	File cbp = new File(b.substring(0,b.lastIndexOf(".bpel")) + ".cbp"); 
-        	if (!cbp.exists()) {
-        		__log.debug("compiling " + bpel);
-        		compile(bpel);
-        	} else {
-        		__log.debug("skipping compilation of " + bpel + " cbp found: " + cbp);
-        	}
+            String b = bpel.getAbsolutePath();
+            File cbp = new File(b.substring(0,b.lastIndexOf(".bpel")) + ".cbp"); 
+            if (!cbp.exists()) {
+                __log.debug("compiling " + bpel);
+                compile(bpel);
+            } else {
+                __log.debug("skipping compilation of " + bpel + " cbp found: " + cbp);
+            }
         }
     }
 
@@ -208,13 +208,13 @@ class DeploymentUnitDir {
         bpelc.setBaseDirectory(_duDirectory);
         // Create process such that immutable objects are intern'ed.
         InternPool.runBlock(new InternableBlock() {
-        	public void run() {
+            public void run() {
                 try {
                     bpelc.compile(bpelFile, getVersion());
                 } catch (IOException e) {
                     __log.error("Compile error in " + bpelFile, e);
                 }
-        	}
+            }
         });
     }
 

@@ -33,9 +33,9 @@ bpws:getVariableData(varname, partname,query) Test Case
   xmlns:test="uri:testing">
   
   <import importType="http://schemas.xmlsoap.org/wsdl/"
-	  location="../test.wsdl"
-	  namespace="uri:testing" />
-	  
+      location="../test.wsdl"
+      namespace="uri:testing" />
+      
   <partnerLinks>
     <partnerLink name="testPartnerLink"
       partnerLinkType="test:PartnerLinkType1"

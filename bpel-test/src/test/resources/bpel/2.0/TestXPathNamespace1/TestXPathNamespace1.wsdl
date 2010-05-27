@@ -36,11 +36,11 @@
        xmlns="http://ode/bpel/unit-test/TestXPathNamespace1.wsdl.types1"
        xmlns:xsd="http://www.w3.org/2001/XMLSchema">
       <xsd:complexType name="typeIndicator">
-	  <xsd:sequence>
-	    <xsd:element name="indicatorOne" type="xsd:string"/>
-	    <xsd:element name="indicatorTwo" type="xsd:string"/>
+      <xsd:sequence>
+        <xsd:element name="indicatorOne" type="xsd:string"/>
+        <xsd:element name="indicatorTwo" type="xsd:string"/>
         </xsd:sequence>
-	</xsd:complexType>
+    </xsd:complexType>
 
       <xsd:complexType name="testMessage">
         <xsd:sequence>
@@ -86,7 +86,7 @@
    </plnk:partnerLinkType>
 
    <plnk:partnerLinkType name="probeRequest">
-	<plnk:role name="probeService" portType="prb:probeMessagePT"/>
+    <plnk:role name="probeService" portType="prb:probeMessagePT"/>
    </plnk:partnerLinkType>
 
 </wsdl:definitions>

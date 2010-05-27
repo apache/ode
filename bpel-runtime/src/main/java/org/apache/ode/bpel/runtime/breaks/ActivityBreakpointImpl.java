@@ -27,30 +27,30 @@ public class ActivityBreakpointImpl extends BreakpointImpl implements ActivityBr
     private static final long serialVersionUID = -8717519287041871427L;
     private String _activityName;
 
-	public ActivityBreakpointImpl(String uuid, String activityName) {
-		super(uuid);
+    public ActivityBreakpointImpl(String uuid, String activityName) {
+        super(uuid);
     _activityName = activityName;
-	}
+    }
 
   /**
-	 * @see org.apache.ode.bpel.bdi.breaks.ActivityBreakpoint#activityName()
-	 */
-	public String activityName() {
-		return _activityName;
-	}
+     * @see org.apache.ode.bpel.bdi.breaks.ActivityBreakpoint#activityName()
+     */
+    public String activityName() {
+        return _activityName;
+    }
 
   /**
-	 * @see org.apache.ode.bpel.runtime.breaks.BreakpointImpl#checkBreak(org.apache.ode.bpel.evt.BpelEvent)
-	 */
-	public boolean checkBreak(BpelEvent event) {
- 		return isEnabled() 
+     * @see org.apache.ode.bpel.runtime.breaks.BreakpointImpl#checkBreak(org.apache.ode.bpel.evt.BpelEvent)
+     */
+    public boolean checkBreak(BpelEvent event) {
+        return isEnabled() 
         && (event instanceof ActivityExecStartEvent
           && ((ActivityExecStartEvent)event).getActivityName() != null
           && ((ActivityExecStartEvent)event).getActivityName().equals(_activityName))
           || 
-					((event instanceof ScopeCompletionEvent)
+                    ((event instanceof ScopeCompletionEvent)
               && ((ScopeCompletionEvent)event).getScopeName() != null
-							&& ((ScopeCompletionEvent)event).getScopeName().equals(_activityName));
-	}
-	
+                            && ((ScopeCompletionEvent)event).getScopeName().equals(_activityName));
+    }
+    
 }

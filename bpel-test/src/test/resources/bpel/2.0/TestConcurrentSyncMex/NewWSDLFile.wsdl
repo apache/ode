@@ -31,10 +31,10 @@
 <wsdl:part element="tns:NewOperationResponse" name="parameters"/>
 </wsdl:message>
     <wsdl:message name="RespOperationRequest">
-    	<wsdl:part name="parameters" element="tns:RespOperation"></wsdl:part>
+        <wsdl:part name="parameters" element="tns:RespOperation"></wsdl:part>
     </wsdl:message>
     <wsdl:message name="RespOperationResponse">
-    	<wsdl:part name="parameters" element="tns:RespOperationResponse"></wsdl:part>
+        <wsdl:part name="parameters" element="tns:RespOperationResponse"></wsdl:part>
     </wsdl:message>
     <wsdl:portType name="NewWSDLFile">
 <wsdl:operation name="NewOperation">
@@ -42,8 +42,8 @@
 <wsdl:output message="tns:NewOperationResponse"/>
 </wsdl:operation>
         <wsdl:operation name="RespOperation">
-        	<wsdl:input message="tns:RespOperationRequest"></wsdl:input>
-        	<wsdl:output message="tns:RespOperationResponse"></wsdl:output>
+            <wsdl:input message="tns:RespOperationRequest"></wsdl:input>
+            <wsdl:output message="tns:RespOperationResponse"></wsdl:output>
         </wsdl:operation>
     </wsdl:portType>
 <wsdl:binding name="NewWSDLFileSOAP" type="tns:NewWSDLFile">

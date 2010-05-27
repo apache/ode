@@ -70,7 +70,7 @@
    </plnk:partnerLinkType>
 
    <plnk:partnerLinkType name="probeRequest">
-	  <plnk:role name="probeService" portType="prb:probeMessagePT"/>
+      <plnk:role name="probeService" portType="prb:probeMessagePT"/>
    </plnk:partnerLinkType>
 
    <prop:property name="testProbeID" type="xsd:string"/>

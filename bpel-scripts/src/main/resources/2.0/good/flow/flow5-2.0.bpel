@@ -18,17 +18,17 @@
   -->
 
 <process name="flow5-2.0"
-	 targetNamespace="http://ode/bpel/unit-test" 
-	 xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
-	 xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
-	 xmlns:tns="http://ode/bpel/unit-test"
-	 xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-	 xmlns:test="http://ode/bpel/unit-test.wsdl" 
-	 suppressJoinFailure="yes">
+     targetNamespace="http://ode/bpel/unit-test" 
+     xmlns:bpws="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+     xmlns="http://schemas.xmlsoap.org/ws/2004/03/business-process/"
+     xmlns:tns="http://ode/bpel/unit-test"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+     xmlns:test="http://ode/bpel/unit-test.wsdl" 
+     suppressJoinFailure="yes">
 
   <import importType="http://schemas.xmlsoap.org/wsdl/"
-	  location="test.wsdl"
-	  namespace="http://ode/bpel/unit-test.wsdl" />
+      location="test.wsdl"
+      namespace="http://ode/bpel/unit-test.wsdl" />
 
    <partnerLinks>
       <partnerLink name="testPartnerLink" 
@@ -59,7 +59,7 @@
            <!-- this should happen last -->
              <targets>
                <joinCondition>
-             	  $link-a and $link-b
+                  $link-a and $link-b
                </joinCondition>
          
                <target linkName="link-a"/>

@@ -28,10 +28,10 @@ public class XQuery10ExpressionCompilerImplTest extends TestCase {
     
     public void testGetVariableNames() throws Exception {
         String xq = "let $status := string($SomeVariable/ns:somePath)\n" + 
-        		"                     return\n" + 
-        		"                     if ($status = 'ABC' ) then\n" + 
-        		"                        '123'\n" + 
-        		"                     else $status (: workaround :)";
+                "                     return\n" + 
+                "                     if ($status = 'ABC' ) then\n" + 
+                "                        '123'\n" + 
+                "                     else $status (: workaround :)";
 
         assertMatches(xq);
     }

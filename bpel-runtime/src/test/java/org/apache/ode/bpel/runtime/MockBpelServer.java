@@ -374,7 +374,7 @@ class MockBpelServer {
         }
         
         public <T> T execTransaction(Callable<T> transaction, int timeout) throws Exception, ContextException {
-       		return _scheduler.execTransaction(transaction, timeout);
+            return _scheduler.execTransaction(transaction, timeout);
         }
 
         public void beginTransaction() throws Exception {
@@ -417,8 +417,8 @@ class MockBpelServer {
         public void setPolledRunnableProcesser(JobProcessor delegatedRunnableProcessor) {
         }
 
-		public boolean amICoordinator() {
-			return true;
-		}
+        public boolean amICoordinator() {
+            return true;
+        }
     }
 }

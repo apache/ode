@@ -18,7 +18,7 @@
   -->
 
 <!--
-	Pick will be used to create process instance.
+    Pick will be used to create process instance.
 -->
 <process name="pick3_onAlarm" 
     targetNamespace="http://ode/bpel/unit-test" 
@@ -39,7 +39,7 @@
    </variables>
    
    <sequence>   
-   		<receive 
+        <receive 
           name="startReceive"
           partnerLink="testPartnerLink"
           portType="test:TestPortType"
@@ -47,25 +47,25 @@
           variable="var1"
           createInstance="yes" />
        <pick name="pick1" createInstance="no">
-       	  <onMessage 
-          	partnerLink="testPartnerLink"
-          	portType="test:TestPortType"
-          	operation="pickOp2"
-          	variable="var1">
-        	<assign>
-        		<copy>
-        			<from expression="'onMessage'"/>
-        			<to variable="var1" part="DataPart"/>
-        		</copy>
-        	</assign>  	  
+          <onMessage 
+            partnerLink="testPartnerLink"
+            portType="test:TestPortType"
+            operation="pickOp2"
+            variable="var1">
+            <assign>
+                <copy>
+                    <from expression="'onMessage'"/>
+                    <to variable="var1" part="DataPart"/>
+                </copy>
+            </assign>  	  
          </onMessage>
          <onAlarm for="'P0Y0M0DT0H0M5S'">
-         	<assign>
-        		<copy>
-        			<from expression="'onAlarm'"/>
-        			<to variable="var1" part="DataPart"/>
-        		</copy>
-        	</assign>
+            <assign>
+                <copy>
+                    <from expression="'onAlarm'"/>
+                    <to variable="var1" part="DataPart"/>
+                </copy>
+            </assign>
          </onAlarm>
        </pick>
        <reply name="endReply" 

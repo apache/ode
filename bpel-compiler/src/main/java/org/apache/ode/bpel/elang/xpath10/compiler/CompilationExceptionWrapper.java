@@ -28,14 +28,14 @@ import org.jaxen.JaxenException;
  */
 class CompilationExceptionWrapper extends JaxenException {
 
-	private static final long serialVersionUID = -6918197147269316065L;
+    private static final long serialVersionUID = -6918197147269316065L;
 
-	public CompilationExceptionWrapper(CompilationException cause) {
-		super(cause);
-		assert getCompilationException() != null;
-	}
+    public CompilationExceptionWrapper(CompilationException cause) {
+        super(cause);
+        assert getCompilationException() != null;
+    }
 
-	public CompilationException getCompilationException() {
-		return (CompilationException) getCause();
-	}
+    public CompilationException getCompilationException() {
+        return (CompilationException) getCause();
+    }
 }

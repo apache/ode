@@ -101,7 +101,7 @@ class BindingContextImpl implements BindingContext {
     }
 
 
-	public long calculateSizeofService(EndpointReference epr) {
-		return _ode.calculateSizeOfService(epr);
-	}
+    public long calculateSizeofService(EndpointReference epr) {
+        return _ode.calculateSizeOfService(epr);
+    }
 }

@@ -113,7 +113,7 @@ define "ode" do
       cp_r _("src/test/webapp"), test.compile.target.to_s
       rm_rf Dir[_(webapp_dir) + "/**/.svn"]
       cp_r Dir[_("src/main/webapp/WEB-INF/classes/*")], test.compile.target.to_s
-	  rm_rf Dir[_(webapp_dir) + "/**/.svn"]
+      rm_rf Dir[_(webapp_dir) + "/**/.svn"]
       cp Dir[project("axis2").path_to("src/main/wsdl/*")], "#{webapp_dir}/WEB-INF"
       cp project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd"), "#{webapp_dir}/WEB-INF"
       rm_rf Dir[_(webapp_dir) + "/**/.svn"]

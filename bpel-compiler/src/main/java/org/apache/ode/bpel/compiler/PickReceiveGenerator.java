@@ -85,11 +85,11 @@ abstract class PickReceiveGenerator extends DefaultActivityGenerator {
 
         Set<String> csetNames = new HashSet<String>(); // prevents duplicate cset in on one set of correlations
         for (Correlation correlation : correlations) {
-        	if( csetNames.contains(correlation.getCorrelationSet() ) ) {
+            if( csetNames.contains(correlation.getCorrelationSet() ) ) {
                 throw new CompilationException(__cmsgsGeneral.errDuplicateUseCorrelationSet(correlation
                         .getCorrelationSet()));
-        	}
-        	
+            }
+            
             OScope.CorrelationSet cset = _context.resolveCorrelationSet(correlation.getCorrelationSet());
 
             switch (correlation.getInitiate()) {
@@ -105,8 +105,8 @@ abstract class PickReceiveGenerator extends DefaultActivityGenerator {
                 onMessage.initCorrelations.add(cset);
                 break;
             case JOIN:
-            	cset.hasJoinUseCases = true;
-            	onMessage.joinCorrelations.add(cset);
+                cset.hasJoinUseCases = true;
+                onMessage.joinCorrelations.add(cset);
                 onMessage.partnerLink.addCorrelationSetForOperation(onMessage.operation, cset, true);
                 break;
 

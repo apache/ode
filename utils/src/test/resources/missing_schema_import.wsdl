@@ -20,13 +20,13 @@
 
 <definitions
   targetNamespace="foo://bar/baz"
-	xmlns="http://schemas.xmlsoap.org/wsdl/"
-	xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-	<types>
-		<xs:schema>
-			<xs:import namespace="missing.xsd" schemaLocation="missing.xsd"/>
-		</xs:schema>
-	</types>
-	
+    <types>
+        <xs:schema>
+            <xs:import namespace="missing.xsd" schemaLocation="missing.xsd"/>
+        </xs:schema>
+    </types>
+    
 </definitions>

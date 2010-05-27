@@ -20,19 +20,19 @@
 <deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03"
         xmlns:p="urn:/PingPong">
 
-	<process name="p:Ping">
-		<active>true</active>
-		<provide partnerLink="PingPartnerLink">
-			<service name="p:PingPongService" port="Port1"/>
-		</provide>
-		<invoke partnerLink="PongPartnerLink" usePeer2Peer="false">
-			<service name="p:PingPongService" port="Port2"/>
-		</invoke>
-	</process>
-	<process name="p:Pong">
-		<active>true</active>
-		<provide partnerLink="PongPartnerLink">
-			<service name="p:PingPongService2" port="Port2"/>
-		</provide>
-	</process>
+    <process name="p:Ping">
+        <active>true</active>
+        <provide partnerLink="PingPartnerLink">
+            <service name="p:PingPongService" port="Port1"/>
+        </provide>
+        <invoke partnerLink="PongPartnerLink" usePeer2Peer="false">
+            <service name="p:PingPongService" port="Port2"/>
+        </invoke>
+    </process>
+    <process name="p:Pong">
+        <active>true</active>
+        <provide partnerLink="PongPartnerLink">
+            <service name="p:PingPongService2" port="Port2"/>
+        </provide>
+    </process>
 </deploy>

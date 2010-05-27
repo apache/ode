@@ -156,13 +156,13 @@ public class MockScheduler implements Scheduler {
     }
 
     public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
-    	return execTransaction(transaction, 0);
+        return execTransaction(transaction, 0);
     }
     
     public <T> T execTransaction(Callable<T> transaction, int timeout) throws Exception, ContextException {
-    	if (timeout > 0) {
-    		_txm.setTransactionTimeout(timeout);
-    	}
+        if (timeout > 0) {
+            _txm.setTransactionTimeout(timeout);
+        }
         beginTransaction();
         try {
             T retval = transaction.call();
@@ -173,10 +173,10 @@ public class MockScheduler implements Scheduler {
             rollbackTransaction();
             throw new ContextException("Error in tx", t);
         } finally {
-        	if (timeout > 0) {
+            if (timeout > 0) {
                 // restores the default value
-        		_txm.setTransactionTimeout(0);
-        	}
+                _txm.setTransactionTimeout(0);
+            }
         }
     }
 

@@ -19,14 +19,14 @@
   -->
 <project>
 
-	<property name="db.scripts.dir" value="${basedir}/target" />
-	<property name="descriptor.dir" value="${basedir}/src/main/descriptors"/>
-	<property name="scripts.dir" value="${basedir}/src/main/scripts"/>
+    <property name="db.scripts.dir" value="${basedir}/target" />
+    <property name="descriptor.dir" value="${basedir}/src/main/descriptors"/>
+    <property name="scripts.dir" value="${basedir}/src/main/scripts"/>
 
-	<path id="classpath">
-	  <pathelement path="${maven.runtime.classpath}"/>
-	</path>
-	
+    <path id="classpath">
+      <pathelement path="${maven.runtime.classpath}"/>
+    </path>
+    
     <target name="create-schema">
 
     <taskdef name="mappingtool" classname="org.apache.openjpa.jdbc.ant.MappingToolTask" classpathref="classpath"/>
@@ -68,10 +68,10 @@
       <echo>=====================</echo>
       <echo>Create DDL @{db}</echo>
         <mappingtool schemaAction="build" sqlFile="${db.scripts.dir}/partial.@{db}.sql" readSchema="false">
-	   <config propertiesFile="${descriptor.dir}/persistence.@{db}.xml"/> 
-		<classpath> 
-		   <path refid="classpath"/> 
-		</classpath>
+       <config propertiesFile="${descriptor.dir}/persistence.@{db}.xml"/> 
+        <classpath> 
+           <path refid="classpath"/> 
+        </classpath>
         </mappingtool>
         <concat destfile="${db.scripts.dir}/@{db}.sql">
           <fileset file="${scripts.dir}/common.sql"/>

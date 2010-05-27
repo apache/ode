@@ -92,7 +92,7 @@ EOF
           if license
             content = File.read(filename)
             if (content =~ /<\?xml .*\?>/)
-	      modified = content.sub(/(<\?xml .*\?>\n?)(.*)/m) { "#{$1}#{license}#{$2}" }
+          modified = content.sub(/(<\?xml .*\?>\n?)(.*)/m) { "#{$1}#{license}#{$2}" }
             else
               modified = license + "\n" + content
             end

@@ -94,25 +94,25 @@ public class OPartnerLink extends OBase {
      * @param cset non-initiating correlation used in this operation
      */
     public void addCorrelationSetForOperation(Operation operation, OScope.CorrelationSet cset, boolean isJoin) {
-    	if( !isJoin ) {
-	        Set<OScope.CorrelationSet> ret = _nonIntitiatingCorrelationSets.get(operation.getName());
-	        if (ret == null) {
-	            ret = new HashSet<OScope.CorrelationSet>();
-	            _nonIntitiatingCorrelationSets.put(operation.getName(), ret);
-	        }
-	        ret.add(cset);
-    	} else {
-    		// serialization backward compatibility; joiningCorrelationSets could be null if read from old definition
-    		if( _joiningCorrelationSets == null ) {
-    			_joiningCorrelationSets = new HashMap<String,Set<OScope.CorrelationSet>>();
-    		}
-	        Set<OScope.CorrelationSet> ret = _joiningCorrelationSets.get(operation.getName());
-	        if (ret == null) {
-	            ret = new HashSet<OScope.CorrelationSet>();
-	            _joiningCorrelationSets.put(operation.getName(), ret);
-	        }
-	        ret.add(cset);
-    	}
+        if( !isJoin ) {
+            Set<OScope.CorrelationSet> ret = _nonIntitiatingCorrelationSets.get(operation.getName());
+            if (ret == null) {
+                ret = new HashSet<OScope.CorrelationSet>();
+                _nonIntitiatingCorrelationSets.put(operation.getName(), ret);
+            }
+            ret.add(cset);
+        } else {
+            // serialization backward compatibility; joiningCorrelationSets could be null if read from old definition
+            if( _joiningCorrelationSets == null ) {
+                _joiningCorrelationSets = new HashMap<String,Set<OScope.CorrelationSet>>();
+            }
+            Set<OScope.CorrelationSet> ret = _joiningCorrelationSets.get(operation.getName());
+            if (ret == null) {
+                ret = new HashSet<OScope.CorrelationSet>();
+                _joiningCorrelationSets.put(operation.getName(), ret);
+            }
+            ret.add(cset);
+        }
     }
 
     /**

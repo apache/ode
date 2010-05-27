@@ -44,7 +44,7 @@ import org.w3c.dom.Node;
  * Base template for activities.
  */
 abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
-	private static final Log __log = LogFactory.getLog(ACTIVITY.class);
+    private static final Log __log = LogFactory.getLog(ACTIVITY.class);
     protected ActivityInfo _self;
 
     /**
@@ -72,9 +72,9 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
 
     
     protected void sendVariableReadEvent(VariableInstance var) {
-    	VariableReadEvent vre = new VariableReadEvent();
-    	vre.setVarName(var.declaration.name);
-    	sendEvent(vre);
+        VariableReadEvent vre = new VariableReadEvent();
+        vre.setVarName(var.declaration.name);
+        sendEvent(vre);
     }
     
     protected void sendEvent(ActivityEvent event) {
@@ -118,7 +118,7 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
     }
     
     protected OConstants getConstants() {
-    	return _self.o.getOwner().constants;
+        return _self.o.getOwner().constants;
     }
 
     /**
@@ -151,8 +151,8 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
     Node fetchVariableData(VariableInstance variable, boolean forWriting) 
         throws FaultException
     {
-    	return _scopeFrame.fetchVariableData(getBpelRuntimeContext(), variable, forWriting);
-	}
+        return _scopeFrame.fetchVariableData(getBpelRuntimeContext(), variable, forWriting);
+    }
 
     Node fetchVariableData(VariableInstance var, OMessageVarType.Part part, boolean forWriting)
         throws FaultException 
@@ -163,17 +163,17 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
     Node initializeVariable(VariableInstance lvar, Node val) 
         throws ExternalVariableModuleException
     {
-    	return _scopeFrame.initializeVariable(getBpelRuntimeContext(), lvar, val);
+        return _scopeFrame.initializeVariable(getBpelRuntimeContext(), lvar, val);
     }
 
     void commitChanges(VariableInstance lval, Node lvalue) 
         throws ExternalVariableModuleException
     {
-    	_scopeFrame.commitChanges(getBpelRuntimeContext(),lval, lvalue);
-	}
+        _scopeFrame.commitChanges(getBpelRuntimeContext(),lval, lvalue);
+    }
 
     Node getPartData(Element message, Part part) {
-    	return _scopeFrame.getPartData(message, part);
+        return _scopeFrame.getPartData(message, part);
     }
 
     

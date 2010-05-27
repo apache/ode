@@ -40,26 +40,26 @@ import org.apache.ode.bpel.iapi.BpelEventListener;
  * @author Tammo van Lessen (University of Stuttgart)
  */
 public class DebugBpelEventListener implements BpelEventListener {
-	private static final Log __log = LogFactory.getLog(BpelEventListener.class);
+    private static final Log __log = LogFactory.getLog(BpelEventListener.class);
 
-	private static final String SYSOUT_KEY = "debugeventlistener.dumpToStdOut";
-	private boolean _dumpToStdOut = false;
-	
-	public void onEvent(BpelEvent bpelEvent) {
-		if (__log.isDebugEnabled()) {
-			__log.debug(bpelEvent.toString());
-		}
-	
-		if (_dumpToStdOut) {
-			System.out.println(bpelEvent.toString());
-		}
-	}
+    private static final String SYSOUT_KEY = "debugeventlistener.dumpToStdOut";
+    private boolean _dumpToStdOut = false;
+    
+    public void onEvent(BpelEvent bpelEvent) {
+        if (__log.isDebugEnabled()) {
+            __log.debug(bpelEvent.toString());
+        }
+    
+        if (_dumpToStdOut) {
+            System.out.println(bpelEvent.toString());
+        }
+    }
 
-	public void startup(Properties configProperties) {
-		if (configProperties != null) {
-			_dumpToStdOut = BooleanUtils.toBoolean(configProperties.getProperty(SYSOUT_KEY, "false"));
-		}
-	}
+    public void startup(Properties configProperties) {
+        if (configProperties != null) {
+            _dumpToStdOut = BooleanUtils.toBoolean(configProperties.getProperty(SYSOUT_KEY, "false"));
+        }
+    }
 
-	public void shutdown() {}
+    public void shutdown() {}
 }

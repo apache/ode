@@ -22,9 +22,9 @@
     <element name="start" type="string"></element>
 
     <complexType name="Data">
-    	<sequence>
-    		<element name="Name" type="string"></element>
-    		<element name="Age" type="string"></element>
-    	</sequence>
+        <sequence>
+            <element name="Name" type="string"></element>
+            <element name="Age" type="string"></element>
+        </sequence>
     </complexType>
 </schema>

@@ -64,9 +64,9 @@ class JaxenBpelHandler extends JaxenHandler {
     assert out != null;
   }
 
-	public void variableReference(String prefix, String variableName)
-			throws JaxenException {
-		super.variableReference(prefix, variableName);
+    public void variableReference(String prefix, String variableName)
+            throws JaxenException {
+        super.variableReference(prefix, variableName);
 
     // Custom variables
     if ("ode".equals(prefix)) {
@@ -74,24 +74,24 @@ class JaxenBpelHandler extends JaxenHandler {
     }
 
     if(_out instanceof OXPath10ExpressionBPEL20){
-			OXPath10ExpressionBPEL20 out = (OXPath10ExpressionBPEL20)_out;
-			try{
-				if(out.isJoinExpression){
-					// these resolve to links
-					OLink olink = _cctx.resolveLink(variableName);
-					_out.links.put(variableName, olink);
-				}else{
-					int dot = variableName.indexOf('.');
-					if (dot != -1)
-						variableName = variableName.substring(0,dot);
-					OScope.Variable var = _cctx.resolveVariable(variableName);
-					_out.vars.put(variableName, var);
-				}
-			}catch(CompilationException ce){
-				throw new CompilationExceptionWrapper(ce);
-			}
-		}
-	}
+            OXPath10ExpressionBPEL20 out = (OXPath10ExpressionBPEL20)_out;
+            try{
+                if(out.isJoinExpression){
+                    // these resolve to links
+                    OLink olink = _cctx.resolveLink(variableName);
+                    _out.links.put(variableName, olink);
+                }else{
+                    int dot = variableName.indexOf('.');
+                    if (dot != -1)
+                        variableName = variableName.substring(0,dot);
+                    OScope.Variable var = _cctx.resolveVariable(variableName);
+                    _out.vars.put(variableName, var);
+                }
+            }catch(CompilationException ce){
+                throw new CompilationExceptionWrapper(ce);
+            }
+        }
+    }
   
   public void endXPath() throws JaxenException {
     super.endXPath();

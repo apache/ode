@@ -33,26 +33,26 @@ import org.apache.ode.bpel.bdi.breaks.Breakpoint;
  */
 public interface DebuggerContext {
 
-	boolean step(Long iid);
-	
-	boolean resume(final Long iid);
-	
-	void suspend(final Long iid);
-	
-	void terminate(final Long iid);
-	
-	Breakpoint[] getGlobalBreakpoints();
-	
-	Breakpoint[] getBreakpoints(Long iid);
-	
-	void addGlobalBreakpoint(Breakpoint breakpoint);
-	
-	void addBreakpoint(Long pid, Breakpoint breakpoint);
-	
-	void removeGlobalBreakpoint(Breakpoint breakpoint);
-	
-	void removeBreakpoint(Long iid, Breakpoint breakpoint);
-	
+    boolean step(Long iid);
+    
+    boolean resume(final Long iid);
+    
+    void suspend(final Long iid);
+    
+    void terminate(final Long iid);
+    
+    Breakpoint[] getGlobalBreakpoints();
+    
+    Breakpoint[] getBreakpoints(Long iid);
+    
+    void addGlobalBreakpoint(Breakpoint breakpoint);
+    
+    void addBreakpoint(Long pid, Breakpoint breakpoint);
+    
+    void removeGlobalBreakpoint(Breakpoint breakpoint);
+    
+    void removeBreakpoint(Long iid, Breakpoint breakpoint);
+    
     /**
      * @return the process model.
      * Currently an {@link org.apache.ode.bpel.o.OProcess}

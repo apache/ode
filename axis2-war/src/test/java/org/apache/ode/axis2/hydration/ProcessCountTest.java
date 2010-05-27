@@ -116,7 +116,7 @@ public class ProcessCountTest extends Axis2TestBase {
         server.deployProcess(bundleOne);
 
         Thread processOne = new Thread() {
-        	public void run() {
+            public void run() {
                 try {
                     firstResponse = server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                             bundleOne, "testRequest.soap");
@@ -124,16 +124,16 @@ public class ProcessCountTest extends Axis2TestBase {
                 } catch (Exception e) {
                     fail(e.getMessage());
                 }
-        	}
+            }
         };
         processOne.start();
         processOne.join();
         
         try {
-	        processOne.join();        
-	        assertTrue(firstResponse.contains("tooManyProcesses"), firstResponse);
+            processOne.join();        
+            assertTrue(firstResponse.contains("tooManyProcesses"), firstResponse);
         } finally {
-	        server.undeployProcess(bundleOne);
+            server.undeployProcess(bundleOne);
         }
         
     }

@@ -29,13 +29,13 @@ public class ProcessSizeThrottler extends NoOpInterceptor {
 
     @Override
     public void onJobScheduled(MyRoleMessageExchange mex,
-    		InterceptorContext ic) throws FailMessageExchangeException,
-    		FaultMessageExchangeException {
-    	while (ic.getBpelEngine().getHydratedProcessSize(ic.getBpelProcess().getPID()) > ic.getBpelEngine().getProcessThrottledMaximumSize()) {
-    		if (!ic.getBpelEngine().dehydrateLastUnusedProcess()) {
-    			mex.setProperty("causeCode", String.valueOf(InvalidProcessException.TOO_HUGE_PROCESSES_CAUSE_CODE));
-	            throw new FailMessageExchangeException("The size of all running processes is more than the upper limit (" + ic.getBpelEngine().getProcessThrottledMaximumSize() + ")");
-    		}
-    	}
+            InterceptorContext ic) throws FailMessageExchangeException,
+            FaultMessageExchangeException {
+        while (ic.getBpelEngine().getHydratedProcessSize(ic.getBpelProcess().getPID()) > ic.getBpelEngine().getProcessThrottledMaximumSize()) {
+            if (!ic.getBpelEngine().dehydrateLastUnusedProcess()) {
+                mex.setProperty("causeCode", String.valueOf(InvalidProcessException.TOO_HUGE_PROCESSES_CAUSE_CODE));
+                throw new FailMessageExchangeException("The size of all running processes is more than the upper limit (" + ic.getBpelEngine().getProcessThrottledMaximumSize() + ")");
+            }
+        }
     }
 }

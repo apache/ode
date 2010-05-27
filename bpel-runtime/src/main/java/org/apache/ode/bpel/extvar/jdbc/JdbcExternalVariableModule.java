@@ -362,126 +362,126 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
     }
 
     private Object downcastValue(Object value, int dataType) {
-    	if (value == null) {
-    		return null;
-    	}
-    	// Try down casting the value as per its column type.
-    	try {
-        	// Some JDBC 4.0 types have been ignored to avoid compilation errors 
-	    	switch (dataType) {
-	    	case Types.ARRAY:
-	    		break;
-	    	case Types.BIGINT:
-	    		if (!(value instanceof BigInteger)) {
-	    			value = new BigDecimal(value.toString()).longValue();
-	    		}
-	    		break;
-	    	case Types.BINARY:
-	    		break;
-	    	case Types.BIT:
-	    		if (!(value instanceof Boolean)) {
-	    			value = new Boolean(value.toString());
-	    		}
-	    		break;
-	    	case Types.BLOB:
-	    		break;
-	    	case Types.BOOLEAN:
-	    		if (!(value instanceof Boolean)) {
-	    			value = new Boolean(value.toString());
-	    		}
-	    		break;
-	    	case Types.CHAR:
-	    		break;
-	    	case Types.CLOB:
-	    		break;
-	    	case Types.DATALINK:
-	    		break;
-	    	case Types.DATE:    		
-	    		break;
-	    	case Types.DECIMAL:
-	    		if (!(value instanceof BigDecimal)) {
-	    			value = new BigDecimal(value.toString());
-	    		}
-	    		break;
-	    	case Types.DISTINCT:
-	    		break;
-	    	case Types.DOUBLE:
-	    		if (!(value instanceof Double)) {
-	    			value = Double.valueOf(value.toString()).doubleValue();
-	    		}
-	    		break;
-	    	case Types.FLOAT:
-	    		if (!(value instanceof Float)) {
-	    			value = Float.valueOf(value.toString()).floatValue();
-	    		}
-	    		break;
-	    	case Types.INTEGER:
-	    		if (!(value instanceof Integer)) {
-	    			value = Double.valueOf(value.toString()).intValue();
-	    		}
-	    		break;
-	    	case Types.JAVA_OBJECT:
-	    		break;
+        if (value == null) {
+            return null;
+        }
+        // Try down casting the value as per its column type.
+        try {
+            // Some JDBC 4.0 types have been ignored to avoid compilation errors 
+            switch (dataType) {
+            case Types.ARRAY:
+                break;
+            case Types.BIGINT:
+                if (!(value instanceof BigInteger)) {
+                    value = new BigDecimal(value.toString()).longValue();
+                }
+                break;
+            case Types.BINARY:
+                break;
+            case Types.BIT:
+                if (!(value instanceof Boolean)) {
+                    value = new Boolean(value.toString());
+                }
+                break;
+            case Types.BLOB:
+                break;
+            case Types.BOOLEAN:
+                if (!(value instanceof Boolean)) {
+                    value = new Boolean(value.toString());
+                }
+                break;
+            case Types.CHAR:
+                break;
+            case Types.CLOB:
+                break;
+            case Types.DATALINK:
+                break;
+            case Types.DATE:    		
+                break;
+            case Types.DECIMAL:
+                if (!(value instanceof BigDecimal)) {
+                    value = new BigDecimal(value.toString());
+                }
+                break;
+            case Types.DISTINCT:
+                break;
+            case Types.DOUBLE:
+                if (!(value instanceof Double)) {
+                    value = Double.valueOf(value.toString()).doubleValue();
+                }
+                break;
+            case Types.FLOAT:
+                if (!(value instanceof Float)) {
+                    value = Float.valueOf(value.toString()).floatValue();
+                }
+                break;
+            case Types.INTEGER:
+                if (!(value instanceof Integer)) {
+                    value = Double.valueOf(value.toString()).intValue();
+                }
+                break;
+            case Types.JAVA_OBJECT:
+                break;
 //	    	case Types.LONGNVARCHAR:
 //	    		break;
-	    	case Types.LONGVARBINARY:
-	    		break;
-	    	case Types.LONGVARCHAR:
-	    		break;
+            case Types.LONGVARBINARY:
+                break;
+            case Types.LONGVARCHAR:
+                break;
 //	    	case Types.NCHAR:
 //	    		break;
 //	    	case Types.NCLOB:
 //	    		break;
-	    	case Types.NUMERIC:
-	    		if (!(value instanceof BigDecimal)) {
-	    			value = new BigDecimal(value.toString());
-	    		}
-	    		break;
+            case Types.NUMERIC:
+                if (!(value instanceof BigDecimal)) {
+                    value = new BigDecimal(value.toString());
+                }
+                break;
 //	    	case Types.NVARCHAR:
 //	    		break;
-	    	case Types.OTHER:
-	    		break;
-	    	case Types.REAL:
-	    		if (!(value instanceof Double)) {
-	    			value = Float.valueOf(value.toString()).floatValue();
-	    		}
-	    		break;
-	    	case Types.REF:
-	    		break;
+            case Types.OTHER:
+                break;
+            case Types.REAL:
+                if (!(value instanceof Double)) {
+                    value = Float.valueOf(value.toString()).floatValue();
+                }
+                break;
+            case Types.REF:
+                break;
 //	    	case Types.ROWID:
 //	    		break;
-	    	case Types.SMALLINT:
-	    		if (!(value instanceof Short)) {
-	    			value = new Short(value.toString()).shortValue();
-	    		}
-	    		break;
+            case Types.SMALLINT:
+                if (!(value instanceof Short)) {
+                    value = new Short(value.toString()).shortValue();
+                }
+                break;
 //	    	case Types.SQLXML:
 //	    		break;
-	    	case Types.STRUCT:
-	    		break;
-	    	case Types.TIME:
-	    		break;
-	    	case Types.TIMESTAMP:
-	    		break;
-	    	case Types.TINYINT:
-	    		if (!(value instanceof Short)) {
-	    			value = new Short(value.toString()).shortValue();
-	    		}
-	    		break;
-	    	case Types.VARBINARY:
-	    		break;
-	    	case Types.VARCHAR:
-	    		break;
-	    	default:    	
-	    		break;
-	    	}
-    	} catch (Exception e) {
-    		// couldn't cast... let's just use original value object
-    	}
-    	return value;
-	}
+            case Types.STRUCT:
+                break;
+            case Types.TIME:
+                break;
+            case Types.TIMESTAMP:
+                break;
+            case Types.TINYINT:
+                if (!(value instanceof Short)) {
+                    value = new Short(value.toString()).shortValue();
+                }
+                break;
+            case Types.VARBINARY:
+                break;
+            case Types.VARCHAR:
+                break;
+            default:    	
+                break;
+            }
+        } catch (Exception e) {
+            // couldn't cast... let's just use original value object
+        }
+        return value;
+    }
 
-	RowVal execSelect(DbExternalVariable dbev, Locator locator) throws SQLException, ExternalVariableModuleException {
+    RowVal execSelect(DbExternalVariable dbev, Locator locator) throws SQLException, ExternalVariableModuleException {
         RowKey rowkey = dbev.keyFromLocator(locator);
         if (__log.isDebugEnabled()) __log.debug("execSelect: " + rowkey);
         

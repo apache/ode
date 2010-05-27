@@ -39,7 +39,7 @@ public class HProcessInstance extends HObject {
     public static final String SELECT_INSTANCES_BY_PROCESS_AND_STATES="SELECT_INSTANCES_BY_PROCESS_AND_STATES";
     public static final String COUNT_INSTANCES_BY_PROCESSES_IDS_AND_STATES = "COUNT_INSTANCES_BY_PROCESSES_IDS_AND_STATES";
 
-	/** Foreign key to owner {@link HProcess}. */
+    /** Foreign key to owner {@link HProcess}. */
     private HProcess _process;
     
     private Long _processId;
@@ -193,7 +193,7 @@ public class HProcessInstance extends HObject {
     }
 
     public void setProcessId(Long processId) {
-    	_processId = processId;
+        _processId = processId;
     }
     
     /**

@@ -32,10 +32,10 @@ class TimerWork implements Serializable {
   private String _timerChannel;
 
   /** Constructor.	 */
-	TimerWork(Long pid, String timerChannel) {
+    TimerWork(Long pid, String timerChannel) {
     _pid = pid;
-		_timerChannel = timerChannel;
-	}
+        _timerChannel = timerChannel;
+    }
 
   /** Get the Process Instance ID (PIID). */
   public Long getPID() {
@@ -44,7 +44,7 @@ class TimerWork implements Serializable {
 
   /** Get the exported for of the timer response channel. */
   public String getTimerChannel(){
-  	return _timerChannel;
+    return _timerChannel;
   }
 
   public String toString() {

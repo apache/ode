@@ -18,22 +18,22 @@
 
 -->
 <beans xmlns:sm="http://servicemix.apache.org/config/1.0"
-	   xmlns:http="http://servicemix.apache.org/http/1.0"
-	   xmlns:eip="http://servicemix.apache.org/eip/1.0"
+       xmlns:http="http://servicemix.apache.org/http/1.0"
+       xmlns:eip="http://servicemix.apache.org/eip/1.0"
        xmlns:util="http://www.springframework.org/schema/util"
        xmlns:jencks="http://jencks.org/2.0"
-	   >
+       >
 
     <util:map id="jndiEntries">
         <entry key="java:comp/env/jdbc/ode" value-ref="odeDS"/>
     </util:map>
-	
-	<sm:container 
-		id="jbi" 
-		embedded="true" 
-		rootDir="target/test/smx"
-		transactionManager="#transactionManager"
-		depends-on="jndi"
-		>
-	</sm:container>
+    
+    <sm:container 
+        id="jbi" 
+        embedded="true" 
+        rootDir="target/test/smx"
+        transactionManager="#transactionManager"
+        depends-on="jndi"
+        >
+    </sm:container>
 </beans>

@@ -75,10 +75,10 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
         } else if (functionName.getNamespaceURI().equals(Namespaces.ODE_EXTENSION_NS)) {
             String localName = functionName.getLocalPart();
             if (Constants.NON_STDRD_FUNCTION_SPLIT_TO_ELEMENTS.equals(localName) ||
-            		Constants.NON_STDRD_FUNCTION_DEPRECATED_SPLIT_TO_ELEMENTS.equals(localName)) {
+                    Constants.NON_STDRD_FUNCTION_DEPRECATED_SPLIT_TO_ELEMENTS.equals(localName)) {
                 return new SplitToElements();
             } else if (Constants.NON_STDRD_FUNCTION_COMBINE_URL.equals(localName) ||
-            		Constants.NON_STDRD_FUNCTION_DEPRECATED_COMBINE_URL.equals(localName)) {
+                    Constants.NON_STDRD_FUNCTION_DEPRECATED_COMBINE_URL.equals(localName)) {
                 return new CombineUrl();
             } else if (Constants.NON_STDRD_FUNCTION_COMPOSE_URL.equals(localName) ||
                     Constants.NON_STDRD_FUNCTION_EXPAND_TEMPLATE.equals(localName) ||
@@ -86,22 +86,22 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                     Constants.NON_STDRD_FUNCTION_DEPRECATED_EXPAND_TEMPLATE.equals(localName)) {
                 return new ComposeUrl();
             } else if (Constants.NON_STDRD_FUNCTION_DOM_TO_STRING.equals(localName) ||
-            		Constants.NON_STDRD_FUNCTION_DEPRECATED_DOM_TO_STRING.equals(localName)) {
-            	return new DomToString();
+                    Constants.NON_STDRD_FUNCTION_DEPRECATED_DOM_TO_STRING.equals(localName)) {
+                return new DomToString();
             } else if (Constants.NON_STDRD_FUNCTION_INSERT_AFTER.equals(localName)) {
-            	return new InsertAfter();
+                return new InsertAfter();
             } else if (Constants.NON_STDRD_FUNCTION_INSERT_AS_FIRST_INTO.equals(localName)) {
-            	return new InsertAsFirstInto();
+                return new InsertAsFirstInto();
             } else if (Constants.NON_STDRD_FUNCTION_INSERT_AS_LAST_INTO.equals(localName)) {
-            	return new InsertAsLastInto();
+                return new InsertAsLastInto();
             } else if (Constants.NON_STDRD_FUNCTION_INSERT_BEFORE.equals(localName)) {
-            	return new InsertBefore();
+                return new InsertBefore();
             } else if (Constants.NON_STDRD_FUNCTION_DELETE.equals(localName)) {
-            	return new Delete();
+                return new Delete();
             } else if (Constants.NON_STDRD_FUNCTION_RENAME.equals(localName)) {
-            	return new Rename();
+                return new Rename();
             } else if (Constants.NON_STDRD_FUNCTION_PROCESS_PROPERTY.equals(localName)) {
-            	return new ProcessProperty();
+                return new ProcessProperty();
             }
         } else if (functionName.getNamespaceURI().equals(Namespaces.DEPRECATED_XDT_NS)) {
             String localName = functionName.getLocalPart();
@@ -206,93 +206,93 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
     }
     
     public static class InsertInto implements XPathFunction {
-    	public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 3) {
                 throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_INSERT_AFTER));
             }
             return "";
-    	}
+        }
     }
     
     public static class InsertAfter implements XPathFunction {
-    	public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() < 2 || args.size() > 3) {
                 throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_INSERT_AFTER));
             }
             return "";
-    	}
+        }
     }
     
     public static class InsertBefore implements XPathFunction {
-    	public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() < 2 || args.size() > 3) {
                 throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_INSERT_BEFORE));
             }
             return "";
-    	}
+        }
     }
 
     public static class InsertAsFirstInto implements XPathFunction {
-    	public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 2) {
                 throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_INSERT_AS_FIRST_INTO));
             }
             return "";
-    	}
+        }
     }
 
     public static class InsertAsLastInto implements XPathFunction {
-    	public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 2) {
                 throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_INSERT_AS_LAST_INTO));
             }
             return "";
-    	}
+        }
     }
 
     public static class Delete implements XPathFunction {
-    	public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() < 1 || args.size() > 2) {
                 throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_DELETE));
             }
             return "";
-    	}
+        }
     }
     
     public static class Rename implements XPathFunction {
-    	public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() < 2) {
                 throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_RENAME));
             }
             return "";
-    	}
+        }
     }
     
     public static class ProcessProperty implements XPathFunction {
-    	public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 1) {
                 throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_PROCESS_PROPERTY));
             }
             return "";
-    	}
+        }
     }
 
     public static class DayTimeDuration implements XPathFunction {
-    	public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 1) {
                 throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_DAY_TIME_DURATION));
             }
             return "";
-    	}
+        }
     }
 
     public static class YearMonthDuration implements XPathFunction {
-    	public Object evaluate(List args) throws XPathFunctionException {
+        public Object evaluate(List args) throws XPathFunctionException {
             if (args.size() != 1) {
                 throw new CompilationException(__msgs.errInvalidNumberOfArguments(Constants.NON_STDRD_FUNCTION_YEAR_MONTH_DURATION));
             }
             return "";
-    	}
+        }
     }
 
 }

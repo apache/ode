@@ -21,11 +21,11 @@
         xmlns:process="urn:/Pong.bpel"
         xmlns:pong="urn:/Pong.wsdl">
 
-	<process name="process:Pong">
-		<active>true</active>
-		<provide partnerLink="PongPartnerLink">
-			<service name="pong:PongService" port="PongPort"/>
-		</provide>
-	</process>
+    <process name="process:Pong">
+        <active>true</active>
+        <provide partnerLink="PongPartnerLink">
+            <service name="pong:PongService" port="PongPort"/>
+        </provide>
+    </process>
     
 </deploy>

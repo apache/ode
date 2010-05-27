@@ -30,8 +30,8 @@ import java.util.Map;
  */
 class LinkFrame implements Serializable {
 
-	private static final long serialVersionUID = 1L;
-	LinkFrame next;
+    private static final long serialVersionUID = 1L;
+    LinkFrame next;
   Map<OLink, LinkInfo> links = new HashMap<OLink, LinkInfo>();
 
   LinkFrame(LinkFrame next) {

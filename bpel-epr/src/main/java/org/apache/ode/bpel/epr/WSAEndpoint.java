@@ -46,7 +46,7 @@ public class WSAEndpoint implements MutableEndpoint {
 
     // prototype constructor
     public WSAEndpoint(WSAEndpoint prototype) {
-    	_eprElmt = (Element)DOMUtils.newDocument().importNode(prototype._eprElmt, true);
+        _eprElmt = (Element)DOMUtils.newDocument().importNode(prototype._eprElmt, true);
     }
     
     public WSAEndpoint(Map map) {
@@ -59,12 +59,12 @@ public class WSAEndpoint implements MutableEndpoint {
         if (idNodes.getLength() > 0) {
             return idNodes.item(0).getTextContent();
         } else {
-        	// try the same with the intalio header
+            // try the same with the intalio header
             idNodes = _eprElmt.getElementsByTagNameNS(Namespaces.INTALIO_SESSION_NS, "session");
             if (idNodes.getLength() > 0) {
                 return idNodes.item(0).getTextContent();
             } 
-           	return null;
+            return null;
         }
     }
 
@@ -78,7 +78,7 @@ public class WSAEndpoint implements MutableEndpoint {
             _eprElmt.appendChild(sessElmt);
         }
 
-    	// and the same for the intalio header
+        // and the same for the intalio header
         idList = _eprElmt.getElementsByTagNameNS(Namespaces.INTALIO_SESSION_NS, "session");
         if (idList.getLength() > 0)
             idList.item(0).setTextContent(sessionId);

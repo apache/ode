@@ -154,25 +154,25 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
             XPathExpression expr = xpe.compile(xpathStr);
             // evaluate the expression so as to initialize the variables
             try { 
-            	expr.evaluate(node);            	
+                expr.evaluate(node);            	
             } catch (XPathExpressionException xpee) { 
-            	// swallow errors caused by uninitialized variable 
+                // swallow errors caused by uninitialized variable 
             }
             for (String varExpr : extractVariableExprs(xpathStr)) {
                 expr = xpe.compile(varExpr);
-            	try {
-            		expr.evaluate(node);
-            	} catch (XPathExpressionException xpee) {
-                	// swallow errors caused by uninitialized variable 
-            	}
+                try {
+                    expr.evaluate(node);
+                } catch (XPathExpressionException xpee) {
+                    // swallow errors caused by uninitialized variable 
+                }
             }
             for (String functionExpr : extractFunctionExprs(xpathStr)) {
                 expr = xpe.compile(functionExpr);
-            	try {
-            		expr.evaluate(node);
-            	} catch (XPathExpressionException xpee) {
-                	// swallow errors caused by uninitialized variable 
-            	}
+                try {
+                    expr.evaluate(node);
+                } catch (XPathExpressionException xpee) {
+                    // swallow errors caused by uninitialized variable 
+                }
             }
         } catch (XPathExpressionException e) {
             __log.debug(e);
@@ -195,55 +195,55 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
      * @return list of variable expressions that may not have been resolved properly
      */
     private List<String> extractVariableExprs(String xpathStr) {    	
-		ArrayList<String> variableExprs = new ArrayList<String>();
-		int firstVariable = xpathStr.indexOf("$"), 
-			lastVariable = xpathStr.lastIndexOf("$"),
-			firstFunction = xpathStr.indexOf("("); 
-		StringBuffer variableExpr = new StringBuffer();
-		if ((firstVariable > 0 && // the xpath references a variable
-				firstFunction > 0) || // the xpath contains a function
-			(firstVariable < lastVariable)) { // the xpath references multiple variables  
-			// most likely, the variable reference has not been resolved, so make that happen
-			boolean quoted = false, doubleQuoted = false, variable = false;
-			Name11Checker nameChecker = Name11Checker.getInstance();
-			for (int index = 0; index < xpathStr.length(); index++) {
-				char ch = xpathStr.charAt(index);
-				if (ch == '\''){
-					quoted = !quoted;
-				}
-				if (ch == '\"') {
-					doubleQuoted = !doubleQuoted;
-				}
-				if (quoted || doubleQuoted){
-					continue;
-				}
-				if (ch == '$') {
-					variable = true;
-					variableExpr.setLength(0);
-					variableExpr.append(ch);
-				} else {
-					if (variable) {
-						variableExpr.append(ch);
-						// in the name is qualified, don't check if its a qname when we're at the ":" character
-						if (ch == ':') {
-							continue;
-						}
-						if (index == xpathStr.length() || 
-								!nameChecker.isQName(variableExpr.substring(1))) {
-							variable = false;
-							variableExpr.setLength(variableExpr.length() - 1);
-							variableExprs.add(variableExpr.toString());
-							variableExpr.setLength(0);
-						}
-					}
-				}
-			}
-			if (variableExpr.length() > 0) {
-				variableExprs.add(variableExpr.toString());
-			}
-		}
-		return variableExprs;
-	}
+        ArrayList<String> variableExprs = new ArrayList<String>();
+        int firstVariable = xpathStr.indexOf("$"), 
+            lastVariable = xpathStr.lastIndexOf("$"),
+            firstFunction = xpathStr.indexOf("("); 
+        StringBuffer variableExpr = new StringBuffer();
+        if ((firstVariable > 0 && // the xpath references a variable
+                firstFunction > 0) || // the xpath contains a function
+            (firstVariable < lastVariable)) { // the xpath references multiple variables  
+            // most likely, the variable reference has not been resolved, so make that happen
+            boolean quoted = false, doubleQuoted = false, variable = false;
+            Name11Checker nameChecker = Name11Checker.getInstance();
+            for (int index = 0; index < xpathStr.length(); index++) {
+                char ch = xpathStr.charAt(index);
+                if (ch == '\''){
+                    quoted = !quoted;
+                }
+                if (ch == '\"') {
+                    doubleQuoted = !doubleQuoted;
+                }
+                if (quoted || doubleQuoted){
+                    continue;
+                }
+                if (ch == '$') {
+                    variable = true;
+                    variableExpr.setLength(0);
+                    variableExpr.append(ch);
+                } else {
+                    if (variable) {
+                        variableExpr.append(ch);
+                        // in the name is qualified, don't check if its a qname when we're at the ":" character
+                        if (ch == ':') {
+                            continue;
+                        }
+                        if (index == xpathStr.length() || 
+                                !nameChecker.isQName(variableExpr.substring(1))) {
+                            variable = false;
+                            variableExpr.setLength(variableExpr.length() - 1);
+                            variableExprs.add(variableExpr.toString());
+                            variableExpr.setLength(0);
+                        }
+                    }
+                }
+            }
+            if (variableExpr.length() > 0) {
+                variableExprs.add(variableExpr.toString());
+            }
+        }
+        return variableExprs;
+    }
 
     /**
      * Returns the list of function references in the given XPath expression
@@ -254,24 +254,24 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
      * @return list of function expressions that may not have been resolved properly
      */
     private List<String> extractFunctionExprs(String xpathStr) {    	
-		ArrayList<String> functionExprs = new ArrayList<String>(); 
-		// Match the prefix : function name ( all contents except the ) and the closing )'s that may occur
-		final String FUNCTION_REGEX = "\\w+:\\w+\\([.[^\\)]]*\\)*";
-		int firstFunction = xpathStr.indexOf("("), 
-			lastFunction = xpathStr.lastIndexOf("("); 
-		if ((firstFunction > 0 && firstFunction < lastFunction)) {
-	        Pattern regex = Pattern.compile(FUNCTION_REGEX);
-	        Matcher matcher = regex.matcher(xpathStr);
-	        
-	        while (matcher.find()) {
-	            String function = matcher.group();
-	            functionExprs.add(function);
-	        }
-		}
-		return functionExprs;
-	}
+        ArrayList<String> functionExprs = new ArrayList<String>(); 
+        // Match the prefix : function name ( all contents except the ) and the closing )'s that may occur
+        final String FUNCTION_REGEX = "\\w+:\\w+\\([.[^\\)]]*\\)*";
+        int firstFunction = xpathStr.indexOf("("), 
+            lastFunction = xpathStr.lastIndexOf("("); 
+        if ((firstFunction > 0 && firstFunction < lastFunction)) {
+            Pattern regex = Pattern.compile(FUNCTION_REGEX);
+            Matcher matcher = regex.matcher(xpathStr);
+            
+            while (matcher.find()) {
+                String function = matcher.group();
+                functionExprs.add(function);
+            }
+        }
+        return functionExprs;
+    }
     
-	public Map<String, String> getProperties() {
+    public Map<String, String> getProperties() {
         return _properties;
     }
 

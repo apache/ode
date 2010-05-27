@@ -97,7 +97,7 @@ public interface MessageExchangeInterceptor {
         
         BpelEngine getBpelEngine();
 
-		BpelProcess getBpelProcess();
+        BpelProcess getBpelProcess();
 
     }
 }

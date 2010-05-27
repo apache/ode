@@ -102,10 +102,10 @@
                 <from variable="myVar" part="TestPart"/>
                 <to variable="otherMsgVar" part="TestPart"/>
             </copy>
-			<copy ignoreMissingFromData="no">
-				<from>"Hello World"</from>
+            <copy ignoreMissingFromData="no">
+                <from>"Hello World"</from>
                 <to variable="otherMsgVar" part="TestPart"/>
-			</copy>
+            </copy>
         </assign>
         <reply name="end" partnerLink="TestAssignPartnerLink" portType="test:TestAssignPortType"
                operation="testAssign" variable="otherMsgVar"/>

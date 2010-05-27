@@ -159,7 +159,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             // Eventually running some migrations before starting
             if (!(new MigrationHandler(_contexts).migrate(_registeredProcesses, _migrationTransactionTimeout))) {
-            	throw new RuntimeException("An error occurred while migrating your database to a newer version of the server. Please make sure that the required migration scripts have been executed before starting the server.");
+                throw new RuntimeException("An error occurred while migrating your database to a newer version of the server. Please make sure that the required migration scripts have been executed before starting the server.");
             }
 
             _state = State.RUNNING;
@@ -316,7 +316,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             __log.debug("Registering process " + conf.getProcessId() + " with server.");
 
             BpelProcess process = createBpelProcess(conf);
-	    process._classLoader = Thread.currentThread().getContextClassLoader();
+        process._classLoader = Thread.currentThread().getContextClassLoader();
 
             _engine.registerProcess(process);
             _registeredProcesses.add(process);
@@ -680,7 +680,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         }
     }
 
-	public void setMigrationTransactionTimeout(int migrationTransactionTimeout) {
-		this._migrationTransactionTimeout = migrationTransactionTimeout;
-	}
+    public void setMigrationTransactionTimeout(int migrationTransactionTimeout) {
+        this._migrationTransactionTimeout = migrationTransactionTimeout;
+    }
 }

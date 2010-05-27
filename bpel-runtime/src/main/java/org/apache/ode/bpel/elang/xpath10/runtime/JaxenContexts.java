@@ -237,9 +237,9 @@ class JaxenContexts implements FunctionContext, VariableContext {
                 if (e.getCause() instanceof FaultException) {
                     throw new WrappedFaultException.JaxenFunctionException((FaultException) e.getCause());
                 } else {
-                	throw new FunctionCallException("SubLanguageException: Unable to evaluate query expression", e);
+                    throw new FunctionCallException("SubLanguageException: Unable to evaluate query expression", e);
                 }
-			}
+            }
         }
     }
 
@@ -357,7 +357,7 @@ class JaxenContexts implements FunctionContext, VariableContext {
             XslRuntimeUriResolver resolver = new XslRuntimeUriResolver(_oxpath, _xpathEvalCtx.getBaseResourceURI());
             XslTransformHandler.getInstance().cacheXSLSheet(_xpathEvalCtx.getProcessQName(), xslUri, xslSheet.sheetBody, resolver);
             try {
-            	result = XslTransformHandler.getInstance().transform(_xpathEvalCtx.getProcessQName(), xslUri, source, parametersMap, resolver);
+                result = XslTransformHandler.getInstance().transform(_xpathEvalCtx.getProcessQName(), xslUri, source, parametersMap, resolver);
             } catch (Exception e) {
                 throw new WrappedFaultException.JaxenFunctionException(
                         new FaultException(_oxpath.getOwner().constants.qnSubLanguageExecutionFault,

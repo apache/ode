@@ -34,8 +34,8 @@ bpws:getVariableData(varname, partname) Test Case
   expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
 
   <import importType="http://schemas.xmlsoap.org/wsdl/"
-	  location="../test.wsdl"
-	  namespace="uri:testing" />
+      location="../test.wsdl"
+      namespace="uri:testing" />
 
   <partnerLinks>
     <partnerLink name="testPartnerLink"
@@ -61,8 +61,8 @@ bpws:getVariableData(varname, partname) Test Case
 
       <copy>
         <from>
-        	$var1/TComplex1Part1/test:StringElement
-       	</from>
+            $var1/TComplex1Part1/test:StringElement
+        </from>
         <to>$var1/StringPart2</to>
       </copy>
     </assign>

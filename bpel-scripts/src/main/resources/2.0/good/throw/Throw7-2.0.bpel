@@ -18,9 +18,9 @@
   -->
 
 <!-- test intention
-	scenario: throws a fault with associated data of element type
-	 		 this also tests case where messageType has a part with a single element type.
-	outcome: catch with same variable element type should match fault
+    scenario: throws a fault with associated data of element type
+             this also tests case where messageType has a part with a single element type.
+    outcome: catch with same variable element type should match fault
 -->
 
 <process name="throw7-2.0"
@@ -33,8 +33,8 @@
   suppressJoinFailure="yes">
 
   <import importType="http://schemas.xmlsoap.org/wsdl/"
-	  location="test.wsdl"
-	  namespace="http://ode/bpel/unit-test.wsdl" />
+      location="test.wsdl"
+      namespace="http://ode/bpel/unit-test.wsdl" />
 
   <partnerLinks>
     <partnerLink name="testPartnerLink"
@@ -56,13 +56,13 @@
       variable="var1"/>
     <scope>
       <faultHandlers>
-      	<catch faultVariable="faultVar" 
-      		   faultElement="test:TestElement">
-      	<!-- 
-      	 	we want to be here; the fault data is actually 
-      		a message type, but b/c it's a single part with 
-      		a matching element, we should match this catch
-      	 -->
+        <catch faultVariable="faultVar" 
+               faultElement="test:TestElement">
+        <!-- 
+            we want to be here; the fault data is actually 
+            a message type, but b/c it's a single part with 
+            a matching element, we should match this catch
+         -->
          <assign>
            <copy>
              <from>'success'</from>
@@ -78,9 +78,9 @@
            </copy>
           </assign>
         </catchAll>
-   	   </faultHandlers>
-   	   <sequence>
-      	<throw faultName="test:foo" faultVariable="var1"/>
+       </faultHandlers>
+       <sequence>
+        <throw faultName="test:foo" faultVariable="var1"/>
        </sequence>
     </scope>
     <reply name="endReply"

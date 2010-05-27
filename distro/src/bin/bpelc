@@ -19,14 +19,14 @@ cygwin=false;
 darwin=false;
 case "`uname`" in
     Darwin*) 
-	darwin=true
-	if [ -z "$JAVA_HOME" ] ; then
-	    JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Home
-	fi
-	;;
+    darwin=true
+    if [ -z "$JAVA_HOME" ] ; then
+        JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Home
+    fi
+    ;;
     CYGWIN*) 
-	cygwin=true 
-	;;
+    cygwin=true 
+    ;;
 esac
 
 ## Try to find our home directory 
@@ -37,9 +37,9 @@ while [ -h "$command" ] ; do
     ls=`ls -ld "$command"`
     link=`expr "$command" : '.*-> \(.*\)$'`
     if expr "$link" : '/.*' > /dev/null; then
-	command="$link"
+    command="$link"
     else
-	command=`dirname "$command"`"/$link"
+    command=`dirname "$command"`"/$link"
     fi
 done
 

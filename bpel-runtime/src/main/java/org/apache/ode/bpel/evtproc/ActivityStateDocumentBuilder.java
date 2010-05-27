@@ -56,8 +56,8 @@ public class ActivityStateDocumentBuilder implements BpelEventListener {
   private Long _scope;
   
   
-	public ActivityStateDocumentBuilder() {
-	}
+    public ActivityStateDocumentBuilder() {
+    }
     
   public List<ActivityInfoDocument> getActivities() {
     return _activitiesOrdered;
@@ -103,7 +103,7 @@ public class ActivityStateDocumentBuilder implements BpelEventListener {
       }
     }
 
-	}
+    }
 
   private void completed(ActivityInfoDocument ainf) {
     if (_removeCompleted) {
@@ -139,12 +139,12 @@ public class ActivityStateDocumentBuilder implements BpelEventListener {
     info.getScope().setSiid("" + event.getScopeId());
   }
 
-	public void shutdown() {
-		// do nothing
-	}
-	
-	public void startup(Properties configProperties) {
-		// do nothing
-	}
+    public void shutdown() {
+        // do nothing
+    }
+    
+    public void startup(Properties configProperties) {
+        // do nothing
+    }
 }
 

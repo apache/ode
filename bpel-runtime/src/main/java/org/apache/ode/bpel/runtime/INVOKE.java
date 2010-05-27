@@ -137,7 +137,7 @@ public class INVOKE extends ACTIVITY {
                                 initializeCorrelation(_scopeFrame.resolve(anInitCorrelationsOutput), outputVar);
                             }
                             for (OScope.CorrelationSet aJoinCorrelationsOutput : _oinvoke.joinCorrelationsOutput) {
-                            	// will be ignored if already initialized
+                                // will be ignored if already initialized
                                 initializeCorrelation(_scopeFrame.resolve(aJoinCorrelationsOutput), outputVar);
                             }
                             if (_oinvoke.partnerLink.hasPartnerRole()) {
@@ -217,7 +217,7 @@ public class INVOKE extends ACTIVITY {
             initializeCorrelation(_scopeFrame.resolve(c), _scopeFrame.resolve(oinvoke.inputVar));
         }
         for (OScope.CorrelationSet c : outboundJoins) {
-        	// will be ignored if already initialized
+            // will be ignored if already initialized
             initializeCorrelation(_scopeFrame.resolve(c), _scopeFrame.resolve(oinvoke.inputVar));
         }
 
