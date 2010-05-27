@@ -61,6 +61,7 @@
         <prop key="ode-jbi.db.ext.dataSource">java:comp/env/jdbc/ode</prop>
         <prop key="ode-jbi.messageMapper">org.apache.ode.jbi.msgmap.ServiceMixMapper,org.apache.ode.jbi.msgmap.JbiWsdl11WrapperMapper</prop>
         <prop key="ode-jbi.jca.port">0</prop>
+        <prop key="javax.persistence.provider">org.apache.openjpa.persistence.PersistenceProviderImpl</prop>
     </osgix:cm-properties>
     
 </beans>
