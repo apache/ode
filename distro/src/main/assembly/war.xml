@@ -67,47 +67,6 @@
       	<include>*LICENSE</include>
       </includes>
     </fileSet>
-
-    <fileSet>
-      <directory>${basedir}/../extensions/e4x</directory>
-      <outputDirectory>/extensions/ode-extensions-e4x</outputDirectory>
-      <includes>
-      	<include>README</include>
-      </includes>
-    </fileSet>
-
-    <fileSet>
-      <directory>${basedir}/../extensions/e4x/target</directory>
-      <outputDirectory>/extensions/ode-extensions-e4x</outputDirectory>
-      <includes>
-      	<include>ode-extensions-e4x*.jar</include>
-      </includes>
-    </fileSet>
-
-    <fileSet>
-      <directory>${basedir}/../extensions/jms-eventpublisher</directory>
-      <outputDirectory>/extensions/ode-extensions-jms-eventpublisher</outputDirectory>
-      <includes>
-      	<include>README</include>
-      </includes>
-    </fileSet>
-
-    <fileSet>
-      <directory>${basedir}/../extensions/jms-eventpublisher/target</directory>
-      <outputDirectory>/extensions/ode-extensions-jms-eventpublisher</outputDirectory>
-      <includes>
-      	<include>ode-extensions-jms*.jar</include>
-      </includes>
-    </fileSet>
-
-    <fileSet>
-      <directory>${basedir}/../extensions</directory>
-      <outputDirectory>/extensions</outputDirectory>
-      <includes>
-      	<include>README.extensions</include>
-      </includes>
-    </fileSet>
-
   </fileSets>
 
   <files>
@@ -146,23 +105,6 @@
 	<include>xerces:xercesImpl</include>
       </includes>
     </dependencySet>
-
-    <dependencySet>
-      <outputDirectory>/extensions/ode-extensions-e4x/lib</outputDirectory>
-      <includes>
-	<include>rhino:js</include>
-	<include>commons-logging:commons-logging</include>
-      </includes>
-    </dependencySet>
-
-    <dependencySet>
-      <outputDirectory>/extensions/ode-extensions-jms-eventpublisher/lib</outputDirectory>
-      <includes>
-	<include>org.apache.activemq:apache-activemq</include>
-	<include>org.apache.xmlbeans:xmlbeans</include>
-      </includes>
-    </dependencySet>
-
   </dependencySets>
 
 </assembly>

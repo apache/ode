@@ -129,8 +129,7 @@
 	<include>org.apache.geronimo.modules:geronimo-kernel</include>
 	<include>org.apache.geronimo.components:geronimo-transaction</include>
 	<include>org.apache.geronimo.components:geronimo-connector</include>  
-	<include>org.apache.woden:woden-api</include> 
-	<include>org.apache.woden:woden-impl-dom</include> 
+	<include>org.apache.woden:woden</include> 
 	<include>woodstox:wstx-asl</include> 
 	<include>org.apache.neethi:neethi</include> 
 	<include>org.apache.ws.commons.schema:XmlSchema</include>
@@ -175,10 +174,7 @@
     <dependencySet>
       <outputDirectory>/WEB-INF/modules</outputDirectory>
       <includes>
-	<include>org.apache.rampart:rampart:mar</include>
-	<include>org.apache.rampart:rahas:mar</include>
-	<include>org.apache.axis2:addressing:mar</include>
-	<include>org.apache.axis2:mex:mar</include>  
+	    <include>org.apache.axis2:addressing:mar</include>
       </includes>
     </dependencySet>
 
