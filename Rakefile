@@ -126,7 +126,7 @@ define "ode" do
     end
     test.setup unzip("#{webapp_dir}/WEB-INF"=>project("dao-jpa-ojpa-derby").package(:zip))
     test.setup unzip("#{webapp_dir}/WEB-INF"=>project("dao-hibernate-db").package(:zip))
-    test.exclude('*') if Buildr.environment == 'hudson'
+    test.exclude('*') if Buildr.environment == 'hudson' || ENV["notestng"]
 
     NativeDB.prepare_configs test, _(".")
 
