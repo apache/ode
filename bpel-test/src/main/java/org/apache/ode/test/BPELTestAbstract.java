@@ -23,21 +23,35 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.geronimo.connector.outbound.GenericConnectionManager;
+import org.apache.geronimo.connector.outbound.connectionmanagerconfig.LocalTransactions;
+import org.apache.geronimo.connector.outbound.connectionmanagerconfig.PoolingSupport;
+import org.apache.geronimo.connector.outbound.connectionmanagerconfig.SinglePool;
+import org.apache.geronimo.connector.outbound.connectionmanagerconfig.TransactionSupport;
+import org.apache.geronimo.connector.outbound.connectiontracking.ConnectionTracker;
+import org.apache.geronimo.connector.outbound.connectiontracking.ConnectionTrackingCoordinator;
+import org.apache.geronimo.transaction.manager.RecoverableTransactionManager;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.resource.spi.ConnectionManager;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
 import javax.xml.namespace.QName;
 
+import org.apache.derby.jdbc.EmbeddedXADataSource;
 import org.apache.ode.bpel.common.evt.DebugBpelEventListener;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
@@ -50,16 +64,19 @@ import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
-import org.apache.ode.il.MockScheduler;
+import org.apache.ode.il.EmbeddedGeronimoFactory;
 import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.store.ProcessConfImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
+import org.apache.ode.scheduler.simple.SimpleScheduler;
+import org.apache.ode.scheduler.simple.JdbcDelegate;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.w3c.dom.Element;
+import java.util.concurrent.*;
 
 public abstract class BPELTestAbstract {
     public static final long WAIT_BEFORE_INVOKE_TIMEOUT = 2000;
@@ -68,6 +85,9 @@ public abstract class BPELTestAbstract {
 
     protected BpelServerImpl _server;
 
+    public static TransactionManager _txManager = null;
+    public static DataSource _dataSource = null;
+    
     protected ProcessStore store;
 
     protected MessageExchangeContextImpl mexContext;
@@ -75,8 +95,10 @@ public abstract class BPELTestAbstract {
     protected EntityManager em;
 
     protected EntityManagerFactory emf;
+    
+    protected ExecutorService executorService = Executors.newFixedThreadPool(1);
 
-    protected MockScheduler scheduler;
+    protected SimpleScheduler scheduler;
 
     protected BpelDAOConnectionFactory _cf;
 
@@ -94,40 +116,41 @@ public abstract class BPELTestAbstract {
 
     @Before
     public void setUp() throws Exception {
+        EmbeddedGeronimoFactory factory = new EmbeddedGeronimoFactory();
+        if (_txManager == null) {
+            _txManager = createTransactionManager();
+            _dataSource = createDataSource(false);
+            {
+                _txManager.begin();
+                try {
+                    Connection c = _dataSource.getConnection();
+                    c.prepareStatement(org.apache.commons.io.IOUtils.toString(getClass().getResourceAsStream("/scheduler-schema.sql"))).execute();
+                    c.close();
+                } catch (Exception e) {
+                    
+                }
+                _txManager.commit();
+            }
+        }
+//        try {
+//            _dataSource.getConnection();
+//        } catch (Exception e) {
+//            
+//        }
+//        createDataSource(false);
         _failures = new CopyOnWriteArrayList<Failure>();
         _server = new BpelServerImpl();
+        Properties props = getConfigProperties();
+        _server.setConfigProperties(props);
         mexContext = new MessageExchangeContextImpl();
         _deployments = new ArrayList<Deployment>();
         _invocations = new ArrayList<Invocation>();
         _deployed = new ArrayList<Deployment>();
 
-        if (Boolean.getBoolean("org.apache.ode.test.persistent")) {
-            emf = Persistence.createEntityManagerFactory("ode-unit-test-embedded");
-            em = emf.createEntityManager();
-            _cf = new org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl();
-            _server.setDaoConnectionFactory(_cf);
-            scheduler = new MockScheduler() {
-                @Override
-                public void beginTransaction() {
-                    super.beginTransaction();
-                    em.getTransaction().begin();
-                }
-
-                @Override
-                public void commitTransaction() {
-                    super.commitTransaction();
-                    em.getTransaction().commit();
-                }
-
-                @Override
-                public void rollbackTransaction() {
-                    super.rollbackTransaction();
-                    em.getTransaction().rollback();
-                }
-
-            };
-        } else {
-            scheduler = new MockScheduler();
+        {
+            JdbcDelegate del = new JdbcDelegate(_dataSource);
+            scheduler = new SimpleScheduler("node", del, props);
+            scheduler.setTransactionManager(_txManager);
             _cf = new BpelDAOConnectionFactoryImpl(scheduler);
             _server.setDaoConnectionFactory(_cf);
         }
@@ -136,7 +159,8 @@ public abstract class BPELTestAbstract {
         _server.setBindingContext(new BindingContextImpl());
         _server.setMessageExchangeContext(mexContext);
         scheduler.setJobProcessor(_server);
-        store = new ProcessStoreImpl(null, null, "hibernate", new OdeConfigProperties(new Properties(), ""), true);
+        scheduler.setExecutorService(executorService);
+        store = new ProcessStoreImpl(null, _dataSource, "hib", new OdeConfigProperties(new Properties(), ""), true);
         store.registerListener(new ProcessStoreListener() {
             public void onProcessStoreEvent(ProcessStoreEvent event) {
                 // bounce the process
@@ -149,10 +173,10 @@ public abstract class BPELTestAbstract {
                 }
             }
         });
-        _server.setConfigProperties(getConfigProperties());
         _server.registerBpelEventListener(new DebugBpelEventListener());
         _server.init();
         _server.start();
+        scheduler.start();
     }
 
     @After
@@ -174,7 +198,57 @@ public abstract class BPELTestAbstract {
         _deployed = null;
         _deployments = null;
         _invocations = null;
+        
 
+    }
+
+    protected TransactionManager createTransactionManager() throws Exception {
+        EmbeddedGeronimoFactory factory = new EmbeddedGeronimoFactory();
+        TransactionManager _txManager = factory.getTransactionManager();
+        _txManager.setTransactionTimeout(30);
+        return _txManager;
+    }
+
+    protected DataSource createDataSource(boolean shutdown) throws Exception {
+        TransactionSupport transactionSupport = LocalTransactions.INSTANCE;
+        ConnectionTracker connectionTracker = new ConnectionTrackingCoordinator();
+
+        PoolingSupport poolingSupport = new SinglePool(
+                10,
+                0,
+                1000,
+                1,
+                true,
+                false,
+                false);
+
+        ConnectionManager connectionManager = new GenericConnectionManager(
+                    transactionSupport,
+                    poolingSupport,
+                    null,
+                    connectionTracker,
+                    (RecoverableTransactionManager) _txManager,
+                    getClass().getName(),
+                    getClass().getClassLoader());
+
+            org.tranql.connector.derby.EmbeddedLocalMCF mcf = new org.tranql.connector.derby.EmbeddedLocalMCF();
+            mcf.setCreateDatabase(true);
+            mcf.setDatabaseName("target/testdb");
+            mcf.setUserName("sa");
+            mcf.setPassword("");
+            if (shutdown) {
+                mcf.setShutdownDatabase("shutdown");
+            }
+            return (DataSource) mcf.createConnectionFactory(connectionManager);
+
+//        d = org.tranql.connector.jdbc.JDBCDriverMCF();
+//        EmbeddedXADataSource ds = new EmbeddedXADataSource();
+//        ds.setCreateDatabase("create");
+//        ds.setDatabaseName("target/testdb");
+//        ds.setUser("sa");
+//        ds.setPassword("");
+//        _dataSource = ds;
+//        return _dataSource;
     }
 
     protected void negative(String deployDir) throws Throwable {
@@ -561,7 +635,11 @@ public abstract class BPELTestAbstract {
 
         public void run() {
             try {
-                run2();
+                try {
+                    run2();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             } finally {
                 synchronized (_invocation) {
                     _invocation.done = true;
@@ -569,10 +647,10 @@ public abstract class BPELTestAbstract {
                 }
             }
         }
-
-        public void run2() {
-            final MyRoleMessageExchange mex;
-            final Future<MessageExchange.Status> running;
+        
+        public void run2() throws Exception {
+            final MyRoleMessageExchange[] mex = new MyRoleMessageExchange[1];
+            final Future[] running = new Future[1];
 
             // Wait for it....
             try {
@@ -593,40 +671,42 @@ public abstract class BPELTestAbstract {
                 }
             }
 
-            scheduler.beginTransaction();
-            try {
-                mex = _server.getEngine().createMessageExchange(new GUID().toString(), _invocation.target, _invocation.operation);
-                mexContext.clearCurrentResponse();
+            scheduler.execTransaction(new Callable<Void>() {
+                public Void call() throws Exception {
+                    try {
+                        mex[0] = _server.getEngine().createMessageExchange(new GUID().toString(), _invocation.target, _invocation.operation);
+                        mexContext.clearCurrentResponse();
 
-                Message request = mex.createMessage(_invocation.requestType);
-                request.setMessage(_invocation.request);
-                _invocation.invokeTime = System.currentTimeMillis();
-                running = mex.invoke(request);
+                        Message request = mex[0].createMessage(_invocation.requestType);
+                        request.setMessage(_invocation.request);
+                        _invocation.invokeTime = System.currentTimeMillis();
+                        running[0] = mex[0].invoke(request);
 
-                Status status = mex.getStatus();
-                CorrelationStatus cstatus = mex.getCorrelationStatus();
-                if (_invocation.expectedStatus != null && !status.equals(_invocation.expectedStatus))
-                    failure(_invocation, "Unexpected message exchange status", _invocation.expectedStatus, status);
+                        Status status = mex[0].getStatus();
+                        CorrelationStatus cstatus = mex[0].getCorrelationStatus();
+                        if (_invocation.expectedStatus != null && !status.equals(_invocation.expectedStatus))
+                            failure(_invocation, "Unexpected message exchange status", _invocation.expectedStatus, status);
 
-                if (_invocation.expectedCorrelationStatus != null && !cstatus.equals(_invocation.expectedCorrelationStatus))
-                    failure(_invocation, "Unexpected correlation status", _invocation.expectedCorrelationStatus, cstatus);
+                        if (_invocation.expectedCorrelationStatus != null && !cstatus.equals(_invocation.expectedCorrelationStatus))
+                            failure(_invocation, "Unexpected correlation status", _invocation.expectedCorrelationStatus, cstatus);
+                        return null;
 
-            } catch (Exception ex) {
-                if (_invocation.expectedInvokeException == null)
-                    failure(_invocation, "Unexpected invocation exception.", ex);
-                else if (_invocation.expectedInvokeException.isAssignableFrom(ex.getClass()))
-                    failure(_invocation, "Unexpected invocation exception.", _invocation.expectedInvokeException, ex.getClass());
+                    } catch (Exception ex) {
+                        if (_invocation.expectedInvokeException == null)
+                            failure(_invocation, "Unexpected invocation exception.", ex);
+                        else if (_invocation.expectedInvokeException.isAssignableFrom(ex.getClass()))
+                            failure(_invocation, "Unexpected invocation exception.", _invocation.expectedInvokeException, ex.getClass());
 
-                return;
-            } finally {
-                scheduler.commitTransaction();
-            }
+                        return null;
+                    }
+                }
+            });
 
             if (isFailed())
                 return;
 
             try {
-                running.get(_invocation.maximumWaitMs, TimeUnit.MILLISECONDS);
+                running[0].get(_invocation.maximumWaitMs, TimeUnit.MILLISECONDS);
             } catch (Exception ex) {
                 failure(_invocation, "Exception on future object.", ex);
                 return;
@@ -644,32 +724,32 @@ public abstract class BPELTestAbstract {
                 return;
 
             if (_invocation.expectedResponsePattern != null) {
-                scheduler.beginTransaction();
-                try {
-                    Status finalstat = mex.getStatus();
-                    if (_invocation.expectedFinalStatus != null && !_invocation.expectedFinalStatus.equals(finalstat))
-                        if (finalstat.equals(Status.FAULT)) {
-                            failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, "FAULT: "
-                                    + mex.getFault() + " | " + mex.getFaultExplanation());
-                        } else {
-                            failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, finalstat);
-                        }
+                scheduler.execTransaction(new Callable<Void>() {
+                    public Void call() throws Exception {
+                        Status finalstat = mex[0].getStatus();
+                        if (_invocation.expectedFinalStatus != null && !_invocation.expectedFinalStatus.equals(finalstat))
+                            if (finalstat.equals(Status.FAULT)) {
+                                failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, "FAULT: "
+                                        + mex[0].getFault() + " | " + mex[0].getFaultExplanation());
+                            } else {
+                                failure(_invocation, "Unexpected final message exchange status", _invocation.expectedFinalStatus, finalstat);
+                            }
 
-                    if (_invocation.expectedFinalCorrelationStatus != null
-                            && !_invocation.expectedFinalCorrelationStatus.equals(mex.getCorrelationStatus())) {
-                        failure(_invocation, "Unexpected final correlation status", _invocation.expectedFinalCorrelationStatus, mex
-                                .getCorrelationStatus());
+                        if (_invocation.expectedFinalCorrelationStatus != null
+                                && !_invocation.expectedFinalCorrelationStatus.equals(mex[0].getCorrelationStatus())) {
+                            failure(_invocation, "Unexpected final correlation status", _invocation.expectedFinalCorrelationStatus, mex[0]
+                                    .getCorrelationStatus());
+                        }
+                        if (mex[0].getResponse() == null)
+                            failure(_invocation, "Expected response, but got none.", null);
+                        String responseStr = DOMUtils.domToString(mex[0].getResponse().getMessage());
+                        //System.out.println("=>" + responseStr);
+                        Matcher matcher = _invocation.expectedResponsePattern.matcher(responseStr);
+                        if (!matcher.matches())
+                            failure(_invocation, "Response does not match expected pattern", _invocation.expectedResponsePattern, responseStr);
+                        return null;
                     }
-                    if (mex.getResponse() == null)
-                        failure(_invocation, "Expected response, but got none.", null);
-                    String responseStr = DOMUtils.domToString(mex.getResponse().getMessage());
-                    //System.out.println("=>" + responseStr);
-                    Matcher matcher = _invocation.expectedResponsePattern.matcher(responseStr);
-                    if (!matcher.matches())
-                        failure(_invocation, "Response does not match expected pattern", _invocation.expectedResponsePattern, responseStr);
-                } finally {
-                    scheduler.commitTransaction();
-                }
+                });
             }
         }
     }
