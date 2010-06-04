@@ -58,11 +58,13 @@ import org.w3c.dom.Node;
 
 /**
  * XPath compiler based on the SAXON implementation.
+ * 
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
 
-    protected static final Log __log = LogFactory.getLog(XPath20ExpressionCompilerBPEL20.class);
+    protected static final Log __log = LogFactory
+            .getLog(XPath20ExpressionCompilerBPEL20.class);
 
     protected String _bpelNS;
     protected QName _qnLinkStatus;
@@ -70,32 +72,39 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
     protected QName _qnVarData;
     protected QName _qnXslTransform;
 
-    protected final XPathMessages __msgs = MessageBundle.getMessages(XPathMessages.class);
+    protected final XPathMessages __msgs = MessageBundle
+            .getMessages(XPathMessages.class);
     protected Map<String, String> _properties = new HashMap<String, String>();
     protected CompilerContext _compilerContext;
 
     public XPath20ExpressionCompilerImpl(String bpelNS) {
         _bpelNS = bpelNS;
         _qnLinkStatus = new QName(_bpelNS, Constants.EXT_FUNCTION_GETLINKSTATUS);
-        _qnVarProp = new QName(_bpelNS, Constants.EXT_FUNCTION_GETVARIABLEPROPERTY);
+        _qnVarProp = new QName(_bpelNS,
+                Constants.EXT_FUNCTION_GETVARIABLEPROPERTY);
         _qnVarData = new QName(_bpelNS, Constants.EXT_FUNCTION_GETVARIABLEDATA);
-        _qnXslTransform = new QName(_bpelNS, Constants.EXT_FUNCTION_DOXSLTRANSFORM);
+        _qnXslTransform = new QName(_bpelNS,
+                Constants.EXT_FUNCTION_DOXSLTRANSFORM);
 
-        _properties.put("runtime-class", "org.apache.ode.bpel.elang.xpath20.runtime.XPath20ExpressionRuntime");
+        _properties
+                .put("runtime-class",
+                        "org.apache.ode.bpel.elang.xpath20.runtime.XPath20ExpressionRuntime");
         TransformerFactory trsf = new net.sf.saxon.TransformerFactoryImpl();
         XslTransformHandler.getInstance().setTransformerFactory(trsf);
     }
 
     public void setCompilerContext(CompilerContext compilerContext) {
         _compilerContext = compilerContext;
-        XslCompilationErrorListener xe = new XslCompilationErrorListener(compilerContext);
+        XslCompilationErrorListener xe = new XslCompilationErrorListener(
+                compilerContext);
         XslTransformHandler.getInstance().setErrorListener(xe);
     }
 
     /**
      * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compileJoinCondition(java.lang.Object)
      */
-    public OExpression compileJoinCondition(Object source) throws CompilationException {
+    public OExpression compileJoinCondition(Object source)
+            throws CompilationException {
         return _compile((Expression) source, true);
     }
 
@@ -109,70 +118,81 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
     /**
      * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compileLValue(java.lang.Object)
      */
-    public OLValueExpression compileLValue(Object source) throws CompilationException {
+    public OLValueExpression compileLValue(Object source)
+            throws CompilationException {
         return (OLValueExpression) _compile((Expression) source, false);
     }
 
     /**
      * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compile(java.lang.Object)
      */
-    private OExpression _compile(org.apache.ode.bpel.compiler.bom.Expression xpath, boolean isJoinCondition)
-            throws CompilationException {
-        OXPath20ExpressionBPEL20 oexp = new OXPath20ExpressionBPEL20(_compilerContext.getOProcess(), _qnVarData,
-                _qnVarProp, _qnLinkStatus, _qnXslTransform, isJoinCondition);
+    private OExpression _compile(
+            org.apache.ode.bpel.compiler.bom.Expression xpath,
+            boolean isJoinCondition) throws CompilationException {
+        OXPath20ExpressionBPEL20 oexp = new OXPath20ExpressionBPEL20(
+                _compilerContext.getOProcess(), _qnVarData, _qnVarProp,
+                _qnLinkStatus, _qnXslTransform, isJoinCondition);
         oexp.namespaceCtx = xpath.getNamespaceContext();
         doJaxpCompile(oexp, xpath);
         return oexp;
     }
 
-    private void doJaxpCompile(OXPath20ExpressionBPEL20 out, Expression source) throws CompilationException {
+    private void doJaxpCompile(OXPath20ExpressionBPEL20 out, Expression source)
+            throws CompilationException {
         String xpathStr;
         Node node = source.getExpression();
         if (node == null) {
-            throw new CompilationException(__msgs.errEmptyExpression(source.getURI(), new QName(source.getElement().getNamespaceURI(), source.getElement().getNodeName())));
+            throw new CompilationException(__msgs.errEmptyExpression(source
+                    .getURI(), new QName(source.getElement().getNamespaceURI(),
+                    source.getElement().getNodeName())));
         }
         if (node.getNodeType() != Node.TEXT_NODE) {
-            throw new CompilationException(__msgs.errUnexpectedNodeTypeForXPath(DOMUtils.domToString(node)));
+            throw new CompilationException(
+                    __msgs.errUnexpectedNodeTypeForXPath(DOMUtils
+                            .domToString(node)));
         }
         xpathStr = node.getNodeValue();
         xpathStr = xpathStr.trim();
         if (xpathStr.length() == 0) {
-            throw new CompilationException(__msgs.warnXPath20Syntax(DOMUtils.domToString(node), "empty string"));
+            throw new CompilationException(__msgs.warnXPath20Syntax(
+                    DOMUtils.domToString(node), "empty string"));
         }
 
         out.xpath = xpathStr;
-        try {        	
-            __log.debug("Compiling expression " + xpathStr);            
+        try {
+            __log.debug("Compiling expression " + xpathStr);
             XPathFactory xpf = new XPathFactoryImpl();
             JaxpFunctionResolver funcResolver = new JaxpFunctionResolver(
-                    _compilerContext, out, source.getNamespaceContext(), _bpelNS);
-            JaxpVariableResolver varResolver = new JaxpVariableResolver(_compilerContext, out);
+                    _compilerContext, out, source.getNamespaceContext(),
+                    _bpelNS);
+            JaxpVariableResolver varResolver = new JaxpVariableResolver(
+                    _compilerContext, out);
             XPath xpe = xpf.newXPath();
             xpe.setXPathFunctionResolver(funcResolver);
             xpe.setXPathVariableResolver(varResolver);
-            xpe.setNamespaceContext(source.getNamespaceContext());            
+            xpe.setNamespaceContext(source.getNamespaceContext());
             XPathExpression expr = xpe.compile(xpathStr);
             // evaluate the expression so as to initialize the variables
-            try { 
-            	expr.evaluate(node);            	
-            } catch (XPathExpressionException xpee) { 
-            	// swallow errors caused by uninitialized variable 
+            try {
+                expr.evaluate(node);
+            } catch (XPathExpressionException xpee) {
+                // swallow errors caused by uninitialized variable
             }
             for (String varExpr : extractVariableExprs(xpathStr)) {
                 expr = xpe.compile(varExpr);
-            	try {
-            		expr.evaluate(node);
-            	} catch (XPathExpressionException xpee) {
-                	// swallow errors caused by uninitialized variable 
-            	}
+                try {
+                    expr.evaluate(node);
+                } catch (XPathExpressionException xpee) {
+                    // swallow errors caused by uninitialized variable
+                }
             }
             for (String functionExpr : extractFunctionExprs(xpathStr)) {
                 expr = xpe.compile(functionExpr);
-            	try {
-            		expr.evaluate(node);
-            	} catch (XPathExpressionException xpee) {
-                	// swallow errors caused by uninitialized variable 
-            	}
+                try {
+                    expr.evaluate(node);
+                } catch (XPathExpressionException xpee) {
+                    // swallow errors caused by uninitialized variable
+                }
             }
         } catch (XPathExpressionException e) {
             __log.debug(e);
@@ -188,90 +208,96 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
 
     /**
      * Returns the list of variable references in the given XPath expression
-     * that may not have been resolved properly, which is the case especially 
-     * if the expression contains a function, which short circuited the evaluation.
-     *  
+     * that may not have been resolved properly, which is the case especially if
+     * the expression contains a function, which short circuited the evaluation.
+     * 
      * @param xpathStr
-     * @return list of variable expressions that may not have been resolved properly
+     * @return list of variable expressions that may not have been resolved
+     *         properly
      */
-    private List<String> extractVariableExprs(String xpathStr) {    	
-		ArrayList<String> variableExprs = new ArrayList<String>();
-		int firstVariable = xpathStr.indexOf("$"), 
-			lastVariable = xpathStr.lastIndexOf("$"),
-			firstFunction = xpathStr.indexOf("("); 
-		StringBuffer variableExpr = new StringBuffer();
-		if ((firstVariable > 0 && // the xpath references a variable
-				firstFunction > 0) || // the xpath contains a function
-			(firstVariable < lastVariable)) { // the xpath references multiple variables  
-			// most likely, the variable reference has not been resolved, so make that happen
-			boolean quoted = false, doubleQuoted = false, variable = false;
-			Name11Checker nameChecker = Name11Checker.getInstance();
-			for (int index = 0; index < xpathStr.length(); index++) {
-				char ch = xpathStr.charAt(index);
-				if (ch == '\''){
-					quoted = !quoted;
-				}
-				if (ch == '\"') {
-					doubleQuoted = !doubleQuoted;
-				}
-				if (quoted || doubleQuoted){
-					continue;
-				}
-				if (ch == '$') {
-					variable = true;
-					variableExpr.setLength(0);
-					variableExpr.append(ch);
-				} else {
-					if (variable) {
-						variableExpr.append(ch);
-						// in the name is qualified, don't check if its a qname when we're at the ":" character
-						if (ch == ':') {
-							continue;
-						}
-						if (index == xpathStr.length() || 
-								!nameChecker.isQName(variableExpr.substring(1))) {
-							variable = false;
-							variableExpr.setLength(variableExpr.length() - 1);
-							variableExprs.add(variableExpr.toString());
-							variableExpr.setLength(0);
-						}
-					}
-				}
-			}
-			if (variableExpr.length() > 0) {
-				variableExprs.add(variableExpr.toString());
-			}
-		}
-		return variableExprs;
-	}
+    private List<String> extractVariableExprs(String xpathStr) {
+        ArrayList<String> variableExprs = new ArrayList<String>();
+        int firstVariable = xpathStr.indexOf("$"), lastVariable = xpathStr
+                .lastIndexOf("$"), firstFunction = xpathStr.indexOf("(");
+        StringBuffer variableExpr = new StringBuffer();
+        if ((firstVariable > 0 && // the xpath references a variable
+                firstFunction > 0)
+                || // the xpath contains a function
+                (firstVariable < lastVariable)) { // the xpath references
+                                                  // multiple variables
+            // most likely, the variable reference has not been resolved, so
+            // make that happen
+            boolean quoted = false, doubleQuoted = false, variable = false;
+            Name11Checker nameChecker = Name11Checker.getInstance();
+            for (int index = 0; index < xpathStr.length(); index++) {
+                char ch = xpathStr.charAt(index);
+                if (ch == '\'') {
+                    quoted = !quoted;
+                }
+                if (ch == '\"') {
+                    doubleQuoted = !doubleQuoted;
+                }
+                if (quoted || doubleQuoted) {
+                    continue;
+                }
+                if (ch == '$') {
+                    variable = true;
+                    variableExpr.setLength(0);
+                    variableExpr.append(ch);
+                } else {
+                    if (variable) {
+                        variableExpr.append(ch);
+                        // in the name is qualified, don't check if its a qname
+                        // when we're at the ":" character
+                        if (ch == ':') {
+                            continue;
+                        }
+                        if (index == xpathStr.length()
+                                || !nameChecker.isQName(variableExpr
+                                        .substring(1))) {
+                            variable = false;
+                            variableExpr.setLength(variableExpr.length() - 1);
+                            variableExprs.add(variableExpr.toString());
+                            variableExpr.setLength(0);
+                        }
+                    }
+                }
+            }
+            if (variableExpr.length() > 0) {
+                variableExprs.add(variableExpr.toString());
+            }
+        }
+        return variableExprs;
+    }
 
     /**
      * Returns the list of function references in the given XPath expression
-     * that may not have been resolved properly, which is the case especially 
-     * if the expression contains a preceding function, which short circuited the evaluation.
-     *  
+     * that may not have been resolved properly, which is the case especially if
+     * the expression contains a preceding function, which short circuited the
+     * evaluation.
+     * 
      * @param xpathStr
-     * @return list of function expressions that may not have been resolved properly
+     * @return list of function expressions that may not have been resolved
+     *         properly
      */
-    private List<String> extractFunctionExprs(String xpathStr) {    	
-		ArrayList<String> functionExprs = new ArrayList<String>(); 
-		// Match the prefix : function name ( all contents except the ) and the closing )'s that may occur
-		final String FUNCTION_REGEX = "\\w+:\\w+\\([.[^\\)]]*\\)*";
-		int firstFunction = xpathStr.indexOf("("), 
-			lastFunction = xpathStr.lastIndexOf("("); 
-		if ((firstFunction > 0 && firstFunction < lastFunction)) {
-	        Pattern regex = Pattern.compile(FUNCTION_REGEX);
-	        Matcher matcher = regex.matcher(xpathStr);
-	        
-	        while (matcher.find()) {
-	            String function = matcher.group();
-	            functionExprs.add(function);
-	        }
-		}
-		return functionExprs;
-	}
-    
-	public Map<String, String> getProperties() {
+    private List<String> extractFunctionExprs(String xpathStr) {
+        ArrayList<String> functionExprs = new ArrayList<String>();
+        final String FUNCTION_REGEX = "(\\w+:)?\\w+\\((.+)?\\)";
+        int firstFunction = xpathStr.indexOf("("), lastFunction = xpathStr
+                .lastIndexOf("(");
+        if ((firstFunction > 0 && firstFunction < lastFunction)) {
+            Pattern regex = Pattern.compile(FUNCTION_REGEX);
+            Matcher matcher = regex.matcher(xpathStr);
+
+            while (matcher.find()) {
+                String function = matcher.group();
+                functionExprs.add(function);
+            }
+        }
+        return functionExprs;
+    }
+
+    public Map<String, String> getProperties() {
         return _properties;
     }
 
