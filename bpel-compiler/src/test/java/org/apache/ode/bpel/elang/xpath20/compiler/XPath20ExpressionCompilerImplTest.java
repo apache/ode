@@ -41,7 +41,7 @@ public class XPath20ExpressionCompilerImplTest {
                 methods[i].setAccessible(true);
                 Object ret = methods[i].invoke(xp20Exp, params);
                 List<?> values = (List<?>) ret;
-                Assert.assertEquals(0, values.size());
+                Assert.assertEquals(1, values.size());
             }
         }
     }
@@ -70,17 +70,36 @@ public class XPath20ExpressionCompilerImplTest {
             xp20Exp.getClass().getDeclaredMethods();
         for (int i = 0; i < methods.length; ++i) {
             if (methods[i].getName().equals(EXTRACT_FUNCTION_EXPRS)) {
-                final Object params[] = { "concat(current-date() + xs:dayTimeDuration(concat(\"P\", $DAYS_TO_NEXT_REMINDER, \"D\")), \"T\", \"08:30:00.000+08:00\")" };
+                String multipleFunctions = "concat(current-date() + xs:dayTimeDuration(concat(\"P\", $DAYS_TO_NEXT_REMINDER, \"D\")), \"T\", \"08:30:00.000+08:00\")";
+                final Object params[] = { multipleFunctions };
                 methods[i].setAccessible(true);
                 Object ret = methods[i].invoke(xp20Exp, params);
                 List<?> values = (List<?>) ret;
                 Assert.assertEquals(1, values.size());
-                Assert.assertEquals("Unexpected Function value", "xs:dayTimeDuration(concat(\"P\", $DAYS_TO_NEXT_REMINDER, \"D\"))", (String)values.get(0));
+                Assert.assertEquals("Unexpected Function value", multipleFunctions, (String)values.get(0));
             }
         }
     }
-
-
+    
+    @Test
+    public void testExtractFunctionsExprs() throws Exception {
+        XPath20ExpressionCompilerImpl xp20Exp = new XPath20ExpressionCompilerImpl(TEST_NAMESPACE);
+        final Method[] methods =
+            xp20Exp.getClass().getDeclaredMethods();
+        String ODE_840 = "bpel:doXslTransform(\"1.0.1/some.xsl\", $Variable.body, \"someParameter\", $OtherVariable.body, \"someParameter2\", $SwsHeaderRQ, \"someParameter3\", true(), \"someXpathParameter\", $XPath)";
+        
+        for (int i = 0; i < methods.length; ++i) {
+            if (methods[i].getName().equals(EXTRACT_FUNCTION_EXPRS)) {
+                final Object params[] = { ODE_840};
+                methods[i].setAccessible(true);
+                Object ret = methods[i].invoke(xp20Exp, params);
+                List<?> values = (List<?>) ret;
+                Assert.assertEquals(1, values.size());
+                Assert.assertEquals("Unexpected Function value", ODE_840, (String)values.get(0));
+            }
+        }
+        
+    }
 
 
 }

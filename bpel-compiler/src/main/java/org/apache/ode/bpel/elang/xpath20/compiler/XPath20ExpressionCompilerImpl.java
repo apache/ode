@@ -256,7 +256,8 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
     private List<String> extractFunctionExprs(String xpathStr) {
         ArrayList<String> functionExprs = new ArrayList<String>();
         // Match the prefix : function name ( all contents except the ) and the closing )'s that may occur
-        final String FUNCTION_REGEX = "\\w+:\\w+\\([.[^\\)]]*\\)*";
+//        final String FUNCTION_REGEX = "\\w+:\\w+\\([.[^\\)]]*\\)*";
+        final String FUNCTION_REGEX = "(\\w+:)?\\w+\\((.+)?\\)";
         int firstFunction = xpathStr.indexOf("("),
             lastFunction = xpathStr.lastIndexOf("(");
         if ((firstFunction > 0 && firstFunction < lastFunction)) {
