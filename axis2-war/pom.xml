@@ -109,22 +109,25 @@
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-jaxws</artifactId>
             <version>${axis2.version}</version>
-        </dependency>
-        <dependency>
+          </dependency>
+          <!-- According to Axis2 team, axis2 get this dependency from JDK
+               This jar was there in 1.4.1. release -->
+        <!--dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-jaxws-api</artifactId>
             <version>${axis2.version}</version>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-json</artifactId>
             <version>${axis2.version}</version>
         </dependency>
-        <dependency>
+        <!-- deprecated jar. This jar was there in 1.4.1 release -->
+        <!--dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-jws-api</artifactId>
             <version>${axis2.version}</version>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-metadata</artifactId>
