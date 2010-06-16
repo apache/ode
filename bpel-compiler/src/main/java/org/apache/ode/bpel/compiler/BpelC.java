@@ -300,6 +300,22 @@ public class BpelC {
      * @throws IOException if one occurs while reading the BPEL process or writing the
      * output.
      * @throws CompilationException if one occurs while compiling the process.
+     * @deprecated use compile(File bpelFile, long version) instead
+     */
+    public void compile(File bpelFile) throws CompilationException, IOException {
+       compile(bpelFile, 0);
+    }
+
+    /**
+     * <p>
+     * Compile a BPEL process from a file.  This method uses a {@link BpelObjectFactory}
+     * to parse the XML and then calls {@link #compile(Process,String)}.
+     * </p>
+     * @param bpelFile the file of the BPEL process to be compiled.
+     * @param version the version of the BPEL file.
+     * @throws IOException if one occurs while reading the BPEL process or writing the
+     * output.
+     * @throws CompilationException if one occurs while compiling the process.
      */
     public void compile(File bpelFile, long version) throws CompilationException, IOException {
         if (__log.isDebugEnabled()) {
