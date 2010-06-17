@@ -85,9 +85,15 @@ public class CapturingXMLEntityResolver implements XMLEntityResolver {
     }
 
     try {
-      URI systemId = new URI(
-          FileUtils.encodePath(resourceIdentifier.getLiteralSystemId() == null ? resourceIdentifier
-              .getNamespace() : resourceIdentifier.getLiteralSystemId()));
+
+      String identifier = null;
+      if (resourceIdentifier.getNamespace() == null) {
+          identifier = resourceIdentifier.getLiteralSystemId();
+      } else {
+          identifier = resourceIdentifier.getNamespace();
+      }
+      
+      URI systemId = new URI(FileUtils.encodePath(identifier));
 
       __log.debug("Captured: "+systemId);
       _capture.put(systemId, data);

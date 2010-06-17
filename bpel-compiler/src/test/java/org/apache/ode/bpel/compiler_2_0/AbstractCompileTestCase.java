@@ -16,13 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.ode.bpel.compiler_2_0;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.util.ArrayList;
-
-import junit.framework.TestCase;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,47 +28,34 @@ import org.apache.ode.bpel.compiler.BpelC;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
 import org.apache.ode.utils.StreamUtils;
+import org.junit.After;
+import org.junit.Before;
 
-
-/**
- * JUnit {@link TestCase} of the ODE BPEL compiler. This test case provides
- * is not very complex, it simply ensures that the given BPEL input compiles
- * succesfully. These test cases are intended to be run as part of a suite.
- */
-class GoodCompileTCase extends TestCase implements CompileListener {
+public abstract class AbstractCompileTestCase implements CompileListener {
 
     protected final Log __log = LogFactory.getLog(getClass());
-    private BpelC _compiler;
-    private ArrayList<CompilationMessage> _errors = new ArrayList<CompilationMessage>();
-    private String _bpel;
-
-
-    GoodCompileTCase(String bpel) {
-        super(bpel);
-        _bpel = bpel;
-    }
-
-    protected void setUp() throws Exception {
-        super.setUp();
-        _compiler = BpelC.newBpelCompiler();
-        _compiler.setCompileListener(this);
-        _compiler.setOutputStream(new ByteArrayOutputStream(StreamUtils.DEFAULT_BUFFER_SIZE));
-        _errors.clear();
-    }
-
-    public void runTest() throws Exception {
-        try {
-            File bpelFile = new File(getClass().getResource(_bpel).toURI().getPath());
-            _compiler.compile(bpelFile, 0);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            fail("Compilation did not succeed.");
-        }
-    }
+    protected BpelC _compiler;
+    protected ArrayList<CompilationMessage> _errors = new ArrayList<CompilationMessage>();
 
     public void onCompilationMessage(CompilationMessage compilationMessage) {
         _errors.add(compilationMessage);
         __log.debug(compilationMessage.toString());
     }
-
+    
+    public abstract void runTest(String bpel) throws Exception;
+    
+    @Before
+    public void setUp() throws Exception {
+        _compiler = BpelC.newBpelCompiler();
+        _compiler.setCompileListener(this);
+        _compiler.setOutputStream(new ByteArrayOutputStream(StreamUtils.DEFAULT_BUFFER_SIZE));
+        _errors.clear();
+    }
+    
+    @After
+    public void tearDown() throws Exception {
+        _compiler = null;
+        _errors.clear();
+    }
+    
 }

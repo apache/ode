@@ -134,19 +134,15 @@ class WSDLRegistry {
                 __log.info("WSDL at " + defuri + " is a duplicate import, your documents " +
                         "should all be in different namespaces (its's not nice but will still work).");
             }
-            boolean alreadyProcessed = false;
+            
             for (Definition4BPEL aDef : _definitions.get(def.getTargetNamespace())) {
                 if (aDef.getDocumentBaseURI().equals(def.getDocumentBaseURI())) {
-                    alreadyProcessed = true;
-                    break;
+                    if (__log.isInfoEnabled()) {
+                        __log.info("WSDL at " + defuri + " is already imported, this denotes a circular reference.");
+                        // no need to keep going: either return or throw an error
+                    }
+                    return;
                 }
-            }
-            if (alreadyProcessed) {
-                if (__log.isInfoEnabled()) {
-                    __log.info("WSDL at " + defuri + " is already imported, this denotes a circular reference.");
-                    // no need to keep going: either return or throw an error
-                }
-                return;
             }
         }
 
@@ -229,8 +225,13 @@ class WSDLRegistry {
                             Document doc = DOMUtils.parse(new InputSource(new ByteArrayInputStream(schema)));
                             String schemaTargetNS = doc.getDocumentElement().getAttribute("targetNamespace");
                             if (schemaTargetNS != null && schemaTargetNS.length() > 0) {
-                                _internalSchemas.put(new URI(schemaTargetNS), schema);
-                                _documentSchemas.put(new URI(schemaTargetNS), doc);
+                                URI schemaNamespace = new URI(schemaTargetNS);
+                                if (!_internalSchemas.containsKey(schemaNamespace)) {
+                                    _internalSchemas.put(schemaNamespace, schema);
+                                }
+                                if (!_documentSchemas.containsKey(schemaNamespace)) {
+                                    _documentSchemas.put(schemaNamespace, doc);
+                                }
                             }
                         } catch (Exception e) {
                             throw new RuntimeException("Couldn't parse schema in " + def.getTargetNamespace(), e);
