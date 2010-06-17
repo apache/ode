@@ -870,8 +870,11 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     public void refreshSchedules(String packageName) {
-        for( QName pid : listProcesses(packageName) ) {
-            fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.SCHEDULE_SETTINGS_CHANGED, pid, packageName));
+        List<QName> pids = listProcesses(packageName);
+        if (pids != null) {
+            for( QName pid : pids ) {
+                fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.SCHEDULE_SETTINGS_CHANGED, pid, packageName));
+            }
         }
     }
 }
