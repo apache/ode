@@ -316,7 +316,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             __log.debug("Registering process " + conf.getProcessId() + " with server.");
 
             BpelProcess process = createBpelProcess(conf);
-        process._classLoader = Thread.currentThread().getContextClassLoader();
+            process._classLoader = Thread.currentThread().getContextClassLoader();
 
             _engine.registerProcess(process);
             _registeredProcesses.add(process);

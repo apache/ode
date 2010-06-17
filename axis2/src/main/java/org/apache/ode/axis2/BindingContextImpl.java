@@ -120,6 +120,7 @@ public class BindingContextImpl implements BindingContext {
         ODEService odeService = new ODEService(axisService, pconf, serviceName, portName, _server._bpelServer, _server._txMgr);
 
         destroyService(serviceName, portName);
+
         _services.put(serviceName, portName, odeService);
 
         // Setting our new service on the ODE receiver
@@ -146,14 +147,18 @@ public class BindingContextImpl implements BindingContext {
             try {
                 String axisServiceName = service.getAxisService().getName();
                 AxisService axisService = _server._axisConfig.getService(axisServiceName);
-                // first, de-allocate its schemas
-                axisService.releaseSchemaList();
-                // then, de-allocate its parameters
-                // the service's wsdl object model is stored as one of its parameters!
-                // can't stress strongly enough how important it is to clean this up.
-                ArrayList<Parameter> parameters = (ArrayList<Parameter>) axisService.getParameters();
-                for (Parameter parameter : parameters) {
-                    axisService.removeParameter(parameter);
+                
+                //axisService might be null if it could not be properly activated before. 
+                if (axisService != null) {
+                    // first, de-allocate its schemas
+                    axisService.releaseSchemaList();
+                    // then, de-allocate its parameters
+                    // the service's wsdl object model is stored as one of its parameters!
+                    // can't stress strongly enough how important it is to clean this up.
+                    ArrayList<Parameter> parameters = (ArrayList<Parameter>) axisService.getParameters();
+                    for (Parameter parameter : parameters) {
+                        axisService.removeParameter(parameter);
+                    }
                 }
                 // now, stop the service
                 _server._axisConfig.stopService(axisServiceName);
