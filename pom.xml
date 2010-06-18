@@ -3,6 +3,7 @@
     <groupId>org.apache.ode</groupId>
     <artifactId>ode</artifactId>
     <name>ODE</name>
+    <description>Apache ODE (Orchestration Director Engine) executes business processes written following the WS-BPEL standard. It talks to web services, sending and receiving messages, handling data manipulation and error recovery as described by your process definition. It supports both long and short living process executions to orchestrate all the services that are part of your application.</description>
 
     <packaging>pom</packaging>
     <modelVersion>4.0.0</modelVersion>

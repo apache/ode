@@ -22,6 +22,7 @@
   <groupId>org.apache.ode.ping-pong</groupId>
   <artifactId>pom</artifactId>
   <packaging>pom</packaging>
+  <description>Apache ODE Ping-Pong Example (JBI)</description>
   <version>1.0.0</version>
 
   <properties>
