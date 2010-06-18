@@ -1158,6 +1158,11 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _bpelProcess.saveEvent(event, _dao, scopeNames);
     }
 
+    public static String debugInfoToString(org.apache.ode.bpel.o.DebugInfo debugInfo) {
+    	if (debugInfo == null) return "";
+    	else return " at " + debugInfo.sourceURI + ":" + debugInfo.startLine;
+    }
+    
     /**
      * We record all values of properties of a 'MessageType' variable for
      * efficient lookup.
@@ -1176,9 +1181,9 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
                     } catch (FaultException e) {
                         // This will fail as we're basically trying to extract properties on all
                         // received messages for optimization purposes.
-                        if (__log.isDebugEnabled())
-                            __log.debug("Couldn't extract property '" + property.toString()
-                                    + "' in property pre-extraction: " + e.toString());
+                        if (__log.isWarnEnabled())
+                            __log.warn("Couldn't extract property '" + property.toString()
+                                    + "' and variable " + variable.declaration + debugInfoToString(variable.declaration.debugInfo) + " in property pre-extraction: " + e.toString());
                     }
                 }
             }
