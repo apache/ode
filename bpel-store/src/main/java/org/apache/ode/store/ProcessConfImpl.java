@@ -549,7 +549,7 @@ public class ProcessConfImpl implements ProcessConf {
 
                     JobDetails runnableDetails = new JobDetails();
                     runnableDetails.getDetailsExt().put("cleanupInfo", cleanupInfo);
-                    runnableDetails.getDetailsExt().put("pid", _pid);
+                    runnableDetails.setProcessId(_pid);
                     runnableDetails.getDetailsExt().put("transactionSize", 10);
                     job.getRunnableDetailList().add(runnableDetails);
                 }

@@ -78,8 +78,8 @@ class BpelDAOConnectionImpl implements BpelDAOConnection {
         return _store.get(processId);
     }
 
-    public ProcessDAO createTransientProcess(Serializable id) {
-        ProcessDaoImpl process = new ProcessDaoImpl(this, _store, null, null, (String)id, 0);
+    public ProcessDAO createTransientProcess(Long id) {
+        ProcessDaoImpl process = new ProcessDaoImpl(this, _store, null, null, null, 0);
 
         return process;
     }

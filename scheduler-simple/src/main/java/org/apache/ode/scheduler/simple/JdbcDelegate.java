@@ -317,7 +317,7 @@ public class JdbcDelegate implements DatabaseDelegate {
                     if (detailsExt.get("iid") != null) {
                         details.instanceId = (Long) detailsExt.get("iid");
                     }
-                    if (detailsExt.get("pid") != null) {
+                    if (detailsExt.get("pid") != null && detailsExt.get("pid") instanceof String) {
                         details.processId = (String) detailsExt.get("pid");
                     }
                     if (detailsExt.get("inmem") != null) {

@@ -436,7 +436,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                 !DEFERRED_PROCESS_INSTANCE_CLEANUP_DISABLED ) {
                 // schedule deletion of process runtime data
                 _engine._contexts.scheduler.scheduleMapSerializableRunnable(
-                    new ProcessCleanUpRunnable(((DeferredProcessInstanceCleanable)proc).getId()), new Date());
+                    new ProcessCleanUpRunnable(((DeferredProcessInstanceCleanable)proc).getPidId()), new Date());
             } else if( proc instanceof DeferredProcessInstanceCleanable ) {
                 ((DeferredProcessInstanceCleanable)proc).deleteInstances(Integer.MAX_VALUE);
             }

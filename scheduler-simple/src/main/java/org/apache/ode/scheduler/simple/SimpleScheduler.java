@@ -738,7 +738,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         if (_processedSinceLastLoadTask.get(job.jobId) == null) {
             if (_outstandingJobs.putIfAbsent(job.jobId, job.schedDate) == null) {
                 if (job.schedDate <= System.currentTimeMillis()) {
-                    runJob(job);
+                    runTask(job);
                 } else {
                     _todo.enqueue(job);
                 }

@@ -114,9 +114,9 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection, FilteredInstanc
         return new ProcessDaoImpl(_sm, process);
     }
 
-    public ProcessDAO createTransientProcess(Serializable id) {
+    public ProcessDAO createTransientProcess(Long id) {
         HProcess process = new HProcess();
-        process.setId((Long)id);
+        process.setId(id);
 
         return new ProcessDaoImpl(_sm, process);
     }

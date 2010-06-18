@@ -20,6 +20,8 @@ package org.apache.ode.bpel.dao;
 
 import java.io.Serializable;
 
+import javax.xml.namespace.QName;
+
 /**
  * Instances and associated data for a ProcessDAO implementation that implements this
  * interface can be deleted in a deferred fashion.
@@ -33,8 +35,8 @@ public interface DeferredProcessInstanceCleanable {
      *
      * @return database id
      */
-    Serializable getId();
-
+    Long getPidId();
+    
     /**
      * Deletes instances and data for this process, the number of rows gets deletes is limited
      * by the transaction size.

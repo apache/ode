@@ -56,7 +56,7 @@ public class RuntimeDataCleanupRunnable implements MapSerializableRunnable, Cont
     public void restoreFromDetails(JobDetails details) {
         _cleanupInfo = (CleanupInfo)details.getDetailsExt().get("cleanupInfo");
         _transactionSize = (Integer)details.getDetailsExt().get("transactionSize");
-        _pid = (QName) details.getDetailsExt().get("pid");
+        _pid = details.getProcessId();
         _pidsToExclude = (Set<QName>)details.getDetailsExt().get("pidsToExclude");
     }
 

@@ -40,21 +40,21 @@ public class ProcessCleanUpRunnable implements MapSerializableRunnable, Contexts
     public final static int PROCESS_CLEANUP_TRANSACTION_SIZE = Integer.getInteger("org.apache.ode.processInstanceDeletion.transactionSize", 10);
 
     private transient Contexts _contexts;
-    private transient Serializable _pid;
+    private transient Long _pidId;
 
     public ProcessCleanUpRunnable() {
     }
-
-    public ProcessCleanUpRunnable(Serializable pid) {
-        _pid = pid;
+    
+    public ProcessCleanUpRunnable(Long pidId) {
+        _pidId = pidId;
     }
 
     public void storeToDetails(JobDetails details) {
-        details.getDetailsExt().put("pid", _pid);
+        details.getDetailsExt().put("pidId", _pidId);
     }
 
     public void restoreFromDetails(JobDetails details) {
-        _pid = (Serializable) details.getDetailsExt().get("pid");
+        _pidId = (Long) details.getDetailsExt().get("pidId");
     }
 
     public void setContexts(Contexts contexts) {
@@ -62,7 +62,7 @@ public class ProcessCleanUpRunnable implements MapSerializableRunnable, Contexts
     }
 
     public void run() {
-        if(__log.isDebugEnabled()) __log.debug("Deleting runtime data for old process: " + _pid + "...");
+        if(__log.isDebugEnabled()) __log.debug("Deleting runtime data for old process: " + _pidId + "...");
         try {
             // deleting of a process may involve hours' of database transaction,
             // we need to break it down to smaller transactions
@@ -70,20 +70,20 @@ public class ProcessCleanUpRunnable implements MapSerializableRunnable, Contexts
             do {
                 transactionResultSize = _contexts.scheduler.execTransaction(new Callable<Integer>() {
                     public Integer call() throws Exception {
-                        ProcessDAO process = _contexts.dao.getConnection().createTransientProcess(_pid);
+                        ProcessDAO process = _contexts.dao.getConnection().createTransientProcess(_pidId);
                         if( !(process instanceof DeferredProcessInstanceCleanable) ) {
                             throw new IllegalArgumentException("ProcessDAO does not implement DeferredProcessInstanceCleanable!!!");
                         }
                         return ((DeferredProcessInstanceCleanable)process).deleteInstances(PROCESS_CLEANUP_TRANSACTION_SIZE);
                     }
                 });
-                if(__log.isDebugEnabled()) __log.debug("Deleted " + transactionResultSize + "instances for old process: " + _pid + ".");
+                if(__log.isDebugEnabled()) __log.debug("Deleted " + transactionResultSize + "instances for old process: " + _pidId + ".");
             } while( transactionResultSize == PROCESS_CLEANUP_TRANSACTION_SIZE );
         } catch (RuntimeException re) {
             throw re;
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
-        if(__log.isInfoEnabled()) __log.info("Deleted runtime data for old process: " + _pid + ".");
+        if(__log.isInfoEnabled()) __log.info("Deleted runtime data for old process: " + _pidId + ".");
     }
 }

@@ -102,8 +102,7 @@ public interface BpelDAOConnection {
 
     Collection<CorrelationSetDAO> getActiveCorrelationSets();
 
-    ProcessDAO createTransientProcess(Serializable id);
-
+    ProcessDAO createTransientProcess(Long pidId);
     ProcessDAO createProcess(QName pid, QName type, String guid, long version);
 
     /**

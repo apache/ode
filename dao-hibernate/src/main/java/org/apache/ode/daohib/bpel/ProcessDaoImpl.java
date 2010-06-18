@@ -77,6 +77,10 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO, Deferred
         entering("ProcessDaoImpl.ProcessDaoImpl");
         _process = process;
     }
+    
+    public Long getPidId() {
+        return (Long) getId();
+    }
 
     public QName getProcessId() {
         return QName.valueOf(_process.getProcessId());
