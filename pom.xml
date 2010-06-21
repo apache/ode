@@ -1,43 +1,66 @@
 <?xml version="1.0"?>
 <project>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.apache</groupId>
+        <artifactId>apache</artifactId>
+        <version>7</version>
+    </parent>
+
     <groupId>org.apache.ode</groupId>
     <artifactId>ode</artifactId>
+    <packaging>pom</packaging>
+    <version>1.3.5-SNAPSHOT</version>
+    
     <name>ODE</name>
     <description>Apache ODE (Orchestration Director Engine) executes business processes written following the WS-BPEL standard. It talks to web services, sending and receiving messages, handling data manipulation and error recovery as described by your process definition. It supports both long and short living process executions to orchestrate all the services that are part of your application.</description>
-
-    <packaging>pom</packaging>
-    <modelVersion>4.0.0</modelVersion>
-    <version>1.3.5-SNAPSHOT</version>
     <url>http://ode.apache.org</url>
     <issueManagement>
         <system>jira</system>
-        <url>http://issues.apache.org</url>
+        <url>https://issues.apache.org/jira/browse/ODE</url>
     </issueManagement>
-    <licenses>
-        <license>
-            <name>Apache Public License 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
     <scm>
         <connection>scm:svn:http://svn.apache.org/repos/asf/ode/</connection>
         <developerConnection>scm:svn:https://svn.apache.org/repos/asf/ode/</developerConnection>
         <url>http://svn.apache.org/repos/asf/ode/</url>
     </scm>
 
-    <organization>
-        <name>Apache Software Foundation</name>
-        <url>http://www.apache.org</url>
-    </organization>
+    <mailingLists>
+        <mailingList>
+            <name>Apache ODE Users List</name>
+            <subscribe>user-subscribe@ode.apache.org</subscribe>
+            <unsubscribe>user-unsubscribe@ode.apache.org</unsubscribe>
+            <post>user@ode.apache.org</post>
+        </mailingList>
+        <mailingList>
+            <name>Apache ODE Developers List</name>
+            <subscribe>dev-subscribe@ode.apache.org</subscribe>
+            <unsubscribe>dev-unsubscribe@ode.apache.org</unsubscribe>
+            <post>dev@ode.apache.org</post>
+        </mailingList>
+        <mailingList>
+            <name>Apache ODE Commits List</name>
+            <subscribe>commits-subscribe@ode.apache.org</subscribe>
+            <unsubscribe>commits-unsubscribe@ode.apache.org</unsubscribe>
+            <post>commits@ode.apache.org</post>
+        </mailingList>
+    </mailingLists>
 
     <prerequisites>
         <maven>2.2.1</maven>
     </prerequisites>
 
     <properties>
+        <!--
+        NOTE: Project version, to be used instead of ${pom.version} since that
+              value magically changes when using SNAPSHOT versions.
+
+              This value *must* be kept in sync with the value of the <version>
+              element, and it will need to be changed manually before a release,
+              as the maven-release-plugin will not update this value.
+        -->
         <ode.version>1.3.5-SNAPSHOT</ode.version>
+        
         <activation.version>1.1</activation.version>
         <annogen.version>0.1.0</annogen.version>
         <antlr.version>2.7.7</antlr.version>
@@ -104,7 +127,6 @@
         <servicemix.nmr.version>1.1.0-SNAPSHOT</servicemix.nmr.version>
         <axis2.transport.version>1.0.0</axis2.transport.version>
     </properties>
-
 
     <modules>
         <module>agents</module>
@@ -325,24 +347,6 @@
     </pluginRepositories>
 
 -->
-    <!-- |
-     | Repository for distributing new releases.
-     |
-    -->
-    <distributionManagement>
-        <repository>
-            <id>apache.releases.https</id>
-            <name>Apache Release Distribution Repository</name>
-            <url>https://repository.apache.org/service/local/staging/deploy/maven2</url>
-        </repository>
-        <snapshotRepository>
-            <id>apache.snapshots.https</id>
-            <name>Apache Development Snapshot Repository</name>
-            <url>https://repository.apache.org/content/repositories/snapshots</url>
-            <uniqueVersion>false</uniqueVersion>
-        </snapshotRepository>
-    </distributionManagement>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
