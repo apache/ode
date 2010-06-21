@@ -87,6 +87,14 @@ public class ManagementService {
             def = wsdlReader.readWSDL(wsdlFile.toURI().toString());
             AxisService processService = ODEAxisService.createService(axisConfig, PM_SERVICE_NAME, PM_PORT_NAME,
                     PM_AXIS2_NAME, def, new DynamicMessageReceiver<ProcessManagement>(_processMgmt));
+            
+            /*
+             * XXX: Reparsing the WSDL is a workaround for WSCOMMONS-537 (see also ODE-853). When WSCOMMONS-537 is fixed
+             * we can safely remove the following line. 
+             */
+            def = wsdlReader.readWSDL(wsdlFile.toURI().toString());
+            /* end XXX */
+            
             AxisService instanceService = ODEAxisService.createService(axisConfig, IM_SERVICE_NAME, IM_PORT_NAME,
                     IM_AXIS2_NAME, def, new DynamicMessageReceiver<InstanceManagement>(_instanceMgmt));
             axisConfig.addService(processService);
