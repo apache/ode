@@ -21,14 +21,13 @@ AXIOM               = [ group("axiom-api", "axiom-impl", "axiom-dom",
 AXIS2_ALL           = [group("axis2-transport-http", "axis2-transport-local", "axis2-kernel", "axis2-adb", "axis2-codegen", "axis2-java2wsdl",
                              "axis2-jibx", "axis2-saaj", "axis2-xmlbeans",
                             :under=>"org.apache.axis2",
-                            :version=>"1.5"),
+                            :version=>"1.5.1"),
                       group("woden-api", "woden-impl-dom",
                               :under=>"org.apache.woden",
                               :version=>"1.0M8"),
-                       "org.apache.axis2:axis2-transports:jar:1.0-i6",
-                        "org.apache.axis2:axis2-jaxws-api:jar:1.2",
-                        "org.apache.httpcomponents:httpcore:jar:4.0"
-                      ]
+                      "org.apache.axis2:axis2-transport-base:jar:1.0.0",
+                      "org.apache.axis2:axis2-transport-jms:jar:1.0.0",
+                      "org.apache.httpcomponents:httpcore:jar:4.0"]
 AXIS2_MODULES        = struct(
  :mods              => ["org.apache.rampart:rampart:mar:1.4",
                          "org.apache.rampart:rahas:mar:1.4",
@@ -133,8 +132,8 @@ XALAN               = "xalan:xalan:jar:2.7.1"
 XERCES              = "xerces:xercesImpl:jar:2.9.0"
 WS_COMMONS          = struct(
   :axiom            =>AXIOM,
-  :neethi           =>"org.apache.neethi:neethi:jar:2.0.2",
-  :xml_schema       =>"org.apache.ws.commons.schema:XmlSchema:jar:1.3.2"
+  :neethi           =>"org.apache.neethi:neethi:jar:2.0.4",
+  :xml_schema       =>"org.apache.ws.commons.schema:XmlSchema:jar:1.4.3"
 )
 XBEAN               = [
   "org.apache.xbean:xbean-kernel:jar:3.3",
