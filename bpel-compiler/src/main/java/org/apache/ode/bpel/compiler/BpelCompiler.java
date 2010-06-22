@@ -128,9 +128,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 /**
- * Compiler for converting BPEL process descriptions (and their associated WSDL
- * and XSD documents) into compiled representations suitable for execution by
- * the ODE BPEL Service Provider. TODO: Move process validation into this class.
+ * Compiler for converting BPEL process descriptions (and their associated WSDL and XSD documents) into compiled representations
+ * suitable for execution by the ODE BPEL Service Provider. TODO: Move process validation into this class.
  */
 public abstract class BpelCompiler implements CompilerContext {
     /** Class-severity logger. */
@@ -148,7 +147,11 @@ public abstract class BpelCompiler implements CompilerContext {
 
     private boolean _supressJoinFailure = false;
 
+    /** Are we currently in an atomic scope context? */
     private boolean _atomicScope = false;
+
+    /** Are we currently compiling an isolated scope context. */
+    private boolean _isolatedScope = false;
 
     /** Syntactic scope stack. */
     private StructureStack _structureStack = new StructureStack();
@@ -195,8 +198,8 @@ public abstract class BpelCompiler implements CompilerContext {
             WSDLLocatorImpl locator = new WSDLLocatorImpl(_resourceFinder, _resourceFinder.resolve(from, wsdlImport));
             def = (Definition4BPEL) r.readWSDL(locator);
         } catch (WSDLException e) {
-            recoveredFromError(sloc, new CompilationException(__cmsgs.errWsdlParseError(e
-                    .getFaultCode(), e.getLocation(), e.getMessage())));
+            recoveredFromError(sloc, new CompilationException(__cmsgs.errWsdlParseError(e.getFaultCode(), e.getLocation(), e
+                    .getMessage())));
             throw new CompilationException(__cmsgs.errWsdlImportFailed(wsdlImport.toASCIIString(), e.getFaultCode())
                     .setSource(sloc), e);
         }
@@ -228,13 +231,13 @@ public abstract class BpelCompiler implements CompilerContext {
             Map<URI, byte[]> schemas = XSUtils.captureSchema(resFrom, data, resolver);
             _wsdlRegistry.addSchemas(schemas);
         } catch (XsdException e) {
-            CompilationException ce =  new CompilationException(__cmsgs.errInvalidImport(location.toString()));
+            CompilationException ce = new CompilationException(__cmsgs.errInvalidImport(location.toString()));
             recoveredFromError(sloc, ce);
         } catch (MalformedURLException e) {
-            CompilationException ce =  new CompilationException(__cmsgs.errInvalidImport(location.toString()));
+            CompilationException ce = new CompilationException(__cmsgs.errInvalidImport(location.toString()));
             recoveredFromError(sloc, ce);
         } catch (IOException e) {
-            CompilationException ce =  new CompilationException(__cmsgs.errInvalidImport(location.toString()));
+            CompilationException ce = new CompilationException(__cmsgs.errInvalidImport(location.toString()));
             recoveredFromError(sloc, ce);
         }
     }
@@ -442,8 +445,8 @@ public abstract class BpelCompiler implements CompilerContext {
         OMessageVarType msgVarType = (OMessageVarType) var.type;
         OMessageVarType.Part part = msgVarType.parts.get(partname);
         if (part == null)
-            throw new CompilationException(__cmsgs.errUndeclaredMessagePart(var.name,
-                    ((OMessageVarType) var.type).messageType, partname));
+            throw new CompilationException(__cmsgs.errUndeclaredMessagePart(var.name, ((OMessageVarType) var.type).messageType,
+                    partname));
         return part;
     }
 
@@ -491,8 +494,8 @@ public abstract class BpelCompiler implements CompilerContext {
                 });
 
         if (found == null)
-            throw new CompilationException(__cmsgs.errUndeclaredOperation(partnerLink.partnerRolePortType.getQName(),
-                    operationName));
+            throw new CompilationException(__cmsgs
+                    .errUndeclaredOperation(partnerLink.partnerRolePortType.getQName(), operationName));
         return found;
     }
 
@@ -513,8 +516,7 @@ public abstract class BpelCompiler implements CompilerContext {
                     }
                 });
         if (found == null) {
-            throw new CompilationException(__cmsgs.errUndeclaredOperation(partnerLink.myRolePortType.getQName(),
-                    operationName));
+            throw new CompilationException(__cmsgs.errUndeclaredOperation(partnerLink.myRolePortType.getQName(), operationName));
         }
         return found;
     }
@@ -903,8 +905,8 @@ public abstract class BpelCompiler implements CompilerContext {
 
         OActivity compiled;
         try {
-            compiled = (source instanceof ScopeLikeActivity) ? compileSLC((ScopeLikeActivity) source,
-                    new OScope.Variable[0]) : compileActivity(true, source);
+            compiled = (source instanceof ScopeLikeActivity) ? compileSLC((ScopeLikeActivity) source, new OScope.Variable[0])
+                    : compileActivity(true, source);
             compiled.suppressJoinFailure = _supressJoinFailure;
         } finally {
             _supressJoinFailure = previousSupressJoinFailure;
@@ -974,8 +976,8 @@ public abstract class BpelCompiler implements CompilerContext {
         for (LinkTarget lt : source.getLinkTargets())
             compileLinkTarget(lt);
 
-        _structureStack.topActivity().joinCondition = (source.getJoinCondition() == null || source.getLinkTargets()
-                .isEmpty()) ? null : compileJoinCondition(source.getJoinCondition());
+        _structureStack.topActivity().joinCondition = (source.getJoinCondition() == null || source.getLinkTargets().isEmpty()) ? null
+                : compileJoinCondition(source.getJoinCondition());
     }
 
     private String createName(Activity source, String type) {
@@ -1006,11 +1008,9 @@ public abstract class BpelCompiler implements CompilerContext {
         OProcess.OProperty property = resolveProperty(src.getPropertyName());
 
         OProcess.OPropertyAlias alias = new OProcess.OPropertyAlias(_oprocess);
-        alias.debugInfo = createDebugInfo(_processDef, "PropertyAlias " + src.getPropertyName() + " for "
-                + src.getMessageType());
-        if (src.getMessageType() == null){
-            throw new CompilationException(__cmsgs.errAliasUndeclaredMessage(src.getPropertyName(),
-                    src.getQuery().getPath()));
+        alias.debugInfo = createDebugInfo(_processDef, "PropertyAlias " + src.getPropertyName() + " for " + src.getMessageType());
+        if (src.getMessageType() == null) {
+            throw new CompilationException(__cmsgs.errAliasUndeclaredMessage(src.getPropertyName(), src.getQuery().getPath()));
         }
 
         OMessageVarType messageType = resolveMessageType(src.getMessageType());
@@ -1084,8 +1084,7 @@ public abstract class BpelCompiler implements CompilerContext {
             if (plink.hasPartnerRole()) {
                 PartnerLinkType.Role partnerRole = plinkType.getRole(plink.getPartnerRole());
                 if (partnerRole == null)
-                    throw new CompilationException(__cmsgs.errUndeclaredRole(plink.getPartnerRole(), plinkType
-                            .getName()));
+                    throw new CompilationException(__cmsgs.errUndeclaredRole(plink.getPartnerRole(), plinkType.getName()));
                 oplink.partnerRoleName = partnerRole.getName();
                 QName portType = partnerRole.getPortType();
                 if (portType == null)
@@ -1122,7 +1121,7 @@ public abstract class BpelCompiler implements CompilerContext {
 
     public void compile(OActivity context, BpelObject source, Runnable run) {
         DefaultActivityGenerator.defaultExtensibilityElements(context, source);
-        _structureStack.push(context,source);
+        _structureStack.push(context, source);
         try {
             run.run();
         } finally {
@@ -1163,6 +1162,16 @@ public abstract class BpelCompiler implements CompilerContext {
 
             oscope.atomicScope = _atomicScope = newValue;
         }
+
+        if (src.getIsolatedScope() != null) {
+            if (src.getIsolatedScope()) {
+                if (_isolatedScope)
+                    throw new CompilationException(__cmsgs.errIsolatedScopeNesting());
+
+                oscope.isolatedScope = _isolatedScope = true;
+            }
+        }
+
         try {
             compile(oscope, src, new Runnable() {
                 public void run() {
@@ -1302,11 +1311,9 @@ public abstract class BpelCompiler implements CompilerContext {
                 case BPEL20_DRAFT:
                 case BPEL20:
                     if (onEvent.getMessageType() == null && onEvent.getElementType() == null)
-                        throw new CompilationException(__cmsgs.errVariableDeclMissingType(onEvent.getVariable())
-                                .setSource(onEvent));
+                        throw new CompilationException(__cmsgs.errVariableDeclMissingType(onEvent.getVariable()).setSource(onEvent));
                     if (onEvent.getMessageType() != null && onEvent.getElementType() != null)
-                        throw new CompilationException(__cmsgs.errVariableDeclInvalid(onEvent.getVariable()).setSource(
-                                onEvent));
+                        throw new CompilationException(__cmsgs.errVariableDeclInvalid(onEvent.getVariable()).setSource(onEvent));
 
                     OVarType varType;
                     if (onEvent.getMessageType() != null)
@@ -1314,8 +1321,7 @@ public abstract class BpelCompiler implements CompilerContext {
                     else if (onEvent.getElement() != null)
                         varType = resolveElementType(onEvent.getElementType());
                     else
-                        throw new CompilationException(__cmsgs
-                                .errUnrecognizedVariableDeclaration(onEvent.getVariable()));
+                        throw new CompilationException(__cmsgs.errUnrecognizedVariableDeclaration(onEvent.getVariable()));
 
                     oevent.variable = new OScope.Variable(_oprocess, varType);
                     oevent.variable.name = onEvent.getVariable();
@@ -1332,8 +1338,7 @@ public abstract class BpelCompiler implements CompilerContext {
                 oevent.messageExchangeId = onEvent.getMessageExchangeId();
                 oevent.route = onEvent.getRoute();
 
-                if (onEvent.getPortType() != null
-                        && !onEvent.getPortType().equals(oevent.partnerLink.myRolePortType.getQName()))
+                if (onEvent.getPortType() != null && !onEvent.getPortType().equals(oevent.partnerLink.myRolePortType.getQName()))
                     throw new CompilationException(__cmsgs.errPortTypeMismatch(onEvent.getPortType(),
                             oevent.partnerLink.myRolePortType.getQName()));
 
@@ -1448,8 +1453,7 @@ public abstract class BpelCompiler implements CompilerContext {
         oscope.terminationHandler.debugInfo = createDebugInfo(terminationHandler, null);
         if (terminationHandler == null) {
             oscope.terminationHandler.activity = createDefaultCompensateActivity(null,
-                    "Auto-generated 'compensate all' pseudo-activity for default termination handler on "
-                            + oscope.toString());
+                    "Auto-generated 'compensate all' pseudo-activity for default termination handler on " + oscope.toString());
         } else {
             _recoveryContextStack.push(oscope);
             try {
@@ -1467,8 +1471,7 @@ public abstract class BpelCompiler implements CompilerContext {
         oscope.compensationHandler.debugInfo = createDebugInfo(compensationHandler, null);
         if (compensationHandler == null) {
             oscope.compensationHandler.activity = createDefaultCompensateActivity(compensationHandler,
-                    "Auto-generated 'compensate all' pseudo-activity for default compensation handler on  "
-                            + oscope.toString());
+                    "Auto-generated 'compensate all' pseudo-activity for default compensation handler on  " + oscope.toString());
         } else {
             _recoveryContextStack.push(oscope);
             try {
@@ -1542,8 +1545,8 @@ public abstract class BpelCompiler implements CompilerContext {
                                     else if (catchSrc.getFaultVariableElementType() != null)
                                         faultVarType = resolveElementType(catchSrc.getFaultVariableElementType());
                                     else
-                                        throw new CompilationException(__cmsgs
-                                                .errUnrecognizedVariableDeclaration(catchSrc.getFaultVariable()));
+                                        throw new CompilationException(__cmsgs.errUnrecognizedVariableDeclaration(catchSrc
+                                                .getFaultVariable()));
 
                                     faultVar = new OScope.Variable(_oprocess, faultVarType);
                                     faultVar.name = catchSrc.getFaultVariable();
@@ -1552,8 +1555,7 @@ public abstract class BpelCompiler implements CompilerContext {
                                     ctch.addLocalVariable(faultVar);
                                     break;
                                 default:
-                                    throw new AssertionError("Unexpected BPEL VERSION constatnt: "
-                                            + _processDef.getBpelVersion());
+                                    throw new AssertionError("Unexpected BPEL VERSION constatnt: " + _processDef.getBpelVersion());
                                 }
 
                                 ctch.faultVariable = faultVar;
@@ -1764,7 +1766,7 @@ public abstract class BpelCompiler implements CompilerContext {
 
         public void push(OActivity act, BpelObject src) {
             _stack.push(act);
-            _srcMap.put(act,src);
+            _srcMap.put(act, src);
         }
 
         public BpelObject topSource() {

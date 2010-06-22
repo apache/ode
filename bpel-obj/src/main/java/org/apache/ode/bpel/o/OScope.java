@@ -65,7 +65,11 @@ public class OScope extends OActivity {
 
     public boolean implicitScope;
 
+    /** Is this scope <em>atomic</em> i.e. meant to execute in a single transaction. */
     public boolean atomicScope;
+
+    /** Is this scope <em>isolated</em> i.e. protected against concurrent access to its variables. */
+    public boolean isolatedScope;
 
     public OScope(OProcess owner, OActivity parent) {
         super(owner, parent);

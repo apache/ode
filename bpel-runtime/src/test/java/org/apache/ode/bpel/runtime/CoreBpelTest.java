@@ -472,4 +472,10 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
     public PartnerRoleConfig getConfigForPartnerLink(OPartnerLink pLink) {
         return new PartnerRoleConfig(null, true);
     }
+
+    public void forceFlush() {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

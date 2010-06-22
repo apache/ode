@@ -138,6 +138,8 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
     protected BpelProcess _bpelProcess;
 
     private Date _currentEventDateTime;
+    
+    private boolean _forceFlush;
 
     /** Five second maximum for continous execution. */
     private long _maxReductionTimeMs = 2000000;
@@ -954,7 +956,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         long maxTime = System.currentTimeMillis() + _maxReductionTimeMs;
         boolean canReduce = true;
         assert _outstandingRequests == null && _imaManager != null;
-        while (ProcessState.canExecute(_dao.getState()) && System.currentTimeMillis() < maxTime && canReduce) {
+        while (ProcessState.canExecute(_dao.getState()) && System.currentTimeMillis() < maxTime && canReduce && !_forceFlush) {
             canReduce = _vpu.execute();
         }
         _dao.setLastActiveTime(new Date());
@@ -1565,4 +1567,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
     }
 
+    public void forceFlush() {
+        _forceFlush = true;
+    }
 }

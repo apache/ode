@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	~ Licensed to the Apache Software Foundation (ASF) under one
+	~ or more contributor license agreements.  See the NOTICE file
+	~ distributed with this work for additional information
+	~ regarding copyright ownership.  The ASF licenses this file
+	~ to you under the Apache License, Version 2.0 (the
+	~ "License"); you may not use this file except in compliance
+	~ with the License.  You may obtain a copy of the License at
+	~
+	~    http://www.apache.org/licenses/LICENSE-2.0
+	~
+	~ Unless required by applicable law or agreed to in writing,
+	~ software distributed under the License is distributed on an
+	~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	~ KIND, either express or implied.  See the License for the
+	~ specific language governing permissions and limitations
+	~ under the License.
+-->
+<bpel:process
+	xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop"
+	xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:Start="http://ode/bpel/unit-test/Start"
+	xmlns:HelloWorld="http://ode/bpel/unit-test/HelloWorld"
+	xmlns:this="http://ode/bpel/unit-test"
+	xmlns:diag="http://ode/bpel/unit-test.wsdl"
+	xmlns:tns="http://ode/bpel/unit-test.wsdl"
+	xmlns:xml="http://www.w3.org/XML/1998/namespace"
+	xmlns:atomic="http://ode.apache.org/atomicScope"
+	queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+	expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+	name="HelloWorldAtomic" targetNamespace="http://ode/bpel/unit-test">
+	<bpel:import namespace="http://ode/bpel/unit-test.wsdl"
+		location="HelloWorld.wsdl"
+		importType="http://schemas.xmlsoap.org/wsdl/"/>
+	<bpel:import namespace="http://ode/bpel/unit-test.wsdl"
+		location="HelloWorldAtomic.wsdl"
+		importType="http://schemas.xmlsoap.org/wsdl/"/>
+	<bpel:partnerLinks>
+		<bpel:partnerLink name="helloWorldAndPoolForHelloPortPlkVar"
+			partnerLinkType="diag:HelloWorldAndPoolForHelloPortPlk"
+			initializePartnerRole="true" partnerRole="HelloWorld_for_Pool"/>
+		<bpel:partnerLink name="poolAndStartForHelloPortPlkVar"
+			partnerLinkType="diag:PoolAndStartForHelloPortPlk"
+			myRole="Pool_for_Start"/>
+	</bpel:partnerLinks>
+	<bpel:variables>
+		<bpel:variable name="tnsHelloRequestMsg" messageType="tns:HelloMessage"/>
+		<bpel:variable name="tnsHelloResponseMsg" messageType="tns:HelloMessage"/>
+	</bpel:variables>
+    <bpel:sequence>
+        <bpel:receive partnerLink="poolAndStartForHelloPortPlkVar"
+            portType="tns:HelloPortType" operation="hello"
+            variable="tnsHelloRequestMsg" createInstance="yes"/>
+        <bpel:scope atomic="yes">
+                <bpel:invoke partnerLink="helloWorldAndPoolForHelloPortPlkVar"
+                    portType="tns:HelloPortType" operation="hello"
+                    inputVariable="tnsHelloRequestMsg"
+                    outputVariable="tnsHelloResponseMsg"/>
+        </bpel:scope>
+        <bpel:reply partnerLink="poolAndStartForHelloPortPlkVar"
+            portType="tns:HelloPortType" operation="hello"
+            variable="tnsHelloResponseMsg"/>
+    </bpel:sequence>
+</bpel:process>

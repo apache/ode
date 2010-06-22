@@ -19,12 +19,15 @@
 package org.apache.ode.bpel.runtime;
 
 import org.apache.ode.bpel.evt.ProcessInstanceStartedEvent;
+import org.apache.ode.bpel.o.OBase;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OFailureHandling;
+import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.runtime.channels.ReadWriteLockChannel;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.jacob.SynchChannel;
 
@@ -34,6 +37,7 @@ import org.w3c.dom.Element;
 public class PROCESS extends BpelJacobRunnable {
     private static final long serialVersionUID = 1L;
     private OProcess _oprocess;
+    private InstanceGlobals _globals;
 
     public PROCESS(OProcess process) {
         _oprocess = process;
@@ -43,6 +47,7 @@ public class PROCESS extends BpelJacobRunnable {
         BpelRuntimeContext ntive = getBpelRuntimeContext();
         Long scopeInstanceId = ntive.createScopeInstance(null, _oprocess.procesScope);
 
+        createGlobals();
         ProcessInstanceStartedEvent evt = new ProcessInstanceStartedEvent();
         evt.setRootScopeId(scopeInstanceId);
         evt.setScopeDeclarationId(_oprocess.procesScope.getId());
@@ -51,7 +56,7 @@ public class PROCESS extends BpelJacobRunnable {
         ActivityInfo child = new ActivityInfo(genMonotonic(),
             _oprocess.procesScope,
             newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
-        ScopeFrame processFrame = new ScopeFrame(_oprocess.procesScope, scopeInstanceId, null, null);
+        ScopeFrame processFrame = new ScopeFrame(_oprocess.procesScope, scopeInstanceId, null, null,_globals);
         instance(new SCOPE(child, processFrame, new LinkFrame(null)));
 
         object(new ParentScopeChannelListener(child.parent) {
@@ -79,5 +84,19 @@ public class PROCESS extends BpelJacobRunnable {
                 this.completed(faultData, CompensationHandler.emptySet());
             }
         });
+    }
+
+    private void createGlobals() {
+        _globals = new InstanceGlobals();
+        
+        // For each variable, we create a lock.
+        for (OBase child : _oprocess.getChildren()) 
+            if (child instanceof OScope.Variable) {
+                OScope.Variable var = (Variable) child;
+                ReadWriteLockChannel vlock = newChannel(ReadWriteLockChannel.class);
+                instance(new READWRITELOCK(vlock));
+                _globals._varLocks.put(var, vlock);
+                
+            }
     }
 }

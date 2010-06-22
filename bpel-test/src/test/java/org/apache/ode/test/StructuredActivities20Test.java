@@ -33,6 +33,20 @@ public class StructuredActivities20Test extends BPELTestAbstract {
         // Test Flow with XPath10
         go("/bpel/2.0/TestFlowLinks");
     }
+    
+    @Test public void testIsolatedScopes1() throws Throwable {
+        // Test Flow with XPath10
+        go("/bpel/2.0/TestIsolatedScopes1");
+    }
+    @Test public void testAtomicScopeBasic() throws Throwable {
+        go("/bpel/2.0/TestAtomicScopeBasic");
+    }
+//    @Test public void testAtomicProcess() throws Throwable {
+//        go("/bpel/2.0/TestAtomicProcess");
+//    }
+//    @Test public void testAtomicScopes() throws Throwable {
+//        go("/bpel/2.0/TestAtomicScope");
+//    }
     @Test public void testForEach() throws Throwable {
         // Test Flow with XPath10
         go("/bpel/2.0/TestForEach");

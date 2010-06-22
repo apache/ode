@@ -70,9 +70,10 @@ abstract class PickReceiveGenerator extends DefaultActivityGenerator {
         OPickReceive.OnMessage onMessage = new OPickReceive.OnMessage(_context.getOProcess());
         onMessage.partnerLink = _context.resolvePartnerLink(plink);
         onMessage.operation = _context.resolveMyRoleOperation(onMessage.partnerLink, operation);
-        if (onMessage.operation.getInput() != null && onMessage.operation.getInput().getMessage() != null)
+        if (onMessage.operation.getInput() != null && onMessage.operation.getInput().getMessage() != null) {
             onMessage.variable = _context.resolveMessageVariable(varname, onMessage.operation.getInput().getMessage()
                     .getQName());
+        }
         onMessage.messageExchangeId = messageExchangeId;
         onMessage.route = route;
 

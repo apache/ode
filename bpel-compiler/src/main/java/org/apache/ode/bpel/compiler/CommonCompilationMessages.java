@@ -450,6 +450,10 @@ public class CommonCompilationMessages extends CompilationMessageBundle {
             return this.formatCompilationMessage("A scope enclosed inside an atomic scope cannot declare itself as not atomic");
     }
 
+    public CompilationMessage errIsolatedScopeNesting() {
+        return this.formatCompilationMessage("Cannot nest isolated scopes.");
+    }
+
     public CompilationMessage errProcessNameNotSpecified() {
         return this.formatCompilationMessage("The process name was not specified.");
     }
