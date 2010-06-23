@@ -213,11 +213,11 @@ public class DeploymentBrowser {
                                         out.write("<process><pid>"+pid+"</pid>");
                                         for (final File file : files) {
                                             if (file.getPath().endsWith(".wsdl")) {
-                                                String relativePath = file.getPath().substring(_store.getDeployDir().getCanonicalPath().length() + 1);
+                                                String relativePath = file.getPath().substring(_store.getDeployDir().getCanonicalPath().length() + 1).replace(File.separatorChar, '/');
                                                 out.write("<wsdl>"+ relativePath + "</wsdl>");
                                             }
                                             if (file.getPath().endsWith(".bpel")) {
-                                                String relativePath = file.getPath().substring(_store.getDeployDir().getCanonicalPath().length() + 1);
+                                                String relativePath = file.getPath().substring(_store.getDeployDir().getCanonicalPath().length() + 1).replace(File.separatorChar, '/');
                                                 out.write("<bpel>"+ relativePath + "</bpel>");
                                             }
 
