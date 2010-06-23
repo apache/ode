@@ -50,6 +50,7 @@
 
     <!-- Sybase -->
     <create-ddl db="hsql" />
+    <create-ddl db="h2" />
 
     <!-- MSSQL -->
     <create-ddl db="sqlserver" />
