@@ -265,7 +265,7 @@ public class BpelProcess {
 
         // For a one way, once the engine is done, the mex can be safely released.
         // Sean: not really, if route is not found, we cannot delete the mex yet
-        // Rafal: We don't do cleanup here, look at PXEI-711
+        // Rafal: We don't do cleanup here
 //        if (mex.getPattern().equals(MessageExchange.MessageExchangePattern.REQUEST_ONLY) && routed && getCleanupCategories(false).contains(CLEANUP_CATEGORY.MESSAGES)) {
 //            mex.release();
 //        }
