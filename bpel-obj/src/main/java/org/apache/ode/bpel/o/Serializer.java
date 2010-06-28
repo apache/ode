@@ -135,14 +135,14 @@ public class Serializer  {
             oprocess = (OProcess) ois.readObject();
         } catch (ClassNotFoundException e) {
             throw new IOException("DataStream Error");
-		} finally {
-			try {
-				if (ois != null)
-					ois.close();
-			} catch (IOException e) {
+        } finally {
+            try {
+                if (ois != null)
+                    ois.close();
+            } catch (IOException e) {
 
-			}
-		}
+            }
+        }
 
         return oprocess;
     }
