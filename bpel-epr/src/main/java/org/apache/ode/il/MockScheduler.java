@@ -321,4 +321,10 @@ public class MockScheduler implements Scheduler {
     public boolean amICoordinator() {
         return true;
     }
+
+    @Override
+    public void acquireTransactionLocks() {
+        // TODO Auto-generated method stub
+        
+    }
 }

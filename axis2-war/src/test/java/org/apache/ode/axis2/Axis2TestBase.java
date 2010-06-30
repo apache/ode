@@ -52,6 +52,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -220,6 +221,7 @@ public abstract class Axis2TestBase {
         } else {
             System.clearProperty("ode.persistence");
         }
+        server = null;
     }
 
     protected class ODEAxis2Server extends AxisServer {

@@ -215,4 +215,13 @@ public class NSContext implements NamespaceContext, Externalizable {
     public Map<String, String> toMap() {
         return Collections.unmodifiableMap(_prefixToUriMap);
     }
+
+    @Override
+    public boolean equals(Object b) {
+        if (b instanceof NSContext) {
+            return _prefixToUriMap.equals(((NSContext) b)._prefixToUriMap);
+        } else {
+            return false;
+        }
+    }
 }

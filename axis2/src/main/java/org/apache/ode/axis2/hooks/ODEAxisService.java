@@ -23,9 +23,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +54,8 @@ import org.apache.ode.axis2.util.Axis2WSDLLocator;
 import org.apache.ode.axis2.util.AxisUtils;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.epr.WSDL11Endpoint;
+import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Properties;
 import org.apache.ws.commons.schema.XmlSchema;
 import org.apache.ws.commons.schema.XmlSchemaCollection;
@@ -77,7 +81,7 @@ public class ODEAxisService {
         try {
             URI baseUri = pconf.getBaseURI().resolve(wsdlDefinition.getDocumentBaseURI());
             is = baseUri.toURL().openStream();
-            WSDL11ToAxisServiceBuilder serviceBuilder = new WSDL11ToAxisPatchedBuilder(is, wsdlServiceName, portName);
+            WSDL11ToAxisPatchedBuilder serviceBuilder = new WSDL11ToAxisPatchedBuilder(is, wsdlServiceName, portName);
             serviceBuilder.setBaseUri(baseUri.toString());
             serviceBuilder.setCustomResolver(new Axis2UriResolver());
             serviceBuilder.setCustomWSLD4JResolver(new Axis2WSDLLocator(baseUri));
@@ -303,12 +307,27 @@ public class ODEAxisService {
             super(in);
         }
 
+        private static Map<String, WeakReference<XmlSchema>> cached = new HashMap<String, WeakReference<XmlSchema>>();
+        
         protected XmlSchema getXMLSchema(Element element, String baseUri) {
-            XmlSchemaCollection schemaCollection = new XmlSchemaCollection();
-            if (baseUri != null) {
-                schemaCollection.setBaseUri(baseUri);
+            synchronized (cached) {
+                String digest = GUID.makeGUID("" + baseUri + ";" + DOMUtils.domToString(element));
+                if (cached.containsKey(digest)) {
+                    XmlSchema s = cached.get(digest).get();
+                    if (s != null) {
+                        log.debug("Cache hit for schema guid " + digest);
+                        return s;
+                    }
+                }
+                
+                XmlSchemaCollection schemaCollection = new XmlSchemaCollection();
+                if (baseUri != null) {
+                    schemaCollection.setBaseUri(baseUri);
+                }
+                XmlSchema schema = schemaCollection.read(element, baseUri);
+                cached.put(digest, new WeakReference<XmlSchema>(schema));
+                return schema;
             }
-            return schemaCollection.read(element, baseUri);
         }
     }
 

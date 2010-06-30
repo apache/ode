@@ -111,6 +111,7 @@ public class DeploymentPoller {
     public void stop() {
         _poller.kill();
         _poller = null;
+        __log.info("Poller stopped.");
     }
 
     protected boolean isDeploymentFromODEFileSystemAllowed() {

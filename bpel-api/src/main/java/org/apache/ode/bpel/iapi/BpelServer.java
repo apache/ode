@@ -126,4 +126,9 @@ public interface BpelServer {
      */
     DebuggerContext getDebugger(QName pid) throws BpelEngineException;
 
+    /**
+     * Sometimes it's required to acquire table locks at beginning of transaction.
+     * This is for H2 database. 
+     */
+    void acquireTransactionLocks();
 }

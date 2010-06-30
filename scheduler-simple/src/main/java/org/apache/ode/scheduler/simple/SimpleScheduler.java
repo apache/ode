@@ -906,4 +906,8 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
             }
         }
     }
+
+    public void acquireTransactionLocks() {
+        _db.acquireTransactionLocks();
+    }
 }

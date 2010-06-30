@@ -112,7 +112,7 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
     public OLValueExpression compileLValue(Object source) throws CompilationException {
         return (OLValueExpression) _compile((Expression) source, false);
     }
-
+    
     /**
      * @see org.apache.ode.bpel.compiler.api.ExpressionCompiler#compile(java.lang.Object)
      */
@@ -120,7 +120,7 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
             throws CompilationException {
         OXPath20ExpressionBPEL20 oexp = new OXPath20ExpressionBPEL20(_compilerContext.getOProcess(), _qnVarData,
                 _qnVarProp, _qnLinkStatus, _qnXslTransform, isJoinCondition);
-        oexp.namespaceCtx = xpath.getNamespaceContext();
+        oexp.namespaceCtx = _compilerContext.tryCacheNamespaceContext(xpath.getNamespaceContext());
         doJaxpCompile(oexp, xpath);
         return oexp;
     }

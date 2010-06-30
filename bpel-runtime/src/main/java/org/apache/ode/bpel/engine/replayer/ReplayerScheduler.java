@@ -156,4 +156,10 @@ public class ReplayerScheduler implements Scheduler {
         __log.debug("scheduleVolatileJob");
         return null;
     }
+
+    @Override
+    public void acquireTransactionLocks() {
+        // TODO Auto-generated method stub
+        
+    }
 }

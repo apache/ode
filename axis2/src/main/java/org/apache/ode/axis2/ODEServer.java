@@ -384,6 +384,7 @@ public class ODEServer {
                 __log.error("Unable to cleanup temp files.", t);
             }
 
+            _executorService.shutdownNow();
 
             __log.info(__msgs.msgOdeShutdownCompleted());
         } finally {

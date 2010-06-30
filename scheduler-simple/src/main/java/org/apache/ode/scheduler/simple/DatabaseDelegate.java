@@ -103,4 +103,6 @@ public interface DatabaseDelegate {
      * @throws DatabaseException
      */
     int updateReassign(String oldnode, String newnode) throws DatabaseException;
+    
+    public void acquireTransactionLocks();
 }

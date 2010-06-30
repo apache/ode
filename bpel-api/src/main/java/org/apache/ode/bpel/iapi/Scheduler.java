@@ -313,4 +313,6 @@ public interface Scheduler {
         void storeToDetails(JobDetails details);
         void restoreFromDetails(JobDetails details);
     }
+    
+    public void acquireTransactionLocks();
 }

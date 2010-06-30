@@ -27,6 +27,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -456,6 +457,8 @@ public class JdbcDelegate implements DatabaseDelegate {
                     d = Dialect.FIREBIRD;
                 } else if (dbProductName.indexOf("HSQL") >= 0) {
                     d = Dialect.HSQL;
+                } else if (dbProductName.indexOf("H2") >= 0) {
+                    d = Dialect.H2;
                 } else if (dbProductName.indexOf("Microsoft SQL") >= 0) {
                     d = Dialect.SQLSERVER;
                 } else if (dbProductName.indexOf("MySQL") >= 0) {
@@ -476,8 +479,27 @@ public class JdbcDelegate implements DatabaseDelegate {
         return d;
     }
 
+    public void acquireTransactionLocks() {
+        Statement s = null;
+        Connection c = null;
+        try {
+            c = getConnection();
+            s = c.createStatement();
+            s.execute("update ODE_JOB set jobid = '' where 1 = 0");
+        } catch (Exception e) {
+            throw new RuntimeException("", e);
+        } finally {
+            try {
+                if (s != null) s.close();
+                if (c != null) c.close();
+            } catch (Exception e) {
+                throw new RuntimeException("", e);
+            }
+        }
+    }
+
     enum Dialect {
-        DB2, DERBY, FIREBIRD, HSQL, MYSQL, ORACLE, SQLSERVER, SYBASE, SYBASE12, UNKNOWN
+        DB2, DERBY, FIREBIRD, HSQL, MYSQL, ORACLE, SQLSERVER, SYBASE, SYBASE12, H2, UNKNOWN
     }
 
 }

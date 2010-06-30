@@ -297,4 +297,8 @@ class MockCompilerContext implements CompilerContext {
         // TODO Auto-generated method stub
         return null;
     }
+
+    public NSContext tryCacheNamespaceContext(NSContext nsContext) {
+        return nsContext;
+    }
 }

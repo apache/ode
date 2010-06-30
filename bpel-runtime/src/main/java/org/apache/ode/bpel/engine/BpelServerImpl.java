@@ -683,4 +683,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     public void setMigrationTransactionTimeout(int migrationTransactionTimeout) {
         this._migrationTransactionTimeout = migrationTransactionTimeout;
     }
+
+    public void acquireTransactionLocks() {
+        if (Boolean.parseBoolean(_configProperties.getProperty("ode.acquireTransactionLocks", "false"))) {
+            _contexts.scheduler.acquireTransactionLocks();
+        }
+    }
 }

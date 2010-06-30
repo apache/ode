@@ -675,7 +675,8 @@ public abstract class BpelCompiler implements CompilerContext {
         _oprocess.guid = null;
         _oprocess.constants = makeConstants();
         _oprocess.debugInfo = createDebugInfo(process, "process");
-
+        _oprocess.namespaceContext = process.getNamespaceContext();
+        
         if (process.getTargetNamespace() == null) {
             _oprocess.targetNamespace = "--UNSPECIFIED--";
             recoveredFromError(process, new CompilationException(__cmsgs.errProcessNamespaceNotSpecified()));
@@ -1736,6 +1737,13 @@ public abstract class BpelCompiler implements CompilerContext {
         return _resourceFinder.getBaseResourceURI();
     }
 
+    public NSContext tryCacheNamespaceContext(NSContext nsContext) {
+        if (getOProcess().namespaceContext.equals(nsContext)) {
+            return getOProcess().namespaceContext;
+        } else {
+            return nsContext;
+        }
+    }
 
     /**
      * Compile external variable declaration.

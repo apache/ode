@@ -76,6 +76,8 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
         // Informix Dynamic Server
         // Oracle 8 and Oracle >8
         HIBERNATE_DIALECTS.put("Apache Derby", new DialectFactory.VersionInsensitiveMapper(DEFAULT_HIBERNATE_DIALECT));
+        HIBERNATE_DIALECTS.put("INGRES", new DialectFactory.VersionInsensitiveMapper("org.hibernate.dialect.IngresDialect"));
+        HIBERNATE_DIALECTS.put("H2", new DialectFactory.VersionInsensitiveMapper("org.hibernate.dialect.H2Dialect"));
     }
 
     private TransactionManager _txMgr;

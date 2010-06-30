@@ -44,6 +44,7 @@ import org.apache.axis2.transport.jms.JMSConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.util.SoapMessageConverter;
+import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.epr.WSAEndpoint;
@@ -104,6 +105,8 @@ public class ODEService {
         try {
             _txManager.begin();
             if (__log.isDebugEnabled()) __log.debug("Starting transaction.");
+            
+            _server.acquireTransactionLocks();
 
             // Creating message exchange
             String messageId = new GUID().toString();

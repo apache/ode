@@ -152,4 +152,6 @@ public interface CompilerContext {
      * @return URI - the URI representing the absolute physical file path location that this process is defined within.
      */
     URI getBaseResourceURI();
+
+    public NSContext tryCacheNamespaceContext(NSContext nsContext);
 }
