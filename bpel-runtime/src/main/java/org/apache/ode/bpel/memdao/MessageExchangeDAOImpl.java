@@ -305,4 +305,7 @@ public class MessageExchangeDAOImpl extends DaoBaseImpl implements MessageExchan
         return "mem.mex(direction=" + direction + " id=" + messageExchangeId + ")";
     }
 
+	public boolean lockPremieMessages() {
+		return true;
+	}
 }

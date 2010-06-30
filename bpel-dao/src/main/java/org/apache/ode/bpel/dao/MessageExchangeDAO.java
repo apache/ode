@@ -252,4 +252,6 @@ public interface MessageExchangeDAO {
      * Deletes messages that arrived before the route is setup
      */
     void releasePremieMessages();
+
+    boolean lockPremieMessages();
 }

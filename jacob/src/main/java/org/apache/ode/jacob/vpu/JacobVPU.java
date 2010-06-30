@@ -458,10 +458,14 @@ public final class JacobVPU {
                 __log.error(msg, iae);
                 throw new RuntimeException(msg, iae);
             } catch (InvocationTargetException e) {
-                String msg = __msgs.msgClientMethodException(_method.getName(),
-                        _methodBody.getClass().getName());
-                __log.error(msg, e.getTargetException());
-                throw new RuntimeException(e.getTargetException());
+                if (e.getTargetException() instanceof RuntimeException) {
+                    throw (RuntimeException) e.getTargetException();
+                } else {
+                    String msg = __msgs.msgClientMethodException(_method.getName(),
+                            _methodBody.getClass().getName());
+                    __log.error(msg, e.getTargetException());
+                    throw new RuntimeException(e.getTargetException());
+                }
             } finally {
                 ctime = System.currentTimeMillis() - ctime;
                 _statistics.totalClientTimeMs += ctime;

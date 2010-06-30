@@ -79,7 +79,7 @@ import org.hibernate.criterion.Projections;
 public class BpelDAOConnectionImpl implements BpelDAOConnection, FilteredInstanceDeletable {
     private static final Log __log = LogFactory.getLog(BpelDAOConnectionImpl.class);
 
-    protected SessionManager _sm;
+    public SessionManager _sm;
 
     public BpelDAOConnectionImpl(SessionManager sm) {
         _sm = sm;

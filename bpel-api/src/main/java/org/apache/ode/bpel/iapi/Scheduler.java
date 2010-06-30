@@ -176,7 +176,8 @@ public interface Scheduler {
         INVOKE_INTERNAL,
         INVOKE_RESPONSE,
         MATCHER,
-        INVOKE_CHECK
+        INVOKE_CHECK,
+        MEX_MATCHER
     }
 
     public static class JobDetails {

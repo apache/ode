@@ -382,4 +382,8 @@ public class MessageExchangeDAOImpl extends OpenJPADAO implements MessageExchang
     public void setCreateTime(Date createTime) {
         _createTime = createTime;
     }
+
+	public boolean lockPremieMessages() {
+		return true;
+	}
 }
