@@ -176,6 +176,8 @@
     <!-- Transport Outs -->
     <!-- ================================================= -->
 
+    <transportSender name="tcp"
+                     class="org.apache.axis2.transport.tcp.TCPTransportSender"/>
     <transportSender name="local"
                      class="org.apache.axis2.transport.local.LocalTransportSender"/>
     <transportSender name="http"
@@ -281,7 +283,6 @@
                 <order phase="Addressing"/>
             </handler>
         </phase>
-        <phase name="Security"/>
         <phase name="PreDispatch"/>
         <phase name="Dispatch" class="org.apache.axis2.engine.DispatchPhase">
             <handler name="RequestURIBasedDispatcher"

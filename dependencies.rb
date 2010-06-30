@@ -18,7 +18,7 @@ ANT                 = "ant:ant:jar:1.6.5"
 BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:3.0"
 AXIOM               = [ group("axiom-api", "axiom-impl", "axiom-dom",
                         :under=>"org.apache.ws.commons.axiom", :version=>"1.2.8") ]
-AXIS2_ALL           = [group("axis2-transport-http", "axis2-transport-local", "axis2-kernel", "axis2-adb", "axis2-codegen", "axis2-java2wsdl",
+AXIS2_ALL           = [group("axis2-kernel", "axis2-adb", "axis2-codegen", "axis2-java2wsdl",
                              "axis2-jibx", "axis2-saaj", "axis2-xmlbeans",
                             :under=>"org.apache.axis2",
                             :version=>"1.5.1"),
@@ -26,6 +26,9 @@ AXIS2_ALL           = [group("axis2-transport-http", "axis2-transport-local", "a
                               :under=>"org.apache.woden",
                               :version=>"1.0M8"),
                       "org.apache.axis2:axis2-transport-base:jar:1.0.0",
+                      "org.apache.axis2:axis2-transport-http:jar:1.5.1",
+                      "org.apache.axis2:axis2-transport-local:jar:1.5.1",
+                      "org.apache.axis2:axis2-transport-tcp:jar:1.0.0",
                       "org.apache.axis2:axis2-transport-jms:jar:1.0.0",
                       "org.apache.httpcomponents:httpcore:jar:4.0"]
 AXIS2_MODULES        = struct(
