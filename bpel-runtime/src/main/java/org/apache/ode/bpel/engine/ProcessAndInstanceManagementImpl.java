@@ -19,6 +19,7 @@
 
 package org.apache.ode.bpel.engine;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -141,6 +142,8 @@ import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 import org.apache.ode.utils.stl.UnaryFunction;
+import org.apache.xmlbeans.XmlObject;
+import org.apache.xmlbeans.XmlOptions;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -466,6 +469,44 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                 XmlDataDAO var = scope.getVariable(varName);
                 if (var == null) {
                     throw new InvalidRequestException("VarNotFound:" + varName);
+                }
+
+                Node nval = var.get();
+                if (nval != null) {
+                    TVariableInfo.Value val = vinf.addNewValue();
+                    val.getDomNode().appendChild(val.getDomNode().getOwnerDocument().importNode(nval, true));
+                }
+                return null;
+            }
+        });
+        return ret;
+    }
+    
+    public VariableInfoDocument setVariable(final String scopeId, final String varName, final XmlObject value) throws ManagementException {
+        VariableInfoDocument ret = VariableInfoDocument.Factory.newInstance();
+        final TVariableInfo vinf = ret.addNewVariableInfo();
+        final TVariableRef sref = vinf.addNewSelf();
+        dbexec(new BpelDatabase.Callable<Object>() {
+            public Object run(BpelDAOConnection session) throws Exception {
+                ScopeDAO scope = session.getScope(new Long(scopeId));
+                if (scope == null) {
+                    throw new InvalidRequestException("ScopeNotFound:" + scopeId);
+                }
+
+                sref.setSiid(scopeId);
+                sref.setIid(scope.getProcessInstance().getInstanceId().toString());
+                sref.setName(varName);
+
+                XmlDataDAO var = scope.getVariable(varName);
+                if (var == null) {
+                    throw new InvalidRequestException("VarNotFound:" + varName);
+                }
+                
+                {
+                    ByteArrayOutputStream out = new ByteArrayOutputStream(); 
+                    value.save(out, new XmlOptions().setSaveOuter());
+                    Node value2 = DOMUtils.getFirstChildElement(DOMUtils.stringToDOM(out.toString()));
+                    var.set(value2);
                 }
 
                 Node nval = var.get();
