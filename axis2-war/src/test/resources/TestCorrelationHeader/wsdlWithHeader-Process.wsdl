@@ -1,0 +1,46 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<wsdl:definitions xmlns:tns="http://www.example.org/wsdlwithheader/" xmlns:initiator="http://example.com/wsdlWithHeader/initiator" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:wsdlWithheaders="http://www.example.org/wsdlwithheader/" xmlns:diag="http://example.com/wsdlWithHeader" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:this="http://example.com/wsdlWithHeader/Process" targetNamespace="http://example.com/wsdlWithHeader/Process">
+    <wsdl:types>
+        <xs:schema elementFormDefault="qualified" targetNamespace="http://example.com/wsdlWithHeader/Process">
+            <xs:element name="Recevie_first_messageRequest" type="xs:string"/>
+            <xs:element name="Recevie_first_messageResponse" type="xs:string"/>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:import namespace="http://www.example.org/wsdlwithheader/" location="wsdlWithheaders.wsdl"/>
+    <wsdl:message name="Recevie_first_messageRequest">
+        <wsdl:part name="body" element="this:Recevie_first_messageRequest"/>
+    </wsdl:message>
+    <wsdl:message name="Recevie_first_messageResponse">
+        <wsdl:part name="body" element="this:Recevie_first_messageResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="Forinitiator">
+        <wsdl:operation name="Recevie_first_message">
+            <wsdl:input message="this:Recevie_first_messageRequest" name="Recevie_first_message"/>
+            <wsdl:output message="this:Recevie_first_messageResponse" name="Recevie_first_messageResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="CanonicBindingForinitiator" type="this:Forinitiator">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="Recevie_first_message">
+            <soap:operation style="document" soapAction="http://example.com/wsdlWithHeader/Process/Forinitiator/Recevie_first_message"/>
+            <wsdl:input name="Recevie_first_message">
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="Recevie_first_messageResponse">
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="CanonicServiceForinitiator">
+        <wsdl:port name="canonicPort" binding="this:CanonicBindingForinitiator">
+            <soap:address location="http://localhost:8080/ode/processes/Correlation-Header/wsdlWithHeader/Process/initiator"/>
+        </wsdl:port>
+    </wsdl:service>
+    <vprop:property name="instanceId" type="xs:string"/>
+    <vprop:propertyAlias propertyName="this:instanceId" messageType="this:Recevie_first_messageResponse" part="body">
+        <vprop:query>text()</vprop:query>
+    </vprop:propertyAlias>
+    <vprop:propertyAlias propertyName="this:instanceId" messageType="tns:correlattionWithHeadersRequest" header="header">
+        <vprop:query>in/text()</vprop:query>
+    </vprop:propertyAlias>
+</wsdl:definitions>

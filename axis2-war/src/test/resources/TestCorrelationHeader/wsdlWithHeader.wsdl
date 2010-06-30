@@ -1,0 +1,11 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<wsdl:definitions xmlns:tns="http://www.example.org/wsdlwithheader/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:Process="http://example.com/wsdlWithHeader/Process" xmlns:diag="http://example.com/wsdlWithHeader" xmlns:initiator="http://example.com/wsdlWithHeader/initiator" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" xmlns:bpdm="http://www.intalio/designer/business-process-data-modeling" targetNamespace="http://example.com/wsdlWithHeader">
+    <wsdl:import namespace="http://example.com/wsdlWithHeader/Process" location="wsdlWithHeader-Process.wsdl"/>
+    <wsdl:import namespace="http://www.example.org/wsdlwithheader/" location="wsdlWithheaders.wsdl"/>
+    <pnlk:partnerLinkType name="ProcessAndInitiator">
+        <pnlk:role name="Process_for_initiator" portType="Process:Forinitiator"/>
+    </pnlk:partnerLinkType>
+    <pnlk:partnerLinkType name="ProcessAndInitiatorForPortWsdl-with-headerSOAPPlk">
+        <pnlk:role name="Process_for_initiator" portType="tns:wsdl-with-header"/>
+    </pnlk:partnerLinkType>
+</wsdl:definitions>

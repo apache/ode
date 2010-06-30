@@ -21,8 +21,12 @@ package org.apache.ode.bpel.runtime;
 import java.net.URI;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.engine.BpelRuntimeContextImpl;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OExpression;
@@ -41,21 +45,23 @@ import javax.xml.namespace.QName;
  * Expression language evaluation context used for evaluating property aliases.
  */
 public class PropertyAliasEvaluationContext implements EvaluationContext {
-    private Element _root;
+    private static final Log __log = LogFactory.getLog(PropertyAliasEvaluationContext.class);
+    
+    private Node _root;
 
-    public PropertyAliasEvaluationContext(Element msgData, OProcess.OPropertyAlias alias) {
+    public PropertyAliasEvaluationContext(Element msgData, Map<String, Node> headerParts, OProcess.OPropertyAlias alias) {
         // We need to tweak the context node based on what kind of variable (element vs non-element)
-        if (alias.part == null) {
-            // actually, this should not happen
-            _root  = msgData;
-        } else {
+        if (alias.header != null) {
+            _root = headerParts.get(alias.header);
+        } else if (alias.part != null) {
             Element part = DOMUtils.findChildByName(msgData,new QName(null, alias.part.name),false);
             if (part != null && alias.part.type instanceof OElementVarType) {
                 _root = DOMUtils.findChildByName(part, ((OElementVarType)alias.part.type).elementType);
             } else
                 _root = part;
+        } else {
+            _root = msgData;
         }
-
     }
 
     public Node getRootNode() {

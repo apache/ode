@@ -1,0 +1,11 @@
+﻿<?xml version='1.0' encoding='UTF-8'?>
+<dd:deploy xmlns:dd="http://www.apache.org/ode/schemas/dd/2007/03"><dd:process xmlns:dd="http://www.apache.org/ode/schemas/dd/2007/03" xmlns:tns="http://www.example.org/wsdlwithheader/" xmlns:initiator="http://example.com/wsdlWithHeader/initiator" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:diag="http://example.com/wsdlWithHeader" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:this="http://example.com/wsdlWithHeader/Process" name="this:Process" fileName="wsdlWithHeader-Process.bpel">
+  <dd:property name="PATH">wsdlWithHeader</dd:property>
+  <dd:property name="SVG">wsdlWithHeader.svg</dd:property>
+  <dd:provide partnerLink="processAndInitiatorPlkVar">
+    <dd:service name="this:CanonicServiceForinitiator" port="canonicPort"></dd:service>
+  </dd:provide>
+  <dd:provide partnerLink="processAndInitiatorForPortWsdl-with-headerSOAPPlkVar">
+    <dd:service name="tns:wsdl-with-header" port="wsdl-with-headerSOAP"></dd:service>
+  </dd:provide>
+</dd:process></dd:deploy>

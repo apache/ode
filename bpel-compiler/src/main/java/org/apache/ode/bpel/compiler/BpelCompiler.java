@@ -1025,6 +1025,9 @@ public abstract class BpelCompiler implements CompilerContext {
                 throw new CompilationException(__cmsgs.errUnknownPartInAlias(src.getPart(),
                         messageType.messageType.toString()));
             rootNodeType = alias.part.type;
+        } else if (src.getHeader() != null) {
+            alias.header = src.getHeader();
+            rootNodeType = new OElementVarType(_oprocess, QName.valueOf("{http://www.w3.org/2001/XMLSchema}any"));
         }
         if (src.getQuery() != null)
             alias.location = compileExpr(src.getQuery(), rootNodeType, null, new Object[1]);

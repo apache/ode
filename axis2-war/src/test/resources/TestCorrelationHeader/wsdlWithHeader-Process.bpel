@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<bpel:process xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable" xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ode="http://www.apache.org/ode/type/extension" xmlns:this="http://example.com/wsdlWithHeader/Process" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:tns="http://www.example.org/wsdlwithheader/" xmlns:diag="http://example.com/wsdlWithHeader" xmlns:initiator="http://example.com/wsdlWithHeader/initiator" xmlns:bpmn="http://www.intalio.com/bpms" xmlns:atomic="http://ode.apache.org/atomicScope" queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0" bpmn:label="Process" name="Process" bpmn:id="_McZpcDJ2Ed6Mu8Tm6kQxHA" targetNamespace="http://example.com/wsdlWithHeader/Process">
+  <bpel:import namespace="http://example.com/wsdlWithHeader" location="wsdlWithHeader.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:import namespace="http://example.com/wsdlWithHeader/Process" location="wsdlWithHeader-Process.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:import namespace="http://www.example.org/wsdlwithheader/" location="wsdlWithheaders.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <bpel:partnerLinks>
+    <bpel:partnerLink name="processAndInitiatorPlkVar" partnerLinkType="diag:ProcessAndInitiator" myRole="Process_for_initiator"/>
+    <bpel:partnerLink name="processAndInitiatorForPortWsdl-with-headerSOAPPlkVar" partnerLinkType="diag:ProcessAndInitiatorForPortWsdl-with-headerSOAPPlk" myRole="Process_for_initiator"/>
+  </bpel:partnerLinks>
+  <bpel:correlationSets>
+    <bpel:correlationSet name="set1" properties="this:instanceId"/>
+  </bpel:correlationSets>
+  <bpel:variables>
+    <bpel:variable name="thisRecevie_first_messageRequest" messageType="this:Recevie_first_messageRequest"/>
+    <bpel:variable name="thisRecevie_first_messageResponse" messageType="this:Recevie_first_messageResponse"/>
+    <bpel:variable name="tnsCorrelattionWithHeadersRequestMsg" messageType="tns:correlattionWithHeadersRequest"/>
+    <bpel:variable name="tnsCorrelattionWithHeadersResponseMsg" messageType="tns:correlattionWithHeadersResponse"/>
+  </bpel:variables>
+  <bpel:sequence>
+    <bpel:receive partnerLink="processAndInitiatorPlkVar" portType="this:Forinitiator" operation="Recevie_first_message" variable="thisRecevie_first_messageRequest" createInstance="yes" bpmn:label="Recevie first message" name="Recevie_first_message" bpmn:id="_Of-qwDJ2Ed6Mu8Tm6kQxHA"></bpel:receive>
+    <bpel:assign name="init-variables-Process" bpmn:id="_Of-qwDJ2Ed6Mu8Tm6kQxHA">
+      <bpel:copy bpmn:label="$thisRecevie_first_messageResponse">
+        <bpel:from>
+          <bpel:literal>
+<this:Recevie_first_messageResponse></this:Recevie_first_messageResponse></bpel:literal>
+        </bpel:from>
+        <bpel:to>$thisRecevie_first_messageResponse.body</bpel:to>
+      </bpel:copy>
+      <bpel:copy bpmn:label="$tnsCorrelattionWithHeadersResponseMsg">
+        <bpel:from>
+          <bpel:literal>
+<tns:response>
+  <out></out>
+</tns:response></bpel:literal>
+        </bpel:from>
+        <bpel:to>$tnsCorrelattionWithHeadersResponseMsg.parameters</bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+    <bpel:assign bpmn:label="Recevie first message" name="Recevie_first_message-1" bpmn:id="_Of-qwDJ2Ed6Mu8Tm6kQxHA">
+      <bpel:copy>
+          <bpel:from>'11234'</bpel:from>
+        <bpel:to>$thisRecevie_first_messageResponse.body</bpel:to>
+      </bpel:copy>
+    </bpel:assign>
+    <bpel:reply partnerLink="processAndInitiatorPlkVar" portType="this:Forinitiator" operation="Recevie_first_message" variable="thisRecevie_first_messageResponse" bpmn:label="Recevie first message" name="Recevie_first_message-2" bpmn:id="_Of-qwDJ2Ed6Mu8Tm6kQxHA">
+      <bpel:correlations>
+        <bpel:correlation set="set1" initiate="join"/>
+      </bpel:correlations>
+    </bpel:reply>
+    <bpel:receive partnerLink="processAndInitiatorForPortWsdl-with-headerSOAPPlkVar" portType="tns:wsdl-with-header" operation="correlattionWithHeaders" variable="tnsCorrelattionWithHeadersRequestMsg" bpmn:label="correlattionWithHeaders" name="correlattionWithHeaders" bpmn:id="_kzEgGDJ7Ed6WJp7-9Y3qBw">
+      <bpel:correlations>
+        <bpel:correlation set="set1" initiate="no"/>
+      </bpel:correlations>
+    </bpel:receive>
+    <bpel:reply partnerLink="processAndInitiatorForPortWsdl-with-headerSOAPPlkVar" portType="tns:wsdl-with-header" operation="correlattionWithHeaders" variable="tnsCorrelattionWithHeadersResponseMsg" bpmn:label="correlattionWithHeaders" name="correlattionWithHeaders-1" bpmn:id="_kzEgGDJ7Ed6WJp7-9Y3qBw"></bpel:reply>
+  </bpel:sequence>
+</bpel:process>

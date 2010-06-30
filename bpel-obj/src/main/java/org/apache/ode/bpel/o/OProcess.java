@@ -169,6 +169,7 @@ public class OProcess extends OBase {
 
         /** For BPEL 1.1 */
         public OMessageVarType.Part part;
+        public String header;
 
         public OExpression location;
 
@@ -182,6 +183,7 @@ public class OProcess extends OBase {
             StringBuffer buf = new StringBuffer(varType.toString());
             buf.append('[');
             buf.append(part != null ? part.name : "");
+            buf.append(header != null ? "header: " + header : "");
             if (location != null) {
                 buf.append("][");
                 buf.append(location.toString());

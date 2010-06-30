@@ -24,6 +24,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -464,7 +465,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         Node varData = readVariable(variable.scopeInstance, variable.declaration.name, false);
 
         OProcess.OPropertyAlias alias = property.getAlias(variable.declaration.type);
-        String val = _bpelProcess.extractProperty((Element) varData, alias, variable.declaration.getDescription());
+        String val = _bpelProcess.extractProperty((Element) varData, Collections.EMPTY_MAP, alias, variable.declaration.getDescription());
 
         if (BpelProcess.__log.isTraceEnabled()) {
             BpelProcess.__log.trace("readPropertyAlias(variable=" + variable + ", alias=" + alias + ") = "
@@ -1175,7 +1176,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 OProcess.OPropertyAlias alias = property.getAlias(variable.declaration.type);
                 if (alias != null) {
                     try {
-                        String val = _bpelProcess.extractProperty((Element) value, alias, variable.declaration
+                        String val = _bpelProcess.extractProperty((Element) value, Collections.EMPTY_MAP, alias, variable.declaration
                                 .getDescription());
                         if (val != null) {
                             dao.setProperty(property.name.toString(), val);

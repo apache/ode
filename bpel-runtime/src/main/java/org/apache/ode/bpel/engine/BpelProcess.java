@@ -340,9 +340,9 @@ public class BpelProcess {
      * @return value of the property
      * @throws FaultException
      */
-    String extractProperty(Element msgData, OProcess.OPropertyAlias alias, String target) throws FaultException {
+    String extractProperty(Element msgData, Map<String, Node> headerParts, OProcess.OPropertyAlias alias, String target) throws FaultException {
         markused();
-        PropertyAliasEvaluationContext ectx = new PropertyAliasEvaluationContext(msgData, alias);
+        PropertyAliasEvaluationContext ectx = new PropertyAliasEvaluationContext(msgData, headerParts, alias);
         Node lValue = ectx.getRootNode();
 
         if (alias.location != null) {

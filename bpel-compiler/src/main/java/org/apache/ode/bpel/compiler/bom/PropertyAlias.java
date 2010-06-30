@@ -60,6 +60,10 @@ public class PropertyAlias extends BpelObject4WSDL implements ExtensibilityEleme
     public String getPart() {
         return getAttribute("part");
     }
+    
+    public String getHeader() {
+        return getAttribute("header");
+    }
 
     /**
      * Get the <code>QName</code> of the property that this alias applies to.

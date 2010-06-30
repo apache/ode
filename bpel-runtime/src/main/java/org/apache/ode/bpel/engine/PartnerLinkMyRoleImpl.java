@@ -21,6 +21,7 @@ package org.apache.ode.bpel.engine;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.wsdl.Operation;
@@ -57,6 +58,7 @@ import org.apache.ode.bpel.runtime.PROCESS;
 import org.apache.ode.utils.ObjectPrinter;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * @author Matthieu Riou <mriou at apache dot org>
@@ -309,19 +311,20 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 
         Operation operation = mex.getOperation();
         Element msg = mex.getRequest().getMessage();
+        Map<String, Node> headerParts = mex.getRequest().getHeaderParts();
         javax.wsdl.Message msgDescription = operation.getInput().getMessage();
 
         Set<OScope.CorrelationSet> csets = _plinkDef.getNonInitiatingCorrelationSetsForOperation(operation);
         for (OScope.CorrelationSet cset : csets) {
             CorrelationKey key = computeCorrelationKey(cset,
-                    _process.getOProcess().messageTypes.get(msgDescription.getQName()), msg);
+                    _process.getOProcess().messageTypes.get(msgDescription.getQName()), msg, headerParts);
             keySet.add(key);
         }
 
         csets = _plinkDef.getJoinningCorrelationSetsForOperation(operation);
         for (OScope.CorrelationSet cset : csets) {
             CorrelationKey key = computeCorrelationKey(cset,
-                    _process.getOProcess().messageTypes.get(msgDescription.getQName()), msg);
+                    _process.getOProcess().messageTypes.get(msgDescription.getQName()), msg, headerParts);
             keySet.add(key);
         }
 
@@ -335,9 +338,9 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 
     @SuppressWarnings("unchecked")
     private CorrelationKey computeCorrelationKey(OScope.CorrelationSet cset, OMessageVarType messagetype,
-            Element msg) {
-        CorrelationKey key = null;
-
+            Element msg, Map<String, Node> headerParts) {
+    	CorrelationKey key = null;
+    	
         String[] values = new String[cset.properties.size()];
 
         int jIdx = 0;
@@ -354,7 +357,7 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 
             String value;
             try {
-                value = _process.extractProperty(msg, alias, msg.toString());
+                value = _process.extractProperty(msg, headerParts, alias, msg.toString());
             } catch (FaultException fe) {
                 String emsg = __msgs.msgPropertyAliasDerefFailedOnMessage(alias.getDescription(), fe.getMessage());
                 __log.error(emsg, fe);
