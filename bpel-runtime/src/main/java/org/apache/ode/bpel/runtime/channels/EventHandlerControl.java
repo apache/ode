@@ -18,12 +18,10 @@
  */
 package org.apache.ode.bpel.runtime.channels;
 
-import org.apache.ode.jacob.ap.ChannelType;
 
 /**
  * Channel used to control processing of event handler activities.
  */
-@ChannelType
 public interface EventHandlerControl {
 
   /**

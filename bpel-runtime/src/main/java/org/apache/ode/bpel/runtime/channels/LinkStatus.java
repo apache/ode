@@ -18,11 +18,9 @@
  */
 package org.apache.ode.bpel.runtime.channels;
 
-import org.apache.ode.jacob.ap.ChannelType;
 
 /**
  */
-@ChannelType
 public interface LinkStatus  {
 
   void linkStatus(boolean value);

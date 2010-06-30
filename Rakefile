@@ -196,9 +196,8 @@ define "ode" do
 
   desc "ODE Runtime Engine"
   define "bpel-runtime" do
-    compile.from apt
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-epr", "bpel-obj", "bpel-schemas",
-      "bpel-store", "jacob", "jacob-ap", "utils", "agents"),
+      "bpel-store", "jacob", "utils", "agents"),
       COMMONS.logging, COMMONS.collections, COMMONS.httpclient, JAXEN, JAVAX.persistence, JAVAX.stream, SAXON, WSDL4J, XMLBEANS,
       SPRING
 
@@ -372,14 +371,8 @@ define "ode" do
 
   desc "ODE JAva Concurrent OBjects"
   define "jacob" do
-    compile.with projects("utils", "jacob-ap"), COMMONS.logging
-    compile.from apt
+    compile.with projects("utils"), COMMONS.logging
 
-    package :jar
-  end
-
-  desc "ODE Jacob APR Code Generation"
-  define "jacob-ap" do
     package :jar
   end
 
@@ -395,7 +388,7 @@ define "ode" do
         projects("bpel-api", "bpel-api-jca", "bpel-compiler", "bpel-connector", "bpel-dao",
         "bpel-epr", "jca-ra", "jca-server", "bpel-obj", "bpel-ql", "bpel-runtime",
         "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
-        "jacob", "jacob-ap", "utils", "agents"),
+        "jacob", "utils", "agents"),
         ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
         COMMONS.primitives, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector,
         JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA,

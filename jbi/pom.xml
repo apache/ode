@@ -205,10 +205,6 @@
             <artifactId>ode-bpel-ql</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.ode</groupId>
-            <artifactId>ode-jacob-ap</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.servicemix.specs</groupId>
             <artifactId>org.apache.servicemix.specs.jbi-api-1.0</artifactId>
             <version>${jbi.version}</version>

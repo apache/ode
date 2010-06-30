@@ -78,7 +78,6 @@
         <include>org.apache.ode:ode-dao-hibernate</include>
         <include>org.apache.ode:ode-dao-jpa</include>
         <include>org.apache.ode:ode-jacob</include>
-        <include>org.apache.ode:ode-jacob-ap</include>
         <include>org.apache.ode:ode-utils</include>
         <include>org.apache.ode:ode-agents</include>
         <include>org.apache.ode:ode-bpel-obj</include>

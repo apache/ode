@@ -18,19 +18,16 @@
  */
 package org.apache.ode.bpel.runtime.channels;
 
-import org.apache.ode.jacob.SynchChannel;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.runtime.CompensationHandler;
-
-import org.w3c.dom.Element;
 import java.util.Set;
 
-import org.apache.ode.jacob.ap.ChannelType;
+import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.runtime.CompensationHandler;
+import org.apache.ode.jacob.SynchChannel;
+import org.w3c.dom.Element;
 
 /**
  * Channel used for child-to-parent scope communication.
  */
-@ChannelType
 public interface ParentScope {
 
   void compensate(OScope scope, SynchChannel ret);

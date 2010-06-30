@@ -18,12 +18,10 @@
  */
 package org.apache.ode.bpel.runtime.channels;
 
-import org.apache.ode.jacob.ap.ChannelType;
 
 /**
  * Response channel for pick requests.
  */
-@ChannelType
 public interface InvokeResponse {
 
   public void onResponse();

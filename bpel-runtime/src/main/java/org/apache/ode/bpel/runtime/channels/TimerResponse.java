@@ -18,12 +18,10 @@
  */
 package org.apache.ode.bpel.runtime.channels;
 
-import org.apache.ode.jacob.ap.ChannelType;
 
 /**
  * Channel for timer notification.
  */
-@ChannelType
 public interface TimerResponse {
     /** timer event has occurred */
     public void onTimeout();

@@ -18,12 +18,10 @@
  */
 package org.apache.ode.bpel.runtime.channels;
 
-import org.apache.ode.jacob.ap.ChannelType;
 
 
 /**
  */
-@ChannelType
 public interface ActivityRecovery  {
 
     /**
