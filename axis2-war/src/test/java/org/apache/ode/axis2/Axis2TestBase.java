@@ -21,6 +21,8 @@ package org.apache.ode.axis2;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContextFactory;
+import org.apache.axis2.deployment.DeploymentEngine;
+import org.apache.axis2.deployment.repository.util.ArchiveReader;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
@@ -39,6 +41,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 
+import com.intalio.ws.timeservice.TimeServiceSkeleton;
+
 
 import javax.servlet.ServletException;
 import javax.wsdl.WSDLException;
@@ -55,6 +59,7 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -205,6 +210,8 @@ public abstract class Axis2TestBase {
         }
 
         startServer();
+        
+        DeploymentEngine.buildServiceGroup(getClass().getResourceAsStream("/test-services.xml"), Thread.currentThread().getContextClassLoader(), "testGroup", server.getConfigurationContext(), new ArchiveReader(), new HashMap());
     }
 
     @AfterMethod

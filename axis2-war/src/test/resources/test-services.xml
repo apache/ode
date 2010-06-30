@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file was auto-generated from WSDL -->
+<!-- by the Apache Axis2 version: 1.5.1  Built on : Oct 19, 2009 (10:59:00 EDT) -->
+<serviceGroup>
+    <service name="TimeService">
+        <messageReceivers>
+            <messageReceiver mep="http://www.w3.org/ns/wsdl/in-out" class="com.intalio.ws.timeservice.TimeServiceMessageReceiverInOut"/>
+        </messageReceivers>
+        <parameter name="ServiceClass">com.intalio.ws.timeservice.TimeServiceSkeleton</parameter>
+        <parameter name="useOriginalwsdl">true</parameter>
+        <parameter name="modifyUserWSDLPortAddress">true</parameter>
+        <operation name="getCityTime" mep="http://www.w3.org/ns/wsdl/in-out" namespace="http://ws.intalio.com/TimeService/">
+            <actionMapping>http://ws.intalio.com/TimeService/getCityTime</actionMapping>
+            <outputActionMapping>http://ws.intalio.com/TimeService/TimeServiceSoap/getCityTimeResponse</outputActionMapping>
+        </operation>
+        <operation name="getUTCTime" mep="http://www.w3.org/ns/wsdl/in-out" namespace="http://ws.intalio.com/TimeService/">
+            <actionMapping>http://ws.intalio.com/TimeService/getUTCTime</actionMapping>
+            <outputActionMapping>http://ws.intalio.com/TimeService/TimeServiceSoap/getUTCTimeResponse</outputActionMapping>
+        </operation>
+    </service>
+</serviceGroup>

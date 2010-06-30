@@ -97,7 +97,7 @@
   <wsdl:service name="TimeService">
     <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">A sample Time service</wsdl:documentation>
     <wsdl:port name="TimeServiceSoap" binding="tns:TimeServiceSoap">
-        <soap:address location="http://localhost:8088/TimeService/" />
+        <soap:address location="http://localhost:8888/axis2/processes/TimeService/" />
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>
