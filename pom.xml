@@ -152,7 +152,7 @@
         <module>dao-hibernate-db</module>
         <module>bpel-runtime</module>
         <module>bpel-connector</module>
-        <!--module>bpel-test</module-->
+        <module>bpel-test</module>
         <module>axis2</module>
         <module>jbi</module>
         <module>jbi-bundle</module>
