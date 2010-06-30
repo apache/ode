@@ -108,21 +108,25 @@ public class HttpSoapSender extends BaseCommandlineTool {
         }
         m.appendTail(sb);
         SimpleHttpConnectionManager mgr = new SimpleHttpConnectionManager();
-        mgr.getParams().setConnectionTimeout(60000);
-        mgr.getParams().setSoTimeout(60000);
-        HttpClient httpClient = new HttpClient(mgr);
-        PostMethod httpPostMethod = new PostMethod(u.toExternalForm());
-        if (proxyServer != null && proxyServer.length() > 0) {
-            httpClient.getState().setCredentials(new AuthScope(proxyServer, proxyPort),
-                    new UsernamePasswordCredentials(username, password));
-            httpPostMethod.setDoAuthentication(true);
-        }
-        if (soapAction == null) soapAction = "";
-        httpPostMethod.setRequestHeader("SOAPAction", "\"" + soapAction + "\"");
-        httpPostMethod.setRequestHeader("Content-Type", "text/xml");
-        httpPostMethod.setRequestEntity(new StringRequestEntity(sb.toString()));
-        httpClient.executeMethod(httpPostMethod);
-        return httpPostMethod.getResponseBodyAsString() + "\n";
+        try {
+            mgr.getParams().setConnectionTimeout(60000);
+            mgr.getParams().setSoTimeout(60000);
+            HttpClient httpClient = new HttpClient(mgr);
+            PostMethod httpPostMethod = new PostMethod(u.toExternalForm());
+            if (proxyServer != null && proxyServer.length() > 0) {
+                httpClient.getState().setCredentials(new AuthScope(proxyServer, proxyPort),
+                        new UsernamePasswordCredentials(username, password));
+                httpPostMethod.setDoAuthentication(true);
+            }
+            if (soapAction == null) soapAction = "";
+            httpPostMethod.setRequestHeader("SOAPAction", "\"" + soapAction + "\"");
+            httpPostMethod.setRequestHeader("Content-Type", "text/xml");
+            httpPostMethod.setRequestEntity(new StringRequestEntity(sb.toString()));
+            httpClient.executeMethod(httpPostMethod);
+            return httpPostMethod.getResponseBodyAsString() + "\n";
+        } finally {
+            mgr.shutdown();
+        }   
     }
 
     public static void main(String[] argv) {
