@@ -1030,6 +1030,10 @@ public class BpelProcess {
     }
 
     public Node getProcessProperty(QName propertyName) {
+        Node value = getEngine()._contexts.customProcessProperties.getProperty(propertyName);
+        if (value != null) {
+            return value;
+        }
         Map<QName, Node> properties = _pconf.getProcessProperties();
         if (properties != null) {
             return properties.get(propertyName);
