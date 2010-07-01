@@ -16,26 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime.channels;
+package org.apache.ode.jacob.ap;
 
-import org.apache.ode.jacob.ap.ChannelType;
-
-@ChannelType
-public interface ActivityRecovery  {
-
-    /**
-     * Retry the activity.
-     */
-    void retry();
-
-    /**
-     * Cancel the activity (unsuccessful completion).
-     */
-    void cancel();
-
-    /**
-     * Fault the activity. Fault data is optional.
-     */
-    void fault(FaultData faultData);
+/**
+ * Annotation used to indicate that an interface is a JACOB channel interface.
+ * @author Maciej Szefler <mszefler at gmail dot com>
+ */
+public @interface ChannelType {
 
 }

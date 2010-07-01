@@ -18,6 +18,7 @@
  */
 package org.apache.ode.jacob;
 
+import org.apache.ode.jacob.ap.ChannelType;
 
 /**
  * Synch represents a synchronous invocation callback notification.
@@ -26,6 +27,8 @@ package org.apache.ode.jacob;
  *
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
+
+@ChannelType
 public interface Synch {
     public void ret();
 }
