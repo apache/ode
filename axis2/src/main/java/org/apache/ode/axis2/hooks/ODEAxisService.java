@@ -311,11 +311,17 @@ public class ODEAxisService {
         
         protected XmlSchema getXMLSchema(Element element, String baseUri) {
             synchronized (cached) {
-                String digest = GUID.makeGUID("" + baseUri + ";" + DOMUtils.domToString(element));
+//              String digest = GUID.makeGUID("" + baseUri + ";" + DOMUtils.domToString(element));
+                String digest = baseUri;
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("getXMLSchema identity: " + System.identityHashCode(element) + " baseURI: " + baseUri + " elementBaseURI: " + element.getBaseURI() + " documentBaseURI:" + element.getOwnerDocument().getBaseURI() + " documentURI: " + element.getOwnerDocument().getDocumentURI() + " digest: " + digest);
+                }
                 if (cached.containsKey(digest)) {
                     XmlSchema s = cached.get(digest).get();
                     if (s != null) {
-                        log.debug("Cache hit for schema guid " + digest);
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Cache hit for schema guid " + digest);
+                        }
                         return s;
                     }
                 }
