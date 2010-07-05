@@ -52,7 +52,7 @@
     <scope name="s1">
       <faultHandlers>
         <catch faultName="bpws:uninitializedVariable">
-          <compensate scope="s2" />
+          <compensateScope target="s2" />
         </catch>
       </faultHandlers>
 

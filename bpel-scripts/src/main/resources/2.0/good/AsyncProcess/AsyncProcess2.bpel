@@ -125,6 +125,7 @@
        </assign>
        <if name="switch">
          <condition>bpws:getVariableData('Request', 'payload', '/typ:AsyncRequest/typ:Order/typ:OrderType/text()') = 'BookOrder'</condition>
+           <then>
            <invoke name="BookOrderInvoke"
             operation="BookOrder"
             inputVariable="Request"
@@ -132,9 +133,10 @@
             portType="resp:ResponderPT">
 
              <correlations>
-              <correlation set="OrderCorrelator" initiate="yes" pattern="out" />
+              <correlation set="OrderCorrelator" initiate="yes" pattern="response" />
              </correlations>
            </invoke>
+           </then>
          <else>
            <invoke name="PaperOrderInvoke"
             operation="PaperOrder"
@@ -143,7 +145,7 @@
             portType="resp:ResponderPT">
 
              <correlations>
-              <correlation set="OrderCorrelator" initiate="yes" pattern="out" />
+              <correlation set="OrderCorrelator" initiate="yes" pattern="response" />
              </correlations>
            </invoke>
          </else>

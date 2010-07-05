@@ -508,10 +508,10 @@
                 <xsd:attribute name="variable" type="BPELVariableName" use="optional"/>
                 <xsd:attribute name="route" use="optional" default="one">
                     <xsd:simpleType>
-                        <xs:restriction base="xs:NMTOKEN">
-                            <xs:enumeration value="all"/>
-                            <xs:enumeration value="one"/>
-                        </xs:restriction>
+                        <xsd:restriction base="xsd:NMTOKEN">
+                            <xsd:enumeration value="all"/>
+                            <xsd:enumeration value="one"/>
+                        </xsd:restriction>
                     </xsd:simpleType>
                 </xsd:attribute>
             </xsd:extension>
@@ -1038,10 +1038,10 @@
                 <xsd:attribute name="messageExchange" type="xsd:NCName" use="optional"/>
                 <xsd:attribute name="route" use="optional" default="one">
                     <xsd:simpleType>
-                        <xs:restriction base="xs:NMTOKEN">
-                            <xs:enumeration value="all"/>
-                            <xs:enumeration value="one"/>
-                        </xs:restriction>
+                        <xsd:restriction base="xsd:NMTOKEN">
+                            <xsd:enumeration value="all"/>
+                            <xsd:enumeration value="one"/>
+                        </xsd:restriction>
                     </xsd:simpleType>
                 </xsd:attribute>
             </xsd:extension>

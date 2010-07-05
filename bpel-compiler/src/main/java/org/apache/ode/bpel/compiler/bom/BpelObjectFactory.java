@@ -20,19 +20,24 @@ package org.apache.ode.bpel.compiler.bom;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.compiler.BpelC;
 import org.apache.ode.bpel.compiler.bom.IfActivity.Case;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.XMLParserUtils;
+import org.jaxen.saxpath.SAXPathException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 
 import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -158,6 +163,7 @@ public class BpelObjectFactory {
         _mappings.put(Bpel20QNames.CORRELATION, Correlation.class);
         _mappings.put(Bpel20QNames.CORRELATIONSET, CorrelationSet.class);
         _mappings.put(Bpel20QNames.COMPENSATE, CompensateScopeActivity.class);
+        _mappings.put(Bpel20QNames.COMPENSATE_SCOPE, CompensateScopeActivity.class);
         _mappings.put(Bpel20QNames.COMPENSATIONHANDLER, CompensationHandler.class);
         _mappings.put(Bpel20QNames.FAULTHANDLERS, FaultHandler.class);
         _mappings.put(Bpel20QNames.TERMINATIONHANDLER, TerminationHandler.class);
@@ -279,6 +285,32 @@ public class BpelObjectFactory {
         }
     }
 
+    public static class BOMSAXErrorHandler implements ErrorHandler {
+        private static final Log __log = LogFactory.getLog(BOMSAXErrorHandler.class);
+        
+    	private boolean ok = true;
+    	
+    	private String formatException(SAXParseException exception) {
+    		return exception.getPublicId() + ":" + exception.getSystemId() + ":" + exception.getLineNumber() + ":" + exception.getColumnNumber() + ":" + exception.getMessage();
+    	}
+    	
+    	public boolean wasOK() { return ok; }
+		@Override
+		public void error(SAXParseException exception) throws SAXException {
+			ok=false;
+			__log.error(formatException(exception));
+		}
+		@Override
+		public void fatalError(SAXParseException exception) throws SAXException {
+			ok=false;
+			__log.fatal(formatException(exception));
+		}
+		@Override
+		public void warning(SAXParseException exception) throws SAXException {
+			__log.warn(formatException(exception));
+		}
+    }
+    
     /**
      * Parse a BPEL process found at the input source.
      * @param isrc input source.
@@ -304,7 +336,24 @@ public class BpelObjectFactory {
         _xr.setContentHandler(new DOMBuilderContentHandler(doc));
         _xr.setFeature("http://xml.org/sax/features/namespaces",true);
         _xr.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
+        
+        _xr.setFeature("http://xml.org/sax/features/validation", true);
+		XMLParserUtils.addExternalSchemaURL(_xr, Bpel11QNames.NS_BPEL4WS_2003_03, Bpel11QNames.NS_BPEL4WS_2003_03);
+		XMLParserUtils.addExternalSchemaURL(_xr, Bpel20QNames.NS_WSBPEL2_0, Bpel20QNames.NS_WSBPEL2_0);
+		XMLParserUtils.addExternalSchemaURL(_xr, Bpel20QNames.NS_WSBPEL2_0_FINAL_EXEC, Bpel20QNames.NS_WSBPEL2_0_FINAL_EXEC);
+		XMLParserUtils.addExternalSchemaURL(_xr, Bpel20QNames.NS_WSBPEL2_0_FINAL_ABSTRACT, Bpel20QNames.NS_WSBPEL2_0_FINAL_ABSTRACT);
+        BOMSAXErrorHandler errorHandler = new BOMSAXErrorHandler();
+        _xr.setErrorHandler(errorHandler);
         _xr.parse(isrc);
+        if (Boolean.parseBoolean(System.getProperty("org.apache.ode.compiler.failOnValidationErrors", "false"))) {
+	        if (!errorHandler.wasOK()) {
+	        	throw new SAXException("Validation errors during parsing");
+	        }
+        } else {
+        	if (!errorHandler.wasOK()) {
+        		__log.warn("Validation errors during parsing, continuing due to -Dorg.apache.ode.compiler.failOnValidationErrors=false switch");
+        	}
+        }
         return (Process) createBpelObject(doc.getDocumentElement(), systemURI);
     }
 
