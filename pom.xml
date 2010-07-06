@@ -159,6 +159,7 @@
         <module>jbi-karaf</module>
         <module>distro/src/examples-jbi/maven2/ping-pong-osgi</module>
         <module>axis2-war</module>
+        <module>bpel-itest</module>
     </modules>
 
     <build>
