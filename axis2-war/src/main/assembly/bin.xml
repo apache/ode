@@ -26,6 +26,10 @@
   </formats>
 
   <fileSets>
+    <fileSet>
+      <directory>${project.build.directory}/axis2-webapp</directory>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
 
     <fileSet>
       <directory>src/main/webapp</directory>
@@ -184,7 +188,6 @@
     <include>org.apache.axis2:mex:mar</include>
       </includes>
     </dependencySet>
-
   </dependencySets>
 
 </assembly>
