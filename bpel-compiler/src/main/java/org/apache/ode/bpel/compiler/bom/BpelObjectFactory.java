@@ -295,17 +295,16 @@ public class BpelObjectFactory {
     	}
     	
     	public boolean wasOK() { return ok; }
-		@Override
 		public void error(SAXParseException exception) throws SAXException {
 			ok=false;
 			__log.error(formatException(exception));
 		}
-		@Override
+
 		public void fatalError(SAXParseException exception) throws SAXException {
 			ok=false;
 			__log.fatal(formatException(exception));
 		}
-		@Override
+
 		public void warning(SAXParseException exception) throws SAXException {
 			__log.warn(formatException(exception));
 		}
