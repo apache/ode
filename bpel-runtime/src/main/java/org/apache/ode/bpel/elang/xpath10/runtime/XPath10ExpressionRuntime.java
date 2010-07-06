@@ -123,11 +123,22 @@ public class XPath10ExpressionRuntime implements ExpressionLanguageRuntime {
 
     public Node evaluateNode(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
         List retVal = evaluate(cexp, ctx);
-        if (retVal.size() == 0)
-            throw new FaultException(cexp.getOwner().constants.qnSelectionFailure, "No results for expression: " + cexp);
-        if (retVal.size() > 1)
-            throw new FaultException(cexp.getOwner().constants.qnSelectionFailure, "Multiple results for expression: "
-                    + cexp);
+        if (retVal.size() == 0 || retVal.size() > 1) {
+            StringBuffer msg = new StringBuffer((retVal.size() == 0) ? "No results for expression: '" : "Multiple results for expression: '");
+            if (cexp instanceof OXPath10Expression) {
+                msg.append(((OXPath10Expression)cexp).xpath);
+            } else {
+                msg.append(cexp.toString());                
+            }
+            msg.append("'");
+            if (ctx.getRootNode() != null) {
+                msg.append(" against '");
+                msg.append(DOMUtils.domToString(ctx.getRootNode()));
+                msg.append("'");
+            }
+            throw new FaultException(cexp.getOwner().constants.qnSelectionFailure, msg.toString());
+        }
+            
         return (Node) retVal.get(0);
     }
 
