@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tes:testSuite xmlns:tes="http://www.bpelunit.org/schema/testSuite" xmlns:unit="http://ode/bpel/unit-test.wsdl">
+    <tes:name>TestComposeUrl.bpts</tes:name>
+    <tes:baseURL>http://localhost:7777/ws</tes:baseURL>
+    <tes:deployment>
+        <tes:put name="ComposeUrl" type="ode">
+            <tes:property name="DeploymentArchive">.</tes:property>
+            <tes:property name="ODEDeploymentServiceURL">http://localhost:8080/ode/processes/DeploymentService</tes:property>
+            <tes:wsdl>ComposeUrlArtifacts.wsdl</tes:wsdl>
+        </tes:put>
+    </tes:deployment>
+    <tes:testCases>
+        <tes:testCase name="case1" basedOn="" abstract="false" vary="false">
+            <tes:clientTrack>
+                <tes:sendReceive service="unit:TestComposeUrlService" port="TestComposeUrlPort" operation="composeUrl">
+                    <tes:send service="unit:TestComposeUrlService" port="TestComposeUrlPort" operation="composeUrl" fault="false">
+                        <tes:data>
+                            <compose>
+                                <template>http://example.com/{user}/{tag}/{a_missing_var}</template>
+                                <name/>
+                                <value/>
+                                <pairs>
+                                    <user>bill</user>
+                                    <tag>ruby</tag>
+                                </pairs>
+                            </compose>
+                        </tes:data>
+                    </tes:send>
+                    <tes:receive service="unit:TestComposeUrlService" port="TestComposeUrlPort" operation="composeUrl" fault="false">
+                        <tes:condition>
+                            <tes:expression>//compose</tes:expression>
+                            <tes:value>'http://example.com/bill/ruby/'</tes:value>
+                        </tes:condition>
+                    </tes:receive>
+                </tes:sendReceive>
+            </tes:clientTrack>
+        </tes:testCase>
+        <tes:testCase name="case2" basedOn="" abstract="false" vary="false">
+            <tes:clientTrack>
+                <tes:sendReceive service="unit:TestComposeUrlService" port="TestComposeUrlPort" operation="composeUrl">
+                    <tes:send service="unit:TestComposeUrlService" port="TestComposeUrlPort" operation="composeUrl" fault="false" delaySequence="">
+                        <tes:data>
+                            <compose>
+                                <template>http://example.com/{user}/{a_missing_var}</template>
+                                <name>user</name>
+                                <value>bill</value>
+                                <pairs/>
+                            </compose>
+                        </tes:data>
+                    </tes:send>
+                    <tes:receive service="unit:TestComposeUrlService" port="TestComposeUrlPort" operation="composeUrl" fault="false">
+                        <tes:condition>
+                            <tes:expression>//compose</tes:expression>
+                            <tes:value>'http://example.com/bill/'</tes:value>
+                        </tes:condition>
+                    </tes:receive>
+                </tes:sendReceive>
+            </tes:clientTrack>
+        </tes:testCase>
+    </tes:testCases>
+</tes:testSuite>

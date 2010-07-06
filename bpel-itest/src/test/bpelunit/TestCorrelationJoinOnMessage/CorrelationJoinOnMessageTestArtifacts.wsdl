@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='utf-8'?>
+	<!--
+		~ Licensed to the Apache Software Foundation (ASF) under one ~ or more
+		contributor license agreements. See the NOTICE file ~ distributed with
+		this work for additional information ~ regarding copyright ownership.
+		The ASF licenses this file ~ to you under the Apache License, Version
+		2.0 (the ~ "License"); you may not use this file except in compliance
+		~ with the License. You may obtain a copy of the License at ~ ~
+		http://www.apache.org/licenses/LICENSE-2.0 ~ ~ Unless required by
+		applicable law or agreed to in writing, ~ software distributed under
+		the License is distributed on an ~ "AS IS" BASIS, WITHOUT WARRANTIES
+		OR CONDITIONS OF ANY ~ KIND, either express or implied. See the
+		License for the ~ specific language governing permissions and
+		limitations ~ under the License.
+	-->
+<wsdl:definitions xmlns:Pool="http://ode.apache.org/test4/Pool"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xml="http://www.w3.org/XML/1998/namespace"
+	xmlns:diag="http://ode.apache.org/test4" xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+	xmlns:pnlk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:this="http://ode.apache.org/test4/process"
+	xmlns:NPGServices_Abstract="http://www.ode.apache.org/NPG/v1/wsdl"
+	xmlns:NPGData="http://www.ode.apache.org/NPG/v1" targetNamespace="http://ode.apache.org/test4/process">
+	<wsdl:types>
+		<xs:schema elementFormDefault="qualified"
+			targetNamespace="http://ode.apache.org/test4/process">
+			<xs:element name="receiveCancelRequest" type="xs:string" />
+			<xs:element name="receiveNPRRequest" type="xs:string" />
+			<xs:element name="receive3Request" type="xs:string" />
+			<xs:element name="receive2Request" type="xs:string" />
+		</xs:schema>
+	</wsdl:types>
+	<wsdl:message name="receiveCancelRequest">
+		<wsdl:part name="body" element="this:receiveCancelRequest" />
+	</wsdl:message>
+	<wsdl:message name="receiveNPRRequest">
+		<wsdl:part name="body" element="this:receiveNPRRequest" />
+	</wsdl:message>
+	<wsdl:message name="receive3Request">
+		<wsdl:part name="body" element="this:receive3Request" />
+	</wsdl:message>
+	<wsdl:message name="receive2Request">
+		<wsdl:part name="body" element="this:receive2Request" />
+	</wsdl:message>
+	<wsdl:portType name="ForPool">
+		<wsdl:operation name="receiveCancel">
+			<wsdl:input message="this:receiveCancelRequest" name="receiveCancel" />
+		</wsdl:operation>
+		<wsdl:operation name="receiveNPR">
+			<wsdl:input message="this:receiveNPRRequest" name="receiveNPR" />
+		</wsdl:operation>
+		<wsdl:operation name="receive3">
+			<wsdl:input message="this:receive3Request" name="receive3" />
+		</wsdl:operation>
+		<wsdl:operation name="receive2">
+			<wsdl:input message="this:receive2Request" name="receive2" />
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="CanonicBindingForPool" type="this:ForPool">
+		<soap:binding style="document"
+			transport="http://schemas.xmlsoap.org/soap/http" />
+		<wsdl:operation name="receiveCancel">
+			<soap:operation style="document"
+				soapAction="http://ode.apache.org/test4/process/ForPool/receiveCancel" />
+			<wsdl:input name="receiveCancel">
+				<soap:body use="literal" />
+			</wsdl:input>
+		</wsdl:operation>
+		<wsdl:operation name="receiveNPR">
+			<soap:operation style="document"
+				soapAction="http://ode.apache.org/test4/process/ForPool/receiveNPR" />
+			<wsdl:input name="receiveNPR">
+				<soap:body use="literal" />
+			</wsdl:input>
+		</wsdl:operation>
+		<wsdl:operation name="receive3">
+			<soap:operation style="document"
+				soapAction="http://ode.apache.org/test4/process/ForPool/receive3" />
+			<wsdl:input name="receive3">
+				<soap:body use="literal" />
+			</wsdl:input>
+		</wsdl:operation>
+		<wsdl:operation name="receive2">
+			<soap:operation style="document"
+				soapAction="http://ode.apache.org/test4/process/ForPool/receive2" />
+			<wsdl:input name="receive2">
+				<soap:body use="literal" />
+			</wsdl:input>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="CanonicServiceForPool">
+		<wsdl:port name="canonicPort" binding="this:CanonicBindingForPool">
+			<soap:address
+				location="http://localhost:8080/ode/processes/NPG072408_4/test4/process/Pool" />
+		</wsdl:port>
+	</wsdl:service>
+
+	<vprop:property name="portIdProp" type="xs:string" />
+	<vprop:propertyAlias propertyName="this:portIdProp"
+		messageType="this:receiveNPRRequest" part="body">
+	</vprop:propertyAlias>
+	<vprop:propertyAlias propertyName="this:portIdProp"
+		messageType="this:receive2Request" part="body">
+	</vprop:propertyAlias>
+	<vprop:propertyAlias propertyName="this:portIdProp"
+		messageType="this:receive3Request" part="body">
+	</vprop:propertyAlias>
+	<vprop:propertyAlias propertyName="this:portIdProp"
+		messageType="this:receiveCancelRequest" part="body">
+	</vprop:propertyAlias>
+</wsdl:definitions>

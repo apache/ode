@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tes:testSuite xmlns:tes1="http://ode/bpel/unit-test/testFlowActivity1.wsdl" xmlns:tes="http://www.bpelunit.org/schema/testSuite">
+    <tes:name>TestFlowActivity1.bpts</tes:name>
+    <tes:baseURL>http://localhost:7777/ws</tes:baseURL>
+    <tes:deployment>
+        <tes:put type="ode" name="TestActivityFlow">
+            <tes:property name="DeploymentArchive">../TestFlowActivity1</tes:property>
+            <tes:property name="ODEDeploymentServiceURL">http://localhost:8080/ode/processes/DeploymentService</tes:property>
+            <tes:wsdl>TestActivityFlow.wsdl</tes:wsdl>
+        </tes:put>
+    </tes:deployment>
+    <tes:testCases>
+        <tes:testCase name="case1" basedOn="" abstract="false" vary="false">
+            <tes:clientTrack>
+                <tes:sendReceive service="tes2:TestFlowActivityService" port="TestFlowActivityPort" operation="request" xmlns:tes1="http://ode/bpel/unit-test/testFlowActivity1" xmlns:tes2="http://ode/bpel/unit-test/testFlowActivity1.wsdl">
+                    <tes:send service="tes1:TestFlowActivityService" port="TestFlowActivityPort" operation="request" fault="false" delaySequence="">
+                        <tes:data>
+                            <request xmlns="http://ode/bpel/unit-test/testFlowActivity1.wsdl.types">
+                                <requestID>Start Test1.1</requestID>
+                                <requestText>Event Start Test1.1</requestText>
+                                <flowIndicators>
+                                    <indicatorOne>yes</indicatorOne>
+                                    <indicatorTwo>yes</indicatorTwo>
+                                </flowIndicators>
+                                <loopIndicator>min</loopIndicator>
+                            </request>
+                        </tes:data>
+                    </tes:send>
+                    <tes:receive service="tes1:TestFlowActivityService" port="TestFlowActivityPort" operation="request" fault="false">
+                        <tes:condition>
+                            <tes:expression>//reply</tes:expression>
+                            <tes:value><![CDATA['processes A and B merge on process C -&gt; merge into root process -&gt; test switch statement -&gt; case min: set loop iterations = 5 -&gt; test loop iterations -&gt; 2 -&gt; 3 -&gt; 4 -&gt; 5 -&gt; 6 -&gt; test1Process complete.']]></tes:value>
+                        </tes:condition>
+                    </tes:receive>
+                </tes:sendReceive>
+            </tes:clientTrack>
+        </tes:testCase>
+    </tes:testCases>
+</tes:testSuite>

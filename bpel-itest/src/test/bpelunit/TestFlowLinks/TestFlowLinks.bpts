@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tes:testSuite xmlns:tes="http://www.bpelunit.org/schema/testSuite" xmlns:wor="workflowns">
+    <tes:name>TestFlowLinks.bpts</tes:name>
+    <tes:baseURL>http://localhost:7777/ws</tes:baseURL>
+    <tes:deployment>
+        <tes:put name="TestCase" type="ode">
+            <tes:property name="DeploymentArchive">.</tes:property>
+            <tes:property name="ODEDeploymentServiceURL">http://localhost:8080/ode/processes/DeploymentService</tes:property>
+            <tes:wsdl>TestFlowLinksArtifacts.wsdl</tes:wsdl>
+        </tes:put>
+    </tes:deployment>
+    <tes:testCases>
+        <tes:testCase name="case1" basedOn="" abstract="false" vary="false">
+            <tes:clientTrack>
+                <tes:sendReceive service="wor:TestCase" port="Workflow" operation="ExecuteWorkflow">
+                    <tes:send service="wor:TestCase" port="Workflow" operation="ExecuteWorkflow" fault="false" delaySequence="">
+                        <tes:data>
+                            <ns1:ExecuteWorkflow xmlns:ns1="workflowns">
+                                <value>foo</value>
+                            </ns1:ExecuteWorkflow>
+                        </tes:data>
+                    </tes:send>
+                    <tes:receive service="wor:TestCase" port="Workflow" operation="ExecuteWorkflow" fault="false"/>
+                </tes:sendReceive>
+            </tes:clientTrack>
+        </tes:testCase>
+    </tes:testCases>
+</tes:testSuite>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tes:testSuite xmlns:tes="http://www.bpelunit.org/schema/testSuite" xmlns:unit="http://ode/bpel/unit-test.wsdl">
+    <tes:name>TestXQueryExpression.bpts</tes:name>
+    <tes:baseURL>http://localhost:7777/ws</tes:baseURL>
+    <tes:deployment>
+        <tes:put name="HelloXQueryWorld" type="ode">
+            <tes:property name="DeploymentArchive">.</tes:property>
+            <tes:property name="ODEDeploymentServiceURL">http://localhost:8080/ode/processes/DeploymentService</tes:property>
+            <tes:wsdl>TestXQueryExpressionArtifacts.wsdl</tes:wsdl>
+        </tes:put>
+    </tes:deployment>
+    <tes:testCases>
+        <tes:testCase name="case1" basedOn="" abstract="false" vary="false">
+            <tes:clientTrack>
+                <tes:sendReceive service="unit:HelloXQueryService" port="HelloXQueryPort" operation="HelloXQuery">
+                    <tes:send service="unit:HelloXQueryService" port="HelloXQueryPort" operation="HelloXQuery" fault="false" delaySequence="">
+                        <tes:data>
+                            <TestPart>
+                                <content>Hello</content>
+                            </TestPart>
+                        </tes:data>
+                    </tes:send>
+                    <tes:receive service="unit:HelloXQueryService" port="HelloXQueryPort" operation="HelloXQuery" fault="false">
+                        <tes:condition>
+                            <tes:expression>//TestPart/content</tes:expression>
+                            <tes:value>'HelloXQuery World'</tes:value>
+                        </tes:condition>
+                    </tes:receive>
+                </tes:sendReceive>
+            </tes:clientTrack>
+        </tes:testCase>
+    </tes:testCases>
+</tes:testSuite>

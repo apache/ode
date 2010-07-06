@@ -1,0 +1,222 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<process name="HelloXQueryWorld" 
+    targetNamespace="http://ode/bpel/unit-test"
+    xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:tns="http://ode/bpel/unit-test"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:types="http://ode/bpel/types"
+    xmlns:test="http://ode/bpel/unit-test.wsdl"
+    xmlns:wsa="http://www.w3.org/2005/08/addressing"
+	xmlns:ode="http://www.apache.org/ode/type/extension"
+    queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+    expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+
+    <import location="TestXQueryExpressionArtifacts.wsdl"
+        namespace="http://ode/bpel/unit-test.wsdl"
+        importType="http://schemas.xmlsoap.org/wsdl/"/>
+    
+    <partnerLinks>
+        <partnerLink name="HelloXQueryPartnerLink" 
+            partnerLinkType="test:HelloXQueryPartnerLinkType" 
+            myRole="me" />
+    </partnerLinks>
+        
+    <variables>
+        <variable name="myVar" messageType="test:HelloXQueryMessage"/>
+        <variable name="otherVar" type="xsd:string"/>
+        <variable name="tempVar" element="test:content"/>
+        <variable name="stringVar" type="xsd:string"/>
+        <variable name="boolVar" type="xsd:boolean"/>
+        <variable name="i" type="xsd:int"/>
+    </variables>
+            
+    <sequence>   
+        <ext:failureHandling xmlns:ext="http://ode.apache.org/activityRecovery">
+          <ext:faultOnFailure>true</ext:faultOnFailure>
+          <ext:retryFor>5</ext:retryFor>
+          <ext:retryDelay>60</ext:retryDelay>
+        </ext:failureHandling>
+        <receive 
+            name="start"
+            partnerLink="HelloXQueryPartnerLink"
+            portType="test:HelloXQueryPortType"
+            operation="HelloXQuery"
+            variable="myVar"
+            createInstance="yes"/>
+        <assign name="assign1">
+            <copy>
+                <from variable="myVar" part="TestPart"/>
+                <to variable="otherVar"/>
+            </copy>
+            <copy>
+                <from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0"><![CDATA[<test:content>Hello</test:content>]]></from>
+                <to variable="tempVar"/>
+            </copy>
+            <copy>
+                <from  expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0"><![CDATA[
+                <sref:service-ref xmlns:sref="http://docs.oasis-open.org/wsbpel/2.0/serviceref">
+                   <wsa:EndpointReference xmlns:pp="http://some-namespace" xmlns:wsa="http://www.w3.org/2005/08/addressing">
+                      <wsa:Address>http://www.w3.org/2005/08/addressing/anonymous</wsa:Address>
+                      <wsa:Metadata>
+                         <Service EndpointName="MyEndpoint">pp:SomeProxy</Service>
+                      </wsa:Metadata>
+                   </wsa:EndpointReference>
+                </sref:service-ref> 
+                ]]>
+                </from>
+                <to variable="tempVar"/>
+            </copy>
+            <copy>
+                <from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
+					typeswitch ($myVar.TestPart) 
+				      case $a as xs:string return "test"
+					  default return "default"
+				</from>
+                <to variable="otherVar"/>
+            </copy>
+            <copy>
+                <from  expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0"><![CDATA[
+					typeswitch ($myVar.TestPart) 
+				      case $a as text() return <test:content/>
+					  default return <test:content/>
+					  ]]>
+				</from>
+                <to variable="otherVar"/>
+            </copy>
+			<!-- this copy will fail since saxon is not schema-aware 
+            <copy>
+                <from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
+					typeswitch ($myVar.TestPart) 
+				      case $a as element(*, test:content) return "test"
+					  default return "default"
+				</from>
+                <to variable="otherVar"/>
+            </copy>
+			-->
+            <copy>
+                <from  expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
+					for $loopOnce in (1) 
+					return 
+						concat(bpws:getVariableProperty("myVar", "test:content"), "XQuery World")
+				</from>
+                <to variable="myVar" part="TestPart"/>
+            </copy>
+        </assign>
+        <if>
+           <condition>not($tempVar/wsa:EndpointReference/wsa:Metadata/Service/@EndpointName eq "MyEndpoint")</condition>
+           <throw faultName="selectionFailure"/>
+        </if>
+        <assign>
+            <copy>
+                <from>0</from>
+                <to variable="i"/>
+            </copy>
+        </assign>
+        <while>
+            <condition>$i &lt; 2</condition>
+            <sequence>
+                <if>
+                    <condition>$i = 0</condition>
+                    <assign>
+                        <copy>
+                            <from>"false"</from>
+                            <to variable="stringVar"/>
+                        </copy>
+                        <copy>
+                            <from>false()</from>
+                            <to variable="boolVar"/>
+                        </copy>
+                    </assign>
+                    <else>
+                        <assign>
+                            <copy>
+                                <from>"true"</from>
+                                <to variable="stringVar"/>
+                            </copy>
+                            <copy>
+                                <from>true()</from>
+                                <to variable="boolVar"/>
+                            </copy>
+                        </assign>
+                    </else>
+                </if>
+				<!--
+                <assign>
+                    <copy>
+                        <from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
+        						if (boolean($stringVar)) then "trueValue" else "falseValue"
+        				</from>
+                        <to variable="otherVar"/>
+                    </copy>
+                </assign>
+	           <if>
+                    <condition>not($otherVar = concat($stringVar, "Value"))</condition>
+                    <throw faultName="selectionFailure"/>
+                </if>
+    			-->
+     
+          	    <assign>
+                    <copy>
+                        <from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
+        						if ($boolVar) then "trueValue" else "falseValue"
+        				</from>
+                        <to variable="otherVar"/>
+                    </copy>
+                </assign>
+                <if>
+                    <condition>not($otherVar = concat($stringVar, "Value"))</condition>
+                    <throw faultName="selectionFailure"/>
+                </if>
+    
+                <assign>
+                    <copy>
+                        <from>$i + 1</from>
+                        <to variable="i"/>
+                    </copy>
+                </assign>
+            </sequence>
+        </while>
+        <scope>
+            <faultHandlers>
+                <catch faultName="subLanguageExecutionFault">
+                    <empty/>
+                </catch>
+            </faultHandlers>
+            <assign>
+              <copy>
+    	        <from variable="myVar" part="TestPart">
+    	          <query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">
+    	             let $j := 10 div 0
+    	             return concat("abc", $j)
+    	          </query>
+    	        </from>
+    	        <to variable="myVar" part="TestPart"/>
+    	      </copy>
+    	    </assign>
+        </scope>
+        <reply name="end"  
+                partnerLink="HelloXQueryPartnerLink"
+                portType="test:HelloXQueryPortType" 
+                operation="HelloXQuery"
+                variable="myVar"/>
+    </sequence>
+    
+</process>

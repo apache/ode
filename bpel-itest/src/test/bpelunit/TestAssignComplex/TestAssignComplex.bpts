@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tes:testSuite xmlns:tes="http://www.bpelunit.org/schema/testSuite" xmlns:var="http://example.com/ComplexVariables/Variable">
+    <tes:name>TestAssignComplex.bpts</tes:name>
+    <tes:baseURL>http://localhost:7777/ws</tes:baseURL>
+    <tes:deployment>
+        <tes:put name="AssignComplex" type="ode">
+            <tes:property name="DeploymentArchive">.</tes:property>
+            <tes:property name="ODEDeploymentServiceURL">http://localhost:8080/ode/processes/DeploymentService</tes:property>
+            <tes:wsdl>AssignComplexArtifacts.wsdl</tes:wsdl>
+        </tes:put>
+    </tes:deployment>
+    <tes:testCases>
+        <tes:testCase name="case1" basedOn="" abstract="false" vary="false">
+            <tes:clientTrack>
+                <tes:sendReceive service="var:CanonicServiceForClient" port="canonicPort" operation="receive">
+                    <tes:send service="var:CanonicServiceForClient" port="canonicPort" operation="receive" fault="false">
+                        <tes:data>
+                            <ns1:receiveRequest xmlns:ns1="http://example.com/ComplexVariables/Variable">
+                                <ns1:Name>name</ns1:Name>
+                                <ns1:JobProfile>profile</ns1:JobProfile>
+                                <ns1:Status>status</ns1:Status>
+                            </ns1:receiveRequest>
+                        </tes:data>
+                    </tes:send>
+                    <tes:receive service="var:CanonicServiceForClient" port="canonicPort" operation="receive" fault="false"/>
+                </tes:sendReceive>
+            </tes:clientTrack>
+        </tes:testCase>
+    </tes:testCases>
+</tes:testSuite>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tes:testSuite xmlns:pool="http://example.com/NewDiagram/Pool" xmlns:tes="http://www.bpelunit.org/schema/testSuite">
+    <tes:name>TestAssignDate.bpts</tes:name>
+    <tes:baseURL>http://localhost:7777/ws</tes:baseURL>
+    <tes:deployment>
+        <tes:put name="Pool" type="ode">
+            <tes:property name="DeploymentArchive">.</tes:property>
+            <tes:property name="ODEDeploymentServiceURL">http://localhost:8080/ode/processes/DeploymentService</tes:property>
+            <tes:wsdl>NewDiagram-PoolArtifacts.wsdl</tes:wsdl>
+        </tes:put>
+    </tes:deployment>
+    <tes:testCases>
+        <tes:testCase name="case1" basedOn="" abstract="false" vary="false">
+            <tes:clientTrack>
+                <tes:sendReceive service="pool:CanonicServiceForPool0" port="canonicPort" operation="Task">
+                    <tes:send service="pool:CanonicServiceForPool0" port="canonicPort" operation="Task" fault="false">
+                        <tes:data>
+                            <pool:TaskRequest xmlns:ns1="http://example.com/NewDiagram/Pool">start</pool:TaskRequest>
+                        </tes:data>
+                    </tes:send>
+                    <tes:receive service="pool:CanonicServiceForPool0" port="canonicPort" operation="Task" fault="false">
+                        <tes:condition>
+                            <tes:expression>//pool:TaskResponse</tes:expression>
+                            <tes:value>'OK'</tes:value>
+                        </tes:condition>
+                    </tes:receive>
+                </tes:sendReceive>
+            </tes:clientTrack>
+        </tes:testCase>
+    </tes:testCases>
+</tes:testSuite>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tes:testSuite xmlns:tes="http://www.bpelunit.org/schema/testSuite" xmlns:unit="http://ode/bpel/unit-test.wsdl">
+    <tes:name>TestCombineUrl.bpts</tes:name>
+    <tes:baseURL>http://localhost:7777/ws</tes:baseURL>
+    <tes:deployment>
+        <tes:put name="TestCombineUrl" type="ode">
+            <tes:property name="DeploymentArchive">.</tes:property>
+            <tes:property name="ODEDeploymentServiceURL">http://localhost:8080/ode/processes/DeploymentService</tes:property>
+            <tes:wsdl>TestCombineUrlArtifacts.wsdl</tes:wsdl>
+        </tes:put>
+    </tes:deployment>
+    <tes:testCases>
+        <tes:testCase name="case1" basedOn="" abstract="false" vary="false">
+            <tes:clientTrack>
+                <tes:sendReceive service="unit:TestCombineUrlService" port="TestCombineUrlPort" operation="combineUrl">
+                    <tes:send service="unit:TestCombineUrlService" port="TestCombineUrlPort" operation="combineUrl" fault="false">
+                        <tes:data>
+                            <base>http://example.com/html/about.html</base>
+                            <relative>../experts/</relative>
+                        </tes:data>
+                    </tes:send>
+                    <tes:receive service="unit:TestCombineUrlService" port="TestCombineUrlPort" operation="combineUrl" fault="false">
+                        <tes:condition>
+                            <tes:expression>//base</tes:expression>
+                            <tes:value>'http://example.com/experts/'</tes:value>
+                        </tes:condition>
+                    </tes:receive>
+                </tes:sendReceive>
+            </tes:clientTrack>
+        </tes:testCase>
+    </tes:testCases>
+</tes:testSuite>

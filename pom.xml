@@ -990,50 +990,51 @@
             </build>
         </profile>
 
-	   <profile>
-	      <id>distro</id>
-	      <modules>
-		  <module>distro</module>
-	      </modules>
-	   </profile>
-	   <profile>
+       <profile>
+          <id>distro</id>
+          <modules>
+          <module>distro</module>
+          </modules>
+       </profile>
+       <profile>
               <!-- To run this profile, you need to uncomment the apt plugin in jacob and bpel-runtime module first.
-		   And then run this profile, those classes with @ChannelType will be regenerated. -->
-	      <id>all</id>
-	      <modules>
-		<module>agents</module>
-		<module>utils</module>
-                <module>jacob-ap</module>
-		<module>jacob</module>
-		<module>bpel-schemas</module>
-		<module>bpel-scripts</module>
-		<module>bpel-api</module>
-		<module>bpel-api-jca</module>
-		<module>bpel-dao</module>
-		<module>bpel-obj</module>
-		<module>dao-jpa</module>
-		<module>jca-ra</module>
-		<module>jca-server</module>
-		<module>scheduler-simple</module>
-		<module>bpel-compiler</module>
-		<module>bpel-epr</module>
-		<module>bpel-ql</module>
-		<module>dao-hibernate</module>
-		<module>tools</module>
-		<module>bpel-store</module>
-		<module>dao-jpa-ojpa-derby</module>
-		<module>dao-hibernate-db</module>
-		<module>bpel-runtime</module>
-		<module>bpel-connector</module>
-		<module>bpel-test</module>
-		<module>axis2</module>
-		<module>jbi</module>
-		<module>jbi-bundle</module>
-		<module>jbi-karaf</module>
-		<module>distro/src/examples-jbi/maven2/ping-pong-osgi</module>
-		<module>axis2-war</module>
-		<module>distro</module>
-	      </modules>
-	   </profile>
+           And then run this profile, those classes with @ChannelType will be regenerated. -->
+          <id>all</id>
+          <modules>
+            <module>agents</module>
+            <module>utils</module>
+            <module>jacob-ap</module>
+            <module>jacob</module>
+            <module>bpel-schemas</module>
+            <module>bpel-scripts</module>
+            <module>bpel-api</module>
+            <module>bpel-api-jca</module>
+            <module>bpel-dao</module>
+            <module>bpel-obj</module>
+            <module>dao-jpa</module>
+            <module>jca-ra</module>
+            <module>jca-server</module>
+            <module>scheduler-simple</module>
+            <module>bpel-compiler</module>
+            <module>bpel-epr</module>
+            <module>bpel-ql</module>
+            <module>dao-hibernate</module>
+            <module>tools</module>
+            <module>bpel-store</module>
+            <module>dao-jpa-ojpa-derby</module>
+            <module>dao-hibernate-db</module>
+            <module>bpel-runtime</module>
+            <module>bpel-connector</module>
+            <module>bpel-test</module>
+            <module>axis2</module>
+            <module>jbi</module>
+            <module>jbi-bundle</module>
+            <module>jbi-karaf</module>
+            <module>distro/src/examples-jbi/maven2/ping-pong-osgi</module>
+            <module>axis2-war</module>
+            <module>bpel-itests</module>
+            <module>distro</module>
+          </modules>
+       </profile>
     </profiles>
 </project>

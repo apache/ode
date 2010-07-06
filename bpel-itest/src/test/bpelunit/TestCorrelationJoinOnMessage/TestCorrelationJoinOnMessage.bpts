@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tes:testSuite xmlns:tes="http://www.bpelunit.org/schema/testSuite" xmlns:proc="http://ode.apache.org/test4/process">
+    <tes:name>TestCorrelationJoinOnMessage.bpts</tes:name>
+    <tes:baseURL>http://localhost:7777/ws</tes:baseURL>
+    <tes:deployment>
+        <tes:put name="Process" type="ode">
+            <tes:property name="DeploymentArchive">.</tes:property>
+            <tes:property name="ODEDeploymentServiceURL">http://localhost:8080/ode/processes/DeploymentService</tes:property>
+            <tes:wsdl>CorrelationJoinOnMessageTestArtifacts.wsdl</tes:wsdl>
+        </tes:put>
+    </tes:deployment>
+    <tes:testCases>
+        <tes:testCase name="case1" basedOn="" abstract="false" vary="false">
+            <tes:clientTrack>
+                <tes:sendReceive service="proc:CanonicServiceForPool" port="canonicPort" operation="receive2">
+                    <tes:send service="proc:CanonicServiceForPool" port="canonicPort" fault="false">
+                        <tes:data>
+                            <receive2Request xmlns="http://ode.apache.org/test4/process">1</receive2Request>
+                        </tes:data>
+                    </tes:send>
+                    <tes:receive service="proc:CanonicServiceForPool" port="canonicPort" fault="false"/>
+                </tes:sendReceive>
+            </tes:clientTrack>
+        </tes:testCase>
+        <tes:testCase name="case2" basedOn="" abstract="false" vary="false">
+            <tes:clientTrack/>
+        </tes:testCase>
+    </tes:testCases>
+</tes:testSuite>

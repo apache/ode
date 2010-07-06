@@ -1,0 +1,157 @@
+
+	<!--
+		~ Licensed to the Apache Software Foundation (ASF) under one ~ or more
+		contributor license agreements. See the NOTICE file ~ distributed with
+		this work for additional information ~ regarding copyright ownership.
+		The ASF licenses this file ~ to you under the Apache License, Version
+		2.0 (the ~ "License"); you may not use this file except in compliance
+		~ with the License. You may obtain a copy of the License at ~ ~
+		http://www.apache.org/licenses/LICENSE-2.0 ~ ~ Unless required by
+		applicable law or agreed to in writing, ~ software distributed under
+		the License is distributed on an ~ "AS IS" BASIS, WITHOUT WARRANTIES
+		OR CONDITIONS OF ANY ~ KIND, either express or implied. See the
+		License for the ~ specific language governing permissions and
+		limitations ~ under the License.
+	-->
+
+<wsdl:definitions targetNamespace="http://ode/bpel/unit-test/testFlowActivity1.wsdl"
+	xmlns:tns="http://ode/bpel/unit-test/testFlowActivity1.wsdl" xmlns="http://ode/bpel/unit-test/testFlowActivity1.wsdl"
+	xmlns:typens="http://ode/bpel/unit-test/testFlowActivity1.wsdl.types"
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+
+	<!-- type defs -->
+	<wsdl:types>
+		<xsd:schema targetNamespace="http://ode/bpel/unit-test/testFlowActivity1.wsdl.types"
+			xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+			<xsd:complexType name="flowIndicator">
+				<xsd:sequence>
+					<xsd:element name="indicatorOne" type="xsd:boolean" />
+					<xsd:element name="indicatorTwo" type="xsd:boolean" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:complexType name="request">
+				<xsd:sequence>
+					<xsd:element name="requestID" type="xsd:string" />
+					<xsd:element name="requestText" type="xsd:string" />
+					<xsd:element name="flowIndicators" type="typens:flowIndicator" />
+					<xsd:element name="loopIndicator" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:complexType name="reply">
+				<xsd:sequence>
+					<xsd:element name="replyID" type="xsd:string" />
+					<xsd:element name="replyText" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:complexType name="internal">
+				<xsd:sequence>
+					<xsd:element name="loop1Counter" type="xsd:int" />
+					<xsd:element name="loop1" type="xsd:int" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:complexType name="probe">
+				<xsd:sequence>
+					<xsd:element name="probeName" type="xsd:string" />
+					<xsd:element name="probeData" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+			
+		</xsd:schema>
+	</wsdl:types>
+
+	<wsdl:message name="requestMessage">
+		<wsdl:part name="requestMessageData" element="typens:request" />
+	</wsdl:message>
+
+	<wsdl:message name="replyMessage">
+		<wsdl:part name="replyMessageData" element="typens:reply" />
+	</wsdl:message>
+
+
+	<wsdl:message name="probeMessage">
+		<wsdl:part name="probeMessageData" element="typens:probe" />
+	</wsdl:message>
+
+	<wsdl:message name="internalProcessData">
+		<wsdl:part name="internalMessageData" element="typens:internal" />
+	</wsdl:message>
+
+	<!-- portType supported by the test process -->
+
+	<wsdl:portType name="testFlowActivityPT">
+		<wsdl:operation name="request">
+			<wsdl:input message="requestMessage" />
+			<wsdl:output message="replyMessage" />
+		</wsdl:operation>
+	</wsdl:portType>
+
+	<wsdl:binding name="TestFlowActivityBinding" type="tns:testFlowActivityPT">
+		<soap:binding style="document"
+			transport="http://schemas.xmlsoap.org/soap/http" />
+		<wsdl:operation name="request">
+			<soap:operation
+				soapAction="http://ode/bpel/unit-test/testFlowActivity1.wsdl/request" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="TestFlowActivityService">
+		<wsdl:port name="TestFlowActivityPort" binding="tns:TestFlowActivityBinding">
+			<soap:address
+				location="http://localhost:8080/ode/processes/TestFlowActivityService" />
+		</wsdl:port>
+	</wsdl:service>
+
+	<plnk:partnerLinkType name="testFlowActivityRequest">
+		<plnk:role name="testFlowActivityService" portType="tns:testFlowActivityPT" />
+	</plnk:partnerLinkType>
+
+	<!--
+
+		<plnk:partnerLinkType name="probeRequest"> <plnk:role
+		name="probeService" portType="prb:probeMessagePT" />
+		</plnk:partnerLinkType>
+	-->
+
+	<vprop:property name="testProbeData" type="xsd:string" />
+	<vprop:propertyAlias propertyName="tns:testProbeData"
+		messageType="tns:requestMessage" part="requestMessageData">
+		<vprop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+			typens:requestText
+    </vprop:query>
+	</vprop:propertyAlias>
+
+	<vprop:property name="testFlow1" type="xsd:boolean" />
+	<vprop:propertyAlias propertyName="tns:testFlow1"
+		messageType="tns:requestMessage" part="requestMessageData">
+
+		<vprop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+			typens:flowIndicators/typens:indicatorOne
+		</vprop:query>
+
+	</vprop:propertyAlias>
+
+
+	<vprop:property name="loopInd" type="xsd:string" />
+	<vprop:propertyAlias propertyName="tns:loopInd"
+		messageType="tns:requestMessage" part="requestMessageData">
+
+		<vprop:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+			typens:loopIndicator
+    </vprop:query>
+
+	</vprop:propertyAlias>
+
+
+
+</wsdl:definitions>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tes:testSuite xmlns:tes="http://www.bpelunit.org/schema/testSuite" xmlns:myn="mynamespace">
+    <tes:name>TestToQuery.bpts</tes:name>
+    <tes:baseURL>http://localhost:7777/ws</tes:baseURL>
+    <tes:deployment>
+        <tes:put name="QueryTest" type="ode">
+            <tes:property name="DeploymentArchive">.</tes:property>
+            <tes:property name="ODEDeploymentServiceURL">http://localhost:8080/ode/processes/DeploymentService</tes:property>
+            <tes:wsdl>QueryTestArtifacts.wsdl</tes:wsdl>
+        </tes:put>
+    </tes:deployment>
+    <tes:testCases>
+        <tes:testCase name="case1" basedOn="" abstract="false" vary="false">
+            <tes:clientTrack>
+                <tes:sendReceive service="myn:QueryTest1Service" port="QueryTest1Port" operation="process">
+                    <tes:send service="myn:QueryTest1Service" port="QueryTest1Port" operation="process" fault="false">
+                        <tes:data>
+                            <QueryTest1Request xmlns="mynamespace">1</QueryTest1Request>
+                        </tes:data>
+                    </tes:send>
+                    <tes:receive service="myn:QueryTest1Service" port="QueryTest1Port" operation="process" fault="false">
+                        <tes:condition>
+                            <tes:expression>//myn:QueryTest1Response</tes:expression>
+                            <tes:value>'one'</tes:value>
+                        </tes:condition>
+                    </tes:receive>
+                </tes:sendReceive>
+            </tes:clientTrack>
+        </tes:testCase>
+    </tes:testCases>
+</tes:testSuite>
