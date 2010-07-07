@@ -105,4 +105,6 @@ public interface DatabaseDelegate {
     int updateReassign(String oldnode, String newnode) throws DatabaseException;
     
     public void acquireTransactionLocks();
+    
+    public void deleteAllJobs();
 }

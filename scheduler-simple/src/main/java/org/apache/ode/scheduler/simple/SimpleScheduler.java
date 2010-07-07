@@ -428,6 +428,23 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         if (_running)
             return;
 
+        if (Boolean.parseBoolean(System.getProperty("org.apache.ode.scheduler.deleteJobsOnStart", "false"))) {
+            __log.debug("DeleteJobsOnStart");
+            try {
+                execTransaction(new Callable<Void>() {
+                    public Void call() throws Exception {
+                        _db.deleteAllJobs();
+                        return null;
+                    }
+                });
+            } catch (Exception ex) {
+                __log.error("", ex);
+                throw new ContextException("", ex);
+            }
+        } else {
+            __log.debug("no DeleteJobsOnStart");
+        }
+
         if (_exec == null)
             _exec = Executors.newCachedThreadPool();
 

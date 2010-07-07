@@ -85,7 +85,7 @@ public class SoapHeaderTest extends Axis2TestBase {
         assertEquals("ConversationId", cidElemt.getLocalName());
         assertEquals("ZZYV", cidElemt.getTextContent());
 
-        server.undeployProcess("TestStructuredFault");
+        server.undeployProcess("TestSoapHeader");
     }
 
 }

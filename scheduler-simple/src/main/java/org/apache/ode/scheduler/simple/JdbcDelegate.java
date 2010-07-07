@@ -498,6 +498,25 @@ public class JdbcDelegate implements DatabaseDelegate {
         }
     }
 
+    public void deleteAllJobs() {
+        Statement s = null;
+        Connection c = null;
+        try {
+            c = getConnection();
+            s = c.createStatement();
+            s.execute("delete from ODE_JOB");
+        } catch (Exception e) {
+            throw new RuntimeException("", e);
+        } finally {
+            try {
+                if (s != null) s.close();
+                if (c != null) c.close();
+            } catch (Exception e) {
+                throw new RuntimeException("", e);
+            }
+        }
+    }
+
     enum Dialect {
         DB2, DERBY, FIREBIRD, HSQL, MYSQL, ORACLE, SQLSERVER, SYBASE, SYBASE12, H2, UNKNOWN
     }

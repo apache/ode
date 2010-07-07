@@ -106,7 +106,9 @@ public class LoggingInterceptor<T> implements InvocationHandler {
                 print("Set isolation level to " + args[0]);
             }
             // JDBC Statement
-            else if (method.getName().startsWith("execute")) {
+            else if (method.getName().startsWith("execute") && args != null && args.length == 1 && args[0] instanceof String) {
+                print(method.getName() + "(" + args[0] + "), " + getParams());
+            } else if (method.getName().startsWith("execute")) {
                 print(method.getName() + ", " + getParams());
             } else if ("clearParameters".equals(method.getName())) {
                 _paramsByIdx.clear();

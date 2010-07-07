@@ -21,13 +21,13 @@ AXIOM               = [ group("axiom-api", "axiom-impl", "axiom-dom",
 AXIS2_ALL           = [group("axis2-kernel", "axis2-adb", "axis2-codegen", "axis2-java2wsdl",
                              "axis2-jibx", "axis2-saaj", "axis2-xmlbeans",
                             :under=>"org.apache.axis2",
-                            :version=>"1.5.1"),
+                            :version=>"1.5"),
                       group("woden-api", "woden-impl-dom",
                               :under=>"org.apache.woden",
                               :version=>"1.0M8"),
-                      "org.apache.axis2:axis2-transport-base:jar:1.0.0",
-                      "org.apache.axis2:axis2-transport-http:jar:1.5.1",
-                      "org.apache.axis2:axis2-transport-local:jar:1.5.1",
+                      "org.apache.axis2:axis2-transports:jar:1.0-i6",
+                      "org.apache.axis2:axis2-transport-http:jar:1.5",
+                      "org.apache.axis2:axis2-transport-local:jar:1.5",
                       "org.apache.axis2:axis2-transport-tcp:jar:1.0.0",
                       "org.apache.axis2:axis2-transport-jms:jar:1.0.0",
                       "org.apache.httpcomponents:httpcore:jar:4.0"]
@@ -54,7 +54,7 @@ COMMONS             = struct(
   :fileupload       =>"commons-fileupload:commons-fileupload:jar:1.1.1",
   :httpclient       =>"commons-httpclient:commons-httpclient:jar:3.1",
   :lang             =>"commons-lang:commons-lang:jar:2.4",
-  :logging          =>"commons-logging:commons-logging:jar:1.1",
+  :logging          =>"commons-logging:commons-logging:jar:1.1.1",
   :io               =>"commons-io:commons-io:jar:1.4",
   :pool             =>"commons-pool:commons-pool:jar:1.4",
   :primitives       =>"commons-primitives:commons-primitives:jar:1.0",
@@ -136,7 +136,7 @@ XERCES              = "xerces:xercesImpl:jar:2.9.0"
 WS_COMMONS          = struct(
   :axiom            =>AXIOM,
   :neethi           =>"org.apache.neethi:neethi:jar:2.0.4",
-  :xml_schema       =>"org.apache.ws.commons.schema:XmlSchema:jar:1.4.3"
+  :xml_schema       =>"org.apache.ws.commons.schema:XmlSchema:jar:1.3.2"
 )
 XBEAN               = [
   "org.apache.xbean:xbean-kernel:jar:3.3",
