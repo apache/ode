@@ -291,11 +291,6 @@
             <name>Apache Maven Repo</name>
             <url>http://repo1.maven.org/maven2/</url>
         </repository>
-        <repository>
-            <id>oss.sonatype.snapshots</id>
-            <name>OSS Sonatype Snapshots (for BPELUnit)</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-        </repository>
     </repositories>
 
     <!--

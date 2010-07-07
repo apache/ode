@@ -42,6 +42,14 @@
        <testng.version>5.8</testng.version>
     </properties>
 
+    <pluginRepositories>
+        <pluginRepository>
+            <id>oss.sonatype.snapshots</id>
+            <name>OSS Sonatype Snapshots (for BPELUnit)</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.ode</groupId>
