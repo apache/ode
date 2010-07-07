@@ -203,4 +203,28 @@ public class HPartnerLink extends HObject {
     public void setMessageExchanges(Set<HMessageExchange> mex) {
       _mex = mex;
     }
+
+    /**
+     * toString method: creates a String representation of the object
+     * @return the String representation
+     * @author Veresh Jain
+     */
+    public String toString() {
+        StringBuilder  buffer = new StringBuilder ();
+        buffer.append("HPartnerLink[");
+        buffer.append("_linkName = ").append(_linkName);
+        buffer.append(", _mex = ").append(_mex);
+        buffer.append(", _modelId = ").append(_modelId);
+        buffer.append(", _myEPR = ").append(_myEPR);
+        buffer.append(", _myrole = ").append(_myrole);
+        buffer.append(", _mySessionId = ").append(_mySessionId);
+        buffer.append(", _partnerEPR = ").append(_partnerEPR);
+        buffer.append(", _partnerRole = ").append(_partnerRole);
+        buffer.append(", _partnerSessionId = ").append(_partnerSessionId);
+        buffer.append(", _process = ").append(_process);
+        buffer.append(", _scope = ").append(_scope);
+        buffer.append(", _svcName = ").append(_svcName);
+        buffer.append("]");
+        return buffer.toString();
+    }
 }

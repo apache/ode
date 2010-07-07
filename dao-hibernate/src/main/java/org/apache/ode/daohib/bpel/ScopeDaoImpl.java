@@ -164,7 +164,12 @@ public class ScopeDaoImpl extends HibernateDao implements ScopeDAO {
         epr.setPartnerRole(partnerRole);
         epr.setScope(_scope);
 //        _scope.addPartnerLink(epr);
-        getSession().save(epr);
+        try {
+            getSession().save(epr);
+        } catch (Exception e) {
+            super.logDao.error("Error while saving Partner Link : " + epr.toString());
+            throw new RuntimeException(e);
+        }
         PartnerLinkDAOImpl eprDao = new PartnerLinkDAOImpl(_sm, epr);
         return eprDao;
     }
