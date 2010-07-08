@@ -18,17 +18,20 @@
  */
 package org.apache.ode.bpel.compiler;
 
+import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.ThrowActivity;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OThrow;
+import org.apache.ode.utils.msg.MessageBundle;
 
 
 /**
  * Generates code for <code>&lt;throw&gt;</code> activities.
  */
 class ThrowGenerator extends DefaultActivityGenerator {
-
+    private static final ThrowGeneratorMessages __cmsgs = MessageBundle.getMessages(ThrowGeneratorMessages.class);
+    
     public OActivity newInstance(Activity src) {
         return new OThrow(_context.getOProcess(), _context.getCurrent());
     }
@@ -36,6 +39,10 @@ class ThrowGenerator extends DefaultActivityGenerator {
     public void compile(OActivity output, Activity src) {
         ThrowActivity throwDef = (ThrowActivity)src;
         OThrow othrow = (OThrow) output;
+
+        if (throwDef.getFaultName() == null)
+            throw new CompilationException(__cmsgs.errThrowMustDefineFaultName()); 
+
         othrow.faultName = throwDef.getFaultName();
         if(throwDef.getFaultVariable() != null)
             othrow.faultVariable = _context.resolveVariable(throwDef.getFaultVariable());
