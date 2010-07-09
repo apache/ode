@@ -59,7 +59,7 @@
                     <bpel:onAlarm>
                         <bpel:for>"PT1S"</bpel:for>
                         <bpel:scope>
-                            <bpel:throw faultName="tns:goodFault"/>
+                            <bpel:throw faultName="this:goodFault"/>
                         </bpel:scope>
                     </bpel:onAlarm>
                 </bpel:eventHandlers>
