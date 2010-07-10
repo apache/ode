@@ -166,7 +166,10 @@ public class DeploymentWebService {
                         _poller.hold();
 
                         File dest = new File(_deployPath, bundleName + "-" + _store.getCurrentVersion());
-                        dest.mkdir();
+                        boolean createDir = dest.mkdir();
+                        if(!createDir){
+                        	throw new OdeFault("Error while creating file " + dest.getName());
+                        }
                         unzip(dest, (DataHandler) binaryNode.getDataHandler());
 
                         // Check that we have a deploy.xml
@@ -178,7 +181,9 @@ public class DeploymentWebService {
                         Collection<QName> deployed = _store.deploy(dest);
 
                         File deployedMarker = new File(_deployPath, dest.getName() + ".deployed");
-                        deployedMarker.createNewFile();
+                        if(!deployedMarker.createNewFile()) {
+                        	throw new OdeFault("Error while creating file " + deployedMarker.getName() + "deployment failed");
+                        }
 
                         // Telling the poller what we deployed so that it doesn't try to deploy it again
                         _poller.markAsDeployed(dest);
@@ -222,7 +227,11 @@ public class DeploymentWebService {
                         Collection<QName> undeployed = _store.undeploy(deploymentDir);
 
                         File deployedMarker = new File(deploymentDir + ".deployed");
-                        deployedMarker.delete();
+                        boolean isDeleted = deployedMarker.delete();
+
+                        if (!isDeleted)
+                            __log.error("Error while deleting file " + deployedMarker.getName());
+
                         FileUtils.deepDelete(deploymentDir);
 
                         OMElement response = factory.createOMElement("response", null);
