@@ -45,6 +45,7 @@ import org.apache.ode.bpel.evt.NewProcessInstanceEvent;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.OdeGlobalConfig;
 import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.JobType;
@@ -256,6 +257,9 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
     public void noRoutingMatch(MyRoleMessageExchangeImpl mex, List<RoutingInfo> routings) {
         if (!mex.isAsynchronous()) {
             mex.setFailure(MessageExchange.FailureType.NOMATCH, "No process instance matching correlation keys.", null);
+            if (!OdeGlobalConfig.queueInOutMessages()) {
+                _process._engine._contexts.mexContext.onAsyncReply(mex);
+            }
         } else {
             // enqueue message with the last message route, as per the comments in caller (@see BpelProcess.invokeProcess())
             RoutingInfo routing =

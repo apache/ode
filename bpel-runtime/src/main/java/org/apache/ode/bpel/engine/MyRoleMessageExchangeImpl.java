@@ -38,6 +38,7 @@ import org.apache.ode.bpel.engine.replayer.Replayer;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.OdeGlobalConfig;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
@@ -183,7 +184,11 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
     }
 
     public boolean isAsynchronous() {
-        return true;
+        if (OdeGlobalConfig.queueInOutMessages()) {
+            return true;
+        } else {
+            return getPattern() == MessageExchangePattern.REQUEST_ONLY;
+        }
     }
 
     public void release(boolean instanceSucceeded) {
