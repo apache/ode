@@ -31,6 +31,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.wsdl.Fault;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
@@ -40,8 +41,11 @@ import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.DeferredProcessInstanceCleanable;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.engine.BpelProcess;
+import org.apache.ode.bpel.engine.MyRoleMessageExchangeImpl;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableConf;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableManager;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
@@ -50,10 +54,13 @@ import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
+import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
+import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.JobType;
@@ -66,6 +73,7 @@ import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.Serializer;
+import org.apache.ode.bpel.runtime.BpelRuntimeContext;
 import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
 import org.apache.ode.bpel.runtime.InvalidProcessException;
 import org.apache.ode.bpel.runtime.PROCESS;
@@ -1157,4 +1165,59 @@ public class BpelProcess {
     public int getVersion() {
         return Integer.parseInt(_pid.getLocalPart().substring(_pid.getLocalPart().lastIndexOf('-') + 1));
     }
+    
+    public void doAsyncReply(MyRoleMessageExchangeImpl m, BpelRuntimeContext context) {
+        MessageExchangeDAO mex = m.getDAO();
+        PartnerRoleMessageExchange pmex = null;
+
+        if (mex.getPipedMessageExchangeId() != null) {
+            pmex = (PartnerRoleMessageExchange) getEngine().getMessageExchange(mex.getPipedMessageExchangeId());
+        }
+
+        if (pmex != null) {
+            if (BpelProcess.__log.isDebugEnabled()) {
+                __log.debug("Replying to a p2p mex, myrole " + m + " - partnerole " + pmex);
+            }
+
+            if (pmex.getStatus() == Status.ASYNC || pmex.getStatus() == Status.REQUEST) {
+                try {
+                    switch (m.getStatus()) {
+                        case FAILURE:
+                            // We can't seem to get the failure out of the myrole mex?
+                            pmex.replyWithFailure(MessageExchange.FailureType.OTHER, "operation failed", null);
+                            break;
+                        case FAULT:
+                            Fault fault = pmex.getOperation().getFault(m.getFault().getLocalPart());
+                            if (fault == null) {
+                                __log.error("process " + this + " instance " + (context != null ? context.getPid() : null) + " thrown unmapped fault in p2p communication " + m.getFault() + " " + m.getFaultExplanation() + " - converted to failure");
+                                pmex.replyWithFailure(MessageExchange.FailureType.OTHER, "process thrown unmapped fault in p2p communication " + m.getFault() + " " + m.getFaultExplanation() + " - converted to failure", m.getFaultResponse().getMessage());
+                            } else {
+                                Message faultRes = pmex.createMessage(pmex.getOperation().getFault(m.getFault().getLocalPart())
+                                        .getMessage().getQName());
+                                faultRes.setMessage(m.getResponse().getMessage());
+                                pmex.replyWithFault(m.getFault(), faultRes);
+                            }
+                            break;
+                        case RESPONSE:
+                            Message response = pmex.createMessage(pmex.getOperation().getOutput().getMessage().getQName());
+                            response.setMessage(m.getResponse().getMessage());
+                            pmex.reply(response);
+                            break;
+                        default:
+                            __log.warn("Unexpected state: " + m.getStatus());
+                            break;
+                    }
+                } finally {
+                    mex.release(this.isCleanupCategoryEnabled(m.getStatus() == MessageExchange.Status.RESPONSE, CLEANUP_CATEGORY.MESSAGES));
+                }
+            } else {
+                __log.warn("Can't send response to a p2p mex: " + mex + " partner mex: " + pmex);
+            }
+        } else {
+            if (context != null) context.checkInvokeExternalPermission();
+            this._engine._contexts.mexContext.onAsyncReply(m);
+            //mex.release(_bpelProcess.isCleanupCategoryEnabled(m.getStatus() == MessageExchange.Status.RESPONSE, CLEANUP_CATEGORY.MESSAGES));
+        }
+    }
+    
 }

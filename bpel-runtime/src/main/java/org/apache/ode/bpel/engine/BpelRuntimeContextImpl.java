@@ -529,61 +529,6 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
     }
 
-    protected void doAsyncReply(MyRoleMessageExchangeImpl m) {
-        MessageExchangeDAO mex = m.getDAO();
-        PartnerRoleMessageExchange pmex = null;
-
-        if (mex.getPipedMessageExchangeId() != null) {
-            pmex = (PartnerRoleMessageExchange) _bpelProcess
-                    .getEngine().getMessageExchange(mex.getPipedMessageExchangeId());
-        }
-
-        if (pmex != null) {
-            if (BpelProcess.__log.isDebugEnabled()) {
-                __log.debug("Replying to a p2p mex, myrole " + m + " - partnerole " + pmex);
-            }
-
-            if (pmex.getStatus() == Status.ASYNC || pmex.getStatus() == Status.REQUEST) {
-                try {
-                    switch (m.getStatus()) {
-                        case FAILURE:
-                            // We can't seem to get the failure out of the myrole mex?
-                            pmex.replyWithFailure(MessageExchange.FailureType.OTHER, "operation failed", null);
-                            break;
-                        case FAULT:
-                            Fault fault = pmex.getOperation().getFault(m.getFault().getLocalPart());
-                            if (fault == null) {
-                                __log.error("process " + _bpelProcess + " instance " + _iid + " thrown unmapped fault in p2p communication " + m.getFault() + " " + m.getFaultExplanation() + " - converted to failure");
-                                pmex.replyWithFailure(MessageExchange.FailureType.OTHER, "process thrown unmapped fault in p2p communication " + m.getFault() + " " + m.getFaultExplanation() + " - converted to failure", m.getFaultResponse().getMessage());
-                            } else {
-                                Message faultRes = pmex.createMessage(pmex.getOperation().getFault(m.getFault().getLocalPart())
-                                        .getMessage().getQName());
-                                faultRes.setMessage(m.getResponse().getMessage());
-                                pmex.replyWithFault(m.getFault(), faultRes);
-                            }
-                            break;
-                        case RESPONSE:
-                            Message response = pmex.createMessage(pmex.getOperation().getOutput().getMessage().getQName());
-                            response.setMessage(m.getResponse().getMessage());
-                            pmex.reply(response);
-                            break;
-                        default:
-                            __log.warn("Unexpected state: " + m.getStatus());
-                            break;
-                    }
-                } finally {
-                    mex.release(_bpelProcess.isCleanupCategoryEnabled(m.getStatus() == MessageExchange.Status.RESPONSE, CLEANUP_CATEGORY.MESSAGES));
-                }
-            } else {
-                __log.warn("Can't send response to a p2p mex: " + mex + " partner mex: " + pmex);
-            }
-        } else {
-            checkInvokeExternalPermission();
-            _bpelProcess._engine._contexts.mexContext.onAsyncReply(m);
-            //mex.release(_bpelProcess.isCleanupCategoryEnabled(m.getStatus() == MessageExchange.Status.RESPONSE, CLEANUP_CATEGORY.MESSAGES));
-        }
-    }
-
     public void reply(final PartnerLinkInstance plinkInstnace, final String opName, final String mexId, Element msg,
             QName fault) throws FaultException {
         String mexRef = _imaManager.release(plinkInstnace, opName, mexId);
@@ -620,7 +565,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             evt.setAspect(ProcessMessageExchangeEvent.PROCESS_OUTPUT);
         }
 
-        doAsyncReply(m);
+        _bpelProcess.doAsyncReply(m, this);
 
         // send event
         sendEvent(evt);
@@ -1211,7 +1156,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
                         }
                     default:
                         mex.setFailure(FailureType.OTHER, "No response.", null);
-                        doAsyncReply(mex);
+                        _bpelProcess.doAsyncReply(mex, this);
                 }
             }
         }
@@ -1232,7 +1177,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
                 mex.setFault(faultData.getFaultName(), message);
                 mex.setFaultExplanation(faultData.getExplanation());
-                doAsyncReply(mex);
+                _bpelProcess.doAsyncReply(mex, this);
             }
         }
     }
@@ -1245,7 +1190,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess, _bpelProcess._engine, mexDao);
                 _bpelProcess.initMyRoleMex(mex);
                 mex.setFailure(FailureType.OTHER, "No response.", null);
-                doAsyncReply(mex);
+                _bpelProcess.doAsyncReply(mex, this);
             }
         }
     }

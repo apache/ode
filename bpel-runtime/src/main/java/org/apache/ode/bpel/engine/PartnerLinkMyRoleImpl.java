@@ -258,7 +258,7 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         if (!mex.isAsynchronous()) {
             mex.setFailure(MessageExchange.FailureType.NOMATCH, "No process instance matching correlation keys.", null);
             if (!OdeGlobalConfig.queueInOutMessages()) {
-                _process._engine._contexts.mexContext.onAsyncReply(mex);
+                _process.doAsyncReply(mex, null);
             }
         } else {
             // enqueue message with the last message route, as per the comments in caller (@see BpelProcess.invokeProcess())

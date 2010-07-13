@@ -309,4 +309,6 @@ public interface BpelRuntimeContext {
     Date getCurrentEventDateTime();
 
     ClassLoader getProcessClassLoader();
+    
+    void checkInvokeExternalPermission();
 }

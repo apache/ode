@@ -182,6 +182,7 @@ abstract class MessageExchangeImpl implements MessageExchange {
         // TODO not using FailureType, nor details
         setStatus(Status.FAILURE);
         getDAO().setFaultExplanation(reason);
+        responseReceived();
     }
 
     void setStatus(Status status) {
