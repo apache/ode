@@ -478,4 +478,6 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
         
     }
 
+    public void checkInvokeExternalPermission() {}
+
 }
