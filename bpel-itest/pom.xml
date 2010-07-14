@@ -89,7 +89,7 @@
       <plugin>
         <groupId>net.bpelunit</groupId>
         <artifactId>maven-bpelunit-plugin</artifactId>
-        <version>1.4.1-SNAPSHOT</version>
+        <version>1.4.1-20100714.084433-3</version>
         <configuration>
           <includes>
             <include>**/*.bpts</include>
