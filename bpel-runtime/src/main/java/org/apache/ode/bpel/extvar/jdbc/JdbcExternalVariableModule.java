@@ -399,9 +399,8 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
             case Types.DATE:
                 break;
             case Types.DECIMAL:
-                if (!(value instanceof BigDecimal)) {
-                    value = new BigDecimal(value.toString());
-                }
+                //ODE-872: Oracle 9g and 10g has problems with BigDecimal on Java1.5
+                value = new BigDecimal(new BigDecimal(value.toString()).toPlainString());
                 break;
             case Types.DISTINCT:
                 break;
@@ -433,9 +432,8 @@ public class JdbcExternalVariableModule implements ExternalVariableModule {
 //	    	case Types.NCLOB:
 //	    		break;
             case Types.NUMERIC:
-                if (!(value instanceof BigDecimal)) {
-                    value = new BigDecimal(value.toString());
-                }
+                //ODE-872: Oracle 9g and 10g has problems with BigDecimal on Java1.5
+                value = new BigDecimal(new BigDecimal(value.toString()).toPlainString());
                 break;
 //	    	case Types.NVARCHAR:
 //	    		break;
