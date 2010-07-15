@@ -151,4 +151,8 @@ public class SessionManager {
         String guid = props.getProperty(PROP_GUID);
         return _dataSources.get(guid).getConnection();
     }
+    
+    public void shutdown() {
+    	_sessionFactory.close();
+    }
 }

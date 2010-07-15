@@ -164,7 +164,7 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
     }
 
     public void shutdown() {
-        // Not too much to do for hibernate.
+    	_sessionManager.shutdown();
     }
 
     private String guessDialect(DataSource dataSource) throws Exception {
