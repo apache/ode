@@ -91,6 +91,7 @@
         <artifactId>maven-bpelunit-plugin</artifactId>
         <version>1.4.1-20100714.084433-3</version>
         <configuration>
+          <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
           <includes>
             <include>**/*.bpts</include>
           </includes>
