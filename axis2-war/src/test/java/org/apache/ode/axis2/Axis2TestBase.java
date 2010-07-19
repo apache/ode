@@ -256,7 +256,7 @@ public abstract class Axis2TestBase {
             try {
                 _ode.init(odeRootDir, configContext.getAxisConfiguration());
             } catch (ServletException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e.getRootCause());
             }
         }
 
