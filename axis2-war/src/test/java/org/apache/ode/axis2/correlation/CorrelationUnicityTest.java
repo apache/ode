@@ -17,8 +17,10 @@
  * under the License.
  */
 
-package org.apache.ode.axis2;
+package org.apache.ode.axis2.correlation;
 
+import org.apache.ode.axis2.Axis2TestBase;
+import org.apache.ode.axis2.ODEConfigDirAware;
 import org.testng.annotations.Test;
 import static org.testng.AssertJUnit.assertTrue;
 

@@ -161,13 +161,7 @@
        <plugin>
     <artifactId>maven-surefire-plugin</artifactId>
     <configuration>
-           <!-- FIXME: temporary skip it, 3 failed test cases (2 in JDK6, 3 in JDK5): testIMA, testRetireOld, testIsolated**-->
       <excludes>
-          <!--
-        <exclude>**/MessageRouting20Test.java</exclude>
-        <exclude>**/VersionedRedeployTest.java</exclude>
-        <exclude>**/StructuredActivities20Test.java</exclude>
-        -->
       </excludes>
     </configuration>
        </plugin>

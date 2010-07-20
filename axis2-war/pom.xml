@@ -300,69 +300,68 @@
           </execution>
         </executions>
       </plugin>
-      <!--plugin>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>maven-jetty-plugin</artifactId>
-        <version>6.1.10</version>
-        <configuration>
-                <scanIntervalSeconds>10</scanIntervalSeconds>
-                <stopKey>foo</stopKey>
-                <stopPort>9999</stopPort>
-                <webApp>${basedir}/target/ode-axis2-war-${project.version}.war</webApp>
-        </configuration>
-        <executions>
-                <execution>
-                        <id>start-jetty</id>
+	    <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-compiler-plugin</artifactId>
+		<executions>
+		    <execution>
+		        <id>compiler-it</id>
+		        <phase>pre-integration-test</phase>
+		        <goals>
+		            <goal>testCompile</goal>
+		        </goals>
+		    </execution>
+		</executions>
+	    </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>resources-it</id>
                         <phase>pre-integration-test</phase>
                         <goals>
-                                <goal>run-war</goal>
+                            <goal>testResources</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!--doclet does not support not-found="ignore" -->
+                <groupId>org.codehaus.groovy.maven</groupId>
+                <artifactId>gmaven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>prepare-itests</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>execute</goal>
                         </goals>
                         <configuration>
-                                <scanIntervalSeconds>0</scanIntervalSeconds>
-                                <daemon>true</daemon>
+                            <source>${pom.basedir}/itest_setup.groovy</source>
                         </configuration>
-                </execution>
-                <execution>
-                        <id>stop-jetty</id>
-                        <phase>post-integration-test</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>test-axis2-web</id>
+                        <phase>integration-test</phase>
                         <goals>
-                                <goal>stop</goal>
+                            <goal>test</goal>
                         </goals>
-                </execution>
-        </executions>
-      </plugin>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <executions>
-                <execution>
-                    <id>compiler-it</id>
-                    <phase>pre-integration-test</phase>
-                    <goals>
-                        <goal>testCompile</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin-->
-        <!-- FIXME: temporary commented out -->
-        <plugin>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-                <includes>
-                    <include>**/*TestCase.java</include>
-                    <include>**/Test.java</include>
-                </includes>
-            </configuration>
-            <executions>
-                <execution>
-                    <id>test-axis2-web</id>
-                    <phase>integration-test</phase>
-                    <goals>
-                        <goal>test</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
+                        <configuration>
+                            <forkMode>always</forkMode>
+                            <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                            <additionalClasspathElements>
+                                <additionalClasspathElement>${project.build.directory}</additionalClasspathElement>
+                            </additionalClasspathElements>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
      </plugins>
    </build>
 
