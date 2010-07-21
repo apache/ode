@@ -25,12 +25,9 @@ import java.io.Serializable;
  * is excluded from schema export.
  *
  * @hibernate.class table="BPEL_MEX_PROPS" lazy="true"
- * @hibernate.query name="SELECT_MEX_PROPS_IDS_BY_INSTANCES" query="select p.id from HMessageExchangeProperty p, HMessageExchange e where p.mex = e and e.instance in (:instances)"
  */
 @SuppressWarnings("serial")
 public class HMessageExchangeProperty implements Serializable {
-    public final static String SELECT_MEX_PROPS_IDS_BY_INSTANCES = "SELECT_MEX_PROPS_IDS_BY_INSTANCES";
-
     private HMessageExchange _mex;
     private String _name;
     private String _value;
