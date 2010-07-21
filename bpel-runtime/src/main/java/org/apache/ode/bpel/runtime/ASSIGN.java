@@ -715,8 +715,7 @@ class ASSIGN extends ACTIVITY {
                 return getBpelRuntimeContext().getExpLangRuntime()
                         .evaluateNode(expr, this);
             } catch (org.apache.ode.bpel.explang.EvaluationException e) {
-                throw new InvalidProcessException("Expression Failed: " + expr,
-                        e);
+                throw new FaultException(expr.getOwner().constants.qnSubLanguageExecutionFault, e);
             }
         }
 

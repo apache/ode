@@ -100,6 +100,20 @@
  			</copy>
  		</assign>
         
+        <scope>
+          <faultHandlers>
+            <catchAll>
+              <empty/>
+            </catchAll>
+          </faultHandlers>
+          <assign name="assign4">
+              <copy insertMissingToData="yes">
+                  <from>$request.requestMessageData/typeIndicators/types:indicatorTwo</from>
+                  <to>$testType/child::typeIndicators[15]</to>
+              </copy>
+          </assign>
+        </scope>
+
  		<reply name="reply" partnerLink="request" portType="wns:TestInsertMissingDataPT" operation="request" variable="reply"/>
  	</sequence>
  </process>
