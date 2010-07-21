@@ -20,13 +20,22 @@
 package org.apache.ode.daohib.bpel;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.common.InstanceFilter;
+import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HCorrelator;
 
@@ -58,5 +67,27 @@ public class MexTest extends BaseTestDAO {
         correlator.setCorrelatorId("abc");
         sm.getSession().save(correlator);
         new CorrelatorDaoImpl(sm, correlator).dequeueMessage(new CorrelationKeySet("@2[12~a~b]"));
+    }
+    
+    public void testCleanup() throws Exception {
+        SessionManager sm = ((BpelDAOConnectionImpl) daoConn)._sm;
+        ProcessDAO p = daoConn.createProcess(QName.valueOf("abc"), QName.valueOf("abc"), "abc", 1);
+        CorrelatorDAO correlator = p.addCorrelator("abc");
+        ProcessInstanceDAO instance = p.createInstance(correlator);
+
+        MessageExchangeDAO mex = daoConn.createMessageExchange('M');
+        mex.setProperty("abc", "def");
+        mex.setInstance(instance);
+
+        txm.commit();
+        txm.begin();
+        assertEquals(1, sm.getSession().createSQLQuery("select count(*) from BPEL_MEX_PROPS").list().get(0));
+        
+        Set<CLEANUP_CATEGORY> cleanupCategories = EnumSet.allOf(CLEANUP_CATEGORY.class);
+        instance.delete(cleanupCategories);
+        txm.commit();
+        txm.begin();
+
+        assertEquals(0, sm.getSession().createSQLQuery("select count(*) from BPEL_MEX_PROPS").list().get(0));
     }
 }
