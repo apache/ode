@@ -177,6 +177,8 @@ public class XPath20ExpressionModifier {
                 } else if (remainingSteps instanceof AxisExpression) {
                     pathExpr = null;
                     step = (AxisExpression) remainingSteps;
+                } else {
+                    throw new RuntimeException("Not supported step " + remainingSteps + " in expression " + expression);
                 }
             } else {
                 break;
