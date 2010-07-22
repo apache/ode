@@ -44,6 +44,7 @@ import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.OdeGlobalConfig;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessState;
@@ -330,6 +331,9 @@ public class BpelEngineImpl implements BpelEngine {
                 BpelProcess cachedVersion = processesIter.next();
                 __log.debug("cached version " + cachedVersion.getPID() + " vs registering version " + process.getPID());
                 if (cachedVersion.getProcessType().equals(process.getProcessType())) {
+                    if (!OdeGlobalConfig.autoRetireProcess()) {
+                        throw new ContextException("Can't activate two processes of the same name: " + process.getConf().getPackage() + ", " + cachedVersion.getConf().getPackage() + ", name: " + process.getProcessType());
+                    }
                     //Check for versions to retain newer one
                     if (cachedVersion.getVersion() > process.getVersion()) {
                         __log.debug("removing current version");

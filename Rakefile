@@ -254,6 +254,7 @@ define "ode" do
       GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, JAVAX.transaction, TRANQL, "tranql:tranql-connector-derby-common:jar:1.1",
     COMMONS.codec
 
+    test.using :properties=>{ "org.apache.ode.autoRetireProcess"=>"true" }
     test.with projects("bpel-obj", "jacob", "bpel-schemas",
       "bpel-scripts"),
       COMMONS.collections, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector,
@@ -407,7 +408,7 @@ define "ode" do
       jbi.include path_to("src/main/jbi/ode-jbi.properties")
     end
 
-    test.using :properties=>{ "java.naming.factory.initial" => "org.apache.xbean.spring.jndi.SpringInitialContextFactory"}, :java_args=>ENV['TEST_JVM_ARGS']
+    test.using :properties=>{ "java.naming.factory.initial" => "org.apache.xbean.spring.jndi.SpringInitialContextFactory", "org.apache.ode.autoRetireProcess"=>"true"}, :java_args=>ENV['TEST_JVM_ARGS']
     test.with projects("dao-jpa", "dao-hibernate", "bpel-compiler", "bpel-api-jca", "jca-ra",
       "jca-server", "jacob"),
       BACKPORT, COMMONS.lang, COMMONS.io, COMMONS.collections, DERBY, GERONIMO.connector, GERONIMO.kernel,
