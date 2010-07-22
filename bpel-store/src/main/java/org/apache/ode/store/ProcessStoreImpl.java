@@ -169,7 +169,7 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     public Collection<QName> deploy(final File deploymentUnitDirectory) {
-        return deploy(deploymentUnitDirectory, true, null, true);
+        return deploy(deploymentUnitDirectory, true, null, OdeGlobalConfig.autoincrementVersion());
     }
 
     /**
