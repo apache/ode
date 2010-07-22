@@ -62,7 +62,7 @@ public class SchemaCaptureTest extends TestCase {
 
             return src;
         }
-    });
+    }, 0);
     // we expect the root schema and three includes
     __log.debug("loaded " + s.keySet());
     assertEquals(5, s.size());

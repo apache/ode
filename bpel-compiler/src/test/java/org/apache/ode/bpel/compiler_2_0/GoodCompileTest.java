@@ -279,4 +279,8 @@ public class GoodCompileTest extends AbstractCompileTestCase implements CompileL
         runTest("/2.0/good/circularReference/CircularReference.bpel");
     }
     
+    @Test
+    public void testMultipleEmbeddedSchemas() throws Exception {
+        runTest("/org/apache/ode/bpel/compiler/MultipleEmbeddedSchemas.bpel");
+    }
 }

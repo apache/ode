@@ -155,6 +155,7 @@ define "ode" do
     compile.with projects("bpel-api", "bpel-obj", "bpel-schemas", "utils"),
       COMMONS.logging, JAVAX.stream, JAXEN, SAXON, WSDL4J, XALAN, XERCES, COMMONS.collections
     test.resources { filter(project("bpel-scripts").path_to("src/main/resources")).into(test.resources.target).run }
+    test.with LOG4J
     package :jar
     test.with SLF4J, LOG4J
   end

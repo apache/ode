@@ -228,7 +228,7 @@ public abstract class BpelCompiler implements CompilerContext {
                 xsdStream.close();
             }
 
-            Map<URI, byte[]> schemas = XSUtils.captureSchema(resFrom, data, resolver);
+            Map<URI, byte[]> schemas = XSUtils.captureSchema(resFrom, data, resolver, 0);
             _wsdlRegistry.addSchemas(schemas);
         } catch (XsdException e) {
             CompilationException ce = new CompilationException(__cmsgs.errInvalidImport(location.toString()));
