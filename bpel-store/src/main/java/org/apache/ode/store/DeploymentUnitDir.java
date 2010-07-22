@@ -413,7 +413,12 @@ class DeploymentUnitDir {
      * @return Static DU version number generated from DU name. -1 when package doesn't use versioning.
      */
     public long getStaticVersion() {
-        return BpelCompiler.getVersion(getName());
+        String name = getName();
+        int p = name.indexOf(File.separator);
+        if (p != -1) {
+            name = name.substring(0, p);
+        }
+        return BpelCompiler.getVersion(name);
     }
 
     public void setVersion(long version) {
