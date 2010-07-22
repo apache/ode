@@ -213,6 +213,7 @@ class WSDLRegistry {
         Types types = def.getTypes();
 
         if (types != null) {
+            int localSchemaId = 0;
             for (Iterator<ExtensibilityElement> iter =
                     ((List<ExtensibilityElement>)def.getTypes().getExtensibilityElements()).iterator();
                  iter.hasNext();) {
@@ -222,8 +223,13 @@ class WSDLRegistry {
                     byte[] schema = ((XMLSchemaType)ee).getXMLSchema();
                     WsdlFinderXMLEntityResolver resolver = new WsdlFinderXMLEntityResolver(rf, defuri, _internalSchemas, false);
                     try {
-                        Map<URI, byte[]> capture = XSUtils.captureSchema(defuri, schema, resolver);
-                        _schemas.putAll(capture);
+                        Map<URI, byte[]> capture = XSUtils.captureSchema(defuri, schema, resolver, localSchemaId);
+                        for (URI uri : capture.keySet()) {
+                            if (!_schemas.containsKey(uri)) {
+                                _schemas.put(uri, capture.get(uri));
+                            }
+                        }
+//                        _schemas.putAll(capture);
 
                         try {
                             Document doc = DOMUtils.parse(new InputSource(new ByteArrayInputStream(schema)));
@@ -258,6 +264,7 @@ class WSDLRegistry {
                     // invalidate model
                     _model = null;
 
+                    localSchemaId ++;
                 }
             }
         }

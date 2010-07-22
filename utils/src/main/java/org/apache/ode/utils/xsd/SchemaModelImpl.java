@@ -193,6 +193,8 @@ public class SchemaModelImpl implements SchemaModel {
                 location = resourceIdentifier.getLiteralSystemId();
             else if (resourceIdentifier.getExpandedSystemId() != null && _schemas.get(resourceIdentifier.getExpandedSystemId()) != null)
                 location = resourceIdentifier.getExpandedSystemId();
+            else if (resourceIdentifier.getBaseSystemId() != null && _schemas.get(resourceIdentifier.getBaseSystemId()) != null)
+                location = resourceIdentifier.getBaseSystemId();
             else {
                 if (__log.isDebugEnabled()) {
                     __log.debug("Available schemas " + _schemas.keySet());

@@ -58,7 +58,7 @@ public class XSUtils {
      * @return
      */
     public static Map<URI, byte[]> captureSchema(URI systemURI, byte[] schemaData,
-                                                 XMLEntityResolver resolver) throws XsdException {
+                                                 XMLEntityResolver resolver, int localSchemaId) throws XsdException {
         if (__log.isDebugEnabled())
             __log.debug("captureSchema(URI,Text,...): systemURI=" + systemURI);
 
@@ -67,7 +67,9 @@ public class XSUtils {
         input.setByteStream(new ByteArrayInputStream(schemaData));
 
         Map<URI, byte[]> ret = captureSchema(input, resolver);
-        ret.put(systemURI, schemaData);
+        
+        URI localURI = localSchemaId == 0 ? systemURI : URI.create(systemURI.toString() + '.' + localSchemaId);
+        ret.put(localURI, schemaData);
         return ret;
     }
 

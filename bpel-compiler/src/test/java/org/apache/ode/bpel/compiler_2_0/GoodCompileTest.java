@@ -78,8 +78,8 @@ public class GoodCompileTest extends TestCase {
         suite.addTest(new GoodCompileTCase("/2.0/good/xpath20-func/GetVariableData4-xp2.0.bpel"));
         suite.addTest(new GoodCompileTCase("/2.0/good/xpath20-func/GetVariableProperty1-xp2.0.bpel"));
         suite.addTest(new GoodCompileTCase("/2.0/good/xsd-import/helloworld-Server.bpel"));
-        
+        suite.addTest(new GoodCompileTCase("/org/apache/ode/bpel/compiler/MultipleEmbeddedSchemas.bpel"));
+
         return suite;
     }
-
 }
