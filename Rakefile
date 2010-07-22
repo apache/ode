@@ -103,7 +103,7 @@ define "ode" do
       end
     end
 
-    test.using :testng, :forkmode=>'perTest', :properties=>{ "log4j.debug" => true,  "log4j.configuration"=>"test-log4j.properties", "test.ports" => ENV['TEST_PORTS'], "org.apache.ode.scheduler.deleteJobsOnStart" => "true" }
+    test.using :testng, :forkmode=>'perTest', :properties=>{ "log4j.debug" => true,  "log4j.configuration"=>"test-log4j.properties", "test.ports" => ENV['TEST_PORTS'], "org.apache.ode.scheduler.deleteJobsOnStart" => "true", "org.apache.ode.autoRetireProcess"=>"true" }
         #:java_args=>['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6001', '-Xmx1024M', '-XX:MaxPermSize=1024m']
     test.with projects("tools"), libs, AXIS2_MODULES.mods, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, DOM4J, SLF4J, LOG4J, H2::REQUIRES
     webapp_dir = "#{test.compile.target}/webapp"
