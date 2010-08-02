@@ -47,6 +47,11 @@
     </fileSet>
 
     <fileSet>
+      <directory>${basedir}/../dao-hibernate-db/target/h2</directory>
+      <outputDirectory>/WEB-INF</outputDirectory>
+    </fileSet>
+
+    <fileSet>
       <directory>${basedir}/../axis2/src/main/wsdl</directory>
       <outputDirectory>/WEB-INF</outputDirectory>
     </fileSet>
@@ -95,20 +100,16 @@
     <include>org.apache.axis2:axis2-java2wsdl</include>
     <include>org.apache.axis2:axis2-jaxbri</include>
     <include>org.apache.axis2:axis2-jaxws</include>
-    <include>org.apache.axis2:axis2-jaxws-api</include>
-    <include>org.apache.axis2:axis2-jibx</include>
     <include>org.apache.axis2:axis2-json</include>
-    <include>org.apache.axis2:axis2-jws-api</include>
     <include>org.apache.axis2:axis2-kernel</include>
     <include>org.apache.axis2:axis2-metadata</include>
     <include>org.apache.axis2:axis2-mtompolicy</include>
     <include>org.apache.axis2:axis2-saaj</include>
-    <include>org.apache.axis2:axis2-saaj-api</include>
     <include>org.apache.axis2:axis2-spring</include>
     <include>org.apache.axis2:axis2-xmlbeans</include>
     <include>org.apache.axis2:axis2-transport-http</include>
     <include>org.apache.axis2:axis2-transport-local</include>
-    <include>org.apache.axis2:axis2-transports</include>
+    <include>org.apache.axis2:axis2-transport-tcp</include>
     <include>org.apache.ws.commons.axiom:axiom-api</include>
     <include>org.apache.ws.commons.axiom:axiom-impl</include>
     <include>org.apache.ws.commons.axiom:axiom-dom</include>
@@ -151,7 +152,6 @@
     <include>org.opensaml:opensaml</include>
     <include>bouncycastle:bcprov-jdk15</include>
     <include>org.jibx:jibx-run</include>
-    <include>org.jibx:jibx-bind</include>
     <include>org.codehaus.jettison:jettison</include>
     <include>jaxen:jaxen</include>
     <include>log4j:log4j</include>
@@ -167,7 +167,6 @@
     <include>xalan:xalan</include>
     <include>org.apache.xmlbeans:xmlbeans</include>
     <include>org.apache.httpcomponents:httpcore</include>
-    <include>org.apache.httpcomponents:httpcore-nio</include>
     <include>javax.xml.bind:jaxb-api</include>
     <include>com.sun.xml.bind:jaxb-impl</include>
     <include>com.sun.xml.bind:jaxb-xjc</include>
@@ -177,17 +176,16 @@
     <include>axion:axion</include>
     <include>org.springframework:spring</include>
    </includes>
-    </dependencySet>
+  </dependencySet>
+  
+  <dependencySet>
+   <outputDirectory>/WEB-INF/modules</outputDirectory>
+   <includes>
+     <include>org.apache.rampart:rampart:mar</include>
+     <include>org.apache.rampart:rahas:mar</include>
+   </includes>
+  </dependencySet>
 
-    <dependencySet>
-      <outputDirectory>/WEB-INF/modules</outputDirectory>
-      <includes>
-    <include>org.apache.rampart:rampart:mar</include>
-    <include>org.apache.rampart:rahas:mar</include>
-    <include>org.apache.axis2:addressing:mar</include>
-    <include>org.apache.axis2:mex:mar</include>
-      </includes>
-    </dependencySet>
   </dependencySets>
 
 </assembly>

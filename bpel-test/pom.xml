@@ -159,11 +159,13 @@
    <build>
      <plugins>
        <plugin>
-    <artifactId>maven-surefire-plugin</artifactId>
-    <configuration>
-      <excludes>
-      </excludes>
-    </configuration>
+	    <artifactId>maven-surefire-plugin</artifactId>
+	    <configuration>
+	      <systemPropertyVariables>
+	      	<org.apache.ode.autoRetireProcess>true</org.apache.ode.autoRetireProcess>
+	      </systemPropertyVariables>
+	      <argLine>-Xms512M -Xmx1024M -XX:MaxPermSize=512M</argLine>
+	    </configuration>
        </plugin>
      </plugins>
    </build>

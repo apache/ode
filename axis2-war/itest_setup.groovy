@@ -22,6 +22,10 @@ import java.io.File
 def warname = project.build.directory+"/"+project.build.finalName+".war";
 def webapp = project.build.directory + "/webapp";
 def testresources = new File(project.basedir, 'src/test/webapp')
+def mavenresources = new File(project.basedir, 'src/test/maven2')
+
+def hibconf = webapp + "/WEB-INF/conf.hib-derby";
+def defconf = webapp + "/WEB-INF/conf";
 
 log.info('-----Performing pre-integration test tasks-----');
 log.info('extracting the axis2 war');
@@ -32,6 +36,27 @@ ant.copy(todir: webapp) {
         include(name: '**')
     }
 }
+
+log.info('copying some maven specific resources')
+
+ant.copy(todir:defconf, overwrite:true) {
+    fileset(dir: mavenresources) {
+        include(name: 'ode-axis2.properties')
+    }
+}
+
+ant.copy(todir:hibconf, overwrite:true) {
+    fileset(dir: mavenresources) {
+        include(name: 'ode-axis2.properties')
+    }
+}
+
+ant.copy(todir:webapp + "/WEB-INF/modules") {
+    fileset(dir: mavenresources) {
+        include(name: 'modules.list')
+    }
+}
+
 //This was in buildr, don't know if it is needed
 //copy target/test-classes/TestEndpointProperties/*_global_conf*.endpoint to webapp/WEB-INF/conf
 
