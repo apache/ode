@@ -19,18 +19,16 @@
 
 package org.apache.ode.scheduler.simple;
 
-import java.util.HashMap;
 import java.util.List;
 
 import javax.xml.namespace.QName;
 
+import junit.framework.Assert;
+
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.Scheduler.JobType;
-import org.apache.ode.scheduler.simple.DatabaseDelegate;
-import org.apache.ode.scheduler.simple.Job;
-
-
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  *
@@ -38,17 +36,18 @@ import junit.framework.TestCase;
  *
  * @author Maciej Szefler ( m s z e f l e r  @ g m a i l . c o m )
  */
-public class JdbcDelegateTest extends TestCase {
+public class JdbcDelegateTest extends Assert {
 
     private DelegateSupport _ds;
     private DatabaseDelegate _del;
-
+    
+    @Before
     public void setUp() throws Exception {
         _ds = new DelegateSupport();
         _del = _ds.delegate();
     }
 
-
+    @Test
     public void testGetNodeIds() throws Exception {
         // should have no node ids in the db, empty list (not null)
         List<String> nids = _del.getNodeIds();
@@ -74,7 +73,8 @@ public class JdbcDelegateTest extends TestCase {
         assertTrue(nids.contains("abc"));
         assertTrue(nids.contains("123"));
     }
-
+    
+    @Test
     public void testReassign() throws Exception {
         _del.insertJob(new Job(100L,"j1",true,new Scheduler.JobDetails()), "n1", false);
         _del.insertJob(new Job(200L,"j2",true,new Scheduler.JobDetails()), "n2", false);
@@ -83,7 +83,8 @@ public class JdbcDelegateTest extends TestCase {
         List<Job> jobs = _del.dequeueImmediate("n2", 400L, 1000);
         assertEquals(2,jobs.size());
     }
-
+    
+    @Test
     public void testScheduleImmediateTimeFilter() throws Exception {
         _del.insertJob(new Job(100L,"j1",true,new Scheduler.JobDetails()), "n1", false);
         _del.insertJob(new Job(200L,"j2",true,new Scheduler.JobDetails()), "n1", false);
@@ -99,7 +100,8 @@ public class JdbcDelegateTest extends TestCase {
         assertEquals("j1",jobs.get(0).jobId);
         assertEquals("j2",jobs.get(1).jobId);
     }
-
+    
+    @Test
     public void testScheduleImmediateMaxRows() throws Exception {
         _del.insertJob(new Job(100L,"j1",true,new Scheduler.JobDetails()), "n1", false);
         _del.insertJob(new Job(200L,"j2",true,new Scheduler.JobDetails()), "n1", false);
@@ -109,7 +111,8 @@ public class JdbcDelegateTest extends TestCase {
         assertEquals(1, jobs.size());
         assertEquals("j1",jobs.get(0).jobId);
     }
-
+    
+    @Test
     public void testScheduleImmediateNodeFilter() throws Exception {
         _del.insertJob(new Job(100L,"j1",true,new Scheduler.JobDetails()), "n1", false);
         _del.insertJob(new Job(200L,"j2",true,new Scheduler.JobDetails()), "n2", false);
@@ -119,7 +122,8 @@ public class JdbcDelegateTest extends TestCase {
         assertEquals(1, jobs.size());
         assertEquals("j2",jobs.get(0).jobId);
     }
-
+    
+    @Test
     public void testDeleteJob() throws Exception {
         _del.insertJob(new Job(100L,"j1",true,new Scheduler.JobDetails()), "n1", false);
         _del.insertJob(new Job(200L,"j2",true,new Scheduler.JobDetails()), "n2", false);
@@ -136,7 +140,8 @@ public class JdbcDelegateTest extends TestCase {
         assertTrue(_del.deleteJob("j1", "n1"));
         assertEquals(1,_del.getNodeIds().size());
     }
-
+    
+    @Test
     public void testUpgrade() throws Exception {
         for (int i = 0; i < 200; ++i)
             _del.insertJob(new Job(i ,"j" +i,true,new Scheduler.JobDetails()), null, false);
@@ -152,7 +157,8 @@ public class JdbcDelegateTest extends TestCase {
         assertEquals(n2,_del.dequeueImmediate("n2", 10000L, 1000).size());
         assertEquals(n3,_del.dequeueImmediate("n3", 10000L, 1000).size());
     }
-
+    
+    @Test
     public void testMigration() throws Exception {
         Scheduler.JobDetails j1 = new Scheduler.JobDetails();
         j1.getDetailsExt().put("type", "MATCHER");

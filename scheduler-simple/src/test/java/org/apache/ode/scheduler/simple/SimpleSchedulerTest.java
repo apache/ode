@@ -27,6 +27,7 @@ import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
@@ -35,15 +36,19 @@ import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessor;
 import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
 import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-public class SimpleSchedulerTest extends TestCase implements JobProcessor {
+public class SimpleSchedulerTest extends Assert implements JobProcessor {
 
     DelegateSupport _ds;
     SimpleScheduler _scheduler;
     ArrayList<JobInfo> _jobs;
     ArrayList<JobInfo> _commit;
     TransactionManager _txm;
-
+    
+    @Before
     public void setUp() throws Exception {
         _txm = new GeronimoTransactionManager();
         _ds = new DelegateSupport();
@@ -52,11 +57,13 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
         _jobs = new ArrayList<JobInfo>(100);
         _commit = new ArrayList<JobInfo>(100);
     }
-
+    
+    @After
     public void tearDown() throws Exception {
         _scheduler.shutdown();
     }
-
+    
+    @Test
     public void testConcurrentExec() throws Exception  {
         _scheduler.start();
         for (int i=0; i<10; i++) {
@@ -80,7 +87,8 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
             assertEquals(_jobs.size(), _commit.size());
         }
     }
-
+    
+    @Test
     public void testImmediateScheduling() throws Exception {
         _scheduler.start();
         _txm.begin();
@@ -96,7 +104,8 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
         Thread.sleep(100);
         assertEquals(1, _jobs.size());
     }
-
+    
+    @Test
     public void testStartStop() throws Exception {
         _scheduler.start();
         _txm.begin();
@@ -117,7 +126,8 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
         Thread.sleep(1000);
         assertEquals(10, _jobs.size());
     }
-
+    
+    @Test
     public void testNearFutureScheduling() throws Exception {
         // speed things up a bit to hit the right code paths
         _scheduler.setNearFutureInterval(10000);
@@ -134,7 +144,8 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
         Thread.sleep(8500);
         assertEquals(1, _jobs.size());
     }
-
+    
+    @Test
     public void testFarFutureScheduling() throws Exception {
         // speed things up a bit to hit the right code paths
         _scheduler.setNearFutureInterval(7000);
@@ -151,7 +162,8 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
         Thread.sleep(8500);
         assertEquals(1, _jobs.size());
     }
-
+    
+    @Test
     public void testRecovery() throws Exception {
         // speed things up a bit to hit the right code paths
         _scheduler.setNearFutureInterval(2000);
@@ -175,7 +187,8 @@ public class SimpleSchedulerTest extends TestCase implements JobProcessor {
         Thread.sleep(4000);
         assertEquals(3, _jobs.size());
     }
-
+    
+    @Test
     public void testRecoverySuppressed() throws Exception {
         // speed things up a bit to hit the right code paths
         _scheduler.setNearFutureInterval(2000);

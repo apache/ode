@@ -28,8 +28,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.ode.scheduler.simple.SchedulerThread;
 import org.apache.ode.scheduler.simple.Task;
 import org.apache.ode.scheduler.simple.TaskRunner;
+import org.junit.Before;
+import org.junit.Test;
 
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
 /**
@@ -37,17 +40,19 @@ import junit.framework.TestCase;
  *
  * @author Maciej Szefler  ( m s z e f l e r @ g m a i l . c o m )
  */
-public class SchedulerThreadTest extends TestCase implements TaskRunner {
+public class SchedulerThreadTest extends Assert implements TaskRunner {
 
     static final long SCHED_TOLERANCE = 100;
     SchedulerThread _st;
 
     List<TR> _tasks = new ArrayList<TR>(100);
-
+    
+    @Before
     public void setUp() throws Exception {
         _st = new SchedulerThread(this);
     }
-
+    
+    @Test
     public void testSchedulingResolution() throws Exception {
         _st.start();
         long schedtime = System.currentTimeMillis() + 300;
@@ -57,7 +62,8 @@ public class SchedulerThreadTest extends TestCase implements TaskRunner {
         assertTrue(_tasks.get(0).time < schedtime + SCHED_TOLERANCE / 2);
         assertTrue(_tasks.get(0).time > schedtime - SCHED_TOLERANCE / 2);
     }
-
+    
+    @Test
     public void testStartStop() throws Exception {
         _st.start();
         long schedtime = System.currentTimeMillis() + 500;
@@ -69,7 +75,8 @@ public class SchedulerThreadTest extends TestCase implements TaskRunner {
         Thread.sleep(SCHED_TOLERANCE);
         assertEquals(1,_tasks.size());
     }
-
+    
+    @Test
     public void testParallelEnqueue() throws Exception {
         _st.start();
         final long startTime = System.currentTimeMillis() + 100;

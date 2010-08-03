@@ -23,17 +23,21 @@ import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.transaction.TransactionManager;
 import java.util.*;
 import java.util.concurrent.Callable;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
 /**
  * @author Matthieu Riou <mriou@apache.org>
  */
-public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
+public class RetriesTest extends Assert implements Scheduler.JobProcessor {
     private static final Log __log = LogFactory.getLog(RetriesTest.class);
 
     DelegateSupport _ds;
@@ -43,7 +47,8 @@ public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
     TransactionManager _txm;
     int _tried = 0;
     Scheduler.JobInfo _jobInfo = null;
-
+    
+    @Before
     public void setUp() throws Exception {
         _txm = new GeronimoTransactionManager();
         _ds = new GeronimoDelegateSupport(_txm);
@@ -52,11 +57,13 @@ public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
         _jobs = new ArrayList<Scheduler.JobInfo>(100);
         _commit = new ArrayList<Scheduler.JobInfo>(100);
     }
-
+    
+    @After
     public void tearDown() throws Exception {
         _scheduler.shutdown();
     }
-
+    
+    @Test
     public void testRetries() throws Exception {
         // speed things up a bit to hit the right code paths
         _scheduler.setNearFutureInterval(5000);
@@ -72,7 +79,8 @@ public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
         Thread.sleep(10000);
         assertEquals(6, _tried);
     }
-
+    
+    @Test
     public void testExecTransaction() throws Exception {
         final int[] tryCount = new int[1];
         tryCount[0] = 0;
