@@ -90,7 +90,6 @@
     <include>org.apache.ode:ode-bpel-obj</include>
     <include>org.apache.ode:ode-dao-jpa</include>
     <include>org.apache.ode:ode-bpel-ql</include>
-    <include>annogen:annogen</include>
     <include>antlr:antlr</include>
     <include>javax.activation:activation</include>
     <include>org.apache.axis2:axis2-adb</include>
@@ -106,7 +105,6 @@
     <include>org.apache.axis2:axis2-mtompolicy</include>
     <include>org.apache.axis2:axis2-saaj</include>
     <include>org.apache.axis2:axis2-spring</include>
-    <include>org.apache.axis2:axis2-xmlbeans</include>
     <include>org.apache.axis2:axis2-transport-http</include>
     <include>org.apache.axis2:axis2-transport-local</include>
     <include>org.apache.axis2:axis2-transport-tcp</include>
@@ -175,6 +173,11 @@
     <include>javax.mail:mail</include>
     <include>axion:axion</include>
     <include>org.springframework:spring</include>
+    <!-- needed by rampart 1.5 -->
+    <include>joda-time:joda-time</include>
+    <include>org.opensaml:openws</include>
+    <include>org.opensaml:xmltooling</include>
+    <include>velocity:velocity</include>
    </includes>
   </dependencySet>
   
