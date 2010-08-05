@@ -219,6 +219,7 @@ define "ode" do
     test.compile.with HSQLDB, GERONIMO.kernel, GERONIMO.transaction
     test.with H2::REQUIRES, HSQLDB, JAVAX.transaction, JAVAX.resource, JAVAX.connector, LOG4J,
           GERONIMO.kernel, GERONIMO.transaction, GERONIMO.connector, TRANQL, BACKPORT, JAVAX.ejb
+    test.exclude('*') if Buildr.environment == 'hudson'
     package :jar
   end
 
