@@ -289,6 +289,11 @@ public class BpelObjectFactory {
         private static final Log __log = LogFactory.getLog(BOMSAXErrorHandler.class);
         
     	private boolean ok = true;
+    	private boolean strict = false;
+    	
+    	public BOMSAXErrorHandler(boolean strict) {
+    	    this.strict = strict;
+    	}
     	
     	private String formatException(SAXParseException exception) {
     		return exception.getPublicId() + ":" + exception.getSystemId() + ":" + exception.getLineNumber() + ":" + exception.getColumnNumber() + ":" + exception.getMessage();
@@ -296,13 +301,21 @@ public class BpelObjectFactory {
     	
     	public boolean wasOK() { return ok; }
 		public void error(SAXParseException exception) throws SAXException {
-			ok=false;
-			__log.error(formatException(exception));
+			ok = false;
+			if (strict) {
+			    __log.error(formatException(exception));
+			} else {
+			    __log.warn(formatException(exception));
+			}
 		}
 
 		public void fatalError(SAXParseException exception) throws SAXException {
-			ok=false;
-			__log.fatal(formatException(exception));
+			ok = false;
+			if (strict) {
+			    __log.fatal(formatException(exception));    
+			} else {
+			    __log.warn(formatException(exception));
+			}
 		}
 
 		public void warning(SAXParseException exception) throws SAXException {
@@ -341,10 +354,12 @@ public class BpelObjectFactory {
 		XMLParserUtils.addExternalSchemaURL(_xr, Bpel20QNames.NS_WSBPEL2_0, Bpel20QNames.NS_WSBPEL2_0);
 		XMLParserUtils.addExternalSchemaURL(_xr, Bpel20QNames.NS_WSBPEL2_0_FINAL_EXEC, Bpel20QNames.NS_WSBPEL2_0_FINAL_EXEC);
 		XMLParserUtils.addExternalSchemaURL(_xr, Bpel20QNames.NS_WSBPEL2_0_FINAL_ABSTRACT, Bpel20QNames.NS_WSBPEL2_0_FINAL_ABSTRACT);
-        BOMSAXErrorHandler errorHandler = new BOMSAXErrorHandler();
+        
+		boolean strict = Boolean.parseBoolean(System.getProperty("org.apache.ode.compiler.failOnValidationErrors", "false")); 
+		BOMSAXErrorHandler errorHandler = new BOMSAXErrorHandler(strict);
         _xr.setErrorHandler(errorHandler);
         _xr.parse(isrc);
-        if (Boolean.parseBoolean(System.getProperty("org.apache.ode.compiler.failOnValidationErrors", "false"))) {
+        if (strict) {
 	        if (!errorHandler.wasOK()) {
 	        	throw new SAXException("Validation errors during parsing");
 	        }
