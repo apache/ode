@@ -331,7 +331,9 @@ public class BpelEngineImpl implements BpelEngine {
                 BpelProcess cachedVersion = processesIter.next();
                 __log.debug("cached version " + cachedVersion.getPID() + " vs registering version " + process.getPID());
                 if (cachedVersion.getProcessType().equals(process.getProcessType())) {
-                    if (!OdeGlobalConfig.autoRetireProcess()) {
+                    if (cachedVersion.getConf().getState() == ProcessState.ACTIVE
+                            && process.getConf().getState() == ProcessState.ACTIVE
+                            && !OdeGlobalConfig.autoRetireProcess()) {
                         throw new ContextException("Can't activate two processes of the same name: " + process.getConf().getPackage() + ", " + cachedVersion.getConf().getPackage() + ", name: " + process.getProcessType());
                     }
                     //Check for versions to retain newer one
