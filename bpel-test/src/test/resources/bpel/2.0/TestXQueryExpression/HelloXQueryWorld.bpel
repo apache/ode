@@ -276,6 +276,30 @@
               </copy>
             </assign>
         </scope>
+        <scope>
+          <variables>
+            <variable name="nodeVar" type="xsd:anyType"/>
+            <variable name="textVar" type="xsd:string"/>
+          </variables>
+          <sequence>
+            <assign>
+              <copy>
+                <from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+                <![CDATA[ '<a><b>some-b-text</b></a>' ]]>
+                </from>
+                <to>$textVar</to>
+              </copy>
+              <copy>
+                <from xmlns:saxon="http://saxon.sf.net/" expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xquery1.0">saxon:parse(xsd:string($textVar))</from>
+                <to variable="nodeVar"/>
+              </copy>
+            </assign>
+            <if>
+              <condition>$nodeVar/b/text() != 'some-b-text'</condition>
+              <throw faultName="error"/>
+            </if>
+          </sequence>
+        </scope>
         <reply name="end"
                 partnerLink="HelloXQueryPartnerLink"
                 portType="test:HelloXQueryPortType"
