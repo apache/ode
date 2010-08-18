@@ -19,7 +19,7 @@
 
 package org.apache.ode.axis2.instancecleanup;
 
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.dao.bpel.ProcessInstanceDAO;
 
 public class CleanFaultHibTest extends CleanFaultTest {
     @Override

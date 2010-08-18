@@ -34,13 +34,13 @@ import javax.transaction.TransactionManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.connector.BpelServerConnector;
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.ProcessAndInstanceManagementMBean;
 import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
-
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
+import org.apache.ode.dao.bpel.BpelDAOConnectionFactory;
+import org.apache.ode.dao.store.ConfStoreDAOConnectionFactory;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.il.dbutil.DatabaseConfigException;
 import org.apache.ode.jbi.msgmap.Mapper;
@@ -234,7 +234,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
         _ode._scheduler.setExecutorService(_ode._executorService);
         _ode._scheduler.setTransactionManager((TransactionManager) _ode.getContext().getTransactionManager());
 
-        _ode._store = new ProcessStoreImpl(_ode._eprContext , _ode._dataSource, _ode._config.getDAOConnectionFactory(), _ode._config, false);
+        _ode._store = new ProcessStoreImpl(_ode._eprContext , _ode.getTransactionManager(), _ode._cdaocf);
         registerExternalVariableModules();
         _ode._store.loadAll();
 
@@ -264,14 +264,17 @@ public class OdeLifeCycle implements ComponentLifeCycle {
      * @throws JBIException
      */
     private void initDao() throws JBIException {
-        BpelDAOConnectionFactoryJDBC cf;
+    	BpelDAOConnectionFactory bcf;
+        ConfStoreDAOConnectionFactory ccf;
         try {
-            cf = _db.createDaoCF();
+            bcf = _db.createDaoCF();
+            ccf = _db.createDaoStoreCF();
         } catch (DatabaseConfigException e) {
             String errmsg = __msgs.msgDAOInstantiationFailed(_ode._config.getDAOConnectionFactory());
             throw new JBIException(errmsg,e);
         }
-        _ode._daocf = cf;
+        _ode._daocf = bcf;
+        _ode._cdaocf = ccf;
     }
 
     private void initConnector() throws JBIException {

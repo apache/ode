@@ -20,7 +20,7 @@
 package org.apache.ode.bpel.engine.migration;
 
 import org.apache.ode.bpel.engine.BpelProcess;
-import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.dao.bpel.BpelDAOConnection;
 
 import java.util.Set;
 

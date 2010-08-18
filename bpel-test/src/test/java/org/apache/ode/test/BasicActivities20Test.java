@@ -26,6 +26,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.MessageExchange;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class BasicActivities20Test extends BPELTestAbstract {
@@ -91,6 +92,7 @@ public class BasicActivities20Test extends BPELTestAbstract {
     /**
      * Test the wait "until" syntax.
      */
+    @Ignore("ODE-805,JPA refacotring leftover")
     @Test public void testWaitUntilPast() throws Throwable {
         deploy("/bpel/2.0/TestWaitUntil");
         DateFormat idf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");

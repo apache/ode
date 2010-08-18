@@ -45,6 +45,10 @@ public class OdeConfigProperties {
     public static final String PROP_DB_EXTERNAL_DS = "db.ext.dataSource";
 
     public static final String PROP_DB_EMBEDDED_NAME = "db.emb.name";
+    
+    public static final String PROP_DB_EMBEDDED_TYPE = "db.emb.type";
+
+    public static final String PROP_DB_EMBEDDED_CREATE = "db.emb.create";
 
     public static final String PROP_DB_INTERNAL_URL = "db.int.jdbcurl";
 
@@ -73,7 +77,7 @@ public class OdeConfigProperties {
     public static final String PROP_WORKING_DIR = "working.dir";
 
     public static final String PROP_DEPLOY_DIR = "deploy.dir";
-
+    
     public static final String PROP_EVENT_LISTENERS = "event.listeners";
 
     public static final String PROP_MEX_INTERCEPTORS = "mex.interceptors";
@@ -83,23 +87,27 @@ public class OdeConfigProperties {
     public static final String PROP_PROCESS_DEHYDRATION = "process.dehydration";
 
     public static final String PROP_PROCESS_DEHYDRATION_MAXIMUM_AGE = "process.dehydration.maximum.age";
-
+    
     public static final String PROP_PROCESS_DEHYDRATION_MAXIMUM_COUNT = "process.dehydration.maximum.count";
-
+    
     public static final String PROP_PROCESS_HYDRATION_LAZY = "process.hydration.lazy";
-
+    
     public static final String PROP_PROCESS_HYDRATION_LAZY_MINIMUM_SIZE = "process.hydration.lazy.minimum.size";
-
+    
     public static final String PROP_PROCESS_HYDRATION_THROTTLED_MAXIMUM_COUNT = "process.hydration.throttled.maximum.count";
-
+    
     public static final String PROP_PROCESS_HYDRATION_THROTTLED_MAXIMUM_SIZE = "process.hydration.throttled.maximum.size";
-
+    
     public static final String PROP_PROCESS_INSTANCE_THROTTLED_MAXIMUM_COUNT = "process.instance.throttled.maximum.count";
-
+    
     public static final String PROP_DAOCF = "dao.factory";
 
-    public static final String PROP_MIGRATION_TRANSACTION_TIMEOUT = "migration.transaction.timeout";
+    public static final String PROP_DAOCF_STORE = "dao.factory.store";
 
+    public static final String PROP_DAOCF_SCHEDULER = "dao.factory.scheduler";
+    
+    public static final String PROP_MIGRATION_TRANSACTION_TIMEOUT = "migration.transaction.timeout";
+    
     public static final String DEFAULT_TX_FACTORY_CLASS_NAME = "org.apache.ode.il.EmbeddedGeronimoFactory";
 
     private File _cfgFile;
@@ -110,7 +118,12 @@ public class OdeConfigProperties {
 
     /** Default defaults for the database embedded name and dao connection factory class. */
     private static String __dbEmbName = "jpadb";
-    private static String __daoCfClass = "org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl";
+    public static String DEFAULT_DAOCF_CLASS = "org.apache.ode.dao.jpa.openjpa.BpelDAOConnectionFactoryImpl";
+    public static String DEFAULT_DAOCF_STORE_CLASS = "org.apache.ode.dao.jpa.openjpa.ConfStoreDAOConnectionFactoryImpl";
+    
+    /** Default defaults for the database embedded name and dao connection factory class. */
+    public static String DEFAULT_DB_EMB_NAME = "ode-db";
+    public static String DEFAULT_DB_EMB_TYPE = "h2";
 
     static {
         String odep = System.getProperty("ode.persistence");
@@ -118,8 +131,8 @@ public class OdeConfigProperties {
                 "hibernate".equalsIgnoreCase(odep)) {
             __log.debug("Using HIBERNATE due to system property override!");
             __dbEmbName = "hibdb";
-            __daoCfClass = "org.apache.ode.daohib.bpel.BpelDAOConnectionFactoryImpl";
-
+            DEFAULT_DAOCF_CLASS = "org.apache.ode.dao.hib.bpel.BpelDAOConnectionFactoryImpl";
+            DEFAULT_DAOCF_STORE_CLASS = "org.apache.ode.dao.hib.store.ConfStoreDAOConnectionFactoryImpl";
         }
     }
     /**
@@ -134,6 +147,18 @@ public class OdeConfigProperties {
 
         /** Embedded database (Ode provides default embedded database with connection pool) */
         EMBEDDED
+    }
+    
+    /**
+     * Possible database implementation.
+     */
+    public enum EmbeddedDbType {
+        
+        DERBY,
+        
+        H2,
+
+        HSQL
     }
 
     public OdeConfigProperties(File cfgFile, String prefix) {
@@ -188,14 +213,27 @@ public class OdeConfigProperties {
 
     }
 
+    public EmbeddedDbType getDbEmbeddedType() {
+        return EmbeddedDbType.valueOf(getProperty(OdeConfigProperties.PROP_DB_EMBEDDED_TYPE, DEFAULT_DB_EMB_TYPE).trim().toUpperCase());
+    }
+
+    public boolean isDbEmbeddedCreate() {
+        return Boolean.valueOf(getProperty(OdeConfigProperties.PROP_DB_EMBEDDED_CREATE, "true"));
+    }
+
     public DatabaseMode getDbMode() {
         return DatabaseMode.valueOf(getProperty(OdeConfigProperties.PROP_DB_MODE, DatabaseMode.EMBEDDED.toString()).trim()
                 .toUpperCase());
     }
 
     public String getDAOConnectionFactory() {
-        return getProperty(PROP_DAOCF, __daoCfClass);
+        return getProperty(PROP_DAOCF, DEFAULT_DAOCF_CLASS);
     }
+
+    public String getDAOConfStoreConnectionFactory() {
+        return getProperty(PROP_DAOCF_STORE, DEFAULT_DAOCF_STORE_CLASS);
+    }
+
 
     public String getDbDataSource() {
         return getProperty(OdeConfigProperties.PROP_DB_EXTERNAL_DS, "java:comp/env/jdbc/ode-ds");
@@ -204,11 +242,11 @@ public class OdeConfigProperties {
     public String getDbIntenralJdbcUrl() {
         return getProperty(OdeConfigProperties.PROP_DB_INTERNAL_URL, "jdbc:derby://localhost/ode");
     }
-
+    
     public String getDbInternalMCFClass() {
         return getProperty("db.int.mcf");
     }
-
+    
     public Properties getDbInternalMCFProperties() {
         String prefix = _prefix + "db.int.mcf.";
         Properties p = new Properties();
@@ -239,7 +277,7 @@ public class OdeConfigProperties {
     }
 
     public int getPoolMaxSize() {
-        return Integer.valueOf(getProperty(OdeConfigProperties.PROP_POOL_MAX, "10"));
+        return Integer.valueOf(getProperty(OdeConfigProperties.PROP_POOL_MAX, "15"));
     }
 
     public int getPoolMinSize() {
@@ -261,7 +299,7 @@ public class OdeConfigProperties {
     public String getDeployDir() {
         return getProperty(OdeConfigProperties.PROP_DEPLOY_DIR);
     }
-
+    
     public String getTxFactoryClass() {
         return getProperty(OdeConfigProperties.PROP_TX_FACTORY_CLASS, DEFAULT_TX_FACTORY_CLASS_NAME);
     }
@@ -282,38 +320,38 @@ public class OdeConfigProperties {
         return Boolean.valueOf(getProperty(OdeConfigProperties.PROP_PROCESS_DEHYDRATION, "false"));
     }
 
-    public long getDehydrationMaximumAge() {
+    public long getDehydrationMaximumAge() {     
         return Long.valueOf(getProperty(PROP_PROCESS_DEHYDRATION_MAXIMUM_AGE, ""+20*60*1000));
     }
-
+    
     public int getDehydrationMaximumCount() {
         return Integer.valueOf(getProperty(PROP_PROCESS_DEHYDRATION_MAXIMUM_COUNT, ""+1000));
     }
-
+    
     public boolean isHydrationLazy() {
         return Boolean.valueOf(getProperty(OdeConfigProperties.PROP_PROCESS_HYDRATION_LAZY, "true"));
     }
-
+    
     public int getHydrationLazyMinimumSize() {
         return Integer.valueOf(getProperty(OdeConfigProperties.PROP_PROCESS_HYDRATION_LAZY_MINIMUM_SIZE, String.valueOf(0)));
     }
-
+    
     public int getProcessThrottledMaximumCount() {
         return Integer.valueOf(getProperty(OdeConfigProperties.PROP_PROCESS_HYDRATION_THROTTLED_MAXIMUM_COUNT, String.valueOf(Integer.MAX_VALUE)));
     }
-
+    
     public int getInstanceThrottledMaximumCount() {
         return Integer.valueOf(getProperty(OdeConfigProperties.PROP_PROCESS_INSTANCE_THROTTLED_MAXIMUM_COUNT, String.valueOf(Integer.MAX_VALUE)));
     }
-
+    
     public long getProcessThrottledMaximumSize() {
         return Long.valueOf(getProperty(OdeConfigProperties.PROP_PROCESS_HYDRATION_THROTTLED_MAXIMUM_SIZE, String.valueOf(Long.MAX_VALUE)));
     }
-
+    
     public boolean isProcessSizeThrottled() {
         return getProcessThrottledMaximumSize() == Long.MAX_VALUE;
     }
-
+    
     public boolean isDbLoggingEnabled() {
         return Boolean.valueOf(getProperty(OdeConfigProperties.PROP_DB_LOGGING, "false"));
     }
@@ -338,7 +376,7 @@ public class OdeConfigProperties {
     public String getDbInternalPassword() {
         return getProperty(PROP_DB_INTERNAL_PASSWORD);
     }
-
+    
     public int getMigrationTransactionTimeout() {
         return Integer.valueOf(getProperty(PROP_MIGRATION_TRANSACTION_TIMEOUT, String.valueOf(0)));
     }

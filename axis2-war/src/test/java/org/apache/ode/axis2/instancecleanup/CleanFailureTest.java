@@ -20,8 +20,8 @@
 package org.apache.ode.axis2.instancecleanup;
 
 import org.apache.ode.axis2.DummyService;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.dao.bpel.ProcessDAO;
+import org.apache.ode.dao.bpel.ProcessInstanceDAO;
 import org.testng.annotations.Test;
 
 public class CleanFailureTest extends CleanTestBase {
@@ -29,9 +29,13 @@ public class CleanFailureTest extends CleanTestBase {
     public void testCleanAll() throws Exception {
         String bundleName = "TestCleanFailure";
         // deploy the required service
+        System.out.println("-------> Starting deploying .......");
         server.deployService(DummyService.class.getCanonicalName());
-        if (server.isDeployed(bundleName)) server.undeployProcess(bundleName);
+        if (server.isDeployed(bundleName)) {
+        	server.undeployProcess(bundleName);
+        }
         server.deployProcess(bundleName);
+        System.out.println("-------> DEPLOYED SUCCESSFULLY.......");
         try {
             initialLargeDataCount = getLargeDataCount(0);
             server.sendRequestFile("http://localhost:8888/processes/helloWorld", bundleName, "testRequest.soap");

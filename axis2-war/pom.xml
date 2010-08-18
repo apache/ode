@@ -90,6 +90,23 @@
         </dependency>
         <dependency>
             <groupId>org.apache.ode</groupId>
+            <artifactId>ode-dao-jpa</artifactId>
+            <classifier>openjpa</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ode</groupId>
+            <artifactId>ode-dao-hibernate</artifactId>
+        </dependency>        
+        <dependency>
+            <groupId>org.apache.ode</groupId>
+            <artifactId>ode-dao-jpa-ojpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ode</groupId>
+            <artifactId>ode-dao-jpa-hibernate</artifactId>
+        </dependency>                 
+        <dependency>
+            <groupId>org.apache.ode</groupId>
             <artifactId>ode-bpel-ql</artifactId>
         </dependency>
         <dependency>
@@ -156,6 +173,10 @@
             <groupId>org.apache.derby</groupId>
             <artifactId>derbytools</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+        </dependency>        
         <dependency>
             <groupId>org.jibx</groupId>
             <artifactId>jibx-run</artifactId>
@@ -247,7 +268,7 @@
         </dependency>
 	    <dependency>
 	      <groupId>org.hibernate</groupId>
-	      <artifactId>hibernate</artifactId>
+	      <artifactId>hibernate-core</artifactId>
 	      <scope>test</scope>
 	    </dependency>
 	    <dependency>
@@ -415,6 +436,8 @@
                                <exclude>**/management/InstanceManagementTest.java</exclude>
                                <exclude>**/rampart/basic/*Test.java</exclude>
                                <exclude>**/rampart/policy/*Test.java</exclude>
+                               <exclude>**/instancecleanup/*Test.java</exclude>
+                               <exclude>**/correlation/*Test.java</exclude>
                             </excludes>
 							<includes>
 								<include>**/*Test.java</include>

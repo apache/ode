@@ -129,8 +129,8 @@
                <artifactId>hibernate-core</artifactId>
              </exclusion>
              <exclusion>
-               <groupId>hsqldb</groupId>
-               <artifactId>hsqldb</artifactId>
+               <groupId>com.h2database</groupId>
+               <artifactId>h2</artifactId>
              </exclusion>
              <exclusion>
                <groupId>org.apache.geronimo.specs</groupId>
@@ -230,7 +230,7 @@
         </dependency>
         <dependency>
           <groupId>org.hibernate</groupId>
-          <artifactId>hibernate</artifactId>
+          <artifactId>hibernate-core</artifactId>
           <scope>provided</scope>
         </dependency>
         <dependency>
@@ -379,6 +379,11 @@
           <groupId>org.apache.geronimo.specs</groupId>
           <artifactId>geronimo-ejb_2.1_spec</artifactId>
        </dependency>
+       
+        <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
 
        <!-- This is a way to specify the global exclusion in the dependency tree -->
        <dependency>

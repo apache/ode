@@ -57,7 +57,7 @@
         <dependency>
             <groupId>org.apache.ode</groupId>
             <artifactId>ode-dao-jpa</artifactId>
-        </dependency>
+        </dependency>     
         <dependency>
             <groupId>org.apache.ode</groupId>
             <artifactId>ode-bpel-runtime</artifactId>
@@ -146,28 +146,50 @@
           <artifactId>junit</artifactId>
         </dependency>
         <dependency>
+          <groupId>com.h2database</groupId>
+          <artifactId>h2</artifactId>
+        </dependency>
+        <dependency>
           <groupId>org.apache.derby</groupId>
           <artifactId>derby</artifactId>
-        </dependency>
+        </dependency>        
         <dependency>
           <groupId>tranql</groupId>
           <artifactId>tranql-connector-derby-common</artifactId>
           <version>1.1</version>
         </dependency>
+        
+        <!-- for the integration tests - seems to work with the openjpa enhanced enities -->
+	    <dependency>
+	      <groupId>org.apache.ode</groupId>
+	      <artifactId>ode-dao-jpa-hibernate</artifactId>
+	      <scope>test</scope>
+	    </dependency>
+	    <dependency>
+	      <groupId>org.apache.ode</groupId>
+	      <artifactId>ode-dao-jpa-ojpa</artifactId>
+	      <scope>test</scope>
+	    </dependency>	    
+	    <dependency>
+	      <groupId>org.apache.ode</groupId>
+	      <artifactId>ode-dao-hibernate</artifactId>
+	      <scope>test</scope>
+	    </dependency>
     </dependencies>
 
-   <build>
-     <plugins>
-       <plugin>
-	    <artifactId>maven-surefire-plugin</artifactId>
-	    <configuration>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
 	      <systemPropertyVariables>
 	      	<org.apache.ode.autoRetireProcess>true</org.apache.ode.autoRetireProcess>
 	      </systemPropertyVariables>
 	      <argLine>-Xms512M -Xmx1024M -XX:MaxPermSize=512M</argLine>
-	    </configuration>
-       </plugin>
-     </plugins>
-   </build>
+        </configuration>
+    </plugin>
+  </plugins>
+  
+ </build>
 
 </project>

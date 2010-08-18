@@ -27,13 +27,14 @@ import java.io.File;
 import org.apache.ode.axis2.Axis2TestBase;
 import org.apache.ode.axis2.ODEConfigDirAware;
 import org.apache.ode.axis2.ODEConfigProperties;
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceProfileDAO;
-import org.apache.ode.bpel.dao.ProcessProfileDAO;
+import org.apache.ode.dao.bpel.ProcessDAO;
+import org.apache.ode.dao.bpel.ProcessInstanceDAO;
+import org.apache.ode.dao.bpel.ProcessInstanceProfileDAO;
+import org.apache.ode.dao.bpel.ProcessProfileDAO;
 import org.apache.ode.il.EmbeddedGeronimoFactory;
 import org.apache.ode.il.dbutil.Database;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 
 import javax.transaction.TransactionManager;
 
@@ -43,11 +44,11 @@ public abstract class CleanTestBase extends Axis2TestBase implements ODEConfigDi
     protected int initialLargeDataCount = 0;
 
     @AfterMethod
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         stopTM();
         super.tearDown();
     }
-
+    
     protected void initTM() throws Exception {
         if( txm != null ) {
             try {

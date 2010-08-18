@@ -39,6 +39,10 @@
      </dependency>
     <dependency>
       <groupId>org.apache.ode</groupId>
+      <artifactId>ode-agents</artifactId>
+    </dependency> 
+    <dependency>
+      <groupId>org.apache.ode</groupId>
       <artifactId>ode-bpel-api</artifactId>
     </dependency>
     <dependency>
@@ -81,6 +85,11 @@
     </dependency>
     <dependency>
       <groupId>org.apache.ode</groupId>
+      <artifactId>ode-dao-jpa-ojpa</artifactId>
+      <scope>test</scope>
+    </dependency>    
+    <dependency>
+      <groupId>org.apache.ode</groupId>
       <artifactId>ode-dao-hibernate</artifactId>
       <scope>test</scope>
     </dependency>
@@ -95,10 +104,10 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>hsqldb</groupId>
-      <artifactId>hsqldb</artifactId>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
       <scope>test</scope>
-    </dependency>
+    </dependency> 
     <dependency>
       <groupId>jmock</groupId>
       <artifactId>jmock</artifactId>
@@ -109,27 +118,6 @@
       <artifactId>derby</artifactId>
       <scope>test</scope>
     </dependency>
-        <dependency>
-            <groupId>org.apache.ode</groupId>
-            <artifactId>ode-agents</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.ode</groupId>
-            <artifactId>ode-jacob</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ode</groupId>
-            <artifactId>ode-utils</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ode</groupId>
-            <artifactId>ode-bpel-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ode</groupId>
-            <artifactId>ode-bpel-dao</artifactId>
-        </dependency>
         <dependency>
           <groupId>commons-collections</groupId>
           <artifactId>commons-collections</artifactId>
@@ -191,17 +179,20 @@
           <artifactId>xercesImpl</artifactId>
         </dependency>
 
-        <dependency>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
-      <scope>test</scope>
-        </dependency>
-
        <dependency>
           <groupId>tranql</groupId>
           <artifactId>tranql-connector-derby-common</artifactId>
           <version>1.1</version>
           <scope>test</scope>
+       </dependency>
+       
+       <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+       </dependency>
+       <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
        </dependency>
    </dependencies>
    

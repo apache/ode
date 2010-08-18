@@ -19,7 +19,6 @@
 
 package org.apache.ode.bpel.engine;
 
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
@@ -28,6 +27,7 @@ import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.engine.cron.CronScheduler;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
+import org.apache.ode.dao.bpel.BpelDAOConnectionFactory;
 
 import java.util.HashMap;
 import java.util.List;

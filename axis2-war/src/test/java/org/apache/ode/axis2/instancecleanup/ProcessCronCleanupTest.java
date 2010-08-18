@@ -18,8 +18,8 @@
  */
 package org.apache.ode.axis2.instancecleanup;
 
-import org.apache.ode.bpel.dao.ProcessDAO;
-import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.dao.bpel.ProcessDAO;
+import org.apache.ode.dao.bpel.ProcessInstanceDAO;
 import org.testng.annotations.Test;
 
 public class ProcessCronCleanupTest extends CleanTestBase {

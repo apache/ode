@@ -21,12 +21,16 @@ package org.apache.ode.axis2;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContextFactory;
+import org.apache.axis2.deployment.DeploymentConstants;
 import org.apache.axis2.deployment.DeploymentEngine;
+import org.apache.axis2.deployment.FileSystemConfigurator;
 import org.apache.axis2.deployment.repository.util.ArchiveReader;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.WSDL11ToAxisServiceBuilder;
+import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.axis2.engine.AxisConfigurator;
 import org.apache.axis2.engine.AxisServer;
 import org.apache.axis2.engine.MessageReceiver;
 import org.apache.commons.logging.Log;
@@ -172,7 +176,7 @@ public abstract class Axis2TestBase {
 
     @BeforeMethod
     protected void setUp() throws Exception {
-        log.debug("##### Running "+getClass().getName());
+        System.out.println("##### Running "+getClass().getName());
         /**
          * 1. If no settings are given from buildr, the test runs with the default config directory.
          * 2. If no settings are given from buildr and if the test implements ODEConfigDirAware, the test runs with
@@ -245,7 +249,7 @@ public abstract class Axis2TestBase {
                 log.info("Axis2 Repo dir: " + axis2RepoDir);
             }
 
-            configContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem(axis2RepoDir, axis2ConfLocation);
+            configContext = ConfigurationContextFactory.createConfigurationContext(new TestConfigurator(odeRootDir, axis2RepoDir, axis2ConfLocation));
             // do not use 8080 for tests, and make sure to pass a string, not an int
             configContext.getAxisConfiguration().getTransportIn("http").addParameter(new Parameter("port", ""+getTestPort(0)));
         }
@@ -319,6 +323,9 @@ public abstract class Axis2TestBase {
                 if(url.getPort()==DEFAULT_TEST_PORT_0 && url.getPort()!=getTestPort(0)){
                     url=  new URL(url.getProtocol()+"://"+url.getHost()+":"+getTestPort(0)+url.getPath()+(url.getQuery()!=null?"?"+url.getQuery():""));
                 }
+                System.out.println("url is: " + url.toString());
+                System.out.println("file is: " + getResource(filename));
+                
                 return HttpSoapSender.doSend(url,
                         new FileInputStream(getResource(filename)), null, 0, null, null, null);
             } catch (IOException e) {
@@ -352,5 +359,21 @@ public abstract class Axis2TestBase {
         public ODEServer getODEServer() {
             return _ode;
         }
+    }
+    
+    public static class TestConfigurator extends FileSystemConfigurator implements AxisConfigurator {
+    	
+    	String _serviceDir;
+    	
+		public TestConfigurator(String webRoot, String serviceDir, String axis2xml) throws AxisFault {
+			super(webRoot, axis2xml);
+			_serviceDir = serviceDir;
+		}
+		
+		public synchronized AxisConfiguration getAxisConfiguration() throws AxisFault {
+			servicesPath = _serviceDir + File.separator + DeploymentConstants.SERVICE_PATH;
+			return super.getAxisConfiguration();
+		}
+    	
     }
 }
