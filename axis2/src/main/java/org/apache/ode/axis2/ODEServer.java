@@ -58,6 +58,7 @@ import org.apache.ode.axis2.service.DeploymentWebService;
 import org.apache.ode.axis2.service.ManagementService;
 import org.apache.ode.axis2.util.ClusterUrlTransformer;
 import org.apache.ode.bpel.connector.BpelServerConnector;
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
 import org.apache.ode.bpel.engine.cron.CronScheduler;
@@ -72,8 +73,6 @@ import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.bpel.pmapi.InstanceManagement;
 import org.apache.ode.bpel.pmapi.ProcessManagement;
-import org.apache.ode.dao.bpel.BpelDAOConnectionFactory;
-import org.apache.ode.dao.store.ConfStoreDAOConnectionFactory;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.scheduler.simple.JdbcDelegate;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
@@ -110,8 +109,6 @@ public class ODEServer {
     protected TransactionManager _txMgr;
 
     protected BpelDAOConnectionFactory _daoCF;
-    
-    protected ConfStoreDAOConnectionFactory _storeDaoCF;
 
     protected ExecutorService _executorService;
 
@@ -438,7 +435,6 @@ public class ODEServer {
         __log.info(__msgs.msgOdeUsingDAOImpl(_odeConfig.getDAOConnectionFactory()));
         try {
             _daoCF = _db.createDaoCF();
-            _storeDaoCF = _db.createDaoStoreCF();
         } catch (Exception ex) {
             String errmsg = __msgs.msgDAOInstantiationFailed(_odeConfig.getDAOConnectionFactory());
             __log.error(errmsg, ex);
@@ -458,7 +454,7 @@ public class ODEServer {
     }
 
     protected ProcessStoreImpl createProcessStore(EndpointReferenceContext eprContext, DataSource ds) {
-        return new ProcessStoreImpl(eprContext,_txMgr,_storeDaoCF);
+        return new ProcessStoreImpl(eprContext, ds, _odeConfig.getDAOConnectionFactory(), _odeConfig, false);
     }
 
     protected Scheduler createScheduler() {

@@ -37,12 +37,7 @@
     </fileSet>
 
     <fileSet>
-      <directory>${basedir}/../dao-jpa-db/target/derby</directory>
-      <outputDirectory>/WEB-INF</outputDirectory>
-    </fileSet>
-    
-    <fileSet>
-      <directory>${basedir}/../dao-jpa-db/target/h2</directory>
+      <directory>${basedir}/../dao-jpa-ojpa-derby/target/derby</directory>
       <outputDirectory>/WEB-INF</outputDirectory>
     </fileSet>
 
@@ -93,8 +88,7 @@
     <include>org.apache.ode:ode-utils</include>
     <include>org.apache.ode:ode-agents</include>
     <include>org.apache.ode:ode-bpel-obj</include>
-    <include>org.apache.ode:ode-dao-jpa:jar:openjpa</include>
-     <include>org.apache.ode:ode-dao-jpa-ojpa</include>
+    <include>org.apache.ode:ode-dao-jpa</include>
     <include>org.apache.ode:ode-bpel-ql</include>
     <include>antlr:antlr</include>
     <include>javax.activation:activation</include>

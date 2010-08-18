@@ -18,13 +18,13 @@
  */
 package org.apache.ode.bpel.intercept;
 
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.engine.BpelProcess;
 import org.apache.ode.bpel.iapi.BpelEngine;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessConf;
-import org.apache.ode.dao.bpel.BpelDAOConnection;
-import org.apache.ode.dao.bpel.ProcessDAO;
 
 /**
  * Hook into the BPEL server that enables intercepting of message exchange

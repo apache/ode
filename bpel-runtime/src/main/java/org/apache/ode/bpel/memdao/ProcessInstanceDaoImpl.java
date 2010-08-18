@@ -19,18 +19,18 @@
 package org.apache.ode.bpel.memdao;
 
 import org.apache.ode.bpel.common.ProcessState;
+import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.CorrelationSetDAO;
+import org.apache.ode.bpel.dao.CorrelatorDAO;
+import org.apache.ode.bpel.dao.FaultDAO;
+import org.apache.ode.bpel.dao.MessageExchangeDAO;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.ScopeDAO;
+import org.apache.ode.bpel.dao.XmlDataDAO;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
-import org.apache.ode.dao.bpel.ActivityRecoveryDAO;
-import org.apache.ode.dao.bpel.BpelDAOConnection;
-import org.apache.ode.dao.bpel.CorrelationSetDAO;
-import org.apache.ode.dao.bpel.CorrelatorDAO;
-import org.apache.ode.dao.bpel.FaultDAO;
-import org.apache.ode.dao.bpel.MessageExchangeDAO;
-import org.apache.ode.dao.bpel.ProcessDAO;
-import org.apache.ode.dao.bpel.ProcessInstanceDAO;
-import org.apache.ode.dao.bpel.ScopeDAO;
-import org.apache.ode.dao.bpel.XmlDataDAO;
 import org.apache.ode.utils.QNameUtils;
 import org.w3c.dom.Element;
 
@@ -209,7 +209,7 @@ public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstan
     }
 
     /**
-     * @see org.apache.ode.dao.bpel.ProcessInstanceDAO#getScope(java.lang.Long)
+     * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getScope(java.lang.Long)
      */
     public ScopeDAO getScope(Long scopeInstanceId) {
         return _scopes.get(scopeInstanceId);
@@ -223,7 +223,7 @@ public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstan
     }
 
     /**
-     * @see org.apache.ode.dao.bpel.ProcessInstanceDAO#insertBpelEvent(org.apache.ode.bpel.evt.ProcessInstanceEvent)
+     * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#insertBpelEvent(org.apache.ode.bpel.evt.ProcessInstanceEvent)
      */
     public void insertBpelEvent(ProcessInstanceEvent event) {
         _events.add(event);
@@ -234,14 +234,14 @@ public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstan
     }
 
     /**
-     * @see org.apache.ode.dao.bpel.ProcessInstanceDAO#getInstantiatingCorrelator()
+     * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getInstantiatingCorrelator()
      */
     public CorrelatorDAO getInstantiatingCorrelator() {
         return _instantiatingCorrelator;
     }
 
     /**
-     * @see org.apache.ode.dao.bpel.ProcessInstanceDAO#getScopes(java.lang.String)
+     * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getScopes(java.lang.String)
      */
     public Collection<ScopeDAO> getScopes(String scopeName) {
         List<ScopeDAO> scopes = _scopesByName.get(scopeName);
@@ -249,28 +249,28 @@ public class ProcessInstanceDaoImpl extends DaoBaseImpl implements ProcessInstan
     }
 
     /**
-     * @see org.apache.ode.dao.bpel.ProcessInstanceDAO#getPreviousState()
+     * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getPreviousState()
      */
     public short getPreviousState() {
         return _previousState;
     }
 
     /**
-     * @see org.apache.ode.dao.bpel.ProcessInstanceDAO#getLastActiveTime()
+     * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#getLastActiveTime()
      */
     public Date getLastActiveTime() {
         return _lastActive;
     }
 
     /**
-     * @see org.apache.ode.dao.bpel.ProcessInstanceDAO#setLastActiveTime(java.util.Date)
+     * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#setLastActiveTime(java.util.Date)
      */
     public void setLastActiveTime(Date dt) {
         _lastActive = dt;
     }
 
     /**
-     * @see org.apache.ode.dao.bpel.ProcessInstanceDAO#finishCompletion()
+     * @see org.apache.ode.bpel.dao.ProcessInstanceDAO#finishCompletion()
      */
     public void finishCompletion() {
         // make sure we have completed.

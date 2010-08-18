@@ -40,6 +40,7 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.agents.memory.SizingAgent;
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.ProcessAndInstanceManagementImpl;
 import org.apache.ode.bpel.iapi.Endpoint;
@@ -50,8 +51,6 @@ import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.bpel.pmapi.InstanceManagement;
 import org.apache.ode.bpel.pmapi.ProcessManagement;
-import org.apache.ode.dao.bpel.BpelDAOConnectionFactory;
-import org.apache.ode.dao.store.ConfStoreDAOConnectionFactory;
 import org.apache.ode.jbi.msgmap.Mapper;
 import org.apache.ode.jbi.util.WSDLFlattener;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
@@ -100,8 +99,6 @@ final public class OdeContext {
     ExecutorService _executorService;
 
     BpelDAOConnectionFactory _daocf;
-    
-    ConfStoreDAOConnectionFactory _cdaocf;
 
     OdeConfigProperties _config;
 

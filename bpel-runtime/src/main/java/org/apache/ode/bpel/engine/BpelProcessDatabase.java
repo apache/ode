@@ -18,9 +18,9 @@
  */
 package org.apache.ode.bpel.engine;
 
+import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.dao.bpel.BpelDAOConnectionFactory;
-import org.apache.ode.dao.bpel.ProcessDAO;
 
 import javax.xml.namespace.QName;
 

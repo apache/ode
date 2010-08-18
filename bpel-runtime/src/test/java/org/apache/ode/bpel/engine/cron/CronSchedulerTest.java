@@ -36,7 +36,7 @@ import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.iapi.ProcessConf.CleanupInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
-import org.apache.ode.dao.hib.bpel.BpelDAOConnectionImpl;
+import org.apache.ode.daohib.bpel.BpelDAOConnectionImpl;
 import org.apache.ode.utils.CronExpression;
 import org.jmock.Mock;
 import org.jmock.MockObjectTestCase;

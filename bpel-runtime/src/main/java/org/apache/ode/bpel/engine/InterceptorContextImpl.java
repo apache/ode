@@ -18,11 +18,11 @@
  */
 package org.apache.ode.bpel.engine;
 
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.iapi.BpelEngine;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext;
-import org.apache.ode.dao.bpel.BpelDAOConnection;
-import org.apache.ode.dao.bpel.ProcessDAO;
 
 /**
  * Implementation of the {@link org.apache.ode.bpel.intercept.MessageExchangeInterceptor.InterceptorContext}

@@ -89,8 +89,7 @@
         <wsdl4j.version>1.6.2</wsdl4j.version>
         <woodstox.version>3.2.4</woodstox.version>
         <javax.mail.version>1.4</javax.mail.version>
-        <hibernate.version>3.3.2.GA</hibernate.version>
-        <hibernate.entitymanager.version>3.4.0.GA</hibernate.entitymanager.version>
+        <hibernate.version>3.2.5.ga</hibernate.version>
         <spring.version>2.5.6</spring.version>
         <geronimo.specs.version>1.0</geronimo.specs.version>
         <geronimo.version>2.0.1</geronimo.version>
@@ -127,8 +126,7 @@
         <xml-apis.version>1.3.04</xml-apis.version>
         <servicemix.nmr.version>1.1.0-SNAPSHOT</servicemix.nmr.version>
         <axis2.transport.version>1.0.0</axis2.transport.version>
-	<javassist.version>3.9.0.GA</javassist.version>
-        <h2.version>1.1.117</h2.version>
+		<h2.version>1.1.117</h2.version>
     </properties>
 
     <modules>
@@ -150,9 +148,6 @@
         <module>bpel-ql</module>
         <module>dao-hibernate</module>
         <module>tools</module>
-        <module>dao-jpa-hibernate</module>
-        <module>dao-jpa-ojpa</module>
-        <module>dao-jpa-db</module>
         <module>bpel-store</module>
         <module>dao-jpa-ojpa-derby</module>
         <module>dao-hibernate-db</module>
@@ -441,24 +436,8 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.ode</groupId>
-                <artifactId>ode-dao-jpa-hibernate</artifactId>
-                <version>${ode.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.ode</groupId>
-                <artifactId>ode-dao-jpa-ojpa</artifactId>
-                <version>${ode.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.ode</groupId>
                 <artifactId>ode-dao-jpa</artifactId>
                 <version>${ode.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.ode</groupId>
-                <artifactId>ode-dao-jpa</artifactId>
-                <version>${ode.version}</version>
-                <classifier>openjpa</classifier>
             </dependency>
             <dependency>
                 <groupId>org.apache.ode</groupId>
@@ -520,11 +499,6 @@
                 <groupId>annogen</groupId>
                 <artifactId>annogen</artifactId>
                 <version>${annogen.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>javassist</groupId>
-                <artifactId>javassist</artifactId>
-                <version>${javassist.version}</version>
             </dependency>
             <dependency>
                 <groupId>antlr</groupId>
@@ -773,25 +747,16 @@
 
             <dependency>
                 <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-core</artifactId>
+                <artifactId>hibernate</artifactId>
                 <version>${hibernate.version}</version>
+                <!--
                 <exclusions>
                     <exclusion>
                         <artifactId>jta</artifactId>
                         <groupId>javax.transaction</groupId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-entitymanager</artifactId>
-                <version>${hibernate.entitymanager.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>jta</artifactId>
-                        <groupId>javax.transaction</groupId>
-                    </exclusion>
-                </exclusions>
+                -->
             </dependency>
 
             <dependency>
@@ -886,9 +851,9 @@
                 <version>${derby.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.h2database</groupId>
-                <artifactId>h2</artifactId>
-                <version>${h2.version}</version>
+                <groupId>hsqldb</groupId>
+                <artifactId>hsqldb</artifactId>
+                <version>${hsqldb.version}</version>
             </dependency>
 
             <dependency>

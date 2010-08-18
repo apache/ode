@@ -20,13 +20,13 @@
 package org.apache.ode.bpel.engine.migration;
 
 import org.apache.ode.bpel.engine.BpelProcess;
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.dao.CorrelatorDAO;
+import org.apache.ode.bpel.dao.MessageRouteDAO;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.CorrelationKeySet;
-import org.apache.ode.dao.bpel.BpelDAOConnection;
-import org.apache.ode.dao.bpel.CorrelatorDAO;
-import org.apache.ode.dao.bpel.MessageRouteDAO;
-import org.apache.ode.dao.bpel.ProcessDAO;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

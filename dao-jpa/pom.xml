@@ -21,7 +21,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.ode</groupId>
   <artifactId>ode-dao-jpa</artifactId>
-  <name>ODE :: JPA DAO Impl</name>
+  <name>ODE :: OpenJPA DAO Impl</name>
 
   <parent>
     <groupId>org.apache.ode</groupId>
@@ -98,43 +98,25 @@
             </goals>
             <configuration>
               <tasks>
-                <copy todir="${basedir}/target/classes-openjpa">
-                  <fileset dir="${basedir}/target/classes" includes="**/*"/>
-                </copy>
-                <property name="maven.compile.classpath" refid="maven.compile.classpath"/>
+                <property name="maven.runtime.classpath" refid="maven.compile.classpath"/>
                 <path id="classpath">
-                  <pathelement location="${basedir}/target/classes-openjpa"/>
-                  <pathelement path="${maven.compile.classpath}"/>
-                </path>
-                <taskdef name="openjpac" classname="org.apache.openjpa.ant.PCEnhancerTask" classpathref="classpath"/>
-                <openjpac directory="${basedir}/target/classes-openjpa">
-                  <fileset dir="${basedir}/src/main">
-                    <include name="**/*.java" />                    
-                  </fileset>
-                  <classpath refid="classpath"/>
-                </openjpac>
+           <pathelement path="${maven.runtime.classpath}"/>
+        </path>
+        <taskdef name="openjpac" classname="org.apache.openjpa.ant.PCEnhancerTask" classpathref="classpath"/>
+                <openjpac>
+            <fileset dir="${basedir}/src/main">
+              <include name="**/*.java" />
+            </fileset>
+            <classpath>
+             <pathelement location="${basedir}/target/classes"/>
+             <pathelement path="${maven.runtime.classpath}"/>
+            </classpath>
+         </openjpac>
               </tasks>
             </configuration>
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>openjpa-enhancer-package</id>
-            <phase>package</phase>
-            <configuration>
-              <classifier>openjpa</classifier>
-              <classesDirectory>${project.build.directory}/classes-openjpa</classesDirectory>
-            </configuration>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>      
     </plugins>
    </build>
 

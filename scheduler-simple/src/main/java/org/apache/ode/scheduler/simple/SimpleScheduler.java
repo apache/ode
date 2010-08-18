@@ -294,7 +294,6 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
                         }
                     } else {
                         if (__log.isDebugEnabled()) __log.debug("Rollbacking on " + txm + "...");
-                        ex.printStackTrace();
                         txm.rollback();
                     }
 

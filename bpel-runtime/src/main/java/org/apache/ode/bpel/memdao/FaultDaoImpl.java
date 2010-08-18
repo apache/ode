@@ -19,7 +19,7 @@
 
 package org.apache.ode.bpel.memdao;
 
-import org.apache.ode.dao.bpel.FaultDAO;
+import org.apache.ode.bpel.dao.FaultDAO;
 import org.apache.ode.utils.QNameUtils;
 import org.w3c.dom.Element;
 

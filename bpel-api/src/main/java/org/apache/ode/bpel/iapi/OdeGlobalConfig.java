@@ -24,7 +24,7 @@ public class OdeGlobalConfig {
         return Boolean.parseBoolean(System.getProperty("org.apache.ode.queueInOutMessages", "true"));
     }
     public static boolean autoRetireProcess() {
-        return Boolean.parseBoolean(System.getProperty("org.apache.ode.autoRetireProcess", "true"));
+        return Boolean.parseBoolean(System.getProperty("org.apache.ode.autoRetireProcess", "false"));
     }
     public static boolean autoincrementVersion() {
         return Boolean.parseBoolean(System.getProperty("org.apache.ode.autoincrementVersion", "true"));

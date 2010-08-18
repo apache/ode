@@ -24,7 +24,6 @@ import javax.xml.namespace.QName;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessState;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -36,7 +35,7 @@ public class VersionedRedeployTest extends BPELTestAbstract {
     QName qName2 = new QName("http://ode/bpel/unit-test", "HelloWorld2-2");
     QName qName3 = new QName("http://ode/bpel/unit-test", "HelloWorld2-3");
 
-     @Test public void testRetireOld() throws Throwable {
+    @Test public void testRetireOld() throws Throwable {
         deploy("/bpel/2.0/TestVersionedRedeploy/HelloWorld-1");
         ProcessConf conf = store.getProcessConfiguration(qName1);
         Assert.assertEquals(ProcessState.ACTIVE, conf.getState());
@@ -58,38 +57,32 @@ public class VersionedRedeployTest extends BPELTestAbstract {
         Assert.assertEquals(ProcessState.RETIRED, conf.getState());
         conf = store.getProcessConfiguration(qName3);
         Assert.assertEquals(ProcessState.ACTIVE, conf.getState());
-        
     }
 
-     @Ignore("ODE-805, JPA refacotring leftover")
-     @Test public void testInstancePersistence() throws Throwable {
+    @Test public void testInstancePersistence() throws Throwable {
         // Checking for each step that all instances still exist and that each process got one execution
         // so no instance has been created after a process has been retired.
         go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-1");
-        Assert.assertEquals(1, _bcf.getConnection().getProcess(qName1).getNumInstances());
+        Assert.assertEquals(1, _cf.getConnection().getProcess(qName1).getNumInstances());
 
         // clean up deployment and invocations
         _deployments.clear();
         _invocations.clear();
 
         go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-2");
-        Assert.assertEquals(1, _bcf.getConnection().getProcess(qName1).getNumInstances());
-        Assert.assertEquals(1, _bcf.getConnection().getProcess(qName2).getNumInstances());
+        Assert.assertEquals(1, _cf.getConnection().getProcess(qName1).getNumInstances());
+        Assert.assertEquals(1, _cf.getConnection().getProcess(qName2).getNumInstances());
 
         // clean up deployment and invocations
         _deployments.clear();
         _invocations.clear();
 
         go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-3");
-        Assert.assertEquals(1, _bcf.getConnection().getProcess(qName1).getNumInstances());
-        Assert.assertEquals(1, _bcf.getConnection().getProcess(qName2).getNumInstances());
-        Assert.assertEquals(1, _bcf.getConnection().getProcess(qName3).getNumInstances());
-        
-        _deployments.clear();
-        _invocations.clear();
+        Assert.assertEquals(1, _cf.getConnection().getProcess(qName1).getNumInstances());
+        Assert.assertEquals(1, _cf.getConnection().getProcess(qName2).getNumInstances());
+        Assert.assertEquals(1, _cf.getConnection().getProcess(qName3).getNumInstances());
     }
-     
-    @Ignore("ODE-805,JPA refacotring leftover") 
+
     @Test public void testVersionedUndeployDeploy() throws Throwable {
         go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-1");
         doUndeployments();
@@ -102,7 +95,7 @@ public class VersionedRedeployTest extends BPELTestAbstract {
         Assert.assertNull(store.getProcessConfiguration(qName1));
         Assert.assertNull(store.getProcessConfiguration(qName3));
 
-        Assert.assertEquals(1, _bcf.getConnection().getProcess(qName2).getNumInstances());
+        Assert.assertEquals(1, _cf.getConnection().getProcess(qName2).getNumInstances());
     }
 
 }

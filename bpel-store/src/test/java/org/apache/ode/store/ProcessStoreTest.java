@@ -23,49 +23,29 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Properties;
 
-import javax.transaction.TransactionManager;
 import javax.xml.namespace.QName;
 
 import junit.framework.TestCase;
 
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
-import org.apache.ode.dao.store.ConfStoreDAOConnectionFactory;
-import org.apache.ode.il.config.OdeConfigProperties;
-import org.apache.ode.il.dbutil.Database;
-import org.apache.ode.il.txutil.TxManager;
 
 public class ProcessStoreTest extends TestCase {
 
     ProcessStoreImpl _ps;
-    Database _db;
-    ConfStoreDAOConnectionFactory _cf;
-    
     private File _testdd;
-    
+
     public void setUp() throws Exception {
-        Properties props = new Properties();
-        props.setProperty(OdeConfigProperties.PROP_DAOCF_STORE,System.getProperty(OdeConfigProperties.PROP_DAOCF_STORE,OdeConfigProperties.DEFAULT_DAOCF_STORE_CLASS));
-        OdeConfigProperties odeProps = new OdeConfigProperties(props, "");
-        _db = new Database(odeProps);
-        TxManager tx = new TxManager(odeProps);
-        TransactionManager txm = tx.createTransactionManager();
-        _db.setTransactionManager(txm);
-        _db.start();
-        _cf = _db.createDaoStoreCF();
-        _ps = new ProcessStoreImpl(null,txm,  _cf);
+        System.setProperty("openjpa.properties", "/openjpa.xml");
+        _ps = new ProcessStoreImpl();
         _ps.loadAll();
-        URI tdd = getClass().getResource("/testdd/deploy.xml").toURI();
+        URI tdd= getClass().getResource("/testdd/deploy.xml").toURI();
         _testdd = new File(tdd.getPath()).getParentFile();
-        
-    } 
+    }
 
     public void tearDown() throws Exception {
         _ps.shutdown();
-        _cf.shutdown();
-        _db.shutdown();
     }
 
     public void testSanity() {

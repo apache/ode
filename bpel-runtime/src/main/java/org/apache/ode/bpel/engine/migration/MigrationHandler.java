@@ -61,7 +61,7 @@ public class MigrationHandler {
     }
 
     public boolean migrate(final Set<BpelProcess> registeredProcesses, int migrationTransactionTimeout) {
-        if (_contexts.dao.getConnection() == null) {
+        if (_contexts.dao.getDataSource() == null) {
             __log.debug("No datasource available, stopping migration. Probably running fully in-memory.");
             return true;
         }
@@ -153,7 +153,7 @@ public class MigrationHandler {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            conn = null; //FIXME jpa refactoring work leftover
+            conn = _contexts.dao.getDataSource().getConnection();
             stmt = conn.prepareStatement("SELECT VERSION FROM ODE_SCHEMA_VERSION");
             rs = stmt.executeQuery();
             if (rs.next()) version = rs.getInt("VERSION");
@@ -175,7 +175,7 @@ public class MigrationHandler {
         Connection conn = null;
         Statement stmt = null;
         try {
-            conn = null; //FIXME jpa refactoring work leftover
+            conn = _contexts.dao.getDataSource().getConnection();
             stmt = conn.createStatement();
             int res = stmt.executeUpdate("UPDATE ODE_SCHEMA_VERSION SET VERSION = " + version);
             // This should never happen but who knows?
