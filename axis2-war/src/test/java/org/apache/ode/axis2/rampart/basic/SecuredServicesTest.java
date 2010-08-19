@@ -76,7 +76,7 @@ public class SecuredServicesTest extends Axis2TestBase {
         }
         server.deployProcess(bundleName);
         try {
-            String response = server.sendRequestFile("http://localhost:8888/processes/helloWorld",
+            String response = sendRequestFile("http://localhost:8888/processes/helloWorld",
                     bundleName, "testRequest.soap");
             System.out.println(response);
             assertTrue(response.contains("helloResponse") && response.contains("Hello World"));

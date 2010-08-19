@@ -162,7 +162,18 @@ public abstract class Axis2TestBase {
         String odeRootAbsolutePath = getClass().getClassLoader().getResource("webapp/WEB-INF").getFile();
         String axis2RepoAbsolutePath = getClass().getClassLoader().getResource(axis2RepoDir).getFile();
         String axis2ConfAbsolutePath = axis2ConfLocation == null ? null : getClass().getClassLoader().getResource(axis2ConfLocation).getFile();
-        server = new ODEAxis2Server(odeRootAbsolutePath, axis2RepoAbsolutePath, axis2ConfAbsolutePath);
+        ODEConfigProperties config = new ODEConfigProperties(new File(System.getProperty("org.apache.ode.configDir", odeRootAbsolutePath + "/conf.hib-derby")));
+        config.load();
+        server = new ODEAxis2Server(odeRootAbsolutePath, axis2RepoAbsolutePath, axis2ConfAbsolutePath, getTestPort(0), config);
+        server.txMgrCreatedCallback = new Runnable() {
+            public void run() {
+                try {
+                    org.springframework.mock.jndi.SimpleNamingContextBuilder.emptyActivatedContextBuilder().bind("java:comp/UserTransaction", server.getODEServer().getTransactionManager());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
         server.start();
     }
 
@@ -230,127 +241,23 @@ public abstract class Axis2TestBase {
         }
         server = null;
     }
+    
+    public String sendRequestFile(String endpoint, String bundleName, String filename) {
+        return sendRequestFile(endpoint, bundleName + "/" + filename);
+    }
 
-    protected class ODEAxis2Server extends AxisServer {
-
-        ODEServer _ode;
-        String odeRootDir;
-
-        protected ODEAxis2Server(String odeRootDir, String axis2RepoDir, String axis2ConfLocation) throws Exception {
-            super(false);
-            this.odeRootDir = odeRootDir;
-            if (log.isInfoEnabled()) {
-                log.info("Ode Root Dir: " + odeRootDir);
-                log.info("Axis2 Conf file: " + axis2ConfLocation);
-                log.info("Axis2 Repo dir: " + axis2RepoDir);
+    public String sendRequestFile(String endpoint, String filename) {
+        try {
+            URL url = new URL(endpoint);
+            // override the port if necessary but only if the given port is the default one
+            if(url.getPort()==DEFAULT_TEST_PORT_0 && url.getPort()!=getTestPort(0)){
+                url=  new URL(url.getProtocol()+"://"+url.getHost()+":"+getTestPort(0)+url.getPath()+(url.getQuery()!=null?"?"+url.getQuery():""));
             }
-
-            configContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem(axis2RepoDir, axis2ConfLocation);
-            // do not use 8080 for tests, and make sure to pass a string, not an int
-            configContext.getAxisConfiguration().getTransportIn("http").addParameter(new Parameter("port", ""+getTestPort(0)));
-        }
-
-        protected void start() throws AxisFault {
-            super.start();
-            _ode = new ODEServer();
-            try {
-                _ode.init(odeRootDir, configContext.getAxisConfiguration());
-            } catch (ServletException e) {
-                throw new RuntimeException(e.getRootCause());
-            }
-        }
-
-        public void stop() throws AxisFault {
-            _ode.shutDown();
-            super.stop();
-        }
-
-        public Collection<QName> deployProcess(String bundleName) {
-            return _ode.getProcessStore().deploy(new File(getResource(bundleName)));
-        }
-
-        public void undeployProcess(String bundleName) {
-            _ode.getProcessStore().undeploy(new File(getResource(bundleName)));
-        }
-
-        public boolean isDeployed(String bundleName) {
-            return _ode.getProcessStore().getPackages().contains(bundleName);
-        }
-
-        /**
-         * Creates and deploys an Axis service based on a provided MessageReceiver. The receiver
-         * will be invoked for all invocations of that service.
-         */
-        protected void deployService(String bundleName, String defFile, QName serviceName, String port,
-                                     MessageReceiver receiver) throws WSDLException, IOException, URISyntaxException {
-            URI wsdlUri = new File(getResource(bundleName) + "/" + defFile).toURI();
-
-            InputStream is = wsdlUri.toURL().openStream();
-            WSDL11ToAxisServiceBuilder serviceBuilder = new ODEAxisService.WSDL11ToAxisPatchedBuilder(is, serviceName, port);
-            serviceBuilder.setBaseUri(wsdlUri.toString());
-            serviceBuilder.setCustomResolver(new Axis2UriResolver());
-            serviceBuilder.setCustomWSLD4JResolver(new Axis2WSDLLocator(wsdlUri));
-            serviceBuilder.setServerSide(true);
-
-            AxisService axisService = serviceBuilder.populateService();
-            axisService.setName(serviceName.getLocalPart());
-            axisService.setWsdlFound(true);
-            axisService.setCustomWsdl(true);
-            axisService.setClassLoader(getConfigurationContext().getAxisConfiguration().getServiceClassLoader());
-
-            Iterator operations = axisService.getOperations();
-            while (operations.hasNext()) {
-                AxisOperation operation = (AxisOperation) operations.next();
-                if (operation.getMessageReceiver() == null) {
-                    operation.setMessageReceiver(receiver);
-                }
-            }
-            getConfigurationContext().getAxisConfiguration().addService(axisService);
-        }
-
-        public String sendRequestFile(String endpoint, String bundleName, String filename) {
-            return sendRequestFile(endpoint, bundleName + "/" + filename);
-        }
-
-        public String sendRequestFile(String endpoint, String filename) {
-            try {
-                URL url = new URL(endpoint);
-                // override the port if necessary but only if the given port is the default one
-                if(url.getPort()==DEFAULT_TEST_PORT_0 && url.getPort()!=getTestPort(0)){
-                    url=  new URL(url.getProtocol()+"://"+url.getHost()+":"+getTestPort(0)+url.getPath()+(url.getQuery()!=null?"?"+url.getQuery():""));
-                }
-                return HttpSoapSender.doSend(url,
-                        new FileInputStream(getResource(filename)), null, 0, null, null, null);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        protected String getResource(String bundleName) {
-            return getClass().getClassLoader().getResource(bundleName).getFile();
-        }
-
-        /**
-         * Convenient methods to generate a WSDL for an Axis2 service. Often nice, but also often
-         * generates crappy WSDL that aren't even valid (especially when faults are involved) so
-         * use with care.
-         *
-         * @param serviceName
-         * @param fileName
-         * @throws AxisFault
-         */
-        protected void generateWSDL(String serviceName, String fileName) throws AxisFault {
-            FileOutputStream fos = null;
-            try {
-                fos = new FileOutputStream(fileName);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            configContext.getAxisConfiguration().getService(serviceName).printWSDL(fos);
-        }
-
-        public ODEServer getODEServer() {
-            return _ode;
+            return HttpSoapSender.doSend(url,
+                    new FileInputStream(server.getResource(filename)), null, 0, null, null, null);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
+
 }

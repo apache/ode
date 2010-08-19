@@ -40,21 +40,21 @@ public class RetireTestVar extends Axis2TestBase {
 
         QName deployedQName = server.deployProcess(bundleName + "/withVar").iterator().next();
 
-        server.sendRequestFile("http://localhost:8888/processes/testretire",
+        sendRequestFile("http://localhost:8888/processes/testretire",
                 bundleName + "/1", "testRequest1.soap");
 
         server.getODEServer().getProcessManagement().setRetired(deployedQName, true);
         server.deployProcess(bundleName + "/noVar");
 
-        response = server.sendRequestFile("http://localhost:8888/processes/testretire",
+        response = sendRequestFile("http://localhost:8888/processes/testretire",
                 bundleName + "/1", "testRequest2.soap");
 
         assertTrue(response.indexOf("DONE") > 0);
 
-        server.sendRequestFile("http://localhost:8888/processes/testretire",
+        sendRequestFile("http://localhost:8888/processes/testretire",
                 bundleName + "/1", "testRequest1.soap");
 
-        response = server.sendRequestFile("http://localhost:8888/processes/testretire",
+        response = sendRequestFile("http://localhost:8888/processes/testretire",
                 bundleName + "/1", "testRequest2.soap");
 
         assertTrue(response.indexOf("XYZ") > 0);

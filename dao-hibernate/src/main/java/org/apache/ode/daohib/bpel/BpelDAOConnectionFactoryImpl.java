@@ -28,7 +28,7 @@ import org.apache.ode.daohib.SessionManager;
 import org.hibernate.HibernateException;
 import org.hibernate.cfg.Environment;
 import org.hibernate.dialect.Dialect;
-import org.hibernate.dialect.DialectFactory;
+import org.hibernate.dialect.resolver.DialectFactory;
 
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
@@ -104,20 +104,6 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
         properties.put(Environment.TRANSACTION_STRATEGY, "org.hibernate.transaction.JTATransactionFactory");
         properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "jta");
 
-        // Guess Hibernate dialect if not specified in hibernate.properties
-        if (properties.get(Environment.DIALECT) == null) {
-            try {
-                properties.put(Environment.DIALECT, guessDialect(_ds));
-            } catch (Exception ex) {
-                String errmsg = "Unable to detect Hibernate dialect!";
-
-                if (__log.isDebugEnabled())
-                    __log.debug(errmsg, ex);
-
-                __log.error(errmsg);
-            }
-        }
-
         // Isolation levels override; when you use a ConnectionProvider, this has no effect
         String level = System.getProperty("ode.connection.isolation", "2");
         properties.put(Environment.ISOLATION, level);
@@ -139,66 +125,8 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
 
     private static final String DEFAULT_HIBERNATE_DIALECT = "org.hibernate.dialect.DerbyDialect";
 
-    private static final HashMap<String, DialectFactory.VersionInsensitiveMapper> HIBERNATE_DIALECTS = new HashMap<String, DialectFactory.VersionInsensitiveMapper>();
-
-    static {
-        // Hibernate has a nice table that resolves the dialect from the
-        // database
-        // product name,
-        // but doesn't include all the drivers. So this is supplementary, and
-        // some
-        // day in the
-        // future they'll add more drivers and we can get rid of this.
-        // Drivers already recognized by Hibernate:
-        // HSQL Database Engine
-        // DB2/NT
-        // MySQL
-        // PostgreSQL
-        // Microsoft SQL Server Database, Microsoft SQL Server
-        // Sybase SQL Server
-        // Informix Dynamic Server
-        // Oracle 8 and Oracle >8
-        HIBERNATE_DIALECTS.put("Apache Derby", new DialectFactory.VersionInsensitiveMapper("org.hibernate.dialect.DerbyDialect"));
-        HIBERNATE_DIALECTS.put("INGRES", new DialectFactory.VersionInsensitiveMapper("org.hibernate.dialect.IngresDialect"));
-        HIBERNATE_DIALECTS.put("H2", new DialectFactory.VersionInsensitiveMapper("org.hibernate.dialect.H2Dialect"));
-    }
-
     public void shutdown() {
     	_sessionManager.shutdown();
-    }
-
-    private String guessDialect(DataSource dataSource) throws Exception {
-        String dialect = null;
-        // Open a connection and use that connection to figure out database
-        // product name/version number in order to decide which Hibernate
-        // dialect to use.
-        Connection conn = dataSource.getConnection();
-        try {
-            DatabaseMetaData metaData = conn.getMetaData();
-            if (metaData != null) {
-                String dbProductName = metaData.getDatabaseProductName();
-                int dbMajorVer = metaData.getDatabaseMajorVersion();
-                __log.info("Using database " + dbProductName + " major version " + dbMajorVer);
-                DialectFactory.DatabaseDialectMapper mapper = HIBERNATE_DIALECTS.get(dbProductName);
-                if (mapper != null) {
-                    dialect = mapper.getDialectClass(dbMajorVer);
-                } else {
-                    Dialect hbDialect = DialectFactory.determineDialect(dbProductName, dbMajorVer);
-                    if (hbDialect != null)
-                        dialect = hbDialect.getClass().getName();
-                }
-            }
-        } finally {
-            conn.close();
-        }
-
-        if (dialect == null) {
-            __log.info("Cannot determine hibernate dialect for this database: using the default one.");
-            dialect = DEFAULT_HIBERNATE_DIALECT;
-        }
-
-        return dialect;
-
     }
 
     public void setDataSource(DataSource ds) {

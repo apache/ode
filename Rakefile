@@ -105,7 +105,7 @@ define "ode" do
 
     test.using :testng, :forkmode=>'perTest', :properties=>{ "log4j.debug" => true,  "log4j.configuration"=>"test-log4j.properties", "test.ports" => ENV['TEST_PORTS'], "org.apache.ode.scheduler.deleteJobsOnStart" => "true", "org.apache.ode.autoRetireProcess"=>"true" }
         #:java_args=>['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6001', '-Xmx1024M', '-XX:MaxPermSize=1024m']
-    test.with projects("tools"), libs, AXIS2_MODULES.mods, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, DOM4J, SLF4J, LOG4J, H2::REQUIRES
+    test.with projects("tools"), libs, AXIS2_MODULES.mods, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, DOM4J, SLF4J, LOG4J, H2::REQUIRES, SPRING_TEST
     webapp_dir = "#{test.compile.target}/webapp"
     test.setup task(:prepare_webapp) do |task|
       cp_r _("src/main/webapp"), test.compile.target.to_s
@@ -207,7 +207,7 @@ define "ode" do
         BACKPORT, COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
         GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, TRANQL, HSQLDB, JAVAX.ejb,
         OPENJPA, XERCES, XALAN, LOG4J, SLF4J,
-        DOM4J, HIBERNATE,
+        DOM4J, HIBERNATE, SPRING_TEST,
         "tranql:tranql-connector-derby-common:jar:1.1"
 
     package :jar
@@ -243,7 +243,8 @@ define "ode" do
     resources hibernate_doclet(:package=>"org.apache.ode.store.hib", :excludedtags=>"@version,@author,@todo")
 
     test.with COMMONS.collections, COMMONS.lang, JAVAX.connector, JAVAX.transaction, DOM4J, LOG4J,
-      XERCES, XALAN, JAXEN, SAXON, OPENJPA, GERONIMO.transaction
+      XERCES, XALAN, JAXEN, SAXON, OPENJPA, GERONIMO.transaction, SLF4J, SPRING_TEST, DERBY,
+      GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb
     package :jar
   end
 
@@ -251,14 +252,15 @@ define "ode" do
   define "bpel-test" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-runtime",
       "bpel-store", "utils", "bpel-epr", "dao-hibernate", "agents", "scheduler-simple"),
-      DERBY, JUnit.dependencies, JAVAX.persistence, OPENJPA, WSDL4J, COMMONS.httpclient, COMMONS.io,
+      DERBY, JUnit.dependencies, JAVAX.persistence, OPENJPA, WSDL4J, COMMONS.httpclient, COMMONS.io, COMMONS.logging,
       GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, JAVAX.transaction, TRANQL, "tranql:tranql-connector-derby-common:jar:1.1",
+      SPRING_TEST,
     COMMONS.codec
 
     test.using :properties=>{ "org.apache.ode.autoRetireProcess"=>"true" }
     test.with projects("bpel-obj", "jacob", "bpel-schemas",
       "bpel-scripts"),
-      COMMONS.collections, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector,
+      COMMONS.collections, COMMONS.lang, DERBY, JAVAX.connector,
       JAVAX.stream, JAVAX.transaction, JAXEN, HSQLDB, LOG4J, SAXON, XERCES, XMLBEANS, XALAN, GERONIMO.transaction, SPRING, HIBERNATE, SLF4J, DOM4J,
       JAVAX.connector
 
@@ -283,7 +285,7 @@ define "ode" do
     task "compile" => "hbm-hack"
 
     test.with project("bpel-epr"), BACKPORT, COMMONS.collections, COMMONS.lang, DERBY, COMMONS.logging, COMMONS.pool, COMMONS.dbcp, LOG4J, SLF4J,
-      GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, SPRING
+      GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, SPRING, SPRING_TEST
 
     package :jar
   end

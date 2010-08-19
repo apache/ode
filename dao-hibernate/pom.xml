@@ -64,7 +64,13 @@
 
     <dependency>
       <groupId>org.hibernate</groupId>
-      <artifactId>hibernate</artifactId>
+      <artifactId>hibernate-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javassist</groupId>
+      <artifactId>javassist</artifactId>
+      <version>3.4.GA</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -75,6 +81,12 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.xbean</groupId>
+      <artifactId>xbean-spring</artifactId>
+      <version>3.4.3</version>
       <scope>test</scope>
     </dependency>
    </dependencies>
@@ -102,6 +114,21 @@
            </execution>
          </executions>
        </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+            <!-- FIXME: temporary skip it -->
+            <!--
+            <skipTests>true</skipTests>
+            -->
+            <systemProperties>
+                <property>
+                    <name>java.naming.factory.initial</name>
+                    <value>org.apache.xbean.spring.jndi.SpringInitialContextFactory</value>
+                </property>
+            </systemProperties>
+        </configuration>
+      </plugin>
        <plugin>
          <!--doclet does not support not-found="ignore" -->
          <groupId>org.codehaus.groovy.maven</groupId>

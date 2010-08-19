@@ -38,7 +38,7 @@ public class ClusteredOutgoingTrafficTest extends Axis2TestBase implements ODECo
         if (server.isDeployed(bundleName)) server.undeployProcess(bundleName);
         server.deployProcess(bundleName);
         try {
-            String response = server.sendRequestFile("http://localhost:8888/ode/processes/PingPongService/",
+            String response = sendRequestFile("http://localhost:8888/ode/processes/PingPongService/",
                     bundleName, "testRequest.soap");
             System.out.println(response);
             assertTrue(response.contains("clusterOutput"));

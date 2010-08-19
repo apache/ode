@@ -20,6 +20,9 @@ package org.apache.ode.store.hib;
 
 import junit.framework.TestCase;
 
+import org.apache.derby.jdbc.EmbeddedXADataSource;
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.il.EmbeddedGeronimoFactory;
 import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.store.ConfStoreConnection;
 import org.apache.ode.store.ConfStoreConnectionFactory;
@@ -27,24 +30,44 @@ import org.apache.ode.store.DeploymentUnitDAO;
 import org.apache.ode.store.ProcessConfDAO;
 import org.hsqldb.jdbc.jdbcDataSource;
 import java.util.Properties;
+
+import javax.resource.spi.ConnectionManager;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
 import javax.xml.namespace.QName;
 
 public class DaoTest extends TestCase {
-    jdbcDataSource hsqlds;
-
+    protected BpelDAOConnection daoConn;
+    protected TransactionManager txm;
+    protected ConnectionManager connectionManager;
+    private DataSource ds;
     ConfStoreConnectionFactory cf;
 
-    public void setUp() throws Exception {
-        hsqlds = new jdbcDataSource();
-        hsqlds.setDatabase("jdbc:hsqldb:mem:test");
-        hsqlds.setUser("sa");
-        hsqlds.setPassword("");
+    protected DataSource getDataSource() {
+        if (ds == null) {
+            EmbeddedXADataSource ds = new EmbeddedXADataSource();
+            ds.setCreateDatabase("create");
+            ds.setDatabaseName("target/testdb");
+            ds.setUser("sa");
+            ds.setPassword("");
+            this.ds = ds;
+        }
+        return ds;
+    }
 
-        cf = new DbConfStoreConnectionFactory(hsqlds, new Properties(), true, OdeConfigProperties.DEFAULT_TX_FACTORY_CLASS_NAME);
+    public void setUp() throws Exception {
+        EmbeddedGeronimoFactory factory = new EmbeddedGeronimoFactory();
+        connectionManager = new org.apache.geronimo.connector.outbound.GenericConnectionManager();
+        txm = factory.getTransactionManager();
+        ds = getDataSource();
+        org.springframework.mock.jndi.SimpleNamingContextBuilder.emptyActivatedContextBuilder().bind("java:comp/UserTransaction", txm);
+        txm.begin();
+        
+        cf = new DbConfStoreConnectionFactory(ds, new Properties(), true, OdeConfigProperties.DEFAULT_TX_FACTORY_CLASS_NAME);
     }
 
     public void tearDown() throws Exception {
-        hsqlds.getConnection().createStatement().execute("SHUTDOWN");
+//        hsqlds.getConnection().createStatement().execute("SHUTDOWN");
     }
 
     public void testEmpty() {

@@ -50,6 +50,7 @@
 
     <util:map id="jndiEntries">
         <entry key="java:comp/env/jdbc/ode" value-ref="odeDS"/>
+        <entry key="java:comp/UserTransaction" value-ref="transactionManager" />
         <entry key="testds" value-ref="localDerbyDataSource"/>
     </util:map>
 

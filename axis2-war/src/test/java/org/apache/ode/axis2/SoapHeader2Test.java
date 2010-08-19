@@ -110,7 +110,7 @@ public class SoapHeader2Test extends Axis2TestBase {
         // deploy the required service
         if (!server.isDeployed(bundleName)) server.deployProcess(bundleName);
         try {
-            String response = server.sendRequestFile("http://localhost:8888/processes/hello/hello/process/client",
+            String response = sendRequestFile("http://localhost:8888/processes/hello/hello/process/client",
                     bundleName, "testRequest.soap");
             if (log.isDebugEnabled()) log.debug(response);
             assertTrue("Soap headers missing!", response.contains("TestSoapHeader2 passed"));

@@ -77,8 +77,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.w3c.dom.Element;
 import java.util.concurrent.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public abstract class BPELTestAbstract {
+    private static final Log log = LogFactory.getLog(BPELTestAbstract.class);
     public static final long WAIT_BEFORE_INVOKE_TIMEOUT = 2000;
 
     private static final String SHOW_EVENTS_ON_CONSOLE = "no";
@@ -119,6 +122,7 @@ public abstract class BPELTestAbstract {
         EmbeddedGeronimoFactory factory = new EmbeddedGeronimoFactory();
         if (_txManager == null) {
             _txManager = createTransactionManager();
+            org.springframework.mock.jndi.SimpleNamingContextBuilder.emptyActivatedContextBuilder().bind("java:comp/UserTransaction", _txManager);
             _dataSource = createDataSource(false);
             {
                 _txManager.begin();
@@ -389,10 +393,10 @@ public abstract class BPELTestAbstract {
             _deployed.add(d);
         } catch (Exception ex) {
             if (d.expectedException == null) {
-                ex.printStackTrace();
+                log.error("", ex);
                 failure(d, "DEPLOY: Unexpected exception: " + ex, ex);
             } else if (!d.expectedException.isAssignableFrom(ex.getClass())) {
-                ex.printStackTrace();
+                log.error("", ex);
                 failure(d, "DEPLOY: Wrong exception; expected " + d.expectedException + " but got " + ex.getClass(), ex);
             }
             return;
@@ -529,6 +533,7 @@ public abstract class BPELTestAbstract {
             StringBuffer sbuf = new StringBuffer(where + ": " + msg);
             if (ex != null) {
                 sbuf.append("; got exception msg: " + ex.getMessage());
+                ex.printStackTrace();
             }
             if (actual != null)
                 sbuf.append("; got " + actual + ", expected " + expected);

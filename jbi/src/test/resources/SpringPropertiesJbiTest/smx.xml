@@ -26,9 +26,7 @@
        xmlns:bpel="http://sample.bpel.org/bpel/sample"
        >
 
-    <util:map id="jndiEntries">
-        <entry key="java:comp/env/jdbc/ode" value-ref="odeDS"/>
-    </util:map>
+    <import resource="classpath:jndi-entries.xml"/>
 
     <sm:container
         id="jbi"

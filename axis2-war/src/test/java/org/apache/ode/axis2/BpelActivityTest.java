@@ -36,7 +36,7 @@ public class BpelActivityTest extends Axis2TestBase implements ODEConfigDirAware
             public void run() {
                 try {
                     Thread.sleep(3000);
-                    String response = server.sendRequestFile("http://localhost:8888/ode/processes/OnEventCorrelation/",
+                    String response = sendRequestFile("http://localhost:8888/ode/processes/OnEventCorrelation/",
                             bundleName, "testRequest.soap");
                 } catch( Exception e ) {
                     fail(e.getMessage());
@@ -48,7 +48,7 @@ public class BpelActivityTest extends Axis2TestBase implements ODEConfigDirAware
           public void run() {
               try {
                   Thread.sleep(6000);
-                  server.sendRequestFile("http://localhost:8888/ode/processes/OnEventCorrelation/",
+                  sendRequestFile("http://localhost:8888/ode/processes/OnEventCorrelation/",
                             bundleName, "testRequest.soap");
               } catch( Exception e ) {
                   fail(e.getMessage());
@@ -64,7 +64,7 @@ public class BpelActivityTest extends Axis2TestBase implements ODEConfigDirAware
 
         try {
             Thread.currentThread().setName("FIRST CLIENT");
-            server.sendRequestFile("http://localhost:8888/ode/processes/OnEventCorrelation/",
+            sendRequestFile("http://localhost:8888/ode/processes/OnEventCorrelation/",
                 bundleName, "testRequest.soap");
             Thread.sleep(9000);
         } catch( Exception e ) {

@@ -61,7 +61,7 @@ public class SystemCronCleanupTest extends CleanTestBase {
         try {
             initialLargeDataCount = getLargeDataCount(0);
 
-            server.sendRequestFile("http://localhost:8888/processes/FirstProcess/FirstProcess/FirstProcess/Client", bundleName, "testRequest.soap");
+            sendRequestFile("http://localhost:8888/processes/FirstProcess/FirstProcess/FirstProcess/Client", bundleName, "testRequest.soap");
             // every second, clean up cron job kicks in
             Thread.sleep(2000);
             LogFactory.getLog(SystemCronCleanupTest.class).debug("============ASSERT INSTANCE CLEANUP===============");

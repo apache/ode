@@ -245,7 +245,7 @@ public class InstanceManagementTest extends Axis2TestBase implements ODEConfigDi
         _deployedName = res.getFirstChildWithName(new QName(null, "response")).getFirstChildWithName(new QName("http://www.apache.org/ode/deployapi", "name")).getText();
 
         // Execute
-      System.out.println(server.sendRequestFile("http://localhost:8888/processes/DynMainService", "testDynPartnerRequest.soap"));
+      System.out.println(sendRequestFile("http://localhost:8888/processes/DynMainService", "testDynPartnerRequest.soap"));
         // Just making sure the instance starts
         Thread.sleep(1000);
     }

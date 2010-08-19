@@ -180,7 +180,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     }
 
     private void initDataSource() throws JBIException {
-        _db = new Database(_ode._config);
+        _db = Database.create(_ode._config);
         _db.setTransactionManager(_ode.getTransactionManager());
         _db.setWorkRoot(new File(_ode.getContext().getInstallRoot()));
 

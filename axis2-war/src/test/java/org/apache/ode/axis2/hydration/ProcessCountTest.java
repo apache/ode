@@ -118,7 +118,7 @@ public class ProcessCountTest extends Axis2TestBase {
         Thread processOne = new Thread() {
             public void run() {
                 try {
-                    firstResponse = server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
+                    firstResponse = sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                             bundleOne, "testRequest.soap");
                     System.out.println("=>\n" + firstResponse);
                 } catch (Exception e) {

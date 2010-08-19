@@ -20,6 +20,7 @@
 package org.apache.ode.axis2;
 
 import java.io.File;
+import java.util.Properties;
 
 import org.apache.ode.il.config.OdeConfigProperties;
 
@@ -33,6 +34,7 @@ public class ODEConfigProperties extends OdeConfigProperties {
         super(new File(installRoot, ODEConfigProperties.CONFIG_FILE_NAME),"ode-axis2.");
     }
 
-
-
+    public ODEConfigProperties(Properties properties) {
+        super(properties, "ode-axis2.");
+    }
 }

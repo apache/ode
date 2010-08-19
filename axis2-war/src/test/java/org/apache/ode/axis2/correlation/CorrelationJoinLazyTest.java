@@ -46,7 +46,7 @@ public class CorrelationJoinLazyTest extends Axis2TestBase implements ODEConfigD
             public void run() {
                 try {
                     Thread.sleep(3000);
-                    server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
+                    sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                             bundleName, "testRequest2.soap");
                 } catch( Exception e ) {
                     fail(e.getMessage());
@@ -58,7 +58,7 @@ public class CorrelationJoinLazyTest extends Axis2TestBase implements ODEConfigD
             public void run() {
                 try {
                     Thread.sleep(6000);
-                    server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
+                    sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                             bundleName, "testRequest3.soap");
                 } catch( Exception e ) {
                     fail(e.getMessage());
@@ -67,7 +67,7 @@ public class CorrelationJoinLazyTest extends Axis2TestBase implements ODEConfigD
         }.start();
 
         try {
-            String response = server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
+            String response = sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                     bundleName, "testRequest.soap");
             System.out.println("=>\n" + response);
             assertTrue(response.contains(">1;3;2;<"));

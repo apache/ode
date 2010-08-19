@@ -114,7 +114,7 @@ public class InstanceCountTest extends Axis2TestBase {
             public void run() {
                 try {
                     Thread.sleep(3000);
-                    server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
+                    sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                             bundleName, "testRequest2.soap");
                 } catch( Exception e ) {
                     fail(e.getMessage());
@@ -125,7 +125,7 @@ public class InstanceCountTest extends Axis2TestBase {
         Thread processOne = new Thread() {
             public void run() {
                 try {
-                    firstResponse = server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
+                    firstResponse = sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                             bundleName, "testRequest.soap");
                     System.out.println("=>\n" + firstResponse);
                 } catch (Exception e) {
@@ -139,7 +139,7 @@ public class InstanceCountTest extends Axis2TestBase {
             public void run() {
                 try {
                     Thread.sleep(3000);
-                    secondResponse = server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
+                    secondResponse = sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                             bundleName, "testRequest.soap");
                 } catch( Exception e ) {
                     fail(e.getMessage());
@@ -160,7 +160,7 @@ public class InstanceCountTest extends Axis2TestBase {
             public void run() {
                 try {
                     Thread.sleep(6000);
-                    server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
+                    sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                             bundleName, "testRequest3.soap");
                 } catch( Exception e ) {
                     fail(e.getMessage());

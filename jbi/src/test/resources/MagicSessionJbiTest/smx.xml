@@ -24,9 +24,7 @@
        xmlns:jencks="http://jencks.org/2.0"
        >
 
-    <util:map id="jndiEntries">
-        <entry key="java:comp/env/jdbc/ode" value-ref="odeDS"/>
-    </util:map>
+    <import resource="classpath:jndi-entries.xml"/>
 
     <sm:container
         id="jbi"

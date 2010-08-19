@@ -40,7 +40,7 @@ public class EndpointTimeoutsTest extends Axis2TestBase {
         if (server.isDeployed(bundleName)) server.undeployProcess(bundleName);
         server.deployProcess(bundleName);
         try {
-            String response = server.sendRequestFile("http://localhost:8888/processes/helloWorld",
+            String response = sendRequestFile("http://localhost:8888/processes/helloWorld",
                     bundleName, "testRequest.soap");
             System.out.println(response);
             assertTrue("A timeout exception was expected", response.contains("<soapenv:Fault") && response.contains("Timeout or execution error when waiting for response to MEX"));

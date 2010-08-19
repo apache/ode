@@ -77,7 +77,7 @@ public class CleanSuccessTest extends CleanTestBase {
         try {
             initialLargeDataCount = getLargeDataCount(0);
 
-            server.sendRequestFile("http://localhost:8888/processes/FirstProcess/FirstProcess/FirstProcess/Client", bundleName, "testRequest.soap");
+            sendRequestFile("http://localhost:8888/processes/FirstProcess/FirstProcess/FirstProcess/Client", bundleName, "testRequest.soap");
             process = assertInstanceCleanup(instances, activityRecoveries, correlationSets, faults, exchanges, routes, messsages, partnerLinks, scopes, variables, events, largeData);
         } finally {
             try {

@@ -45,7 +45,7 @@ public class CorrelationJoinTest extends Axis2TestBase implements ODEConfigDirAw
             public void run() {
                 try {
                     Thread.sleep(3000);
-                    server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
+                    sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                             bundleName, "testRequest2.soap");
                 } catch( Exception e ) {
                     fail(e.getMessage());
@@ -57,7 +57,7 @@ public class CorrelationJoinTest extends Axis2TestBase implements ODEConfigDirAw
             public void run() {
                 try {
                     Thread.sleep(6000);
-                    server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
+                    sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                             bundleName, "testRequest3.soap");
                 } catch( Exception e ) {
                     fail(e.getMessage());
@@ -66,7 +66,7 @@ public class CorrelationJoinTest extends Axis2TestBase implements ODEConfigDirAw
         }.start();
 
         try {
-            String response = server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
+            String response = sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                     bundleName, "testRequest.soap");
             System.out.println("=>\n" + response);
             assertTrue(response.contains(">1;2;3;<"));

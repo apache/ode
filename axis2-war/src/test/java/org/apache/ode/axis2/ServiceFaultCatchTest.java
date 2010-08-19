@@ -37,7 +37,7 @@ public class ServiceFaultCatchTest extends Axis2TestBase {
         if (server.isDeployed(bundleName)) server.undeployProcess(bundleName);
         server.deployProcess(bundleName);
         try {
-            String response = server.sendRequestFile("http://localhost:8888/processes/helloWorld",
+            String response = sendRequestFile("http://localhost:8888/processes/helloWorld",
                     bundleName, "testRequest.soap");
             assertTrue(response.contains("helloResponse") && response.contains("Something went wrong. Fortunately, it was meant to be."));
         } finally {

@@ -39,13 +39,13 @@ public class RedeployTest extends Axis2TestBase {
 
         QName deployedQName = server.deployProcess(bundleName + "/withVar").iterator().next();
 
-        server.sendRequestFile("http://localhost:8888/processes/testretire",
+        sendRequestFile("http://localhost:8888/processes/testretire",
                 bundleName + "/1", "testRequest1.soap");
 
         server.undeployProcess(bundleName + "/withVar");
         server.deployProcess(bundleName + "/withVar").iterator().next();
 
-        String response = server.sendRequestFile("http://localhost:8888/processes/testretire",
+        String response = sendRequestFile("http://localhost:8888/processes/testretire",
                 bundleName + "/1", "testRequest2.soap");
     }
 }

@@ -38,7 +38,7 @@ public class NoP2PTest extends Axis2TestBase {
         if (server.isDeployed(bundleName)) server.undeployProcess(bundleName);
         server.deployProcess(bundleName);
         try {
-            String response = server.sendRequestFile("http://localhost:8888/ode/processes/PingPongService/",
+            String response = sendRequestFile("http://localhost:8888/ode/processes/PingPongService/",
                     bundleName, "testRequest.soap");
             System.out.println(response);
             assertTrue(response.contains("magic"));

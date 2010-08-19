@@ -84,6 +84,7 @@ public class ConfStoreConnectionHib implements ConfStoreConnection {
     }
 
     public void setVersion(long version) {
+        _session.flush();
         VersionTrackerDAOImpl vt = (VersionTrackerDAOImpl)
                 _session.createQuery("from VersionTrackerDAOImpl v ").uniqueResult();
         if (vt == null) {

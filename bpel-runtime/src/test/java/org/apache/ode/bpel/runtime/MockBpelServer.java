@@ -94,6 +94,7 @@ class MockBpelServer {
         try {
             _server = new BpelServerImpl();
             createTransactionManager();
+            org.springframework.mock.jndi.SimpleNamingContextBuilder.emptyActivatedContextBuilder().bind("java:comp/UserTransaction", _txManager);
             createDataSource();
             createScheduler();
             createDAOConnection();

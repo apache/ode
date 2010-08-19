@@ -89,7 +89,7 @@
         <wsdl4j.version>1.6.2</wsdl4j.version>
         <woodstox.version>3.2.4</woodstox.version>
         <javax.mail.version>1.4</javax.mail.version>
-        <hibernate.version>3.2.5.ga</hibernate.version>
+        <hibernate.version>3.3.2.GA</hibernate.version>
         <spring.version>2.5.6</spring.version>
         <geronimo.specs.version>1.0</geronimo.specs.version>
         <geronimo.version>2.0.1</geronimo.version>
@@ -155,6 +155,7 @@
         <module>bpel-connector</module>
         <module>bpel-test</module>
         <module>axis2</module>
+        <module>axis2-bundle</module>
         <module>jbi</module>
         <module>jbi-bundle</module>
         <module>jbi-karaf</module>
@@ -747,16 +748,8 @@
 
             <dependency>
                 <groupId>org.hibernate</groupId>
-                <artifactId>hibernate</artifactId>
+                <artifactId>hibernate-core</artifactId>
                 <version>${hibernate.version}</version>
-                <!--
-                <exclusions>
-                    <exclusion>
-                        <artifactId>jta</artifactId>
-                        <groupId>javax.transaction</groupId>
-                    </exclusion>
-                </exclusions>
-                -->
             </dependency>
 
             <dependency>

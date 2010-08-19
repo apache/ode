@@ -128,12 +128,18 @@ public class ODEServer {
 
     protected MultiThreadedHttpConnectionManager httpConnectionManager;
     protected IdleConnectionTimeoutThread idleConnectionTimeoutThread;
+    
+    public Runnable txMgrCreatedCallback;
 
     public void init(ServletConfig config, AxisConfiguration axisConf) throws ServletException {
         init(config.getServletContext().getRealPath("/WEB-INF"), axisConf);
     }
 
     public void init(String contextPath, AxisConfiguration axisConf) throws ServletException {
+        init(contextPath, axisConf, null);
+    }
+    
+    public void init(String contextPath, AxisConfiguration axisConf, ODEConfigProperties config) throws ServletException {
         _axisConfig = axisConf;
         String rootDir = System.getProperty("org.apache.ode.rootDir");
         if (rootDir != null) _appRoot = new File(rootDir);
@@ -149,10 +155,13 @@ public class ODEServer {
         if (!_configRoot.isDirectory())
             throw new IllegalArgumentException(_configRoot + " does not exist or is not a directory");
 
-        _odeConfig = new ODEConfigProperties(_configRoot);
-
         try {
-            _odeConfig.load();
+            if (config == null) {
+                _odeConfig = new ODEConfigProperties(_configRoot);
+                _odeConfig.load();
+            } else {
+                _odeConfig = config;
+            }
         } catch (FileNotFoundException fnf) {
             String errmsg = __msgs.msgOdeInstallErrorCfgNotFound(_odeConfig.getFile());
             __log.warn(errmsg);
@@ -170,6 +179,9 @@ public class ODEServer {
 
         __log.debug("Initializing transaction manager");
         initTxMgr();
+        if (txMgrCreatedCallback != null) {
+            txMgrCreatedCallback.run();
+        }
         __log.debug("Creating data source.");
         initDataSource();
         __log.debug("Starting DAO.");
@@ -259,7 +271,7 @@ public class ODEServer {
     }
 
     private void initDataSource() throws ServletException {
-        _db = new Database(_odeConfig);
+        _db = Database.create(_odeConfig);
         _db.setTransactionManager(_txMgr);
         _db.setWorkRoot(_workRoot);
 
@@ -271,6 +283,10 @@ public class ODEServer {
             throw new ServletException(errmsg, ex);
         }
 
+    }
+
+    public TransactionManager getTransactionManager() {
+        return _txMgr;
     }
 
     /**

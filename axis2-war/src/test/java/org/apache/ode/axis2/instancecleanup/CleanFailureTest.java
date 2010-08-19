@@ -34,7 +34,7 @@ public class CleanFailureTest extends CleanTestBase {
         server.deployProcess(bundleName);
         try {
             initialLargeDataCount = getLargeDataCount(0);
-            server.sendRequestFile("http://localhost:8888/processes/helloWorld", bundleName, "testRequest.soap");
+            sendRequestFile("http://localhost:8888/processes/helloWorld", bundleName, "testRequest.soap");
         } finally {
             ProcessDAO process = getProcess();
             server.undeployProcess(bundleName);

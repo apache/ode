@@ -39,14 +39,14 @@ public class CorrelationUnicityTest extends Axis2TestBase implements ODEConfigDi
         server.deployProcess(bundleName);
         try {
             {
-                String response = server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
+                String response = sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                         bundleName, "testRequest.soap");
                 System.out.println(response);
                 assertTrue(response.contains("correlationUnicity1"));
             }
 
             {
-                String response = server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
+                String response = sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                         bundleName, "testRequest.soap");
                 System.out.println(response);
                 assertTrue(response.contains("correlationUnicity1"));

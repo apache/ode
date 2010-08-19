@@ -37,7 +37,7 @@ public class SelectorsTest extends Axis2TestBase implements ODEConfigDirAware {
         String bundleName = "TestSelectors";
         if (server.isDeployed(bundleName)) server.undeployProcess(bundleName);
         server.deployProcess(bundleName);
-        String response = server.sendRequestFile("http://localhost:8888/ode/processes/Project-Reproduce-Isolation-Problem/ReproduceIsolationProblem/Pool2/Pool",
+        String response = sendRequestFile("http://localhost:8888/ode/processes/Project-Reproduce-Isolation-Problem/ReproduceIsolationProblem/Pool2/Pool",
                 bundleName, "testRequest.soap");
         System.out.println(response);
         assertTrue(response.contains("_21Response"));

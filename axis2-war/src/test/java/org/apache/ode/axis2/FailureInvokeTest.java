@@ -40,7 +40,7 @@ public class FailureInvokeTest extends Axis2TestBase {
         try {
             new Thread(new Killer(this)).start();
             try {
-                String response = server.sendRequestFile("http://localhost:8888/processes/invokeFailureTest",
+                String response = sendRequestFile("http://localhost:8888/processes/invokeFailureTest",
                         bundleName, "testRequest.soap");
                 System.out.println("=> " + response);
             } catch (Exception e) {

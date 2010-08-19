@@ -40,7 +40,7 @@ public class CorrelationMultiTest extends Axis2TestBase implements ODEConfigDirA
             public void run() {
                 try {
                     Thread.sleep(3000);
-                    server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
+                    sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                             bundleName, "testRequest2.soap");
                 } catch( Exception e ) {
                     fail(e.getMessage());
@@ -49,7 +49,7 @@ public class CorrelationMultiTest extends Axis2TestBase implements ODEConfigDirA
         }.start();
 
         try {
-            String response = server.sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
+            String response = sendRequestFile("http://localhost:8888/processes/correlationMultiTest",
                     bundleName, "testRequest.soap");
             assertTrue(response.contains(">1;2;<"));
         } catch (Exception e) {

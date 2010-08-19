@@ -56,6 +56,7 @@ public abstract class BaseTestDAO extends TestCase {
         connectionManager = new org.apache.geronimo.connector.outbound.GenericConnectionManager();
         txm = factory.getTransactionManager();
         ds = getDataSource();
+        org.springframework.mock.jndi.SimpleNamingContextBuilder.emptyActivatedContextBuilder().bind("java:comp/UserTransaction", txm);
         txm.begin();
 
         BpelDAOConnectionFactoryImpl factoryImpl = new BpelDAOConnectionFactoryImpl();
