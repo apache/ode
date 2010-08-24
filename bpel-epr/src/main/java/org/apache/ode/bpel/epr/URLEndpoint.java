@@ -40,7 +40,7 @@ public class URLEndpoint implements MutableEndpoint {
     }
 
     public String getUrl() {
-        return _url;
+        return _url != null ? _url.trim() : null;
     }
 
     public void setUrl(String url) {

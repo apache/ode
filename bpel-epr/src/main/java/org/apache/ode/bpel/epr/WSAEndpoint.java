@@ -90,7 +90,7 @@ public class WSAEndpoint implements MutableEndpoint {
     }
 
     public String getUrl() {
-        return _eprElmt.getElementsByTagNameNS(Namespaces.WS_ADDRESSING_NS, "Address").item(0).getTextContent();
+        return _eprElmt.getElementsByTagNameNS(Namespaces.WS_ADDRESSING_NS, "Address").item(0).getTextContent().trim();
     }
 
     public void setUrl(String url) {
