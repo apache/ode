@@ -37,6 +37,8 @@ public abstract class BpelEvent implements Serializable {
      * Bpel Event Context. In Event Listeners, use this to get Variable Data
      */
     public transient EventContext eventContext;
+    
+    public transient boolean _cancelEventPersisting = false;
 
     private Date _timestamp = new Date();
 
@@ -57,7 +59,19 @@ public abstract class BpelEvent implements Serializable {
     public void setTimestamp(Date tstamp) {
         _timestamp = tstamp;
     }
+    
+    public void enableEventPersisting() {
+        _cancelEventPersisting = false;
+    }
 
+    public void disableEventPersisting() {
+        _cancelEventPersisting = true;
+    }
+
+    public boolean isEventPersistingCancelled() {
+        return _cancelEventPersisting;
+    }
+    
     public String toString() {
         StringBuilder sb = new StringBuilder("\n" + eventName(this) + ":");
 

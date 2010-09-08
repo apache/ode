@@ -709,7 +709,7 @@ public class BpelProcess {
             // notify the listeners
             _engine.fireEvent(event);
 
-            if (instanceDao != null)
+            if (instanceDao != null && !event.isEventPersistingCancelled())
                 instanceDao.insertBpelEvent(event);
             else
                 __log.debug("Couldn't find instance to save event, no event generated!");
