@@ -178,6 +178,15 @@ public class CorrelationKeySet implements Serializable {
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result
+                + ((correlationKeys == null) ? 0 : correlationKeys.hashCode());
+        return result;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if( o == null || !(o instanceof CorrelationKeySet) ) {
             return false;

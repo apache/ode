@@ -18,10 +18,6 @@
  */
 package org.apache.ode.bpel.engine;
 
-import org.apache.ode.bpel.runtime.PartnerLinkInstance;
-import org.apache.ode.bpel.runtime.Selector;
-import org.apache.ode.utils.ObjectPrinter;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +29,10 @@ import javax.wsdl.OperationType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.common.CorrelationKeySet;
+import org.apache.ode.bpel.runtime.PartnerLinkInstance;
+import org.apache.ode.bpel.runtime.Selector;
+import org.apache.ode.utils.ObjectPrinter;
 
 /**
  * <p>
@@ -64,7 +64,7 @@ public class IMAManager implements Serializable {
 
         Set<RequestIdTuple> workingSet = new HashSet<RequestIdTuple>(_byRid.keySet());
         for (int i = 0; i < selectors.length; ++i) {
-            final RequestIdTuple rid = new RequestIdTuple(selectors[i].plinkInstance, selectors[i].opName);
+            final RequestIdTuple rid = new RequestIdTuple(selectors[i].plinkInstance, selectors[i].opName, selectors[i].correlationKeySet);
             if (workingSet.contains(rid)) {
                 return i;
             }
@@ -94,7 +94,7 @@ public class IMAManager implements Serializable {
 
         Entry entry = new Entry(pickResponseChannel, selectors);
         for (int i = 0; i < selectors.length; ++i) {
-            final RequestIdTuple rid = new RequestIdTuple(selectors[i].plinkInstance, selectors[i].opName);
+            final RequestIdTuple rid = new RequestIdTuple(selectors[i].plinkInstance, selectors[i].opName, selectors[i].correlationKeySet);
             if (_byRid.containsKey(rid)) {
                 String errmsg = "INTERNAL ERROR: Duplicate ENTRY for RID " + rid;
                 __log.fatal(errmsg);
@@ -187,7 +187,7 @@ public class IMAManager implements Serializable {
                 _byOrid.put(orid, oldEntry.mexRef);
             } else {
                 //registered IMA
-                RequestIdTuple rid = new RequestIdTuple(oldRid.partnerLink, oldRid.opName);
+                RequestIdTuple rid = new RequestIdTuple(oldRid.partnerLink, oldRid.opName, null);
                 Entry entry = new Entry(oldEntry.pickResponseChannel, (Selector[]) oldEntry.selectors);
                 _byRid.put(rid, entry);
                 _byChannel.put(entry.pickResponseChannel, entry);
@@ -223,24 +223,74 @@ public class IMAManager implements Serializable {
         PartnerLinkInstance partnerLink;
         /** Name of the operation. */
         String opName;
+        /** cset */
+        CorrelationKeySet ckeySet;
+        /** migrated tuple. This is true if the tuple has been created based on an old tuple which didn't contain a cset.*/
+        boolean isMigrated = false;
 
         /** Constructor. */
-        private RequestIdTuple(PartnerLinkInstance partnerLink, String opName) {
+        private RequestIdTuple(PartnerLinkInstance partnerLink, String opName, CorrelationKeySet ckeySet) {
             this.partnerLink = partnerLink;
             this.opName = opName;
-        }
-
-        public int hashCode() {
-            return this.partnerLink.hashCode() ^ this.opName.hashCode();
-        }
-
-        public boolean equals(Object obj) {
-            RequestIdTuple other = (RequestIdTuple) obj;
-            return other.partnerLink.equals(partnerLink) && other.opName.equals(opName);
+            this.ckeySet = ckeySet;
+            if (ckeySet == null) {
+                this.isMigrated = true;
+            }
         }
 
         public String toString() {
-            return ObjectPrinter.toString(this, new Object[] { "partnerLink", partnerLink, "opName", opName});
+            return ObjectPrinter.toString(this, new Object[] { "partnerLink", partnerLink, "opName", opName, "cSet", ckeySet});
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + getOuterType().hashCode();
+            result = prime * result
+                    + ((ckeySet == null) ? 0 : ckeySet.hashCode());
+            result = prime * result
+                    + ((opName == null) ? 0 : opName.hashCode());
+            if (!isMigrated) {
+                result = prime * result
+                        + ((partnerLink == null) ? 0 : partnerLink.hashCode());
+            }
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            RequestIdTuple other = (RequestIdTuple) obj;
+            if (!getOuterType().equals(other.getOuterType()))
+                return false;
+            if (!isMigrated) {
+                if (ckeySet == null) {
+                    if (other.ckeySet != null)
+                        return false;
+                } else if (!ckeySet.equals(other.ckeySet))
+                    return false;
+            }
+            if (opName == null) {
+                if (other.opName != null)
+                    return false;
+            } else if (!opName.equals(other.opName))
+                return false;
+            if (partnerLink == null) {
+                if (other.partnerLink != null)
+                    return false;
+            } else if (!partnerLink.equals(other.partnerLink))
+                return false;
+            return true;
+        }
+
+        private IMAManager getOuterType() {
+            return IMAManager.this;
         }
     }
 
