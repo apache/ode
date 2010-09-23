@@ -30,13 +30,13 @@ import org.apache.xerces.xni.parser.XMLParseException;
 import org.apache.xerces.xs.XSModel;
 import org.w3c.dom.ls.LSInput;
 
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 /**
  * Various utility methods related to XML Schema processing.
@@ -64,7 +64,7 @@ public class XSUtils {
 
         DOMInputImpl input = new DOMInputImpl();
         input.setSystemId(systemURI.toString());
-        input.setStringData(new String(schemaData));
+        input.setByteStream(new ByteArrayInputStream(schemaData));
 
         Map<URI, byte[]> ret = captureSchema(input, resolver);
         
