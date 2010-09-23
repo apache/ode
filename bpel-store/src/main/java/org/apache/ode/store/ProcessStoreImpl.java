@@ -315,7 +315,7 @@ public class ProcessStoreImpl implements ProcessStore {
             __log.warn("Deployment failed within the engine, store undeploying process.", e);
             undeploy(deploymentUnitDirectory);
             if (e instanceof ContextException) throw (ContextException) e;
-            else throw new ContextException("Deployment failed within the engine.", e);
+            else throw new ContextException("Deployment failed within the engine. " + e.getMessage(), e);
         }
 
         return deployed;

@@ -87,7 +87,7 @@ public class ExternalVariableManager {
                 evar._engine.configure(_pid, evar._extVarId, evar._config);
             } catch (ExternalVariableModuleException eve) {
                 __log.error("External variable subsystem configuration error.", eve);
-                throw new BpelEngineException("External variable subsystem configuration error.",eve);
+                throw new BpelEngineException("External variable subsystem configuration error: " + eve.getMessage(), eve);
             }
             if (_externalVariables.containsKey(var.extVariableId)) {
                 __log.warn("Duplicate external variable configuration for \"" + var.extVariableId + "\" will be ignored!");
