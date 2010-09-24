@@ -439,6 +439,8 @@
                             <excludes>
                                <exclude>**/management/DeploymentTest.java</exclude>
                                <exclude>**/management/InstanceManagementTest.java</exclude>
+							   <exclude>**/*EndpointConfigurationTest.java</exclude>
+							   <exclude>**/*HttpBindingTest.java</exclude>
                                <exclude>**/rampart/basic/*Test.java</exclude>
                                <exclude>**/rampart/policy/*Test.java</exclude>
                             </excludes>
