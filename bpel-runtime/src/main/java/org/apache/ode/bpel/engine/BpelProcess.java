@@ -1162,8 +1162,8 @@ public class BpelProcess {
         return timeout;
     }
 
-    public int getVersion() {
-        return Integer.parseInt(_pid.getLocalPart().substring(_pid.getLocalPart().lastIndexOf('-') + 1));
+    public long getVersion() {
+        return Long.parseLong(_pid.getLocalPart().substring(_pid.getLocalPart().lastIndexOf('-') + 1));
     }
     
     public void doAsyncReply(MyRoleMessageExchangeImpl m, BpelRuntimeContext context) {
