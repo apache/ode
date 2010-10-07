@@ -28,7 +28,8 @@ import java.util.Date;
  * Base interface for all bpel events.
  */
 public abstract class BpelEvent implements Serializable {
-
+    private static final long serialVersionUID = 2904857392517854573L;
+    
     public enum TYPE {
         dataHandling, activityLifecycle, scopeHandling, instanceLifecycle, correlation;
     }
