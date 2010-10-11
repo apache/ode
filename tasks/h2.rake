@@ -33,7 +33,7 @@ module H2
       targetDir=File.expand_path(db)
       file(targetDir=>prereqs) do |task|
         rm_rf dbname if File.exist?(dbname)
-        Java::Commands.java "org.h2.tools.RunScript", "-url", "jdbc:h2:file:"+targetDir+File::Separator+dbname+";DB_CLOSE_ON_EXIT=false;user=sa", "-showResults", "-script", prereqs, :classpath => REQUIRES 
+        Java::Commands.java "org.h2.tools.RunScript", "-url", "jdbc:h2:file:"+Util.normalize_path("#{targetDir}/#{dbname}")+";DB_CLOSE_ON_EXIT=false;user=sa", "-showResults", "-script", prereqs, :classpath => REQUIRES
         #Buildr.filter(prereqs).into(dbname).run
         #touch task.name, :verbose=>false
       end

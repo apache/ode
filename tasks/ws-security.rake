@@ -22,7 +22,7 @@ module WSSecurity
     def prepare_secure_services_tests(test_dir, file_pattern, modules)
       task(test_dir.to_sym) do
         # copy the required modules
-        mkdir "#{test_dir}/modules" unless File.directory? "#{test_dir}/modules"
+        mkdir_p "#{test_dir}/modules" unless File.directory? "#{test_dir}/modules"
         Buildr.artifacts(modules).each(&:invoke)
         cp modules.map {|a| Buildr.repositories.locate(a)} , "#{test_dir}/modules"
         # generate one process per test
