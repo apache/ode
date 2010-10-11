@@ -29,6 +29,7 @@ import javax.wsdl.OperationType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.runtime.PartnerLinkInstance;
 import org.apache.ode.bpel.runtime.Selector;
 import org.apache.ode.utils.ObjectPrinter;
@@ -38,13 +39,11 @@ import org.apache.ode.utils.ObjectPrinter;
  * This class handles behaviour of IMAs (Inbound Message Activities) as specified in WS BPEL.
  * This includes detecting conflictingReceive and conflictingRequest faults.
  * </p>
- * @deprecated use IMAManager2 instead.
  */
-@Deprecated
-public class IMAManager implements Serializable {
+public class IMAManager2 implements Serializable {
     private static final long serialVersionUID = -5556374398943757951L;
 
-    private static final Log __log = LogFactory.getLog(IMAManager.class);
+    private static final Log __log = LogFactory.getLog(IMAManager2.class);
 
     // holds rid for registered IMAs
     public final Map<RequestIdTuple, Entry> _byRid = new HashMap<RequestIdTuple, Entry>();
@@ -65,7 +64,7 @@ public class IMAManager implements Serializable {
 
         Set<RequestIdTuple> workingSet = new HashSet<RequestIdTuple>(_byRid.keySet());
         for (int i = 0; i < selectors.length; ++i) {
-            final RequestIdTuple rid = new RequestIdTuple(selectors[i].plinkInstance, selectors[i].opName);
+            final RequestIdTuple rid = new RequestIdTuple(selectors[i].plinkInstance, selectors[i].opName, selectors[i].correlationKeySet);
             if (workingSet.contains(rid)) {
                 return i;
             }
@@ -95,7 +94,7 @@ public class IMAManager implements Serializable {
 
         Entry entry = new Entry(pickResponseChannel, selectors);
         for (int i = 0; i < selectors.length; ++i) {
-            final RequestIdTuple rid = new RequestIdTuple(selectors[i].plinkInstance, selectors[i].opName);
+            final RequestIdTuple rid = new RequestIdTuple(selectors[i].plinkInstance, selectors[i].opName, selectors[i].correlationKeySet);
             if (_byRid.containsKey(rid)) {
                 String errmsg = "INTERNAL ERROR: Duplicate ENTRY for RID " + rid;
                 __log.fatal(errmsg);
@@ -179,23 +178,6 @@ public class IMAManager implements Serializable {
         return mexRef;
     }
 
-    public void migrateRids(Map<OutstandingRequestManager.RequestIdTuple, OutstandingRequestManager.Entry> oldRids) {
-        for (OutstandingRequestManager.RequestIdTuple oldRid : oldRids.keySet()) {
-            OutstandingRequestManager.Entry oldEntry = oldRids.get(oldRid);
-            if (oldEntry.mexRef != null) {
-                //open IMA
-                OutstandingRequestIdTuple orid = new OutstandingRequestIdTuple(oldRid.partnerLink, oldRid.opName, oldRid.mexId);
-                _byOrid.put(orid, oldEntry.mexRef);
-            } else {
-                //registered IMA
-                RequestIdTuple rid = new RequestIdTuple(oldRid.partnerLink, oldRid.opName);
-                Entry entry = new Entry(oldEntry.pickResponseChannel, (Selector[]) oldEntry.selectors);
-                _byRid.put(rid, entry);
-                _byChannel.put(entry.pickResponseChannel, entry);
-            }
-        }
-    }
-
     /**
      * "Release" all Open IMAs
      *
@@ -217,56 +199,78 @@ public class IMAManager implements Serializable {
     public String toString() {
         return ObjectPrinter.toString(this, new Object[] { "byRid", _byRid, "byOrid", _byOrid, "byChannel", _byChannel });
     }
-    
-    public IMAManager2 toIMAManager2() {
-        IMAManager2 newIMA = new IMAManager2();
-        for (String channel : _byChannel.keySet()) {
-            IMAManager2.Entry entry = new IMAManager2.Entry(_byChannel.get(channel).pickResponseChannel, _byChannel.get(channel).selectors);
-            newIMA._byChannel.put(channel, entry);
-        }
-        for (OutstandingRequestIdTuple orid : _byOrid.keySet()) {
-            IMAManager2.OutstandingRequestIdTuple newOrid = new IMAManager2.OutstandingRequestIdTuple(orid.partnerLink, orid.opName, orid.mexId);
-            newIMA._byOrid.put(newOrid, _byOrid.get(orid));
-        }
-        for (RequestIdTuple rid : _byRid.keySet()) {
-            IMAManager2.Entry entry = new IMAManager2.Entry(_byRid.get(rid).pickResponseChannel, _byRid.get(rid).selectors);
-            for (Selector sel : entry.selectors) {
-                IMAManager2.RequestIdTuple newRid = new IMAManager2.RequestIdTuple(rid.partnerLink, rid.opName, sel.correlationKeySet);
-                newIMA._byRid.put(newRid, entry);
-            }
-        }
 
-        return newIMA;
-    }
-
-    private class RequestIdTuple implements Serializable {
+    public static class RequestIdTuple implements Serializable {
         private static final long serialVersionUID = -1059389611839777482L;
         /** On which partner link it was received. */
         PartnerLinkInstance partnerLink;
         /** Name of the operation. */
         String opName;
+        /** cset */
+        CorrelationKeySet ckeySet;
 
         /** Constructor. */
-        private RequestIdTuple(PartnerLinkInstance partnerLink, String opName) {
+        RequestIdTuple(PartnerLinkInstance partnerLink, String opName, CorrelationKeySet ckeySet) {
             this.partnerLink = partnerLink;
             this.opName = opName;
+            this.ckeySet = ckeySet;
         }
-
-        public int hashCode() {
-            return this.partnerLink.hashCode() ^ this.opName.hashCode();
-        }
-
-        public boolean equals(Object obj) {
-            RequestIdTuple other = (RequestIdTuple) obj;
-            return other.partnerLink.equals(partnerLink) && other.opName.equals(opName);
-        } 
 
         public String toString() {
-            return ObjectPrinter.toString(this, new Object[] { "partnerLink", partnerLink, "opName", opName});
+            return ObjectPrinter.toString(this, new Object[] { "partnerLink", partnerLink, "opName", opName, "cSet", ckeySet});
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result
+                    + ((ckeySet == null) ? 0 : ckeySet.hashCode());
+            result = prime * result
+                    + ((opName == null) ? 0 : opName.hashCode());
+            result = prime * result
+                    + ((partnerLink == null) ? 0 : partnerLink.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (!(obj instanceof RequestIdTuple)) {
+                return false;
+            }
+            RequestIdTuple other = (RequestIdTuple) obj;
+            if (ckeySet == null) {
+                if (other.ckeySet != null) {
+                    return false;
+                }
+            } else if (!ckeySet.equals(other.ckeySet)) {
+                return false;
+            }
+            if (opName == null) {
+                if (other.opName != null) {
+                    return false;
+                }
+            } else if (!opName.equals(other.opName)) {
+                return false;
+            }
+            if (partnerLink == null) {
+                if (other.partnerLink != null) {
+                    return false;
+                }
+            } else if (!partnerLink.equals(other.partnerLink)) {
+                return false;
+            }
+            return true;
         }
     }
 
-    private class OutstandingRequestIdTuple implements Serializable {
+    public static class OutstandingRequestIdTuple implements Serializable {
         private static final long serialVersionUID = -1059389611839777482L;
         /** On which partner link it was received. */
         PartnerLinkInstance partnerLink;
@@ -276,7 +280,7 @@ public class IMAManager implements Serializable {
         String mexId;
 
         /** Constructor. */
-        private OutstandingRequestIdTuple(PartnerLinkInstance partnerLink, String opName, String mexId) {
+        OutstandingRequestIdTuple(PartnerLinkInstance partnerLink, String opName, String mexId) {
             this.partnerLink = partnerLink;
             this.opName = opName;
             this.mexId = mexId == null ? "" : mexId;
@@ -296,12 +300,12 @@ public class IMAManager implements Serializable {
         }
     }
 
-    public class Entry implements Serializable {
+    public static class Entry implements Serializable {
         private static final long serialVersionUID = -583743124656582887L;
         final String pickResponseChannel;
         public Selector[] selectors;
 
-        private Entry(String pickResponseChannel, Selector[] selectors) {
+        Entry(String pickResponseChannel, Selector[] selectors) {
             this.pickResponseChannel = pickResponseChannel;
             this.selectors = selectors;
         }

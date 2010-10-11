@@ -134,7 +134,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     protected OutstandingRequestManager _outstandingRequests;
 
-    protected IMAManager _imaManager;
+    protected IMAManager2 _imaManager;
 
     protected BpelProcess _bpelProcess;
 
@@ -157,14 +157,14 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _soup = new ExecutionQueueImpl(null);
         _soup.setReplacementMap(_bpelProcess.getReplacementMap(dao.getProcess().getProcessId()));
         _outstandingRequests = null;
-        _imaManager = new IMAManager();
+        _imaManager = new IMAManager2();
         _vpu.setContext(_soup);
 
         if (bpelProcess.isInMemory()) {
             ProcessInstanceDaoImpl inmem = (ProcessInstanceDaoImpl) _dao;
             if (inmem.getSoup() != null) {
                 _soup = (ExecutionQueueImpl) inmem.getSoup();
-                _imaManager = (IMAManager) _soup.getGlobalData();
+                _imaManager = (IMAManager2) _soup.getGlobalData();
                 _vpu.setContext(_soup);
             }
         } else {
@@ -176,7 +176,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
-                _imaManager = (IMAManager) _soup.getGlobalData();
+                _imaManager = (IMAManager2) _soup.getGlobalData();
             }
         }
 
