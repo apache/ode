@@ -27,6 +27,8 @@ Buildr.settings.build['jmock'] = "1.2.0"
 Buildr::Hibernate::REQUIRES[:xdoclet] = Buildr.group("xdoclet", "xdoclet-xdoclet-module", "xdoclet-hibernate-module", 
  :under=>"xdoclet", :version=>"1.2.3") + ["xdoclet:xjavadoc:jar:1.1-j5"] 
 
+# dirty workaround for BUILDR-541/BUILDR-508
+Java.classpath << Buildr::OpenJPA::REQUIRES
 
 require File.join(File.dirname(__FILE__), 'repositories.rb')
 require File.join(File.dirname(__FILE__), 'dependencies.rb')
