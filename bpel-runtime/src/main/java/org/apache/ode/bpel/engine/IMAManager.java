@@ -221,19 +221,11 @@ public class IMAManager implements Serializable {
     public IMAManager2 toIMAManager2() {
         IMAManager2 newIMA = new IMAManager2();
         for (String channel : _byChannel.keySet()) {
-            IMAManager2.Entry entry = new IMAManager2.Entry(_byChannel.get(channel).pickResponseChannel, _byChannel.get(channel).selectors);
-            newIMA._byChannel.put(channel, entry);
+            newIMA.register(channel, _byChannel.get(channel).selectors);
         }
         for (OutstandingRequestIdTuple orid : _byOrid.keySet()) {
             IMAManager2.OutstandingRequestIdTuple newOrid = new IMAManager2.OutstandingRequestIdTuple(orid.partnerLink, orid.opName, orid.mexId);
             newIMA._byOrid.put(newOrid, _byOrid.get(orid));
-        }
-        for (RequestIdTuple rid : _byRid.keySet()) {
-            IMAManager2.Entry entry = new IMAManager2.Entry(_byRid.get(rid).pickResponseChannel, _byRid.get(rid).selectors);
-            for (Selector sel : entry.selectors) {
-                IMAManager2.RequestIdTuple newRid = new IMAManager2.RequestIdTuple(rid.partnerLink, rid.opName, sel.correlationKeySet);
-                newIMA._byRid.put(newRid, entry);
-            }
         }
 
         return newIMA;

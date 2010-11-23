@@ -20,6 +20,7 @@ package org.apache.ode.bpel.engine;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -308,6 +309,37 @@ public class IMAManager2 implements Serializable {
         Entry(String pickResponseChannel, Selector[] selectors) {
             this.pickResponseChannel = pickResponseChannel;
             this.selectors = selectors;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime
+                    * result
+                    + ((pickResponseChannel == null) ? 0 : pickResponseChannel
+                            .hashCode());
+            result = prime * result + Arrays.hashCode(selectors);
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            Entry other = (Entry) obj;
+            if (pickResponseChannel == null) {
+                if (other.pickResponseChannel != null)
+                    return false;
+            } else if (!pickResponseChannel.equals(other.pickResponseChannel))
+                return false;
+            if (!Arrays.equals(selectors, other.selectors))
+                return false;
+            return true;
         }
 
         public String toString() {
