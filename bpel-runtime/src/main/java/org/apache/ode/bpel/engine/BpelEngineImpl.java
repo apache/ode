@@ -703,11 +703,11 @@ public class BpelEngineImpl implements BpelEngine {
         BpelProcess process = _activeProcesses.get(processId);
         long processSize = process.sizeOf();
         if (hydratedOnce) {
-            _hydratedSizes.put(process.getPID(), new Long(processSize));
+            _hydratedSizes.put(process.getPID(), Long.valueOf(processSize));
             _unhydratedSizes.remove(process.getPID());
         } else {
             _hydratedSizes.remove(process.getPID());
-            _unhydratedSizes.put(process.getPID(), new Long(processSize));
+            _unhydratedSizes.put(process.getPID(), Long.valueOf(processSize));
         }
     }
 
