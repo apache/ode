@@ -68,6 +68,8 @@ class JaxenContexts implements FunctionContext, VariableContext {
 
     /** Static, thread-safe singleton implementing default XPath functions */
     private static final FunctionContext __defaultXPathFunctions = XPathFunctionContext.getInstance();
+    
+    private static final QName BOOLEAN = new QName("http://www.w3.org/2001/XMLSchema", "boolean");
 
     private OXPath10Expression _oxpath;
     private EvaluationContext _xpathEvalCtx;
@@ -186,7 +188,13 @@ class JaxenContexts implements FunctionContext, VariableContext {
                 }
 
                 if (_xpathEvalCtx.narrowTypes() && type instanceof OXsdTypeVarType && ((OXsdTypeVarType)type).simple) {
-                    return variableNode.getTextContent();
+                	String value = variableNode.getTextContent();
+                	OXsdTypeVarType theType = (OXsdTypeVarType)type;
+                	
+                	if (BOOLEAN.equals(theType.xsdType)) {
+                		return new Boolean(value) ;
+                	}
+                    return value;
                 } else {
                     return variableNode;
                 }
