@@ -53,6 +53,10 @@ public class BasicActivities20Test extends BPELTestAbstract {
         go("/bpel/2.0/TestIf");
     }
 
+    @Test public void testIfBoolean() throws Throwable {
+        go("/bpel/2.0/TestIfBoolean");
+    }
+
     /**
      * Tests the wait "for" syntax.
      * @throws Throwable
