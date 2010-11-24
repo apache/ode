@@ -18,7 +18,20 @@
  */
 package org.apache.ode.bpel.elang.xpath20.runtime;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+
+import java.net.URI;
+import java.net.URL;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.elang.xpath20.compiler.XPath20ExpressionCompilerBPEL20;
@@ -30,19 +43,15 @@ import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OProcess.OProperty;
 import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.utils.DOMUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import javax.xml.namespace.QName;
-
-import java.net.URI;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-public class XPath20ExpressionRuntimeTest extends TestCase implements EvaluationContext {
+public class XPath20ExpressionRuntimeTest implements EvaluationContext {
 
     private XPath20ExpressionRuntime _runtime;
     private Map<String, Node> _vars;
@@ -52,7 +61,7 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
     private Document _vardoc;
     public XPath20ExpressionRuntimeTest() {}
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         _vars = new HashMap<String, Node>();
         _cc = new MockCompilerContext();
@@ -80,11 +89,22 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
             }
         }
     }
-
+    
+    @After
+    public void tearDown() throws Exception {
+        _vars = null;
+        _cc = null;
+        _runtime = null;
+        _compiler = null;
+        _vardoc = null;
+    }
+    
+    @Test
     public void testCompilation() throws Exception {
         compile("$foo");
     }
 
+    @Test
     public void testVariableSelection() throws Exception {
         OXPath20ExpressionBPEL20 exp = compile("$foo");
         Node retVal = _runtime.evaluateNode(exp, this);
@@ -93,6 +113,7 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
         assertSame(retVal.getOwnerDocument(),_vardoc);
     }
 
+    @Test
     public void testVariableSelectionEmpty() throws Exception {
         OXPath20ExpressionBPEL20 exp = compile("$emptyVar");
         Node retVal = _runtime.evaluateNode(exp, this);
@@ -101,6 +122,7 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
         assertTrue(DOMUtils.getFirstChildElement((Element)retVal).getLocalName().equals("empty"));
     }
 
+    @Test
     public void testVariableSelectionReallyEmpty() throws Exception {
         OXPath20ExpressionBPEL20 exp = compile("$reallyEmptyVar");
         Node retVal = _runtime.evaluateNode(exp, this);
@@ -109,6 +131,16 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
         assertNull(DOMUtils.getFirstChildElement((Element)retVal));
     }
 
+    @Test
+    public void testXpathDocFunction() throws Exception {
+        URL url = getClass().getResource("/xpath20/variables.xml");
+
+        OXPath20ExpressionBPEL20 exp = compile("doc('" + url.toExternalForm() + "')");
+        Node retVal = _runtime.evaluateNode(exp, this);
+        assertNotNull(retVal);
+        assertEquals("Unexpected root node", "variables", retVal.getNodeName());
+    }
+    
     public Node readVariable(Variable variable, Part part) throws FaultException {
         return _vars.get(variable.name);
     }
