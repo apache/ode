@@ -23,7 +23,7 @@
   <groupId>org.apache.ode.examples</groupId>
   <artifactId>ping-pong-bundle</artifactId>
   <name>ODE :: Examples :: Ping Pong OSGi</name>
-  <version>1.3.4</version>
+  <version>1.3.5-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <build>
