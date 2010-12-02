@@ -247,6 +247,35 @@
 
    <build>
      <plugins>
+       <plugin>
+         <groupId>org.apache.maven.plugins</groupId>
+         <artifactId>maven-dependency-plugin</artifactId>
+         <executions>
+           <execution>
+             <id>unpack-axis2-webapp</id>
+             <phase>package</phase>
+             <goals>
+               <goal>unpack</goal>
+             </goals>
+             <configuration>
+               <artifactItems>
+                 <artifactItem>
+                   <groupId>org.apache.axis2</groupId>
+                   <artifactId>axis2-webapp</artifactId>
+                   <version>${axis2.version}</version>
+                   <type>war</type>
+                   <overWrite>false</overWrite>
+                 </artifactItem>
+               </artifactItems>
+               <includes>axis2-web/**,WEB-INF/classes/org/**,WEB-INF/modules/*</includes>
+               <outputDirectory>${project.build.directory}/axis2-webapp</outputDirectory>
+               <overWriteReleases>false</overWriteReleases>
+               <overWriteSnapshots>false</overWriteSnapshots>
+             </configuration>
+           </execution>
+         </executions>
+        </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
