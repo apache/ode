@@ -22,6 +22,7 @@ import org.apache.ode.utils.DOMUtils;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 
 import javax.wsdl.Definition;
 import javax.wsdl.WSDLException;
@@ -76,6 +77,12 @@ public class XMLSchemaTypeSerializer implements ExtensionSerializer,
                                          ExtensionRegistry extensionRegistry)
                                   throws WSDLException {
     DOMUtils.pancakeNamespaces(element);
-    return new XMLSchemaType(DOMUtils.domToString(element).getBytes());
+    try {
+        // xml dump is encoded in UTF-8, so the byte array should use the same encoding
+        // the reading xml parser should be able to correctly detect the encoding then.
+        return new XMLSchemaType(DOMUtils.domToString(element).getBytes("UTF-8"));
+    } catch (UnsupportedEncodingException e) {
+        throw new WSDLException(WSDLException.OTHER_ERROR, e.getMessage(), e);
+    }
   }
 }
