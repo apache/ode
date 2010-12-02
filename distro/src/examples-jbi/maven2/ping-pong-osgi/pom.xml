@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.apache.ode</groupId>
     <artifactId>ode</artifactId>
-    <version>1.3.5-SNAPSHOT</version>
+    <version>1.4-SNAPSHOT</version>
   </parent>
 
   <build>
