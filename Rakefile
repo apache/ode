@@ -14,7 +14,7 @@
 #    limitations under the License.
 #
 
-gem "buildr", "~>1.4"
+gem "buildr", "~>1.4.3"
 require "buildr"
 require "buildr/xmlbeans.rb"
 require "buildr/openjpa"
@@ -35,6 +35,15 @@ require File.join(File.dirname(__FILE__), 'dependencies.rb')
 
 # Keep this structure to allow the build system to update version numbers.
 VERSION_NUMBER = "1.4-SNAPSHOT"
+
+# Apache Nexus Repositories
+if VERSION_NUMBER =~ /SNAPSHOT/
+    # Apache Development Snapshot Repository
+    repositories.release_to[:url] = 'https://repository.apache.org/content/repositories/snapshots'
+else
+    # Apache Release Distribution Repository
+    repositories.release_to[:url] = 'https://repository.apache.org/service/local/staging/deploy/maven2'
+end
 
 BUNDLE_VERSIONS = {
   "ode.version" => VERSION_NUMBER,
@@ -531,6 +540,9 @@ define "ode" do
 
   package_with_sources
   package_with_javadoc unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
+
+  # sign artifacts
+  projects.each { |pr| pr.packages.each { |pkg| GPG.sign_and_upload(pkg) } }
 end
 
 define "apache-ode" do
@@ -619,4 +631,10 @@ define "apache-ode" do
 
   package(:zip, :id=>"#{id}-docs").include(doc.from(project("ode").projects).
     using(:javadoc, :windowtitle=>"Apache ODE #{project.version}").target, :as=>"#{id}-docs-#{version}") unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
+    
+  # sign disto packages
+  projects.each { |pr| pr.packages.each { |pkg| GPG.sign_and_upload(pkg) } }
+  # sign source and javadoc artifacts
+  packages.each { |pkg| GPG.sign_and_upload(pkg) }
+
 end
