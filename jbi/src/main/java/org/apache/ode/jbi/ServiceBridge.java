@@ -45,13 +45,17 @@ public class ServiceBridge {
      * @param odeMex source ODE message-exchange
      */
     protected void copyMexProperties(javax.jbi.messaging.MessageExchange jbiMex, PartnerRoleMessageExchange odeMex) {
-        __log.debug(odeMex + ": pmex copyProperties");
+        if (__log.isDebugEnabled()) {
+            __log.debug(odeMex + ": pmex copyProperties");
+        }
         NormalizedMessage in = jbiMex.getMessage("in");
         for (String propName : odeMex.getPropertyNames()) {
             String val = odeMex.getProperty(propName);
             if (val != null) {
                 in.setProperty(propName, val);
-                __log.debug(jbiMex + ": set pmex property " + propName + " = " + val);
+                if (__log.isDebugEnabled()) {
+                    __log.debug(jbiMex + ": set pmex property " + propName + " = " + val);
+                }
             }
         }
 
@@ -67,7 +71,9 @@ public class ServiceBridge {
      */
     @SuppressWarnings("unchecked")
     protected void copyMexProperties(MyRoleMessageExchange odeMex, javax.jbi.messaging.MessageExchange jbiMex) {
-        __log.debug(odeMex + ": mmex copyProperties");
+        if (__log.isDebugEnabled()) {
+            __log.debug(odeMex + ": mmex copyProperties");
+        }
         NormalizedMessage in = jbiMex.getMessage("in");
         for (String propName : (Set<String>) in.getPropertyNames()) {
             Object val = in.getProperty(propName);
@@ -76,12 +82,16 @@ public class ServiceBridge {
                 if (val != null) {
                     String sval = val.toString();
                     odeMex.setProperty(propName, sval);
-                    __log.debug(odeMex + ": set mmex property " + propName + " = " + sval);
+                    if (__log.isDebugEnabled()) {
+                        __log.debug(odeMex + ": set mmex property " + propName + " = " + sval);
+                    }
                 }
             } else {
                 // Non ODE-specific properties,
                 // TODO: Should we copy these?
-                __log.debug(odeMex + ": other mmex property " + propName + " = " + val);
+                if (__log.isDebugEnabled()) {
+                    __log.debug(odeMex + ": other mmex property " + propName + " = " + val);
+                }
             }
         }
     }

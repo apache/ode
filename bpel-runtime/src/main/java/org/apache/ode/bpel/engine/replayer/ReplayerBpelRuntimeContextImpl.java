@@ -80,7 +80,9 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
 
     @Override
     public void cancel(TimerResponseChannel timerResponseChannel) {
-        __log.debug("cancel " + timerResponseChannel.export());
+        if (__log.isDebugEnabled()) {
+            __log.debug("cancel " + timerResponseChannel.export());
+        }
         super.cancel(timerResponseChannel);
     }
 
@@ -233,13 +235,17 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
 
         String pipedId = mex.getPipedMessageExchangeId();
         if (pipedId != null) {
-            __log.debug("instance replied for live communication:" + mexRef + " " + DOMUtils.domToString(msg));
+            if (__log.isDebugEnabled()) {
+                __log.debug("instance replied for live communication:" + mexRef + " " + DOMUtils.domToString(msg));
+            }
             super.reply2(plinkInstnace, opName, mexId, msg, fault, false, mexRef);
         } else {
             MessageDAO message = mex.createMessage(plinkInstnace.partnerLink.getMyRoleOperation(opName).getOutput().getMessage().getQName());
             buildOutgoingMessage(message, msg);
 
-            __log.debug("instance replied mexRef:" + mexRef + " " + DOMUtils.domToString(msg));
+            if (__log.isDebugEnabled()) {
+                __log.debug("instance replied mexRef:" + mexRef + " " + DOMUtils.domToString(msg));
+            }
             mex.setResponse(message);
             mex.setStatus(Status.RESPONSE.toString());
         }
@@ -248,7 +254,9 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
     @Override
     public void select(PickResponseChannel pickResponseChannel, Date timeout, boolean createInstance, Selector[] selectors) throws FaultException {
         super.select(pickResponseChannel, timeout, createInstance, selectors);
-        __log.debug("select " + pickResponseChannel + " " + ObjectPrinter.toString(selectors, selectors));
+        if (__log.isDebugEnabled()) {
+            __log.debug("select " + pickResponseChannel + " " + ObjectPrinter.toString(selectors, selectors));
+        }
     }
 
 
@@ -283,7 +291,9 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
     }
 
     public void handleIncomingRequest(final MyRoleMessageExchangeImpl mex, final Date currentEventDateTime) {
-        __log.debug("handleIncomingRequest for mock communication " + mex);
+        if (__log.isDebugEnabled()) {
+            __log.debug("handleIncomingRequest for mock communication " + mex);
+        }
 
         setCurrentEventDateTime(currentEventDateTime);
 

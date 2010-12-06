@@ -135,12 +135,16 @@ public class BindingContextImpl implements BindingContext {
 
         // We're public!
         _server._axisConfig.addService(axisService);
-        __log.debug("Created Axis2 service " + serviceName);
+        if (__log.isDebugEnabled()) {
+            __log.debug("Created Axis2 service " + serviceName);
+        }
         return odeService;
     }
 
     protected ODEService destroyService(QName serviceName, String portName) {
-        __log.debug("Destroying service " + serviceName + " port " + portName);
+        if (__log.isDebugEnabled()) {
+            __log.debug("Destroying service " + serviceName + " port " + portName);
+        }
         ODEService service = (ODEService) _services.remove(serviceName, portName);
         if (service != null) {
             // try to clean up the service after itself
@@ -170,7 +174,9 @@ public class BindingContextImpl implements BindingContext {
                 __log.error("Couldn't destroy service " + serviceName);
             }
         } else {
-            __log.debug("Couldn't find service " + serviceName + " port " + portName + " to destroy.");
+            if (__log.isDebugEnabled()) {
+                __log.debug("Couldn't find service " + serviceName + " port " + portName + " to destroy.");
+            }
         }
         return service;
     }
@@ -224,7 +230,9 @@ public class BindingContextImpl implements BindingContext {
             throw new ContextException("Only SOAP and HTTP binding supported!");
         }
 
-        __log.debug("Created external service " + serviceName);
+        if (__log.isDebugEnabled()) {
+            __log.debug("Created external service " + serviceName);
+        }
         return extService;
     }
 

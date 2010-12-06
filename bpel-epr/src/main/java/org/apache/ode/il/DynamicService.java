@@ -98,7 +98,9 @@ public class DynamicService<T> {
         int paramIdx = 0;
         for (Class<?> paramClass : paramTypes) {
             OMElement omchild = (OMElement) omChildren.next();
-            __log.debug("Extracting param " + paramClass + " from " + omchild);
+            if (__log.isDebugEnabled()) {
+                __log.debug("Extracting param " + paramClass + " from " + omchild);
+            }
             params[paramIdx++] = convertFromOM(paramClass, omchild);
         }
         return params;

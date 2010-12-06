@@ -459,7 +459,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                     Thread.sleep(pollingTime);
                     if (!_mngmtLock.writeLock().tryLock(100L, TimeUnit.MILLISECONDS)) continue;
                     try {
-                        __log.debug("Kicking reaper, OProcess instances: " + OProcess.instanceCount);
+                        if (__log.isDebugEnabled()) {
+                            __log.debug("Kicking reaper, OProcess instances: " + OProcess.instanceCount);
+                        }
                         // Copying the runnning process list to avoid synchronization
                         // problems and a potential mess if a policy modifies the list
                         List<BpelProcess> candidates = new ArrayList<BpelProcess>(_registeredProcesses);
@@ -474,7 +476,9 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                         List<BpelProcess> ripped = _dehydrationPolicy.markForDehydration(candidates);
                         // Bye bye
                         for (BpelProcess process : ripped) {
-                            __log.debug("Dehydrating process " + process.getPID());
+                            if (__log.isDebugEnabled()) {
+                                __log.debug("Dehydrating process " + process.getPID());
+                            }
                             process.dehydrate();
                         }
                     } finally {
@@ -482,7 +486,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                     }
                 }
             } catch (InterruptedException e) {
-                __log.debug(e);
+                __log.debug(e.getMessage(), e);
             }
         }
     }

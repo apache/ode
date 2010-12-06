@@ -278,7 +278,9 @@ public class BpelEngineImpl implements BpelEngine {
 
     BpelProcess unregisterProcess(QName process) {
         BpelProcess p = _activeProcesses.remove(process);
-        __log.debug("Unregister process: serviceId=" + process + ", process=" + p);
+        if (__log.isDebugEnabled()) {
+            __log.debug("Unregister process: serviceId=" + process + ", process=" + p);
+        }
         if (p != null) {
             if (__log.isDebugEnabled())
                 __log.debug("Deactivating process " + p.getPID());
@@ -319,7 +321,9 @@ public class BpelEngineImpl implements BpelEngine {
     void registerProcess(BpelProcess process) {
         _activeProcesses.put(process.getPID(), process);
         for (Endpoint e : process.getServiceNames()) {
-            __log.debug("Register process: serviceId=" + e + ", process=" + process);
+            if (__log.isDebugEnabled()) {
+                __log.debug("Register process: serviceId=" + e + ", process=" + process);
+            }
             List<BpelProcess> processes = _serviceMap.get(e.serviceName);
             if (processes == null) {
                 processes = new ArrayList<BpelProcess>();
@@ -329,7 +333,9 @@ public class BpelEngineImpl implements BpelEngine {
             Iterator<BpelProcess> processesIter = processes.iterator();
             while (processesIter.hasNext()) {
                 BpelProcess cachedVersion = processesIter.next();
-                __log.debug("cached version " + cachedVersion.getPID() + " vs registering version " + process.getPID());
+                if (__log.isDebugEnabled()) {
+                    __log.debug("cached version " + cachedVersion.getPID() + " vs registering version " + process.getPID());                    
+                }
                 if (cachedVersion.getProcessType().equals(process.getProcessType())) {
                     if (cachedVersion.getConf().getState() == ProcessState.ACTIVE
                             && process.getConf().getState() == ProcessState.ACTIVE
@@ -452,7 +458,9 @@ public class BpelEngineImpl implements BpelEngine {
 
             if (process == null) {
                 // The process is not active, there's nothing we can do with this job
-                __log.debug("Process " + we.getProcessId() + " can't be found, job abandoned.");
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Process " + we.getProcessId() + " can't be found, job abandoned.");
+                }
                 return;
             }
 

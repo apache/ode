@@ -161,7 +161,9 @@ public class SCOPEACT extends ACTIVITY {
     
                     /** Our owner will notify us when it becomes clear what to do with the links. */
                     public void val(Object retVal) {
-                        __log.debug("LINKSTATUSINTERCEPTOR: status received " + retVal);
+                        if (__log.isDebugEnabled()) {
+                            __log.debug("LINKSTATUSINTERCEPTOR: status received " + retVal);
+                        }
                         
                         _status = (Boolean) retVal;
                         for (OLink available : _statuses.keySet())
@@ -236,7 +238,9 @@ public class SCOPEACT extends ACTIVITY {
         public void run() {
             if (_locksNeeded.isEmpty()) {
                 // acquired all locks.
-                __log.debug("ISOLATIONGUARD: got all required locks: " + _locksAcquired);
+                if (__log.isDebugEnabled()) {
+                    __log.debug("ISOLATIONGUARD: got all required locks: " + _locksAcquired);
+                }
 
                 ScopeFrame newFrame = new ScopeFrame((OScope) _self.o, getBpelRuntimeContext().createScopeInstance(
                         _scopeFrame.scopeInstanceId, (OScope) _self.o), _scopeFrame, null);
@@ -251,7 +255,9 @@ public class SCOPEACT extends ACTIVITY {
                 instance(new SCOPE(_self, newFrame, linkframe));
                 return;
             } else {
-                __log.debug("ISOLATIONGUARD: don't have all locks still need: " + _locksNeeded);
+                if (__log.isDebugEnabled()) {
+                    __log.debug("ISOLATIONGUARD: don't have all locks still need: " + _locksNeeded);
+                }
 
                 // try to acquire the locks in sequence (IMPORTANT) not all at once.
                 IsolationLock il = _locksNeeded.get(0);
@@ -348,7 +354,9 @@ public class SCOPEACT extends ACTIVITY {
          * 
          */
         private void unlockAll() {
-            __log.debug("UNLOCKER: unlockAll: " + _locks);
+            if (__log.isDebugEnabled()) {
+                __log.debug("UNLOCKER: unlockAll: " + _locks);
+            }
 
             if (((OScope)SCOPEACT.this._self.o).atomicScope)
                 getBpelRuntimeContext().forceFlush();

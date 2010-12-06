@@ -272,7 +272,9 @@ class SCOPE extends ACTIVITY {
                 // We're done with the main work, if we were terminated, we will
                 // need to load the termination handler:
                 if (_terminated) {
-                    __log.debug("Scope: " + _oscope + " was terminated.");
+                    if (__log.isDebugEnabled()) {
+                        __log.debug("Scope: " + _oscope + " was terminated.");
+                    }
                     // ??? Should we forward
                     _self.parent.completed(null,_compensations);
                 } else if (_fault != null) {

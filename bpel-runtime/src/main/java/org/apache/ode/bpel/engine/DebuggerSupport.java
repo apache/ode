@@ -172,7 +172,9 @@ public class DebuggerSupport implements DebuggerContext {
 
                         onEvent(evt);
 
-                        __log.debug("step(" + iid + ") adding step indicator to table.");
+                        if (__log.isDebugEnabled()) {
+                            __log.debug("step(" + iid + ") adding step indicator to table.");
+                        }
                         _step.add(iid);
 
                         JobDetails we = new JobDetails();

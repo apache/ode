@@ -124,7 +124,9 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
 
         if (jbiMex.getStatus() != ExchangeStatus.ACTIVE) {
             // We can forget about the exchange.
-            __log.debug("Consuming MEX tracker " + jbiMex.getExchangeId());
+            if (__log.isDebugEnabled()) {
+                __log.debug("Consuming MEX tracker " + jbiMex.getExchangeId());
+            }
             _jbiMexTracker.consume(jbiMex.getExchangeId());
             return;
         }
@@ -195,7 +197,9 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
     public void onResponse(MyRoleMessageExchange mex) {
         final String clientId = mex.getClientId();
         final String mexId = mex.getMessageExchangeId();
-        __log.debug("Processing MEX tracker mexId: " + mexId + " clientId: " + clientId);
+        if (__log.isDebugEnabled()) {
+            __log.debug("Processing MEX tracker mexId: " + mexId + " clientId: " + clientId);
+        }
         final javax.jbi.messaging.MessageExchange jbiMex = _jbiMexTracker.peek(clientId);
         if (jbiMex == null) {
             __log.warn("Ignoring unknown async reply. mexId: " + mexId + " clientId: " + clientId);
@@ -224,7 +228,9 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
                     //Deliver reply to external world only if ODE scheduler's job has completed successfully
                     try {
                         _ode.getChannel().send(jbiMex);
-                    __log.debug("Consuming MEX tracker mexId: " + mexId + " clientId: " + clientId);
+                        if (__log.isDebugEnabled()) {
+                            __log.debug("Consuming MEX tracker mexId: " + mexId + " clientId: " + clientId);
+                        }
                     _jbiMexTracker.consume(clientId);
                     } catch (MessagingException e) {
                         __log.error("Error delivering response from ODE to JBI mexId: " + mexId + " clientId: " + clientId, e);
@@ -249,7 +255,9 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
 
         // If this has already been tracked, we will not invoke!
         if (_jbiMexTracker.track(jbiMex)) {
-            __log.debug("Skipping JBI MEX " + jbiMex.getExchangeId() + ", already received!");
+            if (__log.isDebugEnabled()) {
+                __log.debug("Skipping JBI MEX " + jbiMex.getExchangeId() + ", already received!");
+            }
             return;
         }
 
@@ -283,11 +291,15 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
 
                 // Handle the response if it is immediately available.
                 if (odeMex.getStatus() != Status.ASYNC) {
-                    __log.debug("ODE MEX " + odeMex + " completed SYNCHRONOUSLY.");
+                    if (__log.isDebugEnabled()) {
+                        __log.debug("ODE MEX " + odeMex + " completed SYNCHRONOUSLY.");
+                    }
                     onResponse(odeMex);
                     _jbiMexTracker.consume(jbiMex.getExchangeId());
                 } else {
-                    __log.debug("ODE MEX " + odeMex + " completed ASYNCHRONOUSLY.");
+                    if (__log.isDebugEnabled()) {
+                        __log.debug("ODE MEX " + odeMex + " completed ASYNCHRONOUSLY.");
+                    }
                 }
             } else {
                 __log.error("ODE MEX " + odeMex + " was unroutable.");
@@ -297,16 +309,22 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
             success = true;
             // For one-way invocation we do not need to maintain the association
             if (jbiMex.getPattern().equals(org.apache.ode.jbi.MessageExchangePattern.IN_ONLY)) {
-                __log.debug("Consuming non Req/Res MEX tracker " + jbiMex.getExchangeId() + " with pattern " + jbiMex.getPattern());
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Consuming non Req/Res MEX tracker " + jbiMex.getExchangeId() + " with pattern " + jbiMex.getPattern());
+                }
                 _jbiMexTracker.consume(jbiMex.getExchangeId());
             }
 
         } finally {
             if (success) {
-                __log.debug("Commiting ODE MEX " + odeMex);
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Commiting ODE MEX " + odeMex);
+                }
                 _ode.getTransactionManager().commit();
             } else {
-                __log.debug("Rolling back ODE MEX " + odeMex);
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Rolling back ODE MEX " + odeMex);
+                }
                 _jbiMexTracker.consume(jbiMex.getExchangeId());
                 _ode.getTransactionManager().rollback();
 

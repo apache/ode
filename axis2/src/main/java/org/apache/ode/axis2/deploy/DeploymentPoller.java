@@ -139,7 +139,9 @@ public class DeploymentPoller {
 
                 if (!deployXml.exists()) {
                     // Skip if deploy.xml is abset
-                    __log.debug("Not deploying " + file + " (missing deploy.xml)");
+                    if (__log.isDebugEnabled()) {
+                        __log.debug("Not deploying " + file + " (missing deploy.xml)");
+                    }
                 }
 
                 WatchDog ddWatchDog = ensureDeployXmlWatchDog(file, deployXml);
@@ -152,8 +154,7 @@ public class DeploymentPoller {
                 try {
                     boolean isCreated = deployedMarker.createNewFile();
                     if (!isCreated) {
-                        __log
-                                .error("Error while creating  file "
+                        __log.error("Error while creating  file "
                                         + file.getName()
                                         + ".deployed ,deployment could be inconsistent");
                     }
@@ -186,8 +187,7 @@ public class DeploymentPoller {
                 Collection<QName> undeployed = _odeServer.getProcessStore().undeploy(deployDir);
                 boolean isDeleted = file.delete();
                 if (!isDeleted) {
-                    __log
-                            .error("Error while deleting file "
+                    __log.error("Error while deleting file "
                                     + file.getName()
                                     + ".deployed , please check if file is locked or if it really exist");
                 }

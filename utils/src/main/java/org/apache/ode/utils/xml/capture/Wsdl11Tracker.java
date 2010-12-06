@@ -49,8 +49,11 @@ public class Wsdl11Tracker extends XmlSchemaTracker {
       if (schemaLoc == null)
         schemaLoc = atts.getValue(ATTR_NAMESPACE);
 
-      __log.debug("found WSDL11 reference element " + uri + "@" + localName
-          + "-->" + schemaLoc);
+      if (__log.isDebugEnabled()) {
+          __log.debug("found WSDL11 reference element " + uri + "@" + localName
+                  + "-->" + schemaLoc);
+      }
+          
       addReference(schemaLoc);
     }
 

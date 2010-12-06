@@ -92,7 +92,9 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
     }
 
     boolean processInterceptor(MessageExchangeInterceptor i, MyRoleMessageExchangeImpl mex, InterceptorContext ictx, InterceptorInvoker invoker) {
-        __log.debug(invoker + "--> interceptor " + i);
+        if (__log.isDebugEnabled()) {
+            __log.debug(invoker + "--> interceptor " + i);
+        }
         try {
             invoker.invoke(i, mex, ictx);
         } catch (FaultMessageExchangeException fme) {

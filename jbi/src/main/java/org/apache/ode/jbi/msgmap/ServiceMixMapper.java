@@ -52,7 +52,9 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
         // First of all, if we are not in ServiceMix, we exclude this
         // as a possibility.
         if (nmsMsg.getClass().getName().indexOf("servicemix") == -1) {
-            __log.debug("Unrecognized message class: " + nmsMsg.getClass());
+            if (__log.isDebugEnabled()) {
+                __log.debug("Unrecognized message class: " + nmsMsg.getClass());
+            }
             return Recognized.FALSE;
         }
 
@@ -102,14 +104,18 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
 
             if (part.getElementName() != null) {
                 //RPC style invocation doesn't allow element parts, so we don't accept it
-                __log.debug("Part " + part.getName() + " has element content " + part.getElementName() + ". It's not allowed for RPC style.");
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Part " + part.getName() + " has element content " + part.getElementName() + ". It's not allowed for RPC style.");
+                }
                 return Recognized.FALSE;
             }
 
             // with RPC semantic the body is wrapped by a partName which is same as bodyElementName
             Element pdata = DOMUtils.findChildByName(msg, new QName(null, part.getName()));
             if (pdata == null) {
-                __log.debug("no part data for " + part.getName() + " -- unrecognized.");
+                if (__log.isDebugEnabled()) {
+                    __log.debug("no part data for " + part.getName() + " -- unrecognized.");
+                }
                 return Recognized.FALSE;
             }
         }
@@ -228,7 +234,9 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
             }
         }
         if (docLit) {
-            __log.debug("toODE() doc-like message ");
+            if (__log.isDebugEnabled()) {
+                __log.debug("toODE() doc-like message ");
+            }
 
             Document doc = newDocument();
             Element message = doc.createElement("message");
@@ -272,11 +280,7 @@ public class ServiceMixMapper extends BaseXmlMapper implements Mapper {
     }
 
     private String prettyPrint(Element el) {
-        try {
-            return DOMUtils.prettyPrint(el);
-        } catch (java.io.IOException ioe) {
-            return ioe.getMessage();
-        }
+        return DOMUtils.domToString(el);
     }
 
 }

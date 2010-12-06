@@ -19,7 +19,12 @@
 
 package org.apache.ode.scheduler.simple;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
+import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -33,15 +38,12 @@ import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
-import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.log4j.helpers.AbsoluteTimeDateFormat;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.log4j.helpers.AbsoluteTimeDateFormat;
-import org.apache.ode.bpel.iapi.Scheduler.JobType;
 
 /**
  * A reliable and relatively simple scheduler that uses a database to persist information about
@@ -381,16 +383,22 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
                 if (_outstandingJobs.size() < _todoLimit) {
                     addTodoOnCommit(job);
                 }
-                __log.debug("scheduled immediate job: " + job.jobId);
+                if (__log.isDebugEnabled()) {
+                    __log.debug("scheduled immediate job: " + job.jobId);
+                }
             } else if (nearfuture) {
                 // Near future, assign the job to ourselves (why? -- this makes it very unlikely that we
                 // would get two nodes trying to process the same instance, which causes unsightly rollbacks).
                 _db.insertJob(job, _nodeId, false);
-                __log.debug("scheduled near-future job: " + job.jobId);
+                if (__log.isDebugEnabled()) {
+                    __log.debug("scheduled near-future job: " + job.jobId);
+                }
             } else /* far future */ {
                 // Not the near future, we don't assign a node-id, we'll assign it later.
                 _db.insertJob(job, null, false);
-                __log.debug("scheduled far-future job: " + job.jobId);
+                if (__log.isDebugEnabled()) {
+                    __log.debug("scheduled far-future job: " + job.jobId);
+                }
             }
         } catch (DatabaseException dbe) {
             __log.error("Database error.", dbe);
@@ -808,7 +816,9 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
      * @param nodeId
      */
     void recoverStaleNode(final String nodeId) {
-        __log.debug("recovering stale node " + nodeId);
+        if (__log.isDebugEnabled()) {
+            __log.debug("recovering stale node " + nodeId);
+        }
         try {
             int numrows = execTransaction(new Callable<Integer>() {
                 public Integer call() throws Exception {
@@ -816,7 +826,9 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
                 }
             });
 
-            __log.debug("reassigned " + numrows + " jobs to self. ");
+            if (__log.isDebugEnabled()) {
+                __log.debug("reassigned " + numrows + " jobs to self. ");
+            }
 
             // We can now forget about this node, if we see it again, it will be
             // "new to us"
@@ -880,12 +892,16 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         public void run() {
             long ctime = System.currentTimeMillis();
             long ntime = _nextUpgrade.get();
-            __log.debug("UPGRADE task for " + schedDate + " fired at " + ctime);
+            if (__log.isDebugEnabled()) {
+                __log.debug("UPGRADE task for " + schedDate + " fired at " + ctime);
+            }
 
             // We could be too early, this can happen if upgrade gets delayed due to another
             // node
             if (_nextUpgrade.get() > System.currentTimeMillis()) {
-                __log.debug("UPGRADE skipped -- wait another " + (ntime - ctime) + "ms");
+                if (__log.isDebugEnabled()) {
+                    __log.debug("UPGRADE skipped -- wait another " + (ntime - ctime) + "ms");
+                }
                 _todo.enqueue(new UpgradeJobsTask(ntime));
                 return;
             }
@@ -897,7 +913,9 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
                 long future = System.currentTimeMillis() + (success ? (long) (_nearFutureInterval * .50) : 1000);
                 _nextUpgrade.set(future);
                 _todo.enqueue(new UpgradeJobsTask(future));
-                __log.debug("UPGRADE completed, success = " + success + "; next time in " + (future - ctime) + "ms");
+                if (__log.isDebugEnabled()) {
+                    __log.debug("UPGRADE completed, success = " + success + "; next time in " + (future - ctime) + "ms");
+                }
             }
         }
     }

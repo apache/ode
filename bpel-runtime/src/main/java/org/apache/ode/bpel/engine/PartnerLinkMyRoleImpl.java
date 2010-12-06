@@ -191,7 +191,9 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         }
 
         if (!_process.processInterceptors(mex, InterceptorInvoker.__onNewInstanceInvoked)) {
-            __log.debug("Not creating a new instance for mex " + mex + "; interceptor prevented!");
+            if (__log.isDebugEnabled()) {
+                __log.debug("Not creating a new instance for mex " + mex + "; interceptor prevented!");
+            }
             throw new InvalidProcessException("Cannot instantiate process '" + _process.getPID() + "' any more.", InvalidProcessException.TOO_MANY_INSTANCES_CAUSE_CODE);
         }
 

@@ -228,7 +228,9 @@ public class BpelProcess {
             mex.getDAO().setProcess(getProcessDAO());
 
             if (!processInterceptors(mex, InterceptorInvoker.__onProcessInvoked)) {
-                __log.debug("Aborting processing of mex " + mex + " due to interceptors.");
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Aborting processing of mex " + mex + " due to interceptors.");
+                }
                 return false;
             }
 
@@ -523,8 +525,10 @@ public class BpelProcess {
                 __log.error(errmsg);
                 throw new BpelEngineException(errmsg);
             }
-            __log.debug("Processing <invoke> element for process " + _pid + ": partnerlink " + invoke.getKey() + " --> "
+            if (__log.isDebugEnabled()) {
+                __log.debug("Processing <invoke> element for process " + _pid + ": partnerlink " + invoke.getKey() + " --> "
                     + invoke.getValue());
+            }
         }
 
         for (OPartnerLink pl : oprocess.getAllPartnerLinks()) {
@@ -591,7 +595,9 @@ public class BpelProcess {
         if (getInstanceMaximumCount() < Integer.MAX_VALUE)
             registerMessageExchangeInterceptor(new InstanceCountThrottler());
 
-        __log.debug("Activating " + _pid);
+        if (__log.isDebugEnabled()) {
+            __log.debug("Activating " + _pid);
+        }
         // Activate all the my-role endpoints.
         for (Map.Entry<String, Endpoint> entry : _pconf.getProvideEndpoints().entrySet()) {
             Endpoint endpoint = entry.getValue();
@@ -603,18 +609,24 @@ public class BpelProcess {
                     // Create an EPR by physically activating the endpoint
                     initialEPR = _engine._contexts.bindingContext.activateMyRoleEndpoint(_pid, endpoint);
                     _sharedEps.addEndpoint(endpoint, initialEPR);
-                    __log.debug("Activated " + _pid + " myrole " + entry.getKey() + ": EPR is " + initialEPR);
+                    if (__log.isDebugEnabled()) {
+                        __log.debug("Activated " + _pid + " myrole " + entry.getKey() + ": EPR is " + initialEPR);
+                    }
                 }
                 // Increment the reference count on the endpoint
                 _sharedEps.incrementReferenceCount(endpoint);
             } else {
                 // Create an EPR by physically activating the endpoint
                 initialEPR = _engine._contexts.bindingContext.activateMyRoleEndpoint(_pid, endpoint);
-                __log.debug("Activated " + _pid + " myrole " + entry.getKey() + ": EPR is " + initialEPR);
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Activated " + _pid + " myrole " + entry.getKey() + ": EPR is " + initialEPR);
+                }
             }
             _myEprs.put(endpoint, initialEPR);
         }
-        __log.debug("Activated " + _pid);
+        if (__log.isDebugEnabled()) {
+            __log.debug("Activated " + _pid);
+        }
 
         markused();
     }
@@ -866,7 +878,9 @@ public class BpelProcess {
 
         private void doHydrate() {
             markused();
-            __log.debug("Rehydrating process " + _pconf.getProcessId());
+            if (__log.isDebugEnabled()) {
+                __log.debug("Rehydrating process " + _pconf.getProcessId());
+            }
             try {
                 InputStream inputStream = _pconf.getCBPInputStream();
                 try {
@@ -921,8 +935,11 @@ public class BpelProcess {
                             prole._initialEPR = epr;
                             _partnerEprs.put(prole._initialPartner, epr);
                         }
-                        __log.debug("Activated " + _pid + " partnerrole " + prole.getPartnerLinkName() + ": EPR is "
-                                + prole._initialEPR);
+                        if (__log.isDebugEnabled()) {
+                            __log.debug("Activated " + _pid + " partnerrole " + prole.getPartnerLinkName() + ": EPR is "
+                                    + prole._initialEPR);
+                        }
+                              
                     }
                 }
                 _engine.setProcessSize(_pid, true);
@@ -988,7 +1005,9 @@ public class BpelProcess {
             boolean create = true;
             ProcessDAO old = conn.getProcess(pid);
             if (old != null) {
-                __log.debug("Found ProcessDAO for " + pid + " with GUID " + old.getGuid());
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Found ProcessDAO for " + pid + " with GUID " + old.getGuid());
+                }
                 if (oprocess.guid == null) {
                     // No guid, old version assume its good
                     create = false;

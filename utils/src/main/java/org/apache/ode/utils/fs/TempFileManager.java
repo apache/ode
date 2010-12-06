@@ -109,7 +109,9 @@ public class TempFileManager {
       else {
         if (f.isDirectory() && f.canWrite()) {
           __baseDir = f;
-          __log.debug("Setting base working directory: " + f);
+          if (__log.isDebugEnabled()) {
+              __log.debug("Setting base working directory: " + f);
+          }
         }
         else {
           throw new IllegalArgumentException("Not a writeable directory: " + f);
@@ -202,7 +204,9 @@ public class TempFileManager {
 
   private synchronized void _registerTemporaryFile(File f) {
     _registeredFiles.add(f);
-    __log.debug("Registered temporary file: " + f.getPath());
+    if (__log.isDebugEnabled()) {
+        __log.debug("Registered temporary file: " + f.getPath());
+    }
   }
 
   /**
@@ -232,11 +236,15 @@ public class TempFileManager {
         }
       }
 
-      __log.debug("cleaning up " +  allFiles.size() + " files.");
+      if (__log.isDebugEnabled()) {
+          __log.debug("cleaning up " +  allFiles.size() + " files.");
+      }
 
       // now delete all files
       for (File f: allFiles) {
-        __log.debug("deleting: " + f.getAbsolutePath());
+        if (__log.isDebugEnabled()) {
+            __log.debug("deleting: " + f.getAbsolutePath());
+        }
         if (f.exists() && !f.delete()) {
           __log.error("Unable to delete file " + f.getAbsolutePath() +
           "; this may be caused by a descriptor leak and should be reported.");

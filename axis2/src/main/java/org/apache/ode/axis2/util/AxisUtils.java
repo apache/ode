@@ -65,9 +65,13 @@ public class AxisUtils {
      */
     public static void configureService(ConfigurationContext configCtx, AxisService axisService, URL service_file) throws IOException, XMLStreamException, AxisFault {
         InputStream ais = service_file.openStream();
-        log.debug("Looking for Axis2 service configuration file: " + service_file);
+        if (log.isDebugEnabled()) {
+            log.debug("Looking for Axis2 service configuration file: " + service_file);
+        }
         if (ais != null) {
-            log.debug("Configuring service " + axisService.getName() + " using: " + service_file);
+            if (log.isDebugEnabled()) {
+                log.debug("Configuring service " + axisService.getName() + " using: " + service_file);
+            }
             try {
                 if (configCtx == null)
                     configCtx = new ConfigurationContext(axisService.getAxisConfiguration());

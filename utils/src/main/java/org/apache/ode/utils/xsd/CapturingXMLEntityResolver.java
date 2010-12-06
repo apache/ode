@@ -95,7 +95,9 @@ public class CapturingXMLEntityResolver implements XMLEntityResolver {
       
       URI systemId = new URI(FileUtils.encodePath(identifier));
 
-      __log.debug("Captured: "+systemId);
+      if (__log.isDebugEnabled()) {
+          __log.debug("Captured: "+systemId);
+      }
       _capture.put(systemId, data);
     } catch (URISyntaxException use) {
       __log.error("Invalid URI: " + resourceIdentifier.getLiteralSystemId());

@@ -188,13 +188,15 @@ public class Replayer {
             }
             e.setType(ExchangeType.Enum.forString("" + mexDao.getDirection()));
 
-            __log.debug("---");
-            __log.debug("" + mexDao.getCallee());
-            __log.debug("" + mexDao.getChannel());
-            __log.debug("" + mexDao.getCreateTime());
-            __log.debug("" + mexDao.getEPR());
-            __log.debug("" + mexDao.getPortType());
-
+            if (__log.isDebugEnabled()) {
+                __log.debug("---");
+                __log.debug("" + mexDao.getCallee());
+                __log.debug("" + mexDao.getChannel());
+                __log.debug("" + mexDao.getCreateTime());
+                __log.debug("" + mexDao.getEPR());
+                __log.debug("" + mexDao.getPortType());
+            }
+            
             if (e.getType() == ExchangeType.P) {
                 e.setService(mexDao.getPortType());
             } else {

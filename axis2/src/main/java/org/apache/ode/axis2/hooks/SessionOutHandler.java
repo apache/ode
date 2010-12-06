@@ -107,7 +107,9 @@ public class SessionOutHandler extends AbstractHandler {
                     header.addChild(session);
                     session.setText(targetEpr.getSessionId());
                 }
-                __log.debug("Sending stateful TO epr in message header using session " + targetEpr.getSessionId());
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Sending stateful TO epr in message header using session " + targetEpr.getSessionId());
+                }
             }
 
             if (ocallbackSession != null && ocallbackSession instanceof MutableEndpoint) {
@@ -128,11 +130,15 @@ public class SessionOutHandler extends AbstractHandler {
                     odeCallback.addChild(odeSession);
                     intCallback.addChild(intSession);
                 }
-                __log.debug("Sending stateful FROM epr in message header using session " + callbackEpr.getSessionId());
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Sending stateful FROM epr in message header using session " + callbackEpr.getSessionId());
+                }
             }
 
-            __log.debug("Sending a message containing wsa endpoints in headers for session passing.");
-            __log.debug(messageContext.getEnvelope().toString());
+            if (__log.isDebugEnabled()) {
+                __log.debug("Sending a message containing wsa endpoints in headers for session passing.");
+                __log.debug(messageContext.getEnvelope().toString());
+            }
 
         }
         return InvocationResponse.CONTINUE;

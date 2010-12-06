@@ -38,7 +38,7 @@ import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.MapSerializableRunnable;
 
 public class RuntimeDataCleanupRunnable implements MapSerializableRunnable, ContextsAware {
-    private final Log _log = LogFactory.getLog(RuntimeDataCleanupRunnable.class);
+    private final Log __log = LogFactory.getLog(RuntimeDataCleanupRunnable.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -69,7 +69,7 @@ public class RuntimeDataCleanupRunnable implements MapSerializableRunnable, Cont
     }
 
     public void run() {
-        _log.info("CRON CLEAN.run().");
+        __log.info("CRON CLEAN.run().");
 
         for( String filter : _cleanupInfo.getFilters() ) {
             if( _pid != null ) {
@@ -86,7 +86,7 @@ public class RuntimeDataCleanupRunnable implements MapSerializableRunnable, Cont
             }
 
             if( filter.trim().length() > 0 ) {
-                _log.info("CRON CLEAN.run(" + filter + ")");
+                __log.info("CRON CLEAN.run(" + filter + ")");
                 long numberOfDeletedInstances = 0;
                 do {
                     numberOfDeletedInstances = cleanInstances(filter, _cleanupInfo.getCategories(), _transactionSize);
@@ -96,7 +96,9 @@ public class RuntimeDataCleanupRunnable implements MapSerializableRunnable, Cont
     }
 
     int cleanInstances(String filter, final Set<CLEANUP_CATEGORY> categories, int limit) {
-        _log.debug("CRON CLEAN using filter: " + filter + ", limit: " + limit);
+        if (__log.isDebugEnabled()) {
+            __log.debug("CRON CLEAN using filter: " + filter + ", limit: " + limit);
+        }
 
         final InstanceFilter instanceFilter = new InstanceFilter(filter, "", limit);
         try {

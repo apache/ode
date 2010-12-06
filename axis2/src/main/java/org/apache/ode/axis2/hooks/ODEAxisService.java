@@ -105,7 +105,9 @@ public class ODEAxisService {
 
             // axis2 service configuration
             URL service_file = pconf.getBaseURI().resolve(wsdlServiceName.getLocalPart()+".axis2").toURL();
-            LOG.debug("Looking for Axis2 service configuration file: "+service_file);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Looking for Axis2 service configuration file: "+service_file);
+            }
             try {
                 AxisUtils.configureService(axisService, service_file);
             } catch (FileNotFoundException except) {

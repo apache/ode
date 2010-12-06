@@ -34,7 +34,9 @@ public class XmlSchemaTracker extends Tracker {
   public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
     if (uri != null && uri.equals(NS) && (localName.equals("import") || localName.equals("include"))) {
       String loc = atts.getValue("schemaLocation");
-      __log.debug("found reference element " + uri + "@" + localName + "-->" +loc);
+      if (__log.isDebugEnabled()) {
+          __log.debug("found reference element " + uri + "@" + localName + "-->" +loc);
+      }
 
       if (loc != null) addReference(loc);
     }

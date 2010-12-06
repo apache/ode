@@ -177,8 +177,11 @@ public class ProcessConfImpl implements ProcessConf {
                 // NOTE: service can be null for partner links
                 if (service == null)
                     continue;
-                __log.debug("Processing <invoke> element for process " + _pinfo.getName() + ": partnerlink " + plinkName + " --> "
-                        + service);
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Processing <invoke> element for process " + _pinfo.getName() + ": partnerlink " + plinkName + " --> "
+                            + service);
+                }
+                    
                 _partnerRoleInitialValues.put(plinkName, new Endpoint(service.getName(), service.getPort()));
 
                 {
@@ -193,7 +196,9 @@ public class ProcessConfImpl implements ProcessConf {
                     }
 
                     PartnerRoleConfig c = new PartnerRoleConfig(g, invoke.getUsePeer2Peer());
-                    __log.debug("PartnerRoleConfig for " + plinkName + " " + c.failureHandling + " usePeer2Peer: " + c.usePeer2Peer);
+                    if (__log.isDebugEnabled()) {
+                        __log.debug("PartnerRoleConfig for " + plinkName + " " + c.failureHandling + " usePeer2Peer: " + c.usePeer2Peer);
+                    }
                     _partnerRoleConfig.put(plinkName, c);
                 }
             }
@@ -209,8 +214,10 @@ public class ProcessConfImpl implements ProcessConf {
                     __log.error(errmsg);
                     throw new ContextException(errmsg);
                 }
-                __log.debug("Processing <provide> element for process " + _pinfo.getName() + ": partnerlink " + plinkName + " --> "
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Processing <provide> element for process " + _pinfo.getName() + ": partnerlink " + plinkName + " --> "
                         + service.getName() + " : " + service.getPort());
+                }
                 _myRoleEndpoints.put(plinkName, new Endpoint(service.getName(), service.getPort()));
 
                 if (provide.isSetEnableSharing()) {

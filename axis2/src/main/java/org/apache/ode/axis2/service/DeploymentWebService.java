@@ -295,11 +295,15 @@ public class DeploymentWebService {
                 // Processing the package
                 while((entry = zis.getNextEntry()) != null) {
                     if(entry.isDirectory()) {
-                        __log.debug("Extracting directory: " + entry.getName());
+                        if (__log.isDebugEnabled()) {
+                            __log.debug("Extracting directory: " + entry.getName());
+                        }
                         new File(dest, entry.getName()).mkdir();
                         continue;
                     }
-                    __log.debug("Extracting file: " + entry.getName());
+                    if (__log.isDebugEnabled()) {
+                        __log.debug("Extracting file: " + entry.getName());
+                    }
                     File destFile = new File(dest, entry.getName());
                     if (!destFile.getParentFile().exists()) destFile.getParentFile().mkdirs();
                     copyInputStream(zis, new BufferedOutputStream(
