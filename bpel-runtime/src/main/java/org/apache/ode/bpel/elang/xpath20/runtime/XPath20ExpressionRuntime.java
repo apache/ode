@@ -33,8 +33,8 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import net.sf.saxon.om.NamespaceConstant;
-import net.sf.saxon.trans.DynamicError;
+import net.sf.saxon.Configuration;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.DurationValue;
 import net.sf.saxon.xpath.XPathFactoryImpl;
 
@@ -73,6 +73,8 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
 
     /** Class-level logger. */
     private static final Log __log = LogFactory.getLog(XPath20ExpressionRuntime.class);
+    
+    private final XPathFactory _xpf = new XPathFactoryImpl();
 
     public XPath20ExpressionRuntime(){
     }
@@ -114,7 +116,9 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
         }
         if (someRes instanceof List) {
             result = (List) someRes;
-            __log.debug("Returned list of size " + result.size());
+            if (__log.isDebugEnabled()) {
+                __log.debug("Returned list of size " + result.size());
+            }
             if ((result.size() == 1) && !(result.get(0) instanceof Node)) {
                 // Dealing with a Java class
                 Object simpleType = result.get(0);
@@ -139,7 +143,9 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             }
         } else if (someRes instanceof NodeList) {
             NodeList retVal = (NodeList) someRes;
-            __log.debug("Returned node list of size " + retVal.getLength());
+            if (__log.isDebugEnabled()) {
+                __log.debug("Returned node list of size " + retVal.getLength());
+            }
             result = new ArrayList(retVal.getLength());
             for(int m = 0; m < retVal.getLength(); ++m) {
                 Node val = retVal.item(m);
@@ -172,11 +178,11 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             } else {
                 msg.append(cexp.toString());                
             }
-            msg.append("'");
+            msg.append('\'');
             if (ctx.getRootNode() != null) {
                 msg.append(" against '");
                 msg.append(DOMUtils.domToString(ctx.getRootNode()));
-                msg.append("'");
+                msg.append('\'');
             }
 
             if (retVal.size() == 0)
@@ -228,21 +234,22 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
     private Object evaluate(OExpression cexp, EvaluationContext ctx, QName type) throws FaultException, EvaluationException {
         try {
             OXPath20ExpressionBPEL20 oxpath20 = ((OXPath20ExpressionBPEL20) cexp);
-            XPathFactory xpf = new XPathFactoryImpl();
 
-            JaxpFunctionResolver funcResolver = new JaxpFunctionResolver(
-                    ctx, oxpath20);
-            JaxpVariableResolver varResolver = new JaxpVariableResolver(ctx, oxpath20, ((XPathFactoryImpl) xpf).getConfiguration());
-            xpf.setXPathFunctionResolver(funcResolver);
-            xpf.setXPathVariableResolver(varResolver);
-            XPath xpe = xpf.newXPath();
+            JaxpFunctionResolver funcResolver = new JaxpFunctionResolver(ctx, oxpath20);
+            JaxpVariableResolver varResolver = new JaxpVariableResolver(ctx, oxpath20, ((XPathFactoryImpl) _xpf).getConfiguration());
+            XPath xpe = _xpf.newXPath();
+            xpe.setXPathFunctionResolver(funcResolver);
+            xpe.setXPathVariableResolver(varResolver);
             xpe.setNamespaceContext(oxpath20.namespaceCtx);
             String xpath = ((OXPath10Expression)cexp).xpath;
             XPathExpression expr = xpe.compile(xpath);
-            Node contextNode = ctx.getRootNode() == null ? DOMUtils.newDocument() : ctx.getRootNode();
+            Node contextNode = ctx.getRootNode();
+            if (contextNode == null) {
+                contextNode = DOMUtils.newDocument();
+            }
             // Create step nodes in XPath in case it is incompletely instantiated
             if (oxpath20.insertMissingData) {
-                XPath20ExpressionModifier modifier = new XPath20ExpressionModifier(oxpath20.namespaceCtx, ((XPathFactoryImpl) xpf).getConfiguration().getNamePool());
+                XPath20ExpressionModifier modifier = new XPath20ExpressionModifier(oxpath20.namespaceCtx, ((XPathFactoryImpl) _xpf).getConfiguration().getNamePool());
                 modifier.insertMissingData(expr, ctx.getRootNode());
             }
             Object evalResult = expr.evaluate(contextNode, type);
@@ -256,8 +263,8 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
         } catch (XPathExpressionException e) {
             // Extracting the real cause from all this wrapping isn't a simple task
             Throwable cause = e.getCause() != null ? e.getCause() : e;
-            if (cause instanceof DynamicError) {
-                Throwable th = ((DynamicError)cause).getException();
+            if (cause instanceof XPathException) {
+                Throwable th = ((XPathException)cause).getException();
                 if (th != null) {
                     cause = th;
                     if (cause.getCause() != null) cause = cause.getCause();

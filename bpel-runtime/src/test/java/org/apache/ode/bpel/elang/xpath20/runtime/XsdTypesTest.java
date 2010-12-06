@@ -20,6 +20,10 @@
 package org.apache.ode.bpel.elang.xpath20.runtime;
 
 import javax.xml.namespace.QName;
+import javax.xml.xpath.XPathFactory;
+
+import net.sf.saxon.Configuration;
+import net.sf.saxon.xpath.XPathFactoryImpl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,15 +35,18 @@ public class XsdTypesTest extends TestCase {
     private static Log __log = LogFactory.getLog(XsdTypesTest.class);
 
     public void testDateTime() throws Exception {
-        Object o = JaxpVariableResolver.getSimpleContent(DOMUtils.stringToDOM("<temporary-simple-type-wrapper>2010-01-25T15:38:54.82Z</temporary-simple-type-wrapper>"), QName.valueOf("{http://www.w3.org/2001/XMLSchema}dateTime"));
+        XPathFactoryImpl xpf = new XPathFactoryImpl();
+        JaxpVariableResolver jvr = new JaxpVariableResolver(null, null, xpf.getConfiguration());
+        Object o = jvr.getSimpleContent(DOMUtils.stringToDOM("<temporary-simple-type-wrapper>2010-01-25T15:38:54.82Z</temporary-simple-type-wrapper>"), QName.valueOf("{http://www.w3.org/2001/XMLSchema}dateTime"));
         __log.debug(o);
         assertTrue(o.toString().contains("2010-01-25T15:38:54.82Z"));
     }
 
     public void testEmptyDateTime() throws Exception {
-        Object o = JaxpVariableResolver.getSimpleContent(DOMUtils.stringToDOM("<temporary-simple-type-wrapper></temporary-simple-type-wrapper>"), QName.valueOf("{http://www.w3.org/2001/XMLSchema}dateTime"));
+        XPathFactoryImpl xpf = new XPathFactoryImpl();
+        JaxpVariableResolver jvr = new JaxpVariableResolver(null, null, xpf.getConfiguration());
+        Object o = jvr.getSimpleContent(DOMUtils.stringToDOM("<temporary-simple-type-wrapper></temporary-simple-type-wrapper>"), QName.valueOf("{http://www.w3.org/2001/XMLSchema}dateTime"));
         __log.debug(o);
         assertTrue(o.toString().equals(""));
     }
-
 }

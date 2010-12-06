@@ -19,13 +19,10 @@
 
 package org.apache.ode.bpel.elang.xpath20.runtime;
 
-import java.util.Calendar;
-
 import javax.xml.namespace.QName;
 import javax.xml.xpath.XPathVariableResolver;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.ValidationException;
@@ -46,8 +43,6 @@ import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OXsdTypeVarType;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
-import org.apache.ode.utils.xsd.XSTypes;
-import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 /**
@@ -68,7 +63,9 @@ public class JaxpVariableResolver implements XPathVariableResolver {
     }
 
     public Object resolveVariable(QName variableName) {
-        __log.debug("Resolving variable " + variableName);
+        if (__log.isDebugEnabled()) {
+            __log.debug("Resolving variable " + variableName);
+        }
 
         if (!(_oxpath instanceof OXPath10ExpressionBPEL20)) {
             throw new IllegalStateException("XPath variables not supported for bpel 1.1");
@@ -128,7 +125,7 @@ public class JaxpVariableResolver implements XPathVariableResolver {
         }
     }
 
-    public static Value convertSimpleTypeToSaxon(QName type, String value, Configuration _config) {
+    public Value convertSimpleTypeToSaxon(QName type, String value) {
         int fp = _config.getNamePool().allocate("", type.getNamespaceURI(), type.getLocalPart());
         SchemaType type2 = _config.getSchemaType(fp);
         if (type2 == null || !type2.isAtomicType()) {
@@ -148,11 +145,12 @@ public class JaxpVariableResolver implements XPathVariableResolver {
         }
     }
 
-    public static Object getSimpleContent(Node simpleNode, QName type) {
-        Document doc = (simpleNode instanceof Document) ? ((Document) simpleNode) : simpleNode.getOwnerDocument();
+    public Object getSimpleContent(Node simpleNode, QName type) {
         String text = simpleNode.getTextContent();
-        Object o = convertSimpleTypeToSaxon(type, text, Configuration.makeConfiguration(null, null));
-        __log.debug("getSimpleContent for " + DOMUtils.domToString(simpleNode) + " " + type + " returned " + o);
+        Object o = convertSimpleTypeToSaxon(type, text);
+        if (__log.isDebugEnabled()) {
+            __log.debug("getSimpleContent for " + DOMUtils.domToString(simpleNode) + " " + type + " returned " + o);
+        }
         return o;
     }
 }
