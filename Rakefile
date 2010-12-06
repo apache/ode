@@ -543,6 +543,23 @@ define "ode" do
 
   # sign artifacts
   projects.each { |pr| pr.packages.each { |pkg| GPG.sign_and_upload(pkg) } }
+
+  task :pmd do
+    pmd_classpath = transitive('pmd:pmd:jar:4.2.5').each(&:invoke).map(&:to_s).join(File::PATH_SEPARATOR)
+    mkdir_p _(:reports)
+    ant("pmd-report") do |ant|
+      ant.taskdef :name=> 'pmd', :classpath=>pmd_classpath, :classname=>'net.sourceforge.pmd.ant.PMDTask'
+      # rulesets: basic,imports,unusedcode,strings,optimizations,logging-jakarta-commons,migrating,design
+      ant.pmd :rulesetfiles => 'basic,unusedcode,optimizations,design' do
+        ant.formatter :type=>'html', :toFile=> _(:reports, 'pmd.html')
+        projects.each do |pr|
+          pr.compile.sources.each do |src|
+            ant.fileset :dir=> src, :includes=>'**/*.java'
+          end
+        end
+      end
+    end  
+  end
 end
 
 define "apache-ode" do
