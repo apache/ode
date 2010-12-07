@@ -48,6 +48,11 @@
             <name>OSS Sonatype Snapshots (for BPELUnit)</name>
             <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </pluginRepository>
+        <pluginRepository>
+            <id>oss.sonatype.releases</id>
+            <name>OSS Sonatype Releases (for BPELUnit)</name>
+            <url>https://oss.sonatype.org/content/repositories/releases/</url>
+        </pluginRepository>
     </pluginRepositories>
 
    <build>
