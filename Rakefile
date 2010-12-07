@@ -14,7 +14,7 @@
 #    limitations under the License.
 #
 
-gem "buildr", "~>1.3"
+gem "buildr", "~>1.4.3"
 require "buildr"
 require "buildr/xmlbeans.rb"
 require "buildr/openjpa"
@@ -22,11 +22,28 @@ require "buildr/javacc"
 require "buildr/jetty"
 require "buildr/hibernate"
 
+Buildr.settings.build['jmock'] = "1.2.0"
+
+Buildr::Hibernate::REQUIRES[:xdoclet] = Buildr.group("xdoclet", "xdoclet-xdoclet-module", "xdoclet-hibernate-module", 
+ :under=>"xdoclet", :version=>"1.2.3") + ["xdoclet:xjavadoc:jar:1.1-j5"] 
+
+# dirty workaround for BUILDR-541/BUILDR-508
+Java.classpath << Buildr::OpenJPA::REQUIRES
+
 require File.join(File.dirname(__FILE__), 'repositories.rb')
 require File.join(File.dirname(__FILE__), 'dependencies.rb')
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "1.3.5-SNAPSHOT"
+VERSION_NUMBER = "1.3.5rc1"
+
+# Apache Nexus Repositories
+if VERSION_NUMBER =~ /SNAPSHOT/
+    # Apache Development Snapshot Repository
+    repositories.release_to[:url] = 'https://repository.apache.org/content/repositories/snapshots'
+else
+    # Apache Release Distribution Repository
+    repositories.release_to[:url] = 'https://repository.apache.org/service/local/staging/deploy/maven2'
+end
 
 BUNDLE_VERSIONS = {
   "ode.version" => VERSION_NUMBER,
@@ -40,7 +57,7 @@ BUNDLE_VERSIONS = {
   "servicemix.shared.version" => "2009.02-SNAPSHOT",
   "servicemix.specs.version" => "1.4-SNAPSHOT",
 }
-Release.find.tag_name = lambda { |version| "APACHE_ODE_#{version.upcase}" } if Release.find
+Release.tag_name = lambda { |version| "APACHE_ODE_#{version.upcase}" } if Release
 
 desc "Apache ODE"
 define "ode" do
@@ -291,16 +308,12 @@ define "ode" do
     dao_hibernate = project("dao-hibernate").compile.target
     bpel_store = project("bpel-store").compile.target
 
-    Buildr::Hibernate::REQUIRES[:xdoclet] =  Buildr.group("xdoclet", "xdoclet-xdoclet-module", "xdoclet-hibernate-module",
+    hibernate_requires[:xdoclet] = Buildr.group("xdoclet", "xdoclet-xdoclet-module", "xdoclet-hibernate-module", 
       :under=>"xdoclet", :version=>"1.2.3") + ["xdoclet:xjavadoc:jar:1.1-j5"] + projects("dao-hibernate")
 
     export = lambda do |properties, source, target|
       file(target=>[properties, source]) do |task|
         mkpath File.dirname(target), :verbose=>false
-        # Protection against a buildr bug until the fix is released, avoids build failure
-
-        class << task ; attr_accessor :ant ; end
-        task.enhance { |task| task.ant = Buildr::Hibernate.schemaexport }
        
         hibernate_schemaexport target do |task, ant|
           ant.schemaexport(:properties=>properties.to_s, :quiet=>"yes", :text=>"yes", :delimiter=>";",
@@ -519,6 +532,11 @@ define "ode" do
      package(:jar).with :manifest=>_("src/main/resources/META-INF/MANIFEST.MF")
   end
 
+  package_with_sources
+  package_with_javadoc unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
+
+  # sign artifacts
+  projects.each { |pr| pr.packages.each { |pkg| GPG.sign_and_upload(pkg) } }
 end
 
 define "apache-ode" do
@@ -599,12 +617,17 @@ define "apache-ode" do
     if File.exist?(".svn")
       `svn status -v`.reject { |l| l[0] == ?? || l[0] == ?D || l.strip.empty? || l[0...3] == "---"}.
         map { |l| l.split.last }.reject { |f| File.directory?(f) }.
-        each { |f| zip.include f, :as=>f }
+        each { |f| zip.include f, :as=>f.gsub("\\", "/") }
     else
       zip.include Dir.pwd, :as=>"."
     end
   end
 
-  package(:zip, :id=>"#{id}-docs").include(javadoc(project("ode").projects).target) unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
+  package(:zip, :id=>"#{id}-docs").include(doc.from(project("ode").projects).
+    using(:javadoc, :windowtitle=>"Apache ODE #{project.version}").target, :as=>"#{id}-docs-#{version}") unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
+    
+  # sign disto packages
+  projects.each { |pr| pr.packages.each { |pkg| GPG.sign_and_upload(pkg) } }
+  # sign source and javadoc artifacts
+  packages.each { |pkg| GPG.sign_and_upload(pkg) }
 end
-
