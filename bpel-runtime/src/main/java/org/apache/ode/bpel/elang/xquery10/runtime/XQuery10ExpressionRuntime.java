@@ -162,7 +162,9 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
 
         if (someRes instanceof List) {
             result = (List) someRes;
-            __log.debug("Returned list of size " + result.size());
+            if (__log.isDebugEnabled()) {
+                __log.debug("Returned list of size " + result.size());
+            }
 
             if ((result.size() == 1) && !(result.get(0) instanceof Node)) {
                 // Dealing with a Java class
@@ -191,7 +193,9 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
             }
         } else if (someRes instanceof NodeList) {
             NodeList retVal = (NodeList) someRes;
-            __log.debug("Returned node list of size " + retVal.getLength());
+            if (__log.isDebugEnabled()) {
+                __log.debug("Returned node list of size " + retVal.getLength());
+            }
             result = new ArrayList(retVal.getLength());
 
             for (int m = 0; m < retVal.getLength(); ++m) {
