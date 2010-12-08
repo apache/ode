@@ -16,7 +16,7 @@
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
 AXIOM               = [ group("axiom-api", "axiom-impl", "axiom-dom",
-                        :under=>"org.apache.ws.commons.axiom", :version=>"1.2.5") ]
+                        :under=>"org.apache.ws.commons.axiom", :version=>"1.2.7") ]
 AXIS2_ALL           = group("axis2-adb", "axis2-codegen", "axis2-kernel",
                         "axis2-java2wsdl", "axis2-jibx", "axis2-saaj", "axis2-xmlbeans",
                         :under=>"org.apache.axis2", :version=>"1.3")
@@ -35,12 +35,12 @@ AXIS2_MODULES        = struct(
                         "bouncycastle:bcprov-jdk15:jar:140"] 
 )
 AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.3"
-BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:3.0"
+BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:3.1"
 COMMONS             = struct(
   :codec            =>"commons-codec:commons-codec:jar:1.3",
   :collections      =>"commons-collections:commons-collections:jar:3.2.1",
   :dbcp             =>"commons-dbcp:commons-dbcp:jar:1.2.2",
-  :fileupload       =>"commons-fileupload:commons-fileupload:jar:1.1.1",
+  :fileupload       =>"commons-fileupload:commons-fileupload:jar:1.2",
   :httpclient       =>"commons-httpclient:commons-httpclient:jar:3.1",
   :lang             =>"commons-lang:commons-lang:jar:2.4",
   :logging          =>"commons-logging:commons-logging:jar:1.1",
@@ -65,7 +65,7 @@ JAVAX               = struct(
   #:activation       =>"geronimo-spec:geronimo-spec-activation:jar:1.0.2-rc4",
   :connector        =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec:jar:1.0",
   :ejb              =>"org.apache.geronimo.specs:geronimo-ejb_2.1_spec:jar:1.1",
-  :javamail         =>"geronimo-spec:geronimo-spec-javamail:jar:1.3.1-rc5",
+  :javamail         =>"org.apache.geronimo.specs:geronimo-javamail_1.4_spec:jar:1.2",
   :jms              =>"geronimo-spec:geronimo-spec-jms:jar:1.1-rc4",
   :persistence      =>"javax.persistence:persistence-api:jar:1.0",
   :servlet          =>"org.apache.geronimo.specs:geronimo-servlet_2.4_spec:jar:1.0",
@@ -76,7 +76,7 @@ JAVAX               = struct(
 JAXEN               = "jaxen:jaxen:jar:1.1.1"
 JBI                 = group("org.apache.servicemix.specs.jbi-api-1.0", :under=>"org.apache.servicemix.specs", :version=>"1.1.0")
 JENCKS              = "org.jencks:jencks:jar:all:1.3"
-JIBX                = "jibx:jibx-run:jar:1.1-beta3"
+JIBX                = "org.jibx:jibx-run:jar:1.1.5"
 KARAF               = [
                         "org.apache.felix:org.osgi.core:jar:1.4.0",
                         "org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.console:jar:1.0.0",
@@ -118,13 +118,13 @@ SERVICEMIX          = [
 SLF4J = group(%w{ slf4j-api slf4j-log4j12 jcl104-over-slf4j }, :under=>"org.slf4j", :version=>"1.4.3")                        
 SPRING              = ["org.springframework:spring:jar:2.5.6"]
 TRANQL              = [ "tranql:tranql-connector:jar:1.1", COMMONS.primitives ]
-WOODSTOX            = "woodstox:wstx-asl:jar:3.2.1"
-WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.1"
+WOODSTOX            = "woodstox:wstx-asl:jar:3.2.4"
+WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.2"
 XALAN               = "xalan:xalan:jar:2.7.1"
 XERCES              = "xerces:xercesImpl:jar:2.9.0"
 WS_COMMONS          = struct(
   :axiom            =>AXIOM,
-  :neethi           =>"org.apache.neethi:neethi:jar:2.0.2",
+  :neethi           =>"org.apache.neethi:neethi:jar:2.0.4",
   :xml_schema       =>"org.apache.ws.commons.schema:XmlSchema:jar:1.3.2"
 )
 XBEAN               = [
