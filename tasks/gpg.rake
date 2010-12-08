@@ -38,4 +38,13 @@ module GPG
     artifact.from sign_task(pkg)
     task(:upload).enhance [artifact.upload_task]
   end
+
+  def sign_before_upload(root)
+    root.enhance do 
+      [root, root.projects].flatten.each { |prj|
+        prj.packages.each { |pkg| sign_and_upload(pkg); puts pkg }
+        prj.packages.map {|pkg| pkg.pom }.uniq.each { |pom| sign_and_upload(pom) }
+      }
+    end
+  end
 end

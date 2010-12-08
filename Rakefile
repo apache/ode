@@ -34,7 +34,7 @@ require File.join(File.dirname(__FILE__), 'repositories.rb')
 require File.join(File.dirname(__FILE__), 'dependencies.rb')
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "1.3.5rc1"
+VERSION_NUMBER = "1.3.5-SNAPSHOT"
 
 # Apache Nexus Repositories
 if VERSION_NUMBER =~ /SNAPSHOT/
@@ -536,7 +536,8 @@ define "ode" do
   package_with_javadoc unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
 
   # sign artifacts
-  projects.each { |pr| pr.packages.each { |pkg| GPG.sign_and_upload(pkg) } }
+  GPG.sign_before_upload(self)
+
 end
 
 define "apache-ode" do
@@ -626,8 +627,6 @@ define "apache-ode" do
   package(:zip, :id=>"#{id}-docs").include(doc.from(project("ode").projects).
     using(:javadoc, :windowtitle=>"Apache ODE #{project.version}").target, :as=>"#{id}-docs-#{version}") unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
     
-  # sign disto packages
-  projects.each { |pr| pr.packages.each { |pkg| GPG.sign_and_upload(pkg) } }
-  # sign source and javadoc artifacts
-  packages.each { |pkg| GPG.sign_and_upload(pkg) }
+  # sign packages
+  GPG.sign_before_upload(self)
 end
