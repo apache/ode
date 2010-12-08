@@ -39,10 +39,10 @@ VERSION_NUMBER = "1.3.5-SNAPSHOT"
 # Apache Nexus Repositories
 if VERSION_NUMBER =~ /SNAPSHOT/
     # Apache Development Snapshot Repository
-    repositories.release_to[:url] = 'https://repository.apache.org/content/repositories/snapshots'
+    repositories.release_to[:url] ||= 'https://repository.apache.org/content/repositories/snapshots'
 else
     # Apache Release Distribution Repository
-    repositories.release_to[:url] = 'https://repository.apache.org/service/local/staging/deploy/maven2'
+    repositories.release_to[:url] ||= 'https://repository.apache.org/service/local/staging/deploy/maven2'
 end
 
 BUNDLE_VERSIONS = {

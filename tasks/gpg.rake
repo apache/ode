@@ -42,7 +42,7 @@ module GPG
   def sign_before_upload(root)
     root.enhance do 
       [root, root.projects].flatten.each { |prj|
-        prj.packages.each { |pkg| sign_and_upload(pkg); puts pkg }
+        prj.packages.each { |pkg| sign_and_upload(pkg) }
         prj.packages.map {|pkg| pkg.pom }.uniq.each { |pom| sign_and_upload(pom) }
       }
     end
