@@ -253,6 +253,9 @@ public class DeploymentWebService {
                 } else if (operation.equals("listProcesses")) {
                     OMElement namePart = messageContext.getEnvelope().getBody().getFirstElement().getFirstElement();
                     List<QName> processIds = _store.listProcesses(namePart.getText());
+                    if (processIds == null) {
+                        throw new OdeFault("Could not find process package: " + namePart.getText());
+                    }
                     OMElement response = factory.createOMElement("processIds", null);
                     for (QName qname : processIds) {
                         OMElement nameElmt = factory.createOMElement("id", _deployapi);
