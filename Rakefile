@@ -619,6 +619,8 @@ define "apache-ode" do
       `svn status -v`.reject { |l| l[0] == ?? || l[0] == ?D || l.strip.empty? || l[0...3] == "---"}.
         map { |l| l.split.last }.reject { |f| File.directory?(f) }.
         each { |f| zip.include f, :as=>f.gsub("\\", "/") }
+    else if File.exist? '.git/config'
+      `git ls-files`.split("\n").each { |f| zip.include f, :as=>f.gsub("\\", "/") }
     else
       zip.include Dir.pwd, :as=>"."
     end
