@@ -357,6 +357,7 @@ public class ODEServer {
                 try {
                     __log.debug("shutdown BpelConnector");
                     _connector.shutdown();
+                    _connector = null;
                 } catch (Throwable t) {
                     __log.error("Unable to cleanup temp files.", t);
                 }
@@ -365,6 +366,7 @@ public class ODEServer {
                 __log.debug("shutting down HTTP connection manager.");
                 try {
                     httpConnectionManager.shutdown();
+                    httpConnectionManager = null;
                 } catch(Throwable t) {
                     __log.error("Unable to shut down HTTP connection manager.", t);
                 }
@@ -373,6 +375,7 @@ public class ODEServer {
                 __log.debug("shutting down Idle Connection Timeout Thread.");
                 try {
                     idleConnectionTimeoutThread.shutdown();
+                    idleConnectionTimeoutThread = null;
                 } catch(Throwable t) {
                     __log.error("Unable to shut down Idle Connection Timeout Thread.", t);
                 }
@@ -384,6 +387,8 @@ public class ODEServer {
                 __log.error("Unable to cleanup temp files.", t);
             }
 
+            _executorService.shutdownNow();
+            _executorService = null;
 
             __log.info(__msgs.msgOdeShutdownCompleted());
         } finally {

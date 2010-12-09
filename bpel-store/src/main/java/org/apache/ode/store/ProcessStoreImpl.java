@@ -144,6 +144,10 @@ public class ProcessStoreImpl implements ProcessStore {
             shutdownInternalDB(_inMemDs);
             _inMemDs = null;
         }
+        if (_executor != null) {
+            _executor.shutdownNow();
+            _executor = null;
+        }
     }
 
     @Override
