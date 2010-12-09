@@ -541,9 +541,8 @@ define "ode" do
   package_with_sources
   package_with_javadoc unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
 
-  # sign artifacts
-  projects.each { |pr| pr.packages.each { |pkg| GPG.sign_and_upload(pkg) } }
-
+  GPG.sign_before_upload(self)
+  
   task :pmd do
     pmd_classpath = transitive('pmd:pmd:jar:4.2.5').each(&:invoke).map(&:to_s).join(File::PATH_SEPARATOR)
     mkdir_p _(:reports)
@@ -641,6 +640,8 @@ define "apache-ode" do
       `svn status -v`.reject { |l| l[0] == ?? || l[0] == ?D || l.strip.empty? || l[0...3] == "---"}.
         map { |l| l.split.last }.reject { |f| File.directory?(f) }.
         each { |f| zip.include f, :as=>f.gsub("\\", "/") }
+    elsif File.exist? '.git/config'
+      `git ls-files`.split("\n").each { |f| zip.include f, :as=>f.gsub("\\", "/") }
     else
       zip.include Dir.pwd, :as=>"."
     end
@@ -649,9 +650,7 @@ define "apache-ode" do
   package(:zip, :id=>"#{id}-docs").include(doc.from(project("ode").projects).
     using(:javadoc, :windowtitle=>"Apache ODE #{project.version}").target, :as=>"#{id}-docs-#{version}") unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
     
-  # sign disto packages
-  projects.each { |pr| pr.packages.each { |pkg| GPG.sign_and_upload(pkg) } }
-  # sign source and javadoc artifacts
-  packages.each { |pkg| GPG.sign_and_upload(pkg) }
+  # sign packages
+  GPG.sign_before_upload(self)
 
 end
