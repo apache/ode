@@ -55,7 +55,7 @@ module Buildr
       def to_params
         params = self.project.manifest.merge(@params).reject { |k, v| v.nil? }
         params["-classpath"] ||= self.classpath.collect(&:to_s).join(", ")
-        params['Bundle-SymbolicName'] ||= [self.project.group, self.project.name.gsub(':', '.')].join('.')
+        params['Bundle-SymbolicName'] ||= [self.project.group, self.project.name.gsub(':', '-')].join('.')
         params['Bundle-Name'] ||= self.project.comment || self.project.name
         params['Bundle-Description'] ||= self.project.comment
         params['Bundle-Version'] ||= self.project.version
