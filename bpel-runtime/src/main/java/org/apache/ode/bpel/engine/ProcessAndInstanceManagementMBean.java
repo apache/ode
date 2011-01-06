@@ -114,7 +114,9 @@ public class ProcessAndInstanceManagementMBean implements DynamicMBean {
 
     public Object invoke(String actionName, Object[] params, String[] signature)
             throws MBeanException, ReflectionException {
+		ClassLoader cl = Thread.currentThread().getContextClassLoader();
         try {
+            Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
             Method m = _pm.getClass().getMethod(actionName, findTypes(_pm.getClass().getClassLoader(), signature));
             if (m == null) {
                 throw new ReflectionException(new NoSuchMethodException(actionName));
@@ -122,6 +124,8 @@ public class ProcessAndInstanceManagementMBean implements DynamicMBean {
             return m.invoke(_pm, params);
         } catch (Exception e) {
             throw new ReflectionException(e);
+		} finally {
+            Thread.currentThread().setContextClassLoader(cl);
         }
     }
 
