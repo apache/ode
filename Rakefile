@@ -456,11 +456,10 @@ define "ode" do
       BUNDLE_VERSIONS.each {|key, value| bnd[key] = value }
       bnd['Bundle-Name'] = "Apache ODE Commands"
       bnd['Bundle-Version'] = VERSION_NUMBER
-      bnd['Require-Bundle'] = "org.apache.ode.jbi"
+      bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;version=#{VERSION_NUMBER}"
       bnd['Import-Package'] = "org.osgi.service.command,*"
       bnd['Private-Package'] = "org.apache.ode.karaf.commands;version=#{VERSION_NUMBER}"
       bnd['Include-Resource'] = _('src/main/resources')
-      bnd['-removeheaders'] = "Include-Resource"
     end
   end
 
@@ -484,9 +483,6 @@ define "ode" do
     filter('src/main/filtered-resources').into('target').using(BUNDLE_VERSIONS)
 
     package(:bundle).tap do |bnd|
-      # inline log4j helper classes
-      #bnd['log4j.jar'] = artifact(LOG4J).to_s
-
       # inline dao zip files
       zips = artifacts(project("dao-hibernate-db").package(:zip), project("dao-jpa-ojpa-derby").package(:zip))
       inlines = zips.map{|item| "@" + item.to_s}
@@ -501,16 +497,15 @@ define "ode" do
 
       # embedd *.xsd, *.xml, xmlbeans* from ode libs
       embedres = ode_libs.map {|pkg| ['**.xsd', '**.xml', 'schemaorg_apache_xmlbeans/**'].map {|x| '@' + pkg.to_s + '!/' + x}}.join(', ')
-
       bnd['Export-Package'] = "org.apache.ode*;version=#{VERSION_NUMBER};-split-package:=merge-first"
-      bnd['Import-Package'] = '!com.sun.mirror*, !org.apache.axis2.client*, javax.jbi*;version="1.0", javax.transaction*;version="1.1", org.tranql.connector.jdbc, org.apache.commons.httpclient*;version="3.0", org.apache.commons.logging*;version="1.1", org.apache.commons*, org.apache.geronimo.transaction.manager;version="2.0", org.osgi.service.command;version="[0.2,1)", org.springframework.beans.factory.xml;version="2.5", org.apache.geronimo.transaction.manager,org.tranql.connector.jdbc,org.w3c.dom, org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers, org.jaxen.saxpath,net.sf.saxon.xpath,*;resolution:=optional'
+      bnd['Import-Package'] = '!com.sun.mirror*, !org.apache.axis2.client*, javax.jbi*;version="1.0", javax.transaction*;version="1.1", org.tranql.connector.jdbc, org.apache.commons.httpclient*;version="3.0", org.apache.commons.logging*;version="1.1", org.apache.commons*, org.apache.geronimo.transaction.manager;version="2.0", org.osgi.service.command;version="[0.2,1)", org.springframework.beans.factory.xml;version="2.5", org.w3c.dom, org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers, org.jaxen.saxpath,net.sf.saxon.xpath,*;resolution:=optional'
       bnd['Embed-Dependency'] = '*;inline=**.xsd|schemaorg_apache_xmlbeans/**|**.xml'
       bnd['DynamicImport-Package'] = '*'
       bnd['Include-Resource'] = [embedres, _('src/main/resources'), inlines].flatten.join(', ')
       bnd['Bundle-Vendor'] = 'Apache Software Foundation'
       bnd['Bundle-License'] = 'http://www.apache.org/licenses/LICENSE-2.0'
       bnd['Bundle-DocURL'] = 'http://ode.apache.org'
-      bnd.classpath = [project.compile.target, ode_libs, artifacts(project("jbi").package(:jar)), libs].flatten
+      bnd.classpath = [project.compile.target, bnd_libs, artifacts(project("jbi").package(:jar)), libs].flatten
 
       BUNDLE_VERSIONS.each {|key, value| bnd[key] = value }
     end
