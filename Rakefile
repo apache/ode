@@ -461,6 +461,17 @@ define "ode" do
   define "jbi-karaf" do
     resources.filter.using(BUNDLE_VERSIONS)
     package :jar
+    # Generate features.xml
+    def package_as_feature(file_name)
+      file file_name => [_("src/main/resources/features.xml")] do
+        filter(_("src/main/resources")).include("features.xml").into(_("target")).using(BUNDLE_VERSIONS).run
+        mv _("target/features.xml"), file_name
+      end
+    end
+    def package_as_feature_spec(spec)
+      spec.merge({ :type=>:xml, :classifier=>'features' })
+    end
+    package(:feature)
   end
 
   desc "ODE JBI Bundle"
@@ -473,8 +484,7 @@ define "ode" do
                      COMMONS.primitives, COMMONS.io, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector, 
                      JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA, 
                      SAXON, TRANQL, XALAN, XERCES, XMLBEANS, WSDL4J, KARAF)
-    compile.with projects("bpel-schemas", "jbi"), JBI, libs
-    filter('src/main/filtered-resources').into('target').using(BUNDLE_VERSIONS)
+    compile.with projects("bpel-schemas", "jbi", "bpel-api"), JBI, libs, KARAF, SPRING, SPRING_OSGI
 
     package(:bundle).tap do |bnd|
       # inline dao zip files
@@ -499,6 +509,7 @@ define "ode" do
       bnd['Bundle-Vendor'] = 'Apache Software Foundation'
       bnd['Bundle-License'] = 'http://www.apache.org/licenses/LICENSE-2.0'
       bnd['Bundle-DocURL'] = 'http://ode.apache.org'
+      bnd['Bundle-Name'] = 'Apache ODE :: BPEL Service Engine'
       bnd.classpath = [project.compile.target, bnd_libs, artifacts(project("jbi").package(:jar)), libs].flatten
 
       BUNDLE_VERSIONS.each {|key, value| bnd[key] = value }

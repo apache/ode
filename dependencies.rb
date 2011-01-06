@@ -79,6 +79,7 @@ JENCKS              = "org.jencks:jencks:jar:all:1.3"
 JIBX                = "org.jibx:jibx-run:jar:1.1.5"
 KARAF               = [
                         "org.apache.felix:org.osgi.core:jar:1.4.0",
+                        "org.apache.felix:org.osgi.compendium:jar:1.4.0",
                         "org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.console:jar:1.0.0",
                         group("org.apache.felix.gogo.commands","org.apache.felix.gogo.runtime", 
                           :under=>"org.apache.felix.gogo", :version=>"0.2.0")
@@ -117,6 +118,7 @@ SERVICEMIX          = [
                         ]
 SLF4J = group(%w{ slf4j-api slf4j-log4j12 jcl104-over-slf4j }, :under=>"org.slf4j", :version=>"1.4.3")                        
 SPRING              = ["org.springframework:spring:jar:2.5.6"]
+SPRING_OSGI         = ["org.springframework.osgi:spring-osgi-core:jar:1.2.0"]
 TRANQL              = [ "tranql:tranql-connector:jar:1.1", COMMONS.primitives ]
 WOODSTOX            = "woodstox:wstx-asl:jar:3.2.4"
 WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.2"
