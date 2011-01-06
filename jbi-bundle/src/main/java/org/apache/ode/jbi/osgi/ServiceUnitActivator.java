@@ -19,101 +19,27 @@
 
 package org.apache.ode.jbi.osgi;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Enumeration;
+import java.util.logging.Logger;
 
-import javax.jbi.component.Component;
-import javax.jbi.component.ServiceUnitManager;
-
-import org.apache.commons.io.IOUtils;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+
 
 /**
- * @author mproch
+ * This class is now deprecated in favor of using OdeExtender service, which watches
+ * deployment of bundles and manages start/stop/install/uninstall/update from OSGi
+ * to ODE.
  *
+ * @deprecated
+ * @see OdeExtenderImpl
  */
 public class ServiceUnitActivator implements BundleActivator {
-
-    File rootDir;
-    String generatedName;
+    private static final Logger LOG = Logger.getLogger(ServiceUnitActivator.class.getName());
 
     public void start(BundleContext context) throws Exception {
-        generatedName = context.getBundle().getSymbolicName();
-        rootDir = context.getDataFile("bpelData");
-        rootDir.mkdirs();
-        Enumeration<?> en = context.getBundle().findEntries("/", "*", false);
-        while (en.hasMoreElements()) {
-            copyOne(rootDir, (URL) en.nextElement());
-        }
-        ServiceReference[] refs = context.getAllServiceReferences(
-                "javax.jbi.component.Component", "(&(NAME=OdeBpelEngine))");
-        if (refs == null || refs.length != 1) {
-            throw new RuntimeException("no appropriate service :(");
-        }
-        ServiceUnitManager suM = ((Component) context.getService(refs[0]))
-                .getServiceUnitManager();
-        ClassLoader l = Thread.currentThread().getContextClassLoader();
-        try {
-            ClassLoader suL = suM.getClass().getClassLoader();
-            Thread.currentThread().setContextClassLoader(new BundleClassLoader(suL, context.getBundle()));
-            suM.deploy(generatedName, rootDir.getAbsolutePath());
-            suM.init(generatedName, rootDir.getAbsolutePath());
-            suM.start(generatedName);
-        } finally {
-            Thread.currentThread().setContextClassLoader(l);
-        }
-
-    }
-
-    private void copyOne(File dest, URL url) throws Exception {
-        File d = new File(dest, url.getPath());
-        InputStream str = url.openStream();
-        if (str != null) {
-            FileWriter wr = new FileWriter(d);
-            try {
-                IOUtils.copy(str, wr);
-            } finally {
-                wr.flush();
-                wr.close();
-            }
-        }
+	LOG.warning("Use of " + this.getClass().getName() + " has been deprecated.  BPEL bundle deployment is now handled by the ODE extender service.  Remove Bundle-Activator from OSGi manifest for bundle: " + context.getBundle().getSymbolicName());
     }
 
     public void stop(BundleContext context) throws Exception {
-        ServiceReference[] refs = context.getAllServiceReferences(
-                "javax.jbi.component.Component", "(&(NAME=OdeBpelEngine))");
-        if (refs == null || refs.length != 1) {
-            throw new RuntimeException("no appropriate service :(");
-        }
-        ServiceUnitManager suM = ((Component) context.getService(refs[0]))
-                .getServiceUnitManager();
-        suM.shutDown(generatedName);
-        suM.undeploy(generatedName, rootDir.getAbsolutePath());
-
     }
-
-    public class BundleClassLoader extends ClassLoader {
-        private final Bundle delegate;
-
-        public BundleClassLoader(ClassLoader parent, Bundle delegate) {
-            super(parent);
-            this.delegate = delegate;
-        }
-
-        @Override
-        public Class<?> loadClass(String name) throws ClassNotFoundException {
-            try {
-                return getParent().loadClass(name);
-            } catch (Exception e) {
-                return delegate.loadClass(name);
-            }
-        }
-    }
-
 }

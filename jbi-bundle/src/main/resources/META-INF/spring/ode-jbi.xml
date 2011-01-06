@@ -64,4 +64,17 @@
         <prop key="javax.persistence.provider">org.apache.openjpa.persistence.PersistenceProviderImpl</prop>
     </osgix:cm-properties>
 
+    <!-- ODE Extender Service -->
+    <bean id="ode-extender-service" class="org.apache.ode.jbi.osgi.deployer.OdeExtenderImpl">
+      <property name="odeComponent">
+        <ref bean="ode-jbi-component" />
+      </property>
+    </bean>
+
+    <osgi:service ref="ode-extender-service">
+        <osgi:interfaces>
+            <value>org.apache.ode.jbi.osgi.deployer.OdeExtender</value>
+        </osgi:interfaces>
+    </osgi:service>
+
 </beans>
