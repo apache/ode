@@ -1,85 +1,147 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements. See the NOTICE file distributed with this
+# work for additional information regarding copyright ownership. The ASF
+# licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-#    Licensed to the Apache Software Foundation (ASF) under one or more
-#    contributor license agreements.  See the NOTICE file distributed with
-#    this work for additional information regarding copyright ownership.
-#    The ASF licenses this file to You under the Apache License, Version 2.0
-#    (the "License"); you may not use this file except in compliance with
-#    the License.  You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0
 #
-#       http://www.apache.org/licenses/LICENSE-2.0
-#
-#    Unless required by applicable law or agreed to in writing, software
-#    distributed under the License is distributed on an "AS IS" BASIS,
-#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#    See the License for the specific language governing permissions and
-#    limitations under the License.
-#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
 
-# This task creates an OSGi bundle package using the bnd tool.
-#
-# The classpath and path to a bnd configuration file are required.
-# Additional properties can be specified using the bnd.properties
-# hash. Refer to the bnd documentation (http://www.aqute.biz/Code/Bnd)
-# for details on the supported properties.
-#
-# The easiest way to use this task is through the Project#package method.
-# For example:
-#   package(:bundle).tap do |bnd|
-#     bnd.bnd_file = 'conf/foo.bnd'
-#     bnd.classpath = artifacts(...)
-#     bnd.properties['foo'] = 'bar'
-#   end
-class BndTask < Rake::FileTask
+module Buildr
+  module Bnd
+    class << self
+      # The specs for requirements
+      def dependencies
+        ["biz.aQute:bnd:jar:0.0.384"]
+      end
 
-  BND = "biz.aQute:bnd:jar:0.0.379"
+      # Repositories containing the requirements
+      def remote_repository
+        "http://www.aQute.biz/repo"
+      end
 
-  # Classpath string for building the bundle
-  attr_accessor :classpath
+      def bnd_main(*args)
+        cp = Buildr.artifacts(self.dependencies).each(&:invoke).map(&:to_s)
+        Java::Commands.java 'aQute.bnd.main.bnd', *(args + [{ :classpath => cp }])
+      end
+    end
+    
+    class BundleTask < Rake::FileTask
+      attr_reader :project
+      attr_accessor :classpath
 
-  # Sourcepath
-  attr_accessor :sourcepath
+      def [](key)
+        @params[key]
+      end
 
-  # Path to bnd file
-  attr_accessor :bnd_file
+      def []=(key, value)
+        @params[key] = value
+      end
 
-  # Hash of properties passed to bnd
-  attr_accessor :properties
+      def classpath_element(dependencies)
+        artifacts = Buildr.artifacts([dependencies])
+        self.prerequisites << artifacts
+        artifacts.each do |dependency|
+          self.classpath << dependency.to_s
+        end
+      end
 
-  def initialize(*args)
-    super
-    @properties = {}
+      def to_params
+        params = self.project.manifest.merge(@params).reject { |k, v| v.nil? }
+        params["-classpath"] ||= self.classpath.collect(&:to_s).join(", ")
+        params['Bundle-SymbolicName'] ||= [self.project.group, self.project.name.gsub(':', '.')].join('.')
+        params['Bundle-Name'] ||= self.project.comment || self.project.name
+        params['Bundle-Description'] ||= self.project.comment
+        params['Bundle-Version'] ||= self.project.version
+        if params["Include-Resource"].nil? && !project.resources.target.nil?
+          params["Include-Resource"] = "#{project.resources.target}/"
+        end
+        params['-removeheaders'] ||= "Include-Resource,Bnd-LastModified,Created-By,Implementation-Title,Tool"
 
-    # Make sure bnd tool is available
-    Buildr.artifact(BND).invoke
+        params
+      end
 
-    enhance do
-      Buildr.ant('bnd') do |project|
+      def project=(project)
+        @project = project
+      end
 
-        # pass properties to bnd as ant properties
-        properties.each do |key, value|
-          project.property(:name=>key, :value=>value)
+      def classpath=(classpath)
+        @classpath = []
+        Buildr.artifacts([classpath.flatten.compact]).each do |dependency|
+          self.prerequisites << dependency
+          @classpath << dependency.to_s
+        end
+        @classpath
+      end
+
+      def classpath
+        @classpath ||= ([project.compile.target] + project.compile.dependencies).flatten.compact
+      end
+
+      protected
+
+      def initialize(*args) #:nodoc:
+        super
+        @params = {}
+        enhance do
+          filename = self.name
+          # Generate BND file with same name as target jar but different extension
+          bnd_filename = filename.sub /(\.jar)?$/, '.bnd'
+
+          params = self.to_params
+          params["-output"] = filename
+          File.open(bnd_filename, 'w') do |f|
+            f.print params.collect { |k, v| "#{k}=#{v}" }.join("\n")
+          end
+
+          Buildr::Bnd.bnd_main( "build", "-noeclipse", bnd_filename )
+          begin
+            Buildr::Bnd.bnd_main( "print", "-verify", filename )
+          rescue => e
+            rm filename
+            raise e
+          end
+        end
+      end
+    end
+
+    module ProjectExtension
+      include Extension
+
+      first_time do
+        desc "Does `bnd print` on the packaged bundle and stdouts the output for inspection"
+        Project.local_task("bnd:print")
+      end
+
+      def package_as_bundle(filename)
+        project.task('bnd:print' => [filename]) do |task|
+          Buildr::Bnd.bnd_main("print", filename)
         end
 
-        project.taskdef :name=>'bnd', :classname=>'aQute.bnd.ant.BndTask', :classpath=>Buildr.artifact(BND)
-        project.bnd(:classpath=>classpath, :sourcepath=>(sourcepath == nil) ? "" : File.expand_path(sourcepath),
-                    :files=>File.expand_path(bnd_file), :output=>name,
-                    :eclipse=>false, :failok=>false, :exceptions=>true)
+        dirname = File.dirname(filename)
+        directory(dirname)
+
+        # Add Buildr.application.buildfile so it will rebuild if we change settings
+        task = BundleTask.define_task(filename => [Buildr.application.buildfile, dirname])
+        task.project = self
+        # the last task is the task considered the packaging task
+        task
+      end
+
+      # Change the bundle package to .jar extension
+      def package_as_bundle_spec(spec)
+        spec.merge(:type => :jar)
       end
     end
   end
-
-
 end
 
-
-class Project
-
-  def package_as_bundle(file_name) #:nodoc
-    BndTask.define_task(file_name)
-  end
-
-  def package_as_bundle_spec(spec) #:nodoc
-    spec.merge({ :type=>:jar, :classifier=>'bundle' })
-  end
-
+class Buildr::Project
+  include Buildr::Bnd::ProjectExtension
 end

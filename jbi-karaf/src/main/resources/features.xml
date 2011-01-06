@@ -28,49 +28,49 @@
     <feature name="ode-core" version="${ode.version}">
         <bundle>mvn:org.apache.ode/ode-jbi-bundle/${ode.version}</bundle>
     </feature>
-    <feature name="ode-hib-deps" version="${project.version}">
+    <feature name="ode-hib-deps" version="${ode.version}">
         <bundle>wrap:mvn:dom4j/dom4j/1.6.1</bundle>
         <bundle>wrap:mvn:org.hibernate/hibernate/3.2.5.ga</bundle>
     </feature>
-    <feature name="ode-jpa-deps" version="${project.version}">
+    <feature name="ode-jpa-deps" version="${ode.version}">
         <bundle>mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.java-persistence-api-1.1.1/1.4.0</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.serp/1.13.1_2</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.openjpa/1.2.1_2</bundle>
     </feature>
-    <feature name="ode-derby-deps" version="${project.version}">
+    <feature name="ode-derby-deps" version="${ode.version}">
         <bundle>wrap:mvn:org.tranql/tranql-connector/1.4</bundle>
         <bundle>mvn:org.apache.derby/derby/${derby.version}</bundle>
     </feature>
-    <feature name="ode-sqlserver-deps" version="${project.version}">
+    <feature name="ode-sqlserver-deps" version="${ode.version}">
         <bundle>wrap:mvn:com.microsoft.sqlserver/sqljdbc/1.2</bundle>
         <bundle>wrap:mvn:org.tranql/tranql-connector/1.4</bundle>
         <bundle>wrap:mvn:org.tranql/tranql-connector-sqlserver2005-common/1.1</bundle>
     </feature>
-    <feature name="ode-oracle-deps" version="${project.version}">
+    <feature name="ode-oracle-deps" version="${ode.version}">
         <bundle>wrap:mvn:oracle/ojdbc5/11.1.0.6.0</bundle>
         <bundle>wrap:mvn:org.tranql/tranql-connector/1.4</bundle>
         <bundle>wrap:mvn:org.tranql/tranql-connector-oracle-common/1.4</bundle>
     </feature>
-    <feature name="ode" version="${project.version}">
-        <feature version="${project.version}">ode-derby-deps</feature>
-        <feature version="${project.version}">ode-jpa-deps</feature>
-        <feature version="${project.version}">ode-core-deps</feature>
-        <feature version="${project.version}">ode-core</feature>
+    <feature name="ode" version="${ode.version}">
+        <feature version="${ode.version}">ode-derby-deps</feature>
+        <feature version="${ode.version}">ode-jpa-deps</feature>
+        <feature version="${ode.version}">ode-core-deps</feature>
+        <feature version="${ode.version}">ode-core</feature>
     </feature>
-    <feature name="ode-hib-oracle" version="${project.version}">
-        <feature version="${project.version}">ode-oracle-deps</feature>
-        <feature version="${project.version}">ode-hib-deps</feature>
-        <feature version="${project.version}">ode-core-deps</feature>
-        <feature version="${project.version}">ode-core</feature>
+    <feature name="ode-hib-oracle" version="${ode.version}">
+        <feature version="${ode.version}">ode-oracle-deps</feature>
+        <feature version="${ode.version}">ode-hib-deps</feature>
+        <feature version="${ode.version}">ode-core-deps</feature>
+        <feature version="${ode.version}">ode-core</feature>
     </feature>
-    <feature name="ode-hib-sqlserver" version="${project.version}">
-        <feature version="${project.version}">ode-sqlserver-deps</feature>
-        <feature version="${project.version}">ode-hib-deps</feature>
-        <feature version="${project.version}">ode-core-deps</feature>
-        <feature version="${project.version}">ode-core</feature>
+    <feature name="ode-hib-sqlserver" version="${ode.version}">
+        <feature version="${ode.version}">ode-sqlserver-deps</feature>
+        <feature version="${ode.version}">ode-hib-deps</feature>
+        <feature version="${ode.version}">ode-core-deps</feature>
+        <feature version="${ode.version}">ode-core</feature>
     </feature>
-    <feature name="examples-ode-ping-pong" version="${project.version}">
-        <feature version="${project.version}">ode</feature>
-        <bundle>mvn:org.apache.ode.examples/ping-pong-bundle/${project.version}</bundle>
+    <feature name="examples-ode-ping-pong" version="${ode.version}">
+        <feature version="${ode.version}">ode</feature>
+        <bundle>mvn:org.apache.ode.examples/ping-pong-bundle/${ode.version}</bundle>
     </feature>
 </features>

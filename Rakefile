@@ -447,63 +447,74 @@ define "ode" do
     end
   end
 
-#  desc "ODE Commmands for Karaf"
-#  define "jbi-karaf-commands" do
-#    compile.with projects("bpel-schemas", "jbi"), JBI, KARAF, XMLBEANS, COMMONS.logging
-#    libs = artifacts(projects("bpel-schemas", "jbi"), JBI, KARAF, XMLBEANS, COMMONS.logging)
-#    package(:bundle).tap do |bnd|
-#      bnd.bnd_file = _("org.apache.ode.commands.bnd")
-#      bnd.sourcepath = _("src/main/java")
-#      bnd.classpath = _("target/classes") + File::PATH_SEPARATOR + libs.join(File::PATH_SEPARATOR)
-#      bnd.properties.update(BUNDLE_VERSIONS)
-#    end
-#  end
-#
-#  desc "ODE JBI Packaging for Karaf"
-#  define "jbi-karaf" do
-#    ode_libs = artifacts(projects("bpel-api", "bpel-api-jca", "bpel-compiler", "bpel-connector", "bpel-dao",
-#                                  "bpel-epr", "jca-ra", "jca-server", "bpel-obj", "bpel-ql", "bpel-runtime",
-#                                  "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
-#                                  "jacob", "jacob-ap", "utils", "agents"))
-#    libs = artifacts(ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
-#                     COMMONS.primitives, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector,
-#                     JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA,
-#                     SAXON, TRANQL, XALAN, XERCES, XMLBEANS, WSDL4J)
-#    package(:bundle).tap do |bnd|
-#      bnd.bnd_file = _("bnd.bnd")
-#      bnd.classpath = (ode_libs + artifacts(project("jbi").package(:jar)) + libs).join(File::PATH_SEPARATOR)
-#      bnd.properties.update(BUNDLE_VERSIONS)
-#
-#      # inline log4j helper classes
-#      bnd.properties["log4j.jar"] = artifact(LOG4J).to_s
-#
-#      # inline dao zip files
-#      zips = artifacts(project("dao-hibernate-db").package(:zip), project("dao-jpa-ojpa-derby").package(:zip))
-#      inlines = zips.map{|item| "@" + item.to_s}
-#      bnd.properties["inlines"] = inlines.join(', ')
-#
-#      # embed jars
-#      bnd_libs = ode_libs + artifacts(AXIOM, BACKPORT, GERONIMO.connector, JAXEN,
-#                                      JAVAX.connector, JAVAX.persistence, JAVAX.ejb,
-#                                      OPENJPA, SAXON, TRANQL,
-#                                      XALAN, XERCES, XMLBEANS, WSDL4J)
-#      includes = bnd_libs.map{|item| File.basename(item.to_s)}
-#      bnd.properties["includes"] = includes.join(', ')
-#    end
-#
-#    # Generate features.xml
-#    def package_as_feature(file_name)
-#      file file_name  => [_("src/main/filtered-resources/features.xml")] do
-#        filter(_("src/main/filtered-resources")).include("features.xml").into(_("target")).using(BUNDLE_VERSIONS).run
-#        mv _("target/features.xml"), file_name
-#      end
-#    end
-#    def package_as_feature_spec(spec)
-#      spec.merge({ :type=>:xml, :classifier=>'features' })
-#    end
-#    package(:feature)
-#
-#  end
+  desc "ODE Commmands for Karaf"
+  define "jbi-karaf-commands" do
+    compile.with projects("bpel-schemas", "jbi"), JBI, KARAF, XMLBEANS, COMMONS.logging
+    libs = artifacts(projects("bpel-schemas", "jbi"), JBI, KARAF, XMLBEANS, COMMONS.logging)
+    package(:bundle).tap do |bnd|
+      bnd.classpath = [_("target/classes"), libs].flatten
+      BUNDLE_VERSIONS.each {|key, value| bnd[key] = value }
+      bnd['Bundle-Name'] = "Apache ODE Commands"
+      bnd['Bundle-Version'] = VERSION_NUMBER
+      bnd['Require-Bundle'] = "org.apache.ode.jbi"
+      bnd['Import-Package'] = "org.osgi.service.command,*"
+      bnd['Private-Package'] = "org.apache.ode.karaf.commands;version=#{VERSION_NUMBER}"
+      bnd['Include-Resource'] = _('src/main/resources')
+      bnd['-removeheaders'] = "Include-Resource"
+    end
+  end
+
+  desc "ODE JBI Packaging for Karaf"
+  define "jbi-karaf" do
+    resources.filter.using(BUNDLE_VERSIONS)
+    package :jar
+  end
+
+  desc "ODE JBI Bundle"
+  define "jbi-bundle" do
+    ode_libs = artifacts(projects("bpel-api", "bpel-api-jca", "bpel-compiler", "bpel-connector", "bpel-dao",
+                                  "bpel-epr", "jca-ra", "jca-server", "bpel-obj", "bpel-ql", "bpel-runtime",
+                                  "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
+                                  "jacob", "jacob-ap", "utils", "agents"))
+    libs = artifacts(ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
+                     COMMONS.primitives, COMMONS.io, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector, 
+                     JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA, 
+                     SAXON, TRANQL, XALAN, XERCES, XMLBEANS, WSDL4J, KARAF)
+    compile.with projects("bpel-schemas", "jbi"), JBI, libs
+    filter('src/main/filtered-resources').into('target').using(BUNDLE_VERSIONS)
+
+    package(:bundle).tap do |bnd|
+      # inline log4j helper classes
+      #bnd['log4j.jar'] = artifact(LOG4J).to_s
+
+      # inline dao zip files
+      zips = artifacts(project("dao-hibernate-db").package(:zip), project("dao-jpa-ojpa-derby").package(:zip))
+      inlines = zips.map{|item| "@" + item.to_s}
+
+      # embed jars
+      bnd_libs = ode_libs + artifacts(AXIOM, BACKPORT, GERONIMO.connector, JAXEN, 
+                                      JAVAX.connector, JAVAX.persistence, JAVAX.ejb, 
+                                      OPENJPA, SAXON, TRANQL, 
+                                      XALAN, XERCES, XMLBEANS, WSDL4J)
+      includes = bnd_libs.map{|item| File.basename(item.to_s)} 
+      bnd["includes"] = includes.join(', ') 
+
+      # embedd *.xsd, *.xml, xmlbeans* from ode libs
+      embedres = ode_libs.map {|pkg| ['**.xsd', '**.xml', 'schemaorg_apache_xmlbeans/**'].map {|x| '@' + pkg.to_s + '!/' + x}}.join(', ')
+
+      bnd['Export-Package'] = "org.apache.ode*;version=#{VERSION_NUMBER};-split-package:=merge-first"
+      bnd['Import-Package'] = '!com.sun.mirror*, !org.apache.axis2.client*, javax.jbi*;version="1.0", javax.transaction*;version="1.1", org.tranql.connector.jdbc, org.apache.commons.httpclient*;version="3.0", org.apache.commons.logging*;version="1.1", org.apache.commons*, org.apache.geronimo.transaction.manager;version="2.0", org.osgi.service.command;version="[0.2,1)", org.springframework.beans.factory.xml;version="2.5", org.apache.geronimo.transaction.manager,org.tranql.connector.jdbc,org.w3c.dom, org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers, org.jaxen.saxpath,net.sf.saxon.xpath,*;resolution:=optional'
+      bnd['Embed-Dependency'] = '*;inline=**.xsd|schemaorg_apache_xmlbeans/**|**.xml'
+      bnd['DynamicImport-Package'] = '*'
+      bnd['Include-Resource'] = [embedres, _('src/main/resources'), inlines].flatten.join(', ')
+      bnd['Bundle-Vendor'] = 'Apache Software Foundation'
+      bnd['Bundle-License'] = 'http://www.apache.org/licenses/LICENSE-2.0'
+      bnd['Bundle-DocURL'] = 'http://ode.apache.org'
+      bnd.classpath = [project.compile.target, ode_libs, artifacts(project("jbi").package(:jar)), libs].flatten
+
+      BUNDLE_VERSIONS.each {|key, value| bnd[key] = value }
+    end
+  end
 
   desc "ODE JCA Resource Archive"
   define "jca-ra" do
