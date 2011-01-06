@@ -27,36 +27,36 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.felix.gogo.commands.*;
 import org.apache.ode.bpel.pmapi.TInstanceInfo;
 
-@Command(scope = "ode", name = "terminate", description = "Terminate active ODE process instances")
-public class OdeTerminateCommand extends OdeCommandsBase {
+@Command(scope = "ode", name = "suspend", description = "Suspend active ODE process instances")
+public class OdeSuspendCommand extends OdeCommandsBase {
 
-    private static final Log __log = LogFactory.getLog(OdeTerminateCommand.class);
+    private static final Log __log = LogFactory.getLog(OdeSuspendCommand.class);
 
-    @Argument(name = "iids", description = "Instance IDs to terminate", multiValued = true)
+    @Argument(name = "iids", description = "Instance IDs to suspend", multiValued = true)
     private static Long[] iids;
 
-    @Option(name = "-a", aliases = "--all", description = "Terminate all active instances")
-    private boolean terminateAll;
+    @Option(name = "-a", aliases = "--all", description = "Suspend all active instances")
+    private boolean suspendAll;
 
     private long timeoutInSeconds = 30;
 
     @Override
     protected Object doExecute() throws Exception {
         try {
-            if (terminateAll) {
+            if (suspendAll) {
                 List<TInstanceInfo> instances = getActiveInstances(timeoutInSeconds);
                 if (instances != null) {
                     for (TInstanceInfo instance : instances) {
-                        terminate(Long.parseLong(instance.getIid()),
+                        suspend(Long.parseLong(instance.getIid()),
                                 timeoutInSeconds);
                     }
                 }
             } else {
                 if (iids == null) {
-                    System.out.println("No instance ids to terminate");
+                    System.out.println("No instance ids to suspend");
                 } else {
                     for (Long iid : iids) {
-                        terminate(iid, timeoutInSeconds);
+                        suspend(iid, timeoutInSeconds);
                     }
                 }
             }
