@@ -25,6 +25,15 @@
         <shell:command name="ode/terminate">
             <shell:action class="org.apache.ode.karaf.commands.OdeTerminateCommand" />
         </shell:command>
+        <shell:command name="ode/suspend">
+            <shell:action class="org.apache.ode.karaf.commands.OdeSuspendCommand" />
+        </shell:command>
+        <shell:command name="ode/resume">
+            <shell:action class="org.apache.ode.karaf.commands.OdeResumeCommand" />
+        </shell:command>
+        <shell:command name="ode/recoverActivity">
+            <shell:action class="org.apache.ode.karaf.commands.OdeRecoverActivityCommand" />
+        </shell:command>
     </shell:command-bundle>
 
 </blueprint>

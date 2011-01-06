@@ -36,9 +36,13 @@ public abstract class OdeCommandsBase extends OsgiCommandSupport {
 
     protected static String COMPONENT_NAME = "org.apache.servicemix:Type=Component,Name=OdeBpelEngine,SubType=Management";
 
-    protected static final String LIST_ALL_PROCESSES = "listAllProcesses";
+    protected static final String LIST_INSTANCES = "listInstances";
     protected static final String LIST_ALL_INSTANCES = "listAllInstances";
+    protected static final String LIST_ALL_PROCESSES = "listAllProcesses";
+    protected static final String RECOVER_ACTIVITY= "recoverActivity";
     protected static final String TERMINATE = "terminate";
+    protected static final String SUSPEND = "suspend";
+    protected static final String RESUME = "resume";
 
     protected MBeanServer getMBeanServer() {
         OdeContext ode = OdeContext.getInstance();
@@ -59,7 +63,7 @@ public abstract class OdeCommandsBase extends OsgiCommandSupport {
      */
     @SuppressWarnings("unchecked")
     protected <T> T invoke(final String operationName, final Object[] params,
-            final String[] signature, Class<?> T, long timeoutInSeconds)
+            final String[] signature, long timeoutInSeconds)
             throws Exception {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Callable<T> callable = new Callable<T>() {
@@ -77,28 +81,67 @@ public abstract class OdeCommandsBase extends OsgiCommandSupport {
         return future.get(timeoutInSeconds, TimeUnit.SECONDS);
     }
 
+    protected List<TInstanceInfo> getActiveInstances(long timeoutInSeconds)
+        throws Exception {
+        return getFilteredInstances(timeoutInSeconds, "status=active");
+    }
+
+    protected List<TInstanceInfo> getSuspendedInstances(long timeoutInSeconds)
+        throws Exception {
+        return getFilteredInstances(timeoutInSeconds, "status=suspended");
+    }
+
+    protected List<TInstanceInfo> getFilteredInstances(long timeoutInSeconds, String filter)
+        throws Exception {
+        InstanceInfoListDocument instances = invoke(LIST_INSTANCES, 
+                new Object[] {filter, "pid", 10},
+                new String[] {String.class.getName(), String.class.getName(), int.class.getName()}, 
+                timeoutInSeconds);
+        if (instances != null) {
+            return instances.getInstanceInfoList().getInstanceInfoList();
+        }
+        return null;
+    }
+    
+    protected List<TInstanceInfo> getAllInstances(long timeoutInSeconds)
+            throws Exception {
+        InstanceInfoListDocument instances = invoke(LIST_ALL_INSTANCES, null,
+                null, timeoutInSeconds);
+        if (instances != null) {
+            return instances.getInstanceInfoList().getInstanceInfoList();
+        }
+        return null;
+    }
+         
     protected List<TProcessInfo> getProcesses(long timeoutInSeconds)
             throws Exception {
-        ProcessInfoListDocument result = invoke(LIST_ALL_PROCESSES, null, null,
-                ProcessInfoListDocument.class, timeoutInSeconds);
+        ProcessInfoListDocument result = invoke(LIST_ALL_PROCESSES, null, null, timeoutInSeconds);
         if (result != null) {
             return result.getProcessInfoList().getProcessInfoList();
         }
         return null;
     }
 
-    protected List<TInstanceInfo> getActiveInstances(long timeoutInSeconds)
-            throws Exception {
-        InstanceInfoListDocument instances = invoke(LIST_ALL_INSTANCES, null,
-                null, InstanceInfoListDocument.class, timeoutInSeconds);
-        if (instances != null) {
-            return instances.getInstanceInfoList().getInstanceInfoList();
-        }
-        return null;
+    protected InstanceInfoDocument recoverActivity(Long instanceId, Long activityId, String action, long timeoutInSeconds) throws Exception {
+        InstanceInfoDocument result = invoke(RECOVER_ACTIVITY, new Object[] {instanceId, activityId, action},
+                new String[] {Long.class.getName(), Long.class.getName(), String.class.getName()}, 
+                timeoutInSeconds);
+        return result;
     }
 
     protected void terminate(Long iid, long timeoutInSeconds) throws Exception {
         invoke(TERMINATE, new Long[] { iid }, new String[] { Long.class
-                .getName() }, InstanceInfoDocument.class, timeoutInSeconds);
+                .getName() }, timeoutInSeconds);
     }
+    
+    protected void suspend(Long iid, long timeoutInSeconds) throws Exception {
+        invoke(SUSPEND, new Long[] { iid }, new String[] { Long.class
+                .getName() }, timeoutInSeconds);
+    }
+    
+    protected void resume(Long iid, long timeoutInSeconds) throws Exception {
+        invoke(RESUME, new Long[] { iid }, new String[] { Long.class
+                .getName() }, timeoutInSeconds);
+    }
+
 }
