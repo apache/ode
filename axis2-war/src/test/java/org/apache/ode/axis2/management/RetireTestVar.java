@@ -49,7 +49,7 @@ public class RetireTestVar extends Axis2TestBase {
         response = sendRequestFile("http://localhost:8888/processes/testretire",
                 bundleName + "/1", "testRequest2.soap");
 
-        assertTrue(response.indexOf("DONE") > 0);
+        assertTrue("'" + response + "' does not contain 'DONE'.", response.indexOf("DONE") > 0);
 
         sendRequestFile("http://localhost:8888/processes/testretire",
                 bundleName + "/1", "testRequest1.soap");
@@ -57,6 +57,6 @@ public class RetireTestVar extends Axis2TestBase {
         response = sendRequestFile("http://localhost:8888/processes/testretire",
                 bundleName + "/1", "testRequest2.soap");
 
-        assertTrue(response.indexOf("XYZ") > 0);
+        assertTrue("'" + response + "' does not contain 'XYZ'.", response.indexOf("XYZ") > 0);
     }
 }
