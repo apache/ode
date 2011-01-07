@@ -43,7 +43,7 @@ public class SchemaCaptureTest extends TestCase {
 
   public void testSchemaCapture() throws Exception {
       __log.debug("GETTING RESOURCE " + TestResources.getRetailerSchema());
-    InputStream xsdStream = new FileInputStream(TestResources.getRetailerSchema().getFile());
+    InputStream xsdStream = TestResources.getRetailerSchema().openStream();
     byte[] data;
     try {
         data = StreamUtils.read(xsdStream);
