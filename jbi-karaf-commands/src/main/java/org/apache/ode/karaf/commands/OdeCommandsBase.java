@@ -93,16 +93,16 @@ public abstract class OdeCommandsBase extends OsgiCommandSupport {
 
     protected List<TInstanceInfo> getFilteredInstances(long timeoutInSeconds, String filter)
         throws Exception {
-        InstanceInfoListDocument instances = invoke(LIST_INSTANCES, 
+        InstanceInfoListDocument instances = invoke(LIST_INSTANCES,
                 new Object[] {filter, "pid", 10},
-                new String[] {String.class.getName(), String.class.getName(), int.class.getName()}, 
+                new String[] {String.class.getName(), String.class.getName(), int.class.getName()},
                 timeoutInSeconds);
         if (instances != null) {
             return instances.getInstanceInfoList().getInstanceInfoList();
         }
         return null;
     }
-    
+
     protected List<TInstanceInfo> getAllInstances(long timeoutInSeconds)
             throws Exception {
         InstanceInfoListDocument instances = invoke(LIST_ALL_INSTANCES, null,
@@ -112,7 +112,7 @@ public abstract class OdeCommandsBase extends OsgiCommandSupport {
         }
         return null;
     }
-         
+
     protected List<TProcessInfo> getProcesses(long timeoutInSeconds)
             throws Exception {
         ProcessInfoListDocument result = invoke(LIST_ALL_PROCESSES, null, null, timeoutInSeconds);
@@ -124,7 +124,7 @@ public abstract class OdeCommandsBase extends OsgiCommandSupport {
 
     protected InstanceInfoDocument recoverActivity(Long instanceId, Long activityId, String action, long timeoutInSeconds) throws Exception {
         InstanceInfoDocument result = invoke(RECOVER_ACTIVITY, new Object[] {instanceId, activityId, action},
-                new String[] {Long.class.getName(), Long.class.getName(), String.class.getName()}, 
+                new String[] {Long.class.getName(), Long.class.getName(), String.class.getName()},
                 timeoutInSeconds);
         return result;
     }
@@ -133,12 +133,12 @@ public abstract class OdeCommandsBase extends OsgiCommandSupport {
         invoke(TERMINATE, new Long[] { iid }, new String[] { Long.class
                 .getName() }, timeoutInSeconds);
     }
-    
+
     protected void suspend(Long iid, long timeoutInSeconds) throws Exception {
         invoke(SUSPEND, new Long[] { iid }, new String[] { Long.class
                 .getName() }, timeoutInSeconds);
     }
-    
+
     protected void resume(Long iid, long timeoutInSeconds) throws Exception {
         invoke(RESUME, new Long[] { iid }, new String[] { Long.class
                 .getName() }, timeoutInSeconds);
