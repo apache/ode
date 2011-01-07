@@ -170,7 +170,7 @@
         <part name="varName" type="xsd:string"/>
     </message>
     <message name="getVariableInfoOutput">
-        <part name="scope-info" type="typ:tVariableInfo"/>
+        <part name="variable-info" type="typ:tVariableInfo"/>
     </message>
     <message name="setVariableInput">
         <part name="sid" type="xsd:string"/>
@@ -178,7 +178,7 @@
         <part name="value" type="xsd:anyType"/>
     </message>
     <message name="setVariableOutput">
-        <part name="scope-info" type="typ:tVariableInfo"/>
+        <part name="variable-info" type="typ:tVariableInfo"/>
     </message>
     <message name="listEventsInput">
         <part name="instanceFilter" type="xsd:string"/>
