@@ -225,7 +225,7 @@ define "ode" do
         BACKPORT, COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
         GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, TRANQL, HSQLDB, JAVAX.ejb,
         OPENJPA, XERCES, XALAN, LOG4J, SLF4J,
-        DOM4J, HIBERNATE, SPRING_TEST,
+        DOM4J, HIBERNATE, SPRING_TEST, COMMONS.io
         "tranql:tranql-connector-derby-common:jar:1.1"
 
     package :jar
