@@ -220,7 +220,7 @@ define "ode" do
 
 
     test.with projects("scheduler-simple", "dao-jpa", "dao-hibernate", "bpel-epr"),
-        BACKPORT, COMMONS.pool, COMMONS.lang, DERBY, JAVAX.connector, JAVAX.transaction,
+        BACKPORT, COMMONS.pool, COMMONS.lang, COMMONS.io, DERBY, JAVAX.connector, JAVAX.transaction,
         GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, TRANQL, HSQLDB, JAVAX.ejb,
         OPENJPA, XERCES, XALAN, LOG4J, SLF4J,
         DOM4J, HIBERNATE,
