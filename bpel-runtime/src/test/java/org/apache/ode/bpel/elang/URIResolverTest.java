@@ -9,7 +9,8 @@ import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
 import static org.junit.Assert.*;
 import org.junit.Ignore;
 import org.junit.Test;
-import static org.junit.internal.matchers.StringContains.containsString;
+
+import static org.junit.matchers.JUnitMatchers.containsString;
 
 public class URIResolverTest {
 
