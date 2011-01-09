@@ -17,27 +17,25 @@
  * under the License.
  */
 
-package org.apache.ode.bpel.elang.xpath20.runtime;
+package org.apache.ode.bpel.elang;
 
-import org.apache.ode.bpel.compiler.api.CompilationException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+
+import javax.xml.transform.Source;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.URIResolver;
+import javax.xml.transform.stream.StreamSource;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
 import org.apache.ode.bpel.o.OXslSheet;
 import org.apache.ode.utils.StreamUtils;
 import org.apache.ode.utils.fs.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.xml.transform.URIResolver;
-import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.stream.StreamSource;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
 
 /**
  * Used to give the Xsl processor a way to access included XSL sheets
@@ -88,15 +86,18 @@ public class XslRuntimeUriResolver implements URIResolver {
      * @return String - the resource contents, or null if none found.
      */
     private String getResourceAsString(URI docUri) {
-        URI resolvedURI= _baseResourceURI.resolve(docUri);
+        URI resolvedURI = _baseResourceURI.resolve(docUri);
         InputStream is = null;
+        
         try {
-            File f = new File(resolvedURI);
-            if (!f.exists()) return null;
-            is = new FileInputStream(f);
+            // treat URI as URL and try to load it.
+            URL url = resolvedURI.toURL();
+            is = url.openStream();
+
+            // and read it to a buffer.
             return new String(StreamUtils.read(is));
-        } catch (IOException e) {
-            __log.info("Couldn't load XSL resource " + docUri);
+        } catch (Exception e) {
+            __log.warn("Couldn't load XSL resource " + docUri, e);
         } finally {
             try {
                 if (is != null) is.close();
@@ -106,7 +107,5 @@ public class XslRuntimeUriResolver implements URIResolver {
         }
         return null;
     }
-
-
 
 }
