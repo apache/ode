@@ -55,7 +55,6 @@ public class XslRuntimeUriResolver implements URIResolver {
     }
 
     public Source resolve(String href, String base) throws TransformerException {
-        String result;
         URI uri;
         try {
             uri = new URI(FileUtils.encodePath(href));
@@ -65,13 +64,17 @@ public class XslRuntimeUriResolver implements URIResolver {
 
         OXslSheet sheet = _expr.getXslSheet(uri);
         if( sheet != null) {
-            result = sheet.sheetBody;
-        } else {
-            result = getResourceAsString(uri);
-        }
-
+            String result = sheet.sheetBody;
+            if (result != null) {
+                return new StreamSource(new StringReader(result));
+            } else {
+                return null;
+            }
+        } 
+        
+        InputStream result = getResourceAsStream(uri);
         if( result != null ) {
-            return new StreamSource(new StringReader(result));
+            return new StreamSource(result);
         } else {
             return null;
         }
@@ -79,13 +82,13 @@ public class XslRuntimeUriResolver implements URIResolver {
 
     /**
      * Given a URI this function will attempt to retrieve the resource declared at that URI location
-     * as a string.  (Hopefully everything's character encodings are all ok...)  This URI can be
-     * defined as being relative to the executing process instance's physical file location.
+     * as a stream. This URI can be defined as being relative to the executing process instance's 
+     * physical file location or can point to an HTTP(S) resource.
      *
      * @param docUri - the URI to resolve
-     * @return String - the resource contents, or null if none found.
+     * @return stream - the resource contents, or null if none found.
      */
-    private String getResourceAsString(URI docUri) {
+    private InputStream getResourceAsStream(URI docUri) {
         URI resolvedURI = _baseResourceURI.resolve(docUri);
         InputStream is = null;
         
@@ -95,15 +98,9 @@ public class XslRuntimeUriResolver implements URIResolver {
             is = url.openStream();
 
             // and read it to a buffer.
-            return new String(StreamUtils.read(is));
+            return is;
         } catch (Exception e) {
             __log.warn("Couldn't load XSL resource " + docUri, e);
-        } finally {
-            try {
-                if (is != null) is.close();
-            } catch (Exception ex) {
-                // No worries.
-            }
         }
         return null;
     }

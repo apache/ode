@@ -18,17 +18,20 @@
  */
 package org.apache.ode.bpel.elang;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.matchers.JUnitMatchers.containsString;
+
 import java.net.URI;
 
-import javax.xml.transform.stream.StreamSource;
+import javax.xml.transform.Source;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
-import static org.junit.Assert.*;
+import org.apache.ode.utils.DOMUtils;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import static org.junit.matchers.JUnitMatchers.containsString;
+import org.w3c.dom.Document;
 
 public class URIResolverTest {
 
@@ -37,10 +40,10 @@ public class URIResolverTest {
         OXPath10Expression expr = new OXPath10Expression(null, null, null, null);
         URI baseResourceURI = getClass().getResource("/xpath20/").toURI();
         XslRuntimeUriResolver resolver = new XslRuntimeUriResolver(expr, baseResourceURI);
-        StreamSource ss = (StreamSource)resolver.resolve("variables.xml", null);
-        String result = IOUtils.toString(ss.getReader());
+        Source source = resolver.resolve("variables.xml", null);
+        Document doc = DOMUtils.sourceToDOM(source);
         
-        assertThat(result, containsString("<variables>"));
+        assertThat(DOMUtils.domToString(doc), containsString("<variables>"));
     }
 
     @Test
@@ -53,15 +56,25 @@ public class URIResolverTest {
     }
 
     @Test
+    public void testEncoding() throws Exception {
+        OXPath10Expression expr = new OXPath10Expression(null, null, null, null);
+        URI baseResourceURI = getClass().getResource("/xslt/").toURI();
+        XslRuntimeUriResolver resolver = new XslRuntimeUriResolver(expr, baseResourceURI);
+
+        Document doc = DOMUtils.sourceToDOM(resolver.resolve("test.xml", null));
+        assertEquals("Prova lettere accentate: à è ì ò ù", doc.getDocumentElement().getTextContent().trim());
+    }
+
+    @Test
     @Ignore("automated tests should not rely on remote connections.")
     public void testResolveURL() throws Exception {
         OXPath10Expression expr = new OXPath10Expression(null, null, null, null);
         URI baseResourceURI = getClass().getResource("/xpath20/").toURI();
         XslRuntimeUriResolver resolver = new XslRuntimeUriResolver(expr, baseResourceURI);
-        StreamSource ss = (StreamSource)resolver.resolve("http://ode.apache.org/", null);
-        String result = IOUtils.toString(ss.getReader());
+        Source source = resolver.resolve("https://svn.apache.org/repos/asf/ode/trunk/bpel-schemas/src/main/xsd/pmapi.xsd", null);
+        Document doc = DOMUtils.sourceToDOM(source);
         
-        assertThat(result, containsString("Orchestration Director Engine"));
+        assertThat(DOMUtils.domToString(doc), containsString("activity-info"));
     }
 
 }
