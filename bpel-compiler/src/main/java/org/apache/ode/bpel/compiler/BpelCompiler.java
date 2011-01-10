@@ -110,6 +110,7 @@ import org.apache.ode.bpel.o.OTerminationHandler;
 import org.apache.ode.bpel.o.OVarType;
 import org.apache.ode.bpel.o.OXsdTypeVarType;
 import org.apache.ode.bpel.o.OXslSheet;
+import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.Namespaces;
@@ -1614,8 +1615,10 @@ public abstract class BpelCompiler implements CompilerContext {
             return null;
 
         try {
-            return new String(StreamUtils.read(is));
-        } catch (IOException e) {
+            // verify that sheet is well-formed and preserve encoding.
+            Document doc = DOMUtils.parse(is);
+            return DOMUtils.domToString(doc);
+        } catch (Exception e) {
             __log.debug("IO error", e);
             // todo: this should produce a message
             return null;

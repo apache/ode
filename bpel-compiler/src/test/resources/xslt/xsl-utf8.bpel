@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpws:process exitOnStandardFault="yes" name="test1"
+    suppressJoinFailure="yes" targetNamespace="http://example.org/test1"
+    xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:tns="http://example.org/test1">
+    <bpws:import importType="http://schemas.xmlsoap.org/wsdl/"
+        location="test1.wsdl" namespace="http://example.org/test1"/>
+    <bpws:partnerLinks>
+        <bpws:partnerLink myRole="test1Provider" name="client" partnerLinkType="tns:test1"/>
+    </bpws:partnerLinks>
+    <bpws:variables>
+        <bpws:variable messageType="tns:test1RequestMessage" name="input"/>
+        <bpws:variable messageType="tns:test1ResponseMessage" name="output"/>
+    </bpws:variables>
+    <bpws:sequence name="main">
+        <bpws:receive createInstance="yes" name="receiveInput"
+            operation="test1" partnerLink="client" portType="tns:test1" variable="input"/>
+        <bpws:assign name="prepareResponse" validate="no">
+            <bpws:copy>
+                <bpws:from>
+                    <bpws:literal>
+                        <test1Response xmlns="http://example.org/test1">
+                            <testxslt xmlns="http://example.org/test"/>
+                        </test1Response>
+                    </bpws:literal>
+                </bpws:from>
+                <bpws:to part="payload" variable="output"/>
+            </bpws:copy>
+            <bpws:copy>
+                <bpws:from><![CDATA[bpws:doXslTransform("test-utf8.xslt", $input.payload)]]></bpws:from>
+                <bpws:to><![CDATA[$output.payload/*[1]]]></bpws:to>
+            </bpws:copy>
+        </bpws:assign>
+        <bpws:reply name="replyOutput" operation="test1"
+            partnerLink="client" portType="tns:test1" variable="output"/>
+    </bpws:sequence>
+</bpws:process>
