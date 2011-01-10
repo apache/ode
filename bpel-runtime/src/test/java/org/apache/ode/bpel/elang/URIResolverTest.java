@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.elang;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.matchers.JUnitMatchers.containsString;
@@ -57,12 +57,13 @@ public class URIResolverTest {
 
     @Test
     public void testEncoding() throws Exception {
+        Document original = DOMUtils.parse(getClass().getResourceAsStream("/xslt/test.xml"));
         OXPath10Expression expr = new OXPath10Expression(null, null, null, null);
         URI baseResourceURI = getClass().getResource("/xslt/").toURI();
         XslRuntimeUriResolver resolver = new XslRuntimeUriResolver(expr, baseResourceURI);
 
         Document doc = DOMUtils.sourceToDOM(resolver.resolve("test.xml", null));
-        assertEquals("Prova lettere accentate: à è ì ò ù", doc.getDocumentElement().getTextContent().trim());
+        assertArrayEquals(original.getDocumentElement().getTextContent().trim().getBytes(), doc.getDocumentElement().getTextContent().trim().getBytes());
     }
 
     @Test
