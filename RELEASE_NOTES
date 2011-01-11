@@ -2,25 +2,44 @@
 Apache ODE Release Notes
 ========================
 
-Apache ODE 1.3.4 includes about 100 bug fixes and new features. It's 
-also the most stable version of ODE released so far. 
+Apache ODE 1.3.5 includes about 20 bug fixes and performance improvements.
 
-Apache ODE 1.3.4 requires Java 1.5.x or higher. The WAR distribution can 
+Apache ODE 1.3.5 requires Java 1.5.x or higher. The WAR distribution can 
 run in most J2EE servlet container. The JBI distribution should be able 
-to run in any JBI container but has only been tested with ServiceMix 3.2.1
-and latest ServiceMix 4 (OSGi bundle) so far. See the BUILDING file if you 
+to run in any JBI container but has only been tested with ServiceMix 3.x
+and latest ServiceMix 4.x (OSGi bundle) so far. See the BUILDING file if you 
 want to build your own distribution from the source release. 
 
-New Features:
-------------
-    * [ODE-483] - Instance replayer
-    * [ODE-776] - Build support for both Buildr and Maven 2/3
-    * [ODE-778] - Add a possibility to deploy processes as OSGi bundles
-    * [ODE-814] - Add spring confgurable process properties
+The performance improvements affect XPath 2.0 processing in assign activities
+or transition conditions and makes it up to 10 times faster than ODE 1.3.4.
 
 Changes:
 ------- 
 
-See our Jira for more information: 
+** Sub-task
+    * [ODE-739] - Add recoverActivity command
 
-https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12310270&styleName=Html&version=12314168
+** Bug
+    * [ODE-155] - Examples: Exceptions for SOAP calls after retrieving WSDL
+    * [ODE-472] - utf-8 encoding is handled incorrectly within xslt stylesheets
+    * [ODE-625] - Deployment Poller Crashes when trying to deploy BPEL File with errors
+    * [ODE-678] - org.apache.ode.bpel.memdao.ProcessDaoImpl cleans instances which are already cleaned and the instances are nulls
+    * [ODE-737] - Patch for NullPointerException in ProcessStoreImpl
+    * [ODE-763] - boolean variable false() was judged as true()
+    * [ODE-780] - examples-ode-ping-pong doesn't start correctly
+    * [ODE-856] - BPEL/WSDL files do not show up in management console (deployment tab)
+    * [ODE-865] - getVariableInfo() returns invalid response
+    * [ODE-876] - ODE 1.3.4 is 10 times slower than ODE 1.3.3
+    * [ODE-878] - Processes are not recompiled if .deploy is deleted and .bpel has changed
+    * [ODE-885] - whitespaces in dynamic EPR cause AxisFault: Transport out has not been set
+    * [ODE-891] - Compiler cannot deal with unicode characters in inline XSD in WSDLs
+    * [ODE-900] - xsd boolean element is handled as xsd string in if conditions.
+    * [ODE-901] - Cannot Deploy More than One Process on Servicemix 4 Using OSGi Bundling
+
+** Improvement
+    * [ODE-43] - Provide service description for ServiceEndpoints
+    * [ODE-881] - SchemaCaptureTest fails locally with spaces in path
+    * [ODE-904] - document() function in XSL scripts can not resolve remote documents
+
+  See our Jira for more information: 
+    * https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12310270&styleName=Html&version=12314243
