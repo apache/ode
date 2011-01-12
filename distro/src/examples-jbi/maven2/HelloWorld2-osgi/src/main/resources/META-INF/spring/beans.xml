@@ -26,14 +26,15 @@
        http://www.springframework.org/schema/beans 
        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
        ">
-       
+ 
     <bean class="org.apache.servicemix.common.osgi.EndpointExporter" />
+
     <cxfbc:consumer 
-        xmlns:ping="urn:/Ping.wsdl"
-        xmlns:pong="urn:/Pong.wsdl"
-        wsdl="classpath:Ping.wsdl"
-        locationURI="http://localhost:8193/PingService"
-        targetService="ping:PingService"
-        targetEndpoint="PingPort" />
+            xmlns:helloworld="urn:/HelloWorld2.wsdl"
+            wsdl="classpath:HelloWorld2.wsdl"
+            locationURI="http://localhost:8193/HelloService"
+            targetService="helloworld:HelloService"
+            targetEndpoint="HelloPort"
+            />
 
 </beans>

@@ -1,3 +1,3 @@
 Import-Package: org.apache.servicemix.cxfbc,org.apache.servicemix.common.osgi
-Export-Package: org.apache.ode.ping
 Include-Resource: src/main/resources
+Export-Package:
