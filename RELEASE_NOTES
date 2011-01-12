@@ -2,25 +2,20 @@
 Apache ODE Release Notes
 ========================
 
-Apache ODE 1.3.4 includes about 100 bug fixes and new features. It's 
-also the most stable version of ODE released so far. 
+Apache ODE 1.3.5 includes about 20 bug fixes and performance improvements.
 
-Apache ODE 1.3.4 requires Java 1.5.x or higher. The WAR distribution can 
+Apache ODE 1.3.5 requires Java 1.5.x or higher. The WAR distribution can 
 run in most J2EE servlet container. The JBI distribution should be able 
-to run in any JBI container but has only been tested with ServiceMix 3.2.1
-and latest ServiceMix 4 (OSGi bundle) so far. See the BUILDING file if you 
+to run in any JBI container but has only been tested with ServiceMix 3.x
+and latest ServiceMix 4.x (OSGi bundle) so far. See the BUILDING file if you 
 want to build your own distribution from the source release. 
 
-New Features:
-------------
-    * [ODE-483] - Instance replayer
-    * [ODE-776] - Build support for both Buildr and Maven 2/3
-    * [ODE-778] - Add a possibility to deploy processes as OSGi bundles
-    * [ODE-814] - Add spring confgurable process properties
+The performance improvements affect XPath 2.0 processing in assign activities
+or transition conditions and makes it up to 10 times faster than ODE 1.3.4.
 
 Changes:
 ------- 
-
-See our Jira for more information: 
-
-https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12310270&styleName=Html&version=12314168
+  ...
+  
+  See our Jira for more information: 
+    * https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12310270&styleName=Html&version=12314243
