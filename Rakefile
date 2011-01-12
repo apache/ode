@@ -448,7 +448,7 @@ define "ode" do
     package(:bundle).tap do |bnd|
       bnd.classpath = [_("target/classes"), libs].flatten
       BUNDLE_VERSIONS.each {|key, value| bnd[key] = value }
-      bnd['Bundle-Name'] = "Apache ODE Commands"
+      bnd['Bundle-Name'] = "Apache ODE :: Commands"
       bnd['Bundle-Version'] = VERSION_NUMBER
       bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;version=#{VERSION_NUMBER}"
       bnd['Import-Package'] = "org.osgi.service.command,*"
@@ -465,7 +465,7 @@ define "ode" do
     define "helloworld2-osgi" do
       package(:bundle, :id => "helloworld-bundle").tap do |bnd|
         bnd.classpath = [KARAF, project("ode:jbi-bundle")]
-        bnd['Bundle-Name'] = "Apache ODE Hello World Example"
+        bnd['Bundle-Name'] = "Apache ODE :: Hello World Example"
         bnd['Bundle-SymbolicName'] = "org.apache.ode.examples-helloworld2-bundle"
         bnd['Bundle-Version'] = VERSION_NUMBER
         bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;version=#{VERSION_NUMBER}"
@@ -479,7 +479,7 @@ define "ode" do
     define "ping-pong-osgi" do
       package(:bundle, :id => "ping-pong-bundle").tap do |bnd|
         bnd.classpath = [KARAF, project("ode:jbi-bundle")]
-        bnd['Bundle-Name'] = "Apache ODE Ping-Pong Example"
+        bnd['Bundle-Name'] = "Apache ODE :: Ping-Pong Example"
         bnd['Bundle-SymbolicName'] = "org.apache.ode.examples-ping-pong-bundle"
         bnd['Bundle-Version'] = VERSION_NUMBER
         bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;version=#{VERSION_NUMBER}"
@@ -489,7 +489,20 @@ define "ode" do
         bnd['Include-Resource'] = _('src/main/resources')
       end
     end
-    
+  end
+
+  define "jbi-karaf-pmapi-httpbinding" do
+    package(:bundle).tap do |bnd|
+      bnd.classpath = [KARAF, project("ode:jbi-bundle")]
+      bnd['Bundle-Name'] = "Apache ODE :: PMAPI HTTP Binding"
+      bnd['Bundle-SymbolicName'] = "org.apache.ode-pmapi-httpbinding"
+      bnd['Bundle-Version'] = VERSION_NUMBER
+      bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;version=#{VERSION_NUMBER}"
+      bnd['Import-Package'] = "org.apache.servicemix.cxfbc,org.apache.servicemix.common.osgi"
+      bnd['Export-Package'] = "wsdl.ode.pmapi"
+      bnd['-exportcontents'] = ""
+      bnd['Include-Resource'] = _('src/main/resources')
+    end
   end
 
   desc "ODE JBI Packaging for Karaf"

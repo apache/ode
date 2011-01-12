@@ -135,6 +135,8 @@
 	  <module>jbi-bundle</module>
 	  <module>jbi-karaf</module>
       <module>distro/src/examples-jbi/maven2/ping-pong-osgi</module>
+      <module>distro/src/examples-jbi/maven2/helloworld2-osgi</module>
+      <module>jbi-karaf-pmapi-httpbinding</module>
 	  <module>axis2-war</module>
 	  <module>distro</module>
     </modules>
