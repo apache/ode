@@ -48,13 +48,25 @@
     <plnk:partnerLinkType name="PingPartnerLinkType">
         <plnk:role name="Provider" portType="tns:PingPortType"/>
     </plnk:partnerLinkType>
-
-    <!--
-
-    This is an abstract interface/portType definition.  Note the lack of
-    binding and service: these are defined by the HTTP binding component.
-    See ping-http/Ping.wsdl for details.
-
-    -->
-
+    
+    <binding name="PingSoapBinding" type="tns:PingPortType">
+    	<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+    	<operation name="Ping">
+    		<soap:operation soapAction="" />
+    		<input>
+    			<soap:body use="literal" />
+    		</input>
+    		<output>
+    			<soap:body use="literal" />
+    		</output>
+    	</operation>
+    </binding>
+    
+    <service name="PingService">
+    	<port name="PingPort" binding="tns:PingSoapBinding">
+    		<!-- this address will be overridden by CXF -->
+    		<soap:address location="http://unused.url/here" />
+    	</port>
+    </service>
+    
 </definitions>

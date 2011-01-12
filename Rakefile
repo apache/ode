@@ -483,15 +483,15 @@ define "ode" do
     end
     
     define "ping-pong-osgi" do
+      compile
       package(:bundle, :id => "ping-pong-bundle").tap do |bnd|
-        bnd.classpath = [KARAF, project("ode:jbi-bundle")]
+        bnd.classpath = [_("target/classes"), KARAF, project("ode:jbi-bundle")].flatten
         bnd['Bundle-Name'] = "Apache ODE :: Ping-Pong Example"
         bnd['Bundle-SymbolicName'] = "org.apache.ode.examples-ping-pong-bundle"
         bnd['Bundle-Version'] = VERSION_NUMBER
         bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;version=#{VERSION_NUMBER}"
         bnd['Import-Package'] = "org.apache.servicemix.cxfbc,org.apache.servicemix.common.osgi"
-        bnd['Export-Package'] = ""
-        bnd['-exportcontents'] = ""
+        bnd['Export-Package'] = "org.apache.ode.ping"
         bnd['Include-Resource'] = _('src/main/resources')
       end
     end
