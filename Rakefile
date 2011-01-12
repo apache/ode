@@ -463,6 +463,41 @@ define "ode" do
     end
   end
 
+  desc "ODE Examples for Karaf"
+  define "jbi-karaf-examples",
+    :group => "org.apache.ode.examples",
+    :base_dir => "distro/src/examples-jbi/maven2" do
+    
+    define "helloworld2-osgi" do
+      package(:bundle, :id => "helloworld-bundle").tap do |bnd|
+        bnd.classpath = [KARAF, project("ode:jbi-bundle")]
+        bnd['Bundle-Name'] = "Apache ODE Hello World Example"
+        bnd['Bundle-SymbolicName'] = "org.apache.ode.examples-helloworld2-bundle"
+        bnd['Bundle-Version'] = VERSION_NUMBER
+        bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;version=#{VERSION_NUMBER}"
+        bnd['Import-Package'] = "org.apache.servicemix.cxfbc,org.apache.servicemix.common.osgi"
+        bnd['Export-Package'] = ""
+        bnd['-exportcontents'] = ""
+        bnd['Include-Resource'] = _('src/main/resources')
+      end
+    end
+    
+    define "ping-pong-osgi" do
+      package(:bundle, :id => "ping-pong-bundle").tap do |bnd|
+        bnd.classpath = [KARAF, project("ode:jbi-bundle")]
+        bnd['Bundle-Name'] = "Apache ODE Ping-Pong Example"
+        bnd['Bundle-SymbolicName'] = "org.apache.ode.examples-ping-pong-bundle"
+        bnd['Bundle-Version'] = VERSION_NUMBER
+        bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;version=#{VERSION_NUMBER}"
+        bnd['Import-Package'] = "org.apache.servicemix.cxfbc,org.apache.servicemix.common.osgi"
+        bnd['Export-Package'] = ""
+        bnd['-exportcontents'] = ""
+        bnd['Include-Resource'] = _('src/main/resources')
+      end
+    end
+    
+  end
+
   desc "ODE JBI Packaging for Karaf"
   define "jbi-karaf" do
     resources.filter.using(BUNDLE_VERSIONS)

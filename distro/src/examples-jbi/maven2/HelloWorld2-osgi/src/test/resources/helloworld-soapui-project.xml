@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project name="HelloService" resourceRoot="" soapui-version="3.5.1" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:interface xsi:type="con:WsdlInterface" wsaVersion="NONE" name="HelloSoapBinding" type="wsdl" bindingName="{urn:/HelloWorld2.wsdl}HelloSoapBinding" soapVersion="1_1" anonymous="optional" definition="http://localhost:8193/HelloService?wsdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache type="TEXT" rootPart="http://localhost:8193/HelloService?wsdl"><con:part><con:url>http://localhost:8193/HelloService?wsdl</con:url><con:content><![CDATA[<definitions name="Hello" targetNamespace="urn:/HelloWorld2.wsdl" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:smix="http://servicemix.org/wsdl/jbi/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="urn:/HelloWorld2.wsdl">
+  <types>
+    <schema targetNamespace="urn:/HelloWorld2.wsdl" xmlns="http://www.w3.org/2001/XMLSchema">
+      <element name="HelloRequest">
+        <complexType>
+          <all>
+            <element name="text" type="string"/>
+          </all>
+        </complexType>
+      </element>
+      <element name="HelloResponse">
+        <complexType>
+          <all>
+            <element name="text" type="string"/>
+          </all>
+        </complexType>
+      </element>
+    </schema>
+  </types>
+  <message name="HelloResponse">
+    <part element="tns:HelloResponse" name="body"></part>
+  </message>
+  <message name="HelloRequest">
+    <part element="tns:HelloRequest" name="body"></part>
+  </message>
+  <portType name="HelloPortType">
+    <operation name="Hello">
+      <input message="tns:HelloRequest"></input>
+      <output message="tns:HelloResponse"></output>
+    </operation>
+  </portType>
+  <binding name="HelloSoapBinding" type="tns:HelloPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="Hello">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+  </binding>
+  <service name="HelloService">
+    <port binding="tns:HelloSoapBinding" name="HelloPort">
+      <soap:address location="http://localhost:8193/HelloService"/>
+      <smix:endpoint defaultMep="in-out" role="consumer"/>
+    </port>
+  </service>
+</definitions>]]></con:content><con:type>http://schemas.xmlsoap.org/wsdl/</con:type></con:part></con:definitionCache><con:endpoints><con:endpoint>http://localhost:8193/HelloService</con:endpoint></con:endpoints><con:operation isOneWay="false" action="" name="Hello" bindingOperationName="Hello" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call name="Request 1"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8193/HelloService</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:hel="urn:/HelloWorld2.wsdl">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <hel:HelloRequest>
+         <hel:text>Hello</hel:text>
+      </hel:HelloRequest>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="urn:/HelloWorld2.wsdl/HelloPortType/HelloRequest"/><con:wsrmConfig version="1.2"/></con:call></con:operation></con:interface><con:testSuite name="TestSend"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Send" searchProperties="true"><con:settings/><con:testStep type="request" name="Hello - Request 1"><con:settings/><con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:interface>HelloSoapBinding</con:interface><con:operation>Hello</con:operation><con:request name="Hello - Request 1" outgoingWss="" incomingWss="" timeout="" wssPasswordType=""><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>http://localhost:8193/HelloService</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:hel="urn:/HelloWorld2.wsdl">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <hel:HelloRequest>
+         <hel:text>Hello</hel:text>
+      </hel:HelloRequest>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:assertion type="SOAP Response"/><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:wsaConfig mustUnderstand="NONE" version="200508" action="urn:/HelloWorld2.wsdl/HelloPortType/HelloRequest"/><con:wsrmConfig version="1.2"/></con:request></con:config></con:testStep><con:properties/></con:testCase><con:properties/></con:testSuite><con:properties/><con:wssContainer/></con:soapui-project>
