@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.management.*;
 
-import org.apache.felix.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.apache.ode.bpel.pmapi.*;
 import org.apache.ode.jbi.OdeContext;
 

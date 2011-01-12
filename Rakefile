@@ -457,7 +457,7 @@ define "ode" do
       bnd['Bundle-Name'] = "Apache ODE :: Commands"
       bnd['Bundle-Version'] = VERSION_NUMBER
       bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;version=#{VERSION_NUMBER}"
-      bnd['Import-Package'] = "org.osgi.service.command,*"
+      bnd['Import-Package'] = 'org.osgi.service.command,org.apache.karaf.shell.console;version="[2.0,2.1)",*'
       bnd['Private-Package'] = "org.apache.ode.karaf.commands;version=#{VERSION_NUMBER}"
       bnd['Include-Resource'] = _('src/main/resources')
     end

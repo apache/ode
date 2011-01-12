@@ -93,9 +93,9 @@ JIBX                = "jibx:jibx-run:jar:1.1-beta3"
 KARAF               = [
                         "org.apache.felix:org.osgi.core:jar:1.4.0",
                         "org.apache.felix:org.osgi.compendium:jar:1.4.0",
-                        "org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.console:jar:1.0.0",
+                        "org.apache.karaf.shell:org.apache.karaf.shell.console:jar:2.1.3",
                         group("org.apache.felix.gogo.commands","org.apache.felix.gogo.runtime",
-                          :under=>"org.apache.felix.gogo", :version=>"0.2.0")
+                          :under=>"org.apache.felix.gogo", :version=>"0.4.0")
                       ]
 LOG4J               = "log4j:log4j:jar:1.2.13"
 OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.2.1",
