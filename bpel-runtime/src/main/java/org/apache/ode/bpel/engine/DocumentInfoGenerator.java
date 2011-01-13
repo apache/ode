@@ -40,7 +40,7 @@ class DocumentInfoGenerator {
 
     __extToTypeMap.put(".xsd",  "http://www.w3.org/2001/XMLSchema");
     __extToTypeMap.put(".svg",  "http://www.w3.org/2000/svg");
-    __extToTypeMap.put(".cbp",  "http://www.fivesight.com/schemas/2005/12/19/CompiledBPEL");
+    __extToTypeMap.put(".cbp",  "http://ode.apache.org/schemas/2005/12/19/CompiledBPEL");
     // Assume BPEL is 2.0 for now...
     __extToTypeMap.put(".bpel", "http://schemas.xmlsoap.org/ws/2004/03/business-process/");
   }
