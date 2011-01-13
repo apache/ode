@@ -90,7 +90,7 @@ public class CronScheduler {
     public void cancelProcessCronJobs(QName pid, boolean undeployed) {
         assert pid != null;
 
-        if( __log.isInfoEnabled() ) __log.info("Cancelling PROCESS CRON jobs for: " + pid);
+        if( __log.isDebugEnabled() ) __log.debug("Cancelling PROCESS CRON jobs for: " + pid);
         Collection<TerminationListener> listenersToTerminate = new ArrayList<TerminationListener>();
 
         synchronized( _terminationListenersByPid ) {
@@ -122,7 +122,7 @@ public class CronScheduler {
         Collection<TerminationListener> newListeners = new ArrayList<TerminationListener>();
 
         synchronized( pid ) {
-            if( __log.isInfoEnabled() ) __log.info("Scheduling PROCESS CRON jobs for: " + pid);
+            if( __log.isDebugEnabled() ) __log.debug("Scheduling PROCESS CRON jobs for: " + pid);
 
             // start new cron jobs
             for( final CronJob job : pconf.getCronJobs() ) {
