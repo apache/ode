@@ -2,7 +2,7 @@
 Apache ODE Release Notes
 ========================
 
-Apache ODE 1.3.5 includes about 20 bug fixes and performance improvements.
+Apache ODE 1.3.5 includes about 30 bug fixes and performance improvements.
 
 Apache ODE 1.3.5 requires Java 1.5.x or higher. The WAR distribution can 
 run in most J2EE servlet container. The JBI distribution should be able 
@@ -21,18 +21,25 @@ Changes:
 
 ** Bug
     * [ODE-155] - Examples: Exceptions for SOAP calls after retrieving WSDL
+    * [ODE-374] - MMC is quite noisy when it loses the connection to ODE
     * [ODE-472] - utf-8 encoding is handled incorrectly within xslt stylesheets
     * [ODE-625] - Deployment Poller Crashes when trying to deploy BPEL File with errors
+    * [ODE-661] - processes and instances do not appear to show up on the console in the web container
     * [ODE-678] - org.apache.ode.bpel.memdao.ProcessDaoImpl cleans instances which are already cleaned and the instances are nulls
+    * [ODE-699] - Exceptions when instance data cleanup is enabled
+    * [ODE-733] - Patch to fix "Error occurred during getting processes or no processes"
     * [ODE-737] - Patch for NullPointerException in ProcessStoreImpl
     * [ODE-763] - boolean variable false() was judged as true()
     * [ODE-780] - examples-ode-ping-pong doesn't start correctly
+    * [ODE-828] - BPEL process deployment problem in ODE
     * [ODE-856] - BPEL/WSDL files do not show up in management console (deployment tab)
     * [ODE-865] - getVariableInfo() returns invalid response
     * [ODE-876] - ODE 1.3.4 is 10 times slower than ODE 1.3.3
     * [ODE-878] - Processes are not recompiled if .deploy is deleted and .bpel has changed
     * [ODE-885] - whitespaces in dynamic EPR cause AxisFault: Transport out has not been set
+    * [ODE-887] - Number of instances is always shown as 0 at the start page
     * [ODE-891] - Compiler cannot deal with unicode characters in inline XSD in WSDLs
+    * [ODE-892] - routing fails as terminated instance's data was not cleaned up.
     * [ODE-900] - xsd boolean element is handled as xsd string in if conditions.
     * [ODE-901] - Cannot Deploy More than One Process on Servicemix 4 Using OSGi Bundling
 
@@ -40,6 +47,11 @@ Changes:
     * [ODE-43] - Provide service description for ServiceEndpoints
     * [ODE-881] - SchemaCaptureTest fails locally with spaces in path
     * [ODE-904] - document() function in XSL scripts can not resolve remote documents
+    * [ODE-905] - Example for PMAPI access over JBI/http
+    * [ODE-906] - Example for HelloWorld on OSGi
+
+** Task
+    * [ODE-903] - Refactor jbi-karaf-commands to make them work with SMX >= 4.3
 
   See our Jira for more information: 
     * https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12310270&styleName=Html&version=12314243
