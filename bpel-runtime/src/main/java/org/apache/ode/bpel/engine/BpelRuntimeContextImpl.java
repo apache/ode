@@ -647,6 +647,14 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         _dao.finishCompletion();
         failOutstandingMessageExchanges();
+
+        _bpelProcess._engine._contexts.scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
+            public void afterCompletion(boolean success) {
+            }
+            public void beforeCompletion() {
+                _dao.delete(_bpelProcess.getCleanupCategories(false), false);
+            }
+        });
     }
 
     public void registerTimer(TimerResponseChannel timerChannel, Date timeToFire) {
