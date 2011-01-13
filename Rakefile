@@ -486,7 +486,6 @@ define "ode" do
         bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;version=#{VERSION_NUMBER}"
         bnd['Import-Package'] = "org.apache.servicemix.cxfbc,org.apache.servicemix.common.osgi"
         bnd['Export-Package'] = "org.apache.ode.ping"
-        bnd['-exportcontents'] = ""
         bnd['Include-Resource'] = _('src/main/resources')
       end
     end
@@ -500,7 +499,6 @@ define "ode" do
       bnd['Bundle-Version'] = VERSION_NUMBER
       bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;version=#{VERSION_NUMBER}"
       bnd['Import-Package'] = "org.apache.servicemix.cxfbc,org.apache.servicemix.common.osgi"
-      bnd['Export-Package'] = "wsdl.ode.pmapi"
       bnd['-exportcontents'] = ""
       bnd['Include-Resource'] = _('src/main/resources')
     end
