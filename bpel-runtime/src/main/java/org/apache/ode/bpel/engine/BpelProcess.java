@@ -926,7 +926,7 @@ public class BpelProcess {
                 // If we have a transaction, we do this in the current transaction
                 if(__log.isDebugEnabled()) __log.debug("Creating new process DAO for " + _pid + " (guid=" + _oprocess.guid + ")...");
                 createProcessDAO(_engine._contexts.dao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
-                if(__log.isInfoEnabled()) __log.info("Created new process DAO for " + _pid + " (guid=" + _oprocess.guid + ").");
+                if(__log.isDebugEnabled()) __log.debug("Created new process DAO for " + _pid + " (guid=" + _oprocess.guid + ").");
             } else {
                 try {
                     _engine._contexts.scheduler.execTransaction(new Callable<Object>() {
@@ -952,7 +952,7 @@ public class BpelProcess {
     private void bounceProcessDAOInDB(final BpelDAOConnection conn, final QName pid, final long version, final OProcess oprocess) {
         if(__log.isDebugEnabled()) __log.debug("Creating new process DAO for " + pid + " (guid=" + oprocess.guid + ")...");
         createProcessDAO(conn, pid, version, oprocess);
-        if(__log.isInfoEnabled()) __log.info("Created new process DAO for " + pid + " (guid=" + oprocess.guid + ").");
+        if(__log.isDebugEnabled()) __log.debug("Created new process DAO for " + pid + " (guid=" + oprocess.guid + ").");
     }
 
     public int getInstanceInUseCount() {
@@ -983,7 +983,7 @@ public class BpelProcess {
                 for (String correlator : oprocess.getCorrelators()) {
                     newDao.addCorrelator(correlator);
                 }
-                if(__log.isInfoEnabled()) __log.info("Created new process DAO for " + pid + " (guid=" + oprocess.guid + ")");
+                if(__log.isDebugEnabled()) __log.debug("Created new process DAO for " + pid + " (guid=" + oprocess.guid + ")");
             }
         } catch (BpelEngineException ex) {
             throw ex;
