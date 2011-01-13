@@ -110,12 +110,12 @@ if (!isMultipart) {
                                         out.println("Package deployement failed!");
                                     }
                                 } catch (AxisFault axisFault) {
-                                    out.println("Axis2 Fault Occurred while Sending the request!");
+                                    out.println(axisFault.getMessage());
                                 }
                             }else{
                                 out.println("No package Name specified!");
                                 break;
-                            }
+                            }                            
                         }else{
                             out.println("TODO: Implement Base64 encoded string support!");
                         }
