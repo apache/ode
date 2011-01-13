@@ -20,22 +20,22 @@
 package org.apache.ode.dao.jpa;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import javax.xml.namespace.QName;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.InstanceFilter;
+import org.apache.ode.bpel.common.InstanceFilter.StatusKeys;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ProcessManagementDAO;
-import org.apache.ode.bpel.dao.ProcessManagementDAO.FailedSummaryValue;
-import org.apache.ode.bpel.dao.ProcessManagementDAO.InstanceSummaryKey;
 
 public class ProcessManagementDAOImpl implements ProcessManagementDAO {
     private static final Log __log = LogFactory.getLog(ProcessManagementDAOImpl.class);
@@ -85,10 +85,35 @@ public class ProcessManagementDAOImpl implements ProcessManagementDAO {
     }
 
     public Map<InstanceSummaryKey, Long> countInstancesSummary(Set<String> pids) {
-        return new HashMap<InstanceSummaryKey, Long>();
+        Map<InstanceSummaryKey, Long> result = new HashMap<InstanceSummaryKey, Long>();
+        if (!pids.isEmpty()) {
+            for (StatusKeys status : InstanceFilter.StatusKeys.values()) {
+                Query query = em.createNamedQuery(ProcessInstanceDAOImpl.COUNT_INSTANCES_BY_PROCESSES_IDS_AND_STATES);
+                query.setParameter("states", new InstanceFilter("status=" + status.toString()).convertFilterState());
+                query.setParameter("processIds", pids);
+                for (Object o : query.getResultList()) {
+                    Object[] row = (Object[]) o;
+                    InstanceSummaryKey key = new InstanceSummaryKey(row[0].toString(), status.toString());
+                    result.put(key, (Long) row[1]);
+                }
+            }
+        }
+
+        return result;
     }
 
     public Map<String, FailedSummaryValue> findFailedCountAndLastFailedDateForProcessIds(Set<String> pids) {
-        return new HashMap<String, FailedSummaryValue>();
+        Map<String, FailedSummaryValue> result = new HashMap<String, FailedSummaryValue>();
+        if (!pids.isEmpty()) {
+            Query query = em.createNamedQuery(ProcessInstanceDAOImpl.COUNT_FAILED_INSTANCES_BY_STATUS_AND_PROCESS_IDS);
+            query.setParameter("processIds", pids);
+            for (Object o : query.getResultList()) {
+                System.out.println(o);
+                Object[] row = (Object[]) o;
+                result.put(row[0].toString(), new FailedSummaryValue((Long) row[1], (Date) row[2]));
+            }
+        }
+        return result;
+
     }
 }
