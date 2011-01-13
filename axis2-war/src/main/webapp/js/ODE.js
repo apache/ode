@@ -27,6 +27,12 @@ if(baseDirectoryName.indexOf('/') == 0){
 }
 var baseDirectoryURL = baseURL + baseDirectoryName;
 
+debug = function (log_txt) {
+    if (window.console != undefined) {
+        console.log(log_txt);
+    }
+}
+
 var org;
 if (!org) {
     org = {};
@@ -320,12 +326,8 @@ org.apache.ode.ProcessHandling = {};
             return listAllProcessesRes;
         }
         catch (e) {
-            if (typeof e == "string") {
-                alert("Exception Occurred " + e.toString());
-            }
-            else {
-                alert("Exception Occurred!" + e);
-            }
+            // probably a connection error. We don't want to spam the user, so we're just logging it if a console is available
+            debug("Exception in " + arguments.callee.toString().match(/function\s+([^(]+)/)[1] + ": " + e.toString());
             return null;
         }
     }
@@ -353,6 +355,10 @@ org.apache.ode.ProcessHandling = {};
     }
 
     function processProcessInfoList(listAllProcessesRes){
+        if (listAllProcessesRes == null) {
+          return 0;
+        }
+
         var returnInfoArray = [];
         var processInfoList = org.apache.ode.DOMHelper.getElementsByTagName(
             processInfoTagName,
@@ -403,6 +409,7 @@ org.apache.ode.ProcessHandling = {};
                 for(var m = instanceSummaryEle.firstChild; m != null; m = m.nextSibling){
                     var state = m.getAttribute("state");
                     var count = m.getAttribute("count");
+
                     if (state == 'ACTIVE') {
                         activeInstances = parseInt(count);
                     }else if (state == 'COMPLETED') {
@@ -552,7 +559,7 @@ org.apache.ode.ProcessHandling = {};
         }
         var stat;
         var processes = processProcessInfoList(loadProcessInfo());
-        var numOfProcesses = processes.length;
+        var numOfProcesses = (processes == 0) ? 0 : processes.length;
         var _ter = 0;
         var _act = 0;
         var _error = 0;
@@ -821,12 +828,9 @@ org.apache.ode.InstanceHandling = {};
             return responseDoc;
         }
         catch (e) {
-            if (typeof(e) == "string") {
-                org.apache.ode.Widgets.alert("Exception occured in loadInstanceInfo():\n" + e.toString());
-            }
-            else {
-                org.apache.ode.Widgets.alert("Exception occurred in loadInstanceInfo()!");
-            }
+            // probably a connection error. We don't want to spam the user, so we're just logging it if a console is available
+            debug("Exception in " + arguments.callee.toString().match(/function\s+([^(]+)/)[1] + ": " + e.toString());
+            return null;
         }
     }
 
@@ -844,6 +848,9 @@ org.apache.ode.InstanceHandling = {};
     }
 
     function processInstanceInfo(instanceInfoDoc){
+        if (instanceInfoDoc == null) {
+          return 0;
+        }
         var returnInstanceArray = [];
         var instanceInfoList = org.apache.ode.DOMHelper.getElementsByTagName(
             instanceInfoTagName,
@@ -1158,17 +1165,18 @@ org.apache.ode.DeploymentHandling = {};
             var response = DeploymentService.listDeployedPackages();
             return response;
         }catch(e){
-            if(typeof e == 'string'){
-                org.apache.ode.Widgets.alert("Exception occured:\n" + e.toString());
-            }else{
-                org.apache.ode.Widgets.alert("Exception occurred in loadDeployedBundles.");
-            }
+            // probably a connection error. We don't want to spam the user, so we're just logging it if a console is available
+            debug("Exception in " + arguments.callee.toString().match(/function\s+([^(]+)/)[1] + ": " + e.toString());
+            return null;
         }
     }
 
     function getDeployedPackages(){
         var packageNames = [];
         var response = loadDeployedPackages();
+        if (response == null) {
+          return 0;
+        }
         var names = org.apache.ode.DOMHelper.getElementsByTagName('name',"http://www.apache.org/ode/deployapi","deployapi",response);
         //var names = response.getElementsByTagName('name');
         if (names.length != 0) {
@@ -1186,7 +1194,7 @@ org.apache.ode.DeploymentHandling = {};
         try{
             var processes = [];
             var response = DeploymentService.listProcesses(packageName);
-            var ids = response.getElementsByTagName('id');
+            var ids = org.apache.ode.DOMHelper.getElementsByTagName('id',"http://www.apache.org/ode/deployapi","deployapi",response);
             if(ids.length != 0){
                 for(var i =0; i < ids.length; i++){
                     processes[i] = org.apache.ode.DOMHelper.getText(ids[i]);
@@ -1197,11 +1205,9 @@ org.apache.ode.DeploymentHandling = {};
             }
 
         }catch(e){
-            if(typeof e == 'string'){
-                org.apache.ode.Widgets.alert("Exception occured:\n" + e.toString());
-            }else{
-                org.apache.ode.Widgets.alert("Exception occurred in getProcesses.");
-            }
+            // probably a connection error. We don't want to spam the user, so we're just logging it if a console is available
+            debug("Exception in " + arguments.callee.toString().match(/function\s+([^(]+)/)[1] + ": " + e.toString());
+            return 0;
         }
     }
     function getPackageContents(packageName){
@@ -1244,7 +1250,7 @@ org.apache.ode.DeploymentHandling = {};
             var processes = getProcesses(deployedPacks[i]);
             if(processes != 0){
                 for(var j = 0; j < processes.length; j++){
-                    contentHtml += processes[j]+', ';
+                    contentHtml += processes[j] + (j+1 < processes.length ? ', ' : '');
                 }
             }else{
                 contentHtml += 'Error occurred during getting processes or no processes.';
@@ -1255,7 +1261,7 @@ org.apache.ode.DeploymentHandling = {};
                 for(var k =0; k < content.length; k++){
                     var strC = content[k];
                     var index = strC.indexOf('/');
-                    contentHtml += strC.substr(index+1) + ", ";
+                    contentHtml += strC.substr(index+1) + (k+1 < content.length ? ", " : "");
                 }
             }else{
                 contentHtml += 'Error occurred during getting package Content or no content.'
