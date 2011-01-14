@@ -600,7 +600,7 @@ define "ode" do
   package_with_javadoc unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
 
   # sign artifacts
-  GPG.sign_before_upload(self)
+  gpg_sign_before_upload
 
 end
 
@@ -694,5 +694,5 @@ define "apache-ode" do
     using(:javadoc, :windowtitle=>"Apache ODE #{project.version}").target, :as=>"#{id}-docs-#{version}") unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
     
   # sign packages
-  GPG.sign_before_upload(self)
+  gpg_sign_before_upload
 end
