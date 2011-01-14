@@ -474,14 +474,12 @@ define "ode" do
         bnd['-exportcontents'] = ""
         bnd['Include-Resource'] = _('src/main/resources')
       end
+      # we package sources and javadocs separately to give them a custom id
+      package(:sources, :id => "helloworld-bundle")
       
       # This project does not contain java classes, hence there are no javadocs. 
       # But since Nexus will complain about a missing javadoc artifact, we make sure that an empty one is created.
-      package(:javadoc).enhance { mkdir_p _("target/doc") }
-      
-      # we package sources and javadocs separately to give them a custom id
-      package(:sources, :id => "helloworld-bundle")
-      package(:javadoc, :id => "helloworld-bundle")
+      package(:javadoc, :id => "helloworld-bundle").enhance { mkdir_p _("target/doc") }
     end
     
     define "ping-pong-osgi" do
