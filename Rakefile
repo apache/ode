@@ -605,7 +605,7 @@ define "ode" do
   package_with_sources
   package_with_javadoc unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
 
-  GPG.sign_before_upload(self)
+  gpg_sign_before_upload
   
   task :pmd do
     pmd_classpath = transitive('pmd:pmd:jar:4.2.5').each(&:invoke).map(&:to_s).join(File::PATH_SEPARATOR)
@@ -715,6 +715,6 @@ define "apache-ode" do
     using(:javadoc, :windowtitle=>"Apache ODE #{project.version}").target, :as=>"#{id}-docs-#{version}") unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
     
   # sign packages
-  GPG.sign_before_upload(self)
+  gpg_sign_before_upload
 
 end
