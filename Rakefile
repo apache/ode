@@ -480,6 +480,14 @@ define "ode" do
         bnd['-exportcontents'] = ""
         bnd['Include-Resource'] = _('src/main/resources')
       end
+      
+      # This project does not contain java classes, hence there are no javadocs. 
+      # But since Nexus will complain about a missing javadoc artifact, we make sure that an empty one is created.
+      package(:javadoc).enhance { mkdir_p _("target/doc") }
+      
+      # we package sources and javadocs separately to give them a custom id
+      package(:sources, :id => "helloworld-bundle")
+      package(:javadoc, :id => "helloworld-bundle")
     end
     
     define "ping-pong-osgi" do
@@ -494,6 +502,10 @@ define "ode" do
         bnd['Export-Package'] = "org.apache.ode.ping"
         bnd['Include-Resource'] = _('src/main/resources')
       end
+      
+      # we package sources and javadocs separately to give them a custom id
+      package(:sources, :id => "ping-pong-bundle")
+      package(:javadoc, :id => "ping-pong-bundle")
     end
   end
 
@@ -602,8 +614,9 @@ define "ode" do
      package(:jar).with :manifest=>_("src/main/resources/META-INF/MANIFEST.MF")
   end
 
-  package_with_sources
-  package_with_javadoc unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
+  # sources and javadocs of jbi-karaf-examples are packaged separately.
+  package_with_sources :except => ["jbi-karaf-examples:helloworld2-osgi", "jbi-karaf-examples:ping-pong-osgi"]
+  package_with_javadoc :except => ["jbi-karaf-examples:helloworld2-osgi", "jbi-karaf-examples:ping-pong-osgi"] unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
 
   gpg_sign_before_upload
   
