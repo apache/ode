@@ -34,7 +34,7 @@ require File.join(File.dirname(__FILE__), 'repositories.rb')
 require File.join(File.dirname(__FILE__), 'dependencies.rb')
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "1.3.5-SNAPSHOT"
+VERSION_NUMBER = "1.3.5"
 
 # Apache Nexus Repositories
 if VERSION_NUMBER =~ /SNAPSHOT/
@@ -474,6 +474,12 @@ define "ode" do
         bnd['-exportcontents'] = ""
         bnd['Include-Resource'] = _('src/main/resources')
       end
+      # we package sources and javadocs separately to give them a custom id
+      package(:sources, :id => "helloworld-bundle")
+      
+      # This project does not contain java classes, hence there are no javadocs. 
+      # But since Nexus will complain about a missing javadoc artifact, we make sure that an empty one is created.
+      package(:javadoc, :id => "helloworld-bundle").enhance { mkdir_p _("target/doc") }
     end
     
     define "ping-pong-osgi" do
@@ -488,6 +494,10 @@ define "ode" do
         bnd['Export-Package'] = "org.apache.ode.ping"
         bnd['Include-Resource'] = _('src/main/resources')
       end
+      
+      # we package sources and javadocs separately to give them a custom id
+      package(:sources, :id => "ping-pong-bundle")
+      package(:javadoc, :id => "ping-pong-bundle")
     end
   end
 
@@ -596,8 +606,9 @@ define "ode" do
      package(:jar).with :manifest=>_("src/main/resources/META-INF/MANIFEST.MF")
   end
 
-  package_with_sources
-  package_with_javadoc unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
+  # sources and javadocs of jbi-karaf-examples are packaged separately.
+  package_with_sources :except => ["jbi-karaf-examples:helloworld2-osgi", "jbi-karaf-examples:ping-pong-osgi"]
+  package_with_javadoc :except => ["jbi-karaf-examples:helloworld2-osgi", "jbi-karaf-examples:ping-pong-osgi"] unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
 
   # sign artifacts
   gpg_sign_before_upload
