@@ -18,7 +18,7 @@
   ~ under the License.
   -->
 
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <groupId>org.apache.ode</groupId>
     <artifactId>ode-dao-hibernate</artifactId>
     <name>ODE :: Hibernate DAO Implementation</name>
@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.apache.ode</groupId>
     <artifactId>ode</artifactId>
-    <version>1.3.5-SNAPSHOT</version>
+    <version>1.3.5</version>
   </parent>
 
   <dependencies>
@@ -82,10 +82,9 @@
              </goals>
              <configuration>
                <tasks>
-                 <hibernatedoclet excludedTags="@version,@author,@todo" verbose="true"
-                   destdir="${project.build.outputDirectory}" force="true">
-                   <hibernate version="3.0"/>
-                   <fileset dir="${project.build.sourceDirectory}" includes="org/apache/ode/daohib/bpel/hobj/*.java"/>
+                 <hibernatedoclet excludedTags="@version,@author,@todo" verbose="true" destdir="${project.build.outputDirectory}" force="true">
+                   <hibernate version="3.0" />
+                   <fileset dir="${project.build.sourceDirectory}" includes="org/apache/ode/daohib/bpel/hobj/*.java" />
                  </hibernatedoclet>
                </tasks>
              </configuration>

@@ -18,7 +18,7 @@
   ~ under the License.
   -->
 
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <groupId>org.apache.ode</groupId>
     <artifactId>ode-bpel-store</artifactId>
     <name>ODE :: Process Store</name>
@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.apache.ode</groupId>
     <artifactId>ode</artifactId>
-    <version>1.3.5-SNAPSHOT</version>
+    <version>1.3.5</version>
   </parent>
 
   <dependencies>
@@ -176,18 +176,18 @@
             </goals>
             <configuration>
               <tasks>
-                <property name="maven.runtime.classpath" refid="maven.test.classpath"/>
+                <property name="maven.runtime.classpath" refid="maven.test.classpath" />
                 <path id="classpath">
-		   <pathelement path="${maven.runtime.classpath}"/>
+		   <pathelement path="${maven.runtime.classpath}" />
 		</path>
-		<taskdef name="openjpac" classname="org.apache.openjpa.ant.PCEnhancerTask" classpathref="classpath"/>
+		<taskdef name="openjpac" classname="org.apache.openjpa.ant.PCEnhancerTask" classpathref="classpath" />
                 <openjpac>
 		    <fileset dir="${basedir}/src/main">
 		      <include name="**/*.java" />
 		    </fileset>
 		    <classpath>
-		     <pathelement location="${basedir}/target/classes"/>
-		     <pathelement path="${maven.runtime.classpath}"/>
+		     <pathelement location="${basedir}/target/classes" />
+		     <pathelement path="${maven.runtime.classpath}" />
 		    </classpath>
 		 </openjpac>
               </tasks>
@@ -208,10 +208,9 @@
 	     
              <configuration>
                <tasks>
-                 <hibernatedoclet excludedTags="@version,@author,@todo" verbose="true"
-                   destdir="${project.build.outputDirectory}" force="true">
-                   <hibernate version="3.0"/>
-                   <fileset dir="${project.build.sourceDirectory}" includes="org/apache/ode/store/hib/*.java"/>
+                 <hibernatedoclet excludedTags="@version,@author,@todo" verbose="true" destdir="${project.build.outputDirectory}" force="true">
+                   <hibernate version="3.0" />
+                   <fileset dir="${project.build.sourceDirectory}" includes="org/apache/ode/store/hib/*.java" />
                  </hibernatedoclet>
                </tasks>
              </configuration>

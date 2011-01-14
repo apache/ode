@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <groupId>org.apache.ode</groupId>
     <artifactId>ode</artifactId>
     <name>ODE</name>
 
     <packaging>pom</packaging>
     <modelVersion>4.0.0</modelVersion>
-    <version>1.3.5-SNAPSHOT</version>
+    <version>1.3.5</version>
     <url>http://ode.apache.org</url>
     <issueManagement>
         <system>jira</system>
@@ -21,9 +21,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/ode/</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/ode/</developerConnection>
-        <url>http://svn.apache.org/repos/asf/ode/</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/ode/tags/ode-1.3.5</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/ode/tags/ode-1.3.5</developerConnection>
+        <url>http://svn.apache.org/repos/asf/ode/tags/ode-1.3.5</url>
     </scm>
 
     <organization>
@@ -36,7 +36,7 @@
     </prerequisites>
 
     <properties>
-        <ode.version>1.3.5-SNAPSHOT</ode.version>
+        <ode.version>1.3.5</ode.version>
         <activation.version>1.1</activation.version>
         <annogen.version>0.1.0</annogen.version>
 	<antlr.version>2.7.7</antlr.version>
