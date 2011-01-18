@@ -31,8 +31,8 @@ WS-BPEL is an XML-based language defining several constructs to write business p
     <category rdf:resource="http://projects.apache.org/category/network-server" />
     <release>
       <Version>
-        <name>1.0-incubating</name>
-        <created>2007-05-27</created>
+        <name>1.3.4</name>
+        <created>2010-06-09</created>
         <revision>tagged</revision>
       </Version>
     </release>
@@ -44,8 +44,8 @@ WS-BPEL is an XML-based language defining several constructs to write business p
     </repository>
     <maintainer>
       <foaf:Person>
-        <foaf:name>Matthieu Riou</foaf:name>
-          <foaf:mbox rdf:resource="mailto:mriou@apache.org"/>
+        <foaf:name>Tammo van Lessen</foaf:name>
+          <foaf:mbox rdf:resource="mailto:vanto@apache.org"/>
       </foaf:Person>
     </maintainer>
     <asfext:implements><asfext:Standard>
