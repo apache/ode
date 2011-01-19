@@ -456,8 +456,8 @@ define "ode" do
       BUNDLE_VERSIONS.each {|key, value| bnd[key] = value }
       bnd['Bundle-Name'] = "Apache ODE :: Commands"
       bnd['Bundle-Version'] = VERSION_NUMBER
-      bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;version=#{VERSION_NUMBER}"
-      bnd['Import-Package'] = 'org.osgi.service.command,org.apache.karaf.shell.console;version="[2.0,2.1)",*'
+      bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;bundle-version=#{osgi_version_for(VERSION_NUMBER)}"
+      bnd['Import-Package'] = 'org.osgi.service.command,org.apache.karaf.shell.console;version="[2.1,2.2)",*'
       bnd['Private-Package'] = "org.apache.ode.karaf.commands;version=#{VERSION_NUMBER}"
       bnd['Include-Resource'] = _('src/main/resources')
     end
@@ -474,7 +474,7 @@ define "ode" do
         bnd['Bundle-Name'] = "Apache ODE :: Hello World Example"
         bnd['Bundle-SymbolicName'] = "org.apache.ode.examples-helloworld2-bundle"
         bnd['Bundle-Version'] = VERSION_NUMBER
-        bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;version=#{VERSION_NUMBER}"
+        bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;bundle-version=#{osgi_version_for(VERSION_NUMBER)}"
         bnd['Import-Package'] = "org.apache.servicemix.cxfbc,org.apache.servicemix.common.osgi"
         bnd['Export-Package'] = ""
         bnd['-exportcontents'] = ""
@@ -495,7 +495,7 @@ define "ode" do
         bnd['Bundle-Name'] = "Apache ODE :: Ping-Pong Example"
         bnd['Bundle-SymbolicName'] = "org.apache.ode.examples-ping-pong-bundle"
         bnd['Bundle-Version'] = VERSION_NUMBER
-        bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;version=#{VERSION_NUMBER}"
+        bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;bundle-version=#{osgi_version_for(VERSION_NUMBER)}"
         bnd['Import-Package'] = "org.apache.servicemix.cxfbc,org.apache.servicemix.common.osgi"
         bnd['Export-Package'] = "org.apache.ode.ping"
         bnd['Include-Resource'] = _('src/main/resources')
@@ -513,7 +513,7 @@ define "ode" do
       bnd['Bundle-Name'] = "Apache ODE :: PMAPI HTTP Binding"
       bnd['Bundle-SymbolicName'] = "org.apache.ode-pmapi-httpbinding"
       bnd['Bundle-Version'] = VERSION_NUMBER
-      bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;version=#{VERSION_NUMBER}"
+      bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;bundle-version=#{osgi_version_for(VERSION_NUMBER)}"
       bnd['Import-Package'] = "org.apache.servicemix.cxfbc,org.apache.servicemix.common.osgi"
       bnd['-exportcontents'] = ""
       bnd['Include-Resource'] = _('src/main/resources')
