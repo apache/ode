@@ -18,3 +18,4 @@ bin
 target
 reports
 test-output
+_buildr.rb
