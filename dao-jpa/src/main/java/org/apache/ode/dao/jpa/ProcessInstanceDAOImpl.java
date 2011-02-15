@@ -393,6 +393,9 @@ public class ProcessInstanceDAOImpl extends OpenJPADAO implements ProcessInstanc
     public void setState(short state) {
         _previousState = _state;
         _state = state;
+        if (state == ProcessState.STATE_TERMINATED) {
+          deleteMessageRoutes();
+        }
     }
 
     void removeRoutes(String routeGroupId) {
