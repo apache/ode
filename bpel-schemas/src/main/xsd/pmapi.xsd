@@ -233,6 +233,12 @@
                         requests.</documentation>
                 </annotation>
             </enumeration>
+            <enumeration value="DISABLED">
+                <annotation>
+                    <documentation>Process is NOT accepting new
+                        requests and old requests.</documentation>
+                </annotation>
+            </enumeration>
         </restriction>
     </simpleType>
     <simpleType name="tActivityStatus">

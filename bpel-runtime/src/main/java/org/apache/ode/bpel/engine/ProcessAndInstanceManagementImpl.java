@@ -893,6 +893,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         // Active process may be retired at the same time
         if (pconf.getState() == ProcessState.RETIRED) {
             info.setStatus(TProcessStatus.RETIRED);
+        } else if (pconf.getState() == ProcessState.DISABLED) {
+            info.setStatus(TProcessStatus.DISABLED);
         } else {
             info.setStatus(TProcessStatus.ACTIVE);
         }
