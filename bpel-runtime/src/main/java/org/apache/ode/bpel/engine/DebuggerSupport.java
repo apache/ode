@@ -384,7 +384,7 @@ public class DebuggerSupport implements DebuggerContext {
                     terminationEvent.setProcessInstanceId(iid);
                     terminationEvent.setProcessName(processName);
                     terminationEvent.setProcessId(processId);
-                    _process.saveEvent(evt, instance);
+                    _process.saveEvent(terminationEvent, instance);
 
                     onEvent(evt);
                     onEvent(terminationEvent);
