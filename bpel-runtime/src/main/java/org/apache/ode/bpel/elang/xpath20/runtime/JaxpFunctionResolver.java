@@ -558,7 +558,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                     childNodes = new ArrayList<Node>();
                     childNodes.add(childElmt);
                 } else {
-                    throw new XPathFunctionException("Unexpected argument type: "+args.get(0).getClass());
+                    throw new XPathFunctionException("Unexpected argument type: "+args.get(2).getClass());
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
@@ -781,7 +781,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                     siblingNodes = new ArrayList<Node>();
                     siblingNodes.add(childElmt);
                 } else {
-                    throw new XPathFunctionException("Unexpected argument type: "+args.get(0).getClass());
+                    throw new XPathFunctionException("Unexpected argument type: "+args.get(1).getClass());
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
@@ -840,7 +840,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                     siblingNodes = new ArrayList<Node>();
                     siblingNodes.add(childElmt);
                 } else {
-                    throw new XPathFunctionException("Unexpected argument type: "+args.get(0).getClass());
+                    throw new XPathFunctionException("Unexpected argument type: "+args.get(1).getClass());
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
