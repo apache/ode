@@ -58,6 +58,8 @@ BUNDLE_VERSIONS = {
   "servicemix.specs.version" => "1.4-SNAPSHOT",
 }
 
+BND_VERSION_POLICY = "[$(version;==;$(@)),$(version;+;$(@)))"
+
 Release.tag_name = lambda { |version| "APACHE_ODE_#{version.upcase}" } if Release
 
 desc "Apache ODE"
@@ -457,9 +459,10 @@ define "ode" do
       bnd['Bundle-Name'] = "Apache ODE :: Commands"
       bnd['Bundle-Version'] = VERSION_NUMBER
       bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;bundle-version=#{osgi_version_for(VERSION_NUMBER)}"
-      bnd['Import-Package'] = 'org.osgi.service.command,org.apache.karaf.shell.console;version="[2.1,2.2)",*'
+      bnd['Import-Package'] = 'org.apache.karaf.shell.console,*'
       bnd['Private-Package'] = "org.apache.ode.karaf.commands;version=#{VERSION_NUMBER}"
       bnd['Include-Resource'] = _('src/main/resources')
+      bnd['-versionpolicy'] = BND_VERSION_POLICY
     end
   end
 
@@ -479,6 +482,7 @@ define "ode" do
         bnd['Export-Package'] = ""
         bnd['-exportcontents'] = ""
         bnd['Include-Resource'] = _('src/main/resources')
+        bnd['-versionpolicy'] = BND_VERSION_POLICY
       end
       # we package sources and javadocs separately to give them a custom id
       package(:sources, :id => "helloworld-bundle")
@@ -499,6 +503,7 @@ define "ode" do
         bnd['Import-Package'] = "org.apache.servicemix.cxfbc,org.apache.servicemix.common.osgi"
         bnd['Export-Package'] = "org.apache.ode.ping"
         bnd['Include-Resource'] = _('src/main/resources')
+        bnd['-versionpolicy'] = BND_VERSION_POLICY
       end
       
       # we package sources and javadocs separately to give them a custom id
@@ -565,7 +570,7 @@ define "ode" do
       # embedd *.xsd, *.xml, xmlbeans* from ode libs
       embedres = ode_libs.map {|pkg| ['**.xsd', '**.xml', 'schemaorg_apache_xmlbeans/**'].map {|x| '@' + pkg.to_s + '!/' + x}}.join(', ')
       bnd['Export-Package'] = "org.apache.ode*;version=#{VERSION_NUMBER};-split-package:=merge-first"
-      bnd['Import-Package'] = '!com.sun.mirror*, !org.apache.axis2.client*, javax.jbi*;version="1.0", javax.transaction*;version="1.1", org.tranql.connector.jdbc, org.apache.commons.httpclient*;version="3.0", org.apache.commons.logging*;version="1.1", org.apache.commons*, org.apache.geronimo.transaction.manager;version="2.0", org.osgi.service.command;version="[0.2,1)", org.springframework.beans.factory.xml;version="2.5", org.w3c.dom, org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers, org.jaxen.saxpath,net.sf.saxon.xpath,*;resolution:=optional'
+      bnd['Import-Package'] = '!com.sun.mirror*, !org.apache.axis2.client*, javax.jbi*;version="1.0", javax.transaction*;version="1.1", org.tranql.connector.jdbc, org.apache.commons.httpclient*;version="3.0", org.apache.commons.logging*;version="1.1", org.apache.commons*, org.apache.geronimo.transaction.manager;version="2.0", org.springframework.beans.factory.xml;version="2.5", org.w3c.dom, org.xml.sax, org.xml.sax.ext, org.xml.sax.helpers, org.jaxen.saxpath,net.sf.saxon.xpath,*;resolution:=optional'
       bnd['Embed-Dependency'] = '*;inline=**.xsd|schemaorg_apache_xmlbeans/**|**.xml'
       bnd['DynamicImport-Package'] = '*'
       bnd['Include-Resource'] = [embedres, _('src/main/resources'), inlines].flatten.join(', ')
@@ -573,6 +578,7 @@ define "ode" do
       bnd['Bundle-License'] = 'http://www.apache.org/licenses/LICENSE-2.0'
       bnd['Bundle-DocURL'] = 'http://ode.apache.org'
       bnd['Bundle-Name'] = 'Apache ODE :: BPEL Service Engine'
+      bnd['-versionpolicy'] = BND_VERSION_POLICY
       bnd.classpath = [project.compile.target, bnd_libs, artifacts(project("jbi").package(:jar)), libs].flatten
 
       BUNDLE_VERSIONS.each {|key, value| bnd[key] = value }

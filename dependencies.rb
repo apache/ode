@@ -43,7 +43,7 @@ AXIS2_MODULES        = struct(
                         "org.apache.santuario:xmlsec:jar:1.4.1",
                         "org.apache.axis2:mex:jar:impl:1.41", #1.41 is not a typo!
                         "opensaml:opensaml:jar:1.1",
-                        "bouncycastle:bcprov-jdk15:jar:132",
+                        "bouncycastle:bcprov-jdk15:jar:133",
                         BACKPORT]
 )
 AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.5"
@@ -93,9 +93,9 @@ JIBX                = "jibx:jibx-run:jar:1.1-beta3"
 KARAF               = [
                         "org.apache.felix:org.osgi.core:jar:1.4.0",
                         "org.apache.felix:org.osgi.compendium:jar:1.4.0",
-                        "org.apache.karaf.shell:org.apache.karaf.shell.console:jar:2.1.3",
-                        group("org.apache.felix.gogo.commands","org.apache.felix.gogo.runtime",
-                          :under=>"org.apache.felix.gogo", :version=>"0.4.0")
+                        "org.apache.karaf.shell:org.apache.karaf.shell.console:jar:2.2.0",
+                        group("org.apache.felix.gogo.command","org.apache.felix.gogo.runtime",
+                          :under=>"org.apache.felix", :version=>"0.6.1")
                       ]
 LOG4J               = "log4j:log4j:jar:1.2.13"
 OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.2.1",
