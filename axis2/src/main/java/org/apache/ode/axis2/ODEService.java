@@ -71,6 +71,9 @@ public class ODEService {
 
     private static final Log __log = LogFactory.getLog(ODEService.class);
 
+    public static final String CALLBACK_SESSION_ENDPOINT = "callbackSessionEndpoint";
+    public static final String TARGET_SESSION_ENDPOINT = "targetSessionEndpoint";
+
     private AxisService _axisService;
     private BpelServer _server;
     private TransactionManager _txManager;
@@ -288,7 +291,7 @@ public class ODEService {
         if (correlationId != null) {
             odeMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, correlationId);
         } else {
-            Object otse = msgContext.getProperty("targetSessionEndpoint");
+            Object otse = msgContext.getProperty(TARGET_SESSION_ENDPOINT);
             if (otse != null) {
                 Element serviceEpr = (Element) otse;
                 WSAEndpoint endpoint = new WSAEndpoint();
@@ -298,7 +301,7 @@ public class ODEService {
             }
         }
 
-        Object ocse = msgContext.getProperty("callbackSessionEndpoint");
+        Object ocse = msgContext.getProperty(CALLBACK_SESSION_ENDPOINT);
         if (ocse != null) {
             Element serviceEpr = (Element) ocse;
             WSAEndpoint endpoint = new WSAEndpoint();
@@ -328,7 +331,7 @@ public class ODEService {
         if (odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID) != null) {
             WSAEndpoint sessionAwareEndPoint = new WSAEndpoint(_serviceRef);
             sessionAwareEndPoint.setSessionId(odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID));
-            msgContext.setProperty("callbackSessionEndpoint", sessionAwareEndPoint);
+            msgContext.setProperty(CALLBACK_SESSION_ENDPOINT, sessionAwareEndPoint);
         }
 
     }

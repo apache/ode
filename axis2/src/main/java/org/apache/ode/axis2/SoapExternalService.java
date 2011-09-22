@@ -338,7 +338,7 @@ public class SoapExternalService implements ExternalService {
             }
             targetEPR.setSessionId(partnerSessionId);
         }
-        options.setProperty("targetSessionEndpoint", targetEPR);
+        options.setProperty(ODEService.TARGET_SESSION_ENDPOINT, targetEPR);
 
         if (myRoleWSAEPR != null) {
             WSAEndpoint myRoleEPR = new WSAEndpoint(myRoleWSAEPR);
@@ -349,7 +349,7 @@ public class SoapExternalService implements ExternalService {
                 }
                 myRoleEPR.setSessionId(myRoleSessionId);
             }
-            options.setProperty("callbackSessionEndpoint", myRoleEPR);
+            options.setProperty(ODEService.CALLBACK_SESSION_ENDPOINT, myRoleEPR);
 
             // Map My Session ID to JMS Correlation ID
             Document callbackEprXml = odeMex.getMyRoleEndpointReference().toXML();
