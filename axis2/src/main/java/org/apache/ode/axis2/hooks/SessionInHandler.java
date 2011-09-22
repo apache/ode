@@ -48,15 +48,21 @@ public class SessionInHandler extends AbstractHandler {
             if (__log.isDebugEnabled())
                 __log.debug("Found a header in incoming message, checking if there are endpoints there.");
             // Checking if a session identifier has been provided for a stateful endpoint
-            OMElement wsaToSession = header.getFirstChildWithName(new QName(Namespaces.INTALIO_SESSION_NS, "session"));
+            OMElement wsaToSession = header.getFirstChildWithName(new QName(Namespaces.ODE_SESSION_NS, "session"));
+            if (wsaToSession == null) {
+                wsaToSession = header.getFirstChildWithName(new QName(Namespaces.INTALIO_SESSION_NS, "session"));
+            }
             if (wsaToSession != null) {
                 // Building an endpoint supposed to target the right instance
                 Document doc = DOMUtils.newDocument();
                 Element serviceEpr = doc.createElementNS(Namespaces.WS_ADDRESSING_NS, "EndpointReference");
-                Element sessionId = doc.createElementNS(Namespaces.INTALIO_SESSION_NS, "session");
+                Element intSessionId = doc.createElementNS(Namespaces.INTALIO_SESSION_NS, "session");
+                Element odeSessionId = doc.createElementNS(Namespaces.ODE_SESSION_NS, "session");
                 doc.appendChild(serviceEpr);
-                serviceEpr.appendChild(sessionId);
-                sessionId.setTextContent(wsaToSession.getText());
+                serviceEpr.appendChild(intSessionId);
+                serviceEpr.appendChild(odeSessionId);
+                intSessionId.setTextContent(wsaToSession.getText());
+                odeSessionId.setTextContent(wsaToSession.getText());
                 if (__log.isDebugEnabled())
                     __log.debug("A TO endpoint has been found in the header with session: " + wsaToSession.getText());
 
@@ -73,17 +79,23 @@ public class SessionInHandler extends AbstractHandler {
             }
 
             // Seeing if there's a callback, in case our client would be stateful as well
-            OMElement callback = header.getFirstChildWithName(new QName(Namespaces.INTALIO_SESSION_NS, "callback"));
+            OMElement callback = header.getFirstChildWithName(new QName(Namespaces.ODE_SESSION_NS, "callback"));
+            if (callback == null) {
+                callback = header.getFirstChildWithName(new QName(Namespaces.INTALIO_SESSION_NS, "callback"));
+            }
             if (callback != null) {
                 OMElement callbackSession = callback.getFirstChildWithName(new QName(Namespaces.INTALIO_SESSION_NS, "session"));
                 if (callbackSession != null) {
                     // Building an endpoint that represents our client (we're supposed to call him later on)
                     Document doc = DOMUtils.newDocument();
                     Element serviceEpr = doc.createElementNS(Namespaces.WS_ADDRESSING_NS, "EndpointReference");
-                    Element sessionId = doc.createElementNS(Namespaces.INTALIO_SESSION_NS, "session");
+                    Element intSessionId = doc.createElementNS(Namespaces.INTALIO_SESSION_NS, "session");
+                    Element odeSessionId = doc.createElementNS(Namespaces.ODE_SESSION_NS, "session");
                     doc.appendChild(serviceEpr);
-                    serviceEpr.appendChild(sessionId);
-                    sessionId.setTextContent(callbackSession.getText());
+                    serviceEpr.appendChild(intSessionId);
+                    serviceEpr.appendChild(odeSessionId);
+                    intSessionId.setTextContent(callbackSession.getText());
+                    odeSessionId.setTextContent(callbackSession.getText());
                     if (__log.isDebugEnabled())
                         __log.debug("A CALLBACK endpoint has been found in the header with session: " + callbackSession.getText());
 

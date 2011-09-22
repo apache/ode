@@ -119,9 +119,9 @@ public class SessionOutHandler extends AbstractHandler {
                 header.addChild(odeCallback);
                 header.addChild(intCallback);
                 OMElement address = factory.createOMElement("Address", wsAddrNS);
+                address.setText(callbackEpr.getUrl());
                 odeCallback.addChild(address);
                 intCallback.addChild(address.cloneOMElement());
-                address.setText(callbackEpr.getUrl());
                 if (callbackEpr.getSessionId() != null) {
                     OMElement odeSession = factory.createOMElement("session", odeSessNS);
                     OMElement intSession = factory.createOMElement("session", intalioSessNS);
