@@ -90,7 +90,7 @@
         <woodstox.version>3.2.4</woodstox.version>
         <javax.mail.version>1.4</javax.mail.version>
         <hibernate.version>3.3.2.GA</hibernate.version>
-		<javassist.version>3.9.0.GA</javassist.version>
+        <javassist.version>3.9.0.GA</javassist.version>
         <spring.version>2.5.6</spring.version>
         <geronimo.specs.version>1.0</geronimo.specs.version>
         <geronimo.version>2.0.1</geronimo.version>
@@ -127,7 +127,7 @@
         <xml-apis.version>1.3.04</xml-apis.version>
         <servicemix.nmr.version>1.1.0-SNAPSHOT</servicemix.nmr.version>
         <axis2.transport.version>1.0.0</axis2.transport.version>
-		<h2.version>1.1.117</h2.version>
+        <h2.version>1.1.117</h2.version>
     </properties>
 
     <modules>
@@ -161,8 +161,8 @@
         <module>jbi-bundle</module>
         <module>jbi-karaf</module>
         <module>distro/src/examples-jbi/maven2/ping-pong-osgi</module>
-      <module>distro/src/examples-jbi/maven2/helloworld2-osgi</module>
-      <module>jbi-karaf-pmapi-httpbinding</module>
+        <module>distro/src/examples-jbi/maven2/helloworld2-osgi</module>
+        <module>jbi-karaf-pmapi-httpbinding</module>
         <module>axis2-war</module>
         <module>bpel-itest</module>
     </modules>
