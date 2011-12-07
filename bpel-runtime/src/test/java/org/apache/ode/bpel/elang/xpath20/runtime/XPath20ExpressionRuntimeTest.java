@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.net.URI;
 import java.net.URL;
@@ -59,6 +60,8 @@ public class XPath20ExpressionRuntimeTest implements EvaluationContext {
 
     private MockCompilerContext _cc;
     private Document _vardoc;
+    private Node _rootNode;
+
     public XPath20ExpressionRuntimeTest() {}
 
     @Before
@@ -85,6 +88,41 @@ public class XPath20ExpressionRuntimeTest implements EvaluationContext {
                     cn = cn.getNextSibling();
                 Element el = (Element)cn;
                 _cc.registerElementVar(name, new QName(el.getNamespaceURI(),el.getLocalName()));
+                _vars.put(name,el);
+            } else if (v.getLocalName().equals("messageTypeVar")) {
+                String name = v.getAttribute("name");
+                Node cn = v.getFirstChild();
+                while (cn != null && cn.getNodeType() != Node.ELEMENT_NODE)
+                    cn = cn.getNextSibling();
+                Element el = (Element)cn;
+                
+                java.util.List<String> partNames=new java.util.Vector<String>();
+                java.util.List<QName> partTypes=new java.util.Vector<QName>();
+                NodeList nl=el.getChildNodes();
+                
+                for (int j=0; j < nl.getLength(); j++) {
+                	Node partNode=nl.item(j);
+                	if (partNode instanceof Element) {
+	                	partNames.add(partNode.getLocalName());
+	                	
+	                	partNode.normalize();
+	                	
+	                	Node body=((Element)partNode).getFirstChild();
+	                	
+	                	while (body != null && (body instanceof Element) == false) {
+	                		body = body.getNextSibling();
+	                	}
+	                	
+	                	if (body != null) {
+		                	QName partType=new QName(((Element)body).getNamespaceURI(),
+		                			((Element)body).getLocalName());
+		                	partTypes.add(partType);
+	                	}
+                	}
+                }
+                
+                _cc.registerMessageTypeVar(name, new QName(el.getNamespaceURI(),el.getLocalName()),
+                				partNames, partTypes);
                 _vars.put(name,el);
             }
         }
@@ -141,6 +179,58 @@ public class XPath20ExpressionRuntimeTest implements EvaluationContext {
         assertEquals("Unexpected root node", "variables", retVal.getNodeName());
     }
     
+    @Test
+    public void testMessageTypeVariableSelection() throws Exception {
+        OXPath20ExpressionBPEL20 exp = compile("$messageVar.parameters");
+        Node retVal = _runtime.evaluateNode(exp, this);
+        assertNotNull(retVal);
+        assertSame(retVal , _vars.get("messageVar"));
+        assertSame(retVal.getOwnerDocument(),_vardoc);
+    }
+
+    @Test
+    public void testMessageInsertMissingData() throws Exception {
+    	String insertElementName="InsertedNode";
+    	
+        OXPath20ExpressionBPEL20 exp = compile("$messageVar.parameters/"+insertElementName);
+        exp.insertMissingData = true;
+        
+        // Setup root node
+        _rootNode = DOMUtils.stringToDOM("<message><parameters>" +
+        		"<tns:ApplicationData xmlns:tns=\"http://foobar\"/></parameters></message>");
+        
+        java.util.List<?> list = _runtime.evaluate(exp, this);
+        
+        if (list == null || list.size() != 0) {
+        	fail("List should have no elements");
+        }
+        
+        if (((Element)_rootNode).getElementsByTagName(insertElementName).getLength() != 1) {
+        	fail("Missing '"+insertElementName+"' element has not been inserted");
+        }
+    }
+    
+    @Test
+    public void testVariableInsertMissingData() throws Exception {
+    	String insertElementName="InsertedNode";
+    	
+        OXPath20ExpressionBPEL20 exp = compile("$reallyEmptyVar/"+insertElementName);
+        exp.insertMissingData = true;
+        
+        // Setup root node
+        _rootNode = DOMUtils.stringToDOM("<tns:ApplicationData xmlns:tns=\"http://foobar\"/>");
+        
+        java.util.List<?> list = _runtime.evaluate(exp, this);
+        
+        if (list == null || list.size() != 0) {
+        	fail("List should have no elements");
+        }
+        
+        if (((Element)_rootNode).getElementsByTagName(insertElementName).getLength() != 1) {
+        	fail("Missing '"+insertElementName+"' element has not been inserted");
+        }
+    }
+
     public Node readVariable(Variable variable, Part part) throws FaultException {
         return _vars.get(variable.name);
     }
@@ -161,8 +251,7 @@ public class XPath20ExpressionRuntimeTest implements EvaluationContext {
     }
 
     public Node getRootNode() {
-        // TODO Auto-generated method stub
-        return null;
+        return _rootNode;
     }
 
     public Node evaluateQuery(Node root, OExpression expr) throws FaultException {

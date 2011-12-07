@@ -102,7 +102,7 @@ public class XPath20ExpressionModifier {
             return;
         }
 
-        Document document = DOMUtils.toDOMDocument(contextNode);
+        Document document = contextNode.getOwnerDocument();
         PathExpression pathExpr = (PathExpression) subExpr;
         Expression step = pathExpr.getFirstStep();
 

@@ -192,6 +192,20 @@ public class MockCompilerContext implements CompilerContext {
         var.name = name;
         _vars.put(name, var);
     }
+    
+    public void registerMessageTypeVar(String name, QName type, java.util.List<String> partNames,
+    					java.util.List<QName> partTypes) {
+    	java.util.List<Part> parts=new java.util.Vector<Part>();
+    	for (int i=0; i < partNames.size(); i++) {
+    		parts.add(new Part(getOProcess(), partNames.get(i), 
+    				new OElementVarType(getOProcess(), partTypes.get(i))));
+    	}
+        OMessageVarType varType = new OMessageVarType(getOProcess(),type,parts);
+        OScope.Variable var = new OScope.Variable(getOProcess(),varType);
+        var.name = name;
+        _vars.put(name, var);
+    }
+    
     public OExpression compileExpr(String locationstr, NSContext nsContext) {
         // TODO Auto-generated method stub
         return null;

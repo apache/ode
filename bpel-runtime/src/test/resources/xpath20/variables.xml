@@ -61,5 +61,14 @@
                              </tns:PaymentInfo>
                          </tns:ApplicationData>
 
-    </elementVar>
+	</elementVar>
+	
+	<messageTypeVar name="messageVar"  xmlns:tns="http://foobar" >
+		<tns:ExampleMessage>
+			<parameters>
+					<tns:ApplicationData/>
+			</parameters>
+		</tns:ExampleMessage>
+	</messageTypeVar>
+
 </variables>

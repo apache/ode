@@ -250,7 +250,28 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             // Create step nodes in XPath in case it is incompletely instantiated
             if (oxpath20.insertMissingData) {
                 XPath20ExpressionModifier modifier = new XPath20ExpressionModifier(oxpath20.namespaceCtx, ((XPathFactoryImpl) _xpf).getConfiguration().getNamePool());
-                modifier.insertMissingData(expr, ctx.getRootNode());
+
+                Node temp = ctx.getRootNode();
+                if (temp.getLocalName().equals("message") && temp.getNamespaceURI() == null) {
+                	int startind=xpath.indexOf('.');
+                	int endind=xpath.indexOf('/');
+                	if (startind != -1) {
+                		String part=null;
+                		if (endind != -1) {
+                			part = xpath.substring(startind+1, endind);
+                		} else {
+                			part = xpath.substring(startind+1);
+                		}
+                		Element partElem=DOMUtils.findChildByName((Element)temp,
+                							new QName(null, part));
+                		
+                		if (partElem != null && partElem.getFirstChild() != null) {
+                			temp = partElem.getFirstChild();
+                		}
+                	}
+                }
+                
+                modifier.insertMissingData(expr, temp);
             }
             Object evalResult = expr.evaluate(contextNode, type);
             if (evalResult != null && __log.isDebugEnabled()) {
