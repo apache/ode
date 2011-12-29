@@ -75,7 +75,10 @@ public class SessionInHandler extends AbstractHandler {
             // Seeing if there's a callback, in case our client would be stateful as well
             OMElement callback = header.getFirstChildWithName(new QName(Namespaces.INTALIO_SESSION_NS, "callback"));
             if (callback != null) {
-                OMElement callbackSession = callback.getFirstChildWithName(new QName(Namespaces.INTALIO_SESSION_NS, "session"));
+                OMElement callbackSession = callback.getFirstChildWithName(new QName(Namespaces.ODE_SESSION_NS, "session"));
+                if(callbackSession==null){
+                    callbackSession = callback.getFirstChildWithName(new QName(Namespaces.INTALIO_SESSION_NS, "session"));
+                }
                 if (callbackSession != null) {
                     // Building an endpoint that represents our client (we're supposed to call him later on)
                     Document doc = DOMUtils.newDocument();
