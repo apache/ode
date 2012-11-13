@@ -394,6 +394,11 @@ define "ode" do
     package(:zip).include(derby_db)
   end
 
+  desc "ODE JAva Concurrent OBjects - Annotations"
+  define "jacob-annotation" do
+    package :jar
+  end
+
   desc "ODE JAva Concurrent OBjects"
   define "jacob" do
     compile.with projects("utils"), COMMONS.logging
