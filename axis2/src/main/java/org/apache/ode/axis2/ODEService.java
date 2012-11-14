@@ -212,9 +212,6 @@ public class ODEService {
             if (!success) {
                 throw new OdeFault("Message was either unroutable or timed out!");
             }
-        } else {
-            // One ways cleanup
-            odeMex.release(true);
         }
     }
 
