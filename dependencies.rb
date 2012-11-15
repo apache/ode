@@ -149,4 +149,4 @@ XBEAN               = [
   "org.apache.xbean:xbean-spring:jar:3.4.3",
   "org.apache.xbean:xbean-classloader:jar:3.4.3"
 ]
-XMLBEANS            = "org.apache.xmlbeans:xmlbeans:jar:2.3.0"
+XMLBEANS            = "org.apache.xmlbeans:xmlbeans:jar:2.6.0"
