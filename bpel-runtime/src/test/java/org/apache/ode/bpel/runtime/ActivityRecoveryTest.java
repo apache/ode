@@ -209,7 +209,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
         // Stay active, awaiting recovery.
 
         TInstanceSummary summary = _management.getProcessInfo(_processId).getProcessInfo().getInstanceSummary();
-        for (TInstanceSummary.Instances instances : summary.getInstancesList()) {
+        for (TInstanceSummary.Instances instances : summary.getInstancesArray()) {
             switch (instances.getState().intValue()) {
               case TInstanceStatus.INT_COMPLETED:
                 assertTrue(instances.getCount() == 1);
@@ -446,7 +446,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
             } else
                 assertNull(activity.getFailure());
         }
-        for (TScopeRef ref : scope.getChildren().getChildRefList()) {
+        for (TScopeRef ref : scope.getChildren().getChildRefArray()) {
             TScopeInfo child = _management.getScopeInfoWithActivity(ref.getSiid(), true).getScopeInfo();
             if (child != null)
                 getRecoveriesInScope(instance, child, recoveries);

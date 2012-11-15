@@ -194,7 +194,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
                         }
                     }
                     try {
-                        fillProcessInfoSummary(conn, procInfoList.getProcessInfoList(), custom);
+                        fillProcessInfoSummary(conn, procInfoList.getProcessInfoArray(), custom);
                     } catch (Exception e) {
                         failIfSQLException(e);
                         __log.error("Exception fetching instances summary", e);
@@ -774,7 +774,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             if (pconf == null)
                 throw new ProcessNotFoundException("ProcessNotFound:" + procid);
             fillProcessInfo(pi, pconf, custom);
-            fillProcessInfoSummary(conn, Collections.singletonList(pi), custom);
+            fillProcessInfoSummary(conn, new TProcessInfo[]{pi}, custom);
         } catch (ManagementException me) {
             throw me;
         } catch (Exception e) {
@@ -846,7 +846,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         return ret;
     }
 
-    private void fillProcessInfoSummary(BpelDAOConnection conn, List<TProcessInfo> infos, ProcessInfoCustomizer custom) {
+    private void fillProcessInfoSummary(BpelDAOConnection conn, TProcessInfo[] infos, ProcessInfoCustomizer custom) {
         if (custom.includeInstanceSummary()) {
             Set<String> pids = new HashSet<String>();
             for (TProcessInfo i : infos) {

@@ -224,7 +224,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
             retirePreviousPackageVersions(du);
 
-            for (TDeployment.Process processDD : dd.getDeploy().getProcessList()) {
+            for (TDeployment.Process processDD : dd.getDeploy().getProcessArray()) {
                 QName pid = toPid(processDD.getName(), version);
 
                 if (_processes.containsKey(pid)) {
@@ -641,18 +641,16 @@ public class ProcessStoreImpl implements ProcessStore {
             ret.put(new QName(key), doc.getDocumentElement());
         }
 
-        if (dd.getPropertyList().size() > 0) {
-            for (TDeployment.Process.Property property : dd.getPropertyList()) {
-                Element elmtContent = DOMUtils.getElementContent(property.getDomNode());
-                if (elmtContent != null) {
-                    // We'll need DOM Level 3
-                    Document doc = DOMUtils.newDocument();
-                    doc.appendChild(doc.importNode(elmtContent, true));
-                    ret.put(property.getName(), doc.getDocumentElement());
-                } else
-                    ret.put(property.getName(), property.getDomNode().getFirstChild());
+        for (TDeployment.Process.Property property : dd.getPropertyArray()) {
+            Element elmtContent = DOMUtils.getElementContent(property.getDomNode());
+            if (elmtContent != null) {
+                // We'll need DOM Level 3
+                Document doc = DOMUtils.newDocument();
+                doc.appendChild(doc.importNode(elmtContent, true));
+                ret.put(property.getName(), doc.getDocumentElement());
+            } else
+                ret.put(property.getName(), property.getDomNode().getFirstChild());
 
-            }
         }
         return ret;
     }

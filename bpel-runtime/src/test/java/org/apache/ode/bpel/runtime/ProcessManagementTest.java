@@ -43,52 +43,52 @@ public class ProcessManagementTest extends TestCase {
 
     public void testFilterProcessesByName() throws Exception {
 
-        List<TProcessInfo> pilist = _management.listProcesses(null,null).getProcessInfoList().getProcessInfoList();
-        assertEquals(6,pilist.size());
+        TProcessInfo[] pilist = _management.listProcesses(null,null).getProcessInfoList().getProcessInfoArray();
+        assertEquals(6,pilist.length);
 
-        pilist = _management.listProcesses("name=FailureInh*",null).getProcessInfoList().getProcessInfoList();
-        assertEquals(1,pilist.size());
+        pilist = _management.listProcesses("name=FailureInh*",null).getProcessInfoList().getProcessInfoArray();
+        assertEquals(1,pilist.length);
 
-        pilist = _management.listProcesses("name=FailureToRecovery*",null).getProcessInfoList().getProcessInfoList();
-        assertEquals(1,pilist.size());
+        pilist = _management.listProcesses("name=FailureToRecovery*",null).getProcessInfoList().getProcessInfoArray();
+        assertEquals(1,pilist.length);
 
-        pilist = _management.listProcesses("name=foobaz*",null).getProcessInfoList().getProcessInfoList();
-        assertEquals(0,pilist.size());
+        pilist = _management.listProcesses("name=foobaz*",null).getProcessInfoList().getProcessInfoArray();
+        assertEquals(0,pilist.length);
 
-        pilist = _management.listProcesses("namespace="+NAMESPACE,null).getProcessInfoList().getProcessInfoList();
-        assertEquals(6,pilist.size());
+        pilist = _management.listProcesses("namespace="+NAMESPACE,null).getProcessInfoList().getProcessInfoArray();
+        assertEquals(6,pilist.length);
 
-        pilist = _management.listProcesses("namespace=http:*",null).getProcessInfoList().getProcessInfoList();
-        assertEquals(6,pilist.size());
+        pilist = _management.listProcesses("namespace=http:*",null).getProcessInfoList().getProcessInfoArray();
+        assertEquals(6,pilist.length);
 
-        pilist = _management.listProcesses("namespace=foo:*",null).getProcessInfoList().getProcessInfoList();
-        assertEquals(0,pilist.size());
+        pilist = _management.listProcesses("namespace=foo:*",null).getProcessInfoList().getProcessInfoArray();
+        assertEquals(0,pilist.length);
     }
 
     public void testListProcessesOrder() {
-        List<TProcessInfo> pilist =
-            _management.listProcesses(null,"name").getProcessInfoList().getProcessInfoList();
+        TProcessInfo[] pilist =
+            _management.listProcesses(null,"name").getProcessInfoList().getProcessInfoArray();
 
-        for (int i = 1 ; i <  pilist.size(); ++i) {
-            QName qname = QName.valueOf(pilist.get(i).getPid());
-            QName qnamePrev = QName.valueOf(pilist.get(i-1).getPid());
+        for (int i = 1 ; i <  pilist.length; ++i) {
+            QName qname = QName.valueOf(pilist[i].getPid());
+            QName qnamePrev = QName.valueOf(pilist[i-1].getPid());
             assertTrue(0<=qname.getLocalPart().compareTo(qnamePrev.getLocalPart()));
         }
 
         pilist =
-            _management.listProcesses(null,"-name").getProcessInfoList().getProcessInfoList();
+            _management.listProcesses(null,"-name").getProcessInfoList().getProcessInfoArray();
 
-        for (int i = 1 ; i <  pilist.size(); ++i) {
-            QName qname = QName.valueOf(pilist.get(i).getPid());
-            QName qnamePrev = QName.valueOf(pilist.get(i-1).getPid());
+        for (int i = 1 ; i <  pilist.length; ++i) {
+            QName qname = QName.valueOf(pilist[i].getPid());
+            QName qnamePrev = QName.valueOf(pilist[i-1].getPid());
             assertTrue(0>=qname.getLocalPart().compareTo(qnamePrev.getLocalPart()));
         }
     }
 
     public void testListProcessCustom() {
-        List<TProcessInfo> pilist =
-            _management.listProcessesCustom(null,"name", ProcessInfoCustomizer.ALL).getProcessInfoList().getProcessInfoList();
-        assertEquals(6,pilist.size());
+        TProcessInfo[] pilist =
+            _management.listProcessesCustom(null,"name", ProcessInfoCustomizer.ALL).getProcessInfoList().getProcessInfoArray();
+        assertEquals(6, pilist.length);
     }
 
     protected void setUp() throws Exception {

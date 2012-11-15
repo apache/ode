@@ -19,16 +19,14 @@
 package org.apache.ode.bpel.engine.replayer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,24 +39,24 @@ import org.apache.ode.bpel.engine.BpelProcess;
 import org.apache.ode.bpel.engine.MyRoleMessageExchangeImpl;
 import org.apache.ode.bpel.engine.PartnerLinkMyRoleImpl;
 import org.apache.ode.bpel.engine.PartnerLinkMyRoleImpl.RoutingInfo;
-import org.apache.ode.bpel.evt.CorrelationMatchEvent;
 import org.apache.ode.bpel.iapi.BpelEngine;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.JobType;
 import org.apache.ode.bpel.pmapi.CommunicationType;
+import org.apache.ode.bpel.pmapi.CommunicationType.Exchange;
 import org.apache.ode.bpel.pmapi.ExchangeType;
 import org.apache.ode.bpel.pmapi.FaultType;
 import org.apache.ode.bpel.pmapi.GetCommunication;
 import org.apache.ode.bpel.pmapi.GetCommunicationResponse;
 import org.apache.ode.bpel.pmapi.Replay;
-import org.apache.ode.bpel.pmapi.CommunicationType.Exchange;
 import org.apache.ode.bpel.runtime.PROCESS;
 import org.apache.xmlbeans.XmlCalendar;
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
+
 
 /**
  * Main class used for replaying. It's invoked from InstanceManagement API.
@@ -87,13 +85,15 @@ public class Replayer {
                 List<Long> toDelete = new ArrayList<Long>();
                 List<CommunicationType> toRestore = new ArrayList<CommunicationType>();
 
-                toDelete.addAll(request.getReplaceInstanceList());
+                for (Long iid : request.getReplaceInstanceArray()) {
+                    toDelete.add(iid);
+                }
 
-                for (Long iid : request.getUpgradeInstanceList()) {
+                for (Long iid : request.getUpgradeInstanceArray()) {
                     toDelete.add(iid);
                     toRestore.add(CommunicationType.Factory.parse(getCommunication(iid, conn).toString()));
                 }
-                toRestore.addAll(request.getRestoreInstanceList());
+                toRestore.addAll(Arrays.asList(request.getRestoreInstanceArray()));
 
                 {
                     Set<CLEANUP_CATEGORY> cleanupCategory = new HashSet<CLEANUP_CATEGORY>();
@@ -141,7 +141,7 @@ public class Replayer {
 
     public GetCommunicationResponse getCommunication(GetCommunication request, BpelDAOConnection conn) throws Exception {
         GetCommunicationResponse response = GetCommunicationResponse.Factory.newInstance();
-        for (Long iid : request.getIidList()) {
+        for (Long iid : request.getIidArray()) {
             response.addNewRestoreInstance().set(getCommunication(iid, conn));
         }
         return response;
