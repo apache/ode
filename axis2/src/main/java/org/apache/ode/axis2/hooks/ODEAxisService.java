@@ -245,7 +245,7 @@ public class ODEAxisService {
             String service;
 
             int serviceStart = index + servicePrefix.length();
-            if (path.length() > serviceStart + 1) {
+            if (path.length() > serviceStart) {
                 service = path.substring(serviceStart);
                 // Path may contain query string, not interesting for us.
                 int queryIndex = service.indexOf('?');
