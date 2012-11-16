@@ -19,10 +19,13 @@ package org.apache.ode.jacob.generator;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -30,6 +33,9 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 
 import org.apache.ode.jacob.annotation.ChannelType;
@@ -46,7 +52,7 @@ public class ChannelTypeProcessor extends AbstractProcessor {
                     + " is only supported on interfaces; " + elem.asType().toString() + " is a " + elem.getKind().toString());
                 continue;
             }
-            if (generateSourceFile(elem, channelClass(elem)) && generateSourceFile(elem, channelListener(elem))) {
+            if (channelClass(elem).generate() && channelListener(elem).generate()) {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE,
                     "Generation complete: @ChannelType implementation and listener for " + elem.asType().toString());
             } else {
@@ -56,43 +62,98 @@ public class ChannelTypeProcessor extends AbstractProcessor {
         return true;
     }
 
-    protected boolean generateSourceFile(Element elem, SourceGenerator gen) {
-        try {
-            gen.generate(processingEnv.getFiler().createSourceFile(gen.getSourceFileName(), elem).openWriter());
-        } catch (IOException e) {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, e.getMessage());
-            return false;
-        }
-        return true;
-    }
-    
     private SourceGenerator channelClass(Element element) {
-        return new ChannelClassGenerator(element);
+        return new ChannelClassGenerator(processingEnv, element);
     }
 
     private SourceGenerator channelListener(Element element) {
-        return new ChannelListenerGenerator(element);
+        return new ChannelListenerGenerator(processingEnv, element);
     }
 
+    // TODO: check if instead of using a String and '\n' line terminators wouldn't be better to
+    //  return a String[] of lines and use println foreach line (would probably use crlf on Win)
+    private static final String HEADER = 
+        // TODO: ported from earlier version, but ugly as hell, could use a facelift
+        "/*\n" +
+        " * SOURCE FILE GENERATATED BY JACOB CHANNEL CLASS GENERATOR\n" +
+        " * \n" +
+        " *               !!! DO NOT EDIT !!!! \n" +
+        " * \n" +
+        " * Generated On  : <today>\n" +
+        " * For Interface : <fqn>\n" +
+        " */\n" +
+        "package <package>;\n";
+    private static final String CHANNEL_DECL = 
+		"/**\n" +
+		" * An auto-generated channel interface for the channel type\n" +
+		" * {@link <fqn>}.\n" +
+		" * @see <fqn>\n" +
+		" * @see <fqn>ChannelListener\n" +
+		" */\n" +
+		"public interface <name>Channel extends\n" + 
+        "<interfaces> {\n" + 
+        "}";
+    private static final String LISTENER_DECL = 
+        "import org.apache.commons.logging.Log;\n" + 
+        "import org.apache.commons.logging.LogFactory;\n" + 
+        "\n" + 
+        "/**\n" +
+        " * An auto-generated channel listener abstract class for the \n" +
+        " * {@link <fqn>} channel type. \n" +
+        " * @see <fqn>\n" +
+        " * @see <fqn>Channel\n" +
+        " */\n" +
+        "public abstract class <name>ChannelListener\n" +
+        "    extends org.apache.ode.jacob.ChannelListener<<fqn>Channel>\n" +
+        "    implements <fqn> {\n" + 
+        "\n" + 
+        "    private static final Log LOG = LogFactory.getLog(<fqn>.class);\n" +
+        "\n" + 
+        "    protected Log log() {\n" +
+        "        return LOG;\n" +
+        "    }\n" +
+        "\n" + 
+        "    protected <name>ChannelListener(<fqn>Channel channel) {\n" +
+        "        super(channel);\n" +
+        "    }\n" +
+        "}";
+
     public abstract class SourceGenerator {
+        public static final String INDENT = "    ";
+        private final ProcessingEnvironment penv;
         private final Date today = new Date();
         private final String suffix;
         private Element type;
         
-        public SourceGenerator(Element type, String suffix) {
+        public SourceGenerator(ProcessingEnvironment penv, Element type, String suffix) {
+            this.penv = penv;
             this.type = type;
             this.suffix = suffix;
+        }
+
+        public ProcessingEnvironment getProcessingEnvironment() {
+            return penv;
         }
 
         public Element getType() {
             return type;
         }
 
-        public void generate(Writer writer) {
-            final PrintWriter w = new PrintWriter(writer);
-            generateHeader(w);
-            generateContent(w);
-            w.close();
+        public boolean generate() {
+            Writer w;
+            try {
+                w = penv.getFiler().createSourceFile(getSourceFileName(), type).openWriter();
+            } catch (IOException e) {
+                penv.getMessager().printMessage(Diagnostic.Kind.NOTE, e.getMessage());
+                return false;
+            }
+
+            final PrintWriter writer = new PrintWriter(w);
+            generateHeader(writer);
+            generateContent(writer);
+            writer.flush();
+            writer.close();
+            return true;
         }
 
         // TODO: is it really worth splitting this into a interface/abstract class? maybe later...
@@ -107,47 +168,64 @@ public class ChannelTypeProcessor extends AbstractProcessor {
         }
 
         protected String getPackage() {
-            return type.asType().toString();
+            return penv.getElementUtils().getPackageOf(type).toString();
         }
         
+        protected List<TypeMirror> getSuperInterfaces() {
+            List<TypeMirror> answer = new ArrayList<TypeMirror>();
+            for (TypeMirror m : getProcessingEnvironment().getTypeUtils().directSupertypes(getType().asType())) {
+                DeclaredType decl = m.getKind() == TypeKind.DECLARED ? (DeclaredType) m : null;
+                if (decl.asElement().getKind() == ElementKind.INTERFACE) {
+                    answer.add(m);
+                }
+            }
+            return answer;
+        }
+
         protected void generateHeader(PrintWriter writer) {
-            // TODO: ported from earlier version, but ugly as hell, could use a facelift
-            writer.println("/*");
-            writer.println(" * SOURCE FILE GENERATATED BY JACOB CHANNEL CLASS GENERATOR");
-            writer.println(" * ");
-            writer.println(" *               !!! DO NOT EDIT !!!! ");
-            writer.println(" * ");
-            writer.println(" * Generated On  : "  + today);
-            writer.println(" * For Interface : "  + getType().asType().toString());
-            writer.println(" */");
-            writer.println();
-     
-            writer.append("package ").append(getPackage()).println(';');
-            writer.println();
+        	writer.println(HEADER
+        		.replaceAll("<today>", today.toString())
+        		.replaceAll("<fqn>", getType().asType().toString())
+        		.replaceAll("<package>", getPackage()));
         }
     };
 
     private class ChannelClassGenerator extends SourceGenerator {
 
-        public ChannelClassGenerator(Element type) {
-            super(type, "Channel");
+        public ChannelClassGenerator(ProcessingEnvironment penv, Element type) {
+            super(penv, type, "Channel");
+        }
+
+        protected String generateInterfaces() {
+        	StringBuilder ifs = new StringBuilder();
+            for (TypeMirror m : getSuperInterfaces()) {
+                ifs.append("    ").append(m.toString()).append("\n");
+            }
+            ifs.append("    org.apache.ode.jacob.Channel,\n");
+            ifs.append("    ").append(getType().asType().toString());
+            return ifs.toString();
         }
 
         protected void generateContent(PrintWriter writer) {
-            writer.append("public interface ").append(getType().getSimpleName()).append(getSuffix()).println("{}");
-            writer.flush();
+            // TODO: add the javadoc class prefix?
+        	writer.println(CHANNEL_DECL
+        		.replaceAll("<name>", getType().getSimpleName().toString())
+        		.replaceAll("<interfaces>", generateInterfaces())
+    		    .replaceAll("<fqn>", getType().asType().toString()));
         }
     };
     
     private class ChannelListenerGenerator extends SourceGenerator {
 
-        public ChannelListenerGenerator(Element type) {
-            super(type, "ChannelListener");
+        public ChannelListenerGenerator(ProcessingEnvironment penv, Element type) {
+            super(penv, type, "ChannelListener");
         }
 
         protected void generateContent(PrintWriter writer) {
-            writer.append("public interface ").append(getType().getSimpleName()).append(getSuffix()).println("{}");
-            writer.flush();
+            // TODO: add the javadoc class prefix?
+        	writer.println(LISTENER_DECL
+        		.replaceAll("<name>", getType().getSimpleName().toString())
+        		.replaceAll("<fqn>", getType().asType().toString()));
         }
     }
 }
