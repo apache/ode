@@ -139,7 +139,7 @@ public class OdeListCommand extends OdeCommandsBase {
     private void collectFailedActivities(TScopeInfo scopeInfo, List<TActivityInfo> bin) {
         Activities acts = scopeInfo.getActivities();
         if (acts != null) {
-            for (TActivityInfo actInfo : acts.getActivityInfoList()) {
+            for (TActivityInfo actInfo : acts.getActivityInfoArray()) {
                 if (actInfo.getStatus() == TActivityStatus.FAILURE) {
                     bin.add(actInfo);
                 }
@@ -147,7 +147,7 @@ public class OdeListCommand extends OdeCommandsBase {
         }
         TScopeInfo.Children children = scopeInfo.getChildren();
         if (children != null) {
-            for (TScopeRef child : children.getChildRefList()) {
+            for (TScopeRef child : children.getChildRefArray()) {
                 TScopeInfo childScopeInfo = getScopeInfo(child);
                 if (childScopeInfo != null) {
                     collectFailedActivities(childScopeInfo, bin);

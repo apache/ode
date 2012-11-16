@@ -225,23 +225,21 @@ public class ReplayerContext {
 
         replayerConfig = r;
 
-        for (ServiceConfig s : r.getServiceConfigList()) {
+        for (ServiceConfig s : r.getServiceConfigArray()) {
             servicesConfig.put(s.getService(), s);
         }
 
-        final List<Exchange> exchangeList = r.getExchangeList();
+        final Exchange[] exchanges = r.getExchangeArray();
 
-        for (int i = 1; i < exchangeList.size(); i++) {
-            Exchange e = exchangeList.get(i);
-            // We skip failures, because INVOKE_CHECK job is not handled by
-            // replayer
+        for (Exchange e : exchanges) {
+            // We skip failures, because INVOKE_CHECK job is not handled by replayer
             if (e.getType() == ExchangeType.P && !e.isSetFailure()) {
                 answers.add(e);
             }
         }
 
         {
-            final Exchange e = exchangeList.get(0);
+            final Exchange e = exchanges[0];
 
             final Date time = e.getCreateTime().getTime();
             scheduler.scheduleReplayerJob(new Callable<Void>() {
@@ -275,12 +273,11 @@ public class ReplayerContext {
                                 }
                             }, true);
 
-                    for (int i = 1; i < exchangeList.size(); i++) {
-                        Exchange e2 = exchangeList.get(i);
-                        if (e2.getType() == ExchangeType.M) {
-                            MyRoleMessageExchangeImpl mex2 = ReplayerBpelRuntimeContextImpl.createMyRoleMex(e2, bpelEngine);
+                    for (Exchange e : exchanges) {
+                        if (e.getType() == ExchangeType.M) {
+                            MyRoleMessageExchangeImpl mex2 = ReplayerBpelRuntimeContextImpl.createMyRoleMex(e, bpelEngine);
                             runtimeContext.updateMyRoleMex(mex2);
-                            scheduleInvoke(e2, mex2);
+                            scheduleInvoke(e, mex2);
                         }
                     }
                     return null;

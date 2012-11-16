@@ -22,16 +22,20 @@ require "buildr/javacc"
 require "buildr/jetty"
 require "buildr/hibernate"
 
+require File.join(File.dirname(__FILE__), 'repositories.rb')
+require File.join(File.dirname(__FILE__), 'dependencies.rb')
+
 Buildr.settings.build['jmock'] = "1.2.0"
 
 Buildr::Hibernate::REQUIRES[:xdoclet] = Buildr.group("xdoclet", "xdoclet-xdoclet-module", "xdoclet-hibernate-module", 
  :under=>"xdoclet", :version=>"1.2.3") + ["xdoclet:xjavadoc:jar:1.1-j5"] 
 
+# XMLBeans addon must use the same version as we do.
+Buildr::XMLBeans::REQUIRES.xmlbeans = artifact(XMLBEANS).version
+
 # dirty workaround for BUILDR-541/BUILDR-508
 Java.classpath << Buildr::OpenJPA::REQUIRES
 
-require File.join(File.dirname(__FILE__), 'repositories.rb')
-require File.join(File.dirname(__FILE__), 'dependencies.rb')
 
 # Keep this structure to allow the build system to update version numbers.
 VERSION_NUMBER = "1.4-SNAPSHOT"
@@ -67,8 +71,8 @@ define "ode" do
   project.version = VERSION_NUMBER
   project.group = "org.apache.ode"
 
-  compile.options.source = "1.5"
-  compile.options.target = "1.5"
+  compile.options.source = "1.6"
+  compile.options.target = "1.6"
   manifest["Implementation-Vendor"] = "Apache Software Foundation"
   meta_inf << file("NOTICE")
 

@@ -13,11 +13,12 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-repositories.remote << "http://www.intalio.org/public/maven2"
+repositories.remote << "http://repo.maven.apache.org/maven2"
 repositories.remote << "http://people.apache.org/repo/m2-incubating-repository"
 repositories.remote << "http://repo1.maven.org/maven2"
 repositories.remote << "http://people.apache.org/repo/m2-snapshot-repository"
 repositories.remote << "http://download.java.net/maven/2"
 repositories.remote << "http://svn.apache.org/repos/asf/servicemix/m2-repo"
-repositories.remote << "http://www.aqute.biz/repo"
+repositories.remote << "http://www.aqute.biz/repo" # TODO: remove me
+repositories.remote << "http://www.intalio.org/public/maven2" # TODO: remove me
 repositories.release_to[:url] ||= "sftp://guest@localhost/home/guest"

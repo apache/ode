@@ -19,6 +19,7 @@
 
 package org.apache.ode.store;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -38,12 +39,12 @@ public class ProcessCleanupConfImpl {
 
     // package default
     ProcessCleanupConfImpl(TDeployment.Process pinfo) {
-        for( TCleanup cleanup : pinfo.getCleanupList() ) {
+        for( TCleanup cleanup : pinfo.getCleanupArray() ) {
             if( cleanup.getOn() == TCleanup.On.SUCCESS || cleanup.getOn() == TCleanup.On.ALWAYS ) {
-                processACleanup(successCategories, cleanup.getCategoryList());
+                processACleanup(successCategories, Arrays.asList(cleanup.getCategoryArray()));
             }
             if( cleanup.getOn() == TCleanup.On.FAILURE || cleanup.getOn() == TCleanup.On.ALWAYS ) {
-                processACleanup(failureCategories, cleanup.getCategoryList());
+                processACleanup(failureCategories, Arrays.asList(cleanup.getCategoryArray()));
             }
         }
 

@@ -68,10 +68,8 @@ GERONIMO            = struct(
   :transaction      =>"org.apache.geronimo.components:geronimo-transaction:jar:2.0.1",
   :connector        =>"org.apache.geronimo.components:geronimo-connector:jar:2.0.1"
 )
-HIBERNATE           = [ "org.hibernate:hibernate-core:jar:3.3.2.GA", "javassist:javassist:jar:3.4.GA", "antlr:antlr:jar:2.7.6"
-    #"asm:asm:jar:1.5.3",
-    #                    , "cglib:cglib:jar:2.1_3", "net.sf.ehcache:ehcache:jar:1.2.3" 
-                        ]
+HIBERNATE           = [ "org.hibernate:hibernate-core:jar:3.3.2.GA", "javassist:javassist:jar:3.4.GA", "antlr:antlr:jar:2.7.6",
+                        "asm:asm:jar:1.5.3", "cglib:cglib:jar:2.1_3", "net.sf.ehcache:ehcache:jar:1.2.3" ]
 HSQLDB              = "hsqldb:hsqldb:jar:1.8.0.7"
 JAVAX               = struct(
   :activation       =>"javax.activation:activation:jar:1.1",
@@ -149,4 +147,4 @@ XBEAN               = [
   "org.apache.xbean:xbean-spring:jar:3.4.3",
   "org.apache.xbean:xbean-classloader:jar:3.4.3"
 ]
-XMLBEANS            = "org.apache.xmlbeans:xmlbeans:jar:2.3.0"
+XMLBEANS            = "org.apache.xmlbeans:xmlbeans:jar:2.6.0"

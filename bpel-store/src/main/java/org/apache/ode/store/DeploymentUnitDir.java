@@ -176,7 +176,7 @@ class DeploymentUnitDir {
         _processes = processes;
 
         HashMap<QName, Process> processInfo = new HashMap<QName, TDeployment.Process>();
-        for (TDeployment.Process p : getDeploymentDescriptor().getDeploy().getProcessList()) {
+        for (TDeployment.Process p : getDeploymentDescriptor().getDeploy().getProcessArray()) {
             processInfo.put(p.getName(), p);
         }
         _processInfo = processInfo;
@@ -359,8 +359,7 @@ class DeploymentUnitDir {
     }
 
     private Map<String, Object> prepareCompileProperties(File bpelFile) {
-        List<Process> plist = getDeploymentDescriptor().getDeploy().getProcessList();
-        for (Process process : plist) {
+        for (Process process : getDeploymentDescriptor().getDeploy().getProcessArray()) {
             if (process.getFileName() == null || "".equals(process.getFileName()))
                 continue;
 
@@ -382,8 +381,7 @@ class DeploymentUnitDir {
      * @return file name of the WSDL, or null if none specified.
      */
     private File findBpel11Wsdl(File bpelFile) {
-        List<Process> plist = getDeploymentDescriptor().getDeploy().getProcessList();
-        for (Process process : plist) {
+        for (Process process : getDeploymentDescriptor().getDeploy().getProcessArray()) {
             if (process.getFileName() == null || "".equals(process.getFileName()))
                 continue;
             if (!bpelFile.getName().equals(process.getFileName()))
