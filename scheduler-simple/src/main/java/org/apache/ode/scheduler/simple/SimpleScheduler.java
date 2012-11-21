@@ -19,6 +19,8 @@
 
 package org.apache.ode.scheduler.simple;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -41,7 +43,6 @@ import javax.transaction.TransactionManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.helpers.AbsoluteTimeDateFormat;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Scheduler;
 
@@ -143,6 +144,8 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
 
     /** Interval between immediate retries when the transaction fails **/
     private long _immediateTransactionRetryInterval = 1000;
+
+    private DateFormat debugDateFormatter = new SimpleDateFormat("HH:mm:ss,SSS");
 
     public SimpleScheduler(String nodeId, DatabaseDelegate del, Properties conf) {
         _nodeId = nodeId;
@@ -729,7 +732,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
             long delayedTime = System.currentTimeMillis() - _warningDelay;
             int delayedCount = 0;
             boolean runningLate;
-            AbsoluteTimeDateFormat f = new AbsoluteTimeDateFormat();
+
             for (Job j : jobs) {
                 // jobs might have been enqueued by #addTodoOnCommit meanwhile
                 if (_outstandingJobs.size() >= _todoLimit){
@@ -741,7 +744,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
                     delayedCount++;
                 }
                 if (__log.isDebugEnabled())
-                    __log.debug("todo.enqueue job from db: " + j.jobId.trim() + " for " + j.schedDate + "(" + f.format(j.schedDate)+") "+(runningLate?" delayed=true":""));
+                    __log.debug("todo.enqueue job from db: " + j.jobId.trim() + " for " + j.schedDate + "(" + debugDateFormatter.format(j.schedDate)+") "+(runningLate?" delayed=true":""));
                 enqueue(j);
             }
             if (delayedCount > 0) {
