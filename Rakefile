@@ -27,8 +27,8 @@ require File.join(File.dirname(__FILE__), 'dependencies.rb')
 
 Buildr.settings.build['jmock'] = "1.2.0"
 
-Buildr::Hibernate::REQUIRES[:xdoclet] = Buildr.group("xdoclet", "xdoclet-xdoclet-module", "xdoclet-hibernate-module", 
- :under=>"xdoclet", :version=>"1.2.3") + ["xdoclet:xjavadoc:jar:1.1-j5"] 
+Buildr::Hibernate::REQUIRES[:xdoclet] = Buildr.group("xdoclet", "xdoclet-xdoclet-module", "xdoclet-hibernate-module",
+ :under=>"xdoclet", :version=>"1.2.3") + ["xdoclet:xjavadoc:jar:1.1-j5"]
 
 # XMLBeans addon must use the same version as we do.
 Buildr::XMLBeans::REQUIRES.xmlbeans = artifact(XMLBEANS).version
@@ -77,8 +77,8 @@ define "ode" do
   define "axis2" do
     compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "bpel-epr", "bpel-runtime",
       "scheduler-simple", "bpel-schemas", "bpel-store", "utils", "agents"),
-      AXIOM, AXIS2_ALL, COMMONS.lang, COMMONS.logging, COMMONS.collections, COMMONS.httpclient, COMMONS.lang, 
-      DERBY, GERONIMO.kernel, GERONIMO.transaction, JAVAX.activation, JAVAX.servlet, JAVAX.stream, 
+      AXIOM, AXIS2_ALL, COMMONS.lang, COMMONS.logging, COMMONS.collections, COMMONS.httpclient, COMMONS.lang,
+      DERBY, GERONIMO.kernel, GERONIMO.transaction, JAVAX.activation, JAVAX.servlet, JAVAX.stream,
       JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS, XMLBEANS, AXIS2_MODULES.libs
 
     test.exclude 'org.apache.ode.axis2.management.*'
@@ -123,8 +123,8 @@ define "ode" do
         jetty.undeploy url
       end
     end
-    
-    test.using :testng, :properties=>{ "log4j.debug" => true,  "log4j.configuration"=>"test-log4j.properties", "test.ports" => ENV['TEST_PORTS'] }
+
+    test.using :testng, :forkmode=>'perTest', :properties=>{ "log4j.debug" => true,  "log4j.configuration"=>"test-log4j.properties", "test.ports" => ENV['TEST_PORTS'] }
     test.with projects("tools"), libs, AXIS2_TEST, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, DOM4J, SLF4J, LOG4J
     webapp_dir = "#{test.compile.target}/webapp"
     test.setup task(:prepare_webapp) do |task|
@@ -289,7 +289,7 @@ define "ode" do
 
     # doclet does not support not-found="ignore"
     task "hbm-hack" do |task|
-      process_instance_hbm_file = project.path_to("target/classes/org/apache/ode/daohib/bpel/hobj/HProcessInstance.hbm.xml") 
+      process_instance_hbm_file = project.path_to("target/classes/org/apache/ode/daohib/bpel/hobj/HProcessInstance.hbm.xml")
       process_instance_hbm = File.read(process_instance_hbm_file)
       if !process_instance_hbm.include? "not-found=\"ignore\""
         process_instance_hbm.insert(process_instance_hbm.index("class=\"org.apache.ode.daohib.bpel.hobj.HProcess\"") - 1, "not-found=\"ignore\" ")
@@ -312,17 +312,17 @@ define "ode" do
     dao_hibernate = project("dao-hibernate").compile.target
     bpel_store = project("bpel-store").compile.target
 
-    hibernate_requires[:xdoclet] = Buildr.group("xdoclet", "xdoclet-xdoclet-module", "xdoclet-hibernate-module", 
+    hibernate_requires[:xdoclet] = Buildr.group("xdoclet", "xdoclet-xdoclet-module", "xdoclet-hibernate-module",
       :under=>"xdoclet", :version=>"1.2.3") + ["xdoclet:xjavadoc:jar:1.1-j5"] + projects("dao-hibernate")
 
     export = lambda do |properties, source, target|
       file(target=>[properties, source]) do |task|
         mkpath File.dirname(target), :verbose=>false
-       
+
         hibernate_schemaexport target do |task, ant|
           ant.schemaexport(:properties=>properties.to_s, :quiet=>"yes", :text=>"yes", :delimiter=>";",
                            :drop=>"no", :create=>"yes", :output=>target) do
-            ant.fileset(:dir=>source.to_s) { 
+            ant.fileset(:dir=>source.to_s) {
               ant.include :name=>"**/*.hbm.xml"
               ant.exclude :name=>"**/HMessageExchangeProperty.hbm.xml"}
           end
@@ -411,8 +411,8 @@ define "ode" do
         "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
         "jacob", "jacob-ap", "utils", "agents"),
         ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
-        COMMONS.primitives, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector, 
-        JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA, 
+        COMMONS.primitives, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector,
+        JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA,
         SAXON, TRANQL, XALAN, XERCES, XMLBEANS, WSDL4J)
 
       jbi.component :type=>:service_engine, :name=>"OdeBpelEngine", :description=>self.comment
@@ -429,7 +429,7 @@ define "ode" do
       BACKPORT, COMMONS.lang, COMMONS.io, COMMONS.collections, DERBY, GERONIMO.connector, GERONIMO.kernel,
       GERONIMO.transaction, JAVAX.connector, JAVAX.ejb, JAVAX.persistence, JAVAX.stream,
       JAVAX.transaction, JAXEN, JBI, OPENJPA, SAXON, SERVICEMIX, SPRING, TRANQL,
-      XALAN, XBEAN, XMLBEANS, 
+      XALAN, XBEAN, XMLBEANS,
       SLF4J,
       LOG4J,
       DOM4J,
@@ -465,7 +465,7 @@ define "ode" do
   define "jbi-karaf-examples",
     :group => "org.apache.ode.examples",
     :base_dir => "distro/src/examples-jbi/maven2" do
-    
+
     define "helloworld2-osgi" do
       package(:bundle, :id => "helloworld-bundle").tap do |bnd|
         bnd.classpath = [KARAF, project("ode:jbi-bundle")]
@@ -480,12 +480,12 @@ define "ode" do
       end
       # we package sources and javadocs separately to give them a custom id
       package(:sources, :id => "helloworld-bundle")
-      
-      # This project does not contain java classes, hence there are no javadocs. 
+
+      # This project does not contain java classes, hence there are no javadocs.
       # But since Nexus will complain about a missing javadoc artifact, we make sure that an empty one is created.
       package(:javadoc, :id => "helloworld-bundle").enhance { mkdir_p _("target/doc") }
     end
-    
+
     define "ping-pong-osgi" do
       compile
       package(:bundle, :id => "ping-pong-bundle").tap do |bnd|
@@ -498,7 +498,7 @@ define "ode" do
         bnd['Export-Package'] = "org.apache.ode.ping"
         bnd['Include-Resource'] = _('src/main/resources')
       end
-      
+
       # we package sources and javadocs separately to give them a custom id
       package(:sources, :id => "ping-pong-bundle")
       package(:javadoc, :id => "ping-pong-bundle")
@@ -542,8 +542,8 @@ define "ode" do
                                   "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
                                   "jacob", "jacob-ap", "utils", "agents"))
     libs = artifacts(ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
-                     COMMONS.primitives, COMMONS.io, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector, 
-                     JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA, 
+                     COMMONS.primitives, COMMONS.io, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector,
+                     JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J, OPENJPA,
                      SAXON, TRANQL, XALAN, XERCES, XMLBEANS, WSDL4J, KARAF)
     compile.with projects("bpel-schemas", "jbi", "bpel-api"), JBI, libs, KARAF, SPRING, SPRING_OSGI
 
@@ -553,12 +553,12 @@ define "ode" do
       inlines = zips.map{|item| "@" + item.to_s}
 
       # embed jars
-      bnd_libs = ode_libs + artifacts(AXIOM, BACKPORT, GERONIMO.connector, JAXEN, 
-                                      JAVAX.connector, JAVAX.persistence, JAVAX.ejb, 
-                                      OPENJPA, SAXON, TRANQL, 
+      bnd_libs = ode_libs + artifacts(AXIOM, BACKPORT, GERONIMO.connector, JAXEN,
+                                      JAVAX.connector, JAVAX.persistence, JAVAX.ejb,
+                                      OPENJPA, SAXON, TRANQL,
                                       XALAN, XERCES, XMLBEANS, WSDL4J)
-      includes = bnd_libs.map{|item| File.basename(item.to_s)} 
-      bnd["includes"] = includes.join(', ') 
+      includes = bnd_libs.map{|item| File.basename(item.to_s)}
+      bnd["includes"] = includes.join(', ')
 
       # embedd *.xsd, *.xml, xmlbeans* from ode libs
       embedres = ode_libs.map {|pkg| ['**.xsd', '**.xml', 'schemaorg_apache_xmlbeans/**'].map {|x| '@' + pkg.to_s + '!/' + x}}.join(', ')
@@ -603,7 +603,7 @@ define "ode" do
     test.exclude "*TestResources"
     package :jar
   end
-  
+
   desc "ODE Agents"
   define "agents" do
      compile
@@ -707,7 +707,7 @@ define "apache-ode" do
 
   package(:zip, :id=>"#{id}-docs").include(doc.from(project("ode").projects).
     using(:javadoc, :windowtitle=>"Apache ODE #{project.version}").target, :as=>"#{id}-docs-#{version}") unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
-    
+
   # sign packages
   gpg_sign_before_upload
 end
