@@ -125,7 +125,7 @@ define "ode" do
     end
 
     test.using :testng, :forkmode=>'perTest', :properties=>{ "log4j.debug" => true,  "log4j.configuration"=>"test-log4j.properties", "test.ports" => ENV['TEST_PORTS'] }
-    test.with projects("tools"), libs, AXIS2_TEST, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, DOM4J, SLF4J, LOG4J
+    test.with projects("tools"), libs, AXIS2_TEST, AXIOM, HIBERNATE, JAVAX.servlet, Buildr::Jetty::REQUIRES, DOM4J, SLF4J, LOG4J
     webapp_dir = "#{test.compile.target}/webapp"
     test.setup task(:prepare_webapp) do |task|
       cp_r _("src/main/webapp"), test.compile.target.to_s
