@@ -80,13 +80,9 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
 
     private TransactionManager _txMgr;
 
-    private final DataSource _ds;
-
     final SessionFactory _sessionFactory;
 
     public DbConfStoreConnectionFactory(DataSource ds, Properties initialProps, boolean createDatamodel, String txFactoryClassName) {
-        _ds = ds;
-
         // Don't want to pollute original properties
         Properties properties = new Properties();
         for (Object prop : initialProps.keySet()) {
@@ -98,7 +94,7 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
 
         if (properties.get(Environment.DIALECT) == null) {
             try {
-                properties.put(Environment.DIALECT, guessDialect(_ds));
+                properties.put(Environment.DIALECT, guessDialect(ds));
             } catch (Exception ex) {
                 String errmsg = __msgs.msgOdeInitHibernateDialectDetectFailed();
                 __log.error(errmsg, ex);

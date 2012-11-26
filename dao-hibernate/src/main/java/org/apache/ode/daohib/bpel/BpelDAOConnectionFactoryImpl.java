@@ -166,6 +166,8 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
 
     public void shutdown() {
         _sessionManager.shutdown();
+        _ds = null;
+        _sessionManager = null;
     }
 
     private String guessDialect(DataSource dataSource) throws Exception {
