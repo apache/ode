@@ -27,23 +27,23 @@ import java.lang.reflect.Proxy;
  * Interface implemented by channel proxies.
  */
 public class ProxyConstructor<T> {
-	private Constructor<T> constructor;
-	@SuppressWarnings("unchecked")
-	public ProxyConstructor(Class<T> clazz) {
-	    try {
-		    Class<?> proxyClass = Proxy.getProxyClass(clazz.getClassLoader(), new Class[] {clazz});
-			constructor = (Constructor<T>) proxyClass.getConstructor(new Class[] { InvocationHandler.class });
-		} catch (Exception e) {
-			// TODO: ignore? LOG?
-		}
-	}
-	
-	public T newInstance(InvocationHandler handler) {
-		try {
-			return constructor != null ? (T)constructor.newInstance(handler) : null;
-		} catch (Exception e) {
-			// TODO: really ignore?
-		}
-		return null;
-	}
+    private Constructor<T> constructor;
+    @SuppressWarnings("unchecked")
+    public ProxyConstructor(Class<T> clazz) {
+        try {
+            Class<?> proxyClass = Proxy.getProxyClass(clazz.getClassLoader(), new Class[] {clazz});
+            constructor = (Constructor<T>) proxyClass.getConstructor(new Class[] { InvocationHandler.class });
+        } catch (Exception e) {
+            // TODO: ignore? LOG?
+        }
+    }
+    
+    public T newInstance(InvocationHandler handler) {
+        try {
+            return constructor != null ? (T)constructor.newInstance(handler) : null;
+        } catch (Exception e) {
+            // TODO: really ignore?
+        }
+        return null;
+    }
 }

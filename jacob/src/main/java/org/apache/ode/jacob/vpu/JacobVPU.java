@@ -116,7 +116,7 @@ public final class JacobVPU {
      */
     public boolean execute() {
         if (__log.isTraceEnabled()) {
-        	// TODO: make this look nicer with slf4j
+            // TODO: make this look nicer with slf4j
             // __log.trace(ObjectPrinter.stringifyMethodEnter("execute", new Class[]{}));
             __log.trace(">> execute ()");
         }
@@ -177,7 +177,7 @@ public final class JacobVPU {
     public void registerExtension(Class extensionClass, Object obj) {
         if (__log.isTraceEnabled()) {
             // TODO: __log.trace(ObjectPrinter.stringifyMethodEnter(
-        	// "registerExtension", new Object[] {"extensionClass", extensionClass, "obj", obj }));
+            // "registerExtension", new Object[] {"extensionClass", extensionClass, "obj", obj }));
             __log.trace(">> setContext (extensionClass=" +  extensionClass + ", obj=" + obj + ")");
         }
         _extensions.put(extensionClass, obj);
@@ -458,7 +458,7 @@ public final class JacobVPU {
             } catch (IllegalAccessException iae) {
                 // TODO: String msg = __msgs.msgMethodNotAccessible(_method.getName(),
                 //        _method.getDeclaringClass().getName());
-            	String msg = "MethodNotAccessible: " + _method.getName() + " in " + _method.getDeclaringClass().getName();
+                String msg = "MethodNotAccessible: " + _method.getName() + " in " + _method.getDeclaringClass().getName();
                 __log.error(msg, iae);
                 throw new RuntimeException(msg, iae);
             } catch (InvocationTargetException e) {
@@ -467,7 +467,7 @@ public final class JacobVPU {
                 } else {
                     // TODO: String msg = __msgs.msgClientMethodException(_method.getName(),
                     //        _methodBody.getClass().getName());
-                	String msg = "ClientMethodException: " + _method.getName() + " in " + _methodBody.getClass().getName();
+                    String msg = "ClientMethodException: " + _method.getName() + " in " + _methodBody.getClass().getName();
                     __log.error(msg, e.getTargetException());
                     throw new RuntimeException(e.getTargetException());
                 }
