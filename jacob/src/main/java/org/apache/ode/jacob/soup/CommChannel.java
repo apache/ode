@@ -18,7 +18,6 @@
  */
 package org.apache.ode.jacob.soup;
 
-import org.apache.ode.utils.ObjectPrinter;
 
 /**
  * DOCUMENTME.
@@ -28,13 +27,13 @@ import org.apache.ode.utils.ObjectPrinter;
 
 public class CommChannel extends ExecutionQueueObject {
 
-    private Class _type;
+    private Class<?> _type;
 
-    public CommChannel(Class type) {
+    public CommChannel(Class<?> type) {
         _type = type;
     }
 
-    public Class getType() {
+    public Class<?> getType() {
         return _type;
     }
 

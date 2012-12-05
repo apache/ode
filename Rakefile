@@ -445,7 +445,7 @@ define "ode" do
 
   desc "ODE JAva Concurrent OBjects"
   define "jacob" do
-    compile.with projects("utils"), COMMONS.logging
+    compile.with COMMONS.logging
 
     package :jar
   end

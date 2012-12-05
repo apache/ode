@@ -19,7 +19,6 @@
 package org.apache.ode.jacob.soup;
 
 import org.apache.ode.jacob.JacobObject;
-import org.apache.ode.utils.ObjectPrinter;
 
 import java.lang.reflect.Method;
 
@@ -53,7 +52,12 @@ public class Continuation extends ExecutionQueueObject {
   }
 
   public String toString () {
-    return ObjectPrinter.toString(this, new Object[] { "closure", _closure, "method", _method.getName(), "args", _args});
+    return new StringBuilder("{")
+        .append(this.getClass().getSimpleName())
+        .append(" closure=").append(_closure)
+        .append(", method=").append(_method.getName())
+        .append(", args=").append(_args)
+        .append("}").toString();
   }
 
 }
