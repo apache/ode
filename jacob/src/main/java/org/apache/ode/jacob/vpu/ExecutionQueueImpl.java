@@ -801,29 +801,4 @@ public class ExecutionQueueImpl implements ExecutionQueue {
             _id = Integer.valueOf(in.readInt());
         }
     }
-
-    private static final class ExecutionQueueStatistics {
-        public long cloneClosureTimeMs;
-
-        public long cloneClosureBytes;
-
-        public long cloneClousreCount;
-
-        public long cloneClosureReadTimeMs;
-
-        public void printStatistics(PrintStream ps) {
-            Field[] fields = getClass().getFields();
-
-            for (int i = 0; i < fields.length; ++i) {
-                ps.print(fields[i].getName());
-                ps.print(" = ");
-
-                try {
-                    ps.println(fields[i].get(this));
-                } catch (Exception ex) {
-                    ps.println(ex.toString());
-                }
-            }
-        }
-    }
 }
