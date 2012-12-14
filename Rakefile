@@ -403,6 +403,13 @@ define "ode" do
     package :jar
   end
 
+  desc "ODE JAva Concurrent OBjects - Generator"
+  define "jacob-generator" do
+    compile.with projects("jacob-annotation")
+
+    package :jar
+  end
+
   desc "ODE JAva Concurrent OBjects"
   define "jacob" do
     compile.with projects("utils"), COMMONS.logging

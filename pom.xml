@@ -133,6 +133,7 @@
     <modules>
         <module>agents</module>
         <module>utils</module>
+        <module>jacob-annotation</module>
         <module>jacob</module>
         <module>bpel-schemas</module>
         <module>bpel-scripts</module>
@@ -426,6 +427,11 @@
             <dependency>
                 <groupId>org.apache.ode</groupId>
                 <artifactId>ode-dao-hibernate</artifactId>
+                <version>${ode.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ode</groupId>
+                <artifactId>jacob-annotation</artifactId>
                 <version>${ode.version}</version>
             </dependency>
             <dependency>
