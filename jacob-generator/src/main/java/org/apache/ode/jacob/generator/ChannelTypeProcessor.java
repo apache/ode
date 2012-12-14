@@ -84,13 +84,13 @@ public class ChannelTypeProcessor extends AbstractProcessor {
         " */\n" +
         "package <package>;\n";
     private static final String CHANNEL_DECL = 
-		"/**\n" +
-		" * An auto-generated channel interface for the channel type\n" +
-		" * {@link <fqn>}.\n" +
-		" * @see <fqn>\n" +
-		" * @see <fqn>ChannelListener\n" +
-		" */\n" +
-		"public interface <name>Channel extends\n" + 
+        "/**\n" +
+        " * An auto-generated channel interface for the channel type\n" +
+        " * {@link <fqn>}.\n" +
+        " * @see <fqn>\n" +
+        " * @see <fqn>ChannelListener\n" +
+        " */\n" +
+        "public interface <name>Channel extends\n" + 
         "<interfaces> {\n" + 
         "}";
     private static final String LISTENER_DECL = 
@@ -183,10 +183,10 @@ public class ChannelTypeProcessor extends AbstractProcessor {
         }
 
         protected void generateHeader(PrintWriter writer) {
-        	writer.println(HEADER
-        		.replaceAll("<today>", today.toString())
-        		.replaceAll("<fqn>", getType().asType().toString())
-        		.replaceAll("<package>", getPackage()));
+            writer.println(HEADER
+                .replaceAll("<today>", today.toString())
+                .replaceAll("<fqn>", getType().asType().toString())
+                .replaceAll("<package>", getPackage()));
         }
     };
 
@@ -197,7 +197,7 @@ public class ChannelTypeProcessor extends AbstractProcessor {
         }
 
         protected String generateInterfaces() {
-        	StringBuilder ifs = new StringBuilder();
+            StringBuilder ifs = new StringBuilder();
             for (TypeMirror m : getSuperInterfaces()) {
                 ifs.append("    ").append(m.toString()).append("\n");
             }
@@ -208,10 +208,10 @@ public class ChannelTypeProcessor extends AbstractProcessor {
 
         protected void generateContent(PrintWriter writer) {
             // TODO: add the javadoc class prefix?
-        	writer.println(CHANNEL_DECL
-        		.replaceAll("<name>", getType().getSimpleName().toString())
-        		.replaceAll("<interfaces>", generateInterfaces())
-    		    .replaceAll("<fqn>", getType().asType().toString()));
+            writer.println(CHANNEL_DECL
+                .replaceAll("<name>", getType().getSimpleName().toString())
+                .replaceAll("<interfaces>", generateInterfaces())
+                .replaceAll("<fqn>", getType().asType().toString()));
         }
     };
     
@@ -223,9 +223,9 @@ public class ChannelTypeProcessor extends AbstractProcessor {
 
         protected void generateContent(PrintWriter writer) {
             // TODO: add the javadoc class prefix?
-        	writer.println(LISTENER_DECL
-        		.replaceAll("<name>", getType().getSimpleName().toString())
-        		.replaceAll("<fqn>", getType().asType().toString()));
+            writer.println(LISTENER_DECL
+                .replaceAll("<name>", getType().getSimpleName().toString())
+                .replaceAll("<fqn>", getType().asType().toString()));
         }
     }
 }
