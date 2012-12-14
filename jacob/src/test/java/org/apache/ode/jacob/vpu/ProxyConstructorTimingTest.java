@@ -22,6 +22,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
+import org.apache.ode.jacob.Channel;
+
 import junit.framework.TestCase;
 
 
@@ -32,6 +34,10 @@ public class ProxyConstructorTimingTest extends TestCase {
     }
 
     public void testDoNothing() throws Exception {
+        Greeter gp = (Greeter) Proxy.newProxyInstance(Greeter.class.getClassLoader(),
+            new Class<?>[] {Channel.class, Greeter.class}, new GreeterInvocationHandler(new GreeterImpl()));
+        assertEquals("Hello World", gp.hello("World"));
+        assertEquals("Implemented by InvocationHandler", ((Channel)gp).export());
     }
 
     public interface TestExecution {
@@ -134,6 +140,9 @@ public class ProxyConstructorTimingTest extends TestCase {
                } else {
                    throw new IllegalStateException(String.valueOf(method));
                }
+           }
+           if (method.equals(Channel.class.getMethod("export", new Class[] {}))) {
+               return "Implemented by InvocationHandler";
            }
            return method.invoke(greeter, args);
         }    
