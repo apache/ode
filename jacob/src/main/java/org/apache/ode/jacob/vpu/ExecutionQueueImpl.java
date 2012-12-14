@@ -96,8 +96,6 @@ public class ExecutionQueueImpl implements ExecutionQueue {
 
     private int _objIdCounter;
 
-    private ExecutionQueueStatistics _statistics = new ExecutionQueueStatistics();
-
     private ReplacementMap _replacementMap;
 
     private Serializable _gdata;
@@ -380,7 +378,6 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         ps.println("-- GENERAL INFO");
         ps.println("   Current Cycle          : " + _currentCycle);
         ps.println("   Num. Reactions  : " + _reactions.size());
-        _statistics.printStatistics(ps);
         if (!_reactions.isEmpty()) {
             ps.println("-- REACTIONS");
             int cnt = 0;
