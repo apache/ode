@@ -59,7 +59,7 @@ public abstract class Comm extends ExecutionQueueObject {
     }
 
     public String toString() {
-    	// TODO: maybe find a better way to do a toString and replace ObjectPrinter
+        // TODO: maybe find a better way to do a toString and replace ObjectPrinter
         return new StringBuilder("{")
             .append(this.getClass().getSimpleName())
             .append(" chnl=").append(_channel)
