@@ -18,7 +18,6 @@
  */
 package org.apache.ode.jacob.soup;
 
-import org.apache.ode.utils.ObjectPrinter;
 
 /**
  * DOCUMENTME.
@@ -30,7 +29,6 @@ import org.apache.ode.utils.ObjectPrinter;
  */
 public abstract class Comm extends ExecutionQueueObject {
     private CommChannel _channel;
-
     private CommGroup _group;
 
     protected Comm() {
@@ -61,6 +59,11 @@ public abstract class Comm extends ExecutionQueueObject {
     }
 
     public String toString() {
-        return ObjectPrinter.toString(this, new Object[] { "chnl", _channel, "group", _group });
+    	// TODO: maybe find a better way to do a toString and replace ObjectPrinter
+        return new StringBuilder("{")
+            .append(this.getClass().getSimpleName())
+            .append(" chnl=").append(_channel)
+            .append(", group=").append(_group)
+            .append(" }").toString();
     }
 }

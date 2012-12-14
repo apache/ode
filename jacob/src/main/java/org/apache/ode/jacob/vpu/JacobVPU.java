@@ -22,9 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.jacob.*;
 import org.apache.ode.jacob.soup.*;
-import org.apache.ode.utils.CollectionUtils;
-import org.apache.ode.utils.ObjectPrinter;
-import org.apache.ode.utils.msg.MessageBundle;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -43,7 +40,8 @@ public final class JacobVPU {
     /**
      * Internationalization messages.
      */
-    private static final JacobMessages __msgs = MessageBundle.getMessages(JacobMessages.class);
+    // TODO: i8n messages
+    // private static final JacobMessages __msgs = MessageBundle.getMessages(JacobMessages.class);
 
     /**
      * Thread-local for associating a thread with a VPU. Needs to be stored in a stack to allow reentrance.
@@ -57,7 +55,7 @@ public final class JacobVPU {
      */
     static {
         try {
-            REDUCE_METHOD = JacobRunnable.class.getMethod("run", CollectionUtils.EMPTY_CLASS_ARRAY);
+            REDUCE_METHOD = JacobRunnable.class.getMethod("run", new Class[]{});
         } catch (Exception e) {
             throw new Error("Cannot resolve 'run' method", e);
         }
@@ -118,7 +116,9 @@ public final class JacobVPU {
      */
     public boolean execute() {
         if (__log.isTraceEnabled()) {
-            __log.trace(ObjectPrinter.stringifyMethodEnter("execute", CollectionUtils.EMPTY_OBJECT_ARRAY));
+        	// TODO: make this look nicer with slf4j
+            // __log.trace(ObjectPrinter.stringifyMethodEnter("execute", new Class[]{}));
+            __log.trace(">> execute ()");
         }
         if (_executionQueue == null) {
             throw new IllegalStateException("No state object for VPU!");
@@ -151,7 +151,8 @@ public final class JacobVPU {
 
     public void flush() {
         if (__log.isTraceEnabled()) {
-            __log.trace(ObjectPrinter.stringifyMethodEnter("flush", CollectionUtils.EMPTY_OBJECT_ARRAY));
+            // TODO: __log.trace(ObjectPrinter.stringifyMethodEnter("flush", new Class[]{}));
+            __log.trace(">> flush ()");
         }
         _executionQueue.flush();
     }
@@ -165,8 +166,9 @@ public final class JacobVPU {
      */
     public void setContext(ExecutionQueue executionQueue) {
         if (__log.isTraceEnabled()) {
-            __log.trace(ObjectPrinter.stringifyMethodEnter("setContext",
-                    new Object[] { "executionQueue", executionQueue }));
+            // TODO: __log.trace(ObjectPrinter.stringifyMethodEnter("setContext",
+            //        new Object[] { "executionQueue", executionQueue }));
+            __log.trace(">> setContext (executionQueue=" +  executionQueue + ")");
         }
         _executionQueue = executionQueue;
         _executionQueue.setClassLoader(_classLoader);
@@ -174,9 +176,9 @@ public final class JacobVPU {
 
     public void registerExtension(Class extensionClass, Object obj) {
         if (__log.isTraceEnabled()) {
-            __log.trace(ObjectPrinter
-                    .stringifyMethodEnter("registerExtension", new Object[] {
-                            "extensionClass", extensionClass, "obj", obj }));
+            // TODO: __log.trace(ObjectPrinter.stringifyMethodEnter(
+        	// "registerExtension", new Object[] {"extensionClass", extensionClass, "obj", obj }));
+            __log.trace(">> setContext (extensionClass=" +  extensionClass + ", obj=" + obj + ")");
         }
         _extensions.put(extensionClass, obj);
     }
@@ -186,8 +188,9 @@ public final class JacobVPU {
      */
     public void addReaction(JacobObject jo, Method method, Object[] args, String desc) {
         if (__log.isTraceEnabled()) {
-            __log.trace(ObjectPrinter.stringifyMethodEnter("addReaction",
-                    new Object[] { "jo", jo, "method", method, "args", args, "desc", desc }));
+            // TODO: __log.trace(ObjectPrinter.stringifyMethodEnter("addReaction",
+            //        new Object[] { "jo", jo, "method", method, "args", args, "desc", desc }));
+            __log.trace(">> addReaction (jo=" +  jo + ", method=" + method + ", args=" + args + ", desc=" + desc + ")");
         }
 
         Continuation continuation = new Continuation(jo, method, args);
@@ -214,7 +217,7 @@ public final class JacobVPU {
         if (__log.isDebugEnabled()) {
             __log.debug("injecting " + concretion);
         }
-        addReaction(concretion, REDUCE_METHOD, CollectionUtils.EMPTY_OBJECT_ARRAY,
+        addReaction(concretion, REDUCE_METHOD, new Class[]{},
                 (__log.isInfoEnabled() ? concretion.toString() : null));
     }
 
@@ -313,7 +316,7 @@ public final class JacobVPU {
                 desc = template.toString();
             }
             _statistics.numReductionsStruct++;
-            addReaction(template, REDUCE_METHOD, CollectionUtils.EMPTY_OBJECT_ARRAY, desc);
+            addReaction(template, REDUCE_METHOD, new Class[]{}, desc);
         }
 
         public Channel message(Channel channel, Method method, Object[] args) {
@@ -453,16 +456,18 @@ public final class JacobVPU {
                     synchChannel.ret();
                 }
             } catch (IllegalAccessException iae) {
-                String msg = __msgs.msgMethodNotAccessible(_method.getName(),
-                        _method.getDeclaringClass().getName());
+                // TODO: String msg = __msgs.msgMethodNotAccessible(_method.getName(),
+                //        _method.getDeclaringClass().getName());
+            	String msg = "MethodNotAccessible: " + _method.getName() + " in " + _method.getDeclaringClass().getName();
                 __log.error(msg, iae);
                 throw new RuntimeException(msg, iae);
             } catch (InvocationTargetException e) {
                 if (e.getTargetException() instanceof RuntimeException) {
                     throw (RuntimeException) e.getTargetException();
                 } else {
-                    String msg = __msgs.msgClientMethodException(_method.getName(),
-                            _methodBody.getClass().getName());
+                    // TODO: String msg = __msgs.msgClientMethodException(_method.getName(),
+                    //        _methodBody.getClass().getName());
+                	String msg = "ClientMethodException: " + _method.getName() + " in " + _methodBody.getClass().getName();
                     __log.error(msg, e.getTargetException());
                     throw new RuntimeException(e.getTargetException());
                 }

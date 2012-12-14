@@ -33,8 +33,6 @@ import org.apache.ode.jacob.soup.Continuation;
 import org.apache.ode.jacob.soup.ExecutionQueue;
 import org.apache.ode.jacob.soup.ExecutionQueueObject;
 import org.apache.ode.jacob.soup.ReplacementMap;
-import org.apache.ode.utils.CollectionUtils;
-import org.apache.ode.utils.ObjectPrinter;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -119,8 +117,10 @@ public class ExecutionQueueImpl implements ExecutionQueue {
     }
 
     public void add(CommChannel channel) {
-        if (__log.isTraceEnabled())
-            __log.trace(ObjectPrinter.stringifyMethodEnter("add", new Object[] { "channel", channel }));
+        if (__log.isTraceEnabled()) {
+            // TODO: __log.trace(ObjectPrinter.stringifyMethodEnter("add", new Object[] { "channel", channel }));
+            __log.trace(">> add (channel=" +  channel + ")");
+        }
 
         verifyNew(channel);
         ChannelFrame cframe = new ChannelFrame(channel.getType(), ++_objIdCounter, channel.getType().getName(), channel
@@ -130,9 +130,11 @@ public class ExecutionQueueImpl implements ExecutionQueue {
     }
 
     public void enqueueReaction(Continuation continuation) {
-        if (__log.isTraceEnabled())
-            __log.trace(ObjectPrinter.stringifyMethodEnter("enqueueReaction", new Object[] { "continuation",
-                    continuation }));
+        if (__log.isTraceEnabled()) {
+            // TODO: __log.trace(ObjectPrinter.stringifyMethodEnter("enqueueReaction", new Object[] { "continuation",
+            //        continuation }));
+            __log.trace(">> enqueueReaction (continuation=" +  continuation + ")");
+        }
 
         verifyNew(continuation);
         _reactions.add(continuation);
@@ -140,7 +142,8 @@ public class ExecutionQueueImpl implements ExecutionQueue {
 
     public Continuation dequeueReaction() {
         if (__log.isTraceEnabled()) {
-            __log.trace(ObjectPrinter.stringifyMethodEnter("dequeueReaction", CollectionUtils.EMPTY_OBJECT_ARRAY));
+            // TODO: __log.trace(ObjectPrinter.stringifyMethodEnter("dequeueReaction", new Class[]{}));
+            __log.trace(">> dequeueReaction ()");
         }
 
         Continuation continuation = null;
@@ -153,8 +156,10 @@ public class ExecutionQueueImpl implements ExecutionQueue {
     }
 
     public void add(CommGroup group) {
-        if (__log.isTraceEnabled())
-            __log.trace(ObjectPrinter.stringifyMethodEnter("add", new Object[] { "group", group }));
+        if (__log.isTraceEnabled()) {
+            // __log.trace(ObjectPrinter.stringifyMethodEnter("add", new Object[] { "group", group }));
+            __log.trace(">> add (group=" +  group + ")");
+        }
 
         verifyNew(group);
         CommGroupFrame commGroupFrame = new CommGroupFrame(group.isReplicated());
@@ -207,15 +212,19 @@ public class ExecutionQueueImpl implements ExecutionQueue {
 
     public int cycle() {
         if (__log.isTraceEnabled()) {
-            __log.trace(ObjectPrinter.stringifyMethodEnter("cycle", CollectionUtils.EMPTY_OBJECT_ARRAY));
+            // TODO: __log.trace(ObjectPrinter.stringifyMethodEnter("cycle", new Class[]{}));
+            __log.trace(">> cycle ()");
         }
 
         return ++_currentCycle;
     }
 
     public String createExport(CommChannel channel) {
-        if (__log.isTraceEnabled())
-            __log.trace(ObjectPrinter.stringifyMethodEnter("createExport", new Object[] { "channel", channel }));
+        if (__log.isTraceEnabled()) {
+            // TODO: __log.trace(ObjectPrinter.stringifyMethodEnter("createExport", new Object[] { "channel", channel }));
+            __log.trace(">> createExport (channel=" +  channel + ")");
+        }
+
         ChannelFrame cframe = findChannelFrame(channel.getId());
         cframe.refCount++;
         return channel.getId().toString();
@@ -223,7 +232,8 @@ public class ExecutionQueueImpl implements ExecutionQueue {
 
     public CommChannel consumeExport(String exportId) {
         if (__log.isTraceEnabled()) {
-            __log.trace(ObjectPrinter.stringifyMethodEnter("consumeExport", new Object[] { "exportId", exportId }));
+            // TODO: __log.trace(ObjectPrinter.stringifyMethodEnter("consumeExport", new Object[] { "exportId", exportId }));
+            __log.trace(">> consumeExport (exportId=" +  exportId + ")");
         }
 
         Integer id = Integer.valueOf(exportId);
@@ -241,7 +251,8 @@ public class ExecutionQueueImpl implements ExecutionQueue {
 
     public void flush() {
         if (__log.isTraceEnabled()) {
-            __log.trace(ObjectPrinter.stringifyMethodEnter("flush", CollectionUtils.EMPTY_OBJECT_ARRAY));
+            // TODO: __log.trace(ObjectPrinter.stringifyMethodEnter("flush", new Class[]{}));
+            __log.trace(">> flush ()");
         }
     }
 
@@ -390,7 +401,8 @@ public class ExecutionQueueImpl implements ExecutionQueue {
 
     private void matchCommunications(CommChannel channel) {
         if (__log.isTraceEnabled()) {
-            __log.trace(ObjectPrinter.stringifyMethodEnter("matchCommunications", new Object[] { "channel", channel }));
+            // TODO: __log.trace(ObjectPrinter.stringifyMethodEnter("matchCommunications", new Object[] { "channel", channel }));
+            __log.trace(">> matchCommunications (channel=" +  channel + ")");
         }
         ChannelFrame cframe = _channels.get(channel.getId());
         while (cframe != null && !cframe.msgFrames.isEmpty() && !cframe.objFrames.isEmpty()) {
@@ -619,7 +631,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         public MessageFrame(CommGroupFrame commFrame, ChannelFrame channelFrame, String method, Object[] args) {
             super(commFrame, channelFrame);
             this.method = method;
-            this.args = args == null ? CollectionUtils.EMPTY_CLASS_ARRAY : args;
+            this.args = args == null ? new Class[]{} : args;
         }
 
         public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {

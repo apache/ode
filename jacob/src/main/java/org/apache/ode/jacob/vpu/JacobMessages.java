@@ -19,14 +19,14 @@
 
 package org.apache.ode.jacob.vpu;
 
-import org.apache.ode.utils.msg.MessageBundle;
 
 /**
  * Messages for the Jacob VPU.
  *
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
-public class JacobMessages extends MessageBundle {
+// TODO: fix i18n, although it may not be neede for jacob! 
+public class JacobMessages { // extends MessageBundle {
 
   /**
    * Error indicating that client-code (i.e. not the VPU kernel) threw an
@@ -39,15 +39,17 @@ public class JacobMessages extends MessageBundle {
    *
    * Method "{0}" in class "{1}" threw an unexpected exception.
    */
+  /*
   public String msgClientMethodException(String methodName, String className) {
     return this.format("Method \"{0}\" in class \"{1}\" threw an unexpected exception.",
         methodName, className);
   }
 
-  // TODO
+	// TODO
   public String msgContDeHydrationErr(String channel, String name) {
     throw new UnsupportedOperationException();
   }
+  */
 
   /**
    * Error indicating that a re-hydration of a saved _continuation object could
@@ -59,9 +61,11 @@ public class JacobMessages extends MessageBundle {
    *          name of de-hydrated {@link org.apache.ode.jacob.ChannelListener} object
    *
    */
+  /*
   public String msgContHydrationErr(String channel, String mlClassName) {
     throw new UnsupportedOperationException();
   }
+  */
 
   /**
    * Internal error indicating that a required client method was not accessible
@@ -70,9 +74,10 @@ public class JacobMessages extends MessageBundle {
    *
    * Method "{0}" in class "{1}" is not accessible.
    */
+  /*
   public String msgMethodNotAccessible(String methodName, String className) {
     return this.format("Method \"{0}\" in class \"{1}\" is not accessible.", methodName,
         className);
   }
-
+  */
 }

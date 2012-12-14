@@ -24,7 +24,6 @@ import java.lang.reflect.Proxy;
 
 import org.apache.ode.jacob.Channel;
 import org.apache.ode.jacob.soup.CommChannel;
-import org.apache.ode.utils.CollectionUtils;
 
 public class ChannelFactory {
     private static final Method METHOD_OBJECT_EQUALS;
@@ -39,7 +38,7 @@ public class ChannelFactory {
         }
 
         try {
-            METHOD_CHANNEL_EXPORT = Channel.class.getMethod("export", CollectionUtils.EMPTY_CLASS_ARRAY);
+            METHOD_CHANNEL_EXPORT = Channel.class.getMethod("export", new Class[] {});
         } catch (Exception e) {
             throw new AssertionError("No export() method on Object!");
         }
