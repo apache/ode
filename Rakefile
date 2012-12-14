@@ -151,7 +151,39 @@ define "ode" do
     end
     test.setup unzip("#{webapp_dir}/WEB-INF"=>project("dao-jpa-ojpa-derby").package(:zip))
     test.setup unzip("#{webapp_dir}/WEB-INF"=>project("dao-hibernate-db").package(:zip))
-    test.exclude('*') if Buildr.environment == 'hudson' || ENV["notestng"]
+    # test.exclude('*') if Buildr.environment == 'hudson' || ENV["notestng"]
+    test.exclude 'org.apache.ode.axis2.rampart', 'org.apache.ode.axis2.hydration',
+      'org.apache.ode.axis2.BpelActivityTest',
+      'org.apache.ode.axis2.ClusteredOutgoingTrafficTest',
+      'org.apache.ode.axis2.EndpointConfigurationTest',
+      'org.apache.ode.axis2.EndpointTimeoutsTest',
+      'org.apache.ode.axis2.MessageStructureTest',
+      'org.apache.ode.axis2.MultiPartMessageTest',
+      'org.apache.ode.axis2.NoP2PTest',
+      'org.apache.ode.axis2.SelectorsTest',
+      'org.apache.ode.axis2.ServiceFaultCatchTest',
+      'org.apache.ode.axis2.SoapHeader2Test',
+      'org.apache.ode.axis2.SoapHeaderTest',
+      'org.apache.ode.axis2.XSDReferencesDeployTest',
+      'org.apache.ode.axis2.correlation.CorrelationJoinHibTest',
+      'org.apache.ode.axis2.correlation.CorrelationJoinLazyHibTest',
+      'org.apache.ode.axis2.correlation.CorrelationJoinLazyTest',
+      'org.apache.ode.axis2.correlation.CorrelationJoinTest',
+      'org.apache.ode.axis2.correlation.CorrelationMultiHibTest',
+      'org.apache.ode.axis2.correlation.CorrelationMultiTest',
+      'org.apache.ode.axis2.correlation.CorrelationUnicityTest',
+      'org.apache.ode.axis2.httpbinding.HttpBindingTest',
+      'org.apache.ode.axis2.instancecleanup.CleanFailureHibTest',
+      'org.apache.ode.axis2.instancecleanup.CleanFailureTest',
+      'org.apache.ode.axis2.instancecleanup.CleanFaultHibTest',
+      'org.apache.ode.axis2.instancecleanup.CleanFaultTest',
+      'org.apache.ode.axis2.instancecleanup.CleanSuccessHibTest',
+      'org.apache.ode.axis2.instancecleanup.CleanSuccessTest',
+      'org.apache.ode.axis2.management.DeploymentTest',
+      'org.apache.ode.axis2.management.InstanceManagementTest',
+      'org.apache.ode.axis2.management.Retire2Test',
+      'org.apache.ode.axis2.management.RetireTest',
+      'org.apache.ode.axis2.management.RetireTestVar'
 
     NativeDB.prepare_configs test, _(".")
 
@@ -287,6 +319,7 @@ define "ode" do
       COMMONS.collections, COMMONS.lang, DERBY, JAVAX.connector,
       JAVAX.stream, JAVAX.transaction, JAXEN, HSQLDB, LOG4J, SAXON, XERCES, XMLBEANS, XALAN, GERONIMO.transaction, SPRING, HIBERNATE, SLF4J, DOM4J,
       JAVAX.connector
+    test.exclude 'org.apache.ode.test.StructuredActivities20Test'
 
     package :jar
   end
@@ -463,6 +496,7 @@ define "ode" do
       rm_rf Dir["target/test/resources"]
       cp_r _("src/test/resources"), _("target/test/resources")
     end
+    test.exclude '*TestBase', 'org.apache.ode.jbi.OdeJbiComponentLifeCycleTest', 'org.apache.ode.jbi.ReplayerJbiTest'
   end
 
   desc "ODE Commmands for Karaf"
