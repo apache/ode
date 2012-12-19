@@ -81,31 +81,7 @@ public final class JacobVPU {
      */
     private RuntimeException _fault;
 
-    /**
-     * Default constructor.
-     */
     public JacobVPU() {
-    }
-
-    /**
-     * Re-hydration constructor.
-     *
-     * @param executionQueue previously saved execution context
-     */
-    public JacobVPU(ExecutionQueue executionQueue) {
-        setContext(executionQueue);
-    }
-
-    /**
-     * Instantiation constructor; used to initialize context with the concretion
-     * of a process abstraction.
-     *
-     * @param context virgin context object
-     * @param concretion the process
-     */
-    public JacobVPU(ExecutionQueue context, JacobRunnable concretion) {
-        setContext(context);
-        inject(concretion);
     }
 
     /**

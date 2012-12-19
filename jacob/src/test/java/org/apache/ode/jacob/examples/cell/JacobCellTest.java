@@ -37,7 +37,9 @@ public class JacobCellTest extends TestCase {
 
   public void testJacobCell1() throws IOException {
     ExecutionQueueImpl fsoup = new ExecutionQueueImpl(null);
-    JacobVPU vpu = new JacobVPU(fsoup, new CellTest1());
+    JacobVPU vpu = new JacobVPU();
+    vpu.setContext(fsoup);
+    vpu.inject(new CellTest1());
 
 
     while (vpu.execute()) {

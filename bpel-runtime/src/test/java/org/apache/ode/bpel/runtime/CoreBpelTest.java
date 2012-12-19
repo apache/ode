@@ -81,7 +81,8 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
         _terminate = false;
         _fault = null;
         _soup = new ExecutionQueueImpl(CoreBpelTest.class.getClassLoader());
-        _vpu = new JacobVPU(_soup);
+        _vpu = new JacobVPU();
+        _vpu.setContext(_soup);
         _vpu.registerExtension(BpelRuntimeContext.class, this);
         _pid = new Long(19355);
     }
