@@ -18,16 +18,27 @@
  */
 package org.apache.ode.jacob.vpu;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.jacob.*;
-import org.apache.ode.jacob.soup.*;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+
+import org.apache.ode.jacob.Channel;
+import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.JacobObject;
+import org.apache.ode.jacob.JacobRunnable;
+import org.apache.ode.jacob.JacobThread;
+import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.soup.CommChannel;
+import org.apache.ode.jacob.soup.CommGroup;
+import org.apache.ode.jacob.soup.CommRecv;
+import org.apache.ode.jacob.soup.CommSend;
+import org.apache.ode.jacob.soup.Continuation;
+import org.apache.ode.jacob.soup.ExecutionQueue;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The JACOB Virtual Processing Unit ("VPU").
@@ -35,29 +46,18 @@ import java.util.Stack;
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com" />
  */
 public final class JacobVPU {
-    private static final Log __log = LogFactory.getLog(JacobVPU.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JacobVPU.class);
 
-    /**
-     * Internationalization messages.
-     */
-    // TODO: i8n messages
-    // private static final JacobMessages __msgs = MessageBundle.getMessages(JacobMessages.class);
-
-    /**
-     * Thread-local for associating a thread with a VPU. Needs to be stored in a stack to allow reentrance.
-     */
-    static final ThreadLocal<Stack<JacobThread>> __activeJacobThread = new ThreadLocal<Stack<JacobThread>>();
-
+    // Thread-local for associating a thread with a VPU. Needs to be stored in a stack to allow reentrance.
+    private static final ThreadLocal<Stack<JacobThread>> ACTIVE_THREAD = new ThreadLocal<Stack<JacobThread>>();
     private static final Method REDUCE_METHOD;
 
-    /**
-     * Resolve the {@link JacobRunnable#run} method statically
-     */
     static {
         try {
+            // Resolve the {@link JacobRunnable#run} method once statically
             REDUCE_METHOD = JacobRunnable.class.getMethod("run", new Class[]{});
         } catch (Exception e) {
-            throw new Error("Cannot resolve 'run' method", e);
+            throw new Error("Cannot resolve 'run()' method", e);
         }
     }
 
@@ -65,8 +65,7 @@ public final class JacobVPU {
      * Persisted cross-VPU state (state of the channels)
      */
     private ExecutionQueue _executionQueue;
-
-    private Map<Class, Object> _extensions = new HashMap<Class, Object>();
+    private Map<Class<?>, Object> _extensions = new HashMap<Class<?>, Object>();
 
     /**
      * Classloader used for loading object continuations.
@@ -115,11 +114,8 @@ public final class JacobVPU {
      * @return <code>true</code> if the run queue is not empty after this cycle, <code>false</code> otherwise.
      */
     public boolean execute() {
-        if (__log.isTraceEnabled()) {
-            // TODO: make this look nicer with slf4j
-            // __log.trace(ObjectPrinter.stringifyMethodEnter("execute", new Class[]{}));
-            __log.trace(">> execute ()");
-        }
+        LOG.trace(">> JacobVPU.execute()");
+
         if (_executionQueue == null) {
             throw new IllegalStateException("No state object for VPU!");
         }
@@ -150,10 +146,7 @@ public final class JacobVPU {
     }
 
     public void flush() {
-        if (__log.isTraceEnabled()) {
-            // TODO: __log.trace(ObjectPrinter.stringifyMethodEnter("flush", new Class[]{}));
-            __log.trace(">> flush ()");
-        }
+        LOG.trace(">> JacobVPU.flush ()");
         _executionQueue.flush();
     }
 
@@ -165,21 +158,14 @@ public final class JacobVPU {
      *            process executionQueue (state)
      */
     public void setContext(ExecutionQueue executionQueue) {
-        if (__log.isTraceEnabled()) {
-            // TODO: __log.trace(ObjectPrinter.stringifyMethodEnter("setContext",
-            //        new Object[] { "executionQueue", executionQueue }));
-            __log.trace(">> setContext (executionQueue=" +  executionQueue + ")");
-        }
+        LOG.trace(">> setContext (executionQueue={})", executionQueue);
+
         _executionQueue = executionQueue;
         _executionQueue.setClassLoader(_classLoader);
     }
 
-    public void registerExtension(Class extensionClass, Object obj) {
-        if (__log.isTraceEnabled()) {
-            // TODO: __log.trace(ObjectPrinter.stringifyMethodEnter(
-            // "registerExtension", new Object[] {"extensionClass", extensionClass, "obj", obj }));
-            __log.trace(">> setContext (extensionClass=" +  extensionClass + ", obj=" + obj + ")");
-        }
+    public void registerExtension(Class<?> extensionClass, Object obj) {
+        LOG.trace(">> setContext (extensionClass={}, obj={})", extensionClass, obj);
         _extensions.put(extensionClass, obj);
     }
 
@@ -187,11 +173,7 @@ public final class JacobVPU {
      * Add an item to the run queue.
      */
     public void addReaction(JacobObject jo, Method method, Object[] args, String desc) {
-        if (__log.isTraceEnabled()) {
-            // TODO: __log.trace(ObjectPrinter.stringifyMethodEnter("addReaction",
-            //        new Object[] { "jo", jo, "method", method, "args", args, "desc", desc }));
-            __log.trace(">> addReaction (jo=" +  jo + ", method=" + method + ", args=" + args + ", desc=" + desc + ")");
-        }
+        LOG.trace(">> addReaction (jo={}, method={}, args={}, desc={})", jo, method, args, desc);
 
         Continuation continuation = new Continuation(jo, method, args);
         continuation.setDescription(desc);
@@ -203,7 +185,7 @@ public final class JacobVPU {
      * Get the active Jacob thread, i.e. the one associated with the current Java thread.
      */
     public static JacobThread activeJacobThread() {
-        return __activeJacobThread.get().peek();
+        return ACTIVE_THREAD.get().peek();
     }
 
     /**
@@ -214,14 +196,12 @@ public final class JacobVPU {
      * but is intended to be used from outside of an active {@link JacobThread}.
      */
     public void inject(JacobRunnable concretion) {
-        if (__log.isDebugEnabled()) {
-            __log.debug("injecting " + concretion);
-        }
+        LOG.debug("injecting {}", concretion);
         addReaction(concretion, REDUCE_METHOD, new Class[]{},
-                (__log.isInfoEnabled() ? concretion.toString() : null));
+            (LOG.isInfoEnabled() ? concretion.toString() : null));
     }
 
-    static String stringifyMethods(Class kind) {
+    static String stringifyMethods(Class<?> kind) {
         StringBuffer buf = new StringBuffer();
         Method[] methods = kind.getMethods();
         boolean found = false;
@@ -301,7 +281,7 @@ public final class JacobVPU {
             _source = rqe.getDescription();
             _method = rqe.getMethod();
 
-            if (__log.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
                 StringBuffer buf = new StringBuffer(_methodBody.getClass().getName());
                 buf.append('.');
                 buf.append(rqe.getMethod());
@@ -310,20 +290,17 @@ public final class JacobVPU {
         }
 
         public void instance(JacobRunnable template) {
-            String desc = null;
-            if (__log.isTraceEnabled()) {
-                __log.trace(_cycle + ": " + template);
-                desc = template.toString();
-            }
+            LOG.trace(">> [{}] : {}", _cycle, template);
+
             _statistics.numReductionsStruct++;
-            addReaction(template, REDUCE_METHOD, new Class[]{}, desc);
+            addReaction(template, REDUCE_METHOD, new Class[]{}, 
+                LOG.isInfoEnabled() ? template.toString() : null);
         }
 
         public Channel message(Channel channel, Method method, Object[] args) {
-            if (__log.isTraceEnabled()) {
-                __log.trace(_cycle + ": " + channel + " ! "
-                        + method.getName() + "(" + stringify(args) + ")");
-            }
+            LOG.trace(">> [{}] : {} ! {} ({})", _cycle, channel, method.getName(),
+                LOG.isTraceEnabled() ? stringify(args) : null);
+
             _statistics.messagesSent++;
 
             SynchChannel replyChannel = null;
@@ -331,7 +308,7 @@ public final class JacobVPU {
             if (method.getReturnType() != void.class) {
                 if (method.getReturnType() != SynchChannel.class) {
                     throw new IllegalStateException(
-                            "ChannelListener method can only return SynchChannel: " + method);
+                        "ChannelListener method can only return SynchChannel: " + method);
                 }
                 replyChannel = (SynchChannel) newChannel(SynchChannel.class, "", "Reply Channel");
                 Object[] newArgs = new Object[args.length + 1];
@@ -353,17 +330,15 @@ public final class JacobVPU {
             _executionQueue.add(chnl);
 
             Channel ret = ChannelFactory.createChannel(chnl, channelType);
-            if (__log.isTraceEnabled())
-                __log.trace(_cycle + ": new " + ret);
+            LOG.trace(">> [{}] : new {}", _cycle, ret);
 
             _statistics.channelsCreated++;
             return ret;
         }
 
         public String exportChannel(Channel channel) {
-            if (__log.isTraceEnabled()) {
-                __log.trace(_cycle + ": export<" + channel + ">");
-            }
+            LOG.trace(">> [{}] : export<{}>", _cycle, channel);
+
             CommChannel chnl = (CommChannel) ChannelFactory.getBackend(channel);
             return _executionQueue.createExport(chnl);
         }
@@ -374,7 +349,7 @@ public final class JacobVPU {
         }
 
         public void object(boolean replicate, ChannelListener[] ml) {
-            if (__log.isTraceEnabled()) {
+            if (LOG.isTraceEnabled()) {
                 StringBuffer msg = new StringBuffer();
                 msg.append(_cycle);
                 msg.append(": ");
@@ -385,7 +360,7 @@ public final class JacobVPU {
                     msg.append(ml.toString());
 
                 }
-                __log.debug(msg.toString());
+                LOG.trace(msg.toString());
             }
 
             _statistics.numContinuations++;
@@ -425,7 +400,7 @@ public final class JacobVPU {
         }
         */
 
-        public Object getExtension(Class extensionClass) {
+        public Object getExtension(Class<?> extensionClass) {
             return _extensions.get(extensionClass);
         }
 
@@ -434,9 +409,7 @@ public final class JacobVPU {
             assert _method != null;
             assert _method.getDeclaringClass().isAssignableFrom(_methodBody.getClass());
 
-            if (__log.isTraceEnabled()) {
-                __log.trace(_cycle + ": " + _source);
-            }
+            LOG.trace(">> [{}] : {}", _cycle, _source);
 
             Object[] args;
             SynchChannel synchChannel;
@@ -456,21 +429,12 @@ public final class JacobVPU {
                     synchChannel.ret();
                 }
             } catch (IllegalAccessException iae) {
-                // TODO: String msg = __msgs.msgMethodNotAccessible(_method.getName(),
-                //        _method.getDeclaringClass().getName());
-                String msg = "MethodNotAccessible: " + _method.getName() + " in " + _method.getDeclaringClass().getName();
-                __log.error(msg, iae);
-                throw new RuntimeException(msg, iae);
+                throw new RuntimeException("MethodNotAccessible: " + _method.getName() + " in " + _method.getDeclaringClass().getName(), iae);
             } catch (InvocationTargetException e) {
-                if (e.getTargetException() instanceof RuntimeException) {
-                    throw (RuntimeException) e.getTargetException();
-                } else {
-                    // TODO: String msg = __msgs.msgClientMethodException(_method.getName(),
-                    //        _methodBody.getClass().getName());
-                    String msg = "ClientMethodException: " + _method.getName() + " in " + _methodBody.getClass().getName();
-                    __log.error(msg, e.getTargetException());
-                    throw new RuntimeException(e.getTargetException());
-                }
+                Throwable target = e.getTargetException();
+                throw (target instanceof RuntimeException)
+                    ? (RuntimeException) target
+                    : new RuntimeException("ClientMethodException: " + _method.getName() + " in " + _methodBody.getClass().getName(), target);
             } finally {
                 ctime = System.currentTimeMillis() - ctime;
                 _statistics.totalClientTimeMs += ctime;
@@ -483,19 +447,16 @@ public final class JacobVPU {
         }
 
         private void stackThread() {
-            Stack<JacobThread> currStack = __activeJacobThread.get();
-            if (currStack == null) {
-                currStack = new Stack<JacobThread>();
-                __activeJacobThread.set(currStack);
+            Stack<JacobThread> crt = ACTIVE_THREAD.get();
+            if (crt == null) {
+                crt = new Stack<JacobThread>();
+                ACTIVE_THREAD.set(crt);
             }
-            currStack.push(this);
+            crt.push(this);
         }
 
         private JacobThread unstackThread() {
-            Stack<JacobThread> currStack = __activeJacobThread.get();
-            assert currStack != null;
-            return currStack.pop();
+            return ACTIVE_THREAD.get().pop();
         }
     }
-
 }

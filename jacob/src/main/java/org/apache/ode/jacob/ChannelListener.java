@@ -23,18 +23,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Base-class for method-list objects. Method-lists objects should extends this
  * class <em>and</em> implement one <code>Channel</code> interface.
  */
 public abstract class ChannelListener<CT extends Channel> extends JacobObject {
-    private static Log __log = LogFactory.getLog(ChannelListener.class);
-
     private transient Set<Method> _implementedMethods;
-
     private transient CT _channel;
 
     protected ChannelListener(CT channel) throws IllegalStateException {
@@ -106,9 +101,5 @@ public abstract class ChannelListener<CT extends Channel> extends JacobObject {
         buf.setLength(buf.length()-1);
         buf.append('}');
         return buf.toString();
-    }
-
-    protected Log log() {
-        return __log;
     }
 }

@@ -9,8 +9,6 @@
 
 package org.apache.ode.jacob;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 /**
  * An auto-generated channel listener abstract class for the 
@@ -22,11 +20,6 @@ public abstract class ValChannelListener
     extends org.apache.ode.jacob.ChannelListener<org.apache.ode.jacob.ValChannel>
     implements org.apache.ode.jacob.Val
 {
-
-    private static final Log __log = LogFactory.getLog(org.apache.ode.jacob.Val.class);
-
-    protected Log log() { return __log; } 
-
     protected ValChannelListener(org.apache.ode.jacob.ValChannel channel) {
        super(channel);
     }

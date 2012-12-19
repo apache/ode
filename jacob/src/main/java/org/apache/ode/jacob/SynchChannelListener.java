@@ -9,8 +9,6 @@
 
 package org.apache.ode.jacob;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 /**
  * An auto-generated channel listener abstract class for the 
@@ -22,11 +20,6 @@ public abstract class SynchChannelListener
     extends org.apache.ode.jacob.ChannelListener<org.apache.ode.jacob.SynchChannel>
     implements org.apache.ode.jacob.Synch
 {
-
-    private static final Log __log = LogFactory.getLog(org.apache.ode.jacob.Synch.class);
-
-    protected Log log() { return __log; } 
-
     protected SynchChannelListener(org.apache.ode.jacob.SynchChannel channel) {
        super(channel);
     }

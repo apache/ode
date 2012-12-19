@@ -30,7 +30,7 @@ import java.lang.reflect.Method;
  * scoping rules for channel names are simply the Java object visibility rules.
  */
 public interface JacobThread {
-    public Object getExtension(Class extensionClass);
+    public Object getExtension(Class<?> extensionClass);
 
     public String exportChannel(Channel channel);
 

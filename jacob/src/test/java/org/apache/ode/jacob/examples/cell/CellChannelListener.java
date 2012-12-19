@@ -9,8 +9,6 @@
 
 package org.apache.ode.jacob.examples.cell;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 /**
  * An auto-generated channel listener abstract class for the 
@@ -22,11 +20,6 @@ public abstract class CellChannelListener
     extends org.apache.ode.jacob.ChannelListener<org.apache.ode.jacob.examples.cell.CellChannel>
     implements org.apache.ode.jacob.examples.cell.Cell
 {
-
-    private static final Log __log = LogFactory.getLog(org.apache.ode.jacob.examples.cell.Cell.class);
-
-    protected Log log() { return __log; } 
-
     protected CellChannelListener(org.apache.ode.jacob.examples.cell.CellChannel channel) {
        super(channel);
     }
