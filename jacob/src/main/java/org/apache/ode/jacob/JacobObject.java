@@ -28,6 +28,7 @@ import org.apache.ode.jacob.vpu.JacobVPU;
  * Base class for constructs which rely on a Java method body to represent some
  * aspect of the process.
  */
+@SuppressWarnings("serial")
 public abstract class JacobObject implements Serializable {
     public abstract Set<Method> getImplementedMethods();
 
@@ -38,7 +39,7 @@ public abstract class JacobObject implements Serializable {
         return getClass().getSimpleName();
     }
 
-    protected static Object getExtension(Class extensionClass) {
+    protected static Object getExtension(Class<?> extensionClass) {
         return JacobVPU.activeJacobThread().getExtension(extensionClass);
     }
 
@@ -86,15 +87,15 @@ public abstract class JacobObject implements Serializable {
         return methodList.getChannel();
     }
 
-    protected static void object(boolean replication, ChannelListener methodList) {
+    protected static void object(boolean replication, ChannelListener<?> methodList) {
         JacobVPU.activeJacobThread().object(replication, methodList);
     }
 
-    protected static void object(boolean replication, ChannelListener[] methodLists) {
+    protected static void object(boolean replication, ChannelListener<?>[] methodLists) {
         JacobVPU.activeJacobThread().object(replication, methodLists);
     }
 
-    protected static void object(boolean replication, Set<ChannelListener> methodLists) {
+    protected static void object(boolean replication, Set<ChannelListener<?>> methodLists) {
         JacobVPU.activeJacobThread().object(replication,
                 methodLists.toArray(new ChannelListener[methodLists.size()]));
     }

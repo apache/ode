@@ -16,6 +16,7 @@ package org.apache.ode.jacob.examples.synch;
  * @see org.apache.ode.jacob.examples.synch.SynchPrint
  * @see org.apache.ode.jacob.examples.synch.SynchPrintChannel
  */
+@SuppressWarnings("serial")
 public abstract class SynchPrintChannelListener
     extends org.apache.ode.jacob.ChannelListener<org.apache.ode.jacob.examples.synch.SynchPrintChannel>
     implements org.apache.ode.jacob.examples.synch.SynchPrint

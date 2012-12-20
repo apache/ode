@@ -49,9 +49,9 @@ public class ChannelFactory {
         return cih._backend;
     }
 
-    public static Channel createChannel(CommChannel backend, Class type) {
+    public static Channel createChannel(CommChannel backend, Class<?> type) {
         InvocationHandler h = new ChannelInvocationHandler(backend);
-        Class[] ifaces = new Class[] { Channel.class, type };
+        Class<?>[] ifaces = new Class[] { Channel.class, type };
         Object proxy = Proxy.newProxyInstance(Channel.class.getClassLoader(), ifaces, h);
         return (Channel) proxy;
     }

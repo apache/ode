@@ -16,6 +16,7 @@ package org.apache.ode.jacob;
  * @see org.apache.ode.jacob.Val
  * @see org.apache.ode.jacob.ValChannel
  */
+@SuppressWarnings("serial")
 public abstract class ValChannelListener
     extends org.apache.ode.jacob.ChannelListener<org.apache.ode.jacob.ValChannel>
     implements org.apache.ode.jacob.Val

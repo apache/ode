@@ -16,6 +16,7 @@ package org.apache.ode.jacob;
  * @see org.apache.ode.jacob.Synch
  * @see org.apache.ode.jacob.SynchChannel
  */
+@SuppressWarnings("serial")
 public abstract class SynchChannelListener
     extends org.apache.ode.jacob.ChannelListener<org.apache.ode.jacob.SynchChannel>
     implements org.apache.ode.jacob.Synch

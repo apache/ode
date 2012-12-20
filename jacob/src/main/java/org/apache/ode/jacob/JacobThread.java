@@ -25,8 +25,8 @@ import java.lang.reflect.Method;
  * <p>
  * Note: these operations represent a subset of a process algebra mapped into
  * Java invocations; other aspects of the syntax are represented natively in Java.
- * In particular, parallel composition is modelled as sequential Java invocation
- * and if-else are modelled using Java's if-else statement. Note also that the
+ * In particular, parallel composition is modeled as sequential Java invocation
+ * and if-else are modeled using Java's if-else statement. Note also that the
  * scoping rules for channel names are simply the Java object visibility rules.
  */
 public interface JacobThread {
@@ -34,7 +34,7 @@ public interface JacobThread {
 
     public String exportChannel(Channel channel);
 
-    public Channel importChannel(String channelId, Class channelClass);
+    public Channel importChannel(String channelId, Class<?> channelClass);
 
     /**
      * Create a process instance i.e. a concretion of a process abstraction.
@@ -57,8 +57,7 @@ public interface JacobThread {
     /**
      * Create a new channel.
      */
-    public Channel newChannel(Class channelType, String creator,
-            String description);
+    public Channel newChannel(Class<?> channelType, String creator, String description);
 
     /**
      * <p>
@@ -85,9 +84,9 @@ public interface JacobThread {
      * @throws IllegalArgumentException
      *             if the method list does not match the channel kind
      */
-    public void object(boolean replicate, ChannelListener methodList)
-            throws IllegalArgumentException;
+    public void object(boolean replicate, ChannelListener<?> methodList)
+        throws IllegalArgumentException;
 
-    public void object(boolean reaplicate, ChannelListener[] methodLists)
-            throws IllegalArgumentException;
+    public void object(boolean reaplicate, ChannelListener<?>[] methodLists)
+        throws IllegalArgumentException;
 }

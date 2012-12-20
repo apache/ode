@@ -190,7 +190,7 @@ public final class JacobVPU {
                 buf.append(" & ");
             }
             buf.append(method.getName()).append('(');
-            Class[] argTypes = method.getParameterTypes();
+            Class<?>[] argTypes = method.getParameterTypes();
             for (int j = 0; j < argTypes.length; ++j) {
                 if (j > 0) {
                     buf.append(", ");
@@ -300,7 +300,7 @@ public final class JacobVPU {
             return replyChannel;
         }
 
-        public Channel newChannel(Class channelType, String creator, String description) {
+        public Channel newChannel(Class<?> channelType, String creator, String description) {
             CommChannel chnl = new CommChannel(channelType);
             chnl.setDescription(description);
             _executionQueue.add(chnl);
@@ -319,12 +319,12 @@ public final class JacobVPU {
             return _executionQueue.createExport(chnl);
         }
 
-        public Channel importChannel(String channelId, Class channelType) {
+        public Channel importChannel(String channelId, Class<?> channelType) {
             CommChannel cframe = _executionQueue.consumeExport(channelId);
             return ChannelFactory.createChannel(cframe, channelType);
         }
 
-        public void object(boolean replicate, ChannelListener[] ml) {
+        public void object(boolean replicate, ChannelListener<?>[] ml) {
             if (LOG.isTraceEnabled()) {
                 StringBuffer msg = new StringBuffer();
                 msg.append(_cycle);
@@ -353,9 +353,8 @@ public final class JacobVPU {
             _executionQueue.add(grp);
         }
 
-        public void object(boolean replicate, ChannelListener methodList)
-                throws IllegalArgumentException {
-            object(replicate, new ChannelListener[] { methodList });
+        public void object(boolean replicate, ChannelListener<?> methodList) throws IllegalArgumentException {
+            object(replicate, new ChannelListener<?>[] { methodList });
         }
 
         /* UNUSED

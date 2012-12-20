@@ -16,6 +16,7 @@ package org.apache.ode.jacob.examples.eratosthenes;
  * @see org.apache.ode.jacob.examples.eratosthenes.NaturalNumberStream
  * @see org.apache.ode.jacob.examples.eratosthenes.NaturalNumberStreamChannel
  */
+@SuppressWarnings("serial")
 public abstract class NaturalNumberStreamChannelListener
     extends org.apache.ode.jacob.ChannelListener<org.apache.ode.jacob.examples.eratosthenes.NaturalNumberStreamChannel>
     implements org.apache.ode.jacob.examples.eratosthenes.NaturalNumberStream

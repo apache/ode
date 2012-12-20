@@ -56,7 +56,7 @@ public class CELL_<T> extends JacobRunnable {
                 // Note: sequential Java above translates to parallel proc calc expression!
             }
 
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings({ "unchecked", "rawtypes" })
             public void write(Object newVal) {
                 // COMMUNICATION{x & [... & write...] ==> Cell(run, newVal)
                 instance(new CELL_(_self, newVal));

@@ -28,6 +28,7 @@ import java.util.Set;
  * Base-class for method-list objects. Method-lists objects should extends this
  * class <em>and</em> implement one <code>Channel</code> interface.
  */
+@SuppressWarnings("serial")
 public abstract class ChannelListener<CT extends Channel> extends JacobObject {
     private transient Set<Method> _implementedMethods;
     private transient CT _channel;
@@ -49,15 +50,15 @@ public abstract class ChannelListener<CT extends Channel> extends JacobObject {
         _channel = channel;
     }
 
-    public Set<ChannelListener> or(ChannelListener other) {
-        HashSet<ChannelListener> retval = new HashSet<ChannelListener>();
+    public Set<ChannelListener<?>> or(ChannelListener<?> other) {
+        HashSet<ChannelListener<?>> retval = new HashSet<ChannelListener<?>>();
         retval.add(this);
         retval.add(other);
         return retval;
     }
 
-    public Set<ChannelListener> or(Set<ChannelListener> other) {
-        HashSet<ChannelListener> retval = new HashSet<ChannelListener>(other);
+    public Set<ChannelListener<?>> or(Set<ChannelListener<?>> other) {
+        HashSet<ChannelListener<?>> retval = new HashSet<ChannelListener<?>>(other);
         retval.add(this);
         return retval;
     }
@@ -71,8 +72,8 @@ public abstract class ChannelListener<CT extends Channel> extends JacobObject {
         return _implementedMethods;
     }
 
-    private static Set<Method> getImplementedMethods(Set<Method> methods, Class clazz) {
-        Class[] interfaces = clazz.getInterfaces();
+    private static Set<Method> getImplementedMethods(Set<Method> methods, Class<?> clazz) {
+        Class<?>[] interfaces = clazz.getInterfaces();
         for (int i=0; i<interfaces.length; ++i) {
             if (interfaces[i] != Channel.class) {
                 Method[] allmethods = interfaces[i].getDeclaredMethods();

@@ -25,6 +25,7 @@ import org.apache.ode.jacob.SynchChannelListener;
 /**
  * Abstract process that executes a number of steps sequentially.
  */
+@SuppressWarnings("serial")
 public abstract class Sequence extends JacobRunnable {
     private int _steps;
     private int _current;

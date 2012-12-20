@@ -55,7 +55,8 @@ public class JacobCellTest extends TestCase {
     assertEquals("foo", _val);
   }
 
-  static class CellTest1 extends JacobRunnable {
+  @SuppressWarnings("serial")
+static class CellTest1 extends JacobRunnable {
     public void run() {
       CellChannel cellChannel = newChannel(CellChannel.class, "cell");
       ValChannel retChannel = newChannel(ValChannel.class, "val");

@@ -29,7 +29,6 @@ import java.io.ObjectStreamClass;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,7 +38,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import org.apache.ode.jacob.Channel;
 import org.apache.ode.jacob.ChannelListener;
@@ -54,7 +52,6 @@ import org.apache.ode.jacob.soup.Continuation;
 import org.apache.ode.jacob.soup.ExecutionQueue;
 import org.apache.ode.jacob.soup.ExecutionQueueObject;
 import org.apache.ode.jacob.soup.ReplacementMap;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,8 +136,8 @@ public class ExecutionQueueImpl implements ExecutionQueue {
 
         Continuation continuation = null;
         if (!_reactions.isEmpty()) {
-            Iterator it = _reactions.iterator();
-            continuation = (Continuation) it.next();
+            Iterator<Continuation> it = _reactions.iterator();
+            continuation = it.next();
             it.remove();
         }
         return continuation;
@@ -151,8 +148,8 @@ public class ExecutionQueueImpl implements ExecutionQueue {
 
         verifyNew(group);
         CommGroupFrame commGroupFrame = new CommGroupFrame(group.isReplicated());
-        for (Iterator i = group.getElements(); i.hasNext();) {
-            Comm comm = (Comm) i.next();
+        for (Iterator<Comm> i = group.getElements(); i.hasNext();) {
+            Comm comm = i.next();
             ChannelFrame chnlFrame = findChannelFrame(comm.getChannel().getId());
             if (comm instanceof CommSend) {
                 if (chnlFrame.replicatedSend) {
@@ -184,8 +181,8 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         }
 
         // Match communications.
-        for (Iterator i = group.getElements(); i.hasNext();) {
-            Comm comm = (Comm) i.next();
+        for (Iterator<Comm> i = group.getElements(); i.hasNext();) {
+            Comm comm = i.next();
             matchCommunications(comm.getChannel());
         }
     }
@@ -303,21 +300,21 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         }
 
         sos.writeInt(_channels.values().size());
-        for (Iterator i = _channels.values().iterator(); i.hasNext();) {
-            ChannelFrame cframe = (ChannelFrame) i.next();
+        for (Iterator<ChannelFrame> i = _channels.values().iterator(); i.hasNext();) {
+            ChannelFrame cframe = i.next();
             sos.writeInt(cframe.objFrames.size());
-            for (Iterator j = cframe.objFrames.iterator(); j.hasNext();) {
+            for (Iterator<ObjectFrame> j = cframe.objFrames.iterator(); j.hasNext();) {
                 sos.writeObject(j.next());
             }
             sos.writeInt(cframe.msgFrames.size());
-            for (Iterator j = cframe.msgFrames.iterator(); j.hasNext();) {
+            for (Iterator<MessageFrame> j = cframe.msgFrames.iterator(); j.hasNext();) {
                 sos.writeObject(j.next());
             }
         }
 
-        Set referencedChannels = sos.getSerializedChannels();
-        for (Iterator i = _channels.values().iterator(); i.hasNext();) {
-            ChannelFrame cframe = (ChannelFrame) i.next();
+        Set<Object> referencedChannels = sos.getSerializedChannels();
+        for (Iterator<ChannelFrame> i = _channels.values().iterator(); i.hasNext();) {
+            ChannelFrame cframe = i.next();
             if (referencedChannels.contains(Integer.valueOf(cframe.id)) || cframe.refCount > 0) {
                 // skip
             } else {
@@ -328,8 +325,8 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         }
 
         sos.writeInt(_channels.values().size());
-        for (Iterator i = _channels.values().iterator(); i.hasNext();) {
-            ChannelFrame cframe = (ChannelFrame) i.next();
+        for (Iterator<ChannelFrame> i = _channels.values().iterator(); i.hasNext();) {
+            ChannelFrame cframe = i.next();
             LOG.debug("Writing Channel: {}", cframe);
             sos.writeObject(cframe);
         }
@@ -364,8 +361,8 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         if (!_reactions.isEmpty()) {
             ps.println("-- REACTIONS");
             int cnt = 0;
-            for (Iterator i = _reactions.iterator(); i.hasNext();) {
-                Continuation continuation = (Continuation) i.next();
+            for (Iterator<Continuation> i = _reactions.iterator(); i.hasNext();) {
+                Continuation continuation = i.next();
                 ps.println("   #" + (++cnt) + ":  " + continuation.toString());
             }
         }
@@ -417,8 +414,8 @@ public class ExecutionQueueImpl implements ExecutionQueue {
 
     private void removeCommGroup(CommGroupFrame groupFrame) {
         // Add all channels reference in the group to the GC candidate set.
-        for (Iterator i = groupFrame.commFrames.iterator(); i.hasNext();) {
-            CommFrame frame = (CommFrame) i.next();
+        for (Iterator<CommFrame> i = groupFrame.commFrames.iterator(); i.hasNext();) {
+            CommFrame frame = i.next();
             if (frame instanceof ObjectFrame) {
                 assert frame.channelFrame.objFrames.contains(frame);
                 frame.channelFrame.objFrames.remove(frame);
@@ -439,7 +436,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
     }
 
     private static class ChannelFrame implements Externalizable {
-        Class type;
+        Class<?> type;
 
         int id;
 
@@ -456,10 +453,12 @@ public class ExecutionQueueImpl implements ExecutionQueue {
 
         public String description;
 
+        // Used for deserialization
+        @SuppressWarnings("unused")
         public ChannelFrame() {
         }
 
-        public ChannelFrame(Class type, int id, String name, String description) {
+        public ChannelFrame(Class<?> type, int id, String name, String description) {
             this.type = type;
             this.id = id;
             this.description = description;
@@ -470,7 +469,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         }
 
         public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            type = (Class) in.readObject();
+            type = (Class<?>)in.readObject();
             id = in.readInt();
             description = in.readUTF();
             refCount = in.readInt();
@@ -527,20 +526,18 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         }
     }
 
+    @SuppressWarnings("serial")
     private static class CommGroupFrame implements Serializable {
         boolean replicated;
-
         public Set<CommFrame> commFrames = new HashSet<CommFrame>();
 
         public CommGroupFrame(boolean replicated) {
             this.replicated = replicated;
         }
-
     }
 
     private static class CommFrame implements Externalizable {
         CommGroupFrame commGroupFrame;
-
         ChannelFrame channelFrame;
 
         public CommFrame() {
@@ -565,20 +562,21 @@ public class ExecutionQueueImpl implements ExecutionQueue {
     private static class ObjectFrame extends CommFrame implements Externalizable {
         private static final long serialVersionUID = -7212430608484116919L;
 
-        ChannelListener _continuation;
+        ChannelListener<?> _continuation;
 
+        // Used for deserialization
+        @SuppressWarnings("unused")
         public ObjectFrame() {
-            super();
         }
 
-        public ObjectFrame(CommGroupFrame commGroupFrame, ChannelFrame channelFrame, ChannelListener continuation) {
+        public ObjectFrame(CommGroupFrame commGroupFrame, ChannelFrame channelFrame, ChannelListener<?> continuation) {
             super(commGroupFrame, channelFrame);
             this._continuation = continuation;
         }
 
         public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
             super.readExternal(in);
-            _continuation = (ChannelListener) in.readObject();
+            _continuation = (ChannelListener<?>)in.readObject();
         }
 
         public void writeExternal(ObjectOutput out) throws IOException {
@@ -591,11 +589,11 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         private static final long serialVersionUID = -1112437852498126297L;
 
         String method;
-
         Object[] args;
 
+        // Used for deserialization
+        @SuppressWarnings("unused")
         public MessageFrame() {
-            super();
         }
 
         public MessageFrame(CommGroupFrame commFrame, ChannelFrame channelFrame, String method, Object[] args) {
@@ -609,17 +607,18 @@ public class ExecutionQueueImpl implements ExecutionQueue {
             method = in.readUTF();
             int numArgs = in.readInt();
             args = new Object[numArgs];
-            for (int i = 0; i < numArgs; ++i)
+            for (int i = 0; i < numArgs; ++i) {
                 args[i] = in.readObject();
-
+            }
         }
 
         public void writeExternal(ObjectOutput out) throws IOException {
             super.writeExternal(out);
             out.writeUTF(method);
             out.writeInt(args.length);
-            for (int i = 0; i < args.length; ++i)
+            for (int i = 0; i < args.length; ++i) {
                 out.writeObject(args[i]);
+            }
         }
     }
 
@@ -635,7 +634,8 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         private Set<Object> _serializedChannels = new HashSet<Object>();
 
         public ExecutionQueueOutputStream(OutputStream outputStream) throws IOException {
-            super(new GZIPOutputStream(outputStream));
+            // super(new GZIPOutputStream(outputStream));
+            super(outputStream);
             enableReplaceObject(true);
         }
 
@@ -737,15 +737,17 @@ public class ExecutionQueueImpl implements ExecutionQueue {
     }
 
     private static final class ChannelRef implements Externalizable {
-        private Class _type;
+        private Class<?> _type;
 
         private Integer _id;
 
-        private ChannelRef(Class type, Integer id) {
+        private ChannelRef(Class<?> type, Integer id) {
             _type = type;
             _id = id;
         }
 
+        // Used for deserialization
+        @SuppressWarnings("unused")
         public ChannelRef() {
         }
 
@@ -763,7 +765,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         }
 
         public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-            _type = (Class) in.readObject();
+            _type = (Class<?>)in.readObject();
             _id = Integer.valueOf(in.readInt());
         }
     }

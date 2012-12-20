@@ -94,9 +94,6 @@ public class ChannelTypeProcessor extends AbstractProcessor {
         "<interfaces> {\n" + 
         "}";
     private static final String LISTENER_DECL = 
-        "import org.apache.commons.logging.Log;\n" + 
-        "import org.apache.commons.logging.LogFactory;\n" + 
-        "\n" + 
         "/**\n" +
         " * An auto-generated channel listener abstract class for the \n" +
         " * {@link <fqn>} channel type. \n" +
@@ -106,12 +103,6 @@ public class ChannelTypeProcessor extends AbstractProcessor {
         "public abstract class <name>ChannelListener\n" +
         "    extends org.apache.ode.jacob.ChannelListener<<fqn>Channel>\n" +
         "    implements <fqn> {\n" + 
-        "\n" + 
-        "    private static final Log LOG = LogFactory.getLog(<fqn>.class);\n" +
-        "\n" + 
-        "    protected Log log() {\n" +
-        "        return LOG;\n" +
-        "    }\n" +
         "\n" + 
         "    protected <name>ChannelListener(<fqn>Channel channel) {\n" +
         "        super(channel);\n" +

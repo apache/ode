@@ -16,6 +16,7 @@ package org.apache.ode.jacob.examples.cell;
  * @see org.apache.ode.jacob.examples.cell.Cell
  * @see org.apache.ode.jacob.examples.cell.CellChannel
  */
+@SuppressWarnings("serial")
 public abstract class CellChannelListener
     extends org.apache.ode.jacob.ChannelListener<org.apache.ode.jacob.examples.cell.CellChannel>
     implements org.apache.ode.jacob.examples.cell.Cell

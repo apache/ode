@@ -65,6 +65,7 @@ import java.util.Set;
  *
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com" />
  */
+@SuppressWarnings("serial")
 public abstract class JacobRunnable extends JacobObject {
     private static final Set<Method> IMPLEMENTED_METHODS;
 

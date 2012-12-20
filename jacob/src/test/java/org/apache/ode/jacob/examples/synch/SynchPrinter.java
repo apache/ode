@@ -55,6 +55,7 @@ public class SynchPrinter {
     public static final class Tester extends JacobRunnable {
         private static final long serialVersionUID = 7899682832271627464L;
 
+        @SuppressWarnings("serial")
         public void run() {
             final SynchPrintChannel p = newChannel(SynchPrintChannel.class);
             instance(new SystemPrinter(p));
