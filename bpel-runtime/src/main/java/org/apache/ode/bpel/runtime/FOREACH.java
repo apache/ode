@@ -112,7 +112,7 @@ public class FOREACH extends ACTIVITY {
             // Continuing as long as a child is active
             if (active().hasNext()) {
 
-                Set<ChannelListener> mlSet = new HashSet<ChannelListener>();
+                Set<ChannelListener<?>> mlSet = new HashSet<ChannelListener<?>>();
                 mlSet.add(new TerminationChannelListener(_self.self) {
                     private static final long serialVersionUID = 2554750257484084466L;
 

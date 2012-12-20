@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.ode.jacob.Channel;
 import org.apache.ode.jacob.ChannelListener;
@@ -59,13 +60,12 @@ import org.slf4j.LoggerFactory;
  * A fast, in-memory {@link org.apache.ode.jacob.soup.ExecutionQueue} implementation.
  */
 public class ExecutionQueueImpl implements ExecutionQueue {
-    /** Class-level logger. */
+    public static ConcurrentHashMap<String, ObjectStreamClass> _classDescriptors = 
+        new ConcurrentHashMap<String, ObjectStreamClass>();
+
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionQueueImpl.class);
 
     private ClassLoader _classLoader;
-
-    public static ConcurrentHashMap<String, ObjectStreamClass> _classDescriptors
-        = new ConcurrentHashMap<String, ObjectStreamClass>();
 
     /**
      * Cached set of enqueued {@link Continuation} objects (i.e. those read using
@@ -634,8 +634,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         private Set<Object> _serializedChannels = new HashSet<Object>();
 
         public ExecutionQueueOutputStream(OutputStream outputStream) throws IOException {
-            // super(new GZIPOutputStream(outputStream));
-            super(outputStream);
+            super(new GZIPOutputStream(outputStream));
             enableReplaceObject(true);
         }
 

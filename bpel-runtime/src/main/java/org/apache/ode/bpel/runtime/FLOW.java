@@ -78,7 +78,7 @@ class FLOW extends ACTIVITY {
         public void run() {
             Iterator<ChildInfo> active = active();
             if (active.hasNext()) {
-                Set<ChannelListener> mlSet = new HashSet<ChannelListener>();
+                Set<ChannelListener<?>> mlSet = new HashSet<ChannelListener<?>>();
                 mlSet.add(new TerminationChannelListener(_self.self) {
                     private static final long serialVersionUID = 2554750258974084466L;
 

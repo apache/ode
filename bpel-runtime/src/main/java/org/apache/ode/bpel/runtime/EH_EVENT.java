@@ -158,11 +158,9 @@ class EH_EVENT extends BpelJacobRunnable {
             _pickResponseChannel = pickResponseChannel;
         }
 
-        @SuppressWarnings("unchecked")
         public void run() {
-
             if (!_active.isEmpty() || _pickResponseChannel != null) {
-                HashSet<ChannelListener> mlset = new HashSet<ChannelListener>();
+                HashSet<ChannelListener<?>> mlset = new HashSet<ChannelListener<?>>();
 
                 if (!_terminated) {
                     mlset.add(new TerminationChannelListener(_tc) {
@@ -341,6 +339,5 @@ class EH_EVENT extends BpelJacobRunnable {
                 _psc.completed(_fault, _comps);
             }
         }
-
     }
 }

@@ -105,7 +105,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                 dpe(_oactivity);
             }
         } else /* don't know all our links statuses */ {
-            Set<ChannelListener> mlset = new HashSet<ChannelListener>();
+            Set<ChannelListener<?>> mlset = new HashSet<ChannelListener<?>>();
             mlset.add(new TerminationChannelListener(_self.self) {
                 private static final long serialVersionUID = 5094153128476008961L;
 

@@ -132,7 +132,7 @@ class EH_ALARM extends BpelJacobRunnable {
         public void run() {
             Calendar now = Calendar.getInstance();
 
-            Set<ChannelListener> listeners = new EventHandlerControlChannelListener(_cc) {
+            Set<ChannelListener<?>> listeners = new EventHandlerControlChannelListener(_cc) {
                 private static final long serialVersionUID = -7750428941445331236L;
 
                 public void stop() {
