@@ -33,6 +33,7 @@ import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.LinkStatus;
 import org.apache.ode.bpel.runtime.channels.LinkStatusChannel;
 import org.apache.ode.bpel.runtime.channels.LinkStatusChannelListener;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
@@ -178,9 +179,7 @@ public class SCOPEACT extends ACTIVITY {
                 if (_statuses.containsKey(m.getKey()))
                     continue;
             
-                mlset.add(new LinkStatusChannelListener(m.getValue().pub) {
-                    private static final long serialVersionUID = 1568144473514091593L;
-
+                mlset.add(new ReceiveProcess<LinkStatusChannel, LinkStatus>(m.getValue().pub, new LinkStatus() {
                     public void linkStatus(boolean value) {
                         _statuses.put(m.getKey(), value);
                         if (_status != null)
@@ -190,7 +189,8 @@ public class SCOPEACT extends ACTIVITY {
                             instance(LINKSTATUSINTERCEPTOR.this);
 
                     }
-
+                }) {
+                    private static final long serialVersionUID = 1568144473514091593L;
                 });
             }
             
@@ -206,7 +206,6 @@ public class SCOPEACT extends ACTIVITY {
             return (_statuses.keySet().size() < SCOPEACT.this._self.o.outgoingLinks.size());
 
         }
-
     }
     
     

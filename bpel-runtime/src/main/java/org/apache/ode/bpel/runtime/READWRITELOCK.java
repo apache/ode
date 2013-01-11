@@ -22,9 +22,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import org.apache.ode.bpel.runtime.channels.ReadWriteLock;
 import org.apache.ode.bpel.runtime.channels.ReadWriteLockChannel;
 import org.apache.ode.bpel.runtime.channels.ReadWriteLockChannelListener;
 import org.apache.ode.jacob.JacobRunnable;
+import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.SynchChannel;
 
 /**
@@ -55,9 +57,7 @@ public class READWRITELOCK extends JacobRunnable {
 
     @Override
     public void run() {
-        object(new ReadWriteLockChannelListener(_self) {
-            private static final long serialVersionUID = -8644268413754259515L;
-
+        object(new ReceiveProcess<ReadWriteLockChannel, ReadWriteLock>(_self, new ReadWriteLock() {
             public void readLock(SynchChannel s) {
                 switch (_status) {
                 case UNLOCKED:
@@ -72,11 +72,9 @@ public class READWRITELOCK extends JacobRunnable {
                 case WRITELOCK:
                     _waiters.add(new Waiter(s, false));
                     break;
-
                 }
 
                 instance(READWRITELOCK.this);
-
             }
 
             public void writeLock(SynchChannel s) {
@@ -108,7 +106,7 @@ public class READWRITELOCK extends JacobRunnable {
                         _status = w.write ? Status.WRITELOCK : Status.READLOCK;
                         w.synch.ret();
 
-                        if (_status == Status.READLOCK)
+                        if (_status == Status.READLOCK) {
                             for (Iterator<Waiter> i = _waiters.iterator(); i.hasNext();) {
                                 Waiter w1 = i.next();
                                 if (w1.write)
@@ -117,12 +115,14 @@ public class READWRITELOCK extends JacobRunnable {
                                 w1.synch.ret();
                                 i.remove();
                             }
+                        }
                     }
                 }
 
                 instance(READWRITELOCK.this);
             }
-
+        }) {
+            private static final long serialVersionUID = -8644268413754259515L;
         });
     }
 
@@ -136,6 +136,4 @@ public class READWRITELOCK extends JacobRunnable {
             write = w;
         }
     }
-
-  
 }

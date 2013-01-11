@@ -23,16 +23,20 @@ import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OEventHandler;
 import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.runtime.channels.EventHandlerControl;
 import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannel;
 import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannelListener;
 import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannelListener;
 import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.SynchChannel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -210,9 +214,7 @@ class EH_ALARM extends BpelJacobRunnable {
         }
 
         public void run() {
-            object(false,new ParentScopeChannelListener(_activity.parent){
-                private static final long serialVersionUID = -3357030137175178040L;
-
+            object(false,new ReceiveProcess<ParentScopeChannel, ParentScope>(_activity.parent, new ParentScope() {
                 public void compensate(OScope scope, SynchChannel ret) {
                     _psc.compensate(scope,ret);
                     instance(ACTIVE.this);
@@ -244,24 +246,24 @@ class EH_ALARM extends BpelJacobRunnable {
 
                 public void cancelled() { completed(null, CompensationHandler.emptySet()); }
                 public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
-            }.or(new EventHandlerControlChannelListener(_cc) {
-                private static final long serialVersionUID = -3873619538789039424L;
-
+            }){
+                private static final long serialVersionUID = -3357030137175178040L;
+            }.or(new ReceiveProcess<EventHandlerControlChannel, EventHandlerControl>(_cc, new EventHandlerControl() {
                 public void stop() {
                     _stopped = true;
                     instance(ACTIVE.this);
                 }
-
-            }.or(new TerminationChannelListener(_tc) {
-                private static final long serialVersionUID = -4566956567870652885L;
-
+            }){
+                private static final long serialVersionUID = -3873619538789039424L;
+            }.or(new ReceiveProcess<TerminationChannel, Termination>(_tc, new Termination() {
                 public void terminate() {
                     replication(_activity.self).terminate();
                     _stopped = true;
                     instance(ACTIVE.this);
                 }
+            }){
+                private static final long serialVersionUID = -4566956567870652885L;
             })));
-
         }
     }
 }
