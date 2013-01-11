@@ -103,9 +103,7 @@ public class Sieve extends JacobRunnable {
     }
 
     public void run() {
-      object(new NaturalNumberStreamChannelListener(_in) {
-        private static final long serialVersionUID = -2145752474431263689L;
-
+      object(new ReceiveProcess<NaturalNumberStreamChannel, NaturalNumberStream>(_in, new NaturalNumberStream() {
         public void val(final int n, final SynchChannel ret) {
           _primes.val(n, object(new ReceiveProcess<SynchChannel, Synch>(newChannel(SynchChannel.class), new Synch() {
             public void ret() {
@@ -118,6 +116,8 @@ public class Sieve extends JacobRunnable {
               private static final long serialVersionUID = -3009595654233593893L;
           }));
        }
+      }) {
+          private static final long serialVersionUID = -2145752474431263689L;
       });
     }
   }
@@ -130,15 +130,15 @@ public class Sieve extends JacobRunnable {
       _in = in;
     }
     public void run() {
-      object(true, new NaturalNumberStreamChannelListener(_in){
-        private static final long serialVersionUID = 7671019806323866866L;
-
+      object(true, new ReceiveProcess<NaturalNumberStreamChannel, NaturalNumberStream>(_in, new NaturalNumberStream(){
         public void val(int n, SynchChannel ret) {
           _cnt ++;
           _last = n;
           System.out.println("PRIME: " + n);
           ret.ret();
         }
+      }) {
+          private static final long serialVersionUID = 7671019806323866866L;
       });
     }
   }
@@ -164,9 +164,7 @@ public class Sieve extends JacobRunnable {
       _out = out;
     }
     public void run() {
-       object(true, new NaturalNumberStreamChannelListener(_in) {
-          private static final long serialVersionUID = 6625386475773075604L;
-
+       object(true, new ReceiveProcess<NaturalNumberStreamChannel, NaturalNumberStream>(_in, new NaturalNumberStream() {
           public void val(int n, final SynchChannel ret) {
               if (n % _prime != 0) {
                  _out.val(n, object(new ReceiveProcess<SynchChannel, Synch>(newChannel(SynchChannel.class), new Synch() {
@@ -180,6 +178,8 @@ public class Sieve extends JacobRunnable {
                  ret.ret();
               }
           }
+       }) {
+           private static final long serialVersionUID = 6625386475773075604L;
        });
     }
   }
@@ -201,7 +201,5 @@ public class Sieve extends JacobRunnable {
       }
       System.err.println("The " + _cnt + "th prime is " + _last);
     }
-
-
   }
 }

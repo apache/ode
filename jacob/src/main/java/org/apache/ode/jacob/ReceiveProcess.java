@@ -27,7 +27,7 @@ import java.util.Set;
 @SuppressWarnings("serial")
 public abstract class ReceiveProcess<C extends Channel, R> extends ChannelListener<C> {
     private transient Set<Method> _implementedMethods;
-    final R receiver;
+    private R receiver;
     
     protected ReceiveProcess(C channel, R receiver) throws IllegalStateException {
         super(channel);
