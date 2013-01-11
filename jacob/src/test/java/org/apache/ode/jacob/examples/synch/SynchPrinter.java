@@ -42,13 +42,13 @@ public class SynchPrinter {
         }
 
         public void run() {
-            object(true, new SynchPrintChannelListener(_self) {
-                private static final long serialVersionUID = -1990741944766989782L;
-
+            object(true, new ReceiveProcess<SynchPrintChannel, SynchPrint>(_self, new SynchPrint() {
                 public SynchChannel print(String msg) {
                     System.out.println(msg);
                     return null; // SynchChannel automatically created by JacobVPU
                 }
+            }) {
+                private static final long serialVersionUID = -1990741944766989782L;
             });
         }
     }
