@@ -39,10 +39,11 @@ import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
 import org.apache.ode.bpel.runtime.channels.ReadWriteLockChannel;
 import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.ReceiveProcess;
+import org.apache.ode.jacob.Synch;
 import org.apache.ode.jacob.SynchChannel;
-import org.apache.ode.jacob.SynchChannelListener;
+import org.apache.ode.jacob.Val;
 import org.apache.ode.jacob.ValChannel;
-import org.apache.ode.jacob.ValChannelListener;
 import org.w3c.dom.Element;
 
 /**
@@ -58,8 +59,6 @@ public class SCOPEACT extends ACTIVITY {
     }
 
     public void run() {
-
-        
         if (((OScope) _self.o).isolatedScope) {
             __log.debug("found ISOLATED scope, instance ISOLATEDGUARD");
             instance(new ISOLATEDGUARD(createLockList(), newChannel(SynchChannel.class)));
@@ -155,10 +154,7 @@ public class SCOPEACT extends ACTIVITY {
             Set<ChannelListener<?>> mlset = new HashSet<ChannelListener<?>>();
             
             if (_status == null)
-                mlset.add(new ValChannelListener(_self) {
-    
-                    private static final long serialVersionUID = 5029554538593371750L;
-    
+                mlset.add(new ReceiveProcess<ValChannel, Val>(_self, new Val() {
                     /** Our owner will notify us when it becomes clear what to do with the links. */
                     public void val(Object retVal) {
                         if (__log.isDebugEnabled()) {
@@ -174,7 +170,8 @@ public class SCOPEACT extends ACTIVITY {
                             instance(LINKSTATUSINTERCEPTOR.this);
     
                     }
-    
+                }) {
+                    private static final long serialVersionUID = 5029554538593371750L;
                 });
 
             for (final Map.Entry<OLink, LinkInfo> m : _interceptedChannels.links.entrySet()) {
@@ -267,16 +264,15 @@ public class SCOPEACT extends ACTIVITY {
                 else
                     il.lockChannel.readLock(_synchChannel);
 
-                object(new SynchChannelListener(_synchChannel) {
-                    private static final long serialVersionUID = 2857261074409098274L;
-
+                object(new ReceiveProcess<SynchChannel, Synch>(_synchChannel, new Synch() {
                     public void ret() {
                         __log.debug("ISOLATIONGUARD: got lock: " + _locksNeeded.get(0));
                         _locksAcquired.add(_locksNeeded.remove(0));
                         instance(ISOLATEDGUARD.this);
                     }
+                }) {
+                    private static final long serialVersionUID = 2857261074409098274L;
                 });
-
             }
         }
 

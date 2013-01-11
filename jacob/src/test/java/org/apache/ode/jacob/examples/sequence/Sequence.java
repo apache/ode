@@ -19,8 +19,9 @@
 package org.apache.ode.jacob.examples.sequence;
 
 import org.apache.ode.jacob.JacobRunnable;
+import org.apache.ode.jacob.ReceiveProcess;
+import org.apache.ode.jacob.Synch;
 import org.apache.ode.jacob.SynchChannel;
-import org.apache.ode.jacob.SynchChannelListener;
 
 /**
  * Abstract process that executes a number of steps sequentially.
@@ -53,13 +54,13 @@ public abstract class Sequence extends JacobRunnable {
             }
         } else {
             SynchChannel r = newChannel(SynchChannel.class);
-            object(new SynchChannelListener(r) {
-                private static final long serialVersionUID = -6999108928780639603L;
-
+            object(new ReceiveProcess<SynchChannel, Synch>(r, new Synch() {
                 public void ret() {
                     ++_current;
                     instance(Sequence.this);
                 }
+            }) {
+                private static final long serialVersionUID = -6999108928780639603L;
             });
             instance(doStep(_current, r));
         }

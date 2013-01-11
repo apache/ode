@@ -19,8 +19,9 @@
 package org.apache.ode.jacob.examples.eratosthenes;
 
 import org.apache.ode.jacob.JacobRunnable;
+import org.apache.ode.jacob.ReceiveProcess;
+import org.apache.ode.jacob.Synch;
 import org.apache.ode.jacob.SynchChannel;
-import org.apache.ode.jacob.SynchChannelListener;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
 
@@ -70,13 +71,13 @@ public class Sieve extends JacobRunnable {
     }
 
     public void run() {
-      _out.val(_n, object(new SynchChannelListener(newChannel(SynchChannel.class)) {
-        private static final long serialVersionUID = -4336285925619915276L;
-
-        public void ret() {
-          instance(new Counter(_out, _n+1));
-        }
-      }));
+        _out.val(_n, object(new ReceiveProcess<SynchChannel, Synch>(newChannel(SynchChannel.class), new Synch() {
+            public void ret() {
+                instance(new Counter(_out, _n+1));
+            }
+        }) {
+            private static final long serialVersionUID = -4336285925619915276L;
+        }));
     }
   }
 
@@ -106,15 +107,15 @@ public class Sieve extends JacobRunnable {
         private static final long serialVersionUID = -2145752474431263689L;
 
         public void val(final int n, final SynchChannel ret) {
-          _primes.val(n, object(new SynchChannelListener(newChannel(SynchChannel.class)) {
-            private static final long serialVersionUID = -3009595654233593893L;
-
+          _primes.val(n, object(new ReceiveProcess<SynchChannel, Synch>(newChannel(SynchChannel.class), new Synch() {
             public void ret() {
               NaturalNumberStreamChannel x = newChannel(NaturalNumberStreamChannel.class);
               instance(new PrimeFilter(n, _in, x));
               instance(new Head(x, _primes));
               ret.ret();
             }
+          }) {
+              private static final long serialVersionUID = -3009595654233593893L;
           }));
        }
       });
@@ -164,20 +165,21 @@ public class Sieve extends JacobRunnable {
     }
     public void run() {
        object(true, new NaturalNumberStreamChannelListener(_in) {
-        private static final long serialVersionUID = 6625386475773075604L;
+          private static final long serialVersionUID = 6625386475773075604L;
 
-        public void val(int n, final SynchChannel ret) {
-           if (n % _prime != 0)
-             _out.val(n, object(new SynchChannelListener(newChannel(SynchChannel.class)) {
-              private static final long serialVersionUID = 2523405590764193613L;
-
-              public void ret() {
+          public void val(int n, final SynchChannel ret) {
+              if (n % _prime != 0) {
+                 _out.val(n, object(new ReceiveProcess<SynchChannel, Synch>(newChannel(SynchChannel.class), new Synch() {
+                     public void ret() {
+                         ret.ret();
+                     }
+                 }) {
+                     private static final long serialVersionUID = 2523405590764193613L;
+                 }));
+              } else {
                  ret.ret();
-               }
-             }));
-           else
-             ret.ret();
-         }
+              }
+          }
        });
     }
   }

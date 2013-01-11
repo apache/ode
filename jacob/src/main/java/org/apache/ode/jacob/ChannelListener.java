@@ -66,24 +66,10 @@ public abstract class ChannelListener<CT extends Channel> extends JacobObject {
     public Set<Method> getImplementedMethods() {
         if (_implementedMethods == null) {
             Set<Method> implementedMethods = new HashSet<Method>();
-            getImplementedMethods(implementedMethods, getClass().getSuperclass());
+            ClassUtil.getImplementedMethods(implementedMethods, getClass().getSuperclass());
             _implementedMethods = Collections.unmodifiableSet(implementedMethods);
         }
         return _implementedMethods;
-    }
-
-    private static Set<Method> getImplementedMethods(Set<Method> methods, Class<?> clazz) {
-        Class<?>[] interfaces = clazz.getInterfaces();
-        for (int i=0; i<interfaces.length; ++i) {
-            if (interfaces[i] != Channel.class) {
-                Method[] allmethods = interfaces[i].getDeclaredMethods();
-                for (int j=0; j<allmethods.length; ++j) {
-                    methods.add(allmethods[j]);
-                }
-                getImplementedMethods(methods, interfaces[i]);
-            }
-        }
-        return methods;
     }
 
     /**

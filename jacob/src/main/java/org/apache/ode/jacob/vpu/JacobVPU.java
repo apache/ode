@@ -29,6 +29,7 @@ import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.JacobObject;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.JacobThread;
+import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.jacob.soup.CommChannel;
 import org.apache.ode.jacob.soup.CommGroup;
@@ -399,7 +400,8 @@ public final class JacobVPU {
             stackThread();
             long ctime = System.currentTimeMillis();
             try {
-                _method.invoke(_methodBody, args);
+                _method.invoke(_methodBody instanceof ReceiveProcess ? 
+                    ((ReceiveProcess<?, ?>)_methodBody).receiver() : _methodBody, args);
                 if (synchChannel != null) {
                     synchChannel.ret();
                 }

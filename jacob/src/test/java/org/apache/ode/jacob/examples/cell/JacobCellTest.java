@@ -18,15 +18,18 @@
  */
 package org.apache.ode.jacob.examples.cell;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import junit.framework.TestCase;
+
 import org.apache.ode.jacob.JacobRunnable;
+import org.apache.ode.jacob.ReceiveProcess;
+import org.apache.ode.jacob.Val;
 import org.apache.ode.jacob.ValChannel;
-import org.apache.ode.jacob.ValChannelListener;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 public class JacobCellTest extends TestCase {
   private static Object _val;
@@ -62,11 +65,12 @@ static class CellTest1 extends JacobRunnable {
       ValChannel retChannel = newChannel(ValChannel.class, "val");
 
       instance(new CELL_<String>(cellChannel, "foo"));
-      object(new ValChannelListener(retChannel) {
+      object(new ReceiveProcess<ValChannel, Val>(retChannel, new Val() {
           public void val(Object retVal) {
-            _val = retVal;
-          }
-        });
+              _val = retVal;
+            }
+      }) {});
+
       cellChannel.read(retChannel);
     }
   }

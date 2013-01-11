@@ -19,8 +19,9 @@
 package org.apache.ode.jacob.examples.synch;
 
 import org.apache.ode.jacob.JacobRunnable;
+import org.apache.ode.jacob.ReceiveProcess;
+import org.apache.ode.jacob.Synch;
 import org.apache.ode.jacob.SynchChannel;
-import org.apache.ode.jacob.SynchChannelListener;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
 
@@ -59,18 +60,18 @@ public class SynchPrinter {
         public void run() {
             final SynchPrintChannel p = newChannel(SynchPrintChannel.class);
             instance(new SystemPrinter(p));
-            object(new SynchChannelListener(p.print("1")) {
+            object(new ReceiveProcess<SynchChannel, Synch>(p.print("1"), new Synch() {
                 public void ret() {
-                    object(new SynchChannelListener(p.print("2")) {
+                    object(new ReceiveProcess<SynchChannel, Synch>(p.print("2"), new Synch() {
                         public void ret() {
-                            object(new SynchChannelListener(p.print("3")) {
+                            object(new ReceiveProcess<SynchChannel, Synch>(p.print("3"), new Synch() {
                                 public void ret() {
                                 }
-                            });
+                            }) {});
                         }
-                    });
+                    }) {});
                 }
-            });
+            }) {});
         }
     }
 
@@ -82,5 +83,4 @@ public class SynchPrinter {
             // run
         }
     }
-
 }

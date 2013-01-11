@@ -18,12 +18,13 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.jacob.ReceiveProcess;
+import org.apache.ode.jacob.Synch;
 import org.apache.ode.jacob.SynchChannel;
-import org.apache.ode.jacob.SynchChannelListener;
-
-import java.util.List;
 
 /**
  * Serially activates a list of compensations in order.
@@ -49,13 +50,13 @@ class ORDEREDCOMPENSATOR extends BpelJacobRunnable  {
       SynchChannel r = newChannel(SynchChannel.class);
       CompensationHandler cdata = _compensations.remove(0);
       cdata.compChannel.compensate(r);
-      object(new SynchChannelListener(r) {
-        private static final long serialVersionUID = 7173916663479205420L;
-
-        public void ret() {
-          instance(ORDEREDCOMPENSATOR.this);
-        }
-      });
+      object(new ReceiveProcess<SynchChannel, Synch>(r, new Synch() {
+          public void ret() {
+            instance(ORDEREDCOMPENSATOR.this);
+          }
+        }) {
+          private static final long serialVersionUID = 7173916663479205420L;
+        });
     }
 
   }
