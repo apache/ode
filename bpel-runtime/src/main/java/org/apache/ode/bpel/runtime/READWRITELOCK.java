@@ -24,7 +24,6 @@ import java.util.LinkedList;
 
 import org.apache.ode.bpel.runtime.channels.ReadWriteLock;
 import org.apache.ode.bpel.runtime.channels.ReadWriteLockChannel;
-import org.apache.ode.bpel.runtime.channels.ReadWriteLockChannelListener;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.SynchChannel;

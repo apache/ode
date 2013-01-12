@@ -13,7 +13,6 @@ package org.apache.ode.jacob;
  * An auto-generated channel interface for the channel type
  * {@link org.apache.ode.jacob.Val}.
  * @see org.apache.ode.jacob.Val
- * @see org.apache.ode.jacob.ValChannelListener
  */
 public interface ValChannel
     extends org.apache.ode.jacob.Channel, 

@@ -13,7 +13,6 @@ package org.apache.ode.jacob.examples.eratosthenes;
  * An auto-generated channel interface for the channel type
  * {@link org.apache.ode.jacob.examples.eratosthenes.NaturalNumberStream}.
  * @see org.apache.ode.jacob.examples.eratosthenes.NaturalNumberStream
- * @see org.apache.ode.jacob.examples.eratosthenes.NaturalNumberStreamChannelListener
  */
 public interface NaturalNumberStreamChannel
     extends org.apache.ode.jacob.Channel, 

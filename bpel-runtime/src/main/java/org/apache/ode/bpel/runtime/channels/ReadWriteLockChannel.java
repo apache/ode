@@ -13,7 +13,6 @@ package org.apache.ode.bpel.runtime.channels;
  * An auto-generated channel interface for the channel type
  * {@link org.apache.ode.bpel.runtime.channels.ReadWriteLock}.
  * @see org.apache.ode.bpel.runtime.channels.ReadWriteLock
- * @see org.apache.ode.bpel.runtime.channels.ReadWriteLockChannelListener
  */
 public interface ReadWriteLockChannel
     extends org.apache.ode.jacob.Channel, 

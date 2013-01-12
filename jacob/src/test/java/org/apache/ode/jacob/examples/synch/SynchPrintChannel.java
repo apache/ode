@@ -13,7 +13,6 @@ package org.apache.ode.jacob.examples.synch;
  * An auto-generated channel interface for the channel type
  * {@link org.apache.ode.jacob.examples.synch.SynchPrint}.
  * @see org.apache.ode.jacob.examples.synch.SynchPrint
- * @see org.apache.ode.jacob.examples.synch.SynchPrintChannelListener
  */
 public interface SynchPrintChannel
     extends org.apache.ode.jacob.Channel, 
