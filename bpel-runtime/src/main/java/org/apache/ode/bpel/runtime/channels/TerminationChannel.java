@@ -13,7 +13,6 @@ package org.apache.ode.bpel.runtime.channels;
  * An auto-generated channel interface for the channel type
  * {@link org.apache.ode.bpel.runtime.channels.Termination}.
  * @see org.apache.ode.bpel.runtime.channels.Termination
- * @see org.apache.ode.bpel.runtime.channels.TerminationChannelListener
  */
 public interface TerminationChannel
     extends org.apache.ode.jacob.Channel, 

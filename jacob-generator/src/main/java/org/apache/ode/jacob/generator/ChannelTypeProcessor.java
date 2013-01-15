@@ -88,7 +88,6 @@ public class ChannelTypeProcessor extends AbstractProcessor {
         " * An auto-generated channel interface for the channel type\n" +
         " * {@link <fqn>}.\n" +
         " * @see <fqn>\n" +
-        " * @see <fqn>ChannelListener\n" +
         " */\n" +
         "public interface <name>Channel extends\n" + 
         "<interfaces> {\n" + 
@@ -101,10 +100,10 @@ public class ChannelTypeProcessor extends AbstractProcessor {
         " * @see <fqn>Channel\n" +
         " */\n" +
         "public abstract class <name>ChannelListener\n" +
-        "    extends org.apache.ode.jacob.ChannelListener<<fqn>Channel>\n" +
+        "    extends org.apache.ode.jacob.ChannelListener\n" +
         "    implements <fqn> {\n" + 
         "\n" + 
-        "    protected <name>ChannelListener(<fqn>Channel channel) {\n" +
+        "    protected <name>ChannelListener(Channel channel) {\n" +
         "        super(channel);\n" +
         "    }\n" +
         "}";

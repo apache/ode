@@ -13,7 +13,6 @@ package org.apache.ode.bpel.runtime.channels;
  * An auto-generated channel interface for the channel type
  * {@link org.apache.ode.bpel.runtime.channels.PickResponse}.
  * @see org.apache.ode.bpel.runtime.channels.PickResponse
- * @see org.apache.ode.bpel.runtime.channels.PickResponseChannelListener
  */
 public interface PickResponseChannel
     extends             org.apache.ode.bpel.runtime.channels.TimerResponseChannel, 
