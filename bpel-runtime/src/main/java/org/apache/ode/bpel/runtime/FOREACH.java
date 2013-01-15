@@ -113,7 +113,7 @@ public class FOREACH extends ACTIVITY {
             // Continuing as long as a child is active
             if (active().hasNext()) {
 
-                Set<ChannelListener<?>> mlSet = new HashSet<ChannelListener<?>>();
+                Set<ChannelListener> mlSet = new HashSet<ChannelListener>();
                 mlSet.add(new ReceiveProcess<TerminationChannel, Termination>(_self.self, new Termination() {
                     public void terminate() {
                         // Terminating all children before sepuku

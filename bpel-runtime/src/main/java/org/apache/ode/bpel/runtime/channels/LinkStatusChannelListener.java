@@ -19,7 +19,7 @@ import org.apache.commons.logging.Log;
  * @see org.apache.ode.bpel.runtime.channels.LinkStatusChannel
  */
 public abstract class LinkStatusChannelListener
-    extends org.apache.ode.jacob.ChannelListener<org.apache.ode.bpel.runtime.channels.LinkStatusChannel>
+    extends org.apache.ode.jacob.ChannelListener
     implements org.apache.ode.bpel.runtime.channels.LinkStatus
 {
 

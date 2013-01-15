@@ -161,7 +161,7 @@ class EH_EVENT extends BpelJacobRunnable {
 
         public void run() {
             if (!_active.isEmpty() || _pickResponseChannel != null) {
-                HashSet<ChannelListener<?>> mlset = new HashSet<ChannelListener<?>>();
+                HashSet<ChannelListener> mlset = new HashSet<ChannelListener>();
 
                 if (!_terminated) {
                     mlset.add(new ReceiveProcess<TerminationChannel, Termination>(_tc, new Termination() {

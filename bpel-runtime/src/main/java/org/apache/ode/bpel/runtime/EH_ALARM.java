@@ -131,7 +131,7 @@ class EH_ALARM extends BpelJacobRunnable {
         public void run() {
             Calendar now = Calendar.getInstance();
 
-            Set<ChannelListener<?>> listeners = new ReceiveProcess<EventHandlerControlChannel, EventHandlerControl>(_cc, new EventHandlerControl() {
+            Set<ChannelListener> listeners = new ReceiveProcess<EventHandlerControlChannel, EventHandlerControl>(_cc, new EventHandlerControl() {
                 public void stop() {
                     _psc.completed(null, _comps);
                 }

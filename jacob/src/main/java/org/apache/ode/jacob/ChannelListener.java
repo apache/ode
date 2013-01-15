@@ -29,11 +29,11 @@ import java.util.Set;
  * class <em>and</em> implement one <code>Channel</code> interface.
  */
 @SuppressWarnings("serial")
-public abstract class ChannelListener<CT extends Channel> extends JacobObject {
+public abstract class ChannelListener extends JacobObject {
     private transient Set<Method> _implementedMethods;
-    private transient CT _channel;
+    private transient Channel _channel;
 
-    protected ChannelListener(CT channel) throws IllegalStateException {
+    protected ChannelListener(Channel channel) throws IllegalStateException {
         assert getClass().getSuperclass().getSuperclass() == ChannelListener.class :
                "Inheritance in ChannelListener classes not allowed!";
         if (channel == null) {
@@ -42,23 +42,23 @@ public abstract class ChannelListener<CT extends Channel> extends JacobObject {
         _channel = channel;
     }
 
-    public CT getChannel() {
+    public Channel getChannel() {
         return _channel;
     }
 
-    public void setChannel(CT channel) {
+    public void setChannel(Channel channel) {
         _channel = channel;
     }
 
-    public Set<ChannelListener<?>> or(ChannelListener<?> other) {
-        HashSet<ChannelListener<?>> retval = new HashSet<ChannelListener<?>>();
+    public Set<ChannelListener> or(ChannelListener other) {
+        HashSet<ChannelListener> retval = new HashSet<ChannelListener>();
         retval.add(this);
         retval.add(other);
         return retval;
     }
 
-    public Set<ChannelListener<?>> or(Set<ChannelListener<?>> other) {
-        HashSet<ChannelListener<?>> retval = new HashSet<ChannelListener<?>>(other);
+    public Set<ChannelListener> or(Set<ChannelListener> other) {
+        HashSet<ChannelListener> retval = new HashSet<ChannelListener>(other);
         retval.add(this);
         return retval;
     }

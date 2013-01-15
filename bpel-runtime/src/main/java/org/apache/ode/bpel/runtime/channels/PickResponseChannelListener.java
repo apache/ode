@@ -19,7 +19,7 @@ import org.apache.commons.logging.Log;
  * @see org.apache.ode.bpel.runtime.channels.PickResponseChannel
  */
 public abstract class PickResponseChannelListener
-    extends org.apache.ode.jacob.ChannelListener<org.apache.ode.bpel.runtime.channels.PickResponseChannel>
+    extends org.apache.ode.jacob.ChannelListener
     implements org.apache.ode.bpel.runtime.channels.PickResponse
 {
 

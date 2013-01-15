@@ -19,7 +19,7 @@ import org.apache.commons.logging.Log;
  * @see org.apache.ode.bpel.runtime.channels.TimerResponseChannel
  */
 public abstract class TimerResponseChannelListener
-    extends org.apache.ode.jacob.ChannelListener<org.apache.ode.bpel.runtime.channels.TimerResponseChannel>
+    extends org.apache.ode.jacob.ChannelListener
     implements org.apache.ode.bpel.runtime.channels.TimerResponse
 {
 

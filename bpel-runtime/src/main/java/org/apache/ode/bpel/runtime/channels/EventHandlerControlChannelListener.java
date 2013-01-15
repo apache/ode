@@ -19,7 +19,7 @@ import org.apache.commons.logging.Log;
  * @see org.apache.ode.bpel.runtime.channels.EventHandlerControlChannel
  */
 public abstract class EventHandlerControlChannelListener
-    extends org.apache.ode.jacob.ChannelListener<org.apache.ode.bpel.runtime.channels.EventHandlerControlChannel>
+    extends org.apache.ode.jacob.ChannelListener
     implements org.apache.ode.bpel.runtime.channels.EventHandlerControl
 {
 

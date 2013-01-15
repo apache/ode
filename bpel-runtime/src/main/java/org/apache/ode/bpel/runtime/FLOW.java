@@ -79,7 +79,7 @@ class FLOW extends ACTIVITY {
         public void run() {
             Iterator<ChildInfo> active = active();
             if (active.hasNext()) {
-                Set<ChannelListener<?>> mlSet = new HashSet<ChannelListener<?>>();
+                Set<ChannelListener> mlSet = new HashSet<ChannelListener>();
                 mlSet.add(new ReceiveProcess<TerminationChannel, Termination>(_self.self, new Termination() {
                     public void terminate() {
                         for (Iterator<ChildInfo> i = active(); i.hasNext(); )

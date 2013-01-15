@@ -140,7 +140,7 @@ class SCOPE extends ACTIVITY {
 
         public void run() {
             if (_child != null || !_eventHandlers.isEmpty()) {
-                HashSet<ChannelListener<?>> mlSet = new HashSet<ChannelListener<?>>();
+                HashSet<ChannelListener> mlSet = new HashSet<ChannelListener>();
 
                 // Listen to messages from our parent.
                 mlSet.add(new ReceiveProcess<TerminationChannel, Termination>(_self.self, new Termination() {

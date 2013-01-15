@@ -19,7 +19,7 @@ import org.apache.commons.logging.Log;
  * @see org.apache.ode.bpel.runtime.channels.TerminationChannel
  */
 public abstract class TerminationChannelListener
-    extends org.apache.ode.jacob.ChannelListener<org.apache.ode.bpel.runtime.channels.TerminationChannel>
+    extends org.apache.ode.jacob.ChannelListener
     implements org.apache.ode.bpel.runtime.channels.Termination
 {
 

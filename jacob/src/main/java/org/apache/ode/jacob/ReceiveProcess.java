@@ -25,7 +25,7 @@ import java.util.Set;
 
 
 @SuppressWarnings("serial")
-public abstract class ReceiveProcess<C extends Channel, R> extends ChannelListener<C> {
+public abstract class ReceiveProcess<C extends Channel, R> extends ChannelListener {
     private transient Set<Method> _implementedMethods;
     private R receiver;
     

@@ -108,7 +108,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                 dpe(_oactivity);
             }
         } else /* don't know all our links statuses */ {
-            Set<ChannelListener<?>> mlset = new HashSet<ChannelListener<?>>();
+            Set<ChannelListener> mlset = new HashSet<ChannelListener>();
             mlset.add(new ReceiveProcess<TerminationChannel, Termination>(_self.self, new Termination() {
                 public void terminate() {
                     // Complete immediately, without faulting or registering any comps.

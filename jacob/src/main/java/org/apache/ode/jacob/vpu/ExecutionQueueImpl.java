@@ -562,21 +562,21 @@ public class ExecutionQueueImpl implements ExecutionQueue {
     private static class ObjectFrame extends CommFrame implements Externalizable {
         private static final long serialVersionUID = -7212430608484116919L;
 
-        ChannelListener<?> _continuation;
+        ChannelListener _continuation;
 
         // Used for deserialization
         @SuppressWarnings("unused")
         public ObjectFrame() {
         }
 
-        public ObjectFrame(CommGroupFrame commGroupFrame, ChannelFrame channelFrame, ChannelListener<?> continuation) {
+        public ObjectFrame(CommGroupFrame commGroupFrame, ChannelFrame channelFrame, ChannelListener continuation) {
             super(commGroupFrame, channelFrame);
             this._continuation = continuation;
         }
 
         public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
             super.readExternal(in);
-            _continuation = (ChannelListener<?>)in.readObject();
+            _continuation = (ChannelListener)in.readObject();
         }
 
         public void writeExternal(ObjectOutput out) throws IOException {

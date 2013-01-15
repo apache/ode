@@ -153,7 +153,7 @@ public class SCOPEACT extends ACTIVITY {
 
             __log.debug("LINKSTATUSINTERCEPTOR: running ");
 
-            Set<ChannelListener<?>> mlset = new HashSet<ChannelListener<?>>();
+            Set<ChannelListener> mlset = new HashSet<ChannelListener>();
             
             if (_status == null)
                 mlset.add(new ReceiveProcess<ValChannel, Val>(_self, new Val() {

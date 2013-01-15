@@ -325,7 +325,7 @@ public final class JacobVPU {
             return ChannelFactory.createChannel(cframe, channelType);
         }
 
-        public void object(boolean replicate, ChannelListener<?>[] ml) {
+        public void object(boolean replicate, ChannelListener[] ml) {
             if (LOG.isTraceEnabled()) {
                 StringBuffer msg = new StringBuffer();
                 msg.append(_cycle);
@@ -354,8 +354,8 @@ public final class JacobVPU {
             _executionQueue.add(grp);
         }
 
-        public void object(boolean replicate, ChannelListener<?> methodList) throws IllegalArgumentException {
-            object(replicate, new ChannelListener<?>[] { methodList });
+        public void object(boolean replicate, ChannelListener methodList) throws IllegalArgumentException {
+            object(replicate, new ChannelListener[] { methodList });
         }
 
         /* UNUSED

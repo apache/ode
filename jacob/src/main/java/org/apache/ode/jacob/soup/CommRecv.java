@@ -29,12 +29,12 @@ import org.apache.ode.jacob.ChannelListener;
  * replicated variety.
  */
 public class CommRecv extends Comm {
-    private ChannelListener<?> _continuation;
+    private ChannelListener _continuation;
 
     protected CommRecv() {
     }
 
-    public CommRecv(CommChannel chnl, ChannelListener<?> continuation) {
+    public CommRecv(CommChannel chnl, ChannelListener continuation) {
         super(null, chnl);
         _continuation = continuation;
     }
@@ -48,7 +48,7 @@ public class CommRecv extends Comm {
      *
      * @return byte array representing the serialized form of the continuation
      */
-    public ChannelListener<?> getContinuation() {
+    public ChannelListener getContinuation() {
         return _continuation;
     }
 
