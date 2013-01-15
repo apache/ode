@@ -65,7 +65,7 @@ static class CellTest1 extends JacobRunnable {
       ValChannel retChannel = newChannel(ValChannel.class, "val");
 
       instance(new CELL_<String>(cellChannel, "foo"));
-      object(new ReceiveProcess<ValChannel, Val>(retChannel, new Val() {
+      object(new ReceiveProcess<Val>(retChannel, new Val() {
           public void val(Object retVal) {
               _val = retVal;
             }

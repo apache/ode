@@ -60,7 +60,7 @@ public class PROCESS extends BpelJacobRunnable {
         ScopeFrame processFrame = new ScopeFrame(_oprocess.procesScope, scopeInstanceId, null, null,_globals);
         instance(new SCOPE(child, processFrame, new LinkFrame(null)));
 
-        object(new ReceiveProcess<ParentScopeChannel, ParentScope>(child.parent, new ParentScope() {
+        object(new ReceiveProcess<ParentScope>(child.parent, new ParentScope() {
             public void compensate(OScope scope, SynchChannel ret) {
                 assert false;
             }

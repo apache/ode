@@ -44,7 +44,6 @@ import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.PickResponse;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.Termination;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.xsd.Duration;
@@ -280,7 +279,7 @@ class PICK extends ACTIVITY {
         }
 
         public void run() {
-            object(false, new ReceiveProcess<PickResponseChannel, PickResponse>(_pickResponseChannel, new PickResponse() {
+            object(false, new ReceiveProcess<PickResponse>(_pickResponseChannel, new PickResponse() {
                 public void onRequestRcvd(int selectorIdx, String mexId) {
                     OPickReceive.OnMessage onMessage = _opick.onMessages.get(selectorIdx);
 
@@ -374,7 +373,7 @@ class PICK extends ACTIVITY {
 
             }){
                 private static final long serialVersionUID = -8237296827418738011L;
-            }.or(new ReceiveProcess<TerminationChannel, Termination>(_self.self, new Termination() {
+            }.or(new ReceiveProcess<Termination>(_self.self, new Termination() {
                 public void terminate() {
                     getBpelRuntimeContext().cancel(_pickResponseChannel);
                     instance(WAITING.this);

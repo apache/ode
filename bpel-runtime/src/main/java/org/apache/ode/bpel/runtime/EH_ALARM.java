@@ -131,14 +131,14 @@ class EH_ALARM extends BpelJacobRunnable {
         public void run() {
             Calendar now = Calendar.getInstance();
 
-            Set<ChannelListener> listeners = new ReceiveProcess<EventHandlerControlChannel, EventHandlerControl>(_cc, new EventHandlerControl() {
+            Set<ChannelListener> listeners = new ReceiveProcess<EventHandlerControl>(_cc, new EventHandlerControl() {
                 public void stop() {
                     _psc.completed(null, _comps);
                 }
 
             }){
                 private static final long serialVersionUID = -7750428941445331236L;
-            }.or(new ReceiveProcess<TerminationChannel, Termination>(_tc, new Termination() {
+            }.or(new ReceiveProcess<Termination>(_tc, new Termination() {
                 public void terminate() {
                     _psc.completed(null, _comps);
                 }
@@ -152,7 +152,7 @@ class EH_ALARM extends BpelJacobRunnable {
                 TimerResponseChannel trc = newChannel(TimerResponseChannel.class);
                 getBpelRuntimeContext().registerTimer(trc,_alarm.getTime());
 
-                listeners.add(new ReceiveProcess<TimerResponseChannel, TimerResponse>(trc, new TimerResponse(){
+                listeners.add(new ReceiveProcess<TimerResponse>(trc, new TimerResponse(){
                     public void onTimeout() {
                         // This is what we are waiting for, fire the activity
                         instance(new FIRE());
@@ -208,7 +208,7 @@ class EH_ALARM extends BpelJacobRunnable {
         }
 
         public void run() {
-            object(false,new ReceiveProcess<ParentScopeChannel, ParentScope>(_activity.parent, new ParentScope() {
+            object(false,new ReceiveProcess<ParentScope>(_activity.parent, new ParentScope() {
                 public void compensate(OScope scope, SynchChannel ret) {
                     _psc.compensate(scope,ret);
                     instance(ACTIVE.this);
@@ -242,14 +242,14 @@ class EH_ALARM extends BpelJacobRunnable {
                 public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
             }){
                 private static final long serialVersionUID = -3357030137175178040L;
-            }.or(new ReceiveProcess<EventHandlerControlChannel, EventHandlerControl>(_cc, new EventHandlerControl() {
+            }.or(new ReceiveProcess<EventHandlerControl>(_cc, new EventHandlerControl() {
                 public void stop() {
                     _stopped = true;
                     instance(ACTIVE.this);
                 }
             }){
                 private static final long serialVersionUID = -3873619538789039424L;
-            }.or(new ReceiveProcess<TerminationChannel, Termination>(_tc, new Termination() {
+            }.or(new ReceiveProcess<Termination>(_tc, new Termination() {
                 public void terminate() {
                     replication(_activity.self).terminate();
                     _stopped = true;

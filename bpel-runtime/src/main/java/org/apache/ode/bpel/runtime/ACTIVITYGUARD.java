@@ -45,11 +45,9 @@ import org.apache.ode.bpel.runtime.channels.ActivityRecovery;
 import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.LinkStatus;
-import org.apache.ode.bpel.runtime.channels.LinkStatusChannel;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.Termination;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponse;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.jacob.ChannelListener;
@@ -109,7 +107,7 @@ class ACTIVITYGUARD extends ACTIVITY {
             }
         } else /* don't know all our links statuses */ {
             Set<ChannelListener> mlset = new HashSet<ChannelListener>();
-            mlset.add(new ReceiveProcess<TerminationChannel, Termination>(_self.self, new Termination() {
+            mlset.add(new ReceiveProcess<Termination>(_self.self, new Termination() {
                 public void terminate() {
                     // Complete immediately, without faulting or registering any comps.
                     _self.parent.completed(null, CompensationHandler.emptySet());
@@ -120,7 +118,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                 private static final long serialVersionUID = 5094153128476008961L;
             });
             for (final OLink link : _oactivity.targetLinks) {
-                mlset.add(new ReceiveProcess<LinkStatusChannel, LinkStatus>(_linkFrame.resolve(link).sub, new LinkStatus() {
+                mlset.add(new ReceiveProcess<LinkStatus>(_linkFrame.resolve(link).sub, new LinkStatus() {
                     public void linkStatus(boolean value) {
                         _linkVals.put(link, Boolean.valueOf(value));
                         instance(ACTIVITYGUARD.this);
@@ -202,7 +200,7 @@ class ACTIVITYGUARD extends ACTIVITY {
         }
 
         public void run() {
-            object(new ReceiveProcess<ParentScopeChannel, ParentScope>(_in, new ParentScope() {
+            object(new ReceiveProcess<ParentScope>(_in, new ParentScope() {
                 public void compensate(OScope scope, SynchChannel ret) {
                     _self.parent.compensate(scope,ret);
                     instance(TCONDINTERCEPT.this);
@@ -276,7 +274,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                         (failureHandling == null ? 0L : failureHandling.retryDelay * 1000));
                     final TimerResponseChannel timerChannel = newChannel(TimerResponseChannel.class);
                     getBpelRuntimeContext().registerTimer(timerChannel, future);
-                    object(false, new ReceiveProcess<TimerResponseChannel, TimerResponse>(timerChannel, new TimerResponse() {
+                    object(false, new ReceiveProcess<TimerResponse>(timerChannel, new TimerResponse() {
                         public void onTimeout() {
                             ++_failure.retryCount;
                             startGuardedActivity();
@@ -297,7 +295,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                     getBpelRuntimeContext().registerActivityForRecovery(
                         recoveryChannel, _self.aId, _failure.reason, _failure.dateTime, _failure.data,
                         new String[] { "retry", "cancel", "fault" }, _failure.retryCount);
-                    object(false, new ReceiveProcess<ActivityRecoveryChannel, ActivityRecovery>(recoveryChannel, new ActivityRecovery() {
+                    object(false, new ReceiveProcess<ActivityRecovery>(recoveryChannel, new ActivityRecovery() {
                         public void retry() {
                             if (__log.isDebugEnabled())
                                 __log.debug("ActivityRecovery: Retrying activity " + _self.aId + " (user initiated)");
@@ -324,7 +322,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                         }
                     }){
                         private static final long serialVersionUID = 8397883882810521685L;
-                    }.or(new ReceiveProcess<TerminationChannel, Termination>(_self.self, new Termination() {
+                    }.or(new ReceiveProcess<Termination>(_self.self, new Termination() {
                         public void terminate() {
                             if (__log.isDebugEnabled())
                                 __log.debug("ActivityRecovery: Cancelling activity " + _self.aId + " (terminated by scope)");

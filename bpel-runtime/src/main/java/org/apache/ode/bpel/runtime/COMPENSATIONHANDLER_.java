@@ -25,7 +25,6 @@ import org.apache.ode.bpel.evt.CompensationHandlerRegistered;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.channels.Compensation;
-import org.apache.ode.bpel.runtime.channels.CompensationChannel;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
@@ -49,7 +48,7 @@ class COMPENSATIONHANDLER_ extends BpelJacobRunnable {
 
     public void run() {
         sendEvent(new CompensationHandlerRegistered());
-        object(new ReceiveProcess<CompensationChannel, Compensation>(_self.compChannel, new Compensation() {
+        object(new ReceiveProcess<Compensation>(_self.compChannel, new Compensation() {
             public void forget() {
                 // Tell all our completed children to forget.
                 for (Iterator<CompensationHandler> i = _completedChildren.iterator(); i.hasNext(); )
@@ -74,7 +73,7 @@ class COMPENSATIONHANDLER_ extends BpelJacobRunnable {
                 // Create the compensation handler scope.
                 instance(new SCOPE(ai,compHandlerScopeFrame, new LinkFrame(null)));
 
-                object(new ReceiveProcess<ParentScopeChannel, ParentScope>(ai.parent, new ParentScope() {
+                object(new ReceiveProcess<ParentScope>(ai.parent, new ParentScope() {
                     public void compensate(OScope scope, SynchChannel ret) {
                         throw new AssertionError("Unexpected.");
                     }

@@ -34,7 +34,6 @@ import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponse;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.Termination;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
@@ -98,7 +97,7 @@ public class INVOKE extends ACTIVITY {
                         _scopeFrame.resolve(_oinvoke.partnerLink), _oinvoke.operation,
                         outboundMsg, invokeResponseChannel);
 
-                object(false, new ReceiveProcess<InvokeResponseChannel, InvokeResponse>(invokeResponseChannel, new InvokeResponse() {
+                object(false, new ReceiveProcess<InvokeResponse>(invokeResponseChannel, new InvokeResponse() {
                     public void onResponse() {
                         // we don't have to write variable data -> this already
                         // happened in the nativeAPI impl
@@ -192,7 +191,7 @@ public class INVOKE extends ACTIVITY {
 
                 }){
                     private static final long serialVersionUID = 4496880438819196765L;
-                }.or(new ReceiveProcess<TerminationChannel, Termination>(_self.self, new Termination() {
+                }.or(new ReceiveProcess<Termination>(_self.self, new Termination() {
                     public void terminate() {
                         _self.parent.completed(null, CompensationHandler.emptySet());
                     }

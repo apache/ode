@@ -154,7 +154,7 @@ public class SCOPEACT extends ACTIVITY {
             Set<ChannelListener> mlset = new HashSet<ChannelListener>();
             
             if (_status == null)
-                mlset.add(new ReceiveProcess<ValChannel, Val>(_self, new Val() {
+                mlset.add(new ReceiveProcess<Val>(_self, new Val() {
                     /** Our owner will notify us when it becomes clear what to do with the links. */
                     public void val(Object retVal) {
                         if (__log.isDebugEnabled()) {
@@ -178,7 +178,7 @@ public class SCOPEACT extends ACTIVITY {
                 if (_statuses.containsKey(m.getKey()))
                     continue;
             
-                mlset.add(new ReceiveProcess<LinkStatusChannel, LinkStatus>(m.getValue().pub, new LinkStatus() {
+                mlset.add(new ReceiveProcess<LinkStatus>(m.getValue().pub, new LinkStatus() {
                     public void linkStatus(boolean value) {
                         _statuses.put(m.getKey(), value);
                         if (_status != null)
@@ -262,7 +262,7 @@ public class SCOPEACT extends ACTIVITY {
                 else
                     il.lockChannel.readLock(_synchChannel);
 
-                object(new ReceiveProcess<SynchChannel, Synch>(_synchChannel, new Synch() {
+                object(new ReceiveProcess<Synch>(_synchChannel, new Synch() {
                     public void ret() {
                         __log.debug("ISOLATIONGUARD: got lock: " + _locksNeeded.get(0));
                         _locksAcquired.add(_locksNeeded.remove(0));
@@ -310,7 +310,7 @@ public class SCOPEACT extends ACTIVITY {
         public void run() {
 
             __log.debug("running UNLOCKER");
-            object(new ReceiveProcess<ParentScopeChannel, ParentScope>(_self, new ParentScope() {
+            object(new ReceiveProcess<ParentScope>(_self, new ParentScope() {
                 public void cancelled() {
                     _parent.cancelled();
                     unlockAll();

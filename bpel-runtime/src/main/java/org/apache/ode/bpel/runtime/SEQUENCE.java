@@ -77,7 +77,7 @@ class SEQUENCE extends ACTIVITY {
         }
 
         public void run() {
-            object(false, new ReceiveProcess<TerminationChannel, Termination>(_self.self, new Termination() {
+            object(false, new ReceiveProcess<Termination>(_self.self, new Termination() {
                 public void terminate() {
                     replication(_child.self).terminate();
 
@@ -91,7 +91,7 @@ class SEQUENCE extends ACTIVITY {
                 }
             }) {
                 private static final long serialVersionUID = -2680515407515637639L;
-            }.or(new ReceiveProcess<ParentScopeChannel, ParentScope>(_child.parent, new ParentScope() {
+            }.or(new ReceiveProcess<ParentScope>(_child.parent, new ParentScope() {
                 public void compensate(OScope scope, SynchChannel ret) {
                     _self.parent.compensate(scope,ret);
                     instance(ACTIVE.this);

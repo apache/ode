@@ -44,7 +44,7 @@ public class CELL_<T> extends JacobRunnable {
     public void run() {
         // INSTANTIATION{Cell(run,val)}
         // ==> run ? [ read(r)={...} & write(newVal)={...} ]
-        object(new ReceiveProcess<CellChannel, Cell>(_self, new Cell() {
+        object(new ReceiveProcess<Cell>(_self, new Cell() {
             public void read(Val r) {
                 // COMMUNICATION{x & [read... & ... ] | x ! read} ==> Cell(run, val) ...
                 instance(new CELL_<T>(_self, _val));

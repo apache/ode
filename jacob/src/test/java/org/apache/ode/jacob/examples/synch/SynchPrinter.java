@@ -42,7 +42,7 @@ public class SynchPrinter {
         }
 
         public void run() {
-            object(true, new ReceiveProcess<SynchPrintChannel, SynchPrint>(_self, new SynchPrint() {
+            object(true, new ReceiveProcess<SynchPrint>(_self, new SynchPrint() {
                 public SynchChannel print(String msg) {
                     System.out.println(msg);
                     return null; // SynchChannel automatically created by JacobVPU
@@ -60,11 +60,11 @@ public class SynchPrinter {
         public void run() {
             final SynchPrintChannel p = newChannel(SynchPrintChannel.class);
             instance(new SystemPrinter(p));
-            object(new ReceiveProcess<SynchChannel, Synch>(p.print("1"), new Synch() {
+            object(new ReceiveProcess<Synch>(p.print("1"), new Synch() {
                 public void ret() {
-                    object(new ReceiveProcess<SynchChannel, Synch>(p.print("2"), new Synch() {
+                    object(new ReceiveProcess<Synch>(p.print("2"), new Synch() {
                         public void ret() {
-                            object(new ReceiveProcess<SynchChannel, Synch>(p.print("3"), new Synch() {
+                            object(new ReceiveProcess<Synch>(p.print("3"), new Synch() {
                                 public void ret() {
                                 }
                             }) {});

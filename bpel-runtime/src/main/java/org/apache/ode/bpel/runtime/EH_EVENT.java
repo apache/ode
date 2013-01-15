@@ -164,7 +164,7 @@ class EH_EVENT extends BpelJacobRunnable {
                 HashSet<ChannelListener> mlset = new HashSet<ChannelListener>();
 
                 if (!_terminated) {
-                    mlset.add(new ReceiveProcess<TerminationChannel, Termination>(_tc, new Termination() {
+                    mlset.add(new ReceiveProcess<Termination>(_tc, new Termination() {
                         public void terminate() {
                             terminateActive();
                             _terminated = true;
@@ -178,7 +178,7 @@ class EH_EVENT extends BpelJacobRunnable {
                 }
 
                 if (!_stopped) {
-                    mlset.add(new ReceiveProcess<EventHandlerControlChannel, EventHandlerControl>(_ehc, new EventHandlerControl() {
+                    mlset.add(new ReceiveProcess<EventHandlerControl>(_ehc, new EventHandlerControl() {
                         public void stop() {
                             _stopped = true;
                             if (_pickResponseChannel != null)
@@ -191,7 +191,7 @@ class EH_EVENT extends BpelJacobRunnable {
                 }
 
                 for (final ActivityInfo ai : _active) {
-                    mlset.add(new ReceiveProcess<ParentScopeChannel, ParentScope>(ai.parent, new ParentScope() {
+                    mlset.add(new ReceiveProcess<ParentScope>(ai.parent, new ParentScope() {
                         public void compensate(OScope scope, SynchChannel ret) {
                             _psc.compensate(scope, ret);
                             instance(WAITING.this);
@@ -219,7 +219,7 @@ class EH_EVENT extends BpelJacobRunnable {
                 }
 
                 if (_pickResponseChannel != null)
-                    mlset.add(new ReceiveProcess<PickResponseChannel, PickResponse>(_pickResponseChannel, new PickResponse() {
+                    mlset.add(new ReceiveProcess<PickResponse>(_pickResponseChannel, new PickResponse() {
                          public void onRequestRcvd(int selectorIdx, String mexId) {
                             // The receipt of the message causes a new scope to be created:
                             ScopeFrame ehScopeFrame = new ScopeFrame(_oevent,

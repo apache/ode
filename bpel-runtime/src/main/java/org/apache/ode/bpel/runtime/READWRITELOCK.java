@@ -56,7 +56,7 @@ public class READWRITELOCK extends JacobRunnable {
 
     @Override
     public void run() {
-        object(new ReceiveProcess<ReadWriteLockChannel, ReadWriteLock>(_self, new ReadWriteLock() {
+        object(new ReceiveProcess<ReadWriteLock>(_self, new ReadWriteLock() {
             public void readLock(SynchChannel s) {
                 switch (_status) {
                 case UNLOCKED:

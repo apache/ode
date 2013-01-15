@@ -50,7 +50,7 @@ class ORDEREDCOMPENSATOR extends BpelJacobRunnable  {
       SynchChannel r = newChannel(SynchChannel.class);
       CompensationHandler cdata = _compensations.remove(0);
       cdata.compChannel.compensate(r);
-      object(new ReceiveProcess<SynchChannel, Synch>(r, new Synch() {
+      object(new ReceiveProcess<Synch>(r, new Synch() {
           public void ret() {
             instance(ORDEREDCOMPENSATOR.this);
           }

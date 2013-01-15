@@ -41,7 +41,7 @@ class COMPENSATE extends ACTIVITY {
         OScope scopeToCompensate = _ocompact.compensatedScope;
         SynchChannel sc = newChannel(SynchChannel.class);
         _self.parent.compensate(scopeToCompensate,sc);
-        object(new ReceiveProcess<SynchChannel, Synch>(sc, new Synch() {
+        object(new ReceiveProcess<Synch>(sc, new Synch() {
             public void ret() {
                 _self.parent.completed(null, CompensationHandler.emptySet());
               }

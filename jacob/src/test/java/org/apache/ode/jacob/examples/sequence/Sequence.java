@@ -54,7 +54,7 @@ public abstract class Sequence extends JacobRunnable {
             }
         } else {
             SynchChannel r = newChannel(SynchChannel.class);
-            object(new ReceiveProcess<SynchChannel, Synch>(r, new Synch() {
+            object(new ReceiveProcess<Synch>(r, new Synch() {
                 public void ret() {
                     ++_current;
                     instance(Sequence.this);

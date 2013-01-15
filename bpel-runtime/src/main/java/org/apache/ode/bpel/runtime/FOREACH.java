@@ -114,7 +114,7 @@ public class FOREACH extends ACTIVITY {
             if (active().hasNext()) {
 
                 Set<ChannelListener> mlSet = new HashSet<ChannelListener>();
-                mlSet.add(new ReceiveProcess<TerminationChannel, Termination>(_self.self, new Termination() {
+                mlSet.add(new ReceiveProcess<Termination>(_self.self, new Termination() {
                     public void terminate() {
                         // Terminating all children before sepuku
                         for (Iterator<ChildInfo> i = active(); i.hasNext(); )
@@ -128,7 +128,7 @@ public class FOREACH extends ACTIVITY {
                 for (;active.hasNext();) {
                     // Checking out our children
                     final ChildInfo child = active.next();
-                    mlSet.add(new ReceiveProcess<ParentScopeChannel, ParentScope>(child.activity.parent, new ParentScope() {
+                    mlSet.add(new ReceiveProcess<ParentScope>(child.activity.parent, new ParentScope() {
                         public void compensate(OScope scope, SynchChannel ret) {
                             // Forward compensation to parent
                             _self.parent.compensate(scope, ret);

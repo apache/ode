@@ -401,7 +401,7 @@ public final class JacobVPU {
             long ctime = System.currentTimeMillis();
             try {
                 _method.invoke(_methodBody instanceof ReceiveProcess ? 
-                    ((ReceiveProcess<?, ?>)_methodBody).receiver() : _methodBody, args);
+                    ((ReceiveProcess<?>)_methodBody).receiver() : _methodBody, args);
                 if (synchChannel != null) {
                     synchChannel.ret();
                 }

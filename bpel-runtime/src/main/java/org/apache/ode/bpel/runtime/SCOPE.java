@@ -143,7 +143,7 @@ class SCOPE extends ACTIVITY {
                 HashSet<ChannelListener> mlSet = new HashSet<ChannelListener>();
 
                 // Listen to messages from our parent.
-                mlSet.add(new ReceiveProcess<TerminationChannel, Termination>(_self.self, new Termination() {
+                mlSet.add(new ReceiveProcess<Termination>(_self.self, new Termination() {
                     public void terminate() {
                         _terminated = true;
 
@@ -164,7 +164,7 @@ class SCOPE extends ACTIVITY {
 
                 // Handle messages from the child if it is still alive
                 if (_child != null) {
-                    mlSet.add(new ReceiveProcess<ParentScopeChannel, ParentScope>(_child.parent, new ParentScope() {
+                    mlSet.add(new ReceiveProcess<ParentScope>(_child.parent, new ParentScope() {
                         public void compensate(OScope scope, SynchChannel ret) {
                             //  If this scope does not have available compensations, defer to
                             // parent scope, otherwise do compensation.
@@ -219,7 +219,7 @@ class SCOPE extends ACTIVITY {
                 for (Iterator<EventHandlerInfo> i = _eventHandlers.iterator();i.hasNext();) {
                     final EventHandlerInfo ehi = i.next();
 
-                    mlSet.add(new ReceiveProcess<ParentScopeChannel, ParentScope>(ehi.psc, new ParentScope() {
+                    mlSet.add(new ReceiveProcess<ParentScope>(ehi.psc, new ParentScope() {
                         public void compensate(OScope scope, SynchChannel ret) {
                             // ACTIVE scopes do not compensate, send request up to parent.
                             _self.parent.compensate(scope, ret);
@@ -294,7 +294,7 @@ class SCOPE extends ACTIVITY {
                         // Create the temination handler scope.
                         instance(new SCOPE(terminationHandlerActivity,terminationHandlerScopeFrame, SCOPE.this._linkFrame));
 
-                        object(new ReceiveProcess<ParentScopeChannel, ParentScope>(terminationHandlerActivity.parent, new ParentScope() {
+                        object(new ReceiveProcess<ParentScope>(terminationHandlerActivity.parent, new ParentScope() {
                             public void compensate(OScope scope, SynchChannel ret) {
                                 // This should never happen.
                                 throw new AssertionError("received compensate request!");
@@ -373,7 +373,7 @@ class SCOPE extends ACTIVITY {
                         // Create the fault handler scope.
                         instance(new SCOPE(faultHandlerActivity,faultHandlerScopeFrame, SCOPE.this._linkFrame));
 
-                        object(new ReceiveProcess<ParentScopeChannel, ParentScope>(faultHandlerActivity.parent, new ParentScope() {
+                        object(new ReceiveProcess<ParentScope>(faultHandlerActivity.parent, new ParentScope() {
                             public void compensate(OScope scope, SynchChannel ret) {
                                 // This should never happen.
                                 throw new AssertionError("received compensate request!");

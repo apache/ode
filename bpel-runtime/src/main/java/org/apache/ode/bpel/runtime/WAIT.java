@@ -28,7 +28,6 @@ import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OWait;
 import org.apache.ode.bpel.runtime.channels.Termination;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponse;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.jacob.ReceiveProcess;
@@ -68,7 +67,7 @@ class WAIT extends ACTIVITY {
             final TimerResponseChannel timerChannel = newChannel(TimerResponseChannel.class);
             getBpelRuntimeContext().registerTimer(timerChannel, dueDate);
 
-            object(false, new ReceiveProcess<TimerResponseChannel, TimerResponse>(timerChannel, new TimerResponse() {
+            object(false, new ReceiveProcess<TimerResponse>(timerChannel, new TimerResponse() {
                 public void onTimeout() {
                     _self.parent.completed(null, CompensationHandler.emptySet());
                 }
@@ -78,10 +77,10 @@ class WAIT extends ACTIVITY {
                 }
             }){
                 private static final long serialVersionUID = 3120518305645437327L;
-            }.or(new ReceiveProcess<TerminationChannel, Termination>(_self.self, new Termination() {
+            }.or(new ReceiveProcess<Termination>(_self.self, new Termination() {
                 public void terminate() {
                     _self.parent.completed(null, CompensationHandler.emptySet());
-                    object(new ReceiveProcess<TimerResponseChannel, TimerResponse>(timerChannel, new TimerResponse() {
+                    object(new ReceiveProcess<TimerResponse>(timerChannel, new TimerResponse() {
                         public void onTimeout() {
                             //ignore
                         }

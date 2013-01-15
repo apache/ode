@@ -71,7 +71,7 @@ public class Sieve extends JacobRunnable {
     }
 
     public void run() {
-        _out.val(_n, (SynchChannel)object(new ReceiveProcess<SynchChannel, Synch>(newChannel(SynchChannel.class), new Synch() {
+        _out.val(_n, (SynchChannel)object(new ReceiveProcess<Synch>(newChannel(SynchChannel.class), new Synch() {
             public void ret() {
                 instance(new Counter(_out, _n+1));
             }
@@ -103,9 +103,9 @@ public class Sieve extends JacobRunnable {
     }
 
     public void run() {
-      object(new ReceiveProcess<NaturalNumberStreamChannel, NaturalNumberStream>(_in, new NaturalNumberStream() {
+      object(new ReceiveProcess<NaturalNumberStream>(_in, new NaturalNumberStream() {
         public void val(final int n, final SynchChannel ret) {
-          _primes.val(n, (SynchChannel)object(new ReceiveProcess<SynchChannel, Synch>(newChannel(SynchChannel.class), new Synch() {
+          _primes.val(n, (SynchChannel)object(new ReceiveProcess<Synch>(newChannel(SynchChannel.class), new Synch() {
             public void ret() {
               NaturalNumberStreamChannel x = newChannel(NaturalNumberStreamChannel.class);
               instance(new PrimeFilter(n, _in, x));
@@ -130,7 +130,7 @@ public class Sieve extends JacobRunnable {
       _in = in;
     }
     public void run() {
-      object(true, new ReceiveProcess<NaturalNumberStreamChannel, NaturalNumberStream>(_in, new NaturalNumberStream(){
+      object(true, new ReceiveProcess<NaturalNumberStream>(_in, new NaturalNumberStream(){
         public void val(int n, SynchChannel ret) {
           _cnt ++;
           _last = n;
@@ -164,10 +164,10 @@ public class Sieve extends JacobRunnable {
       _out = out;
     }
     public void run() {
-       object(true, new ReceiveProcess<NaturalNumberStreamChannel, NaturalNumberStream>(_in, new NaturalNumberStream() {
+       object(true, new ReceiveProcess<NaturalNumberStream>(_in, new NaturalNumberStream() {
           public void val(int n, final SynchChannel ret) {
               if (n % _prime != 0) {
-                 _out.val(n, (SynchChannel)object(new ReceiveProcess<SynchChannel, Synch>(newChannel(SynchChannel.class), new Synch() {
+                 _out.val(n, (SynchChannel)object(new ReceiveProcess<Synch>(newChannel(SynchChannel.class), new Synch() {
                      public void ret() {
                          ret.ret();
                      }
