@@ -18,20 +18,21 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.util.Set;
+
 import org.apache.ode.bpel.evt.ProcessInstanceStartedEvent;
 import org.apache.ode.bpel.o.OBase;
+import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
 import org.apache.ode.bpel.runtime.channels.ReadWriteLockChannel;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
+import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.SynchChannel;
-
-import java.util.Set;
 import org.w3c.dom.Element;
 
 public class PROCESS extends BpelJacobRunnable {
@@ -59,9 +60,7 @@ public class PROCESS extends BpelJacobRunnable {
         ScopeFrame processFrame = new ScopeFrame(_oprocess.procesScope, scopeInstanceId, null, null,_globals);
         instance(new SCOPE(child, processFrame, new LinkFrame(null)));
 
-        object(new ParentScopeChannelListener(child.parent) {
-            private static final long serialVersionUID = -8564969578471906493L;
-
+        object(new ReceiveProcess<ParentScopeChannel, ParentScope>(child.parent, new ParentScope() {
             public void compensate(OScope scope, SynchChannel ret) {
                 assert false;
             }
@@ -83,6 +82,8 @@ public class PROCESS extends BpelJacobRunnable {
                 FaultData faultData = createFault(OFailureHandling.FAILURE_FAULT_NAME, _oprocess, reason);
                 this.completed(faultData, CompensationHandler.emptySet());
             }
+        }) {
+            private static final long serialVersionUID = -8564969578471906493L;
         });
     }
 

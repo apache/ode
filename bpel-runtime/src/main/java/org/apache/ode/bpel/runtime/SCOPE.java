@@ -47,11 +47,12 @@ import org.apache.ode.bpel.o.OVarType;
 import org.apache.ode.bpel.runtime.channels.CompensationChannel;
 import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannel;
 import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
-import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
 import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.SynchChannel;
 import org.w3c.dom.Element;
 
@@ -142,9 +143,7 @@ class SCOPE extends ACTIVITY {
                 HashSet<ChannelListener<?>> mlSet = new HashSet<ChannelListener<?>>();
 
                 // Listen to messages from our parent.
-                mlSet.add(new TerminationChannelListener(_self.self) {
-                    private static final long serialVersionUID = 1913414844895865116L;
-
+                mlSet.add(new ReceiveProcess<TerminationChannel, Termination>(_self.self, new Termination() {
                     public void terminate() {
                         _terminated = true;
 
@@ -159,13 +158,13 @@ class SCOPE extends ACTIVITY {
 
                         instance(ACTIVE.this);
                     }
+                }) {
+                    private static final long serialVersionUID = 1913414844895865116L;
                 });
 
                 // Handle messages from the child if it is still alive
                 if (_child != null) {
-                    mlSet.add(new ParentScopeChannelListener(_child.parent) {
-                        private static final long serialVersionUID = -6934246487304813033L;
-
+                    mlSet.add(new ReceiveProcess<ParentScopeChannel, ParentScope>(_child.parent, new ParentScope() {
                         public void compensate(OScope scope, SynchChannel ret) {
                             //  If this scope does not have available compensations, defer to
                             // parent scope, otherwise do compensation.
@@ -210,6 +209,8 @@ class SCOPE extends ACTIVITY {
                                       CompensationHandler.emptySet());
                         }
 
+                    }) {
+                        private static final long serialVersionUID = -6934246487304813033L;
                     });
                 }
 
@@ -218,9 +219,7 @@ class SCOPE extends ACTIVITY {
                 for (Iterator<EventHandlerInfo> i = _eventHandlers.iterator();i.hasNext();) {
                     final EventHandlerInfo ehi = i.next();
 
-                    mlSet.add(new ParentScopeChannelListener(ehi.psc) {
-                        private static final long serialVersionUID = -4694721357537858221L;
-
+                    mlSet.add(new ReceiveProcess<ParentScopeChannel, ParentScope>(ehi.psc, new ParentScope() {
                         public void compensate(OScope scope, SynchChannel ret) {
                             // ACTIVE scopes do not compensate, send request up to parent.
                             _self.parent.compensate(scope, ret);
@@ -250,6 +249,8 @@ class SCOPE extends ACTIVITY {
 
                         public void cancelled() { completed(null, CompensationHandler.emptySet()); }
                         public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
+                    }) {
+                        private static final long serialVersionUID = -4694721357537858221L;
                     });
                 }
                 object(false, mlSet);
@@ -293,9 +294,7 @@ class SCOPE extends ACTIVITY {
                         // Create the temination handler scope.
                         instance(new SCOPE(terminationHandlerActivity,terminationHandlerScopeFrame, SCOPE.this._linkFrame));
 
-                        object(new ParentScopeChannelListener(terminationHandlerActivity.parent) {
-                            private static final long serialVersionUID = -6009078124717125270L;
-
+                        object(new ReceiveProcess<ParentScopeChannel, ParentScope>(terminationHandlerActivity.parent, new ParentScope() {
                             public void compensate(OScope scope, SynchChannel ret) {
                                 // This should never happen.
                                 throw new AssertionError("received compensate request!");
@@ -313,6 +312,8 @@ class SCOPE extends ACTIVITY {
 
                             public void cancelled() { completed(null, CompensationHandler.emptySet()); }
                             public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
+                        }) {
+                            private static final long serialVersionUID = -6009078124717125270L;
                         });
                     } else {
                     	_self.parent.completed(null,_compensations);
@@ -372,9 +373,7 @@ class SCOPE extends ACTIVITY {
                         // Create the fault handler scope.
                         instance(new SCOPE(faultHandlerActivity,faultHandlerScopeFrame, SCOPE.this._linkFrame));
 
-                        object(new ParentScopeChannelListener(faultHandlerActivity.parent) {
-                            private static final long serialVersionUID = -6009078124717125270L;
-
+                        object(new ReceiveProcess<ParentScopeChannel, ParentScope>(faultHandlerActivity.parent, new ParentScope() {
                             public void compensate(OScope scope, SynchChannel ret) {
                                 // This should never happen.
                                 throw new AssertionError("received compensate request!");
@@ -391,6 +390,8 @@ class SCOPE extends ACTIVITY {
 
                             public void cancelled() { completed(null, CompensationHandler.emptySet()); }
                             public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
+                        }) {
+                            private static final long serialVersionUID = -6009078124717125270L;
                         });
                     }
                 } else /* completed ok */ {

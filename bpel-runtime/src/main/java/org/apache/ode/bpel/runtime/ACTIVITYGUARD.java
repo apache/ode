@@ -18,6 +18,14 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.io.Serializable;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
@@ -29,30 +37,25 @@ import org.apache.ode.bpel.evt.ActivityRecoveryEvent;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OExpression;
+import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.o.OInvoke;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OFailureHandling;
-import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.channels.LinkStatusChannelListener;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
-import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.bpel.runtime.channels.ActivityRecovery;
 import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
-import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannelListener;
+import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.LinkStatus;
+import org.apache.ode.bpel.runtime.channels.LinkStatusChannel;
+import org.apache.ode.bpel.runtime.channels.ParentScope;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
+import org.apache.ode.bpel.runtime.channels.Termination;
+import org.apache.ode.bpel.runtime.channels.TerminationChannel;
+import org.apache.ode.bpel.runtime.channels.TimerResponse;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
-import org.apache.ode.bpel.runtime.channels.TimerResponseChannelListener;
 import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.SynchChannel;
-
 import org.w3c.dom.Element;
-import java.io.Serializable;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 class ACTIVITYGUARD extends ACTIVITY {
     private static final long serialVersionUID = 1L;
@@ -106,24 +109,24 @@ class ACTIVITYGUARD extends ACTIVITY {
             }
         } else /* don't know all our links statuses */ {
             Set<ChannelListener<?>> mlset = new HashSet<ChannelListener<?>>();
-            mlset.add(new TerminationChannelListener(_self.self) {
-                private static final long serialVersionUID = 5094153128476008961L;
-
+            mlset.add(new ReceiveProcess<TerminationChannel, Termination>(_self.self, new Termination() {
                 public void terminate() {
                     // Complete immediately, without faulting or registering any comps.
                     _self.parent.completed(null, CompensationHandler.emptySet());
                     // Dead-path activity
                     dpe(_oactivity);
                 }
+            }) {
+                private static final long serialVersionUID = 5094153128476008961L;
             });
             for (final OLink link : _oactivity.targetLinks) {
-                mlset.add(new LinkStatusChannelListener(_linkFrame.resolve(link).sub) {
-                    private static final long serialVersionUID = 1024137371118887935L;
-
+                mlset.add(new ReceiveProcess<LinkStatusChannel, LinkStatus>(_linkFrame.resolve(link).sub, new LinkStatus() {
                     public void linkStatus(boolean value) {
                         _linkVals.put(link, Boolean.valueOf(value));
                         instance(ACTIVITYGUARD.this);
                     }
+                }) {
+                    private static final long serialVersionUID = 1024137371118887935L;
                 });
             }
 
@@ -199,9 +202,7 @@ class ACTIVITYGUARD extends ACTIVITY {
         }
 
         public void run() {
-            object(new ParentScopeChannelListener(_in) {
-                private static final long serialVersionUID = 2667359535900385952L;
-
+            object(new ReceiveProcess<ParentScopeChannel, ParentScope>(_in, new ParentScope() {
                 public void compensate(OScope scope, SynchChannel ret) {
                     _self.parent.compensate(scope,ret);
                     instance(TCONDINTERCEPT.this);
@@ -275,15 +276,16 @@ class ACTIVITYGUARD extends ACTIVITY {
                         (failureHandling == null ? 0L : failureHandling.retryDelay * 1000));
                     final TimerResponseChannel timerChannel = newChannel(TimerResponseChannel.class);
                     getBpelRuntimeContext().registerTimer(timerChannel, future);
-                    object(false, new TimerResponseChannelListener(timerChannel) {
+                    object(false, new ReceiveProcess<TimerResponseChannel, TimerResponse>(timerChannel, new TimerResponse() {
+                        public void onTimeout() {
+                            ++_failure.retryCount;
+                            startGuardedActivity();
+                        }
+                        public void onCancel() {
+                            requireRecovery();
+                        }
+                    }) {
                         private static final long serialVersionUID = -261911108068231376L;
-                            public void onTimeout() {
-                                ++_failure.retryCount;
-                                startGuardedActivity();
-                            }
-                            public void onCancel() {
-                                requireRecovery();
-                            }
                     });
                 }
 
@@ -295,8 +297,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                     getBpelRuntimeContext().registerActivityForRecovery(
                         recoveryChannel, _self.aId, _failure.reason, _failure.dateTime, _failure.data,
                         new String[] { "retry", "cancel", "fault" }, _failure.retryCount);
-                    object(false, new ActivityRecoveryChannelListener(recoveryChannel) {
-                        private static final long serialVersionUID = 8397883882810521685L;
+                    object(false, new ReceiveProcess<ActivityRecoveryChannel, ActivityRecovery>(recoveryChannel, new ActivityRecovery() {
                         public void retry() {
                             if (__log.isDebugEnabled())
                                 __log.debug("ActivityRecovery: Retrying activity " + _self.aId + " (user initiated)");
@@ -321,19 +322,22 @@ class ACTIVITYGUARD extends ACTIVITY {
                                 faultData = createFault(OFailureHandling.FAILURE_FAULT_NAME, _self.o, _failure.reason);
                             completed(faultData, CompensationHandler.emptySet());
                         }
-                    }.or(new TerminationChannelListener(_self.self) {
-                        private static final long serialVersionUID = 2148587381204858397L;
-
+                    }){
+                        private static final long serialVersionUID = 8397883882810521685L;
+                    }.or(new ReceiveProcess<TerminationChannel, Termination>(_self.self, new Termination() {
                         public void terminate() {
                             if (__log.isDebugEnabled())
                                 __log.debug("ActivityRecovery: Cancelling activity " + _self.aId + " (terminated by scope)");
                             getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
                             cancelled();
                         }
+                    }) {
+                        private static final long serialVersionUID = 2148587381204858397L;
                     }));
                 }
+            }) {
+                private static final long serialVersionUID = 2667359535900385952L;
             });
-
         }
     }
 

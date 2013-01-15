@@ -18,24 +18,23 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OSequence;
-import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
-import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
-import org.apache.ode.jacob.SynchChannel;
-
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.ode.bpel.o.OActivity;
+import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OSequence;
+import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.ParentScope;
+import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
+import org.apache.ode.bpel.runtime.channels.Termination;
+import org.apache.ode.bpel.runtime.channels.TerminationChannel;
+import org.apache.ode.jacob.ReceiveProcess;
+import org.apache.ode.jacob.SynchChannel;
 import org.w3c.dom.Element;
 
 /**
@@ -78,9 +77,7 @@ class SEQUENCE extends ACTIVITY {
         }
 
         public void run() {
-            object(false, new TerminationChannelListener(_self.self) {
-                private static final long serialVersionUID = -2680515407515637639L;
-
+            object(false, new ReceiveProcess<TerminationChannel, Termination>(_self.self, new Termination() {
                 public void terminate() {
                     replication(_child.self).terminate();
 
@@ -92,9 +89,9 @@ class SEQUENCE extends ACTIVITY {
                     _terminateRequested = true;
                     instance(ACTIVE.this);
                 }
-            }.or(new ParentScopeChannelListener(_child.parent) {
-                private static final long serialVersionUID = 7195562310281985971L;
-
+            }) {
+                private static final long serialVersionUID = -2680515407515637639L;
+            }.or(new ReceiveProcess<ParentScopeChannel, ParentScope>(_child.parent, new ParentScope() {
                 public void compensate(OScope scope, SynchChannel ret) {
                     _self.parent.compensate(scope,ret);
                     instance(ACTIVE.this);
@@ -115,6 +112,8 @@ class SEQUENCE extends ACTIVITY {
 
                 public void cancelled() { completed(null, CompensationHandler.emptySet()); }
                 public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
+            }) {
+                private static final long serialVersionUID = 7195562310281985971L;
             }));
         }
 
@@ -122,7 +121,6 @@ class SEQUENCE extends ACTIVITY {
             for (Iterator<OActivity> i = remaining.iterator();i.hasNext();)
                 dpe(i.next());
         }
-
     }
 
     public String toString() {

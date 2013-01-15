@@ -26,20 +26,17 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.evt.ActivityFailureEvent;
-import org.apache.ode.bpel.evt.ActivityRecoveryEvent;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
-import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.o.OInvoke;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
-import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannelListener;
 import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.InvokeResponse;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
-import org.apache.ode.bpel.runtime.channels.InvokeResponseChannelListener;
-import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.bpel.runtime.channels.Termination;
+import org.apache.ode.bpel.runtime.channels.TerminationChannel;
+import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -101,9 +98,7 @@ public class INVOKE extends ACTIVITY {
                         _scopeFrame.resolve(_oinvoke.partnerLink), _oinvoke.operation,
                         outboundMsg, invokeResponseChannel);
 
-                object(false, new InvokeResponseChannelListener(invokeResponseChannel) {
-                    private static final long serialVersionUID = 4496880438819196765L;
-
+                object(false, new ReceiveProcess<InvokeResponseChannel, InvokeResponse>(invokeResponseChannel, new InvokeResponse() {
                     public void onResponse() {
                         // we don't have to write variable data -> this already
                         // happened in the nativeAPI impl
@@ -195,14 +190,15 @@ public class INVOKE extends ACTIVITY {
                         getBpelRuntimeContext().releasePartnerMex(mexId, false);
                     }
 
-                }.or(new TerminationChannelListener(_self.self) {
-                    private static final long serialVersionUID = 4219496341785922396L;
-
+                }){
+                    private static final long serialVersionUID = 4496880438819196765L;
+                }.or(new ReceiveProcess<TerminationChannel, Termination>(_self.self, new Termination() {
                     public void terminate() {
                         _self.parent.completed(null, CompensationHandler.emptySet());
                     }
+                }) {
+                    private static final long serialVersionUID = 4219496341785922396L;
                 }));
-
             }
         } catch (FaultException fault) {
             __log.error(fault);

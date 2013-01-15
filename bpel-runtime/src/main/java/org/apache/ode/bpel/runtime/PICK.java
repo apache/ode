@@ -31,21 +31,23 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.explang.EvaluationException;
+import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OPickReceive;
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.PickResponse;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
-import org.apache.ode.bpel.runtime.channels.PickResponseChannelListener;
-import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.bpel.runtime.channels.Termination;
+import org.apache.ode.bpel.runtime.channels.TerminationChannel;
+import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.xsd.Duration;
-import org.apache.ode.bpel.evar.ExternalVariableModuleException;
-import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -278,9 +280,7 @@ class PICK extends ACTIVITY {
         }
 
         public void run() {
-            object(false, new PickResponseChannelListener(_pickResponseChannel) {
-                private static final long serialVersionUID = -8237296827418738011L;
-
+            object(false, new ReceiveProcess<PickResponseChannel, PickResponse>(_pickResponseChannel, new PickResponse() {
                 public void onRequestRcvd(int selectorIdx, String mexId) {
                     OPickReceive.OnMessage onMessage = _opick.onMessages.get(selectorIdx);
 
@@ -372,13 +372,15 @@ class PICK extends ACTIVITY {
                     _self.parent.completed(null, CompensationHandler.emptySet());
                 }
 
-            }.or(new TerminationChannelListener(_self.self) {
-                private static final long serialVersionUID = 4399496341785922396L;
-
+            }){
+                private static final long serialVersionUID = -8237296827418738011L;
+            }.or(new ReceiveProcess<TerminationChannel, Termination>(_self.self, new Termination() {
                 public void terminate() {
                     getBpelRuntimeContext().cancel(_pickResponseChannel);
                     instance(WAITING.this);
                 }
+            }) {
+                private static final long serialVersionUID = 4399496341785922396L;
             }));
         }
     }

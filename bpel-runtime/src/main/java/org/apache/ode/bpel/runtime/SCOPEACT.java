@@ -36,6 +36,7 @@ import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.LinkStatus;
 import org.apache.ode.bpel.runtime.channels.LinkStatusChannel;
 import org.apache.ode.bpel.runtime.channels.LinkStatusChannelListener;
+import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
 import org.apache.ode.bpel.runtime.channels.ReadWriteLockChannel;
@@ -311,8 +312,7 @@ public class SCOPEACT extends ACTIVITY {
         public void run() {
 
             __log.debug("running UNLOCKER");
-            object(new ParentScopeChannelListener(_self) {
-
+            object(new ReceiveProcess<ParentScopeChannel, ParentScope>(_self, new ParentScope() {
                 public void cancelled() {
                     _parent.cancelled();
                     unlockAll();
@@ -331,7 +331,6 @@ public class SCOPEACT extends ACTIVITY {
                     _linkStatusInterceptor.val(faultData == null);
                     unlockAll();
                     // no more listening
-
                 }
 
                 public void failure(String reason, Element data) {
@@ -340,7 +339,8 @@ public class SCOPEACT extends ACTIVITY {
                     unlockAll();
                     // no more listening
                 }
-
+            }) {
+				private static final long serialVersionUID = 1L;
             });
         }
 

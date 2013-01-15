@@ -18,24 +18,25 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OFlow;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.LinkStatusChannel;
+import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
-import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
 import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.utils.stl.FilterIterator;
 import org.apache.ode.utils.stl.MemberOfFunction;
-
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 import org.w3c.dom.Element;
 
 class FLOW extends ACTIVITY {
@@ -79,21 +80,19 @@ class FLOW extends ACTIVITY {
             Iterator<ChildInfo> active = active();
             if (active.hasNext()) {
                 Set<ChannelListener<?>> mlSet = new HashSet<ChannelListener<?>>();
-                mlSet.add(new TerminationChannelListener(_self.self) {
-                    private static final long serialVersionUID = 2554750258974084466L;
-
+                mlSet.add(new ReceiveProcess<TerminationChannel, Termination>(_self.self, new Termination() {
                     public void terminate() {
                         for (Iterator<ChildInfo> i = active(); i.hasNext(); )
                             replication(i.next().activity.self).terminate();
                         instance(ACTIVE.this);
                     }
+                }) {
+                    private static final long serialVersionUID = 2554750258974084466L;
                 });
 
                 for (;active.hasNext();) {
                     final ChildInfo child = active.next();
-                    mlSet.add(new ParentScopeChannelListener(child.activity.parent) {
-                        private static final long serialVersionUID = -8027205709169238172L;
-
+                    mlSet.add(new ReceiveProcess<ParentScopeChannel, ParentScope>(child.activity.parent, new ParentScope() {
                         public void completed(FaultData faultData, Set<CompensationHandler> compensations) {
                             child.completed = true;
                             _compensations.addAll(compensations);
@@ -115,6 +114,8 @@ class FLOW extends ACTIVITY {
 
                         public void cancelled() { completed(null, CompensationHandler.emptySet()); }
                         public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
+                    }) {
+                        private static final long serialVersionUID = -8027205709169238172L;
                     });
                 }
                 object(false,mlSet);

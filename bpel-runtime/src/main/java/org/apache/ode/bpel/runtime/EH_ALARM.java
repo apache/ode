@@ -18,6 +18,12 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
@@ -25,27 +31,16 @@ import org.apache.ode.bpel.o.OEventHandler;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.channels.EventHandlerControl;
 import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannel;
-import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannelListener;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
 import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
-import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.bpel.runtime.channels.TimerResponse;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
-import org.apache.ode.bpel.runtime.channels.TimerResponseChannelListener;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.SynchChannel;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Date;
-
 import org.w3c.dom.Element;
 
 /**
@@ -136,19 +131,19 @@ class EH_ALARM extends BpelJacobRunnable {
         public void run() {
             Calendar now = Calendar.getInstance();
 
-            Set<ChannelListener<?>> listeners = new EventHandlerControlChannelListener(_cc) {
-                private static final long serialVersionUID = -7750428941445331236L;
-
+            Set<ChannelListener<?>> listeners = new ReceiveProcess<EventHandlerControlChannel, EventHandlerControl>(_cc, new EventHandlerControl() {
                 public void stop() {
                     _psc.completed(null, _comps);
                 }
 
-            }.or(new TerminationChannelListener(_tc) {
-                private static final long serialVersionUID = 6100105997983514609L;
-
+            }){
+                private static final long serialVersionUID = -7750428941445331236L;
+            }.or(new ReceiveProcess<TerminationChannel, Termination>(_tc, new Termination() {
                 public void terminate() {
                     _psc.completed(null, _comps);
                 }
+            }) {
+                private static final long serialVersionUID = 6100105997983514609L;
             });
 
             if (_alarm == null) {
@@ -157,9 +152,7 @@ class EH_ALARM extends BpelJacobRunnable {
                 TimerResponseChannel trc = newChannel(TimerResponseChannel.class);
                 getBpelRuntimeContext().registerTimer(trc,_alarm.getTime());
 
-                listeners.add(new TimerResponseChannelListener(trc){
-                    private static final long serialVersionUID = 1110683632756756017L;
-
+                listeners.add(new ReceiveProcess<TimerResponseChannel, TimerResponse>(trc, new TimerResponse(){
                     public void onTimeout() {
                         // This is what we are waiting for, fire the activity
                         instance(new FIRE());
@@ -168,6 +161,8 @@ class EH_ALARM extends BpelJacobRunnable {
                     public void onCancel() {
                         _psc.completed(null, _comps);
                     }
+                }) {
+                    private static final long serialVersionUID = 1110683632756756017L;
                 });
                 object(false, listeners);
             } else /* now is later then alarm time */ {
@@ -178,7 +173,6 @@ class EH_ALARM extends BpelJacobRunnable {
                 instance(createChild(child, _scopeFrame, new LinkFrame(null) ));
                 instance(new ACTIVE(child));
             }
-
         }
     }
 

@@ -26,19 +26,20 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.o.OEventHandler;
 import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.runtime.channels.EventHandlerControl;
 import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannel;
-import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannelListener;
 import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.runtime.channels.PickResponse;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
-import org.apache.ode.bpel.runtime.channels.PickResponseChannelListener;
+import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
-import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
-import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.SynchChannel;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -163,9 +164,7 @@ class EH_EVENT extends BpelJacobRunnable {
                 HashSet<ChannelListener<?>> mlset = new HashSet<ChannelListener<?>>();
 
                 if (!_terminated) {
-                    mlset.add(new TerminationChannelListener(_tc) {
-                        private static final long serialVersionUID = 7666910462948788042L;
-
+                    mlset.add(new ReceiveProcess<TerminationChannel, Termination>(_tc, new Termination() {
                         public void terminate() {
                             terminateActive();
                             _terminated = true;
@@ -173,28 +172,26 @@ class EH_EVENT extends BpelJacobRunnable {
                                 getBpelRuntimeContext().cancel(_pickResponseChannel);
                             instance(WAITING.this);
                         }
+                    }) {
+                        private static final long serialVersionUID = 7666910462948788042L;
                     });
-
                 }
 
                 if (!_stopped) {
-                    mlset.add(new EventHandlerControlChannelListener(_ehc) {
-                        private static final long serialVersionUID = -1050788954724647970L;
-
+                    mlset.add(new ReceiveProcess<EventHandlerControlChannel, EventHandlerControl>(_ehc, new EventHandlerControl() {
                         public void stop() {
                             _stopped = true;
                             if (_pickResponseChannel != null)
                                 getBpelRuntimeContext().cancel(_pickResponseChannel);
                             instance(WAITING.this);
                         }
+                    }) {
+                        private static final long serialVersionUID = -1050788954724647970L;
                     });
-
                 }
 
                 for (final ActivityInfo ai : _active) {
-                    mlset.add(new ParentScopeChannelListener(ai.parent) {
-                        private static final long serialVersionUID = 5341207762415360982L;
-
+                    mlset.add(new ReceiveProcess<ParentScopeChannel, ParentScope>(ai.parent, new ParentScope() {
                         public void compensate(OScope scope, SynchChannel ret) {
                             _psc.compensate(scope, ret);
                             instance(WAITING.this);
@@ -216,15 +213,14 @@ class EH_EVENT extends BpelJacobRunnable {
 
                         public void cancelled() { completed(null, CompensationHandler.emptySet()); }
                         public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
+                    }) {
+                        private static final long serialVersionUID = 5341207762415360982L;
                     });
                 }
 
                 if (_pickResponseChannel != null)
-                    mlset.add(new PickResponseChannelListener(_pickResponseChannel) {
-                        private static final long serialVersionUID = -4929999153478677288L;
-
-
-                        public void onRequestRcvd(int selectorIdx, String mexId) {
+                    mlset.add(new ReceiveProcess<PickResponseChannel, PickResponse>(_pickResponseChannel, new PickResponse() {
+                         public void onRequestRcvd(int selectorIdx, String mexId) {
                             // The receipt of the message causes a new scope to be created:
                             ScopeFrame ehScopeFrame = new ScopeFrame(_oevent,
                                     getBpelRuntimeContext().createScopeInstance(_scopeFrame.scopeInstanceId, _oevent),
@@ -332,6 +328,8 @@ class EH_EVENT extends BpelJacobRunnable {
                         public void onCancel() {
                             instance(new WAITING(null));
                         }
+                    }) {
+                        private static final long serialVersionUID = -4929999153478677288L;
                     });
 
                 object(false, mlset);

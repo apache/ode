@@ -28,10 +28,11 @@ import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OWhile;
 import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannelListener;
+import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
-import org.apache.ode.bpel.runtime.channels.TerminationChannelListener;
+import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.SynchChannel;
 import org.w3c.dom.Element;
 
@@ -113,17 +114,15 @@ class WHILE extends ACTIVITY {
         }
 
         public void run() {
-            object(false, new TerminationChannelListener(_self.self) {
-                private static final long serialVersionUID = -5471984635653784051L;
-
+            object(false, new ReceiveProcess<TerminationChannel, Termination>(_self.self, new Termination() {
                 public void terminate() {
                     _terminated = true;
                     replication(_child.self).terminate();
                     instance(WAITER.this);
                 }
-            }.or(new ParentScopeChannelListener(_child.parent) {
-                private static final long serialVersionUID = 3907167240907524405L;
-
+            }) {
+                private static final long serialVersionUID = -5471984635653784051L;
+            }.or(new ReceiveProcess<ParentScopeChannel, ParentScope>(_child.parent, new ParentScope() {
                 public void compensate(OScope scope, SynchChannel ret) {
                     _self.parent.compensate(scope,ret);
                     instance(WAITER.this);
@@ -139,6 +138,8 @@ class WHILE extends ACTIVITY {
 
                 public void cancelled() { completed(null, CompensationHandler.emptySet()); }
                 public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
+            }) {
+                private static final long serialVersionUID = 3907167240907524405L;
             }));
         }
     }
