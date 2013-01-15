@@ -18,12 +18,14 @@
  */
 package org.apache.ode.jacob;
 
+import java.io.Serializable;
+
 import org.apache.ode.jacob.ap.ChannelType;
 
 /**
  * Generic return-value channel type.
  */
 @ChannelType
-public interface Val {
+public interface Val extends Serializable {
   public void val(Object retVal);
 }

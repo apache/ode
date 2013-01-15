@@ -18,6 +18,8 @@
  */
 package org.apache.ode.bpel.runtime.channels;
 
+import java.io.Serializable;
+
 import org.apache.ode.jacob.ap.ChannelType;
 
 
@@ -25,7 +27,7 @@ import org.apache.ode.jacob.ap.ChannelType;
  * Channel for timer notification.
  */
 @ChannelType
-public interface TimerResponse {
+public interface TimerResponse extends Serializable {
     /** timer event has occurred */
     public void onTimeout();
 

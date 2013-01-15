@@ -18,6 +18,8 @@
  */
 package org.apache.ode.jacob;
 
+import java.io.Serializable;
+
 import org.apache.ode.jacob.ap.ChannelType;
 
 /**
@@ -29,6 +31,6 @@ import org.apache.ode.jacob.ap.ChannelType;
  */
 
 @ChannelType
-public interface Synch {
+public interface Synch extends Serializable {
     public void ret();
 }

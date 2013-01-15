@@ -18,6 +18,8 @@
  */
 package org.apache.ode.bpel.runtime.channels;
 
+import java.io.Serializable;
+
 import org.apache.ode.jacob.ap.ChannelType;
 
 
@@ -26,7 +28,7 @@ import org.apache.ode.jacob.ap.ChannelType;
  * Channel used for parent-to-child scope communication.
  */
 @ChannelType
-public interface Termination  {
+public interface Termination extends Serializable {
 
   /**
    * Stop processing immediately.
