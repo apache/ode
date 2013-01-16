@@ -51,6 +51,7 @@ import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.jacob.JacobRunnable;
+import org.apache.ode.jacob.ProcessUtil;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.ObjectPrinter;
@@ -81,7 +82,7 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
     @Override
     public void cancel(TimerResponseChannel timerResponseChannel) {
         if (__log.isDebugEnabled()) {
-            __log.debug("cancel " + timerResponseChannel.export());
+            __log.debug("cancel " + ProcessUtil.exportChannel(timerResponseChannel));
         }
         super.cancel(timerResponseChannel);
     }
@@ -157,7 +158,7 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
                     throw new IllegalStateException("I don't have response for invoke " + answer);
                 }
 
-                final String channel2 = channel.export();
+                final String channel2 = ProcessUtil.exportChannel(channel);
                 final String mexid = mexDao.getMessageExchangeId();
                 replayerContext.scheduler.scheduleReplayerJob(new Callable() {
                     public Object call() throws Exception {
@@ -195,7 +196,7 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
     @Override
     public void registerTimer(final TimerResponseChannel timerChannel, final Date timeToFire) {
         __log.debug("register timer " + timerChannel + " " + timeToFire);
-        final String channel = timerChannel.export();
+        final String channel = ProcessUtil.exportChannel(timerChannel);
 
         if (timeToFire.before(replayerContext.replayStartDate)) {
             replayerContext.scheduler.scheduleReplayerJob(new Callable() {

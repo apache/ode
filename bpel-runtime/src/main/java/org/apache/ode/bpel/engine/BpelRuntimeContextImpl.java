@@ -101,6 +101,7 @@ import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.jacob.JacobRunnable;
+import org.apache.ode.jacob.ProcessUtil;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
 import org.apache.ode.utils.DOMUtils;
@@ -344,7 +345,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             sendEvent(evt);
         }
 
-        final String pickResponseChannelStr = pickResponseChannel.export();
+        final String pickResponseChannelStr = ProcessUtil.exportChannel(pickResponseChannel);
 
         List<CorrelatorDAO> correlators = new ArrayList<CorrelatorDAO>(selectors.length);
         for (Selector selector : selectors) {
@@ -403,7 +404,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             CorrelatorDAO correlator = correlators.get(i);
             Selector selector = selectors[i];
 
-            correlator.addRoute(pickResponseChannel.export(), _dao, i, selector.correlationKeySet, selector.route);
+            correlator.addRoute(ProcessUtil.exportChannel(pickResponseChannel), _dao, i, selector.correlationKeySet, selector.route);
             scheduleCorrelatorMatcher(correlator.getCorrelatorId(), selector.correlationKeySet);
 
             if (BpelProcess.__log.isDebugEnabled()) {
@@ -660,7 +661,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
     public void registerTimer(TimerResponseChannel timerChannel, Date timeToFire) {
         JobDetails we = new JobDetails();
         we.setInstanceId(_dao.getInstanceId());
-        we.setChannel(timerChannel.export());
+        we.setChannel(ProcessUtil.exportChannel(timerChannel));
         we.setType(JobType.TIMER);
         we.setInMem(_bpelProcess.isInMemory());
         if(_bpelProcess.isInMemory()){
@@ -740,7 +741,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         mexDao.setInstance(_dao);
         mexDao.setPattern((operation.getOutput() != null ? MessageExchangePattern.REQUEST_RESPONSE
                 : MessageExchangePattern.REQUEST_ONLY).toString());
-        mexDao.setChannel(channel == null ? null : channel.export());
+        mexDao.setChannel(channel == null ? null : ProcessUtil.exportChannel(channel));
 
         // Properties used by stateful-exchange protocol.
         String mySessionId = plinkDAO.getMySessionId();
@@ -1006,7 +1007,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
     public void cancel(final TimerResponseChannel timerResponseChannel) {
         // In case this is a pick response channel, we need to cancel routes and
         // receive/reply association.
-        final String id = timerResponseChannel.export();
+        final String id = ProcessUtil.exportChannel(timerResponseChannel);
         _dao.getProcess().removeRoutes(id, _dao);
         _imaManager.cancel(id, true);
 
@@ -1365,12 +1366,12 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (dateTime == null)
             dateTime = new Date();
         __log.info("ActivityRecovery: Registering activity " + activityId + ", failure reason: " + reason +
-                " on channel " + channel.export());
-        _dao.createActivityRecovery(channel.export(), (int) activityId, reason, dateTime, details, actions, retries);
+                " on channel " + ProcessUtil.exportChannel(channel));
+        _dao.createActivityRecovery(ProcessUtil.exportChannel(channel), (int) activityId, reason, dateTime, details, actions, retries);
     }
 
     public void unregisterActivityForRecovery(ActivityRecoveryChannel channel) {
-        _dao.deleteActivityRecovery(channel.export());
+        _dao.deleteActivityRecovery(ProcessUtil.exportChannel(channel));
     }
 
     public void recoverActivity(final String channel, final long activityId, final String action, final FaultData fault) {

@@ -23,6 +23,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import org.apache.ode.jacob.Channel;
+import org.apache.ode.jacob.ChannelType;
+import org.apache.ode.jacob.ProcessUtil;
 
 import junit.framework.TestCase;
 
@@ -37,7 +39,7 @@ public class ProxyConstructorTimingTest extends TestCase {
         Greeter gp = (Greeter) Proxy.newProxyInstance(Greeter.class.getClassLoader(),
             new Class<?>[] {Channel.class, Greeter.class}, new GreeterInvocationHandler(new GreeterImpl()));
         assertEquals("Hello World", gp.hello("World"));
-        assertEquals("Implemented by InvocationHandler", ((Channel)gp).export());
+        assertEquals("Implemented by InvocationHandler", ProcessUtil.exportChannel(gp));
     }
 
     public interface TestExecution {
@@ -104,17 +106,19 @@ public class ProxyConstructorTimingTest extends TestCase {
         });
     }
     
-    public interface Greeter {
+    public interface Greeter extends ChannelType {
         String hello(String name);
     }
     
-    public class GreeterImpl implements Greeter {
+    @SuppressWarnings("serial")
+	public class GreeterImpl implements Greeter {
         public String hello(String name) {
             return "Hello " + name;
         }
     }
 
-    public class GreeterImpl2 implements Greeter {
+    @SuppressWarnings("serial")
+	public class GreeterImpl2 implements Greeter {
         public String hello(String name) {
             return "";
         }

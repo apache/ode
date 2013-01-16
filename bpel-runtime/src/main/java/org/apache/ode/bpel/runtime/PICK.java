@@ -44,6 +44,7 @@ import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.PickResponse;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.Termination;
+import org.apache.ode.jacob.ProcessUtil;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.xsd.Duration;
@@ -295,7 +296,7 @@ class PICK extends ACTIVITY {
                         dpe(_alarm.activity);
                     }
 
-                    getBpelRuntimeContext().cancelOutstandingRequests(_pickResponseChannel.export());
+                    getBpelRuntimeContext().cancelOutstandingRequests(ProcessUtil.exportChannel(_pickResponseChannel));
 
                     FaultData fault;
                     initVariable(mexId, onMessage);

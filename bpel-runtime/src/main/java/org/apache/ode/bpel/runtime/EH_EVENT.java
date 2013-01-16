@@ -39,6 +39,7 @@ import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.ProcessUtil;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.SynchChannel;
 import org.w3c.dom.Element;
@@ -275,7 +276,7 @@ class EH_EVENT extends BpelJacobRunnable {
                                                 partnersSessionId);
                                 }
 
-                                getBpelRuntimeContext().cancelOutstandingRequests(_pickResponseChannel.export());
+                                getBpelRuntimeContext().cancelOutstandingRequests(ProcessUtil.exportChannel(_pickResponseChannel));
                                 // this request is now waiting for a reply
                                 getBpelRuntimeContext().processOutstandingRequest(_scopeFrame.resolve(_oevent.partnerLink),
                                         _oevent.operation.getName(), _oevent.messageExchangeId, mexId);

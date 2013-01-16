@@ -25,10 +25,10 @@ public final class ProcessUtil {
     }
 
     public static String exportChannel(ChannelType channel) {
-    	if (channel instanceof Channel) {
+    	if (channel != null && channel instanceof Channel) {
     		return ((Channel)channel).export();
     	}
-    	// TODO: add a check for null?
-        throw new RuntimeException("Invalid proxy type " + channel.getClass());
+        throw new IllegalArgumentException("Invalid proxy type: "
+    	    + channel == null ? "<null>" : channel.getClass().toString());
     }
 }
