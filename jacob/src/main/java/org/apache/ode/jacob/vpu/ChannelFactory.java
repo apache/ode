@@ -50,11 +50,11 @@ public class ChannelFactory {
         return cih._backend;
     }
 
-    public static ExportableChannel createChannel(CommChannel backend, Class<?> type) {
+    public static Channel createChannel(CommChannel backend, Class<?> type) {
         InvocationHandler h = new ChannelInvocationHandler(backend);
         Class<?>[] ifaces = new Class[] { ExportableChannel.class, type };
         Object proxy = Proxy.newProxyInstance(ExportableChannel.class.getClassLoader(), ifaces, h);
-        return (ExportableChannel) proxy;
+        return (Channel) proxy;
     }
 
     public static final class ChannelInvocationHandler implements InvocationHandler {
@@ -84,9 +84,9 @@ public class ChannelFactory {
                 return method.invoke(this, args);
             }
             if (method.equals(METHOD_CHANNEL_EXPORT)) {
-                return JacobVPU.activeJacobThread().exportChannel((ExportableChannel) proxy);
+                return JacobVPU.activeJacobThread().exportChannel((Channel)proxy);
             }
-            return JacobVPU.activeJacobThread().message((ExportableChannel) proxy, method, args);
+            return JacobVPU.activeJacobThread().message((Channel)proxy, method, args);
         }
     } // class ChannelInvocationHandler
 

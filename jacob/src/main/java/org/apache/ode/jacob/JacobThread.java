@@ -32,9 +32,9 @@ import java.lang.reflect.Method;
 public interface JacobThread {
     public Object getExtension(Class<?> extensionClass);
 
-    public String exportChannel(ExportableChannel channel);
+    public String exportChannel(Channel channel);
 
-    public ExportableChannel importChannel(String channelId, Class<?> channelClass);
+    public Channel importChannel(String channelId, Class<?> channelClass);
 
     /**
      * Create a process instance i.e. a concretion of a process abstraction.
@@ -43,7 +43,7 @@ public interface JacobThread {
 
     /**
      * Send a message (object invocation). This method shouldn't really be used
-     * as {@link ExportableChannel} objects may be used as proxies in this respect.
+     * as {@link Channel} objects may be used as proxies in this respect.
      *
      * @param channel
      *            channel on which to send the message
@@ -52,12 +52,12 @@ public interface JacobThread {
      * @param args
      *            arguments
      */
-    public ExportableChannel message(ExportableChannel channel, Method method, Object[] args);
+    public Channel message(Channel channel, Method method, Object[] args);
 
     /**
      * Create a new channel.
      */
-    public ExportableChannel newChannel(Class<?> channelType, String creator, String description);
+    public Channel newChannel(Class<?> channelType, String creator, String description);
 
     /**
      * <p>

@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.apache.ode.jacob.Channel;
-import org.apache.ode.jacob.ExportableChannel;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.JacobObject;
 import org.apache.ode.jacob.JacobRunnable;
@@ -38,7 +37,6 @@ import org.apache.ode.jacob.soup.CommRecv;
 import org.apache.ode.jacob.soup.CommSend;
 import org.apache.ode.jacob.soup.Continuation;
 import org.apache.ode.jacob.soup.ExecutionQueue;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -275,7 +273,7 @@ public final class JacobVPU {
                 LOG.isInfoEnabled() ? template.toString() : null);
         }
 
-        public ExportableChannel message(ExportableChannel channel, Method method, Object[] args) {
+        public Channel message(Channel channel, Method method, Object[] args) {
             LOG.trace(">> [{}] : {} ! {} ({})", _cycle, channel, method.getName(),
                 LOG.isTraceEnabled() ? stringify(args) : null);
 
@@ -302,26 +300,26 @@ public final class JacobVPU {
             return replyChannel;
         }
 
-        public ExportableChannel newChannel(Class<?> channelType, String creator, String description) {
+        public Channel newChannel(Class<?> channelType, String creator, String description) {
             CommChannel chnl = new CommChannel(channelType);
             chnl.setDescription(description);
             _executionQueue.add(chnl);
 
-            ExportableChannel ret = ChannelFactory.createChannel(chnl, channelType);
+            Channel ret = ChannelFactory.createChannel(chnl, channelType);
             LOG.trace(">> [{}] : new {}", _cycle, ret);
 
             _statistics.channelsCreated++;
             return ret;
         }
 
-        public String exportChannel(ExportableChannel channel) {
+        public String exportChannel(Channel channel) {
             LOG.trace(">> [{}] : export<{}>", _cycle, channel);
 
             CommChannel chnl = (CommChannel)ChannelFactory.getBackend((Channel)channel);
             return _executionQueue.createExport(chnl);
         }
 
-        public ExportableChannel importChannel(String channelId, Class<?> channelType) {
+        public Channel importChannel(String channelId, Class<?> channelType) {
             CommChannel cframe = _executionQueue.consumeExport(channelId);
             return ChannelFactory.createChannel(cframe, channelType);
         }

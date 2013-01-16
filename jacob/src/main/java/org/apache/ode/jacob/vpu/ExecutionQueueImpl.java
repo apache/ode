@@ -41,7 +41,6 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.ode.jacob.Channel;
-import org.apache.ode.jacob.ExportableChannel;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.IndexedObject;
 import org.apache.ode.jacob.JacobObject;
