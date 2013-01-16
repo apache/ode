@@ -84,7 +84,7 @@ public abstract class JacobObject implements Serializable {
      */
     protected static ExportableChannel object(ChannelListener methodList) {
         JacobVPU.activeJacobThread().object(false, methodList);
-        return methodList.getChannel();
+        return (ExportableChannel)methodList.getChannel();
     }
 
     protected static void object(boolean replication, ChannelListener methodList) {
@@ -102,7 +102,7 @@ public abstract class JacobObject implements Serializable {
 
     protected static ExportableChannel replication(ChannelListener methodList) {
         JacobVPU.activeJacobThread().object(true, methodList);
-        return methodList.getChannel();
+        return (ExportableChannel)methodList.getChannel();
     }
 
     /**

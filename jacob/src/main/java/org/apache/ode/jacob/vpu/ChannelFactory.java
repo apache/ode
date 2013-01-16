@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
+import org.apache.ode.jacob.Channel;
 import org.apache.ode.jacob.ExportableChannel;
 import org.apache.ode.jacob.soup.CommChannel;
 
@@ -44,7 +45,7 @@ public class ChannelFactory {
         }
     }
 
-    public static Object getBackend(ExportableChannel channel) {
+    public static Object getBackend(Channel channel) {
         ChannelInvocationHandler cih = (ChannelInvocationHandler) Proxy.getInvocationHandler(channel);
         return cih._backend;
     }

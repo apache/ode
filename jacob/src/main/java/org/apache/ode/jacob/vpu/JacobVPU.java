@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
+import org.apache.ode.jacob.Channel;
 import org.apache.ode.jacob.ExportableChannel;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.JacobObject;
@@ -293,7 +294,7 @@ public final class JacobVPU {
                 newArgs[args.length] = replyChannel;
                 args = newArgs;
             }
-            CommChannel chnl = (CommChannel) ChannelFactory.getBackend(channel);
+            CommChannel chnl = (CommChannel) ChannelFactory.getBackend((Channel)channel);
             CommGroup grp = new CommGroup(false);
             CommSend send = new CommSend(chnl, method, args);
             grp.add(send);
@@ -316,7 +317,7 @@ public final class JacobVPU {
         public String exportChannel(ExportableChannel channel) {
             LOG.trace(">> [{}] : export<{}>", _cycle, channel);
 
-            CommChannel chnl = (CommChannel) ChannelFactory.getBackend(channel);
+            CommChannel chnl = (CommChannel)ChannelFactory.getBackend((Channel)channel);
             return _executionQueue.createExport(chnl);
         }
 
@@ -344,8 +345,7 @@ public final class JacobVPU {
 
             CommGroup grp = new CommGroup(replicate);
             for (int i = 0; i < ml.length; ++i) {
-                CommChannel chnl = (CommChannel) ChannelFactory
-                        .getBackend(ml[i].getChannel());
+                CommChannel chnl = (CommChannel) ChannelFactory.getBackend(ml[i].getChannel());
                 // TODO see below..
                 // oframe.setDebugInfo(fillDebugInfo());
                 CommRecv recv = new CommRecv(chnl, ml[i]);

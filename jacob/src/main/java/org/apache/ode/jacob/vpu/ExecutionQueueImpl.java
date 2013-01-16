@@ -40,6 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import org.apache.ode.jacob.Channel;
 import org.apache.ode.jacob.ExportableChannel;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.IndexedObject;
@@ -665,7 +666,7 @@ public class ExecutionQueueImpl implements ExecutionQueue {
                 return null;
 
             if (obj instanceof org.apache.ode.jacob.ExportableChannel) {
-                CommChannel commChannel = (CommChannel) ChannelFactory.getBackend((ExportableChannel) obj);
+                CommChannel commChannel = (CommChannel) ChannelFactory.getBackend((Channel)obj);
                 _serializedChannels.add(commChannel.getId());
                 return new ChannelRef(commChannel.getType(), (Integer) commChannel.getId());
             } else if (_replacementMap != null && _replacementMap.isReplaceable(obj)) {
