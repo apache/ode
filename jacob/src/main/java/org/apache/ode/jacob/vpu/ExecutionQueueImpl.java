@@ -361,11 +361,18 @@ public class ExecutionQueueImpl implements ExecutionQueue {
         if (!_reactions.isEmpty()) {
             ps.println("-- REACTIONS");
             int cnt = 0;
-            for (Iterator<Continuation> i = _reactions.iterator(); i.hasNext();) {
-                Continuation continuation = i.next();
+            for (Continuation continuation : _reactions) {
                 ps.println("   #" + (++cnt) + ":  " + continuation.toString());
             }
         }
+        if (!_channels.isEmpty()) {
+            ps.println("-- CHANNELS");
+            int cnt = 0;
+            for (ChannelFrame channel : _channels.values()) {
+                ps.println("   #" + (++cnt) + ":  " + channel.toString());
+            }
+        }
+
     }
 
     private void matchCommunications(CommChannel channel) {
