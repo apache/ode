@@ -24,7 +24,7 @@ public final class ProcessUtil {
         // Utility class
     }
 
-    public static String exportChannel(ChannelType channel) {
+    public static String exportChannel(Channel channel) {
     	if (channel != null && channel instanceof ExportableChannel) {
     		return ((ExportableChannel)channel).export();
     	}

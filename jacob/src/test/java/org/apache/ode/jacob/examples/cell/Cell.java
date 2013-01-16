@@ -19,13 +19,13 @@
 package org.apache.ode.jacob.examples.cell;
 
 
-import org.apache.ode.jacob.ChannelType;
+import org.apache.ode.jacob.Channel;
 import org.apache.ode.jacob.Val;
 
 /**
  * Channel type for a cell. The channel allows reading of and setting the values of a cell.
  */
-public interface Cell extends ChannelType {
+public interface Cell extends Channel {
 
     /**
      * Read the value of the cell.

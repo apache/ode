@@ -18,12 +18,12 @@
  */
 package org.apache.ode.bpel.runtime.channels;
 
-import org.apache.ode.jacob.ChannelType;
+import org.apache.ode.jacob.Channel;
 
 /**
  * Channel used for parent-to-child scope communication.
  */
-public interface Termination extends ChannelType {
+public interface Termination extends Channel {
 
   /**
    * Stop processing immediately.

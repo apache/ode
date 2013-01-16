@@ -24,5 +24,5 @@ import java.io.Serializable;
  * Marker interface extended by channel interfaces.
  * TODO: evaluate if an annotation, although slower, would offer a more elegant approach
  */
-public interface ChannelType extends Serializable {
+public interface Channel extends Serializable {
 }

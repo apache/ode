@@ -22,7 +22,7 @@ package org.apache.ode.jacob;
 /**
  * Generic return-value channel type.
  */
-public interface Val extends ChannelType {
+public interface Val extends Channel {
 
 	public void val(Object retVal);
 

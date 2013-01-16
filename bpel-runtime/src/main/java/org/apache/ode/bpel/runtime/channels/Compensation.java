@@ -18,10 +18,10 @@
  */
 package org.apache.ode.bpel.runtime.channels;
 
-import org.apache.ode.jacob.ChannelType;
+import org.apache.ode.jacob.Channel;
 import org.apache.ode.jacob.SynchChannel;
 
-public interface Compensation extends ChannelType {
+public interface Compensation extends Channel {
 
   public void forget();
 

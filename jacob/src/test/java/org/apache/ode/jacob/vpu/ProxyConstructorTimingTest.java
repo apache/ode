@@ -23,7 +23,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import org.apache.ode.jacob.ExportableChannel;
-import org.apache.ode.jacob.ChannelType;
+import org.apache.ode.jacob.Channel;
 import org.apache.ode.jacob.ProcessUtil;
 
 import junit.framework.TestCase;
@@ -106,7 +106,7 @@ public class ProxyConstructorTimingTest extends TestCase {
         });
     }
     
-    public interface Greeter extends ChannelType {
+    public interface Greeter extends Channel {
         String hello(String name);
     }
     

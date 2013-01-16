@@ -18,7 +18,7 @@
  */
 package org.apache.ode.jacob.examples.synch;
 
-import org.apache.ode.jacob.ChannelType;
+import org.apache.ode.jacob.Channel;
 import org.apache.ode.jacob.SynchChannel;
 
 /**
@@ -27,7 +27,7 @@ import org.apache.ode.jacob.SynchChannel;
  *
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
-public interface SynchPrint extends ChannelType {
+public interface SynchPrint extends Channel {
 
 	public SynchChannel print(String msg);
 

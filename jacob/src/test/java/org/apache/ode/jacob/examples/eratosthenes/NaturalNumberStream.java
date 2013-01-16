@@ -19,7 +19,7 @@
 package org.apache.ode.jacob.examples.eratosthenes;
 
 
-import org.apache.ode.jacob.ChannelType;
+import org.apache.ode.jacob.Channel;
 import org.apache.ode.jacob.SynchChannel;
 
 /**
@@ -29,7 +29,7 @@ import org.apache.ode.jacob.SynchChannel;
  * @jacob.kind
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
-public interface NaturalNumberStream extends ChannelType {
+public interface NaturalNumberStream extends Channel {
 
 	public void val(int n, SynchChannel ret);
 

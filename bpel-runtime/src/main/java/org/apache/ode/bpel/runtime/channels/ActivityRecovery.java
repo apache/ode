@@ -19,9 +19,9 @@
 package org.apache.ode.bpel.runtime.channels;
 
 
-import org.apache.ode.jacob.ChannelType;
+import org.apache.ode.jacob.Channel;
 
-public interface ActivityRecovery extends ChannelType {
+public interface ActivityRecovery extends Channel {
 
     /**
      * Retry the activity.

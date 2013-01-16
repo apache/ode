@@ -27,7 +27,7 @@ package org.apache.ode.jacob;
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
 
-public interface Synch extends ChannelType {
+public interface Synch extends Channel {
 
 	public void ret();
 
