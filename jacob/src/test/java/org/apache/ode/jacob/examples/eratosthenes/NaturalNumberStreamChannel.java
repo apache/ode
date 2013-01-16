@@ -15,6 +15,6 @@ package org.apache.ode.jacob.examples.eratosthenes;
  * @see org.apache.ode.jacob.examples.eratosthenes.NaturalNumberStream
  */
 public interface NaturalNumberStreamChannel
-    extends org.apache.ode.jacob.Channel, 
+    extends org.apache.ode.jacob.ExportableChannel, 
             org.apache.ode.jacob.examples.eratosthenes.NaturalNumberStream
 {}

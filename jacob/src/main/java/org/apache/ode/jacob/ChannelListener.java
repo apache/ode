@@ -31,9 +31,9 @@ import java.util.Set;
 @SuppressWarnings("serial")
 public abstract class ChannelListener extends JacobObject {
     private transient Set<Method> _implementedMethods;
-    private transient Channel _channel;
+    private transient ExportableChannel _channel;
 
-    protected ChannelListener(Channel channel) throws IllegalStateException {
+    protected ChannelListener(ExportableChannel channel) throws IllegalStateException {
         assert getClass().getSuperclass().getSuperclass() == ChannelListener.class :
                "Inheritance in ChannelListener classes not allowed!";
         if (channel == null) {
@@ -42,11 +42,11 @@ public abstract class ChannelListener extends JacobObject {
         _channel = channel;
     }
 
-    public Channel getChannel() {
+    public ExportableChannel getChannel() {
         return _channel;
     }
 
-    public void setChannel(Channel channel) {
+    public void setChannel(ExportableChannel channel) {
         _channel = channel;
     }
 

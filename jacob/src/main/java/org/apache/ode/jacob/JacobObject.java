@@ -44,7 +44,7 @@ public abstract class JacobObject implements Serializable {
     }
 
     @SuppressWarnings("unchecked")
-    protected static <T extends Channel> T importChannel(String channelId, Class<T> channelClass) {
+    protected static <T extends ExportableChannel> T importChannel(String channelId, Class<T> channelClass) {
         return (T) JacobVPU.activeJacobThread().importChannel(channelId, channelClass);
     }
 
@@ -58,7 +58,7 @@ public abstract class JacobObject implements Serializable {
         JacobVPU.activeJacobThread().instance(concretion);
     }
 
-    protected <T extends Channel> T newChannel(Class<T> channelType)
+    protected <T extends ExportableChannel> T newChannel(Class<T> channelType)
             throws IllegalArgumentException
     {
         return newChannel(channelType, null);
@@ -69,7 +69,7 @@ public abstract class JacobObject implements Serializable {
      * is equivalent to <code>(new x) ... </code> in the process calculus.
      */
     @SuppressWarnings("unchecked")
-    protected <T extends Channel> T newChannel(Class<T> channelType, String description)
+    protected <T extends ExportableChannel> T newChannel(Class<T> channelType, String description)
         throws IllegalArgumentException
     {
         return (T) JacobVPU.activeJacobThread().newChannel(channelType, getClassName(), description);
@@ -82,7 +82,7 @@ public abstract class JacobObject implements Serializable {
      * @param methodList method list for the communication reduction
      * @see JacobThread#object
      */
-    protected static Channel object(ChannelListener methodList) {
+    protected static ExportableChannel object(ChannelListener methodList) {
         JacobVPU.activeJacobThread().object(false, methodList);
         return methodList.getChannel();
     }
@@ -100,7 +100,7 @@ public abstract class JacobObject implements Serializable {
                 methodLists.toArray(new ChannelListener[methodLists.size()]));
     }
 
-    protected static Channel replication(ChannelListener methodList) {
+    protected static ExportableChannel replication(ChannelListener methodList) {
         JacobVPU.activeJacobThread().object(true, methodList);
         return methodList.getChannel();
     }
@@ -111,7 +111,7 @@ public abstract class JacobObject implements Serializable {
      * @param channel target channel
      * @return replicated channel broadcaster
      */
-    protected static <T extends Channel> T replication(T channel) {
+    protected static <T extends ExportableChannel> T replication(T channel) {
         // TODO: we should create a replicated wrapper here.
         return channel;
     }

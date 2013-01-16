@@ -22,7 +22,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-import org.apache.ode.jacob.Channel;
+import org.apache.ode.jacob.ExportableChannel;
 import org.apache.ode.jacob.soup.CommChannel;
 
 public class ChannelFactory {
@@ -38,22 +38,22 @@ public class ChannelFactory {
         }
 
         try {
-            METHOD_CHANNEL_EXPORT = Channel.class.getMethod("export", new Class[] {});
+            METHOD_CHANNEL_EXPORT = ExportableChannel.class.getMethod("export", new Class[] {});
         } catch (Exception e) {
             throw new AssertionError("No export() method on Object!");
         }
     }
 
-    public static Object getBackend(Channel channel) {
+    public static Object getBackend(ExportableChannel channel) {
         ChannelInvocationHandler cih = (ChannelInvocationHandler) Proxy.getInvocationHandler(channel);
         return cih._backend;
     }
 
-    public static Channel createChannel(CommChannel backend, Class<?> type) {
+    public static ExportableChannel createChannel(CommChannel backend, Class<?> type) {
         InvocationHandler h = new ChannelInvocationHandler(backend);
-        Class<?>[] ifaces = new Class[] { Channel.class, type };
-        Object proxy = Proxy.newProxyInstance(Channel.class.getClassLoader(), ifaces, h);
-        return (Channel) proxy;
+        Class<?>[] ifaces = new Class[] { ExportableChannel.class, type };
+        Object proxy = Proxy.newProxyInstance(ExportableChannel.class.getClassLoader(), ifaces, h);
+        return (ExportableChannel) proxy;
     }
 
     public static final class ChannelInvocationHandler implements InvocationHandler {
@@ -83,9 +83,9 @@ public class ChannelFactory {
                 return method.invoke(this, args);
             }
             if (method.equals(METHOD_CHANNEL_EXPORT)) {
-                return JacobVPU.activeJacobThread().exportChannel((Channel) proxy);
+                return JacobVPU.activeJacobThread().exportChannel((ExportableChannel) proxy);
             }
-            return JacobVPU.activeJacobThread().message((Channel) proxy, method, args);
+            return JacobVPU.activeJacobThread().message((ExportableChannel) proxy, method, args);
         }
     } // class ChannelInvocationHandler
 

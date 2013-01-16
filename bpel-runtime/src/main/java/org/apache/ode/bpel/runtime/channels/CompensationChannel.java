@@ -15,6 +15,6 @@ package org.apache.ode.bpel.runtime.channels;
  * @see org.apache.ode.bpel.runtime.channels.Compensation
  */
 public interface CompensationChannel
-    extends org.apache.ode.jacob.Channel, 
+    extends org.apache.ode.jacob.ExportableChannel, 
             org.apache.ode.bpel.runtime.channels.Compensation
 {}

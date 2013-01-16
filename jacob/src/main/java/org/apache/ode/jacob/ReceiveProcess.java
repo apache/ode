@@ -29,7 +29,7 @@ public abstract class ReceiveProcess<R> extends ChannelListener {
     private transient Set<Method> _implementedMethods;
     private R receiver;
     
-    protected ReceiveProcess(Channel channel, R receiver) throws IllegalStateException {
+    protected ReceiveProcess(ExportableChannel channel, R receiver) throws IllegalStateException {
         super(channel);
         this.receiver = receiver;
     }
