@@ -15,6 +15,6 @@ package org.apache.ode.jacob;
  * @see org.apache.ode.jacob.Synch
  */
 public interface SynchChannel
-    extends org.apache.ode.jacob.ExportableChannel, 
+    extends org.apache.ode.jacob.ChannelProxy, 
             org.apache.ode.jacob.Synch
 {}

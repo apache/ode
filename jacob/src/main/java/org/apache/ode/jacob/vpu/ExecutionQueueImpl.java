@@ -661,10 +661,11 @@ public class ExecutionQueueImpl implements ExecutionQueue {
          * @throws IOException
          */
         protected Object replaceObject(Object obj) throws IOException {
-            if (!Serializable.class.isAssignableFrom(obj.getClass()))
-                return null;
+            if (!Serializable.class.isAssignableFrom(obj.getClass())) {
+                throw new IllegalArgumentException("Cannot replace non Serializable instance of " + obj.getClass());
+            }
 
-            if (obj instanceof org.apache.ode.jacob.ExportableChannel) {
+            if (obj instanceof org.apache.ode.jacob.ChannelProxy) {
                 CommChannel commChannel = (CommChannel) ChannelFactory.getBackend((Channel)obj);
                 _serializedChannels.add(commChannel.getId());
                 return new ChannelRef(commChannel.getType(), (Integer) commChannel.getId());

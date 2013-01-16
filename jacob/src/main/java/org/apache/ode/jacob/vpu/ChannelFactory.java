@@ -23,7 +23,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import org.apache.ode.jacob.Channel;
-import org.apache.ode.jacob.ExportableChannel;
+import org.apache.ode.jacob.ChannelProxy;
 import org.apache.ode.jacob.soup.CommChannel;
 
 public class ChannelFactory {
@@ -39,7 +39,7 @@ public class ChannelFactory {
         }
 
         try {
-            METHOD_CHANNEL_EXPORT = ExportableChannel.class.getMethod("export", new Class[] {});
+            METHOD_CHANNEL_EXPORT = ChannelProxy.class.getMethod("export", new Class[] {});
         } catch (Exception e) {
             throw new AssertionError("No export() method on Object!");
         }
@@ -52,8 +52,8 @@ public class ChannelFactory {
 
     public static Channel createChannel(CommChannel backend, Class<?> type) {
         InvocationHandler h = new ChannelInvocationHandler(backend);
-        Class<?>[] ifaces = new Class[] { ExportableChannel.class, type };
-        Object proxy = Proxy.newProxyInstance(ExportableChannel.class.getClassLoader(), ifaces, h);
+        Class<?>[] ifaces = new Class[] { ChannelProxy.class, type };
+        Object proxy = Proxy.newProxyInstance(ChannelProxy.class.getClassLoader(), ifaces, h);
         return (Channel) proxy;
     }
 

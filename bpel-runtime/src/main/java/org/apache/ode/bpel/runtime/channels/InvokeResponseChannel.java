@@ -15,6 +15,6 @@ package org.apache.ode.bpel.runtime.channels;
  * @see org.apache.ode.bpel.runtime.channels.InvokeResponse
  */
 public interface InvokeResponseChannel
-    extends org.apache.ode.jacob.ExportableChannel, 
+    extends org.apache.ode.jacob.ChannelProxy, 
             org.apache.ode.bpel.runtime.channels.InvokeResponse
 {}

@@ -25,8 +25,8 @@ public final class ProcessUtil {
     }
 
     public static String exportChannel(Channel channel) {
-    	if (channel != null && channel instanceof ExportableChannel) {
-    		return ((ExportableChannel)channel).export();
+    	if (channel != null && channel instanceof ChannelProxy) {
+    		return ((ChannelProxy)channel).export();
     	}
         throw new IllegalArgumentException("Invalid proxy type: "
     	    + channel == null ? "<null>" : channel.getClass().toString());

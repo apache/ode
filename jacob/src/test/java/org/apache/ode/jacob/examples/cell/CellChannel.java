@@ -15,6 +15,6 @@ package org.apache.ode.jacob.examples.cell;
  * @see org.apache.ode.jacob.examples.cell.Cell
  */
 public interface CellChannel
-    extends org.apache.ode.jacob.ExportableChannel, 
+    extends org.apache.ode.jacob.ChannelProxy, 
             org.apache.ode.jacob.examples.cell.Cell
 {}

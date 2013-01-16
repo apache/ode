@@ -33,7 +33,7 @@ public final class ClassUtil {
         Class<?>[] interfaces = clazz.getInterfaces();
         for (Class<?> iface : interfaces) {
             // TODO: the test below could be more generic...
-            if (iface != ExportableChannel.class) {
+            if (iface != ChannelProxy.class) {
                 for (Method method : iface.getDeclaredMethods()) {
                     methods.add(method);
                 }

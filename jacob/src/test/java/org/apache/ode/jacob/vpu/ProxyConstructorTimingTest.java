@@ -22,7 +22,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-import org.apache.ode.jacob.ExportableChannel;
+import org.apache.ode.jacob.ChannelProxy;
 import org.apache.ode.jacob.Channel;
 import org.apache.ode.jacob.ProcessUtil;
 
@@ -37,7 +37,7 @@ public class ProxyConstructorTimingTest extends TestCase {
 
     public void testDoNothing() throws Exception {
         Greeter gp = (Greeter) Proxy.newProxyInstance(Greeter.class.getClassLoader(),
-            new Class<?>[] {ExportableChannel.class, Greeter.class}, new GreeterInvocationHandler(new GreeterImpl()));
+            new Class<?>[] {ChannelProxy.class, Greeter.class}, new GreeterInvocationHandler(new GreeterImpl()));
         assertEquals("Hello World", gp.hello("World"));
         assertEquals("Implemented by InvocationHandler", ProcessUtil.exportChannel(gp));
     }
@@ -145,7 +145,7 @@ public class ProxyConstructorTimingTest extends TestCase {
                    throw new IllegalStateException(String.valueOf(method));
                }
            }
-           if (method.equals(ExportableChannel.class.getMethod("export", new Class[] {}))) {
+           if (method.equals(ChannelProxy.class.getMethod("export", new Class[] {}))) {
                return "Implemented by InvocationHandler";
            }
            return method.invoke(greeter, args);

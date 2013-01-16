@@ -23,6 +23,8 @@ import java.io.Serializable;
 /**
  * Interface implemented by channel proxies.
  */
-public interface ExportableChannel extends Serializable {
+public interface ChannelProxy extends Serializable {
+
     public String export();
+
 }

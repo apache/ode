@@ -15,6 +15,6 @@ package org.apache.ode.jacob.examples.synch;
  * @see org.apache.ode.jacob.examples.synch.SynchPrint
  */
 public interface SynchPrintChannel
-    extends org.apache.ode.jacob.ExportableChannel, 
+    extends org.apache.ode.jacob.ChannelProxy, 
             org.apache.ode.jacob.examples.synch.SynchPrint
 {}

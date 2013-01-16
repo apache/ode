@@ -16,6 +16,6 @@ package org.apache.ode.bpel.runtime.channels;
  */
 public interface PickResponseChannel
     extends             org.apache.ode.bpel.runtime.channels.TimerResponseChannel, 
-            org.apache.ode.jacob.ExportableChannel, 
+            org.apache.ode.jacob.ChannelProxy, 
             org.apache.ode.bpel.runtime.channels.PickResponse
 {}
