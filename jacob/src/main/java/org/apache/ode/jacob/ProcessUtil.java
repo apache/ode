@@ -18,6 +18,8 @@
  */
 package org.apache.ode.jacob;
 
+import org.apache.ode.jacob.vpu.JacobVPU;
+
 
 public final class ProcessUtil {
     private ProcessUtil() {
@@ -26,7 +28,10 @@ public final class ProcessUtil {
 
     public static String exportChannel(Channel channel) {
     	if (channel != null && channel instanceof ChannelProxy) {
-    		return ((ChannelProxy)channel).export();
+            // TODO: replace the brute force call on the activeThread with
+            //  something that doesn't expose the implementation once the
+            //  cleaner refactored api becomes available
+            return JacobVPU.activeJacobThread().exportChannel(channel);
     	}
         throw new IllegalArgumentException("Invalid proxy type: "
     	    + channel == null ? "<null>" : channel.getClass().toString());

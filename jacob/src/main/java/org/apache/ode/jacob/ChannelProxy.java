@@ -18,13 +18,9 @@
  */
 package org.apache.ode.jacob;
 
-import java.io.Serializable;
 
 /**
  * Interface implemented by channel proxies.
  */
-public interface ChannelProxy extends Serializable {
-
-    public String export();
-
+public interface ChannelProxy {
 }

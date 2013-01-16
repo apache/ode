@@ -29,19 +29,11 @@ import org.apache.ode.jacob.soup.CommChannel;
 public class ChannelFactory {
     private static final Method METHOD_OBJECT_EQUALS;
 
-    private static final Method METHOD_CHANNEL_EXPORT;
-
     static {
         try {
             METHOD_OBJECT_EQUALS = Object.class.getMethod("equals", new Class[] { Object.class });
         } catch (Exception e) {
             throw new AssertionError("No equals(Object) method on Object!");
-        }
-
-        try {
-            METHOD_CHANNEL_EXPORT = ChannelProxy.class.getMethod("export", new Class[] {});
-        } catch (Exception e) {
-            throw new AssertionError("No export() method on Object!");
         }
     }
 
@@ -82,9 +74,6 @@ public class ChannelFactory {
                     return Boolean.valueOf(this.equals(Proxy.getInvocationHandler(args[0])));
                 }
                 return method.invoke(this, args);
-            }
-            if (method.equals(METHOD_CHANNEL_EXPORT)) {
-                return JacobVPU.activeJacobThread().exportChannel((Channel)proxy);
             }
             return JacobVPU.activeJacobThread().message((Channel)proxy, method, args);
         }

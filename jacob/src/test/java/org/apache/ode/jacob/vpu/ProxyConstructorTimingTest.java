@@ -39,7 +39,6 @@ public class ProxyConstructorTimingTest extends TestCase {
         Greeter gp = (Greeter) Proxy.newProxyInstance(Greeter.class.getClassLoader(),
             new Class<?>[] {ChannelProxy.class, Greeter.class}, new GreeterInvocationHandler(new GreeterImpl()));
         assertEquals("Hello World", gp.hello("World"));
-        assertEquals("Implemented by InvocationHandler", ProcessUtil.exportChannel(gp));
     }
 
     public interface TestExecution {
@@ -144,9 +143,6 @@ public class ProxyConstructorTimingTest extends TestCase {
                } else {
                    throw new IllegalStateException(String.valueOf(method));
                }
-           }
-           if (method.equals(ChannelProxy.class.getMethod("export", new Class[] {}))) {
-               return "Implemented by InvocationHandler";
            }
            return method.invoke(greeter, args);
         }    
