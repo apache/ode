@@ -18,15 +18,12 @@
  */
 package org.apache.ode.bpel.runtime.channels;
 
-import java.io.Serializable;
-
-import org.apache.ode.jacob.ap.ChannelType;
+import org.apache.ode.jacob.ChannelType;
 
 /**
  * Response channel for pick requests.
  */
-@ChannelType
-public interface InvokeResponse extends Serializable {
+public interface InvokeResponse extends ChannelType {
 
   public void onResponse();
 

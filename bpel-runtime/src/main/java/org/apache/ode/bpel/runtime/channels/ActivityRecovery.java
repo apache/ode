@@ -18,12 +18,10 @@
  */
 package org.apache.ode.bpel.runtime.channels;
 
-import java.io.Serializable;
 
-import org.apache.ode.jacob.ap.ChannelType;
+import org.apache.ode.jacob.ChannelType;
 
-@ChannelType
-public interface ActivityRecovery extends Serializable {
+public interface ActivityRecovery extends ChannelType {
 
     /**
      * Retry the activity.

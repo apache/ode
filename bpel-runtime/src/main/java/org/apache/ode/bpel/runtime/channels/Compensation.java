@@ -18,13 +18,10 @@
  */
 package org.apache.ode.bpel.runtime.channels;
 
-import java.io.Serializable;
-
+import org.apache.ode.jacob.ChannelType;
 import org.apache.ode.jacob.SynchChannel;
-import org.apache.ode.jacob.ap.ChannelType;
 
-@ChannelType
-public interface Compensation extends Serializable {
+public interface Compensation extends ChannelType {
 
   public void forget();
 

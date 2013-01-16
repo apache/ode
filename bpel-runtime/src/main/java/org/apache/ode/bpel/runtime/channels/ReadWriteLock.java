@@ -18,17 +18,15 @@
  */
 package org.apache.ode.bpel.runtime.channels;
 
-import java.io.Serializable;
-
+import org.apache.ode.jacob.ChannelType;
 import org.apache.ode.jacob.SynchChannel;
-import org.apache.ode.jacob.ap.ChannelType;
 
-@ChannelType
-public interface ReadWriteLock extends Serializable {
+public interface ReadWriteLock extends ChannelType {
 
     public void readLock(SynchChannel s);
     
     public void writeLock(SynchChannel s);
     
     public void unlock(SynchChannel s);
+
 }

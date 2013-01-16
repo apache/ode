@@ -16,27 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.jacob.examples.cell;
+package org.apache.ode.jacob;
 
 
-import org.apache.ode.jacob.ChannelType;
-import org.apache.ode.jacob.Val;
+public final class ProcessUtil {
+    private ProcessUtil() {
+        // Utility class
+    }
 
-/**
- * Channel type for a cell. The channel allows reading of and setting the values of a cell.
- */
-public interface Cell extends ChannelType {
-
-    /**
-     * Read the value of the cell.
-     * @param replyTo channel to which the value of the cell is sent
-     */
-    public void read(Val replyTo);
-
-    /**
-     * Write the value of the cell.
-     * @param newVal new value of the cell
-     */
-    public void write(Object newVal);
-
+    public static String exportChannel(ChannelType channel) {
+    	if (channel instanceof Channel) {
+    		return ((Channel)channel).export();
+    	}
+    	// TODO: add a check for null?
+        throw new RuntimeException("Invalid proxy type " + channel.getClass());
+    }
 }

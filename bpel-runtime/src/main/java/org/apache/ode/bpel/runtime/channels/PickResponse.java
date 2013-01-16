@@ -18,7 +18,6 @@
  */
 package org.apache.ode.bpel.runtime.channels;
 
-import org.apache.ode.jacob.ap.ChannelType;
 
 
 /**
@@ -26,7 +25,6 @@ import org.apache.ode.jacob.ap.ChannelType;
  * @jacob.kind
  * @jacob.parent TimerResponseChannel
  */
-@ChannelType
 public interface PickResponse extends TimerResponse {
 
   public void onRequestRcvd(int selectorIdx, String mexId);

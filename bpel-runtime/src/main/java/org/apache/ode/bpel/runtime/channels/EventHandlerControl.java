@@ -18,15 +18,12 @@
  */
 package org.apache.ode.bpel.runtime.channels;
 
-import java.io.Serializable;
-
-import org.apache.ode.jacob.ap.ChannelType;
+import org.apache.ode.jacob.ChannelType;
 
 /**
  * Channel used to control processing of event handler activities.
  */
-@ChannelType
-public interface EventHandlerControl extends Serializable {
+public interface EventHandlerControl extends ChannelType {
 
   /**
    * Finish up active events but stop processing any more.

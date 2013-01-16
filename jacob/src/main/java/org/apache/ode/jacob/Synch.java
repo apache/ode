@@ -18,9 +18,6 @@
  */
 package org.apache.ode.jacob;
 
-import java.io.Serializable;
-
-import org.apache.ode.jacob.ap.ChannelType;
 
 /**
  * Synch represents a synchronous invocation callback notification.
@@ -30,7 +27,8 @@ import org.apache.ode.jacob.ap.ChannelType;
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com">mbs</a>
  */
 
-@ChannelType
-public interface Synch extends Serializable {
-    public void ret();
+public interface Synch extends ChannelType {
+
+	public void ret();
+
 }

@@ -16,12 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.jacob.ap;
+package org.apache.ode.jacob;
+
+import java.io.Serializable;
 
 /**
- * Annotation used to indicate that an interface is a JACOB channel interface.
- * @author Maciej Szefler <mszefler at gmail dot com>
+ * Marker interface extended by channel interfaces.
+ * TODO: evaluate if an annotation, although slower, would offer a more elegant approach
  */
-public @interface ChannelType {
-
+public interface ChannelType extends Serializable {
 }

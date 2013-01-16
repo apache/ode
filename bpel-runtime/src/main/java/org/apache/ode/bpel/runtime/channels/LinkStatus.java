@@ -18,14 +18,11 @@
  */
 package org.apache.ode.bpel.runtime.channels;
 
-import java.io.Serializable;
-
-import org.apache.ode.jacob.ap.ChannelType;
+import org.apache.ode.jacob.ChannelType;
 
 /**
  */
-@ChannelType
-public interface LinkStatus extends Serializable {
+public interface LinkStatus extends ChannelType {
 
   void linkStatus(boolean value);
 
