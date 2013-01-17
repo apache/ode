@@ -425,18 +425,6 @@ define "ode" do
     package(:zip).include(derby_db)
   end
 
-  desc "ODE JAva Concurrent OBjects - Annotations"
-  define "jacob-annotation" do
-    package :jar
-  end
-
-  desc "ODE JAva Concurrent OBjects - Generator"
-  define "jacob-generator" do
-    compile.with projects("jacob-annotation")
-
-    package :jar
-  end
-
   desc "ODE JAva Concurrent OBjects"
   define "jacob" do
     compile.with SLF4J, LOG4J
