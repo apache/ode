@@ -38,105 +38,105 @@ import org.apache.ode.jacob.vpu.JacobVPU;
 @SuppressWarnings("serial")
 public class HelloWorld extends JacobRunnable {
 
-	public interface Callback<T, R extends Channel> extends Channel {
-		public void invoke(T value, R callback);
-	}
+    public interface Callback<T, R extends Channel> extends Channel {
+        public void invoke(T value, R callback);
+    }
 
-	static class ReliablePrinterProcess extends JacobRunnable {
-		private Callback<String, Synch> _in;
-		public ReliablePrinterProcess(Callback<String, Synch> in) {
-			_in = in;
-		}
+    static class ReliablePrinterProcess extends JacobRunnable {
+        private Callback<String, Synch> _in;
+        public ReliablePrinterProcess(Callback<String, Synch> in) {
+            _in = in;
+        }
 
-		public void run() {
-			object(true, new ReceiveProcess<Callback<String, Synch>>(_in, new Callback<String, Synch>(){
-				@Override
-				public void invoke(String value, Synch callback) {
-					System.out.println(value);
-					callback.ret();
-				}
-			}) {
-				private static final long serialVersionUID = 1L;
-			});
-		}
-	}
+        public void run() {
+            object(true, new ReceiveProcess<Callback<String, Synch>>(_in, new Callback<String, Synch>(){
+                @Override
+                public void invoke(String value, Synch callback) {
+                    System.out.println(value);
+                    callback.ret();
+                }
+            }) {
+                private static final long serialVersionUID = 1L;
+            });
+        }
+    }
 
-	static class ReliableStringEmitterProcess extends JacobRunnable {
-		private String str;
-		private Callback<String, Synch> to;
-		
-		public ReliableStringEmitterProcess(String str, Callback<String, Synch> to) {
-			this.str = str;
-			this.to = to;
-		}
+    static class ReliableStringEmitterProcess extends JacobRunnable {
+        private String str;
+        private Callback<String, Synch> to;
+        
+        public ReliableStringEmitterProcess(String str, Callback<String, Synch> to) {
+            this.str = str;
+            this.to = to;
+        }
 
-		public void run() {
-			Synch callback = newChannel(Synch.class, "callback channel to ACK " + str);
-			object(new ReceiveProcess<Synch>(callback, new Synch() {
-				
-				@Override
-				public void ret() {
-					System.out.println(str + " ACKed");
-				}
-			}) {
-	             private static final long serialVersionUID = 1L;
-			});
-			to.invoke(str, callback);
-		}
-	}
+        public void run() {
+            Synch callback = newChannel(Synch.class, "callback channel to ACK " + str);
+            object(new ReceiveProcess<Synch>(callback, new Synch() {
+                
+                @Override
+                public void ret() {
+                    System.out.println(str + " ACKed");
+                }
+            }) {
+                 private static final long serialVersionUID = 1L;
+            });
+            to.invoke(str, callback);
+        }
+    }
 
-	
-	static class PrinterProcess extends JacobRunnable {
-		private Val _in;
-		public PrinterProcess(Val in) {
-			_in = in;
-		}
+    
+    static class PrinterProcess extends JacobRunnable {
+        private Val _in;
+        public PrinterProcess(Val in) {
+            _in = in;
+        }
 
-		public void run() {
-			object(true, new ReceiveProcess<Val>(_in, new Val(){
-				public void val(Object o) {
-					System.out.println(o);
-				}
-			}) {
-				private static final long serialVersionUID = 1L;
-			});
-		}
-	}
+        public void run() {
+            object(true, new ReceiveProcess<Val>(_in, new Val(){
+                public void val(Object o) {
+                    System.out.println(o);
+                }
+            }) {
+                private static final long serialVersionUID = 1L;
+            });
+        }
+    }
 
-	static class StringEmitterProcess extends JacobRunnable {
-		private String str;
-		private Val to;
-		
-		public StringEmitterProcess(String str, Val to) {
-			this.str = str;
-			this.to = to;
-		}
+    static class StringEmitterProcess extends JacobRunnable {
+        private String str;
+        private Val to;
+        
+        public StringEmitterProcess(String str, Val to) {
+            this.str = str;
+            this.to = to;
+        }
 
-		public void run() {
-			to.val(str);
-		}
-	}
+        public void run() {
+            to.val(str);
+        }
+    }
 
-	static class ForwarderProcess extends JacobRunnable {
-		private Val in;
-		private Val out;
-		public ForwarderProcess(Val in, Val out) {
-			this.in = in;
-			this.out = out;
-		}
+    static class ForwarderProcess extends JacobRunnable {
+        private Val in;
+        private Val out;
+        public ForwarderProcess(Val in, Val out) {
+            this.in = in;
+            this.out = out;
+        }
 
-		public void run() {
-			object(true, new ReceiveProcess<Val>(in, new Val(){
-				public void val(Object o) {
-					out.val(o);
-				}
-			}) {
-				private static final long serialVersionUID = 1L;
-			});
-		}
-	}
+        public void run() {
+            object(true, new ReceiveProcess<Val>(in, new Val(){
+                public void val(Object o) {
+                    out.val(o);
+                }
+            }) {
+                private static final long serialVersionUID = 1L;
+            });
+        }
+    }
 
-	private void simpleHelloWorld() {
+    private void simpleHelloWorld() {
         // new(out)
         final Val out = newChannel(Val.class, "simpleHelloWorld-out");
         // new(x)
@@ -149,9 +149,9 @@ public class HelloWorld extends JacobRunnable {
         // !out(hello) | !out(world)
         instance(new StringEmitterProcess("Hello", x));
         instance(new StringEmitterProcess("World", x));
-	}
-	
-	private void reliableHelloWorld() {
+    }
+    
+    private void reliableHelloWorld() {
         // reliable version of the code above
         // (new(callback).!out(hello).?callback) | (new(callback).!out(world).?callback)
         
@@ -163,14 +163,14 @@ public class HelloWorld extends JacobRunnable {
         instance(new ReliableStringEmitterProcess("Hello", rout));
         // (new(callback).!out(world).?callback)
         instance(new ReliableStringEmitterProcess("World", rout));
-	}
-	
-	
-	private void sequencedHelloWorld() {
+    }
+    
+    
+    private void sequencedHelloWorld() {
         // send hello world as a sequence
         // !out(hello).!out(world)
 
-	    // new(out)
+        // new(out)
         final Val out = newChannel(Val.class, "sequencedHelloWorld-out");
 
         final String[] greeting = {"Hello", "World"};
@@ -186,24 +186,24 @@ public class HelloWorld extends JacobRunnable {
                 };
             }
         });
-	}
-	
-	@Override
-	public void run() {
-		simpleHelloWorld();
-		reliableHelloWorld();
-		sequencedHelloWorld();
-	}
+    }
+    
+    @Override
+    public void run() {
+        simpleHelloWorld();
+        reliableHelloWorld();
+        sequencedHelloWorld();
+    }
 
-	public static void main(String args[]) {
-		JacobVPU vpu = new JacobVPU();
-		vpu.setContext(new ExecutionQueueImpl(null));
-		vpu.inject(new HelloWorld());
-		while (vpu.execute()) {
-			System.out.println(vpu.isComplete() ? "Ø" : ".");
-			//vpu.dumpState();
-		}
-		vpu.dumpState();
-	}
+    public static void main(String args[]) {
+        JacobVPU vpu = new JacobVPU();
+        vpu.setContext(new ExecutionQueueImpl(null));
+        vpu.inject(new HelloWorld());
+        while (vpu.execute()) {
+            System.out.println(vpu.isComplete() ? "<0>" : ".");
+            //vpu.dumpState();
+        }
+        vpu.dumpState();
+    }
 
 }
