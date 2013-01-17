@@ -43,7 +43,6 @@ import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
 import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.jacob.Val;
-import org.apache.ode.jacob.ValChannel;
 import org.w3c.dom.Element;
 
 /**
@@ -70,7 +69,7 @@ public class SCOPEACT extends ACTIVITY {
             // Depending on whether we are ATOMIC or not, we'll need to create outgoing link status interceptors
             LinkFrame linkframe;
             if (((OScope) _self.o).atomicScope && !_self.o.outgoingLinks.isEmpty()) {
-                ValChannel linkInterceptorControl = newChannel(ValChannel.class);
+                Val linkInterceptorControl = newChannel(Val.class);
                 ParentScopeChannel psc = newChannel(ParentScopeChannel.class);
                 linkframe = createInterceptorLinkFrame();
                 instance(new LINKSTATUSINTERCEPTOR(linkInterceptorControl,linkframe));
@@ -131,7 +130,7 @@ public class SCOPEACT extends ACTIVITY {
         private static final long serialVersionUID = 3104008741240676253L;
 
         /** We'll listen here for notification that its ok to send links status out. */
-        private final ValChannel _self;
+        private final Val _self;
 
         private final LinkFrame _interceptedChannels;
 
@@ -141,7 +140,7 @@ public class SCOPEACT extends ACTIVITY {
         /** NULL means defer links, TRUE means passthrough, FALSE means send FALSE */
         private Boolean _status;
 
-        LINKSTATUSINTERCEPTOR(ValChannel self, LinkFrame interceptedChannels) {
+        LINKSTATUSINTERCEPTOR(Val self, LinkFrame interceptedChannels) {
             _self = self;
             _interceptedChannels = interceptedChannels;
         }
@@ -243,7 +242,7 @@ public class SCOPEACT extends ACTIVITY {
                 
                 final ParentScopeChannel parent = _self.parent;
                 _self.parent = newChannel(ParentScopeChannel.class);
-                ValChannel lsi = newChannel(ValChannel.class);
+                Val lsi = newChannel(Val.class);
                 instance(new UNLOCKER(_self.parent, parent, _synchChannel, _locksAcquired, lsi));
                 LinkFrame linkframe = createInterceptorLinkFrame();
                 instance(new LINKSTATUSINTERCEPTOR(lsi,linkframe));
@@ -294,11 +293,10 @@ public class SCOPEACT extends ACTIVITY {
         
         private final List<IsolationLock> _locks;
 
-        private final ValChannel _linkStatusInterceptor;
+        private final Val _linkStatusInterceptor;
 
         public UNLOCKER(ParentScopeChannel self, ParentScopeChannel parent, SynchChannel synchChannel,
-                List<IsolationLock> locksAcquired,
-                ValChannel linkStatusInterceptor) {
+                List<IsolationLock> locksAcquired, Val linkStatusInterceptor) {
             _self = self;
             _parent = parent;
             _synchChannel = synchChannel;

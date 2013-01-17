@@ -32,11 +32,11 @@ import org.apache.ode.jacob.Val;
 public class CELL_<T> extends JacobRunnable {
     private static final long serialVersionUID = 1550566086202728251L;
 
-    private CellChannel _self;
+    private Cell _self;
 
     private T _val;
 
-    public CELL_(CellChannel self, T val) {
+    public CELL_(Cell self, T val) {
         _self = self;
         _val = val;
     }

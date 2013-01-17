@@ -33,18 +33,18 @@ import java.util.Set;
  * <code>Cell(s,v) := s ? { read(...) = ... & write(...) = ... }</code> would
  * be represented by the following Java class: <code>
  * <pre>
- * public class Cell extends JacobRunnable {
- *     private CellChannel s;
+ * public class CellProcess extends JacobRunnable {
+ *     private Cell s;
  *
  *     private Object v;
  *
- *     public Cell(CellChannel s, Object v) {
+ *     public CellProcess(Cell s, Object v) {
  *         this.s = s;
  *         this.v = v;
  *     }
  *
  *     public void run() {
- *      object(new CellChannelListener(s) { read(...) {...}
+ *      object(new ReceiveProcess<Cell> { read(...) {...}
  *                             write(...) {...} } );
  *    }
  * }
@@ -54,9 +54,9 @@ import java.util.Set;
  * <pre>
  *    .
  *    .
- *    // (new c) Cell(c,v)
+ *    // (new c) CellProcess(c,v)
  *    Integer v = Integer.valueOf(0);
- *    CellChannel c = (CellChannel)newChannel(CellChannel.class);
+ *    Cell c = (Cell)newChannel(Cell.class);
  *    instance(new Cell(c, v));
  *    .
  *    .

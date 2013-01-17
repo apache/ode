@@ -26,7 +26,6 @@ import junit.framework.TestCase;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Val;
-import org.apache.ode.jacob.ValChannel;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
 
@@ -34,45 +33,43 @@ import org.apache.ode.jacob.vpu.JacobVPU;
 public class JacobCellTest extends TestCase {
   private static Object _val;
 
-  public JacobCellTest(String testName) {
-    super(testName);
-  }
-
-  public void testJacobCell1() throws IOException {
-    ExecutionQueueImpl fsoup = new ExecutionQueueImpl(null);
-    JacobVPU vpu = new JacobVPU();
-    vpu.setContext(fsoup);
-    vpu.inject(new CellTest1());
-
-
-    while (vpu.execute()) {
-      vpu.flush();
-      ByteArrayOutputStream bos = new ByteArrayOutputStream();
-      fsoup.write(bos);
-      bos.close();
-      System.err.println("CONTINUATION SIZE: " + bos.size());
+    public JacobCellTest(String testName) {
+        super(testName);
     }
-    vpu.dumpState();
-    fsoup.dumpState(System.err);
-    assertNotNull(_val);
-    assertEquals("foo", _val);
-  }
 
-  @SuppressWarnings("serial")
-static class CellTest1 extends JacobRunnable {
-    public void run() {
-      CellChannel cellChannel = newChannel(CellChannel.class, "cell");
-      ValChannel retChannel = newChannel(ValChannel.class, "val");
+    public void testJacobCell1() throws IOException {
+        ExecutionQueueImpl fsoup = new ExecutionQueueImpl(null);
+        JacobVPU vpu = new JacobVPU();
+        vpu.setContext(fsoup);
+        vpu.inject(new CellTest1());
 
-      instance(new CELL_<String>(cellChannel, "foo"));
-      object(new ReceiveProcess<Val>(retChannel, new Val() {
-          public void val(Object retVal) {
-              _val = retVal;
-            }
-      }) {});
-
-      cellChannel.read(retChannel);
+        while (vpu.execute()) {
+            vpu.flush();
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            fsoup.write(bos);
+            bos.close();
+            System.err.println("CONTINUATION SIZE: " + bos.size());
+        }
+        vpu.dumpState();
+        fsoup.dumpState(System.err);
+        assertNotNull(_val);
+        assertEquals("foo", _val);
     }
-  }
+
+    @SuppressWarnings("serial")
+    static class CellTest1 extends JacobRunnable {
+        public void run() {
+            Cell cell = newChannel(Cell.class, "cell");
+            Val ret = newChannel(Val.class, "val");
+
+            instance(new CELL_<String>(cell, "foo"));
+            object(new ReceiveProcess<Val>(ret, new Val() {
+                public void val(Object retVal) {
+                    _val = retVal;
+                }
+            }) {});
+            cell.read(ret);
+        }
+    }
 
 }
