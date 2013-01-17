@@ -89,14 +89,10 @@ import org.apache.ode.bpel.runtime.PartnerLinkInstance;
 import org.apache.ode.bpel.runtime.Selector;
 import org.apache.ode.bpel.runtime.VariableInstance;
 import org.apache.ode.bpel.runtime.channels.ActivityRecovery;
-import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponse;
-import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponse;
-import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponse;
-import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.ProcessUtil;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
@@ -320,7 +316,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
     }
 
-    public void select(PickResponseChannel pickResponseChannel, Date timeout, boolean createInstance,
+    public void select(PickResponse pickResponseChannel, Date timeout, boolean createInstance,
                        Selector[] selectors) throws FaultException {
         if (BpelProcess.__log.isTraceEnabled())
             BpelProcess.__log.trace(ObjectPrinter.stringifyMethodEnter("select", new Object[] { "pickResponseChannel",
@@ -653,7 +649,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         });
     }
 
-    public void registerTimer(TimerResponseChannel timerChannel, Date timeToFire) {
+    public void registerTimer(TimerResponse timerChannel, Date timeToFire) {
         JobDetails we = new JobDetails();
         we.setInstanceId(_dao.getInstanceId());
         we.setChannel(ProcessUtil.exportChannel(timerChannel));
@@ -695,7 +691,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
      * in which case it is one of the bpel standard fault.
      */
     public String invoke(int aid, PartnerLinkInstance partnerLink, Operation operation, Element outgoingMessage,
-                         InvokeResponseChannel channel) throws FaultException {
+                         InvokeResponse channel) throws FaultException {
 
         PartnerLinkDAO plinkDAO = fetchPartnerLinkDAO(partnerLink);
         // The target (partner endpoint) -- if it has not been explicitly
@@ -992,14 +988,14 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             private static final long serialVersionUID = -7767141033611036745L;
 
             public void run() {
-                TimerResponseChannel responseChannel = importChannel(timerResponseChannel, TimerResponseChannel.class);
+                TimerResponse responseChannel = importChannel(timerResponseChannel, TimerResponse.class);
                 responseChannel.onTimeout();
             }
         });
         execute();
     }
 
-    public void cancel(final TimerResponseChannel timerResponseChannel) {
+    public void cancel(final TimerResponse timerResponseChannel) {
         // In case this is a pick response channel, we need to cancel routes and
         // receive/reply association.
         final String id = ProcessUtil.exportChannel(timerResponseChannel);
@@ -1354,7 +1350,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         return dao.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
     }
 
-    public void registerActivityForRecovery(ActivityRecoveryChannel channel, long activityId, String reason,
+    public void registerActivityForRecovery(ActivityRecovery channel, long activityId, String reason,
                                             Date dateTime, Element details, String[] actions, int retries) {
         if (reason == null)
             reason = "Unspecified";
@@ -1365,7 +1361,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _dao.createActivityRecovery(ProcessUtil.exportChannel(channel), (int) activityId, reason, dateTime, details, actions, retries);
     }
 
-    public void unregisterActivityForRecovery(ActivityRecoveryChannel channel) {
+    public void unregisterActivityForRecovery(ActivityRecovery channel) {
         _dao.deleteActivityRecovery(ProcessUtil.exportChannel(channel));
     }
 

@@ -27,8 +27,7 @@ import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.channels.Compensation;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
+import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
 import org.w3c.dom.Element;
@@ -61,7 +60,7 @@ class COMPENSATIONHANDLER_ extends BpelJacobRunnable {
 
                 ActivityInfo ai = new ActivityInfo(genMonotonic(),
                     _self.compensated.oscope.compensationHandler,
-                    newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
+                    newChannel(Termination.class), newChannel(ParentScope.class));
 
 
                 ScopeFrame compHandlerScopeFrame = new ScopeFrame(

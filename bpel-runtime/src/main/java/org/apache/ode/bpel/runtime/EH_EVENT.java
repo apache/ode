@@ -32,11 +32,8 @@ import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.channels.EventHandlerControl;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponse;
-import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.Termination;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.ProcessUtil;
 import org.apache.ode.jacob.ReceiveProcess;
@@ -54,8 +51,8 @@ class EH_EVENT extends BpelJacobRunnable {
     private static final Log __log = LogFactory.getLog(EH_EVENT.class);
 
     private EventHandlerControl _ehc;
-    private TerminationChannel _tc;
-    private ParentScopeChannel _psc;
+    private Termination _tc;
+    private ParentScope _psc;
     private ScopeFrame _scopeFrame;
     private OEventHandler.OEvent _oevent;
 
@@ -76,7 +73,7 @@ class EH_EVENT extends BpelJacobRunnable {
     private boolean _childrenTerminated;
 
 
-    EH_EVENT(ParentScopeChannel psc,TerminationChannel tc, EventHandlerControl ehc, OEventHandler.OEvent o, ScopeFrame scopeFrame) {
+    EH_EVENT(ParentScope psc,Termination tc, EventHandlerControl ehc, OEventHandler.OEvent o, ScopeFrame scopeFrame) {
         _scopeFrame = scopeFrame;
         _oevent = o;
         _tc = tc;
@@ -114,7 +111,7 @@ class EH_EVENT extends BpelJacobRunnable {
         public void run() {
             Selector selector;
             try {
-                PickResponseChannel pickResponseChannel = newChannel(PickResponseChannel.class);
+                PickResponse pickResponseChannel = newChannel(PickResponse.class);
                 CorrelationKeySet keySet = new CorrelationKeySet();
                 PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(_oevent.partnerLink);
                 for( OScope.CorrelationSet cset : _oevent.joinCorrelations ) {
@@ -153,9 +150,9 @@ class EH_EVENT extends BpelJacobRunnable {
      */
     private class WAITING extends BpelJacobRunnable {
         private static final long serialVersionUID = 1L;
-        private PickResponseChannel _pickResponseChannel;
+        private PickResponse _pickResponseChannel;
 
-        private WAITING(PickResponseChannel pickResponseChannel) {
+        private WAITING(PickResponse pickResponseChannel) {
             _pickResponseChannel = pickResponseChannel;
         }
 
@@ -293,19 +290,18 @@ class EH_EVENT extends BpelJacobRunnable {
                             // load 'onMessage' activity; we'll do this even if a stop/terminate has been
                             // requested becasue we cannot undo the receipt of the message at this point.
                             ActivityInfo child = new ActivityInfo(genMonotonic(),
-                                    _oevent.activity,
-                                    newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
-
+                                _oevent.activity,
+                                newChannel(Termination.class), newChannel(ParentScope.class));
 
                             _active.add(child);
 
                             LinkFrame lf = new LinkFrame(null);
 
                             ScopeFrame innerScopeFrame = new ScopeFrame((OScope) _oevent.activity,
-                                    getBpelRuntimeContext().createScopeInstance(_scopeFrame.scopeInstanceId, (OScope) _oevent.activity),
-                                    ehScopeFrame,
-                                    _comps,
-                                    _fault);
+                                getBpelRuntimeContext().createScopeInstance(_scopeFrame.scopeInstanceId, (OScope) _oevent.activity),
+                                ehScopeFrame,
+                                _comps,
+                                _fault);
                             instance(new SCOPE(child, innerScopeFrame, lf));
 
                             // If we previously terminated the other activiites, then we do the same

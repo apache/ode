@@ -42,7 +42,6 @@ import org.apache.ode.bpel.o.OPickReceive;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.PickResponse;
-import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.jacob.ProcessUtil;
 import org.apache.ode.jacob.ReceiveProcess;
@@ -74,7 +73,7 @@ class PICK extends ACTIVITY {
      * @see org.apache.ode.jacob.JacobRunnable#run()
      */
     public void run() {
-        PickResponseChannel pickResponseChannel = newChannel(PickResponseChannel.class);
+        PickResponse pickResponseChannel = newChannel(PickResponse.class);
         Date timeout;
         Selector[] selectors;
 
@@ -273,9 +272,9 @@ class PICK extends ACTIVITY {
     private class WAITING extends BpelJacobRunnable {
         private static final long serialVersionUID = 1L;
 
-        private PickResponseChannel _pickResponseChannel;
+        private PickResponse _pickResponseChannel;
 
-        private WAITING(PickResponseChannel pickResponseChannel) {
+        private WAITING(PickResponse pickResponseChannel) {
             this._pickResponseChannel = pickResponseChannel;
         }
 

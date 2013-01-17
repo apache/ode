@@ -42,14 +42,11 @@ import org.apache.ode.bpel.o.OInvoke;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.channels.ActivityRecovery;
-import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.LinkStatus;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.bpel.runtime.channels.TimerResponse;
-import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
@@ -88,7 +85,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                 ActivityExecStartEvent aese = new ActivityExecStartEvent();
                 sendEvent(aese);
                 // intercept completion channel in order to execute transition conditions.
-                ActivityInfo activity = new ActivityInfo(genMonotonic(),_self.o,_self.self, newChannel(ParentScopeChannel.class));
+                ActivityInfo activity = new ActivityInfo(genMonotonic(),_self.o,_self.self, newChannel(ParentScope.class));
                 instance(createActivity(activity));
                 instance(new TCONDINTERCEPT(activity.parent));
             } else {
@@ -180,7 +177,7 @@ class ACTIVITYGUARD extends ACTIVITY {
     }
 
     private void startGuardedActivity() {
-        ActivityInfo activity = new ActivityInfo(genMonotonic(),_self.o,_self.self, newChannel(ParentScopeChannel.class));
+        ActivityInfo activity = new ActivityInfo(genMonotonic(),_self.o,_self.self, newChannel(ParentScope.class));
         instance(createActivity(activity));
         instance(new TCONDINTERCEPT(activity.parent));
     }
@@ -188,14 +185,14 @@ class ACTIVITYGUARD extends ACTIVITY {
 
     /**
      * Intercepts the
-     * {@link ParentScopeChannel#completed(org.apache.ode.bpel.runtime.channels.FaultData, java.util.Set<org.apache.ode.bpel.runtime.CompensationHandler>)}
+     * {@link ParentScope#completed(org.apache.ode.bpel.runtime.channels.FaultData, java.util.Set<org.apache.ode.bpel.runtime.CompensationHandler>)}
      * call, to evaluate transition conditions before returning to the parent.
      */
     private class TCONDINTERCEPT extends BpelJacobRunnable {
         private static final long serialVersionUID = 4014873396828400441L;
-        ParentScopeChannel _in;
+        ParentScope _in;
 
-        public TCONDINTERCEPT(ParentScopeChannel in) {
+        public TCONDINTERCEPT(ParentScope in) {
             _in = in;
         }
 
@@ -272,7 +269,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                         __log.debug("ActivityRecovery: Retrying activity " + _self.aId);
                     Date future = new Date(new Date().getTime() +
                         (failureHandling == null ? 0L : failureHandling.retryDelay * 1000));
-                    final TimerResponseChannel timerChannel = newChannel(TimerResponseChannel.class);
+                    final TimerResponse timerChannel = newChannel(TimerResponse.class);
                     getBpelRuntimeContext().registerTimer(timerChannel, future);
                     object(false, new ReceiveProcess<TimerResponse>(timerChannel, new TimerResponse() {
                         public void onTimeout() {
@@ -291,7 +288,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                     if (__log.isDebugEnabled())
                         __log.debug("ActivityRecovery: Activity " + _self.aId + " requires recovery");
                     sendEvent(new ActivityFailureEvent(_failure.reason));
-                    final ActivityRecoveryChannel recoveryChannel = newChannel(ActivityRecoveryChannel.class);
+                    final ActivityRecovery recoveryChannel = newChannel(ActivityRecovery.class);
                     getBpelRuntimeContext().registerActivityForRecovery(
                         recoveryChannel, _self.aId, _failure.reason, _failure.dateTime, _failure.data,
                         new String[] { "retry", "cancel", "fault" }, _failure.retryCount);

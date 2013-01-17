@@ -48,9 +48,7 @@ import org.apache.ode.bpel.runtime.channels.Compensation;
 import org.apache.ode.bpel.runtime.channels.EventHandlerControl;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.Termination;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
@@ -80,7 +78,7 @@ class SCOPE extends ACTIVITY {
         // Start the child activity.
         _child = new ActivityInfo(genMonotonic(),
             _oscope.activity,
-            newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
+            newChannel(Termination.class), newChannel(ParentScope.class));
         instance(createChild(_child, _scopeFrame, _linkFrame));
 
         if (_oscope.eventHandler != null) {
@@ -88,8 +86,8 @@ class SCOPE extends ACTIVITY {
                 OEventHandler.OAlarm alarm = i.next();
                 EventHandlerInfo ehi = new EventHandlerInfo(alarm,
                         newChannel(EventHandlerControl.class),
-                        newChannel(ParentScopeChannel.class),
-                        newChannel(TerminationChannel.class));
+                        newChannel(ParentScope.class),
+                        newChannel(Termination.class));
                 _eventHandlers.add(ehi);
                 instance(new EH_ALARM(ehi.psc,ehi.tc, ehi.cc, alarm, _scopeFrame));
             }
@@ -98,8 +96,8 @@ class SCOPE extends ACTIVITY {
                 OEventHandler.OEvent event = i.next();
                 EventHandlerInfo ehi = new EventHandlerInfo(event,
                         newChannel(EventHandlerControl.class),
-                        newChannel(ParentScopeChannel.class),
-                        newChannel(TerminationChannel.class));
+                        newChannel(ParentScope.class),
+                        newChannel(Termination.class));
                 _eventHandlers.add(ehi);
                 instance(new EH_EVENT(ehi.psc,ehi.tc, ehi.cc, event, _scopeFrame));
             }
@@ -285,7 +283,7 @@ class SCOPE extends ACTIVITY {
                         BpelRuntimeContext ntive = getBpelRuntimeContext();
 
                         ActivityInfo terminationHandlerActivity = new ActivityInfo(genMonotonic(), _oscope.terminationHandler,
-                                newChannel(TerminationChannel.class,"TH"), newChannel(ParentScopeChannel.class,"TH"));
+                                newChannel(Termination.class,"TH"), newChannel(ParentScope.class,"TH"));
 
                         ScopeFrame terminationHandlerScopeFrame = new ScopeFrame(_oscope.terminationHandler,
                                 ntive.createScopeInstance(_scopeFrame.scopeInstanceId, _oscope.terminationHandler),
@@ -348,7 +346,7 @@ class SCOPE extends ACTIVITY {
                         BpelRuntimeContext ntive = getBpelRuntimeContext();
 
                         ActivityInfo faultHandlerActivity = new ActivityInfo(genMonotonic(), catchBlock,
-                                newChannel(TerminationChannel.class,"FH"), newChannel(ParentScopeChannel.class,"FH"));
+                                newChannel(Termination.class,"FH"), newChannel(ParentScope.class,"FH"));
 
                         ScopeFrame faultHandlerScopeFrame = new ScopeFrame(catchBlock,
                                 ntive.createScopeInstance(_scopeFrame.scopeInstanceId, catchBlock),
@@ -501,12 +499,12 @@ class SCOPE extends ACTIVITY {
         private static final long serialVersionUID = -9046603073542446478L;
         final OBase o;
         final EventHandlerControl cc;
-        final ParentScopeChannel psc;
-        final TerminationChannel tc;
+        final ParentScope psc;
+        final Termination tc;
         boolean terminateRequested;
         boolean stopRequested;
 
-        EventHandlerInfo(OBase o, EventHandlerControl cc, ParentScopeChannel psc, TerminationChannel tc) {
+        EventHandlerInfo(OBase o, EventHandlerControl cc, ParentScope psc, Termination tc) {
             this.o = o;
             this.cc = cc;
             this.psc = psc;

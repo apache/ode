@@ -32,29 +32,28 @@ import junit.framework.TestCase;
 
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
+import org.apache.ode.bpel.iapi.ProcessConf.PartnerRoleConfig;
 import org.apache.ode.bpel.o.OCatch;
 import org.apache.ode.bpel.o.OEmpty;
-import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.o.OFaultHandler;
 import org.apache.ode.bpel.o.OFlow;
 import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.o.OSequence;
 import org.apache.ode.bpel.o.OThrow;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.o.OScope.Variable;
-import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
+import org.apache.ode.bpel.runtime.channels.ActivityRecovery;
 import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
-import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
-import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
+import org.apache.ode.bpel.runtime.channels.InvokeResponse;
+import org.apache.ode.bpel.runtime.channels.PickResponse;
+import org.apache.ode.bpel.runtime.channels.TimerResponse;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
-import org.apache.ode.bpel.evar.ExternalVariableModuleException;
-import org.apache.ode.bpel.iapi.ProcessConf.PartnerRoleConfig;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -129,7 +128,7 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
     public void writeCorrelation(CorrelationSetInstance cset, CorrelationKey correlation) {
     }
 
-    public void cancel(TimerResponseChannel timerResponseChannel) {
+    public void cancel(TimerResponse timerResponseChannel) {
     }
 
     public void completedOk() {
@@ -140,7 +139,7 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
         _fault = faultData;
     }
 
-    public void select(PickResponseChannel response, Date timeout, boolean createInstnace, Selector[] selectors) throws FaultException {
+    public void select(PickResponse response, Date timeout, boolean createInstnace, Selector[] selectors) throws FaultException {
     }
 
     public void cancelOutstandingRequests(String channelId) {
@@ -149,11 +148,11 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
     public void reply(PartnerLinkInstance plink, String opName, String mexId, Element msg, QName fault) throws FaultException {
     }
 
-    public String invoke(int aid, PartnerLinkInstance partnerLinkInstance, Operation operation, Element outboundMsg, InvokeResponseChannel invokeResponseChannel) {
+    public String invoke(int aid, PartnerLinkInstance partnerLinkInstance, Operation operation, Element outboundMsg, InvokeResponse invokeResponseChannel) {
         return null;
     }
 
-    public void registerTimer(TimerResponseChannel timerChannel, Date timeToFire) {
+    public void registerTimer(TimerResponse timerChannel, Date timeToFire) {
     }
 
     public void terminate() {
@@ -398,10 +397,10 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
         return null;
     }
 
-    public void registerActivityForRecovery(ActivityRecoveryChannel channel, long activityId, String reason, Date dateTime, Element data, String[] actions, int retries) {
+    public void registerActivityForRecovery(ActivityRecovery channel, long activityId, String reason, Date dateTime, Element data, String[] actions, int retries) {
     }
 
-    public void unregisterActivityForRecovery(ActivityRecoveryChannel channel) {
+    public void unregisterActivityForRecovery(ActivityRecovery channel) {
     }
 
     public void recoverActivity(String channel, long activityId, String action, FaultData fault) {

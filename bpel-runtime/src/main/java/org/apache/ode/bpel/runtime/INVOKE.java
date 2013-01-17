@@ -32,7 +32,6 @@ import org.apache.ode.bpel.o.OInvoke;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponse;
-import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.utils.DOMUtils;
@@ -91,7 +90,7 @@ public class INVOKE extends ACTIVITY {
 
             } else /* two-way */{
                 final VariableInstance outputVar = _scopeFrame.resolve(_oinvoke.outputVar);
-                InvokeResponseChannel invokeResponseChannel = newChannel(InvokeResponseChannel.class);
+                InvokeResponse invokeResponseChannel = newChannel(InvokeResponse.class);
 
                 final String mexId = getBpelRuntimeContext().invoke(_oinvoke.getId(),
                         _scopeFrame.resolve(_oinvoke.partnerLink), _oinvoke.operation,

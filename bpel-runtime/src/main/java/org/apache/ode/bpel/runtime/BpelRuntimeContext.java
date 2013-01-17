@@ -32,11 +32,11 @@ import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OScope.Variable;
-import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
+import org.apache.ode.bpel.runtime.channels.ActivityRecovery;
 import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
-import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
-import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
+import org.apache.ode.bpel.runtime.channels.InvokeResponse;
+import org.apache.ode.bpel.runtime.channels.PickResponse;
+import org.apache.ode.bpel.runtime.channels.TimerResponse;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.iapi.ProcessConf.PartnerRoleConfig;
 import org.w3c.dom.Element;
@@ -185,14 +185,14 @@ public interface BpelRuntimeContext {
     /**
      * Non-deterministic selection on incoming message-exchanges.
      */
-    void select(PickResponseChannel response, Date timeout, boolean createInstnace,
+    void select(PickResponse response, Date timeout, boolean createInstnace,
                 Selector[] selectors) throws FaultException;
 
     /**
      * Cancel a timer, or pick.
      * @param timerResponseChannel
      */
-    void cancel(TimerResponseChannel timerResponseChannel);
+    void cancel(TimerResponse timerResponseChannel);
 
     void cancelOutstandingRequests(String channelId);
 
@@ -219,7 +219,7 @@ public interface BpelRuntimeContext {
      */
     String invoke(int activityId, PartnerLinkInstance partnerLinkInstance,
                   Operation operation, Element outboundMsg,
-                  InvokeResponseChannel invokeResponseChannel) throws FaultException;
+                  InvokeResponse invokeResponseChannel) throws FaultException;
 
 
     /**
@@ -227,7 +227,7 @@ public interface BpelRuntimeContext {
      * @param timerChannel channel for timer notification
      * @param timeToFire future time to fire timer notification
      */
-    void registerTimer(TimerResponseChannel timerChannel, Date timeToFire);
+    void registerTimer(TimerResponse timerChannel, Date timeToFire);
 
     /**
      * Terminates the process / sets state flag to terminate
@@ -262,10 +262,10 @@ public interface BpelRuntimeContext {
 
     Element getSourceEPR(String mexId);
 
-    void registerActivityForRecovery(ActivityRecoveryChannel channel, long activityId, String reason,
+    void registerActivityForRecovery(ActivityRecovery channel, long activityId, String reason,
                                      Date dateTime, Element details, String[] actions, int retries);
 
-    void unregisterActivityForRecovery(ActivityRecoveryChannel channel);
+    void unregisterActivityForRecovery(ActivityRecovery channel);
 
     void recoverActivity(String channel, long activityId, String action, FaultData fault);
 

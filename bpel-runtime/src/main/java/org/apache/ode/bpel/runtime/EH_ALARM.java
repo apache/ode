@@ -32,11 +32,8 @@ import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.channels.EventHandlerControl;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.Termination;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponse;
-import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
@@ -54,8 +51,8 @@ class EH_ALARM extends BpelJacobRunnable {
 
     private static final long serialVersionUID = 1L;
 
-    private ParentScopeChannel _psc;
-    private TerminationChannel _tc;
+    private ParentScope _psc;
+    private Termination _tc;
     private OEventHandler.OAlarm _oalarm;
     private ScopeFrame _scopeFrame;
     private EventHandlerControl _cc;
@@ -69,7 +66,7 @@ class EH_ALARM extends BpelJacobRunnable {
      * @param o our prototype / compiled representation
      * @param scopeFrame the {@link ScopeFrame} in which we are executing
      */
-    EH_ALARM(ParentScopeChannel psc, TerminationChannel tc, EventHandlerControl cc, OEventHandler.OAlarm o, ScopeFrame scopeFrame) {
+    EH_ALARM(ParentScope psc, Termination tc, EventHandlerControl cc, OEventHandler.OAlarm o, ScopeFrame scopeFrame) {
         _psc = psc;
         _tc = tc;
         _cc = cc;
@@ -148,7 +145,7 @@ class EH_ALARM extends BpelJacobRunnable {
             if (_alarm == null) {
                 object(false, listeners);
             } else if (now.before(_alarm)) {
-                TimerResponseChannel trc = newChannel(TimerResponseChannel.class);
+                TimerResponse trc = newChannel(TimerResponse.class);
                 getBpelRuntimeContext().registerTimer(trc,_alarm.getTime());
 
                 listeners.add(new ReceiveProcess<TimerResponse>(trc, new TimerResponse(){
@@ -167,8 +164,8 @@ class EH_ALARM extends BpelJacobRunnable {
             } else /* now is later then alarm time */ {
                 // If the alarm has passed we fire the nested activity
                 ActivityInfo child = new ActivityInfo(genMonotonic(),
-                        _oalarm.activity,
-                        newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
+                    _oalarm.activity,
+                    newChannel(Termination.class), newChannel(ParentScope.class));
                 instance(createChild(child, _scopeFrame, new LinkFrame(null) ));
                 instance(new ACTIVE(child));
             }
@@ -184,8 +181,8 @@ class EH_ALARM extends BpelJacobRunnable {
         public void run() {
             // Start the child activity.
             ActivityInfo child = new ActivityInfo(genMonotonic(),
-                    _oalarm.activity,
-                    newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
+                _oalarm.activity,
+                newChannel(Termination.class), newChannel(ParentScope.class));
             instance(createChild(child, _scopeFrame, new LinkFrame(null) ));
             instance(new ACTIVE(child));
         }

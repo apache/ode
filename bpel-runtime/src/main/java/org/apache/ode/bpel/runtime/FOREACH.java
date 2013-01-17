@@ -34,9 +34,7 @@ import org.apache.ode.bpel.o.OForEach;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.Termination;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
@@ -198,7 +196,7 @@ public class FOREACH extends ACTIVITY {
 
     private void newChild() {
         ChildInfo child = new ChildInfo(new ActivityInfo(genMonotonic(), _oforEach.innerScope,
-                newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class)));
+                newChannel(Termination.class), newChannel(ParentScope.class)));
         _children.add(child);
 
         // Creating the current counter value node

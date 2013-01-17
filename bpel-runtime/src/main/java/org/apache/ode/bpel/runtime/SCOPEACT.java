@@ -35,7 +35,6 @@ import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.LinkStatus;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.ReadWriteLock;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.ReceiveProcess;
@@ -68,7 +67,7 @@ public class SCOPEACT extends ACTIVITY {
             LinkFrame linkframe;
             if (((OScope) _self.o).atomicScope && !_self.o.outgoingLinks.isEmpty()) {
                 Val linkInterceptorControl = newChannel(Val.class);
-                ParentScopeChannel psc = newChannel(ParentScopeChannel.class);
+                ParentScope psc = newChannel(ParentScope.class);
                 linkframe = createInterceptorLinkFrame();
                 instance(new LINKSTATUSINTERCEPTOR(linkInterceptorControl,linkframe));
                 instance(new UNLOCKER(psc, _self.parent, null, Collections.<IsolationLock>emptyList(), linkInterceptorControl));
@@ -238,8 +237,8 @@ public class SCOPEACT extends ACTIVITY {
                         _scopeFrame.scopeInstanceId, (OScope) _self.o), _scopeFrame, null);
 
                 
-                final ParentScopeChannel parent = _self.parent;
-                _self.parent = newChannel(ParentScopeChannel.class);
+                final ParentScope parent = _self.parent;
+                _self.parent = newChannel(ParentScope.class);
                 Val lsi = newChannel(Val.class);
                 instance(new UNLOCKER(_self.parent, parent, _synchChannel, _locksAcquired, lsi));
                 LinkFrame linkframe = createInterceptorLinkFrame();
@@ -283,9 +282,9 @@ public class SCOPEACT extends ACTIVITY {
 
         private static final long serialVersionUID = -476393080609348172L;
 
-        private final ParentScopeChannel _self;
+        private final ParentScope _self;
 
-        private final ParentScopeChannel _parent;
+        private final ParentScope _parent;
 
         private final Synch _synchChannel;
         
@@ -293,7 +292,7 @@ public class SCOPEACT extends ACTIVITY {
 
         private final Val _linkStatusInterceptor;
 
-        public UNLOCKER(ParentScopeChannel self, ParentScopeChannel parent, Synch synchChannel,
+        public UNLOCKER(ParentScope self, ParentScope parent, Synch synchChannel,
                 List<IsolationLock> locksAcquired, Val linkStatusInterceptor) {
             _self = self;
             _parent = parent;

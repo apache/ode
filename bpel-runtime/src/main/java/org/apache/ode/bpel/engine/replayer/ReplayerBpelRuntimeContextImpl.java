@@ -45,12 +45,11 @@ import org.apache.ode.bpel.pmapi.CommunicationType.Exchange;
 import org.apache.ode.bpel.runtime.PROCESS;
 import org.apache.ode.bpel.runtime.PartnerLinkInstance;
 import org.apache.ode.bpel.runtime.Selector;
-import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
+import org.apache.ode.bpel.runtime.channels.ActivityRecovery;
 import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
-import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
+import org.apache.ode.bpel.runtime.channels.InvokeResponse;
+import org.apache.ode.bpel.runtime.channels.PickResponse;
 import org.apache.ode.bpel.runtime.channels.TimerResponse;
-import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.ProcessUtil;
 import org.apache.ode.utils.DOMUtils;
@@ -81,7 +80,7 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
     }
 
     @Override
-    public void cancel(TimerResponseChannel timerResponseChannel) {
+    public void cancel(TimerResponse timerResponseChannel) {
         if (__log.isDebugEnabled()) {
             __log.debug("cancel " + ProcessUtil.exportChannel(timerResponseChannel));
         }
@@ -96,7 +95,7 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
     }
 
     @Override
-    public String invoke(int aid, PartnerLinkInstance partnerLink, Operation operation, Element outgoingMessage, InvokeResponseChannel channel) throws FaultException {
+    public String invoke(int aid, PartnerLinkInstance partnerLink, Operation operation, Element outgoingMessage, InvokeResponse channel) throws FaultException {
         __log.debug("invoke");
         AnswerResult answerResult = replayerContext.answers.fetchAnswer(partnerLink.partnerLink.partnerRolePortType.getQName(), operation.getName(), outgoingMessage, getCurrentEventDateTime());
 
@@ -195,7 +194,7 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
     }
 
     @Override
-    public void registerTimer(final TimerResponseChannel timerChannel, final Date timeToFire) {
+    public void registerTimer(final TimerResponse timerChannel, final Date timeToFire) {
         __log.debug("register timer " + timerChannel + " " + timeToFire);
         final String channel = ProcessUtil.exportChannel(timerChannel);
 
@@ -214,7 +213,7 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
 
 
     @Override
-    public void registerActivityForRecovery(ActivityRecoveryChannel channel, long activityId, String reason, Date dateTime, Element details, String[] actions, int retries) {
+    public void registerActivityForRecovery(ActivityRecovery channel, long activityId, String reason, Date dateTime, Element details, String[] actions, int retries) {
         super.registerActivityForRecovery(channel, activityId, reason, dateTime, details, actions, retries);
         replayerContext.checkRollbackOnFault();
     }
@@ -254,7 +253,7 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
     }
 
     @Override
-    public void select(PickResponseChannel pickResponseChannel, Date timeout, boolean createInstance, Selector[] selectors) throws FaultException {
+    public void select(PickResponse pickResponseChannel, Date timeout, boolean createInstance, Selector[] selectors) throws FaultException {
         super.select(pickResponseChannel, timeout, createInstance, selectors);
         if (__log.isDebugEnabled()) {
             __log.debug("select " + pickResponseChannel + " " + ObjectPrinter.toString(selectors, selectors));

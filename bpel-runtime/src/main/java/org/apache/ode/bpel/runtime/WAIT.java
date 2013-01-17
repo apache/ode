@@ -29,7 +29,6 @@ import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OWait;
 import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.bpel.runtime.channels.TimerResponse;
-import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.utils.xsd.Duration;
 
@@ -64,7 +63,7 @@ class WAIT extends ACTIVITY {
 
 
         if(dueDate.getTime() > getBpelRuntimeContext().getCurrentEventDateTime().getTime()) {
-            final TimerResponseChannel timerChannel = newChannel(TimerResponseChannel.class);
+            final TimerResponse timerChannel = newChannel(TimerResponse.class);
             getBpelRuntimeContext().registerTimer(timerChannel, dueDate);
 
             object(false, new ReceiveProcess<TimerResponse>(timerChannel, new TimerResponse() {

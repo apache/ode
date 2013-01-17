@@ -28,9 +28,8 @@ import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.ReadWriteLock;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
+import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
 import org.w3c.dom.Element;
@@ -56,7 +55,7 @@ public class PROCESS extends BpelJacobRunnable {
 
         ActivityInfo child = new ActivityInfo(genMonotonic(),
             _oprocess.procesScope,
-            newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
+            newChannel(Termination.class), newChannel(ParentScope.class));
         ScopeFrame processFrame = new ScopeFrame(_oprocess.procesScope, scopeInstanceId, null, null,_globals);
         instance(new SCOPE(child, processFrame, new LinkFrame(null)));
 

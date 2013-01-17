@@ -21,8 +21,9 @@ package org.apache.ode.bpel.runtime;
 import java.io.Serializable;
 
 import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
+import org.apache.ode.bpel.runtime.channels.ParentScope;
+import org.apache.ode.bpel.runtime.channels.Termination;
+
 
 class ActivityInfo implements Serializable {
 
@@ -32,10 +33,10 @@ class ActivityInfo implements Serializable {
 
     /** Activity definition. */
     OActivity o;
-    TerminationChannel self;
-    ParentScopeChannel parent;
+    Termination self;
+    ParentScope parent;
 
-    ActivityInfo(long aid, OActivity o, TerminationChannel self, ParentScopeChannel parent) {
+    ActivityInfo(long aid, OActivity o, Termination self, ParentScope parent) {
         assert o != null;
         assert self != null;
         assert parent != null;

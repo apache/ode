@@ -23,7 +23,6 @@ package org.apache.ode.bpel.runtime.channels;
 /**
  * Response channel for pick requests.
  * @jacob.kind
- * @jacob.parent TimerResponseChannel
  */
 public interface PickResponse extends TimerResponse {
 

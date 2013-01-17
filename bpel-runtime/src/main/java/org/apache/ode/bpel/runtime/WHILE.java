@@ -29,9 +29,7 @@ import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OWhile;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
-import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.Termination;
-import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
 import org.w3c.dom.Element;
@@ -65,7 +63,7 @@ class WHILE extends ACTIVITY {
         if (condResult) {
             ActivityInfo child = new ActivityInfo(genMonotonic(),
                     getOWhile().activity,
-                    newChannel(TerminationChannel.class), newChannel(ParentScopeChannel.class));
+                    newChannel(Termination.class), newChannel(ParentScope.class));
             instance(createChild(child, _scopeFrame, _linkFrame));
             instance(new WAITER(child));
         } else /* stop. */ {
