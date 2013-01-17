@@ -44,8 +44,8 @@ public class Sieve extends JacobRunnable {
   private static int _last = 0;
 
   public void run() {
-    NaturalNumberStreamChannel integers =  newChannel(NaturalNumberStreamChannel.class);
-    NaturalNumberStreamChannel primes =  newChannel(NaturalNumberStreamChannel.class);
+    NaturalNumberStream integers =  newChannel(NaturalNumberStream.class);
+    NaturalNumberStream primes =  newChannel(NaturalNumberStream.class);
     instance(new Counter(integers,2));
     instance(new Head(integers,primes));
     instance(new Print(primes));
@@ -62,10 +62,10 @@ public class Sieve extends JacobRunnable {
   private static class Counter extends JacobRunnable {
     private static final long serialVersionUID = 4739323750438991003L;
 
-    private NaturalNumberStreamChannel _out;
+    private NaturalNumberStream _out;
     private int _n;
 
-    public Counter(NaturalNumberStreamChannel out, int n) {
+    public Counter(NaturalNumberStream out, int n) {
       _out = out;
       _n = n;
     }
@@ -94,10 +94,10 @@ public class Sieve extends JacobRunnable {
   private static final class Head extends JacobRunnable {
     private static final long serialVersionUID = 1791641314141082728L;
 
-    NaturalNumberStreamChannel _in;
-    NaturalNumberStreamChannel _primes;
+    NaturalNumberStream _in;
+    NaturalNumberStream _primes;
 
-    public Head(NaturalNumberStreamChannel in, NaturalNumberStreamChannel primes) {
+    public Head(NaturalNumberStream in, NaturalNumberStream primes) {
       _in = in;
       _primes = primes;
     }
@@ -107,7 +107,7 @@ public class Sieve extends JacobRunnable {
         public void val(final int n, final SynchChannel ret) {
           _primes.val(n, (SynchChannel)object(new ReceiveProcess<Synch>(newChannel(SynchChannel.class), new Synch() {
             public void ret() {
-              NaturalNumberStreamChannel x = newChannel(NaturalNumberStreamChannel.class);
+              NaturalNumberStream x = newChannel(NaturalNumberStream.class);
               instance(new PrimeFilter(n, _in, x));
               instance(new Head(x, _primes));
               ret.ret();
@@ -125,8 +125,8 @@ public class Sieve extends JacobRunnable {
   private static final class Print extends JacobRunnable {
     private static final long serialVersionUID = -3134193737519487672L;
 
-    private NaturalNumberStreamChannel _in;
-    public Print(NaturalNumberStreamChannel in) {
+    private NaturalNumberStream _in;
+    public Print(NaturalNumberStream in) {
       _in = in;
     }
     public void run() {
@@ -155,10 +155,10 @@ public class Sieve extends JacobRunnable {
     private static final long serialVersionUID = 1569523200422202448L;
 
     private int _prime;
-    private NaturalNumberStreamChannel _in;
-    private NaturalNumberStreamChannel _out;
+    private NaturalNumberStream _in;
+    private NaturalNumberStream _out;
 
-    public PrimeFilter(int prime, NaturalNumberStreamChannel in, NaturalNumberStreamChannel out) {
+    public PrimeFilter(int prime, NaturalNumberStream in, NaturalNumberStream out) {
       _prime = prime;
       _in = in;
       _out = out;

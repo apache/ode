@@ -30,7 +30,6 @@ import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.o.OEventHandler;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.channels.EventHandlerControl;
-import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannel;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
@@ -54,7 +53,7 @@ class EH_EVENT extends BpelJacobRunnable {
 
     private static final Log __log = LogFactory.getLog(EH_EVENT.class);
 
-    private EventHandlerControlChannel _ehc;
+    private EventHandlerControl _ehc;
     private TerminationChannel _tc;
     private ParentScopeChannel _psc;
     private ScopeFrame _scopeFrame;
@@ -77,7 +76,7 @@ class EH_EVENT extends BpelJacobRunnable {
     private boolean _childrenTerminated;
 
 
-    EH_EVENT(ParentScopeChannel psc,TerminationChannel tc, EventHandlerControlChannel ehc, OEventHandler.OEvent o, ScopeFrame scopeFrame) {
+    EH_EVENT(ParentScopeChannel psc,TerminationChannel tc, EventHandlerControl ehc, OEventHandler.OEvent o, ScopeFrame scopeFrame) {
         _scopeFrame = scopeFrame;
         _oevent = o;
         _tc = tc;

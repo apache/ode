@@ -18,11 +18,11 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.ode.bpel.runtime.channels.CompensationChannel;
-
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Set;
+
+import org.apache.ode.bpel.runtime.channels.Compensation;
 
 
 /**
@@ -35,7 +35,7 @@ public class CompensationHandler implements Serializable, Comparable<Compensatio
   final ScopeFrame compensated;
 
   /** Compensation activation channel. */
-  final CompensationChannel compChannel;
+  final Compensation compChannel;
 
   /** Time that the scope was started. */
   final long scopeStartTime;
@@ -43,7 +43,7 @@ public class CompensationHandler implements Serializable, Comparable<Compensatio
   /** Time that the scope was completed. */
   final long scopeEndTime;
 
-  CompensationHandler(ScopeFrame compensated, CompensationChannel compChannel, long scopeStartTime, long scopeEndTime) {
+  CompensationHandler(ScopeFrame compensated, Compensation compChannel, long scopeStartTime, long scopeEndTime) {
     assert compChannel != null;
 
     this.compensated = compensated;

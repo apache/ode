@@ -35,9 +35,9 @@ public class SynchPrinter {
     public static final class SystemPrinter extends JacobRunnable {
         private static final long serialVersionUID = -8516348116865575605L;
 
-        private SynchPrintChannel _self;
+        private SynchPrint _self;
 
-        public SystemPrinter(SynchPrintChannel self) {
+        public SystemPrinter(SynchPrint self) {
             _self = self;
         }
 
@@ -45,7 +45,7 @@ public class SynchPrinter {
             object(true, new ReceiveProcess<SynchPrint>(_self, new SynchPrint() {
                 public SynchChannel print(String msg) {
                     System.out.println(msg);
-                    return null; // SynchChannel automatically created by JacobVPU
+                    return null; // Synch channel automatically created by JacobVPU
                 }
             }) {
                 private static final long serialVersionUID = -1990741944766989782L;
@@ -58,7 +58,7 @@ public class SynchPrinter {
 
         @SuppressWarnings("serial")
         public void run() {
-            final SynchPrintChannel p = newChannel(SynchPrintChannel.class);
+            final SynchPrint p = newChannel(SynchPrint.class);
             instance(new SystemPrinter(p));
             object(new ReceiveProcess<Synch>(p.print("1"), new Synch() {
                 public void ret() {

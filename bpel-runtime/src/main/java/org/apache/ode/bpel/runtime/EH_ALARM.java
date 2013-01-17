@@ -30,7 +30,6 @@ import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.o.OEventHandler;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.channels.EventHandlerControl;
-import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannel;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
@@ -59,7 +58,7 @@ class EH_ALARM extends BpelJacobRunnable {
     private TerminationChannel _tc;
     private OEventHandler.OAlarm _oalarm;
     private ScopeFrame _scopeFrame;
-    private EventHandlerControlChannel _cc;
+    private EventHandlerControl _cc;
     private Set<CompensationHandler> _comps = new HashSet<CompensationHandler>();
 
     /**
@@ -70,7 +69,7 @@ class EH_ALARM extends BpelJacobRunnable {
      * @param o our prototype / compiled representation
      * @param scopeFrame the {@link ScopeFrame} in which we are executing
      */
-    EH_ALARM(ParentScopeChannel psc, TerminationChannel tc, EventHandlerControlChannel cc, OEventHandler.OAlarm o, ScopeFrame scopeFrame) {
+    EH_ALARM(ParentScopeChannel psc, TerminationChannel tc, EventHandlerControl cc, OEventHandler.OAlarm o, ScopeFrame scopeFrame) {
         _psc = psc;
         _tc = tc;
         _cc = cc;

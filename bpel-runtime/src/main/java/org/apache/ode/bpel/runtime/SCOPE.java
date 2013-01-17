@@ -44,8 +44,8 @@ import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OVarType;
-import org.apache.ode.bpel.runtime.channels.CompensationChannel;
-import org.apache.ode.bpel.runtime.channels.EventHandlerControlChannel;
+import org.apache.ode.bpel.runtime.channels.Compensation;
+import org.apache.ode.bpel.runtime.channels.EventHandlerControl;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
@@ -87,7 +87,7 @@ class SCOPE extends ACTIVITY {
             for (Iterator<OEventHandler.OAlarm> i = _oscope.eventHandler.onAlarms.iterator(); i.hasNext(); ) {
                 OEventHandler.OAlarm alarm = i.next();
                 EventHandlerInfo ehi = new EventHandlerInfo(alarm,
-                        newChannel(EventHandlerControlChannel.class),
+                        newChannel(EventHandlerControl.class),
                         newChannel(ParentScopeChannel.class),
                         newChannel(TerminationChannel.class));
                 _eventHandlers.add(ehi);
@@ -97,7 +97,7 @@ class SCOPE extends ACTIVITY {
             for (Iterator<OEventHandler.OEvent> i = _oscope.eventHandler.onMessages.iterator(); i.hasNext(); ) {
                 OEventHandler.OEvent event = i.next();
                 EventHandlerInfo ehi = new EventHandlerInfo(event,
-                        newChannel(EventHandlerControlChannel.class),
+                        newChannel(EventHandlerControl.class),
                         newChannel(ParentScopeChannel.class),
                         newChannel(TerminationChannel.class));
                 _eventHandlers.add(ehi);
@@ -400,7 +400,7 @@ class SCOPE extends ACTIVITY {
                     if (_oscope.compensationHandler != null) {
                         CompensationHandler compensationHandler = new CompensationHandler(
                             _scopeFrame,
-                            newChannel(CompensationChannel.class),
+                            newChannel(Compensation.class),
                             _startTime,
                             System.currentTimeMillis());
                         _self.parent.completed(null, Collections.singleton(compensationHandler));
@@ -500,13 +500,13 @@ class SCOPE extends ACTIVITY {
     static final class EventHandlerInfo implements Serializable {
         private static final long serialVersionUID = -9046603073542446478L;
         final OBase o;
-        final EventHandlerControlChannel cc;
+        final EventHandlerControl cc;
         final ParentScopeChannel psc;
         final TerminationChannel tc;
         boolean terminateRequested;
         boolean stopRequested;
 
-        EventHandlerInfo(OBase o, EventHandlerControlChannel cc, ParentScopeChannel psc, TerminationChannel tc) {
+        EventHandlerInfo(OBase o, EventHandlerControl cc, ParentScopeChannel psc, TerminationChannel tc) {
             this.o = o;
             this.cc = cc;
             this.psc = psc;
