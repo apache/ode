@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.apache.ode.bpel.runtime.channels.ReadWriteLock;
-import org.apache.ode.bpel.runtime.channels.ReadWriteLockChannel;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.SynchChannel;
@@ -48,9 +47,9 @@ public class READWRITELOCK extends JacobRunnable {
 
     private Status _status = Status.UNLOCKED;
 
-    private ReadWriteLockChannel _self;
+    private ReadWriteLock _self;
 
-    public READWRITELOCK(ReadWriteLockChannel self) {
+    public READWRITELOCK(ReadWriteLock self) {
         _self = self;
     }
 

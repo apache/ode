@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.runtime.channels.ReadWriteLockChannel;
+import org.apache.ode.bpel.runtime.channels.ReadWriteLock;
 
 
 /**
@@ -34,5 +34,5 @@ import org.apache.ode.bpel.runtime.channels.ReadWriteLockChannel;
 public class InstanceGlobals implements Serializable {
     
     /** Variable locks. Used by isolated scopes. */
-    Map<OScope.Variable, ReadWriteLockChannel> _varLocks = new HashMap<OScope.Variable, ReadWriteLockChannel>();
+    Map<OScope.Variable, ReadWriteLock> _varLocks = new HashMap<OScope.Variable, ReadWriteLock>();
 }

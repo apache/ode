@@ -34,10 +34,9 @@ import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.LinkStatus;
-import org.apache.ode.bpel.runtime.channels.LinkStatusChannel;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.ReadWriteLockChannel;
+import org.apache.ode.bpel.runtime.channels.ReadWriteLock;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
@@ -114,7 +113,7 @@ public class SCOPEACT extends ACTIVITY {
         LinkFrame newframe = new LinkFrame(_linkFrame);
         for (OLink outlink : _self.o.outgoingLinks) {
             LinkInfo original = _linkFrame.resolve(outlink);
-            LinkStatusChannel newchannel = newChannel(LinkStatusChannel.class);
+            LinkStatus newchannel = newChannel(LinkStatus.class);
             newframe.links.put(original.olink, new LinkInfo(original.olink, newchannel, newchannel));
         }
         return newframe;
@@ -372,9 +371,9 @@ public class SCOPEACT extends ACTIVITY {
 
         boolean writeLock;
 
-        ReadWriteLockChannel lockChannel;
+        ReadWriteLock lockChannel;
 
-        public IsolationLock(OScope.Variable go, boolean writeLock, ReadWriteLockChannel channel) {
+        public IsolationLock(OScope.Variable go, boolean writeLock, ReadWriteLock channel) {
             this.guardedObject = go;
             this.writeLock = writeLock;
             this.lockChannel = channel;
@@ -383,6 +382,5 @@ public class SCOPEACT extends ACTIVITY {
         public int compareTo(IsolationLock o) {
             return guardedObject.getId() - o.guardedObject.getId();
         }
-
     }
 }

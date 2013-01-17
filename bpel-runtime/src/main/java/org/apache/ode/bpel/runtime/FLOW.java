@@ -27,7 +27,7 @@ import org.apache.ode.bpel.o.OFlow;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.channels.LinkStatusChannel;
+import org.apache.ode.bpel.runtime.channels.LinkStatus;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.Termination;
@@ -55,7 +55,7 @@ class FLOW extends ACTIVITY {
         LinkFrame myLinkFrame = new LinkFrame(_linkFrame);
         for (Iterator<OLink> i = _oflow.localLinks.iterator(); i.hasNext(); ) {
             OLink link = i.next();
-            LinkStatusChannel lsc = newChannel(LinkStatusChannel.class);
+            LinkStatus lsc = newChannel(LinkStatus.class);
             myLinkFrame.links.put(link,new LinkInfo(link,lsc,lsc));
         }
 

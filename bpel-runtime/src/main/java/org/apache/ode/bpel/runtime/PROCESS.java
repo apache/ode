@@ -29,7 +29,7 @@ import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
-import org.apache.ode.bpel.runtime.channels.ReadWriteLockChannel;
+import org.apache.ode.bpel.runtime.channels.ReadWriteLock;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.SynchChannel;
@@ -91,13 +91,13 @@ public class PROCESS extends BpelJacobRunnable {
         _globals = new InstanceGlobals();
         
         // For each variable, we create a lock.
-        for (OBase child : _oprocess.getChildren()) 
+        for (OBase child : _oprocess.getChildren()) {
             if (child instanceof OScope.Variable) {
                 OScope.Variable var = (Variable) child;
-                ReadWriteLockChannel vlock = newChannel(ReadWriteLockChannel.class);
+                ReadWriteLock vlock = newChannel(ReadWriteLock.class);
                 instance(new READWRITELOCK(vlock));
                 _globals._varLocks.put(var, vlock);
-                
             }
+        }
     }
 }
