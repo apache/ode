@@ -52,7 +52,7 @@ import org.apache.ode.bpel.runtime.channels.TimerResponse;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.ReceiveProcess;
-import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.Synch;
 import org.w3c.dom.Element;
 
 class ACTIVITYGUARD extends ACTIVITY {
@@ -201,7 +201,7 @@ class ACTIVITYGUARD extends ACTIVITY {
 
         public void run() {
             object(new ReceiveProcess<ParentScope>(_in, new ParentScope() {
-                public void compensate(OScope scope, SynchChannel ret) {
+                public void compensate(OScope scope, Synch ret) {
                     _self.parent.compensate(scope,ret);
                     instance(TCONDINTERCEPT.this);
                 }

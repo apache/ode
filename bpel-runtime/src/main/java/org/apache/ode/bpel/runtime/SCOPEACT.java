@@ -40,7 +40,6 @@ import org.apache.ode.bpel.runtime.channels.ReadWriteLock;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
-import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.jacob.Val;
 import org.w3c.dom.Element;
 
@@ -59,7 +58,7 @@ public class SCOPEACT extends ACTIVITY {
     public void run() {
         if (((OScope) _self.o).isolatedScope) {
             __log.debug("found ISOLATED scope, instance ISOLATEDGUARD");
-            instance(new ISOLATEDGUARD(createLockList(), newChannel(SynchChannel.class)));
+            instance(new ISOLATEDGUARD(createLockList(), newChannel(Synch.class)));
 
         } else {
             ScopeFrame newFrame = new ScopeFrame((OScope) _self.o, getBpelRuntimeContext().createScopeInstance(
@@ -220,9 +219,9 @@ public class SCOPEACT extends ACTIVITY {
 
         final LinkedList<IsolationLock> _locksAcquired = new LinkedList<IsolationLock>();
 
-        final SynchChannel _synchChannel;
+        final Synch _synchChannel;
 
-        ISOLATEDGUARD(List<IsolationLock> locks, SynchChannel synchChannel) {
+        ISOLATEDGUARD(List<IsolationLock> locks, Synch synchChannel) {
             _locksNeeded = locks;
             _synchChannel = synchChannel;
         }
@@ -288,13 +287,13 @@ public class SCOPEACT extends ACTIVITY {
 
         private final ParentScopeChannel _parent;
 
-        private final SynchChannel _synchChannel;
+        private final Synch _synchChannel;
         
         private final List<IsolationLock> _locks;
 
         private final Val _linkStatusInterceptor;
 
-        public UNLOCKER(ParentScopeChannel self, ParentScopeChannel parent, SynchChannel synchChannel,
+        public UNLOCKER(ParentScopeChannel self, ParentScopeChannel parent, Synch synchChannel,
                 List<IsolationLock> locksAcquired, Val linkStatusInterceptor) {
             _self = self;
             _parent = parent;
@@ -315,7 +314,7 @@ public class SCOPEACT extends ACTIVITY {
                     // no more listening.
                 }
 
-                public void compensate(OScope scope, SynchChannel ret) {
+                public void compensate(OScope scope, Synch ret) {
                     _parent.compensate(scope, ret);
                     // keep listening
                     instance(UNLOCKER.this);

@@ -19,7 +19,7 @@
 package org.apache.ode.jacob.examples.synch;
 
 import org.apache.ode.jacob.Channel;
-import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.Synch;
 
 /**
  * DOCUMENTME.
@@ -29,6 +29,6 @@ import org.apache.ode.jacob.SynchChannel;
  */
 public interface SynchPrint extends Channel {
 
-	public SynchChannel print(String msg);
+	public Synch print(String msg);
 
 }

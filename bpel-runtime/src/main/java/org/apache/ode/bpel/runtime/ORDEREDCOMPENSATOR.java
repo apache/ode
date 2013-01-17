@@ -24,52 +24,50 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
-import org.apache.ode.jacob.SynchChannel;
+
 
 /**
  * Serially activates a list of compensations in order.
  */
 class ORDEREDCOMPENSATOR extends BpelJacobRunnable  {
-  private static final long serialVersionUID = -3181661355085428370L;
+    private static final long serialVersionUID = -3181661355085428370L;
 
-  private static final Log __log = LogFactory.getLog(ORDEREDCOMPENSATOR.class);
+    private static final Log __log = LogFactory.getLog(ORDEREDCOMPENSATOR.class);
 
-  private List<CompensationHandler> _compensations;
-  private SynchChannel _ret;
+    private List<CompensationHandler> _compensations;
+    private Synch _ret;
 
-  public ORDEREDCOMPENSATOR(List<CompensationHandler> compensations, SynchChannel ret) {
-    _compensations = compensations;
-    _ret = ret;
-  }
-
-  public void run() {
-    if (_compensations.isEmpty()) {
-      _ret.ret();
-    }
-    else {
-      SynchChannel r = newChannel(SynchChannel.class);
-      CompensationHandler cdata = _compensations.remove(0);
-      cdata.compChannel.compensate(r);
-      object(new ReceiveProcess<Synch>(r, new Synch() {
-          public void ret() {
-            instance(ORDEREDCOMPENSATOR.this);
-          }
-        }) {
-          private static final long serialVersionUID = 7173916663479205420L;
-        });
+    public ORDEREDCOMPENSATOR(List<CompensationHandler> compensations, Synch ret) {
+        _compensations = compensations;
+        _ret = ret;
     }
 
-  }
+    public void run() {
+        if (_compensations.isEmpty()) {
+            _ret.ret();
+        } else {
+            Synch r = newChannel(Synch.class);
+            CompensationHandler cdata = _compensations.remove(0);
+            cdata.compChannel.compensate(r);
+            object(new ReceiveProcess<Synch>(r, new Synch() {
+                public void ret() {
+                    instance(ORDEREDCOMPENSATOR.this);
+                }
+            }) {
+                private static final long serialVersionUID = 7173916663479205420L;
+            });
+        }
+    }
 
-  protected Log log() {
-    return __log;
-  }
+    protected Log log() {
+        return __log;
+    }
 
-  public String toString() {
-    return new StringBuffer("ORDEREDCOMPENSATOR(comps=")
+    public String toString() {
+        return new StringBuffer("ORDEREDCOMPENSATOR(comps=")
             .append(_compensations)
             .append(")")
             .toString();
-  }
+    }
 
 }

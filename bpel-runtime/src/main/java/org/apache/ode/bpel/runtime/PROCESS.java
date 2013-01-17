@@ -32,7 +32,7 @@ import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.ReadWriteLock;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.jacob.ReceiveProcess;
-import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.Synch;
 import org.w3c.dom.Element;
 
 public class PROCESS extends BpelJacobRunnable {
@@ -61,7 +61,7 @@ public class PROCESS extends BpelJacobRunnable {
         instance(new SCOPE(child, processFrame, new LinkFrame(null)));
 
         object(new ReceiveProcess<ParentScope>(child.parent, new ParentScope() {
-            public void compensate(OScope scope, SynchChannel ret) {
+            public void compensate(OScope scope, Synch ret) {
                 assert false;
             }
 

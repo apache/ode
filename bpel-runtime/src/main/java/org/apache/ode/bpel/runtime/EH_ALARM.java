@@ -39,7 +39,7 @@ import org.apache.ode.bpel.runtime.channels.TimerResponse;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.ReceiveProcess;
-import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.Synch;
 import org.w3c.dom.Element;
 
 /**
@@ -208,7 +208,7 @@ class EH_ALARM extends BpelJacobRunnable {
 
         public void run() {
             object(false,new ReceiveProcess<ParentScope>(_activity.parent, new ParentScope() {
-                public void compensate(OScope scope, SynchChannel ret) {
+                public void compensate(OScope scope, Synch ret) {
                     _psc.compensate(scope,ret);
                     instance(ACTIVE.this);
                 }

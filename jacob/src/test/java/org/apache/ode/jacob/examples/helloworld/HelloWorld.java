@@ -22,7 +22,6 @@ import org.apache.ode.jacob.Channel;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
-import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.jacob.Val;
 import org.apache.ode.jacob.examples.sequence.Sequence;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
@@ -176,7 +175,7 @@ public class HelloWorld extends JacobRunnable {
         final String[] greeting = {"Hello", "World"};
         instance(new Sequence(greeting.length, null) {
             @Override
-            protected JacobRunnable doStep(final int step, final SynchChannel done) {
+            protected JacobRunnable doStep(final int step, final Synch done) {
                 return new JacobRunnable() {
                     @Override
                     public void run() {

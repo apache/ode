@@ -33,7 +33,7 @@ import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.jacob.ReceiveProcess;
-import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.Synch;
 import org.w3c.dom.Element;
 
 /**
@@ -123,7 +123,7 @@ class WHILE extends ACTIVITY {
             }) {
                 private static final long serialVersionUID = -5471984635653784051L;
             }.or(new ReceiveProcess<ParentScope>(_child.parent, new ParentScope() {
-                public void compensate(OScope scope, SynchChannel ret) {
+                public void compensate(OScope scope, Synch ret) {
                     _self.parent.compensate(scope,ret);
                     instance(WAITER.this);
                 }

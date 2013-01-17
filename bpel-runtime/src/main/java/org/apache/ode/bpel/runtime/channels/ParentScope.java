@@ -23,7 +23,7 @@ import java.util.Set;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.runtime.CompensationHandler;
 import org.apache.ode.jacob.Channel;
-import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.Synch;
 import org.w3c.dom.Element;
 
 
@@ -32,7 +32,7 @@ import org.w3c.dom.Element;
  */
 public interface ParentScope extends Channel {
 
-  void compensate(OScope scope, SynchChannel ret);
+  void compensate(OScope scope, Synch ret);
 
   void completed(FaultData faultData, Set<CompensationHandler> compensations);
 

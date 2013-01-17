@@ -21,7 +21,6 @@ package org.apache.ode.jacob.examples.sequence;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
-import org.apache.ode.jacob.SynchChannel;
 
 /**
  * Abstract process that executes a number of steps sequentially.
@@ -30,7 +29,7 @@ import org.apache.ode.jacob.SynchChannel;
 public abstract class Sequence extends JacobRunnable {
     private int _steps;
     private int _current;
-    private SynchChannel _done;
+    private Synch _done;
 
     /**
      * Create a {@link Sequence} with a number of steps.
@@ -38,7 +37,7 @@ public abstract class Sequence extends JacobRunnable {
      * @param steps number of steps
      * @param done synchronous callback
      */
-    public Sequence(int steps, SynchChannel done) {
+    public Sequence(int steps, Synch done) {
         _steps = steps;
         _current = 0;
         _done = done;
@@ -53,7 +52,7 @@ public abstract class Sequence extends JacobRunnable {
                 _done.ret();
             }
         } else {
-            SynchChannel r = newChannel(SynchChannel.class);
+            Synch r = newChannel(Synch.class);
             object(new ReceiveProcess<Synch>(r, new Synch() {
                 public void ret() {
                     ++_current;
@@ -72,5 +71,5 @@ public abstract class Sequence extends JacobRunnable {
      * @param done notification after step completion
      * @return runnable process
      */
-    protected abstract JacobRunnable doStep(int step, SynchChannel done);
+    protected abstract JacobRunnable doStep(int step, Synch done);
 }

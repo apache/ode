@@ -22,7 +22,6 @@ import org.apache.ode.bpel.o.OCompensate;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
-import org.apache.ode.jacob.SynchChannel;
 
 
 /**
@@ -39,7 +38,7 @@ class COMPENSATE extends ACTIVITY {
 
     public final void run() {
         OScope scopeToCompensate = _ocompact.compensatedScope;
-        SynchChannel sc = newChannel(SynchChannel.class);
+        Synch sc = newChannel(Synch.class);
         _self.parent.compensate(scopeToCompensate,sc);
         object(new ReceiveProcess<Synch>(sc, new Synch() {
             public void ret() {

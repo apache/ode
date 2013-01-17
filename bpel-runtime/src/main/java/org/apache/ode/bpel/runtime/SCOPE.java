@@ -53,7 +53,7 @@ import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.ReceiveProcess;
-import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.Synch;
 import org.w3c.dom.Element;
 
 /**
@@ -165,7 +165,7 @@ class SCOPE extends ACTIVITY {
                 // Handle messages from the child if it is still alive
                 if (_child != null) {
                     mlSet.add(new ReceiveProcess<ParentScope>(_child.parent, new ParentScope() {
-                        public void compensate(OScope scope, SynchChannel ret) {
+                        public void compensate(OScope scope, Synch ret) {
                             //  If this scope does not have available compensations, defer to
                             // parent scope, otherwise do compensation.
                             if (_scopeFrame.availableCompensations == null)
@@ -220,7 +220,7 @@ class SCOPE extends ACTIVITY {
                     final EventHandlerInfo ehi = i.next();
 
                     mlSet.add(new ReceiveProcess<ParentScope>(ehi.psc, new ParentScope() {
-                        public void compensate(OScope scope, SynchChannel ret) {
+                        public void compensate(OScope scope, Synch ret) {
                             // ACTIVE scopes do not compensate, send request up to parent.
                             _self.parent.compensate(scope, ret);
                             instance(ACTIVE.this);
@@ -295,7 +295,7 @@ class SCOPE extends ACTIVITY {
                         instance(new SCOPE(terminationHandlerActivity,terminationHandlerScopeFrame, SCOPE.this._linkFrame));
 
                         object(new ReceiveProcess<ParentScope>(terminationHandlerActivity.parent, new ParentScope() {
-                            public void compensate(OScope scope, SynchChannel ret) {
+                            public void compensate(OScope scope, Synch ret) {
                                 // This should never happen.
                                 throw new AssertionError("received compensate request!");
                             }
@@ -374,7 +374,7 @@ class SCOPE extends ACTIVITY {
                         instance(new SCOPE(faultHandlerActivity,faultHandlerScopeFrame, SCOPE.this._linkFrame));
 
                         object(new ReceiveProcess<ParentScope>(faultHandlerActivity.parent, new ParentScope() {
-                            public void compensate(OScope scope, SynchChannel ret) {
+                            public void compensate(OScope scope, Synch ret) {
                                 // This should never happen.
                                 throw new AssertionError("received compensate request!");
                             }

@@ -21,7 +21,6 @@ package org.apache.ode.jacob.examples.synch;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
-import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
 
@@ -43,7 +42,7 @@ public class SynchPrinter {
 
         public void run() {
             object(true, new ReceiveProcess<SynchPrint>(_self, new SynchPrint() {
-                public SynchChannel print(String msg) {
+                public Synch print(String msg) {
                     System.out.println(msg);
                     return null; // Synch channel automatically created by JacobVPU
                 }

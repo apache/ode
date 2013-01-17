@@ -20,7 +20,7 @@ package org.apache.ode.jacob.examples.eratosthenes;
 
 
 import org.apache.ode.jacob.Channel;
-import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.Synch;
 
 /**
  * DOCUMENTME.
@@ -31,6 +31,6 @@ import org.apache.ode.jacob.SynchChannel;
  */
 public interface NaturalNumberStream extends Channel {
 
-	public void val(int n, SynchChannel ret);
+	public void val(int n, Synch ret);
 
 }

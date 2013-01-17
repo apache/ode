@@ -19,12 +19,12 @@
 package org.apache.ode.bpel.runtime.channels;
 
 import org.apache.ode.jacob.Channel;
-import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.Synch;
 
 public interface Compensation extends Channel {
 
   public void forget();
 
-  public void compensate(SynchChannel ret);
+  public void compensate(Synch ret);
 
 }

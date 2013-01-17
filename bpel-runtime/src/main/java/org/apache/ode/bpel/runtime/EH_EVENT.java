@@ -40,7 +40,7 @@ import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.ProcessUtil;
 import org.apache.ode.jacob.ReceiveProcess;
-import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.Synch;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -192,7 +192,7 @@ class EH_EVENT extends BpelJacobRunnable {
 
                 for (final ActivityInfo ai : _active) {
                     mlset.add(new ReceiveProcess<ParentScope>(ai.parent, new ParentScope() {
-                        public void compensate(OScope scope, SynchChannel ret) {
+                        public void compensate(OScope scope, Synch ret) {
                             _psc.compensate(scope, ret);
                             instance(WAITING.this);
                         }

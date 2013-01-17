@@ -19,14 +19,14 @@
 package org.apache.ode.bpel.runtime.channels;
 
 import org.apache.ode.jacob.Channel;
-import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.Synch;
 
 public interface ReadWriteLock extends Channel {
 
-    public void readLock(SynchChannel s);
+    public void readLock(Synch s);
     
-    public void writeLock(SynchChannel s);
+    public void writeLock(Synch s);
     
-    public void unlock(SynchChannel s);
+    public void unlock(Synch s);
 
 }

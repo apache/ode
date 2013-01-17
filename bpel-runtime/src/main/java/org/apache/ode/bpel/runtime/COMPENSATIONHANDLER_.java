@@ -30,7 +30,7 @@ import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.ParentScopeChannel;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.jacob.ReceiveProcess;
-import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.Synch;
 import org.w3c.dom.Element;
 
 /**
@@ -55,7 +55,7 @@ class COMPENSATIONHANDLER_ extends BpelJacobRunnable {
                     i.next().compChannel.forget();
             }
 
-            public void compensate(final SynchChannel ret) {
+            public void compensate(final Synch ret) {
                 // Only scopes with compensation handlers can be compensated.
                 assert _self.compensated.oscope.compensationHandler != null;
 
@@ -74,7 +74,7 @@ class COMPENSATIONHANDLER_ extends BpelJacobRunnable {
                 instance(new SCOPE(ai,compHandlerScopeFrame, new LinkFrame(null)));
 
                 object(new ReceiveProcess<ParentScope>(ai.parent, new ParentScope() {
-                    public void compensate(OScope scope, SynchChannel ret) {
+                    public void compensate(OScope scope, Synch ret) {
                         throw new AssertionError("Unexpected.");
                     }
 

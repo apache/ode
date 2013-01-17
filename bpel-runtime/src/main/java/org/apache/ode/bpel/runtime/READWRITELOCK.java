@@ -25,7 +25,7 @@ import java.util.LinkedList;
 import org.apache.ode.bpel.runtime.channels.ReadWriteLock;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.ReceiveProcess;
-import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.Synch;
 
 /**
  * A fair READ-WRITE lock.
@@ -43,7 +43,7 @@ public class READWRITELOCK extends JacobRunnable {
     
     private LinkedList<Waiter> _waiters = new LinkedList<Waiter>();
 
-    private HashSet<SynchChannel> _owners = new HashSet<SynchChannel>();
+    private HashSet<Synch> _owners = new HashSet<Synch>();
 
     private Status _status = Status.UNLOCKED;
 
@@ -56,7 +56,7 @@ public class READWRITELOCK extends JacobRunnable {
     @Override
     public void run() {
         object(new ReceiveProcess<ReadWriteLock>(_self, new ReadWriteLock() {
-            public void readLock(SynchChannel s) {
+            public void readLock(Synch s) {
                 switch (_status) {
                 case UNLOCKED:
                     _status = Status.READLOCK;
@@ -75,7 +75,7 @@ public class READWRITELOCK extends JacobRunnable {
                 instance(READWRITELOCK.this);
             }
 
-            public void writeLock(SynchChannel s) {
+            public void writeLock(Synch s) {
                 switch (_status) {
                 case UNLOCKED:
                     _status = Status.WRITELOCK;
@@ -93,7 +93,7 @@ public class READWRITELOCK extends JacobRunnable {
                 instance(READWRITELOCK.this);
             }
 
-            public void unlock(SynchChannel s) {
+            public void unlock(Synch s) {
 
                 _owners.remove(s);
                 if (_owners.isEmpty()) {
@@ -125,11 +125,10 @@ public class READWRITELOCK extends JacobRunnable {
     }
 
     private static class Waiter {
-        SynchChannel synch;
-
+        Synch synch;
         boolean write;
 
-        Waiter(SynchChannel s, boolean w) {
+        Waiter(Synch s, boolean w) {
             synch = s;
             write = w;
         }

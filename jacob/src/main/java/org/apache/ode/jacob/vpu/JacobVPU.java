@@ -30,7 +30,7 @@ import org.apache.ode.jacob.JacobObject;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.JacobThread;
 import org.apache.ode.jacob.ReceiveProcess;
-import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.Synch;
 import org.apache.ode.jacob.soup.CommChannel;
 import org.apache.ode.jacob.soup.CommGroup;
 import org.apache.ode.jacob.soup.CommRecv;
@@ -279,14 +279,14 @@ public final class JacobVPU {
 
             _statistics.messagesSent++;
 
-            SynchChannel replyChannel = null;
+            Synch replyChannel = null;
             // Check for synchronous methods; create a synchronization channel
             if (method.getReturnType() != void.class) {
-                if (method.getReturnType() != SynchChannel.class) {
+                if (method.getReturnType() != Synch.class) {
                     throw new IllegalStateException(
-                        "ChannelListener method can only return SynchChannel: " + method);
+                        "Channel method '" + method + "' must only return void or Synch");
                 }
-                replyChannel = (SynchChannel) newChannel(SynchChannel.class, "", "Reply Channel");
+                replyChannel = (Synch) newChannel(Synch.class, "", "Reply Channel");
                 Object[] newArgs = new Object[args.length + 1];
                 System.arraycopy(args, 0, newArgs, 0, args.length);
                 newArgs[args.length] = replyChannel;
@@ -386,11 +386,11 @@ public final class JacobVPU {
             LOG.trace(">> [{}] : {}", _cycle, _source);
 
             Object[] args;
-            SynchChannel synchChannel;
+            Synch synchChannel;
             if (_method.getReturnType() != void.class) {
                 args = new Object[_args.length - 1];
                 System.arraycopy(_args, 0, args, 0, args.length);
-                synchChannel = (SynchChannel) _args[args.length];
+                synchChannel = (Synch)_args[args.length];
             } else {
                 args = _args;
                 synchChannel = null;

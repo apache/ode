@@ -39,7 +39,7 @@ import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.ReceiveProcess;
-import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.Synch;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.stl.FilterIterator;
 import org.apache.ode.utils.stl.MemberOfFunction;
@@ -129,7 +129,7 @@ public class FOREACH extends ACTIVITY {
                     // Checking out our children
                     final ChildInfo child = active.next();
                     mlSet.add(new ReceiveProcess<ParentScope>(child.activity.parent, new ParentScope() {
-                        public void compensate(OScope scope, SynchChannel ret) {
+                        public void compensate(OScope scope, Synch ret) {
                             // Forward compensation to parent
                             _self.parent.compensate(scope, ret);
                             instance(ACTIVE.this);

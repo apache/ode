@@ -34,7 +34,7 @@ import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.bpel.runtime.channels.TerminationChannel;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.ReceiveProcess;
-import org.apache.ode.jacob.SynchChannel;
+import org.apache.ode.jacob.Synch;
 import org.apache.ode.utils.stl.FilterIterator;
 import org.apache.ode.utils.stl.MemberOfFunction;
 import org.w3c.dom.Element;
@@ -106,7 +106,7 @@ class FLOW extends ACTIVITY {
                             instance(ACTIVE.this);
                         }
 
-                        public void compensate(OScope scope, SynchChannel ret) {
+                        public void compensate(OScope scope, Synch ret) {
                             // Flow does not do compensations, forward these to parent.
                             _self.parent.compensate(scope, ret);
                             instance(ACTIVE.this);
