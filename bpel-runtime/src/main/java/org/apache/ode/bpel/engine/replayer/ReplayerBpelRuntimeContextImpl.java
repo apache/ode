@@ -49,6 +49,7 @@ import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
+import org.apache.ode.bpel.runtime.channels.TimerResponse;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.ProcessUtil;
@@ -189,7 +190,7 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
 
         @Override
         public void run() {
-            importChannel(channelId, TimerResponseChannel.class).onTimeout();
+            importChannel(channelId, TimerResponse.class).onTimeout();
         }
     }
 

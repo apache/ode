@@ -26,11 +26,8 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import javax.wsdl.Fault;
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 
@@ -51,8 +48,8 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.ScopeStateEnum;
 import org.apache.ode.bpel.dao.XmlDataDAO;
-import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evar.ExternalVariableModule.Value;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.CorrelationSetWriteEvent;
 import org.apache.ode.bpel.evt.ProcessCompletionEvent;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
@@ -69,19 +66,15 @@ import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
-import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.iapi.ProcessConf.PartnerRoleConfig;
+import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.JobType;
-import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
-import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
@@ -95,10 +88,14 @@ import org.apache.ode.bpel.runtime.PROCESS;
 import org.apache.ode.bpel.runtime.PartnerLinkInstance;
 import org.apache.ode.bpel.runtime.Selector;
 import org.apache.ode.bpel.runtime.VariableInstance;
+import org.apache.ode.bpel.runtime.channels.ActivityRecovery;
 import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
 import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.channels.InvokeResponse;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
+import org.apache.ode.bpel.runtime.channels.PickResponse;
 import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
+import org.apache.ode.bpel.runtime.channels.TimerResponse;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.ProcessUtil;
@@ -108,12 +105,10 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.ObjectPrinter;
-import org.apache.ode.bpel.evar.ExternalVariableModuleException;
-import org.apache.ode.bpel.evar.ExternalVariableModule.Value;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.Document;
 
 public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
@@ -976,8 +971,8 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             private static final long serialVersionUID = 3168964409165899533L;
 
             public void run() {
-                PickResponseChannel responseChannel = importChannel(responsechannel, PickResponseChannel.class);
-                responseChannel.onRequestRcvd(idx, mexId);
+                PickResponse pickResponse = importChannel(responsechannel, PickResponse.class);
+                pickResponse.onRequestRcvd(idx, mexId);
             }
         });
     }
@@ -1015,8 +1010,8 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             private static final long serialVersionUID = 6157913683737696396L;
 
             public void run() {
-                TimerResponseChannel responseChannel = importChannel(id, TimerResponseChannel.class);
-                responseChannel.onCancel();
+                TimerResponse timerResponse = importChannel(id, TimerResponse.class);
+                timerResponse.onCancel();
             }
         });
     }
@@ -1038,8 +1033,8 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             private static final long serialVersionUID = -1095444335740879981L;
 
             public void run() {
-                ((BpelRuntimeContextImpl) getBpelRuntimeContext()).invocationResponse2(mexid, importChannel(
-                        responseChannelId, InvokeResponseChannel.class));
+                ((BpelRuntimeContextImpl) getBpelRuntimeContext()).invocationResponse2(
+                    mexid, importChannel(responseChannelId, InvokeResponse.class));
             }
         });
     }
@@ -1050,7 +1045,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
      * @param mexid
      * @param responseChannel
      */
-    private void invocationResponse2(String mexid, InvokeResponseChannel responseChannel) {
+    private void invocationResponse2(String mexid, InvokeResponse responseChannel) {
         __log.debug("Triggering response");
         MessageExchangeDAO mex = _dao.getConnection().getMessageExchange(mexid);
 
@@ -1379,7 +1374,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             private static final long serialVersionUID = 3168964409165899533L;
 
             public void run() {
-                ActivityRecoveryChannel recovery = importChannel(channel, ActivityRecoveryChannel.class);
+                ActivityRecovery recovery = importChannel(channel, ActivityRecovery.class);
                 __log.info("ActivityRecovery: Recovering activity " + activityId + " with action " + action +
                         " on channel " + recovery);
                 if (recovery != null) {
