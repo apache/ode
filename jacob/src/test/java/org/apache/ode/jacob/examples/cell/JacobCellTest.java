@@ -29,6 +29,8 @@ import org.apache.ode.jacob.Val;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
 
+import static org.apache.ode.jacob.ProcessUtil.receive;
+
 
 public class JacobCellTest extends TestCase {
   private static Object _val;
@@ -63,11 +65,11 @@ public class JacobCellTest extends TestCase {
             Val ret = newChannel(Val.class, "val");
 
             instance(new CELL_<String>(cell, "foo"));
-            object(new ReceiveProcess<Val>(ret, new Val() {
+            object(receive(ret, new Val() {
                 public void val(Object retVal) {
                     _val = retVal;
                 }
-            }) {});
+            }));
             cell.read(ret);
         }
     }

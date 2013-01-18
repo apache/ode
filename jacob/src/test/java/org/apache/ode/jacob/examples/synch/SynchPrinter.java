@@ -24,6 +24,8 @@ import org.apache.ode.jacob.Synch;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
 
+import static org.apache.ode.jacob.ProcessUtil.receive;
+
 /**
  * Example JACOB process illustrating the use of {@link SynchPrint}
  *
@@ -59,18 +61,18 @@ public class SynchPrinter {
         public void run() {
             final SynchPrint p = newChannel(SynchPrint.class);
             instance(new SystemPrinter(p));
-            object(new ReceiveProcess<Synch>(p.print("1"), new Synch() {
+            object(receive(p.print("1"), new Synch() {
                 public void ret() {
-                    object(new ReceiveProcess<Synch>(p.print("2"), new Synch() {
+                    object(receive(p.print("2"), new Synch() {
                         public void ret() {
-                            object(new ReceiveProcess<Synch>(p.print("3"), new Synch() {
+                            object(receive(p.print("3"), new Synch() {
                                 public void ret() {
                                 }
-                            }) {});
+                            }));
                         }
-                    }) {});
+                    }));
                 }
-            }) {});
+            }));
         }
     }
 
