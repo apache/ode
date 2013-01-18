@@ -42,6 +42,7 @@ public class SynchPrinter {
             _self = self;
         }
 
+        @SuppressWarnings("serial")
         public void run() {
             object(true, new ReceiveProcess<SynchPrint>(_self, new SynchPrint() {
                 public Synch print(String msg) {
@@ -57,22 +58,52 @@ public class SynchPrinter {
     public static final class Tester extends JacobRunnable {
         private static final long serialVersionUID = 7899682832271627464L;
 
-        @SuppressWarnings("serial")
         public void run() {
             final SynchPrint p = newChannel(SynchPrint.class);
             instance(new SystemPrinter(p));
-            object(receive(p.print("1"), new Synch() {
-                public void ret() {
-                    object(receive(p.print("2"), new Synch() {
-                        public void ret() {
-                            object(receive(p.print("3"), new Synch() {
-                                public void ret() {
-                                }
-                            }));
+            printer(p).print("1").then().print("2").then().print("3").done().run();
+        }
+
+        public static PrinterProcess printer(SynchPrint p) {
+            return new PrinterProcess(p);
+        }
+
+        public static final class PrinterProcess implements Runnable {
+            private final SynchPrint printer;
+            final private PrinterProcess prev;
+            private PrinterProcess next;
+            private String message;
+
+            public PrinterProcess(final SynchPrint p) {
+                this(p, null);
+            }
+            private PrinterProcess(final SynchPrint p, final PrinterProcess prev) {
+                printer = p;
+                this.prev = prev;
+            }
+            public PrinterProcess print(String message) {
+                this.message = message;
+                return this;
+            }
+            public PrinterProcess then() {
+                next = new PrinterProcess(printer, this);
+                return next;
+            }
+            public PrinterProcess done() {
+                return prev != null ? prev.done() : this;
+            }
+
+            @Override
+            public void run() {
+                object(receive(printer.print(message), new Synch() {
+                    private static final long serialVersionUID = 1L;
+                    public void ret() {
+                        if (next != null) {
+                            next.run();
                         }
-                    }));
-                }
-            }));
+                    }
+                }));
+            }
         }
     }
 
