@@ -61,10 +61,14 @@ public class SynchPrinter {
         public void run() {
             final SynchPrint p = newChannel(SynchPrint.class);
             instance(new SystemPrinter(p));
-            printer(p).print("1").then().print("2").then().print("3").done().run();
+            dudeWhoStoleMyCar(p)
+                .order("1")
+                .and().then().order("2")
+                .and().then().order("3")
+                .and().no().andthen();
         }
 
-        public static PrinterProcess printer(SynchPrint p) {
+        public static PrinterProcess dudeWhoStoleMyCar(SynchPrint p) {
             return new PrinterProcess(p);
         }
 
@@ -81,16 +85,23 @@ public class SynchPrinter {
                 printer = p;
                 this.prev = prev;
             }
-            public PrinterProcess print(String message) {
+            public PrinterProcess order(String message) {
                 this.message = message;
+                return this;
+            }
+            public PrinterProcess and() {
+                // noop
                 return this;
             }
             public PrinterProcess then() {
                 next = new PrinterProcess(printer, this);
                 return next;
             }
-            public PrinterProcess done() {
-                return prev != null ? prev.done() : this;
+            public PrinterProcess no() {
+                return prev != null ? prev.no() : this;
+            }
+            public void andthen() {
+                run();
             }
 
             @Override
