@@ -82,9 +82,8 @@ public abstract class JacobObject implements Serializable {
      * @param methodList method list for the communication reduction
      * @see JacobThread#object
      */
-    protected static Channel object(ChannelListener methodList) {
+    protected static void object(ChannelListener methodList) {
         JacobVPU.activeJacobThread().object(false, methodList);
-        return methodList.getChannel();
     }
 
     protected static void object(boolean replication, ChannelListener methodList) {
@@ -100,9 +99,8 @@ public abstract class JacobObject implements Serializable {
                 methodLists.toArray(new ChannelListener[methodLists.size()]));
     }
 
-    protected static Channel replication(ChannelListener methodList) {
+    protected static void replication(ChannelListener methodList) {
         JacobVPU.activeJacobThread().object(true, methodList);
-        return methodList.getChannel();
     }
 
     /**

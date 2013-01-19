@@ -330,11 +330,13 @@ public final class JacobVPU {
                 msg.append(_cycle);
                 msg.append(": ");
                 for (int i = 0; i < ml.length; ++i) {
-                    if (i != 0) msg.append(" + ");
-                    msg.append(ml[i].getChannel());
-                    msg.append(" ? ");
-                    msg.append(ml.toString());
-
+                    if (ml[i] instanceof ReceiveProcess) {
+                        ReceiveProcess<?> rp = (ReceiveProcess<?>)ml[i];
+                        if (i != 0) msg.append(" + ");
+                        msg.append(rp.getChannel());
+                        msg.append(" ? ");
+                        msg.append(rp.toString());
+                    }
                 }
                 LOG.trace(msg.toString());
             }
@@ -343,11 +345,14 @@ public final class JacobVPU {
 
             CommGroup grp = new CommGroup(replicate);
             for (int i = 0; i < ml.length; ++i) {
-                CommChannel chnl = (CommChannel) ChannelFactory.getBackend(ml[i].getChannel());
-                // TODO see below..
-                // oframe.setDebugInfo(fillDebugInfo());
-                CommRecv recv = new CommRecv(chnl, ml[i]);
-                grp.add(recv);
+                if (ml[i] instanceof ReceiveProcess) {
+                    CommChannel chnl = (CommChannel)ChannelFactory.getBackend(
+                        ((ReceiveProcess<?>)ml[i]).getChannel());
+                    // TODO see below..
+                    // oframe.setDebugInfo(fillDebugInfo());
+                    CommRecv recv = new CommRecv(chnl, ml[i]);
+                    grp.add(recv);
+                }
             }
             _executionQueue.add(grp);
         }

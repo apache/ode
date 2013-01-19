@@ -70,13 +70,15 @@ public class Sieve extends JacobRunnable {
     }
 
     public void run() {
-        _out.val(_n, (Synch)object(new ReceiveProcess<Synch>(newChannel(Synch.class), new Synch() {
+        Synch ret = newChannel(Synch.class);
+        object(new ReceiveProcess<Synch>(ret, new Synch() {
             public void ret() {
                 instance(new Counter(_out, _n+1));
             }
         }) {
             private static final long serialVersionUID = -4336285925619915276L;
-        }));
+        });
+        _out.val(_n, ret);
     }
   }
 
@@ -104,16 +106,18 @@ public class Sieve extends JacobRunnable {
     public void run() {
       object(new ReceiveProcess<NaturalNumberStream>(_in, new NaturalNumberStream() {
         public void val(final int n, final Synch ret) {
-          _primes.val(n, (Synch)object(new ReceiveProcess<Synch>(newChannel(Synch.class), new Synch() {
-            public void ret() {
-              NaturalNumberStream x = newChannel(NaturalNumberStream.class);
-              instance(new PrimeFilter(n, _in, x));
-              instance(new Head(x, _primes));
-              ret.ret();
-            }
-          }) {
-              private static final long serialVersionUID = -3009595654233593893L;
-          }));
+            Synch r = newChannel(Synch.class);
+            object(new ReceiveProcess<Synch>(r, new Synch() {
+                public void ret() {
+                  NaturalNumberStream x = newChannel(NaturalNumberStream.class);
+                  instance(new PrimeFilter(n, _in, x));
+                  instance(new Head(x, _primes));
+                  ret.ret();
+                }
+            }) {
+                private static final long serialVersionUID = -3009595654233593893L;
+            });
+            _primes.val(n, r);
        }
       }) {
           private static final long serialVersionUID = -2145752474431263689L;
@@ -166,13 +170,15 @@ public class Sieve extends JacobRunnable {
        object(true, new ReceiveProcess<NaturalNumberStream>(_in, new NaturalNumberStream() {
           public void val(int n, final Synch ret) {
               if (n % _prime != 0) {
-                 _out.val(n, (Synch)object(new ReceiveProcess<Synch>(newChannel(Synch.class), new Synch() {
-                     public void ret() {
-                         ret.ret();
-                     }
-                 }) {
-                     private static final long serialVersionUID = 2523405590764193613L;
-                 }));
+                  Synch r = newChannel(Synch.class);
+                  object(new ReceiveProcess<Synch>(r, new Synch() {
+                      public void ret() {
+                          ret.ret();
+                      }
+                  }) {
+                      private static final long serialVersionUID = 2523405590764193613L;
+                  });
+                  _out.val(n, r);
               } else {
                  ret.ret();
               }

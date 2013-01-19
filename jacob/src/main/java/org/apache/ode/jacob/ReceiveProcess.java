@@ -27,15 +27,29 @@ import java.util.Set;
 @SuppressWarnings("serial")
 public abstract class ReceiveProcess<T extends Channel> extends ChannelListener {
     private transient Set<Method> _implementedMethods;
+    private transient Channel channel;
     private T receiver;
     
     protected ReceiveProcess(T channel, T receiver) throws IllegalStateException {
-        super(channel);
+        assert getClass().getSuperclass().getSuperclass() == ChannelListener.class :
+            "Inheritance in ChannelListener classes not allowed!";
+        if (channel == null) {
+            throw new IllegalArgumentException("Null channel!");
+        }
+        this.channel = channel;
         this.receiver = receiver;
     }
 
     public T receiver() {
         return receiver;
+    }
+
+    public Channel getChannel() {
+        return channel;
+    }
+
+    public void setChannel(Channel channel) {
+        this.channel = channel;
     }
 
     public Set<Method> getImplementedMethods() {

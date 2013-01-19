@@ -19,7 +19,6 @@
 package org.apache.ode.jacob;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,25 +29,8 @@ import java.util.Set;
  */
 @SuppressWarnings("serial")
 public abstract class ChannelListener extends JacobObject {
-    private transient Set<Method> _implementedMethods;
-    private transient Channel _channel;
 
-    protected ChannelListener(Channel channel) throws IllegalStateException {
-        assert getClass().getSuperclass().getSuperclass() == ChannelListener.class :
-               "Inheritance in ChannelListener classes not allowed!";
-        if (channel == null) {
-            throw new IllegalArgumentException("Null channel!");
-        }
-        _channel = channel;
-    }
-
-    public Channel getChannel() {
-        return _channel;
-    }
-
-    public void setChannel(Channel channel) {
-        _channel = channel;
-    }
+    public abstract Set<Method> getImplementedMethods();
 
     public Set<ChannelListener> or(ChannelListener other) {
         HashSet<ChannelListener> retval = new HashSet<ChannelListener>();
@@ -63,21 +45,13 @@ public abstract class ChannelListener extends JacobObject {
         return retval;
     }
 
-    public Set<Method> getImplementedMethods() {
-        if (_implementedMethods == null) {
-            Set<Method> implementedMethods = new HashSet<Method>();
-            ClassUtil.getImplementedMethods(implementedMethods, getClass().getSuperclass());
-            _implementedMethods = Collections.unmodifiableSet(implementedMethods);
-        }
-        return _implementedMethods;
-    }
-
     /**
      * Get a description of the object for debugging purposes.
      *
      * @return human-readable description.
      */
     public String toString() {
+        // TODO: needs improvement
         StringBuffer buf = new StringBuffer(getClassName());
         buf.append('{');
         for (Method m : getImplementedMethods()) {
