@@ -35,9 +35,13 @@ import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.bpel.runtime.channels.TimerResponse;
 import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.CompositeProcess;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
 import org.w3c.dom.Element;
+
+import static org.apache.ode.jacob.ProcessUtil.compose;
+
 
 /**
  * Alarm event handler. This process template manages a single alarm event handler.
@@ -127,14 +131,13 @@ class EH_ALARM extends BpelJacobRunnable {
         public void run() {
             Calendar now = Calendar.getInstance();
 
-            Set<ChannelListener> listeners = new ReceiveProcess<EventHandlerControl>(_cc, new EventHandlerControl() {
+            CompositeProcess listeners = compose(new ReceiveProcess<EventHandlerControl>(_cc, new EventHandlerControl() {
                 public void stop() {
                     _psc.completed(null, _comps);
                 }
-
             }){
                 private static final long serialVersionUID = -7750428941445331236L;
-            }.or(new ReceiveProcess<Termination>(_tc, new Termination() {
+            }).or(new ReceiveProcess<Termination>(_tc, new Termination() {
                 public void terminate() {
                     _psc.completed(null, _comps);
                 }
@@ -148,7 +151,7 @@ class EH_ALARM extends BpelJacobRunnable {
                 TimerResponse trc = newChannel(TimerResponse.class);
                 getBpelRuntimeContext().registerTimer(trc,_alarm.getTime());
 
-                listeners.add(new ReceiveProcess<TimerResponse>(trc, new TimerResponse(){
+                listeners.or(new ReceiveProcess<TimerResponse>(trc, new TimerResponse(){
                     public void onTimeout() {
                         // This is what we are waiting for, fire the activity
                         instance(new FIRE());
@@ -204,7 +207,7 @@ class EH_ALARM extends BpelJacobRunnable {
         }
 
         public void run() {
-            object(false,new ReceiveProcess<ParentScope>(_activity.parent, new ParentScope() {
+            object(false, compose(new ReceiveProcess<ParentScope>(_activity.parent, new ParentScope() {
                 public void compensate(OScope scope, Synch ret) {
                     _psc.compensate(scope,ret);
                     instance(ACTIVE.this);
@@ -238,14 +241,14 @@ class EH_ALARM extends BpelJacobRunnable {
                 public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
             }){
                 private static final long serialVersionUID = -3357030137175178040L;
-            }.or(new ReceiveProcess<EventHandlerControl>(_cc, new EventHandlerControl() {
+            }).or(new ReceiveProcess<EventHandlerControl>(_cc, new EventHandlerControl() {
                 public void stop() {
                     _stopped = true;
                     instance(ACTIVE.this);
                 }
             }){
                 private static final long serialVersionUID = -3873619538789039424L;
-            }.or(new ReceiveProcess<Termination>(_tc, new Termination() {
+            }).or(new ReceiveProcess<Termination>(_tc, new Termination() {
                 public void terminate() {
                     replication(_activity.self).terminate();
                     _stopped = true;
@@ -253,7 +256,7 @@ class EH_ALARM extends BpelJacobRunnable {
                 }
             }){
                 private static final long serialVersionUID = -4566956567870652885L;
-            })));
+            }));
         }
     }
 }

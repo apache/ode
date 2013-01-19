@@ -32,6 +32,8 @@ import org.apache.ode.bpel.runtime.channels.TimerResponse;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.utils.xsd.Duration;
 
+import static org.apache.ode.jacob.ProcessUtil.compose;
+
 
 /**
  * JacobRunnable that performs the work of the <code>&lt;wait&gt;</code> activity.
@@ -66,7 +68,7 @@ class WAIT extends ACTIVITY {
             final TimerResponse timerChannel = newChannel(TimerResponse.class);
             getBpelRuntimeContext().registerTimer(timerChannel, dueDate);
 
-            object(false, new ReceiveProcess<TimerResponse>(timerChannel, new TimerResponse() {
+            object(false, compose(new ReceiveProcess<TimerResponse>(timerChannel, new TimerResponse() {
                 public void onTimeout() {
                     _self.parent.completed(null, CompensationHandler.emptySet());
                 }
@@ -74,9 +76,9 @@ class WAIT extends ACTIVITY {
                 public void onCancel() {
                     _self.parent.completed(null, CompensationHandler.emptySet());
                 }
-            }){
+            }) {
                 private static final long serialVersionUID = 3120518305645437327L;
-            }.or(new ReceiveProcess<Termination>(_self.self, new Termination() {
+            }).or(new ReceiveProcess<Termination>(_self.self, new Termination() {
                 public void terminate() {
                     _self.parent.completed(null, CompensationHandler.emptySet());
                     object(new ReceiveProcess<TimerResponse>(timerChannel, new TimerResponse() {
@@ -94,7 +96,7 @@ class WAIT extends ACTIVITY {
             }) {
                 private static final long serialVersionUID = -2791243270691333946L;
             }));
-        }else{
+        } else {
             _self.parent.completed(null, CompensationHandler.emptySet());
         }
     }

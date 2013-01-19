@@ -50,6 +50,9 @@ import org.apache.ode.utils.xsd.Duration;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import static org.apache.ode.jacob.ProcessUtil.compose;
+
+
 /**
  * Template for the BPEL <code>pick</code> activity.
  */
@@ -279,7 +282,7 @@ class PICK extends ACTIVITY {
         }
 
         public void run() {
-            object(false, new ReceiveProcess<PickResponse>(_pickResponseChannel, new PickResponse() {
+            object(false, compose(new ReceiveProcess<PickResponse>(_pickResponseChannel, new PickResponse() {
                 public void onRequestRcvd(int selectorIdx, String mexId) {
                     OPickReceive.OnMessage onMessage = _opick.onMessages.get(selectorIdx);
 
@@ -373,7 +376,7 @@ class PICK extends ACTIVITY {
 
             }){
                 private static final long serialVersionUID = -8237296827418738011L;
-            }.or(new ReceiveProcess<Termination>(_self.self, new Termination() {
+            }).or(new ReceiveProcess<Termination>(_self.self, new Termination() {
                 public void terminate() {
                     getBpelRuntimeContext().cancel(_pickResponseChannel);
                     instance(WAITING.this);

@@ -18,9 +18,6 @@
  */
 package org.apache.ode.jacob;
 
-import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.Set;
 
 
 /**
@@ -29,38 +26,4 @@ import java.util.Set;
  */
 @SuppressWarnings("serial")
 public abstract class ChannelListener extends JacobObject {
-
-    public abstract Set<Method> getImplementedMethods();
-
-    public Set<ChannelListener> or(ChannelListener other) {
-        HashSet<ChannelListener> retval = new HashSet<ChannelListener>();
-        retval.add(this);
-        retval.add(other);
-        return retval;
-    }
-
-    public Set<ChannelListener> or(Set<ChannelListener> other) {
-        HashSet<ChannelListener> retval = new HashSet<ChannelListener>(other);
-        retval.add(this);
-        return retval;
-    }
-
-    /**
-     * Get a description of the object for debugging purposes.
-     *
-     * @return human-readable description.
-     */
-    public String toString() {
-        // TODO: needs improvement
-        StringBuffer buf = new StringBuffer(getClassName());
-        buf.append('{');
-        for (Method m : getImplementedMethods()) {
-            buf.append(m.getName());
-            buf.append("()");
-            buf.append("&");
-        }
-        buf.setLength(buf.length()-1);
-        buf.append('}');
-        return buf.toString();
-    }
 }

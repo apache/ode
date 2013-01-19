@@ -30,7 +30,7 @@ public abstract class ReceiveProcess<T extends Channel> extends ChannelListener 
     private transient Channel channel;
     private T receiver;
     
-    protected ReceiveProcess(T channel, T receiver) throws IllegalStateException {
+    protected ReceiveProcess(T channel, T receiver) {
         assert getClass().getSuperclass().getSuperclass() == ChannelListener.class :
             "Inheritance in ChannelListener classes not allowed!";
         if (channel == null) {
@@ -59,5 +59,19 @@ public abstract class ReceiveProcess<T extends Channel> extends ChannelListener 
             _implementedMethods = Collections.unmodifiableSet(implementedMethods);
         }
         return _implementedMethods;
+    }
+
+    public String toString() {
+        // TODO: needs improvement
+        StringBuffer buf = new StringBuffer(getClassName());
+        buf.append('{');
+        for (Method m : getImplementedMethods()) {
+            buf.append(m.getName());
+            buf.append("()");
+            buf.append(",");
+        }
+        buf.setLength(buf.length()-1);
+        buf.append('}');
+        return buf.toString();
     }
 }

@@ -26,6 +26,7 @@ import java.util.Stack;
 
 import org.apache.ode.jacob.Channel;
 import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.CompositeProcess;
 import org.apache.ode.jacob.JacobObject;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.JacobThread;
@@ -345,20 +346,30 @@ public final class JacobVPU {
 
             CommGroup grp = new CommGroup(replicate);
             for (int i = 0; i < ml.length; ++i) {
-                if (ml[i] instanceof ReceiveProcess) {
-                    CommChannel chnl = (CommChannel)ChannelFactory.getBackend(
-                        ((ReceiveProcess<?>)ml[i]).getChannel());
-                    // TODO see below..
-                    // oframe.setDebugInfo(fillDebugInfo());
-                    CommRecv recv = new CommRecv(chnl, ml[i]);
-                    grp.add(recv);
-                }
+                addCommChannel(grp, ml[i]);
             }
             _executionQueue.add(grp);
         }
 
         public void object(boolean replicate, ChannelListener methodList) throws IllegalArgumentException {
             object(replicate, new ChannelListener[] { methodList });
+        }
+
+        private void addCommChannel(CommGroup group, ChannelListener receiver) {
+            if (receiver instanceof CompositeProcess) {
+                for (ChannelListener r : ((CompositeProcess)receiver).getProcesses()) {
+                    addCommChannel(group, r);
+                }
+            } else if (receiver instanceof ReceiveProcess) {
+                CommChannel chnl = (CommChannel)ChannelFactory.getBackend(
+                        ((ReceiveProcess<?>)receiver).getChannel());
+                    // TODO see below..
+                    // oframe.setDebugInfo(fillDebugInfo());
+                    CommRecv recv = new CommRecv(chnl, receiver);
+                    group.add(recv);
+            } else {
+                throw new IllegalStateException("Don't know how to handle Process type...");
+            }
         }
 
         /* UNUSED

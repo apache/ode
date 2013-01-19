@@ -35,6 +35,9 @@ import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
 import org.w3c.dom.Element;
 
+import static org.apache.ode.jacob.ProcessUtil.compose;
+
+
 /**
  * Implementation of the BPEL &lt;sequence&gt; activity.
  */
@@ -75,7 +78,7 @@ class SEQUENCE extends ACTIVITY {
         }
 
         public void run() {
-            object(false, new ReceiveProcess<Termination>(_self.self, new Termination() {
+            object(false, compose(new ReceiveProcess<Termination>(_self.self, new Termination() {
                 public void terminate() {
                     replication(_child.self).terminate();
 
@@ -89,7 +92,7 @@ class SEQUENCE extends ACTIVITY {
                 }
             }) {
                 private static final long serialVersionUID = -2680515407515637639L;
-            }.or(new ReceiveProcess<ParentScope>(_child.parent, new ParentScope() {
+            }).or(new ReceiveProcess<ParentScope>(_child.parent, new ParentScope() {
                 public void compensate(OScope scope, Synch ret) {
                     _self.parent.compensate(scope,ret);
                     instance(ACTIVE.this);

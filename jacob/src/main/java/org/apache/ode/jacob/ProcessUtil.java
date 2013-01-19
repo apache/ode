@@ -37,6 +37,11 @@ public final class ProcessUtil {
     	    + channel == null ? "<null>" : channel.getClass().toString());
     }
     
+    public static CompositeProcess compose(ReceiveProcess<?> process) {
+        CompositeProcess result = new CompositeProcess();
+        return result.or(process);
+    }
+
     @SuppressWarnings("serial")
 	public static <T extends Channel> ChannelListener receive(T proxy, T listener) {
     	// TODO: NOTE: this *only* works when the listnere doesn't need to be Serialiazble really

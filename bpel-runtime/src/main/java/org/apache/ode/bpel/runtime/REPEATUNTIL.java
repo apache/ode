@@ -34,6 +34,9 @@ import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
 import org.w3c.dom.Element;
 
+import static org.apache.ode.jacob.ProcessUtil.compose;
+
+
 public class REPEATUNTIL extends ACTIVITY {
     private static final long serialVersionUID = 1L;
 
@@ -94,7 +97,7 @@ public class REPEATUNTIL extends ACTIVITY {
         }
 
         public void run() {
-            object(false, new ReceiveProcess<Termination>(_self.self, new Termination() {
+            object(false, compose(new ReceiveProcess<Termination>(_self.self, new Termination() {
                 public void terminate() {
                     _terminated = true;
                     replication(_child.self).terminate();
@@ -102,7 +105,7 @@ public class REPEATUNTIL extends ACTIVITY {
                 }
             }) {
                 private static final long serialVersionUID = -5471984635653784051L;
-            }.or(new ReceiveProcess<ParentScope>(_child.parent, new ParentScope() {
+            }).or(new ReceiveProcess<ParentScope>(_child.parent, new ParentScope() {
                 public void compensate(OScope scope, Synch ret) {
                     _self.parent.compensate(scope,ret);
                     instance(WAITER.this);

@@ -38,6 +38,9 @@ import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import static org.apache.ode.jacob.ProcessUtil.compose;
+
+
 /**
  * JacobRunnable that performs the work of the <code>invoke</code> activity.
  */
@@ -96,7 +99,7 @@ public class INVOKE extends ACTIVITY {
                         _scopeFrame.resolve(_oinvoke.partnerLink), _oinvoke.operation,
                         outboundMsg, invokeResponseChannel);
 
-                object(false, new ReceiveProcess<InvokeResponse>(invokeResponseChannel, new InvokeResponse() {
+                object(false, compose(new ReceiveProcess<InvokeResponse>(invokeResponseChannel, new InvokeResponse() {
                     public void onResponse() {
                         // we don't have to write variable data -> this already
                         // happened in the nativeAPI impl
@@ -190,7 +193,7 @@ public class INVOKE extends ACTIVITY {
 
                 }){
                     private static final long serialVersionUID = 4496880438819196765L;
-                }.or(new ReceiveProcess<Termination>(_self.self, new Termination() {
+                }).or(new ReceiveProcess<Termination>(_self.self, new Termination() {
                     public void terminate() {
                         _self.parent.completed(null, CompensationHandler.emptySet());
                     }

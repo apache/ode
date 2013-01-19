@@ -52,6 +52,9 @@ import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
 import org.w3c.dom.Element;
 
+import static org.apache.ode.jacob.ProcessUtil.compose;
+
+
 class ACTIVITYGUARD extends ACTIVITY {
     private static final long serialVersionUID = 1L;
 
@@ -292,7 +295,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                     getBpelRuntimeContext().registerActivityForRecovery(
                         recoveryChannel, _self.aId, _failure.reason, _failure.dateTime, _failure.data,
                         new String[] { "retry", "cancel", "fault" }, _failure.retryCount);
-                    object(false, new ReceiveProcess<ActivityRecovery>(recoveryChannel, new ActivityRecovery() {
+                    object(false, compose(new ReceiveProcess<ActivityRecovery>(recoveryChannel, new ActivityRecovery() {
                         public void retry() {
                             if (__log.isDebugEnabled())
                                 __log.debug("ActivityRecovery: Retrying activity " + _self.aId + " (user initiated)");
@@ -319,7 +322,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                         }
                     }){
                         private static final long serialVersionUID = 8397883882810521685L;
-                    }.or(new ReceiveProcess<Termination>(_self.self, new Termination() {
+                    }).or(new ReceiveProcess<Termination>(_self.self, new Termination() {
                         public void terminate() {
                             if (__log.isDebugEnabled())
                                 __log.debug("ActivityRecovery: Cancelling activity " + _self.aId + " (terminated by scope)");
