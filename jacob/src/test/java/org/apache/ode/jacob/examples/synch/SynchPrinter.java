@@ -65,6 +65,7 @@ public class SynchPrinter {
                 .order("1")
                 .and().then().order("2")
                 .and().then().order("3")
+                .and().then().and().then().and().then().and().then()
                 .and().no().andthen();
         }
 
@@ -94,6 +95,9 @@ public class SynchPrinter {
                 return this;
             }
             public PrinterProcess then() {
+                if (message == null) {
+                    return this;
+                }
                 next = new PrinterProcess(printer, this);
                 return next;
             }
@@ -106,14 +110,16 @@ public class SynchPrinter {
 
             @Override
             public void run() {
-                object(receive(printer.print(message), new Synch() {
-                    private static final long serialVersionUID = 1L;
-                    public void ret() {
-                        if (next != null) {
-                            next.run();
+                if (message != null) {
+                    object(receive(printer.print(message), new Synch() {
+                        private static final long serialVersionUID = 1L;
+                        public void ret() {
+                            if (next != null) {
+                                next.run();
+                            }
                         }
-                    }
-                }));
+                    }));
+                }
             }
         }
     }
