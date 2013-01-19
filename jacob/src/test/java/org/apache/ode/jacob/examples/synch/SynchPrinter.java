@@ -62,9 +62,10 @@ public class SynchPrinter {
             final SynchPrint p = newChannel(SynchPrint.class);
             instance(new SystemPrinter(p));
             dudeWhoStoleMyCar(p)
-                .order("1")
-                .and().then().order("2")
-                .and().then().order("3")
+                .order("garlic chicken")
+                .and().then().order("white rice")
+                .and().then().order("wonton soup")
+                .and().then().order("fortune cookies")
                 .and().then().and().then().and().then().and().then()
                 .and().no().andthen();
         }
