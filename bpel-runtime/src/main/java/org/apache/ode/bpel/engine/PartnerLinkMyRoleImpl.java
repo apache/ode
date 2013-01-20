@@ -244,6 +244,7 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         if (mex.getDAO().getCreateTime() == null)
             mex.getDAO().setCreateTime(instance.getCurrentEventDateTime()); 
         
+        _process._engine.acquireInstanceLock(newInstance.getInstanceId());
         instance.execute();
     }
 
