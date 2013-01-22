@@ -31,6 +31,8 @@ import org.apache.ode.bpel.runtime.channels.LinkStatus;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.CompositeProcess;
+import org.apache.ode.jacob.ProcessUtil;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
 import org.apache.ode.utils.stl.FilterIterator;
@@ -77,8 +79,7 @@ class FLOW extends ACTIVITY {
         public void run() {
             Iterator<ChildInfo> active = active();
             if (active.hasNext()) {
-                Set<ChannelListener> mlSet = new HashSet<ChannelListener>();
-                mlSet.add(new ReceiveProcess<Termination>(_self.self, new Termination() {
+                CompositeProcess mlSet = ProcessUtil.compose(new ReceiveProcess<Termination>(_self.self, new Termination() {
                     public void terminate() {
                         for (Iterator<ChildInfo> i = active(); i.hasNext(); )
                             replication(i.next().activity.self).terminate();
@@ -90,7 +91,7 @@ class FLOW extends ACTIVITY {
 
                 for (;active.hasNext();) {
                     final ChildInfo child = active.next();
-                    mlSet.add(new ReceiveProcess<ParentScope>(child.activity.parent, new ParentScope() {
+                    mlSet.or(new ReceiveProcess<ParentScope>(child.activity.parent, new ParentScope() {
                         public void completed(FaultData faultData, Set<CompensationHandler> compensations) {
                             child.completed = true;
                             _compensations.addAll(compensations);
@@ -116,7 +117,7 @@ class FLOW extends ACTIVITY {
                         private static final long serialVersionUID = -8027205709169238172L;
                     });
                 }
-                object(false,mlSet);
+                object(false, mlSet);
             } else /** No More active children. */ {
                 // NOTE: we do not not have to do DPE here because all the children
                 // have been started, and are therefore expected to set the value of

@@ -36,7 +36,8 @@ import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.LinkStatus;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.ReadWriteLock;
-import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.CompositeProcess;
+import org.apache.ode.jacob.ProcessUtil;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
 import org.apache.ode.jacob.Val;
@@ -147,10 +148,9 @@ public class SCOPEACT extends ACTIVITY {
 
             __log.debug("LINKSTATUSINTERCEPTOR: running ");
 
-            Set<ChannelListener> mlset = new HashSet<ChannelListener>();
-            
+            CompositeProcess mlset = ProcessUtil.compose(null);
             if (_status == null)
-                mlset.add(new ReceiveProcess<Val>(_self, new Val() {
+                mlset.or(new ReceiveProcess<Val>(_self, new Val() {
                     /** Our owner will notify us when it becomes clear what to do with the links. */
                     public void val(Object retVal) {
                         if (__log.isDebugEnabled()) {
@@ -174,7 +174,7 @@ public class SCOPEACT extends ACTIVITY {
                 if (_statuses.containsKey(m.getKey()))
                     continue;
             
-                mlset.add(new ReceiveProcess<LinkStatus>(m.getValue().pub, new LinkStatus() {
+                mlset.or(new ReceiveProcess<LinkStatus>(m.getValue().pub, new LinkStatus() {
                     public void linkStatus(boolean value) {
                         _statuses.put(m.getKey(), value);
                         if (_status != null)
@@ -190,7 +190,6 @@ public class SCOPEACT extends ACTIVITY {
             }
             
             object(false, mlset);
-
         }
 
         /**
@@ -199,7 +198,6 @@ public class SCOPEACT extends ACTIVITY {
          */
         private boolean isDone() {
             return (_statuses.keySet().size() < SCOPEACT.this._self.o.outgoingLinks.size());
-
         }
     }
     

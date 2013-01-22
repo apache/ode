@@ -49,10 +49,12 @@ import org.apache.ode.bpel.runtime.channels.EventHandlerControl;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.Termination;
-import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.CompositeProcess;
+import org.apache.ode.jacob.ProcessUtil;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
 import org.w3c.dom.Element;
+
 
 /**
  * An active scope.
@@ -138,10 +140,7 @@ class SCOPE extends ACTIVITY {
 
         public void run() {
             if (_child != null || !_eventHandlers.isEmpty()) {
-                HashSet<ChannelListener> mlSet = new HashSet<ChannelListener>();
-
-                // Listen to messages from our parent.
-                mlSet.add(new ReceiveProcess<Termination>(_self.self, new Termination() {
+                CompositeProcess mlSet = ProcessUtil.compose(new ReceiveProcess<Termination>(_self.self, new Termination() {
                     public void terminate() {
                         _terminated = true;
 
@@ -162,7 +161,7 @@ class SCOPE extends ACTIVITY {
 
                 // Handle messages from the child if it is still alive
                 if (_child != null) {
-                    mlSet.add(new ReceiveProcess<ParentScope>(_child.parent, new ParentScope() {
+                    mlSet.or(new ReceiveProcess<ParentScope>(_child.parent, new ParentScope() {
                         public void compensate(OScope scope, Synch ret) {
                             //  If this scope does not have available compensations, defer to
                             // parent scope, otherwise do compensation.
@@ -217,7 +216,7 @@ class SCOPE extends ACTIVITY {
                 for (Iterator<EventHandlerInfo> i = _eventHandlers.iterator();i.hasNext();) {
                     final EventHandlerInfo ehi = i.next();
 
-                    mlSet.add(new ReceiveProcess<ParentScope>(ehi.psc, new ParentScope() {
+                    mlSet.or(new ReceiveProcess<ParentScope>(ehi.psc, new ParentScope() {
                         public void compensate(OScope scope, Synch ret) {
                             // ACTIVE scopes do not compensate, send request up to parent.
                             _self.parent.compensate(scope, ret);

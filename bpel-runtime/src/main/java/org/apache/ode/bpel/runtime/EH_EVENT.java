@@ -34,12 +34,13 @@ import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.PickResponse;
 import org.apache.ode.bpel.runtime.channels.Termination;
-import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.CompositeProcess;
 import org.apache.ode.jacob.ProcessUtil;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
 
 /**
  * Message event handler.
@@ -158,10 +159,10 @@ class EH_EVENT extends BpelJacobRunnable {
 
         public void run() {
             if (!_active.isEmpty() || _pickResponseChannel != null) {
-                HashSet<ChannelListener> mlset = new HashSet<ChannelListener>();
+                CompositeProcess mlset = ProcessUtil.compose(null);
 
                 if (!_terminated) {
-                    mlset.add(new ReceiveProcess<Termination>(_tc, new Termination() {
+                    mlset.or(new ReceiveProcess<Termination>(_tc, new Termination() {
                         public void terminate() {
                             terminateActive();
                             _terminated = true;
@@ -175,7 +176,7 @@ class EH_EVENT extends BpelJacobRunnable {
                 }
 
                 if (!_stopped) {
-                    mlset.add(new ReceiveProcess<EventHandlerControl>(_ehc, new EventHandlerControl() {
+                    mlset.or(new ReceiveProcess<EventHandlerControl>(_ehc, new EventHandlerControl() {
                         public void stop() {
                             _stopped = true;
                             if (_pickResponseChannel != null)
@@ -188,7 +189,7 @@ class EH_EVENT extends BpelJacobRunnable {
                 }
 
                 for (final ActivityInfo ai : _active) {
-                    mlset.add(new ReceiveProcess<ParentScope>(ai.parent, new ParentScope() {
+                    mlset.or(new ReceiveProcess<ParentScope>(ai.parent, new ParentScope() {
                         public void compensate(OScope scope, Synch ret) {
                             _psc.compensate(scope, ret);
                             instance(WAITING.this);
@@ -216,7 +217,7 @@ class EH_EVENT extends BpelJacobRunnable {
                 }
 
                 if (_pickResponseChannel != null)
-                    mlset.add(new ReceiveProcess<PickResponse>(_pickResponseChannel, new PickResponse() {
+                    mlset.or(new ReceiveProcess<PickResponse>(_pickResponseChannel, new PickResponse() {
                          public void onRequestRcvd(int selectorIdx, String mexId) {
                             // The receipt of the message causes a new scope to be created:
                             ScopeFrame ehScopeFrame = new ScopeFrame(_oevent,

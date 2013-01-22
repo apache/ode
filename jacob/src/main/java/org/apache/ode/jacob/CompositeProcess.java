@@ -46,7 +46,9 @@ public final class CompositeProcess extends ChannelListener {
     }
 
     public CompositeProcess or(ChannelListener process) {
-        processes.add(process);
+        if (process != null) {
+            processes.add(process);
+        }
         return this;
     }
 }

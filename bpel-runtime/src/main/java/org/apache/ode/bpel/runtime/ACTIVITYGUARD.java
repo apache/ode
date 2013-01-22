@@ -48,6 +48,7 @@ import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.bpel.runtime.channels.TimerResponse;
 import org.apache.ode.jacob.ChannelListener;
+import org.apache.ode.jacob.CompositeProcess;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
 import org.w3c.dom.Element;
@@ -106,8 +107,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                 dpe(_oactivity);
             }
         } else /* don't know all our links statuses */ {
-            Set<ChannelListener> mlset = new HashSet<ChannelListener>();
-            mlset.add(new ReceiveProcess<Termination>(_self.self, new Termination() {
+            CompositeProcess mlset = compose(new ReceiveProcess<Termination>(_self.self, new Termination() {
                 public void terminate() {
                     // Complete immediately, without faulting or registering any comps.
                     _self.parent.completed(null, CompensationHandler.emptySet());
@@ -118,7 +118,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                 private static final long serialVersionUID = 5094153128476008961L;
             });
             for (final OLink link : _oactivity.targetLinks) {
-                mlset.add(new ReceiveProcess<LinkStatus>(_linkFrame.resolve(link).sub, new LinkStatus() {
+                mlset.or(new ReceiveProcess<LinkStatus>(_linkFrame.resolve(link).sub, new LinkStatus() {
                     public void linkStatus(boolean value) {
                         _linkVals.put(link, Boolean.valueOf(value));
                         instance(ACTIVITYGUARD.this);
