@@ -68,7 +68,9 @@ class WAIT extends ACTIVITY {
             final TimerResponse timerChannel = newChannel(TimerResponse.class);
             getBpelRuntimeContext().registerTimer(timerChannel, dueDate);
 
-            object(false, compose(new ReceiveProcess<TimerResponse>(timerChannel, new TimerResponse() {
+            object(false, compose(new ReceiveProcess<TimerResponse>() {
+                private static final long serialVersionUID = 3120518305645437327L;
+            }.setChannel(timerChannel).setReceiver(new TimerResponse() {
                 public void onTimeout() {
                     _self.parent.completed(null, CompensationHandler.emptySet());
                 }
@@ -76,12 +78,14 @@ class WAIT extends ACTIVITY {
                 public void onCancel() {
                     _self.parent.completed(null, CompensationHandler.emptySet());
                 }
-            }) {
-                private static final long serialVersionUID = 3120518305645437327L;
-            }).or(new ReceiveProcess<Termination>(_self.self, new Termination() {
+            })).or(new ReceiveProcess<Termination>() {
+                private static final long serialVersionUID = -2791243270691333946L;
+            }.setChannel(_self.self).setReceiver(new Termination() {
                 public void terminate() {
                     _self.parent.completed(null, CompensationHandler.emptySet());
-                    object(new ReceiveProcess<TimerResponse>(timerChannel, new TimerResponse() {
+                    object(new ReceiveProcess<TimerResponse>() {
+                        private static final long serialVersionUID = 677746737897792929L;
+                    }.setChannel(timerChannel).setReceiver(new TimerResponse() {
                         public void onTimeout() {
                             //ignore
                         }
@@ -89,13 +93,9 @@ class WAIT extends ACTIVITY {
                         public void onCancel() {
                             //ingore
                         }
-                    }) {
-                        private static final long serialVersionUID = 677746737897792929L;
-                    });
+                    }));
                 }
-            }) {
-                private static final long serialVersionUID = -2791243270691333946L;
-            }));
+            })));
         } else {
             _self.parent.completed(null, CompensationHandler.emptySet());
         }

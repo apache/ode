@@ -79,19 +79,21 @@ class FLOW extends ACTIVITY {
         public void run() {
             Iterator<ChildInfo> active = active();
             if (active.hasNext()) {
-                CompositeProcess mlSet = ProcessUtil.compose(new ReceiveProcess<Termination>(_self.self, new Termination() {
+                CompositeProcess mlSet = ProcessUtil.compose(new ReceiveProcess<Termination>() {
+                    private static final long serialVersionUID = 2554750258974084466L;
+                }.setChannel(_self.self).setReceiver(new Termination() {
                     public void terminate() {
                         for (Iterator<ChildInfo> i = active(); i.hasNext(); )
                             replication(i.next().activity.self).terminate();
                         instance(ACTIVE.this);
                     }
-                }) {
-                    private static final long serialVersionUID = 2554750258974084466L;
-                });
+                }));
 
                 for (;active.hasNext();) {
                     final ChildInfo child = active.next();
-                    mlSet.or(new ReceiveProcess<ParentScope>(child.activity.parent, new ParentScope() {
+                    mlSet.or(new ReceiveProcess<ParentScope>() {
+                        private static final long serialVersionUID = -8027205709169238172L;
+                    }.setChannel(child.activity.parent).setReceiver(new ParentScope() {
                         public void completed(FaultData faultData, Set<CompensationHandler> compensations) {
                             child.completed = true;
                             _compensations.addAll(compensations);
@@ -113,9 +115,7 @@ class FLOW extends ACTIVITY {
 
                         public void cancelled() { completed(null, CompensationHandler.emptySet()); }
                         public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
-                    }) {
-                        private static final long serialVersionUID = -8027205709169238172L;
-                    });
+                    }));
                 }
                 object(false, mlSet);
             } else /** No More active children. */ {

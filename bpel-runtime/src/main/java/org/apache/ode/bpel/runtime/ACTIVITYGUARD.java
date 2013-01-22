@@ -21,7 +21,6 @@ package org.apache.ode.bpel.runtime;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -47,7 +46,6 @@ import org.apache.ode.bpel.runtime.channels.LinkStatus;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.bpel.runtime.channels.TimerResponse;
-import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.CompositeProcess;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
@@ -107,25 +105,25 @@ class ACTIVITYGUARD extends ACTIVITY {
                 dpe(_oactivity);
             }
         } else /* don't know all our links statuses */ {
-            CompositeProcess mlset = compose(new ReceiveProcess<Termination>(_self.self, new Termination() {
+            CompositeProcess mlset = compose(new ReceiveProcess<Termination>() {
+                private static final long serialVersionUID = 5094153128476008961L;
+            }.setChannel(_self.self).setReceiver(new Termination() {
                 public void terminate() {
                     // Complete immediately, without faulting or registering any comps.
                     _self.parent.completed(null, CompensationHandler.emptySet());
                     // Dead-path activity
                     dpe(_oactivity);
                 }
-            }) {
-                private static final long serialVersionUID = 5094153128476008961L;
-            });
+            }));
             for (final OLink link : _oactivity.targetLinks) {
-                mlset.or(new ReceiveProcess<LinkStatus>(_linkFrame.resolve(link).sub, new LinkStatus() {
+                mlset.or(new ReceiveProcess<LinkStatus>() {
+                    private static final long serialVersionUID = 1024137371118887935L;
+                }.setChannel(_linkFrame.resolve(link).sub).setReceiver(new LinkStatus() {
                     public void linkStatus(boolean value) {
                         _linkVals.put(link, Boolean.valueOf(value));
                         instance(ACTIVITYGUARD.this);
                     }
-                }) {
-                    private static final long serialVersionUID = 1024137371118887935L;
-                });
+                }));
             }
 
             object(false, mlset);
@@ -200,7 +198,9 @@ class ACTIVITYGUARD extends ACTIVITY {
         }
 
         public void run() {
-            object(new ReceiveProcess<ParentScope>(_in, new ParentScope() {
+            object(new ReceiveProcess<ParentScope>() {
+                private static final long serialVersionUID = 2667359535900385952L;
+            }.setChannel(_in).setReceiver(new ParentScope() {
                 public void compensate(OScope scope, Synch ret) {
                     _self.parent.compensate(scope,ret);
                     instance(TCONDINTERCEPT.this);
@@ -274,7 +274,9 @@ class ACTIVITYGUARD extends ACTIVITY {
                         (failureHandling == null ? 0L : failureHandling.retryDelay * 1000));
                     final TimerResponse timerChannel = newChannel(TimerResponse.class);
                     getBpelRuntimeContext().registerTimer(timerChannel, future);
-                    object(false, new ReceiveProcess<TimerResponse>(timerChannel, new TimerResponse() {
+                    object(false, new ReceiveProcess<TimerResponse>() {
+                        private static final long serialVersionUID = -261911108068231376L;
+                    }.setChannel(timerChannel).setReceiver(new TimerResponse() {
                         public void onTimeout() {
                             ++_failure.retryCount;
                             startGuardedActivity();
@@ -282,9 +284,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                         public void onCancel() {
                             requireRecovery();
                         }
-                    }) {
-                        private static final long serialVersionUID = -261911108068231376L;
-                    });
+                    }));
                 }
 
                 private void requireRecovery() {
@@ -295,7 +295,9 @@ class ACTIVITYGUARD extends ACTIVITY {
                     getBpelRuntimeContext().registerActivityForRecovery(
                         recoveryChannel, _self.aId, _failure.reason, _failure.dateTime, _failure.data,
                         new String[] { "retry", "cancel", "fault" }, _failure.retryCount);
-                    object(false, compose(new ReceiveProcess<ActivityRecovery>(recoveryChannel, new ActivityRecovery() {
+                    object(false, compose(new ReceiveProcess<ActivityRecovery>() {
+                        private static final long serialVersionUID = 8397883882810521685L;
+                    }.setChannel(recoveryChannel).setReceiver(new ActivityRecovery() {
                         public void retry() {
                             if (__log.isDebugEnabled())
                                 __log.debug("ActivityRecovery: Retrying activity " + _self.aId + " (user initiated)");
@@ -320,22 +322,18 @@ class ACTIVITYGUARD extends ACTIVITY {
                                 faultData = createFault(OFailureHandling.FAILURE_FAULT_NAME, _self.o, _failure.reason);
                             completed(faultData, CompensationHandler.emptySet());
                         }
-                    }){
-                        private static final long serialVersionUID = 8397883882810521685L;
-                    }).or(new ReceiveProcess<Termination>(_self.self, new Termination() {
+                    })).or(new ReceiveProcess<Termination>() {
+                        private static final long serialVersionUID = 2148587381204858397L;
+                    }.setChannel(_self.self).setReceiver(new Termination() {
                         public void terminate() {
                             if (__log.isDebugEnabled())
                                 __log.debug("ActivityRecovery: Cancelling activity " + _self.aId + " (terminated by scope)");
                             getBpelRuntimeContext().unregisterActivityForRecovery(recoveryChannel);
                             cancelled();
                         }
-                    }) {
-                        private static final long serialVersionUID = 2148587381204858397L;
-                    }));
+                    })));
                 }
-            }) {
-                private static final long serialVersionUID = 2667359535900385952L;
-            });
+            }));
         }
     }
 

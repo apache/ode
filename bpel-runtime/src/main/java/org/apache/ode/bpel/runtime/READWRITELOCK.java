@@ -55,7 +55,9 @@ public class READWRITELOCK extends JacobRunnable {
 
     @Override
     public void run() {
-        object(new ReceiveProcess<ReadWriteLock>(_self, new ReadWriteLock() {
+        object(new ReceiveProcess<ReadWriteLock>() {
+            private static final long serialVersionUID = -8644268413754259515L;
+        }.setChannel(_self).setReceiver(new ReadWriteLock() {
             public void readLock(Synch s) {
                 switch (_status) {
                 case UNLOCKED:
@@ -119,9 +121,7 @@ public class READWRITELOCK extends JacobRunnable {
 
                 instance(READWRITELOCK.this);
             }
-        }) {
-            private static final long serialVersionUID = -8644268413754259515L;
-        });
+        }));
     }
 
     private static class Waiter {

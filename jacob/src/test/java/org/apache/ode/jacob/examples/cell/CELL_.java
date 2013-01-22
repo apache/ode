@@ -44,7 +44,9 @@ public class CELL_<T> extends JacobRunnable {
     public void run() {
         // INSTANTIATION{Cell(run,val)}
         // ==> run ? [ read(r)={...} & write(newVal)={...} ]
-        object(new ReceiveProcess<Cell>(_self, new Cell() {
+        object(new ReceiveProcess<Cell>() {
+            private static final long serialVersionUID = 8883128084307471572L;
+        }.setChannel(_self).setReceiver(new Cell() {
             public void read(Val r) {
                 // COMMUNICATION{x & [read... & ... ] | x ! read} ==> Cell(run, val) ...
                 instance(new CELL_<T>(_self, _val));
@@ -60,9 +62,7 @@ public class CELL_<T> extends JacobRunnable {
                 // COMMUNICATION{x & [... & write...] ==> Cell(run, newVal)
                 instance(new CELL_(_self, newVal));
             }
-        }) {
-            private static final long serialVersionUID = 8883128084307471572L;
-        });
+        }));
     }
 
     public String toString() {

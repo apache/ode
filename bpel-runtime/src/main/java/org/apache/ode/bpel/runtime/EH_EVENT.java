@@ -162,7 +162,9 @@ class EH_EVENT extends BpelJacobRunnable {
                 CompositeProcess mlset = ProcessUtil.compose(null);
 
                 if (!_terminated) {
-                    mlset.or(new ReceiveProcess<Termination>(_tc, new Termination() {
+                    mlset.or(new ReceiveProcess<Termination>() {
+                        private static final long serialVersionUID = 7666910462948788042L;
+                    }.setChannel(_tc).setReceiver(new Termination() {
                         public void terminate() {
                             terminateActive();
                             _terminated = true;
@@ -170,26 +172,26 @@ class EH_EVENT extends BpelJacobRunnable {
                                 getBpelRuntimeContext().cancel(_pickResponseChannel);
                             instance(WAITING.this);
                         }
-                    }) {
-                        private static final long serialVersionUID = 7666910462948788042L;
-                    });
+                    }));
                 }
 
                 if (!_stopped) {
-                    mlset.or(new ReceiveProcess<EventHandlerControl>(_ehc, new EventHandlerControl() {
+                    mlset.or(new ReceiveProcess<EventHandlerControl>() {
+                        private static final long serialVersionUID = -1050788954724647970L;
+                    }.setChannel(_ehc).setReceiver(new EventHandlerControl() {
                         public void stop() {
                             _stopped = true;
                             if (_pickResponseChannel != null)
                                 getBpelRuntimeContext().cancel(_pickResponseChannel);
                             instance(WAITING.this);
                         }
-                    }) {
-                        private static final long serialVersionUID = -1050788954724647970L;
-                    });
+                    }));
                 }
 
                 for (final ActivityInfo ai : _active) {
-                    mlset.or(new ReceiveProcess<ParentScope>(ai.parent, new ParentScope() {
+                    mlset.or(new ReceiveProcess<ParentScope>() {
+                        private static final long serialVersionUID = 5341207762415360982L;
+                    }.setChannel(ai.parent).setReceiver(new ParentScope() {
                         public void compensate(OScope scope, Synch ret) {
                             _psc.compensate(scope, ret);
                             instance(WAITING.this);
@@ -211,13 +213,13 @@ class EH_EVENT extends BpelJacobRunnable {
 
                         public void cancelled() { completed(null, CompensationHandler.emptySet()); }
                         public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
-                    }) {
-                        private static final long serialVersionUID = 5341207762415360982L;
-                    });
+                    }));
                 }
 
                 if (_pickResponseChannel != null)
-                    mlset.or(new ReceiveProcess<PickResponse>(_pickResponseChannel, new PickResponse() {
+                    mlset.or(new ReceiveProcess<PickResponse>() {
+                        private static final long serialVersionUID = -4929999153478677288L;
+                    }.setChannel(_pickResponseChannel).setReceiver(new PickResponse() {
                          public void onRequestRcvd(int selectorIdx, String mexId) {
                             // The receipt of the message causes a new scope to be created:
                             ScopeFrame ehScopeFrame = new ScopeFrame(_oevent,
@@ -325,9 +327,7 @@ class EH_EVENT extends BpelJacobRunnable {
                         public void onCancel() {
                             instance(new WAITING(null));
                         }
-                    }) {
-                        private static final long serialVersionUID = -4929999153478677288L;
-                    });
+                    }));
 
                 object(false, mlset);
             } else /* Nothing more to do. */ {

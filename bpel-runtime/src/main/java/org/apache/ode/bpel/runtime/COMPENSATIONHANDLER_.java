@@ -47,7 +47,9 @@ class COMPENSATIONHANDLER_ extends BpelJacobRunnable {
 
     public void run() {
         sendEvent(new CompensationHandlerRegistered());
-        object(new ReceiveProcess<Compensation>(_self.compChannel, new Compensation() {
+        object(new ReceiveProcess<Compensation>() {
+            private static final long serialVersionUID = -477602498730810094L;
+        }.setChannel(_self.compChannel).setReceiver(new Compensation() {
             public void forget() {
                 // Tell all our completed children to forget.
                 for (Iterator<CompensationHandler> i = _completedChildren.iterator(); i.hasNext(); )
@@ -72,7 +74,9 @@ class COMPENSATIONHANDLER_ extends BpelJacobRunnable {
                 // Create the compensation handler scope.
                 instance(new SCOPE(ai,compHandlerScopeFrame, new LinkFrame(null)));
 
-                object(new ReceiveProcess<ParentScope>(ai.parent, new ParentScope() {
+                object(new ReceiveProcess<ParentScope>() {
+                    private static final long serialVersionUID = 8044120498580711546L;
+                }.setChannel(ai.parent).setReceiver(new ParentScope() {
                     public void compensate(OScope scope, Synch ret) {
                         throw new AssertionError("Unexpected.");
                     }
@@ -91,13 +95,9 @@ class COMPENSATIONHANDLER_ extends BpelJacobRunnable {
 
                     public void cancelled() { completed(null, CompensationHandler.emptySet()); }
                     public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
-                }) {
-                    private static final long serialVersionUID = 8044120498580711546L;
-                });
+                }));
             }
-        }) {
-            private static final long serialVersionUID = -477602498730810094L;
-        });
+        }));
     }
 
     private void sendEvent(ScopeEvent event) {

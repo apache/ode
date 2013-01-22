@@ -78,7 +78,9 @@ class SEQUENCE extends ACTIVITY {
         }
 
         public void run() {
-            object(false, compose(new ReceiveProcess<Termination>(_self.self, new Termination() {
+            object(false, compose(new ReceiveProcess<Termination>() {
+                private static final long serialVersionUID = -2680515407515637639L;
+            }.setChannel(_self.self).setReceiver(new Termination() {
                 public void terminate() {
                     replication(_child.self).terminate();
 
@@ -90,9 +92,9 @@ class SEQUENCE extends ACTIVITY {
                     _terminateRequested = true;
                     instance(ACTIVE.this);
                 }
-            }) {
-                private static final long serialVersionUID = -2680515407515637639L;
-            }).or(new ReceiveProcess<ParentScope>(_child.parent, new ParentScope() {
+            })).or(new ReceiveProcess<ParentScope>() {
+                private static final long serialVersionUID = 7195562310281985971L;
+            }.setChannel(_child.parent).setReceiver(new ParentScope() {
                 public void compensate(OScope scope, Synch ret) {
                     _self.parent.compensate(scope,ret);
                     instance(ACTIVE.this);
@@ -113,9 +115,7 @@ class SEQUENCE extends ACTIVITY {
 
                 public void cancelled() { completed(null, CompensationHandler.emptySet()); }
                 public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
-            }) {
-                private static final long serialVersionUID = 7195562310281985971L;
-            }));
+            })));
         }
 
         private void deadPathRemaining(List<OActivity> remaining) {

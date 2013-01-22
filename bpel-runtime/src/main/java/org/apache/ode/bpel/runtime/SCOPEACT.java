@@ -150,7 +150,9 @@ public class SCOPEACT extends ACTIVITY {
 
             CompositeProcess mlset = ProcessUtil.compose(null);
             if (_status == null)
-                mlset.or(new ReceiveProcess<Val>(_self, new Val() {
+                mlset.or(new ReceiveProcess<Val>() {
+                    private static final long serialVersionUID = 5029554538593371750L;
+                }.setChannel(_self).setReceiver(new Val() {
                     /** Our owner will notify us when it becomes clear what to do with the links. */
                     public void val(Object retVal) {
                         if (__log.isDebugEnabled()) {
@@ -162,31 +164,29 @@ public class SCOPEACT extends ACTIVITY {
                             _linkFrame.resolve(available).pub.linkStatus(_statuses.get(available) && _status);
     
                         // Check if we still need to wait around for more links.
-                        if (!isDone())
+                        if (!isDone()) {
                             instance(LINKSTATUSINTERCEPTOR.this);
-    
+                        }
                     }
-                }) {
-                    private static final long serialVersionUID = 5029554538593371750L;
-                });
+                }));
 
             for (final Map.Entry<OLink, LinkInfo> m : _interceptedChannels.links.entrySet()) {
                 if (_statuses.containsKey(m.getKey()))
                     continue;
             
-                mlset.or(new ReceiveProcess<LinkStatus>(m.getValue().pub, new LinkStatus() {
+                mlset.or(new ReceiveProcess<LinkStatus>() {
+                    private static final long serialVersionUID = 1568144473514091593L;
+                }.setChannel(m.getValue().pub).setReceiver(new LinkStatus() {
                     public void linkStatus(boolean value) {
                         _statuses.put(m.getKey(), value);
-                        if (_status != null)
+                        if (_status != null) {
                             _linkFrame.resolve(m.getKey()).pub.linkStatus(value && _status);
-                        
-                        if (!isDone())
+                        }
+                        if (!isDone()) {
                             instance(LINKSTATUSINTERCEPTOR.this);
-
+                        }
                     }
-                }) {
-                    private static final long serialVersionUID = 1568144473514091593L;
-                });
+                }));
             }
             
             object(false, mlset);
@@ -256,15 +256,15 @@ public class SCOPEACT extends ACTIVITY {
                 else
                     il.lockChannel.readLock(_synchChannel);
 
-                object(new ReceiveProcess<Synch>(_synchChannel, new Synch() {
+                object(new ReceiveProcess<Synch>() {
+                    private static final long serialVersionUID = 2857261074409098274L;
+                }.setChannel(_synchChannel).setReceiver(new Synch() {
                     public void ret() {
                         __log.debug("ISOLATIONGUARD: got lock: " + _locksNeeded.get(0));
                         _locksAcquired.add(_locksNeeded.remove(0));
                         instance(ISOLATEDGUARD.this);
                     }
-                }) {
-                    private static final long serialVersionUID = 2857261074409098274L;
-                });
+                }));
             }
         }
 
@@ -303,7 +303,9 @@ public class SCOPEACT extends ACTIVITY {
         public void run() {
 
             __log.debug("running UNLOCKER");
-            object(new ReceiveProcess<ParentScope>(_self, new ParentScope() {
+            object(new ReceiveProcess<ParentScope>() {
+                private static final long serialVersionUID = 1L;
+            }.setChannel(_self).setReceiver(new ParentScope() {
                 public void cancelled() {
                     _parent.cancelled();
                     unlockAll();
@@ -330,9 +332,7 @@ public class SCOPEACT extends ACTIVITY {
                     unlockAll();
                     // no more listening
                 }
-            }) {
-				private static final long serialVersionUID = 1L;
-            });
+            }));
         }
 
         /**

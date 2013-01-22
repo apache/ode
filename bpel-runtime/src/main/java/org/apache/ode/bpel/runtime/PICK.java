@@ -282,7 +282,9 @@ class PICK extends ACTIVITY {
         }
 
         public void run() {
-            object(false, compose(new ReceiveProcess<PickResponse>(_pickResponseChannel, new PickResponse() {
+            object(false, compose(new ReceiveProcess<PickResponse>() {
+                private static final long serialVersionUID = -8237296827418738011L;
+            }.setChannel(_pickResponseChannel).setReceiver(new PickResponse() {
                 public void onRequestRcvd(int selectorIdx, String mexId) {
                     OPickReceive.OnMessage onMessage = _opick.onMessages.get(selectorIdx);
 
@@ -374,16 +376,14 @@ class PICK extends ACTIVITY {
                     _self.parent.completed(null, CompensationHandler.emptySet());
                 }
 
-            }){
-                private static final long serialVersionUID = -8237296827418738011L;
-            }).or(new ReceiveProcess<Termination>(_self.self, new Termination() {
+            })).or(new ReceiveProcess<Termination>() {
+                private static final long serialVersionUID = 4399496341785922396L;
+            }.setChannel(_self.self).setReceiver(new Termination() {
                 public void terminate() {
                     getBpelRuntimeContext().cancel(_pickResponseChannel);
                     instance(WAITING.this);
                 }
-            }) {
-                private static final long serialVersionUID = 4399496341785922396L;
-            }));
+            })));
         }
     }
 }

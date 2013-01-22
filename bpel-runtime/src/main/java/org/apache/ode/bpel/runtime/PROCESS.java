@@ -59,7 +59,9 @@ public class PROCESS extends BpelJacobRunnable {
         ScopeFrame processFrame = new ScopeFrame(_oprocess.procesScope, scopeInstanceId, null, null,_globals);
         instance(new SCOPE(child, processFrame, new LinkFrame(null)));
 
-        object(new ReceiveProcess<ParentScope>(child.parent, new ParentScope() {
+        object(new ReceiveProcess<ParentScope>() {
+            private static final long serialVersionUID = -8564969578471906493L;
+        }.setChannel(child.parent).setReceiver(new ParentScope() {
             public void compensate(OScope scope, Synch ret) {
                 assert false;
             }
@@ -81,9 +83,7 @@ public class PROCESS extends BpelJacobRunnable {
                 FaultData faultData = createFault(OFailureHandling.FAILURE_FAULT_NAME, _oprocess, reason);
                 this.completed(faultData, CompensationHandler.emptySet());
             }
-        }) {
-            private static final long serialVersionUID = -8564969578471906493L;
-        });
+        }));
     }
 
     private void createGlobals() {

@@ -34,7 +34,6 @@ import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.bpel.runtime.channels.TimerResponse;
-import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.CompositeProcess;
 import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.jacob.Synch;
@@ -131,19 +130,19 @@ class EH_ALARM extends BpelJacobRunnable {
         public void run() {
             Calendar now = Calendar.getInstance();
 
-            CompositeProcess listeners = compose(new ReceiveProcess<EventHandlerControl>(_cc, new EventHandlerControl() {
+            CompositeProcess listeners = compose(new ReceiveProcess<EventHandlerControl>() {
+                private static final long serialVersionUID = -7750428941445331236L;
+            }.setChannel(_cc).setReceiver(new EventHandlerControl() {
                 public void stop() {
                     _psc.completed(null, _comps);
                 }
-            }){
-                private static final long serialVersionUID = -7750428941445331236L;
-            }).or(new ReceiveProcess<Termination>(_tc, new Termination() {
+            })).or(new ReceiveProcess<Termination>() {
+                private static final long serialVersionUID = 6100105997983514609L;
+            }.setChannel(_tc).setReceiver(new Termination() {
                 public void terminate() {
                     _psc.completed(null, _comps);
                 }
-            }) {
-                private static final long serialVersionUID = 6100105997983514609L;
-            });
+            }));
 
             if (_alarm == null) {
                 object(false, listeners);
@@ -151,7 +150,9 @@ class EH_ALARM extends BpelJacobRunnable {
                 TimerResponse trc = newChannel(TimerResponse.class);
                 getBpelRuntimeContext().registerTimer(trc,_alarm.getTime());
 
-                listeners.or(new ReceiveProcess<TimerResponse>(trc, new TimerResponse(){
+                listeners.or(new ReceiveProcess<TimerResponse>() {
+                    private static final long serialVersionUID = 1110683632756756017L;
+                }.setChannel(trc).setReceiver(new TimerResponse(){
                     public void onTimeout() {
                         // This is what we are waiting for, fire the activity
                         instance(new FIRE());
@@ -160,9 +161,7 @@ class EH_ALARM extends BpelJacobRunnable {
                     public void onCancel() {
                         _psc.completed(null, _comps);
                     }
-                }) {
-                    private static final long serialVersionUID = 1110683632756756017L;
-                });
+                }));
                 object(false, listeners);
             } else /* now is later then alarm time */ {
                 // If the alarm has passed we fire the nested activity
@@ -207,7 +206,9 @@ class EH_ALARM extends BpelJacobRunnable {
         }
 
         public void run() {
-            object(false, compose(new ReceiveProcess<ParentScope>(_activity.parent, new ParentScope() {
+            object(false, compose(new ReceiveProcess<ParentScope>() {
+                private static final long serialVersionUID = -3357030137175178040L;
+            }.setChannel(_activity.parent).setReceiver(new ParentScope() {
                 public void compensate(OScope scope, Synch ret) {
                     _psc.compensate(scope,ret);
                     instance(ACTIVE.this);
@@ -239,24 +240,22 @@ class EH_ALARM extends BpelJacobRunnable {
 
                 public void cancelled() { completed(null, CompensationHandler.emptySet()); }
                 public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
-            }){
-                private static final long serialVersionUID = -3357030137175178040L;
-            }).or(new ReceiveProcess<EventHandlerControl>(_cc, new EventHandlerControl() {
+            })).or(new ReceiveProcess<EventHandlerControl>() {
+                private static final long serialVersionUID = -3873619538789039424L;
+            }.setChannel(_cc).setReceiver(new EventHandlerControl() {
                 public void stop() {
                     _stopped = true;
                     instance(ACTIVE.this);
                 }
-            }){
-                private static final long serialVersionUID = -3873619538789039424L;
-            }).or(new ReceiveProcess<Termination>(_tc, new Termination() {
+            })).or(new ReceiveProcess<Termination>() {
+                private static final long serialVersionUID = -4566956567870652885L;
+            }.setChannel(_tc).setReceiver(new Termination() {
                 public void terminate() {
                     replication(_activity.self).terminate();
                     _stopped = true;
                     instance(ACTIVE.this);
                 }
-            }){
-                private static final long serialVersionUID = -4566956567870652885L;
-            }));
+            })));
         }
     }
 }

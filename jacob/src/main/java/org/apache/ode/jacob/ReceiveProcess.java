@@ -28,11 +28,12 @@ import java.util.Set;
 public abstract class ReceiveProcess<T extends Channel> extends ChannelListener {
     private transient Set<Method> _implementedMethods;
     private transient Channel channel;
-    private T receiver;
+    private Channel receiver;
     
+    public ReceiveProcess() {        
+    }
+
     protected ReceiveProcess(T channel, T receiver) {
-        assert getClass().getSuperclass().getSuperclass() == ChannelListener.class :
-            "Inheritance in ChannelListener classes not allowed!";
         if (channel == null) {
             throw new IllegalArgumentException("Null channel!");
         }
@@ -40,16 +41,22 @@ public abstract class ReceiveProcess<T extends Channel> extends ChannelListener 
         this.receiver = receiver;
     }
 
-    public T receiver() {
-        return receiver;
-    }
-
     public Channel getChannel() {
         return channel;
     }
 
-    public void setChannel(Channel channel) {
+    public ReceiveProcess<T> setChannel(Channel channel) {
         this.channel = channel;
+        return this;
+    }
+
+    public Channel getReceiver() {
+        return receiver;
+    }
+
+    public ReceiveProcess<T> setReceiver(Channel receiver) {
+        this.receiver = receiver;
+        return this;
     }
 
     public Set<Method> getImplementedMethods() {

@@ -71,13 +71,13 @@ public class Sieve extends JacobRunnable {
 
     public void run() {
         Synch ret = newChannel(Synch.class);
-        object(new ReceiveProcess<Synch>(ret, new Synch() {
+        object(new ReceiveProcess<Synch>() {
+            private static final long serialVersionUID = -4336285925619915276L;
+        }.setChannel(ret).setReceiver(new Synch() {
             public void ret() {
                 instance(new Counter(_out, _n+1));
             }
-        }) {
-            private static final long serialVersionUID = -4336285925619915276L;
-        });
+        }));
         _out.val(_n, ret);
     }
   }
@@ -104,24 +104,24 @@ public class Sieve extends JacobRunnable {
     }
 
     public void run() {
-      object(new ReceiveProcess<NaturalNumberStream>(_in, new NaturalNumberStream() {
+      object(new ReceiveProcess<NaturalNumberStream>() {
+          private static final long serialVersionUID = -2145752474431263689L;
+      }.setChannel(_in).setReceiver(new NaturalNumberStream() {
         public void val(final int n, final Synch ret) {
             Synch r = newChannel(Synch.class);
-            object(new ReceiveProcess<Synch>(r, new Synch() {
+            object(new ReceiveProcess<Synch>() {
+                private static final long serialVersionUID = -3009595654233593893L;
+            }.setChannel(r).setReceiver(new Synch() {
                 public void ret() {
                   NaturalNumberStream x = newChannel(NaturalNumberStream.class);
                   instance(new PrimeFilter(n, _in, x));
                   instance(new Head(x, _primes));
                   ret.ret();
                 }
-            }) {
-                private static final long serialVersionUID = -3009595654233593893L;
-            });
+            }));
             _primes.val(n, r);
        }
-      }) {
-          private static final long serialVersionUID = -2145752474431263689L;
-      });
+      }));
     }
   }
 
@@ -133,16 +133,16 @@ public class Sieve extends JacobRunnable {
       _in = in;
     }
     public void run() {
-      object(true, new ReceiveProcess<NaturalNumberStream>(_in, new NaturalNumberStream(){
+      object(true, new ReceiveProcess<NaturalNumberStream>() {
+          private static final long serialVersionUID = 7671019806323866866L;
+      }.setChannel(_in).setReceiver(new NaturalNumberStream(){
         public void val(int n, Synch ret) {
           _cnt ++;
           _last = n;
           System.out.println("PRIME: " + n);
           ret.ret();
         }
-      }) {
-          private static final long serialVersionUID = 7671019806323866866L;
-      });
+      }));
     }
   }
 
@@ -167,25 +167,25 @@ public class Sieve extends JacobRunnable {
       _out = out;
     }
     public void run() {
-       object(true, new ReceiveProcess<NaturalNumberStream>(_in, new NaturalNumberStream() {
+       object(true, new ReceiveProcess<NaturalNumberStream>() {
+           private static final long serialVersionUID = 2523405590764193613L;
+       }.setChannel(_in).setReceiver(new NaturalNumberStream() {
           public void val(int n, final Synch ret) {
               if (n % _prime != 0) {
                   Synch r = newChannel(Synch.class);
-                  object(new ReceiveProcess<Synch>(r, new Synch() {
+                  object(new ReceiveProcess<Synch>() {
+                      private static final long serialVersionUID = 2523405590764193613L;
+                  }.setChannel(r).setReceiver(new Synch() {
                       public void ret() {
                           ret.ret();
                       }
-                  }) {
-                      private static final long serialVersionUID = 2523405590764193613L;
-                  });
+                  }));
                   _out.val(n, r);
               } else {
                  ret.ret();
               }
           }
-       }) {
-           private static final long serialVersionUID = 6625386475773075604L;
-       });
+       }));
     }
   }
 

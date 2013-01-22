@@ -140,7 +140,9 @@ class SCOPE extends ACTIVITY {
 
         public void run() {
             if (_child != null || !_eventHandlers.isEmpty()) {
-                CompositeProcess mlSet = ProcessUtil.compose(new ReceiveProcess<Termination>(_self.self, new Termination() {
+                CompositeProcess mlSet = ProcessUtil.compose(new ReceiveProcess<Termination>() {
+                    private static final long serialVersionUID = 1913414844895865116L;
+                }.setChannel(_self.self).setReceiver(new Termination() {
                     public void terminate() {
                         _terminated = true;
 
@@ -155,13 +157,13 @@ class SCOPE extends ACTIVITY {
 
                         instance(ACTIVE.this);
                     }
-                }) {
-                    private static final long serialVersionUID = 1913414844895865116L;
-                });
+                }));
 
                 // Handle messages from the child if it is still alive
                 if (_child != null) {
-                    mlSet.or(new ReceiveProcess<ParentScope>(_child.parent, new ParentScope() {
+                    mlSet.or(new ReceiveProcess<ParentScope>() {
+                        private static final long serialVersionUID = -6934246487304813033L;
+                    }.setChannel(_child.parent).setReceiver(new ParentScope() {
                         public void compensate(OScope scope, Synch ret) {
                             //  If this scope does not have available compensations, defer to
                             // parent scope, otherwise do compensation.
@@ -202,13 +204,11 @@ class SCOPE extends ACTIVITY {
                         }
 
                         public void failure(String reason, Element data) {
-                            completed(createFault(OFailureHandling.FAILURE_FAULT_NAME, _self.o, null),
-                                      CompensationHandler.emptySet());
+                            completed(createFault(OFailureHandling.FAILURE_FAULT_NAME, _self.o, null), 
+                                CompensationHandler.emptySet());
                         }
 
-                    }) {
-                        private static final long serialVersionUID = -6934246487304813033L;
-                    });
+                    }) );
                 }
 
                 // Similarly, handle messages from the event handler, if one exists
@@ -216,7 +216,9 @@ class SCOPE extends ACTIVITY {
                 for (Iterator<EventHandlerInfo> i = _eventHandlers.iterator();i.hasNext();) {
                     final EventHandlerInfo ehi = i.next();
 
-                    mlSet.or(new ReceiveProcess<ParentScope>(ehi.psc, new ParentScope() {
+                    mlSet.or(new ReceiveProcess<ParentScope>() {
+                        private static final long serialVersionUID = -4694721357537858221L;
+                    }.setChannel(ehi.psc).setReceiver(new ParentScope() {
                         public void compensate(OScope scope, Synch ret) {
                             // ACTIVE scopes do not compensate, send request up to parent.
                             _self.parent.compensate(scope, ret);
@@ -246,9 +248,7 @@ class SCOPE extends ACTIVITY {
 
                         public void cancelled() { completed(null, CompensationHandler.emptySet()); }
                         public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
-                    }) {
-                        private static final long serialVersionUID = -4694721357537858221L;
-                    });
+                    }));
                 }
                 object(false, mlSet);
             } else /* nothing to wait for... */ {
@@ -291,7 +291,9 @@ class SCOPE extends ACTIVITY {
                         // Create the temination handler scope.
                         instance(new SCOPE(terminationHandlerActivity,terminationHandlerScopeFrame, SCOPE.this._linkFrame));
 
-                        object(new ReceiveProcess<ParentScope>(terminationHandlerActivity.parent, new ParentScope() {
+                        object(new ReceiveProcess<ParentScope>() {
+                            private static final long serialVersionUID = -6009078124717125270L;
+                        }.setChannel(terminationHandlerActivity.parent).setReceiver(new ParentScope() {
                             public void compensate(OScope scope, Synch ret) {
                                 // This should never happen.
                                 throw new AssertionError("received compensate request!");
@@ -309,9 +311,7 @@ class SCOPE extends ACTIVITY {
 
                             public void cancelled() { completed(null, CompensationHandler.emptySet()); }
                             public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
-                        }) {
-                            private static final long serialVersionUID = -6009078124717125270L;
-                        });
+                        }));
                     } else {
                     	_self.parent.completed(null,_compensations);
                     }
@@ -370,7 +370,9 @@ class SCOPE extends ACTIVITY {
                         // Create the fault handler scope.
                         instance(new SCOPE(faultHandlerActivity,faultHandlerScopeFrame, SCOPE.this._linkFrame));
 
-                        object(new ReceiveProcess<ParentScope>(faultHandlerActivity.parent, new ParentScope() {
+                        object(new ReceiveProcess<ParentScope>() {
+                            private static final long serialVersionUID = -6009078124717125270L;
+                        }.setChannel(faultHandlerActivity.parent).setReceiver(new ParentScope() {
                             public void compensate(OScope scope, Synch ret) {
                                 // This should never happen.
                                 throw new AssertionError("received compensate request!");
@@ -387,9 +389,7 @@ class SCOPE extends ACTIVITY {
 
                             public void cancelled() { completed(null, CompensationHandler.emptySet()); }
                             public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
-                        }) {
-                            private static final long serialVersionUID = -6009078124717125270L;
-                        });
+                        }));
                     }
                 } else /* completed ok */ {
                     sendEvent(new ScopeCompletionEvent());

@@ -97,15 +97,17 @@ public class REPEATUNTIL extends ACTIVITY {
         }
 
         public void run() {
-            object(false, compose(new ReceiveProcess<Termination>(_self.self, new Termination() {
+            object(false, compose(new ReceiveProcess<Termination>() {
+                private static final long serialVersionUID = -5471984635653784051L;
+            }.setChannel(_self.self).setReceiver(new Termination() {
                 public void terminate() {
                     _terminated = true;
                     replication(_child.self).terminate();
                     instance(WAITER.this);
                 }
-            }) {
-                private static final long serialVersionUID = -5471984635653784051L;
-            }).or(new ReceiveProcess<ParentScope>(_child.parent, new ParentScope() {
+            })).or(new ReceiveProcess<ParentScope>() {
+                private static final long serialVersionUID = 3907167240907524405L;
+            }.setChannel(_child.parent).setReceiver(new ParentScope() {
                 public void compensate(OScope scope, Synch ret) {
                     _self.parent.compensate(scope,ret);
                     instance(WAITER.this);
@@ -135,9 +137,7 @@ public class REPEATUNTIL extends ACTIVITY {
 
                 public void cancelled() { completed(null, CompensationHandler.emptySet()); }
                 public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
-            }) {
-                private static final long serialVersionUID = 3907167240907524405L;
-            }));
+            })));
         }
     }
 

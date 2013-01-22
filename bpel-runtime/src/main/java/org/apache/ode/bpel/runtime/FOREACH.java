@@ -111,7 +111,9 @@ public class FOREACH extends ACTIVITY {
             Iterator<ChildInfo> active = active();
             // Continuing as long as a child is active
             if (active().hasNext()) {
-                CompositeProcess mlSet = ProcessUtil.compose(new ReceiveProcess<Termination>(_self.self, new Termination() {
+                CompositeProcess mlSet = ProcessUtil.compose(new ReceiveProcess<Termination>() {
+                    private static final long serialVersionUID = 2554750257484084466L;
+                }.setChannel(_self.self).setReceiver(new Termination() {
                     public void terminate() {
                         // Terminating all children before sepuku
                         for (Iterator<ChildInfo> i = active(); i.hasNext(); )
@@ -119,13 +121,13 @@ public class FOREACH extends ACTIVITY {
                         _terminateRequested = true;
                         instance(ACTIVE.this);
                     }
-                }) {
-                    private static final long serialVersionUID = 2554750257484084466L;
-                });
+                }));
                 for (;active.hasNext();) {
                     // Checking out our children
                     final ChildInfo child = active.next();
-                    mlSet.or(new ReceiveProcess<ParentScope>(child.activity.parent, new ParentScope() {
+                    mlSet.or(new ReceiveProcess<ParentScope>() {
+                        private static final long serialVersionUID = -8027205709961438172L;
+                    }.setChannel(child.activity.parent).setReceiver(new ParentScope() {
                         public void compensate(OScope scope, Synch ret) {
                             // Forward compensation to parent
                             _self.parent.compensate(scope, ret);
@@ -158,9 +160,7 @@ public class FOREACH extends ACTIVITY {
 
                         public void cancelled() { completed(null, CompensationHandler.emptySet()); }
                         public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
-                    }) {
-                        private static final long serialVersionUID = -8027205709961438172L;
-                    });
+                    }));
                 }
                 object(false, mlSet);
             } else {

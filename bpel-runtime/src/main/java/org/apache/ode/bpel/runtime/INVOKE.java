@@ -99,7 +99,9 @@ public class INVOKE extends ACTIVITY {
                         _scopeFrame.resolve(_oinvoke.partnerLink), _oinvoke.operation,
                         outboundMsg, invokeResponseChannel);
 
-                object(false, compose(new ReceiveProcess<InvokeResponse>(invokeResponseChannel, new InvokeResponse() {
+                object(false, compose(new ReceiveProcess<InvokeResponse>() {
+                    private static final long serialVersionUID = 4496880438819196765L;
+                }.setChannel(invokeResponseChannel).setReceiver(new InvokeResponse() {
                     public void onResponse() {
                         // we don't have to write variable data -> this already
                         // happened in the nativeAPI impl
@@ -191,15 +193,13 @@ public class INVOKE extends ACTIVITY {
                         getBpelRuntimeContext().releasePartnerMex(mexId, false);
                     }
 
-                }){
-                    private static final long serialVersionUID = 4496880438819196765L;
-                }).or(new ReceiveProcess<Termination>(_self.self, new Termination() {
+                })).or(new ReceiveProcess<Termination>() {
+                    private static final long serialVersionUID = 4219496341785922396L;
+                }.setChannel(_self.self).setReceiver(new Termination() {
                     public void terminate() {
                         _self.parent.completed(null, CompensationHandler.emptySet());
                     }
-                }) {
-                    private static final long serialVersionUID = 4219496341785922396L;
-                }));
+                })));
             }
         } catch (FaultException fault) {
             __log.error(fault);

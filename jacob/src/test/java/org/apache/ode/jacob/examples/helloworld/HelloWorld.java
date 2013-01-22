@@ -48,15 +48,15 @@ public class HelloWorld extends JacobRunnable {
         }
 
         public void run() {
-            object(true, new ReceiveProcess<Callback<String, Synch>>(_in, new Callback<String, Synch>(){
+            object(true, new ReceiveProcess<Callback<String, Synch>>() {
+                private static final long serialVersionUID = 1L;
+            }.setChannel(_in).setReceiver(new Callback<String, Synch>(){
                 @Override
                 public void invoke(String value, Synch callback) {
                     System.out.println(value);
                     callback.ret();
                 }
-            }) {
-                private static final long serialVersionUID = 1L;
-            });
+            }));
         }
     }
 
@@ -71,19 +71,17 @@ public class HelloWorld extends JacobRunnable {
 
         public void run() {
             Synch callback = newChannel(Synch.class, "callback channel to ACK " + str);
-            object(new ReceiveProcess<Synch>(callback, new Synch() {
-                
+            object(new ReceiveProcess<Synch>() {
+                private static final long serialVersionUID = 1L;
+            }.setChannel(callback).setReceiver(new Synch() {
                 @Override
                 public void ret() {
                     System.out.println(str + " ACKed");
                 }
-            }) {
-                 private static final long serialVersionUID = 1L;
-            });
+            }));
             to.invoke(str, callback);
         }
     }
-
     
     static class PrinterProcess extends JacobRunnable {
         private Val _in;
@@ -92,13 +90,13 @@ public class HelloWorld extends JacobRunnable {
         }
 
         public void run() {
-            object(true, new ReceiveProcess<Val>(_in, new Val(){
+            object(true, new ReceiveProcess<Val>() {
+                private static final long serialVersionUID = 1L;
+            }.setChannel(_in).setReceiver(new Val(){
                 public void val(Object o) {
                     System.out.println(o);
                 }
-            }) {
-                private static final long serialVersionUID = 1L;
-            });
+            }));
         }
     }
 
@@ -125,13 +123,13 @@ public class HelloWorld extends JacobRunnable {
         }
 
         public void run() {
-            object(true, new ReceiveProcess<Val>(in, new Val(){
+            object(true, new ReceiveProcess<Val>() {
+                private static final long serialVersionUID = 1L;
+            }.setChannel(in).setReceiver(new Val(){
                 public void val(Object o) {
                     out.val(o);
                 }
-            }) {
-                private static final long serialVersionUID = 1L;
-            });
+            }));
         }
     }
 

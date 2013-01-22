@@ -47,8 +47,6 @@ public final class ProcessUtil {
     	// TODO: NOTE: this *only* works when the listnere doesn't need to be Serialiazble really
     	//  because we cannot declare a staic serialVersionUID like this
     	//  once we fix serialization, this can be simplified significantly via a dsl
-    	return new ReceiveProcess<T>(proxy, listener) {
-    		// private static final long serialVersionUID = 1024137371118887935L;
-        };
+    	return new ReceiveProcess<T>() {}.setChannel(proxy).setReceiver(listener);
     }
 }
