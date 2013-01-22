@@ -115,7 +115,7 @@ class WHILE extends ACTIVITY {
         }
 
         public void run() {
-            object(false, compose(new ReceiveProcess<Termination>() {
+            object(false, compose(new ReceiveProcess() {
                 private static final long serialVersionUID = -5471984635653784051L;
             }.setChannel(_self.self).setReceiver(new Termination() {
                 public void terminate() {
@@ -123,7 +123,7 @@ class WHILE extends ACTIVITY {
                     replication(_child.self).terminate();
                     instance(WAITER.this);
                 }
-            })).or(new ReceiveProcess<ParentScope>() {
+            })).or(new ReceiveProcess() {
                 private static final long serialVersionUID = 3907167240907524405L;
             }.setChannel(_child.parent).setReceiver(new ParentScope() {
                 public void compensate(OScope scope, Synch ret) {

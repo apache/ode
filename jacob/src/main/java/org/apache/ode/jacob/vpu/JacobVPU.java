@@ -331,7 +331,7 @@ public final class JacobVPU {
                 msg.append(_cycle);
                 msg.append(": ");
                 if (ml instanceof ReceiveProcess) {
-                    ReceiveProcess<?> rp = (ReceiveProcess<?>)ml;
+                    ReceiveProcess rp = (ReceiveProcess)ml;
                     msg.append(rp.getChannel());
                     msg.append(" ? ");
                     msg.append(rp.toString());
@@ -353,7 +353,7 @@ public final class JacobVPU {
                 }
             } else if (receiver instanceof ReceiveProcess) {
                 CommChannel chnl = (CommChannel)ChannelFactory.getBackend(
-                        ((ReceiveProcess<?>)receiver).getChannel());
+                        ((ReceiveProcess)receiver).getChannel());
                     // TODO see below..
                     // oframe.setDebugInfo(fillDebugInfo());
                     CommRecv recv = new CommRecv(chnl, receiver);
@@ -406,7 +406,7 @@ public final class JacobVPU {
             long ctime = System.currentTimeMillis();
             try {
                 _method.invoke(_methodBody instanceof ReceiveProcess ? 
-                    ((ReceiveProcess<?>)_methodBody).getReceiver() : _methodBody, args);
+                    ((ReceiveProcess)_methodBody).getReceiver() : _methodBody, args);
                 if (synchChannel != null) {
                     synchChannel.ret();
                 }

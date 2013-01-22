@@ -130,13 +130,13 @@ class EH_ALARM extends BpelJacobRunnable {
         public void run() {
             Calendar now = Calendar.getInstance();
 
-            CompositeProcess listeners = compose(new ReceiveProcess<EventHandlerControl>() {
+            CompositeProcess listeners = compose(new ReceiveProcess() {
                 private static final long serialVersionUID = -7750428941445331236L;
             }.setChannel(_cc).setReceiver(new EventHandlerControl() {
                 public void stop() {
                     _psc.completed(null, _comps);
                 }
-            })).or(new ReceiveProcess<Termination>() {
+            })).or(new ReceiveProcess() {
                 private static final long serialVersionUID = 6100105997983514609L;
             }.setChannel(_tc).setReceiver(new Termination() {
                 public void terminate() {
@@ -150,7 +150,7 @@ class EH_ALARM extends BpelJacobRunnable {
                 TimerResponse trc = newChannel(TimerResponse.class);
                 getBpelRuntimeContext().registerTimer(trc,_alarm.getTime());
 
-                listeners.or(new ReceiveProcess<TimerResponse>() {
+                listeners.or(new ReceiveProcess() {
                     private static final long serialVersionUID = 1110683632756756017L;
                 }.setChannel(trc).setReceiver(new TimerResponse(){
                     public void onTimeout() {
@@ -206,7 +206,7 @@ class EH_ALARM extends BpelJacobRunnable {
         }
 
         public void run() {
-            object(false, compose(new ReceiveProcess<ParentScope>() {
+            object(false, compose(new ReceiveProcess() {
                 private static final long serialVersionUID = -3357030137175178040L;
             }.setChannel(_activity.parent).setReceiver(new ParentScope() {
                 public void compensate(OScope scope, Synch ret) {
@@ -240,14 +240,14 @@ class EH_ALARM extends BpelJacobRunnable {
 
                 public void cancelled() { completed(null, CompensationHandler.emptySet()); }
                 public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
-            })).or(new ReceiveProcess<EventHandlerControl>() {
+            })).or(new ReceiveProcess() {
                 private static final long serialVersionUID = -3873619538789039424L;
             }.setChannel(_cc).setReceiver(new EventHandlerControl() {
                 public void stop() {
                     _stopped = true;
                     instance(ACTIVE.this);
                 }
-            })).or(new ReceiveProcess<Termination>() {
+            })).or(new ReceiveProcess() {
                 private static final long serialVersionUID = -4566956567870652885L;
             }.setChannel(_tc).setReceiver(new Termination() {
                 public void terminate() {

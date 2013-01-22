@@ -44,7 +44,7 @@ public class SynchPrinter {
 
         @SuppressWarnings("serial")
         public void run() {
-            object(true, new ReceiveProcess<SynchPrint>() {
+            object(true, new ReceiveProcess() {
                 private static final long serialVersionUID = -1990741944766989782L;
             }.setChannel(_self).setReceiver(new SynchPrint() {
                 public Synch print(String msg) {

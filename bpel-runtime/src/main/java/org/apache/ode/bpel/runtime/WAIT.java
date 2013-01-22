@@ -68,7 +68,7 @@ class WAIT extends ACTIVITY {
             final TimerResponse timerChannel = newChannel(TimerResponse.class);
             getBpelRuntimeContext().registerTimer(timerChannel, dueDate);
 
-            object(false, compose(new ReceiveProcess<TimerResponse>() {
+            object(false, compose(new ReceiveProcess() {
                 private static final long serialVersionUID = 3120518305645437327L;
             }.setChannel(timerChannel).setReceiver(new TimerResponse() {
                 public void onTimeout() {
@@ -78,12 +78,12 @@ class WAIT extends ACTIVITY {
                 public void onCancel() {
                     _self.parent.completed(null, CompensationHandler.emptySet());
                 }
-            })).or(new ReceiveProcess<Termination>() {
+            })).or(new ReceiveProcess() {
                 private static final long serialVersionUID = -2791243270691333946L;
             }.setChannel(_self.self).setReceiver(new Termination() {
                 public void terminate() {
                     _self.parent.completed(null, CompensationHandler.emptySet());
-                    object(new ReceiveProcess<TimerResponse>() {
+                    object(new ReceiveProcess() {
                         private static final long serialVersionUID = 677746737897792929L;
                     }.setChannel(timerChannel).setReceiver(new TimerResponse() {
                         public void onTimeout() {

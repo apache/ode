@@ -47,7 +47,7 @@ class COMPENSATIONHANDLER_ extends BpelJacobRunnable {
 
     public void run() {
         sendEvent(new CompensationHandlerRegistered());
-        object(new ReceiveProcess<Compensation>() {
+        object(new ReceiveProcess() {
             private static final long serialVersionUID = -477602498730810094L;
         }.setChannel(_self.compChannel).setReceiver(new Compensation() {
             public void forget() {
@@ -74,7 +74,7 @@ class COMPENSATIONHANDLER_ extends BpelJacobRunnable {
                 // Create the compensation handler scope.
                 instance(new SCOPE(ai,compHandlerScopeFrame, new LinkFrame(null)));
 
-                object(new ReceiveProcess<ParentScope>() {
+                object(new ReceiveProcess() {
                     private static final long serialVersionUID = 8044120498580711546L;
                 }.setChannel(ai.parent).setReceiver(new ParentScope() {
                     public void compensate(OScope scope, Synch ret) {

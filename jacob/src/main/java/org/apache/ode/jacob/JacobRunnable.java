@@ -44,7 +44,7 @@ import java.util.Set;
  *     }
  *
  *     public void run() {
- *      object(new ReceiveProcess<Cell> { read(...) {...}
+ *      object(new ReceiveProcess { read(...) {...}
  *                             write(...) {...} } );
  *    }
  * }

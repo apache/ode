@@ -162,7 +162,7 @@ class EH_EVENT extends BpelJacobRunnable {
                 CompositeProcess mlset = ProcessUtil.compose(null);
 
                 if (!_terminated) {
-                    mlset.or(new ReceiveProcess<Termination>() {
+                    mlset.or(new ReceiveProcess() {
                         private static final long serialVersionUID = 7666910462948788042L;
                     }.setChannel(_tc).setReceiver(new Termination() {
                         public void terminate() {
@@ -176,7 +176,7 @@ class EH_EVENT extends BpelJacobRunnable {
                 }
 
                 if (!_stopped) {
-                    mlset.or(new ReceiveProcess<EventHandlerControl>() {
+                    mlset.or(new ReceiveProcess() {
                         private static final long serialVersionUID = -1050788954724647970L;
                     }.setChannel(_ehc).setReceiver(new EventHandlerControl() {
                         public void stop() {
@@ -189,7 +189,7 @@ class EH_EVENT extends BpelJacobRunnable {
                 }
 
                 for (final ActivityInfo ai : _active) {
-                    mlset.or(new ReceiveProcess<ParentScope>() {
+                    mlset.or(new ReceiveProcess() {
                         private static final long serialVersionUID = 5341207762415360982L;
                     }.setChannel(ai.parent).setReceiver(new ParentScope() {
                         public void compensate(OScope scope, Synch ret) {
@@ -217,7 +217,7 @@ class EH_EVENT extends BpelJacobRunnable {
                 }
 
                 if (_pickResponseChannel != null)
-                    mlset.or(new ReceiveProcess<PickResponse>() {
+                    mlset.or(new ReceiveProcess() {
                         private static final long serialVersionUID = -4929999153478677288L;
                     }.setChannel(_pickResponseChannel).setReceiver(new PickResponse() {
                          public void onRequestRcvd(int selectorIdx, String mexId) {

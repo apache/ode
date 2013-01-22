@@ -71,7 +71,7 @@ public class Sieve extends JacobRunnable {
 
     public void run() {
         Synch ret = newChannel(Synch.class);
-        object(new ReceiveProcess<Synch>() {
+        object(new ReceiveProcess() {
             private static final long serialVersionUID = -4336285925619915276L;
         }.setChannel(ret).setReceiver(new Synch() {
             public void ret() {
@@ -104,12 +104,12 @@ public class Sieve extends JacobRunnable {
     }
 
     public void run() {
-      object(new ReceiveProcess<NaturalNumberStream>() {
+      object(new ReceiveProcess() {
           private static final long serialVersionUID = -2145752474431263689L;
       }.setChannel(_in).setReceiver(new NaturalNumberStream() {
         public void val(final int n, final Synch ret) {
             Synch r = newChannel(Synch.class);
-            object(new ReceiveProcess<Synch>() {
+            object(new ReceiveProcess() {
                 private static final long serialVersionUID = -3009595654233593893L;
             }.setChannel(r).setReceiver(new Synch() {
                 public void ret() {
@@ -133,7 +133,7 @@ public class Sieve extends JacobRunnable {
       _in = in;
     }
     public void run() {
-      object(true, new ReceiveProcess<NaturalNumberStream>() {
+      object(true, new ReceiveProcess() {
           private static final long serialVersionUID = 7671019806323866866L;
       }.setChannel(_in).setReceiver(new NaturalNumberStream(){
         public void val(int n, Synch ret) {
@@ -167,13 +167,13 @@ public class Sieve extends JacobRunnable {
       _out = out;
     }
     public void run() {
-       object(true, new ReceiveProcess<NaturalNumberStream>() {
+       object(true, new ReceiveProcess() {
            private static final long serialVersionUID = 2523405590764193613L;
        }.setChannel(_in).setReceiver(new NaturalNumberStream() {
           public void val(int n, final Synch ret) {
               if (n % _prime != 0) {
                   Synch r = newChannel(Synch.class);
-                  object(new ReceiveProcess<Synch>() {
+                  object(new ReceiveProcess() {
                       private static final long serialVersionUID = 2523405590764193613L;
                   }.setChannel(r).setReceiver(new Synch() {
                       public void ret() {

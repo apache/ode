@@ -282,7 +282,7 @@ class PICK extends ACTIVITY {
         }
 
         public void run() {
-            object(false, compose(new ReceiveProcess<PickResponse>() {
+            object(false, compose(new ReceiveProcess() {
                 private static final long serialVersionUID = -8237296827418738011L;
             }.setChannel(_pickResponseChannel).setReceiver(new PickResponse() {
                 public void onRequestRcvd(int selectorIdx, String mexId) {
@@ -376,7 +376,7 @@ class PICK extends ACTIVITY {
                     _self.parent.completed(null, CompensationHandler.emptySet());
                 }
 
-            })).or(new ReceiveProcess<Termination>() {
+            })).or(new ReceiveProcess() {
                 private static final long serialVersionUID = 4399496341785922396L;
             }.setChannel(_self.self).setReceiver(new Termination() {
                 public void terminate() {

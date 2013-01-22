@@ -150,7 +150,7 @@ public class SCOPEACT extends ACTIVITY {
 
             CompositeProcess mlset = ProcessUtil.compose(null);
             if (_status == null)
-                mlset.or(new ReceiveProcess<Val>() {
+                mlset.or(new ReceiveProcess() {
                     private static final long serialVersionUID = 5029554538593371750L;
                 }.setChannel(_self).setReceiver(new Val() {
                     /** Our owner will notify us when it becomes clear what to do with the links. */
@@ -174,7 +174,7 @@ public class SCOPEACT extends ACTIVITY {
                 if (_statuses.containsKey(m.getKey()))
                     continue;
             
-                mlset.or(new ReceiveProcess<LinkStatus>() {
+                mlset.or(new ReceiveProcess() {
                     private static final long serialVersionUID = 1568144473514091593L;
                 }.setChannel(m.getValue().pub).setReceiver(new LinkStatus() {
                     public void linkStatus(boolean value) {
@@ -256,7 +256,7 @@ public class SCOPEACT extends ACTIVITY {
                 else
                     il.lockChannel.readLock(_synchChannel);
 
-                object(new ReceiveProcess<Synch>() {
+                object(new ReceiveProcess() {
                     private static final long serialVersionUID = 2857261074409098274L;
                 }.setChannel(_synchChannel).setReceiver(new Synch() {
                     public void ret() {
@@ -303,7 +303,7 @@ public class SCOPEACT extends ACTIVITY {
         public void run() {
 
             __log.debug("running UNLOCKER");
-            object(new ReceiveProcess<ParentScope>() {
+            object(new ReceiveProcess() {
                 private static final long serialVersionUID = 1L;
             }.setChannel(_self).setReceiver(new ParentScope() {
                 public void cancelled() {

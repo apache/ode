@@ -79,7 +79,7 @@ class FLOW extends ACTIVITY {
         public void run() {
             Iterator<ChildInfo> active = active();
             if (active.hasNext()) {
-                CompositeProcess mlSet = ProcessUtil.compose(new ReceiveProcess<Termination>() {
+                CompositeProcess mlSet = ProcessUtil.compose(new ReceiveProcess() {
                     private static final long serialVersionUID = 2554750258974084466L;
                 }.setChannel(_self.self).setReceiver(new Termination() {
                     public void terminate() {
@@ -91,7 +91,7 @@ class FLOW extends ACTIVITY {
 
                 for (;active.hasNext();) {
                     final ChildInfo child = active.next();
-                    mlSet.or(new ReceiveProcess<ParentScope>() {
+                    mlSet.or(new ReceiveProcess() {
                         private static final long serialVersionUID = -8027205709169238172L;
                     }.setChannel(child.activity.parent).setReceiver(new ParentScope() {
                         public void completed(FaultData faultData, Set<CompensationHandler> compensations) {

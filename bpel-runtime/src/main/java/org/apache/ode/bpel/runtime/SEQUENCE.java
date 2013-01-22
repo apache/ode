@@ -78,7 +78,7 @@ class SEQUENCE extends ACTIVITY {
         }
 
         public void run() {
-            object(false, compose(new ReceiveProcess<Termination>() {
+            object(false, compose(new ReceiveProcess() {
                 private static final long serialVersionUID = -2680515407515637639L;
             }.setChannel(_self.self).setReceiver(new Termination() {
                 public void terminate() {
@@ -92,7 +92,7 @@ class SEQUENCE extends ACTIVITY {
                     _terminateRequested = true;
                     instance(ACTIVE.this);
                 }
-            })).or(new ReceiveProcess<ParentScope>() {
+            })).or(new ReceiveProcess() {
                 private static final long serialVersionUID = 7195562310281985971L;
             }.setChannel(_child.parent).setReceiver(new ParentScope() {
                 public void compensate(OScope scope, Synch ret) {

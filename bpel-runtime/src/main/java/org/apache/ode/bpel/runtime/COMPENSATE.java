@@ -40,7 +40,7 @@ class COMPENSATE extends ACTIVITY {
         OScope scopeToCompensate = _ocompact.compensatedScope;
         Synch sc = newChannel(Synch.class);
         _self.parent.compensate(scopeToCompensate,sc);
-        object(new ReceiveProcess<Synch>() {
+        object(new ReceiveProcess() {
             private static final long serialVersionUID = 3763991229748926216L;
         }.setChannel(sc).setReceiver(new Synch() {
             public void ret() {

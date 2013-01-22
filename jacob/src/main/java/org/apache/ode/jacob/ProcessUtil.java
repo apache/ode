@@ -37,7 +37,7 @@ public final class ProcessUtil {
     	    + channel == null ? "<null>" : channel.getClass().toString());
     }
     
-    public static CompositeProcess compose(ReceiveProcess<?> process) {
+    public static CompositeProcess compose(ReceiveProcess process) {
         CompositeProcess result = new CompositeProcess();
         return result.or(process);
     }
@@ -47,6 +47,6 @@ public final class ProcessUtil {
     	// TODO: NOTE: this *only* works when the listnere doesn't need to be Serialiazble really
     	//  because we cannot declare a staic serialVersionUID like this
     	//  once we fix serialization, this can be simplified significantly via a dsl
-    	return new ReceiveProcess<T>() {}.setChannel(proxy).setReceiver(listener);
+    	return new ReceiveProcess() {}.setChannel(proxy).setReceiver(listener);
     }
 }

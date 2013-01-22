@@ -111,7 +111,7 @@ public class FOREACH extends ACTIVITY {
             Iterator<ChildInfo> active = active();
             // Continuing as long as a child is active
             if (active().hasNext()) {
-                CompositeProcess mlSet = ProcessUtil.compose(new ReceiveProcess<Termination>() {
+                CompositeProcess mlSet = ProcessUtil.compose(new ReceiveProcess() {
                     private static final long serialVersionUID = 2554750257484084466L;
                 }.setChannel(_self.self).setReceiver(new Termination() {
                     public void terminate() {
@@ -125,7 +125,7 @@ public class FOREACH extends ACTIVITY {
                 for (;active.hasNext();) {
                     // Checking out our children
                     final ChildInfo child = active.next();
-                    mlSet.or(new ReceiveProcess<ParentScope>() {
+                    mlSet.or(new ReceiveProcess() {
                         private static final long serialVersionUID = -8027205709961438172L;
                     }.setChannel(child.activity.parent).setReceiver(new ParentScope() {
                         public void compensate(OScope scope, Synch ret) {

@@ -44,7 +44,7 @@ public class CELL_<T> extends JacobRunnable {
     public void run() {
         // INSTANTIATION{Cell(run,val)}
         // ==> run ? [ read(r)={...} & write(newVal)={...} ]
-        object(new ReceiveProcess<Cell>() {
+        object(new ReceiveProcess() {
             private static final long serialVersionUID = 8883128084307471572L;
         }.setChannel(_self).setReceiver(new Cell() {
             public void read(Val r) {

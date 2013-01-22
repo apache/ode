@@ -25,7 +25,7 @@ import java.util.Set;
 
 
 @SuppressWarnings("serial")
-public abstract class ReceiveProcess<T extends Channel> extends ChannelListener {
+public abstract class ReceiveProcess extends ChannelListener {
     private transient Set<Method> _implementedMethods;
     private transient Channel channel;
     private Channel receiver;
@@ -33,19 +33,11 @@ public abstract class ReceiveProcess<T extends Channel> extends ChannelListener 
     public ReceiveProcess() {        
     }
 
-    protected ReceiveProcess(T channel, T receiver) {
-        if (channel == null) {
-            throw new IllegalArgumentException("Null channel!");
-        }
-        this.channel = channel;
-        this.receiver = receiver;
-    }
-
     public Channel getChannel() {
         return channel;
     }
 
-    public ReceiveProcess<T> setChannel(Channel channel) {
+    public ReceiveProcess setChannel(Channel channel) {
         this.channel = channel;
         return this;
     }
@@ -54,7 +46,7 @@ public abstract class ReceiveProcess<T extends Channel> extends ChannelListener 
         return receiver;
     }
 
-    public ReceiveProcess<T> setReceiver(Channel receiver) {
+    public ReceiveProcess setReceiver(Channel receiver) {
         this.receiver = receiver;
         return this;
     }

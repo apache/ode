@@ -59,7 +59,7 @@ public class PROCESS extends BpelJacobRunnable {
         ScopeFrame processFrame = new ScopeFrame(_oprocess.procesScope, scopeInstanceId, null, null,_globals);
         instance(new SCOPE(child, processFrame, new LinkFrame(null)));
 
-        object(new ReceiveProcess<ParentScope>() {
+        object(new ReceiveProcess() {
             private static final long serialVersionUID = -8564969578471906493L;
         }.setChannel(child.parent).setReceiver(new ParentScope() {
             public void compensate(OScope scope, Synch ret) {

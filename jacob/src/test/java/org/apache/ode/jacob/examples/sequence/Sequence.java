@@ -53,7 +53,7 @@ public abstract class Sequence extends JacobRunnable {
             }
         } else {
             Synch r = newChannel(Synch.class);
-            object(new ReceiveProcess<Synch>() {
+            object(new ReceiveProcess() {
                 private static final long serialVersionUID = -6999108928780639603L;
             }.setChannel(r).setReceiver(new Synch() {
                 public void ret() {

@@ -49,7 +49,7 @@ class ORDEREDCOMPENSATOR extends BpelJacobRunnable  {
             Synch r = newChannel(Synch.class);
             CompensationHandler cdata = _compensations.remove(0);
             cdata.compChannel.compensate(r);
-            object(new ReceiveProcess<Synch>() {
+            object(new ReceiveProcess() {
                 private static final long serialVersionUID = 7173916663479205420L;
             }.setChannel(r).setReceiver(new Synch() {
                 public void ret() {

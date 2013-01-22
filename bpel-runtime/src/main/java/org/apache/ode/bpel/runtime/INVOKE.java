@@ -99,7 +99,7 @@ public class INVOKE extends ACTIVITY {
                         _scopeFrame.resolve(_oinvoke.partnerLink), _oinvoke.operation,
                         outboundMsg, invokeResponseChannel);
 
-                object(false, compose(new ReceiveProcess<InvokeResponse>() {
+                object(false, compose(new ReceiveProcess() {
                     private static final long serialVersionUID = 4496880438819196765L;
                 }.setChannel(invokeResponseChannel).setReceiver(new InvokeResponse() {
                     public void onResponse() {
@@ -193,7 +193,7 @@ public class INVOKE extends ACTIVITY {
                         getBpelRuntimeContext().releasePartnerMex(mexId, false);
                     }
 
-                })).or(new ReceiveProcess<Termination>() {
+                })).or(new ReceiveProcess() {
                     private static final long serialVersionUID = 4219496341785922396L;
                 }.setChannel(_self.self).setReceiver(new Termination() {
                     public void terminate() {

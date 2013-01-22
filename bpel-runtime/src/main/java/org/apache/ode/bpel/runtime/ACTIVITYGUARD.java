@@ -105,7 +105,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                 dpe(_oactivity);
             }
         } else /* don't know all our links statuses */ {
-            CompositeProcess mlset = compose(new ReceiveProcess<Termination>() {
+            CompositeProcess mlset = compose(new ReceiveProcess() {
                 private static final long serialVersionUID = 5094153128476008961L;
             }.setChannel(_self.self).setReceiver(new Termination() {
                 public void terminate() {
@@ -116,7 +116,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                 }
             }));
             for (final OLink link : _oactivity.targetLinks) {
-                mlset.or(new ReceiveProcess<LinkStatus>() {
+                mlset.or(new ReceiveProcess() {
                     private static final long serialVersionUID = 1024137371118887935L;
                 }.setChannel(_linkFrame.resolve(link).sub).setReceiver(new LinkStatus() {
                     public void linkStatus(boolean value) {
@@ -198,7 +198,7 @@ class ACTIVITYGUARD extends ACTIVITY {
         }
 
         public void run() {
-            object(new ReceiveProcess<ParentScope>() {
+            object(new ReceiveProcess() {
                 private static final long serialVersionUID = 2667359535900385952L;
             }.setChannel(_in).setReceiver(new ParentScope() {
                 public void compensate(OScope scope, Synch ret) {
@@ -274,7 +274,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                         (failureHandling == null ? 0L : failureHandling.retryDelay * 1000));
                     final TimerResponse timerChannel = newChannel(TimerResponse.class);
                     getBpelRuntimeContext().registerTimer(timerChannel, future);
-                    object(false, new ReceiveProcess<TimerResponse>() {
+                    object(false, new ReceiveProcess() {
                         private static final long serialVersionUID = -261911108068231376L;
                     }.setChannel(timerChannel).setReceiver(new TimerResponse() {
                         public void onTimeout() {
@@ -295,7 +295,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                     getBpelRuntimeContext().registerActivityForRecovery(
                         recoveryChannel, _self.aId, _failure.reason, _failure.dateTime, _failure.data,
                         new String[] { "retry", "cancel", "fault" }, _failure.retryCount);
-                    object(false, compose(new ReceiveProcess<ActivityRecovery>() {
+                    object(false, compose(new ReceiveProcess() {
                         private static final long serialVersionUID = 8397883882810521685L;
                     }.setChannel(recoveryChannel).setReceiver(new ActivityRecovery() {
                         public void retry() {
@@ -322,7 +322,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                                 faultData = createFault(OFailureHandling.FAILURE_FAULT_NAME, _self.o, _failure.reason);
                             completed(faultData, CompensationHandler.emptySet());
                         }
-                    })).or(new ReceiveProcess<Termination>() {
+                    })).or(new ReceiveProcess() {
                         private static final long serialVersionUID = 2148587381204858397L;
                     }.setChannel(_self.self).setReceiver(new Termination() {
                         public void terminate() {

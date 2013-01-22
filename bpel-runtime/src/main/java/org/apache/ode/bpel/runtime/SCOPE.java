@@ -140,7 +140,7 @@ class SCOPE extends ACTIVITY {
 
         public void run() {
             if (_child != null || !_eventHandlers.isEmpty()) {
-                CompositeProcess mlSet = ProcessUtil.compose(new ReceiveProcess<Termination>() {
+                CompositeProcess mlSet = ProcessUtil.compose(new ReceiveProcess() {
                     private static final long serialVersionUID = 1913414844895865116L;
                 }.setChannel(_self.self).setReceiver(new Termination() {
                     public void terminate() {
@@ -161,7 +161,7 @@ class SCOPE extends ACTIVITY {
 
                 // Handle messages from the child if it is still alive
                 if (_child != null) {
-                    mlSet.or(new ReceiveProcess<ParentScope>() {
+                    mlSet.or(new ReceiveProcess() {
                         private static final long serialVersionUID = -6934246487304813033L;
                     }.setChannel(_child.parent).setReceiver(new ParentScope() {
                         public void compensate(OScope scope, Synch ret) {
@@ -216,7 +216,7 @@ class SCOPE extends ACTIVITY {
                 for (Iterator<EventHandlerInfo> i = _eventHandlers.iterator();i.hasNext();) {
                     final EventHandlerInfo ehi = i.next();
 
-                    mlSet.or(new ReceiveProcess<ParentScope>() {
+                    mlSet.or(new ReceiveProcess() {
                         private static final long serialVersionUID = -4694721357537858221L;
                     }.setChannel(ehi.psc).setReceiver(new ParentScope() {
                         public void compensate(OScope scope, Synch ret) {
@@ -291,7 +291,7 @@ class SCOPE extends ACTIVITY {
                         // Create the temination handler scope.
                         instance(new SCOPE(terminationHandlerActivity,terminationHandlerScopeFrame, SCOPE.this._linkFrame));
 
-                        object(new ReceiveProcess<ParentScope>() {
+                        object(new ReceiveProcess() {
                             private static final long serialVersionUID = -6009078124717125270L;
                         }.setChannel(terminationHandlerActivity.parent).setReceiver(new ParentScope() {
                             public void compensate(OScope scope, Synch ret) {
@@ -370,7 +370,7 @@ class SCOPE extends ACTIVITY {
                         // Create the fault handler scope.
                         instance(new SCOPE(faultHandlerActivity,faultHandlerScopeFrame, SCOPE.this._linkFrame));
 
-                        object(new ReceiveProcess<ParentScope>() {
+                        object(new ReceiveProcess() {
                             private static final long serialVersionUID = -6009078124717125270L;
                         }.setChannel(faultHandlerActivity.parent).setReceiver(new ParentScope() {
                             public void compensate(OScope scope, Synch ret) {
