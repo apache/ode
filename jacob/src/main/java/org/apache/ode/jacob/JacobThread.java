@@ -84,9 +84,5 @@ public interface JacobThread {
      * @throws IllegalArgumentException
      *             if the method list does not match the channel kind
      */
-    public void object(boolean replicate, ChannelListener methodList)
-        throws IllegalArgumentException;
-
-    public void object(boolean reaplicate, ChannelListener[] methodLists)
-        throws IllegalArgumentException;
+    public void object(boolean replicate, ChannelListener methodList) throws IllegalArgumentException;
 }

@@ -325,19 +325,16 @@ public final class JacobVPU {
             return ChannelFactory.createChannel(cframe, channelType);
         }
 
-        public void object(boolean replicate, ChannelListener[] ml) {
+        public void object(boolean replicate, ChannelListener ml) {
             if (LOG.isTraceEnabled()) {
                 StringBuffer msg = new StringBuffer();
                 msg.append(_cycle);
                 msg.append(": ");
-                for (int i = 0; i < ml.length; ++i) {
-                    if (ml[i] instanceof ReceiveProcess) {
-                        ReceiveProcess<?> rp = (ReceiveProcess<?>)ml[i];
-                        if (i != 0) msg.append(" + ");
-                        msg.append(rp.getChannel());
-                        msg.append(" ? ");
-                        msg.append(rp.toString());
-                    }
+                if (ml instanceof ReceiveProcess) {
+                    ReceiveProcess<?> rp = (ReceiveProcess<?>)ml;
+                    msg.append(rp.getChannel());
+                    msg.append(" ? ");
+                    msg.append(rp.toString());
                 }
                 LOG.trace(msg.toString());
             }
@@ -345,14 +342,8 @@ public final class JacobVPU {
             _statistics.numContinuations++;
 
             CommGroup grp = new CommGroup(replicate);
-            for (int i = 0; i < ml.length; ++i) {
-                addCommChannel(grp, ml[i]);
-            }
+            addCommChannel(grp, ml);
             _executionQueue.add(grp);
-        }
-
-        public void object(boolean replicate, ChannelListener methodList) throws IllegalArgumentException {
-            object(replicate, new ChannelListener[] { methodList });
         }
 
         private void addCommChannel(CommGroup group, ChannelListener receiver) {

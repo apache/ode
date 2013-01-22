@@ -90,19 +90,6 @@ public abstract class JacobObject implements Serializable {
         JacobVPU.activeJacobThread().object(replication, methodList);
     }
 
-    protected static void object(boolean replication, ChannelListener[] methodLists) {
-        JacobVPU.activeJacobThread().object(replication, methodLists);
-    }
-
-    protected static void object(boolean replication, Set<ChannelListener> methodLists) {
-        JacobVPU.activeJacobThread().object(replication,
-                methodLists.toArray(new ChannelListener[methodLists.size()]));
-    }
-
-    protected static void replication(ChannelListener methodList) {
-        JacobVPU.activeJacobThread().object(true, methodList);
-    }
-
     /**
      * Obtain a replicated channel broadcaster.
      *
