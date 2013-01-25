@@ -19,6 +19,8 @@
 
 package org.apache.ode.scheduler.simple;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  * The thing that we schedule.
  * 
@@ -28,8 +30,11 @@ package org.apache.ode.scheduler.simple;
 class Task {
     /** Scheduled date/time. */
     public long schedDate;
+    public long taskSeqNum;
+    private static final AtomicLong counter = new AtomicLong();
 
     Task(long schedDate) {
         this.schedDate = schedDate;
+        this.taskSeqNum = counter.incrementAndGet();
     }
 }

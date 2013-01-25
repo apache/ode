@@ -32,7 +32,7 @@ class JobComparatorByDate implements Comparator<Task> {
         long diff = o1.schedDate - o2.schedDate;
         if (diff < 0) return -1;
         if (diff > 0) return 1;
-        return 0;
+        return o1.taskSeqNum < o2.taskSeqNum ? -1 : 1;
     }
 
 }
