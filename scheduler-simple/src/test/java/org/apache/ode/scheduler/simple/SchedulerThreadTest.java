@@ -99,7 +99,30 @@ public class SchedulerThreadTest extends TestCase implements TaskRunner {
             assertTrue(tr.time > tr.task.schedDate - SCHED_TOLERANCE / 2);
         }
     }
-    
+
+    public void testTaskDequeueOrderWithSameExecTime() throws Exception {
+        final long startTime = System.currentTimeMillis();
+
+        // enqueue jobs with same execution time and incremental jobId
+        for (int i = 0; i < 300; i++) {
+            Job tsk = new Job(startTime, String.valueOf(i), true, null);
+            _st.enqueue(tsk);
+        }
+
+        _st.start();
+        Thread.sleep(300 + 300 * 5);
+        assertEquals(300, _tasks.size());
+
+        // jobs need to be dequeued in the same order of insertion.
+        for (int i = 0; i < 299; ++i) {
+            Job currJob = (Job) _tasks.get(i).task;
+            Job nextJob = (Job) _tasks.get(i + 1).task;
+            assertTrue(Integer.parseInt(currJob.jobId) < Integer.parseInt(nextJob.jobId));
+        }
+        _st.stop();
+    }
+
+
     public void runTask(Task task) {
         synchronized(_tasks) {
             _tasks.add(new TR(System.currentTimeMillis(),task));
