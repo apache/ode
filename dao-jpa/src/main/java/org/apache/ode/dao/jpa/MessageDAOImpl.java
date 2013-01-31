@@ -71,7 +71,7 @@ public class MessageDAOImpl implements MessageDAO {
     }
 
     public MessageDAOImpl(QName type, MessageExchangeDAOImpl me) {
-        _type = type.toString();
+        _type = (type != null) ? type.toString() : null;
         _messageExchange = me;
     }
 
@@ -123,7 +123,7 @@ public class MessageDAOImpl implements MessageDAO {
     }
 
     public void setType(QName type) {
-        _type = type.toString();
+        _type = (type != null) ? type.toString() : null;
     }
 
 }

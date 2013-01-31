@@ -218,7 +218,7 @@ public class INVOKE extends ACTIVITY {
             initializeCorrelation(_scopeFrame.resolve(c), _scopeFrame.resolve(oinvoke.inputVar));
         }
 
-        if (oinvoke.operation.getInput().getMessage().getParts().size() > 0) {
+        if ((oinvoke.operation.getInput() != null) && (oinvoke.operation.getInput().getMessage().getParts().size() > 0)) {
             sendVariableReadEvent(_scopeFrame.resolve(oinvoke.inputVar));
             Node outboundMsg = fetchVariableData(_scopeFrame.resolve(oinvoke.inputVar), false);
             // TODO outbound message should be updated with non-initiate correlation sets

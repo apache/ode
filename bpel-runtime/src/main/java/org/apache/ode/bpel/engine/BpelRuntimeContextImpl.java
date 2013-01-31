@@ -746,9 +746,19 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (__log.isDebugEnabled())
             __log.debug("INVOKE PARTNER (SEP): sessionId=" + mySessionId + " partnerSessionId=" + partnerSessionId);
 
-        MessageDAO message = mexDao.createMessage(operation.getInput().getMessage().getQName());
+        MessageDAO message = null;
+
+        if (operation.getInput() != null)
+            message = mexDao.createMessage(operation.getInput().getMessage().getQName());
+        else
+            message = mexDao.createMessage(null);
+
         mexDao.setRequest(message);
-        message.setType(operation.getInput().getMessage().getQName());
+
+        if (operation.getInput() != null)
+            message.setType(operation.getInput().getMessage().getQName());
+        else
+            message.setType(null);
         buildOutgoingMessage(message, outgoingMessage);
 
         // Get he my-role EPR (if myrole exists) for optional use by partner
