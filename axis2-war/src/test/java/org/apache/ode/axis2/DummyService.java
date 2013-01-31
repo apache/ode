@@ -62,4 +62,8 @@ public class DummyService {
         throw new AxisFault(new QName("http://schemas.xmlsoap.org/soap/envelope/", "Client"), "dummy reason",
                 "dummy node", "dummy role", root);
     }
+
+    public String noArgmentMethod(){
+        return "noArgmentMethod invocation was successfull";
+    }
 }

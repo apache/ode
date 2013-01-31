@@ -143,7 +143,7 @@ public class SoapMessageConverter {
         if (op == null)
             throw new NullPointerException("Null operation");
         // The message can be null if the input message has no part
-        if (op.getInput().getMessage().getParts().size() > 0 && message == null)
+        if (op.getInput() != null && op.getInput().getMessage().getParts().size() > 0 && message == null)
             throw new NullPointerException("Null message.");
         if (msgCtx == null)
             throw new NullPointerException("Null msgCtx");
@@ -155,20 +155,21 @@ public class SoapMessageConverter {
 
         BindingInput bi = bop.getBindingInput();
         if (bi == null)
-            throw new OdeFault(__msgs.msgBindingInputNotFound(_serviceName, _portName, op.getName()));
+            //throw new OdeFault(__msgs.msgBindingInputNotFound(_serviceName, _portName, op.getName()));
+            __log.warn(__msgs.msgBindingInputNotFound(_serviceName, _portName, op.getName()));
 
         SOAPEnvelope soapEnv = msgCtx.getEnvelope();
         if (soapEnv == null) {
             soapEnv = _soapFactory.getDefaultEnvelope();
             msgCtx.setEnvelope(soapEnv);
         }
-
-        createSoapHeaders(soapEnv, getSOAPHeaders(bi), op.getInput().getMessage(), message.getHeaderParts());
+        Message inputMessage = (op.getInput() != null) ? op.getInput().getMessage() : null;
+        createSoapHeaders(soapEnv, getSOAPHeaders(bi), inputMessage, message.getHeaderParts());
 
         SOAPBody soapBody = getSOAPBody(bi);
         if (soapBody != null) {
             org.apache.axiom.soap.SOAPBody sb = soapEnv.getBody() == null ? _soapFactory.createSOAPBody(soapEnv) : soapEnv.getBody();
-            createSoapBody(sb, soapBody, op.getInput().getMessage(), message.getMessage(), op.getName());
+            createSoapBody(sb, soapBody, inputMessage, message.getMessage(), op.getName());
         }
 
     }
@@ -207,6 +208,9 @@ public class SoapMessageConverter {
     }
 
     public void createSoapHeaders(SOAPEnvelope soapEnv, List<SOAPHeader> headerDefs, Message msgdef, Map<String,Node> headers) throws AxisFault {
+        if (msgdef == null)
+            return;
+
         for (SOAPHeader sh : headerDefs) handleSoapHeaderDef(soapEnv, sh, msgdef, headers);
 
         org.apache.axiom.soap.SOAPHeader soaphdr = soapEnv.getHeader();
@@ -343,6 +347,9 @@ public class SoapMessageConverter {
     @SuppressWarnings("unchecked")
     public void createSoapBody(org.apache.axiom.soap.SOAPBody sb, SOAPBody soapBody, Message msgDef,
                                Element message, String rpcWrapper) throws AxisFault {
+        if (msgDef == null)
+            return;
+
         OMElement partHolder = _isRPC ? _soapFactory
                 .createOMElement(new QName(soapBody.getNamespaceURI(), rpcWrapper, "odens"), sb) : sb;
 
@@ -464,11 +471,17 @@ public class SoapMessageConverter {
 
     @SuppressWarnings("unchecked")
     public static List<SOAPHeader> getSOAPHeaders(ElementExtensible eee) {
+        if (eee == null)
+            return null;
+
         return CollectionsX.filter(new ArrayList<SOAPHeader>(), (Collection<Object>) eee.getExtensibilityElements(),
                 SOAPHeader.class);
     }
 
     public static <T> T getFirstExtensibilityElement(ElementExtensible parent, Class<T> cls) {
+        if (parent == null)
+            return null;
+
         Collection<T> ee = CollectionsX.filter(parent.getExtensibilityElements(), cls);
 
         return ee.isEmpty() ? null : ee.iterator().next();
