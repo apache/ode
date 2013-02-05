@@ -30,7 +30,7 @@ public class NoInputMessageInvocationTest extends Axis2TestBase {
         if (server.isDeployed(bundleName)) server.undeployProcess(bundleName);
         server.deployProcess(bundleName);
         try {
-            String response = sendRequestFile("http://localhost:8888/ode/processes/NoArgumentInvocationProcess",
+            String response = server.sendRequestFile("http://localhost:8888/ode/processes/NoArgumentInvocationProcess",
                     bundleName, "testRequest.soap");
             System.out.println(response);
             assertTrue(response.contains("noArgmentMethod invocation was successfull"));
