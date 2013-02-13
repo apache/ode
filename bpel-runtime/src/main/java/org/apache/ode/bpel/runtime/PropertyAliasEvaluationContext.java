@@ -55,7 +55,10 @@ public class PropertyAliasEvaluationContext implements EvaluationContext {
             _root = headerParts.get(alias.header);
         } else if (alias.part != null) {
             Element part = DOMUtils.findChildByName(msgData,new QName(null, alias.part.name),false);
-            if (part != null && alias.part.type instanceof OElementVarType) {
+            //check if the property alias is defined on the header part of the message
+            if(part == null){
+                _root = headerParts.get(alias.part.name);
+            } else if (part != null && alias.part.type instanceof OElementVarType) {
                 _root = DOMUtils.findChildByName(part, ((OElementVarType)alias.part.type).elementType);
             } else
                 _root = part;

@@ -246,6 +246,8 @@
                      class="org.apache.axis2.dispatchers.RequestURIBasedDispatcher"/>
             <handler name="RequestURIOperationDispatcher"
                      class="org.apache.axis2.dispatchers.RequestURIOperationDispatcher"/>
+            <handler name="SOAPMessageBodyBasedDispatcher"
+                     class="org.apache.axis2.dispatchers.SOAPMessageBodyBasedDispatcher"/>
             <handler name="HTTPLocationBasedDispatcher"
                      class="org.apache.axis2.dispatchers.HTTPLocationBasedDispatcher"/>
         </phase>

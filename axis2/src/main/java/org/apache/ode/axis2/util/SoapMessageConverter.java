@@ -459,7 +459,8 @@ public class SoapMessageConverter {
             Message hdrMsg = _def.getMessage(headerDef.getMessage());
             for (Object o : hdrMsg.getParts().values()) {
                 Part p = (Part) o;
-                if (p.getElementName().equals(elmtName)) return p.getName();
+                if (p.getElementName().equals(elmtName) && p.getName().equals(headerDef.getPart()))
+                    return p.getName();
             }
         }
         return elmtName.getLocalPart();
