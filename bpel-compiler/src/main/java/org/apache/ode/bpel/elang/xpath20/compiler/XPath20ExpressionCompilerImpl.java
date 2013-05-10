@@ -146,7 +146,7 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
                     .getURI(), new QName(source.getElement().getNamespaceURI(),
                     source.getElement().getNodeName())));
         }
-        if (node.getNodeType() != Node.TEXT_NODE) {
+        if (node.getNodeType() != Node.TEXT_NODE && node.getNodeType() != Node.CDATA_SECTION_NODE) {
             throw new CompilationException(
                     __msgs.errUnexpectedNodeTypeForXPath(DOMUtils
                             .domToString(node)));
