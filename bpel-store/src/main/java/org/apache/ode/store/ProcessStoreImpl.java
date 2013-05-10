@@ -448,6 +448,24 @@ public class ProcessStoreImpl implements ProcessStore {
                     throw new ContextException(errmsg);
                 }
 
+                Set processKeys = _processes.keySet();
+                Iterator processConfQNameItr = processKeys.iterator();
+
+                while(processConfQNameItr.hasNext()){
+                    ProcessConf cachedProcessConf = _processes.get(processConfQNameItr.next());
+                    if(dao.getType().equals(cachedProcessConf.getType())){
+                        if (ProcessState.ACTIVE == cachedProcessConf.getState()
+                                && ProcessState.RETIRED == dao.getState()
+                                && ProcessState.ACTIVE == state) {
+                            String errorMsg = "Can't activate the process with PID: " + dao.getPID() + " with version " + dao.getVersion() +
+                                    ", as another version of the process with PID : " + cachedProcessConf.getProcessId() + " with version " +
+                                    cachedProcessConf.getVersion() + " is already active.";
+                            __log.error(errorMsg);
+                            throw new ContextException(errorMsg);
+                        }
+                    }
+                }
+
                 ProcessState old = dao.getState();
                 dao.setState(state);
                 pconf.setState(state);
