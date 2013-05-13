@@ -76,10 +76,14 @@ class JBITask < Buildr::ZipTask
       when nil, true
         # Tempfiles gets deleted on garbage collection, so we're going to hold on to it
         # through instance variable not closure variable.
-        Tempfile.open("MANIFEST.MF") { |@jbi_xml_tmp| @jbi_xml_tmp.write descriptor }
+        @jbi_xml_tmp = Tempfile.new('MANIFEST.MF')
+        @jbi_xml_tmp.write descriptor
+        @jbi_xml_tmp.close
         path("META-INF").include @jbi_xml_tmp.path, :as=>"jbi.xml" 
       when Proc, Method
-        Tempfile.open("MANIFEST.MF") { |@jbi_xml_tmp| @jbi_xml_tmp.write jbi_xml.call.to_s }
+        @jbi_xml_tmp = Tempfile.new('MANIFEST.MF')
+        @jbi_xml_tmp.write jbi_xml.call.to_s
+        @jbi_xml_tmp.close
         path("META-INF").include @jbi_xml_tmp.path, :as=>"jbi.xml" 
       end
     end
