@@ -436,7 +436,8 @@ define "ode" do
       LOG4J,
       DOM4J,
       HIBERNATE
-
+    test.exclude "*JbiTestBase"
+    test.exclude "*OdeJbiComponentLifeCycleTest"
       test.setup unzip(_("target/test/smx/ode")=>project("dao-jpa-ojpa-derby").package(:zip))
       test.setup unzip(_("target/test/smx/ode")=>project("dao-hibernate-db").package(:zip))
       test.setup task(:prepare_jbi_tests) do |task|
