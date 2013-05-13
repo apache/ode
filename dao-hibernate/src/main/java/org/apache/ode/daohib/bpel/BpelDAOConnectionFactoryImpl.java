@@ -18,6 +18,15 @@
  */
 package org.apache.ode.daohib.bpel;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Properties;
+
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
@@ -29,14 +38,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.cfg.Environment;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.resolver.DialectFactory;
-
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.util.HashMap;
-import java.util.Properties;
-import java.util.Enumeration;
 
 /**
  * Hibernate-based {@link org.apache.ode.bpel.dao.BpelDAOConnectionFactory}
@@ -69,7 +70,6 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
     /**
      * @see org.apache.ode.bpel.dao.BpelDAOConnectionFactory#init(java.util.Properties)
      */
-    @SuppressWarnings("unchecked")
     public void init(Properties initialProps) {
         if (_ds == null) {
             String errmsg = "setDataSource() not called!";
@@ -109,7 +109,7 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
         properties.put(Environment.ISOLATION, level);
 
         if (__log.isDebugEnabled()) {
-            Enumeration names = properties.propertyNames();
+            Enumeration<?> names = properties.propertyNames();
             __log.debug("Properties passed to Hibernate:");
             while (names.hasMoreElements()) {
                 String name = (String) names.nextElement();
