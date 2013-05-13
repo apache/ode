@@ -18,6 +18,17 @@
  */
 package org.apache.ode.store.hib;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.BpelEngineException;
@@ -35,17 +46,6 @@ import org.hibernate.cfg.Environment;
 import org.hibernate.connection.ConnectionProvider;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.DialectFactory;
-
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory {
     private static final Log __log = LogFactory.getLog(DbConfStoreConnectionFactory.class);
@@ -133,11 +133,10 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
         return new ConfStoreConnectionHib(_sessionFactory.getCurrentSession());
     }
 
-	@SuppressWarnings("unchecked")
 	private void initTxMgr(String txFactoryClassName) {
 		__log.info("ProcessStore initializing transaction manager using " + txFactoryClassName);
 		try {
-			Class txFactClass = getClass().getClassLoader().loadClass(txFactoryClassName);
+			Class<?> txFactClass = getClass().getClassLoader().loadClass(txFactoryClassName);
 			Object txFact = txFactClass.newInstance();
 			_txMgr = (TransactionManager) txFactClass.getMethod("getTransactionManager", (Class[]) null).invoke(txFact);
 		} catch (Exception e) {

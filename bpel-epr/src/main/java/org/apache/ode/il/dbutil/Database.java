@@ -279,7 +279,8 @@ public class Database {
 
         BpelDAOConnectionFactoryJDBC cf;
         try {
-            cf = (BpelDAOConnectionFactoryJDBC) Class.forName(pClassName).newInstance();
+            Class<?> clazz = this.getClass().getClassLoader().loadClass(pClassName);
+            cf = (BpelDAOConnectionFactoryJDBC) clazz.newInstance();
         } catch (Exception ex) {
             String errmsg = __msgs.msgDAOInstantiationFailed(pClassName);
             __log.error(errmsg, ex);
