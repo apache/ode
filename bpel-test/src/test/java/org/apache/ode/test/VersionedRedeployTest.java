@@ -62,15 +62,17 @@ public class VersionedRedeployTest extends BPELTestAbstract {
     @Test public void testInstancePersistence() throws Throwable {
         // Checking for each step that all instances still exist and that each process got one execution
         // so no instance has been created after a process has been retired.
+        int reference = _cf.getConnection().getProcess(qName1).getNumInstances();
+
         go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-1");
-        Assert.assertEquals(1, _cf.getConnection().getProcess(qName1).getNumInstances());
+        Assert.assertEquals(reference + 1, _cf.getConnection().getProcess(qName1).getNumInstances());
 
         // clean up deployment and invocations
         _deployments.clear();
         _invocations.clear();
 
         go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-2");
-        Assert.assertEquals(1, _cf.getConnection().getProcess(qName1).getNumInstances());
+        Assert.assertEquals(reference + 1, _cf.getConnection().getProcess(qName1).getNumInstances());
         Assert.assertEquals(1, _cf.getConnection().getProcess(qName2).getNumInstances());
 
         // clean up deployment and invocations
@@ -78,7 +80,7 @@ public class VersionedRedeployTest extends BPELTestAbstract {
         _invocations.clear();
 
         go("/bpel/2.0/TestVersionedRedeploy/HelloWorld-3");
-        Assert.assertEquals(1, _cf.getConnection().getProcess(qName1).getNumInstances());
+        Assert.assertEquals(reference + 1, _cf.getConnection().getProcess(qName1).getNumInstances());
         Assert.assertEquals(1, _cf.getConnection().getProcess(qName2).getNumInstances());
         Assert.assertEquals(1, _cf.getConnection().getProcess(qName3).getNumInstances());
     }
