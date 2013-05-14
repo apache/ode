@@ -136,7 +136,7 @@ public class DynamicService<T> {
         } else if (XmlObject.class.isAssignableFrom(clazz)) {
             try {
                 Class beanFactory = clazz.forName(clazz.getCanonicalName() + "$Factory");
-                elmt.setNamespace(new NamespaceImpl(""));
+                elmt.setNamespace(elmt.declareDefaultNamespace(""));
                 elmt.setLocalName("xml-fragment");
                 return beanFactory.getMethod("parse", XMLStreamReader.class)
                         .invoke(null, elmt.getXMLStreamReaderWithoutCaching());
