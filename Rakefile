@@ -469,15 +469,13 @@ define "ode" do
       LOG4J,
       DOM4J,
       HIBERNATE
-    test.exclude "*JbiTestBase"
-    test.exclude "*OdeJbiComponentLifeCycleTest"
       test.setup unzip(_("target/test/smx/ode")=>project("dao-jpa-ojpa-derby").package(:zip))
       test.setup unzip(_("target/test/smx/ode")=>project("dao-hibernate-db").package(:zip))
       test.setup task(:prepare_jbi_tests) do |task|
       cp _("src/test/jbi/ode-jbi.properties"), _("target/test/smx/ode")
       cp _("src/main/jbi/hibernate.properties"), _("target/test/smx/ode")
       rm_rf Dir["target/test/resources"]
-      cp_r _("src/test/resources"), _("target/test/resources")
+      cp_r _("src/test/resources"), _("target/test/")
     end
     test.exclude '*TestBase', 'org.apache.ode.jbi.OdeJbiComponentLifeCycleTest', 'org.apache.ode.jbi.ReplayerJbiTest'
   end
