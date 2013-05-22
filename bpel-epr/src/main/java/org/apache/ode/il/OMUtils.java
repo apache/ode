@@ -35,6 +35,8 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.OMText;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.NSContext;
 import org.w3c.dom.Attr;
@@ -51,6 +53,8 @@ import org.xml.sax.InputSource;
  * Utility methods to convert from/to AxiOM and DOM.
  */
 public class OMUtils {
+
+    private static Log __log = LogFactory.getLog(OMUtils.class);
 
     public static OMElement getFirstChildWithName(OMElement parent, String name) {
         if (parent == null)
@@ -74,12 +78,32 @@ public class OMUtils {
     
     @SuppressWarnings("unchecked")
     public static Element toDOM(OMElement element, Document doc, boolean deepNS) {
-        final Element domElement = doc.createElementNS(element.getQName().getNamespaceURI(), element.getQName().getLocalPart());
+        //
+        //  Fix regarding lost qnames on response of invoke activity:
+        //    * copy an element including its prefix.
+        //    * add all namespase attributes.
+        //
+        String domElementNsUri = element.getQName().getNamespaceURI();
+        String domElementQName;
+        if (element.getQName().getPrefix() == null || element.getQName().getPrefix().trim().length() == 0) {
+            domElementQName = element.getQName().getLocalPart();
+        } else {
+            domElementQName = element.getQName().getPrefix() + ":" + element.getQName().getLocalPart();
+        }
+        if (__log.isTraceEnabled())
+            __log.trace("toDOM: creating element with nsUri=" + domElementNsUri
+                    + " qname=" + domElementQName
+                    + " from omElement, name=" + element.getLocalName());
+
+        final Element domElement = doc.createElementNS(
+                domElementNsUri,
+                domElementQName);
+        
 
         if (deepNS) {
             NSContext nscontext = new NSContext();
             buildNScontext(nscontext, element);
-            DOMUtils.injectNamespaces(domElement,nscontext);
+            DOMUtils.injectNamespacesWithAllPrefixes(domElement,nscontext);
         } else {
             if (element.getAllDeclaredNamespaces() != null) {
                 for (Iterator<OMNamespace> i = element.getAllDeclaredNamespaces(); i.hasNext(); ) {
@@ -92,6 +116,8 @@ public class OMUtils {
     
             }
         }
+        if (__log.isTraceEnabled())
+            __log.trace("toDOM: created root element (deepNS=" + deepNS + "): " + DOMUtils.domToString(domElement));
             
         for (Iterator i = element.getAllAttributes(); i.hasNext();) {
             final OMAttribute attr = (OMAttribute) i.next();

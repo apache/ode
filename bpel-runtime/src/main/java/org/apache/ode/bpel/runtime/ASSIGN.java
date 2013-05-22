@@ -60,6 +60,7 @@ import java.net.URI;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Assign activity run-time template.
@@ -222,6 +223,22 @@ class ASSIGN extends ACTIVITY {
             OExpression expr = ((OAssign.Expression) from).expression;
             try {
                 l = getBpelRuntimeContext().getExpLangRuntime().evaluate(expr, getEvaluationContext());
+                if (l.size() == 0 || l.get(0) == null || !(l.get(0) instanceof Element)) {
+                    if (__log.isTraceEnabled()) {
+                        __log.trace("evalRValue: OAssign.Expression: eval reult not Element or node=null");
+                    }
+                } else {
+                    Element element = (Element)l.get(0);
+                    for (Map.Entry<String, String> entry : DOMUtils.getMyNSContext(element).toMap().entrySet()) {
+                        String key = entry.getKey();
+                        String value = entry.getValue();
+                        if (entry.getKey() == null || entry.getKey().length() == 0) {
+                            element.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns", value);
+                        } else {
+                            element.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns:" + key, value);
+                        }
+                    }
+                }
             } catch (EvaluationException e) {
                 String msg = __msgs.msgEvalException(from.toString(), e.getMessage());
                 if (__log.isDebugEnabled()) __log.debug(from + ": " + msg);
@@ -504,17 +521,7 @@ class ASSIGN extends ACTIVITY {
         NamedNodeMap attrs = src.getAttributes();
         for (int i = 0; i < attrs.getLength(); ++i) {
             Attr attr = (Attr)attrs.item(i);
-            if (!attr.getName().startsWith("xmlns")) {
-                replacement.setAttributeNodeNS((Attr)doc.importNode(attrs.item(i), true));
-                // Case of qualified attribute values, we're forced to add corresponding namespace declaration manually
-                int colonIdx = attr.getValue().indexOf(":");
-                if (colonIdx > 0) {
-                    String prefix = attr.getValue().substring(0, colonIdx);
-                    String attrValNs = src.lookupPrefix(prefix);
-                    if (attrValNs != null)
-                       replacement.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns:"+ prefix, attrValNs);
-                }
-            }
+            replacement.setAttributeNodeNS((Attr)doc.importNode(attr, true));
         }
         parent.replaceChild(replacement, ptr);
         DOMUtils.copyNSContext(ptr, replacement);
