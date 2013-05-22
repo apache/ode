@@ -845,6 +845,31 @@ public class DOMUtils {
         }
     }
 
+    /**
+     * Adds namespaces including all prefixes.
+     * This is needed for correct handling of xsi:type attributes.
+     * @param domElement An element wi which the namespace attributes should be added.
+     * @param nscontext A namespace context.
+     * @author k.petrauskas
+     */
+    public static void injectNamespacesWithAllPrefixes(Element domElement, NSContext nscontext) {
+    	if (__log.isDebugEnabled())
+    		__log.debug("injectNamespacesWithAllPrefixes: element=" + domToString(domElement) + " nscontext=" + nscontext);
+        for (Map.Entry<String, String> entry : nscontext.toMap().entrySet()) {
+            String prefix = entry.getKey();
+            String uri = entry.getValue();
+            if (prefix == null || "".equals(prefix))
+                domElement.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns", uri);
+            else
+                domElement.setAttributeNS(DOMUtils.NS_URI_XMLNS, "xmlns:"+ prefix, uri);
+            
+        	if (__log.isDebugEnabled())
+        		__log.debug("injectNamespacesWithAllPrefixes: added namespace: prefix=\"" + prefix + "\" uri=\"" + uri + "\"");
+        }
+    	if (__log.isDebugEnabled())
+    		__log.debug("injectNamespacesWithAllPrefixes: result: element=" + domToString(domElement));
+    }
+
     public static void copyNSContext(Element source, Element dest) {
         Map<String, String> sourceNS = getParentNamespaces(source);
         sourceNS.putAll(getMyNamespaces(source));
