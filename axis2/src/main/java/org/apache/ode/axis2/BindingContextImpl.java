@@ -34,6 +34,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
+import org.apache.axis2.engine.AxisConfigurator;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -169,7 +170,14 @@ public class BindingContextImpl implements BindingContext {
                 // if only this method did a good job of cleaning up after itself
                 _server._axisConfig.removeService(service.getName());
                 completeCleanup(axisService);
-                _server._axisConfig.cleanup();
+
+                //ODE-994: commenting the cleanup on axisConfig as it cleansup everything on axis2 1.6
+                //_server._axisConfig.cleanup();
+                //For backward compatibility with older versions of axis2 that is below 1.6
+                AxisConfigurator configurator = _server._axisConfig.getConfigurator();
+                if(configurator != null)
+                    configurator.cleanup();
+
             } catch (AxisFault axisFault) {
                 __log.error("Couldn't destroy service " + serviceName);
             }
