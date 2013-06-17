@@ -68,12 +68,12 @@
             </copy>
             <copy>
                 <from>
-                    <litteral>
+                    <literal>
                         <dummy:comment>
                             <dummy:author>Voltaire</dummy:author>
                             <dummy:content>When it is a question of money, everybody is of the same religion.</dummy:content>
                         </dummy:comment>
-                    </litteral>
+                    </literal>
                 </from>
                 <to>$commentMsg.comment</to>
             </copy>

@@ -97,7 +97,7 @@ public class SecuredProcessesTest extends Axis2TestBase {
             System.out.println(response);
 
             System.out.println(response);
-            assertTrue(response.contains("<helloResponse") && response.contains("Hello " + bundleName + "!"));
+            assertTrue("'" + response + "' didn't contain expected content.", response.contains("helloResponse") && response.contains("Hello " + bundleName + "!"));
         } finally {
             server.undeployProcess(bundleName);
         }
