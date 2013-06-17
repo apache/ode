@@ -126,8 +126,7 @@ define "ode" do
       end
     end
 
-    test.using :testng, :forkmode=>'perTest', :properties=>{ "log4j.debug" => true,  "log4j.configuration"=>"test-log4j.properties", "test.ports" => ENV['TEST_PORTS'], "org.apache.ode.scheduler.deleteJobsOnStart" => "true", "org.apache.ode.autoRetireProcess"=>"true" }
-        #:java_args=>['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6001', '-Xmx1024M', '-XX:MaxPermSize=1024m']
+    test.using :testng, :forkmode=>'perTest', :properties=>{ "log4j.debug" => true,  "log4j.configuration"=>"test-log4j.properties", "test.ports" => ENV['TEST_PORTS'], "org.apache.ode.scheduler.deleteJobsOnStart" => "true", "org.apache.ode.autoRetireProcess"=>"true" } #, :java_args=>['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6001', '-Xmx2048m', '-XX:MaxPermSize=256m']
     test.with projects("tools"), libs, AXIS2_MODULES.mods, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, DOM4J, H2::REQUIRES, SPRING_TEST
     webapp_dir = "#{test.compile.target}/webapp"
     test.setup task(:prepare_webapp) do |task|
@@ -151,38 +150,6 @@ define "ode" do
     test.setup unzip("#{webapp_dir}/WEB-INF"=>project("dao-jpa-ojpa-derby").package(:zip))
     test.setup unzip("#{webapp_dir}/WEB-INF"=>project("dao-hibernate-db").package(:zip))
     # test.exclude('*') if Buildr.environment == 'hudson' || ENV["notestng"]
-    test.exclude 'org.apache.ode.axis2.rampart', 'org.apache.ode.axis2.hydration',
-      'org.apache.ode.axis2.BpelActivityTest',
-      'org.apache.ode.axis2.ClusteredOutgoingTrafficTest',
-      'org.apache.ode.axis2.EndpointConfigurationTest',
-      'org.apache.ode.axis2.EndpointTimeoutsTest',
-      'org.apache.ode.axis2.MessageStructureTest',
-      'org.apache.ode.axis2.MultiPartMessageTest',
-      'org.apache.ode.axis2.NoP2PTest',
-      'org.apache.ode.axis2.SelectorsTest',
-      'org.apache.ode.axis2.ServiceFaultCatchTest',
-      'org.apache.ode.axis2.SoapHeader2Test',
-      'org.apache.ode.axis2.SoapHeaderTest',
-      'org.apache.ode.axis2.XSDReferencesDeployTest',
-      'org.apache.ode.axis2.correlation.CorrelationJoinHibTest',
-      'org.apache.ode.axis2.correlation.CorrelationJoinLazyHibTest',
-      'org.apache.ode.axis2.correlation.CorrelationJoinLazyTest',
-      'org.apache.ode.axis2.correlation.CorrelationJoinTest',
-      'org.apache.ode.axis2.correlation.CorrelationMultiHibTest',
-      'org.apache.ode.axis2.correlation.CorrelationMultiTest',
-      'org.apache.ode.axis2.correlation.CorrelationUnicityTest',
-      'org.apache.ode.axis2.httpbinding.HttpBindingTest',
-      'org.apache.ode.axis2.instancecleanup.CleanFailureHibTest',
-      'org.apache.ode.axis2.instancecleanup.CleanFailureTest',
-      'org.apache.ode.axis2.instancecleanup.CleanFaultHibTest',
-      'org.apache.ode.axis2.instancecleanup.CleanFaultTest',
-      'org.apache.ode.axis2.instancecleanup.CleanSuccessHibTest',
-      'org.apache.ode.axis2.instancecleanup.CleanSuccessTest',
-      'org.apache.ode.axis2.management.DeploymentTest',
-      'org.apache.ode.axis2.management.InstanceManagementTest',
-      'org.apache.ode.axis2.management.Retire2Test',
-      'org.apache.ode.axis2.management.RetireTest',
-      'org.apache.ode.axis2.management.RetireTestVar'
 
     NativeDB.prepare_configs test, _(".")
 
@@ -314,7 +281,6 @@ define "ode" do
       "bpel-scripts"),
       COMMONS.collections, COMMONS.lang, DERBY, JAVAX.connector,
       JAVAX.stream, JAVAX.transaction, JAVAX.connector, JAXEN, HSQLDB, SAXON, XERCES, XMLBEANS, XALAN, GERONIMO.transaction, SPRING, HIBERNATE, DOM4J
-    test.exclude 'org.apache.ode.test.StructuredActivities20Test'
 
     package :jar
   end

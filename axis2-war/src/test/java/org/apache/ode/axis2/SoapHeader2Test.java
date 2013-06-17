@@ -73,8 +73,8 @@ public class SoapHeader2Test extends Axis2TestBase {
                 boolean header1found = false, header2found = false;
                 String line;
                 while ((line = request.getReader().readLine()) != null && (!header1found || !header2found)) {
-                    header1found = header1found || line.matches(".*header1-field1>Hello from TestSoapHeader2.*");
-                    header2found = header2found || line.matches(".*header2-field1>Hello from TestSoapHeader2.*");
+                    header1found = header1found || line.matches(".*header1-field1.*Hello from TestSoapHeader2.*header1-field1>");
+                    header2found = header2found || line.matches(".*header2-field1.*Hello from TestSoapHeader2.*header2-field1>");
                 }
                 response.getOutputStream().print("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:unit=\"http://ode/bpel/unit-test.wsdl\">\n" +
                         "   <soapenv:Header/>\n" +
@@ -113,7 +113,7 @@ public class SoapHeader2Test extends Axis2TestBase {
             String response = sendRequestFile("http://localhost:8888/processes/hello/hello/process/client",
                     bundleName, "testRequest.soap");
             if (log.isDebugEnabled()) log.debug(response);
-            assertTrue("Soap headers missing!", response.contains("TestSoapHeader2 passed"));
+            assertTrue("Soap headers missing in: " + response, response.contains("TestSoapHeader2 passed"));
         } finally {
             server.undeployProcess(bundleName);
         }
