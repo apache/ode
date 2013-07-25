@@ -171,11 +171,41 @@ public interface Scheduler {
     }
 
     public enum JobType {
+        /** 
+         * is used for scheduled timer tasks like in pick's/evenhandler's onAlarm. 
+         */
         TIMER, 
+        /** 
+         * is used for resuming process instances if the time slice has been exeeded 
+         * or when the debugger lets the process instance resume.
+         */
         RESUME, 
+        
+        /**
+         * is used to let the runtime process an incoming message after it has been
+         * received and stored by the IL. It will try to correlate the message if
+         * a route to an IMA can be found.
+         */
         INVOKE_INTERNAL, 
+        
+        /**
+         * is used when the response from a two-way invocation comes back and shall be 
+         * passed to the runtime.
+         */
         INVOKE_RESPONSE, 
+        
+        /**
+         * is used to schedule the matchmaking after adding a route to the correlator, i.e.
+         * if a IMA is now waiting for a message. If the message is already in the queue,
+         * this matcher job will find it.
+         */
         MATCHER, 
+        
+        /**
+         * is used to check for failed partner invocations. It runs after a defined time
+         * out, checks whether a response has arrived and if not, it marks the MEX as
+         * faulted.
+         */
         INVOKE_CHECK
     }
     
