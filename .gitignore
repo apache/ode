@@ -1,6 +1,3 @@
-# for those of us using git internally
-# before committing in the central svn repository.
-
 *.class
 *.pyc
 *.iml
@@ -20,3 +17,5 @@ reports
 test-output
 _buildr.rb
 *.log
+.settings
+build
