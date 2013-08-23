@@ -73,6 +73,7 @@ import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.bpel.pmapi.InstanceManagement;
 import org.apache.ode.bpel.pmapi.ProcessManagement;
+import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.scheduler.simple.JdbcDelegate;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
@@ -416,6 +417,11 @@ public class ODEServer {
 
     @SuppressWarnings("unchecked")
      private void initTxMgr() throws ServletException {
+        if (_odeConfig.getDbMode().equals(OdeConfigProperties.DatabaseMode.EXTERNAL) &&
+                _odeConfig.getTxFactoryClass().equals(OdeConfigProperties.DEFAULT_TX_FACTORY_CLASS_NAME)) {
+            throw new ServletException("No external transaction manager factory configured. Please use the INTERNAL mode or configure an external transaction manager that is associated with external datasource.");
+        }
+        
         String txFactoryName = _odeConfig.getTxFactoryClass();
         __log.debug("Initializing transaction manager using " + txFactoryName);
         try {
