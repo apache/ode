@@ -67,6 +67,7 @@ Release.tag_name = lambda { |version| "APACHE_ODE_#{version.upcase}" } if Releas
 
 desc "Apache ODE"
 define "ode" do
+
   project.version = VERSION_NUMBER
   project.group = "org.apache.ode"
 
@@ -100,7 +101,7 @@ define "ode" do
       JAVAX.connector, JAVAX.jms, JAVAX.persistence, JAVAX.transaction, JAVAX.stream,  JIBX,
       GERONIMO.connector, GERONIMO.kernel, GERONIMO.transaction, LOG4J, OPENJPA, SAXON, TRANQL,
       WOODSTOX, WSDL4J, WS_COMMONS, XALAN, XERCES, XMLBEANS, SPRING,
-      AXIS2_MODULES.libs
+      AXIS2_MODULES.libs, H2::REQUIRES
 
     package(:war).with(:libs=>libs).path("WEB-INF").tap do |web_inf|
       web_inf.merge project("dao-jpa-ojpa-derby").package(:zip)
@@ -127,7 +128,7 @@ define "ode" do
     end
 
     test.using :testng, :forkmode=>'perTest', :properties=>{ "log4j.debug" => true,  "log4j.configuration"=>"test-log4j.properties", "test.ports" => ENV['TEST_PORTS'] }
-    test.with projects("tools"), libs, AXIS2_TEST, AXIOM, HIBERNATE, JAVAX.servlet, Buildr::Jetty::REQUIRES, DOM4J, SLF4J, LOG4J
+    test.with [projects("tools"), libs, AXIS2_TEST, Buildr::Jetty::REQUIRES, HIBERNATE, JAVAX.servlet, DOM4J, SLF4J, LOG4J].uniq
     webapp_dir = "#{test.compile.target}/webapp"
     test.setup task(:prepare_webapp) do |task|
       cp_r _("src/main/webapp"), test.compile.target.to_s
@@ -336,17 +337,22 @@ define "ode" do
     store_sql = export[ properties_for[:derby], bpel_store, _("target/store.sql") ]
     common_sql = _("src/main/sql/common.sql")
     derby_sql = concat(_("target/derby.sql")=>[ predefined_for[:derby], common_sql, runtime_sql, store_sql ])
-    derby_db = Derby.create(_("target/derby/hibdb")=>derby_sql)
+    derby_db = Derby.create(_("target/derby-hibdb")=>derby_sql)
     build derby_db
 
     %w{ mysql firebird hsql postgres sqlserver oracle }.each do |db|
-      partial = export[ properties_for[db], dao_hibernate, _("target/partial.#{db}.sql") ]
-      build concat(_("target/#{db}.sql")=>[ common_sql, predefined_for[db], partial ])
+      partial_runtime = export[ properties_for[db], dao_hibernate, _("target/partial.runtime.#{db}.sql") ]
+      partial_store = export[ properties_for[db], bpel_store, _("target/partial.store.#{db}.sql") ]
+      build concat(_("target/#{db}.sql")=>[ common_sql, predefined_for[db], partial_store, partial_runtime])
     end
+
+    h2_sql = _("target/hsql.sql")
+    h2_db = H2.create("ode-hib-h2", _("target/h2-hibdb")=>h2_sql)
+    build h2_db
 
     NativeDB.create_dbs self, _("."), :hib
 
-    package(:zip).include(derby_db)
+    package(:zip).include(derby_db).include(h2_db)
   end
 
   desc "ODE OpenJPA DAO Implementation"
@@ -360,7 +366,7 @@ define "ode" do
 
   desc "ODE OpenJPA Derby Database"
   define "dao-jpa-ojpa-derby" do
-    %w{ derby mysql oracle postgres }.each do |db|
+    %w{ derby mysql oracle postgres h2 }.each do |db|
       db_xml = _("src/main/descriptors/persistence.#{db}.xml")
       scheduler_sql = _("src/main/scripts/simplesched-#{db}.sql")
       common_sql = _("src/main/scripts/common.sql")
@@ -372,7 +378,8 @@ define "ode" do
       sql = concat(_("target/#{db}.sql")=>[_("src/main/scripts/license-header.sql"), common_sql, partial_sql, scheduler_sql])
       build sql
     end
-    derby_db = Derby.create(_("target/derby/jpadb")=>_("target/derby.sql"))
+    derby_db = Derby.create(_("target/derby-jpadb")=>_("target/derby.sql"))
+    h2_db = H2.create("ode-jpa-h2", _("target/h2-jpadb")=>_("target/h2.sql"))
 
     test.with projects("bpel-api", "bpel-dao", "bpel-obj", "bpel-epr", "dao-jpa", "utils"),
       BACKPORT, COMMONS.collections, COMMONS.lang, COMMONS.logging, GERONIMO.transaction,
@@ -380,10 +387,11 @@ define "ode" do
       JAVAX.transaction, LOG4J, OPENJPA, XERCES, WSDL4J
 
     build derby_db
+    build h2_db
 
     NativeDB.create_dbs self, _("."), :jpa
 
-    package(:zip).include(derby_db)
+    package(:zip).include(derby_db).include(h2_db)
   end
 
   desc "ODE JAva Concurrent OBjects"
@@ -622,6 +630,13 @@ define "ode" do
 
   # sign artifacts
   gpg_sign_before_upload
+
+
+
+  task :aligndeps do
+    pp transitive(['org.apache.axis2:axis2-webapp:jar:1.5.6', 'org.apache.rampart:rampart-project:jar:1.5.2']).group_by {|s| "#{s.group}:#{s.id}:#{s.classifier}:#{s.type}" }.map {|i,v| v.sort_by(&:version).first.to_spec}.sort
+  end
+
 
 end
 

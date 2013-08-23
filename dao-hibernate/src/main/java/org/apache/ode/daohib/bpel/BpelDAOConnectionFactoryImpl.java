@@ -162,6 +162,8 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
                 "org.hibernate.dialect.DerbyDialect"));
         HIBERNATE_DIALECTS.put("INGRES", new DialectFactory.VersionInsensitiveMapper(
                 "org.hibernate.dialect.IngresDialect"));
+        HIBERNATE_DIALECTS.put("H2", new DialectFactory.VersionInsensitiveMapper(
+                "org.hibernate.dialect.H2Dialect"));
     }
 
     public void shutdown() {

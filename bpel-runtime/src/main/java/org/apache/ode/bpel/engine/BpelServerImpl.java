@@ -571,6 +571,12 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         _engine.setInstanceThrottledMaximumCount(instanceThrottledMaximumCount);
     }
 
+    public void acquireTransactionLocks() {
+        if (Boolean.parseBoolean(_configProperties.getProperty("ode.acquireTransactionLocks", "false"))) {
+            _contexts.scheduler.acquireTransactionLocks();
+        }
+    }
+    
     /**
      * A polled runnable instance that implements this interface will be set 
      * with the contexts before the run() method is called.

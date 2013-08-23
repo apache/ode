@@ -96,6 +96,9 @@ public class ReplayerScheduler implements Scheduler {
 
     public void shutdown() {
     }
+    
+    public void acquireTransactionLocks() {
+    }
 
     public void startReplaying(Replayer replayer) throws Exception {
         this.replayer = replayer;

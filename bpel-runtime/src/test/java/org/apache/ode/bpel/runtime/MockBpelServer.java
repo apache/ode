@@ -404,6 +404,7 @@ class MockBpelServer {
         public void start() { _scheduler.start(); }
         public void stop() { _scheduler.stop(); }
         public void shutdown() { _scheduler.shutdown(); }
+        public void acquireTransactionLocks() { _scheduler.acquireTransactionLocks(); }
 
         public void registerSynchronizer(Synchronizer synch) throws ContextException {
             _scheduler.registerSynchronizer(synch);

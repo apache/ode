@@ -829,6 +829,10 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
 //        _db.insertJob(jobRetry, _nodeId, false);
 //        return delay;
 //    }
+    
+    public void acquireTransactionLocks() {
+        _db.acquireTransactionLocks();
+    }
 
     private abstract class SchedulerTask extends Task implements Runnable {
         SchedulerTask(long schedDate) {

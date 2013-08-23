@@ -143,6 +143,8 @@ public interface Scheduler {
     void stop();
 
     void shutdown();
+    
+    void acquireTransactionLocks();
 
     public interface Synchronizer {
         /**

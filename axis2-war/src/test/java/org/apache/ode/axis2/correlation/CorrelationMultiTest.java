@@ -60,6 +60,6 @@ public class CorrelationMultiTest extends Axis2TestBase implements ODEConfigDirA
     }
 
     public String getODEConfigDir() {
-        return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby"; 
+        return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-h2"; 
     }
 }

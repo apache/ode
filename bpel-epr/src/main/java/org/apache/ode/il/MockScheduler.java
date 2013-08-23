@@ -212,6 +212,9 @@ public class MockScheduler implements Scheduler {
 
     public void shutdown() {
     }
+    
+    public void acquireTransactionLocks() {
+    }
 
     public void registerSynchronizer(final Synchronizer synch) throws ContextException {
         if (_txm != null) {
