@@ -19,30 +19,6 @@
 
 package org.apache.ode.axis2;
 
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.context.ConfigurationContextFactory;
-import org.apache.axis2.description.AxisOperation;
-import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.Parameter;
-import org.apache.axis2.description.WSDL11ToAxisServiceBuilder;
-import org.apache.axis2.engine.AxisServer;
-import org.apache.axis2.engine.MessageReceiver;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.StringUtils;
-import org.apache.ode.axis2.hooks.ODEAxisService;
-import org.apache.ode.axis2.util.Axis2UriResolver;
-import org.apache.ode.axis2.util.Axis2WSDLLocator;
-import org.apache.ode.bpel.engine.BpelServerImpl;
-import org.apache.ode.tools.sendsoap.cline.HttpSoapSender;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-
-
-import javax.servlet.ServletException;
-import javax.wsdl.WSDLException;
-import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -54,8 +30,35 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.wsdl.WSDLException;
+import javax.xml.namespace.QName;
+
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.context.ConfigurationContextFactory;
+import org.apache.axis2.deployment.DeploymentEngine;
+import org.apache.axis2.deployment.repository.util.ArchiveReader;
+import org.apache.axis2.description.AxisOperation;
+import org.apache.axis2.description.AxisService;
+import org.apache.axis2.description.Parameter;
+import org.apache.axis2.description.WSDL11ToAxisServiceBuilder;
+import org.apache.axis2.engine.AxisServer;
+import org.apache.axis2.engine.MessageReceiver;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.axis2.hooks.ODEAxisService;
+import org.apache.ode.axis2.util.Axis2UriResolver;
+import org.apache.ode.axis2.util.Axis2WSDLLocator;
+import org.apache.ode.bpel.engine.BpelServerImpl;
+import org.apache.ode.tools.sendsoap.cline.HttpSoapSender;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 
 /**
  * @author Matthieu Riou <mriou@apache.org>
@@ -167,7 +170,7 @@ public abstract class Axis2TestBase {
     @BeforeMethod
     protected void setUp() throws Exception {
         System.out.println("##### Running "+getClass().getName());
-        log.debug("##### Running "+getClass().getName());
+        log.info("##### Running "+getClass().getName());
         /**
          * 1. If no settings are given from buildr, the test runs with the default config directory.
          * 2. If no settings are given from buildr and if the test implements ODEConfigDirAware, the test runs with
@@ -205,6 +208,8 @@ public abstract class Axis2TestBase {
         }
 
         startServer();
+        
+        DeploymentEngine.buildServiceGroup(getClass().getResourceAsStream("/test-services.xml"), Thread.currentThread().getContextClassLoader(), "testGroup", server.getConfigurationContext(), new ArchiveReader(), new HashMap());
     }
 
     @AfterMethod
