@@ -127,7 +127,7 @@ define "ode" do
       end
     end
 
-    test.using :testng, :forkmode=>'perTest', :properties=>{ "log4j.debug" => true,  "log4j.configuration"=>"test-log4j.properties", "test.ports" => ENV['TEST_PORTS'] }
+    test.using :testng, :forkmode=>'perTest', :properties=>{ "org.apache.commons.logging.LogFactory" => "org.apache.commons.logging.impl.LogFactoryImpl", "log4j.configuration"=>"test-log4j.properties", "test.ports" => ENV['TEST_PORTS'] } #, :java_args=>['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6001', '-Xmx2048m', '-XX:MaxPermSize=256m']
     test.with [projects("tools"), libs, AXIS2_TEST, Buildr::Jetty::REQUIRES, HIBERNATE, JAVAX.servlet, DOM4J, SLF4J, LOG4J].uniq
     webapp_dir = "#{test.compile.target}/webapp"
     test.setup task(:prepare_webapp) do |task|
