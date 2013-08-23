@@ -28,7 +28,7 @@ import org.apache.axis2.AxisFault;
  */
 public class OdeFault extends AxisFault {
 
-    public static final QName FAULT = new QName("http://incubator.apache.org/ode", "Fault");
+    public static final QName FAULT = new QName("http://ode.apache.org", "Fault", "ode");
 
     public OdeFault(String message) {
         super(FAULT, message, null);
