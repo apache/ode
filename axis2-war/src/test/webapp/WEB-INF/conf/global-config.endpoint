@@ -1,7 +1,3 @@
-t/resources/TestRampartBasic/secured-services/process-template/config.endpoint test/resources/TestRampartPolicy/secured-services/process-template/config.endpoint test/resources/TestRampartPolicy/secured-services/process-sample04_policy_in_service.xml/config.endpoint
-test/resources/TestSoapHeader/location.endpoint
-
-
 alias.dummy-ns=http://axis2.ode.apache.org
 dummy-ns.DummyService.ode.address=http://localhost:${system.test.port.0}/processes/DummyService
 

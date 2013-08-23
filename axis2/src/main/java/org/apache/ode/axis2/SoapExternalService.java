@@ -371,7 +371,7 @@ public class SoapExternalService implements ExternalService {
             }
             if (address != null) {
                 String url = address.getTextContent();
-                String jmsDestination = (String) options.getProperty(JMSConstants.REPLY_PARAM);
+                String jmsDestination = (String) options.getProperty(JMSConstants.PARAM_REPLY_DESTINATION);
                 if (__log.isDebugEnabled()) {
                     __log.debug("The user-defined JMS replyTo destination is: "
                             + jmsDestination);
@@ -394,7 +394,7 @@ public class SoapExternalService implements ExternalService {
                             jmsEndIndex = url.length();
                         }
                         jmsDestination = url.substring(startIndex, jmsEndIndex);
-                        options.setProperty(JMSConstants.REPLY_PARAM, jmsDestination);
+                        options.setProperty(JMSConstants.PARAM_REPLY_DESTINATION, jmsDestination);
                         replyEPR = new EndpointReference(url);
                     } else {
                         startIndex = url.indexOf("http://");
@@ -403,7 +403,7 @@ public class SoapExternalService implements ExternalService {
                             if (startIndex != -1) {
                                 startIndex += "/processes/".length();
                                 jmsDestination = url.substring(startIndex);
-                                options.setProperty(JMSConstants.REPLY_PARAM, jmsDestination);
+                                options.setProperty(JMSConstants.PARAM_REPLY_DESTINATION, jmsDestination);
                             }
                         }
                     }

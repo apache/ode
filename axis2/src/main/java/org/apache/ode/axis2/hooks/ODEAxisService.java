@@ -132,7 +132,7 @@ public class ODEAxisService {
             
             // Set the JMS destination name on the Axis Service
             if (isJmsEndpoint(pconf, wsdlServiceName, portName)) {
-                axisService.addParameter(new Parameter(JMSConstants.DEST_PARAM, 
+                axisService.addParameter(new Parameter(JMSConstants.PARAM_DESTINATION, 
                         extractJMSDestinationName(axisServiceName, deriveBaseServiceUri(pconf))));
             }
 

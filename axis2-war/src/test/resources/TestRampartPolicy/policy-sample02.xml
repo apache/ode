@@ -15,12 +15,7 @@
  ! See the License for the specific language governing permissions and
  ! limitations under the License.
  !-->
-<!-- services.xml of sample-03 : Sign and Encryption-->
-<service>
-
-    <module ref="rampart" />
-
-<wsp:Policy wsu:Id="SigEncr" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+<wsp:Policy wsu:Id="SigOnly" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
     <wsp:ExactlyOne>
         <wsp:All>
             <sp:AsymmetricBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
@@ -29,8 +24,7 @@
                         <wsp:Policy>
                             <sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
                                 <wsp:Policy>
-                                   <sp:RequireThumbprintReference/>
-                                    <sp:WssX509V1Token10/>
+                                    <sp:WssX509V3Token10/>
                                 </wsp:Policy>
                             </sp:X509Token>
                         </wsp:Policy>
@@ -39,7 +33,6 @@
                         <wsp:Policy>
                             <sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Never">
                                 <wsp:Policy>
-                                    <sp:RequireThumbprintReference/>
                                     <sp:WssX509V3Token10/>
                                 </wsp:Policy>
                             </sp:X509Token>
@@ -68,33 +61,21 @@
             <sp:SignedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
                 <sp:Body/>
             </sp:SignedParts>
-            <sp:EncryptedParts xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
-                <sp:Body/>
-            </sp:EncryptedParts>
 
             <ramp:RampartConfig xmlns:ramp="http://ws.apache.org/rampart/policy">
-                <ramp:user>service</ramp:user>
-                <ramp:encryptionUser>client</ramp:encryptionUser>
-                <ramp:passwordCallbackClass>org.apache.rampart.samples.policy.sample03.PWCBHandler</ramp:passwordCallbackClass>
+                <ramp:user>client</ramp:user>
+                <ramp:encryptionUser>service</ramp:encryptionUser>
+                <ramp:passwordCallbackClass>org.apache.rampart.samples.policy.sample02.PWCBHandler</ramp:passwordCallbackClass>
 
                 <ramp:signatureCrypto>
                     <ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin">
                         <ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type">JKS</ramp:property>
-                        <ramp:property name="org.apache.ws.security.crypto.merlin.file">TestRampartPolicy/secured-processes/service.jks</ramp:property>
+                        <ramp:property name="org.apache.ws.security.crypto.merlin.file">TestRampartPolicy/client.jks</ramp:property>
                         <ramp:property name="org.apache.ws.security.crypto.merlin.keystore.password">apache</ramp:property>
                     </ramp:crypto>
                 </ramp:signatureCrypto>
-                <ramp:encryptionCypto>
-                    <ramp:crypto provider="org.apache.ws.security.components.crypto.Merlin">
-                        <ramp:property name="org.apache.ws.security.crypto.merlin.keystore.type">JKS</ramp:property>
-                        <ramp:property name="org.apache.ws.security.crypto.merlin.file">TestRampartPolicy/secured-processes/service.jks</ramp:property>
-                        <ramp:property name="org.apache.ws.security.crypto.merlin.keystore.password">apache</ramp:property>
-                    </ramp:crypto>
-                </ramp:encryptionCypto>
             </ramp:RampartConfig>
 
         </wsp:All>
     </wsp:ExactlyOne>
 </wsp:Policy>
-
-</service>

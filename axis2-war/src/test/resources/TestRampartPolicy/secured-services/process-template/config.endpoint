@@ -3,6 +3,7 @@
 alias.sample-ns={sample.namespace}
 sample-ns.{sample.service.name}.ode.security.policy.file={sample.service.name}.xml
 
+#sample04 tends to time out
+sample-ns.sample04-policy.ode.mex.timeout=120000
 
 sample-ns.{sample.service.name}.ode.address=http://localhost:${system.test.port.0}/axis2/processes/{sample.service.name}
-
