@@ -253,6 +253,8 @@ define "ode" do
 
   desc "ODE BPEL Test Script Files"
   define "bpel-scripts" do
+    eclipse.natures = :java
+
     package :jar
   end
 
