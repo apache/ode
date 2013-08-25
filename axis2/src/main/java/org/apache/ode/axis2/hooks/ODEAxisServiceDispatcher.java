@@ -19,7 +19,10 @@
 
 package org.apache.ode.axis2.hooks;
 
-import org.apache.axiom.om.OMElement;
+import java.util.ArrayList;
+
+import javax.xml.namespace.QName;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.context.MessageContext;
@@ -28,12 +31,12 @@ import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.HandlerDescription;
 import org.apache.axis2.engine.AbstractDispatcher;
 import org.apache.axis2.engine.AxisConfiguration;
-import org.apache.axis2.i18n.Messages;
-import org.apache.commons.collections.map.MultiKeyMap;
+import org.apache.axis2.util.PolicyUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import javax.xml.namespace.QName;
+import org.apache.neethi.Policy;
+import org.apache.neethi.PolicyComponent;
+import org.apache.rampart.RampartMessageData;
 
 /**
  * Dispatches the service based on the information from the target endpoint URL.
@@ -59,7 +62,9 @@ public class ODEAxisServiceDispatcher extends AbstractDispatcher {
         EndpointReference toEPR = messageContext.getTo();
 
         if (toEPR != null) {
-            log.debug("Checking for Service using target endpoint address : " + toEPR.getAddress());
+            if (log.isDebugEnabled()) {
+                log.debug("Checking for Service using target endpoint address : " + toEPR.getAddress());
+            }
 
             // The only thing we understand if a service name that
             // follows /processes/ in the request URL.
@@ -69,7 +74,17 @@ public class ODEAxisServiceDispatcher extends AbstractDispatcher {
                         messageContext.getConfigurationContext().getAxisConfiguration();
                 AxisService service = registry.getService(path);
                 if (service!=null) {
-                    log.debug("Found service in registry from name " + path + ": " + service);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Found service in registry from name " + path + ": " + service);
+                    }
+                    // Axis2 >1.3 is less clever than 1.3. See ODE-509
+                    // We have to do additional work for him.
+                    // TODO: Check if there is a better workaround possible.
+                    Policy policy = PolicyUtil.getMergedPolicy(new ArrayList<PolicyComponent>(service.getPolicySubject().getAttachedPolicyComponents()), service);
+                    if (policy != null) {
+                        if (log.isDebugEnabled()) log.debug("Apply policy: " + policy.getName());
+                        messageContext.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);
+                    }
                     return service;
                 }
             }

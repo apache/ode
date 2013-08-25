@@ -19,21 +19,19 @@
 
 package org.apache.ode.axis2.hooks;
 
+import javax.xml.namespace.QName;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.HandlerDescription;
 import org.apache.axis2.engine.AbstractDispatcher;
-import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.i18n.Messages;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import javax.xml.namespace.QName;
 
 /**
  * Dispatches the service based on the information from the target endpoint URL.
@@ -55,7 +53,9 @@ public class ODEAxisOperationDispatcher extends AbstractDispatcher {
         // way to identify the operation.
         String action = messageContext.getWSAAction();
         if (action != null) {
-            log.debug(Messages.getMessage("checkingoperation", action));
+            if (log.isDebugEnabled()) {
+                log.debug(Messages.getMessage("checkingoperation", action));
+            }
             operation = service.getOperationByAction(action);
             if (operation != null)
                 return operation;
@@ -67,11 +67,15 @@ public class ODEAxisOperationDispatcher extends AbstractDispatcher {
         OMElement bodyFirstChild = messageContext.getEnvelope().getBody().getFirstElement();
         if (bodyFirstChild != null) {
             String localName = bodyFirstChild.getLocalName();
-            log.debug("Checking for Operation using SOAP message body's first child's local name : "
+            if (log.isDebugEnabled()) {
+                log.debug("Checking for Operation using SOAP message body's first child's local name : "
                             + localName);
+            }
             operation = service.getOperation(new QName(localName));
             if (operation != null) {
-                log.debug("Found operation " + operation);
+                if (log.isDebugEnabled()) {
+                    log.debug("Found operation " + operation);
+                }
                 return operation;
             }
 
