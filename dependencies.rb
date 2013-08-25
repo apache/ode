@@ -44,8 +44,8 @@ AXIS2_MODULES        = struct(
                         "org.apache.axis2:mex:jar:impl:1.5.6",
                         "org.opensaml:opensaml1:jar:1.1",
                         "org.opensaml:opensaml:jar:2.2.3",
-                        "org.opensaml:openws:jar:1.2.2",
-                        "org.opensaml:xmltooling:jar:1.2.0",
+                        "org.opensaml:openws:jar:1.4.2",
+                        "org.opensaml:xmltooling:jar:1.3.2",
                         "bouncycastle:bcprov-jdk15:jar:140"] 
 )
 AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.5.6"
