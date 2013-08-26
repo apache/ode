@@ -64,9 +64,16 @@ public class ServiceClientUtil {
         options.setTimeOutInMilliSeconds(timeout);
 
         ServiceClient serviceClient = new ServiceClient();
+        try {
         serviceClient.setOptions(options);
-
-        return serviceClient.sendReceive(msg);
+        
+            OMElement response = serviceClient.sendReceive(msg);
+            // build response to materialize lazy information
+            response.build();
+            return response;
+        } finally {
+            serviceClient.cleanupTransport();
+        }
     }
 
     /**

@@ -256,8 +256,11 @@ public class SoapMessageConverter {
         }
 
         OMElement omPart = OMUtils.toOM(srcPartEl, _soapFactory);
-        for (Iterator<OMNode> i = omPart.getChildren(); i.hasNext();)
-            soaphdr.addChild(i.next());
+        for (Iterator<OMNode> i = omPart.getChildren(); i.hasNext();) {
+            OMNode node = i.next();
+            i.remove();
+            soaphdr.addChild(node);
+        }
     }
 
     public SOAPFault createSoapFault(Element message, QName faultName, Operation op) throws AxisFault {
@@ -361,7 +364,11 @@ public class SoapMessageConverter {
 
             OMElement omPart = OMUtils.toOM(srcPartEl, _soapFactory);
             if (_isRPC) partHolder.addChild(omPart);
-            else for (Iterator<OMNode> i = omPart.getChildren(); i.hasNext();) partHolder.addChild(i.next());
+            else for (Iterator<OMNode> i = omPart.getChildren(); i.hasNext();) {
+                OMNode node = i.next();
+                i.remove();
+                partHolder.addChild(node);
+            }
         }
     }
 
