@@ -134,7 +134,7 @@ public class Serializer  {
         try {
             oprocess = (OProcess) ois.readObject();
         } catch (ClassNotFoundException e) {
-            throw new IOException("DataStream Error");
+            throw new IOException("DataStream Error", e);
         } finally {
             try {
                 if (ois != null)

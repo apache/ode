@@ -19,11 +19,13 @@
 <features>
     <feature name="ode-core-deps" version="${ode.version}">
         <feature>transaction</feature>
+        <feature>jbi</feature>
         <bundle>mvn:commons-collections/commons-collections/${commons.collections.version}</bundle>
         <bundle>mvn:commons-beanutils/commons-beanutils/1.8.2</bundle>
         <bundle>mvn:commons-io/commons-io/1.4</bundle>
         <bundle>wrap:mvn:jaxen/jaxen/1.1.1</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.saxon/9.1.0.8_1</bundle>
+        <bundle>mvn:org.apache.geronimo.specs/geronimo-j2ee-connector_1.5_spec/2.0.0</bundle>
         <bundle>mvn:org.apache.geronimo.components/geronimo-connector/2.1.3</bundle>
     </feature>
     <feature name="ode-core" version="${ode.version}">
@@ -74,14 +76,17 @@
         <bundle>mvn:org.apache.ode/ode-jbi-karaf-commands/${ode.version}</bundle>
     </feature>
     <feature name="ode-pmapi-httpbinding" version="${ode.version}">
+        <feature>servicemix-cxf-bc</feature>
         <bundle>mvn:org.apache.ode/ode-jbi-karaf-pmapi-httpbinding/${ode.version}</bundle>
     </feature>
     <feature name="examples-ode-ping-pong" version="${ode.version}">
         <feature version="${ode.version}">ode</feature>
+        <feature>servicemix-cxf-bc</feature>
         <bundle>mvn:org.apache.ode.examples/ping-pong-bundle/${ode.version}</bundle>
     </feature>
     <feature name="examples-ode-helloworld" version="${ode.version}">
         <feature version="${ode.version}">ode</feature>
+        <feature>servicemix-cxf-bc</feature>
         <bundle>mvn:org.apache.ode.examples/helloworld-bundle/${ode.version}</bundle>
     </feature>
 
