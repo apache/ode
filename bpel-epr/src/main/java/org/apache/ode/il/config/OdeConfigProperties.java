@@ -109,7 +109,7 @@ public class OdeConfigProperties {
     private Properties _props;
 
     /** Default defaults for the database embedded name and dao connection factory class. */
-    private static String __dbEmbName = "jpadb";
+    private static String __dbEmbName = "derby-jpadb";
     private static String __daoCfClass = "org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl";
 
     static {
