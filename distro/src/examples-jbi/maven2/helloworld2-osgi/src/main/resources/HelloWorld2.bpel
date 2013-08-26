@@ -17,10 +17,10 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<process name="HelloWorld2"
-         targetNamespace="urn:/HeaderTest.bpel"
+<process name="HelloWorld"
+         targetNamespace="urn:/jbiTest.bpel"
          xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
-         xmlns:tns="urn:/HeaderTest.bpel"
+         xmlns:tns="urn:/jbiTest.bpel"
          xmlns:hello="urn:/HelloWorld2.wsdl"
          xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 
@@ -51,14 +51,14 @@
                 
         <assign name="assign1">
             <copy>
-                <from>$request.body/hello:text</from>
+                <from>$request.body/text</from>
                 <to variable="text"/>
             </copy>
             <copy>
                 <from>
                     <literal>
                         <hello:HelloResponse>
-                            <hello:text/>
+                            <text xmlns=""/>
                         </hello:HelloResponse>
                     </literal>
                 </from>
@@ -66,7 +66,7 @@
             </copy>
             <copy>
                 <from>concat($text,' World')</from>
-                <to>$response.body/hello:text</to>
+                <to>$response.body/text</to>
             </copy>
         </assign>
         
