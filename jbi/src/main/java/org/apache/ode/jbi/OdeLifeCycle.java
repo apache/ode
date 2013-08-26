@@ -33,12 +33,12 @@ import javax.transaction.TransactionManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.ProcessAndInstanceManagementMBean;
 import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
-
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.il.dbutil.Database;
@@ -180,6 +180,20 @@ public class OdeLifeCycle implements ComponentLifeCycle {
     }
 
     private void initDataSource() throws JBIException {
+        switch (_ode._config.getDbMode()) {
+        case EMBEDDED:
+        case INTERNAL:
+            try {
+                TransactionManager txm = new GeronimoTransactionManager();
+                _ode.setTransactionManager(txm);
+            } catch (Exception e) {
+                throw new RuntimeException("Unable to create Geronimo Transaction Manager", e);
+            }
+            break;
+        default:
+            break;
+        }
+        
         _db = Database.create(_ode._config);
         _db.setTransactionManager(_ode.getTransactionManager());
         _db.setWorkRoot(new File(_ode.getContext().getInstallRoot()));

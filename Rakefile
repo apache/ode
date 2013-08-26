@@ -396,7 +396,7 @@ define "ode" do
   define "jbi" do
     compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "bpel-epr", "bpel-obj",
       "bpel-runtime", "scheduler-simple", "bpel-schemas", "bpel-store", "utils", "agents"),
-      AXIOM, COMMONS.pool, JAVAX.transaction, JBI, WSDL4J, XERCES, SLF4J, LOG4J
+      AXIOM, COMMONS.logging, COMMONS.pool, JAVAX.transaction, GERONIMO.transaction, JBI, SLF4J, LOG4J, WSDL4J, XERCES
 
     package(:jar)
     package(:jbi).tap do |jbi|
