@@ -107,7 +107,17 @@ public class XPath10ExpressionRuntime implements ExpressionLanguageRuntime {
                 // Giving our node a parent just in case it's an LValue
                 // expression
                 Element wrapper = d.createElement("wrapper");
-                Text text = d.createTextNode(retVal.get(0).toString());
+                Object ret = retVal.get(0);
+                
+                if (ret instanceof Double) {
+                    // safely convert a double into a long if they are numerically equal. This
+                    // makes 1 from 1.0, which is more reliable when calling web services.
+                    if (Double.compare((Double)ret, Math.ceil((Double)ret)) == 0) {
+                        // the double is actually an int/long
+                        ret = ((Double)ret).longValue();
+                    }
+                }
+                Text text = d.createTextNode(ret.toString());
                 wrapper.appendChild(text);
                 d.appendChild(wrapper);
                 retVal = Collections.singletonList(text);
