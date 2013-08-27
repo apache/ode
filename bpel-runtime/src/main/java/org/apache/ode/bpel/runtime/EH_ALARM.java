@@ -101,6 +101,16 @@ class EH_ALARM extends BpelJacobRunnable {
                 _psc.completed(createFault(e.getQName(),_oalarm.untilExpr), _comps);
                 return;
             }
+        else if (_oalarm.repeatExpr != null)
+            try {
+                getBpelRuntimeContext().getExpLangRuntime().evaluateAsDuration(_oalarm.repeatExpr, getEvaluationContext()).addTo(alarm);
+            } catch (EvaluationException e) {
+                throw new InvalidProcessException(e);
+            } catch (FaultException e) {
+                __log.error(e);
+                _psc.completed(createFault(e.getQName(),_oalarm.repeatExpr), _comps);
+                return;
+            }
 
         // We reduce to waiting for the alarm to be triggered.
         instance(new WAIT(alarm));
