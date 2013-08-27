@@ -50,7 +50,7 @@
         <startCounterValue>0</startCounterValue>
         <finalCounterValue>10</finalCounterValue>
         <completionCondition>
-          <branches>5</branches>
+          <branches successfulBranchesOnly="yes">5</branches>
         </completionCondition>
 
         <scope name="sc1">

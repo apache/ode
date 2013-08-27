@@ -46,6 +46,9 @@ public class GoodCompileTest extends TestCase {
         suite.addTest(new GoodCompileTCase("/2.0/good/flow/flow5-2.0.bpel"));
         suite.addTest(new GoodCompileTCase("/2.0/good/flow/flow6-2.0.bpel"));
         suite.addTest(new GoodCompileTCase("/2.0/good/flow/flow7-2.0.bpel"));
+        suite.addTest(new GoodCompileTCase("/2.0/good/foreach/Foreach1-2.0.bpel"));
+        suite.addTest(new GoodCompileTCase("/2.0/good/foreach/Foreach2-2.0.bpel"));
+        suite.addTest(new GoodCompileTCase("/2.0/good/foreach/Foreach3-2.0.bpel"));
         suite.addTest(new GoodCompileTCase("/2.0/good/if/If1-2.0.bpel"));
         suite.addTest(new GoodCompileTCase("/2.0/good/if/If2-2.0.bpel"));
         suite.addTest(new GoodCompileTCase("/2.0/good/if/If3-2.0.bpel"));

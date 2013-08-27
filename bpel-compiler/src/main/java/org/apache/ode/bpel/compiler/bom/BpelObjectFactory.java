@@ -74,6 +74,8 @@ public class BpelObjectFactory {
         _mappings.put(Bpel20QNames.FINAL_PICK, PickActivity.class);
         _mappings.put(Bpel20QNames.FINAL_SCOPE, ScopeActivity.class);
         _mappings.put(Bpel20QNames.FINAL_FOREACH, ForEachActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_COMPLETION_CONDITION, CompletionCondition.class);
+        _mappings.put(Bpel20QNames.FINAL_BRANCHES, Branches.class);
         _mappings.put(Bpel20QNames.FINAL_COPY, Copy.class);
         _mappings.put(Bpel20QNames.FINAL_CATCH, Catch.class);
         _mappings.put(Bpel20QNames.FINAL_CATCHALL, Catch.class);
@@ -155,6 +157,8 @@ public class BpelObjectFactory {
         _mappings.put(Bpel20QNames.FROM, From.class);
         _mappings.put(Bpel20QNames.START_COUNTER_VALUE, Expression.class);
         _mappings.put(Bpel20QNames.FINAL_COUNTER_VALUE, Expression.class);
+        _mappings.put(Bpel20QNames.COMPLETION_CONDITION, CompletionCondition.class);
+        _mappings.put(Bpel20QNames.BRANCHES, Branches.class);
         _mappings.put(Bpel20QNames.CORRELATION, Correlation.class);
         _mappings.put(Bpel20QNames.CORRELATIONSET, CorrelationSet.class);
         _mappings.put(Bpel20QNames.COMPENSATE, CompensateScopeActivity.class);
