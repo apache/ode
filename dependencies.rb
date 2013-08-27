@@ -88,7 +88,7 @@ JAVAX               = struct(
   :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.1_spec:jar:1.1",
   :resource         =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec:jar:1.0"
 )
-JAXEN               = "jaxen:jaxen:jar:1.1.3"
+JAXEN               = "jaxen:jaxen:jar:1.1.4"
 JBI                 = group("org.apache.servicemix.specs.jbi-api-1.0", :under=>"org.apache.servicemix.specs", :version=>"1.1.0")
 JENCKS              = "org.jencks:jencks:jar:all:1.3"
 JIBX                = "org.jibx:jibx-run:jar:1.2.1"
