@@ -173,7 +173,7 @@ final public class OdeContext {
     }
 
     public TransactionManager getTransactionManager() {
-        if (_txm != null) {
+        if (_txm == null) {
             return (TransactionManager) getContext().getTransactionManager();
         }
         
