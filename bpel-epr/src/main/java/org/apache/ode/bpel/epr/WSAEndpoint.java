@@ -165,7 +165,7 @@ public class WSAEndpoint implements MutableEndpoint {
         Element serviceRef = doc.createElementNS(SERVICE_REF_QNAME.getNamespaceURI(), SERVICE_REF_QNAME.getLocalPart());
         doc.appendChild(serviceRef);
         serviceRef.appendChild(doc.importNode(_eprElmt, true));
-        return _eprElmt.getOwnerDocument();
+        return doc;
     }
 
     public Map toMap() {
