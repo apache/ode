@@ -27,6 +27,9 @@ import org.apache.ode.bpel.compiler.api.CompileListener;
 import org.junit.Assert;
 import org.junit.Test;
 
+        suite.addTest(new GoodCompileTCase("/2.0/good/foreach/ForEach1-2.0.bpel"));
+        suite.addTest(new GoodCompileTCase("/2.0/good/foreach/ForEach2-2.0.bpel"));
+        suite.addTest(new GoodCompileTCase("/2.0/good/foreach/ForEach3-2.0.bpel"));
 
 public class GoodCompileTest extends AbstractCompileTestCase implements CompileListener {
            

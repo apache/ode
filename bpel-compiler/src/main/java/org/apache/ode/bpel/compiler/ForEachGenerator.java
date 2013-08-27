@@ -58,8 +58,8 @@ public class ForEachGenerator extends DefaultActivityGenerator {
             oforEach.completionCondition =
                     new OForEach.CompletionCondition(_context.getOProcess());
             oforEach.completionCondition.successfulBranchesOnly
-                    = forEach.getCompletionCondition().isSuccessfulBranchesOnly();
-            oforEach.completionCondition.branchCount = _context.compileExpr(forEach.getCompletionCondition());
+                    = forEach.getCompletionCondition().getBranch().isSuccessfulBranchesOnly();
+            oforEach.completionCondition.branchCount = _context.compileExpr(forEach.getCompletionCondition().getBranch());
         }
 
         // ForEach 'adds' a counter variable in inner scope

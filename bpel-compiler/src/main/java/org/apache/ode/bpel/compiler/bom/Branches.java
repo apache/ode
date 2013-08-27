@@ -22,26 +22,23 @@ package org.apache.ode.bpel.compiler.bom;
 import org.w3c.dom.Element;
 
 /**
- * Interface for a <code>&lt;completionCondition&gt;</code> as used in a
+ * Interface for a <code>&lt;branches&gt;</code> as used in a
  * forEach activity.
  */
-public class CompletionCondition extends Expression {
+public class Branches extends Expression {
 
-    public CompletionCondition(Element el) {
+    public Branches(Element el) {
         super(el);
     }
 
     /**
      * Gets whether the completion count should include all terminated children
      * or only successfully completed ones.
-     *
+     * 
      * @return counts completed
      */
     public boolean isSuccessfulBranchesOnly() {
         return getAttribute("successfulBranchesOnly", "no").equals("yes");
     }
     
-    public Branches getBranch() {
-        return (Branches) getFirstChild(Branches.class);
-    }
 }
