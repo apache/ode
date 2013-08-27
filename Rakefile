@@ -198,6 +198,7 @@ define "ode" do
   define "bpel-epr" do
     compile.with projects("utils", "bpel-dao", "bpel-api"),
       AXIOM, COMMONS.lang, COMMONS.logging, COMMONS.beanutils, DERBY, JAVAX.connector, JAVAX.stream, JAVAX.transaction, GERONIMO.transaction, GERONIMO.connector, TRANQL, XMLBEANS
+
     package :jar
   end
 
