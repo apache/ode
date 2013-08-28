@@ -198,6 +198,7 @@ define "ode" do
     compile.with projects("utils", "bpel-dao", "bpel-api"),
       AXIOM, COMMONS.lang, COMMONS.beanutils, DERBY, JAVAX.connector, JAVAX.stream, JAVAX.transaction, 
       GERONIMO.transaction, GERONIMO.connector, TRANQL, XMLBEANS, SLF4J, LOG4J
+    test.with XERCES
     package :jar
   end
 
