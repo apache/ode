@@ -185,13 +185,31 @@ public class FOREACH extends ACTIVITY {
     private int evaluateCondition(OExpression condition)
             throws FaultException {
         try {
-            return getBpelRuntimeContext().getExpLangRuntime().
+            int cond = getBpelRuntimeContext().getExpLangRuntime().
                     evaluateAsNumber(condition, getEvaluationContext()).intValue();
+            
+            if (cond < 0) {
+                String msg = "ForEach counter was negative.";
+                __log.error(msg);
+                throw new FaultException(_oforEach.getOwner().constants.qnInvalidExpressionValue,msg);
+            }
+            
+            if (cond > Integer.MAX_VALUE) {
+                // FIXME: this is not entirely correct. ODE uses an signed integer but the
+                // value range for the counters are xs:unsignedInt, which do not fit in
+                // an integer. To keep byte code compatibility, we can't easily change the type
+                // of the fields. But we can probably live with the limitation to only
+                // support Integer.MAX_VALUE as a maximum instead of Integer.MAX_VALUE * 2 - 1.
+                String msg = "ForEach counter was too large.";
+                __log.error(msg);
+                throw new FaultException(_oforEach.getOwner().constants.qnInvalidExpressionValue,msg);
+            }
+
+            return cond;
         } catch (EvaluationException e) {
-            String msg;
-            msg = "ForEach counter value couldn't be evaluated as xs:unsignedInt.";
+            String msg = "ForEach counter value couldn't be evaluated as xs:unsignedInt.";
             __log.error(msg, e);
-            throw new FaultException(_oforEach.getOwner().constants.qnForEachCounterError,msg);
+            throw new FaultException(_oforEach.getOwner().constants.qnInvalidExpressionValue,msg);
         }
     }
 
