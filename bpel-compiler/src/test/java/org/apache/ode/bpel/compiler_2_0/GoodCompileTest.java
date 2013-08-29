@@ -27,10 +27,6 @@ import org.apache.ode.bpel.compiler.api.CompileListener;
 import org.junit.Assert;
 import org.junit.Test;
 
-        suite.addTest(new GoodCompileTCase("/2.0/good/foreach/ForEach1-2.0.bpel"));
-        suite.addTest(new GoodCompileTCase("/2.0/good/foreach/ForEach2-2.0.bpel"));
-        suite.addTest(new GoodCompileTCase("/2.0/good/foreach/ForEach3-2.0.bpel"));
-
 public class GoodCompileTest extends AbstractCompileTestCase implements CompileListener {
            
     public void runTest(String bpel) throws Exception {
@@ -130,6 +126,21 @@ public class GoodCompileTest extends AbstractCompileTestCase implements CompileL
     @Test
     public void testFlow7() throws Exception {
         runTest("/2.0/good/flow/flow7-2.0.bpel");
+    }
+    
+    @Test
+    public void testForEach1() throws Exception {
+        runTest("/2.0/good/foreach/ForEach1-2.0.bpel");
+    }
+
+    @Test
+    public void testForEach2() throws Exception {
+        runTest("/2.0/good/foreach/ForEach2-2.0.bpel");
+    }
+    
+    @Test
+    public void testForEach3() throws Exception {
+        runTest("/2.0/good/foreach/ForEach3-2.0.bpel");
     }
     
     @Test
