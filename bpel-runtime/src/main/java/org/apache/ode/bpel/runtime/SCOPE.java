@@ -353,7 +353,7 @@ class SCOPE extends ACTIVITY {
                         if (catchBlock.faultVariable != null) {
                             try {
                                 VariableInstance vinst =  faultHandlerScopeFrame.resolve(catchBlock.faultVariable);
-                                initializeVariable(vinst, _fault.getFaultMessage());
+                                initializeVariable(vinst, _fault.getFaultMessage().cloneNode(true));
 
                                 // Generating event
                                 VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.name);
