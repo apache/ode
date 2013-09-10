@@ -126,4 +126,5 @@ public interface BpelServer {
      */
     DebuggerContext getDebugger(QName pid) throws BpelEngineException;
 
+    void acquireTransactionLocks();
 }
