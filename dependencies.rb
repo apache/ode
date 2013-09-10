@@ -98,7 +98,7 @@ KARAF               = [
                         group("org.apache.felix.gogo.command","org.apache.felix.gogo.runtime",
                           :under=>"org.apache.felix", :version=>"0.6.1")
                       ]
-LOG4J               = "log4j:log4j:jar:1.2.13"
+LOG4J               = "log4j:log4j:jar:1.2.17"
 OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.2.1",
                        "net.sourceforge.serp:serp:jar:1.13.1"]
 
