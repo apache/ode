@@ -518,15 +518,21 @@ class ASSIGN extends ACTIVITY {
         NodeList nl = src.getChildNodes();
         for (int i = 0; i < nl.getLength(); ++i)
             replacement.appendChild(doc.importNode(nl.item(i), true));
-        NamedNodeMap attrs = src.getAttributes();
-        for (int i = 0; i < attrs.getLength(); ++i) {
-            Attr attr = (Attr)attrs.item(i);
-            replacement.setAttributeNodeNS((Attr)doc.importNode(attr, true));
-        }
+        copyAttributes(doc, ptr, replacement);
+        copyAttributes(doc, src, replacement);
         parent.replaceChild(replacement, ptr);
         DOMUtils.copyNSContext(ptr, replacement);
         
         return (lval == ptr) ? replacement :  lval;
+    }
+
+    private void copyAttributes(Document doc, Element original,
+            Element replacement) {
+        NamedNodeMap attrs = original.getAttributes();
+        for (int i = 0; i < attrs.getLength(); ++i) {
+            Attr attr = (Attr)attrs.item(i);
+            replacement.setAttributeNodeNS((Attr)doc.importNode(attr, true));
+        }
     }
 
     private Element copyInto(Element lval, Element ptr, Element src) {
