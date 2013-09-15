@@ -379,12 +379,12 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         boolean nearfuture = !immediate && when.getTime() <= ctime + _nearFutureInterval;
         try {
             if (immediate) {
-                // Immediate scheduling means we put it in the DB for safe keeping
-                _db.insertJob(job, _nodeId, true);
-
+                // Immediate scheduling means we put it in the DB for safe keeping.
                 // And add it to our todo list .
                 if (_outstandingJobs.size() < _todoLimit) {
-                    addTodoOnCommit(job);
+                    saveAndAddTodoOnCommit(job, _nodeId, true);
+                } else {
+                    saveTodoOnCommit(job, _nodeId, true);
                 }
                 __log.debug("scheduled immediate job: " + job.jobId);
             } else if (nearfuture) {
@@ -619,6 +619,43 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
      */
     protected void runPolledRunnable(final Job job) {
          _exec.submit(new RunJob(job, _polledRunnableProcessor));
+    }
+
+    private void saveAndAddTodoOnCommit(final Job job, final String nodeId, final boolean loaded) {
+        registerSynchronizer(new Synchronizer() {
+            public void afterCompletion(boolean success) {
+                if (success) {
+                    try {
+                        _db.insertJob(job, nodeId, loaded);
+                    } catch (DatabaseException dbe) {
+                        __log.error("Could not save job on commit. Will add it to in-mem queue anyway.", dbe);
+                        throw new ContextException(dbe.getMessage(), dbe);
+                    }
+                    enqueue(job);
+                }
+            }
+
+            public void beforeCompletion() {
+            }
+        });
+    }
+
+    private void saveTodoOnCommit(final Job job, final String nodeId, final boolean loaded) {
+        registerSynchronizer(new Synchronizer() {
+            public void afterCompletion(boolean success) {
+                if (success) {
+                    try {
+                        _db.insertJob(job, nodeId, loaded);
+                    } catch (DatabaseException dbe) {
+                        __log.error("Could not save job on commit.", dbe);
+                        throw new ContextException(dbe.getMessage(), dbe);
+                    }
+                }
+            }
+
+            public void beforeCompletion() {
+            }
+        });
     }
 
     private void addTodoOnCommit(final Job job) {
