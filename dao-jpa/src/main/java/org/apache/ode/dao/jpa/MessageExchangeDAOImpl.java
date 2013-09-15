@@ -128,6 +128,7 @@ public class MessageExchangeDAOImpl extends OpenJPADAO implements MessageExchang
     
     public MessageDAO createMessage(QName type) {
         MessageDAOImpl ret = new MessageDAOImpl(type,this);
+        getEM().persist(ret);
         return ret ;
     }
 
