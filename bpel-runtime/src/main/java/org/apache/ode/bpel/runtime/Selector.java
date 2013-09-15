@@ -50,7 +50,7 @@ public class Selector implements Serializable {
 
     public String toString() {
         return ObjectPrinter.toString(this, new Object[] {
-                "plinkInstnace", plinkInstance,
+                "plinkInstance", plinkInstance,
                 "ckeySet", correlationKeySet,
                 "opName" ,opName,
                 "oneWay", oneWay ? "yes" : "no",
