@@ -77,8 +77,7 @@ public class MessageImpl implements Message {
             header = doc.createElement("header");
             doc.appendChild(header);
         }
-        Element part = header.getOwnerDocument().createElement(name);
-        header.appendChild(part);
+        Element part = replaceHeader(name, header);
         part.appendChild(header.getOwnerDocument().importNode(content, true));
         _dao.setHeader(header);
     }
@@ -90,10 +89,32 @@ public class MessageImpl implements Message {
             header = doc.createElement("header");
             doc.appendChild(header);
         }
-        Element part = header.getOwnerDocument().createElement(name);
-        header.appendChild(part);
+        Element part = replaceHeader(name, header);
         part.setTextContent(content);
         _dao.setHeader(header);
+    }
+    
+    /**
+     * Removes any existing header  parts with the given name then adds a new
+     * header part with the new content
+     * 
+     * @param name
+     * @param content
+     * @param header
+     */
+    private Element replaceHeader(String name, Element header) {
+        NodeList nodeList = header.getChildNodes();
+        // remove existing header part
+        for (int index = 0; index < nodeList.getLength(); index++) {
+            Node node = nodeList.item(index);
+            if (node.getNodeType() == Node.ELEMENT_NODE && name.equals(node.getNodeName())) {
+                header.removeChild(node);
+            }
+        }
+        // add header
+        Element part = header.getOwnerDocument().createElement(name);
+        header.appendChild(part);
+        return part;
     }
 
     public void setMessage(Element msg) {
@@ -130,7 +151,9 @@ public class MessageImpl implements Message {
                     Element part = (Element) children.item(m);
                     Node node = DOMUtils.findChildByType(part, Node.ELEMENT_NODE);
                     if (node == null) node = DOMUtils.findChildByType(part, Node.TEXT_NODE);
-                    l.put(part.getLocalName(), node);
+                    // Element created with DOM level 1 method createElement(string)
+                    // so getLocalName will alway return null
+                    l.put(part.getNodeName(), node);
                 }
         }
         return l;
