@@ -272,9 +272,48 @@ class SCOPE extends ACTIVITY {
                 // We're done with the main work, if we were terminated, we will
                 // need to load the termination handler:
                 if (_terminated) {
-                    __log.debug("Scope: " + _oscope + " was terminated.");
-                    // ??? Should we forward
-                    _self.parent.completed(null,_compensations);
+                    __log.debug("Scope: " + _oscope + " was terminated. (fault="+_fault+")");
+                    
+                    // If termination handler defined, and the scope has not faulted
+                    if (_oscope.terminationHandler != null && _fault == null) {
+                    
+                        // We have to create a scope for the catch block.
+                        BpelRuntimeContext ntive = getBpelRuntimeContext();
+
+                        ActivityInfo terminationHandlerActivity = new ActivityInfo(genMonotonic(), _oscope.terminationHandler,
+                                newChannel(TerminationChannel.class,"TH"), newChannel(ParentScopeChannel.class,"TH"));
+
+                        ScopeFrame terminationHandlerScopeFrame = new ScopeFrame(_oscope.terminationHandler,
+                                ntive.createScopeInstance(_scopeFrame.scopeInstanceId, _oscope.terminationHandler),
+                                _scopeFrame, CompensationHandler.emptySet(), (FaultData)null);
+                        
+                        // Create the temination handler scope.
+                        instance(new SCOPE(terminationHandlerActivity,terminationHandlerScopeFrame, SCOPE.this._linkFrame));
+
+                        object(new ParentScopeChannelListener(terminationHandlerActivity.parent) {
+                            private static final long serialVersionUID = -6009078124717125270L;
+
+                            public void compensate(OScope scope, SynchChannel ret) {
+                                // This should never happen.
+                                throw new AssertionError("received compensate request!");
+                            }
+
+                            public void completed(FaultData fault, Set<CompensationHandler> compensations) {
+                                // The compensations that have been registered here, will never be activated,
+                                // so we'll forget them as soon as possible.
+                                for (CompensationHandler compensation : compensations)
+                                    compensation.compChannel.forget();
+
+                                // When a fault occurs within a termination handler, it is not propagated
+                                _self.parent.completed(null, CompensationHandler.emptySet());
+                            }
+
+                            public void cancelled() { completed(null, CompensationHandler.emptySet()); }
+                            public void failure(String reason, Element data) { completed(null, CompensationHandler.emptySet()); }
+                        });
+                    } else {
+                        _self.parent.completed(null,_compensations);
+                    }
                 } else if (_fault != null) {
 
                     sendEvent(new ScopeFaultEvent(_fault.getFaultName(), _fault.getFaultLineNo(),_fault.getExplanation()));
