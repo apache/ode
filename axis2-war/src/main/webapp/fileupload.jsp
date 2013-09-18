@@ -3,6 +3,7 @@
 <%@ page import="java.io.File" %>
 <%@ page import="java.lang.String" %>
 <%@ page import="java.io.InputStream" %>
+<%@ page import="java.net.URL" %>
 <%@ page import="org.apache.commons.codec.binary.Base64" %>
 <%@ page import="org.apache.commons.fileupload.servlet.ServletFileUpload"%>
 <%@ page import="org.apache.commons.fileupload.disk.DiskFileItemFactory"%>
@@ -80,8 +81,9 @@ if (!isMultipart) {
                             opts.setSoapVersionURI(SOAP12Constants.SOAP_ENVELOPE_NAMESPACE_URI);
                             opts.setProperty(Constants.Configuration.HTTP_METHOD,
                                 Constants.Configuration.HTTP_METHOD_POST);
-                            opts.setTo(new EndpointReference("http://localhost:8080/ode/processes/DeploymentService"));
-
+                            URL requestURL = new URL(request.getRequestURL().toString());
+                            URL endpointURL = new URL(requestURL, "processes/DeploymentService");
+                            opts.setTo(new EndpointReference(endpointURL.toString()));
                             OMElement payload = null;
                             OMFactory omFactory = OMAbstractFactory.getOMFactory();
                             OMNamespace ns = omFactory.createOMNamespace("http://www.apache.org/ode/pmapi","p");
