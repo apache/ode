@@ -307,8 +307,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             try {
                 result = XslTransformHandler.getInstance().transform(_ectx.getProcessQName(), xslUri, source, parametersMap, resolver);
             } catch (Exception e) {
-            	__log.error("Could not transform XSL sheet " + args.get(0) + " on element " + DOMUtils.domToString(varElmt), e);
-                e.printStackTrace();
+            	__log.warn("Could not transform XSL sheet " + args.get(0) + " on element " + DOMUtils.domToString(varElmt), e);
                 throw new XPathFunctionException(
                         new FaultException(_oxpath.getOwner().constants.qnSubLanguageExecutionFault,
                                 e.toString()));
