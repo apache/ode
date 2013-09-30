@@ -103,7 +103,7 @@ LOG4J               = "log4j:log4j:jar:1.2.17"
 OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.2.1",
                        "net.sourceforge.serp:serp:jar:1.13.1"]
 
-SAXON               = group("saxon", "saxon-xpath", "saxon-dom", "saxon-xqj", :under=>"net.sf.saxon", :version=>"9.1.0.8")
+SAXON               = ["net.sourceforge.saxon:saxon:jar:9.1.0.8", "net.sourceforge.saxon:saxon:jar:xpath:9.1.0.8", "net.sourceforge.saxon:saxon:jar:dom:9.1.0.8", "net.sourceforge.saxon:saxon:jar:xqj:9.1.0.8"]
 SERVICEMIX          = [
                         group("servicemix-core",
                             :under=>"org.apache.servicemix", :version=>"3.3"),
