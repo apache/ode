@@ -21,6 +21,7 @@ require "buildr/openjpa"
 require "buildr/javacc"
 require "buildr/jetty"
 require "buildr/hibernate"
+require "buildr/gpg"
 
 require File.join(File.dirname(__FILE__), 'repositories.rb')
 require File.join(File.dirname(__FILE__), 'dependencies.rb')
@@ -632,15 +633,10 @@ define "ode" do
   package_with_sources :except => ["jbi-karaf-examples:helloworld2-osgi", "jbi-karaf-examples:ping-pong-osgi"]
   package_with_javadoc :except => ["jbi-karaf-examples:helloworld2-osgi", "jbi-karaf-examples:ping-pong-osgi"] unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
 
-  # sign artifacts
-  gpg_sign_before_upload
-
-
 
   task :aligndeps do
     pp transitive(['org.apache.axis2:axis2-webapp:jar:1.5.6', 'org.apache.rampart:rampart-project:jar:1.5.2']).group_by {|s| "#{s.group}:#{s.id}:#{s.classifier}:#{s.type}" }.map {|i,v| v.sort_by(&:version).first.to_spec}.sort
   end
-
 
 end
 
@@ -733,6 +729,4 @@ define "apache-ode" do
   package(:zip, :id=>"#{id}-docs").include(doc.from(project("ode").projects).
     using(:javadoc, :windowtitle=>"Apache ODE #{project.version}").target, :as=>"#{id}-docs-#{version}") unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
 
-  # sign packages
-  gpg_sign_before_upload
 end
