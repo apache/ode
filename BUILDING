@@ -7,16 +7,18 @@ If you downloaded the source distribution of ODE you can safely ignore the first
 Getting the source code
 -----------------------
 
-First you will have to make sure that you have [Subversion|http://svn.tigris.org]. If you don't know what Subversion is or don't  have it installed, check [here|http://svnbook.red-bean.com]. Once installed run:
+First you will have to make sure that you have [git|http://git-scm.com/]. If you don't know what git is or don't have it installed, check [here|http://git-scm.com/]. Once installed run:
 
-svn checkout http://svn.apache.org/repos/asf/ode/trunk ode
+$> git clone http://git.apache.org/ode.git
+$> cd ode
+$> git checkout -b ode-1.3.6.x --track origin/ode-1.3.6.x
 
 For more information or if you have any problem with Subversion (like being behind a proxy or a firewall) check our Source Code documentation (http://ode.apache.org/source-code.html).
 
 Building With Buildr
 --------------------
 
-Our build is based on Buildr 1.4.3 or higher, a Ruby-based build tool for Java applications. Although Buildr runs nicely with Ruby, we recommend using JRuby 1.5.x
+Our build is based on Buildr 1.4.12 or higher, a Ruby-based build tool for Java applications. Although Buildr runs nicely with Ruby, we recommend using JRuby 1.7.x
 Detailed instructions on installing Buildr can be found here: http://buildr.apache.org/installing.html
 
 Building is then pretty simple. Open a command in the source root directory and run:
