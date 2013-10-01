@@ -39,7 +39,7 @@ Java.classpath << Buildr::OpenJPA::REQUIRES
 
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "1.3.6-SNAPSHOT"
+VERSION_NUMBER = "1.3.6"
 
 # Apache Nexus Repositories
 if VERSION_NUMBER =~ /SNAPSHOT/
