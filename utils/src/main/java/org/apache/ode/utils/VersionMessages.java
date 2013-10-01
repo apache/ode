@@ -33,7 +33,7 @@ public class VersionMessages extends MessageBundle {
   }
 
   public String msgGetCopyright() {
-    return this.format("Copyright (c) 2006-2007 Apache Sooftware Foundation.");
+    return this.format("Copyright (c) 2006-2013 Apache Software Foundation.");
   }
 
 }
