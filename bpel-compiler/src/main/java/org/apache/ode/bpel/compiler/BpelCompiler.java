@@ -1159,6 +1159,7 @@ public abstract class BpelCompiler implements CompilerContext {
 
         oscope.debugInfo = createDebugInfo(src, src.toString());
 
+        //TODO: Is the logic incorrect? 
         boolean previousAtomicScope = _atomicScope;
         if (src.getAtomicScope() != null) {
             boolean newValue = src.getAtomicScope().booleanValue();

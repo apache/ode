@@ -25,6 +25,7 @@ require "buildr/gpg"
 
 require File.join(File.dirname(__FILE__), 'repositories.rb')
 require File.join(File.dirname(__FILE__), 'dependencies.rb')
+require File.join(File.dirname(__FILE__), 'tomcatSa.rb')
 
 Buildr.settings.build['jmock'] = "1.2.0"
 
@@ -113,7 +114,20 @@ define "ode" do
     package(:war).tap do |root|
       root.merge(artifact(AXIS2_WAR)).exclude("WEB-INF/*").exclude("META-INF/*")
     end
-
+	
+	task("tomcat-deploy"=>package(:war)) do |task|
+	  tomcat = Buildr::TomcatSa.new('tomcats', 'tomcat', self)
+	  tomcat.deploy
+	end
+	task("tomcat-redeploy"=>package(:war)) do |task|
+	  tomcat = Buildr::TomcatSa.new('tomcats', 'tomcat', self)
+	  tomcat.redeploy
+	end
+	task("tomcat-undeploy") do |task|
+	  tomcat = Buildr::TomcatSa.new('tomcats', 'tomcat', self)
+	  tomcat.undeploy
+	end
+	
     task("start"=>[package(:war), jetty.use]) do |task|
       class << task ; attr_accessor :url, :path ; end
       task.url = "http://localhost:8080/ode"
