@@ -223,6 +223,12 @@ define "ode" do
     package :jar
   end
 
+  desc "New ODE BPEL Object Model"
+  define "bpel-nobj" do
+    compile.with projects("utils", "bpel-obj"), JACKON, SAXON, WSDL4J, COMMONS.collections
+    package :jar
+  end
+
   desc "ODE BPEL Query Language"
   define "bpel-ql" do
     pkg_name = "org.apache.ode.ql.jcc"
