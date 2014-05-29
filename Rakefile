@@ -116,15 +116,15 @@ define "ode" do
     end
 	
 	task("tomcat-deploy"=>package(:war)) do |task|
-	  tomcat = Buildr::TomcatSa.new('tomcats', 'tomcat', self)
+	  tomcat = Buildr::TomcatSa.new(self)
 	  tomcat.deploy
 	end
 	task("tomcat-redeploy"=>package(:war)) do |task|
-	  tomcat = Buildr::TomcatSa.new('tomcats', 'tomcat', self)
+	  tomcat = Buildr::TomcatSa.new(self)
 	  tomcat.redeploy
 	end
 	task("tomcat-undeploy") do |task|
-	  tomcat = Buildr::TomcatSa.new('tomcats', 'tomcat', self)
+	  tomcat = Buildr::TomcatSa.new(self)
 	  tomcat.undeploy
 	end
 	
