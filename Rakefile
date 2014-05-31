@@ -225,7 +225,7 @@ define "ode" do
 
   desc "New ODE BPEL Object Model"
   define "bpel-nobj" do
-    compile.with projects("utils", "bpel-obj"), JACKON, SAXON, WSDL4J, COMMONS.collections
+    compile.with projects("utils", "bpel-obj"), JACKON, LOG4J, SAXON, WSDL4J, COMMONS.collections, COMMONS.logging
     package :jar
   end
 
