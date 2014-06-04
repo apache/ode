@@ -33,7 +33,7 @@ public class SerializerTest {
 		OProcessWrapper wrapper2 = serializer.deserialize(new BufferedInputStream(
 				new ByteArrayInputStream(baos.toByteArray())),
 				Serializer.FORMAT_SERIALIZED_DEFAULT);
-		System.out.println(wrapper2.getMap());
+		System.out.println(wrapper2);
 	}
 
 	/**

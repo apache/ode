@@ -7,9 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -20,10 +19,11 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 
 /**
@@ -38,13 +38,25 @@ public class Serializer {
 	public static final short FORMAT_SERIALIZED_DEFAULT = FORMAT_SERIALIZED_JSON;
 
 	protected static final Log __log = LogFactory.getLog(Serializer.class);
+
+	// fields for deserializer
 	private JsonParser jsonParser;
 	private ObjectMapper mapper;
-	private List<StdSerializer<?>> serializers;
+	private Map<Class<?>, JsonDeserializer<?>> deserializers;
+	// end field for deserializer
+
+	// fields for serializer
+	private Map<Class<?>, JsonSerializer<?>> serializers;
+
+	// end field for serializer
 
 	public Serializer() {
-		serializers = new ArrayList<StdSerializer<?>>();
-		serializers.add(new ByteArraySerializer(byte[].class));
+		serializers = new HashMap<>();
+		serializers.put(byte[].class, new ByteArraySerializer());
+		serializers.put(OBaseExtensible.class,
+				new OBaseExtensible.OBaseExtensibleSerializer());
+
+		deserializers = new HashMap<>();
 	}
 
 	public void serialize(OProcessWrapper wrapper, String bpelPath)
@@ -70,7 +82,6 @@ public class Serializer {
 
 	public void serialize(OProcessWrapper wrapper, OutputStream os, short format)
 			throws SerializaionException, IOException {
-		Map<String, Object> map = wrapper.getMap();
 		ObjectMapper mapper;
 		if (format == FORMAT_SERIALIZED_JSON) {
 			mapper = new ObjectMapper();
@@ -82,11 +93,12 @@ public class Serializer {
 
 		}
 		SimpleModule simpleModule = new SimpleModule("SimpleModule");
-		for (StdSerializer<?> ss : serializers) {
-			simpleModule.addSerializer(ss);
+		for (Class<?> ss : serializers.keySet()) {
+			simpleModule.addSerializer((Class) ss,
+					(JsonSerializer) serializers.get(ss));
 		}
 		mapper.registerModule(simpleModule);
-		mapper.writeValue(os, map);
+		mapper.writeValue(os, wrapper);
 		os.flush();
 	}
 
@@ -120,22 +132,30 @@ public class Serializer {
 		}
 		jsonParser = factory.createParser(is);
 		mapper = new ObjectMapper(factory);
-		
-		OProcessWrapper wrapper = new OProcessWrapper();
-		if (!readHeader(wrapper, is)){
-			//TODO
+		SimpleModule simpleModule = new SimpleModule("SimpleModule");
+		for (Class<?> d : deserializers.keySet()) {
+			simpleModule.addDeserializer((Class) d,
+					(JsonDeserializer) deserializers.get(d));
 		}
-		Map<String, Object> map = wrapper.getMap();
-		OProcess oProcess = mapper.readValue(jsonParser, OProcess.class);
-		map.put(OProcessWrapper.PROCESS, oProcess);
+		mapper.registerModule(simpleModule);
+
+		OProcessWrapper wrapper = new OProcessWrapper();
+		try {
+			readHeader(wrapper, is);
+		} catch (OModelException e) {
+			e.printStackTrace();
+		}
+		@SuppressWarnings("unchecked")
+		Map<String, Object> oProcess = mapper.readValue(jsonParser, Map.class);
+		wrapper.addField(OProcessWrapper.PROCESS, oProcess);
 		
 		jsonParser.close();
 		return wrapper;
 	}
 
-	private boolean readHeader(OProcessWrapper wrapper, InputStream is) throws IOException {
+	private void readHeader(OProcessWrapper wrapper, InputStream is)
+			throws IOException, OModelException {
 		jsonParser.nextToken();
-		Map<String, Object> map = wrapper.getMap();
 		while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
 			String fieldName = jsonParser.getCurrentName();
 			jsonParser.nextToken();
@@ -143,61 +163,65 @@ public class Serializer {
 			case OProcessWrapper.MAGIC_NUMBER:
 				byte[] magic = new byte[OProcessWrapper.CURRENT_MAGIC_NUMBER.length];
 				magic = jsonParser.getBinaryValue();
-				map.put(OProcessWrapper.MAGIC_NUMBER, magic);
-//				if (!Arrays.equals(magic, OProcessWrapper.MAGIC_NUMBER_OFH_20140529)){
-//					throw new SerializaionException("Unrecognized file format (bad magic number)");
-//				}
+				wrapper.addField(OProcessWrapper.MAGIC_NUMBER, magic);
+				// if (!Arrays.equals(magic,
+				// OProcessWrapper.MAGIC_NUMBER_OFH_20140529)){
+				// throw new
+				// SerializaionException("Unrecognized file format (bad magic number)");
+				// }
 				break;
 			case OProcessWrapper.FORMAT:
 				short rformat = jsonParser.getShortValue();
-				map.put(OProcessWrapper.FORMAT, rformat);
+				wrapper.addField(OProcessWrapper.FORMAT, rformat);
 				break;
 			case OProcessWrapper.COMPILE_TIME:
 				long compileTime = jsonParser.getLongValue();
-				map.put(OProcessWrapper.COMPILE_TIME, compileTime);
+				wrapper.addField(OProcessWrapper.COMPILE_TIME, compileTime);
 				break;
 			case OProcessWrapper.GUID:
 				String guid = jsonParser.getText();
-				map.put(OProcessWrapper.GUID, guid);
+				wrapper.addField(OProcessWrapper.GUID, guid);
 				break;
 			case OProcessWrapper.TYPE:
 				String type = jsonParser.getText();
-				map.put(OProcessWrapper.TYPE, type);
+				wrapper.addField(OProcessWrapper.TYPE, type);
 				break;
 			case OProcessWrapper.OTHER_HEADERS:
 				@SuppressWarnings("unchecked")
-				Map<String, Object> headers = mapper.readValue(jsonParser, Map.class);
-				if (headers == null){
+				Map<String, Object> headers = mapper.readValue(jsonParser,
+						Map.class);
+				if (headers == null) {
 					headers = new LinkedHashMap<>();
 				}
-				map.put(OProcessWrapper.OTHER_HEADERS, headers);
+				wrapper.addField(OProcessWrapper.OTHER_HEADERS, headers);
 				break;
 
 			case OProcessWrapper.PROCESS:
-				//headers has been processed
-				return wrapper.checkValid();
+				// headers has been processed
+				wrapper.checkValid();
+				return;
 			}
 		}
-		return false;
 	}
 
-	public void addCustomSerializer(StdSerializer<?> ss) {
-		Class<?> handledType = ss.handledType();
-		for (StdSerializer<?> s : serializers) {
-			if (handledType == s.handledType()) {
-				serializers.remove(s);
-				__log.warn("serizer for type " + handledType
-						+ " has been added. Removed previous one");
-			}
+	public void addCustomSerializer(Class<Object> c, JsonSerializer<Object> ss) {
+		if (serializers.containsKey(c)) {
+			__log.warn("Serizer for type " + c
+					+ " has been added. Removed previous one");
 		}
-		serializers.add(ss);
+		serializers.put(c, ss);
 	}
 
-	static class ByteArraySerializer extends StdSerializer<byte[]> {
-		protected ByteArraySerializer(Class<byte[]> t) {
-			super(t);
+	public void addCustomDeserializer(Class<Object> c,
+			JsonDeserializer<Object> sd) {
+		if (deserializers.containsKey(c)) {
+			__log.warn("Deserizer for type " + c
+					+ " has been added. Removed previous one");
 		}
+		deserializers.put(c, sd);
+	}
 
+	static class ByteArraySerializer extends JsonSerializer<byte[]> {
 		@Override
 		public void serialize(byte[] value, JsonGenerator jgen,
 				SerializerProvider provider) throws IOException,
