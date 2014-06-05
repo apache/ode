@@ -27,7 +27,9 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 
 /**
- * Serializer using jackson
+ * Serializer using jackson. Basically, it (de)serializes OProcessWrapper.
+ * 
+ * The methods and fields are mainly two categories, serialize and deserialize.
  * 
  * @author fangzhen
  * 

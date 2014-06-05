@@ -1,17 +1,27 @@
 package org.apache.ode.bpel.obj;
 
-public class OBase extends OBaseExtensible{
+/**
+ * base class for compiled BPEL objects. It gives some common fields.
+ * 
+ * @author fangzhen
+ * 
+ */
+public class OBase extends OBaseExtensible {
 	private int version;
 	private int id;
-	public void setVersion(int version){
+
+	public void setVersion(int version) {
 		this.version = version;
 	}
+
 	public int getVersion() {
 		return version;
 	}
+
 	public int getId() {
 		return id;
 	}
+
 	public void setId(int _id) {
 		this.id = _id;
 	}

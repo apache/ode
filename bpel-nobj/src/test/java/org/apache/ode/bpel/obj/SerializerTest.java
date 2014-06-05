@@ -5,17 +5,21 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.collections.map.HashedMap;
 import org.junit.Test;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SerializerTest {
@@ -84,5 +88,29 @@ public class SerializerTest {
 		}
 		jp.close();
 		System.out.println(obj);
+	}
+	
+	@Test
+	public void testReference() throws JsonGenerationException, JsonMappingException, IOException{
+		A a = new A();
+		a.val = 1;
+		Map map = new LinkedHashMap();
+		map.put("item1", a);
+		map.put("item2", a);
+		ObjectMapper mapper = new ObjectMapper();
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		mapper.writeValue(os, map);
+		System.out.println(os);
+		
+		ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
+		ObjectMapper m2 = new ObjectMapper();
+		Map dem = m2.readValue(is, Map.class);
+		System.out.println(dem);
+	}
+	
+	@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@id")
+	static class A{
+		private int val;
+		public int getVal(){return val;}
 	}
 }

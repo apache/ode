@@ -9,6 +9,19 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
+/**
+ * An implementation of Extensible interface using map as a container of fields.
+ * Other OModel classes should inherit this class.
+ * 
+ * In fact, in it's subclass, we don't have to put all fields into the
+ * map. There might be other fields along with the map. And override
+ * getMapRepr() to wraps all fields including the map as a new map and return
+ * it. Meanwhile, the add/del/getField() methods are targeted at the map for
+ * extension.
+ * 
+ * @author fangzhen
+ * 
+ */
 public class OBaseExtensible implements Extensible {
 	/** The wrapper wraps fields. Fields can be deleted, added or updated */
 	protected Map<String, Object> fieldContainer;
@@ -16,6 +29,7 @@ public class OBaseExtensible implements Extensible {
 	protected OBaseExtensible() {
 		fieldContainer = new LinkedHashMap<>();
 	}
+
 	protected OBaseExtensible(Map<String, Object> map) {
 		fieldContainer = map;
 	}
@@ -24,7 +38,7 @@ public class OBaseExtensible implements Extensible {
 	public <T> void addField(String fieldName, T value) {
 		fieldContainer.put(fieldName, value);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getField(String fieldName) {
@@ -38,9 +52,9 @@ public class OBaseExtensible implements Extensible {
 
 	/**
 	 * Return map representation of the OBaseExtensible. If the fieldContainer
-	 * maintains all the fields, return it simply. But the map returned should not be
-	 * modified, since we cannot guarantee the change be applied back to the OBaseExtensible.
-	 * use add/delField instead
+	 * maintains all the fields, return it simply. But the map returned should
+	 * not be modified, since we cannot guarantee the change be applied back to
+	 * the OBaseExtensible. use add/delField instead
 	 * 
 	 * @return
 	 */

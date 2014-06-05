@@ -1,5 +1,10 @@
 package org.apache.ode.bpel.obj;
 
+/**
+ * defines interfaces for add/del/get fields.
+ * @author fangzhen
+ *
+ */
 public interface Extensible {
 	/**
 	 * Add or update a field to the extensible object.
