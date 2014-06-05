@@ -9,41 +9,59 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
-public class OBaseExtensible implements Extensible{
-	/** the wrapper wraps the whole process and other data */
-	private Map<String, Object> map;
-	protected OBaseExtensible(){
-		map = new LinkedHashMap<>();
+public class OBaseExtensible implements Extensible {
+	/** The wrapper wraps fields. Fields can be deleted, added or updated */
+	protected Map<String, Object> fieldContainer;
+
+	protected OBaseExtensible() {
+		fieldContainer = new LinkedHashMap<>();
 	}
-	@Override
-	public <T> void addField(String fieldName, T value) {
-		map.put(fieldName, value);
+	protected OBaseExtensible(Map<String, Object> map) {
+		fieldContainer = map;
 	}
 
+	@Override
+	public <T> void addField(String fieldName, T value) {
+		fieldContainer.put(fieldName, value);
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getField(String fieldName) {
-		return (T)map.get(fieldName);
+		return (T) fieldContainer.get(fieldName);
 	}
-	
+
+	@Override
+	public boolean delField(String fieldName) {
+		return fieldContainer.remove(fieldName) != null;
+	}
+
 	/**
-	 * return map representation of the OBaseExtensible
+	 * Return map representation of the OBaseExtensible. If the fieldContainer
+	 * maintains all the fields, return it simply. But the map returned should not be
+	 * modified, since we cannot guarantee the change be applied back to the OBaseExtensible.
+	 * use add/delField instead
+	 * 
 	 * @return
 	 */
-	protected Map<String, Object> getMap(){
-		return map;
+	protected Map<String, Object> getMapRepr() {
+		return fieldContainer;
 	}
-	public String toString(){
-		return map.toString();
+
+	public String toString() {
+		return fieldContainer.toString();
 	}
-	public static class OBaseExtensibleSerializer extends JsonSerializer<OBaseExtensible>{
+
+	public static class OBaseExtensibleSerializer extends
+			JsonSerializer<OBaseExtensible> {
 
 		@Override
 		public void serialize(OBaseExtensible value, JsonGenerator jgen,
 				SerializerProvider provider) throws IOException,
 				JsonGenerationException {
-			jgen.writeObject(value.getMap());
+			jgen.writeObject(value.getMapRepr());
 		}
-		
+
 	}
+
 }

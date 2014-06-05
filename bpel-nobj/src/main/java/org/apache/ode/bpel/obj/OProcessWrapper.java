@@ -9,8 +9,6 @@ import java.util.Map;
  * @author fangzhen
  */
 public class OProcessWrapper extends OBaseExtensible{
-	private Map<String, Object> map;
-
 	// constants
 	public static final byte[] MAGIC_NUMBER_OFH_20140529 = new byte[] { 0x55,
 			'5', 'S', 0x00, 'O', 'F', 'H', 0x20, 0x14, 0x05, 0x29 };
@@ -23,25 +21,23 @@ public class OProcessWrapper extends OBaseExtensible{
 	public static final String TYPE = "TYPE";
 	public static final String PROCESS = "PROCESS";
 	public static final String OTHER_HEADERS = "OTHER_HEADERS";
-//	/** the wrapper wraps the whole process and other data */
-//	private LinkedHashMap<String, Object> map;
 	
 	public OProcessWrapper(){
-		map = new LinkedHashMap<String, Object>();
+		super(new LinkedHashMap<String, Object>());
 	}
 	public OProcessWrapper(long compileTime){
-		map = new LinkedHashMap<String, Object>();
-		map.put(OProcessWrapper.MAGIC_NUMBER, OProcessWrapper.CURRENT_MAGIC_NUMBER);
-		map.put(OProcessWrapper.FORMAT, Serializer.FORMAT_SERIALIZED_DEFAULT);
-		map.put(OProcessWrapper.COMPILE_TIME, new Long(compileTime));
-		map.put(OProcessWrapper.OTHER_HEADERS, new LinkedHashMap<>()); //place holder
+		fieldContainer = new LinkedHashMap<String, Object>();
+		fieldContainer.put(OProcessWrapper.MAGIC_NUMBER, OProcessWrapper.CURRENT_MAGIC_NUMBER);
+		fieldContainer.put(OProcessWrapper.FORMAT, Serializer.FORMAT_SERIALIZED_DEFAULT);
+		fieldContainer.put(OProcessWrapper.COMPILE_TIME, new Long(compileTime));
+		fieldContainer.put(OProcessWrapper.OTHER_HEADERS, new LinkedHashMap<>()); //place holder
 	}
 	
 	public void setOProcess(OProcess process){
 //		map.put(GUID, process.guid);
 //		map.put(TYPE, new QName(process.targetNamespace,
 //				process.processName));
-		map.put(OProcessWrapper.PROCESS, process.getMap());
+		fieldContainer.put(OProcessWrapper.PROCESS, process.getMapRepr());
 	}
 
 	public void checkValid() throws OModelException{

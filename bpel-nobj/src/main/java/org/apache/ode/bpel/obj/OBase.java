@@ -1,6 +1,6 @@
 package org.apache.ode.bpel.obj;
 
-public class OBase {
+public class OBase extends OBaseExtensible{
 	private int version;
 	private int id;
 	public void setVersion(int version){
