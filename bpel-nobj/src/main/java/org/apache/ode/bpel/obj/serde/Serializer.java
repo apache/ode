@@ -1,4 +1,4 @@
-package org.apache.ode.bpel.obj;
+package org.apache.ode.bpel.obj.serde;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -13,6 +13,10 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.obj.OBaseExtensible;
+import org.apache.ode.bpel.obj.OModelException;
+import org.apache.ode.bpel.obj.OProcessWrapper;
+import org.apache.ode.bpel.obj.OBaseExtensible.OBaseExtensibleSerializer;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;

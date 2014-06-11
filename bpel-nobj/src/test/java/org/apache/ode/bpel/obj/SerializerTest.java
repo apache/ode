@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Date;
 
+import org.apache.ode.bpel.obj.serde.Serializer;
 import org.junit.Test;
 
 public class SerializerTest {

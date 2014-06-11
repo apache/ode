@@ -3,6 +3,8 @@ package org.apache.ode.bpel.obj;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.ode.bpel.obj.serde.Serializer;
+
 /**
  * The class maintains all data that should be serialized. Including headers
  * like magic number, format etc. and the BPEL process. The header and whole

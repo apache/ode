@@ -1,4 +1,4 @@
-package org.apache.ode.bpel.obj;
+package org.apache.ode.bpel.obj.serde;
 
 public class SerializaionException extends RuntimeException {
 	public SerializaionException(String string) {
