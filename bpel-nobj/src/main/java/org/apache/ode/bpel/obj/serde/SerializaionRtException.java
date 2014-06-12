@@ -1,7 +1,7 @@
 package org.apache.ode.bpel.obj.serde;
 
-public class SerializaionException extends RuntimeException {
-	public SerializaionException(String string) {
+public class SerializaionRtException extends RuntimeException {
+	public SerializaionRtException(String string) {
 		super(string);
 	}
 

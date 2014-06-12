@@ -1,4 +1,4 @@
-package org.apache.ode.bpel.obj.serde;
+package org.apache.ode.bpel.obj.serde.jacksonhack;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.ode.bpel.obj.serde.jacksonhack.TypeBeanSerializerFactory;
 import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;

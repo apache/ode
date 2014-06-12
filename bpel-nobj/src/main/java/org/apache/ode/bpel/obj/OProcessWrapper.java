@@ -3,7 +3,9 @@ package org.apache.ode.bpel.obj;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.ode.bpel.obj.serde.Serializer;
+import org.apache.ode.bpel.obj.serde.OmSerdeFactory;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * The class maintains all data that should be serialized. Including headers
@@ -21,46 +23,89 @@ import org.apache.ode.bpel.obj.serde.Serializer;
  * 
  * @author fangzhen
  */
-public class OProcessWrapper extends OBaseExtensible {
+public class OProcessWrapper extends OBase {
 	// constants
 	public static final byte[] MAGIC_NUMBER_OFH_20140529 = new byte[] { 0x55,
 			'5', 'S', 0x00, 'O', 'F', 'H', 0x20, 0x14, 0x05, 0x29 };
 	public static final byte[] CURRENT_MAGIC_NUMBER = MAGIC_NUMBER_OFH_20140529;
 	// key constants
-	public static final String MAGIC_NUMBER = "MAGIC";
-	public static final String FORMAT = "FORMAT";
-	public static final String COMPILE_TIME = "COMPILE_TIME";
-	public static final String GUID = "GUID";
-	public static final String TYPE = "TYPE";
-	public static final String PROCESS = "PROCESS";
-	public static final String OTHER_HEADERS = "OTHER_HEADERS";
+	public static final String MAGIC_NUMBER = "magic";
+	public static final String FORMAT = "format";
+	public static final String COMPILE_TIME = "compileTime";
+	public static final String GUID = "guid";
+	public static final String TYPE = "type";
+	public static final String PROCESS = "process";
+	public static final String OTHER_HEADERS = "otherHeaders";
 
 	public OProcessWrapper() {
 		super(new LinkedHashMap<String, Object>());
 	}
 
 	public OProcessWrapper(long compileTime) {
-		fieldContainer = new LinkedHashMap<String, Object>();
-		fieldContainer.put(OProcessWrapper.MAGIC_NUMBER,
-				OProcessWrapper.CURRENT_MAGIC_NUMBER);
-		fieldContainer.put(OProcessWrapper.FORMAT,
-				Serializer.FORMAT_SERIALIZED_DEFAULT);
-		fieldContainer.put(OProcessWrapper.COMPILE_TIME, new Long(compileTime));
-		fieldContainer
-				.put(OProcessWrapper.OTHER_HEADERS, new LinkedHashMap<>()); // place
-																			// holder
+		setMagic(OProcessWrapper.CURRENT_MAGIC_NUMBER);
+		setFormat(OmSerdeFactory.FORMAT_SERIALIZED_DEFAULT);
+		setCompileTime(compileTime);
+		setOtherHeaders(new LinkedHashMap<String, Object>());
 	}
 
-	public void setOProcess(OProcess process) {
-		// map.put(GUID, process.guid);
-		// map.put(TYPE, new QName(process.targetNamespace,
-		// process.processName));
-		fieldContainer.put(OProcessWrapper.PROCESS, process.getMapRepr());
-	}
 
 	public void checkValid() throws OModelException {
 		// TODO Auto-generated method stub
 
 	}
+	
+	//Accessors
+	@JsonIgnore
+	public byte[] getMagic() {
+		return (byte[])fieldContainer.get(MAGIC_NUMBER);
+	}
 
+	public void setMagic(byte[] magic) {
+		fieldContainer.put(MAGIC_NUMBER, magic);
+	}
+
+	@JsonIgnore
+	public short getFormat() {
+		return (short)fieldContainer.get(FORMAT);
+	}
+
+	public void setFormat(short format) {
+		fieldContainer.put(FORMAT, format);
+	}
+
+	@JsonIgnore
+	public long getCompileTime() {
+		return (long)fieldContainer.get(COMPILE_TIME);
+	}
+
+	public void setCompileTime(long compileTime) {
+		fieldContainer.put(COMPILE_TIME, compileTime);
+	}
+
+	@JsonIgnore
+	public String getGuid() {
+		return (String)fieldContainer.get(GUID);
+	}
+
+	public void setGuid(String guid) {
+		fieldContainer.put(GUID, guid);
+	}
+
+	@JsonIgnore
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getOtherHeaders() {
+		return (Map<String, Object>)fieldContainer.get(OTHER_HEADERS);
+	}
+
+	public void setOtherHeaders(Map<String, Object> otherHeaders) {
+		fieldContainer.put(OTHER_HEADERS, otherHeaders);
+	}
+
+	@JsonIgnore
+	public OProcess getProcess() {
+		return (OProcess)fieldContainer.get(PROCESS);
+	}
+	public void setOProcess(OProcess process) {
+		fieldContainer.put(OProcessWrapper.PROCESS, process);
+	}
 }

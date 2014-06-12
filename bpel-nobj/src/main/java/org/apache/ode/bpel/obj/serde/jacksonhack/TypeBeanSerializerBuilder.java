@@ -1,4 +1,4 @@
-package org.apache.ode.bpel.obj.serde;
+package org.apache.ode.bpel.obj.serde.jacksonhack;
 
 
 import com.fasterxml.jackson.databind.BeanDescription;
