@@ -39,15 +39,20 @@ import javax.wsdl.WSDLException;
 import javax.xml.namespace.QName;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.Constants;
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.deployment.DeploymentEngine;
 import org.apache.axis2.deployment.repository.util.ArchiveReader;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
+import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.description.WSDL11ToAxisServiceBuilder;
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.AxisServer;
 import org.apache.axis2.engine.MessageReceiver;
+import org.apache.axis2.transport.http.SimpleHTTPServer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -253,7 +258,7 @@ public abstract class Axis2TestBase {
             super.start();
             _ode = new ODEServer();
             try {
-                _ode.init(odeRootDir, configContext.getAxisConfiguration());
+                _ode.init(odeRootDir, new ConfigurationContext(configContext.getAxisConfiguration()));
             } catch (ServletException e) {
                 e.printStackTrace();
             }
@@ -288,7 +293,7 @@ public abstract class Axis2TestBase {
             WSDL11ToAxisServiceBuilder serviceBuilder = new ODEAxisService.WSDL11ToAxisPatchedBuilder(is, serviceName, port);
             serviceBuilder.setBaseUri(wsdlUri.toString());
             serviceBuilder.setCustomResolver(new Axis2UriResolver());
-            serviceBuilder.setCustomWSLD4JResolver(new Axis2WSDLLocator(wsdlUri));
+            serviceBuilder.setCustomWSDLResolver(new Axis2WSDLLocator(wsdlUri));
             serviceBuilder.setServerSide(true);
 
             AxisService axisService = serviceBuilder.populateService();
@@ -297,9 +302,9 @@ public abstract class Axis2TestBase {
             axisService.setCustomWsdl(true);
             axisService.setClassLoader(getConfigurationContext().getAxisConfiguration().getServiceClassLoader());
 
-            Iterator operations = axisService.getOperations();
+            Iterator<AxisOperation> operations = axisService.getOperations();
             while (operations.hasNext()) {
-                AxisOperation operation = (AxisOperation) operations.next();
+                AxisOperation operation = operations.next();
                 if (operation.getMessageReceiver() == null) {
                     operation.setMessageReceiver(receiver);
                 }
