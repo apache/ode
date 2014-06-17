@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.obj.OProcessWrapper;
+import org.apache.ode.bpel.obj.serde.jacksonhack.TypeBeanSerializerFactory;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -38,13 +39,14 @@ public class JsonOmSerializer implements OmSerializer {
 		this.os = os;
 		this.wrapper = wrapper;
 		this.factory = factory;
-		mapper = new ObjectMapper(factory);
-		mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void serialize() throws SerializaionRtException, IOException {
+		mapper = new ObjectMapper(factory);
+		mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+		mapper.setSerializerFactory(TypeBeanSerializerFactory.instance);
 		SimpleModule simpleModule = new SimpleModule("SimpleModule");
 		for (Class<?> ss : serializers.keySet()) {
 			simpleModule.addSerializer((Class) ss,
@@ -57,7 +59,7 @@ public class JsonOmSerializer implements OmSerializer {
 
 	public void addCustomSerializer(Class<?> c, JsonSerializer<?> ss) {
 		if (serializers.containsKey(c)) {
-			__log.warn("Serizer for type " + c
+			__log.warn("Serializer for type " + c
 					+ " has been added. Removed previous one");
 		}
 		serializers.put(c, ss);

@@ -3,6 +3,8 @@ package org.apache.ode.bpel.obj;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.ode.bpel.o.DebugInfo;
+
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -18,9 +20,16 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
 public class OBase {
 	/** The wrapper wraps fields. Fields can be deleted, added or updated */
-	protected Map<String, Object> fieldContainer;	
-	public static String VERSION = "version";
+	protected Map<String, Object> fieldContainer;
+ 
+	/** Our identifier, in terms of our parent. */
 	public static String ID = "id";
+	/** Version of this class*/
+	public static String VERSION = "version";
+	/** Owner OProcess */
+	public static String OWNER = "owner";
+	public static String DEBUG_INFO = "debugInfo";
+	
 	protected OBase() {
 		fieldContainer = new LinkedHashMap<>();
 	}
@@ -34,6 +43,11 @@ public class OBase {
 	public Map<String, Object> getFieldContainer() {
 		return fieldContainer;
 	}
+	/**
+	 * Convenient method to add or set field dynamically.
+	 * @param name
+	 * @param value
+	 */
 	@JsonAnySetter
 	public void addField(String name, Object value) {
 		fieldContainer.put(name, value);
@@ -43,6 +57,7 @@ public class OBase {
 	public <T> T getField(String name){
 		return (T)fieldContainer.get(name);
 	}
+	
 	
 	@JsonIgnore
 	public int getVersion() {
@@ -59,5 +74,21 @@ public class OBase {
 
 	public void setId(int id) {
 		fieldContainer.put(ID, id);
+	}
+	
+	@JsonIgnore
+	public OProcess getOwner(){
+		return (OProcess)fieldContainer.get(OWNER);
+	}
+	public void setOwner(OProcess process){
+		fieldContainer.put(OWNER, process);
+	}
+	
+	@JsonIgnore
+	public DebugInfo getDebugInfo(){
+		return (DebugInfo)fieldContainer.get(DEBUG_INFO);
+	}
+	public void setDebugInfo(DebugInfo debugInfo){
+		fieldContainer.put(DEBUG_INFO, debugInfo);
 	}
 }

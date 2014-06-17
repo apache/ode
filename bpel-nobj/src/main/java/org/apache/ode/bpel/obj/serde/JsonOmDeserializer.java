@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.obj.OProcessWrapper;
+import org.apache.ode.bpel.obj.serde.jacksonhack.TypeBeanSerializerFactory;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -41,9 +42,9 @@ public class JsonOmDeserializer implements OmDeserializer {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public OProcessWrapper deserialize()
 			throws IOException, SerializaionRtException {
-//		jsonParser = factory.createParser(is);
 		mapper = new ObjectMapper(factory);
 		mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+		mapper.setSerializerFactory(TypeBeanSerializerFactory.instance);
 		SimpleModule simpleModule = new SimpleModule("SimpleModule");
 		for (Class<?> d : deserializers.keySet()) {
 			simpleModule.addDeserializer((Class) d,

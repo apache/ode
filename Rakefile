@@ -225,10 +225,16 @@ define "ode" do
 
   desc "New ODE BPEL Object Model"
   define "bpel-nobj" do
-    compile.with projects("utils", "bpel-obj"), JACKON, LOG4J, SAXON, WSDL4J, COMMONS.collections, COMMONS.logging
+    compile.with projects("utils", "bpel-obj"), JACKSON, LOG4J, SAXON, WSDL4J, COMMONS.collections, COMMONS.logging
     package :jar
   end
-
+  
+  desc "Helper to covert from old OModel to new OModel"
+  define "omodel-conv" do
+	compile.with projects("bpel-obj", "bpel-nobj"), JACKSON, SPOON, COMMONS.io, COMMONS.logging, LOG4J
+	package :jar
+  end
+  
   desc "ODE BPEL Query Language"
   define "bpel-ql" do
     pkg_name = "org.apache.ode.ql.jcc"
