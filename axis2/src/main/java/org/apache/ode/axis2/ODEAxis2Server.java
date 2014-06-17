@@ -35,6 +35,7 @@ import javax.wsdl.WSDLException;
 import javax.xml.namespace.QName;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
@@ -89,7 +90,7 @@ public class ODEAxis2Server extends AxisServer {
             _ode = new ODEServer();
             _ode.txMgrCreatedCallback = txMgrCreatedCallback;
             try {
-                _ode.init(odeRootDir, configContext.getAxisConfiguration(), config);
+                _ode.init(odeRootDir, new ConfigurationContext(configContext.getAxisConfiguration()), config);
             } catch (ServletException e) {
                 throw new RuntimeException(e.getRootCause());
             }
@@ -124,7 +125,7 @@ public class ODEAxis2Server extends AxisServer {
             WSDL11ToAxisServiceBuilder serviceBuilder = new ODEAxisService.WSDL11ToAxisPatchedBuilder(is, serviceName, port);
             serviceBuilder.setBaseUri(wsdlUri.toString());
             serviceBuilder.setCustomResolver(new Axis2UriResolver());
-            serviceBuilder.setCustomWSLD4JResolver(new Axis2WSDLLocator(wsdlUri));
+            serviceBuilder.setCustomWSDLResolver(new Axis2WSDLLocator(wsdlUri));
             serviceBuilder.setServerSide(true);
 
             AxisService axisService = serviceBuilder.populateService();
@@ -133,9 +134,9 @@ public class ODEAxis2Server extends AxisServer {
             axisService.setCustomWsdl(true);
             axisService.setClassLoader(getConfigurationContext().getAxisConfiguration().getServiceClassLoader());
 
-            Iterator operations = axisService.getOperations();
+            Iterator<AxisOperation> operations = axisService.getOperations();
             while (operations.hasNext()) {
-                AxisOperation operation = (AxisOperation) operations.next();
+                AxisOperation operation = operations.next();
                 if (operation.getMessageReceiver() == null) {
                     operation.setMessageReceiver(receiver);
                 }

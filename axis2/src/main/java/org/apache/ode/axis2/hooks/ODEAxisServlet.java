@@ -50,7 +50,7 @@ public class ODEAxisServlet extends AxisServlet {
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         _odeServer = createODEServer();
-        _odeServer.init(config, axisConfiguration);
+        _odeServer.init(config, configContext);
         _browser = new DeploymentBrowser(_odeServer.getProcessStore(), axisConfiguration, _odeServer.getAppRoot());
     }
 

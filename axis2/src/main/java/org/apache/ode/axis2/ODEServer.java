@@ -47,6 +47,7 @@ import javax.transaction.TransactionManager;
 import javax.transaction.xa.XAResource;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.util.IdleConnectionTimeoutThread;
@@ -105,7 +106,7 @@ public class ODEServer {
 
     protected ODEConfigProperties _odeConfig;
 
-    protected AxisConfiguration _axisConfig;
+    protected ConfigurationContext _configContext;
 
     protected TransactionManager _txMgr;
 
@@ -132,16 +133,16 @@ public class ODEServer {
     
     public Runnable txMgrCreatedCallback;
 
-    public void init(ServletConfig config, AxisConfiguration axisConf) throws ServletException {
-        init(config.getServletContext().getRealPath("/WEB-INF"), axisConf);
+    public void init(ServletConfig config, ConfigurationContext configContext) throws ServletException {
+        init(config.getServletContext().getRealPath("/WEB-INF"), configContext);
     }
 
-    public void init(String contextPath, AxisConfiguration axisConf) throws ServletException {
-        init(contextPath, axisConf, null);
+    public void init(String contextPath, ConfigurationContext configContext) throws ServletException {
+        init(contextPath, configContext, null);
     }
     
-    public void init(String contextPath, AxisConfiguration axisConf, ODEConfigProperties config) throws ServletException {
-        _axisConfig = axisConf;
+    public void init(String contextPath, ConfigurationContext configContext, ODEConfigProperties config) throws ServletException {
+        _configContext = configContext;
         String rootDir = System.getProperty("org.apache.ode.rootDir");
         if (rootDir != null) _appRoot = new File(rootDir);
         else _appRoot = new File(contextPath);
@@ -216,11 +217,11 @@ public class ODEServer {
         }
 
         _mgtService = new ManagementService();
-        _mgtService.enableService(_axisConfig, _bpelServer, _store, _appRoot.getAbsolutePath());
+        _mgtService.enableService(_configContext.getAxisConfiguration(), _bpelServer, _store, _appRoot.getAbsolutePath());
 
         try {
             __log.debug("Initializing Deployment Web Service");
-            new DeploymentWebService().enableService(_axisConfig, _store, _poller, _appRoot.getAbsolutePath(), _workRoot.getAbsolutePath());
+            new DeploymentWebService().enableService(_configContext.getAxisConfiguration(), _store, _poller, _appRoot.getAbsolutePath(), _workRoot.getAbsolutePath());
         } catch (Exception e) {
             throw new ServletException(e);
         }

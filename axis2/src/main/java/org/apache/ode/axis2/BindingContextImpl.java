@@ -117,7 +117,7 @@ public class BindingContextImpl implements BindingContext {
     }
 
     protected ODEService createService(ProcessConf pconf, QName serviceName, String portName) throws AxisFault {
-        AxisService axisService = ODEAxisService.createService(_server._axisConfig, pconf, serviceName, portName);
+        AxisService axisService = ODEAxisService.createService(_server._configContext.getAxisConfiguration(), pconf, serviceName, portName);
         ODEService odeService = new ODEService(axisService, pconf, serviceName, portName, _server._bpelServer, _server._txMgr);
 
         destroyService(serviceName, portName);
@@ -135,7 +135,7 @@ public class BindingContextImpl implements BindingContext {
         }
 
         // We're public!
-        _server._axisConfig.addService(axisService);
+        _server._configContext.getAxisConfiguration().addService(axisService);
         if (__log.isDebugEnabled()) {
             __log.debug("Created Axis2 service " + serviceName);
         }
@@ -151,8 +151,8 @@ public class BindingContextImpl implements BindingContext {
             // try to clean up the service after itself
             try {
                 String axisServiceName = service.getAxisService().getName();
-                AxisService axisService = _server._axisConfig.getService(axisServiceName);
-                
+                AxisService axisService = _server._configContext.getAxisConfiguration().getService(axisServiceName);
+
                 //axisService might be null if it could not be properly activated before. 
                 if (axisService != null) {
                     // first, de-allocate its schemas
@@ -166,15 +166,15 @@ public class BindingContextImpl implements BindingContext {
                     }
                 }
                 // now, stop the service
-                _server._axisConfig.stopService(axisServiceName);
+                _server._configContext.getAxisConfiguration().stopService(axisServiceName);
                 // if only this method did a good job of cleaning up after itself
-                _server._axisConfig.removeService(service.getName());
+                _server._configContext.getAxisConfiguration().removeService(service.getName());
                 completeCleanup(axisService);
 
                 //ODE-994: commenting the cleanup on axisConfig as it cleansup everything on axis2 1.6
                 //_server._axisConfig.cleanup();
                 //For backward compatibility with older versions of axis2 that is below 1.6
-                AxisConfigurator configurator = _server._axisConfig.getConfigurator();
+                AxisConfigurator configurator = _server._configContext.getAxisConfiguration().getConfigurator();
                 if(configurator != null)
                     configurator.cleanup();
 
@@ -200,11 +200,11 @@ public class BindingContextImpl implements BindingContext {
      */
     private void completeCleanup(AxisService service) {
         try {
-            Field field= _server._axisConfig.getClass().getDeclaredField("allEndpoints");
+            Field field= _server._configContext.getAxisConfiguration().getClass().getDeclaredField("allEndpoints");
             field.setAccessible(true);
-            synchronized (_server._axisConfig) {
+            synchronized (_server._configContext.getAxisConfiguration()) {
                 //removes the endpoints to this service
-                Map allEndpoints = (Map) field.get(_server._axisConfig);
+                Map allEndpoints = (Map) field.get(_server._configContext.getAxisConfiguration());
 
                 //removes the service endpoints
                 for (Iterator<String> iter = service.getEndpoints().keySet().iterator(); iter.hasNext();) {
@@ -226,7 +226,7 @@ public class BindingContextImpl implements BindingContext {
                 extService = new HttpExternalService(pconf, serviceName, portName, _server._executorService, _server._scheduler, _server._bpelServer, _server.httpConnectionManager, _server._clusterUrlTransformer);
             } else if (WsdlUtils.useSOAPBinding(def, serviceName, portName)) {
                 if (__log.isDebugEnabled()) __log.debug("Creating SOAP-bound external service " + serviceName);
-                extService = new SoapExternalService(pconf, serviceName, portName, _server._executorService, _server._axisConfig, _server._scheduler, _server._bpelServer, _server.httpConnectionManager, _server._clusterUrlTransformer);
+                extService = new SoapExternalService(pconf, serviceName, portName, _server._executorService, _server._configContext, _server._scheduler, _server._bpelServer, _server.httpConnectionManager, _server._clusterUrlTransformer);
             }
         } catch (Exception ex) {
             __log.error("Could not create external service.", ex);

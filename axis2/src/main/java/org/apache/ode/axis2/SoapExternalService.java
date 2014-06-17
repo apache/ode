@@ -106,12 +106,13 @@ public class SoapExternalService implements ExternalService {
     private String endpointUrl;
 
     public SoapExternalService(ProcessConf pconf, QName serviceName, String portName, ExecutorService executorService,
-                               AxisConfiguration axisConfig, Scheduler sched, BpelServer server, MultiThreadedHttpConnectionManager connManager, ClusterUrlTransformer clusterUrlTransformer) throws AxisFault {
+                               ConfigurationContext configContext, Scheduler sched, BpelServer server, MultiThreadedHttpConnectionManager connManager, ClusterUrlTransformer clusterUrlTransformer) throws AxisFault {
         _definition = pconf.getDefinitionForService(serviceName);
         _serviceName = serviceName;
         _portName = portName;
         _executorService = executorService;
-        _axisConfig = axisConfig;
+        _configContext = configContext;
+        _axisConfig = _configContext.getAxisConfiguration();
         _sched = sched;
         _converter = new SoapMessageConverter(_definition, serviceName, portName);
         _server = server;
@@ -121,7 +122,6 @@ public class SoapExternalService implements ExternalService {
         File fileToWatch = new File(_pconf.getBaseURI().resolve(_serviceName.getLocalPart() + ".axis2"));
         _axisServiceWatchDog = WatchDog.watchFile(fileToWatch, new ServiceFileObserver(fileToWatch));
         _axisOptionsWatchDog = new WatchDog<Map, OptionsObserver>(new EndpointPropertiesMutable(), new OptionsObserver());
-        _configContext = new ConfigurationContext(_axisConfig);
         _configContext.setProperty(HTTPConstants.MUTTITHREAD_HTTP_CONNECTION_MANAGER, connManager);
         // make sure the client is not shared, see also org.apache.ode.axis2.Properties.Axis2
         _configContext.setProperty(HTTPConstants.REUSE_HTTP_CLIENT, "false");
