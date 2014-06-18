@@ -127,7 +127,7 @@ define "ode" do
       end
     end
 
-    test.using :testng, :forkmode=>'perTest', :properties=>{ "org.apache.commons.logging.LogFactory" => "org.apache.commons.logging.impl.LogFactoryImpl", "log4j.configuration"=>"test-log4j.properties", "test.ports" => ENV['TEST_PORTS'], "org.apache.ode.scheduler.deleteJobsOnStart" => "true", "org.apache.ode.autoRetireProcess"=>"true" } #, :java_args=>['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6001', '-Xmx2048m', '-XX:MaxPermSize=256m']
+    test.using :testng, :forkmode=>'perTest', :properties=>{ "org.apache.commons.logging.LogFactory" => "org.apache.commons.logging.impl.LogFactoryImpl", "log4j.configuration"=>"test-log4j.properties", "test.ports" => ENV['TEST_PORTS'], "org.apache.ode.scheduler.deleteJobsOnStart" => "true", "org.apache.ode.autoRetireProcess"=>"true" } , :java_args=>['-Xmx2048m', '-XX:MaxPermSize=256m'] #'-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6001',
     test.with projects("tools"), libs, AXIS2_MODULES.mods, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, DOM4J, H2::REQUIRES, SPRING_TEST
     webapp_dir = "#{test.compile.target}/webapp"
     test.setup task(:prepare_webapp) do |task|
