@@ -1,52 +1,59 @@
 package info.fzhen.ode.omodel_conv;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import spoon.processing.AbstractProcessor;
-import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtExpression;
-import spoon.reflect.code.CtStatement;
-import spoon.reflect.code.CtStatementList;
-import spoon.reflect.declaration.CtAnnotation;
-import spoon.reflect.declaration.CtClass;
+import spoon.reflect.cu.CompilationUnit;
+import spoon.reflect.cu.SourceCodeFragment;
 import spoon.reflect.declaration.CtField;
-import spoon.reflect.declaration.CtMethod;
-import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.ModifierKind;
-import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtTypeReference;
-import spoon.support.reflect.declaration.CtAnnotationImpl;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
+/**
+ * This class generates three items from a non-private and non-static field:
+ * 1. A private final String indicates field name;
+ * 2. getter annotated by JsonIgnore.
+ * 3. setter
+ * The initial expression will be dropped out if existed.
+ * @author fangzhen
+ *
+ */
 public class FieldAccessorGen extends AbstractProcessor<CtField<?>>{
 	private CtField<?> field;
-	private Factory factory;
-	private CtClass<?> clazz;
 	private CtTypeReference<?> fieldType;
 	private String fname;
+	private String ofname; //original field name. with _
 	private String cname;
 	private ModifierKind accCtl;
-	
+	private String typeStr;
 	public void process(CtField<?> f) {
 		init(f);
 		generate();
 	}
 	private void init(CtField<?> f) {
 		this.field = f;
-		factory = f.getFactory();
-		clazz = (CtClass<?>) field.getDeclaringType();
 		fieldType = field.getType();
-		fname = field.getSimpleName();
-		if (fname.startsWith("_")) {
+		ofname = field.getSimpleName();
+		fname = ofname;
+		if (ofname.startsWith("_")) {
 			fname = fname.substring(1);
 		}
 		cname = fname.toUpperCase();
-
+		List<CtTypeReference<?>> tas = fieldType.getActualTypeArguments();
+		StringBuffer typeStr = new StringBuffer(fieldType.getSimpleName());
+		if (tas.size() > 0){
+			typeStr.append("<");
+			for (CtTypeReference<?> ta : tas){
+				typeStr.append(ta.getSimpleName());
+				typeStr.append(",");
+			}
+			typeStr.setCharAt(typeStr.length()-1, '>');
+		}
+		this.typeStr = typeStr.toString();
+		
 		Set<ModifierKind> modifiers = field.getModifiers();
 		if (modifiers.contains(ModifierKind.PUBLIC)) {
 			accCtl = ModifierKind.PUBLIC;
@@ -67,84 +74,65 @@ public class FieldAccessorGen extends AbstractProcessor<CtField<?>>{
 		if (modifiers.contains(ModifierKind.STATIC)) {
 			return;
 		}
-
-		genSetter();
-		genGetter();
-		genConstant();
+		CtExpression<?> initExp = field.getDefaultExpression();
+		CompilationUnit cu = field.getPosition().getCompilationUnit();
+		SourceCodeFragment fragment = new SourceCodeFragment();
+		if (initExp == null){
+			fragment.position = field.getPosition().getSourceEnd() + 3;
+		}else{
+			fragment.position = initExp.getPosition().getSourceEnd() + 3;
+		}
+		fragment.replacementLength = 0;
+		
+		fragment.code = "\n" + genConstant() + "\n" +  genGetter() + "\n" + genSetter() + "\n\n" ;
+		cu.addSourceCodeFragment(fragment);
 	}
 
-	public void genConstant() {
-		Set<ModifierKind> modifiers = new LinkedHashSet<ModifierKind>();
-		modifiers.add(ModifierKind.PRIVATE);
-		modifiers.add(ModifierKind.STATIC);
-		modifiers.add(ModifierKind.FINAL);
-		field.setModifiers(modifiers);
-		field.setType((CtTypeReference) factory.Type().STRING);
-		field.setSimpleName(cname);
-		CtExpression<?> expression = factory.Code()
-				.createCodeSnippetExpression("\"" + fname + "\"");
-		field.setDefaultExpression((CtExpression) expression);
+	public String genConstant() {		
+		String cfStr = "";
+		cfStr += "private static final String ";
+		cfStr += cname + " = ";
+		cfStr += "\"" + ofname + "\";";
+		return cfStr;
 	}
 
-	@SuppressWarnings("unchecked")
-	public void genSetter() {
+	public String genSetter() {
 		Set<ModifierKind> modifiers = new HashSet<ModifierKind>();
 		if (accCtl != null) {
 			modifiers.add(accCtl);
 		}
 		String name = "set" + fname.substring(0, 1).toUpperCase()
 				+ fname.substring(1);
-		List<CtParameter<?>> parameters = new ArrayList<CtParameter<?>>();
-		CtParameter<?> parameter = factory.Core().createParameter();
-		parameter.setType((CtTypeReference) fieldType);
-		parameter.setSimpleName(fname);
-		parameters.add(parameter);
-		Set<CtTypeReference<? extends Throwable>> thrownTypes = new HashSet<CtTypeReference<? extends Throwable>>();
-
-		CtBlock<?> body = factory.Core().createBlock();
-		CtStatementList<?> statements = factory.Code()
-				.createStatementList(body);
-		CtStatement statement = factory.Code().createCodeSnippetStatement(
-				"fieldContainer.put(" + cname + ", "
-						+ parameter.getSimpleName() + ");");
-		statements.addStatement(statement);
-		body.setStatements(statements.getStatements());
-
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		CtMethod<?> getMeth = factory.Method().create(clazz, modifiers,
-				(CtTypeReference) fieldType, name, parameters, thrownTypes,
-				body);
+	
+		String setStr = "";
+		for (ModifierKind m : modifiers){
+			setStr += m.toString() + " ";
+		}
+		setStr += "void ";
+		setStr +=  name + "(" + typeStr + " " + fname + "){\n";
+		setStr += "fieldContainer.put(" + cname + ", "
+				+ fname + ");\n}";
+		return setStr;
 	}
 
-	public void genGetter() {
+	public String genGetter() {
 		Set<ModifierKind> modifiers = new HashSet<ModifierKind>();
 		if (accCtl != null) {
 			modifiers.add(accCtl);
 		}
 		String name = "get" + fname.substring(0, 1).toUpperCase()
 				+ fname.substring(1);
-		List<CtParameter<?>> parameters = new ArrayList<CtParameter<?>>();
-		Set<CtTypeReference<? extends Throwable>> thrownTypes = new HashSet<CtTypeReference<? extends Throwable>>();
 
-		CtBlock<?> body = factory.Core().createBlock();
-		CtStatementList<?> statements = factory.Code()
-				.createStatementList(body);
-		CtStatement statement = factory.Code().createCodeSnippetStatement(
-				"return (" + field.getType().getSimpleName()
-						+ ")fieldContainer.get(" + fname.toUpperCase() + ");");
-		statements.addStatement(statement);
-		body.setStatements(statements.getStatements());
-
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		CtMethod<?> getMeth = factory.Method().create(clazz, modifiers,
-				(CtTypeReference) fieldType, name, parameters, thrownTypes,
-				body);
-		//		AnnotationFactory annof = factory.Annotation();
-		//		annof.annotate(getMeth, JsonIgnore.class);
-		CtAnnotation<JsonIgnore> jiAnno = new CtAnnotationImpl<JsonIgnore>();
-		jiAnno.setAnnotationType(factory.Type().createReference(
-				JsonIgnore.class));
-		getMeth.addAnnotation(jiAnno);
+		String getStr = "";
+		getStr += "@JsonIgnore\n";
+		for (ModifierKind m : modifiers){
+			getStr += m.toString() + " ";
+		}
+		getStr += typeStr + " ";
+		getStr += name + "(){\n";
+		getStr += "return (" + typeStr
+				+ ")fieldContainer.get(" + fname.toUpperCase() + ");\n}";
+		return getStr;
 	}
 
 }
