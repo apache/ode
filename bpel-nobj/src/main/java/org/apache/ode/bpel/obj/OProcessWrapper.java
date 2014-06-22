@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * 
  * @author fangzhen
  */
-public class OProcessWrapper extends OBase {
+public class OProcessWrapper extends ExtensibleImpl {
 	// constants
 	public static final byte[] MAGIC_NUMBER_OFH_20140529 = new byte[] { 0x55,
 			'5', 'S', 0x00, 'O', 'F', 'H', 0x20, 0x14, 0x05, 0x29 };

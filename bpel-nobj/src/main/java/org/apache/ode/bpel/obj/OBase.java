@@ -18,13 +18,8 @@
  */
 package org.apache.ode.bpel.obj;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.ode.bpel.o.DebugInfo;
-
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -34,61 +29,32 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
  * 
  */
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
-public class OBase {
-	/** The wrapper wraps fields. Fields can be deleted, added or updated */
-	protected Map<String, Object> fieldContainer;
-
+public class OBase extends ExtensibleImpl{
 	/** Our identifier, in terms of our parent. */
 	private static String ID = "_id";
-	/** Version of this class*/
-	private static String CLASS_VERSION = "classVersion";
 	/** Owner OProcess */
 	private static String OWNER = "_owner";
 	private static String DEBUG_INFO = "debugInfo";
 
 	protected OBase(OProcess owner) {
+		super();
+		init(owner);
+	}
+
+	protected OBase(OProcess owner, Map<String, Object> map) {
+		super(map);
+		init(owner);
+	}
+
+	private void init(OProcess owner) {
 		setOwner(owner);
 		if (owner == null) {
 			setId(0);
 		} else {
-			setId(++owner._childIdCounter);
+			owner.setChildIdCounter(owner.getChildIdCounter() + 1);
+			setId(owner.getChildIdCounter());
 			owner.getChildren().add(this);
 		}
-		fieldContainer = new LinkedHashMap<>();
-	}
-
-	protected OBase(OProcess owner, Map<String, Object> map) {
-		this(owner);
-		fieldContainer = map;
-	}
-
-	@JsonAnyGetter
-	public Map<String, Object> getFieldContainer() {
-		return fieldContainer;
-	}
-
-	/**
-	 * Convenient method to add or set field dynamically.
-	 * @param name
-	 * @param value
-	 */
-	@JsonAnySetter
-	public void addField(String name, Object value) {
-		fieldContainer.put(name, value);
-	}
-
-	@SuppressWarnings("unchecked")
-	public <T> T getField(String name) {
-		return (T) fieldContainer.get(name);
-	}
-
-	@JsonIgnore
-	public int getModelVersion() {
-		return (int) fieldContainer.get(CLASS_VERSION);
-	}
-
-	public void setModelVersion(int version) {
-		fieldContainer.put(CLASS_VERSION, version);
 	}
 
 	@JsonIgnore
@@ -129,8 +95,8 @@ public class OBase {
 	public void dehydrate() {
 		DebugInfo debugInfo = getDebugInfo();
 		if (debugInfo != null) {
-			debugInfo.description = null;
-			debugInfo.extensibilityElements = null;
+			debugInfo.setDescription(null);
+			debugInfo.setExtensibilityElements(null);
 			debugInfo = null;
 		}
 	}
@@ -146,7 +112,6 @@ public class OBase {
 	public boolean equals(Object obj) {
 		if (!(obj instanceof OBase))
 			return false;
-
 		OBase other = (OBase) obj;
 		return (getId() == 0 && other.getId() == 0) || getId() == other.getId()
 				&& other.getOwner().equals(getOwner());

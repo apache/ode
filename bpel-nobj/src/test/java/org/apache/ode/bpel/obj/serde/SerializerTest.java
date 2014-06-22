@@ -20,7 +20,7 @@ public class SerializerTest {
 	public void testBasicSerialize() throws IOException {
 		OmSerdeFactory serdeFactory = new OmSerdeFactory();
 		OProcessWrapper wrapper = new OProcessWrapper(new Date().getTime());
-		wrapper.setOProcess(new OProcess());
+		wrapper.setOProcess(new OProcess(null));
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		OmSerializer omSerializer = serdeFactory.createOmSerializer(baos, wrapper);
 		omSerializer.serialize();
