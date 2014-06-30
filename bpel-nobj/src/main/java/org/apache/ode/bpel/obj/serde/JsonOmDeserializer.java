@@ -7,12 +7,16 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.OProcessWrapper;
 import org.apache.ode.bpel.obj.serde.jacksonhack.TypeBeanSerializerFactory;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 public class JsonOmDeserializer implements OmDeserializer {
@@ -26,7 +30,7 @@ public class JsonOmDeserializer implements OmDeserializer {
 	private Map<Class<?>, JsonDeserializer<?>> deserializers;
 	
 	public JsonOmDeserializer() {
-		deserializers = new HashMap<>();
+		deserializers = new HashMap<Class<?>, JsonDeserializer<?>>();
 	}
 	public JsonOmDeserializer(InputStream is){
 		this(is, new JsonFactory());
@@ -50,6 +54,7 @@ public class JsonOmDeserializer implements OmDeserializer {
 			simpleModule.addDeserializer((Class) d,
 					(JsonDeserializer) deserializers.get(d));
 		}
+		simpleModule.setDeserializerModifier(new OModelDeserModifier());
 		mapper.registerModule(simpleModule);
 
 		wrapper = mapper.readValue(is, OProcessWrapper.class);
@@ -73,5 +78,15 @@ public class JsonOmDeserializer implements OmDeserializer {
 	}
 	public void setIs(InputStream is) {
 		this.is = is;
+	}
+
+	public static class OModelDeserModifier extends BeanDeserializerModifier{
+		@Override 
+		public JsonDeserializer<?> modifyDeserializer(DeserializationConfig config, BeanDescription beanDesc, JsonDeserializer<?> deserializer)
+	      {
+	        if (beanDesc.getBeanClass() == OProcess.class)
+	          return new OProcess.OProcessDeser(deserializer);
+	        return deserializer;
+	      }
 	}
 }

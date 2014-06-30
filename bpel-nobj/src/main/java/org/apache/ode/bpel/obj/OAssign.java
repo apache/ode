@@ -92,23 +92,23 @@ public class OAssign extends OActivity {
 
 		@JsonIgnore
 		public boolean isIgnoreMissingFromData() {
-			return (boolean) fieldContainer.get(IGNOREMISSINGFROMDATA);
+			return (Boolean) fieldContainer.get(IGNOREMISSINGFROMDATA);
 		}
 
 		@JsonIgnore
 		public boolean getIgnoreUninitializedFromVariable() {
-			return (boolean) fieldContainer
+			return (Boolean) fieldContainer
 					.get(IGNOREUNINITIALIZEDFROMVARIABLE);
 		}
 
 		@JsonIgnore
 		public boolean getInsertMissingToData() {
-			return (boolean) fieldContainer.get(INSERTMISSINGTODATA);
+			return (Boolean) fieldContainer.get(INSERTMISSINGTODATA);
 		}
 
 		@JsonIgnore
 		public boolean getKeepSrcElementName() {
-			return (boolean) fieldContainer.get(KEEPSRCELEMENTNAME);
+			return (Boolean) fieldContainer.get(KEEPSRCELEMENTNAME);
 		}
 
 		@JsonIgnore
@@ -214,7 +214,6 @@ public class OAssign extends OActivity {
 			setXmlLiteral(org.apache.ode.utils.DOMUtils.domToString(xmlLiteral));
 		}
 
-		//TODO: transient fields, custome read/writeObject.
 		@JsonIgnore
 		public String getXmlLiteral() {
 			return (String) fieldContainer.get(XMLLITERAL);
@@ -282,7 +281,7 @@ public class OAssign extends OActivity {
 
 		@JsonIgnore
 		public boolean isIsMyEndpointReference() {
-			return (boolean) fieldContainer.get(ISMYENDPOINTREFERENCE);
+			return (Boolean) fieldContainer.get(ISMYENDPOINTREFERENCE);
 		}
 
 		@JsonIgnore

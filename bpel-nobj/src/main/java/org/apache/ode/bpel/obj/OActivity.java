@@ -109,7 +109,7 @@ public abstract class OActivity extends OAgent {
 
 	@JsonIgnore
 	public boolean isSuppressJoinFailure() {
-		return (boolean) fieldContainer.get(SUPPRESSJOINFAILURE);
+		return (Boolean) fieldContainer.get(SUPPRESSJOINFAILURE);
 	}
 
 	@SuppressWarnings("unchecked")

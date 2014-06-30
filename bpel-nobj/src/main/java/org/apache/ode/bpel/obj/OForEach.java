@@ -60,7 +60,7 @@ public class OForEach extends OActivity {
 
 	@JsonIgnore
 	public boolean isParallel() {
-		return (boolean) fieldContainer.get(PARALLEL);
+		return (Boolean) fieldContainer.get(PARALLEL);
 	}
 
 	@JsonIgnore
@@ -123,7 +123,7 @@ public class OForEach extends OActivity {
 
 		@JsonIgnore
 		public boolean getSuccessfulBranchesOnly() {
-			return (boolean) fieldContainer.get(SUCCESSFULBRANCHESONLY);
+			return (Boolean) fieldContainer.get(SUCCESSFULBRANCHESONLY);
 		}
 
 		public void setBranchCount(OExpression branchCount) {

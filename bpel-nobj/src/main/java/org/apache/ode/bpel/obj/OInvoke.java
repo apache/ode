@@ -129,7 +129,7 @@ public class OInvoke extends OActivity {
 		return (OPartnerLink) fieldContainer.get(PARTNERLINK);
 	}
 
-	//TODO: custom read Object
+	//TODO: custom read Object -- backward compatibility
 //	private void readObject(ObjectInputStream in) throws IOException,
 //			ClassNotFoundException {
 //		in.defaultReadObject();

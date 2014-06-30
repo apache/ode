@@ -50,7 +50,7 @@ public class OProcessWrapper extends ExtensibleImpl {
 
 
 	public void checkValid() throws OModelException {
-		// TODO Auto-generated method stub
+		// TODO implement me
 
 	}
 	
@@ -66,7 +66,7 @@ public class OProcessWrapper extends ExtensibleImpl {
 
 	@JsonIgnore
 	public short getFormat() {
-		return (short)fieldContainer.get(FORMAT);
+		return (Short)fieldContainer.get(FORMAT);
 	}
 
 	public void setFormat(short format) {
@@ -75,7 +75,7 @@ public class OProcessWrapper extends ExtensibleImpl {
 
 	@JsonIgnore
 	public long getCompileTime() {
-		return (long)fieldContainer.get(COMPILE_TIME);
+		return (Long)fieldContainer.get(COMPILE_TIME);
 	}
 
 	public void setCompileTime(long compileTime) {

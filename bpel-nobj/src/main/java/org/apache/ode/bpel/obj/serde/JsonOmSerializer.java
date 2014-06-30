@@ -26,7 +26,7 @@ public class JsonOmSerializer implements OmSerializer {
 	private Map<Class<?>, JsonSerializer<?>> serializers;
 
 	public JsonOmSerializer() {
-		serializers = new HashMap<>();
+		serializers = new HashMap<Class<?>, JsonSerializer<?>>();
 	}
 
 	public JsonOmSerializer(OutputStream os, OProcessWrapper wrapper) {

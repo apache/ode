@@ -126,7 +126,7 @@ public class OScope extends OActivity {
 
 	@JsonIgnore
 	public boolean isAtomicScope() {
-		return (boolean) fieldContainer.get(ATOMICSCOPE);
+		return (Boolean) fieldContainer.get(ATOMICSCOPE);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -170,12 +170,12 @@ public class OScope extends OActivity {
 
 	@JsonIgnore
 	public boolean isImplicitScope() {
-		return (boolean) fieldContainer.get(IMPLICITSCOPE);
+		return (Boolean) fieldContainer.get(IMPLICITSCOPE);
 	}
 
 	@JsonIgnore
 	public boolean isIsolatedScope() {
-		return (boolean) fieldContainer.get(ISOLATEDSCOPE);
+		return (Boolean) fieldContainer.get(ISOLATEDSCOPE);
 	}
 
 	public OPartnerLink getLocalPartnerLink(String name) {
@@ -341,7 +341,7 @@ public class OScope extends OActivity {
 
 		@JsonIgnore
 		public boolean getHasJoinUseCases() {
-			return (boolean) fieldContainer.get(HASJOINUSECASES);
+			return (Boolean) fieldContainer.get(HASJOINUSECASES);
 		}
 
 		@JsonIgnore

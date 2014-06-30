@@ -116,12 +116,8 @@ public class OEventHandler extends OAgent {
 		/** Correlation set to match on. */
 		private static final String MATCHCORRELATIONS = "matchCorrelations";
 
-		private OScope.CorrelationSet matchCorrelation;
-
 		/** Correlation set to join on. */
 		private static final String JOINCORRELATIONS = "joinCorrelations";
-
-		private OScope.CorrelationSet joinCorrelation;
 
 		private static final String PARTNERLINK = "partnerLink";
 
@@ -223,6 +219,6 @@ public class OEventHandler extends OAgent {
 			fieldContainer.put(VARIABLE, variable);
 		}
 		
-		//TODO: custom read object; private fields;
+		//TODO: custom read object; private fields. backward compatibility;
 	}
 }

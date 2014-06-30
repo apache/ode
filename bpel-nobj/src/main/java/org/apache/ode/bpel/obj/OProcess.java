@@ -19,7 +19,6 @@
 package org.apache.ode.bpel.obj;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,11 +33,18 @@ import java.util.Set;
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 
-import org.apache.ode.bpel.o.OProcess.OPropertyAlias;
 import org.apache.ode.bpel.obj.OMessageVarType.Part;
 import org.apache.ode.utils.NSContext;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 /**
  * Compiled BPEL process representation.
@@ -127,7 +133,7 @@ public class OProcess extends OBase {
 
 	@JsonIgnore
 	int getChildIdCounter() {
-		return (int) fieldContainer.get(CHILDIDCOUNTER);
+		return (Integer) fieldContainer.get(CHILDIDCOUNTER);
 	}
 
 	@JsonIgnore
@@ -454,5 +460,28 @@ public class OProcess extends OBase {
 			return "{OPropertyAlias " + getDescription() + "}";
 		}
 
+	}
+	
+	/**
+	 * custom deserializer of OProcess.
+	 * @author fangzhen
+	 *
+	 */
+	public static class OProcessDeser extends StdDeserializer<OProcess>{
+		private static final long serialVersionUID = 7750214662590623362L;
+		private JsonDeserializer<?> defaultDeserializer;
+		public OProcessDeser(JsonDeserializer<?> defaultDeserializer) {
+			super(OProcess.class);
+			this.defaultDeserializer = defaultDeserializer;
+		}
+
+		@Override
+		public OProcess deserialize(JsonParser jp, DeserializationContext ctxt)
+				throws IOException, JsonProcessingException {
+			OProcess process = (OProcess)defaultDeserializer.deserialize(jp, ctxt);
+			OProcess.instanceCount ++;
+			return process;
+		}
+		
 	}
 }

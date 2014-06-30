@@ -85,7 +85,7 @@ public class OReply extends OActivity {
 
 	@JsonIgnore
 	public boolean isIsFaultReply() {
-		return (boolean) fieldContainer.get(ISFAULTREPLY);
+		return (Boolean) fieldContainer.get(ISFAULTREPLY);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -155,5 +155,5 @@ public class OReply extends OActivity {
 	public void setVariable(Variable variable) {
 		fieldContainer.put(VARIABLE, variable);
 	}
-	//TODO: custom readObject
+	//TODO: custom readObject -- backward compatibility
 }

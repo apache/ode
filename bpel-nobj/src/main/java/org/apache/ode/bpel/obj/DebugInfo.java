@@ -61,7 +61,7 @@ public class DebugInfo extends ExtensibleImpl {
 
 	@JsonIgnore
 	public int getEndLine() {
-		return (int) fieldContainer.get(ENDLINE);
+		return (Integer) fieldContainer.get(ENDLINE);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -78,7 +78,7 @@ public class DebugInfo extends ExtensibleImpl {
 
 	@JsonIgnore
 	public int getStartLine() {
-		return (int) fieldContainer.get(STARTLINE);
+		return (Integer) fieldContainer.get(STARTLINE);
 	}
 
 	public void setDescription(String description) {

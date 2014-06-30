@@ -50,7 +50,7 @@ public class OPickReceive extends OActivity {
 
 	@JsonIgnore
 	public boolean isCreateInstanceFlag() {
-		return (boolean) fieldContainer.get(CREATEINSTANCEFLAG);
+		return (Boolean) fieldContainer.get(CREATEINSTANCEFLAG);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -233,6 +233,6 @@ public class OPickReceive extends OActivity {
 		public void setVariable(Variable variable) {
 			fieldContainer.put(VARIABLE, variable);
 		}
-		//TODO: custom readObject
+		//TODO: custom readObject -- backward compatibility
 	}
 }

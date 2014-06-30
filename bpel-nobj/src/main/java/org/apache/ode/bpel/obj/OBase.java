@@ -59,7 +59,7 @@ public class OBase extends ExtensibleImpl{
 
 	@JsonIgnore
 	public int getId() {
-		return (int) fieldContainer.get(ID);
+		return (Integer) fieldContainer.get(ID);
 	}
 
 	private void setId(int id) {

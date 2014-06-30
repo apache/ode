@@ -14,7 +14,7 @@ public class ExtensibleImpl  implements Extensible<Object>{
 	private static String CLASS_VERSION = "classVersion";
 
 	protected ExtensibleImpl() {
-		fieldContainer = new LinkedHashMap<>();
+		fieldContainer = new LinkedHashMap<String, Object>();
 	}
 	protected ExtensibleImpl(Map<String, Object> container) {
 		fieldContainer = container;
@@ -40,7 +40,7 @@ public class ExtensibleImpl  implements Extensible<Object>{
 	}
 	@JsonIgnore
 	public int getClassVersion() {
-		return (int) fieldContainer.get(CLASS_VERSION);
+		return (Integer) fieldContainer.get(CLASS_VERSION);
 	}
 
 	public void setClassVersion(int version) {

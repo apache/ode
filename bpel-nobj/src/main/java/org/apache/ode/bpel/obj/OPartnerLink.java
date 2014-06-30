@@ -118,7 +118,7 @@ public class OPartnerLink extends OBase {
 
 	@JsonIgnore
 	public boolean isInitializePartnerRole() {
-		return (boolean) fieldContainer.get(INITIALIZEPARTNERROLE);
+		return (Boolean) fieldContainer.get(INITIALIZEPARTNERROLE);
 	}
 
 	/**
