@@ -136,7 +136,7 @@ SERVICEMIX          = [
                         "tranql:tranql-connector-derby-common:jar:1.1"
                         ]
 SLF4J = group(%w{ slf4j-api slf4j-log4j12 jcl-over-slf4j }, :under=>"org.slf4j", :version=>"1.7.2")
-SPOON               = ["fr.inria.gforge.spoon:spoon-core:jar:2.0", 'com.martiansoftware:jsap:jar:2.1', 
+SPOON               = ["fr.inria.gforge.spoon:spoon-core:jar:3.0-SNAPSHOT", 'com.martiansoftware:jsap:jar:2.1', 
                        "org.eclipse.jdt.core.compiler:ecj:jar:4.2.2"]
 SPRING              = ["org.springframework:spring:jar:2.5.6"]
 SPRING_OSGI         = ["org.springframework.osgi:spring-osgi-core:jar:1.2.0"]

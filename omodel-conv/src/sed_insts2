@@ -1,0 +1,4 @@
+s/org.apache.ode.bpel.o/org.apache.ode.bpel.obj/
+s/org.apache.ode.bpel.elang.xpath10.o/org.apache.ode.bpel.elang.xpath10.obj/
+s/org.apache.ode.bpel.elang.xpath20.o/org.apache.ode.bpel.elang.xpath20.obj/
+s/org.apache.ode.bpel.elang.xquery10.o/org.apache.ode.bpel.elang.xquery10.obj/

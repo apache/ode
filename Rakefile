@@ -231,7 +231,9 @@ define "ode" do
   
   desc "Helper to covert from old OModel to new OModel"
   define "omodel-conv" do
-	compile.with projects("bpel-obj", "bpel-nobj"), JACKSON, SPOON, COMMONS.io, COMMONS.logging, LOG4J
+	compile.with projects("bpel-obj", "bpel-nobj", "bpel-compiler", "bpel-api", "bpel-schemas", "utils"), 
+		JAVAX.stream, JAXEN, SAXON, WSDL4J, XALAN, XERCES, COMMONS.collections, SLF4J,
+		JACKSON, SPOON, COMMONS.io, COMMONS.logging, LOG4J
 	package :jar
   end
   
