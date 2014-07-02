@@ -38,7 +38,9 @@ import org.apache.ode.bpel.compiler.api.SourceLocation;
 import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
 import org.apache.ode.bpel.compiler.bom.Process;
 import org.apache.ode.bpel.obj.OProcess;
-import org.apache.ode.bpel.obj.Serializer;
+import org.apache.ode.bpel.obj.OProcessWrapper;
+import org.apache.ode.bpel.obj.serde.OmSerdeFactory;
+import org.apache.ode.bpel.obj.serde.OmSerializer;
 import org.apache.ode.utils.StreamUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.xsl.XslTransformHandler;
@@ -282,8 +284,9 @@ public class BpelC {
             }
 
             try {
-                Serializer fileHeader = new Serializer(System.currentTimeMillis());
-                fileHeader.writeOProcess(oprocess, _outputStream);
+            	OProcessWrapper wrapper = new OProcessWrapper(System.currentTimeMillis());
+            	OmSerializer serializer = new OmSerdeFactory().createOmSerializer(_outputStream, wrapper);
+            	serializer.serialize();
             } finally {
                 // close & mark myself invalid
                 this.invalidate();

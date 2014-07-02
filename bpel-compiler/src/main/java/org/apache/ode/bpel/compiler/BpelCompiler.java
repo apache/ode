@@ -43,7 +43,6 @@ import javax.wsdl.WSDLException;
 import javax.wsdl.xml.WSDLReader;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -87,7 +86,6 @@ import org.apache.ode.bpel.obj.OActivity;
 import org.apache.ode.bpel.obj.OAssign;
 import org.apache.ode.bpel.obj.OCatch;
 import org.apache.ode.bpel.obj.OCompensate;
-import org.apache.ode.bpel.obj.OCompensationHandler;
 import org.apache.ode.bpel.obj.OConstantExpression;
 import org.apache.ode.bpel.obj.OConstantVarType;
 import org.apache.ode.bpel.obj.OConstants;
@@ -96,7 +94,6 @@ import org.apache.ode.bpel.obj.OEventHandler;
 import org.apache.ode.bpel.obj.OExpression;
 import org.apache.ode.bpel.obj.OExpressionLanguage;
 import org.apache.ode.bpel.obj.OExtVar;
-import org.apache.ode.bpel.obj.OFaultHandler;
 import org.apache.ode.bpel.obj.OFlow;
 import org.apache.ode.bpel.obj.OLValueExpression;
 import org.apache.ode.bpel.obj.OLink;
@@ -106,12 +103,10 @@ import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.ORethrow;
 import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.bpel.obj.OSequence;
-import org.apache.ode.bpel.obj.OTerminationHandler;
 import org.apache.ode.bpel.obj.OVarType;
 import org.apache.ode.bpel.obj.OXsdTypeVarType;
 import org.apache.ode.bpel.obj.OXslSheet;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.StreamUtils;
@@ -743,24 +738,28 @@ public abstract class BpelCompiler implements CompilerContext {
         procesScope.setDebugInfo(createDebugInfo(process, null));
         _oprocess.setProcesScope(compileScope(procesScope, process, new java.lang.Runnable() {
     public void run() {
-        if ((process.getRootActivity()) == null) {
-            throw new org.apache.ode.bpel.compiler.api.CompilationException(org.apache.ode.bpel.compiler.BpelCompiler.__cmsgs.errNoRootActivity());
-        } 
-        if ((_customProcessProperties) != null) {
-            for (java.util.Map.Entry<javax.xml.namespace.QName, org.w3c.dom.Node> customVar : _customProcessProperties.entrySet()) {
-                final org.apache.ode.bpel.obj.OScope oscope = _structureStack.topScope();
-                org.apache.ode.bpel.obj.OVarType varType = new org.apache.ode.bpel.o.OConstantVarType(_oprocess , customVar.getValue());
-                org.apache.ode.bpel.obj.OScope.Variable ovar = new org.apache.ode.bpel.o.OScope.Variable(_oprocess , varType);
-                ovar.getName() = customVar.getKey()setName(customVar.getKey().getLocalPart())claringScope = oscope;
-        setDeclaringScope(oscope)= createDebugInfo(null, "ProcessetDebugInfo(createDebugInfo(null, "Process custom property variable"))(ovar);
-                if (org.apache.ode.bpel.compiler.BpelCompiler.__log.isDebugEnabled())
-                    org.apache.ode.bpel.compiler.BpelCompiler.__log.debug(("Compiled custom property variable " + ovar));
-                
-            }
-        } 
-        _structureStsetActivity(compile(process.getRootActivity()))RootActivity());
-    }
-}));
+    	 if (process.getRootActivity() == null) {
+             throw new CompilationException(__cmsgs.errNoRootActivity());
+         }
+         // Process custom properties are created as variables associated
+         // with the top scope
+         if (_customProcessProperties != null) {
+             for (Map.Entry<QName, Node> customVar : _customProcessProperties.entrySet()) {
+                 final OScope oscope = _structureStack.topScope();
+                 OVarType varType = new OConstantVarType(_oprocess, customVar.getValue());
+                 OScope.Variable ovar = new OScope.Variable(_oprocess, varType);
+                 ovar.setName(customVar.getKey().getLocalPart());
+                 ovar.setDeclaringScope(oscope);
+                 ovar.setDebugInfo(createDebugInfo(null, "Process custom property variable"));
+                 oscope.addLocalVariable(ovar);
+                 if (__log.isDebugEnabled())
+                     __log.debug("Compiled custom property variable " + ovar);
+             }
+         }
+         _structureStack.topScope().setActivity(compile(process.getRootActivity()));
+     }
+ }));
+
 
         assert _structureStack.size() == 0;
 
@@ -918,7 +917,7 @@ public abstract class BpelCompiler implements CompilerContext {
 
     private OCompensate createDefaultCompensateActivity(BpelObject source, String desc) {
         OCompensate activity = new OCompensate(_oprocess, getCurrent());
-        activity.setName("__autoGenCompensate:" + (_structureStack.topScope().ngetName());
+        activity.setName("__autoGenCompensate:" + (_structureStack.topScope().getName()));
         activity.setDebugInfo(createDebugInfo(source, desc));
         return activity;
     }
@@ -1450,7 +1449,7 @@ public abstract class BpelCompiler implements CompilerContext {
     private void compile(TerminationHandler terminationHandler) {
         OScope oscope = _structureStack.topScope();
         oscope.setTerminationHandler(new org.apache.ode.bpel.obj.OTerminationHandler(_oprocess , oscope));
-        oscope.getTerminationHandler().setName("__terminationHandler:" + (oscope.ngetName());
+        oscope.getTerminationHandler().setName("__terminationHandler:" + (oscope.getName()));
         oscope.getTerminationHandler().setDebugInfo(createDebugInfo(terminationHandler, null));
         if (terminationHandler == null) {
             oscope.getTerminationHandler().setActivity(createDefaultCompensateActivity(null, ("Auto-generated \'compensate all\' pseudo-activity for default termination handler on " + (oscope.toString()))));
@@ -1467,7 +1466,7 @@ public abstract class BpelCompiler implements CompilerContext {
     private void compile(CompensationHandler compensationHandler) {
         OScope oscope = _structureStack.topScope();
         oscope.setCompensationHandler(new org.apache.ode.bpel.obj.OCompensationHandler(_oprocess , oscope));
-        oscope.getCompensationHandler().setName("__compenationHandler_" + (oscope.ngetName());
+        oscope.getCompensationHandler().setName("__compenationHandler_" + (oscope.getName()));
         oscope.getCompensationHandler().setDebugInfo(createDebugInfo(compensationHandler, null));
         if (compensationHandler == null) {
             oscope.getCompensationHandler().setActivity(createDefaultCompensateActivity(compensationHandler, ("Auto-generated \'compensate all\' pseudo-activity for default compensation handler on  " + (oscope.toString()))));
@@ -1488,14 +1487,14 @@ public abstract class BpelCompiler implements CompilerContext {
             // The default fault handler compensates all child activities
             // AND then rethrows the fault!
             final OCatch defaultCatch = new OCatch(_oprocess, oscope);
-            defaultCatch.setName("__defaultFaultHandler:" + (oscope.ngetName());
+            defaultCatch.setName("__defaultFaultHandler:" + (oscope.getName()));
             defaultCatch.setFaultName(null); // catch any fault
             defaultCatch.setFaultVariable(null);
             OSequence sequence = new OSequence(_oprocess, defaultCatch);
-            sequence.setName("__defaultFaultHandler_sequence:" + (oscope.ngetName());
+            sequence.setName("__defaultFaultHandler_sequence:" + (oscope.getName()));
             sequence.setDebugInfo(createDebugInfo(fh, "Auto-generated sequence activity."));
             ORethrow rethrow = new ORethrow(_oprocess, sequence);
-            rethrow.setName("__defaultFaultHandler_rethrow:" + (oscope.ngetName());
+            rethrow.setName("__defaultFaultHandler_rethrow:" + (oscope.getName()));
             rethrow.setDebugInfo(createDebugInfo(fh, "Auto-generated re-throw activity."));
             sequence.getSequence().add(createDefaultCompensateActivity(fh, "Default compensation handler for " + oscope));
             sequence.getSequence().add(rethrow);
@@ -1513,7 +1512,7 @@ public abstract class BpelCompiler implements CompilerContext {
                 for (final Catch catchSrc : fh.getCatches()) {
                     final OCatch ctch = new OCatch(_oprocess, oscope);
                     ctch.setDebugInfo(createDebugInfo(catchSrc, catchSrc.toString()));
-                    ctch.setName((("__catch#" + i) + ":") + (_structureStack.topScope().ngetName());
+                    ctch.setName((("__catch#" + i) + ":") + (_structureStack.topScope().getName()));
                     ctch.setFaultName(catchSrc.getFaultName());
                     compile(ctch, catchSrc, new Runnable() {
                         public void run() {
@@ -1813,7 +1812,7 @@ public abstract class BpelCompiler implements CompilerContext {
 
         private List<OScope> scopeStack() {
             ArrayList<OScope> newList = new ArrayList<OScope>();
-            CollectionsX.filter(newList, _stack.iterator(), OScope.getClass());
+            CollectionsX.filter(newList, _stack.iterator(), OScope.class);
             return newList;
         }
 

@@ -42,6 +42,7 @@ public class OProcessWrapper extends ExtensibleImpl {
 	}
 
 	public OProcessWrapper(long compileTime) {
+		this();
 		setMagic(OProcessWrapper.CURRENT_MAGIC_NUMBER);
 		setFormat(OmSerdeFactory.FORMAT_SERIALIZED_DEFAULT);
 		setCompileTime(compileTime);
