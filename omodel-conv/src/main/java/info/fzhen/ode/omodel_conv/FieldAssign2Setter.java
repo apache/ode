@@ -36,15 +36,21 @@ public class FieldAssign2Setter extends AbstractProcessor<CtAssignment<?, ?>>{
 				CompilationUnit cu = fAccess.getPosition().getCompilationUnit();
 				SourceCodeFragment fragment = new SourceCodeFragment();
 				fragment.position = fAccess.getPosition().getSourceEnd() - fAccess.getVariable().getSimpleName().length() + 1;
-				fragment.replacementLength = element.getPosition().getSourceEnd() - fragment.position + 1;
+				fragment.replacementLength = assignment.getPosition().getSourceStart() - fragment.position;
 				
 				String vname = fAccess.getVariable().getSimpleName();
 				if (vname.startsWith("_")) vname = vname.substring(1);
 				vname = vname.substring(0,1).toUpperCase() + vname.substring(1);
-				String setter = "set" + vname + "(" + assignment + ")";
+				String setter = "set" + vname + "(";
 				fragment.code = setter;
 				cu.addSourceCodeFragment(fragment);
-				logger.info("Accessed field: " + fAccess + "; Generated setter: " + setter);
+				
+				SourceCodeFragment fragment2 = new SourceCodeFragment();
+				fragment2.position = assignment.getPosition().getSourceEnd() + 1;
+				fragment2.replacementLength = 0;
+				fragment2.code = ")";
+				cu.addSourceCodeFragment(fragment2);
+				logger.info("Accessed field: " + fAccess + "; Generated setter: " + setter + ")");
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-s/org.apache.ode.bpel.o/org.apache.ode.bpel.obj/
+s/org.apache.ode.bpel.o/org.apache.ode.bpel.obj/g
 s/implements Serializable//
 s/@com.fasterxml.jackson.annotation.JsonIgnore/@JsonIgnore/
 0,/^import/{s/^import/import com.fasterxml.jackson.annotation.JsonIgnore\;\nimport/}

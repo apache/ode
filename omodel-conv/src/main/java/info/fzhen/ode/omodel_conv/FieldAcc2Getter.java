@@ -25,6 +25,7 @@ public class FieldAcc2Getter extends AbstractProcessor<CtFieldAccess<?>> {
 		if (fAccess.getVariable().isStatic()) return;
 //		System.out.println(fAccess + " position " + fAccess.getPosition().getSourceStart() + " "  + fAccess.getPosition().getSourceEnd());
 		CtFieldReference<?> targeted = fAccess.getVariable();
+		if (targeted.getSimpleName() == "class")return;
 		if (targeted.getQualifiedName().startsWith("org.apache.ode.bpel.o.") ||
 				targeted.getQualifiedName().startsWith("org.apache.ode.bpel.elang.xpath10.o") ||
 				targeted.getQualifiedName().startsWith("org.apache.ode.bpel.elang.xpath20.o") ||
