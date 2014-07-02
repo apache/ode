@@ -18,9 +18,9 @@
  */
 package org.apache.ode.bpel.compiler.api;
 
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OLValueExpression;
-import org.apache.ode.bpel.o.OVarType;
+import org.apache.ode.bpel.obj.OExpression;
+import org.apache.ode.bpel.obj.OLValueExpression;
+import org.apache.ode.bpel.obj.OVarType;
 
 import java.util.Map;
 
@@ -36,7 +36,7 @@ public interface ExpressionCompiler {
   void setCompilerContext(CompilerContext compilerContext);
 
   /**
-   * Compile an expression into a {@link org.apache.ode.bpel.o.OExpression} object.
+   * Compile an expression into a {@link org.apache.ode.bpel.obj.OExpression} object.
    * @param source
    * @return
    */
@@ -44,7 +44,7 @@ public interface ExpressionCompiler {
           throws CompilationException;
 
   /**
-   * Compile an lvalue (the 'to' of an assignment) into a {@link org.apache.ode.bpel.o.OLValueExpression} object.
+   * Compile an lvalue (the 'to' of an assignment) into a {@link org.apache.ode.bpel.obj.OLValueExpression} object.
    * @param source
    * @return
    * @throws CompilationException
@@ -53,7 +53,7 @@ public interface ExpressionCompiler {
              throws CompilationException;
 
   /**
-   * Compile a join condition into a {@link org.apache.ode.bpel.o.OExpression} object.
+   * Compile a join condition into a {@link org.apache.ode.bpel.obj.OExpression} object.
    * @param source
    * @return
    */

@@ -21,10 +21,10 @@ package org.apache.ode.bpel.compiler;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.Correlation;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OPickReceive;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.OPickReceive;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.utils.msg.MessageBundle;
 
 import javax.xml.namespace.QName;
@@ -35,7 +35,7 @@ import java.util.Set;
 /**
  * Base class for the {@link PickGenerator} and {@link ReceiveGenerator}
  * classes. Provides common functionality related to generating
- * {@link org.apache.ode.bpel.o.OPickReceive.OnMessage} objects.
+ * {@link org.apache.ode.bpel.obj.OPickReceive.OnMessage} objects.
  */
 abstract class PickReceiveGenerator extends DefaultActivityGenerator {
     protected static final CommonCompilationMessages __cmsgsGeneral = MessageBundle
@@ -68,21 +68,20 @@ abstract class PickReceiveGenerator extends DefaultActivityGenerator {
             String messageExchangeId, QName portType, boolean createInstance, Collection<Correlation> correlations, String route) {
 
         OPickReceive.OnMessage onMessage = new OPickReceive.OnMessage(_context.getOProcess());
-        onMessage.partnerLink = _context.resolvePartnerLink(plink);
-        onMessage.operation = _context.resolveMyRoleOperation(onMessage.partnerLink, operation);
-        if (onMessage.operation.getInput() != null && onMessage.operation.getInput().getMessage() != null) {
-            onMessage.variable = _context.resolveMessageVariable(varname, onMessage.operation.getInput().getMessage()
-                    .getQName());
+        onMessage.setPartnerLink(_context.resolvePartnerLink(plink));
+        onMessage.setOperation(_context.resolveMyRoleOperation(onMessage.getPartnerLink(), operation));
+        if (onMessage.getOperation().getInput() != null && onMessage.getOperation().getInput().getMessage() != null) {
+            onMessage.setVariable(_context.resolveMessageVariable(varname, onMessage.getOperation().getInput().getMessage().getQName()));
         }
-        onMessage.messageExchangeId = messageExchangeId;
-        onMessage.route = route;
+        onMessage.setMessageExchangeId(messageExchangeId);
+        onMessage.setRoute(route);
 
-        if (portType != null && !portType.equals(onMessage.partnerLink.myRolePortType.getQName()))
+        if (portType != null && !portType.equals(onMessage.getPartnerLink().getMyRolePortType().getQName()))
             throw new CompilationException(__cmsgsGeneral.errPortTypeMismatch(portType,
-                    onMessage.partnerLink.myRolePortType.getQName()));
+                    onMessage.getPartnerLink().getMyRolePortType().getQName()));
 
         if (createInstance)
-            onMessage.partnerLink.addCreateInstanceOperation(onMessage.operation);
+            onMessage.getPartnerLink().addCreateInstanceOperation(onMessage.getOperation());
 
         Set<String> csetNames = new HashSet<String>(); // prevents duplicate cset in on one set of correlations
         for (Correlation correlation : correlations) {
@@ -99,33 +98,33 @@ abstract class PickReceiveGenerator extends DefaultActivityGenerator {
                 if (createInstance)
                     throw new CompilationException(__cmsgsGeneral.errUseOfUninitializedCorrelationSet(correlation
                             .getCorrelationSet()));
-                onMessage.matchCorrelations.add(cset);
-                onMessage.partnerLink.addCorrelationSetForOperation(onMessage.operation, cset, false);
+                onMessage.getMatchCorrelations().add(cset);
+                onMessage.getPartnerLink().addCorrelationSetForOperation(onMessage.getOperation(), cset, false);
                 break;
             case YES:
-                onMessage.initCorrelations.add(cset);
+                onMessage.getInitCorrelations().add(cset);
                 break;
             case JOIN:
-                cset.hasJoinUseCases = true;
-                onMessage.joinCorrelations.add(cset);
-                onMessage.partnerLink.addCorrelationSetForOperation(onMessage.operation, cset, true);
+                cset.setHasJoinUseCases(true);
+                onMessage.getJoinCorrelations().add(cset);
+                onMessage.getPartnerLink().addCorrelationSetForOperation(onMessage.getOperation(), cset, true);
                 break;
 
             default:
                     throw new AssertionError("Unexpected value for correlation set enumeration!");
             }
 
-            for (OProcess.OProperty property : cset.properties) {
+            for (OProcess.OProperty property : cset.getProperties()) {
                 // Force resolution of alias, to make sure that we have one for
                 // this variable-property pair.
-                _context.resolvePropertyAlias(onMessage.variable, property.name);
+                _context.resolvePropertyAlias(onMessage.getVariable(), property.getName());
             }
 
             csetNames.add(correlation.getCorrelationSet());
         }
 
-        if (!onMessage.partnerLink.hasMyRole()) {
-            throw new CompilationException(__cmsgsGeneral.errNoMyRoleOnReceivePartnerLink(onMessage.partnerLink
+        if (!onMessage.getPartnerLink().hasMyRole()) {
+            throw new CompilationException(__cmsgsGeneral.errNoMyRoleOnReceivePartnerLink(onMessage.getPartnerLink()
                     .getName()));
         }
 

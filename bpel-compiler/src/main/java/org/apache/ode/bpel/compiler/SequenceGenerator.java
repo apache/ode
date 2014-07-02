@@ -22,8 +22,8 @@ import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.CompositeActivity;
 import org.apache.ode.bpel.compiler.bom.SequenceActivity;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OSequence;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.OSequence;
 import org.apache.ode.utils.msg.MessageBundle;
 
 
@@ -52,7 +52,7 @@ class SequenceGenerator extends DefaultActivityGenerator {
         for (Activity child : src.getActivities()) {
             try {
                 OActivity compiledChild = _context.compile(child);
-                dest.sequence.add(compiledChild);
+                dest.getSequence().add(compiledChild);
             }
             catch (CompilationException ce) {
                 _context.recoveredFromError(child, ce);

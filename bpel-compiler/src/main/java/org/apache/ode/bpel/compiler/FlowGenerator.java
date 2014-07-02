@@ -23,9 +23,9 @@ import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.CompositeActivity;
 import org.apache.ode.bpel.compiler.bom.FlowActivity;
 import org.apache.ode.bpel.compiler.bom.Link;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OFlow;
-import org.apache.ode.bpel.o.OLink;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.OFlow;
+import org.apache.ode.bpel.obj.OLink;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
@@ -45,18 +45,18 @@ class FlowGenerator extends DefaultActivityGenerator {
         compileLinkDecls(oflow, flowAct);
         compileChildren(oflow, flowAct);
 
-        for (Iterator<OLink> i = oflow.localLinks.iterator(); i.hasNext(); ) {
+        for (Iterator<OLink> i = oflow.getLocalLinks().iterator(); i.hasNext(); ) {
             OLink olink = i.next();
             try {
-                if (olink.source == null)
-                    throw new CompilationException(__cmsgs.errLinkMissingSourceActivity(olink.name).setSource(flowAct));
+                if (olink.getSource() == null)
+                    throw new CompilationException(__cmsgs.errLinkMissingSourceActivity(olink.getName()).setSource(flowAct));
             } catch (CompilationException ce) {
                 _context.recoveredFromError(src, ce);
             }
 
             try {
-                if (olink.target == null)
-                    throw new CompilationException(__cmsgs.errLinkMissingTargetActivity(olink.name).setSource(flowAct));
+                if (olink.getTarget() == null)
+                    throw new CompilationException(__cmsgs.errLinkMissingTargetActivity(olink.getName()).setSource(flowAct));
             } catch (CompilationException ce) {
                 _context.recoveredFromError(src, ce);
             }
@@ -71,22 +71,22 @@ class FlowGenerator extends DefaultActivityGenerator {
   private void compileLinkDecls(OFlow oflow, FlowActivity flowAct) {
     for (Link link : flowAct.getLinks()) {
       OLink olink = new OLink(_context.getOProcess());
-      olink.name = link.getLinkName();
+      olink.setName(link.getLinkName());
       declareLink(oflow, olink);
     }
   }
 
 
     private void declareLink(final OFlow oflow, final OLink olink) throws CompilationException {
-        if (CollectionsX.find_if(oflow.localLinks, new MemberOfFunction<OLink>() {
+        if (CollectionsX.find_if(oflow.getLocalLinks(), new MemberOfFunction<OLink>() {
             public boolean isMember(OLink o) {
-                return o.name.equals(olink.name);
+                return o.getName().equals(olink.getName());
             }
         }) != null)
-            throw new CompilationException(__cmsgs.errDuplicateLinkDecl(olink.name));
+            throw new CompilationException(__cmsgs.errDuplicateLinkDecl(olink.getName()));
 
-        olink.declaringFlow = oflow;
-        oflow.localLinks.add(olink);
+        olink.setDeclaringFlow(oflow);
+        oflow.getLocalLinks().add(olink);
     }
 
   /**
@@ -95,7 +95,7 @@ class FlowGenerator extends DefaultActivityGenerator {
     for (Activity child : src.getActivities()){
       try {
         OActivity compiledChild = _context.compile(child);
-        dest.parallelActivities.add(compiledChild);
+        dest.getParallelActivities().add(compiledChild);
       } catch (CompilationException ce) {
         _context.recoveredFromError(child, ce);
       }

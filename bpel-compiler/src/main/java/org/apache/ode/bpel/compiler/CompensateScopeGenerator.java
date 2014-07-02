@@ -22,8 +22,8 @@ package org.apache.ode.bpel.compiler;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.CompensateScopeActivity;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OCompensate;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.OCompensate;
 import org.apache.ode.utils.msg.MessageBundle;
 
 
@@ -37,7 +37,7 @@ class CompensateScopeGenerator extends DefaultActivityGenerator {
         CompensateScopeActivity compSrc = (CompensateScopeActivity) src;
         if (compSrc.getScopeToCompensate() == null)
             throw new CompilationException(__cmsgs.errScopeToCompensateUnspecfied());
-        ((OCompensate)output).compensatedScope = _context.resolveCompensatableScope(compSrc.getScopeToCompensate());
+        ((OCompensate)output).setCompensatedScope(_context.resolveCompensatableScope(compSrc.getScopeToCompensate()));
     }
 
     public OActivity newInstance(Activity src) {

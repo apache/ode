@@ -19,8 +19,8 @@
 package org.apache.ode.bpel.compiler;
 
 import org.apache.ode.bpel.compiler.bom.Activity;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OEmpty;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.OEmpty;
 
 /**
  * Generates code for <code>&lt;empty&gt;</code> activities.

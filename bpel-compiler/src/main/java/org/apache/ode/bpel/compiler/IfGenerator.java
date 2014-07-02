@@ -24,8 +24,8 @@ package org.apache.ode.bpel.compiler;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.IfActivity;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OSwitch;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.OSwitch;
 import org.apache.ode.utils.msg.MessageBundle;
 
 
@@ -49,17 +49,16 @@ class IfGenerator extends DefaultActivityGenerator {
         boolean first = true;
         if (switchDef.getActivity() != null) {
             OSwitch.OCase ocase = new OSwitch.OCase(_context.getOProcess());
-            ocase.activity = _context.compile(switchDef.getActivity());
-            ocase.expression = _context.compileExpr(switchDef.getCondition());
+            ocase.setActivity(_context.compile(switchDef.getActivity()));
+            ocase.setExpression(_context.compileExpr(switchDef.getCondition()));
             oswitch.addCase(ocase);
             first = false;
         }
 
         for (IfActivity.Case ccase : switchDef.getCases()) {
             OSwitch.OCase ocase = new OSwitch.OCase(_context.getOProcess());
-            ocase.activity = _context.compile(ccase.getActivity());
-            ocase.expression = first ? _context.compileExpr(switchDef.getCondition())
-                    : (ccase.getCondition() == null ? _context.constantExpr(true) : _context.compileExpr(ccase.getCondition()));
+            ocase.setActivity(_context.compile(ccase.getActivity()));
+            ocase.setExpression(first ? _context.compileExpr(switchDef.getCondition()) : (ccase.getCondition()) == null ? _context.constantExpr(true) : _context.compileExpr(ccase.getCondition()));
             oswitch.addCase(ocase);
             first = false;
         }

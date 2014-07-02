@@ -20,8 +20,8 @@ package org.apache.ode.bpel.compiler;
 
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.RepeatUntilActivity;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.ORepeatUntil;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.ORepeatUntil;
 
 /**
  * Generates code for <code>&lt;while&gt;</code> activities.
@@ -34,8 +34,8 @@ class RepeatUntilGenerator extends DefaultActivityGenerator {
     public void compile(OActivity output, Activity srcx)  {
         ORepeatUntil oru = (ORepeatUntil) output;
         RepeatUntilActivity src = (RepeatUntilActivity)srcx;
-        oru.untilCondition = _context.compileExpr(src.getCondition());
-        oru.activity = _context.compile(src.getActivity());
+        oru.setUntilCondition(_context.compileExpr(src.getCondition()));
+        oru.setActivity(_context.compile(src.getActivity()));
     }
 }
 

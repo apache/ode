@@ -27,7 +27,7 @@ import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.compiler.api.ExpressionCompiler;
 import org.apache.ode.bpel.compiler.bom.Expression;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
+import org.apache.ode.bpel.elang.xpath10.obj.OXPath10Expression;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.jaxen.saxpath.SAXPathException;
 import org.jaxen.saxpath.XPathReader;
@@ -122,7 +122,7 @@ public abstract class XPath10ExpressionCompilerImpl implements ExpressionCompile
             reader.setXPathHandler(handler);
 
             reader.parse(xpathStr);
-            out.xpath = xpathStr;
+            out.setXpath(xpathStr);
         } catch (CompilationExceptionWrapper e) {
             CompilationException ce = e.getCompilationException();
             if (ce == null) {

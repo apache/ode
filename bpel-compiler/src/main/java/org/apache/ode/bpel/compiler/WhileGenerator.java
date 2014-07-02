@@ -20,8 +20,8 @@ package org.apache.ode.bpel.compiler;
 
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.WhileActivity;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OWhile;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.OWhile;
 
 
 /**
@@ -35,7 +35,7 @@ class WhileGenerator extends DefaultActivityGenerator {
     public void compile(OActivity output, Activity srcx)  {
         OWhile owhile = (OWhile) output;
         WhileActivity src = (WhileActivity)srcx;
-        owhile.whileCondition = _context.compileExpr(src.getCondition());
-        owhile.activity = _context.compile(src.getActivity());
+        owhile.setWhileCondition(_context.compileExpr(src.getCondition()));
+        owhile.setActivity(_context.compile(src.getActivity()));
     }
 }

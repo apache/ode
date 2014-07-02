@@ -20,8 +20,8 @@ package org.apache.ode.bpel.compiler;
 
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.SwitchActivity;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OSwitch;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.OSwitch;
 
 /**
  * Generator for legacy BPEL 1.1 <code>&lt;switch&gt;</code> actiivty.
@@ -39,8 +39,8 @@ public class SwitchGenerator extends DefaultActivityGenerator {
 
     for (SwitchActivity.Case ccase : switchDef.getCases()) {
       OSwitch.OCase ocase = new OSwitch.OCase(_context.getOProcess());
-      ocase.activity = _context.compile(ccase.getActivity());
-      ocase.expression = (ccase.getCondition() == null ? _context.constantExpr(true) : _context.compileExpr(ccase.getCondition()));
+      ocase.setActivity(_context.compile(ccase.getActivity()));
+      ocase.setExpression((ccase.getCondition()) == null ? _context.constantExpr(true) : _context.compileExpr(ccase.getCondition()));
       oswitch.addCase(ocase);
     }
   }

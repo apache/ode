@@ -28,8 +28,8 @@ import org.apache.ode.bpel.compiler.BpelCompiler20;
 import org.apache.ode.bpel.compiler.DefaultResourceFinder;
 import org.apache.ode.bpel.compiler.ResourceFinder;
 import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OXslSheet;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.OXslSheet;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.StreamUtils;
 import org.junit.After;
@@ -63,18 +63,18 @@ public class XslTest {
     public void testUTFEncoding() throws Exception {
         Document original = DOMUtils.parse(getClass().getResourceAsStream("/xslt/test-utf8.xslt"));
         OProcess op = compile("xsl-utf8");
-        OXslSheet sheet = op.xslSheets.get(URI.create("test-utf8.xslt"));
+        OXslSheet sheet = op.getXslSheets().get(URI.create("test-utf8.xslt"));
         Assert.assertNotNull(sheet);
-        Assert.assertEquals(DOMUtils.domToString(original), sheet.sheetBody);        
+        Assert.assertEquals(DOMUtils.domToString(original), sheet.getSheetBody());        
     }
 
     @Test
     public void testISOEncoding() throws Exception {
         Document original = DOMUtils.parse(getClass().getResourceAsStream("/xslt/test-iso.xslt"));
         OProcess op = compile("xsl-iso");
-        OXslSheet sheet = op.xslSheets.get(URI.create("test-iso.xslt"));
+        OXslSheet sheet = op.getXslSheets().get(URI.create("test-iso.xslt"));
         Assert.assertNotNull(sheet);
-        Assert.assertEquals(DOMUtils.domToString(original), sheet.sheetBody);
+        Assert.assertEquals(DOMUtils.domToString(original), sheet.getSheetBody());
     }
 
     private OProcess compile(String bpelFile) throws Exception {

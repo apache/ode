@@ -22,8 +22,8 @@ package org.apache.ode.bpel.compiler;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.WaitActivity;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OWait;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.OWait;
 import org.apache.ode.utils.msg.MessageBundle;
 
 /**
@@ -41,10 +41,10 @@ class WaitGenerator extends DefaultActivityGenerator {
         WaitActivity waitDef = (WaitActivity)src;
         OWait owait = (OWait)output;
         if (waitDef.getFor() != null && waitDef.getUntil() == null) {
-            owait.forExpression = _context.compileExpr(waitDef.getFor());
+            owait.setForExpression(_context.compileExpr(waitDef.getFor()));
         }
         else if (waitDef.getFor() == null && waitDef.getUntil() != null) {
-            owait.untilExpression = _context.compileExpr(waitDef.getUntil());
+            owait.setUntilExpression(_context.compileExpr(waitDef.getUntil()));
         }
         else {
             throw new CompilationException(_msgs.errWaitMustDefineForOrUntilDuration().setSource(waitDef));

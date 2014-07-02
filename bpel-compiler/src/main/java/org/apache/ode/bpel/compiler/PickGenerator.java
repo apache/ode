@@ -23,8 +23,8 @@ import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.OnAlarm;
 import org.apache.ode.bpel.compiler.bom.OnMessage;
 import org.apache.ode.bpel.compiler.bom.PickActivity;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OPickReceive;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.OPickReceive;
 
 
 /**
@@ -40,7 +40,7 @@ class PickGenerator extends PickReceiveGenerator {
         OPickReceive opick = (OPickReceive) output;
         PickActivity pickDef = (PickActivity) src;
 
-        opick.createInstanceFlag = pickDef.isCreateInstance();
+        opick.setCreateInstanceFlag(pickDef.isCreateInstance());
         for (OnMessage sOnMessage : pickDef.getOnMessages()) {
           OPickReceive.OnMessage oOnMessage = compileOnMessage(sOnMessage.getVariable(),
                   sOnMessage.getPartnerLink(),
@@ -52,18 +52,18 @@ class PickGenerator extends PickReceiveGenerator {
                   sOnMessage.getRoute());
           if (sOnMessage.getActivity() == null)
               throw new CompilationException(__cmsgs.errEmptyOnMessage().setSource(sOnMessage));
-          oOnMessage.activity = _context.compile(sOnMessage.getActivity());
-          opick.onMessages.add(oOnMessage);
+          oOnMessage.setActivity(_context.compile(sOnMessage.getActivity()));
+          opick.getOnMessages().add(oOnMessage);
         }
 
         try {
             for(OnAlarm onAlarmDef : pickDef.getOnAlarms()){
                 OPickReceive.OnAlarm oalarm = new OPickReceive.OnAlarm(_context.getOProcess());
-                oalarm.activity = _context.compile(onAlarmDef.getActivity());
+                oalarm.setActivity(_context.compile(onAlarmDef.getActivity()));
                 if (onAlarmDef.getFor() != null && onAlarmDef.getUntil() == null) {
-                    oalarm.forExpr = _context.compileExpr(onAlarmDef.getFor());
+                    oalarm.setForExpr(_context.compileExpr(onAlarmDef.getFor()));
                 } else if (onAlarmDef.getFor() == null && onAlarmDef.getUntil() != null) {
-                    oalarm.untilExpr = _context.compileExpr(onAlarmDef.getUntil());
+                    oalarm.setUntilExpr(_context.compileExpr(onAlarmDef.getUntil()));
                 } else {
                     throw new CompilationException(__cmsgs.errForOrUntilMustBeGiven().setSource(onAlarmDef));
                 }
@@ -71,7 +71,7 @@ class PickGenerator extends PickReceiveGenerator {
                 if (pickDef.isCreateInstance())
                     throw new CompilationException(__cmsgs.errOnAlarmWithCreateInstance().setSource(onAlarmDef));
 
-                opick.onAlarms.add(oalarm);
+                opick.getOnAlarms().add(oalarm);
             }
         } catch (CompilationException ce) {
             _context.recoveredFromError(pickDef, ce);

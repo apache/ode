@@ -20,8 +20,8 @@
 package org.apache.ode.bpel.elang.xpath10.compiler;
 
 import org.apache.ode.bpel.compiler.api.CompilerContext;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
-import org.apache.ode.bpel.o.OXslSheet;
+import org.apache.ode.bpel.elang.xpath10.obj.OXPath10Expression;
+import org.apache.ode.bpel.obj.OXslSheet;
 
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.Source;
@@ -45,7 +45,7 @@ public class XslCompileUriResolver implements URIResolver {
 
   public Source resolve(String href, String base) throws TransformerException {
     OXslSheet xslSheet = _cc.compileXslt(href);
-    _expr.setXslSheet(xslSheet.uri, xslSheet);
-    return new StreamSource(new StringReader(xslSheet.sheetBody));
+    _expr.setXslSheet(xslSheet.getUri(), xslSheet);
+    return new StreamSource(new StringReader(xslSheet.getSheetBody()));
   }
 }
