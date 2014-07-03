@@ -21,11 +21,16 @@ package org.apache.ode.bpel.obj;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 /**
  * Base class for variable types.
  */
 public abstract class OVarType extends OBase {
 
+	@JsonCreator
+	public OVarType(){}
+	
 	public OVarType(OProcess owner) {
 		super(owner);
 	}

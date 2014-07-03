@@ -18,15 +18,13 @@
  */
 package org.apache.ode.bpel.obj;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.wsdl.Operation;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Compiled represenation of a BPEL event handler.
@@ -34,7 +32,9 @@ import javax.wsdl.Operation;
 public class OEventHandler extends OAgent {
 	private static final String ONMESSAGES = "onMessages";
 	private static final String ONALARMS = "onAlarms";
-
+	
+	@JsonCreator
+	public OEventHandler(){}
 	public OEventHandler(OProcess owner) {
 		super(owner);
 		setOnMessages(new ArrayList<OEvent>());
@@ -67,6 +67,9 @@ public class OEventHandler extends OAgent {
 		private static final String REPEATEXPR = "repeatExpr";
 		private static final String ACTIVITY = "activity";
 
+		@JsonCreator
+		public OAlarm(){}
+		
 		public OAlarm(OProcess owner) {
 			super(owner);
 		}
@@ -131,6 +134,8 @@ public class OEventHandler extends OAgent {
 
 		private static final String ROUTE = "route";
 
+		@JsonCreator
+		public OEvent(){}
 		public OEvent(OProcess owner, OActivity parent) {
 			super(owner, parent);
 			setInitCorrelations(new ArrayList<CorrelationSet>());

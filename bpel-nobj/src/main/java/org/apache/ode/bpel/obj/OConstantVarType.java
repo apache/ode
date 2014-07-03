@@ -22,6 +22,7 @@ import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -31,6 +32,8 @@ public class OConstantVarType extends OVarType {
     private static final String STRVALUE = "strValue";
     private transient Node nodeValue;
 
+    @JsonCreator
+    public OConstantVarType(){}
     public OConstantVarType(OProcess owner, Node value) {
         super(owner);
         setStrValue(DOMUtils.domToString(value));

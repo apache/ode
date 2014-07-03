@@ -28,11 +28,15 @@ import org.apache.ode.bpel.obj.OProcess.OPropertyAlias;
 import org.apache.ode.bpel.obj.OScope.Variable;
 import org.w3c.dom.Document;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class OAssign extends OActivity {
 	private static final String COPY = "copy";
 
+	@JsonCreator
+	public OAssign(){
+	}
 	public OAssign(OProcess owner, OActivity parent) {
 		super(owner, parent);
 		setCopy(new ArrayList<Copy>());
@@ -74,8 +78,19 @@ public class OAssign extends OActivity {
 		private static final String IGNOREUNINITIALIZEDFROMVARIABLE = "ignoreUninitializedFromVariable";
 		private static final String INSERTMISSINGTODATA = "insertMissingToData";
 
+		@JsonCreator
+		public Copy(){
+			initPrimitive();
+		}
 		public Copy(OProcess owner) {
 			super(owner);
+			initPrimitive();
+		}
+		private void initPrimitive(){
+			setIgnoreMissingFromData(false);
+			setIgnoreUninitializedFromVariable(false);
+			setInsertMissingToData(false);
+			setKeepSrcElementName(false);			
 		}
 
 		@Override
@@ -96,18 +111,18 @@ public class OAssign extends OActivity {
 		}
 
 		@JsonIgnore
-		public boolean getIgnoreUninitializedFromVariable() {
+		public boolean isIgnoreUninitializedFromVariable() {
 			return (Boolean) fieldContainer
 					.get(IGNOREUNINITIALIZEDFROMVARIABLE);
 		}
 
 		@JsonIgnore
-		public boolean getInsertMissingToData() {
+		public boolean isInsertMissingToData() {
 			return (Boolean) fieldContainer.get(INSERTMISSINGTODATA);
 		}
 
 		@JsonIgnore
-		public boolean getKeepSrcElementName() {
+		public boolean isKeepSrcElementName() {
 			return (Boolean) fieldContainer.get(KEEPSRCELEMENTNAME);
 		}
 
@@ -159,6 +174,9 @@ public class OAssign extends OActivity {
 		/** Name of the element referenced. */
 		private static final String ELNAME = "elName";
 
+		@JsonCreator
+		public DirectRef(){}
+		
 		public DirectRef(OProcess owner) {
 			super(owner);
 		}
@@ -185,6 +203,8 @@ public class OAssign extends OActivity {
 	public static class Expression extends OBase implements RValue {
 		private static final String EXPRESSION = "expression";
 
+		@JsonCreator
+		public Expression(){}
 		public Expression(OProcess owner, OExpression compiledExpression) {
 			super(owner);
 			setExpression(compiledExpression);
@@ -206,7 +226,10 @@ public class OAssign extends OActivity {
 
 	public static class Literal extends OBase implements RValue {
 		private static final String XMLLITERAL = "xmlLiteral";
-
+		
+		@JsonCreator
+		public Literal(){}
+		
 		public Literal(OProcess owner, Document xmlLiteral) {
 			super(owner);
 			if (xmlLiteral == null)
@@ -235,10 +258,16 @@ public class OAssign extends OActivity {
 	public static class LValueExpression extends OBase implements LValue {
 		private static final String EXPRESSION = "expression";
 
+		@JsonCreator
+		public LValueExpression(){
+			setInsertMissingToData(false);
+		}
+		
 		public LValueExpression(OProcess owner,
 				OLValueExpression compiledExpression) {
 			super(owner);
 			setExpression(compiledExpression);
+			setInsertMissingToData(false);
 		}
 
 		@JsonIgnore
@@ -275,8 +304,13 @@ public class OAssign extends OActivity {
 		private static final String PARTNERLINK = "partnerLink";
 		private static final String ISMYENDPOINTREFERENCE = "isMyEndpointReference";
 
+		@JsonCreator
+		public PartnerLinkRef(){
+			setIsMyEndpointReference(false);
+		}
 		public PartnerLinkRef(OProcess owner) {
 			super(owner);
+			setIsMyEndpointReference(false);
 		}
 
 		@JsonIgnore
@@ -312,6 +346,8 @@ public class OAssign extends OActivity {
 		private static final String VARIABLE = "variable";
 		private static final String PROPERTYALIAS = "propertyAlias";
 
+		@JsonCreator
+		public PropertyRef(){}
 		public PropertyRef(OProcess owner) {
 			super(owner);
 		}
@@ -348,6 +384,9 @@ public class OAssign extends OActivity {
 		private static final String HEADERPART = "headerPart";
 		private static final String LOCATION = "location";
 
+		@JsonCreator
+		public VariableRef(){}
+				
 		public VariableRef(OProcess owner) {
 			super(owner);
 		}

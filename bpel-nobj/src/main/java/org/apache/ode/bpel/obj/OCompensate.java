@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -28,6 +29,9 @@ public class OCompensate extends OActivity {
 	/** The scope that is compensated by this activity. */
 	private static final String COMPENSATEDSCOPE = "compensatedScope";
 
+	@JsonCreator
+	public OCompensate(){}
+	
 	@JsonIgnore
 	public OScope getCompensatedScope() {
 		return (OScope) fieldContainer.get(COMPENSATEDSCOPE);

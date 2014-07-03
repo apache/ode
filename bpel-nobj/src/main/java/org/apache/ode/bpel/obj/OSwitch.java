@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -35,6 +36,7 @@ public class OSwitch extends OActivity {
 	 */
 	private static final String CASES = "_cases";
 
+	public OSwitch(){}
 	public OSwitch(OProcess owner, OActivity parent) {
 		super(owner, parent);
 		setCases(new ArrayList<OCase>());
@@ -58,6 +60,8 @@ public class OSwitch extends OActivity {
 		private static final String EXPRESSION = "expression";
 		private static final String ACTIVITY = "activity";
 
+		@JsonCreator
+		public OCase(){}
 		public OCase(OProcess owner) {
 			super(owner);
 		}

@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import org.apache.ode.utils.stl.CollectionsX;
@@ -33,7 +34,10 @@ public class OFlow extends OActivity {
 	/** Links delcared within this activity. */
 	private static final String LOCALLINKS = "localLinks";
 	private static final String PARALLELACTIVITIES = "parallelActivities";
-
+	
+	@JsonCreator
+	public OFlow(){}
+	
 	public OFlow(OProcess owner, OActivity parent) {
 		super(owner, parent);
 		setLocalLinks(new HashSet<OLink>());

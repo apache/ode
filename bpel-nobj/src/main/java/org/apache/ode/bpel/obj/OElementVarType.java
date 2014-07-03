@@ -24,11 +24,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class OElementVarType extends OVarType {
 	private static final String ELEMENTTYPE = "elementType";
 
+	@JsonCreator
+	public OElementVarType(){}
 	public OElementVarType(OProcess owner, QName typeName) {
 		super(owner);
 		setElementType(typeName);

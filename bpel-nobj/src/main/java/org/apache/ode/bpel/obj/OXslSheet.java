@@ -21,6 +21,7 @@ package org.apache.ode.bpel.obj;
 
 import java.net.URI;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -31,6 +32,8 @@ public class OXslSheet extends OBase {
 
 	private static final String SHEETBODY = "sheetBody";
 
+	@JsonCreator
+	public OXslSheet(){}
 	public OXslSheet(OProcess owner) {
 		super(owner);
 	}

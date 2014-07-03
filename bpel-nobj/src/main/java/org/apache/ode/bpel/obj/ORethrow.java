@@ -18,7 +18,11 @@
  */
 package org.apache.ode.bpel.obj;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 public class ORethrow extends OActivity {
+	@JsonCreator
+	public ORethrow(){}
 	public ORethrow(OProcess owner, OActivity parent) {
 		super(owner, parent);
 	}

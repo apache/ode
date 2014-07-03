@@ -30,6 +30,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.obj.OScope.CorrelationSet;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -59,8 +60,13 @@ public class OPartnerLink extends OBase {
 	/** The set of {@link Operation}s that can be used to create a process instance. */
 	private static final String CREATEINSTANCEOPERATIONS = "createInstanceOperations";
 
+	@JsonCreator
+	public OPartnerLink(){
+		setInitializePartnerRole(false);
+	}
 	public OPartnerLink(OProcess owner) {
 		super(owner);
+		setInitializePartnerRole(false);
 	}
 
 	/**

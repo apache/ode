@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import org.apache.ode.bpel.obj.OProcessWrapper;
 
 public class OmSerdeFactory {
+	public static final short FORMAT_UNINITIALIZED = 0x00;
 	public static final short FORMAT_SERIALIZED_JSON = 0x10;
 	public static final short FORMAT_SERIALIZED_SMILE = 0x11;
 	public static final short FORMAT_SERIALIZED_DEFAULT = FORMAT_SERIALIZED_JSON;

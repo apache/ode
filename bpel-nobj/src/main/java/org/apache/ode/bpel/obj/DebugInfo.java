@@ -23,6 +23,7 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -38,6 +39,11 @@ public class DebugInfo extends ExtensibleImpl {
 	/** Source line number (end). */
 	private static final String ENDLINE = "endLine";
 
+	@JsonCreator
+	public DebugInfo(){
+		setStartLine(0);
+		setEndLine(0);
+	}
 	public DebugInfo(String sourceURI, int startLine, int endLine,
 			Map<QName, Object> extElmt) {
 		setSourceURI(sourceURI);

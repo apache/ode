@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.HashMap;
@@ -30,6 +31,8 @@ public class OExpressionLanguage extends OBase {
 	private static final String EXPRESSIONLANGUAGEURI = "expressionLanguageUri";
 	private static final String PROPERTIES = "properties";
 
+	@JsonCreator
+	public OExpressionLanguage(){}
 	public OExpressionLanguage(OProcess owner, Map<String, String> properties) {
 		super(owner);
 		setProperties(new HashMap<String, String>());

@@ -22,6 +22,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.obj.OScope.Variable;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -32,6 +33,8 @@ public class OThrow extends OActivity {
 
 	private static final String FAULTNAME = "faultName";
 
+	@JsonCreator
+	public OThrow(){}
 	public OThrow(OProcess owner, OActivity parent) {
 		super(owner, parent);
 	}

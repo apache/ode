@@ -39,7 +39,9 @@ public class OBase extends ExtensibleImpl{
 	/**
 	 * This should only be used by jackson when deserialize
 	 */
-	protected OBase(){}
+	protected OBase(){
+		setId(0);
+	}
 	
 	protected OBase(OProcess owner) {
 		super();

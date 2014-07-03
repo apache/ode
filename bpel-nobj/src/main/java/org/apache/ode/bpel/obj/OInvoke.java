@@ -30,6 +30,7 @@ import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.obj.OScope.CorrelationSet;
 import org.apache.ode.bpel.obj.OScope.Variable;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -58,7 +59,9 @@ public class OInvoke extends OActivity {
 
 	/** Correlation sets joined on output. */
 	private static final String JOINCORRELATIONSOUTPUT = "joinCorrelationsOutput";
-
+	
+	@JsonCreator
+	public OInvoke(){}
 	public OInvoke(OProcess owner, OActivity parent) {
 		super(owner, parent);
 		setInitCorrelationsInput(new ArrayList<CorrelationSet>());

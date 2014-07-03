@@ -30,6 +30,7 @@ import javax.xml.namespace.QName;
 import org.apache.ode.bpel.obj.OScope.CorrelationSet;
 import org.apache.ode.bpel.obj.OScope.Variable;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -58,12 +59,17 @@ public class OReply extends OActivity {
 	/** OASIS modification - Message Exchange Id. */
 	private static final String MESSAGEEXCHANGEID = "messageExchangeId";
 
+	@JsonCreator
+	public OReply(){
+		setIsFaultReply(false);
+	}
 	public OReply(OProcess owner, OActivity parent) {
 		super(owner, parent);
 		setInitCorrelations(new ArrayList<CorrelationSet>());
 		setJoinCorrelations(new ArrayList<CorrelationSet>());
 		setAssertCorrelations(new ArrayList<CorrelationSet>());
 		setMessageExchangeId("");
+		setIsFaultReply(false);
 	}
 
 	@SuppressWarnings("unchecked")

@@ -29,6 +29,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -43,6 +44,8 @@ public class OMessageVarType extends OVarType {
 	/** For doc-lit-like message types , the element type of the only part. */
 	private static final String DOCLITTYPE = "docLitType";
 
+	@JsonCreator
+	public OMessageVarType(){}
 	public OMessageVarType(OProcess owner, QName messageType,
 			Collection<Part> parts) {
 		super(owner);
@@ -75,6 +78,7 @@ public class OMessageVarType extends OVarType {
 		return (Map<String, Part>) fieldContainer.get(PARTS);
 	}
 
+	@JsonIgnore
 	boolean isDocLit() {
 		return getDocLitType() != null;
 	}
@@ -118,6 +122,8 @@ public class OMessageVarType extends OVarType {
 		private static final String NAME = "name";
 		private static final String TYPE = "type";
 
+		@JsonCreator
+		public Part(){}
 		public Part(OProcess owner, String partName, OVarType partType) {
 			super(owner);
 			setName(partName);

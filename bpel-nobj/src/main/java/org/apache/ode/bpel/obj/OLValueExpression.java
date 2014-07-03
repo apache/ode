@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public abstract class OLValueExpression extends OExpression {
@@ -30,11 +31,16 @@ public abstract class OLValueExpression extends OExpression {
 	 */
 	private static final String INSERTMISSINGDATA = "insertMissingData";
 
+	@JsonCreator
+	public OLValueExpression(){
+		setInsertMissingData(false);
+	}
 	/**
 	 * @param owner
 	 */
 	public OLValueExpression(OProcess owner) {
 		super(owner);
+		setInsertMissingData(false);
 	}
 
 	@JsonIgnore

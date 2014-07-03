@@ -20,6 +20,7 @@ package org.apache.ode.bpel.obj;
 
 import javax.xml.namespace.QName;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -52,6 +53,8 @@ public class OConstants extends OBase {
 	private static final String QNTOOHUGEPROCESSES = "qnTooHugeProcesses";
 	private static final String QNUNKNOWNFAULT = "qnUnknownFault";
 
+	@JsonCreator
+	public OConstants(){}
 	public OConstants(OProcess owner) {
 		super(owner);
 	}

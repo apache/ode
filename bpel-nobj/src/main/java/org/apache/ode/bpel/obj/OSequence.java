@@ -21,6 +21,7 @@ package org.apache.ode.bpel.obj;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -28,7 +29,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class OSequence extends OActivity {
 	private static final String SEQUENCE = "sequence";
-
+	
+	@JsonCreator
+	public OSequence(){}
 	public OSequence(OProcess owner, OActivity parent) {
 		super(owner, parent);
 		setSequence(new ArrayList<OActivity>());

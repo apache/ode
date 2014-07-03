@@ -24,6 +24,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -33,8 +34,13 @@ public class OXsdTypeVarType extends OVarType {
 	private static final String XSDTYPE = "xsdType";
 	private static final String SIMPLE = "simple";
 
+	@JsonCreator
+	public OXsdTypeVarType(){
+		setSimple(false);
+	}
 	public OXsdTypeVarType(OProcess owner) {
 		super(owner);
+		setSimple(false);
 	}
 
 	@JsonIgnore

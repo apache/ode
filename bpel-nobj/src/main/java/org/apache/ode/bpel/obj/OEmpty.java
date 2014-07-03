@@ -18,9 +18,12 @@
  */
 package org.apache.ode.bpel.obj;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 public class OEmpty extends OActivity {
-
-
+	@JsonCreator
+	public OEmpty(){}
+	
     public OEmpty(OProcess owner, OActivity parent) {
         super(owner, parent);
     }

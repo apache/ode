@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.HashSet;
@@ -43,6 +44,9 @@ public class OAgent extends OBase {
 	/** The children of this agent. */
 	private static final String NESTED = "nested";
 
+	@JsonCreator
+	public OAgent(){
+	}
 	public OAgent(OProcess owner) {
 		super(owner);
 		setIncomingLinks(new HashSet<OLink>());

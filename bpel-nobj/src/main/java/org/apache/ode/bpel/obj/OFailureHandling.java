@@ -18,8 +18,11 @@
  */
 package org.apache.ode.bpel.obj;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.xml.namespace.QName;
+
 import java.io.Serializable;
 
 /**
@@ -43,6 +46,15 @@ public class OFailureHandling extends ExtensibleImpl{
 	/** If true, fault when failure occurs, otherwise, enter activity recovery state. */
 	private static final String FAULTONFAILURE = "faultOnFailure";
 
+	/**
+	 * This can be used more than jackson deserializer
+	 */
+	@JsonCreator
+	public OFailureHandling(){
+		setRetryDelay(0);
+		setRetryFor(0);
+		setFaultOnFailure(false);
+	}
 	@JsonIgnore
 	public boolean isFaultOnFailure() {
 		return (Boolean) fieldContainer.get(FAULTONFAILURE);

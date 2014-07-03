@@ -21,6 +21,7 @@ package org.apache.ode.bpel.obj;
 
 import org.apache.ode.bpel.obj.OScope.Variable;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -34,8 +35,13 @@ public class OForEach extends OActivity {
 	private static final String COMPLETIONCONDITION = "completionCondition";
 	private static final String INNERSCOPE = "innerScope";
 
+	@JsonCreator
+	public OForEach(){
+		setParallel(false);
+	}
 	public OForEach(OProcess owner, OActivity parent) {
 		super(owner, parent);
+		setParallel(false);
 	}
 
 	@JsonIgnore

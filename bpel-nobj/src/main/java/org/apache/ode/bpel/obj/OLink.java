@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -39,6 +40,8 @@ public class OLink extends OBase {
 	/** The target activity. */
 	private static final String TARGET = "target";
 
+	@JsonCreator
+	public OLink(){}
 	public OLink(OProcess owner) {
 		super(owner);
 	}

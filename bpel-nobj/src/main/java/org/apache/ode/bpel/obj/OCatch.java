@@ -20,6 +20,7 @@ package org.apache.ode.bpel.obj;
 
 import javax.xml.namespace.QName;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -29,6 +30,8 @@ public final class OCatch extends OScope {
 	private static final String FAULTNAME = "faultName";
 	private static final String FAULTVARIABLE = "faultVariable";
 
+	@JsonCreator
+	public OCatch(){}
 	public OCatch(OProcess owner, OActivity parent) {
 		super(owner, parent);
 	}

@@ -84,6 +84,7 @@ public class OProcess extends OBase {
 	@JsonCreator
 	public OProcess() {
 		instanceCount ++;
+		setChildIdCounter(0);
 	}
 	public OProcess(String version) {
 		super(null);
@@ -372,7 +373,9 @@ public class OProcess extends OBase {
 
 		private static final String ALIASES = "aliases";
 		private static final String NAME = "name";
-
+		
+		@JsonCreator
+		public OProperty(){}
 		public OProperty(OProcess process) {
 			super(process);
 			setAliases(new ArrayList<OPropertyAlias>());
@@ -418,6 +421,9 @@ public class OProcess extends OBase {
 		private static final String HEADER = "header";
 		private static final String LOCATION = "location";
 
+		@JsonCreator
+		public OPropertyAlias(){}
+		
 		public OPropertyAlias(OProcess owner) {
 			super(owner);
 		}

@@ -26,8 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.FastArrayList;
 import org.apache.ode.bpel.obj.OProcess.OProperty;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -73,12 +75,23 @@ public class OScope extends OActivity {
 	/** Is this scope <em>isolated</em> i.e. protected against concurrent access to its variables. */
 	private static final String ISOLATEDSCOPE = "isolatedScope";
 
+	@JsonCreator
+	public OScope(){
+		initPrimitive();
+	}
 	public OScope(OProcess owner, OActivity parent) {
 		super(owner, parent);
 		setVariables(new HashMap<String, Variable>());
 		setCorrelationSets(new HashMap<String, CorrelationSet>());
 		setPartnerLinks(new HashMap<String, OPartnerLink>());
 		setCompensatable(new HashSet<OScope>());
+		
+		initPrimitive();
+	}
+	private void initPrimitive(){
+		setAtomicScope(false);
+		setImplicitScope(false);
+		setIsolatedScope(false);
 	}
 
 	public void addCorrelationSet(CorrelationSet ocset) {
@@ -242,7 +255,7 @@ public class OScope extends OActivity {
 		}
 		return null;
 	}
-
+	@JsonIgnore
 	public boolean isInAtomicScope() {
 		OActivity current = this;
 		while (current != null) {
@@ -328,10 +341,14 @@ public class OScope extends OActivity {
 		 */
 		private static final String HASJOINUSECASES = "hasJoinUseCases";
 
+		@JsonCreator
+		public CorrelationSet(){
+			setHasJoinUseCases(false);
+		}
 		public CorrelationSet(OProcess owner) {
 			super(owner);
 			setProperties(new ArrayList<OProcess.OProperty>());
-
+			setHasJoinUseCases(false);
 		}
 
 		@JsonIgnore
@@ -383,6 +400,8 @@ public class OScope extends OActivity {
 		/** If not-null indicates that this variable has an external representation. */
 		private static final String EXTVAR = "extVar";
 
+		@JsonCreator
+		public Variable(){}
 		public Variable(OProcess owner, OVarType type) {
 			super(owner);
 			setType(type);

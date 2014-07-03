@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -27,6 +28,9 @@ public class OWait extends OActivity {
 	private static final String FOREXPRESSION = "forExpression";
 	private static final String UNTILEXPRESSION = "untilExpression";
 
+	@JsonCreator
+	public OWait(){}
+	
 	public OWait(OProcess owner, OActivity parent) {
 		super(owner, parent);
 	}

@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -32,6 +33,8 @@ public class ORepeatUntil extends OActivity {
 
 	private static final String ACTIVITY = "activity";
 
+	@JsonCreator
+	public ORepeatUntil(){}
 	public ORepeatUntil(OProcess owner, OActivity parent) {
 		super(owner, parent);
 	}

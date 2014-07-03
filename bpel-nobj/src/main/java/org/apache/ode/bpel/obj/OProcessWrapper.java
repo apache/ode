@@ -39,6 +39,9 @@ public class OProcessWrapper extends ExtensibleImpl {
 
 	public OProcessWrapper() {
 		super(new LinkedHashMap<String, Object>());
+		setCompileTime(0);
+		setFormat(OmSerdeFactory.FORMAT_UNINITIALIZED);
+		
 	}
 
 	public OProcessWrapper(long compileTime) {

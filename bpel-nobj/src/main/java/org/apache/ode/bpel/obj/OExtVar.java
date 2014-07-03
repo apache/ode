@@ -20,6 +20,7 @@ package org.apache.ode.bpel.obj;
 
 import org.apache.ode.bpel.obj.OScope.Variable;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -38,6 +39,9 @@ public class OExtVar extends OBase {
 	/** Related variable containing the identifying information. */
 	private static final String RELATED = "related";
 
+	@JsonCreator
+	public OExtVar(){}
+	
 	public OExtVar(OProcess owner) {
 		super(owner);
 	}

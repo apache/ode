@@ -18,10 +18,14 @@
  */
 package org.apache.ode.bpel.obj;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 public class OConstantExpression extends OExpression {
 
     private Object _val;
 
+    @JsonCreator 
+    public OConstantExpression(){}
     public OConstantExpression(OProcess owner, Object val) {
         super(owner);
         setVal(val);

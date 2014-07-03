@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
@@ -28,9 +29,10 @@ import java.util.List;
  * Compiled representation of a BPEL fault handler.
  */
 public class OFaultHandler extends OBase {
-
 	private static final String CATCHBLOCKS = "catchBlocks";
 
+	@JsonCreator
+	public OFaultHandler(){}
 	public OFaultHandler(OProcess owner) {
 		super(owner);
 		setCatchBlocks(new ArrayList<OCatch>());

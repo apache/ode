@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -41,11 +42,16 @@ public abstract class OActivity extends OAgent {
 
 	private OActivity parent;
 
+	@JsonCreator
+	public OActivity(){
+		setSuppressJoinFailure(false);
+	}
 	public OActivity(OProcess owner, OActivity parent) {
 		super(owner);
 		this.parent = parent;
 		setSourceLinks(new HashSet<OLink>());
 		setTargetLinks(new HashSet<OLink>());
+		setSuppressJoinFailure(false);
 	}
 
 	@Override

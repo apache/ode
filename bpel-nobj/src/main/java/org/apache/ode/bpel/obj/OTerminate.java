@@ -18,11 +18,14 @@
  */
 package org.apache.ode.bpel.obj;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 /**
  * Compiled representation of the BPEL <code>&lt;terminate&gt;</code> activity.
  */
 public class OTerminate extends OActivity {
-
+	@JsonCreator
+	public OTerminate(){}
 
     public OTerminate(OProcess owner, OActivity parent) {
         super(owner, parent);

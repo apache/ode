@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -26,7 +27,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public abstract class OExpression extends OBase {
 	private static final String EXPRESSIONLANGUAGE = "expressionLanguage";
-
+	@JsonCreator
+	public OExpression(){}
 	public OExpression(OProcess owner) {
 		super(owner);
 	}

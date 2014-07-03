@@ -29,6 +29,7 @@ import javax.wsdl.Operation;
 import org.apache.ode.bpel.obj.OScope.CorrelationSet;
 import org.apache.ode.bpel.obj.OScope.Variable;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -42,10 +43,15 @@ public class OPickReceive extends OActivity {
 	private static final String ONALARMS = "onAlarms";
 	private static final String CREATEINSTANCEFLAG = "createInstanceFlag";
 
+	@JsonCreator
+	public OPickReceive(){
+		setCreateInstanceFlag(false);
+	}
 	public OPickReceive(OProcess owner, OActivity parent) {
 		super(owner, parent);
 		setOnMessages(new ArrayList<OnMessage>());
 		setOnAlarms(new ArrayList<OnAlarm>());
+		setCreateInstanceFlag(false);
 	}
 
 	@JsonIgnore
