@@ -24,6 +24,7 @@ import javax.xml.namespace.QName;
 import org.apache.ode.bpel.elang.xpath20.obj.OXPath20ExpressionBPEL20;
 import org.apache.ode.bpel.obj.OProcess;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -32,6 +33,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class OXQuery10ExpressionBPEL20 extends OXPath20ExpressionBPEL20 {
 	private static final String XQUERY = "xquery";
 
+	@JsonCreator
+	public OXQuery10ExpressionBPEL20(){}
 	public OXQuery10ExpressionBPEL20(OProcess owner,
 			QName qname_getVariableData, QName qname_getVariableProperty,
 			QName qname_getLinkStatus, QName qname_doXslTransform,

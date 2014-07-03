@@ -26,6 +26,7 @@ import net.sf.saxon.expr.Expression;
 import org.apache.ode.bpel.elang.xpath10.obj.OXPath10ExpressionBPEL20;
 import org.apache.ode.bpel.obj.OProcess;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -34,6 +35,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class OXPath20ExpressionBPEL20 extends OXPath10ExpressionBPEL20 {
 	private final String COMPILEDEXPR = "_compiledExpr";
 
+	@JsonCreator
+	public OXPath20ExpressionBPEL20(){}
 	public OXPath20ExpressionBPEL20(OProcess owner,
 			QName qname_getVariableData, QName qname_getVariableProperty,
 			QName qname_getLinkStatus, QName qname_doXslTransform,

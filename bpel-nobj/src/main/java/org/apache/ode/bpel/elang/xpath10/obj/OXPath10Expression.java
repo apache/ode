@@ -37,6 +37,7 @@ import org.apache.ode.bpel.obj.OMessageVarType.Part;
 import org.apache.ode.bpel.obj.OProcess.OProperty;
 import org.apache.ode.utils.NSContext;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -64,6 +65,8 @@ public class OXPath10Expression extends OLValueExpression {
 
 	private static final String XSLSHEETS = "xslSheets";
 
+	@JsonCreator
+	public OXPath10Expression(){}
 	public OXPath10Expression(OProcess owner, QName qname_getVariableData,
 			QName qname_getVariableProperty, QName qname_getLinkStatus) {
 		super(owner);

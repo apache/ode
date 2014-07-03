@@ -23,6 +23,7 @@ import javax.xml.namespace.QName;
 import org.apache.ode.bpel.elang.xpath10.obj.OXPath10Expression;
 import org.apache.ode.bpel.obj.OProcess;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -36,6 +37,10 @@ public class OXPath10ExpressionBPEL20 extends OXPath10Expression {
 	/** Flags this expression as a joinCondition */
 	private static final String ISJOINEXPRESSION = "isJoinExpression";
 
+	@JsonCreator
+	public OXPath10ExpressionBPEL20(){
+		setIsJoinExpression(false);
+	}
 	public OXPath10ExpressionBPEL20(OProcess owner,
 			QName qname_getVariableData, QName qname_getVariableProperty,
 			QName qname_getLinkStatus, QName qname_doXslTransform,
