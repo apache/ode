@@ -97,6 +97,8 @@ public class OProcess extends OBase {
 		setElementTypes(new HashMap<QName, OElementVarType>());
 		setXsdTypes(new HashMap<QName, OXsdTypeVarType>());
 		setXslSheets(new HashMap<URI, OXslSheet>());
+		
+		setChildIdCounter(0);
 	}
 
 	@Override
@@ -128,9 +130,7 @@ public class OProcess extends OBase {
 	public Set<OPartnerLink> getAllPartnerLinks() {
 		Set<OPartnerLink> links = (Set<OPartnerLink>) fieldContainer
 				.get(ALLPARTNERLINKS);
-		if (links == null)
-			return null;
-		return Collections.unmodifiableSet(links);
+		return links;
 	}
 
 	public OBase getChild(final int id) {
