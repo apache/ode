@@ -19,7 +19,6 @@
 package org.apache.ode.bpel.obj;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -50,7 +49,7 @@ public class OSwitch extends OActivity {
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public List<OCase> getCases() {
-		return Collections.unmodifiableList((List<OCase>)fieldContainer.get(CASES));
+		return (List<OCase>)fieldContainer.get(CASES);
 	}
 	private void setCases(List<OCase> cases){
 		fieldContainer.put(CASES, cases);
