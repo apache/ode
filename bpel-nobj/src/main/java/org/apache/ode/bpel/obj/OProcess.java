@@ -21,7 +21,6 @@ package org.apache.ode.bpel.obj;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,14 +35,15 @@ import javax.xml.namespace.QName;
 import org.apache.ode.bpel.obj.OMessageVarType.Part;
 import org.apache.ode.utils.NSContext;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.deser.ResolvableDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 /**
@@ -78,9 +78,16 @@ public class OProcess extends OBase {
 	private static final String XSLSHEETS = "xslSheets";
 	private static final String NAMESPACECONTEXT = "namespaceContext";
 
-	public OProcess(String bpelVersion) {
+	/**
+	 * This constructor should only be used by Jackson when deserialize.
+	 */
+	@JsonCreator
+	public OProcess() {
+		instanceCount ++;
+	}
+	public OProcess(String version) {
 		super(null);
-		setVersion(bpelVersion);
+		setVersion(version);
 		instanceCount++;
 		setAllPartnerLinks(new HashSet<OPartnerLink>());
 		setProperties(new ArrayList<OProperty>());
@@ -119,7 +126,11 @@ public class OProcess extends OBase {
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public Set<OPartnerLink> getAllPartnerLinks() {
-		return Collections.unmodifiableSet((Set<OPartnerLink>) fieldContainer.get(ALLPARTNERLINKS));
+		Set<OPartnerLink> links = (Set<OPartnerLink>) fieldContainer
+				.get(ALLPARTNERLINKS);
+		if (links == null)
+			return null;
+		return Collections.unmodifiableSet(links);
 	}
 
 	public OBase getChild(final int id) {
@@ -179,8 +190,10 @@ public class OProcess extends OBase {
 
 	@JsonIgnore
 	@SuppressWarnings("unchecked")
-	public Collection getExpressionLanguages() {
-		throw new UnsupportedOperationException(); // TODO: implement me!
+	public HashSet<OExpressionLanguage> getExpressionLanguages() {
+		//TODO conflicts with legacy impl of this method
+		return (HashSet<OExpressionLanguage>) fieldContainer
+				.get(EXPRESSIONLANGUAGES);
 	}
 
 	@JsonIgnore
@@ -194,6 +207,7 @@ public class OProcess extends OBase {
 		return (HashMap<QName, OMessageVarType>) fieldContainer
 				.get(MESSAGETYPES);
 	}
+
 	@JsonIgnore
 	public String getName() {
 		return getProcessName();
@@ -203,10 +217,11 @@ public class OProcess extends OBase {
 	public NSContext getNamespaceContext() {
 		return (NSContext) fieldContainer.get(NAMESPACECONTEXT);
 	}
+
 	@JsonIgnore
 	public OPartnerLink getPartnerLink(String name) {
 		for (OPartnerLink partnerLink : getAllPartnerLinks()) {
-			if (partnerLink.getName().equals(name)){
+			if (partnerLink.getName().equals(name)) {
 				return partnerLink;
 			}
 		}
@@ -267,7 +282,7 @@ public class OProcess extends OBase {
 
 	//	TODO: custom readObject
 	public void setAllPartnerLinks(Set<OPartnerLink> allPartnerLinks) {
-		if (getAllPartnerLinks() == null){
+		if (getAllPartnerLinks() == null) {
 			fieldContainer.put(ALLPARTNERLINKS, allPartnerLinks);
 		}
 	}
@@ -289,14 +304,14 @@ public class OProcess extends OBase {
 	}
 
 	public void setElementTypes(HashMap<QName, OElementVarType> elementTypes) {
-		if (getElementTypes() == null){
+		if (getElementTypes() == null) {
 			fieldContainer.put(ELEMENTTYPES, elementTypes);
 		}
 	}
 
 	public void setExpressionLanguages(
 			HashSet<OExpressionLanguage> expressionLanguages) {
-		if (getExpressionLanguages() == null){
+		if (getExpressionLanguages() == null) {
 			fieldContainer.put(EXPRESSIONLANGUAGES, expressionLanguages);
 		}
 	}
@@ -306,7 +321,7 @@ public class OProcess extends OBase {
 	}
 
 	public void setMessageTypes(HashMap<QName, OMessageVarType> messageTypes) {
-		if (getMessageTypes() == null){
+		if (getMessageTypes() == null) {
 			fieldContainer.put(MESSAGETYPES, messageTypes);
 		}
 	}
@@ -324,7 +339,7 @@ public class OProcess extends OBase {
 	}
 
 	public void setProperties(List<OProperty> properties) {
-		if (getProperties() == null){
+		if (getProperties() == null) {
 			fieldContainer.put(PROPERTIES, properties);
 		}
 	}
@@ -342,13 +357,13 @@ public class OProcess extends OBase {
 	}
 
 	public void setXsdTypes(HashMap<QName, OXsdTypeVarType> xsdTypes) {
-		if (getXsdTypes() == null){
+		if (getXsdTypes() == null) {
 			fieldContainer.put(XSDTYPES, xsdTypes);
 		}
 	}
 
 	public void setXslSheets(HashMap<URI, OXslSheet> xslSheets) {
-		if (getXslSheets() == null){
+		if (getXslSheets() == null) {
 			fieldContainer.put(XSLSHEETS, xslSheets);
 		}
 	}
@@ -461,15 +476,17 @@ public class OProcess extends OBase {
 		}
 
 	}
-	
+
 	/**
 	 * custom deserializer of OProcess.
 	 * @author fangzhen
-	 *
+	 * @deprecated unnecessary now
 	 */
-	public static class OProcessDeser extends StdDeserializer<OProcess>{
+	public static class OProcessDeser extends StdDeserializer<OProcess>
+			implements ResolvableDeserializer {
 		private static final long serialVersionUID = 7750214662590623362L;
 		private JsonDeserializer<?> defaultDeserializer;
+
 		public OProcessDeser(JsonDeserializer<?> defaultDeserializer) {
 			super(OProcess.class);
 			this.defaultDeserializer = defaultDeserializer;
@@ -478,10 +495,18 @@ public class OProcess extends OBase {
 		@Override
 		public OProcess deserialize(JsonParser jp, DeserializationContext ctxt)
 				throws IOException, JsonProcessingException {
-			OProcess process = (OProcess)defaultDeserializer.deserialize(jp, ctxt);
-			OProcess.instanceCount ++;
+			OProcess process = (OProcess) defaultDeserializer.deserialize(jp,
+					ctxt);
+			OProcess.instanceCount++;
 			return process;
 		}
-		
+
+		// for some reason you have to implement ResolvableDeserializer when modifying BeanDeserializer
+		// otherwise deserializing throws JsonMappingException??
+		@Override
+		public void resolve(DeserializationContext ctxt)
+				throws JsonMappingException {
+			((ResolvableDeserializer) defaultDeserializer).resolve(ctxt);
+		}
 	}
 }

@@ -189,7 +189,7 @@ define "ode" do
 
   desc "ODE BPEL Compiler"
   define "bpel-compiler" do
-    compile.with projects("bpel-api", "bpel-nobj", "bpel-obj", "bpel-schemas", "utils"),
+    compile.with projects("bpel-api", "bpel-nobj", "bpel-schemas", "utils"),
       JAVAX.stream, JAXEN, SAXON, WSDL4J, XALAN, XERCES, COMMONS.collections, SLF4J, LOG4J
     test.resources { filter(project("bpel-scripts").path_to("src/main/resources")).into(test.resources.target).run }
     test.with LOG4J

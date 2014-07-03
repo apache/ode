@@ -84,8 +84,6 @@ public class JsonOmDeserializer implements OmDeserializer {
 		@Override 
 		public JsonDeserializer<?> modifyDeserializer(DeserializationConfig config, BeanDescription beanDesc, JsonDeserializer<?> deserializer)
 	      {
-	        if (beanDesc.getBeanClass() == OProcess.class)
-	          return new OProcess.OProcessDeser(deserializer);
 	        return deserializer;
 	      }
 	}

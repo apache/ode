@@ -35,7 +35,12 @@ public class OBase extends ExtensibleImpl{
 	/** Owner OProcess */
 	private static String OWNER = "_owner";
 	private static String DEBUG_INFO = "debugInfo";
-
+	
+	/**
+	 * This should only be used by jackson when deserialize
+	 */
+	protected OBase(){}
+	
 	protected OBase(OProcess owner) {
 		super();
 		init(owner);
