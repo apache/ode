@@ -44,7 +44,7 @@ public class FieldAcc2Getter extends AbstractProcessor<CtFieldAccess<?>> {
 			}
 			fragment.code  = methString + vname + "()";
 			cu.addSourceCodeFragment(fragment);
-			logger.info("Accessed field: " + fAccess + "; Generated getter: " + fragment.code);
+			logger.info(cu.getFile().getPath() + " Accessed field: " + fAccess + "; Generated getter: " + fragment.code);
 		}
 	}
 }

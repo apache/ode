@@ -50,7 +50,7 @@ public class FieldAssign2Setter extends AbstractProcessor<CtAssignment<?, ?>>{
 				fragment2.replacementLength = 0;
 				fragment2.code = ")";
 				cu.addSourceCodeFragment(fragment2);
-				logger.info("Accessed field: " + fAccess + "; Generated setter: " + setter + ")");
+				logger.info(cu.getFile().getPath() + " Accessed field: " + fAccess + "; Generated setter: " + setter + ")");
 			}
 		}
 	}
