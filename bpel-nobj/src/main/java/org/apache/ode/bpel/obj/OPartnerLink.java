@@ -66,6 +66,10 @@ public class OPartnerLink extends OBase {
 	}
 	public OPartnerLink(OProcess owner) {
 		super(owner);
+		setNonIntitiatingCorrelationSets(new HashMap<String, Set<CorrelationSet>>());
+		setJoiningCorrelationSets(new HashMap<String, Set<CorrelationSet>>());
+		setCreateInstanceOperations(new HashSet<String>());
+
 		setInitializePartnerRole(false);
 	}
 

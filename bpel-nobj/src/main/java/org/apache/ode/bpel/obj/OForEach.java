@@ -111,7 +111,7 @@ public class OForEach extends OActivity {
 				+ getFinalCounterValue()
 				+ ", completionCondition="
 				+ (getCompletionCondition() == null ? ""
-						: getCompletionCondition()) + "}";
+						: getCompletionCondition().getBranchCount()) + "}";
 	}
 
 	public static class CompletionCondition extends OBase {

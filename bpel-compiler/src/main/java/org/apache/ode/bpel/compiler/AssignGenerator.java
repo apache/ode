@@ -69,7 +69,7 @@ class AssignGenerator extends DefaultActivityGenerator {
             ocopy.setIgnoreUninitializedFromVariable(scopy.isIgnoreUninitializedFromVariable());
             ocopy.setInsertMissingToData(scopy.isInsertMissingToData());
             ocopy.setInsertMissingToData(scopy.isInsertMissingToData());
-            ocopy.setDebugInfo(new org.apache.ode.bpel.obj.DebugInfo(_context.getSourceLocation() , scopy.getLineNo() , source.getExtensibilityElements()));
+            ocopy.setDebugInfo(new DebugInfo(_context.getSourceLocation() , scopy.getLineNo() , source.getExtensibilityElements()));
             try {
                 if (scopy.getTo() == null)
                     throw new CompilationException(__cmsgs.errMissingToSpec().setSource(scopy));

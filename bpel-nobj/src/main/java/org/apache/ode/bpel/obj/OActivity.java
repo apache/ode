@@ -39,16 +39,15 @@ public abstract class OActivity extends OAgent {
 	private static final String TARGETLINKS = "targetLinks";
 	private static final String NAME = "name";
 	private static final String FAILUREHANDLING = "failureHandling";
-
-	private OActivity parent;
-
+	private static final String PARENT = "parent";
+	
 	@JsonCreator
 	public OActivity(){
 		setSuppressJoinFailure(false);
 	}
 	public OActivity(OProcess owner, OActivity parent) {
 		super(owner);
-		this.parent = parent;
+		setParent(parent);
 		setSourceLinks(new HashSet<OLink>());
 		setTargetLinks(new HashSet<OLink>());
 		setSuppressJoinFailure(false);
@@ -84,10 +83,10 @@ public abstract class OActivity extends OAgent {
 	public OFailureHandling getFailureHandling() {
 		OFailureHandling handling = (OFailureHandling) fieldContainer.get(FAILUREHANDLING);
 		if (handling == null) {
-			OActivity parent = this.parent;
+			OActivity parent = this.getParent();
 			while (parent != null && handling == null) {
 				handling = parent.getFailureHandling();
-				parent = parent.parent;
+				parent = getParent().getParent();
 			}
 		}
 		return handling;
@@ -101,10 +100,6 @@ public abstract class OActivity extends OAgent {
 	@JsonIgnore
 	public String getName() {
 		return (String) fieldContainer.get(NAME);
-	}
-
-	public OActivity getParent() {
-		return getParent();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -164,5 +159,12 @@ public abstract class OActivity extends OAgent {
 		}
 
 		return buf.toString();
+	}
+	@JsonIgnore
+	public OActivity getParent(){
+		return (OActivity)fieldContainer.get(PARENT);
+	}
+	private void setParent(OActivity parent){
+		fieldContainer.put(PARENT, parent);
 	}
 }

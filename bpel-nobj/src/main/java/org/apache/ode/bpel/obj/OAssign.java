@@ -449,7 +449,7 @@ public class OAssign extends OActivity {
 
 		public String toString() {
 			return "{VarRef " + getVariable()
-					+ (getPart() == null ? "" : "." + getPart())
+					+ (getPart() == null ? "" : "." + getPart().getName())
 					+ (getLocation() == null ? "" : getLocation().toString())
 					+ "}";
 		}

@@ -95,11 +95,11 @@ public class OScope extends OActivity {
 	}
 
 	public void addCorrelationSet(CorrelationSet ocset) {
-		getCorrelationSets().put(getName(), ocset);
+		getCorrelationSets().put(ocset.getName(), ocset);
 	}
 
 	public void addLocalVariable(Variable variable) {
-		getVariables().put(getName(), variable);
+		getVariables().put(variable.getName(), variable);
 	}
 
 	@Override
@@ -259,7 +259,7 @@ public class OScope extends OActivity {
 	public boolean isInAtomicScope() {
 		OActivity current = this;
 		while (current != null) {
-			if (current instanceof OScope && isAtomicScope())
+			if (current instanceof OScope && ((OScope)current).isAtomicScope())
 				return true;
 			current = current.getParent();
 		}

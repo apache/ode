@@ -67,13 +67,13 @@ public class OFlow extends OActivity {
 	}
 
 	public void setLocalLinks(Set<OLink> localLinks) {
-		if (getLocalLinks() != null){
+		if (getLocalLinks() == null){
 			fieldContainer.put(LOCALLINKS, localLinks);
 		}
 	}
 
 	public void setParallelActivities(Set<OActivity> parallelActivities) {
-		if (getParallelActivities() != null){
+		if (getParallelActivities() == null){
 			fieldContainer.put(PARALLELACTIVITIES, parallelActivities);
 		}
 	}
