@@ -20,10 +20,14 @@
 package org.apache.ode.bpel.compiler_2_0;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.net.URI;
 import java.net.URL;
 
 import org.apache.ode.bpel.compiler.api.CompileListener;
+import org.apache.ode.bpel.obj.OProcessWrapper;
+import org.apache.ode.bpel.obj.serde.OmDeserializer;
+import org.apache.ode.bpel.obj.serde.OmSerdeFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -37,6 +41,10 @@ public class GoodCompileTest extends AbstractCompileTestCase implements CompileL
             String path = uri.getPath();
             File bpelFile = new File(path);
             _compiler.compile(bpelFile, 0);
+            
+            String cbp = bpel.substring(0, bpel.length()-4) + "cbp";
+            OmDeserializer deserializer = new OmSerdeFactory().createOmDeserializer(getClass().getResourceAsStream(cbp));
+            OProcessWrapper desered = deserializer.deserialize();
         } catch (Exception ex) {
             ex.printStackTrace();
             Assert.fail("Compilation did not succeed.");

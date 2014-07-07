@@ -285,6 +285,7 @@ public class BpelC {
 
             try {
             	OProcessWrapper wrapper = new OProcessWrapper(System.currentTimeMillis());
+            	wrapper.setProcess(oprocess);
             	OmSerializer serializer = new OmSerdeFactory().createOmSerializer(_outputStream, wrapper);
             	serializer.serialize();
             } finally {

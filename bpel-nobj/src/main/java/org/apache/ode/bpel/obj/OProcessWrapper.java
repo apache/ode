@@ -109,7 +109,7 @@ public class OProcessWrapper extends ExtensibleImpl {
 	public OProcess getProcess() {
 		return (OProcess)fieldContainer.get(PROCESS);
 	}
-	public void setOProcess(OProcess process) {
+	public void setProcess(OProcess process) {
 		fieldContainer.put(OProcessWrapper.PROCESS, process);
 	}
 }
