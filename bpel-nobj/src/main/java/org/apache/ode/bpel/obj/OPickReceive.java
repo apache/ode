@@ -88,6 +88,9 @@ public class OPickReceive extends OActivity {
 		private static final String FOREXPR = "forExpr";
 		private static final String UNTILEXPR = "untilExpr";
 
+		@JsonCreator
+		public OnAlarm(){}
+		
 		public OnAlarm(OProcess owner) {
 			super(owner);
 		}
@@ -137,6 +140,10 @@ public class OPickReceive extends OActivity {
 		private static final String MESSAGEEXCHANGEID = "messageExchangeId";
 		private static final String ROUTE = "route";
 
+		@JsonCreator
+		public OnMessage(){
+			
+		}
 		public OnMessage(OProcess owner) {
 			super(owner);
 			setInitCorrelations(new ArrayList<CorrelationSet>());

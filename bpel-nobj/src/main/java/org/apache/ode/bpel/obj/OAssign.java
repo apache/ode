@@ -259,15 +259,12 @@ public class OAssign extends OActivity {
 		private static final String EXPRESSION = "expression";
 
 		@JsonCreator
-		public LValueExpression(){
-			setInsertMissingToData(false);
-		}
+		public LValueExpression(){}
 		
 		public LValueExpression(OProcess owner,
 				OLValueExpression compiledExpression) {
 			super(owner);
 			setExpression(compiledExpression);
-			setInsertMissingToData(false);
 		}
 
 		@JsonIgnore
@@ -278,10 +275,12 @@ public class OAssign extends OActivity {
 		/**
 		 * @see org.apache.ode.bpel.obj.OAssign.LValue#getVariable()
 		 */
+		@JsonIgnore
 		public Variable getVariable() {
 			return getExpression().getVariable();
 		}
 
+		@JsonIgnore
 		public boolean isInsertMissingToData() {
             return getExpression().isInsertMissingData();
 		}

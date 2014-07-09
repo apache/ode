@@ -241,6 +241,8 @@ public class OXPath10Expression extends OLValueExpression {
 
 		private static final String LOCATION = "location";
 
+		@JsonCreator
+		public OSigGetVariableData(){}
 		public OSigGetVariableData(OProcess owner, OScope.Variable variable,
 				OMessageVarType.Part part, OExpression location) {
 			super(owner);
@@ -287,6 +289,8 @@ public class OXPath10Expression extends OLValueExpression {
 		private final String PARTNAME = "partname";
 		private final String LOCATION = "location";
 
+		@JsonCreator
+		SigGetVariableData(){}
 		private SigGetVariableData(String varname, String partname,
 				String location) {
 			setVarname(varname);

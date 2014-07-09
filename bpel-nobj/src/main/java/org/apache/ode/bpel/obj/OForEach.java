@@ -118,8 +118,13 @@ public class OForEach extends OActivity {
 		private static final String SUCCESSFULBRANCHESONLY = "successfulBranchesOnly";
 		private static final String BRANCHCOUNT = "branchCount";
 
+		@JsonCreator
+		public CompletionCondition(){
+			setSuccessfulBranchesOnly(false);
+		}
 		public CompletionCondition(OProcess owner) {
 			super(owner);
+			setSuccessfulBranchesOnly(false);
 		}
 
 		@JsonIgnore
@@ -128,7 +133,7 @@ public class OForEach extends OActivity {
 		}
 
 		@JsonIgnore
-		public boolean getSuccessfulBranchesOnly() {
+		public boolean isSuccessfulBranchesOnly() {
 			return (Boolean) fieldContainer.get(SUCCESSFULBRANCHESONLY);
 		}
 
