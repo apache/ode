@@ -429,6 +429,7 @@ public class OScope extends OActivity {
 		return o == null ? null : (OScope)o;
 		}
 
+		@JsonIgnore
 		public String getDescription() {
 			StringBuffer buf = new StringBuffer(getDeclaringScope().getName());
 			buf.append('.');

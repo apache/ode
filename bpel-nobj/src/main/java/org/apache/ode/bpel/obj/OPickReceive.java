@@ -164,7 +164,8 @@ public class OPickReceive extends OActivity {
 			Object o = fieldContainer.get(ACTIVITY);
 		return o == null ? null : (OActivity)o;
 		}
-
+		
+		@JsonIgnore
 		public String getCorrelatorId() {
 			return getPartnerLink().getId() + "." + getOperation().getName();
 		}

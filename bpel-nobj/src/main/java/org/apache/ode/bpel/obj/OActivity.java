@@ -126,6 +126,7 @@ public abstract class OActivity extends OAgent {
 		return o == null ? null : (Set<OLink>) o;
 	}
 
+	@JsonIgnore
 	public String getType() {
 		return getClass().getSimpleName();
 	}

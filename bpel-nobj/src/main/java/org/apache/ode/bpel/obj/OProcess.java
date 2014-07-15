@@ -444,6 +444,7 @@ public class OProcess extends OBase {
 			super(owner);
 		}
 
+		@JsonIgnore
 		public String getDescription() {
 			StringBuffer buf = new StringBuffer(getVarType().toString());
 			buf.append('[');
