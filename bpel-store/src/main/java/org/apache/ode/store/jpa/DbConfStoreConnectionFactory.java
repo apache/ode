@@ -55,7 +55,7 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
         propMap.put("openjpa.ConnectionFactoryMode", "managed");
         propMap.put("openjpa.FlushBeforeQueries", "false");
         propMap.put("openjpa.FetchBatchSize", 1000);
-        propMap.put("openjpa.jdbc.TransactionIsolation", "read-committed");
+        //propMap.put("openjpa.jdbc.TransactionIsolation", "read-committed");
         propMap.put("javax.persistence.provider", "org.apache.openjpa.persistence.PersistenceProviderImpl");
 
         if (createDatamodel) propMap.put("openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=false)");
