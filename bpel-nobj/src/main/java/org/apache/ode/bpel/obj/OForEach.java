@@ -46,32 +46,38 @@ public class OForEach extends OActivity {
 
 	@JsonIgnore
 	public CompletionCondition getCompletionCondition() {
-		return (CompletionCondition) fieldContainer.get(COMPLETIONCONDITION);
+		Object o = fieldContainer.get(COMPLETIONCONDITION);
+		return o == null ? null : (CompletionCondition)o;
 	}
 
 	@JsonIgnore
 	public Variable getCounterVariable() {
-		return (Variable) fieldContainer.get(COUNTERVARIABLE);
+		Object o = fieldContainer.get(COUNTERVARIABLE);
+		return o == null ? null : (Variable)o;
 	}
 
 	@JsonIgnore
 	public OExpression getFinalCounterValue() {
-		return (OExpression) fieldContainer.get(FINALCOUNTERVALUE);
+		Object o = fieldContainer.get(FINALCOUNTERVALUE);
+		return o == null ? null : (OExpression)o;
 	}
 
 	@JsonIgnore
 	public OScope getInnerScope() {
-		return (OScope) fieldContainer.get(INNERSCOPE);
+		Object o = fieldContainer.get(INNERSCOPE);
+		return o == null ? null : (OScope)o;
 	}
 
 	@JsonIgnore
 	public boolean isParallel() {
-		return (Boolean) fieldContainer.get(PARALLEL);
+		Object o = fieldContainer.get(PARALLEL);
+		return o == null ? null : (Boolean)o;
 	}
 
 	@JsonIgnore
 	public OExpression getStartCounterValue() {
-		return (OExpression) fieldContainer.get(STARTCOUNTERVALUE);
+		Object o = fieldContainer.get(STARTCOUNTERVALUE);
+		return o == null ? null : (OExpression)o;
 	}
 
 	public void setCompletionCondition(CompletionCondition completionCondition) {
@@ -129,12 +135,14 @@ public class OForEach extends OActivity {
 
 		@JsonIgnore
 		public OExpression getBranchCount() {
-			return (OExpression) fieldContainer.get(BRANCHCOUNT);
+			Object o = fieldContainer.get(BRANCHCOUNT);
+		return o == null ? null : (OExpression)o;
 		}
 
 		@JsonIgnore
 		public boolean isSuccessfulBranchesOnly() {
-			return (Boolean) fieldContainer.get(SUCCESSFULBRANCHESONLY);
+			Object o = fieldContainer.get(SUCCESSFULBRANCHESONLY);
+		return o == null ? null : (Boolean)o;
 		}
 
 		public void setBranchCount(OExpression branchCount) {

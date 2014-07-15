@@ -53,12 +53,14 @@ public class OXPath10ExpressionBPEL20 extends OXPath10Expression {
 
 	@JsonIgnore
 	public boolean isIsJoinExpression() {
-		return (Boolean) fieldContainer.get(ISJOINEXPRESSION);
+		Object o = fieldContainer.get(ISJOINEXPRESSION);
+		return o == null ? null : (Boolean)o;
 	}
 
 	@JsonIgnore
 	public QName getQname_doXslTransform() {
-		return (QName) fieldContainer.get(QNAME_DOXSLTRANSFORM);
+		Object o = fieldContainer.get(QNAME_DOXSLTRANSFORM);
+		return o == null ? null : (QName)o;
 	}
 
 	public void setIsJoinExpression(boolean isJoinExpression) {

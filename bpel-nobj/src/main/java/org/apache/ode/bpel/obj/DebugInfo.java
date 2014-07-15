@@ -62,12 +62,14 @@ public class DebugInfo extends ExtensibleImpl {
 
 	@JsonIgnore
 	public String getDescription() {
-		return (String) fieldContainer.get(DESCRIPTION);
+		Object o = fieldContainer.get(DESCRIPTION);
+		return o == null ? null : (String)o;
 	}
 
 	@JsonIgnore
 	public int getEndLine() {
-		return (Integer) fieldContainer.get(ENDLINE);
+		Object o = fieldContainer.get(ENDLINE);
+		return o == null ? null : (Integer)o;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -79,12 +81,14 @@ public class DebugInfo extends ExtensibleImpl {
 
 	@JsonIgnore
 	public String getSourceURI() {
-		return (String) fieldContainer.get(SOURCEURI);
+		Object o = fieldContainer.get(SOURCEURI);
+		return o == null ? null : (String)o;
 	}
 
 	@JsonIgnore
 	public int getStartLine() {
-		return (Integer) fieldContainer.get(STARTLINE);
+		Object o = fieldContainer.get(STARTLINE);
+		return o == null ? null : (Integer)o;
 	}
 
 	public void setDescription(String description) {

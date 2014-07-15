@@ -41,7 +41,8 @@ public class OFaultHandler extends OBase {
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public List<OCatch> getCatchBlocks() {
-		return (List<OCatch>) fieldContainer.get(CATCHBLOCKS);
+		Object o = fieldContainer.get(CATCHBLOCKS);
+		return o == null ? null : (List<OCatch>)o;
 	}
 
 	public Collection<OLink> outgoinglinks() {

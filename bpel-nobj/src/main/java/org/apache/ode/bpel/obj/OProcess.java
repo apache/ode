@@ -145,22 +145,26 @@ public class OProcess extends OBase {
 
 	@JsonIgnore
 	int getChildIdCounter() {
-		return (Integer) fieldContainer.get(CHILDIDCOUNTER);
+		Object o = fieldContainer.get(CHILDIDCOUNTER);
+		return o == null ? null : (Integer)o;
 	}
 
 	@JsonIgnore
 	public List<OBase> getChildren() {
-		return (List<OBase>) fieldContainer.get(CHILDREN);
+		Object o = fieldContainer.get(CHILDREN);
+		return o == null ? null : (List<OBase>)o;
 	}
 
 	@JsonIgnore
 	public Date getCompileDate() {
-		return (Date) fieldContainer.get(COMPILEDATE);
+		Object o = fieldContainer.get(COMPILEDATE);
+		return o == null ? null : (Date)o;
 	}
 
 	@JsonIgnore
 	public OConstants getConstants() {
-		return (OConstants) fieldContainer.get(CONSTANTS);
+		Object o = fieldContainer.get(CONSTANTS);
+		return o == null ? null : (OConstants)o;
 	}
 
 	@JsonIgnore
@@ -199,7 +203,8 @@ public class OProcess extends OBase {
 
 	@JsonIgnore
 	public String getGuid() {
-		return (String) fieldContainer.get(GUID);
+		Object o = fieldContainer.get(GUID);
+		return o == null ? null : (String)o;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -216,7 +221,8 @@ public class OProcess extends OBase {
 
 	@JsonIgnore
 	public NSContext getNamespaceContext() {
-		return (NSContext) fieldContainer.get(NAMESPACECONTEXT);
+		Object o = fieldContainer.get(NAMESPACECONTEXT);
+		return o == null ? null : (NSContext)o;
 	}
 
 	@JsonIgnore
@@ -231,18 +237,21 @@ public class OProcess extends OBase {
 
 	@JsonIgnore
 	public OScope getProcesScope() {
-		return (OScope) fieldContainer.get(PROCESSCOPE);
+		Object o = fieldContainer.get(PROCESSCOPE);
+		return o == null ? null : (OScope)o;
 	}
 
 	@JsonIgnore
 	public String getProcessName() {
-		return (String) fieldContainer.get(PROCESSNAME);
+		Object o = fieldContainer.get(PROCESSNAME);
+		return o == null ? null : (String)o;
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public List<OProperty> getProperties() {
-		return (List<OProperty>) fieldContainer.get(PROPERTIES);
+		Object o = fieldContainer.get(PROPERTIES);
+		return o == null ? null : (List<OProperty>)o;
 	}
 
 	@JsonIgnore
@@ -256,29 +265,34 @@ public class OProcess extends OBase {
 
 	@JsonIgnore
 	public String getTargetNamespace() {
-		return (String) fieldContainer.get(TARGETNAMESPACE);
+		Object o = fieldContainer.get(TARGETNAMESPACE);
+		return o == null ? null : (String)o;
 	}
 
 	@JsonIgnore
 	public String getUuid() {
-		return (String) fieldContainer.get(UUID);
+		Object o = fieldContainer.get(UUID);
+		return o == null ? null : (String)o;
 	}
 
 	@JsonIgnore
 	public String getVersion() {
-		return (String) fieldContainer.get(VERSION);
+		Object o = fieldContainer.get(VERSION);
+		return o == null ? null : (String)o;
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public HashMap<QName, OXsdTypeVarType> getXsdTypes() {
-		return (HashMap<QName, OXsdTypeVarType>) fieldContainer.get(XSDTYPES);
+		Object o = fieldContainer.get(XSDTYPES);
+		return o == null ? null : (HashMap<QName, OXsdTypeVarType>)o;
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public HashMap<URI, OXslSheet> getXslSheets() {
-		return (HashMap<URI, OXslSheet>) fieldContainer.get(XSLSHEETS);
+		Object o = fieldContainer.get(XSLSHEETS);
+		return o == null ? null : (HashMap<URI, OXslSheet>)o;
 	}
 
 	//	TODO: custom readObject
@@ -391,12 +405,14 @@ public class OProcess extends OBase {
 		@SuppressWarnings("unchecked")
 		@JsonIgnore
 		public List<OPropertyAlias> getAliases() {
-			return (List<OPropertyAlias>) fieldContainer.get(ALIASES);
+			Object o = fieldContainer.get(ALIASES);
+		return o == null ? null : (List<OPropertyAlias>)o;
 		}
 
 		@JsonIgnore
 		public QName getName() {
-			return (QName) fieldContainer.get(NAME);
+			Object o = fieldContainer.get(NAME);
+		return o == null ? null : (QName)o;
 		}
 
 		public void setAliases(List<OPropertyAlias> aliases) {
@@ -443,22 +459,26 @@ public class OProcess extends OBase {
 
 		@JsonIgnore
 		public String getHeader() {
-			return (String) fieldContainer.get(HEADER);
+			Object o = fieldContainer.get(HEADER);
+		return o == null ? null : (String)o;
 		}
 
 		@JsonIgnore
 		public OExpression getLocation() {
-			return (OExpression) fieldContainer.get(LOCATION);
+			Object o = fieldContainer.get(LOCATION);
+		return o == null ? null : (OExpression)o;
 		}
 
 		@JsonIgnore
 		public Part getPart() {
-			return (Part) fieldContainer.get(PART);
+			Object o = fieldContainer.get(PART);
+		return o == null ? null : (Part)o;
 		}
 
 		@JsonIgnore
 		public OVarType getVarType() {
-			return (OVarType) fieldContainer.get(VARTYPE);
+			Object o = fieldContainer.get(VARTYPE);
+		return o == null ? null : (OVarType)o;
 		}
 
 		public void setHeader(String header) {

@@ -40,12 +40,14 @@ public class OXslSheet extends OBase {
 
 	@JsonIgnore
 	public String getSheetBody() {
-		return (String) fieldContainer.get(SHEETBODY);
+		Object o = fieldContainer.get(SHEETBODY);
+		return o == null ? null : (String)o;
 	}
 
 	@JsonIgnore
 	public URI getUri() {
-		return (URI) fieldContainer.get(URI);
+		Object o = fieldContainer.get(URI);
+		return o == null ? null : (URI)o;
 	}
 
 	public void setSheetBody(String sheetBody) {

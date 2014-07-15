@@ -68,107 +68,128 @@ public class OConstants extends OBase {
 
 	@JsonIgnore
 	public QName getQnConflictingReceive() {
-		return (QName) fieldContainer.get(QNCONFLICTINGRECEIVE);
+		Object o = fieldContainer.get(QNCONFLICTINGRECEIVE);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQnConflictingRequest() {
-		return (QName) fieldContainer.get(QNCONFLICTINGREQUEST);
+		Object o = fieldContainer.get(QNCONFLICTINGREQUEST);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQnCorrelationViolation() {
-		return (QName) fieldContainer.get(QNCORRELATIONVIOLATION);
+		Object o = fieldContainer.get(QNCORRELATIONVIOLATION);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQnForcedTermination() {
-		return (QName) fieldContainer.get(QNFORCEDTERMINATION);
+		Object o = fieldContainer.get(QNFORCEDTERMINATION);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQnForEachCounterError() {
-		return (QName) fieldContainer.get(QNFOREACHCOUNTERERROR);
+		Object o = fieldContainer.get(QNFOREACHCOUNTERERROR);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQnInvalidBranchCondition() {
-		return (QName) fieldContainer.get(QNINVALIDBRANCHCONDITION);
+		Object o = fieldContainer.get(QNINVALIDBRANCHCONDITION);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQnInvalidExpressionValue() {
-		return (QName) fieldContainer.get(QNINVALIDEXPRESSIONVALUE);
+		Object o = fieldContainer.get(QNINVALIDEXPRESSIONVALUE);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQnJoinFailure() {
-		return (QName) fieldContainer.get(QNJOINFAILURE);
+		Object o = fieldContainer.get(QNJOINFAILURE);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQnMismatchedAssignmentFailure() {
-		return (QName) fieldContainer.get(QNMISMATCHEDASSIGNMENTFAILURE);
+		Object o = fieldContainer.get(QNMISMATCHEDASSIGNMENTFAILURE);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQnMissingReply() {
-		return (QName) fieldContainer.get(QNMISSINGREPLY);
+		Object o = fieldContainer.get(QNMISSINGREPLY);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQnMissingRequest() {
-		return (QName) fieldContainer.get(QNMISSINGREQUEST);
+		Object o = fieldContainer.get(QNMISSINGREQUEST);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQnRetiredProcess() {
-		return (QName) fieldContainer.get(QNRETIREDPROCESS);
+		Object o = fieldContainer.get(QNRETIREDPROCESS);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQnSelectionFailure() {
-		return (QName) fieldContainer.get(QNSELECTIONFAILURE);
+		Object o = fieldContainer.get(QNSELECTIONFAILURE);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQnSubLanguageExecutionFault() {
-		return (QName) fieldContainer.get(QNSUBLANGUAGEEXECUTIONFAULT);
+		Object o = fieldContainer.get(QNSUBLANGUAGEEXECUTIONFAULT);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQnTooHugeProcesses() {
-		return (QName) fieldContainer.get(QNTOOHUGEPROCESSES);
+		Object o = fieldContainer.get(QNTOOHUGEPROCESSES);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQnTooManyInstances() {
-		return (QName) fieldContainer.get(QNTOOMANYINSTANCES);
+		Object o = fieldContainer.get(QNTOOMANYINSTANCES);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQnTooManyProcesses() {
-		return (QName) fieldContainer.get(QNTOOMANYPROCESSES);
+		Object o = fieldContainer.get(QNTOOMANYPROCESSES);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQnUninitializedPartnerRole() {
-		return (QName) fieldContainer.get(QNUNINITIALIZEDPARTNERROLE);
+		Object o = fieldContainer.get(QNUNINITIALIZEDPARTNERROLE);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQnUninitializedVariable() {
-		return (QName) fieldContainer.get(QNUNINITIALIZEDVARIABLE);
+		Object o = fieldContainer.get(QNUNINITIALIZEDVARIABLE);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQnUnknownFault() {
-		return (QName) fieldContainer.get(QNUNKNOWNFAULT);
+		Object o = fieldContainer.get(QNUNKNOWNFAULT);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQnXsltInvalidSource() {
-		return (QName) fieldContainer.get(QNXSLTINVALIDSOURCE);
+		Object o = fieldContainer.get(QNXSLTINVALIDSOURCE);
+		return o == null ? null : (QName)o;
 	}
 
 	public void setQnConflictingReceive(QName qnConflictingReceive) {

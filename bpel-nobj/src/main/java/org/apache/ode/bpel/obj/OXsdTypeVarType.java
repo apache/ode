@@ -45,12 +45,14 @@ public class OXsdTypeVarType extends OVarType {
 
 	@JsonIgnore
 	public boolean isSimple() {
-		return (Boolean) fieldContainer.get(SIMPLE);
+		Object o = fieldContainer.get(SIMPLE);
+		return o == null ? null : (Boolean)o;
 	}
 
 	@JsonIgnore
 	public QName getXsdType() {
-		return (QName) fieldContainer.get(XSDTYPE);
+		Object o = fieldContainer.get(XSDTYPE);
+		return o == null ? null : (QName)o;
 	}
 
 	public Node newInstance(Document doc) {

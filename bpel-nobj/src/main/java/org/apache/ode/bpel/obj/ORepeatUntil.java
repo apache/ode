@@ -41,12 +41,14 @@ public class ORepeatUntil extends OActivity {
 
 	@JsonIgnore
 	public OActivity getActivity() {
-		return (OActivity) fieldContainer.get(ACTIVITY);
+		Object o = fieldContainer.get(ACTIVITY);
+		return o == null ? null : (OActivity)o;
 	}
 
 	@JsonIgnore
 	public OExpression getUntilCondition() {
-		return (OExpression) fieldContainer.get(UNTILCONDITION);
+		Object o = fieldContainer.get(UNTILCONDITION);
+		return o == null ? null : (OExpression)o;
 	}
 
 	public void setActivity(OActivity activity) {

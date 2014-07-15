@@ -57,13 +57,15 @@ public class OFlow extends OActivity {
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public Set<OLink> getLocalLinks() {
-		return (Set<OLink>) fieldContainer.get(LOCALLINKS);
+		Object o = fieldContainer.get(LOCALLINKS);
+		return o == null ? null : (Set<OLink>)o;
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public Set<OActivity> getParallelActivities() {
-		return (Set<OActivity>) fieldContainer.get(PARALLELACTIVITIES);
+		Object o = fieldContainer.get(PARALLELACTIVITIES);
+		return o == null ? null : (Set<OActivity>)o;
 	}
 
 	public void setLocalLinks(Set<OLink> localLinks) {

@@ -36,7 +36,8 @@ public abstract class OExpression extends OBase {
 	/** Get the expression language used to generate this expression. */
 	@JsonIgnore
 	public OExpressionLanguage getExpressionLanguage() {
-		return (OExpressionLanguage) fieldContainer.get(EXPRESSIONLANGUAGE);
+		Object o = fieldContainer.get(EXPRESSIONLANGUAGE);
+		return o == null ? null : (OExpressionLanguage)o;
 	}
 
 	public void setExpressionLanguage(OExpressionLanguage expressionLanguage) {

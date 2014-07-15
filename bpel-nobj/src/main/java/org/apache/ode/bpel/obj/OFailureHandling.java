@@ -57,17 +57,20 @@ public class OFailureHandling extends ExtensibleImpl{
 	}
 	@JsonIgnore
 	public boolean isFaultOnFailure() {
-		return (Boolean) fieldContainer.get(FAULTONFAILURE);
+		Object o = fieldContainer.get(FAULTONFAILURE);
+		return o == null ? null : (Boolean)o;
 	}
 
 	@JsonIgnore
 	public int getRetryDelay() {
-		return (Integer) fieldContainer.get(RETRYDELAY);
+		Object o = fieldContainer.get(RETRYDELAY);
+		return o == null ? null : (Integer)o;
 	}
 
 	@JsonIgnore
 	public int getRetryFor() {
-		return (Integer) fieldContainer.get(RETRYFOR);
+		Object o = fieldContainer.get(RETRYFOR);
+		return o == null ? null : (Integer)o;
 	}
 
 	public void setFaultOnFailure(boolean faultOnFailure) {

@@ -56,19 +56,22 @@ public class OPickReceive extends OActivity {
 
 	@JsonIgnore
 	public boolean isCreateInstanceFlag() {
-		return (Boolean) fieldContainer.get(CREATEINSTANCEFLAG);
+		Object o = fieldContainer.get(CREATEINSTANCEFLAG);
+		return o == null ? null : (Boolean)o;
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public List<OnAlarm> getOnAlarms() {
-		return (List<OnAlarm>) fieldContainer.get(ONALARMS);
+		Object o = fieldContainer.get(ONALARMS);
+		return o == null ? null : (List<OnAlarm>)o;
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public List<OnMessage> getOnMessages() {
-		return (List<OnMessage>) fieldContainer.get(ONMESSAGES);
+		Object o = fieldContainer.get(ONMESSAGES);
+		return o == null ? null : (List<OnMessage>)o;
 	}
 
 	public void setCreateInstanceFlag(boolean createInstanceFlag) {
@@ -97,17 +100,20 @@ public class OPickReceive extends OActivity {
 
 		@JsonIgnore
 		public OActivity getActivity() {
-			return (OActivity) fieldContainer.get(ACTIVITY);
+			Object o = fieldContainer.get(ACTIVITY);
+		return o == null ? null : (OActivity)o;
 		}
 
 		@JsonIgnore
 		public OExpression getForExpr() {
-			return (OExpression) fieldContainer.get(FOREXPR);
+			Object o = fieldContainer.get(FOREXPR);
+		return o == null ? null : (OExpression)o;
 		}
 
 		@JsonIgnore
 		public OExpression getUntilExpr() {
-			return (OExpression) fieldContainer.get(UNTILEXPR);
+			Object o = fieldContainer.get(UNTILEXPR);
+		return o == null ? null : (OExpression)o;
 		}
 
 		public void setActivity(OActivity activity) {
@@ -155,7 +161,8 @@ public class OPickReceive extends OActivity {
 
 		@JsonIgnore
 		public OActivity getActivity() {
-			return (OActivity) fieldContainer.get(ACTIVITY);
+			Object o = fieldContainer.get(ACTIVITY);
+		return o == null ? null : (OActivity)o;
 		}
 
 		public String getCorrelatorId() {
@@ -165,44 +172,52 @@ public class OPickReceive extends OActivity {
 		@SuppressWarnings("unchecked")
 		@JsonIgnore
 		public List<CorrelationSet> getInitCorrelations() {
-			return (List<CorrelationSet>) fieldContainer.get(INITCORRELATIONS);
+			Object o = fieldContainer.get(INITCORRELATIONS);
+		return o == null ? null : (List<CorrelationSet>)o;
 		}
 
 		@SuppressWarnings("unchecked")
 		@JsonIgnore
 		public List<CorrelationSet> getJoinCorrelations() {
-			return (List<CorrelationSet>) fieldContainer.get(JOINCORRELATIONS);
+			Object o = fieldContainer.get(JOINCORRELATIONS);
+		return o == null ? null : (List<CorrelationSet>)o;
 		}
 
 		@SuppressWarnings("unchecked")
 		@JsonIgnore
 		public List<CorrelationSet> getMatchCorrelations() {
-			return (List<CorrelationSet>) fieldContainer.get(MATCHCORRELATIONS);
+			Object o = fieldContainer.get(MATCHCORRELATIONS);
+		return o == null ? null : (List<CorrelationSet>)o;
 		}
 
 		@JsonIgnore
 		public String getMessageExchangeId() {
-			return (String) fieldContainer.get(MESSAGEEXCHANGEID);
+			Object o = fieldContainer.get(MESSAGEEXCHANGEID);
+		return o == null ? null : (String)o;
 		}
 
 		@JsonIgnore
 		public Operation getOperation() {
-			return (Operation) fieldContainer.get(OPERATION);
+			Object o = fieldContainer.get(OPERATION);
+		return o == null ? null : (Operation)o;
 		}
 
 		@JsonIgnore
 		public OPartnerLink getPartnerLink() {
-			return (OPartnerLink) fieldContainer.get(PARTNERLINK);
+			Object o = fieldContainer.get(PARTNERLINK);
+		return o == null ? null : (OPartnerLink)o;
 		}
 
 		@JsonIgnore
 		public String getRoute() {
-			return (String) fieldContainer.get(ROUTE);
+			Object o = fieldContainer.get(ROUTE);
+		return o == null ? null : (String)o;
 		}
 
 		@JsonIgnore
 		public Variable getVariable() {
-			return (Variable) fieldContainer.get(VARIABLE);
+			Object o = fieldContainer.get(VARIABLE);
+		return o == null ? null : (Variable)o;
 		}
 
 		public void setActivity(OActivity activity) {

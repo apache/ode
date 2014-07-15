@@ -40,7 +40,8 @@ public class ExtensibleImpl  implements Extensible<Object>{
 	}
 	@JsonIgnore
 	public int getClassVersion() {
-		return (Integer) fieldContainer.get(CLASS_VERSION);
+		Object o = fieldContainer.get(CLASS_VERSION);
+		return o == null ? null : (Integer)o;
 	}
 
 	public void setClassVersion(int version) {

@@ -48,27 +48,32 @@ public class OLink extends OBase {
 
 	@JsonIgnore
 	public OFlow getDeclaringFlow() {
-		return (OFlow) fieldContainer.get(DECLARINGFLOW);
+		Object o = fieldContainer.get(DECLARINGFLOW);
+		return o == null ? null : (OFlow)o;
 	}
 
 	@JsonIgnore
 	public String getName() {
-		return (String) fieldContainer.get(NAME);
+		Object o = fieldContainer.get(NAME);
+		return o == null ? null : (String)o;
 	}
 
 	@JsonIgnore
 	public OActivity getSource() {
-		return (OActivity) fieldContainer.get(SOURCE);
+		Object o = fieldContainer.get(SOURCE);
+		return o == null ? null : (OActivity)o;
 	}
 
 	@JsonIgnore
 	public OActivity getTarget() {
-		return (OActivity) fieldContainer.get(TARGET);
+		Object o = fieldContainer.get(TARGET);
+		return o == null ? null : (OActivity)o;
 	}
 
 	@JsonIgnore
 	public OExpression getTransitionCondition() {
-		return (OExpression) fieldContainer.get(TRANSITIONCONDITION);
+		Object o = fieldContainer.get(TRANSITIONCONDITION);
+		return o == null ? null : (OExpression)o;
 	}
 
 	public void setDeclaringFlow(OFlow declaringFlow) {

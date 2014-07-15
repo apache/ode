@@ -67,12 +67,14 @@ public class OSwitch extends OActivity {
 
 		@JsonIgnore
 		public OActivity getActivity() {
-			return (OActivity) fieldContainer.get(ACTIVITY);
+			Object o = fieldContainer.get(ACTIVITY);
+		return o == null ? null : (OActivity)o;
 		}
 
 		@JsonIgnore
 		public OExpression getExpression() {
-			return (OExpression) fieldContainer.get(EXPRESSION);
+			Object o = fieldContainer.get(EXPRESSION);
+		return o == null ? null : (OExpression)o;
 		}
 
 		public void setActivity(OActivity activity) {

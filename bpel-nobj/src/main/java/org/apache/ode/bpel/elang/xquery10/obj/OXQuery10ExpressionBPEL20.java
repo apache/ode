@@ -45,7 +45,8 @@ public class OXQuery10ExpressionBPEL20 extends OXPath20ExpressionBPEL20 {
 
 	@JsonIgnore
 	public String getXquery() {
-		return (String) fieldContainer.get(XQUERY);
+		Object o = fieldContainer.get(XQUERY);
+		return o == null ? null : (String)o;
 	}
 
 	public void setXquery(String xquery) {

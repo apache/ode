@@ -37,12 +37,14 @@ public class OWait extends OActivity {
 
 	@JsonIgnore
 	public OExpression getForExpression() {
-		return (OExpression) fieldContainer.get(FOREXPRESSION);
+		Object o = fieldContainer.get(FOREXPRESSION);
+		return o == null ? null : (OExpression)o;
 	}
 
 	@JsonIgnore
 	public OExpression getUntilExpression() {
-		return (OExpression) fieldContainer.get(UNTILEXPRESSION);
+		Object o = fieldContainer.get(UNTILEXPRESSION);
+		return o == null ? null : (OExpression)o;
 	}
 
 	/**

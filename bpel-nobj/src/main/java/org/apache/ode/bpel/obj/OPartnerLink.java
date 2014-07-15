@@ -123,12 +123,14 @@ public class OPartnerLink extends OBase {
 
 	@JsonIgnore
 	public OScope getDeclaringScope() {
-		return (OScope) fieldContainer.get(DECLARINGSCOPE);
+		Object o = fieldContainer.get(DECLARINGSCOPE);
+		return o == null ? null : (OScope)o;
 	}
 
 	@JsonIgnore
 	public boolean isInitializePartnerRole() {
-		return (Boolean) fieldContainer.get(INITIALIZEPARTNERROLE);
+		Object o = fieldContainer.get(INITIALIZEPARTNERROLE);
+		return o == null ? null : (Boolean)o;
 	}
 
 	/**
@@ -153,7 +155,8 @@ public class OPartnerLink extends OBase {
 
 	@JsonIgnore
 	public String getMyRoleName() {
-		return (String) fieldContainer.get(MYROLENAME);
+		Object o = fieldContainer.get(MYROLENAME);
+		return o == null ? null : (String)o;
 	}
 
 	@JsonIgnore
@@ -168,12 +171,14 @@ public class OPartnerLink extends OBase {
 
 	@JsonIgnore
 	public PortType getMyRolePortType() {
-		return (PortType) fieldContainer.get(MYROLEPORTTYPE);
+		Object o = fieldContainer.get(MYROLEPORTTYPE);
+		return o == null ? null : (PortType)o;
 	}
 
 	@JsonIgnore
 	public String getName() {
-		return (String) fieldContainer.get(NAME);
+		Object o = fieldContainer.get(NAME);
+		return o == null ? null : (String)o;
 	}
 
 	/**
@@ -195,12 +200,14 @@ public class OPartnerLink extends OBase {
 
 	@JsonIgnore
 	public QName getPartnerLinkType() {
-		return (QName) fieldContainer.get(PARTNERLINKTYPE);
+		Object o = fieldContainer.get(PARTNERLINKTYPE);
+		return o == null ? null : (QName)o;
 	}
 	
 	@JsonIgnore
 	public String getPartnerRoleName() {
-		return (String) fieldContainer.get(PARTNERROLENAME);
+		Object o = fieldContainer.get(PARTNERROLENAME);
+		return o == null ? null : (String)o;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -214,7 +221,8 @@ public class OPartnerLink extends OBase {
 
 	@JsonIgnore
 	public PortType getPartnerRolePortType() {
-		return (PortType) fieldContainer.get(PARTNERROLEPORTTYPE);
+		Object o = fieldContainer.get(PARTNERROLEPORTTYPE);
+		return o == null ? null : (PortType)o;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -226,13 +234,15 @@ public class OPartnerLink extends OBase {
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public HashMap<String,Set<CorrelationSet>> getJoiningCorrelationSets(){
-		return (HashMap<String, Set<CorrelationSet>>)fieldContainer.get(JOININGCORRELATIONSETS);
+		Object o = fieldContainer.get(JOININGCORRELATIONSETS);
+		return o == null ? null : (HashMap<String,Set<CorrelationSet>>)o;
 	}
 	
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public HashMap<String,Set<CorrelationSet>> getNonIntitiatingCorrelationSets(){
-		return (HashMap<String, Set<CorrelationSet>>)fieldContainer.get(NONINITIATINGCORRELATIONSETS);
+		Object o = fieldContainer.get(NONINITIATINGCORRELATIONSETS);
+		return o == null ? null : (HashMap<String,Set<CorrelationSet>>)o;
 	}
 	
 	@Override

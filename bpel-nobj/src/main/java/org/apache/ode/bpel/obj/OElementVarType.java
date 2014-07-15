@@ -45,7 +45,8 @@ public class OElementVarType extends OVarType {
 
 	@JsonIgnore
 	public QName getElementType() {
-		return (QName) fieldContainer.get(ELEMENTTYPE);
+		Object o = fieldContainer.get(ELEMENTTYPE);
+		return o == null ? null : (QName)o;
 	}
 
 	public void setElementType(QName elementType) {

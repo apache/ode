@@ -83,7 +83,8 @@ public class OXPath10Expression extends OLValueExpression {
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	private HashMap<SigGetVariableData,OSigGetVariableData> getGetVariableDataSigs(){
-		return (HashMap<SigGetVariableData,OSigGetVariableData>) fieldContainer.get(GETVARIABLEDATASIGS);
+		Object o = fieldContainer.get(GETVARIABLEDATASIGS);
+		return o == null ? null : (HashMap<SigGetVariableData,OSigGetVariableData>)o;
 	}
 	private void setGetVariableDataSigs(HashMap<SigGetVariableData,OSigGetVariableData> dataSigs){
 		fieldContainer.put(GETVARIABLEDATASIGS, dataSigs);
@@ -104,33 +105,39 @@ public class OXPath10Expression extends OLValueExpression {
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public HashMap<String, OLink> getLinks() {
-		return (HashMap<String, OLink>) fieldContainer.get(LINKS);
+		Object o = fieldContainer.get(LINKS);
+		return o == null ? null : (HashMap<String, OLink>)o;
 	}
 
 	@JsonIgnore
 	public NSContext getNamespaceCtx() {
-		return (NSContext) fieldContainer.get(NAMESPACECTX);
+		Object o = fieldContainer.get(NAMESPACECTX);
+		return o == null ? null : (NSContext)o;
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public HashMap<String, OProperty> getProperties() {
-		return (HashMap<String, OProperty>) fieldContainer.get(PROPERTIES);
+		Object o = fieldContainer.get(PROPERTIES);
+		return o == null ? null : (HashMap<String, OProperty>)o;
 	}
 
 	@JsonIgnore
 	public QName getQname_getLinkStatus() {
-		return (QName) fieldContainer.get(QNAME_GETLINKSTATUS);
+		Object o = fieldContainer.get(QNAME_GETLINKSTATUS);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQname_getVariableData() {
-		return (QName) fieldContainer.get(QNAME_GETVARIABLEDATA);
+		Object o = fieldContainer.get(QNAME_GETVARIABLEDATA);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public QName getQname_getVariableProperty() {
-		return (QName) fieldContainer.get(QNAME_GETVARIABLEPROPERTY);
+		Object o = fieldContainer.get(QNAME_GETVARIABLEPROPERTY);
+		return o == null ? null : (QName)o;
 	}
 
 	/**
@@ -154,12 +161,14 @@ public class OXPath10Expression extends OLValueExpression {
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public HashMap<String, Variable> getVars() {
-		return (HashMap<String, Variable>) fieldContainer.get(VARS);
+		Object o = fieldContainer.get(VARS);
+		return o == null ? null : (HashMap<String, Variable>)o;
 	}
 
 	@JsonIgnore
 	public String getXpath() {
-		return (String) fieldContainer.get(XPATH);
+		Object o = fieldContainer.get(XPATH);
+		return o == null ? null : (String)o;
 	}
 
 	public OXslSheet getXslSheet(URI projectRelativeXslUri) {
@@ -169,7 +178,8 @@ public class OXPath10Expression extends OLValueExpression {
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	protected HashMap<URI, OXslSheet> getXslSheets() {
-		return (HashMap<URI, OXslSheet>) fieldContainer.get(XSLSHEETS);
+		Object o = fieldContainer.get(XSLSHEETS);
+		return o == null ? null : (HashMap<URI, OXslSheet>)o;
 	}
 
 	/**
@@ -228,7 +238,8 @@ public class OXPath10Expression extends OLValueExpression {
 	}
 
 	public String toString() {
-		return "{OXPath10Expression " + getXpath() + "}";
+		Object o = "}";
+		return o == null ? null : "{OXPath10Expression " + getXpath() +o;
 	}
 
 	/**
@@ -253,17 +264,20 @@ public class OXPath10Expression extends OLValueExpression {
 
 		@JsonIgnore
 		public OExpression getLocation() {
-			return (OExpression) fieldContainer.get(LOCATION);
+			Object o = fieldContainer.get(LOCATION);
+		return o == null ? null : (OExpression)o;
 		}
 
 		@JsonIgnore
 		public Part getPart() {
-			return (Part) fieldContainer.get(PART);
+			Object o = fieldContainer.get(PART);
+		return o == null ? null : (Part)o;
 		}
 
 		@JsonIgnore
 		public Variable getVariable() {
-			return (Variable) fieldContainer.get(VARIABLE);
+			Object o = fieldContainer.get(VARIABLE);
+		return o == null ? null : (Variable)o;
 		}
 
 		public void setLocation(OExpression location) {

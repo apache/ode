@@ -134,23 +134,27 @@ public class OScope extends OActivity {
 
 	@JsonIgnore
 	public OActivity getActivity() {
-		return (OActivity) fieldContainer.get(ACTIVITY);
+		Object o = fieldContainer.get(ACTIVITY);
+		return o == null ? null : (OActivity)o;
 	}
 
 	@JsonIgnore
 	public boolean isAtomicScope() {
-		return (Boolean) fieldContainer.get(ATOMICSCOPE);
+		Object o = fieldContainer.get(ATOMICSCOPE);
+		return o == null ? null : (Boolean)o;
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public Set<OScope> getCompensatable() {
-		return (Set<OScope>) fieldContainer.get(COMPENSATABLE);
+		Object o = fieldContainer.get(COMPENSATABLE);
+		return o == null ? null : (Set<OScope>)o;
 	}
 
 	@JsonIgnore
 	public OCompensationHandler getCompensationHandler() {
-		return (OCompensationHandler) fieldContainer.get(COMPENSATIONHANDLER);
+		Object o = fieldContainer.get(COMPENSATIONHANDLER);
+		return o == null ? null : (OCompensationHandler)o;
 	}
 
 	/**
@@ -173,22 +177,26 @@ public class OScope extends OActivity {
 
 	@JsonIgnore
 	public OEventHandler getEventHandler() {
-		return (OEventHandler) fieldContainer.get(EVENTHANDLER);
+		Object o = fieldContainer.get(EVENTHANDLER);
+		return o == null ? null : (OEventHandler)o;
 	}
 
 	@JsonIgnore
 	public OFaultHandler getFaultHandler() {
-		return (OFaultHandler) fieldContainer.get(FAULTHANDLER);
+		Object o = fieldContainer.get(FAULTHANDLER);
+		return o == null ? null : (OFaultHandler)o;
 	}
 
 	@JsonIgnore
 	public boolean isImplicitScope() {
-		return (Boolean) fieldContainer.get(IMPLICITSCOPE);
+		Object o = fieldContainer.get(IMPLICITSCOPE);
+		return o == null ? null : (Boolean)o;
 	}
 
 	@JsonIgnore
 	public boolean isIsolatedScope() {
-		return (Boolean) fieldContainer.get(ISOLATEDSCOPE);
+		Object o = fieldContainer.get(ISOLATEDSCOPE);
+		return o == null ? null : (Boolean)o;
 	}
 
 	public OPartnerLink getLocalPartnerLink(String name) {
@@ -208,24 +216,28 @@ public class OScope extends OActivity {
 
 	@JsonIgnore
 	public String getName() {
-		return (String) fieldContainer.get(NAME);
+		Object o = fieldContainer.get(NAME);
+		return o == null ? null : (String)o;
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public Map<String, OPartnerLink> getPartnerLinks() {
-		return (Map<String, OPartnerLink>) fieldContainer.get(PARTNERLINKS);
+		Object o = fieldContainer.get(PARTNERLINKS);
+		return o == null ? null : (Map<String, OPartnerLink>)o;
 	}
 
 	@JsonIgnore
 	public OTerminationHandler getTerminationHandler() {
-		return (OTerminationHandler) fieldContainer.get(TERMINATIONHANDLER);
+		Object o = fieldContainer.get(TERMINATIONHANDLER);
+		return o == null ? null : (OTerminationHandler)o;
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public HashMap<String, Variable> getVariables() {
-		return (HashMap<String, Variable>) fieldContainer.get(VARIABLES);
+		Object o = fieldContainer.get(VARIABLES);
+		return o == null ? null : (HashMap<String, Variable>)o;
 	}
 
 	public OPartnerLink getVisiblePartnerLink(String name) {
@@ -353,23 +365,27 @@ public class OScope extends OActivity {
 
 		@JsonIgnore
 		public OScope getDeclaringScope() {
-			return (OScope) fieldContainer.get(DECLARINGSCOPE);
+			Object o = fieldContainer.get(DECLARINGSCOPE);
+		return o == null ? null : (OScope)o;
 		}
 
 		@JsonIgnore
 		public boolean getHasJoinUseCases() {
-			return (Boolean) fieldContainer.get(HASJOINUSECASES);
+			Object o = fieldContainer.get(HASJOINUSECASES);
+		return o == null ? null : (Boolean)o;
 		}
 
 		@JsonIgnore
 		public String getName() {
-			return (String) fieldContainer.get(NAME);
+			Object o = fieldContainer.get(NAME);
+		return o == null ? null : (String)o;
 		}
 
 		@SuppressWarnings("unchecked")
 		@JsonIgnore
 		public List<OProperty> getProperties() {
-			return (List<OProperty>) fieldContainer.get(PROPERTIES);
+			Object o = fieldContainer.get(PROPERTIES);
+		return o == null ? null : (List<OProperty>)o;
 		}
 
 		public void setDeclaringScope(OScope declaringScope) {
@@ -409,7 +425,8 @@ public class OScope extends OActivity {
 
 		@JsonIgnore
 		public OScope getDeclaringScope() {
-			return (OScope) fieldContainer.get(DECLARINGSCOPE);
+			Object o = fieldContainer.get(DECLARINGSCOPE);
+		return o == null ? null : (OScope)o;
 		}
 
 		public String getDescription() {
@@ -421,17 +438,20 @@ public class OScope extends OActivity {
 
 		@JsonIgnore
 		public OExtVar getExtVar() {
-			return (OExtVar) fieldContainer.get(EXTVAR);
+			Object o = fieldContainer.get(EXTVAR);
+		return o == null ? null : (OExtVar)o;
 		}
 
 		@JsonIgnore
 		public String getName() {
-			return (String) fieldContainer.get(NAME);
+			Object o = fieldContainer.get(NAME);
+		return o == null ? null : (String)o;
 		}
 
 		@JsonIgnore
 		public OVarType getType() {
-			return (OVarType) fieldContainer.get(TYPE);
+			Object o = fieldContainer.get(TYPE);
+		return o == null ? null : (OVarType)o;
 		}
 
 		public void setDeclaringScope(OScope declaringScope) {

@@ -59,31 +59,36 @@ public class OAgent extends OBase {
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public Set<OLink> getIncomingLinks() {
-		return (Set<OLink>) fieldContainer.get(INCOMINGLINKS);
+		Object o = fieldContainer.get(INCOMINGLINKS);
+		return o == null ? null : (Set<OLink>)o;
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public Set<OAgent> getNested() {
-		return (Set<OAgent>) fieldContainer.get(NESTED);
+		Object o = fieldContainer.get(NESTED);
+		return o == null ? null : (Set<OAgent>)o;
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public Set<OLink> getOutgoingLinks() {
-		return (Set<OLink>) fieldContainer.get(OUTGOINGLINKS);
+		Object o = fieldContainer.get(OUTGOINGLINKS);
+		return o == null ? null : (Set<OLink>)o;
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public Set<OScope.Variable> getVariableRd() {
-		return (Set<OScope.Variable>) fieldContainer.get(VARIABLERD);
+		Object o = fieldContainer.get(VARIABLERD);
+		return o == null ? null : (Set<OScope.Variable>)o;
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public Set<OScope.Variable> getVariableWr() {
-		return (Set<OScope.Variable>) fieldContainer.get(VARIABLEWR);
+		Object o = fieldContainer.get(VARIABLEWR);
+		return o == null ? null : (Set<OScope.Variable>)o;
 	}
 
 	public void setIncomingLinks(Set<OLink> incomingLinks) {

@@ -39,12 +39,14 @@ public class OWhile extends OActivity {
 
 	@JsonIgnore
 	public OActivity getActivity() {
-		return (OActivity) fieldContainer.get(ACTIVITY);
+		Object o = fieldContainer.get(ACTIVITY);
+		return o == null ? null : (OActivity)o;
 	}
 
 	@JsonIgnore
 	public OExpression getWhileCondition() {
-		return (OExpression) fieldContainer.get(WHILECONDITION);
+		Object o = fieldContainer.get(WHILECONDITION);
+		return o == null ? null : (OExpression)o;
 	}
 
 	public void setActivity(OActivity activity) {

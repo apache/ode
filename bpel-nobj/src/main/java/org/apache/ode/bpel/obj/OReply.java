@@ -75,49 +75,58 @@ public class OReply extends OActivity {
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public List<CorrelationSet> getAssertCorrelations() {
-		return (List<CorrelationSet>) fieldContainer.get(ASSERTCORRELATIONS);
+		Object o = fieldContainer.get(ASSERTCORRELATIONS);
+		return o == null ? null : (List<CorrelationSet>)o;
 	}
 
 	@JsonIgnore
 	public QName getFault() {
-		return (QName) fieldContainer.get(FAULT);
+		Object o = fieldContainer.get(FAULT);
+		return o == null ? null : (QName)o;
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public List<CorrelationSet> getInitCorrelations() {
-		return (List<CorrelationSet>) fieldContainer.get(INITCORRELATIONS);
+		Object o = fieldContainer.get(INITCORRELATIONS);
+		return o == null ? null : (List<CorrelationSet>)o;
 	}
 
 	@JsonIgnore
 	public boolean isIsFaultReply() {
-		return (Boolean) fieldContainer.get(ISFAULTREPLY);
+		Object o = fieldContainer.get(ISFAULTREPLY);
+		return o == null ? null : (Boolean)o;
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public List<CorrelationSet> getJoinCorrelations() {
-		return (List<CorrelationSet>) fieldContainer.get(JOINCORRELATIONS);
+		Object o = fieldContainer.get(JOINCORRELATIONS);
+		return o == null ? null : (List<CorrelationSet>)o;
 	}
 
 	@JsonIgnore
 	public String getMessageExchangeId() {
-		return (String) fieldContainer.get(MESSAGEEXCHANGEID);
+		Object o = fieldContainer.get(MESSAGEEXCHANGEID);
+		return o == null ? null : (String)o;
 	}
 
 	@JsonIgnore
 	public Operation getOperation() {
-		return (Operation) fieldContainer.get(OPERATION);
+		Object o = fieldContainer.get(OPERATION);
+		return o == null ? null : (Operation)o;
 	}
 
 	@JsonIgnore
 	public OPartnerLink getPartnerLink() {
-		return (OPartnerLink) fieldContainer.get(PARTNERLINK);
+		Object o = fieldContainer.get(PARTNERLINK);
+		return o == null ? null : (OPartnerLink)o;
 	}
 
 	@JsonIgnore
 	public Variable getVariable() {
-		return (Variable) fieldContainer.get(VARIABLE);
+		Object o = fieldContainer.get(VARIABLE);
+		return o == null ? null : (Variable)o;
 	}
 
 	public void setAssertCorrelations(List<CorrelationSet> assertCorrelations) {

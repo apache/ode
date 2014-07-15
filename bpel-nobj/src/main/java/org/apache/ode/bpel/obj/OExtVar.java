@@ -48,12 +48,14 @@ public class OExtVar extends OBase {
 
 	@JsonIgnore
 	public String getExternalVariableId() {
-		return (String) fieldContainer.get(EXTERNALVARIABLEID);
+		Object o = fieldContainer.get(EXTERNALVARIABLEID);
+		return o == null ? null : (String)o;
 	}
 
 	@JsonIgnore
 	public Variable getRelated() {
-		return (Variable) fieldContainer.get(RELATED);
+		Object o = fieldContainer.get(RELATED);
+		return o == null ? null : (Variable)o;
 	}
 
 	public void setExternalVariableId(String externalVariableId) {

@@ -98,7 +98,8 @@ public class OProcessWrapper extends ExtensibleImpl {
 	@JsonIgnore
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> getOtherHeaders() {
-		return (Map<String, Object>)fieldContainer.get(OTHER_HEADERS);
+		Object o = fieldContainer.get(OTHER_HEADERS);
+		return o == null ? null : (Map<String,Object>)o;
 	}
 
 	public void setOtherHeaders(Map<String, Object> otherHeaders) {

@@ -66,7 +66,8 @@ public class OBase extends ExtensibleImpl{
 
 	@JsonIgnore
 	public int getId() {
-		return (Integer) fieldContainer.get(ID);
+		Object o = fieldContainer.get(ID);
+		return o == null ? null : (Integer)o;
 	}
 
 	private void setId(int id) {
@@ -85,7 +86,8 @@ public class OBase extends ExtensibleImpl{
 
 	@JsonIgnore
 	public DebugInfo getDebugInfo() {
-		return (DebugInfo) fieldContainer.get(DEBUG_INFO);
+		Object o = fieldContainer.get(DEBUG_INFO);
+		return o == null ? null : (DebugInfo)o;
 	}
 
 	public void setDebugInfo(DebugInfo debugInfo) {

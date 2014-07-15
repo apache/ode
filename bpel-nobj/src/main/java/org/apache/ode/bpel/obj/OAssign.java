@@ -53,7 +53,8 @@ public class OAssign extends OActivity {
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public List<Copy> getCopy() {
-		return (List<Copy>) fieldContainer.get(COPY);
+		Object o = fieldContainer.get(COPY);
+		return o == null ? null : (List<Copy>)o;
 	}
 
 	public void setCopy(List<Copy> copy) {
@@ -102,12 +103,14 @@ public class OAssign extends OActivity {
 
 		@JsonIgnore
 		public RValue getFrom() {
-			return (RValue) fieldContainer.get(FROM);
+			Object o = fieldContainer.get(FROM);
+		return o == null ? null : (RValue)o;
 		}
 
 		@JsonIgnore
 		public boolean isIgnoreMissingFromData() {
-			return (Boolean) fieldContainer.get(IGNOREMISSINGFROMDATA);
+			Object o = fieldContainer.get(IGNOREMISSINGFROMDATA);
+		return o == null ? null : (Boolean)o;
 		}
 
 		@JsonIgnore
@@ -118,17 +121,20 @@ public class OAssign extends OActivity {
 
 		@JsonIgnore
 		public boolean isInsertMissingToData() {
-			return (Boolean) fieldContainer.get(INSERTMISSINGTODATA);
+			Object o = fieldContainer.get(INSERTMISSINGTODATA);
+		return o == null ? null : (Boolean)o;
 		}
 
 		@JsonIgnore
 		public boolean isKeepSrcElementName() {
-			return (Boolean) fieldContainer.get(KEEPSRCELEMENTNAME);
+			Object o = fieldContainer.get(KEEPSRCELEMENTNAME);
+		return o == null ? null : (Boolean)o;
 		}
 
 		@JsonIgnore
 		public LValue getTo() {
-			return (LValue) fieldContainer.get(TO);
+			Object o = fieldContainer.get(TO);
+		return o == null ? null : (LValue)o;
 		}
 
 		public void setFrom(RValue from) {
@@ -183,12 +189,14 @@ public class OAssign extends OActivity {
 
 		@JsonIgnore
 		public QName getElName() {
-			return (QName) fieldContainer.get(ELNAME);
+			Object o = fieldContainer.get(ELNAME);
+		return o == null ? null : (QName)o;
 		}
 
 		@JsonIgnore
 		public OScope.Variable getVariable() {
-			return (OScope.Variable) fieldContainer.get(VARIABLE);
+			Object o = fieldContainer.get(VARIABLE);
+		return o == null ? null : (OScope.Variable)o;
 		}
 
 		public void setElName(QName elName) {
@@ -212,7 +220,8 @@ public class OAssign extends OActivity {
 
 		@JsonIgnore
 		public OExpression getExpression() {
-			return (OExpression) fieldContainer.get(EXPRESSION);
+			Object o = fieldContainer.get(EXPRESSION);
+		return o == null ? null : (OExpression)o;
 		}
 
 		public void setExpression(OExpression expression) {
@@ -239,7 +248,8 @@ public class OAssign extends OActivity {
 
 		@JsonIgnore
 		public String getXmlLiteral() {
-			return (String) fieldContainer.get(XMLLITERAL);
+			Object o = fieldContainer.get(XMLLITERAL);
+		return o == null ? null : (String)o;
 		}
 
 		public void setXmlLiteral(String xmlLiteral) {
@@ -269,7 +279,8 @@ public class OAssign extends OActivity {
 
 		@JsonIgnore
 		public OLValueExpression getExpression() {
-			return (OLValueExpression) fieldContainer.get(EXPRESSION);
+			Object o = fieldContainer.get(EXPRESSION);
+		return o == null ? null : (OLValueExpression)o;
 		}
 
 		/**
@@ -314,12 +325,14 @@ public class OAssign extends OActivity {
 
 		@JsonIgnore
 		public boolean isIsMyEndpointReference() {
-			return (Boolean) fieldContainer.get(ISMYENDPOINTREFERENCE);
+			Object o = fieldContainer.get(ISMYENDPOINTREFERENCE);
+		return o == null ? null : (Boolean)o;
 		}
 
 		@JsonIgnore
 		public OPartnerLink getPartnerLink() {
-			return (OPartnerLink) fieldContainer.get(PARTNERLINK);
+			Object o = fieldContainer.get(PARTNERLINK);
+		return o == null ? null : (OPartnerLink)o;
 		}
 
 		// Must fit in a LValue even if it's not variable based
@@ -353,12 +366,14 @@ public class OAssign extends OActivity {
 
 		@JsonIgnore
 		public OPropertyAlias getPropertyAlias() {
-			return (OPropertyAlias) fieldContainer.get(PROPERTYALIAS);
+			Object o = fieldContainer.get(PROPERTYALIAS);
+		return o == null ? null : (OPropertyAlias)o;
 		}
 
 		@JsonIgnore
 		public Variable getVariable() {
-			return (Variable) fieldContainer.get(VARIABLE);
+			Object o = fieldContainer.get(VARIABLE);
+		return o == null ? null : (Variable)o;
 		}
 
 		public void setPropertyAlias(OPropertyAlias propertyAlias) {
@@ -392,26 +407,30 @@ public class OAssign extends OActivity {
 
 		@JsonIgnore
 		public Part getHeaderPart() {
-			return (Part) fieldContainer.get(HEADERPART);
+			Object o = fieldContainer.get(HEADERPART);
+		return o == null ? null : (Part)o;
 		}
 
 		@JsonIgnore
 		public OExpression getLocation() {
-			return (OExpression) fieldContainer.get(LOCATION);
+			Object o = fieldContainer.get(LOCATION);
+		return o == null ? null : (OExpression)o;
 		}
 
 		@JsonIgnore
 		public Part getPart() {
-			return (Part) fieldContainer.get(PART);
+			Object o = fieldContainer.get(PART);
+		return o == null ? null : (Part)o;
 		}
 
 		@JsonIgnore
 		public Variable getVariable() {
-			return (Variable) fieldContainer.get(VARIABLE);
+			Object o = fieldContainer.get(VARIABLE);
+		return o == null ? null : (Variable)o;
 		}
 
 		public boolean isHeaderRef() {
-            return getVariable().getType() instanceof OMessageVarType && getHeaderPart() != null && getLocation() == null;
+			return getVariable().getType() instanceof OMessageVarType && getHeaderPart() != null && getLocation() == null;
         }
 
 		/**
@@ -419,7 +438,7 @@ public class OAssign extends OActivity {
 		 * @return <code>true</code> if whole-message reference
 		 */
 		public boolean isMessageRef() {
-            return getVariable().getType() instanceof OMessageVarType && getPart() == null && getHeaderPart() == null && getLocation() == null;
+			return getVariable().getType() instanceof OMessageVarType && getPart() == null && getHeaderPart() == null && getLocation() == null;
         }
 
 		/**
@@ -427,7 +446,7 @@ public class OAssign extends OActivity {
 		 * @return <code>true</code> if reference to a message part
 		 */
 		public boolean isPartRef() {
-            return getVariable().getType() instanceof OMessageVarType && getPart() != null && getLocation() == null;
+			return getVariable().getType() instanceof OMessageVarType && getPart() != null && getLocation() == null;
         }
 
 		public void setHeaderPart(Part headerPart) {

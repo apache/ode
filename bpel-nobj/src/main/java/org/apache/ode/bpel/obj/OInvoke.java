@@ -89,7 +89,8 @@ public class OInvoke extends OActivity {
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public List<CorrelationSet> getInitCorrelationsInput() {
-		return (List<CorrelationSet>) fieldContainer.get(INITCORRELATIONSINPUT);
+		Object o = fieldContainer.get(INITCORRELATIONSINPUT);
+		return o == null ? null : (List<CorrelationSet>)o;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -101,13 +102,15 @@ public class OInvoke extends OActivity {
 
 	@JsonIgnore
 	public Variable getInputVar() {
-		return (Variable) fieldContainer.get(INPUTVAR);
+		Object o = fieldContainer.get(INPUTVAR);
+		return o == null ? null : (Variable)o;
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public List<CorrelationSet> getJoinCorrelationsInput() {
-		return (List<CorrelationSet>) fieldContainer.get(JOINCORRELATIONSINPUT);
+		Object o = fieldContainer.get(JOINCORRELATIONSINPUT);
+		return o == null ? null : (List<CorrelationSet>)o;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -119,17 +122,20 @@ public class OInvoke extends OActivity {
 
 	@JsonIgnore
 	public Operation getOperation() {
-		return (Operation) fieldContainer.get(OPERATION);
+		Object o = fieldContainer.get(OPERATION);
+		return o == null ? null : (Operation)o;
 	}
 
 	@JsonIgnore
 	public Variable getOutputVar() {
-		return (Variable) fieldContainer.get(OUTPUTVAR);
+		Object o = fieldContainer.get(OUTPUTVAR);
+		return o == null ? null : (Variable)o;
 	}
 
 	@JsonIgnore
 	public OPartnerLink getPartnerLink() {
-		return (OPartnerLink) fieldContainer.get(PARTNERLINK);
+		Object o = fieldContainer.get(PARTNERLINK);
+		return o == null ? null : (OPartnerLink)o;
 	}
 
 	//TODO: custom read Object -- backward compatibility

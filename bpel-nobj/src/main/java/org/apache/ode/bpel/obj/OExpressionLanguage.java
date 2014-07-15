@@ -50,13 +50,15 @@ public class OExpressionLanguage extends OBase {
 
 	@JsonIgnore
 	public String getExpressionLanguageUri() {
-		return (String) fieldContainer.get(EXPRESSIONLANGUAGEURI);
+		Object o = fieldContainer.get(EXPRESSIONLANGUAGEURI);
+		return o == null ? null : (String)o;
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public Map<String, String> getProperties() {
-		return (Map<String, String>) fieldContainer.get(PROPERTIES);
+		Object o = fieldContainer.get(PROPERTIES);
+		return o == null ? null : (Map<String, String>)o;
 	}
 
 	public int hashCode() {

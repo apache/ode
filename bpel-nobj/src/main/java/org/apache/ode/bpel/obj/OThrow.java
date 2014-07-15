@@ -41,12 +41,14 @@ public class OThrow extends OActivity {
 
 	@JsonIgnore
 	public QName getFaultName() {
-		return (QName) fieldContainer.get(FAULTNAME);
+		Object o = fieldContainer.get(FAULTNAME);
+		return o == null ? null : (QName)o;
 	}
 
 	@JsonIgnore
 	public Variable getFaultVariable() {
-		return (Variable) fieldContainer.get(FAULTVARIABLE);
+		Object o = fieldContainer.get(FAULTVARIABLE);
+		return o == null ? null : (Variable)o;
 	}
 
 	public void setFaultName(QName faultName) {

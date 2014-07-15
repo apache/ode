@@ -40,7 +40,8 @@ public class OSequence extends OActivity {
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public List<OActivity> getSequence() {
-		return (List<OActivity>) fieldContainer.get(SEQUENCE);
+		Object o = fieldContainer.get(SEQUENCE);
+		return o == null ? null : (List<OActivity>)o;
 	}
 
 	public void setSequence(List<OActivity> sequence) {

@@ -34,7 +34,8 @@ public class OCompensate extends OActivity {
 	
 	@JsonIgnore
 	public OScope getCompensatedScope() {
-		return (OScope) fieldContainer.get(COMPENSATEDSCOPE);
+		Object o = fieldContainer.get(COMPENSATEDSCOPE);
+		return o == null ? null : (OScope)o;
 	}
 
 	public void setCompensatedScope(OScope compensatedScope) {

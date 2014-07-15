@@ -64,18 +64,21 @@ public class OMessageVarType extends OVarType {
 
 	@JsonIgnore
 	public OElementVarType getDocLitType() {
-		return (OElementVarType) fieldContainer.get(DOCLITTYPE);
+		Object o = fieldContainer.get(DOCLITTYPE);
+		return o == null ? null : (OElementVarType)o;
 	}
 
 	@JsonIgnore
 	public QName getMessageType() {
-		return (QName) fieldContainer.get(MESSAGETYPE);
+		Object o = fieldContainer.get(MESSAGETYPE);
+		return o == null ? null : (QName)o;
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public Map<String, Part> getParts() {
-		return (Map<String, Part>) fieldContainer.get(PARTS);
+		Object o = fieldContainer.get(PARTS);
+		return o == null ? null : (Map<String, Part>)o;
 	}
 
 	@JsonIgnore
@@ -132,12 +135,14 @@ public class OMessageVarType extends OVarType {
 
 		@JsonIgnore
 		public String getName() {
-			return (String) fieldContainer.get(NAME);
+			Object o = fieldContainer.get(NAME);
+		return o == null ? null : (String)o;
 		}
 
 		@JsonIgnore
 		public OVarType getType() {
-			return (OVarType) fieldContainer.get(TYPE);
+			Object o = fieldContainer.get(TYPE);
+		return o == null ? null : (OVarType)o;
 		}
 
 		public void setName(String name) {

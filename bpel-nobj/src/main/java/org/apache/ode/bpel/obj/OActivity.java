@@ -40,11 +40,12 @@ public abstract class OActivity extends OAgent {
 	private static final String NAME = "name";
 	private static final String FAILUREHANDLING = "failureHandling";
 	private static final String PARENT = "parent";
-	
+
 	@JsonCreator
-	public OActivity(){
+	public OActivity() {
 		setSuppressJoinFailure(false);
 	}
+
 	public OActivity(OProcess owner, OActivity parent) {
 		super(owner);
 		setParent(parent);
@@ -81,7 +82,8 @@ public abstract class OActivity extends OAgent {
 
 	@JsonIgnore
 	public OFailureHandling getFailureHandling() {
-		OFailureHandling handling = (OFailureHandling) fieldContainer.get(FAILUREHANDLING);
+		OFailureHandling handling = (OFailureHandling) fieldContainer
+				.get(FAILUREHANDLING);
 		if (handling == null) {
 			OActivity parent = this.getParent();
 			while (parent != null && handling == null) {
@@ -94,29 +96,34 @@ public abstract class OActivity extends OAgent {
 
 	@JsonIgnore
 	public OExpression getJoinCondition() {
-		return (OExpression) fieldContainer.get(JOINCONDITION);
+		Object o = fieldContainer.get(JOINCONDITION);
+		return o == null ? null : (OExpression) o;
 	}
 
 	@JsonIgnore
 	public String getName() {
-		return (String) fieldContainer.get(NAME);
+		Object o = fieldContainer.get(NAME);
+		return o == null ? null : (String) o;
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public Set<OLink> getSourceLinks() {
-		return (Set<OLink>) fieldContainer.get(SOURCELINKS);
+		Object o = fieldContainer.get(SOURCELINKS);
+		return o == null ? null : (Set<OLink>) o;
 	}
 
 	@JsonIgnore
 	public boolean isSuppressJoinFailure() {
-		return (Boolean) fieldContainer.get(SUPPRESSJOINFAILURE);
+		Object o = fieldContainer.get(SUPPRESSJOINFAILURE);
+		return o == null ? null : (Boolean) o;
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public Set<OLink> getTargetLinks() {
-		return (Set<OLink>) fieldContainer.get(TARGETLINKS);
+		Object o = fieldContainer.get(TARGETLINKS);
+		return o == null ? null : (Set<OLink>) o;
 	}
 
 	public String getType() {
@@ -136,7 +143,7 @@ public abstract class OActivity extends OAgent {
 	}
 
 	public void setSourceLinks(Set<OLink> sourceLinks) {
-		if (getSourceLinks() == null){
+		if (getSourceLinks() == null) {
 			fieldContainer.put(SOURCELINKS, sourceLinks);
 		}
 	}
@@ -146,7 +153,7 @@ public abstract class OActivity extends OAgent {
 	}
 
 	public void setTargetLinks(Set<OLink> targetLinks) {
-		if (getTargetLinks() == null){
+		if (getTargetLinks() == null) {
 			fieldContainer.put(TARGETLINKS, targetLinks);
 		}
 	}
@@ -160,11 +167,13 @@ public abstract class OActivity extends OAgent {
 
 		return buf.toString();
 	}
+
 	@JsonIgnore
-	public OActivity getParent(){
-		return (OActivity)fieldContainer.get(PARENT);
+	public OActivity getParent() {
+		return (OActivity) fieldContainer.get(PARENT);
 	}
-	private void setParent(OActivity parent){
+
+	private void setParent(OActivity parent) {
 		fieldContainer.put(PARENT, parent);
 	}
 }
