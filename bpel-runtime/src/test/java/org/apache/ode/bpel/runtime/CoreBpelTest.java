@@ -35,18 +35,18 @@ import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.iapi.ProcessConf.PartnerRoleConfig;
-import org.apache.ode.bpel.o.OCatch;
-import org.apache.ode.bpel.o.OEmpty;
-import org.apache.ode.bpel.o.OFaultHandler;
-import org.apache.ode.bpel.o.OFlow;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OScope.Variable;
-import org.apache.ode.bpel.o.OSequence;
-import org.apache.ode.bpel.o.OThrow;
+import org.apache.ode.bpel.obj.OCatch;
+import org.apache.ode.bpel.obj.OEmpty;
+import org.apache.ode.bpel.obj.OFaultHandler;
+import org.apache.ode.bpel.obj.OFlow;
+import org.apache.ode.bpel.obj.OMessageVarType;
+import org.apache.ode.bpel.obj.OMessageVarType.Part;
+import org.apache.ode.bpel.obj.OPartnerLink;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.OScope;
+import org.apache.ode.bpel.obj.OScope.Variable;
+import org.apache.ode.bpel.obj.OSequence;
+import org.apache.ode.bpel.obj.OThrow;
 import org.apache.ode.bpel.runtime.channels.ActivityRecovery;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponse;
@@ -171,8 +171,8 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 
     public void testEmptyProcess() {
         OProcess proc = new OProcess("2.0");
-        proc.procesScope = new OScope(proc, null);
-        proc.procesScope.activity = new OEmpty(proc, proc.procesScope);
+        proc.setProcesScope(new OScope(proc, null));
+        proc.getProcesScope().setActivity(new OEmpty(proc, proc.getProcesScope()));
 
         run(proc);
 
@@ -183,28 +183,28 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 
     public void testThrow() {
         OProcess proc = new OProcess("2.0");
-        proc.procesScope = new OScope(proc, null);
-        OThrow othrow = new OThrow(proc, proc.procesScope);
-        othrow.faultName = new QName("foo", "bar");
-        proc.procesScope.activity = othrow;
+        proc.setProcesScope(new OScope(proc, null));
+        OThrow othrow = new OThrow(proc, proc.getProcesScope());
+        othrow.setFaultName(new QName("foo", "bar"));
+        proc.getProcesScope().setActivity(othrow);
 
         run(proc);
 
         assertFalse(_completedOk);
         assertFalse(_terminate);
-        assertEquals(_fault.getFaultName(), othrow.faultName);
+        assertEquals(_fault.getFaultName(), othrow.getFaultName());
     }
 
     public void testFaultHandling() {
         OProcess proc = new OProcess("2.0");
-        proc.procesScope = new OScope(proc, null);
-        OThrow othrow = new OThrow(proc, proc.procesScope);
-        othrow.faultName = new QName("foo", "bar");
-        proc.procesScope.activity = othrow;
-        proc.procesScope.faultHandler = new OFaultHandler(proc);
-        OCatch ocatch = new OCatch(proc, proc.procesScope);
-        proc.procesScope.faultHandler.catchBlocks.add(ocatch);
-        ocatch.activity = new OEmpty(proc, ocatch);
+        proc.setProcesScope(new OScope(proc, null));
+        OThrow othrow = new OThrow(proc, proc.getProcesScope());
+        othrow.setFaultName(new QName("foo", "bar"));
+        proc.getProcesScope().setActivity(othrow);
+        proc.getProcesScope().setFaultHandler(new OFaultHandler(proc));
+        OCatch ocatch = new OCatch(proc, proc.getProcesScope());
+        proc.getProcesScope().getFaultHandler().getCatchBlocks().add(ocatch);
+        ocatch.setActivity(new OEmpty(proc, ocatch));
         run(proc);
 
         assertTrue(_completedOk);
@@ -214,10 +214,10 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 
     public void testOneElementSequence() {
         OProcess proc = new OProcess("2.0");
-        proc.procesScope = new OScope(proc, null);
-        OSequence sequence = new OSequence(proc, proc.procesScope);
-        proc.procesScope.activity = sequence;
-        sequence.sequence.add(new OEmpty(proc, sequence));
+        proc.setProcesScope(new OScope(proc, null));
+        OSequence sequence = new OSequence(proc, proc.getProcesScope());
+        proc.getProcesScope().setActivity(sequence);
+        sequence.getSequence().add(new OEmpty(proc, sequence));
 
         run(proc);
 
@@ -228,11 +228,11 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 
     public void testTwoElementSequence() {
         OProcess proc = new OProcess("2.0");
-        proc.procesScope = new OScope(proc, null);
-        OSequence sequence = new OSequence(proc, proc.procesScope);
-        proc.procesScope.activity = sequence;
-        sequence.sequence.add(new OEmpty(proc, sequence));
-        sequence.sequence.add(new OEmpty(proc, sequence));
+        proc.setProcesScope(new OScope(proc, null));
+        OSequence sequence = new OSequence(proc, proc.getProcesScope());
+        proc.getProcesScope().setActivity(sequence);
+        sequence.getSequence().add(new OEmpty(proc, sequence));
+        sequence.getSequence().add(new OEmpty(proc, sequence));
 
         run(proc);
 
@@ -243,8 +243,8 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 
     public void testEmptyFlow() {
         OProcess proc = new OProcess("2.0");
-        proc.procesScope = new OScope(proc, null);
-        proc.procesScope.activity = new OFlow(proc, proc.procesScope);
+        proc.setProcesScope(new OScope(proc, null));
+        proc.getProcesScope().setActivity(new OFlow(proc, proc.getProcesScope()));
 
         run(proc);
 
@@ -255,10 +255,10 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 
     public void testSingleElementFlow() {
         OProcess proc = new OProcess("2.0");
-        proc.procesScope = new OScope(proc, null);
-        OFlow flow = new OFlow(proc, proc.procesScope);
-        proc.procesScope.activity = flow;
-        flow.parallelActivities.add(new OEmpty(proc, flow));
+        proc.setProcesScope(new OScope(proc, null));
+        OFlow flow = new OFlow(proc, proc.getProcesScope());
+        proc.getProcesScope().setActivity(flow);
+        flow.getParallelActivities().add(new OEmpty(proc, flow));
 
         run(proc);
 
@@ -269,11 +269,11 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 
     public void testTwoElementFlow() {
         OProcess proc = new OProcess("2.0");
-        proc.procesScope = new OScope(proc, null);
-        OFlow flow = new OFlow(proc, proc.procesScope);
-        proc.procesScope.activity = flow;
-        flow.parallelActivities.add(new OEmpty(proc, flow));
-        flow.parallelActivities.add(new OEmpty(proc, flow));
+        proc.setProcesScope(new OScope(proc, null));
+        OFlow flow = new OFlow(proc, proc.getProcesScope());
+        proc.getProcesScope().setActivity(flow);
+        flow.getParallelActivities().add(new OEmpty(proc, flow));
+        flow.getParallelActivities().add(new OEmpty(proc, flow));
 
         run(proc);
 
@@ -284,24 +284,24 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 
     public void testFlowTermination() {
         OProcess proc = new OProcess("2.0");
-        proc.procesScope = new OScope(proc, null);
-        OFlow flow = new OFlow(proc, proc.procesScope);
-        proc.procesScope.activity = flow;
+        proc.setProcesScope(new OScope(proc, null));
+        OFlow flow = new OFlow(proc, proc.getProcesScope());
+        proc.getProcesScope().setActivity(flow);
         OThrow othrow = new OThrow(proc, flow);
-        othrow.faultName = new QName("foo", "bar");
-        flow.parallelActivities.add(othrow);
-        flow.parallelActivities.add(new OEmpty(proc, flow));
-        flow.parallelActivities.add(new OEmpty(proc, flow));
-        flow.parallelActivities.add(new OEmpty(proc, flow));
-        flow.parallelActivities.add(new OEmpty(proc, flow));
-        flow.parallelActivities.add(new OEmpty(proc, flow));
-        flow.parallelActivities.add(new OEmpty(proc, flow));
+        othrow.setFaultName(new QName("foo", "bar"));
+        flow.getParallelActivities().add(othrow);
+        flow.getParallelActivities().add(new OEmpty(proc, flow));
+        flow.getParallelActivities().add(new OEmpty(proc, flow));
+        flow.getParallelActivities().add(new OEmpty(proc, flow));
+        flow.getParallelActivities().add(new OEmpty(proc, flow));
+        flow.getParallelActivities().add(new OEmpty(proc, flow));
+        flow.getParallelActivities().add(new OEmpty(proc, flow));
 
         run(proc);
 
         assertFalse(_completedOk);
         assertFalse(_terminate);
-        assertEquals(_fault.getFaultName(), othrow.faultName);
+        assertEquals(_fault.getFaultName(), othrow.getFaultName());
     }
 
     private void run(OProcess proc) {

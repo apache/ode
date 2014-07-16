@@ -29,9 +29,9 @@ import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OForEach;
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.obj.OExpression;
+import org.apache.ode.bpel.obj.OForEach;
+import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.Termination;
@@ -67,10 +67,10 @@ public class FOREACH extends ACTIVITY {
 
     public void run() {
         try {
-            _startCounter = evaluateCondition(_oforEach.startCounterValue);
-            _finalCounter = evaluateCondition(_oforEach.finalCounterValue);
-            if (_oforEach.completionCondition != null) {
-                _completionCounter = evaluateCondition(_oforEach.completionCondition.branchCount);
+            _startCounter = evaluateCondition(_oforEach.getStartCounterValue());
+            _finalCounter = evaluateCondition(_oforEach.getFinalCounterValue());
+            if (_oforEach.getCompletionCondition() != null) {
+                _completionCounter = evaluateCondition(_oforEach.getCompletionCondition().getBranchCount());
             }
             _currentCounter = _startCounter;
         } catch (FaultException fe) {
@@ -83,7 +83,7 @@ public class FOREACH extends ACTIVITY {
         // to the maximum number of children
         if (_completionCounter > 0 && _completionCounter > _finalCounter - _startCounter) {
             _self.parent.completed(
-                    createFault(_oforEach.getOwner().constants.qnInvalidBranchCondition, _self.o), _compHandlers);
+                    createFault(_oforEach.getOwner().getConstants().getQnInvalidBranchCondition(), _self.o), _compHandlers);
             return;
         }
 
@@ -92,7 +92,7 @@ public class FOREACH extends ACTIVITY {
             _self.parent.completed(null, _compHandlers);
         } else {
             // If we're parrallel, starting all our child copies, otherwise one will suffice.
-            if (_oforEach.parallel) {
+            if (_oforEach.isParallel()) {
                 for (int m = _startCounter; m <= _finalCounter; m++) {
                     newChild();
                 }
@@ -137,7 +137,7 @@ public class FOREACH extends ACTIVITY {
                         public void completed(FaultData faultData, Set<CompensationHandler> compensations) {
                             child.completed = true;
                             //
-                            if (_completionCounter > 0 && _oforEach.completionCondition.successfulBranchesOnly) {
+                            if (_completionCounter > 0 && _oforEach.getCompletionCondition().isSuccessfulBranchesOnly()) {
                                 if (faultData != null) _completedCounter++;
                             } else _completedCounter++;
 
@@ -149,7 +149,7 @@ public class FOREACH extends ACTIVITY {
                             }
                             if (shouldContinue() && _fault == null && !_terminateRequested) {
                                 // Everything fine. If parrallel, just let our children be, otherwise making a new child
-                                if (!_oforEach.parallel) newChild();
+                                if (!_oforEach.isParallel()) newChild();
                             } else {
                                 // Work is done or something wrong happened, children shouldn't continue
                                 for (Iterator<ChildInfo> i = active(); i.hasNext(); )
@@ -189,7 +189,7 @@ public class FOREACH extends ACTIVITY {
             if (cond < 0) {
                 String msg = "ForEach counter was negative.";
                 __log.error(msg);
-                throw new FaultException(_oforEach.getOwner().constants.qnInvalidExpressionValue,msg);
+                throw new FaultException(_oforEach.getOwner().getConstants().getQnInvalidExpressionValue(),msg);
             }
             
             if (cond > Integer.MAX_VALUE) {
@@ -200,19 +200,19 @@ public class FOREACH extends ACTIVITY {
                 // support Integer.MAX_VALUE as a maximum instead of Integer.MAX_VALUE * 2 - 1.
                 String msg = "ForEach counter was too large.";
                 __log.error(msg);
-                throw new FaultException(_oforEach.getOwner().constants.qnInvalidExpressionValue,msg);
+                throw new FaultException(_oforEach.getOwner().getConstants().getQnInvalidExpressionValue(),msg);
             }
 
             return cond;
         } catch (EvaluationException e) {
             String msg = "ForEach counter value couldn't be evaluated as xs:unsignedInt.";
             __log.error(msg, e);
-            throw new FaultException(_oforEach.getOwner().constants.qnInvalidExpressionValue,msg);
+            throw new FaultException(_oforEach.getOwner().getConstants().getQnInvalidExpressionValue(),msg);
         }
     }
 
     private void newChild() {
-        ChildInfo child = new ChildInfo(new ActivityInfo(genMonotonic(), _oforEach.innerScope,
+        ChildInfo child = new ChildInfo(new ActivityInfo(genMonotonic(), _oforEach.getInnerScope(),
                 newChannel(Termination.class), newChannel(ParentScope.class)));
         _children.add(child);
 
@@ -223,9 +223,9 @@ public class FOREACH extends ACTIVITY {
         // Instantiating the scope directly to keep control of its scope frame, allows
         // the introduction of the counter variable in there (monkey business that is).
         ScopeFrame newFrame = new ScopeFrame(
-                _oforEach.innerScope, getBpelRuntimeContext().createScopeInstance(_scopeFrame.scopeInstanceId,
-                _oforEach.innerScope), _scopeFrame, null);
-        VariableInstance vinst = newFrame.resolve(_oforEach.counterVariable);
+                _oforEach.getInnerScope(), getBpelRuntimeContext().createScopeInstance(_scopeFrame.scopeInstanceId,
+                _oforEach.getInnerScope()), _scopeFrame, null);
+        VariableInstance vinst = newFrame.resolve(_oforEach.getCounterVariable());
 
         try {
         initializeVariable(vinst, counterNode);
@@ -236,17 +236,17 @@ public class FOREACH extends ACTIVITY {
         }
 
         // Generating event
-        VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.name);
+        VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.getName());
         se.setNewValue(counterNode);
-        if (_oforEach.debugInfo != null)
-            se.setLineNo(_oforEach.debugInfo.startLine);
+        if (_oforEach.getDebugInfo() != null)
+            se.setLineNo(_oforEach.getDebugInfo().getStartLine());
         sendEvent(se);
 
         instance(new SCOPE(child.activity, newFrame, _linkFrame));
     }
 
     public String toString() {
-        return "<T:Act:Flow:" + _oforEach.name + ">";
+        return "<T:Act:Flow:" + _oforEach.getName() + ">";
     }
 
     private Iterator<ChildInfo> active() {

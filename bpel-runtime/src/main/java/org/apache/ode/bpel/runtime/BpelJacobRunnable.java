@@ -22,9 +22,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.o.OBase;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OVarType;
+import org.apache.ode.bpel.obj.OBase;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.OVarType;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.jacob.JacobRunnable;
 import org.apache.ode.jacob.vpu.JacobVPU;
@@ -73,7 +73,7 @@ public abstract class BpelJacobRunnable extends JacobRunnable {
     protected void initializeCorrelation(CorrelationSetInstance cset, VariableInstance variable)
             throws FaultException {
         if (__log.isDebugEnabled()) {
-          __log.debug("Initializing correlation set " + cset.declaration.name);
+          __log.debug("Initializing correlation set " + cset.declaration.getName());
         }
         // if correlation set is already initialized,
         // then skip
@@ -86,18 +86,18 @@ public abstract class BpelJacobRunnable extends JacobRunnable {
             return;
         }
 
-        String[] propNames = new String[cset.declaration.properties.size()];
-        String[] propValues = new String[cset.declaration.properties.size()];
+        String[] propNames = new String[cset.declaration.getProperties().size()];
+        String[] propValues = new String[cset.declaration.getProperties().size()];
 
-        for (int i = 0; i < cset.declaration.properties.size(); ++i) {
-            OProcess.OProperty property = cset.declaration.properties.get(i);
+        for (int i = 0; i < cset.declaration.getProperties().size(); ++i) {
+            OProcess.OProperty property = cset.declaration.getProperties().get(i);
             propValues[i] = getBpelRuntimeContext().readProperty(variable, property);
-            propNames[i] = property.name.toString();
+            propNames[i] = property.getName().toString();
             if (__log.isDebugEnabled())
               __log.debug("Setting correlation property " + propNames[i] + "=" + propValues[i]);
         }
 
-        CorrelationKey ckeyVal = new CorrelationKey(cset.declaration.name, propValues);
+        CorrelationKey ckeyVal = new CorrelationKey(cset.declaration.getName(), propValues);
         getBpelRuntimeContext().writeCorrelation(cset,ckeyVal);
     }
 

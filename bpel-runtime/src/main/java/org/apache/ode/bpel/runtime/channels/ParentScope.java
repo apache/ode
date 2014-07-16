@@ -20,7 +20,7 @@ package org.apache.ode.bpel.runtime.channels;
 
 import java.util.Set;
 
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.bpel.runtime.CompensationHandler;
 import org.apache.ode.jacob.Channel;
 import org.apache.ode.jacob.Synch;

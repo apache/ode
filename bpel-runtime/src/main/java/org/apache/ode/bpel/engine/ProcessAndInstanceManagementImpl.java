@@ -86,9 +86,9 @@ import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
-import org.apache.ode.bpel.o.OBase;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.obj.OBase;
+import org.apache.ode.bpel.obj.OPartnerLink;
+import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.pmapi.ActivityExtInfoListDocument;
 import org.apache.ode.bpel.pmapi.ActivityInfoDocument;
 import org.apache.ode.bpel.pmapi.EventInfoListDocument;
@@ -656,8 +656,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
         for (int aid : aids) {
             OBase obase = oprocess.getChild(aid);
-            if (obase != null && obase.debugInfo != null && obase.debugInfo.extensibilityElements != null) {
-                for (Map.Entry<QName, Object> entry : obase.debugInfo.extensibilityElements.entrySet()) {
+            if (obase != null && obase.getDebugInfo() != null && obase.getDebugInfo().getExtensibilityElements() != null) {
+                for (Map.Entry<QName, Object> entry : obase.getDebugInfo().getExtensibilityElements().entrySet()) {
                     TActivityExtInfo taei = taeil.addNewActivityExtInfo();
                     taei.setAiid("" + aid);
                     Object extValue = entry.getValue();
@@ -935,7 +935,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
         OProcess oprocess = _server._engine.getOProcess(pconf.getProcessId());
         if (custom.includeEndpoints() && oprocess != null) {
             for (OPartnerLink oplink : oprocess.getAllPartnerLinks()) {
-                if (oplink.hasPartnerRole() && oplink.initializePartnerRole) {
+                if (oplink.hasPartnerRole() && oplink.isInitializePartnerRole()) {
                     // TODO: this is very uncool.
                     EndpointReference pepr = _server._engine._activeProcesses.get(pconf.getProcessId())
                             .getInitialPartnerRoleEPR(oplink);

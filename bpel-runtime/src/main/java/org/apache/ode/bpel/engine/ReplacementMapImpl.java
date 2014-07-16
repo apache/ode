@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.engine;
 
-import org.apache.ode.bpel.o.OBase;
-import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.obj.OBase;
+import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.jacob.soup.ReplacementMap;
 
 import java.io.Externalizable;

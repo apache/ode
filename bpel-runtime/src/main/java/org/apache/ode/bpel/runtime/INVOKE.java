@@ -28,8 +28,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
-import org.apache.ode.bpel.o.OInvoke;
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.obj.OInvoke;
+import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponse;
 import org.apache.ode.bpel.runtime.channels.Termination;
@@ -67,7 +67,7 @@ public class INVOKE extends ACTIVITY {
     public final void run() {
         Element outboundMsg;
         try {
-            outboundMsg = setupOutbound(_oinvoke, _oinvoke.initCorrelationsInput, _oinvoke.joinCorrelationsInput);
+            outboundMsg = setupOutbound(_oinvoke, _oinvoke.getInitCorrelationsInput(), _oinvoke.getJoinCorrelationsInput());
         } catch (FaultException e) {
             __log.error(e);
             FaultData fault = createFault(e.getQName(), _oinvoke);
@@ -81,22 +81,22 @@ public class INVOKE extends ACTIVITY {
         ++_invoked;
 
         // if there is no output variable, then this is a one-way invoke
-        boolean isTwoWay = _oinvoke.outputVar != null;
+        boolean isTwoWay = _oinvoke.getOutputVar() != null;
 
         try {
             if (!isTwoWay) {
                 FaultData faultData = null;
                 getBpelRuntimeContext().invoke(_oinvoke.getId(),
-                        _scopeFrame.resolve(_oinvoke.partnerLink),
-                        _oinvoke.operation, outboundMsg, null);
+                        _scopeFrame.resolve(_oinvoke.getPartnerLink()),
+                        _oinvoke.getOperation(), outboundMsg, null);
                 _self.parent.completed(faultData, CompensationHandler.emptySet());
 
             } else /* two-way */{
-                final VariableInstance outputVar = _scopeFrame.resolve(_oinvoke.outputVar);
+                final VariableInstance outputVar = _scopeFrame.resolve(_oinvoke.getOutputVar());
                 InvokeResponse invokeResponseChannel = newChannel(InvokeResponse.class);
 
                 final String mexId = getBpelRuntimeContext().invoke(_oinvoke.getId(),
-                        _scopeFrame.resolve(_oinvoke.partnerLink), _oinvoke.operation,
+                        _scopeFrame.resolve(_oinvoke.getPartnerLink()), _oinvoke.getOperation(),
                         outboundMsg, invokeResponseChannel);
 
                 object(false, compose(new ReceiveProcess() {
@@ -124,35 +124,35 @@ public class INVOKE extends ACTIVITY {
                         }
 
                         // Generating event
-                        VariableModificationEvent se = new VariableModificationEvent(outputVar.declaration.name);
+                        VariableModificationEvent se = new VariableModificationEvent(outputVar.declaration.getName());
                         se.setNewValue(response);
-                        if (_oinvoke.debugInfo != null)
-                            se.setLineNo(_oinvoke.debugInfo.startLine);
+                        if (_oinvoke.getDebugInfo() != null)
+                            se.setLineNo(_oinvoke.getDebugInfo().getStartLine());
                         sendEvent(se);
 
                         try {
-                            for (OScope.CorrelationSet anInitCorrelationsOutput : _oinvoke.initCorrelationsOutput) {
+                            for (OScope.CorrelationSet anInitCorrelationsOutput : _oinvoke.getInitCorrelationsOutput()) {
                                 initializeCorrelation(_scopeFrame.resolve(anInitCorrelationsOutput), outputVar);
                             }
-                            for (OScope.CorrelationSet aJoinCorrelationsOutput : _oinvoke.joinCorrelationsOutput) {
+                            for (OScope.CorrelationSet aJoinCorrelationsOutput : _oinvoke.getJoinCorrelationsOutput()) {
                                 // will be ignored if already initialized
                                 initializeCorrelation(_scopeFrame.resolve(aJoinCorrelationsOutput), outputVar);
                             }
-                            if (_oinvoke.partnerLink.hasPartnerRole()) {
+                            if (_oinvoke.getPartnerLink().hasPartnerRole()) {
                                 // Trying to initialize partner epr based on a message-provided epr/session.
                                 if (!getBpelRuntimeContext().isPartnerRoleEndpointInitialized(_scopeFrame
-                                        .resolve(_oinvoke.partnerLink)) || !_oinvoke.partnerLink.initializePartnerRole) {
+                                        .resolve(_oinvoke.getPartnerLink())) || !_oinvoke.getPartnerLink().isInitializePartnerRole()) {
 
                                     Node fromEpr = getBpelRuntimeContext().getSourceEPR(mexId);
                                     if (fromEpr != null) {
                                         getBpelRuntimeContext().writeEndpointReference(
-                                                _scopeFrame.resolve(_oinvoke.partnerLink), (Element) fromEpr);
+                                                _scopeFrame.resolve(_oinvoke.getPartnerLink()), (Element) fromEpr);
                                     }
                                 }
 
                                 String partnersSessionId = getBpelRuntimeContext().getSourceSessionId(mexId);
                                 if (partnersSessionId != null)
-                                    getBpelRuntimeContext().initializePartnersSessionId(_scopeFrame.resolve(_oinvoke.partnerLink),
+                                    getBpelRuntimeContext().initializePartnersSessionId(_scopeFrame.resolve(_oinvoke.getPartnerLink()),
                                             partnersSessionId);
 
                             }
@@ -171,7 +171,7 @@ public class INVOKE extends ACTIVITY {
                         Element msg = getBpelRuntimeContext().getPartnerResponse(mexId);
                         QName msgType = getBpelRuntimeContext().getPartnerResponseType(mexId);
                         FaultData fault = createFault(faultName, msg,
-                                _oinvoke.getOwner().messageTypes.get(msgType), _self.o);
+                                _oinvoke.getOwner().getMessageTypes().get(msgType), _self.o);
                         _self.parent.completed(fault, CompensationHandler.emptySet());
                         getBpelRuntimeContext().releasePartnerMex(mexId, false);
                     }
@@ -211,16 +211,16 @@ public class INVOKE extends ACTIVITY {
     private Element setupOutbound(OInvoke oinvoke, Collection<OScope.CorrelationSet> outboundInitiations, Collection<OScope.CorrelationSet> outboundJoins)
             throws FaultException, ExternalVariableModuleException {
         for (OScope.CorrelationSet c : outboundInitiations) {
-            initializeCorrelation(_scopeFrame.resolve(c), _scopeFrame.resolve(oinvoke.inputVar));
+            initializeCorrelation(_scopeFrame.resolve(c), _scopeFrame.resolve(oinvoke.getInputVar()));
         }
         for (OScope.CorrelationSet c : outboundJoins) {
             // will be ignored if already initialized
-            initializeCorrelation(_scopeFrame.resolve(c), _scopeFrame.resolve(oinvoke.inputVar));
+            initializeCorrelation(_scopeFrame.resolve(c), _scopeFrame.resolve(oinvoke.getInputVar()));
         }
 
-        if ((oinvoke.operation.getInput() != null) && (oinvoke.operation.getInput().getMessage().getParts().size() > 0)) {
-            sendVariableReadEvent(_scopeFrame.resolve(oinvoke.inputVar));
-            Node outboundMsg = fetchVariableData(_scopeFrame.resolve(oinvoke.inputVar), false);
+        if ((oinvoke.getOperation().getInput() != null) && (oinvoke.getOperation().getInput().getMessage().getParts().size() > 0)) {
+            sendVariableReadEvent(_scopeFrame.resolve(oinvoke.getInputVar()));
+            Node outboundMsg = fetchVariableData(_scopeFrame.resolve(oinvoke.getInputVar()), false);
             // TODO outbound message should be updated with non-initiate correlation sets
             assert outboundMsg instanceof Element;
             return (Element) outboundMsg;

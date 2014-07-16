@@ -25,9 +25,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OSequence;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.OScope;
+import org.apache.ode.bpel.obj.OSequence;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.Termination;
@@ -47,7 +47,7 @@ class SEQUENCE extends ACTIVITY {
     private final Set<CompensationHandler> _compensations;
 
     SEQUENCE(ActivityInfo self, ScopeFrame scopeFrame, LinkFrame linkFrame) {
-        this(self, scopeFrame, linkFrame, ((OSequence)self.o).sequence, CompensationHandler.emptySet());
+        this(self, scopeFrame, linkFrame, ((OSequence)self.o).getSequence(), CompensationHandler.emptySet());
     }
 
     SEQUENCE(ActivityInfo self,

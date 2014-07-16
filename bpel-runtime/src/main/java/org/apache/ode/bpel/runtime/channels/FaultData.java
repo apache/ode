@@ -18,10 +18,10 @@
  */
 package org.apache.ode.bpel.runtime.channels;
 
-import org.apache.ode.bpel.o.OBase;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OVarType;
+import org.apache.ode.bpel.obj.OBase;
+import org.apache.ode.bpel.obj.OElementVarType;
+import org.apache.ode.bpel.obj.OMessageVarType;
+import org.apache.ode.bpel.obj.OVarType;
 import org.apache.ode.utils.SerializableElement;
 import org.w3c.dom.Element;
 
@@ -110,9 +110,9 @@ public class FaultData implements Serializable {
   protected int findLineNo(OBase location) {
     if (location == null)
         return -1;
-    if (location.debugInfo == null)
+    if (location.getDebugInfo() == null)
         return -1;
-    return location.debugInfo.startLine;
+    return location.getDebugInfo().getStartLine();
   }
 
 

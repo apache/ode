@@ -50,10 +50,10 @@ import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.JobType;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.obj.OMessageVarType;
+import org.apache.ode.bpel.obj.OPartnerLink;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.bpel.runtime.InvalidProcessException;
 import org.apache.ode.bpel.runtime.PROCESS;
 import org.apache.ode.utils.ObjectPrinter;
@@ -78,9 +78,9 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 
     public String toString() {
         StringBuffer buf = new StringBuffer("{PartnerLinkRole-");
-        buf.append(_plinkDef.name);
+        buf.append(_plinkDef.getName());
         buf.append('.');
-        buf.append(_plinkDef.myRoleName);
+        buf.append(_plinkDef.getMyRoleName());
         buf.append(" on ");
         buf.append(_endpoint);
         buf.append('}');
@@ -203,7 +203,7 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
                 .createRuntimeContext(newInstance, new PROCESS(_process.getOProcess()), mex);
 
         // send process instance event
-        NewProcessInstanceEvent evt = new NewProcessInstanceEvent(new QName(_process.getOProcess().targetNamespace,
+        NewProcessInstanceEvent evt = new NewProcessInstanceEvent(new QName(_process.getOProcess().getTargetNamespace(),
                 _process.getOProcess().getName()), _process.getProcessDAO().getProcessId(), newInstance.getInstanceId());
         evt.setPortType(mex.getPortType().getQName());
         evt.setOperation(operation.getName());
@@ -238,7 +238,7 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         routing.correlator.removeRoutes(routing.messageRoute.getGroupId(), instanceDao);
 
         // send process instance event
-        CorrelationMatchEvent evt = new CorrelationMatchEvent(new QName(process2.getOProcess().targetNamespace,
+        CorrelationMatchEvent evt = new CorrelationMatchEvent(new QName(process2.getOProcess().getTargetNamespace(),
                 process2.getOProcess().getName()), process2.getProcessDAO().getProcessId(),
                 instanceDao.getInstanceId(), routing.matchedKeySet);
         evt.setPortType(mex.getPortType().getQName());
@@ -278,7 +278,7 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
                         .getOperation().getName(), mex.getMessageExchangeId(), routing.wholeKeySet);
 
                 evt.setProcessId(_process.getProcessDAO().getProcessId());
-                evt.setProcessName(new QName(_process.getOProcess().targetNamespace, _process.getOProcess().getName()));
+                evt.setProcessName(new QName(_process.getOProcess().getTargetNamespace(), _process.getOProcess().getName()));
                 _process._debugger.onEvent(evt);
 
                 mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.QUEUED);
@@ -304,7 +304,7 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
     private void setMexRole(MyRoleMessageExchangeImpl mex) {
         Operation operation = getMyRoleOperation(mex.getOperationName());
         mex.getDAO().setPartnerLinkModelId(_plinkDef.getId());
-        mex.setPortOp(_plinkDef.myRolePortType, operation);
+        mex.setPortOp(_plinkDef.getMyRolePortType(), operation);
         mex.setPattern(operation.getOutput() == null ? MessageExchange.MessageExchangePattern.REQUEST_ONLY
                 : MessageExchange.MessageExchangePattern.REQUEST_RESPONSE);
     }
@@ -324,14 +324,14 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         Set<OScope.CorrelationSet> csets = _plinkDef.getNonInitiatingCorrelationSetsForOperation(operation);
         for (OScope.CorrelationSet cset : csets) {
             CorrelationKey key = computeCorrelationKey(cset,
-                    _process.getOProcess().messageTypes.get(msgDescription.getQName()), msg, headerParts);
+                    _process.getOProcess().getMessageTypes().get(msgDescription.getQName()), msg, headerParts);
             keySet.add(key);
         }
 
         csets = _plinkDef.getJoinningCorrelationSetsForOperation(operation);
         for (OScope.CorrelationSet cset : csets) {
             CorrelationKey key = computeCorrelationKey(cset,
-                    _process.getOProcess().messageTypes.get(msgDescription.getQName()), msg, headerParts);
+                    _process.getOProcess().getMessageTypes().get(msgDescription.getQName()), msg, headerParts);
             keySet.add(key);
         }
 
@@ -348,17 +348,17 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
             Element msg, Map<String, Node> headerParts) {
     	CorrelationKey key = null;
     	
-        String[] values = new String[cset.properties.size()];
+        String[] values = new String[cset.getProperties().size()];
 
         int jIdx = 0;
-        for (Iterator j = cset.properties.iterator(); j.hasNext(); ++jIdx) {
+        for (Iterator j = cset.getProperties().iterator(); j.hasNext(); ++jIdx) {
             OProcess.OProperty property = (OProcess.OProperty) j.next();
             OProcess.OPropertyAlias alias = property.getAlias(messagetype);
 
             if (alias == null) {
                 // TODO: Throw a real exception! And catch this at compile
                 // time.
-                throw new IllegalArgumentException("No alias matching property '" + property.name
+                throw new IllegalArgumentException("No alias matching property '" + property.getName()
                         + "' with message type '" + messagetype + "'");
             }
 
@@ -373,10 +373,10 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
             values[jIdx] = value;
         }
 
-        if( cset.hasJoinUseCases ) {
-            key = new OptionalCorrelationKey(cset.name, values);
+        if( cset.isHasJoinUseCases() ) {
+            key = new OptionalCorrelationKey(cset.getName(), values);
         } else {
-            key = new CorrelationKey(cset.name, values);
+            key = new CorrelationKey(cset.getName(), values);
         }
 
         return key;
@@ -384,7 +384,7 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 
     @SuppressWarnings("unchecked")
     public boolean isOneWayOnly() {
-        PortType portType = _plinkDef.myRolePortType;
+        PortType portType = _plinkDef.getMyRolePortType();
         if (portType == null) {
             return false;
         }

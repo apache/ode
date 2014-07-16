@@ -31,19 +31,19 @@ import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableReadEvent;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.o.OConstantVarType;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
+import org.apache.ode.bpel.obj.OConstantVarType;
+import org.apache.ode.bpel.obj.OExpression;
+import org.apache.ode.bpel.obj.OLink;
+import org.apache.ode.bpel.obj.OMessageVarType;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.OScope;
+import org.apache.ode.bpel.obj.OMessageVarType.Part;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 /**
  * The context in which BPEL expressions are evaluated. This class is handed of
- * the {@link org.apache.ode.bpel.o.OExpression} instances to provide access to
+ * the {@link org.apache.ode.bpel.obj.OExpression} instances to provide access to
  * variables, link statuses, and the like.
  */
 public class ExprEvaluationContextImpl implements EvaluationContext {
@@ -84,14 +84,14 @@ public class ExprEvaluationContextImpl implements EvaluationContext {
         // TODO: check for null _scopeInstance
 
         Node ret;
-        if (variable.type instanceof OConstantVarType) {
-            ret = ((OConstantVarType) variable.type).getValue();
+        if (variable.getType() instanceof OConstantVarType) {
+            ret = ((OConstantVarType) variable.getType()).getValue();
         } else {
             VariableInstance varInstance = _scopeInstance.resolve(variable);
             if (varInstance == null)
                 return null;
             VariableReadEvent vre = new VariableReadEvent();
-            vre.setVarName(varInstance.declaration.name);
+            vre.setVarName(varInstance.declaration.getName());
             sendEvent(vre);
             ret = _scopeInstance.fetchVariableData(_native,varInstance, part, false);
         }

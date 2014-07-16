@@ -75,11 +75,11 @@ import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.JobType;
 import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OScope.Variable;
+import org.apache.ode.bpel.obj.OMessageVarType;
+import org.apache.ode.bpel.obj.OPartnerLink;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.OScope;
+import org.apache.ode.bpel.obj.OScope.Variable;
 import org.apache.ode.bpel.runtime.BpelJacobRunnable;
 import org.apache.ode.bpel.runtime.BpelRuntimeContext;
 import org.apache.ode.bpel.runtime.CorrelationSetInstance;
@@ -194,7 +194,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
      */
     public boolean isCorrelationInitialized(CorrelationSetInstance correlationSet) {
         ScopeDAO scopeDAO = _dao.getScope(correlationSet.scopeInstance);
-        CorrelationSetDAO cs = scopeDAO.getCorrelationSet(correlationSet.declaration.name);
+        CorrelationSetDAO cs = scopeDAO.getCorrelationSet(correlationSet.declaration.getName());
 
         return cs.getValue() != null;
     }
@@ -207,7 +207,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             return false;
         }
         ScopeDAO scopeDAO = _dao.getScope(var.scopeInstance);
-        XmlDataDAO dataDAO = scopeDAO.getVariable(var.declaration.name);
+        XmlDataDAO dataDAO = scopeDAO.getVariable(var.declaration.getName());
         return !dataDAO.isNull();
     }
 
@@ -278,7 +278,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     /**
      * @see BpelRuntimeContext#createScopeInstance(Long,
-     *      org.apache.ode.bpel.o.OScope)
+     *      org.apache.ode.bpel.obj.OScope)
      */
     public Long createScopeInstance(Long parentScopeId, OScope scope) {
         if (BpelProcess.__log.isTraceEnabled()) {
@@ -292,7 +292,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             parent = _dao.getScope(parentScopeId);
         }
 
-        ScopeDAO scopeDao = _dao.createScope(parent, scope.name, scope.getId());
+        ScopeDAO scopeDao = _dao.createScope(parent, scope.getName(), scope.getId());
         return scopeDao.getScopeInstanceId();
     }
 
@@ -305,8 +305,8 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         ScopeDAO parent = _dao.getScope(parentScopeId);
         for (OPartnerLink partnerLink : partnerLinks) {
-            PartnerLinkDAO pdao = parent.createPartnerLink(partnerLink.getId(), partnerLink.name,
-                    partnerLink.myRoleName, partnerLink.partnerRoleName);
+            PartnerLinkDAO pdao = parent.createPartnerLink(partnerLink.getId(), partnerLink.getName(),
+                    partnerLink.getMyRoleName(), partnerLink.getPartnerRoleName());
             // If there is a myrole on the link, initialize the session id so it
             // is always
             // available for opaque correlations. The myrole session id should
@@ -350,7 +350,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         // Checking conflicts
         int conflict = _imaManager.findConflict(selectors);
         if (conflict != -1)
-            throw new FaultException(_bpelProcess.getOProcess().constants.qnConflictingReceive, selectors[conflict]
+            throw new FaultException(_bpelProcess.getOProcess().getConstants().getQnConflictingReceive(), selectors[conflict]
                     .toString());
 
         // Check for ambiguous receive
@@ -359,7 +359,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             Selector selector = selectors[i];
 
             if (!correlator.checkRoute(selector.correlationKeySet)) {
-                throw new FaultException(_bpelProcess.getOProcess().constants.qnAmbiguousReceive(), selector.toString());
+                throw new FaultException(_bpelProcess.getOProcess().getConstants().qnAmbiguousReceive(), selector.toString());
             }
         }
 
@@ -410,7 +410,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
      */
     public CorrelationKey readCorrelation(CorrelationSetInstance cset) {
         ScopeDAO scopeDAO = _dao.getScope(cset.scopeInstance);
-        CorrelationSetDAO cs = scopeDAO.getCorrelationSet(cset.declaration.name);
+        CorrelationSetDAO cs = scopeDAO.getCorrelationSet(cset.declaration.getName());
         return cs.getValue();
     }
 
@@ -426,7 +426,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
 
         if (epr == null) {
-            throw new FaultException(_bpelProcess.getOProcess().constants.qnUninitializedPartnerRole);
+            throw new FaultException(_bpelProcess.getOProcess().getConstants().getQnUninitializedPartnerRole());
         }
 
         return epr;
@@ -454,9 +454,9 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
      *             in case of selection or other fault
      */
     public String readProperty(VariableInstance variable, OProcess.OProperty property) throws FaultException {
-        Node varData = readVariable(variable.scopeInstance, variable.declaration.name, false);
+        Node varData = readVariable(variable.scopeInstance, variable.declaration.getName(), false);
 
-        OProcess.OPropertyAlias alias = property.getAlias(variable.declaration.type);
+        OProcess.OPropertyAlias alias = property.getAlias(variable.declaration.getType());
         String val = _bpelProcess.extractProperty((Element) varData, Collections.EMPTY_MAP, alias, variable.declaration.getDescription());
 
         if (BpelProcess.__log.isTraceEnabled()) {
@@ -502,7 +502,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
     public Node writeVariable(VariableInstance variable, Node changes) {
         ScopeDAO scopeDAO = _dao.getScope(variable.scopeInstance);
-        XmlDataDAO dataDAO = scopeDAO.getVariable(variable.declaration.name);
+        XmlDataDAO dataDAO = scopeDAO.getVariable(variable.declaration.getName());
         dataDAO.set(changes);
 
         writeProperties(variable, changes, dataDAO);
@@ -516,8 +516,8 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
     public void processOutstandingRequest(PartnerLinkInstance partnerLink, String opName, String bpelMexId, String odeMexId) throws FaultException {
         String mexRef = _imaManager.processOutstandingRequest(partnerLink, opName, bpelMexId, odeMexId);
         if (mexRef != null) {
-            reply2(partnerLink, opName, bpelMexId, null, _bpelProcess.getOProcess().constants.qnConflictingRequest, false, mexRef);
-            throw new FaultException(_bpelProcess.getOProcess().constants.qnConflictingRequest);
+            reply2(partnerLink, opName, bpelMexId, null, _bpelProcess.getOProcess().getConstants().getQnConflictingRequest(), false, mexRef);
+            throw new FaultException(_bpelProcess.getOProcess().getConstants().getQnConflictingRequest());
         }
     }
 
@@ -534,7 +534,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         ProcessMessageExchangeEvent evt = new ProcessMessageExchangeEvent();
         evt.setMexId(mexId);
         evt.setOperation(opName);
-        evt.setPortType(plinkInstnace.partnerLink.myRolePortType.getQName());
+        evt.setPortType(plinkInstnace.partnerLink.getMyRolePortType().getQName());
 
         MessageExchangeDAO mex = _dao.getConnection().getMessageExchange(mexRef);
 
@@ -569,15 +569,15 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
      */
     public void writeCorrelation(CorrelationSetInstance cset, CorrelationKey correlation) {
         ScopeDAO scopeDAO = _dao.getScope(cset.scopeInstance);
-        CorrelationSetDAO cs = scopeDAO.getCorrelationSet(cset.declaration.name);
-        QName[] propNames = new QName[cset.declaration.properties.size()];
-        for (int m = 0; m < cset.declaration.properties.size(); m++) {
-            OProcess.OProperty oProperty = cset.declaration.properties.get(m);
-            propNames[m] = oProperty.name;
+        CorrelationSetDAO cs = scopeDAO.getCorrelationSet(cset.declaration.getName());
+        QName[] propNames = new QName[cset.declaration.getProperties().size()];
+        for (int m = 0; m < cset.declaration.getProperties().size(); m++) {
+            OProcess.OProperty oProperty = cset.declaration.getProperties().get(m);
+            propNames[m] = oProperty.getName();
         }
         cs.setValue(propNames, correlation);
 
-        CorrelationSetWriteEvent cswe = new CorrelationSetWriteEvent(cset.declaration.name, correlation);
+        CorrelationSetWriteEvent cswe = new CorrelationSetWriteEvent(cset.declaration.getName(), correlation);
         cswe.setScopeId(cset.scopeInstance);
         sendEvent(cswe);
 
@@ -597,7 +597,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
      */
     public void initializeCorrelation(CorrelationSetInstance cset, VariableInstance variable) throws FaultException {
         if (BpelProcess.__log.isDebugEnabled()) {
-            BpelProcess.__log.debug("Initializing correlation set " + cset.declaration.name);
+            BpelProcess.__log.debug("Initializing correlation set " + cset.declaration.getName());
         }
         // if correlation set is already initialized, then skip
         if (isCorrelationInitialized(cset)) {
@@ -608,16 +608,16 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             return;
         }
 
-        String[] propNames = new String[cset.declaration.properties.size()];
-        String[] propValues = new String[cset.declaration.properties.size()];
+        String[] propNames = new String[cset.declaration.getProperties().size()];
+        String[] propValues = new String[cset.declaration.getProperties().size()];
 
-        for (int i = 0; i < cset.declaration.properties.size(); ++i) {
-            OProcess.OProperty property = cset.declaration.properties.get(i);
+        for (int i = 0; i < cset.declaration.getProperties().size(); ++i) {
+            OProcess.OProperty property = cset.declaration.getProperties().get(i);
             propValues[i] = readProperty(variable, property);
-            propNames[i] = property.name.toString();
+            propNames[i] = property.getName().toString();
         }
 
-        CorrelationKey ckeyVal = new CorrelationKey(cset.declaration.name, propValues);
+        CorrelationKey ckeyVal = new CorrelationKey(cset.declaration.getName(), propValues);
         writeCorrelation(cset, ckeyVal);
     }
 
@@ -704,7 +704,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             partnerEpr = _bpelProcess.getInitialPartnerRoleEPR(partnerLink.partnerLink);
             // In this case, the partner link has not been initialized.
             if (partnerEpr == null)
-                throw new FaultException(partnerLink.partnerLink.getOwner().constants.qnUninitializedPartnerRole);
+                throw new FaultException(partnerLink.partnerLink.getOwner().getConstants().getQnUninitializedPartnerRole());
         } else {
             partnerEpr = _bpelProcess._engine._contexts.eprContext.resolveEndpointReference(partnerEPR);
         }
@@ -717,7 +717,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         // prepare event
         ProcessMessageExchangeEvent evt = new ProcessMessageExchangeEvent();
         evt.setOperation(operation.getName());
-        evt.setPortType(partnerLink.partnerLink.partnerRolePortType.getQName());
+        evt.setPortType(partnerLink.partnerLink.getPartnerRolePortType().getQName());
         evt.setAspect(ProcessMessageExchangeEvent.PARTNER_INPUT);
 
         MessageExchangeDAO mexDao = _dao.getConnection().createMessageExchange(
@@ -725,7 +725,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         mexDao.setCreateTime(getCurrentEventDateTime());
         mexDao.setStatus(MessageExchange.Status.NEW.toString());
         mexDao.setOperation(operation.getName());
-        mexDao.setPortType(partnerLink.partnerLink.partnerRolePortType.getQName());
+        mexDao.setPortType(partnerLink.partnerLink.getPartnerRolePortType().getQName());
         mexDao.setPartnerLinkModelId(partnerLink.partnerLink.getId());
         mexDao.setPartnerLink(plinkDAO);
         mexDao.setProcess(_dao.getProcess());
@@ -861,7 +861,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 PartnerLinkInstance partnerLink, Operation operation, EndpointReference partnerEpr,
                 EndpointReference myRoleEndpoint) {
         return new PartnerRoleMessageExchangeImpl(getBpelProcess().getEngine(), mexDao,
-                partnerLink.partnerLink.partnerRolePortType, operation, partnerEpr, myRoleEndpoint,
+                partnerLink.partnerLink.getPartnerRolePortType(), operation, partnerEpr, myRoleEndpoint,
                 getBpelProcess().getPartnerRoleChannel(partnerLink.partnerLink));
     }
 
@@ -1116,9 +1116,9 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _bpelProcess.saveEvent(event, _dao, scopeNames);
     }
 
-    public static String debugInfoToString(org.apache.ode.bpel.o.DebugInfo debugInfo) {
+    public static String debugInfoToString(org.apache.ode.bpel.obj.DebugInfo debugInfo) {
     	if (debugInfo == null) return "";
-    	else return " at " + debugInfo.sourceURI + ":" + debugInfo.startLine;
+    	else return " at " + debugInfo.getSourceURI() + ":" + debugInfo.getStartLine();
     }
     
     /**
@@ -1126,22 +1126,22 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
      * efficient lookup.
      */
     private void writeProperties(VariableInstance variable, Node value, XmlDataDAO dao) {
-        if (variable.declaration.type instanceof OMessageVarType) {
-            for (OProcess.OProperty property : variable.declaration.getOwner().properties) {
-                OProcess.OPropertyAlias alias = property.getAlias(variable.declaration.type);
+        if (variable.declaration.getType() instanceof OMessageVarType) {
+            for (OProcess.OProperty property : variable.declaration.getOwner().getProperties()) {
+                OProcess.OPropertyAlias alias = property.getAlias(variable.declaration.getType());
                 if (alias != null) {
                     try {
                         String val = _bpelProcess.extractProperty((Element) value, Collections.EMPTY_MAP, alias, variable.declaration
                                 .getDescription());
                         if (val != null) {
-                            dao.setProperty(property.name.toString(), val);
+                            dao.setProperty(property.getName().toString(), val);
                         }
                     } catch (FaultException e) {
                         // This will fail as we're basically trying to extract properties on all
                         // received messages for optimization purposes.
                         if (__log.isWarnEnabled())
                             __log.warn("Couldn't extract property '" + property.toString()
-                                    + "' and variable " + variable.declaration + debugInfoToString(variable.declaration.debugInfo) + " in property pre-extraction: " + e.toString());
+                                    + "' and variable " + variable.declaration + debugInfoToString(variable.declaration.getDebugInfo()) + " in property pre-extraction: " + e.toString());
                     }
                 }
             }
@@ -1515,7 +1515,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
     }
 
     public PartnerRoleConfig getConfigForPartnerLink(OPartnerLink pLink) {
-        PartnerRoleConfig c = _bpelProcess.getConf().getPartnerRoleConfig().get(pLink.name);
+        PartnerRoleConfig c = _bpelProcess.getConf().getPartnerRoleConfig().get(pLink.getName());
         if (c == null) {
             return new PartnerRoleConfig(null, true);
         } else {

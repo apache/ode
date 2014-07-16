@@ -35,23 +35,23 @@ import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.BpelObject;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.compiler.bom.ScopeLikeActivity;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OLValueExpression;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OVarType;
-import org.apache.ode.bpel.o.OXsdTypeVarType;
-import org.apache.ode.bpel.o.OXslSheet;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.o.OProcess.OProperty;
-import org.apache.ode.bpel.o.OProcess.OPropertyAlias;
-import org.apache.ode.bpel.o.OScope.CorrelationSet;
-import org.apache.ode.bpel.o.OScope.Variable;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.OElementVarType;
+import org.apache.ode.bpel.obj.OExpression;
+import org.apache.ode.bpel.obj.OLValueExpression;
+import org.apache.ode.bpel.obj.OLink;
+import org.apache.ode.bpel.obj.OMessageVarType;
+import org.apache.ode.bpel.obj.OPartnerLink;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.OScope;
+import org.apache.ode.bpel.obj.OVarType;
+import org.apache.ode.bpel.obj.OXsdTypeVarType;
+import org.apache.ode.bpel.obj.OXslSheet;
+import org.apache.ode.bpel.obj.OMessageVarType.Part;
+import org.apache.ode.bpel.obj.OProcess.OProperty;
+import org.apache.ode.bpel.obj.OProcess.OPropertyAlias;
+import org.apache.ode.bpel.obj.OScope.CorrelationSet;
+import org.apache.ode.bpel.obj.OScope.Variable;
 import org.apache.ode.utils.NSContext;
 
 public class MockCompilerContext implements CompilerContext {
@@ -109,7 +109,7 @@ public class MockCompilerContext implements CompilerContext {
     }
 
     public Part resolvePart(Variable variable, String partname) throws CompilationException {
-        return ((OMessageVarType)variable.type).parts.get(partname);
+        return ((OMessageVarType)variable.getType()).getParts().get(partname);
     }
 
     public OActivity compile(Activity child) throws CompilationException {
@@ -189,7 +189,7 @@ public class MockCompilerContext implements CompilerContext {
     public void registerElementVar(String name, QName type) {
         OElementVarType varType = new OElementVarType(getOProcess(),type);
         OScope.Variable var = new OScope.Variable(getOProcess(),varType);
-        var.name = name;
+        var.setName(name);
         _vars.put(name, var);
     }
     
@@ -202,7 +202,7 @@ public class MockCompilerContext implements CompilerContext {
     	}
         OMessageVarType varType = new OMessageVarType(getOProcess(),type,parts);
         OScope.Variable var = new OScope.Variable(getOProcess(),varType);
-        var.name = name;
+        var.setName(name);
         _vars.put(name, var);
     }
     

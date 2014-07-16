@@ -97,7 +97,7 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
     @Override
     public String invoke(int aid, PartnerLinkInstance partnerLink, Operation operation, Element outgoingMessage, InvokeResponse channel) throws FaultException {
         __log.debug("invoke");
-        AnswerResult answerResult = replayerContext.answers.fetchAnswer(partnerLink.partnerLink.partnerRolePortType.getQName(), operation.getName(), outgoingMessage, getCurrentEventDateTime());
+        AnswerResult answerResult = replayerContext.answers.fetchAnswer(partnerLink.partnerLink.getPartnerRolePortType().getQName(), operation.getName(), outgoingMessage, getCurrentEventDateTime());
 
         if (answerResult.isLive) {
             return super.invoke(aid, partnerLink, operation, outgoingMessage, channel);
@@ -108,7 +108,7 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
 
             mexDao.setCreateTime(new Date(getCurrentEventDateTime().getTime() + 1));
             mexDao.setOperation(operation.getName());
-            mexDao.setPortType(partnerLink.partnerLink.partnerRolePortType.getQName());
+            mexDao.setPortType(partnerLink.partnerLink.getPartnerRolePortType().getQName());
             mexDao.setPartnerLinkModelId(partnerLink.partnerLink.getId());
             mexDao.setPartnerLink(plinkDAO);
             mexDao.setPattern((operation.getOutput() != null ? MessageExchangePattern.REQUEST_RESPONSE : MessageExchangePattern.REQUEST_ONLY).toString());
@@ -229,7 +229,7 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
         String mexRef = _imaManager.release(plinkInstnace, opName, mexId);
 
         if (mexRef == null) {
-            throw new FaultException(_bpelProcess.getOProcess().constants.qnMissingRequest);
+            throw new FaultException(_bpelProcess.getOProcess().getConstants().getQnMissingRequest());
         }
 
         MessageExchangeDAO mex = _dao.getConnection().getMessageExchange(mexRef);

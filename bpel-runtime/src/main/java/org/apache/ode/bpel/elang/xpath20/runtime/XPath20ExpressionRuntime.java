@@ -41,14 +41,14 @@ import net.sf.saxon.xpath.XPathFactoryImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
+import org.apache.ode.bpel.elang.xpath10.obj.OXPath10Expression;
 import org.apache.ode.bpel.elang.xpath20.compiler.WrappedResolverException;
-import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
+import org.apache.ode.bpel.elang.xpath20.obj.OXPath20ExpressionBPEL20;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.explang.ExpressionLanguageRuntime;
-import org.apache.ode.bpel.o.OExpression;
+import org.apache.ode.bpel.obj.OExpression;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.xsd.Duration;
@@ -85,14 +85,14 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
     }
 
     /**
-     * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluateAsString(org.apache.ode.bpel.o.OExpression, org.apache.ode.bpel.explang.EvaluationContext)
+     * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluateAsString(org.apache.ode.bpel.obj.OExpression, org.apache.ode.bpel.explang.EvaluationContext)
      */
     public String evaluateAsString(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
         return (String)evaluate(cexp, ctx, XPathConstants.STRING);
     }
 
     /**
-     * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluateAsBoolean(org.apache.ode.bpel.o.OExpression, org.apache.ode.bpel.explang.EvaluationContext)
+     * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluateAsBoolean(org.apache.ode.bpel.obj.OExpression, org.apache.ode.bpel.explang.EvaluationContext)
      */
     public boolean evaluateAsBoolean(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
         return (Boolean) evaluate(cexp, ctx, XPathConstants.BOOLEAN);
@@ -103,7 +103,7 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
     }
 
     /**
-     * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluate(org.apache.ode.bpel.o.OExpression, org.apache.ode.bpel.explang.EvaluationContext)
+     * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluate(org.apache.ode.bpel.obj.OExpression, org.apache.ode.bpel.explang.EvaluationContext)
      */
     @SuppressWarnings("unchecked")
     public List evaluate(OExpression cexp, EvaluationContext ctx) throws FaultException, EvaluationException {
@@ -174,7 +174,7 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
         if (retVal.size() == 0 || retVal.size() > 1) {
             StringBuffer msg = new StringBuffer((retVal.size() == 0) ? "No results for expression: '" : "Multiple results for expression: '");
             if (cexp instanceof OXPath10Expression) {
-                msg.append(((OXPath10Expression)cexp).xpath);
+                msg.append(((OXPath10Expression)cexp).getXpath());
             } else {
                 msg.append(cexp.toString());                
             }
@@ -186,9 +186,9 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             }
 
             if (retVal.size() == 0)
-                throw new FaultException(cexp.getOwner().constants.qnSelectionFailure, msg.toString(), new Throwable("ignoreMissingFromData"));
+                throw new FaultException(cexp.getOwner().getConstants().getQnSelectionFailure(), msg.toString(), new Throwable("ignoreMissingFromData"));
             if (retVal.size() > 1)
-                throw new FaultException(cexp.getOwner().constants.qnSelectionFailure, msg.toString());
+                throw new FaultException(cexp.getOwner().getConstants().getQnSelectionFailure(), msg.toString());
         }
         return (Node) retVal.get(0);
     }
@@ -196,9 +196,9 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
     public Calendar evaluateAsDate(OExpression cexp, EvaluationContext context) throws FaultException, EvaluationException {
         List literal = DOMUtils.toList(evaluate(cexp, context));
         if (literal.size() == 0)
-            throw new FaultException(cexp.getOwner().constants.qnSelectionFailure, "No results for expression: " + cexp);
+            throw new FaultException(cexp.getOwner().getConstants().getQnSelectionFailure(), "No results for expression: " + cexp);
         if (literal.size() > 1)
-            throw new FaultException(cexp.getOwner().constants.qnSelectionFailure, "Multiple results for expression: " + cexp);
+            throw new FaultException(cexp.getOwner().getConstants().getQnSelectionFailure(), "Multiple results for expression: " + cexp);
 
         Object date =literal.get(0);
         if (date instanceof Calendar) return (Calendar) date;
@@ -216,7 +216,7 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
         } catch (Exception ex) {
             String errmsg = "Invalid date: " + literal;
             __log.error(errmsg, ex);
-            throw new FaultException(cexp.getOwner().constants.qnInvalidExpressionValue,errmsg);
+            throw new FaultException(cexp.getOwner().getConstants().getQnInvalidExpressionValue(),errmsg);
         }
     }
 
@@ -227,7 +227,7 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
         } catch (Exception ex) {
             String errmsg = "Invalid duration: " + literal;
             __log.error(errmsg, ex);
-            throw new FaultException(cexp.getOwner().constants.qnInvalidExpressionValue,errmsg);
+            throw new FaultException(cexp.getOwner().getConstants().getQnInvalidExpressionValue(),errmsg);
         }
     }
 
@@ -240,16 +240,16 @@ public class XPath20ExpressionRuntime implements ExpressionLanguageRuntime {
             XPath xpe = _xpf.newXPath();
             xpe.setXPathFunctionResolver(funcResolver);
             xpe.setXPathVariableResolver(varResolver);
-            xpe.setNamespaceContext(oxpath20.namespaceCtx);
-            String xpath = ((OXPath10Expression)cexp).xpath;
+            xpe.setNamespaceContext(oxpath20.getNamespaceCtx());
+            String xpath = ((OXPath10Expression)cexp).getXpath();
             XPathExpression expr = xpe.compile(xpath);
             Node contextNode = ctx.getRootNode();
             if (contextNode == null) {
                 contextNode = DOMUtils.newDocument();
             }
             // Create step nodes in XPath in case it is incompletely instantiated
-            if (oxpath20.insertMissingData) {
-                XPath20ExpressionModifier modifier = new XPath20ExpressionModifier(oxpath20.namespaceCtx, ((XPathFactoryImpl) _xpf).getConfiguration().getNamePool());
+            if (oxpath20.isInsertMissingData()) {
+                XPath20ExpressionModifier modifier = new XPath20ExpressionModifier(oxpath20.getNamespaceCtx(), ((XPathFactoryImpl) _xpf).getConfiguration().getNamePool());
 
                 Node temp = ctx.getRootNode();
                 if (temp.getLocalName().equals("message") && temp.getNamespaceURI() == null) {

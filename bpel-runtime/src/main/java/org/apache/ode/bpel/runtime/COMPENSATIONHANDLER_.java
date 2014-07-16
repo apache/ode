@@ -23,7 +23,7 @@ import java.util.Set;
 
 import org.apache.ode.bpel.evt.CompensationHandlerRegistered;
 import org.apache.ode.bpel.evt.ScopeEvent;
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.bpel.runtime.channels.Compensation;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
@@ -58,16 +58,16 @@ class COMPENSATIONHANDLER_ extends BpelJacobRunnable {
 
             public void compensate(final Synch ret) {
                 // Only scopes with compensation handlers can be compensated.
-                assert _self.compensated.oscope.compensationHandler != null;
+                assert _self.compensated.oscope.getCompensationHandler() != null;
 
                 ActivityInfo ai = new ActivityInfo(genMonotonic(),
-                    _self.compensated.oscope.compensationHandler,
+                    _self.compensated.oscope.getCompensationHandler(),
                     newChannel(Termination.class), newChannel(ParentScope.class));
 
 
                 ScopeFrame compHandlerScopeFrame = new ScopeFrame(
-                    _self.compensated.oscope.compensationHandler,
-                    getBpelRuntimeContext().createScopeInstance(_self.compensated.scopeInstanceId, _self.compensated.oscope.compensationHandler),
+                    _self.compensated.oscope.getCompensationHandler(),
+                    getBpelRuntimeContext().createScopeInstance(_self.compensated.scopeInstanceId, _self.compensated.oscope.getCompensationHandler()),
                     _self.compensated,
                     _completedChildren);
 

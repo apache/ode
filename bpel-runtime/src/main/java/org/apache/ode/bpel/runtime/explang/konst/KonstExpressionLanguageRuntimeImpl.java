@@ -20,8 +20,8 @@ package org.apache.ode.bpel.runtime.explang.konst;
 
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.*;
-import org.apache.ode.bpel.o.OConstantExpression;
-import org.apache.ode.bpel.o.OExpression;
+import org.apache.ode.bpel.obj.OConstantExpression;
+import org.apache.ode.bpel.obj.OExpression;
 import org.apache.ode.utils.xsd.Duration;
 import org.w3c.dom.Node;
 

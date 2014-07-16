@@ -24,7 +24,7 @@ import org.apache.ode.bpel.engine.ReplacementMapImpl;
 import org.apache.ode.bpel.engine.OutstandingRequestManager;
 import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.o.*;
+import org.apache.ode.bpel.obj.*;
 import org.apache.ode.bpel.runtime.Selector;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.commons.logging.Log;
@@ -61,7 +61,7 @@ public class CorrelationKeyMigration implements Migration {
                     OScope.CorrelationSet ocset = findCorrelationById(ckeyInt, registeredProcesses, cset.getProcess().getProcessId());
                     if (ocset == null) __log.debug("Correlation set not found, couldn't upgrade set " + ckey.toCanonicalString());
                     else {
-                        cset.setValue(null, new CorrelationKey(ocset.name, ckey.getValues()));
+                        cset.setValue(null, new CorrelationKey(ocset.getName(), ckey.getValues()));
                     }
                 }
             }
@@ -74,7 +74,7 @@ public class CorrelationKeyMigration implements Migration {
 
             for (OPartnerLink plink : process.getOProcess().getAllPartnerLinks()) {
                 if (plink.hasMyRole()) {
-                    for (Iterator opI = plink.myRolePortType.getOperations().iterator(); opI.hasNext();) {
+                    for (Iterator opI = plink.getMyRolePortType().getOperations().iterator(); opI.hasNext();) {
                         Operation op = (Operation)opI.next();
                         try {
                             CorrelatorDAO corr = processDao.getCorrelator(plink.getName() + "." + op.getName());
@@ -88,7 +88,7 @@ public class CorrelationKeyMigration implements Migration {
                                             OScope.CorrelationSet ocset = findCorrelationById(ckeyInt, registeredProcesses, process.getConf().getProcessId());
                                             if (ocset == null) __log.debug("Correlation set not found, couldn't upgrade route " + oldKey.toCanonicalString());
                                             else {
-                                                routeDAO.setCorrelationKey(new CorrelationKey(ocset.name, oldKey.getValues()));
+                                                routeDAO.setCorrelationKey(new CorrelationKey(ocset.getName(), oldKey.getValues()));
                                             }
                                         }
                                     }
@@ -103,7 +103,7 @@ public class CorrelationKeyMigration implements Migration {
                                             OScope.CorrelationSet ocset = findCorrelationById(ckeyInt, registeredProcesses, process.getConf().getProcessId());
                                             if (ocset == null) __log.debug("Correlation set not found, couldn't upgrade route " + oldKey.toCanonicalString());
                                             else {
-                                                corrMsgDAO.setCorrelationKey(new CorrelationKey(ocset.name, oldKey.getValues()));
+                                                corrMsgDAO.setCorrelationKey(new CorrelationKey(ocset.getName(), oldKey.getValues()));
                                             }
                                         }
                                     }

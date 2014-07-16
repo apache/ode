@@ -67,12 +67,12 @@ import org.apache.ode.bpel.iapi.Scheduler.JobType;
 import org.apache.ode.bpel.intercept.InstanceCountThrottler;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OExpressionLanguage;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.Serializer;
+import org.apache.ode.bpel.obj.OElementVarType;
+import org.apache.ode.bpel.obj.OExpressionLanguage;
+import org.apache.ode.bpel.obj.OMessageVarType;
+import org.apache.ode.bpel.obj.OPartnerLink;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.Serializer;
 import org.apache.ode.bpel.runtime.BpelRuntimeContext;
 import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
 import org.apache.ode.bpel.runtime.InvalidProcessException;
@@ -332,7 +332,7 @@ public class BpelProcess {
             }
         }
         if (target != null) {
-            mex.setPortOp(target._plinkDef.myRolePortType, target._plinkDef.getMyRoleOperation(mex.getOperationName()));
+            mex.setPortOp(target._plinkDef.getMyRolePortType(), target._plinkDef.getMyRoleOperation(mex.getOperationName()));
         } else {
             __log.warn("Couldn't find endpoint from service " + mex.getServiceName() + " when initializing a myRole mex.");
         }
@@ -355,11 +355,11 @@ public class BpelProcess {
         PropertyAliasEvaluationContext ectx = new PropertyAliasEvaluationContext(msgData, headerParts, alias);
         Node lValue = ectx.getRootNode();
 
-        if (alias.location != null) {
+        if (alias.getLocation() != null) {
             try {
-                lValue = _expLangRuntimeRegistry.evaluateNode(alias.location, ectx);
+                lValue = _expLangRuntimeRegistry.evaluateNode(alias.getLocation(), ectx);
             } catch (EvaluationException ec) {
-                throw new FaultException(getOProcess().constants.qnSelectionFailure, alias.getDescription());
+                throw new FaultException(getOProcess().getConstants().getQnSelectionFailure(), alias.getDescription());
             }
         }
 
@@ -368,7 +368,7 @@ public class BpelProcess {
             if (__log.isErrorEnabled()) {
                 __log.error(errmsg);
             }
-            throw new FaultException(getOProcess().constants.qnSelectionFailure, errmsg);
+            throw new FaultException(getOProcess().getConstants().getQnSelectionFailure(), errmsg);
         }
 
         if (lValue.getNodeType() == Node.ELEMENT_NODE) {
@@ -397,7 +397,7 @@ public class BpelProcess {
      * @return name of element containing said part
      */
     static QName getElementNameForPart(OMessageVarType.Part part) {
-        return (part.type instanceof OElementVarType) ? ((OElementVarType) part.type).elementType : new QName(null, part.name);
+        return (part.getType() instanceof OElementVarType) ? ((OElementVarType) part.getType()).getElementType() : new QName(null, part.getName());
     }
 
     /**
@@ -543,7 +543,7 @@ public class BpelProcess {
 
             if (pl.hasPartnerRole()) {
                 Endpoint endpoint = _pconf.getInvokeEndpoints().get(pl.getName());
-                if (endpoint == null && pl.initializePartnerRole)
+                if (endpoint == null && pl.isInitializePartnerRole())
                     throw new IllegalArgumentException(pl.getName() + " must be bound to an endpoint in deploy.xml");
                 PartnerLinkPartnerRoleImpl partnerRole = new PartnerLinkPartnerRoleImpl(this, pl, endpoint);
                 _partnerRoles.put(pl, partnerRole);
@@ -927,7 +927,7 @@ public class BpelProcess {
                     // Null for initializePartnerRole = false
                     if (prole._initialPartner != null) {
                         PartnerRoleChannel channel = _engine._contexts.bindingContext.createPartnerRoleChannel(_pid,
-                                prole._plinkDef.partnerRolePortType, prole._initialPartner);
+                                prole._plinkDef.getPartnerRolePortType(), prole._initialPartner);
                         prole._channel = channel;
                         _partnerChannels.put(prole._initialPartner, prole._channel);
                         EndpointReference epr = channel.getInitialEndpointReference();
@@ -965,9 +965,9 @@ public class BpelProcess {
                 createProcessDAO(_engine._contexts.inMemDao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
             } else if (_engine._contexts.scheduler.isTransacted()) {
                 // If we have a transaction, we do this in the current transaction
-                if(__log.isDebugEnabled()) __log.debug("Creating new process DAO for " + _pid + " (guid=" + _oprocess.guid + ")...");
+                if(__log.isDebugEnabled()) __log.debug("Creating new process DAO for " + _pid + " (guid=" + _oprocess.getGuid() + ")...");
                 createProcessDAO(_engine._contexts.dao.getConnection(), _pid, _pconf.getVersion(), _oprocess);
-                if(__log.isDebugEnabled()) __log.debug("Created new process DAO for " + _pid + " (guid=" + _oprocess.guid + ").");
+                if(__log.isDebugEnabled()) __log.debug("Created new process DAO for " + _pid + " (guid=" + _oprocess.getGuid() + ").");
             } else {
                 try {
                     _engine._contexts.scheduler.execTransaction(new Callable<Object>() {
@@ -986,14 +986,14 @@ public class BpelProcess {
     }
 
     private void bounceProcessDAOInMemory(BpelDAOConnection conn, final QName pid, final long version, final OProcess oprocess) {
-        if(__log.isInfoEnabled()) __log.info("Creating new process DAO[mem] for " + pid + " (guid=" + oprocess.guid + ").");
+        if(__log.isInfoEnabled()) __log.info("Creating new process DAO[mem] for " + pid + " (guid=" + oprocess.getGuid() + ").");
         createProcessDAO(conn, pid, version, oprocess);
     }
 
     private void bounceProcessDAOInDB(final BpelDAOConnection conn, final QName pid, final long version, final OProcess oprocess) {
-        if(__log.isDebugEnabled()) __log.debug("Creating new process DAO for " + pid + " (guid=" + oprocess.guid + ")...");
+        if(__log.isDebugEnabled()) __log.debug("Creating new process DAO for " + pid + " (guid=" + oprocess.getGuid() + ")...");
         createProcessDAO(conn, pid, version, oprocess);
-        if(__log.isDebugEnabled()) __log.debug("Created new process DAO for " + pid + " (guid=" + oprocess.guid + ").");
+        if(__log.isDebugEnabled()) __log.debug("Created new process DAO for " + pid + " (guid=" + oprocess.getGuid() + ").");
     }
 
     public int getInstanceInUseCount() {
@@ -1008,11 +1008,11 @@ public class BpelProcess {
                 if (__log.isDebugEnabled()) {
                     __log.debug("Found ProcessDAO for " + pid + " with GUID " + old.getGuid());
                 }
-                if (oprocess.guid == null) {
+                if (oprocess.getGuid() == null) {
                     // No guid, old version assume its good
                     create = false;
                 } else {
-                    if (old.getGuid().equals(oprocess.guid)) {
+                    if (old.getGuid().equals(oprocess.getGuid())) {
                         // Guids match, no need to create
                         create = false;
                     }
@@ -1020,13 +1020,13 @@ public class BpelProcess {
             }
 
             if (create) {
-                if(__log.isDebugEnabled()) __log.debug("Creating process DAO for " + pid + " (guid=" + oprocess.guid + ")");
+                if(__log.isDebugEnabled()) __log.debug("Creating process DAO for " + pid + " (guid=" + oprocess.getGuid() + ")");
 
-                ProcessDAO newDao = conn.createProcess(pid, oprocess.getQName(), oprocess.guid, (int) version);
+                ProcessDAO newDao = conn.createProcess(pid, oprocess.getQName(), oprocess.getGuid(), (int) version);
                 for (String correlator : oprocess.getCorrelators()) {
                     newDao.addCorrelator(correlator);
                 }
-                if(__log.isDebugEnabled()) __log.debug("Created new process DAO for " + pid + " (guid=" + oprocess.guid + ")");
+                if(__log.isDebugEnabled()) __log.debug("Created new process DAO for " + pid + " (guid=" + oprocess.getGuid() + ")");
             }
         } catch (BpelEngineException ex) {
             throw ex;
@@ -1037,11 +1037,11 @@ public class BpelProcess {
     }
 
     private void registerExprLang(OProcess oprocess) {
-        for (OExpressionLanguage elang : oprocess.expressionLanguages) {
+        for (OExpressionLanguage elang : oprocess.getExpressionLanguages()) {
             try {
                 _expLangRuntimeRegistry.registerRuntime(elang);
             } catch (ConfigurationException e) {
-                String msg = __msgs.msgExpLangRegistrationError(elang.expressionLanguageUri, elang.properties);
+                String msg = __msgs.msgExpLangRegistrationError(elang.getExpressionLanguageUri(), elang.getProperties());
                 __log.error(msg, e);
                 throw new BpelEngineException(msg, e);
             }

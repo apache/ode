@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.obj.OPartnerLink;
 import org.apache.ode.utils.ObjectPrinter;
 
 import java.io.Serializable;

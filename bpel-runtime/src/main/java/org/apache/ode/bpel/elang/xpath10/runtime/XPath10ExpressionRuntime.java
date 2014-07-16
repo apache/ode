@@ -21,12 +21,12 @@ package org.apache.ode.bpel.elang.xpath10.runtime;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
+import org.apache.ode.bpel.elang.xpath10.obj.OXPath10Expression;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.explang.ExpressionLanguageRuntime;
-import org.apache.ode.bpel.o.OExpression;
+import org.apache.ode.bpel.obj.OExpression;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.xsd.Duration;
@@ -136,7 +136,7 @@ public class XPath10ExpressionRuntime implements ExpressionLanguageRuntime {
         if (retVal.size() == 0 || retVal.size() > 1) {
             StringBuffer msg = new StringBuffer((retVal.size() == 0) ? "No results for expression: '" : "Multiple results for expression: '");
             if (cexp instanceof OXPath10Expression) {
-                msg.append(((OXPath10Expression)cexp).xpath);
+                msg.append(((OXPath10Expression)cexp).getXpath());
             } else {
                 msg.append(cexp.toString());                
             }
@@ -146,7 +146,7 @@ public class XPath10ExpressionRuntime implements ExpressionLanguageRuntime {
                 msg.append(DOMUtils.domToString(ctx.getRootNode()));
                 msg.append("'");
             }
-            throw new FaultException(cexp.getOwner().constants.qnSelectionFailure, msg.toString());
+            throw new FaultException(cexp.getOwner().getConstants().getQnSelectionFailure(), msg.toString());
         }
             
         return (Node) retVal.get(0);
@@ -161,7 +161,7 @@ public class XPath10ExpressionRuntime implements ExpressionLanguageRuntime {
         } catch (Exception ex) {
             String errmsg = "Invalid date: " + literal;
             __log.error(errmsg, ex);
-            throw new FaultException(cexp.getOwner().constants.qnInvalidExpressionValue, errmsg);
+            throw new FaultException(cexp.getOwner().getConstants().getQnInvalidExpressionValue(), errmsg);
         }
     }
 
@@ -174,13 +174,13 @@ public class XPath10ExpressionRuntime implements ExpressionLanguageRuntime {
         } catch (Exception ex) {
             String errmsg = "Invalid duration: " + literal;
             __log.error(errmsg, ex);
-            throw new FaultException(cexp.getOwner().constants.qnInvalidExpressionValue, errmsg);
+            throw new FaultException(cexp.getOwner().getConstants().getQnInvalidExpressionValue(), errmsg);
         }
     }
 
     private Context createContext(OXPath10Expression oxpath, EvaluationContext ctx) {
         JaxenContexts bpelSupport = new JaxenContexts(oxpath, _extensionFunctions, ctx);
-        ContextSupport support = new ContextSupport(new JaxenNamespaceContextAdapter(oxpath.namespaceCtx), bpelSupport,
+        ContextSupport support = new ContextSupport(new JaxenNamespaceContextAdapter(oxpath.getNamespaceCtx()), bpelSupport,
                 bpelSupport, new BpelDocumentNavigator(ctx.getRootNode()));
         Context jctx = new Context(support);
 
@@ -191,11 +191,11 @@ public class XPath10ExpressionRuntime implements ExpressionLanguageRuntime {
     }
 
     private XPath compile(OXPath10Expression exp) throws JaxenException {
-        XPath xpath = _compiledExpressions.get(exp.xpath);
+        XPath xpath = _compiledExpressions.get(exp.getXpath());
         if (xpath == null) {
-            xpath = new DOMXPath(exp.xpath);
+            xpath = new DOMXPath(exp.getXpath());
             synchronized (_compiledExpressions) {
-                _compiledExpressions.put(exp.xpath, xpath);
+                _compiledExpressions.put(exp.getXpath(), xpath);
             }
         }
         return xpath;

@@ -19,8 +19,8 @@
 package org.apache.ode.bpel.runtime;
 
 import org.apache.ode.bpel.evt.EventContext;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OScope.Variable;
+import org.apache.ode.bpel.obj.OScope;
+import org.apache.ode.bpel.obj.OScope.Variable;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Node;
 
@@ -70,7 +70,7 @@ public class EventContextImpl implements EventContext
         {
             Variable var = __scope.getVisibleVariable(varName);
             VariableInstance varInstance = new VariableInstance(__scopeInstanceId, var);
-            Node varNode = __runtimeContext.readVariable(varInstance.scopeInstance, varInstance.declaration.name, false);
+            Node varNode = __runtimeContext.readVariable(varInstance.scopeInstance, varInstance.declaration.getName(), false);
             value = DOMUtils.domToString(varNode);
         }
         catch(Throwable e)
@@ -89,10 +89,10 @@ public class EventContextImpl implements EventContext
         String[] __varNames = null;
         try
         {
-            int varSize = __scope.variables.size();
+            int varSize = __scope.getVariables().size();
             __varNames = new String[varSize];
 
-            Iterator<String> _varNames = __scope.variables.keySet().iterator();
+            Iterator<String> _varNames = __scope.getVariables().keySet().iterator();
             int i = 0;
             while(_varNames.hasNext())
             {

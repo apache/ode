@@ -19,8 +19,8 @@
 package org.apache.ode.bpel.runtime;
 
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.o.OReply;
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.obj.OReply;
+import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 
 import java.util.Iterator;
@@ -42,33 +42,33 @@ class REPLY extends ACTIVITY {
         final OReply oreply = (OReply)_self.o;
 
         if (__log.isDebugEnabled()) {
-            __log.debug("<reply>  partnerLink=" + oreply.partnerLink + ", operation=" + oreply.operation);
+            __log.debug("<reply>  partnerLink=" + oreply.getPartnerLink() + ", operation=" + oreply.getOperation());
         }
         FaultData fault = null;
 
         // TODO: Check for fault without message.
 
         try {
-            sendVariableReadEvent(_scopeFrame.resolve(oreply.variable));
-            Node msg = fetchVariableData(_scopeFrame.resolve(oreply.variable), false);
+            sendVariableReadEvent(_scopeFrame.resolve(oreply.getVariable()));
+            Node msg = fetchVariableData(_scopeFrame.resolve(oreply.getVariable()), false);
 
             assert msg instanceof Element;
 
-            for (Iterator<OScope.CorrelationSet> i = oreply.initCorrelations.iterator(); i.hasNext(); ) {
+            for (Iterator<OScope.CorrelationSet> i = oreply.getInitCorrelations().iterator(); i.hasNext(); ) {
                 OScope.CorrelationSet cset = i.next();
                 initializeCorrelation(_scopeFrame.resolve(cset),
-                        _scopeFrame.resolve(oreply.variable));
+                        _scopeFrame.resolve(oreply.getVariable()));
             }
-            for (OScope.CorrelationSet aJoinCorrelation : oreply.joinCorrelations) {
+            for (OScope.CorrelationSet aJoinCorrelation : oreply.getJoinCorrelations()) {
                 // will be ignored if already initialized
-                initializeCorrelation(_scopeFrame.resolve(aJoinCorrelation), _scopeFrame.resolve(oreply.variable));
+                initializeCorrelation(_scopeFrame.resolve(aJoinCorrelation), _scopeFrame.resolve(oreply.getVariable()));
             }
 
             //		send reply
             getBpelRuntimeContext()
-                    .reply(_scopeFrame.resolve(oreply.partnerLink), oreply.operation.getName(),
-                            oreply.messageExchangeId, (Element)msg,
-                            (oreply.fault != null) ? oreply.fault : null);
+                    .reply(_scopeFrame.resolve(oreply.getPartnerLink()), oreply.getOperation().getName(),
+                            oreply.getMessageExchangeId(), (Element)msg,
+                            (oreply.getFault() != null) ? oreply.getFault() : null);
         } catch (FaultException e) {
             __log.error(e);
             fault = createFault(e.getQName(), oreply);

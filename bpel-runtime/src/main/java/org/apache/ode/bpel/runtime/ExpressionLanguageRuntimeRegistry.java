@@ -23,8 +23,8 @@ import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.explang.ExpressionLanguageRuntime;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OExpressionLanguage;
+import org.apache.ode.bpel.obj.OExpression;
+import org.apache.ode.bpel.obj.OExpressionLanguage;
 import org.apache.ode.utils.xsd.Duration;
 import org.w3c.dom.Node;
 
@@ -45,12 +45,12 @@ public class ExpressionLanguageRuntimeRegistry  {
 
   public void registerRuntime(OExpressionLanguage oelang) throws ConfigurationException {
     try {
-      String className = oelang.properties.get("runtime-class");
+      String className = oelang.getProperties().get("runtime-class");
       // backward compatibility.
       className = className.replace("com.fs.pxe.","org.apache.ode.");
       Class cls = Class.forName(className);
       ExpressionLanguageRuntime elangRT = (ExpressionLanguageRuntime) cls.newInstance();
-      elangRT.initialize(oelang.properties);
+      elangRT.initialize(oelang.getProperties());
       _runtimes.put(oelang, elangRT);
     } catch (ConfigurationException ce) {
       throw ce;
@@ -93,7 +93,7 @@ public class ExpressionLanguageRuntimeRegistry  {
   }
 
   private ExpressionLanguageRuntime findRuntime(OExpression cexp) {
-    return _runtimes.get(cexp.expressionLanguage);
+    return _runtimes.get(cexp.getExpressionLanguage());
   }
 
 }

@@ -32,8 +32,8 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
-import org.apache.ode.bpel.o.OXslSheet;
+import org.apache.ode.bpel.elang.xpath10.obj.OXPath10Expression;
+import org.apache.ode.bpel.obj.OXslSheet;
 import org.apache.ode.utils.StreamUtils;
 import org.apache.ode.utils.fs.FileUtils;
 
@@ -64,7 +64,7 @@ public class XslRuntimeUriResolver implements URIResolver {
 
         OXslSheet sheet = _expr.getXslSheet(uri);
         if( sheet != null) {
-            String result = sheet.sheetBody;
+            String result = sheet.getSheetBody();
             if (result != null) {
                 return new StreamSource(new StringReader(result));
             } else {

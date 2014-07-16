@@ -30,11 +30,11 @@ import org.apache.ode.bpel.evt.EventContext;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableReadEvent;
 import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OConstants;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.OConstants;
+import org.apache.ode.bpel.obj.OLink;
+import org.apache.ode.bpel.obj.OMessageVarType;
+import org.apache.ode.bpel.obj.OMessageVarType.Part;
 import org.apache.ode.jacob.IndexedObject;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.w3c.dom.Element;
@@ -73,12 +73,12 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
 
     protected void sendVariableReadEvent(VariableInstance var) {
         VariableReadEvent vre = new VariableReadEvent();
-        vre.setVarName(var.declaration.name);
+        vre.setVarName(var.declaration.getName());
         sendEvent(vre);
     }
 
     protected void sendEvent(ActivityEvent event) {
-        event.setActivityName(_self.o.name);
+        event.setActivityName(_self.o.getName());
         event.setActivityType(_self.o.getType());
         event.setActivityDeclarationId(_self.o.getId());
         event.setActivityId(_self.aId);
@@ -89,8 +89,8 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
     }
 
     protected void sendEvent(ScopeEvent event) {
-        if (event.getLineNo() == -1 && _self.o.debugInfo != null) {
-            event.setLineNo(_self.o.debugInfo.startLine);
+        if (event.getLineNo() == -1 && _self.o.getDebugInfo() != null) {
+            event.setLineNo(_self.o.getDebugInfo().getStartLine());
         }
         _scopeFrame.fillEventInfo(event);
         fillEventContext(event);
@@ -112,13 +112,13 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
     protected void dpe(Collection<OLink> links) {
         // Dead path all of the outgoing links (nothing has been activated yet!)
         for (OLink link : links) {
-            if (__log.isDebugEnabled()) __log.debug("DPE on link " + link.name);
+            if (__log.isDebugEnabled()) __log.debug("DPE on link " + link.getName());
             _linkFrame.resolve(link).pub.linkStatus(false);
         }
     }
 
     protected OConstants getConstants() {
-        return _self.o.getOwner().constants;
+        return _self.o.getOwner().getConstants();
     }
 
     /**
@@ -128,8 +128,8 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
      * @param activity
      */
     protected void dpe(OActivity activity) {
-        dpe(activity.sourceLinks);
-        dpe(activity.outgoingLinks);
+        dpe(activity.getSourceLinks());
+        dpe(activity.getOutgoingLinks());
         // TODO: register listeners for target / incoming links
     }
 
@@ -138,8 +138,8 @@ abstract class ACTIVITY extends BpelJacobRunnable implements IndexedObject {
     }
 
     private int getLineNo() {
-        if (_self.o.debugInfo != null && _self.o.debugInfo.startLine != -1) {
-            return _self.o.debugInfo.startLine;
+        if (_self.o.getDebugInfo() != null && _self.o.getDebugInfo().getStartLine() != -1) {
+            return _self.o.getDebugInfo().getStartLine();
         }
         return -1;
     }

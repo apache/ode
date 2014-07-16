@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.obj.OScope;
 
 import java.io.Serializable;
 

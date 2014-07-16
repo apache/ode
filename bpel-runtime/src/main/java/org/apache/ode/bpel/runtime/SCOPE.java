@@ -34,16 +34,16 @@ import org.apache.ode.bpel.evt.ScopeCompletionEvent;
 import org.apache.ode.bpel.evt.ScopeFaultEvent;
 import org.apache.ode.bpel.evt.ScopeStartEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
-import org.apache.ode.bpel.o.OBase;
-import org.apache.ode.bpel.o.OCatch;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OEventHandler;
-import org.apache.ode.bpel.o.OFailureHandling;
-import org.apache.ode.bpel.o.OFaultHandler;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OVarType;
+import org.apache.ode.bpel.obj.OBase;
+import org.apache.ode.bpel.obj.OCatch;
+import org.apache.ode.bpel.obj.OElementVarType;
+import org.apache.ode.bpel.obj.OEventHandler;
+import org.apache.ode.bpel.obj.OFailureHandling;
+import org.apache.ode.bpel.obj.OFaultHandler;
+import org.apache.ode.bpel.obj.OLink;
+import org.apache.ode.bpel.obj.OMessageVarType;
+import org.apache.ode.bpel.obj.OScope;
+import org.apache.ode.bpel.obj.OVarType;
 import org.apache.ode.bpel.runtime.channels.Compensation;
 import org.apache.ode.bpel.runtime.channels.EventHandlerControl;
 import org.apache.ode.bpel.runtime.channels.FaultData;
@@ -72,19 +72,19 @@ class SCOPE extends ACTIVITY {
     public SCOPE(ActivityInfo self, ScopeFrame frame, LinkFrame linkFrame) {
         super(self, frame, linkFrame);
         _oscope = (OScope) self.o;
-        assert _oscope.activity != null;
+        assert _oscope.getActivity() != null;
     }
 
     public void run() {
 
         // Start the child activity.
         _child = new ActivityInfo(genMonotonic(),
-            _oscope.activity,
+            _oscope.getActivity(),
             newChannel(Termination.class), newChannel(ParentScope.class));
         instance(createChild(_child, _scopeFrame, _linkFrame));
 
-        if (_oscope.eventHandler != null) {
-            for (Iterator<OEventHandler.OAlarm> i = _oscope.eventHandler.onAlarms.iterator(); i.hasNext(); ) {
+        if (_oscope.getEventHandler() != null) {
+            for (Iterator<OEventHandler.OAlarm> i = _oscope.getEventHandler().getOnAlarms().iterator(); i.hasNext(); ) {
                 OEventHandler.OAlarm alarm = i.next();
                 EventHandlerInfo ehi = new EventHandlerInfo(alarm,
                         newChannel(EventHandlerControl.class),
@@ -94,7 +94,7 @@ class SCOPE extends ACTIVITY {
                 instance(new EH_ALARM(ehi.psc,ehi.tc, ehi.cc, alarm, _scopeFrame));
             }
 
-            for (Iterator<OEventHandler.OEvent> i = _oscope.eventHandler.onMessages.iterator(); i.hasNext(); ) {
+            for (Iterator<OEventHandler.OEvent> i = _oscope.getEventHandler().getOnMessages().iterator(); i.hasNext(); ) {
                 OEventHandler.OEvent event = i.next();
                 EventHandlerInfo ehi = new EventHandlerInfo(event,
                         newChannel(EventHandlerControl.class),
@@ -106,7 +106,7 @@ class SCOPE extends ACTIVITY {
         }
 
         getBpelRuntimeContext().initializePartnerLinks(_scopeFrame.scopeInstanceId,
-            _oscope.partnerLinks.values());
+            _oscope.getPartnerLinks().values());
 
         sendEvent(new ScopeStartEvent());
         instance(new ACTIVE());
@@ -197,7 +197,7 @@ class SCOPE extends ACTIVITY {
                         public void cancelled() {
                             // Implicit scope holds links of the enclosed activity,
                             // they only get cancelled when we propagate upwards.
-                            if (_oscope.implicitScope)
+                            if (_oscope.isImplicitScope())
                                 _self.parent.cancelled();
                             else
                                 completed(null, CompensationHandler.emptySet());
@@ -263,9 +263,9 @@ class SCOPE extends ACTIVITY {
 
                 // Maintain a set of links needing dead-path elimination.
                 Set<OLink> linksNeedingDPE = new HashSet<OLink>();
-                if (_oscope.faultHandler != null)
-                    for (Iterator<OCatch> i = _oscope.faultHandler.catchBlocks.iterator(); i.hasNext(); )
-                        linksNeedingDPE.addAll(i.next().outgoingLinks);
+                if (_oscope.getFaultHandler() != null)
+                    for (Iterator<OCatch> i = _oscope.getFaultHandler().getCatchBlocks().iterator(); i.hasNext(); )
+                        linksNeedingDPE.addAll(i.next().getOutgoingLinks());
 
                 // We're done with the main work, if we were terminated, we will
                 // need to load the termination handler:
@@ -276,16 +276,16 @@ class SCOPE extends ACTIVITY {
                     // ??? Should we forward
                     
                     // If termination handler defined, and the scope has not faulted
-                    if (_oscope.terminationHandler != null && _fault == null) {
+                    if (_oscope.getTerminationHandler() != null && _fault == null) {
                     
                         // We have to create a scope for the catch block.
                         BpelRuntimeContext ntive = getBpelRuntimeContext();
 
-                        ActivityInfo terminationHandlerActivity = new ActivityInfo(genMonotonic(), _oscope.terminationHandler,
+                        ActivityInfo terminationHandlerActivity = new ActivityInfo(genMonotonic(), _oscope.getTerminationHandler(),
                                 newChannel(Termination.class,"TH"), newChannel(ParentScope.class,"TH"));
 
-                        ScopeFrame terminationHandlerScopeFrame = new ScopeFrame(_oscope.terminationHandler,
-                                ntive.createScopeInstance(_scopeFrame.scopeInstanceId, _oscope.terminationHandler),
+                        ScopeFrame terminationHandlerScopeFrame = new ScopeFrame(_oscope.getTerminationHandler(),
+                                ntive.createScopeInstance(_scopeFrame.scopeInstanceId, _oscope.getTerminationHandler()),
                                 _scopeFrame, CompensationHandler.emptySet(), (FaultData)null);
                         
                         // Create the temination handler scope.
@@ -321,7 +321,7 @@ class SCOPE extends ACTIVITY {
                     sendEvent(new ScopeFaultEvent(_fault.getFaultName(), _fault.getFaultLineNo(),_fault.getExplanation()));
 
                     // Find a fault handler for our fault.
-                    OCatch catchBlock = _oscope.faultHandler == null ? null : findCatch(_oscope.faultHandler, _fault.getFaultName(), _fault.getFaultType());
+                    OCatch catchBlock = _oscope.getFaultHandler() == null ? null : findCatch(_oscope.getFaultHandler(), _fault.getFaultName(), _fault.getFaultType());
 
                     // Collect all the compensation data for completed child scopes.
                     assert !!_eventHandlers.isEmpty();
@@ -339,7 +339,7 @@ class SCOPE extends ACTIVITY {
                             __log.warn(_self + ": has a fault handler for "
                                     + _fault.getFaultName() + ": "+ catchBlock + " ,  " + _fault.toString());
 
-                        linksNeedingDPE.removeAll(catchBlock.outgoingLinks);
+                        linksNeedingDPE.removeAll(catchBlock.getOutgoingLinks());
 
                         // We have to create a scope for the catch block.
                         BpelRuntimeContext ntive = getBpelRuntimeContext();
@@ -350,16 +350,16 @@ class SCOPE extends ACTIVITY {
                         ScopeFrame faultHandlerScopeFrame = new ScopeFrame(catchBlock,
                                 ntive.createScopeInstance(_scopeFrame.scopeInstanceId, catchBlock),
                                 _scopeFrame, _compensations, _fault);
-                        if (catchBlock.faultVariable != null) {
+                        if (catchBlock.getFaultVariable() != null) {
                             try {
-                                VariableInstance vinst =  faultHandlerScopeFrame.resolve(catchBlock.faultVariable);
+                                VariableInstance vinst =  faultHandlerScopeFrame.resolve(catchBlock.getFaultVariable());
                                 initializeVariable(vinst, _fault.getFaultMessage().cloneNode(true));
 
                                 // Generating event
-                                VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.name);
+                                VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.getName());
                                 se.setNewValue(_fault.getFaultMessage());
-                                if (_oscope.debugInfo != null)
-                                    se.setLineNo(_oscope.debugInfo.startLine);
+                                if (_oscope.getDebugInfo() != null)
+                                    se.setLineNo(_oscope.getDebugInfo().getStartLine());
                                 sendEvent(se);
                             } catch (Exception ex) {
                                 __log.fatal(ex);
@@ -394,7 +394,7 @@ class SCOPE extends ACTIVITY {
                 } else /* completed ok */ {
                     sendEvent(new ScopeCompletionEvent());
 
-                    if (_oscope.compensationHandler != null) {
+                    if (_oscope.getCompensationHandler() != null) {
                         CompensationHandler compensationHandler = new CompensationHandler(
                             _scopeFrame,
                             newChannel(Compensation.class),
@@ -437,36 +437,36 @@ class SCOPE extends ACTIVITY {
 
     private static OCatch findCatch(OFaultHandler fh, QName faultName, OVarType faultType) {
         OCatch bestMatch = null;
-        for (OCatch c : fh.catchBlocks) {
+        for (OCatch c : fh.getCatchBlocks()) {
             // First we try to eliminate this catch block based on fault-name mismatches:
-            if (c.faultName != null) {
+            if (c.getFaultName() != null) {
                 if (faultName == null)
                     continue;
-                if (!faultName.equals(c.faultName))
+                if (!faultName.equals(c.getFaultName()))
                     continue;
             }
 
             // Then we try to eliminate this catch based on type incompatibility:
-            if (c.faultVariable != null) {
+            if (c.getFaultVariable() != null) {
                 if (faultType == null)
                     continue;
-                else if (c.faultVariable.type instanceof OMessageVarType) {
+                else if (c.getFaultVariable().getType() instanceof OMessageVarType) {
                     if (faultType instanceof OMessageVarType
-                            && ((OMessageVarType) faultType).equals(c.faultVariable.type)) {
+                            && ((OMessageVarType) faultType).equals(c.getFaultVariable().getType())) {
                         // Don't eliminate.
                     } else if (faultType instanceof OElementVarType
-                            && ((OMessageVarType) c.faultVariable.type).docLitType != null
-                            && !((OMessageVarType) c.faultVariable.type).docLitType.equals(faultType)) {
+                            && ((OMessageVarType) c.getFaultVariable().getType()).getDocLitType() != null
+                            && !((OMessageVarType) c.getFaultVariable().getType()).getDocLitType().equals(faultType)) {
                         // Don't eliminate.
                     } else {
                         continue;  // Eliminate.
                     }
-                } else if (c.faultVariable.type instanceof OElementVarType) {
-                    if (faultType instanceof OElementVarType && faultType.equals(c.faultVariable.type)) {
+                } else if (c.getFaultVariable().getType() instanceof OElementVarType) {
+                    if (faultType instanceof OElementVarType && faultType.equals(c.getFaultVariable().getType())) {
                         // Don't eliminate
                     } else if (faultType instanceof OMessageVarType
-                            && ((OMessageVarType) faultType).docLitType != null
-                            && ((OMessageVarType) faultType).docLitType.equals(c.faultVariable.type)) {
+                            && ((OMessageVarType) faultType).getDocLitType() != null
+                            && ((OMessageVarType) faultType).getDocLitType().equals(c.getFaultVariable().getType())) {
                         // Don't eliminate
                     } else {
                         continue; // eliminate
@@ -484,8 +484,8 @@ class SCOPE extends ACTIVITY {
             } else {
                 // Otherwise we prefer name and variable matches but prefer name-only matches to
                 // variable-only matches.
-                int existingScore = (bestMatch.faultName == null ? 0 : 2) + (bestMatch.faultVariable == null ? 0 : 1);
-                int currentScore = (c.faultName == null ? 0 : 2) + (c.faultVariable == null ? 0 : 1);
+                int existingScore = (bestMatch.getFaultName() == null ? 0 : 2) + (bestMatch.getFaultVariable() == null ? 0 : 1);
+                int currentScore = (c.getFaultName() == null ? 0 : 2) + (c.getFaultVariable() == null ? 0 : 1);
                 if (currentScore > existingScore) {
                     bestMatch = c;
                 }

@@ -25,8 +25,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.o.ORepeatUntil;
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.obj.ORepeatUntil;
+import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.Termination;
@@ -50,7 +50,7 @@ public class REPEATUNTIL extends ACTIVITY {
 
     public void run() {
         ActivityInfo child = new ActivityInfo(genMonotonic(),
-                getORepeatUntil().activity,
+                getORepeatUntil().getActivity(),
                 newChannel(Termination.class), newChannel(ParentScope.class));
         instance(createChild(child, _scopeFrame, _linkFrame));
         instance(new WAITER(child));
@@ -79,7 +79,7 @@ public class REPEATUNTIL extends ACTIVITY {
      */
     private boolean checkCondition() throws FaultException {
         try {
-            return getBpelRuntimeContext().getExpLangRuntime().evaluateAsBoolean(getORepeatUntil().untilCondition,getEvaluationContext());
+            return getBpelRuntimeContext().getExpLangRuntime().evaluateAsBoolean(getORepeatUntil().getUntilCondition(),getEvaluationContext());
         } catch (EvaluationException e) {
             String msg = "Unexpected expression evaluation error checking repeatUntil condition.";
             __log.error(msg, e);

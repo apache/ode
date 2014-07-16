@@ -27,11 +27,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.engine.BpelProcess;
 import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.o.OBase;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OScope.Variable;
+import org.apache.ode.bpel.obj.OBase;
+import org.apache.ode.bpel.obj.OElementVarType;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.OScope;
+import org.apache.ode.bpel.obj.OScope.Variable;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evar.ExternalVariableModule.Locator;
@@ -100,14 +100,14 @@ public class ExternalVariableManager {
             if (!(child instanceof OScope))
                 continue;
             OScope oscope = (OScope) child;
-            for (OScope.Variable var : oscope.variables.values()) {
-                if (var.extVar == null)
+            for (OScope.Variable var : oscope.getVariables().values()) {
+                if (var.getExtVar() == null)
                     continue;
 
-                EVar evar = _externalVariables.get(var.extVar.externalVariableId);
+                EVar evar = _externalVariables.get(var.getExtVar().getExternalVariableId());
                 if (evar == null) {
-                    __log.error("The \"" + oscope.name + "\" scope declared an unknown external variable \""
-                            + var.extVar.externalVariableId + "\"; check the deployment descriptor.");
+                    __log.error("The \"" + oscope.getName() + "\" scope declared an unknown external variable \""
+                            + var.getExtVar().getExternalVariableId() + "\"; check the deployment descriptor.");
                     fatal = true;
                     continue;
                 }
@@ -128,15 +128,15 @@ public class ExternalVariableManager {
      * Read an external variable.
      */
     public Value read(Variable variable, Node reference, Long iid) throws ExternalVariableModuleException{
-        EVar evar = _externalVariables.get(variable.extVar.externalVariableId);
+        EVar evar = _externalVariables.get(variable.getExtVar().getExternalVariableId());
         if (evar == null) {
             // Should not happen if constructor is working.
-            throw new BpelEngineException("InternalError: reference to unknown external variable " + variable.extVar.externalVariableId);
+            throw new BpelEngineException("InternalError: reference to unknown external variable " + variable.getExtVar().getExternalVariableId());
         }
 
-        Locator locator = new Locator(variable.extVar.externalVariableId, _pid,iid, reference);
+        Locator locator = new Locator(variable.getExtVar().getExternalVariableId(), _pid,iid, reference);
         Value newval;
-        newval = evar._engine.readValue(((OElementVarType) variable.type).elementType, locator );
+        newval = evar._engine.readValue(((OElementVarType) variable.getType()).getElementType(), locator );
         if (newval == null)
             return null;
         return newval;
@@ -144,15 +144,15 @@ public class ExternalVariableManager {
 
 
     public Value write(Variable variable, Node reference, Node val, Long iid) throws ExternalVariableModuleException  {
-        EVar evar = _externalVariables.get(variable.extVar.externalVariableId);
+        EVar evar = _externalVariables.get(variable.getExtVar().getExternalVariableId());
         if (evar == null) {
             // Should not happen if constructor is working.
-            throw new BpelEngineException("InternalError: reference to unknown external variable " + variable.extVar.externalVariableId);
+            throw new BpelEngineException("InternalError: reference to unknown external variable " + variable.getExtVar().getExternalVariableId());
         }
 
-        Locator locator = new Locator(variable.extVar.externalVariableId,_pid,iid,reference);
+        Locator locator = new Locator(variable.getExtVar().getExternalVariableId(),_pid,iid,reference);
         Value newval = new Value(locator,val,null);
-        newval = evar._engine.writeValue(((OElementVarType) variable.type).elementType, newval);
+        newval = evar._engine.writeValue(((OElementVarType) variable.getType()).getElementType(), newval);
 
         return newval;
     }
