@@ -370,7 +370,7 @@ public class OScope extends OActivity {
 		}
 
 		@JsonIgnore
-		public boolean getHasJoinUseCases() {
+		public boolean isHasJoinUseCases() {
 			Object o = fieldContainer.get(HASJOINUSECASES);
 		return o == null ? null : (Boolean)o;
 		}

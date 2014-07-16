@@ -21,15 +21,12 @@ package org.apache.ode.bpel.engine;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.wsdl.Fault;
 import javax.xml.namespace.QName;
@@ -40,12 +37,9 @@ import org.apache.ode.agents.memory.SizingAgent;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.bpel.dao.DeferredProcessInstanceCleanable;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
-import org.apache.ode.bpel.engine.BpelProcess;
-import org.apache.ode.bpel.engine.MyRoleMessageExchangeImpl;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableConf;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableManager;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
@@ -56,11 +50,10 @@ import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessConf;
-import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.JobType;
@@ -72,7 +65,9 @@ import org.apache.ode.bpel.obj.OExpressionLanguage;
 import org.apache.ode.bpel.obj.OMessageVarType;
 import org.apache.ode.bpel.obj.OPartnerLink;
 import org.apache.ode.bpel.obj.OProcess;
-import org.apache.ode.bpel.obj.Serializer;
+import org.apache.ode.bpel.obj.OProcessWrapper;
+import org.apache.ode.bpel.obj.serde.OmDeserializer;
+import org.apache.ode.bpel.obj.serde.OmSerdeFactory;
 import org.apache.ode.bpel.runtime.BpelRuntimeContext;
 import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
 import org.apache.ode.bpel.runtime.InvalidProcessException;
@@ -569,8 +564,9 @@ public class BpelProcess {
      */
     private OProcess deserializeCompiledProcess(InputStream is) throws Exception {
         OProcess compiledProcess;
-        Serializer ofh = new Serializer(is);
-        compiledProcess = ofh.readOProcess();
+        OmDeserializer deserializer = new OmSerdeFactory().createOmDeserializer(is);
+        OProcessWrapper wrapper = deserializer.deserialize();
+        compiledProcess = wrapper.getProcess();
         return compiledProcess;
     }
 

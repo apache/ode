@@ -3,6 +3,8 @@ package org.apache.ode.bpel.obj;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.obj.serde.OmSerdeFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -59,6 +61,14 @@ public class OProcessWrapper extends ExtensibleImpl {
 	}
 	
 	//Accessors
+	@JsonIgnore
+	public QName getType(){
+		Object o = fieldContainer.get(TYPE);
+		return o == null ? null : (QName)o;
+	}
+	public void setType(QName type){
+		fieldContainer.put(TYPE, type);
+	}
 	@JsonIgnore
 	public byte[] getMagic() {
 		return (byte[])fieldContainer.get(MAGIC_NUMBER);

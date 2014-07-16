@@ -48,7 +48,9 @@ import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.obj.OPartnerLink;
 import org.apache.ode.bpel.obj.OProcess;
-import org.apache.ode.bpel.obj.Serializer;
+import org.apache.ode.bpel.obj.OProcessWrapper;
+import org.apache.ode.bpel.obj.serde.OmDeserializer;
+import org.apache.ode.bpel.obj.serde.OmSerdeFactory;
 import org.apache.ode.bpel.pmapi.InstanceManagement;
 import org.apache.ode.bpel.pmapi.ProcessManagement;
 import org.apache.ode.jbi.msgmap.Mapper;
@@ -198,8 +200,9 @@ final public class OdeContext {
             InputStream is = pc.getCBPInputStream();
             OProcess compiledProcess = null;
             try {
-                Serializer ofh = new Serializer(is);
-                compiledProcess = ofh.readOProcess();
+                OmDeserializer deserializer = new OmSerdeFactory().createOmDeserializer(is);
+                OProcessWrapper wrapper = deserializer.deserialize();
+                compiledProcess = wrapper.getProcess();
             } finally {
                 is.close();
             }
