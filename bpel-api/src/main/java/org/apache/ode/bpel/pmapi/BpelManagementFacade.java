@@ -23,7 +23,7 @@ import org.apache.ode.bpel.bdi.breaks.Breakpoint;
 import org.apache.ode.bpel.bdi.breaks.VariableModificationBreakpoint;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
-import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.obj.OProcess;
 
 import javax.xml.namespace.QName;
 import java.util.Date;

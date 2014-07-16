@@ -20,7 +20,7 @@ package org.apache.ode.bpel.explang;
 
 /**
  * Exception indicating thrown from the
- * {@link ExpressionLanguageRuntime#initialize(org.apache.ode.bpel.o.OExpressionLanguage)}
+ * {@link ExpressionLanguageRuntime#initialize(org.apache.ode.bpel.obj.OExpressionLanguage)}
  * method indicating that the expression language processor could not be
  * configured.
  */

@@ -32,7 +32,7 @@ import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.evt.BpelEvent;
-import org.apache.ode.bpel.o.OFailureHandling;
+import org.apache.ode.bpel.obj.OFailureHandling;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.utils.CronExpression;
 import org.w3c.dom.Element;

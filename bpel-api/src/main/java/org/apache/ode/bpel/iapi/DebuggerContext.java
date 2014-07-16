@@ -55,7 +55,7 @@ public interface DebuggerContext {
 
     /**
      * @return the process model.
-     * Currently an {@link org.apache.ode.bpel.o.OProcess}
+     * Currently an {@link org.apache.ode.bpel.obj.OProcess}
      * However it is not guaranteed that it will remain an OProcess
      * in future versions of ODE or for different types
      * of process lanaguage than BPEL.
