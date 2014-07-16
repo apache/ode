@@ -46,9 +46,9 @@ import org.apache.ode.bpel.engine.ProcessAndInstanceManagementImpl;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.ProcessConf;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.Serializer;
+import org.apache.ode.bpel.obj.OPartnerLink;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.Serializer;
 import org.apache.ode.bpel.pmapi.InstanceManagement;
 import org.apache.ode.bpel.pmapi.ProcessManagement;
 import org.apache.ode.jbi.msgmap.Mapper;
@@ -207,7 +207,7 @@ final public class OdeContext {
             for (Map.Entry<String, Endpoint> provide : pc.getProvideEndpoints().entrySet()) {
                 if (provide.getValue().equals(endpoint)) {
                     OPartnerLink plink = compiledProcess.getPartnerLink(provide.getKey());
-                    portType = plink.myRolePortType.getQName();
+                    portType = plink.getMyRolePortType().getQName();
                     break;
                 }
             }
