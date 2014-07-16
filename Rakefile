@@ -95,7 +95,7 @@ define "ode" do
   desc "ODE Axis2 Based Web Application"
   define "axis2-war" do
     libs = projects("axis2", "bpel-api", "bpel-compiler", "bpel-connector", "bpel-dao",
-      "bpel-epr", "bpel-obj", "bpel-nobj", "bpel-ql", "bpel-runtime", "scheduler-simple",
+      "bpel-epr", "bpel-nobj", "bpel-ql", "bpel-runtime", "scheduler-simple",
       "bpel-schemas", "bpel-store", "dao-hibernate", "jca-ra", "jca-server",
       "utils", "dao-jpa", "agents"),
       AXIS2_ALL, ANNONGEN, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.fileupload, COMMONS.io, COMMONS.httpclient, COMMONS.beanutils,
@@ -177,7 +177,7 @@ define "ode" do
 
   desc "ODE APIs"
   define "bpel-api" do
-    compile.with projects("utils", "bpel-obj", "bpel-nobj", "bpel-schemas"), WSDL4J, XERCES, SLF4J, LOG4J
+    compile.with projects("utils", "bpel-nobj", "bpel-schemas"), WSDL4J, XERCES, SLF4J, LOG4J
     package :jar
   end
 
@@ -242,14 +242,14 @@ define "ode" do
     pkg_name = "org.apache.ode.ql.jcc"
     jjtree = jjtree(_("src/main/jjtree"), :in_package=>pkg_name)
     compile.from javacc(jjtree, :in_package=>pkg_name), jjtree
-    compile.with projects("bpel-api", "bpel-compiler", "bpel-obj", "bpel-nobj", "utils"), JACOB
+    compile.with projects("bpel-api", "bpel-compiler", "bpel-nobj", "utils"), JACOB
 
     package :jar
   end
 
   desc "ODE Runtime Engine"
   define "bpel-runtime" do
-    compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-epr", "bpel-obj", "bpel-nobj", "bpel-schemas",
+    compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-epr", "bpel-nobj", "bpel-schemas",
       "bpel-store", "utils", "agents"),
       COMMONS.collections, COMMONS.httpclient, JACOB, JAVAX.persistence, JAVAX.stream, JAXEN, SAXON, WSDL4J, XMLBEANS, SPRING, SLF4J, LOG4J
 
@@ -288,7 +288,7 @@ define "ode" do
 
   desc "ODE Process Store"
   define "bpel-store" do
-    compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-obj", "bpel-nobj", "bpel-schemas", "bpel-epr",
+    compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-nobj", "bpel-schemas", "bpel-epr",
       "dao-hibernate", "dao-jpa", "utils"),
       JAVAX.persistence, JAVAX.stream, JAVAX.transaction, HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J, OPENJPA, SPRING, SLF4J, LOG4J
     compile { open_jpa_enhance }
@@ -309,7 +309,7 @@ define "ode" do
       SPRING_TEST, COMMONS.codec, SLF4J, LOG4J
 
     test.using :properties=>{ "org.apache.ode.autoRetireProcess"=>"true" }
-    test.with projects("bpel-obj", "bpel-nobj", "bpel-schemas", "bpel-scripts"),
+    test.with projects("bpel-nobj", "bpel-schemas", "bpel-scripts"),
       COMMONS.collections, COMMONS.lang, DERBY, JACOB, JAVAX.connector,
       JAVAX.stream, JAVAX.transaction, JAVAX.connector, JAXEN, HSQLDB, SAXON, XERCES, XMLBEANS, XALAN, GERONIMO.transaction, SPRING, HIBERNATE, DOM4J
 
@@ -410,7 +410,7 @@ define "ode" do
     end
     derby_db = Derby.create(_("target/derby/jpadb")=>_("target/derby.sql"))
 
-    test.with projects("bpel-api", "bpel-dao", "bpel-obj", "bpel-nobj", "bpel-epr", "dao-jpa", "utils"),
+    test.with projects("bpel-api", "bpel-dao", "bpel-nobj", "bpel-epr", "dao-jpa", "utils"),
       BACKPORT, COMMONS.collections, COMMONS.lang, COMMONS.logging, GERONIMO.transaction,
       GERONIMO.kernel, GERONIMO.connector, HSQLDB, JAVAX.connector, JAVAX.ejb, JAVAX.persistence,
       JAVAX.transaction, LOG4J, OPENJPA, XERCES, WSDL4J
@@ -424,7 +424,7 @@ define "ode" do
 
   desc "ODE JBI Integration Layer"
   define "jbi" do
-    compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "bpel-epr", "bpel-obj","bpel-nobj", 
+    compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "bpel-epr", "bpel-nobj", 
       "bpel-runtime", "scheduler-simple", "bpel-schemas", "bpel-store", "utils", "agents"),
       AXIOM, COMMONS.logging, COMMONS.pool, JAVAX.transaction, GERONIMO.transaction, JBI, SLF4J, LOG4J, WSDL4J, XERCES
 
@@ -432,7 +432,7 @@ define "ode" do
     package(:jbi).tap do |jbi|
       libs = artifacts(package(:jar),
         projects("bpel-api", "bpel-api-jca", "bpel-compiler", "bpel-connector", "bpel-dao",
-        "bpel-epr", "jca-ra", "jca-server", "bpel-obj", "bpel-nobj", "bpel-ql", "bpel-runtime",
+        "bpel-epr", "jca-ra", "jca-server", "bpel-nobj", "bpel-ql", "bpel-runtime",
         "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa", "utils", "agents"),
         ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
         COMMONS.primitives, DERBY, GERONIMO.connector, GERONIMO.transaction, JACOB, JAVAX.connector,
@@ -564,7 +564,7 @@ define "ode" do
   desc "ODE JBI Bundle"
   define "jbi-bundle" do
     ode_libs = artifacts(projects("bpel-api", "bpel-api-jca", "bpel-compiler", "bpel-connector", "bpel-dao", "bpel-epr",
-                                  "jca-ra", "jca-server", "bpel-obj", "bpel-nobj", "bpel-ql", "bpel-runtime", "scheduler-simple",
+                                  "jca-ra", "jca-server", "bpel-nobj", "bpel-ql", "bpel-runtime", "scheduler-simple",
                                   "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa", "utils", "agents"))
     libs = artifacts(ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
                      COMMONS.primitives, COMMONS.io, DERBY, GERONIMO.connector, GERONIMO.transaction, JACOB, JAVAX.connector, 
@@ -672,7 +672,7 @@ define "apache-ode" do
         # Libraries
         zip.path("lib").include artifacts(COMMONS.codec, COMMONS.httpclient,
           COMMONS.pool, COMMONS.collections, JAXEN, SAXON, WSDL4J, XALAN, XERCES, SLF4J, LOG4J)
-        project("ode").projects("utils", "tools", "bpel-compiler", "bpel-api", "bpel-obj", "bpel-nobj", "bpel-schemas").
+        project("ode").projects("utils", "tools", "bpel-compiler", "bpel-api", "bpel-nobj", "bpel-schemas").
           map(&:packages).flatten.each do |pkg|
             zip.include(pkg.to_s, :as=>"#{pkg.id}.#{pkg.type}", :path=>"lib") unless ['sources', 'javadoc'].include?(pkg.classifier)
         end
