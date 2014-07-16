@@ -28,6 +28,8 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import de.danielbechler.diff.annotation.ObjectDiffProperty;
+
 /**
  * Compiled represnetation of a BPEL activity.
  */
@@ -80,6 +82,7 @@ public abstract class OActivity extends OAgent {
 		return buf.toString();
 	}
 
+	@ObjectDiffProperty(ignore = true)
 	@JsonIgnore
 	public OFailureHandling getFailureHandling() {
 		OFailureHandling handling = (OFailureHandling) fieldContainer

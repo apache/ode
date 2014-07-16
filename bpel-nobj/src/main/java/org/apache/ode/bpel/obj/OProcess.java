@@ -21,7 +21,6 @@ package org.apache.ode.bpel.obj;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,7 +36,6 @@ import org.apache.ode.utils.NSContext;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -45,6 +43,8 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.deser.ResolvableDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+
+import de.danielbechler.diff.annotation.ObjectDiffProperty;
 
 /**
  * Compiled BPEL process representation.
@@ -167,6 +167,7 @@ public class OProcess extends OBase {
 		return o == null ? null : (OConstants)o;
 	}
 
+	@ObjectDiffProperty(ignore = true)
 	@JsonIgnore
 	@SuppressWarnings("unchecked")
 	public List<String> getCorrelators() {
@@ -254,6 +255,7 @@ public class OProcess extends OBase {
 		return o == null ? null : (List<OProperty>)o;
 	}
 
+	@ObjectDiffProperty(ignore = true)
 	@JsonIgnore
 	public QName getQName() {
 		return new QName(getTargetNamespace(), getProcessName());

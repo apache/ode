@@ -105,6 +105,7 @@ KARAF               = [
                           :under=>"org.apache.felix", :version=>"0.6.1")
                       ]
 LOG4J               = "log4j:log4j:jar:1.2.17"
+OBJECT_DIFF		="de.danielbechler:java-object-diff:jar:0.13.1"
 OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.2.1",
                        "net.sourceforge.serp:serp:jar:1.13.1"]
 

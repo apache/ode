@@ -190,7 +190,7 @@ define "ode" do
   desc "ODE BPEL Compiler"
   define "bpel-compiler" do
     compile.with projects("bpel-api", "bpel-nobj", "bpel-schemas", "utils"),
-      JAVAX.stream, JAXEN, SAXON, WSDL4J, XALAN, XERCES, COMMONS.collections, SLF4J, LOG4J, JACKSON
+      JAVAX.stream, JAXEN, SAXON, WSDL4J, XALAN, XERCES, COMMONS.collections, SLF4J, LOG4J, JACKSON, OBJECT_DIFF
     test.resources { filter(project("bpel-scripts").path_to("src/main/resources")).into(test.resources.target).run }
     test.with LOG4J
     package :jar
@@ -225,7 +225,7 @@ define "ode" do
 
   desc "New ODE BPEL Object Model"
   define "bpel-nobj" do
-    compile.with projects("utils", "bpel-obj"), JACKSON, LOG4J, SAXON, WSDL4J, COMMONS.collections, COMMONS.logging
+    compile.with projects("utils", "bpel-obj"), JACKSON, LOG4J, SAXON, WSDL4J, COMMONS.collections, COMMONS.logging, OBJECT_DIFF
     package :jar
   end
   
