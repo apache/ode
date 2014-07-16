@@ -50,7 +50,7 @@ import org.apache.ode.bpel.dd.DeployDocument;
 import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.dd.TDeployment.Process;
 import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.o.Serializer;
+import org.apache.ode.bpel.obj.Serializer;
 import org.apache.ode.utils.InternPool;
 import org.apache.ode.utils.InternPool.InternableBlock;
 import org.apache.ode.utils.fs.FileUtils;
@@ -217,7 +217,7 @@ class DeploymentUnitDir {
         try {
             is = new FileInputStream(f);
             Serializer ofh = new Serializer(is);
-            CBPInfo info = new CBPInfo(ofh.type, ofh.guid, f);
+            CBPInfo info = new CBPInfo(ofh.getType(), ofh.getGuid(), f);
             return info;
         } catch (Exception e) {
             throw new ContextException("Couldn't read compiled BPEL process " + f.getAbsolutePath(), e);
