@@ -63,12 +63,9 @@ public class OProcessWrapper extends ExtensibleImpl {
 	//Accessors
 	@JsonIgnore
 	public QName getType(){
-		Object o = fieldContainer.get(TYPE);
-		return o == null ? null : (QName)o;
+		return new QName(getProcess().getTargetNamespace(), getProcess().getProcessName());
 	}
-	public void setType(QName type){
-		fieldContainer.put(TYPE, type);
-	}
+	
 	@JsonIgnore
 	public byte[] getMagic() {
 		return (byte[])fieldContainer.get(MAGIC_NUMBER);
@@ -121,6 +118,7 @@ public class OProcessWrapper extends ExtensibleImpl {
 		return (OProcess)fieldContainer.get(PROCESS);
 	}
 	public void setProcess(OProcess process) {
+		setGuid(process.getGuid());
 		fieldContainer.put(OProcessWrapper.PROCESS, process);
 	}
 }
