@@ -251,13 +251,14 @@ define "ode" do
   define "bpel-runtime" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-epr", "bpel-nobj", "bpel-schemas",
       "bpel-store", "utils", "agents"),
-      COMMONS.collections, COMMONS.httpclient, JACOB, JAVAX.persistence, JAVAX.stream, JAXEN, SAXON, WSDL4J, XMLBEANS, SPRING, SLF4J, LOG4J, JACKSON
+      COMMONS.collections, COMMONS.httpclient, JACOB, JAVAX.persistence, JAVAX.stream, JAXEN, SAXON, WSDL4J, XMLBEANS, SPRING, SLF4J, LOG4J,
+	  JACKSON, JAVAX.connector
 
 
     test.with projects("scheduler-simple", "dao-jpa", "dao-hibernate", "bpel-epr"),
 #         BACKPORT, COMMONS.pool, COMMONS.lang, COMMONS.io, DERBY, JAVAX.connector, JAVAX.transaction,
-        GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, TRANQL, HSQLDB, JAVAX.ejb,
-        OPENJPA, XERCES, XALAN, DOM4J, HIBERNATE, SPRING_TEST, JACKSON,
+        GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, TRANQL, HSQLDB, JAVAX.ejb, JAVAX.transaction,
+        OPENJPA, XERCES, XALAN, DOM4J, HIBERNATE, SPRING_TEST, JACKSON, DERBY,
         "tranql:tranql-connector-derby-common:jar:1.1"
 
     package :jar
