@@ -231,7 +231,7 @@ public class CollectionsX {
      */
     @SuppressWarnings("unchecked")
     public static <T> Collection<T> filter(Collection src, final Class<T> aClass) {
-        return filter(new ArrayList<T>(src.size()), src.iterator(), aClass);
+        return (Collection<T>) filter(new ArrayList<T>(src.size()), src.iterator(), aClass);
     }
 
 }
