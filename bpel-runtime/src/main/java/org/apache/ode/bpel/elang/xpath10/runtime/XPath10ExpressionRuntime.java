@@ -109,7 +109,7 @@ public class XPath10ExpressionRuntime implements ExpressionLanguageRuntime {
                 Element wrapper = d.createElement("wrapper");
                 Object ret = retVal.get(0);
                 
-                if (ret instanceof Double) {
+                if (ret instanceof Double && !((Double)ret).isNaN()) {
                     // safely convert a double into a long if they are numerically equal. This
                     // makes 1 from 1.0, which is more reliable when calling web services.
                     if (Double.compare((Double)ret, Math.ceil((Double)ret)) == 0) {
