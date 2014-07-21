@@ -41,7 +41,7 @@ public class XPath10ExpressionRuntimeTest implements EvaluationContext {
     public void setUp() throws Exception {
         _cc = new MockCompilerContext();
         _runtime = new XPath10ExpressionRuntime();
-        _runtime.initialize(new HashMap<>());
+        _runtime.initialize(new HashMap());
         _compiler = new XPath10ExpressionCompilerBPEL20();
         _compiler.setCompilerContext(_cc);
     }
