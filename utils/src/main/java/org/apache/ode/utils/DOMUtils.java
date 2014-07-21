@@ -135,6 +135,14 @@ public class DOMUtils {
         return out.toString();
     }
 
+    public static Element getFirstChildElement(Node node) {
+        NodeList l = node.getChildNodes();
+        for (int i = 0; i < l.getLength(); i++) {
+            if (l.item(i) instanceof Element) return (Element) l.item(i);
+        }
+        return null;
+    }
+
     /**
      * Returns the value of an attribute of an element. Returns null if the
      * attribute is not found (whereas Element.getAttributeNS returns "" if an

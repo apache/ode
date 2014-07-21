@@ -172,6 +172,14 @@
     <message name="getVariableInfoOutput">
         <part name="variable-info" type="typ:tVariableInfo"/>
     </message>
+    <message name="setVariableInput">
+        <part name="sid" type="xsd:string"/>
+        <part name="varName" type="xsd:string"/>
+        <part name="value" type="xsd:anyType"/>
+    </message>
+    <message name="setVariableOutput">
+        <part name="scope-info" type="typ:tVariableInfo"/>
+    </message>
     <message name="listEventsInput">
         <part name="instanceFilter" type="xsd:string"/>
         <part name="eventFilter" type="xsd:string"/>
@@ -338,6 +346,11 @@
         <operation name="getVariableInfo">
             <input message="tns:getVariableInfoInput"/>
             <output message="tns:getVariableInfoOutput"/>
+            <fault name="ManagementFault" message="tns:managementFault"/>
+        </operation>
+        <operation name="setVariable">
+            <input message="tns:setVariableInput"/>
+            <output message="tns:setVariableOutput"/>
             <fault name="ManagementFault" message="tns:managementFault"/>
         </operation>
         <operation name="listEvents">
@@ -615,6 +628,18 @@
              </fault>
         </operation>
         <operation name="getVariableInfo">
+            <soap:operation soapAction="" style="rpc"/>
+            <input>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
+            </input>
+            <output>
+                <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
+            </output>
+            <fault name="ManagementFault">
+                <soap:fault name="ManagementFault" use="literal"/>
+             </fault>
+        </operation>
+        <operation name="setVariable">
             <soap:operation soapAction="" style="rpc"/>
             <input>
                 <soap:body namespace="http://www.apache.org/ode/pmapi" use="literal"/>
