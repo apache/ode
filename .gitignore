@@ -19,3 +19,4 @@ _buildr.rb
 *.log
 .settings
 build
+Gemfile.lock
