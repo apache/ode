@@ -1,0 +1,2 @@
+alias.timeService-ns=http://ws.intalio.com/TimeService/
+timeService-ns.TimeService.ode.address=http://localhost:${system.test.port.0}/axis2/processes/TimeService/
