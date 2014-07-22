@@ -1,0 +1,2 @@
+alias.PingPongService2-ns=urn:/PingPong
+PingPongService2-ns.PingPongService.Port2.ode.address=http://localhost:${system.test.port.0}/ode/processes/PingPongService2/
