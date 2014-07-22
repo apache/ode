@@ -32,7 +32,7 @@ Buildr::Hibernate::REQUIRES[:xdoclet] = Buildr.group("xdoclet", "xdoclet-xdoclet
  :under=>"xdoclet", :version=>"1.2.3") + ["xdoclet:xjavadoc:jar:1.1-j5"]
 
 # XMLBeans addon must use the same version as we do.
-Buildr::XMLBeans::REQUIRES.xmlbeans = artifact(XMLBEANS).version
+Buildr::XMLBeans::REQUIRES.xmlbeans.version = artifact(XMLBEANS).version
 
 # dirty workaround for BUILDR-541/BUILDR-508
 Java.classpath << Buildr::OpenJPA::REQUIRES
