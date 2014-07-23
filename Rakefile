@@ -185,7 +185,7 @@ define "ode" do
 
   desc "ODE JCA Connector Implementation"
   define "bpel-connector" do
-    compile.with projects("bpel-api", "bpel-api-jca", "bpel-runtime", "jca-ra", "jca-server")
+    compile.with projects("bpel-api", "bpel-api-jca", "bpel-runtime", "jca-ra", "jca-server", "bpel-dao")
     package :jar
   end
 
@@ -255,7 +255,7 @@ define "ode" do
 
   desc "ODE BPEL Test Script Files"
   define "bpel-scripts" do
-    #eclipse.natures = :java
+    eclipse.natures = :java
 
     package :jar
   end
@@ -610,7 +610,7 @@ define "ode" do
 
   desc "ODE Tools"
   define "tools" do
-    compile.with projects("bpel-compiler", "utils"), ANT, COMMONS.httpclient, COMMONS.logging
+    compile.with projects("bpel-compiler", "utils", "bpel-obj"), ANT, COMMONS.httpclient, COMMONS.logging
     package :jar
   end
 
