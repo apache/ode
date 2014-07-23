@@ -46,10 +46,8 @@ import org.apache.axis2.deployment.DeploymentEngine;
 import org.apache.axis2.deployment.repository.util.ArchiveReader;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.Parameter;
 import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.description.WSDL11ToAxisServiceBuilder;
-import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.AxisServer;
 import org.apache.axis2.engine.MessageReceiver;
 import org.apache.axis2.transport.http.SimpleHTTPServer;
@@ -250,8 +248,10 @@ public abstract class Axis2TestBase {
             }
 
             configContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem(axis2RepoDir, axis2ConfLocation);
-            // do not use 8080 for tests, and make sure to pass a string, not an int
-            configContext.getAxisConfiguration().getTransportIn("http").addParameter(new Parameter("port", ""+getTestPort(0)));
+
+            SimpleHTTPServer receiver = new SimpleHTTPServer(configContext, getTestPort(0));
+            TransportInDescription trsIn = configContext.getAxisConfiguration().getTransportIn(Constants.TRANSPORT_HTTP);
+            trsIn.setReceiver(receiver);
         }
 
         protected void start() throws AxisFault {
