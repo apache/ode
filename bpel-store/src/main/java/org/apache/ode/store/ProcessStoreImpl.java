@@ -113,7 +113,7 @@ public class ProcessStoreImpl implements ProcessStore {
             if (persistenceType.toLowerCase().indexOf("hib") != -1) {
                 _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(ds, props.getProperties(), createDatamodel, props.getTxFactoryClass());
             } else {
-                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(ds, createDatamodel, props.getTxFactoryClass());
+                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(ds, props.getProperties(), createDatamodel, props.getTxFactoryClass());
             }
          } else {
             // If the datasource is not provided, then we create a HSQL-based
@@ -122,7 +122,7 @@ public class ProcessStoreImpl implements ProcessStore {
             if ("hibernate".equalsIgnoreCase(persistenceType)) {
                 _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(hsqlds, props.getProperties(), createDatamodel, props.getTxFactoryClass());
             } else {
-                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(hsqlds, createDatamodel, props.getTxFactoryClass());
+                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(hsqlds, props.getProperties(), createDatamodel, props.getTxFactoryClass());
             }
             _inMemDs = hsqlds;
         }
