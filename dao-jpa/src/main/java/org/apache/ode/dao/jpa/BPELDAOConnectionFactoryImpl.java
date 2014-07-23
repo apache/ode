@@ -35,6 +35,7 @@ import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -101,7 +102,12 @@ public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
         propMap.put("openjpa.ConnectionFactoryMode", "managed");
 //        propMap.put("openjpa.FlushBeforeQueries", "false");
         propMap.put("openjpa.FetchBatchSize", 1000);
-        //propMap.put("openjpa.jdbc.TransactionIsolation", "read-committed");
+
+        //dirty hack for ODE-1015
+        String skipIsolation = System.getProperty("openjpa.connection.isolation.skip", "N");
+        if(skipIsolation.equalsIgnoreCase("N"))
+            propMap.put("openjpa.jdbc.TransactionIsolation", "read-committed");
+
 
         if (_dbdictionary != null)
             propMap.put("openjpa.jdbc.DBDictionary", _dbdictionary);

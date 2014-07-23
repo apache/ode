@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.dao.jpa.JpaTxMgrProvider;
 import org.apache.ode.store.ConfStoreConnection;
 import org.apache.ode.store.ConfStoreConnectionFactory;
+import org.hibernate.cfg.Environment;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -60,7 +61,12 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
         propMap.put("openjpa.ConnectionFactoryMode", "managed");
         propMap.put("openjpa.FlushBeforeQueries", "false");
         propMap.put("openjpa.FetchBatchSize", 1000);
-        propMap.put("openjpa.jdbc.TransactionIsolation", "read-committed");
+
+        //dirty hack for ODE-1015
+        String skipIsolation = System.getProperty("openjpa.connection.isolation.skip", "N");
+        if(skipIsolation.equalsIgnoreCase("N"))
+            propMap.put("openjpa.jdbc.TransactionIsolation", "read-committed");
+
         propMap.put("javax.persistence.provider", "org.apache.openjpa.persistence.PersistenceProviderImpl");
 
         if (createDatamodel) propMap.put("openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=false)");
