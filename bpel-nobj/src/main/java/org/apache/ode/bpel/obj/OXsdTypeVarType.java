@@ -46,7 +46,7 @@ public class OXsdTypeVarType extends OVarType {
 	@JsonIgnore
 	public boolean isSimple() {
 		Object o = fieldContainer.get(SIMPLE);
-		return o == null ? null : (Boolean)o;
+		return o == null ? false : (Boolean)o;
 	}
 
 	@JsonIgnore

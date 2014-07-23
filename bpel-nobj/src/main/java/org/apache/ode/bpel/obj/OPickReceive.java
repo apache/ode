@@ -57,7 +57,7 @@ public class OPickReceive extends OActivity {
 	@JsonIgnore
 	public boolean isCreateInstanceFlag() {
 		Object o = fieldContainer.get(CREATEINSTANCEFLAG);
-		return o == null ? null : (Boolean)o;
+		return o == null ? false : (Boolean)o;
 	}
 
 	@SuppressWarnings("unchecked")

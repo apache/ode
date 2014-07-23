@@ -46,7 +46,7 @@ public abstract class OLValueExpression extends OExpression {
 	@JsonIgnore
 	public boolean isInsertMissingData() {
 		Object o = fieldContainer.get(INSERTMISSINGDATA);
-		return o == null ? null : (Boolean)o;
+		return o == null ? false : (Boolean)o;
 	}
 
 	public abstract OScope.Variable getVariable();

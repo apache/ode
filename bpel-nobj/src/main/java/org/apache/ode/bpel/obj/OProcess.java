@@ -146,7 +146,7 @@ public class OProcess extends OBase {
 	@JsonIgnore
 	int getChildIdCounter() {
 		Object o = fieldContainer.get(CHILDIDCOUNTER);
-		return o == null ? null : (Integer)o;
+		return o == null ? 0 : (Integer)o;
 	}
 
 	@JsonIgnore

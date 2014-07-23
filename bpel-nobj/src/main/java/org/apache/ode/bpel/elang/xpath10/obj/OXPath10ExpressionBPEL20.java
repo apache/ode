@@ -54,7 +54,7 @@ public class OXPath10ExpressionBPEL20 extends OXPath10Expression {
 	@JsonIgnore
 	public boolean isIsJoinExpression() {
 		Object o = fieldContainer.get(ISJOINEXPRESSION);
-		return o == null ? null : (Boolean)o;
+		return o == null ? false : (Boolean)o;
 	}
 
 	@JsonIgnore

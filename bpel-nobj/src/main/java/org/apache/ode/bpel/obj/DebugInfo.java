@@ -69,7 +69,7 @@ public class DebugInfo extends ExtensibleImpl {
 	@JsonIgnore
 	public int getEndLine() {
 		Object o = fieldContainer.get(ENDLINE);
-		return o == null ? null : (Integer)o;
+		return o == null ? 0 : (Integer)o;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -88,7 +88,7 @@ public class DebugInfo extends ExtensibleImpl {
 	@JsonIgnore
 	public int getStartLine() {
 		Object o = fieldContainer.get(STARTLINE);
-		return o == null ? null : (Integer)o;
+		return o == null ? 0 : (Integer)o;
 	}
 
 	public void setDescription(String description) {

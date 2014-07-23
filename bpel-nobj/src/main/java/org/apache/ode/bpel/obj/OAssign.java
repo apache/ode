@@ -110,7 +110,7 @@ public class OAssign extends OActivity {
 		@JsonIgnore
 		public boolean isIgnoreMissingFromData() {
 			Object o = fieldContainer.get(IGNOREMISSINGFROMDATA);
-		return o == null ? null : (Boolean)o;
+		return o == null ? false : (Boolean)o;
 		}
 
 		@JsonIgnore
@@ -122,13 +122,13 @@ public class OAssign extends OActivity {
 		@JsonIgnore
 		public boolean isInsertMissingToData() {
 			Object o = fieldContainer.get(INSERTMISSINGTODATA);
-		return o == null ? null : (Boolean)o;
+		return o == null ? false : (Boolean)o;
 		}
 
 		@JsonIgnore
 		public boolean isKeepSrcElementName() {
 			Object o = fieldContainer.get(KEEPSRCELEMENTNAME);
-		return o == null ? null : (Boolean)o;
+		return o == null ? false : (Boolean)o;
 		}
 
 		@JsonIgnore
@@ -326,7 +326,7 @@ public class OAssign extends OActivity {
 		@JsonIgnore
 		public boolean isIsMyEndpointReference() {
 			Object o = fieldContainer.get(ISMYENDPOINTREFERENCE);
-		return o == null ? null : (Boolean)o;
+		return o == null ? false : (Boolean)o;
 		}
 
 		@JsonIgnore

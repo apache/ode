@@ -95,7 +95,7 @@ public class OReply extends OActivity {
 	@JsonIgnore
 	public boolean isIsFaultReply() {
 		Object o = fieldContainer.get(ISFAULTREPLY);
-		return o == null ? null : (Boolean)o;
+		return o == null ? false : (Boolean)o;
 	}
 
 	@SuppressWarnings("unchecked")
