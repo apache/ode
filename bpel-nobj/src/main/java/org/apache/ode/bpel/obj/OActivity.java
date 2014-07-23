@@ -91,7 +91,7 @@ public abstract class OActivity extends OAgent {
 			OActivity parent = this.getParent();
 			while (parent != null && handling == null) {
 				handling = parent.getFailureHandling();
-				parent = getParent().getParent();
+				parent = parent.getParent();
 			}
 		}
 		return handling;
@@ -174,7 +174,8 @@ public abstract class OActivity extends OAgent {
 
 	@JsonIgnore
 	public OActivity getParent() {
-		return (OActivity) fieldContainer.get(PARENT);
+		Object o = fieldContainer.get(PARENT);
+		return o == null ? null : (OActivity)o;
 	}
 
 	private void setParent(OActivity parent) {

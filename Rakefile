@@ -443,7 +443,8 @@ define "ode" do
       SLF4J,
       LOG4J,
       DOM4J,
-      HIBERNATE
+      HIBERNATE,
+	  JACKSON
       test.setup unzip(_("target/test/smx/ode")=>project("dao-jpa-ojpa-derby").package(:zip))
       test.setup unzip(_("target/test/smx/ode")=>project("dao-hibernate-db").package(:zip))
       test.setup task(:prepare_jbi_tests) do |task|
