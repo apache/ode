@@ -31,6 +31,7 @@ import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
 import java.util.HashMap;
+import java.util.Properties;
 
 /**
  * @author Matthieu Riou <mriou at apache dot org>
@@ -45,6 +46,10 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
 
     @SuppressWarnings("unchecked")
     public DbConfStoreConnectionFactory(DataSource ds, boolean createDatamodel, String txFactoryClassName) {
+        this(ds,new Properties(), createDatamodel, txFactoryClassName);
+    }
+
+    public DbConfStoreConnectionFactory(DataSource ds, Properties initialProps, boolean createDatamodel, String txFactoryClassName) {
         _ds = ds;
         initTxMgr(txFactoryClassName);
 
@@ -55,7 +60,7 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
         propMap.put("openjpa.ConnectionFactoryMode", "managed");
         propMap.put("openjpa.FlushBeforeQueries", "false");
         propMap.put("openjpa.FetchBatchSize", 1000);
-        //propMap.put("openjpa.jdbc.TransactionIsolation", "read-committed");
+        propMap.put("openjpa.jdbc.TransactionIsolation", "read-committed");
         propMap.put("javax.persistence.provider", "org.apache.openjpa.persistence.PersistenceProviderImpl");
 
         if (createDatamodel) propMap.put("openjpa.jdbc.SynchronizeMappings", "buildSchema(ForeignKeys=false)");
