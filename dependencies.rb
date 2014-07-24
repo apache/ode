@@ -26,8 +26,8 @@ AXIS2_ALL           = [group("axis2-adb", "axis2-codegen", "axis2-kernel", "axis
                               :under=>"org.apache.woden",
                               :version=>"1.0M9"),
                       "org.apache.axis2:axis2-transports:jar:1.0-i6",
-                      "org.apache.axis2:axis2-transport-http:jar:1.5",
-                      "org.apache.axis2:axis2-transport-local:jar:1.5",
+                      "org.apache.axis2:axis2-transport-http:jar:1.5.6",
+                      "org.apache.axis2:axis2-transport-local:jar:1.5.6",
                       "org.apache.axis2:axis2-transport-tcp:jar:1.0.0",
                       "org.apache.axis2:axis2-transport-jms:jar:1.0.0",
                       "org.apache.httpcomponents:httpcore:jar:4.0"]

@@ -64,7 +64,6 @@ public class ODEAxisServlet extends AxisServlet {
 
 
     public void stop() throws AxisFault {
-        super.stop();
         _odeServer.shutDown();
     }
 
