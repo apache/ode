@@ -336,6 +336,7 @@ public class OAssign extends OActivity {
 		}
 
 		// Must fit in a LValue even if it's not variable based
+		@JsonIgnore
 		public Variable getVariable() {
 			return null;
 		}
