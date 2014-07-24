@@ -86,7 +86,7 @@ define "ode" do
       JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS, XMLBEANS, AXIS2_MODULES.libs, SLF4J, LOG4J
 
     test.exclude 'org.apache.ode.axis2.management.*'
-    test.with project("tools"), AXIOM, JAVAX.javamail, COMMONS.codec, COMMONS.httpclient, XERCES, WOODSTOX
+    test.with project("tools"), AXIOM, JAVAX.javamail, COMMONS.codec, COMMONS.httpclient, XERCES, WOODSTOX, JACKSON
 
     package :jar
   end
@@ -128,7 +128,7 @@ define "ode" do
     end
 
     test.using :testng, :forkmode=>'perTest', :properties=>{ "org.apache.commons.logging.LogFactory" => "org.apache.commons.logging.impl.LogFactoryImpl", "log4j.configuration"=>"test-log4j.properties", "test.ports" => ENV['TEST_PORTS'], "org.apache.ode.scheduler.deleteJobsOnStart" => "true", "org.apache.ode.autoRetireProcess"=>"true" } #, :java_args=>['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6001', '-Xmx2048m', '-XX:MaxPermSize=256m']
-    test.with projects("tools"), libs, AXIS2_MODULES.mods, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, DOM4J, H2::REQUIRES, SPRING_TEST
+    test.with projects("tools"), libs, AXIS2_MODULES.mods, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, DOM4J, H2::REQUIRES, SPRING_TEST, JACKSON
     webapp_dir = "#{test.compile.target}/webapp"
     test.setup task(:prepare_webapp) do |task|
       cp_r _("src/main/webapp"), test.compile.target.to_s
@@ -298,7 +298,7 @@ define "ode" do
     test.using :properties=>{ "org.apache.ode.autoRetireProcess"=>"true" }
     test.with projects("bpel-nobj", "bpel-schemas", "bpel-scripts"),
       COMMONS.collections, COMMONS.lang, DERBY, JACOB, JAVAX.connector,
-      JAVAX.stream, JAVAX.transaction, JAVAX.connector, JAXEN, HSQLDB, SAXON, XERCES, XMLBEANS, XALAN, GERONIMO.transaction, SPRING, HIBERNATE, DOM4J
+      JAVAX.stream, JAVAX.transaction, JAVAX.connector, JAXEN, HSQLDB, SAXON, XERCES, XMLBEANS, XALAN, GERONIMO.transaction, SPRING, HIBERNATE, DOM4J, JACKSON
 
     package :jar
   end
