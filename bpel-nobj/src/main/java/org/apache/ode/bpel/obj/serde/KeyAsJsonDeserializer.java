@@ -1,6 +1,8 @@
 package org.apache.ode.bpel.obj.serde;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -15,6 +17,16 @@ public class KeyAsJsonDeserializer extends KeyDeserializer{
 	@Override
 	public Object deserializeKey(String key, DeserializationContext ctxt)
 			throws IOException, JsonProcessingException {
+		if (key.startsWith(KeyAsJsonSerializer.URIPrefix)){
+			key = key.substring(KeyAsJsonSerializer.URIPrefix.length());
+			try {
+				return new URI(key);
+			} catch (URISyntaxException e) {
+				// should never get here.
+				e.printStackTrace();
+				return null;
+			}
+		}
 		return mapper.readValue(key, Object.class);
 	}
 	
