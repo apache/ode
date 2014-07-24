@@ -2,10 +2,12 @@ package org.apache.ode.bpel.obj.serde;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.wsdl.OperationType;
+import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -71,6 +73,8 @@ public class JsonOmDeserializer implements OmDeserializer {
 					(JsonDeserializer) deserializers.get(d));
 		}
 		simpleModule.setDeserializerModifier(new OModelDeserModifier());
+		simpleModule.addKeyDeserializer(Object.class, new KeyAsJsonDeserializer());
+		simpleModule.addKeyDeserializer(String.class, new KeyAsJsonDeserializer());
 		mapper.registerModule(simpleModule);
 
 		wrapper = mapper.readValue(is, OProcessWrapper.class);

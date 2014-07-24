@@ -8,13 +8,22 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.xml.namespace.QName;
+
+import org.apache.ode.bpel.obj.serde.KeyAsJsonDeserializer;
+import org.apache.ode.bpel.obj.serde.KeyAsJsonSerializer;
 import org.junit.Test;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public class JacksonTest {
 	/**
@@ -26,14 +35,14 @@ public class JacksonTest {
 	@Test
 	public void testReference() throws JsonGenerationException,
 			JsonMappingException, IOException {
-		Map<String, Object> map = new LinkedHashMap<String, Object>();
+		Map<Object, Object> map = new LinkedHashMap<Object, Object>();
 		A a = new A();
 		a.next = a;
 		a.val = 100;
 		map.put("i1", 100);
 		map.put("i2", a);
 		map.put("i4", a);
-		Map<String, Object> map2 = new LinkedHashMap<String, Object>();
+		Map<Object, Object> map2 = new LinkedHashMap<Object, Object>();
 		String s = "a string";
 		map2.put("i31", s);
 		map2.put("i33", s);
@@ -47,6 +56,7 @@ public class JacksonTest {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setSerializerFactory(TypeBeanSerializerFactory.instance);
 		mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		mapper.writeValue(os, map);
 		ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
@@ -93,5 +103,31 @@ public class JacksonTest {
 			return parent;
 		}
 	}
+	static class C{
+		@JsonSerialize(keyUsing=KeyAsJsonSerializer.class)
+		@JsonDeserialize(keyUsing=KeyAsJsonDeserializer.class)
+		Map<Object, Object> map = new LinkedHashMap<Object, Object>();
+	
+	}
+	@Test
+	public void testMapTypeInfo() throws JsonParseException, JsonMappingException, IOException{
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.setSerializerFactory(TypeBeanSerializerFactory.instance);
+		mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		
+		C c = new C();
+		QName qname = new QName("uri","localtest");
+		c.map.put(qname, qname);
+		mapper.writeValue(os, c);
 
+		ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
+		ObjectMapper m2 = new ObjectMapper();
+		m2.setSerializerFactory(TypeBeanSerializerFactory.instance);
+		m2.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+
+		C de = m2.readValue(is, C.class);
+		assertEquals(c.map, de.map);
+	}
 }

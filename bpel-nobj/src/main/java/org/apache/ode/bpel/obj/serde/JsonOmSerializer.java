@@ -3,13 +3,16 @@ package org.apache.ode.bpel.obj.serde;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.wsdl.OperationType;
+import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.elang.xpath10.obj.OXPath10Expression;
 import org.apache.ode.bpel.obj.OProcessWrapper;
 import org.apache.ode.bpel.obj.serde.jacksonhack.TypeBeanSerializerFactory;
 import org.apache.ode.utils.NSContext;
@@ -70,6 +73,10 @@ public class JsonOmSerializer implements OmSerializer {
 			simpleModule.addSerializer((Class) ss,
 					(JsonSerializer) serializers.get(ss));
 		}
+//		simpleModule.addKeySerializer(QName.class, new KeyAsJsonSerializer());
+//		simpleModule.addKeySerializer(URI.class, new KeyAsJsonSerializer());
+//		simpleModule.addKeySerializer(OXPath10Expression.SigGetVariableData.class, new KeyAsJsonSerializer());
+		simpleModule.addKeySerializer(Object.class, new KeyAsJsonSerializer());
 		mapper.registerModule(simpleModule);
 		
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
