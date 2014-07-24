@@ -35,11 +35,13 @@ import javax.wsdl.WSDLException;
 import javax.xml.namespace.QName;
 
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.Constants;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
+import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.description.WSDL11ToAxisServiceBuilder;
 import org.apache.axis2.engine.AxisServer;
 import org.apache.axis2.engine.MessageReceiver;
@@ -48,6 +50,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.util.Axis2UriResolver;
 import org.apache.ode.axis2.util.Axis2WSDLLocator;
+import org.apache.axis2.transport.http.SimpleHTTPServer;
 
 public class ODEAxis2Server extends AxisServer {
     private static final Log log = LogFactory.getLog(ODEAxis2Server.class);
@@ -68,7 +71,9 @@ public class ODEAxis2Server extends AxisServer {
             }
 
             configContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem(axis2RepoDir, axis2ConfLocation);
-            configContext.getAxisConfiguration().getTransportIn("http").addParameter(new Parameter("port", ""+port));
+            SimpleHTTPServer receiver = new SimpleHTTPServer(configContext, port);
+            TransportInDescription trsIn = configContext.getAxisConfiguration().getTransportIn(Constants.TRANSPORT_HTTP);
+            trsIn.setReceiver(receiver);
         }
 
         public ODEAxis2Server(String odeRootDir, URL axis2xml, URL axis2repository, int port, ODEConfigProperties config) throws Exception {
@@ -82,7 +87,9 @@ public class ODEAxis2Server extends AxisServer {
             }
 
             configContext = ConfigurationContextFactory.createConfigurationContextFromURIs(axis2xml, axis2repository);
-            configContext.getAxisConfiguration().getTransportIn("http").addParameter(new Parameter("port", ""+port));
+            SimpleHTTPServer receiver = new SimpleHTTPServer(configContext, port);
+            TransportInDescription trsIn = configContext.getAxisConfiguration().getTransportIn(Constants.TRANSPORT_HTTP);
+            trsIn.setReceiver(receiver);
         }
 
         public void start() throws AxisFault {
