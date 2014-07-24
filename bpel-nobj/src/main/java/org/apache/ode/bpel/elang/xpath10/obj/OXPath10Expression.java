@@ -246,7 +246,7 @@ public class OXPath10Expression extends OLValueExpression {
 	 * Data structure representing the compiled signature of a <code>bpws:getVariableData</code>
 	 * invocation.
 	 */
-	public static final class OSigGetVariableData extends OBase {
+	public static class OSigGetVariableData extends OBase {
 		private static final String VARIABLE = "variable";
 		private static final String PART = "part";
 
@@ -297,7 +297,7 @@ public class OXPath10Expression extends OLValueExpression {
 	   * Data structure representing the signature of a <code>bpws:getVariableData</code>
 	   * invocation.
 	   */
-	private static final class SigGetVariableData extends ExtensibleImpl{
+	public static class SigGetVariableData extends ExtensibleImpl{
 
 		private final String VARNAME = "varname";
 		private final String PARTNAME = "partname";

@@ -151,6 +151,7 @@ public class OEventHandler extends OAgent {
 			setRoute("one");
 		}
 
+		@JsonIgnore
 		public String getCorrelatorId() {
 			return getPartnerLink().getId() + "." + getOperation().getName();
 		}

@@ -3,13 +3,11 @@ package org.apache.ode.bpel.obj;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
+@JsonIdentityInfo(generator = ObjectIdGenerators.UUIDGenerator.class, property = "@id")
 public class ExtensibleImpl  implements Extensible<Object>{
 	/** The wrapper wraps fields. Fields can be deleted, added or updated */
 	protected Map<String, Object> fieldContainer;
@@ -23,12 +21,15 @@ public class ExtensibleImpl  implements Extensible<Object>{
 		fieldContainer = container;
 	}
 	
-	@JsonAnyGetter
+//	@JsonAnyGetter
 	public Map<String, Object> getFieldContainer() {
 		return fieldContainer;
 	}
+	public void setFieldContainer(Map<String, Object> fieldContainer){
+		this.fieldContainer = fieldContainer;
+	}
 
-	@JsonAnySetter
+//	@JsonAnySetter
 	public void addField(String name, Object value) {
 		fieldContainer.put(name, value);
 	}

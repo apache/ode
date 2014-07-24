@@ -28,7 +28,6 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
  * base class for compiled BPEL objects. It gives some common fields.
  * 
  */
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
 public class OBase extends ExtensibleImpl{
 	/** Our identifier, in terms of our parent. */
 	private static String ID = "_id";

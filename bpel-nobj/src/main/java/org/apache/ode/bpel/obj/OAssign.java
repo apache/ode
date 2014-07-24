@@ -429,6 +429,7 @@ public class OAssign extends OActivity {
 		return o == null ? null : (Variable)o;
 		}
 
+		@JsonIgnore
 		public boolean isHeaderRef() {
 			return getVariable().getType() instanceof OMessageVarType && getHeaderPart() != null && getLocation() == null;
         }
@@ -437,6 +438,7 @@ public class OAssign extends OActivity {
 		 * Report whether this is a reference to a whole "message"
 		 * @return <code>true</code> if whole-message reference
 		 */
+		@JsonIgnore
 		public boolean isMessageRef() {
 			return getVariable().getType() instanceof OMessageVarType && getPart() == null && getHeaderPart() == null && getLocation() == null;
         }
@@ -445,6 +447,7 @@ public class OAssign extends OActivity {
 		 * Report whether this is a reference to a message part.
 		 * @return <code>true</code> if reference to a message part
 		 */
+		@JsonIgnore
 		public boolean isPartRef() {
 			return getVariable().getType() instanceof OMessageVarType && getPart() != null && getLocation() == null;
         }
