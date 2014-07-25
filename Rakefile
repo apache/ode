@@ -434,7 +434,7 @@ define "ode" do
       jbi.include path_to("src/main/jbi/ode-jbi.properties")
     end
 
-    test.using :properties=>{ "java.naming.factory.initial" => "org.apache.xbean.spring.jndi.SpringInitialContextFactory", "org.apache.ode.autoRetireProcess"=>"true"}, :java_args=>ENV['TEST_JVM_ARGS']
+    test.using :properties=>{ "java.naming.factory.initial" => "org.apache.xbean.spring.jndi.SpringInitialContextFactory", "org.apache.ode.autoRetireProcess"=>"true"}, :java_args=>(ENV['TEST_JVM_ARGS']||='').split(' ')
     test.with projects("dao-jpa", "dao-hibernate", "bpel-compiler", "bpel-api-jca", "jca-ra", "jca-server"),
       BACKPORT, COMMONS.lang, COMMONS.io, COMMONS.collections, DERBY, GERONIMO.connector, GERONIMO.kernel,
       GERONIMO.transaction, JACOB, JAVAX.connector, JAVAX.ejb, JAVAX.persistence, JAVAX.stream,
