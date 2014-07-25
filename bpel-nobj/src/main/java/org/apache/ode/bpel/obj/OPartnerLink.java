@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,7 +38,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 /**
  * Compiled representation of a BPEL partnerLink.
  */
-public class OPartnerLink extends OBase {
+public class OPartnerLink extends OBase  implements Serializable{
+	public static final long serialVersionUID = -1L;
 	/** partnerLink name. */
 	private static final String NAME = "name";
 

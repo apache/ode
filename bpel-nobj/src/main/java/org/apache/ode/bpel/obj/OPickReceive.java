@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Field;
@@ -38,7 +39,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * a simplified version of the former, at run-time we do not distinguish
  * between the two.
  */
-public class OPickReceive extends OActivity {
+public class OPickReceive extends OActivity  implements Serializable{
+	public static final long serialVersionUID = -1L;
 	private static final String ONMESSAGES = "onMessages";
 	private static final String ONALARMS = "onAlarms";
 	private static final String CREATEINSTANCEFLAG = "createInstanceFlag";
@@ -86,7 +88,8 @@ public class OPickReceive extends OActivity {
 		fieldContainer.put(ONMESSAGES, onMessages);
 	}
 
-	public static class OnAlarm extends OBase {
+	public static class OnAlarm extends OBase  implements Serializable{
+	public static final long serialVersionUID = -1L;
 		private static final String ACTIVITY = "activity";
 		private static final String FOREXPR = "forExpr";
 		private static final String UNTILEXPR = "untilExpr";
@@ -129,7 +132,8 @@ public class OPickReceive extends OActivity {
 		}
 	}
 
-	public static class OnMessage extends OBase {
+	public static class OnMessage extends OBase  implements Serializable{
+	public static final long serialVersionUID = -1L;
 
 		/** Correlations to initialize. */
 		private static final String INITCORRELATIONS = "initCorrelations";

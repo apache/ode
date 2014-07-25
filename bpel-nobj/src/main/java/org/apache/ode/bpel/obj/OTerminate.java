@@ -18,12 +18,14 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
  * Compiled representation of the BPEL <code>&lt;terminate&gt;</code> activity.
  */
-public class OTerminate extends OActivity {
+public class OTerminate extends OActivity  implements Serializable{
+	public static final long serialVersionUID = -1L;
 	@JsonCreator
 	public OTerminate(){}
 

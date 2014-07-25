@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -49,7 +50,8 @@ import de.danielbechler.diff.annotation.ObjectDiffProperty;
 /**
  * Compiled BPEL process representation.
  */
-public class OProcess extends OBase {
+public class OProcess extends OBase  implements Serializable{
+	public static final long serialVersionUID = -1L;
 	public static int instanceCount = 0;
 	private static final String GUID = "guid";
 	/** BPEL version. */
@@ -385,7 +387,8 @@ public class OProcess extends OBase {
 		}
 	}
 
-	public static class OProperty extends OBase {
+	public static class OProperty extends OBase  implements Serializable{
+	public static final long serialVersionUID = -1L;
 
 		private static final String ALIASES = "aliases";
 		private static final String NAME = "name";
@@ -430,7 +433,8 @@ public class OProcess extends OBase {
 		}
 	}
 
-	public static class OPropertyAlias extends OBase {
+	public static class OPropertyAlias extends OBase  implements Serializable{
+	public static final long serialVersionUID = -1L;
 
 		private static final String VARTYPE = "varType";
 

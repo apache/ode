@@ -19,6 +19,7 @@
 
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import java.net.URI;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -27,7 +28,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * Compiled representation of an XSL sheet.
  */
-public class OXslSheet extends OBase {
+public class OXslSheet extends OBase  implements Serializable{
+	public static final long serialVersionUID = -1L;
 	private static final String URI = "uri";
 
 	private static final String SHEETBODY = "sheetBody";

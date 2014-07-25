@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import org.apache.ode.bpel.obj.OScope.Variable;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -29,7 +30,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author Maciej Szefler <mszefler at gmail dot com>
  *
  */
-public class OExtVar extends OBase {
+public class OExtVar extends OBase  implements Serializable{
+	public static final long serialVersionUID = -1L;
 
 	/**
 	 * Unique identifier for the external variable. Will be referenced in the deployment descriptor.

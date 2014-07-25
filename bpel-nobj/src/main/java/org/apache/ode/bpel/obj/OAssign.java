@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +32,8 @@ import org.w3c.dom.Document;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class OAssign extends OActivity {
+public class OAssign extends OActivity  implements Serializable{
+	public static final long serialVersionUID = -1L;
 	private static final String COPY = "copy";
 
 	@JsonCreator
@@ -71,7 +73,8 @@ public class OAssign extends OActivity {
 	/**
 	 * Assignmenet copy entry, i.e. what the assignment consits of.
 	 */
-	public static class Copy extends OBase {
+	public static class Copy extends OBase  implements Serializable{
+	public static final long serialVersionUID = -1L;
 		private static final String TO = "to";
 		private static final String FROM = "from";
 		private static final String KEEPSRCELEMENTNAME = "keepSrcElementName";
@@ -173,7 +176,8 @@ public class OAssign extends OActivity {
 	 * This is used for access to extensions (SOAP headers for example).
 	 * @author mszefler
 	 */
-	public static class DirectRef extends OBase implements RValue, LValue {
+	public static class DirectRef extends OBase implements RValue, LValue, Serializable{
+	public static final long serialVersionUID = -1L;
 		/** Referenced Variable */
 		private static final String VARIABLE = "variable";
 
@@ -208,7 +212,8 @@ public class OAssign extends OActivity {
 		}
 	}
 
-	public static class Expression extends OBase implements RValue {
+	public static class Expression extends OBase implements RValue, Serializable{
+	public static final long serialVersionUID = -1L;
 		private static final String EXPRESSION = "expression";
 
 		@JsonCreator
@@ -233,7 +238,8 @@ public class OAssign extends OActivity {
 		}
 	}
 
-	public static class Literal extends OBase implements RValue {
+	public static class Literal extends OBase implements RValue, Serializable{
+	public static final long serialVersionUID = -1L;
 		private static final String XMLLITERAL = "xmlLiteral";
 		
 		@JsonCreator
@@ -265,7 +271,8 @@ public class OAssign extends OActivity {
 		OScope.Variable getVariable();
 	}
 
-	public static class LValueExpression extends OBase implements LValue {
+	public static class LValueExpression extends OBase implements LValue, Serializable{
+	public static final long serialVersionUID = -1L;
 		private static final String EXPRESSION = "expression";
 
 		@JsonCreator
@@ -310,7 +317,8 @@ public class OAssign extends OActivity {
 
 	}
 
-	public static class PartnerLinkRef extends OBase implements RValue, LValue {
+	public static class PartnerLinkRef extends OBase implements RValue, LValue, Serializable{
+	public static final long serialVersionUID = -1L;
 		private static final String PARTNERLINK = "partnerLink";
 		private static final String ISMYENDPOINTREFERENCE = "isMyEndpointReference";
 
@@ -355,7 +363,8 @@ public class OAssign extends OActivity {
 		}
 	}
 
-	public static class PropertyRef extends OBase implements RValue, LValue {
+	public static class PropertyRef extends OBase implements RValue, LValue, Serializable{
+	public static final long serialVersionUID = -1L;
 		private static final String VARIABLE = "variable";
 		private static final String PROPERTYALIAS = "propertyAlias";
 
@@ -393,7 +402,8 @@ public class OAssign extends OActivity {
 	public interface RValue {
 	}
 
-	public static class VariableRef extends OBase implements RValue, LValue {
+	public static class VariableRef extends OBase implements RValue, LValue, Serializable{
+	public static final long serialVersionUID = -1L;
 		private static final String VARIABLE = "variable";
 		private static final String PART = "part";
 		private static final String HEADERPART = "headerPart";

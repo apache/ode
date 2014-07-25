@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Field;
@@ -36,7 +37,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * Compiled representation of the BPEL <code>&lt;reply&gt;</code> activity.
  */
-public class OReply extends OActivity {
+public class OReply extends OActivity  implements Serializable{
+	public static final long serialVersionUID = -1L;
 
 	/** Is this a Fault reply? */
 	private static final String ISFAULTREPLY = "isFaultReply";

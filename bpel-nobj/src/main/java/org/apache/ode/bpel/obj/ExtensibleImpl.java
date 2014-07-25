@@ -1,5 +1,6 @@
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -8,7 +9,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @JsonIdentityInfo(generator = ObjectIdGenerators.UUIDGenerator.class, property = "@id")
-public class ExtensibleImpl  implements Extensible<Object>{
+public class ExtensibleImpl  implements Extensible<Object>, Serializable{
+	public static final long serialVersionUID = -1L;
 	/** The wrapper wraps fields. Fields can be deleted, added or updated */
 	protected Map<String, Object> fieldContainer;
 	/** Version of this class*/

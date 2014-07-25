@@ -18,10 +18,12 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public abstract class OLValueExpression extends OExpression {
+public abstract class OLValueExpression extends OExpression  implements Serializable{
+	public static final long serialVersionUID = -1L;
 
 	/**
 	 * Indicates whether the expression, if it is a simple path, must

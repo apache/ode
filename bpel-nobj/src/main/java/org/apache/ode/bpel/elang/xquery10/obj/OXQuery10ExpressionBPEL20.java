@@ -19,6 +19,7 @@
 
 package org.apache.ode.bpel.elang.xquery10.obj;
 
+import java.io.Serializable;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.elang.xpath20.obj.OXPath20ExpressionBPEL20;
@@ -30,7 +31,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * A representation of an XQuery expression
  */
-public class OXQuery10ExpressionBPEL20 extends OXPath20ExpressionBPEL20 {
+public class OXQuery10ExpressionBPEL20 extends OXPath20ExpressionBPEL20 implements Serializable{
+	private static final long serialVersionUID = -1L;
+	
 	private static final String XQUERY = "xquery";
 
 	@JsonCreator

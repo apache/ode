@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -28,7 +29,8 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
  * base class for compiled BPEL objects. It gives some common fields.
  * 
  */
-public class OBase extends ExtensibleImpl{
+public class OBase extends ExtensibleImpl implements Serializable{
+	public static final long serialVersionUID = -1L;
 	/** Our identifier, in terms of our parent. */
 	private static String ID = "_id";
 	/** Owner OProcess */

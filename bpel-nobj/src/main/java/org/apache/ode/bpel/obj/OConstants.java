@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import javax.xml.namespace.QName;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -27,7 +28,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * Compiled BPEL constants. Mostly the qualified names of the standard
  * faults.
  */
-public class OConstants extends OBase {
+public class OConstants extends OBase  implements Serializable{
+	public static final long serialVersionUID = -1L;
 
 	private static final String QNMISSINGREQUEST = "qnMissingRequest";
 	private static final String QNMISSINGREPLY = "qnMissingReply";

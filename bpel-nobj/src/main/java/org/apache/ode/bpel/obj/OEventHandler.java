@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +30,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * Compiled represenation of a BPEL event handler.
  */
-public class OEventHandler extends OAgent {
+public class OEventHandler extends OAgent  implements Serializable{
+	public static final long serialVersionUID = -1L;
 	private static final String ONMESSAGES = "onMessages";
 	private static final String ONALARMS = "onAlarms";
 	
@@ -63,7 +65,8 @@ public class OEventHandler extends OAgent {
 		fieldContainer.put(ONMESSAGES, onMessages);
 	}
 
-	public static class OAlarm extends OAgent {
+	public static class OAlarm extends OAgent  implements Serializable{
+	public static final long serialVersionUID = -1L;
 		private static final String FOREXPR = "forExpr";
 		private static final String UNTILEXPR = "untilExpr";
 		private static final String REPEATEXPR = "repeatExpr";
@@ -117,7 +120,8 @@ public class OEventHandler extends OAgent {
 		}
 	}
 
-	public static class OEvent extends OScope {
+	public static class OEvent extends OScope  implements Serializable{
+	public static final long serialVersionUID = -1L;
 
 		/** Correlations to initialize. */
 		private static final String INITCORRELATIONS = "initCorrelations";

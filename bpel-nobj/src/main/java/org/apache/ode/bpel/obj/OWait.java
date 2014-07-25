@@ -18,13 +18,15 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Wait object
  */
-public class OWait extends OActivity {
+public class OWait extends OActivity  implements Serializable{
+	public static final long serialVersionUID = -1L;
 	private static final String FOREXPRESSION = "forExpression";
 	private static final String UNTILEXPRESSION = "untilExpression";
 

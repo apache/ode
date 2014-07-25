@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -28,7 +29,8 @@ import java.io.Serializable;
 /**
  * Holds information about the failure handling of this activity.
  */
-public class OFailureHandling extends ExtensibleImpl{
+public class OFailureHandling extends ExtensibleImpl implements Serializable{
+	public static final long serialVersionUID = -1L;
 
 	public static final String EXTENSION_NS_URI = "http://ode.apache.org/activityRecovery";
 	public static final QName FAILURE_FAULT_NAME = new QName(EXTENSION_NS_URI,

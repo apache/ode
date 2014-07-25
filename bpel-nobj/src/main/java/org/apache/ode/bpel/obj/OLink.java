@@ -18,13 +18,15 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Compiled representation of a BPEL control link.
  */
-public class OLink extends OBase {
+public class OLink extends OBase  implements Serializable{
+	public static final long serialVersionUID = -1L;
 	/** The flow in which the link is declared. */
 	private static final String DECLARINGFLOW = "declaringFlow";
 

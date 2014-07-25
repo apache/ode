@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Field;
@@ -36,7 +37,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * Compiled rerpresentation of the BPEL <code>&lt;invoke&gt;</code> activity.
  */
-public class OInvoke extends OActivity {
+public class OInvoke extends OActivity  implements Serializable{
+	public static final long serialVersionUID = -1L;
 	private static final String PARTNERLINK = "partnerLink";
 	private static final String INPUTVAR = "inputVar";
 	private static final String OUTPUTVAR = "outputVar";

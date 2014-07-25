@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import javax.xml.namespace.QName;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -26,7 +27,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * The catch pseudo-activity.
  */
-public final class OCatch extends OScope {
+public final class OCatch extends OScope  implements Serializable{
+	public static final long serialVersionUID = -1L;
 	private static final String FAULTNAME = "faultName";
 	private static final String FAULTVARIABLE = "faultVariable";
 

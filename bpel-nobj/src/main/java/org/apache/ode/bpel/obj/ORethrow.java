@@ -18,9 +18,12 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
-public class ORethrow extends OActivity {
+public class ORethrow extends OActivity implements Serializable{
+	private static final long serialVersionUID = -1L;
+	
 	@JsonCreator
 	public ORethrow(){}
 	public ORethrow(OProcess owner, OActivity parent) {

@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -27,7 +28,8 @@ import java.util.Map;
 /**
  * Compiled representation of an expression language dependency.
  */
-public class OExpressionLanguage extends OBase {
+public class OExpressionLanguage extends OBase  implements Serializable{
+	public static final long serialVersionUID = -1L;
 	private static final String EXPRESSIONLANGUAGEURI = "expressionLanguageUri";
 	private static final String PROPERTIES = "properties";
 

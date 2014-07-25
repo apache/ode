@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -26,7 +27,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 /**
  * Base class for variable types.
  */
-public abstract class OVarType extends OBase {
+public abstract class OVarType extends OBase  implements Serializable{
+	public static final long serialVersionUID = -1L;
 
 	@JsonCreator
 	public OVarType(){}

@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +28,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * Compiled representation of the BPEL <code>&lt;sequence&gt;</code> activity.
  */
-public class OSequence extends OActivity {
+public class OSequence extends OActivity  implements Serializable{
+	public static final long serialVersionUID = -1L;
 	private static final String SEQUENCE = "sequence";
 	
 	@JsonCreator

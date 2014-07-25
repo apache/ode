@@ -1,5 +1,6 @@
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -25,7 +26,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * 
  * @author fangzhen
  */
-public class OProcessWrapper extends ExtensibleImpl {
+public class OProcessWrapper extends ExtensibleImpl  implements Serializable{
+	public static final long serialVersionUID = -1L;
 	// constants
 	public static final byte[] MAGIC_NUMBER_OFH_20140529 = new byte[] { 0x55,
 			'5', 'S', 0x00, 'O', 'F', 'H', 0x20, 0x14, 0x05, 0x29 };

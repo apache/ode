@@ -19,6 +19,7 @@
 
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import org.apache.ode.bpel.obj.OScope.Variable;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -27,7 +28,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * Base model class for forEach activity.
  */
-public class OForEach extends OActivity {
+public class OForEach extends OActivity implements Serializable{
+	private static final long serialVersionUID = -1L;
+	
 	private static final String COUNTERVARIABLE = "counterVariable";
 	private static final String PARALLEL = "parallel";
 	private static final String STARTCOUNTERVALUE = "startCounterValue";
@@ -120,7 +123,9 @@ public class OForEach extends OActivity {
 						: getCompletionCondition().getBranchCount()) + "}";
 	}
 
-	public static class CompletionCondition extends OBase {
+	public static class CompletionCondition extends OBase implements Serializable{
+		private static final long serialVersionUID = -1L;
+
 		private static final String SUCCESSFULBRANCHESONLY = "successfulBranchesOnly";
 		private static final String BRANCHCOUNT = "branchCount";
 

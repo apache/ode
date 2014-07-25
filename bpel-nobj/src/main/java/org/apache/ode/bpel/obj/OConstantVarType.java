@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -28,7 +29,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * @author Matthieu Riou <mriou at apache dot org>
  */
-public class OConstantVarType extends OVarType {
+public class OConstantVarType extends OVarType  implements Serializable{
+	public static final long serialVersionUID = -1L;
     private static final String STRVALUE = "strValue";
     private transient Node nodeValue;
 

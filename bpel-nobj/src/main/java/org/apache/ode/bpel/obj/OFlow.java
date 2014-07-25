@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -29,7 +30,8 @@ import java.util.Set;
 
 /**
  */
-public class OFlow extends OActivity {
+public class OFlow extends OActivity  implements Serializable{
+	public static final long serialVersionUID = -1L;
 
 	/** Links delcared within this activity. */
 	private static final String LOCALLINKS = "localLinks";

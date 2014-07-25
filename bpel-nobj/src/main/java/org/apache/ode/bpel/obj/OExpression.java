@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -25,7 +26,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * Base class for compiled expressions. The exact form of a compiled expression is
  * dependent on the compiler implementation.
  */
-public abstract class OExpression extends OBase {
+public abstract class OExpression extends OBase  implements Serializable{
+	public static final long serialVersionUID = -1L;
 	private static final String EXPRESSIONLANGUAGE = "expressionLanguage";
 	@JsonCreator
 	public OExpression(){}

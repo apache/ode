@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.elang.xpath10.obj;
 
+import java.io.Serializable;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.elang.xpath10.obj.OXPath10Expression;
@@ -29,7 +30,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * Jaxen-based compiled-xpath representation for XPATH 1.0 expression language.
  */
-public class OXPath10ExpressionBPEL20 extends OXPath10Expression {
+public class OXPath10ExpressionBPEL20 extends OXPath10Expression implements Serializable{
+	private static final long serialVersionUID = -1L;
 
 	/** QName of the <code>bpws:getVariableData</code> function. */
 	private static final String QNAME_DOXSLTRANSFORM = "qname_doXslTransform";

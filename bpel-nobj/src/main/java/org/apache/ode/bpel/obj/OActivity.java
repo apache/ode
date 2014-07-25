@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -33,7 +34,8 @@ import de.danielbechler.diff.annotation.ObjectDiffProperty;
 /**
  * Compiled represnetation of a BPEL activity.
  */
-public abstract class OActivity extends OAgent {
+public abstract class OActivity extends OAgent  implements Serializable{
+	public static final long serialVersionUID = -1L;
 
 	private static final String JOINCONDITION = "joinCondition";
 	private static final String SUPPRESSJOINFAILURE = "suppressJoinFailure";

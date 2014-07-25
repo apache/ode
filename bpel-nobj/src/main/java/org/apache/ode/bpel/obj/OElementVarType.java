@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import javax.xml.namespace.QName;
 
 import org.w3c.dom.Document;
@@ -27,7 +28,8 @@ import org.w3c.dom.Node;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class OElementVarType extends OVarType {
+public class OElementVarType extends OVarType  implements Serializable{
+	public static final long serialVersionUID = -1L;
 	private static final String ELEMENTTYPE = "elementType";
 
 	@JsonCreator

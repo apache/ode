@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -26,7 +27,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  *
  * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
  */
-public class ORepeatUntil extends OActivity {
+public class ORepeatUntil extends OActivity  implements Serializable{
+	public static final long serialVersionUID = -1L;
 
 	/** The repeat until condition. */
 	private static final String UNTILCONDITION = "untilCondition";

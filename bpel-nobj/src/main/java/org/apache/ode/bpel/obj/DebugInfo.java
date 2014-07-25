@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,7 +30,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * Information about the source that was used to create a compiled object.
  */
-public class DebugInfo extends ExtensibleImpl {
+public class DebugInfo extends ExtensibleImpl  implements Serializable{
+	public static final long serialVersionUID = -1L;
 	/** Source file / resource name. */
 	private static final String SOURCEURI = "sourceURI";
 	/** Source line number (start). */

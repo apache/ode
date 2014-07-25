@@ -18,9 +18,11 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
-public class OConstantExpression extends OExpression {
+public class OConstantExpression extends OExpression  implements Serializable{
+	public static final long serialVersionUID = -1L;
 
     private Object _val;
 

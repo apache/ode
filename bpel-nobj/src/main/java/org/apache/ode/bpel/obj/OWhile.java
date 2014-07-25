@@ -18,13 +18,15 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Compiled representation of a <code>&lt;while&gt;</code> activity.
  */
-public class OWhile extends OActivity {
+public class OWhile extends OActivity implements Serializable{
+	private static final long serialVersionUID = -1L;
 
 	/** The while condition. */
 	private static final String WHILECONDITION = "whileCondition";

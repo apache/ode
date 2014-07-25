@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +29,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * Compiled representation of a BPEL <code>&lt;switch&gt;</code>. The
  * BPEL compiler generates instances of this class.
  */
-public class OSwitch extends OActivity {
+public class OSwitch extends OActivity  implements Serializable{
+	public static final long serialVersionUID = -1L;
 
 	/**
 	 * The cases declared within the <code>&lt;switch&gt;</code> actvity.
@@ -55,7 +57,8 @@ public class OSwitch extends OActivity {
 		fieldContainer.put(CASES, cases);
 	}
 
-	public static class OCase extends OBase {
+	public static class OCase extends OBase  implements Serializable{
+	public static final long serialVersionUID = -1L;
 		private static final String EXPRESSION = "expression";
 		private static final String ACTIVITY = "activity";
 

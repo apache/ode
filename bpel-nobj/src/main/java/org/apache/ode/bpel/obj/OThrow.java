@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.obj.OScope.Variable;
@@ -28,7 +29,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * Compiled representation of the BPEL <code>&lt;throw&gt;</code> activity.
  */
-public class OThrow extends OActivity {
+public class OThrow extends OActivity  implements Serializable{
+	public static final long serialVersionUID = -1L;
 	private static final String FAULTVARIABLE = "faultVariable";
 
 	private static final String FAULTNAME = "faultName";

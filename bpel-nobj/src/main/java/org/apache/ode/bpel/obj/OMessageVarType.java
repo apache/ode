@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -35,7 +36,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * Message variable type.
  */
-public class OMessageVarType extends OVarType {
+public class OMessageVarType extends OVarType  implements Serializable{
+	public static final long serialVersionUID = -1L;
 
 	private static final String MESSAGETYPE = "messageType";
 
@@ -120,7 +122,8 @@ public class OMessageVarType extends OVarType {
 		return buf.toString();
 	}
 
-	public static class Part extends OBase {
+	public static class Part extends OBase  implements Serializable{
+	public static final long serialVersionUID = -1L;
 
 		private static final String NAME = "name";
 		private static final String TYPE = "type";

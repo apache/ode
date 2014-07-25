@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.elang.xpath10.obj;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.HashMap;
 
@@ -43,7 +44,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * Jaxen-based compiled-xpath representation for XPATH 1.0 expression language.
  */
-public class OXPath10Expression extends OLValueExpression {
+public class OXPath10Expression extends OLValueExpression implements Serializable{
+	private static final long serialVersionUID = -1L;
 
 	/** Map from query name to variable declaration. */
 	private static final String VARS = "vars";
@@ -246,7 +248,9 @@ public class OXPath10Expression extends OLValueExpression {
 	 * Data structure representing the compiled signature of a <code>bpws:getVariableData</code>
 	 * invocation.
 	 */
-	public static class OSigGetVariableData extends OBase {
+	public static class OSigGetVariableData extends OBase implements Serializable{
+		private static final long serialVersionUID = -1L;
+		
 		private static final String VARIABLE = "variable";
 		private static final String PART = "part";
 
@@ -297,7 +301,8 @@ public class OXPath10Expression extends OLValueExpression {
 	   * Data structure representing the signature of a <code>bpws:getVariableData</code>
 	   * invocation.
 	   */
-	public static class SigGetVariableData extends ExtensibleImpl{
+	public static class SigGetVariableData extends ExtensibleImpl implements Serializable{
+		private static final long serialVersionUID = -1L;
 
 		private final String VARNAME = "varname";
 		private final String PARTNAME = "partname";

@@ -18,13 +18,15 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Compiled representation of the BPEL <code>&lt;compensate&gt;</code> activity.
  */
-public class OCompensate extends OActivity {
+public class OCompensate extends OActivity  implements Serializable{
+	public static final long serialVersionUID = -1L;
 
 	/** The scope that is compensated by this activity. */
 	private static final String COMPENSATEDSCOPE = "compensatedScope";

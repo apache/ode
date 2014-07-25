@@ -19,6 +19,7 @@
 
 package org.apache.ode.bpel.elang.xpath20.obj;
 
+import java.io.Serializable;
 import javax.xml.namespace.QName;
 
 import net.sf.saxon.expr.Expression;
@@ -32,7 +33,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * @author mriou <mriou at apache dot org>
  */
-public class OXPath20ExpressionBPEL20 extends OXPath10ExpressionBPEL20 {
+public class OXPath20ExpressionBPEL20 extends OXPath10ExpressionBPEL20 implements Serializable{
+	private static final long serialVersionUID = -1L;
+	
 	private final String COMPILEDEXPR = "_compiledExpr";
 
 	@JsonCreator

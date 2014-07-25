@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -27,7 +28,8 @@ import java.util.Set;
 /**
  * Base class for active BPEL agents.
  */
-public class OAgent extends OBase {
+public class OAgent extends OBase  implements Serializable{
+	public static final long serialVersionUID = -1L;
 
 	/** Links entering this agent. */
 	private static final String INCOMINGLINKS = "incomingLinks";
