@@ -26,8 +26,8 @@ import java.sql.Statement;
 import javax.sql.DataSource;
 import javax.xml.namespace.QName;
 
-import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
 import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
+import org.h2.jdbcx.JdbcDataSource;
 import org.junit.Test;
 
 /**
@@ -41,11 +41,12 @@ public class ExternalVariableTest extends BPELTestAbstract {
 
     public void setUp() throws Exception {
         super.setUp();
+        
+        JdbcDataSource hds = new JdbcDataSource();
+        hds.setURL("jdbc:h2:mem:odeextvar;DB_CLOSE_DELAY=-1");
+        hds.setUser("sa");
 
-        EmbeddedConnectionPoolDataSource ds = new EmbeddedConnectionPoolDataSource();
-        ds.setCreateDatabase("create");
-        ds.setDatabaseName("target/ExternalVariableTest");
-        _ds = ds;
+        _ds = hds;
 
         _jdbcext = new JdbcExternalVariableModule();
         _jdbcext.registerDataSource("testds", _ds);

@@ -17,7 +17,7 @@
 
 module H2
 
-  REQUIRES = "com.h2database:h2:jar:1.1.117"
+  REQUIRES = "com.h2database:h2:jar:1.3.176"
 
   #Java.classpath << REQUIRES
 
@@ -32,8 +32,8 @@ module H2
       db, prereqs = args.keys.first, args.values.first
       targetDir=File.expand_path(db)
       file(targetDir=>prereqs) do |task|
-        rm_rf dbname if File.exist?(dbname)
-        Java::Commands.java "org.h2.tools.RunScript", "-url", "jdbc:h2:file:"+Util.normalize_path("#{targetDir}/#{dbname}")+";DB_CLOSE_ON_EXIT=false;user=sa", "-showResults", "-script", prereqs, :classpath => REQUIRES
+        rm_rf task.name if File.exist?(task.name)
+        Java::Commands.java "org.h2.tools.RunScript", "-url", "jdbc:h2:file:"+Util.normalize_path("#{targetDir}/#{dbname}")+";DB_CLOSE_ON_EXIT=false", "-user", "sa", "-checkResults", "-script", prereqs, :classpath => REQUIRES
         #Buildr.filter(prereqs).into(dbname).run
         #touch task.name, :verbose=>false
       end

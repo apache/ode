@@ -79,6 +79,6 @@ public class CorrelationJoinLazyTest extends Axis2TestBase implements ODEConfigD
     }
 
     public String getODEConfigDir() {
-        return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby";
+        return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-h2";
     }
 }

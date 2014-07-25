@@ -46,6 +46,10 @@ public class OdeConfigProperties {
 
     public static final String PROP_DB_EMBEDDED_NAME = "db.emb.name";
 
+    public static final String PROP_DB_EMBEDDED_TYPE = "db.emb.type";
+
+    public static final String PROP_DB_EMBEDDED_CREATE = "db.emb.create";
+    
     public static final String PROP_DB_INTERNAL_URL = "db.int.jdbcurl";
 
     public static final String PROP_DB_INTERNAL_DRIVER = "db.int.driver";
@@ -112,6 +116,10 @@ public class OdeConfigProperties {
     private static String __dbEmbName = "jpadb";
     private static String __daoCfClass = "org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl";
 
+    public static String DEFAULT_DB_EMB_NAME = "ode-db";
+    public static String DEFAULT_DB_EMB_TYPE = "h2";
+    public static String DEFAULT_DAOCF_CLASS = "org.apache.ode.dao.jpa.openjpa.BpelDAOConnectionFactoryImpl";
+
     static {
         String odep = System.getProperty("ode.persistence");
         if (odep != null &&
@@ -135,6 +143,17 @@ public class OdeConfigProperties {
         /** Embedded database (Ode provides default embedded database with connection pool) */
         EMBEDDED
     }
+    
+    /**
+     * Possible database implementation.
+     */
+    public enum EmbeddedDbType {
+        
+        DERBY,
+        
+        H2
+    }
+
 
     public OdeConfigProperties(File cfgFile, String prefix) {
         _cfgFile = cfgFile;
@@ -186,6 +205,14 @@ public class OdeConfigProperties {
     public String getDbEmbeddedName() {
         return getProperty(OdeConfigProperties.PROP_DB_EMBEDDED_NAME, __dbEmbName);
 
+    }
+    
+    public EmbeddedDbType getDbEmbeddedType() {
+        return EmbeddedDbType.valueOf(getProperty(OdeConfigProperties.PROP_DB_EMBEDDED_TYPE, DEFAULT_DB_EMB_TYPE).trim().toUpperCase());
+    }
+
+    public boolean isDbEmbeddedCreate() {
+        return Boolean.valueOf(getProperty(OdeConfigProperties.PROP_DB_EMBEDDED_CREATE, "true"));
     }
 
     public DatabaseMode getDbMode() {

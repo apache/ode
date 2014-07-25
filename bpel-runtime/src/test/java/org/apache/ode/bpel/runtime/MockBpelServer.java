@@ -18,17 +18,24 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.derby.jdbc.EmbeddedXADataSource;
-import org.apache.geronimo.connector.outbound.GenericConnectionManager;
-import org.apache.geronimo.connector.outbound.connectionmanagerconfig.LocalTransactions;
-import org.apache.geronimo.connector.outbound.connectionmanagerconfig.PoolingSupport;
-import org.apache.geronimo.connector.outbound.connectionmanagerconfig.SinglePool;
-import org.apache.geronimo.connector.outbound.connectionmanagerconfig.TransactionSupport;
-import org.apache.geronimo.connector.outbound.connectiontracking.ConnectionTracker;
-import org.apache.geronimo.connector.outbound.connectiontracking.ConnectionTrackingCoordinator;
-import org.apache.geronimo.transaction.manager.RecoverableTransactionManager;
+import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import javax.wsdl.PortType;
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
-import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.ContextException;
@@ -41,9 +48,7 @@ import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.iapi.Scheduler.MapSerializableRunnable;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
-import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
 import org.apache.ode.il.EmbeddedGeronimoFactory;
 import org.apache.ode.il.MockScheduler;
 import org.apache.ode.il.config.OdeConfigProperties;
@@ -51,27 +56,8 @@ import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
-import org.hsqldb.jdbc.jdbcDataSource;
-import org.tranql.connector.derby.EmbeddedLocalMCF;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.resource.spi.ConnectionManager;
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import javax.wsdl.PortType;
-import javax.xml.namespace.QName;
-import java.io.File;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Collections;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 
 class MockBpelServer {
@@ -173,6 +159,7 @@ class MockBpelServer {
         _server.stop();
         _scheduler.stop();
         _scheduler.shutdown();
+        _database.shutdown();
     }
 
     protected TransactionManager createTransactionManager() throws Exception {
@@ -183,45 +170,14 @@ class MockBpelServer {
     }
 
     protected DataSource createDataSource() throws Exception {
-        TransactionSupport transactionSupport = LocalTransactions.INSTANCE;
-        ConnectionTracker connectionTracker = new ConnectionTrackingCoordinator();
-
-        PoolingSupport poolingSupport = new SinglePool(
-                10,
-                0,
-                1000,
-                1,
-                true,
-                false,
-                false);
-
-        ConnectionManager connectionManager = new GenericConnectionManager(
-                    transactionSupport,
-                    poolingSupport,
-                    null,
-                    connectionTracker,
-                    (RecoverableTransactionManager) _txManager,
-                    getClass().getName(),
-                    getClass().getClassLoader());
-
-
-            EmbeddedLocalMCF mcf = new org.tranql.connector.derby.EmbeddedLocalMCF();
-            mcf.setCreateDatabase(true);
-            mcf.setDatabaseName("target/testdb");
-            mcf.setUserName("sa");
-            mcf.setPassword("");
-            _dataSource = (DataSource) mcf.createConnectionFactory(connectionManager);
-            return _dataSource;
-
-
-//        d = org.tranql.connector.jdbc.JDBCDriverMCF();
-//        EmbeddedXADataSource ds = new EmbeddedXADataSource();
-//        ds.setCreateDatabase("create");
-//        ds.setDatabaseName("target/testdb");
-//        ds.setUser("sa");
-//        ds.setPassword("");
-//        _dataSource = ds;
-//        return _dataSource;
+        Properties props = new Properties();
+        props.setProperty(OdeConfigProperties.PROP_DAOCF, System.getProperty(OdeConfigProperties.PROP_DAOCF, OdeConfigProperties.DEFAULT_DAOCF_CLASS));
+        OdeConfigProperties odeProps = new OdeConfigProperties(props,"");
+        _database = Database.create(odeProps);
+        _database.setTransactionManager(_txManager);
+        _database.start();
+        _dataSource = _database.getDataSource();
+        return _dataSource;
     }
 
     protected Scheduler createScheduler() throws Exception {

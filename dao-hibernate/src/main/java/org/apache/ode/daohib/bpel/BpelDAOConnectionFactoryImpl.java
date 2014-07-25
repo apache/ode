@@ -123,8 +123,6 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
         return new SessionManager(properties, ds, tm);
     }
 
-    private static final String DEFAULT_HIBERNATE_DIALECT = "org.hibernate.dialect.DerbyDialect";
-
     public void shutdown() {
     	_sessionManager.shutdown();
     }

@@ -78,6 +78,6 @@ public class CorrelationJoinTest extends Axis2TestBase implements ODEConfigDirAw
     }
 
     public String getODEConfigDir() {
-        return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-derby";
+        return getClass().getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-h2";
     }
 }

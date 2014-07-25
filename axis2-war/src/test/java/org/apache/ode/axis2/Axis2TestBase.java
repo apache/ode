@@ -184,7 +184,7 @@ public abstract class Axis2TestBase {
     @BeforeMethod
     protected void setUp() throws Exception {
 		System.out.println("##### Running "+getClass().getName());
-        log.debug("##### Running "+getClass().getName());
+        log.info("##### Running "+getClass().getName());
         /**
          * 1. If no settings are given from buildr, the test runs with the default config directory.
          * 2. If no settings are given from buildr and if the test implements ODEConfigDirAware, the test runs with

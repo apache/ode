@@ -17,7 +17,7 @@
 
 module Derby
 
-  REQUIRES = Buildr.group("derby", "derbytools", :under=>"org.apache.derby", :version=>"10.1.2.1")
+  REQUIRES = Buildr.group("derby", "derbytools", :under=>"org.apache.derby", :version=>"10.5.3.0_1")
 
   Java.classpath << REQUIRES
 

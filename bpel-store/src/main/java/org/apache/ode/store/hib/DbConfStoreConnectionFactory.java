@@ -51,8 +51,6 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
 
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
-    private static final String DEFAULT_HIBERNATE_DIALECT = "org.hibernate.dialect.DerbyDialect";
-
     private static final String _guid = new GUID().toString();
 
     private static final Map<String, DataSource> _dataSources = new ConcurrentHashMap<String, DataSource>();

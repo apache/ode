@@ -18,46 +18,46 @@
  */
 package org.apache.ode.store.hib;
 
-import junit.framework.TestCase;
-
-import org.apache.derby.jdbc.EmbeddedXADataSource;
-import org.apache.ode.bpel.dao.BpelDAOConnection;
-import org.apache.ode.il.EmbeddedGeronimoFactory;
-import org.apache.ode.il.config.OdeConfigProperties;
-import org.apache.ode.store.ConfStoreConnection;
-import org.apache.ode.store.ConfStoreConnectionFactory;
-import org.apache.ode.store.DeploymentUnitDAO;
-import org.apache.ode.store.ProcessConfDAO;
-import org.hsqldb.jdbc.jdbcDataSource;
 import java.util.Properties;
 
-import javax.resource.spi.ConnectionManager;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 import javax.xml.namespace.QName;
 
+import junit.framework.TestCase;
+
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.il.EmbeddedGeronimoFactory;
+import org.apache.ode.il.config.OdeConfigProperties;
+import org.apache.ode.il.dbutil.Database;
+import org.apache.ode.il.dbutil.DatabaseConfigException;
+import org.apache.ode.store.ConfStoreConnection;
+import org.apache.ode.store.ConfStoreConnectionFactory;
+import org.apache.ode.store.DeploymentUnitDAO;
+import org.apache.ode.store.ProcessConfDAO;
+
 public class DaoTest extends TestCase {
     protected BpelDAOConnection daoConn;
     protected TransactionManager txm;
-    protected ConnectionManager connectionManager;
     private DataSource ds;
+    private Database db;
     ConfStoreConnectionFactory cf;
 
-    protected DataSource getDataSource() {
+    protected DataSource getDataSource() throws DatabaseConfigException {
         if (ds == null) {
-            EmbeddedXADataSource ds = new EmbeddedXADataSource();
-            ds.setCreateDatabase("create");
-            ds.setDatabaseName("target/testdb");
-            ds.setUser("sa");
-            ds.setPassword("");
-            this.ds = ds;
+            Properties props = new Properties();
+            props.setProperty(OdeConfigProperties.PROP_DAOCF, System.getProperty(OdeConfigProperties.PROP_DAOCF, OdeConfigProperties.DEFAULT_DAOCF_CLASS));
+            OdeConfigProperties odeProps = new OdeConfigProperties(props,"");
+            db = Database.create(odeProps);
+            db.setTransactionManager(txm);
+            db.start();
+            this.ds = db.getDataSource();
         }
         return ds;
     }
 
     public void setUp() throws Exception {
         EmbeddedGeronimoFactory factory = new EmbeddedGeronimoFactory();
-        connectionManager = new org.apache.geronimo.connector.outbound.GenericConnectionManager();
         txm = factory.getTransactionManager();
         ds = getDataSource();
         org.springframework.mock.jndi.SimpleNamingContextBuilder.emptyActivatedContextBuilder().bind("java:comp/UserTransaction", txm);
@@ -67,7 +67,7 @@ public class DaoTest extends TestCase {
     }
 
     public void tearDown() throws Exception {
-//        hsqlds.getConnection().createStatement().execute("SHUTDOWN");
+        db.shutdown();
     }
 
     public void testEmpty() {

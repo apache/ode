@@ -24,7 +24,7 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 public class CleanSuccessHibTest extends CleanSuccessTest {
     @Override
     public String getODEConfigDir() {
-        return HIB_DERBY_CONF_DIR;
+        return HIB_H2_CONF_DIR;
     }
 
     @Override

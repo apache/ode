@@ -73,7 +73,7 @@ public class SystemCronCleanupTest extends CleanTestBase {
     }
 
     public String getODEConfigDir() {
-        return HIB_DERBY_CONF_DIR;
+        return HIB_H2_CONF_DIR;
     }
 
     protected ProcessInstanceDAO getInstance() {

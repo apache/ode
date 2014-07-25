@@ -21,7 +21,6 @@ package org.apache.ode.daohib.bpel;
 
 import java.util.Properties;
 
-import javax.resource.spi.ConnectionManager;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
@@ -43,7 +42,6 @@ public abstract class BaseTestDAO extends TestCase {
 
     protected BpelDAOConnection daoConn;
     protected TransactionManager txm;
-    protected ConnectionManager connectionManager;
     private DataSource ds;
     /*
      * Make this true and change the getDataSource
@@ -53,7 +51,6 @@ public abstract class BaseTestDAO extends TestCase {
 
     protected void initTM() throws Exception {
         EmbeddedGeronimoFactory factory = new EmbeddedGeronimoFactory();
-        connectionManager = new org.apache.geronimo.connector.outbound.GenericConnectionManager();
         txm = factory.getTransactionManager();
         ds = getDataSource();
         org.springframework.mock.jndi.SimpleNamingContextBuilder.emptyActivatedContextBuilder().bind("java:comp/UserTransaction", txm);

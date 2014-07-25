@@ -19,31 +19,13 @@
 
 package org.apache.ode.il.dbutil;
 
-import java.sql.SQLException;
-import java.util.Properties;
-
-import javax.sql.DataSource;
-
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.derby.jdbc.EmbeddedDriver;
-import org.apache.geronimo.connector.outbound.GenericConnectionManager;
-import org.apache.geronimo.connector.outbound.connectionmanagerconfig.LocalTransactions;
-import org.apache.geronimo.connector.outbound.connectionmanagerconfig.PoolingSupport;
-import org.apache.geronimo.connector.outbound.connectionmanagerconfig.SinglePool;
-import org.apache.geronimo.connector.outbound.connectionmanagerconfig.TransactionSupport;
-import org.apache.geronimo.connector.outbound.connectiontracking.ConnectionTracker;
-import org.apache.geronimo.connector.outbound.connectiontracking.ConnectionTrackingCoordinator;
-import org.apache.geronimo.transaction.manager.RecoverableTransactionManager;
 import org.apache.ode.il.config.OdeConfigProperties;
-import org.tranql.connector.jdbc.JDBCDriverMCF;
 
 public class InternalDB extends Database {
+    protected static final int CONNECTION_MAX_WAIT_MILLIS = 30000;
+    protected static final int CONNECTION_MAX_IDLE_MINUTES = 5;
 
-    protected GenericConnectionManager _connectionManager;
-
-    protected boolean _needDerbyShutdown;
-
-    protected String _derbyUrl;
+    protected DatabaseConnectionManager _connectionManager;
     
     public InternalDB(OdeConfigProperties props) {
         super(props);
@@ -54,7 +36,6 @@ public class InternalDB extends Database {
         if (_started)
             return;
 
-        _needDerbyShutdown = false;
         _datasource = null;
         _connectionManager = null;
 
@@ -67,35 +48,24 @@ public class InternalDB extends Database {
         if (!_started)
             return;
 
-        if (_connectionManager != null)
+        if (_connectionManager != null) {
             try {
                 __log.debug("Stopping connection manager");
-                _connectionManager.doStop();
+                _connectionManager.shutdown();
             } catch (Throwable t) {
                 __log.warn("Exception while stopping connection manager: " + t.getMessage());
             } finally {
                 _connectionManager = null;
             }
-
-        if (_needDerbyShutdown) {
-            __log.debug("shutting down derby.");
-            EmbeddedDriver driver = new EmbeddedDriver();
-            try {
-                driver.connect(_derbyUrl + ";shutdown=true", new Properties());
-            } catch (SQLException ex) {
-                // Shutdown will always return an exeption!
-                if (ex.getErrorCode() != 45000)
-                    __log.error("Error shutting down Derby: " + ex.getErrorCode(), ex);
-
-            } catch (Throwable ex) {
-                __log.debug("Error shutting down Derby.", ex);
-            }
         }
-
-        _needDerbyShutdown = false;
+        
+        shutdownDB();
+    
         _datasource = null;
         _started = false;
     }
+    
+    protected void shutdownDB() {}
     
     protected void initDataSource() throws DatabaseConfigException {
         __log.info(__msgs.msgOdeUsingInternalDb(_odeConfig.getDbIntenralJdbcUrl(), _odeConfig.getDbInternalJdbcDriverClass()));
@@ -104,65 +74,8 @@ public class InternalDB extends Database {
     }
 
     protected void initInternalDb(String url, String driverClass, String username,String password) throws DatabaseConfigException {
-
-        __log.debug("Creating connection pool for " + url + " with driver " + driverClass);
-        if (!(_txm instanceof RecoverableTransactionManager)) {
-            throw new RuntimeException("TransactionManager is not recoverable.");
-        }
-
-        TransactionSupport transactionSupport = LocalTransactions.INSTANCE;
-        ConnectionTracker connectionTracker = new ConnectionTrackingCoordinator();
-
-        PoolingSupport poolingSupport = new SinglePool(
-                _odeConfig.getPoolMaxSize(),
-                _odeConfig.getPoolMinSize(),
-                CONNECTION_MAX_WAIT_MILLIS,
-                CONNECTION_MAX_IDLE_MINUTES,
-                true, // match one
-                false, // match all
-                false); // select one assume match
-
-        _connectionManager = new GenericConnectionManager(
-                    transactionSupport,
-                    poolingSupport,
-                    null,
-                    connectionTracker,
-                    (RecoverableTransactionManager) _txm,
-                    getClass().getName(),
-                    getClass().getClassLoader());
-
-
-        try {
-            javax.resource.spi.ManagedConnectionFactory mcf = null;
-            String mcfClass = _odeConfig.getDbInternalMCFClass();
-            if (mcfClass != null) {
-                Properties dbInternalMCFProps = _odeConfig.getDbInternalMCFProperties();
-                if (__log.isDebugEnabled()) {
-                    __log.debug("Using internal DB MCF " + mcfClass + " " + dbInternalMCFProps);
-                }
-                mcf = (javax.resource.spi.ManagedConnectionFactory) Class.forName(mcfClass).newInstance();
-                BeanUtils.copyProperties(mcf, dbInternalMCFProps);
-            } else {
-                if (__log.isDebugEnabled()) {
-                    __log.debug("Using internal DB JDBCDriverMCF");
-                }
-                JDBCDriverMCF mcf2 = new JDBCDriverMCF();
-                mcf = mcf2;
-                mcf2.setDriver(driverClass);
-                mcf2.setConnectionURL(url);
-                if (username != null) {
-                    mcf2.setUserName(username);
-                }
-                if (password != null) {
-                    mcf2.setPassword(password);
-                }
-            }
-            _connectionManager.doStart();
-            _datasource = (DataSource) mcf.createConnectionFactory(_connectionManager);
-        } catch (Exception ex) {
-            String errmsg = __msgs.msgOdeDbPoolStartupFailed(url);
-            __log.error(errmsg, ex);
-            throw new DatabaseConfigException(errmsg, ex);
-        }
-    }
+        _connectionManager = new DatabaseConnectionManager(_txm,_odeConfig);
+        _connectionManager.init(url, driverClass, username, password);
+        _datasource = _connectionManager.getDataSource();
+     }
 }

@@ -59,6 +59,6 @@ public class CorrelationUnicityTest extends Axis2TestBase implements ODEConfigDi
     }
 
     public String getODEConfigDir() {
-        return HIB_DERBY_CONF_DIR;
+        return HIB_H2_CONF_DIR;
     }
 }

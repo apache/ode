@@ -90,7 +90,7 @@ public class CleanSuccessTest extends CleanTestBase {
     }
 
     public String getODEConfigDir() {
-        return JPA_DERBY_CONF_DIR;
+        return JPA_H2_CONF_DIR;
     }
 
     protected ProcessInstanceDAO getInstance() {

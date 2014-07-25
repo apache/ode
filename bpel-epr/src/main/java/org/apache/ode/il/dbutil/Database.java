@@ -40,10 +40,6 @@ public abstract class Database {
 
     protected static final Messages __msgs = Messages.getMessages(Messages.class);
 
-    protected static final int CONNECTION_MAX_WAIT_MILLIS = 30000;
-
-    protected static final int CONNECTION_MAX_IDLE_MINUTES = 5;
-
     protected OdeConfigProperties _odeConfig;
 
     protected boolean _started;
@@ -59,7 +55,11 @@ public abstract class Database {
             throw new NullPointerException("Must provide a configuration.");
         
         switch (props.getDbMode()) {
-        case EMBEDDED: return new EmbeddedDB(props);
+        case EMBEDDED: 
+            switch (props.getDbEmbeddedType()) {
+                case DERBY: return new DerbyEmbeddedDB(props);
+                case H2: return new H2EmbeddedDB(props);
+            }
         case EXTERNAL: return new ExternalDB(props);
         case INTERNAL: return new InternalDB(props);
         default: throw new IllegalStateException();

@@ -30,55 +30,46 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.geronimo.connector.outbound.GenericConnectionManager;
-import org.apache.geronimo.connector.outbound.connectionmanagerconfig.LocalTransactions;
-import org.apache.geronimo.connector.outbound.connectionmanagerconfig.PoolingSupport;
-import org.apache.geronimo.connector.outbound.connectionmanagerconfig.SinglePool;
-import org.apache.geronimo.connector.outbound.connectionmanagerconfig.TransactionSupport;
-import org.apache.geronimo.connector.outbound.connectiontracking.ConnectionTracker;
-import org.apache.geronimo.connector.outbound.connectiontracking.ConnectionTrackingCoordinator;
-import org.apache.geronimo.transaction.manager.RecoverableTransactionManager;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.resource.spi.ConnectionManager;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 import javax.xml.namespace.QName;
 
-import org.apache.derby.jdbc.EmbeddedXADataSource;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.evt.DebugBpelEventListener;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.bpel.iapi.ProcessStoreEvent;
 import org.apache.ode.bpel.iapi.ProcessStoreListener;
-import org.apache.ode.bpel.iapi.MessageExchange.Status;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.il.EmbeddedGeronimoFactory;
 import org.apache.ode.il.config.OdeConfigProperties;
+import org.apache.ode.il.dbutil.Database;
+import org.apache.ode.scheduler.simple.JdbcDelegate;
+import org.apache.ode.scheduler.simple.SimpleScheduler;
 import org.apache.ode.store.ProcessConfImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
-import org.apache.ode.scheduler.simple.SimpleScheduler;
-import org.apache.ode.scheduler.simple.JdbcDelegate;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.w3c.dom.Element;
-import java.util.concurrent.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public abstract class BPELTestAbstract {
     private static final Log log = LogFactory.getLog(BPELTestAbstract.class);
@@ -90,6 +81,7 @@ public abstract class BPELTestAbstract {
 
     public static TransactionManager _txManager = null;
     public static DataSource _dataSource = null;
+    protected Database _database;
     
     protected ProcessStore store;
 
@@ -119,7 +111,6 @@ public abstract class BPELTestAbstract {
 
     @Before
     public void setUp() throws Exception {
-        EmbeddedGeronimoFactory factory = new EmbeddedGeronimoFactory();
         if (_txManager == null) {
             _txManager = createTransactionManager();
             org.springframework.mock.jndi.SimpleNamingContextBuilder.emptyActivatedContextBuilder().bind("java:comp/UserTransaction", _txManager);
@@ -136,12 +127,7 @@ public abstract class BPELTestAbstract {
                 _txManager.commit();
             }
         }
-//        try {
-//            _dataSource.getConnection();
-//        } catch (Exception e) {
-//            
-//        }
-//        createDataSource(false);
+
         _failures = new CopyOnWriteArrayList<Failure>();
         _server = new BpelServerImpl();
         Properties props = getConfigProperties();
@@ -202,8 +188,6 @@ public abstract class BPELTestAbstract {
         _deployed = null;
         _deployments = null;
         _invocations = null;
-        
-
     }
 
     protected TransactionManager createTransactionManager() throws Exception {
@@ -214,45 +198,14 @@ public abstract class BPELTestAbstract {
     }
 
     protected DataSource createDataSource(boolean shutdown) throws Exception {
-        TransactionSupport transactionSupport = LocalTransactions.INSTANCE;
-        ConnectionTracker connectionTracker = new ConnectionTrackingCoordinator();
-
-        PoolingSupport poolingSupport = new SinglePool(
-                10,
-                0,
-                1000,
-                1,
-                true,
-                false,
-                false);
-
-        ConnectionManager connectionManager = new GenericConnectionManager(
-                    transactionSupport,
-                    poolingSupport,
-                    null,
-                    connectionTracker,
-                    (RecoverableTransactionManager) _txManager,
-                    getClass().getName(),
-                    getClass().getClassLoader());
-
-            org.tranql.connector.derby.EmbeddedLocalMCF mcf = new org.tranql.connector.derby.EmbeddedLocalMCF();
-            mcf.setCreateDatabase(true);
-            mcf.setDatabaseName("target/testdb");
-            mcf.setUserName("sa");
-            mcf.setPassword("");
-            if (shutdown) {
-                mcf.setShutdownDatabase("shutdown");
-            }
-            return (DataSource) mcf.createConnectionFactory(connectionManager);
-
-//        d = org.tranql.connector.jdbc.JDBCDriverMCF();
-//        EmbeddedXADataSource ds = new EmbeddedXADataSource();
-//        ds.setCreateDatabase("create");
-//        ds.setDatabaseName("target/testdb");
-//        ds.setUser("sa");
-//        ds.setPassword("");
-//        _dataSource = ds;
-//        return _dataSource;
+        Properties props = new Properties();
+        props.setProperty(OdeConfigProperties.PROP_DAOCF, System.getProperty(OdeConfigProperties.PROP_DAOCF, OdeConfigProperties.DEFAULT_DAOCF_CLASS));
+        OdeConfigProperties odeProps = new OdeConfigProperties(props,"");
+        _database = Database.create(odeProps);
+        _database.setTransactionManager(_txManager);
+        _database.start();
+        _dataSource = _database.getDataSource();
+        return _dataSource;
     }
 
     protected void negative(String deployDir) throws Throwable {

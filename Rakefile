@@ -28,12 +28,14 @@ require File.join(File.dirname(__FILE__), 'dependencies.rb')
 
 Buildr.settings.build['jmock'] = "1.2.0"
 
+Buildr::Hibernate::REQUIRES[:hibernate] = HIBERNATE,
 Buildr::Hibernate::REQUIRES[:xdoclet] = Buildr.group("xdoclet", "xdoclet-xdoclet-module", "xdoclet-hibernate-module", 
  :under=>"xdoclet", :version=>"1.2.3") + ["xdoclet:xjavadoc:jar:1.1-j5"] 
 
 # XMLBeans addon must use the same version as we do.
 Buildr::XMLBeans::REQUIRES.xmlbeans.version = artifact(XMLBEANS).version
 
+Buildr::OpenJPA::REQUIRES[0] = "org.apache.openjpa:openjpa:jar:1.2.0"
 # dirty workaround for BUILDR-541/BUILDR-508
 Java.classpath << Buildr::OpenJPA::REQUIRES
 
@@ -111,7 +113,7 @@ define "ode" do
     end
     package(:war).path("WEB-INF/modules").include(artifacts(AXIS2_MODULES.mods))
     package(:war).tap do |root|
-      root.merge(artifact(AXIS2_WAR)).exclude("WEB-INF/*").exclude("META-INF/*")
+      root.merge(artifact(AXIS2_WAR)).include("WEB-INF/classes/org/*")
     end
 
     task("start"=>[package(:war), jetty.use]) do |task|
@@ -128,7 +130,7 @@ define "ode" do
     end
 
     test.using :testng, :forkmode=>'perTest', :properties=>{ "org.apache.commons.logging.LogFactory" => "org.apache.commons.logging.impl.LogFactoryImpl", "log4j.configuration"=>"test-log4j.properties", "test.ports" => ENV['TEST_PORTS'], "org.apache.ode.scheduler.deleteJobsOnStart" => "true", "org.apache.ode.autoRetireProcess"=>"true" } , :java_args=>['-Xmx2048m', '-XX:MaxPermSize=256m'] #'-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6001',
-    test.with projects("tools"), libs, AXIS2_MODULES.mods, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, DOM4J, H2::REQUIRES, SPRING_TEST
+    test.with [projects("tools"), libs, AXIS2_MODULES.mods, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, DOM4J, H2::REQUIRES, SPRING_TEST].uniq
     webapp_dir = "#{test.compile.target}/webapp"
     test.setup task(:prepare_webapp) do |task|
       cp_r _("src/main/webapp"), test.compile.target.to_s
@@ -198,7 +200,7 @@ define "ode" do
   define "bpel-epr" do
     compile.with projects("utils", "bpel-dao", "bpel-api"),
       AXIOM, COMMONS.lang, COMMONS.beanutils, DERBY, JAVAX.connector, JAVAX.stream, JAVAX.transaction, 
-      GERONIMO.transaction, GERONIMO.connector, TRANQL, XMLBEANS, SLF4J, LOG4J
+      GERONIMO.transaction, GERONIMO.connector, TRANQL, XMLBEANS, SLF4J, LOG4J, H2::REQUIRES
     test.with XERCES
     package :jar
   end
@@ -229,7 +231,7 @@ define "ode" do
     test.with projects("scheduler-simple", "dao-jpa", "dao-hibernate", "bpel-epr"),
         BACKPORT, COMMONS.pool, COMMONS.lang, COMMONS.io, DERBY, JAVAX.connector, JAVAX.transaction,
         GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, TRANQL, HSQLDB, JAVAX.ejb,
-        OPENJPA, XERCES, XALAN, DOM4J, HIBERNATE, SPRING_TEST,
+        OPENJPA, XERCES, XALAN, DOM4J, HIBERNATE, SPRING_TEST, H2::REQUIRES,
         "tranql:tranql-connector-derby-common:jar:1.1"
 
     package :jar
@@ -268,7 +270,7 @@ define "ode" do
 
     test.with COMMONS.collections, COMMONS.lang, JAVAX.connector, JAVAX.transaction, DOM4J, 
       XERCES, XALAN, JAXEN, SAXON, OPENJPA, GERONIMO.transaction, SLF4J, SPRING_TEST, DERBY,
-      GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb
+      GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, H2::REQUIRES
     package :jar
   end
 
@@ -283,7 +285,7 @@ define "ode" do
     test.using :properties=>{ "org.apache.ode.autoRetireProcess"=>"true" }
     test.with projects("bpel-obj", "bpel-schemas", "bpel-scripts"),
       COMMONS.collections, COMMONS.lang, DERBY, JACOB, JAVAX.connector,
-      JAVAX.stream, JAVAX.transaction, JAVAX.connector, JAXEN, HSQLDB, SAXON, XERCES, XMLBEANS, XALAN, GERONIMO.transaction, SPRING, HIBERNATE, DOM4J
+      JAVAX.stream, JAVAX.transaction, JAVAX.connector, JAXEN, HSQLDB, SAXON, XERCES, XMLBEANS, XALAN, GERONIMO.transaction, SPRING, HIBERNATE, DOM4J, H2::REQUIRES
 
     package :jar
   end
@@ -337,21 +339,21 @@ define "ode" do
       end
     end
 
-    runtime_sql = export[ properties_for[:derby], dao_hibernate, _("target/runtime.sql") ]
-    store_sql = export[ properties_for[:derby], bpel_store, _("target/store.sql") ]
     common_sql = _("src/main/sql/common.sql")
-    derby_sql = concat(_("target/derby.sql")=>[ predefined_for[:derby], common_sql, runtime_sql, store_sql ])
-    derby_db = Derby.create(_("target/derby/hibdb")=>derby_sql)
-    build derby_db
     
-    h2_sql = _("src/schema/ode-hib-h2.sql")
-    h2_db = H2.create("ode-hib-h2", _("target/h2/hibdb")=>h2_sql)
-    build h2_db
-
-    %w{ mysql firebird hsql postgres sqlserver oracle }.each do |db|
-      partial = export[ properties_for[db], dao_hibernate, _("target/partial.#{db}.sql") ]
-      build concat(_("target/#{db}.sql")=>[ common_sql, predefined_for[db], partial ])
+    %w{ derby mysql firebird hsql postgres sqlserver oracle h2}.each do |db|
+      partial_runtime = export[ properties_for[db], dao_hibernate, _("target/partial.runtime.#{db}.sql") ]
+      partial_store = export[ properties_for[db], bpel_store, _("target/partial.store.#{db}.sql") ]
+      build concat(_("target/#{db}.sql")=>[ common_sql, predefined_for[db], partial_store, partial_runtime])
     end
+
+    derby_sql = _("target/derby.sql")
+    derby_db = Derby.create(_("target/derby-hibdb")=>derby_sql)
+    build derby_db
+
+    h2_sql = _("target/h2.sql")
+    h2_db = H2.create("ode-hib-h2", _("target/h2-hibdb")=>h2_sql)
+    build h2_db
 
     NativeDB.create_dbs self, _("."), :hib
 
@@ -368,7 +370,7 @@ define "ode" do
 
   desc "ODE OpenJPA Derby Database"
   define "dao-jpa-ojpa-derby" do
-    %w{ derby mysql oracle postgres }.each do |db|
+    %w{ derby mysql oracle postgres h2 }.each do |db|
       db_xml = _("src/main/descriptors/persistence.#{db}.xml")
       scheduler_sql = _("src/main/scripts/simplesched-#{db}.sql")
       common_sql = _("src/main/scripts/common.sql")
@@ -380,7 +382,8 @@ define "ode" do
       sql = concat(_("target/#{db}.sql")=>[_("src/main/scripts/license-header.sql"), common_sql, partial_sql, scheduler_sql])
       build sql
     end
-    derby_db = Derby.create(_("target/derby/jpadb")=>_("target/derby.sql"))
+    derby_db = Derby.create(_("target/derby-jpadb")=>_("target/derby.sql"))
+    h2_db = H2.create("ode-jpa-h2", _("target/h2-jpadb")=>_("target/h2.sql"))
 
     test.with projects("bpel-api", "bpel-dao", "bpel-obj", "bpel-epr", "dao-jpa", "utils"),
       BACKPORT, COMMONS.collections, COMMONS.lang, COMMONS.logging, GERONIMO.transaction,
@@ -388,10 +391,11 @@ define "ode" do
       JAVAX.transaction, LOG4J, OPENJPA, XERCES, WSDL4J
 
     build derby_db
-
+    build h2_db
+    
     NativeDB.create_dbs self, _("."), :jpa
 
-    package(:zip).include(derby_db)
+    package(:zip).include(derby_db, h2_db)
   end
 
   desc "ODE JBI Integration Layer"
