@@ -21,9 +21,7 @@ package org.apache.ode.bpel.obj;
 import java.io.Serializable;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 /**
  * base class for compiled BPEL objects. It gives some common fields.

@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.collections.FastArrayList;
 import org.apache.ode.bpel.obj.OProcess.OProperty;
 
 import com.fasterxml.jackson.annotation.JsonCreator;

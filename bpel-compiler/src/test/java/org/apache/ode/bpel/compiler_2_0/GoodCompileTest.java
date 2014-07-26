@@ -19,28 +19,18 @@
 
 package org.apache.ode.bpel.compiler_2_0;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URI;
 import java.net.URL;
 
 import org.apache.ode.bpel.compiler.api.CompileListener;
-import org.apache.ode.bpel.obj.OBase;
 import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.OProcessWrapper;
 import org.apache.ode.bpel.obj.serde.OmDeserializer;
 import org.apache.ode.bpel.obj.serde.OmSerdeFactory;
 import org.junit.Assert;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import de.danielbechler.diff.Configuration;
-import de.danielbechler.diff.ObjectDiffer;
-import de.danielbechler.diff.ObjectDifferFactory;
-import de.danielbechler.diff.node.Node;
-import de.danielbechler.diff.path.PropertyPath;
-import de.danielbechler.diff.visitor.PrintingVisitor;
 
 public class GoodCompileTest extends AbstractCompileTestCase implements CompileListener {
            
@@ -54,27 +44,11 @@ public class GoodCompileTest extends AbstractCompileTestCase implements CompileL
             OProcess origi = _compiler.compile2OProcess(bpelFile, 0);
             String bpelPath = bpelFile.getAbsolutePath();
             String cbpPath = bpelPath.substring(0, bpelPath.lastIndexOf(".")) + ".cbp";
-            ByteArrayOutputStream out1 = new ByteArrayOutputStream();
-            _compiler._outputStream = out1;
             _compiler.serializeOProcess(origi, cbpPath);
             
             OmDeserializer deserializer = new OmSerdeFactory().createOmDeserializer(new FileInputStream(cbpPath));
             OProcessWrapper wrapper = deserializer.deserialize();
-            OProcess desered = wrapper.getProcess();
-            
-            String cbpPath2 = bpelPath.substring(0, bpelPath.lastIndexOf(".")) + "_2.cbp";
-            ByteArrayOutputStream out2 = new ByteArrayOutputStream();
-            _compiler._outputStream = out2;
-            _compiler.serializeOProcess(desered, cbpPath2);
-
-//            final Configuration configuration = new Configuration();
-//            configuration.withoutProperty(PropertyPath.buildWith("nextSibling"));
-//            configuration.withoutProperty(PropertyPath.buildWith("ownerDocument"));
-//            configuration.withoutProperty(PropertyPath.buildWith("parentNode"));
-//            configuration.withCompareToOnlyType(OBase.class);
-//            ObjectDiffer objectDiffer = ObjectDifferFactory.getInstance(configuration);
-//            Node root = objectDiffer.compare(desered, origi);
-//            root.visit(new PrintingVisitor(desered, origi));
+            wrapper.getProcess();
         } catch (Exception ex) {
             ex.printStackTrace();
             Assert.fail("Compilation did not succeed.");
