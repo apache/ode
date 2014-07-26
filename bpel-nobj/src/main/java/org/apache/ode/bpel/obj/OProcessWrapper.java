@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.obj.serde.OmSerdeFactory;
+import org.apache.ode.bpel.obj.serde.OmSerdeFactory.SerializeFormat;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -44,7 +45,7 @@ public class OProcessWrapper extends ExtensibleImpl  implements Serializable{
 	public OProcessWrapper() {
 		super(new LinkedHashMap<String, Object>());
 		setCompileTime(0);
-		setFormat(OmSerdeFactory.FORMAT_UNINITIALIZED);
+		setFormat(SerializeFormat.FORMAT_UNINITIALIZED);
 		
 	}
 
@@ -78,11 +79,11 @@ public class OProcessWrapper extends ExtensibleImpl  implements Serializable{
 	}
 
 	@JsonIgnore
-	public short getFormat() {
-		return (Short)fieldContainer.get(FORMAT);
+	public SerializeFormat getFormat() {
+		return (SerializeFormat)fieldContainer.get(FORMAT);
 	}
 
-	public void setFormat(short format) {
+	public void setFormat(SerializeFormat format) {
 		fieldContainer.put(FORMAT, format);
 	}
 
