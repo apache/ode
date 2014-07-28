@@ -127,7 +127,7 @@ define "ode" do
       end
     end
 
-    test.using :testng, :forkmode=>'perTest', :properties=>{ "org.apache.commons.logging.LogFactory" => "org.apache.commons.logging.impl.LogFactoryImpl", "log4j.configuration"=>"test-log4j.properties", "test.ports" => ENV['TEST_PORTS'], "org.apache.ode.scheduler.deleteJobsOnStart" => "true", "org.apache.ode.autoRetireProcess"=>"true" } #, :java_args=>['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6001', '-Xmx2048m', '-XX:MaxPermSize=256m']
+    test.using :testng, :forkmode=>'perTest', :properties=>{ "org.apache.commons.logging.LogFactory" => "org.apache.commons.logging.impl.LogFactoryImpl", "log4j.configuration"=>"test-log4j.properties", "test.ports" => ENV['TEST_PORTS'], "org.apache.ode.scheduler.deleteJobsOnStart" => "true", "org.apache.ode.autoRetireProcess"=>"true" } , :java_args=>['-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6001', '-Xmx4g', '-XX:MaxPermSize=1g']
     test.with projects("tools"), libs, AXIS2_MODULES.mods, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, DOM4J, H2::REQUIRES, SPRING_TEST, JACKSON
     webapp_dir = "#{test.compile.target}/webapp"
     test.setup task(:prepare_webapp) do |task|
@@ -178,7 +178,7 @@ define "ode" do
     compile.with projects("bpel-api", "bpel-nobj", "bpel-schemas", "utils"),
       JAVAX.stream, JAXEN, SAXON, WSDL4J, XALAN, XERCES, COMMONS.collections, SLF4J, LOG4J, JACKSON, OBJECT_DIFF
     test.resources { filter(project("bpel-scripts").path_to("src/main/resources")).into(test.resources.target).run }
-    test.with LOG4J
+    test.with LOG4J, projects("bpel-obj")
     package :jar
   end
 
@@ -213,6 +213,7 @@ define "ode" do
   define "bpel-nobj" do
     compile.with projects("utils", "bpel-obj"), JACKSON, LOG4J, SAXON, WSDL4J, COMMONS.collections, COMMONS.logging, OBJECT_DIFF
     package :jar
+	test.with XERCES
   end
   
   desc "Helper to covert from old OModel to new OModel"

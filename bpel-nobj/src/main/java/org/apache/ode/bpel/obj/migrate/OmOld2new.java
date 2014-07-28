@@ -1,9 +1,12 @@
 package org.apache.ode.bpel.obj.migrate;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -11,6 +14,8 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.obj.ExtensibleImpl;
+
+import com.sun.xml.internal.ws.api.pipe.Tube;
 
 public class OmOld2new {
     private static final Log __log = LogFactory.getLog(OmOld2new.class);
@@ -107,14 +112,20 @@ public class OmOld2new {
 		Object tn = initiateNew(old);
 		assert tn instanceof ExtensibleImpl;
 		ExtensibleImpl n = (ExtensibleImpl) tn;
-		Field[] fields = old.getClass().getFields();
+		List<Field> fields  = getAllFields(old.getClass());
 		Map<String, Object> fieldMap = n.getFieldContainer();
 		for (Field f : fields){
+			if ((f.getModifiers() & Modifier.STATIC) != 0){
+				continue; //skip static fields
+			}
+			f.setAccessible(true);
 			try{
 				String fname = f.getName();
 				Object fvalue = f.get(old);
 				if (fvalue != null){
 					fieldMap.put(fname, migrateFrom(fvalue));
+				}else{
+					fieldMap.put(fname, null);
 				}
 			} catch (Exception e) {
 				RuntimeException rte = new RuntimeException("Error when try to construct corresponding new Omodel class from old one:"
@@ -123,8 +134,21 @@ public class OmOld2new {
 				throw rte;
 			}
 		}
-		return null;
+		return n;
 	}
+	private List<Field> getAllFields(Class cls) {
+		return getAllFieldsRec(cls, new ArrayList<Field>());
+	}
+
+	private List<Field> getAllFieldsRec(Class cls, ArrayList<Field> fields) {
+		Class par = cls.getSuperclass();
+		if (par != null){
+			getAllFieldsRec(par, fields);
+		}
+		fields.addAll(Arrays.asList(cls.getDeclaredFields()));
+		return fields;
+	}
+
 	private Object initiateNew(Object old) {
 		String clsName = old.getClass().getName();
 		String qcls = clsName.replace(".o.", ".obj.");
