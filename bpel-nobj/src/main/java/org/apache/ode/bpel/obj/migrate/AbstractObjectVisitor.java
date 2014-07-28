@@ -44,7 +44,7 @@ public abstract class AbstractObjectVisitor implements ObjectVisitor{
 		rtab.assign(obj, n);
 		return n;
 	}
-	private boolean isSet(Object obj) {
+	protected boolean isSet(Object obj) {
 		return obj instanceof Set;
 	}
 
@@ -73,13 +73,13 @@ public abstract class AbstractObjectVisitor implements ObjectVisitor{
 	public abstract Object visitCollection(Object obj);
 	public abstract Object visitArray(Object obj);
 	public abstract Object visitPojo(Object obj);
-	public abstract Boolean visitSet(Object obj);
+	public abstract Object visitSet(Object obj);
 	
 	/**
      * Lightweight identity hash table which maps objects to replacement
      * objects.
      */   
-    private static class ReplaceTable {
+    public static class ReplaceTable {
 
         /* maps object -> index */
         private final HandleTable htab;

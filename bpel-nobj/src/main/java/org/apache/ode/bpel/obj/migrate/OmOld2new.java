@@ -15,9 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.obj.ExtensibleImpl;
 
-import com.sun.xml.internal.ws.api.pipe.Tube;
-
-public class OmOld2new {
+public class OmOld2new extends AbstractObjectVisitor{
     private static final Log __log = LogFactory.getLog(OmOld2new.class);
     
 	private static Map<String, String> beanPkgMap = new HashMap<String, String>();
@@ -27,45 +25,61 @@ public class OmOld2new {
 		beanPkgMap.put("org.apache.ode.bpel.elang.xpath20.o", "org.apache.ode.bpel.elang.xpath20.obj");
 		beanPkgMap.put("org.apache.ode.bpel.elang.xquery10.o", "org.apache.ode.bpel.elang.xquery10.obj");
 	}
-	private HandleTable htab = new HandleTable(1000, 0.8f);
-	private ReplaceTable rtab = new ReplaceTable(1000, 0.8f);
 	
-	public Object migrateFrom(Object old){
-		__log.debug("migrating object: " + old.getClass() + "@" + System.identityHashCode(old));
-		if (old == null) return null;
-		if (htab.lookup(old) != -1){
-			return rtab.lookup(old);
-		}
-		htab.assign(old);
+	public Object visit(Object obj){
+		__log.debug("migrating object: " + obj.getClass() + "@" + System.identityHashCode(obj));
 		Object n;
-		if (isOmodelBean(old)){
-			n = constructNewOm(old);
-		}else if (isMap(old)){
-			n = constructNewMap(old);
-		}else if (isCollection(old)){
-			n = constructNewCollection(old);
-		}else if (isArray(old)){
-			n = constructNewArray(old);
+		if (isMap(obj)){
+			n = visitMap(obj);
+		}else if (isCollection(obj)){
+			n = visitCollection(obj);
+		}else if (isArray(obj)){
+			n = visitArray(obj);
 		}else{
-			n = old;
+			n = visitPojo(obj);
 		}
-		rtab.assign(old, n);
-		__log.debug("Assigned object " + old.getClass() + "@" + System.identityHashCode(old));
+		rtab.assign(obj, n);
+		
+		if (isMap(obj)){
+			visitMap(obj, n);
+		}else if (isCollection(obj)){
+			visitCollection(obj, n);
+		}else if (isArray(obj)){
+			visitArray(obj, n);
+		}else{
+			visitPojo(obj, n);
+		}
 		return n;
 	}
-	
-	private Object constructNewArray(Object old) {
+
+
+	@Override
+	protected boolean isCollection(Object old) {
+		return (old instanceof Collection);
+	}
+
+	private boolean isOmodelBean(Object old){
+		Class<?> cls = old.getClass();
+		if (beanPkgMap.containsKey(cls.getPackage().getName()) && !cls.getSimpleName().equals("Serializer")){
+			return true;
+		}
+		return false;
+	}
+	@Override
+	public Object visitArray(Object old) {
 		throw new UnsupportedOperationException("Create new Array is unsupported");
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private Object constructNewCollection(Object old) {
+	private void visitArray(Object obj, Object n) {
+		throw new UnsupportedOperationException("We don't need the method here");
+	}
+
+	@Override
+	@SuppressWarnings({ "rawtypes"})
+	public Object visitCollection(Object old) {
 		Collection o = (Collection) old;
 		try {
 			Collection n = o.getClass().newInstance();
-			for (Object obj : o){
-				n.add(migrateFrom(obj));
-			}
 			return n;
 		} catch (Exception e){
 			//should not get here
@@ -75,14 +89,20 @@ public class OmOld2new {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private Object constructNewMap(Object old) {
+	private void visitCollection(Object old, Object nu) {
+		Collection o = (Collection) old;
+		Collection n = (Collection) nu;
+		for (Object obj : o){
+			n.add(traverse.traverseObject(obj));
+		}
+	}
+
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public Object visitMap(Object old) {
 		Map o = (Map) old;
 		try{
 			Map n = o.getClass().newInstance();
-			Set<Entry> entries = o.entrySet();
-			for (Entry e : entries){
-				n.put(migrateFrom(e.getKey()), migrateFrom(e.getValue()));
-			}
 			return n;
 		}catch (Exception e){
 			//should not get here
@@ -90,26 +110,35 @@ public class OmOld2new {
 		}
 		return null;
 	}
-
-	private boolean isArray(Object old) {
-		return old.getClass().isArray();
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void visitMap(Object obj, Object nu) {
+		Set<Entry> entries = ((Map)obj).entrySet();
+		Map n = (Map)nu;
+		for (Entry e : entries){
+			n.put(traverse.traverseObject(e.getKey()), traverse.traverseObject(e.getValue()));
+		}
 	}
 
-	private boolean isCollection(Object old) {
-		return old instanceof Collection;
+	@Override
+	public Object visitPojo(Object old) {
+		if (!isOmodelBean(old)){
+			return old;
+		}else{
+			return initiateNew(old);
+		}
 	}
 
-	private boolean isMap(Object old) {
-		return old instanceof Map;
+	private void visitPojo(Object old, Object n) {
+		if (isOmodelBean(old)){
+			constructNewOm(old, n);
+		}
 	}
-
 	/**
 	 * construct new omodel instances from old ones. Assume <code>old</code> is an old OmodelBean
 	 * @param old
 	 * @return
 	 */
-	private Object constructNewOm(Object old) {
-		Object tn = initiateNew(old);
+	private Object constructNewOm(Object old, Object tn) {
 		assert tn instanceof ExtensibleImpl;
 		ExtensibleImpl n = (ExtensibleImpl) tn;
 		List<Field> fields  = getAllFields(old.getClass());
@@ -123,7 +152,7 @@ public class OmOld2new {
 				String fname = f.getName();
 				Object fvalue = f.get(old);
 				if (fvalue != null){
-					fieldMap.put(fname, migrateFrom(fvalue));
+					fieldMap.put(fname, traverse.traverseObject(fvalue));
 				}else{
 					fieldMap.put(fname, null);
 				}
@@ -136,6 +165,7 @@ public class OmOld2new {
 		}
 		return n;
 	}
+	
 	private List<Field> getAllFields(Class cls) {
 		return getAllFieldsRec(cls, new ArrayList<Field>());
 	}
@@ -161,201 +191,8 @@ public class OmOld2new {
 		}
 	}
 
-	private boolean isOmodelBean(Object old){
-		Class<?> cls = old.getClass();
-		if (beanPkgMap.containsKey(cls.getPackage().getName()) && !cls.getSimpleName().equals("Serializer")){
-			return true;
-		}
-		return false;
+	@Override
+	public Object visitSet(Object obj) {
+		throw new UnsupportedOperationException("We don't really need this operatiion here");
 	}
-	
-	 /**
-	  * Stole from openjdk OOS
-     * Lightweight identity hash table which maps objects to integer handles,
-     * assigned in ascending order.
-     */
-    private static class HandleTable {
-
-        /* number of mappings in table/next available handle */
-        private int size;
-        /* size threshold determining when to expand hash spine */
-        private int threshold;
-        /* factor for computing size threshold */
-        private final float loadFactor;
-        /* maps hash value -> candidate handle value */
-        private int[] spine;
-        /* maps handle value -> next candidate handle value */
-        private int[] next;
-        /* maps handle value -> associated object */
-        private Object[] objs;
-
-        /**
-         * Creates new HandleTable with given capacity and load factor.
-         */
-        HandleTable(int initialCapacity, float loadFactor) {
-            this.loadFactor = loadFactor;
-            spine = new int[initialCapacity];
-            next = new int[initialCapacity];
-            objs = new Object[initialCapacity];
-            threshold = (int) (initialCapacity * loadFactor);
-            clear();
-        }
-
-        /**
-         * Assigns next available handle to given object, and returns handle
-         * value.  Handles are assigned in ascending order starting at 0.
-         */
-        int assign(Object obj) {
-            if (size >= next.length) {
-                growEntries();
-            }
-            if (size >= threshold) {
-                growSpine();
-            }
-            insert(obj, size);
-            return size++;
-        }
-
-        /**
-         * Looks up and returns handle associated with given object, or -1 if
-         * no mapping found.
-         */
-        int lookup(Object obj) {
-            if (size == 0) {
-                return -1;
-            }
-            int index = hash(obj) % spine.length;
-            for (int i = spine[index]; i >= 0; i = next[i]) {
-                if (objs[i] == obj) {
-                    return i;
-                }
-            }
-            return -1;
-        }
-
-        /**
-         * Resets table to its initial (empty) state.
-         */
-        void clear() {
-            Arrays.fill(spine, -1);
-            Arrays.fill(objs, 0, size, null);
-            size = 0;
-        }
-
-        /**
-         * Returns the number of mappings currently in table.
-         */
-        int size() {
-            return size;
-        }
-
-        /**
-         * Inserts mapping object -> handle mapping into table.  Assumes table
-         * is large enough to accommodate new mapping.
-         */
-        private void insert(Object obj, int handle) {
-            int index = hash(obj) % spine.length;
-            objs[handle] = obj;
-            next[handle] = spine[index];
-            spine[index] = handle;
-        }
-
-        /**
-         * Expands the hash "spine" -- equivalent to increasing the number of
-         * buckets in a conventional hash table.
-         */
-        private void growSpine() {
-            spine = new int[(spine.length << 1) + 1];
-            threshold = (int) (spine.length * loadFactor);
-            Arrays.fill(spine, -1);
-            for (int i = 0; i < size; i++) {
-                insert(objs[i], i);
-            }
-        }
-
-        /**
-         * Increases hash table capacity by lengthening entry arrays.
-         */
-        private void growEntries() {
-            int newLength = (next.length << 1) + 1;
-            int[] newNext = new int[newLength];
-            System.arraycopy(next, 0, newNext, 0, size);
-            next = newNext;
-
-            Object[] newObjs = new Object[newLength];
-            System.arraycopy(objs, 0, newObjs, 0, size);
-            objs = newObjs;
-        }
-
-        /**
-         * Returns hash value for given object.
-         */
-        private int hash(Object obj) {
-            return System.identityHashCode(obj) & 0x7FFFFFFF;
-        }
-    }
-    
-    /**
-     * Lightweight identity hash table which maps objects to replacement
-     * objects.
-     */   
-    private static class ReplaceTable {
-
-        /* maps object -> index */
-        private final HandleTable htab;
-        /* maps index -> replacement object */
-        private Object[] reps;
-
-        /**
-         * Creates new ReplaceTable with given capacity and load factor.
-         */
-        ReplaceTable(int initialCapacity, float loadFactor) {
-            htab = new HandleTable(initialCapacity, loadFactor);
-            reps = new Object[initialCapacity];
-        }
-
-        /**
-         * Enters mapping from object to replacement object.
-         */
-        void assign(Object obj, Object rep) {
-            int index = htab.assign(obj);
-            while (index >= reps.length) {
-                grow();
-            }
-            reps[index] = rep;
-        }
-
-        /**
-         * Looks up and returns replacement for given object.  If no
-         * replacement is found, returns the lookup object itself.
-         */
-        Object lookup(Object obj) {
-            int index = htab.lookup(obj);
-            return (index >= 0) ? reps[index] : obj;
-        }
-
-        /**
-         * Resets table to its initial (empty) state.
-         */
-        void clear() {
-            Arrays.fill(reps, 0, htab.size(), null);
-            htab.clear();
-        }
-
-        /**
-         * Returns the number of mappings currently in table.
-         */
-        int size() {
-            return htab.size();
-        }
-
-        /**
-         * Increases table capacity.
-         */
-        private void grow() {
-            Object[] newReps = new Object[(reps.length << 1) + 1];
-            System.arraycopy(reps, 0, newReps, 0, reps.length);
-            reps = newReps;
-        }
-    }
 }

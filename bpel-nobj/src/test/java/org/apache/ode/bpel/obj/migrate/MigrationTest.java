@@ -29,7 +29,7 @@ public class MigrationTest {
 //		assertEquals(Boolean.TRUE, traverse.traverseObject(old2));
 		
 		OmOld2new mig = new OmOld2new();
-		org.apache.ode.bpel.obj.OProcess migrated = (org.apache.ode.bpel.obj.OProcess)mig.migrateFrom(old);
+		org.apache.ode.bpel.obj.OProcess migrated = (org.apache.ode.bpel.obj.OProcess)mig.visit(old);
 	}
 	
 	@Test

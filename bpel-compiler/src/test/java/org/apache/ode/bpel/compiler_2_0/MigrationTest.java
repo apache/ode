@@ -35,8 +35,11 @@ public class MigrationTest extends GoodCompileTest{
     		__log.debug("compiled new OProcess " + nu.getFieldContainer());
     		org.apache.ode.bpel.o.OProcess old = new Serializer(new FileInputStream(oldCbpFile)).readOProcess();
     		OmOld2new mig = new OmOld2new();
-    		OProcess migrated = (OProcess) mig.migrateFrom(old);
+    		TraverseObject mtraverse = new TraverseObject();
+    		mtraverse.accept(mig);
+    		OProcess migrated = (OProcess) mtraverse.traverseObject(old);
     		__log.debug("migrated new OProcess " + migrated.getFieldContainer());
+    		
     		TraverseObject traverse = new TraverseObject();
     		EqualityVisitor visitor = new EqualityVisitor(nu);
     		visitor.addCustomComparator(new ExtensibeImplEqualityComp(visitor));
