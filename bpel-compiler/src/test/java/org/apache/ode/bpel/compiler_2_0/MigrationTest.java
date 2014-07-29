@@ -11,7 +11,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.bpel.obj.OProcess;
-import org.apache.ode.bpel.obj.migrate.DebugInfoComparator;
 import org.apache.ode.bpel.obj.migrate.EqualityVisitor;
 import org.apache.ode.bpel.obj.migrate.ExtensibeImplEqualityComp;
 import org.apache.ode.bpel.obj.migrate.OmOld2new;
@@ -44,7 +43,6 @@ public class MigrationTest extends GoodCompileTest{
     		TraverseObject traverse = new TraverseObject();
     		EqualityVisitor visitor = new EqualityVisitor(nu);
     		visitor.addCustomComparator(new ExtensibeImplEqualityComp(visitor));
-    		visitor.addCustomComparator(new DebugInfoComparator(visitor));
     		traverse.accept(visitor);
     		boolean res = (Boolean)traverse.traverseObject(migrated);
        		assertEquals(Boolean.TRUE, res);   		

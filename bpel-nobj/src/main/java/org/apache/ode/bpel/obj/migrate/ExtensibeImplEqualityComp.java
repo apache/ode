@@ -8,11 +8,12 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.obj.DebugInfo;
 import org.apache.ode.bpel.obj.ExtensibleImpl;
 import org.apache.ode.bpel.obj.OProcess;
 
 public class ExtensibeImplEqualityComp implements EqualityComparator{
-    private static final Log __log = LogFactory.getLog(DebugInfoComparator.class);
+    private static final Log __log = LogFactory.getLog(ExtensibeImplEqualityComp.class);
 	private EqualityVisitor visitor;
 	
 	public ExtensibeImplEqualityComp() {
@@ -50,12 +51,19 @@ public class ExtensibeImplEqualityComp implements EqualityComparator{
 		Map m2 = new LinkedHashMap(esio.getFieldContainer());
 		dehydrate(m1);
 		dehydrate(m2);
-		if (obj1.getClass() == OProcess.class){
+		if (obj1 instanceof OProcess){
 			dehydrateOProcess(m1);
 			dehydrateOProcess(m2);
 		}
+		if (obj1 instanceof DebugInfo){
+			dehydrateDebugInfo(m1);
+			dehydrateDebugInfo(m2);
+		}
 		visitor.setOther(m2);
 		return (Boolean) visitor.getTraverse().traverseObject(m1);
+	}
+	private void dehydrateDebugInfo(Map m) {
+		m.remove("description");
 	}
 	private void dehydrateOProcess(Map m) {
 		m.remove("compileDate");
