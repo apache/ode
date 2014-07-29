@@ -34,13 +34,12 @@ public class OProcessWrapper extends ExtensibleImpl  implements Serializable{
 			'5', 'S', 0x00, 'O', 'F', 'H', 0x20, 0x14, 0x05, 0x29 };
 	public static final byte[] CURRENT_MAGIC_NUMBER = MAGIC_NUMBER_OFH_20140529;
 	// key constants
-	public static final String MAGIC_NUMBER = "magic";
-	public static final String FORMAT = "format";
-	public static final String COMPILE_TIME = "compileTime";
-	public static final String GUID = "guid";
-	public static final String TYPE = "type";
-	public static final String PROCESS = "process";
-	public static final String OTHER_HEADERS = "otherHeaders";
+	private static final String MAGIC_NUMBER = "magic";
+	private static final String FORMAT = "format";
+	private static final String COMPILE_TIME = "compileTime";
+	private static final String GUID = "guid";
+	private static final String PROCESS = "process";
+	private static final String OTHER_HEADERS = "otherHeaders";
 
 	public OProcessWrapper() {
 		super(new LinkedHashMap<String, Object>());

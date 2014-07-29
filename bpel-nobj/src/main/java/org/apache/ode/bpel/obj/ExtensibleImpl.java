@@ -6,7 +6,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.ode.bpel.obj.migrate.OModelVisitor;
 
@@ -21,7 +20,7 @@ public class ExtensibleImpl  implements Extensible<Object>, Serializable{
 	/** The wrapper wraps fields. Fields can be deleted, added or updated */
 	transient protected Map<String, Object> fieldContainer;
 	/** Version of this class*/
-	private static String CLASS_VERSION = "classVersion";
+	private static final String CLASS_VERSION = "classVersion";
 
 	protected ExtensibleImpl() {
 		fieldContainer = new LinkedHashMap<String, Object>();

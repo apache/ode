@@ -30,10 +30,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class OBase extends ExtensibleImpl implements Serializable{
 	public static final long serialVersionUID = -1L;
 	/** Our identifier, in terms of our parent. */
-	private static String ID = "_id";
+	private static final String ID = "_id";
 	/** Owner OProcess */
-	private static String OWNER = "_owner";
-	private static String DEBUG_INFO = "debugInfo";
+	private static final String OWNER = "_owner";
+	private static final String DEBUG_INFO = "debugInfo";
 	
 	/**
 	 * This should only be used by jackson when deserialize
