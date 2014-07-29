@@ -48,7 +48,7 @@ public class MigrationTest extends GoodCompileTest{
        		assertEquals(Boolean.TRUE, res);   		
      } catch (Exception ex) {
             ex.printStackTrace();
-            Assert.fail("Compilation did not succeed.");
+            Assert.fail("Compilation or migration did not succeed.");
         }
     }
 }
