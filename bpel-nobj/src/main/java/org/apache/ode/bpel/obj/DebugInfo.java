@@ -118,19 +118,6 @@ public class DebugInfo extends ExtensibleImpl  implements Serializable{
 
 	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException{
 		ois.defaultReadObject();
-		int size = ois.readInt();
-		String cls = (String)ois.readObject();
-		try {
-			fieldContainer = (Map<String, Object>)(Class.forName(cls).newInstance());
-		} catch (Exception e) {
-			//should never get here
-			e.printStackTrace();
-		}
-		for (int i = 0; i < size; i++){
-			String key = (String)ois.readObject();
-			Object value = ois.readObject();
-			if (!key.equals(DESCRIPTION))
-				fieldContainer.put(key, value);
-		}
+		fieldContainer.remove(DESCRIPTION);
 	}
 }

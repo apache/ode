@@ -51,7 +51,7 @@ public class GoodCompileTest extends AbstractCompileTestCase implements CompileL
             wrapper.getProcess();
         } catch (Exception ex) {
             ex.printStackTrace();
-            Assert.fail("Compilation did not succeed.");
+            Assert.fail("Compilation or deserialization did not succeed.");
         }
     }
 
