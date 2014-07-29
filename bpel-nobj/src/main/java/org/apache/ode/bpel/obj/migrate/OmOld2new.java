@@ -1,5 +1,6 @@
 package org.apache.ode.bpel.obj.migrate;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -183,7 +184,9 @@ public class OmOld2new extends AbstractObjectVisitor{
 		String clsName = old.getClass().getName();
 		String qcls = clsName.replace(".o.", ".obj.");
 		try {
-			return Class.forName(qcls).newInstance();
+			Constructor cons = Class.forName(qcls).getConstructor();
+			cons.setAccessible(true);
+			return cons.newInstance();
 		} catch (Exception e) {
 			RuntimeException rte = new RuntimeException("Error when try to initiate corresponding new Omodel class of old one:"+old.getClass());
 			rte.initCause(e);

@@ -56,11 +56,11 @@ public class OPartnerLink extends OBase  implements Serializable{
 	private static final String INITIALIZEPARTNERROLE = "initializePartnerRole";
 
 	/** The set of CorrelationSets that may be used as a match criteria, organized by {@link Operation} */
-	private static final String NONINITIATINGCORRELATIONSETS = "nonIntitiatingCorrelationSets";
+	private static final String NONINITIATINGCORRELATIONSETS = "_nonIntitiatingCorrelationSets";
 	/** The set of joining CorrelationSets that may be used as a match criteria, organized by {@link Operation} */
-	private static final String JOININGCORRELATIONSETS = "joiningCorrelationSets";
+	private static final String JOININGCORRELATIONSETS = "_joiningCorrelationSets";
 	/** The set of {@link Operation}s that can be used to create a process instance. */
-	private static final String CREATEINSTANCEOPERATIONS = "createInstanceOperations";
+	private static final String CREATEINSTANCEOPERATIONS = "_createInstanceOperations";
 
 	@JsonCreator
 	public OPartnerLink(){

@@ -9,4 +9,6 @@ public interface ObjectVisitor {
 	void setTraverse(TraverseObject traverseObject);
 
 	void addCustomVisitor(Class cls, ObjectVisitor visitor);
+
+	TraverseObject getTraverse();
 }

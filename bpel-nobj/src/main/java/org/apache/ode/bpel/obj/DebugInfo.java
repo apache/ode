@@ -18,6 +18,8 @@
  */
 package org.apache.ode.bpel.obj;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -114,5 +116,21 @@ public class DebugInfo extends ExtensibleImpl  implements Serializable{
 		fieldContainer.put(STARTLINE, startLine);
 	}
 
-	//TODO: check legacy OModel DebugInfo#readObject.
+	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException{
+		ois.defaultReadObject();
+		int size = ois.readInt();
+		String cls = (String)ois.readObject();
+		try {
+			fieldContainer = (Map<String, Object>)(Class.forName(cls).newInstance());
+		} catch (Exception e) {
+			//should never get here
+			e.printStackTrace();
+		}
+		for (int i = 0; i < size; i++){
+			String key = (String)ois.readObject();
+			Object value = ois.readObject();
+			if (!key.equals(DESCRIPTION))
+				fieldContainer.put(key, value);
+		}
+	}
 }

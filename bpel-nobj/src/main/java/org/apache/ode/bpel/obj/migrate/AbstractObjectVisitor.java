@@ -21,7 +21,11 @@ public abstract class AbstractObjectVisitor implements ObjectVisitor{
 		}
 		return rtab.lookup(obj);
 	}
-
+	
+	@Override
+	public TraverseObject getTraverse(){
+		return traverse;
+	}
 	@Override
 	public Object visit(Object obj) {
 		ObjectVisitor customVisitor = visitors.get(obj.getClass());

@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 public class OConstantExpression extends OExpression  implements Serializable{
 	public static final long serialVersionUID = -1L;
 
-    private Object _val;
+    private static String VAL = "_val";
 
     @JsonCreator 
     public OConstantExpression(){}
@@ -34,14 +34,14 @@ public class OConstantExpression extends OExpression  implements Serializable{
     }
 
     public Object getVal() {
-        return _val;
+        return fieldContainer.get(VAL);
     }
 
     public void setVal(Object val) {
         if (val == null)
           throw new IllegalArgumentException("OConstatExpression cannot be null.");
 
-        _val = val;
+         fieldContainer.put(VAL, val);
     }
 
     public String toString() {

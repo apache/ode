@@ -309,7 +309,7 @@ public class OXPath10Expression extends OLValueExpression implements Serializabl
 		private final String LOCATION = "location";
 
 		@JsonCreator
-		SigGetVariableData(){}
+		public SigGetVariableData(){}
 		private SigGetVariableData(String varname, String partname,
 				String location) {
 			setVarname(varname);
