@@ -3,6 +3,7 @@ package org.apache.ode.bpel.obj.serde;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.OProcessWrapper;
 
 public class OmSerdeFactory {
@@ -11,8 +12,10 @@ public class OmSerdeFactory {
 	private SerializeFormat format = FORMAT_SERIALIZED_DEFAULT;
 	
 	
-	public OmSerializer createOmSerializer(OutputStream out, OProcessWrapper wrapper){
-		OmSerializer serializer = null;
+	public OmSerializer createOmSerializer(OutputStream out, OProcess process){
+		OProcessWrapper wrapper = new OProcessWrapper(System.currentTimeMillis());
+		wrapper.setProcess(process);
+		OmSerializer serializer;
 		switch (format) {
 		case FORMAT_SERIALIZED_JSON:
 			serializer = new JsonOmSerializer(out, wrapper);

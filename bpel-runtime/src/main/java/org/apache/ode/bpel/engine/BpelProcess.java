@@ -565,8 +565,7 @@ public class BpelProcess {
     private OProcess deserializeCompiledProcess(InputStream is) throws Exception {
         OProcess compiledProcess;
         OmDeserializer deserializer = new OmSerdeFactory().createOmDeserializer(is);
-        OProcessWrapper wrapper = deserializer.deserialize();
-        compiledProcess = wrapper.getProcess();
+        compiledProcess = deserializer.deserialize();
         return compiledProcess;
     }
 

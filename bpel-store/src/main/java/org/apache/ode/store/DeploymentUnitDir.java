@@ -50,7 +50,7 @@ import org.apache.ode.bpel.dd.DeployDocument;
 import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.dd.TDeployment.Process;
 import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.obj.OProcessWrapper;
+import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.serde.OmDeserializer;
 import org.apache.ode.bpel.obj.serde.OmSerdeFactory;
 import org.apache.ode.utils.InternPool;
@@ -219,8 +219,8 @@ class DeploymentUnitDir {
         try {
             is = new FileInputStream(f);
             OmDeserializer deserializer = new OmSerdeFactory().createOmDeserializer(is);
-            OProcessWrapper wrapper = deserializer.deserialize();
-            CBPInfo info = new CBPInfo(wrapper.getType(), wrapper.getGuid(), f);
+            OProcess process = deserializer.deserialize();
+            CBPInfo info = new CBPInfo(deserializer.getType(),deserializer.getGuid(), f);
 //            Serializer ofh = new Serializer(is);
 //            CBPInfo info = new CBPInfo(ofh.getType(), ofh.getGuid(), f);
             return info;

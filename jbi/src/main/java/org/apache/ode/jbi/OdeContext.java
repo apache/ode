@@ -201,8 +201,7 @@ final public class OdeContext {
             OProcess compiledProcess = null;
             try {
                 OmDeserializer deserializer = new OmSerdeFactory().createOmDeserializer(is);
-                OProcessWrapper wrapper = deserializer.deserialize();
-                compiledProcess = wrapper.getProcess();
+                compiledProcess = deserializer.deserialize();
             } finally {
                 is.close();
             }

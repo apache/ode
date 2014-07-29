@@ -285,9 +285,7 @@ public class BpelC {
             }
 
             try {
-            	OProcessWrapper wrapper = new OProcessWrapper(System.currentTimeMillis());
-            	wrapper.setProcess(oprocess);
-            	OmSerializer serializer = new OmSerdeFactory().createOmSerializer(_outputStream, wrapper);
+            	OmSerializer serializer = new OmSerdeFactory().createOmSerializer(_outputStream, oprocess);
             	serializer.serialize();
             } finally {
                 // close & mark myself invalid
@@ -440,9 +438,7 @@ public class BpelC {
             }
 
             try {
-            	OProcessWrapper wrapper = new OProcessWrapper(System.currentTimeMillis());
-            	wrapper.setProcess(oprocess);
-            	OmSerializer serializer = new OmSerdeFactory().createOmSerializer(_outputStream, wrapper);
+            	OmSerializer serializer = new OmSerdeFactory().createOmSerializer(_outputStream, oprocess);
             	serializer.serialize();
             } finally {
                 // close & mark myself invalid

@@ -11,6 +11,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.OProcessWrapper;
 import org.apache.ode.bpel.obj.serde.jacksonhack.TypeBeanSerializerFactory;
 import org.apache.ode.utils.NSContext;
@@ -62,7 +63,7 @@ public class JsonOmDeserializer implements OmDeserializer {
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public OProcessWrapper deserialize() throws IOException,
+	public OProcess deserialize() throws IOException,
 			SerializaionRtException {
 		mapper = new ObjectMapper(factory);
 		mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
@@ -78,7 +79,7 @@ public class JsonOmDeserializer implements OmDeserializer {
 		mapper.registerModule(simpleModule);
 
 		wrapper = mapper.readValue(is, OProcessWrapper.class);
-		return wrapper;
+		return wrapper.getProcess();
 	}
 
 	public void addCustomDeserializer(Class<?> c, JsonDeserializer<?> sd) {
@@ -184,5 +185,15 @@ public class JsonOmDeserializer implements OmDeserializer {
 			return ctx;
 		}
 		
+	}
+
+	@Override
+	public String getGuid() {
+		return wrapper.getGuid();
+	}
+
+	@Override
+	public QName getType() {
+		return wrapper.getType();
 	}
 }
