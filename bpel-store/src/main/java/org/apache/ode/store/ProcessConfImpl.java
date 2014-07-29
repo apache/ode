@@ -547,7 +547,7 @@ public class ProcessConfImpl implements ProcessConf {
             CronJob job = new CronJob();
             try {
                 job.setCronExpression(new CronExpression(schedule.getWhen()));
-                for(final TCleanup aCleanup : schedule.getCleanupArray()) {
+                for(TCleanup aCleanup : schedule.getCleanupArray()) {
                     CleanupInfo cleanupInfo = new CleanupInfo();
                     assert aCleanup.getFilterArray().length > 0;
                     cleanupInfo.setFilters(Arrays.asList(aCleanup.getFilterArray()));
