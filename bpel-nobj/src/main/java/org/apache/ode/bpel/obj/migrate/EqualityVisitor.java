@@ -14,16 +14,25 @@ import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/**
+ * compare two object for equality. default strategy:
+ * for collections and maps, compare their contents
+ * for POJO, 
+ * 		if any custom equality comparator can handle it, then use it;
+ * 		if it has an equals() method defined, use it.
+ * 		or compare their non-transient accessible fields by reflection.
+ * @author fangzhen
+ *
+ */
 public class EqualityVisitor extends AbstractObjectVisitor{
-	private static final Log __log = LogFactory.getLog(TraverseObject.class);
+	private static final Log __log = LogFactory.getLog(ObjectTraverser.class);
     private List<EqualityComparator> comparators = new LinkedList<EqualityComparator>();
+    /**stack that holds current visit path */
     private Stack<String> st = new Stack<String>();
-    
+    /**object that compared to */
     protected Object other;
     public boolean logFalseThrough = false;
-    public EqualityVisitor(){
-    	
-    }
+
 	public EqualityVisitor(Object other){
 		this.other = other;
 		st.push(":" + other.getClass().getSimpleName());

@@ -16,6 +16,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.obj.ExtensibleImpl;
 
+/**
+ * Migrate from old Omodel classes to new ones.
+ * @author fangzhen
+ *
+ */
 public class OmOld2new extends AbstractObjectVisitor{
     private static final Log __log = LogFactory.getLog(OmOld2new.class);
     
@@ -30,6 +35,13 @@ public class OmOld2new extends AbstractObjectVisitor{
 	public Object visit(Object obj){
 		__log.debug("migrating object: " + obj.getClass() + "@" + System.identityHashCode(obj));
 		Object n;
+		/*
+		 * we use two category of visitXXX methods here. The first  visitXXX(Object) 
+		 * return corresponding new object instance without fulfilling its contents, 
+		 * which avoids recursively call. And then assign the new object. then fill contents.
+		 * other wise, on cyclic reference case, the object re-visited but hasn't prepared yet.
+		 * However, this workaround assumes that the new object is mutable, which is true in our case.
+		 */
 		if (isMap(obj)){
 			n = visitMap(obj);
 		}else if (isCollection(obj)){
@@ -61,7 +73,8 @@ public class OmOld2new extends AbstractObjectVisitor{
 
 	private boolean isOmodelBean(Object old){
 		Class<?> cls = old.getClass();
-		if (beanPkgMap.containsKey(cls.getPackage().getName()) && !cls.getSimpleName().equals("Serializer")){
+		if (beanPkgMap.containsKey(cls.getPackage().getName()) &&
+				!cls.getSimpleName().equals("Serializer")){
 			return true;
 		}
 		return false;
@@ -158,7 +171,8 @@ public class OmOld2new extends AbstractObjectVisitor{
 					fieldMap.put(fname, null);
 				}
 			} catch (Exception e) {
-				RuntimeException rte = new RuntimeException("Error when try to construct corresponding new Omodel class from old one:"
+				RuntimeException rte = new RuntimeException(
+						"Error when try to construct corresponding new Omodel class from old one:"
 						+old.getClass() + "; Failed on field:" + f.getName());
 				rte.initCause(e);
 				throw rte;
@@ -188,7 +202,9 @@ public class OmOld2new extends AbstractObjectVisitor{
 			cons.setAccessible(true);
 			return cons.newInstance();
 		} catch (Exception e) {
-			RuntimeException rte = new RuntimeException("Error when try to initiate corresponding new Omodel class of old one:"+old.getClass());
+			RuntimeException rte = new RuntimeException(
+					"Error when try to initiate corresponding new Omodel class of old one:"
+							+ old.getClass());
 			rte.initCause(e);
 			throw rte;
 		}

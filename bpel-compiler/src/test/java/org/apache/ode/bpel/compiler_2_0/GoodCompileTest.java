@@ -30,7 +30,7 @@ import org.apache.ode.bpel.compiler.api.CompileListener;
 import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.migrate.EqualityVisitor;
 import org.apache.ode.bpel.obj.migrate.ExtensibeImplEqualityComp;
-import org.apache.ode.bpel.obj.migrate.TraverseObject;
+import org.apache.ode.bpel.obj.migrate.ObjectTraverser;
 import org.apache.ode.bpel.obj.serde.OmDeserializer;
 import org.apache.ode.bpel.obj.serde.OmSerdeFactory;
 import org.junit.Assert;
@@ -56,7 +56,7 @@ public class GoodCompileTest extends AbstractCompileTestCase implements
 					.createOmDeserializer(new FileInputStream(cbpPath));
 			OProcess desered = deserializer.deserialize();
 
-			TraverseObject traverse = new TraverseObject();
+			ObjectTraverser traverse = new ObjectTraverser();
 			EqualityVisitor visitor = new EqualityVisitor(desered);
 			visitor.addCustomComparator(new ExtensibeImplEqualityComp(visitor));
 			traverse.accept(visitor);

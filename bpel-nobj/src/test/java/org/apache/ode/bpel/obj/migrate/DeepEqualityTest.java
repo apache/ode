@@ -24,7 +24,7 @@ public class DeepEqualityTest {
 		List<String> ls2 = new ArrayList<String>();
 		ls2.add("Hello");
 		ls2.add("world");
-		TraverseObject traverse = new TraverseObject();
+		ObjectTraverser traverse = new ObjectTraverser();
 		EqualityVisitor visitor = new EqualityVisitor(ls2);
 		traverse.accept(visitor);
 		assertEquals(Boolean.TRUE, traverse.traverseObject(ls1));
@@ -43,7 +43,7 @@ public class DeepEqualityTest {
 		s2.add("world");
 		s2.add("hello");
 		
-		TraverseObject traverse = new TraverseObject();
+		ObjectTraverser traverse = new ObjectTraverser();
 		EqualityVisitor visitor = new EqualityVisitor(s2);
 		traverse.accept(visitor);
 		assertEquals(Boolean.TRUE, traverse.traverseObject(s1));
@@ -60,7 +60,7 @@ public class DeepEqualityTest {
 		m2.put("item1", "string1");
 		m2.put("item2", new ArrayList());
 
-		TraverseObject traverse = new TraverseObject();
+		ObjectTraverser traverse = new ObjectTraverser();
 		EqualityVisitor visitor = new EqualityVisitor(m2);
 		traverse.accept(visitor);
 		assertEquals(Boolean.TRUE, traverse.traverseObject(m1));
@@ -83,7 +83,7 @@ public class DeepEqualityTest {
 		DebugInfo d2 = new DebugInfo("/a/path", 0, 1, m2);
 		m2.put("cylic", d2);
 
-		TraverseObject traverse = new TraverseObject();
+		ObjectTraverser traverse = new ObjectTraverser();
 		EqualityVisitor visitor = new EqualityVisitor(d2);
 		visitor.addCustomComparator(new ExtensibeImplEqualityComp(visitor));
 		traverse.accept(visitor);

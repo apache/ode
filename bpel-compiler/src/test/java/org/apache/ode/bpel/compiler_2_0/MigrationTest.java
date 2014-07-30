@@ -14,12 +14,15 @@ import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.migrate.EqualityVisitor;
 import org.apache.ode.bpel.obj.migrate.ExtensibeImplEqualityComp;
 import org.apache.ode.bpel.obj.migrate.OmOld2new;
-import org.apache.ode.bpel.obj.migrate.TraverseObject;
+import org.apache.ode.bpel.obj.migrate.ObjectTraverser;
 import org.junit.Assert;
 
 public class MigrationTest extends GoodCompileTest{
     private static final Log __log = LogFactory.getLog(MigrationTest.class);
 
+    /**
+     * compare compiled OProcess with migrated ones.
+     */
     public void runTest(String bpel) throws Exception {
         try {
             Class testClass = getClass();
@@ -35,12 +38,12 @@ public class MigrationTest extends GoodCompileTest{
     		__log.debug("compiled new OProcess " + nu.getFieldContainer());
     		org.apache.ode.bpel.o.OProcess old = new Serializer(new FileInputStream(oldCbpFile)).readOProcess();
     		OmOld2new mig = new OmOld2new();
-    		TraverseObject mtraverse = new TraverseObject();
+    		ObjectTraverser mtraverse = new ObjectTraverser();
     		mtraverse.accept(mig);
     		OProcess migrated = (OProcess) mtraverse.traverseObject(old);
     		__log.debug("migrated new OProcess " + migrated.getFieldContainer());
     		
-    		TraverseObject traverse = new TraverseObject();
+    		ObjectTraverser traverse = new ObjectTraverser();
     		EqualityVisitor visitor = new EqualityVisitor(nu);
     		visitor.addCustomComparator(new ExtensibeImplEqualityComp(visitor));
     		traverse.accept(visitor);

@@ -5,9 +5,12 @@ import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-
-public class TraverseObject{
-    private static final Log __log = LogFactory.getLog(TraverseObject.class);
+/**
+ * Traverse an Object with help of an {@link ObjectVisitor}, taking into consideration of cyclic references.
+ * 
+ */
+public class ObjectTraverser{
+    private static final Log __log = LogFactory.getLog(ObjectTraverser.class);
 
     private HandleTable htab = new HandleTable(1000, 0.8f);
 	private ObjectVisitor visitor;
@@ -16,8 +19,6 @@ public class TraverseObject{
 		return htab;
 	}
 
-	public TraverseObject(){
-	}
 	public void accept(ObjectVisitor visitor){
 		this.visitor = visitor;
 		visitor.setTraverse(this);
@@ -25,6 +26,14 @@ public class TraverseObject{
 	public Object traverseObject(Object obj){
 		return traverseObject(obj, true);
 	}
+	
+	/**
+	 * 
+	 * @param obj current object
+	 * @param assign should we record this visit. Usually, this should be true to avoid infinite loop of cyclic reference. 
+	 * Sometime set to false when we need visit an object more than once.
+	 * @return anything the visitor returns.
+	 */
 	public Object traverseObject(Object obj, boolean assign){
 		__log.debug("current object " + obj);
 		if (obj == null) return null;
@@ -38,7 +47,7 @@ public class TraverseObject{
 	}
 	
 	/**
-	* Stole from openjdk OOS
+	* Stole from openjdk ObjectOutputStream
     * Lightweight identity hash table which maps objects to integer handles,
     * assigned in ascending order.
     */

@@ -7,8 +7,6 @@ import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.ode.bpel.obj.migrate.OModelVisitor;
-
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -49,10 +47,6 @@ public class ExtensibleImpl  implements Extensible<Object>, Serializable{
 	@Override
 	public Object delField(String fieldName) {
 		return fieldContainer.remove(fieldName);
-	}
-	
-	public void accept(OModelVisitor visitor){
-		visitor.visitExtensibleImpl(this);
 	}
 	
 	@JsonIgnore

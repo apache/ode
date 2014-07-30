@@ -6,12 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.ode.bpel.obj.migrate.TraverseObject.HandleTable;
-
+import org.apache.ode.bpel.obj.migrate.ObjectTraverser.HandleTable;
 
 public abstract class AbstractObjectVisitor implements ObjectVisitor{
 	protected ReplaceTable rtab = new ReplaceTable(1000, 0.8f);
-	protected TraverseObject traverse;
+	protected ObjectTraverser traverse;
 	protected Map<Class, ObjectVisitor>  visitors = new HashMap<Class, ObjectVisitor>();
 	
 	@Override
@@ -23,7 +22,7 @@ public abstract class AbstractObjectVisitor implements ObjectVisitor{
 	}
 	
 	@Override
-	public TraverseObject getTraverse(){
+	public ObjectTraverser getTraverse(){
 		return traverse;
 	}
 	@Override
@@ -48,6 +47,12 @@ public abstract class AbstractObjectVisitor implements ObjectVisitor{
 		rtab.assign(obj, n);
 		return n;
 	}
+	
+	/**
+	 * determine if obj is collections that order doesn't matter.
+	 * @param obj
+	 * @return
+	 */
 	protected boolean isSet(Object obj) {
 		return obj instanceof Set;
 	}
@@ -56,6 +61,11 @@ public abstract class AbstractObjectVisitor implements ObjectVisitor{
 		return old.getClass().isArray();
 	}
 
+	/**
+	 * determine if obj is collections that order does matter.
+	 * @param obj
+	 * @return
+	 */
 	protected boolean isCollection(Object old) {
 		return (old instanceof Collection) && !isSet(old);
 	}
@@ -64,7 +74,7 @@ public abstract class AbstractObjectVisitor implements ObjectVisitor{
 		return old instanceof Map;
 	}
 	@Override
-	public void setTraverse(TraverseObject traverseObject) {
+	public void setTraverse(ObjectTraverser traverseObject) {
 		this.traverse = traverseObject;		
 	}
 	
