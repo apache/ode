@@ -51,6 +51,7 @@ import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.dd.TDeployment.Process;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.serde.DeSerializer;
 import org.apache.ode.bpel.obj.serde.OmDeserializer;
 import org.apache.ode.bpel.obj.serde.OmSerdeFactory;
 import org.apache.ode.utils.InternPool;
@@ -218,11 +219,8 @@ class DeploymentUnitDir {
         InputStream is = null;
         try {
             is = new FileInputStream(f);
-            OmDeserializer deserializer = new OmSerdeFactory().createOmDeserializer(is);
-            OProcess process = deserializer.deserialize();
-            CBPInfo info = new CBPInfo(deserializer.getType(),deserializer.getGuid(), f);
-//            Serializer ofh = new Serializer(is);
-//            CBPInfo info = new CBPInfo(ofh.getType(), ofh.getGuid(), f);
+            DeSerializer deserializer = new DeSerializer(is);
+            CBPInfo info = new CBPInfo(deserializer.getWrapper().getType(),deserializer.getWrapper().getGuid(), f);
             return info;
         } catch (Exception e) {
             throw new ContextException("Couldn't read compiled BPEL process " + f.getAbsolutePath(), e);

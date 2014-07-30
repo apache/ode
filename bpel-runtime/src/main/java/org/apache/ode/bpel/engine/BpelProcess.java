@@ -66,6 +66,7 @@ import org.apache.ode.bpel.obj.OMessageVarType;
 import org.apache.ode.bpel.obj.OPartnerLink;
 import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.OProcessWrapper;
+import org.apache.ode.bpel.obj.serde.DeSerializer;
 import org.apache.ode.bpel.obj.serde.OmDeserializer;
 import org.apache.ode.bpel.obj.serde.OmSerdeFactory;
 import org.apache.ode.bpel.runtime.BpelRuntimeContext;
@@ -564,7 +565,7 @@ public class BpelProcess {
      */
     private OProcess deserializeCompiledProcess(InputStream is) throws Exception {
         OProcess compiledProcess;
-        OmDeserializer deserializer = new OmSerdeFactory().createOmDeserializer(is);
+        DeSerializer deserializer = new DeSerializer(is);
         compiledProcess = deserializer.deserialize();
         return compiledProcess;
     }

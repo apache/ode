@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.apache.ode.bpel.obj.OProcess;
-import org.apache.ode.bpel.obj.OProcessWrapper;
 
 public class OmSerdeFactory {
 	public static final SerializeFormat FORMAT_SERIALIZED_DEFAULT = SerializeFormat.FORMAT_SERIALIZED_JAVA;
@@ -13,18 +12,16 @@ public class OmSerdeFactory {
 	
 	
 	public OmSerializer createOmSerializer(OutputStream out, OProcess process){
-		OProcessWrapper wrapper = new OProcessWrapper(System.currentTimeMillis());
-		wrapper.setProcess(process);
 		OmSerializer serializer;
 		switch (format) {
 		case FORMAT_SERIALIZED_JSON:
-			serializer = new JsonOmSerializer(out, wrapper);
+			serializer = new JsonOmSerializer(out, process);
 			break;
 		case FORMAT_SERIALIZED_SMILE:
-			serializer = new SmileOmSerializer(out, wrapper);
+			serializer = new SmileOmSerializer(out, process);
 			break;
 		case FORMAT_SERIALIZED_JAVA:
-			serializer = new JavaSerOmSerializer(out, wrapper);
+			serializer = new JavaSerOmSerializer(out, process);
 			break;
 		default:
 			throw new SerializaionRtException("Unsupported format");
@@ -57,9 +54,30 @@ public class OmSerdeFactory {
 	}
 	
 	public static enum SerializeFormat{
-		FORMAT_UNINITIALIZED,
-		FORMAT_SERIALIZED_JSON,
-		FORMAT_SERIALIZED_SMILE,
-		FORMAT_SERIALIZED_JAVA;
+		FORMAT_UNINITIALIZED(0x00),
+		FORMAT_SERIALIZED_JSON(0x10),
+		FORMAT_SERIALIZED_SMILE(0x11),
+		FORMAT_SERIALIZED_JAVA(0x20);
+		
+		private int code;
+		private SerializeFormat(int code){
+			this.code = code;
+		}
+		
+		public int encode(){
+			return code;
+		}
+		public SerializeFormat decode(int c){
+			switch (c) {
+			case 0x10:
+				return FORMAT_SERIALIZED_JSON;
+			case 0x11:
+				return FORMAT_SERIALIZED_SMILE;
+			case 0x20:
+				return FORMAT_SERIALIZED_JAVA;
+			default:
+				return FORMAT_UNINITIALIZED;
+			}
+		}
 	}
 }

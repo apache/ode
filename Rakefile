@@ -28,14 +28,7 @@ require File.join(File.dirname(__FILE__), 'dependencies.rb')
 
 Buildr.settings.build['jmock'] = "1.2.0"
 Buildr.settings.build['junit'] = "4.11"
-module Buildr
-  class << JUnit
-	alias_method :olddeps, :dependencies
-	def dependencies
-	  ["org.hamcrest:hamcrest-core:jar:1.3"] + olddeps
-	end
-  end
-end
+Buildr::JUnit.instance_eval { @dependencies = ["junit:junit:jar:#{version}", "org.hamcrest:hamcrest-core:jar:1.3"] + Buildr::JMock.dependencies}
 
 Buildr::Hibernate::REQUIRES[:xdoclet] = Buildr.group("xdoclet", "xdoclet-xdoclet-module", "xdoclet-hibernate-module", 
  :under=>"xdoclet", :version=>"1.2.3") + ["xdoclet:xjavadoc:jar:1.1-j5"] 

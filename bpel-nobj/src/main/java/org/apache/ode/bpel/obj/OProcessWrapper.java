@@ -40,6 +40,7 @@ public class OProcessWrapper extends ExtensibleImpl  implements Serializable{
 	private static final String GUID = "guid";
 	private static final String PROCESS = "process";
 	private static final String OTHER_HEADERS = "otherHeaders";
+	private static final String TYPE = "type";
 
 	public OProcessWrapper() {
 		super(new LinkedHashMap<String, Object>());
@@ -65,9 +66,14 @@ public class OProcessWrapper extends ExtensibleImpl  implements Serializable{
 	//Accessors
 	@JsonIgnore
 	public QName getType(){
-		return new QName(getProcess().getTargetNamespace(), getProcess().getProcessName());
+		return (QName)fieldContainer.get(TYPE);
 	}
-	
+	public void setType(QName qname){
+		fieldContainer.put(TYPE, qname);
+	}
+	private void setType(String namespace, String local){
+		fieldContainer.put(TYPE, new QName(namespace, local));
+	}
 	@JsonIgnore
 	public byte[] getMagic() {
 		return (byte[])fieldContainer.get(MAGIC_NUMBER);
@@ -121,6 +127,7 @@ public class OProcessWrapper extends ExtensibleImpl  implements Serializable{
 	}
 	public void setProcess(OProcess process) {
 		setGuid(process.getGuid());
+		setType(process.getTargetNamespace(), process.getProcessName());
 		fieldContainer.put(OProcessWrapper.PROCESS, process);
 	}
 }

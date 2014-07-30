@@ -40,6 +40,7 @@ import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
 import org.apache.ode.bpel.compiler.bom.Process;
 import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.OProcessWrapper;
+import org.apache.ode.bpel.obj.serde.DeSerializer;
 import org.apache.ode.bpel.obj.serde.OmSerdeFactory;
 import org.apache.ode.bpel.obj.serde.OmSerializer;
 import org.apache.ode.utils.StreamUtils;
@@ -285,8 +286,8 @@ public class BpelC {
             }
 
             try {
-            	OmSerializer serializer = new OmSerdeFactory().createOmSerializer(_outputStream, oprocess);
-            	serializer.serialize();
+            	DeSerializer serializer = new DeSerializer();
+            	serializer.serialize(_outputStream, oprocess);
             } finally {
                 // close & mark myself invalid
                 this.invalidate();
@@ -438,8 +439,8 @@ public class BpelC {
             }
 
             try {
-            	OmSerializer serializer = new OmSerdeFactory().createOmSerializer(_outputStream, oprocess);
-            	serializer.serialize();
+               	DeSerializer serializer = new DeSerializer();
+            	serializer.serialize(_outputStream, oprocess);
             } finally {
                 // close & mark myself invalid
                 this.invalidate();

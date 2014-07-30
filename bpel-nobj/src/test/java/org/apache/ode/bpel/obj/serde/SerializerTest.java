@@ -18,13 +18,14 @@ public class SerializerTest {
 		OmSerdeFactory serdeFactory = new OmSerdeFactory();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		OProcess original = new OProcess("0");
-		OmSerializer omSerializer = serdeFactory.createOmSerializer(baos, original);
-		omSerializer.serialize();
+		original.setProcessName("process1");
+      	DeSerializer serializer = new DeSerializer();
+    	serializer.serialize(baos, original);
 		
 		InputStream is = new BufferedInputStream(new ByteArrayInputStream(baos
 				.toByteArray()));
-		OmDeserializer omDeserializer = serdeFactory.createOmDeserializer(is);
-		OProcess desered = omDeserializer.deserialize();
+		DeSerializer deSerializer = new DeSerializer(is);
+		OProcess desered = deSerializer.deserialize();
 		assertEquals(original.getFieldContainer(), desered.getFieldContainer());
 	}
 }

@@ -2,12 +2,10 @@ package org.apache.ode.bpel.obj.serde;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.wsdl.OperationType;
-import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,7 +33,7 @@ public class JsonOmDeserializer implements OmDeserializer {
 	protected static final Log __log = LogFactory
 			.getLog(JsonOmDeserializer.class);
 
-	private OProcessWrapper wrapper;
+	private OProcess process;
 	private InputStream is;
 
 	protected JsonFactory factory;
@@ -58,13 +56,12 @@ public class JsonOmDeserializer implements OmDeserializer {
 		this();
 		this.is = is;
 		this.factory = factory;
-		wrapper = new OProcessWrapper();
+		process = new OProcess();
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public OProcess deserialize() throws IOException,
-			SerializaionRtException {
+	public OProcess deserialize() throws SerializaionRtException {
 		mapper = new ObjectMapper(factory);
 		mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
 		mapper.setSerializerFactory(TypeBeanSerializerFactory.instance);
@@ -78,8 +75,14 @@ public class JsonOmDeserializer implements OmDeserializer {
 		simpleModule.addKeyDeserializer(String.class, new KeyAsJsonDeserializer());
 		mapper.registerModule(simpleModule);
 
-		wrapper = mapper.readValue(is, OProcessWrapper.class);
-		return wrapper.getProcess();
+		try {
+			process = mapper.readValue(is, OProcess.class);
+		} catch (Exception e1) {
+			SerializaionRtException e = new SerializaionRtException("Error when deseriaze process during deseriazation");
+			e.initCause(e1);
+			throw e;
+		}
+		return process;
 	}
 
 	public void addCustomDeserializer(Class<?> c, JsonDeserializer<?> sd) {
@@ -187,13 +190,4 @@ public class JsonOmDeserializer implements OmDeserializer {
 		
 	}
 
-	@Override
-	public String getGuid() {
-		return wrapper.getGuid();
-	}
-
-	@Override
-	public QName getType() {
-		return wrapper.getType();
-	}
 }

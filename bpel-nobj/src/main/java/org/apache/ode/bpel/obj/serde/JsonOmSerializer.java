@@ -3,16 +3,14 @@ package org.apache.ode.bpel.obj.serde;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.wsdl.OperationType;
-import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.elang.xpath10.obj.OXPath10Expression;
+import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.OProcessWrapper;
 import org.apache.ode.bpel.obj.serde.jacksonhack.TypeBeanSerializerFactory;
 import org.apache.ode.utils.NSContext;
@@ -21,6 +19,7 @@ import org.w3c.dom.Element;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,7 +36,7 @@ public class JsonOmSerializer implements OmSerializer {
 			.getLog(JsonOmSerializer.class);
 
 	private OutputStream os;
-	private OProcessWrapper wrapper;
+	private OProcess process;
 
 	private ObjectMapper mapper;
 	protected JsonFactory factory;
@@ -50,21 +49,21 @@ public class JsonOmSerializer implements OmSerializer {
 		addCustomSerializer(NSContext.class, new NSContextSerializer(NSContext.class));
 	}
 
-	public JsonOmSerializer(OutputStream os, OProcessWrapper wrapper) {
-		this(os, wrapper, new JsonFactory());
+	public JsonOmSerializer(OutputStream os, OProcess process){
+		this(os, process, new JsonFactory());
 	}
 
-	protected JsonOmSerializer(OutputStream os, OProcessWrapper wrapper,
+	protected JsonOmSerializer(OutputStream os, OProcess process,
 			JsonFactory factory) {
 		this();
 		this.os = os;
-		this.wrapper = wrapper;
+		this.process = process;
 		this.factory = factory;
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void serialize() throws SerializaionRtException, IOException {
+	public void serialize(){
 		mapper = new ObjectMapper(factory);
 		mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
 		mapper.setSerializerFactory(TypeBeanSerializerFactory.instance);
@@ -73,15 +72,19 @@ public class JsonOmSerializer implements OmSerializer {
 			simpleModule.addSerializer((Class) ss,
 					(JsonSerializer) serializers.get(ss));
 		}
-//		simpleModule.addKeySerializer(QName.class, new KeyAsJsonSerializer());
-//		simpleModule.addKeySerializer(URI.class, new KeyAsJsonSerializer());
-//		simpleModule.addKeySerializer(OXPath10Expression.SigGetVariableData.class, new KeyAsJsonSerializer());
+
 		simpleModule.addKeySerializer(Object.class, new KeyAsJsonSerializer());
 		mapper.registerModule(simpleModule);
 		
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
-		mapper.writeValue(os, wrapper);
-		os.flush();
+		try {
+			mapper.writeValue(os, process);
+			os.flush();
+		} catch (Exception e) {
+			SerializaionRtException se = new SerializaionRtException("error when serialize process");
+			se.initCause(e);
+			throw se;
+		}
 	}
 
 	public void addCustomSerializer(Class<?> c, JsonSerializer<?> ss) {
@@ -102,14 +105,6 @@ public class JsonOmSerializer implements OmSerializer {
 
 	public void setOs(OutputStream os) {
 		this.os = os;
-	}
-
-	public OProcessWrapper getWrapper() {
-		return wrapper;
-	}
-
-	public void setWrapper(OProcessWrapper wrapper) {
-		this.wrapper = wrapper;
 	}
 
 	public static class OperationTypeSerializer extends

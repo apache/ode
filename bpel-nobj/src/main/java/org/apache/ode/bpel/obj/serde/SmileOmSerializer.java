@@ -2,7 +2,7 @@ package org.apache.ode.bpel.obj.serde;
 
 import java.io.OutputStream;
 
-import org.apache.ode.bpel.obj.OProcessWrapper;
+import org.apache.ode.bpel.obj.OProcess;
 
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 
@@ -11,7 +11,7 @@ public class SmileOmSerializer extends JsonOmSerializer{
 		super();
 		factory = new SmileFactory();
 	}
-	public SmileOmSerializer(OutputStream out, OProcessWrapper wrapper) {
-		super(out, wrapper, new SmileFactory());
+	public SmileOmSerializer(OutputStream out, OProcess process) {
+		super(out, process, new SmileFactory());
 	}
 }

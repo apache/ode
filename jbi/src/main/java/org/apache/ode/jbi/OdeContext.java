@@ -49,6 +49,7 @@ import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.obj.OPartnerLink;
 import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.OProcessWrapper;
+import org.apache.ode.bpel.obj.serde.DeSerializer;
 import org.apache.ode.bpel.obj.serde.OmDeserializer;
 import org.apache.ode.bpel.obj.serde.OmSerdeFactory;
 import org.apache.ode.bpel.pmapi.InstanceManagement;
@@ -200,7 +201,7 @@ final public class OdeContext {
             InputStream is = pc.getCBPInputStream();
             OProcess compiledProcess = null;
             try {
-                OmDeserializer deserializer = new OmSerdeFactory().createOmDeserializer(is);
+            	DeSerializer deserializer = new DeSerializer(is);
                 compiledProcess = deserializer.deserialize();
             } finally {
                 is.close();
