@@ -224,15 +224,7 @@ define "ode" do
     package :jar
 	test.with XERCES
   end
-  
-  desc "Helper to covert from old OModel to new OModel"
-  define "omodel-conv" do
-	compile.with projects("bpel-obj", "bpel-nobj", "bpel-compiler", "bpel-api", "bpel-schemas", "utils"), 
-		JAVAX.stream, JAXEN, SAXON, WSDL4J, XALAN, XERCES, COMMONS.collections, SLF4J,
-		JACKSON, SPOON, COMMONS.io, COMMONS.logging, LOG4J
-	package :jar
-  end
-  
+
   desc "ODE BPEL Query Language"
   define "bpel-ql" do
     pkg_name = "org.apache.ode.ql.jcc"
