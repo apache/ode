@@ -178,6 +178,7 @@ public class OmOld2new extends AbstractObjectVisitor{
 				throw rte;
 			}
 		}
+		n.upgrade2Newest();
 		return n;
 	}
 	

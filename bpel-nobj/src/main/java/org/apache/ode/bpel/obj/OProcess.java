@@ -18,8 +18,10 @@
  */
 package org.apache.ode.bpel.obj;
 
-import java.io.Serializable;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
@@ -52,6 +54,17 @@ import de.danielbechler.diff.annotation.ObjectDiffProperty;
  */
 public class OProcess extends OBase  implements Serializable{
 	public static final long serialVersionUID = -1L;
+	
+	/**
+	 * Change log of class version
+	 * initial 1
+	 * current 2
+	 * 
+	 * 1->2:
+	 * 	added namespaceContext attribute
+	 *  */
+	public static final int CURRENT_CLASS_VERSION = 2;
+
 	public static int instanceCount = 0;
 	private static final String GUID = "guid";
 	/** BPEL version. */
@@ -299,7 +312,6 @@ public class OProcess extends OBase  implements Serializable{
 		return o == null ? null : (HashMap<URI, OXslSheet>)o;
 	}
 
-	//	TODO: custom readObject
 	public void setAllPartnerLinks(Set<OPartnerLink> allPartnerLinks) {
 		if (getAllPartnerLinks() == null) {
 			fieldContainer.put(ALLPARTNERLINKS, allPartnerLinks);
@@ -387,6 +399,11 @@ public class OProcess extends OBase  implements Serializable{
 		}
 	}
 
+	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException{
+		ois.defaultReadObject();
+		fieldContainer.remove(NAMESPACECONTEXT);
+	}
+
 	public static class OProperty extends OBase  implements Serializable{
 	public static final long serialVersionUID = -1L;
 
@@ -434,7 +451,16 @@ public class OProcess extends OBase  implements Serializable{
 	}
 
 	public static class OPropertyAlias extends OBase  implements Serializable{
-	public static final long serialVersionUID = -1L;
+		public static final long serialVersionUID = -1L;
+		/**
+		 * Change log of class version
+		 * initial 1
+		 * current 2
+		 * 
+		 * 1->2:
+		 * 	added header attribute
+		 *  */
+		public static final int CURRENT_CLASS_VERSION = 2;
 
 		private static final String VARTYPE = "varType";
 
@@ -467,7 +493,7 @@ public class OProcess extends OBase  implements Serializable{
 		@JsonIgnore
 		public String getHeader() {
 			Object o = fieldContainer.get(HEADER);
-		return o == null ? null : (String)o;
+			return o == null ? null : (String)o;
 		}
 
 		@JsonIgnore

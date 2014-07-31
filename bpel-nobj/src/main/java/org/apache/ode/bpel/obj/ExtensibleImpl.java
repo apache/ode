@@ -14,17 +14,18 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 @JsonIdentityInfo(generator = ObjectIdGenerators.UUIDGenerator.class, property = "@id")
 public class ExtensibleImpl  implements Extensible<Object>, Serializable{
 	public static final long serialVersionUID = -1L;
-	
+	protected static final int CURRENT_CLASS_VERSION = 1;
 	/** The wrapper wraps fields. Fields can be deleted, added or updated */
 	transient protected Map<String, Object> fieldContainer;
 	/** Version of this class*/
-	private static final String CLASS_VERSION = "classVersion";
+	private static final String CLASSVERSION = "classVersion";
 
 	protected ExtensibleImpl() {
-		fieldContainer = new LinkedHashMap<String, Object>();
+		this(new LinkedHashMap<String, Object>());
 	}
 	protected ExtensibleImpl(Map<String, Object> container) {
 		fieldContainer = container;
+		setClassVersion(CURRENT_CLASS_VERSION);
 	}
 	
 //	@JsonAnyGetter
@@ -51,12 +52,12 @@ public class ExtensibleImpl  implements Extensible<Object>, Serializable{
 	
 	@JsonIgnore
 	public int getClassVersion() {
-		Object o = fieldContainer.get(CLASS_VERSION);
+		Object o = fieldContainer.get(CLASSVERSION);
 		return o == null ? 0 : (Integer)o;
 	}
 
 	public void setClassVersion(int version) {
-		fieldContainer.put(CLASS_VERSION, version);
+		fieldContainer.put(CLASSVERSION, version);
 	}
 	
 	private void writeObject(ObjectOutputStream oos) throws IOException{
@@ -83,5 +84,13 @@ public class ExtensibleImpl  implements Extensible<Object>, Serializable{
 			Object value = ois.readObject();
 			fieldContainer.put(key, value);
 		}
+		
+		//migrate to newest version
+		upgrade2Newest();
+	}
+	
+	@Override
+	public void upgrade2Newest(){
+		return;
 	}
 }

@@ -13,9 +13,10 @@ import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.migrate.EqualityVisitor;
 import org.apache.ode.bpel.obj.migrate.ExtensibeImplEqualityComp;
-import org.apache.ode.bpel.obj.migrate.OmOld2new;
 import org.apache.ode.bpel.obj.migrate.ObjectTraverser;
+import org.apache.ode.bpel.obj.migrate.OmOld2new;
 import org.junit.Assert;
+import org.junit.Test;
 
 public class MigrationTest extends GoodCompileTest{
     private static final Log __log = LogFactory.getLog(MigrationTest.class);
@@ -48,10 +49,23 @@ public class MigrationTest extends GoodCompileTest{
     		visitor.addCustomComparator(new ExtensibeImplEqualityComp(visitor));
     		traverse.accept(visitor);
     		boolean res = (Boolean)traverse.traverseObject(migrated);
-       		assertEquals(Boolean.TRUE, res);   		
+       		assertEquals(Boolean.TRUE, res);
      } catch (Exception ex) {
             ex.printStackTrace();
             Assert.fail("Compilation or migration did not succeed.");
         }
     }
+    
+    
+	@Test
+	public void testCompensation1() throws Exception {
+    	//skip this test for no corresponding cbp from 1.3.x
+//		runTest("/2.0/good/compensation/comp1-2.0.bpel");
+	}
+  
+    @Test
+	public void testMultipleEmbeddedSchemas() throws Exception {
+    	//skip this test for no corresponding cbp from 1.3.x
+//		runTest("/org/apache/ode/bpel/compiler/MultipleEmbeddedSchemas.bpel");
+	}
 }

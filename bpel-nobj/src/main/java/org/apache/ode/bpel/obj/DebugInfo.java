@@ -34,6 +34,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class DebugInfo extends ExtensibleImpl  implements Serializable{
 	public static final long serialVersionUID = -1L;
+	/**
+	 * Change log of class version
+	 * initial 1
+	 * current 2
+	 * 
+	 * 1->2:
+	 * 	sourceURI attribute is more meaningful
+	 *  */
+	public static final int CURRENT_CLASS_VERSION = 2;
+
 	/** Source file / resource name. */
 	private static final String SOURCEURI = "sourceURI";
 	/** Source line number (start). */
@@ -116,6 +126,13 @@ public class DebugInfo extends ExtensibleImpl  implements Serializable{
 		fieldContainer.put(STARTLINE, startLine);
 	}
 
+	@Override
+	public boolean equals(Object obj){
+		if (!(obj instanceof DebugInfo)) return false;
+		DebugInfo other = (DebugInfo)obj;
+		return this.getStartLine() == other.getStartLine() &&
+				this.getEndLine() == other.getEndLine();
+	}
 	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException{
 		ois.defaultReadObject();
 		fieldContainer.remove(DESCRIPTION);

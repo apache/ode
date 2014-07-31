@@ -27,4 +27,10 @@ public interface Extensible<T> {
 	 * @return
 	 */
 	public T getField(String fieldName);
+
+	/**
+	 * Upgrade to newest version of this class.
+	 * @return
+	 */
+	public void upgrade2Newest();
 }

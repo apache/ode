@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.print.attribute.standard.MediaSize.Other;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.obj.DebugInfo;
@@ -47,6 +49,15 @@ public class ExtensibeImplEqualityComp implements EqualityComparator{
 			//won't get here
 			return false;
 		}
+		if (obj1 instanceof DebugInfo){
+			boolean r = obj1.equals(obj2);
+			if (!r){
+				if(!visitor.logFalseThrough){
+					__log.debug("Unequal in ExtensibleImpl: DebugInfo unequal." + visitor.getSt());
+				}
+			}
+			return r;
+		}
 		Map m1 = new LinkedHashMap(esi.getFieldContainer());
 		Map m2 = new LinkedHashMap(esio.getFieldContainer());
 		dehydrate(m1);
@@ -55,18 +66,12 @@ public class ExtensibeImplEqualityComp implements EqualityComparator{
 			dehydrateOProcess(m1);
 			dehydrateOProcess(m2);
 		}
-		if (obj1 instanceof DebugInfo){
-			dehydrateDebugInfo(m1);
-			dehydrateDebugInfo(m2);
-		}
 		visitor.setOther(m2);
 		return (Boolean) visitor.getTraverse().traverseObject(m1);
 	}
-	private void dehydrateDebugInfo(Map m) {
-		m.remove("description");
-	}
 	private void dehydrateOProcess(Map m) {
 		m.remove("compileDate");
+		m.remove("namespaceContext");
 	}
 	@SuppressWarnings("rawtypes")
 	private void dehydrate(Map map) {

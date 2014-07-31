@@ -38,7 +38,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class OScope extends OActivity  implements Serializable{
 	public static final long serialVersionUID = -1L;
-
+	/**
+	 * Change log of class version
+	 * initial 1
+	 * current 2
+	 * 
+	 * 1->2:
+	 * 	added isolatedScope attribute
+	 *  */
+	public static final int CURRENT_CLASS_VERSION = 2;
 	/** Name of the scope. */
 	private static final String NAME = "name";
 
