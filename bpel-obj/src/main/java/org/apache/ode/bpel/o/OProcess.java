@@ -20,9 +20,6 @@ package org.apache.ode.bpel.o;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
-
-import org.apache.ode.utils.NSContext;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.URI;
@@ -79,8 +76,6 @@ public class OProcess extends OBase {
 
     public final HashMap<URI, OXslSheet> xslSheets = new HashMap<URI, OXslSheet>();
 
-    public NSContext namespaceContext = null;
-    
     public OProcess(String bpelVersion) {
         super(null);
         this.version = bpelVersion;
@@ -169,7 +164,6 @@ public class OProcess extends OBase {
 
         /** For BPEL 1.1 */
         public OMessageVarType.Part part;
-        public String header;
 
         public OExpression location;
 
@@ -183,7 +177,6 @@ public class OProcess extends OBase {
             StringBuffer buf = new StringBuffer(varType.toString());
             buf.append('[');
             buf.append(part != null ? part.name : "");
-            buf.append(header != null ? "header: " + header : "");
             if (location != null) {
                 buf.append("][");
                 buf.append(location.toString());
