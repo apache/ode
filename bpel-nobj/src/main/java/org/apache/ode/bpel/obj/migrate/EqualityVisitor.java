@@ -2,6 +2,7 @@ package org.apache.ode.bpel.obj.migrate;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -166,6 +167,7 @@ public class EqualityVisitor extends AbstractObjectVisitor{
 			other = t2;
 			if ((Boolean)traverse.traverseObject(t1, false)) {
 				logFalseThrough = false;
+				other = pre;
 				return t2;
 			}
 		}
@@ -272,9 +274,9 @@ public class EqualityVisitor extends AbstractObjectVisitor{
 	}
 	public Boolean equalityByReflection(Object obj) {
 		//TODO if it's sufficient to just compare public fields?
-		Field[] fields = obj.getClass().getFields();
-		Field[] fields2 = other.getClass().getFields();
-		if (! Arrays.equals(fields, fields2)){
+		List<Field> fields = getAllFields(obj.getClass());
+		List<Field> fields2 = getAllFields(other.getClass());
+		if (!fields.equals(fields2)){
 			if (!logFalseThrough){
 				__log.debug("Unequal: getFields() of two Object do not match " + st);
 			}
@@ -282,7 +284,8 @@ public class EqualityVisitor extends AbstractObjectVisitor{
 		}
 		
 		for (Field f : fields){
-			if ((Modifier.TRANSIENT & f.getModifiers()) != 0){
+			f.setAccessible(true);
+			if (((Modifier.TRANSIENT | Modifier.STATIC) & f.getModifiers()) != 0){
 				continue; //skip transient fields
 			}
 			try {
@@ -303,10 +306,6 @@ public class EqualityVisitor extends AbstractObjectVisitor{
 				other = v2;
 				Boolean res = (Boolean)traverse.traverseObject(v1);
 				if (!res){
-					if (!logFalseThrough){
-						__log.debug("Unequal:" + st + ".\n When dealing with " 
-							+ v1 + " and " + v2);
-					}
 					return false;
 				}
 				other = pre;
@@ -317,6 +316,29 @@ public class EqualityVisitor extends AbstractObjectVisitor{
 			}
 		}
 		return true;
+	}
+	private List<Field> getAllFields(Class cls) {
+		List<Field> fields = getFieldsRec(cls.getSuperclass(), new ArrayList<Field>());
+		fields.addAll(Arrays.asList(cls.getDeclaredFields()));
+		return fields;
+	}
+	/**
+	 * get fields that are accessible to its sub-classes.
+	 * @param cls
+	 * @param fields
+	 * @return
+	 */
+	private List<Field> getFieldsRec(Class cls, ArrayList<Field> fields) {
+		if (cls != null){
+			Field[] fs = cls.getDeclaredFields();
+			for (Field f : fs){
+				if ((f.getModifiers() & Modifier.PRIVATE) == 0){
+					fields.add(f);
+				}
+			}
+			getFieldsRec(cls.getSuperclass(), fields);
+		}
+		return fields;
 	}
 	
 	public void setOther(Object other){
