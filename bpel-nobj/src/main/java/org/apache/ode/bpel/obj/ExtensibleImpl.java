@@ -15,10 +15,13 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 public class ExtensibleImpl  implements Extensible<Object>, Serializable{
 	public static final long serialVersionUID = -1L;
 	protected static final int CURRENT_CLASS_VERSION = 1;
+	
 	/** The wrapper wraps fields. Fields can be deleted, added or updated */
 	transient protected Map<String, Object> fieldContainer;
 	/** Version of this class*/
 	private static final String CLASSVERSION = "classVersion";
+	/** Original version before migration*/
+	private static final String ORIGINALVERSION = "originalVersion";
 
 	protected ExtensibleImpl() {
 		this(new LinkedHashMap<String, Object>());
@@ -26,6 +29,7 @@ public class ExtensibleImpl  implements Extensible<Object>, Serializable{
 	protected ExtensibleImpl(Map<String, Object> container) {
 		fieldContainer = container;
 		setClassVersion(CURRENT_CLASS_VERSION);
+		setOriginalVersion(CURRENT_CLASS_VERSION); //if this is called by deserializer, original will be set later.
 	}
 	
 //	@JsonAnyGetter
@@ -60,6 +64,15 @@ public class ExtensibleImpl  implements Extensible<Object>, Serializable{
 		fieldContainer.put(CLASSVERSION, version);
 	}
 	
+	@JsonIgnore
+	public int getOriginalVersion(){
+		Object o = fieldContainer.get(ORIGINALVERSION);
+		return o == null? -1 : (Integer)o;
+	}
+	public void setOriginalVersion(int version){
+		fieldContainer.put(ORIGINALVERSION, version);
+	}
+	
 	private void writeObject(ObjectOutputStream oos) throws IOException{
 		oos.defaultWriteObject();
 		oos.writeInt(fieldContainer.size());
@@ -91,6 +104,13 @@ public class ExtensibleImpl  implements Extensible<Object>, Serializable{
 	
 	@Override
 	public void upgrade2Newest(){
+		int version = getClassVersion();
+		if (version == CURRENT_CLASS_VERSION) return;
+		if (version > CURRENT_CLASS_VERSION){
+			//should never get here. 
+			throw new RuntimeException("class version is newer than newest!");
+		}
+		setClassVersion(CURRENT_CLASS_VERSION);
 		return;
 	}
 }

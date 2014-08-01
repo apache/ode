@@ -130,8 +130,13 @@ public class DebugInfo extends ExtensibleImpl  implements Serializable{
 	public boolean equals(Object obj){
 		if (!(obj instanceof DebugInfo)) return false;
 		DebugInfo other = (DebugInfo)obj;
-		return this.getStartLine() == other.getStartLine() &&
+		boolean eq = this.getStartLine() == other.getStartLine() &&
 				this.getEndLine() == other.getEndLine();
+		if (this.getOriginalVersion() == 0 || other.getOriginalVersion() == 0){
+			return eq;
+		}else{
+			return eq && this.getSourceURI().equals(other.getSourceURI());
+		}
 	}
 	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException{
 		ois.defaultReadObject();

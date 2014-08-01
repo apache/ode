@@ -76,6 +76,7 @@ public class ExtensibeImplEqualityComp implements EqualityComparator{
 	@SuppressWarnings("rawtypes")
 	private void dehydrate(Map map) {
 		if (map == null) return;
+		map.remove("originalVersion");
 		Set<Entry> entries = map.entrySet();
 		Iterator<Entry> itor = entries.iterator();
 		while (itor.hasNext()){
