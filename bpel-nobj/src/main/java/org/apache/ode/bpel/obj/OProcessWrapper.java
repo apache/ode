@@ -1,6 +1,7 @@
 package org.apache.ode.bpel.obj;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -44,23 +45,23 @@ public class OProcessWrapper extends ExtensibleImpl  implements Serializable{
 
 	public OProcessWrapper() {
 		super(new LinkedHashMap<String, Object>());
+		setMagic(OProcessWrapper.CURRENT_MAGIC_NUMBER);
 		setCompileTime(0);
 		setFormat(SerializeFormat.FORMAT_UNINITIALIZED);
+		setOtherHeaders(new LinkedHashMap<String, Object>());
 		
 	}
 
 	public OProcessWrapper(long compileTime) {
 		this();
-		setMagic(OProcessWrapper.CURRENT_MAGIC_NUMBER);
-		setFormat(OmSerdeFactory.FORMAT_SERIALIZED_DEFAULT);
 		setCompileTime(compileTime);
-		setOtherHeaders(new LinkedHashMap<String, Object>());
 	}
 
 
 	public void checkValid() throws OModelException {
-		// TODO implement me
-
+		if (!Arrays.equals(getMagic(), MAGIC_NUMBER_OFH_20140529)){
+			throw new OModelException("Unrecognized magic number");
+		}
 	}
 	
 	//Accessors
