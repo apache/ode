@@ -14,9 +14,17 @@ import org.apache.ode.bpel.obj.migrate.DomElementComparator;
 import org.apache.ode.bpel.obj.migrate.ExtensibeImplEqualityComp;
 import org.apache.ode.bpel.obj.serde.DeSerializer;
 import org.apache.ode.bpel.obj.serde.OmSerdeFactory;
+import org.apache.ode.bpel.obj.serde.OmSerdeFactory.SerializeFormat;
 import org.junit.Assert;
 
-public class SerializationTest extends GoodCompileTest{
+public class JavaSerializationTest extends GoodCompileTest{
+	protected SerializeFormat format;
+	protected String pathSuffix;
+	
+	public JavaSerializationTest(){
+		this.format = OmSerdeFactory.SerializeFormat.FORMAT_SERIALIZED_JAVA;
+		this.pathSuffix = "java";
+	}
 	public void runTest(String bpel) throws Exception {
 		try {
 			Class testClass = getClass();
@@ -27,10 +35,10 @@ public class SerializationTest extends GoodCompileTest{
 			OProcess origi = _compiler.compile2OProcess(bpelFile, 0);
 			String bpelPath = bpelFile.getAbsolutePath();
 			String cbpPath = bpelPath.substring(0, bpelPath.lastIndexOf("."))
-					+ ".json.cbp";
+					+ "." + pathSuffix + ".cbp";
 			DeSerializer serializer = new DeSerializer();
 			serializer.serialize(new FileOutputStream(cbpPath), 
-					origi, OmSerdeFactory.SerializeFormat.FORMAT_SERIALIZED_JSON);
+					origi, format);
 
 			DeSerializer deserializer = new DeSerializer(new FileInputStream(cbpPath));
 			OProcess desered = deserializer.deserialize();

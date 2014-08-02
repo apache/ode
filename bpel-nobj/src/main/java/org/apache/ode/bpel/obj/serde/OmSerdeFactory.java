@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import org.apache.ode.bpel.obj.OProcess;
 
 public class OmSerdeFactory {
-	public static final SerializeFormat FORMAT_SERIALIZED_DEFAULT = SerializeFormat.FORMAT_SERIALIZED_JAVA;
+	public static final SerializeFormat FORMAT_SERIALIZED_DEFAULT = SerializeFormat.FORMAT_SERIALIZED_SMILE;
 
 	private SerializeFormat format = FORMAT_SERIALIZED_DEFAULT;
 	

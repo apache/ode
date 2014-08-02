@@ -50,18 +50,9 @@ public class GoodCompileTest extends AbstractCompileTestCase implements
 			String cbpPath = bpelPath.substring(0, bpelPath.lastIndexOf("."))
 					+ ".cbp";
 			_compiler.serializeOProcess(origi, cbpPath);
-
-			DeSerializer deserializer = new DeSerializer(new FileInputStream(cbpPath));
-			OProcess desered = deserializer.deserialize();
-
-    		DeepEqualityHelper de = new DeepEqualityHelper();
-    		de.addCustomComparator(new ExtensibeImplEqualityComp());
-    		de.addCustomComparator(new DomElementComparator());
-    		boolean res = de.deepEquals(origi, desered);
-			assertEquals(Boolean.TRUE, res);
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			Assert.fail("Compilation or deserialization did not succeed.");
+			Assert.fail("Compilation did not succeed.");
 		}
 	}
 

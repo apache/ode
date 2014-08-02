@@ -7,11 +7,12 @@ import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.ode.bpel.obj.serde.jacksonhack.UniqueStringIdGenerator;
+
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
-@JsonIdentityInfo(generator = ObjectIdGenerators.UUIDGenerator.class, property = "@id")
+@JsonIdentityInfo(generator = UniqueStringIdGenerator.class, property = "@id")
 public class ExtensibleImpl  implements Extensible<Object>, Serializable{
 	public static final long serialVersionUID = -1L;
 	protected static final int CURRENT_CLASS_VERSION = 1;

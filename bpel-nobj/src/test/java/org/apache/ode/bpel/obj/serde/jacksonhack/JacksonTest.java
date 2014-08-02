@@ -5,7 +5,9 @@ import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
@@ -14,7 +16,6 @@ import org.apache.ode.bpel.obj.serde.KeyAsJsonDeserializer;
 import org.apache.ode.bpel.obj.serde.KeyAsJsonSerializer;
 import org.junit.Test;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -24,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 
 public class JacksonTest {
 	/**
@@ -53,14 +55,14 @@ public class JacksonTest {
 		A a2 = b;
 		map.put("i5", b);
 		map.put("i6", a2);
-		ObjectMapper mapper = new ObjectMapper();
+		ObjectMapper mapper = new ObjectMapper(new SmileFactory());
 		mapper.setSerializerFactory(TypeBeanSerializerFactory.instance);
 		mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		mapper.writeValue(os, map);
 		ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
-		ObjectMapper m2 = new ObjectMapper();
+		ObjectMapper m2 = new ObjectMapper(new SmileFactory());
 		m2.setSerializerFactory(TypeBeanSerializerFactory.instance);
 		m2.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
 		@SuppressWarnings("rawtypes")
@@ -111,7 +113,7 @@ public class JacksonTest {
 	}
 	@Test
 	public void testMapTypeInfo() throws JsonParseException, JsonMappingException, IOException{
-		ObjectMapper mapper = new ObjectMapper();
+		ObjectMapper mapper = new ObjectMapper(new SmileFactory());
 		mapper.setSerializerFactory(TypeBeanSerializerFactory.instance);
 		mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -123,11 +125,37 @@ public class JacksonTest {
 		mapper.writeValue(os, c);
 
 		ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
-		ObjectMapper m2 = new ObjectMapper();
+		ObjectMapper m2 = new ObjectMapper(new SmileFactory());
 		m2.setSerializerFactory(TypeBeanSerializerFactory.instance);
 		m2.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
 
 		C de = m2.readValue(is, C.class);
 		assertEquals(c.map, de.map);
+	}
+	
+	@JsonIdentityInfo(generator = UniqueStringIdGenerator.class, property = "@id")
+	public static class D{
+		public D next;
+	}
+	@Test
+	public void testSmileFormat() throws JsonGenerationException, JsonMappingException, IOException{
+		ObjectMapper mapper = new ObjectMapper(new SmileFactory());
+		D d = new D();
+		d.next = d;
+		
+		mapper.setSerializerFactory(TypeBeanSerializerFactory.instance);
+		mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		mapper.writeValue(os, d);
+
+		ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
+		ObjectMapper m2 = new ObjectMapper(new SmileFactory());
+		m2.setSerializerFactory(TypeBeanSerializerFactory.instance);
+		m2.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+
+		D de = m2.readValue(is, D.class);
+		assertEquals(D.class, de.next.getClass());
+		
 	}
 }
