@@ -2,15 +2,20 @@ package org.apache.ode.bpel.obj.serde;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
+import javax.wsdl.Message;
 import javax.wsdl.OperationType;
+import javax.wsdl.Part;
+import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.obj.OProcess;
-import org.apache.ode.bpel.obj.OProcessWrapper;
 import org.apache.ode.bpel.obj.serde.jacksonhack.TypeBeanSerializerFactory;
 import org.apache.ode.utils.NSContext;
 import org.w3c.dom.Element;
@@ -29,6 +34,7 @@ import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.module.jaxb.deser.DomElementJsonDeserializer;
+import com.ibm.wsdl.MessageImpl;
 public class JsonOmDeserializer implements OmDeserializer {
 	protected static final Log __log = LogFactory
 			.getLog(JsonOmDeserializer.class);
@@ -46,6 +52,7 @@ public class JsonOmDeserializer implements OmDeserializer {
 				new OperationTypeDeserializer());
 		addCustomDeserializer(Element.class, new DomElementDeserializerHack());
 		addCustomDeserializer(NSContext.class, new NSContextDeserializer(NSContext.class));
+		addCustomDeserializer(MessageImpl.class, new MessageDeserializer(MessageImpl.class));
 	}
 
 	public JsonOmDeserializer(InputStream is) {
@@ -186,6 +193,45 @@ public class JsonOmDeserializer implements OmDeserializer {
 			NSContext ctx = new NSContext();
 			ctx.register(map);
 			return ctx;
+		}
+		
+	}
+	
+	public static class MessageDeserializer extends StdScalarDeserializer<MessageImpl>{
+
+		protected MessageDeserializer(Class<?> vc) {
+			super(vc);
+		}
+
+		@Override
+		public MessageImpl deserialize(JsonParser jp, DeserializationContext ctxt)
+				throws IOException, JsonProcessingException {
+			MessageImpl value = new MessageImpl();
+			value.setDocumentationElement(jp.readValueAs(Element.class));
+			value.getExtensibilityElements().addAll(jp.readValueAs(Vector.class));
+			value.getExtensionAttributes().putAll(jp.readValueAs(HashMap.class));
+
+			value.getParts().putAll(jp.readValueAs(HashMap.class));
+			Field f1;
+			try {
+				f1 = MessageImpl.class.getDeclaredField("nativeAttributeNames");
+				f1.setAccessible(true);
+				f1.set(value, jp.readValueAs(List.class));
+			} catch (Exception e) {
+				__log.debug("Exception when serialize MessageImpl:" + e);
+			}
+			value.setUndefined(jp.readValueAs(Boolean.class));
+			value.setQName(jp.readValueAs(QName.class));
+
+			Vector<String> parts = jp.readValueAs(Vector.class);
+			try{
+				Field f = MessageImpl.class.getDeclaredField("additionOrderOfParts");
+				f.setAccessible(true);
+				f.set(value, parts);
+			}catch(Exception e){
+				__log.debug("Exception when serialize MessageImpl:" + e);
+			}
+			return value;
 		}
 		
 	}

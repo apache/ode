@@ -37,6 +37,7 @@ public class OmSerdeFactory {
 			break;
 		case FORMAT_SERIALIZED_SMILE:
 			deser = new SmileOmDeserializer(is);
+			break;
 		case FORMAT_SERIALIZED_JAVA:
 			deser = new JavaSerOmDeserializer(is);
 			break;

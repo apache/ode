@@ -11,7 +11,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.bpel.obj.OProcess;
-import org.apache.ode.bpel.obj.migrate.EqualityVisitor;
+import org.apache.ode.bpel.obj.migrate.DeepEqualityHelper;
+import org.apache.ode.bpel.obj.migrate.DomElementComparator;
 import org.apache.ode.bpel.obj.migrate.ExtensibeImplEqualityComp;
 import org.apache.ode.bpel.obj.migrate.ObjectTraverser;
 import org.apache.ode.bpel.obj.migrate.OmOld2new;
@@ -44,11 +45,10 @@ public class MigrationTest extends GoodCompileTest{
     		OProcess migrated = (OProcess) mtraverse.traverseObject(old);
     		__log.debug("migrated new OProcess " + migrated.getFieldContainer());
     		
-    		ObjectTraverser traverse = new ObjectTraverser();
-    		EqualityVisitor visitor = new EqualityVisitor(nu);
-    		visitor.addCustomComparator(new ExtensibeImplEqualityComp(visitor));
-    		traverse.accept(visitor);
-    		boolean res = (Boolean)traverse.traverseObject(migrated);
+    		DeepEqualityHelper de = new DeepEqualityHelper();
+    		de.addCustomComparator(new ExtensibeImplEqualityComp());
+    		de.addCustomComparator(new DomElementComparator());
+    		boolean res = de.deepEquals(nu, migrated);
        		assertEquals(Boolean.TRUE, res);
      } catch (Exception ex) {
             ex.printStackTrace();

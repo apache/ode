@@ -2,16 +2,20 @@ package org.apache.ode.bpel.obj.serde;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import javax.wsdl.OperationType;
+import javax.wsdl.Part;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.obj.OProcess;
-import org.apache.ode.bpel.obj.OProcessWrapper;
 import org.apache.ode.bpel.obj.serde.jacksonhack.TypeBeanSerializerFactory;
 import org.apache.ode.utils.NSContext;
 import org.w3c.dom.Element;
@@ -19,7 +23,6 @@ import org.w3c.dom.Element;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +32,7 @@ import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer;
 import com.fasterxml.jackson.module.jaxb.ser.DomElementJsonSerializer;
+import com.ibm.wsdl.MessageImpl;
 
 
 public class JsonOmSerializer implements OmSerializer {
@@ -47,6 +51,7 @@ public class JsonOmSerializer implements OmSerializer {
 		addCustomSerializer(OperationType.class, new OperationTypeSerializer());
 		addCustomSerializer(Element.class, new DomElementSerializerHack());
 		addCustomSerializer(NSContext.class, new NSContextSerializer(NSContext.class));
+		addCustomSerializer(MessageImpl.class, new MessageSerializer(MessageImpl.class));
 	}
 
 	public JsonOmSerializer(OutputStream os, OProcess process){
@@ -165,6 +170,37 @@ public class JsonOmSerializer implements OmSerializer {
 				SerializerProvider provider) throws IOException,
 				JsonGenerationException {
 			jgen.writeObject(new HashMap(value.toMap()));
+		}
+		
+	}
+	
+	public static class MessageSerializer extends StdScalarSerializer<MessageImpl>{
+
+		protected MessageSerializer(Class<MessageImpl> class1) {
+			super(class1);
+		}
+
+		@Override
+		public void serialize(MessageImpl value, JsonGenerator jgen,
+				SerializerProvider provider) throws IOException,
+				JsonGenerationException {
+			jgen.writeObject(value.getDocumentationElement());
+			jgen.writeObject(value.getExtensibilityElements());
+			jgen.writeObject(value.getExtensionAttributes());
+
+			jgen.writeObject(value.getParts());
+			jgen.writeObject(value.getNativeAttributeNames());
+			jgen.writeObject(value.isUndefined());
+			jgen.writeObject(value.getQName());
+			try {
+				Field f = value.getClass().getDeclaredField("additionOrderOfParts");
+				f.setAccessible(true);
+				Vector<Part> parts = (Vector)f.get(value);
+				jgen.writeObject(parts);
+			} catch (Exception e) {
+				//nothing to do.
+				__log.debug("Exception when serialize MessageImpl:" + e);
+			}
 		}
 		
 	}

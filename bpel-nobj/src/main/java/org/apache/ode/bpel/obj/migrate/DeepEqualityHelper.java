@@ -5,6 +5,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,32 +26,55 @@ import org.apache.commons.logging.LogFactory;
  * @author fangzhen
  *
  */
-public class EqualityVisitor extends AbstractObjectVisitor{
+public class DeepEqualityHelper{
+
 	private static final Log __log = LogFactory.getLog(ObjectTraverser.class);
-    private List<EqualityComparator> comparators = new LinkedList<EqualityComparator>();
-    /**stack that holds current visit path */
-    private Stack<String> st = new Stack<String>();
-    /**object that compared to */
-    protected Object other;
     public boolean logFalseThrough = false;
-
-	public EqualityVisitor(Object other){
-		this.other = other;
-		st.push(":" + other.getClass().getSimpleName());
-	}
-
-	@Override
-	public Boolean visit(Object obj){
-		if (!logFalseThrough){
-			__log.debug("comparing Object " + obj.getClass() + "@" + System.identityHashCode(obj) + " " + obj + 
-				" and " + other.getClass() + "@" + System.identityHashCode(other) + " " + other);
+    private Stack<String> st = new Stack<String>();
+    
+    private List<EqualityComparator> comparators = new LinkedList<EqualityComparator>();
+    private Stack<Long> ongoing = new Stack<Long>();
+    
+    private Map<Long, Boolean> cache = new HashMap<Long, Boolean>();
+    
+    public boolean deepEquals(Object obj1, Object obj2){
+  //  	__log.debug("comparing Objects: " + obj1 + " and " + obj2); //will cause too much log
+    	Boolean c = cachedRes(obj1, obj2);
+    	if (c != null) {
+    		return c;
+    	}
+    	Long h12 = hash(obj1, obj2);
+    	if (ongoing.contains(h12)) {
+    		return true;
+    	}
+    	ongoing.push(h12);
+    	
+		boolean n;
+		if (isMap(obj1)){
+			n = visitMap(obj1, obj2);
+		}else if (isSet(obj1)){
+			n = visitSet(obj1, obj2);
+		}else if (isCollection(obj1)){
+			n = visitCollection(obj1, obj2);
+		}else if (isArray(obj1)){
+			n = visitArray(obj1, obj2);
+		}else{
+			n = visitPojo(obj1, obj2);
 		}
-		Boolean res =  (Boolean)super.visit(obj);
-		return res;
+		cacheRes(obj1, obj2, n);
+		ongoing.pop();
+    	return n;
+    }
+    
+	private void cacheRes(Object obj1, Object obj2, Boolean n) {
+		cache.put(hash(obj1, obj2), n);
 	}
-	@SuppressWarnings("rawtypes")
-	@Override
-	public Boolean visitMap(Object obj) {
+
+	private Boolean cachedRes(Object obj1, Object obj2) {
+		return cache.get(hash(obj1, obj2));
+	}
+
+	public Boolean visitMap(Object obj, Object other) {
 		if (obj == other) return true;
 		if (other == null) {
 			if (!logFalseThrough){
@@ -84,6 +108,7 @@ public class EqualityVisitor extends AbstractObjectVisitor{
 				if (!logFalseThrough){
 					__log.debug("Unequal in Map: cant find key. " + st + "\n missing key: " + k1);
 				}
+				st.pop();
 				return false;
 			}
 			Object o1 = m1.get(k1);
@@ -93,29 +118,27 @@ public class EqualityVisitor extends AbstractObjectVisitor{
 					if (!logFalseThrough){
 						__log.debug("Unequal in Map: mismatch, one is null" + st + 
 							"\n When dealing with " + o1 + " and " + o2);
-					}					
-						return false;
+					}	
+					st.pop();
+					return false;
 				}
 			}
 
 			st.pop();
 			st.push(k1.toString() + ":" + o1.getClass().getSimpleName());
 			
-			Object pre = other;
-			other = o2;
-			Boolean e = (Boolean)traverse.traverseObject(o1);
+			Boolean e = deepEquals(o1, o2);
 			if (!e) {
+				st.pop();
 				return false;
 			}
-			other = pre;
 			st.pop();
 		}
 		return true;
 	}
 
-	@Override
 	@SuppressWarnings("rawtypes")
-	public Boolean visitSet(Object obj){
+	public Boolean visitSet(Object obj, Object other){
 		if (obj == other) return true;
 		if (other == null) {
 			if (!logFalseThrough){
@@ -148,8 +171,9 @@ public class EqualityVisitor extends AbstractObjectVisitor{
 			if (contains(c2, o1) == null) {
 				if (!logFalseThrough){
 					__log.debug("Unequal in Set: Object mismatch. " + st + 
-						"\n" + "cann't find" + o1);
+						"\n" + "cann't find " + o1);
 				}
+				st.pop();
 				return false;
 			}
 			st.pop();
@@ -160,26 +184,20 @@ public class EqualityVisitor extends AbstractObjectVisitor{
 	private Object contains(Collection c, Object t1) {
 		Iterator itor = c.iterator();
 		Object t2;
-		Object pre = other;
 		logFalseThrough = true;
 		while (itor.hasNext()){
 			t2 = itor.next();
-			other = t2;
-			if ((Boolean)traverse.traverseObject(t1, false)) {
+			if (deepEquals(t1, t2)) {
 				logFalseThrough = false;
-				other = pre;
 				return t2;
 			}
 		}
-		traverse.getHtab().assign(t1);
-		other = pre;
 		logFalseThrough = false;
 		return null;
 	}
 
 	@SuppressWarnings("rawtypes")
-	@Override
-	public Boolean visitCollection(Object obj) {
+	public Boolean visitCollection(Object obj, Object other) {
 		if (obj == other) return true;
 		if (other == null) {
 			if (!logFalseThrough){
@@ -212,25 +230,21 @@ public class EqualityVisitor extends AbstractObjectVisitor{
 			Object o1 = i1.next();
 			Object o2 = i2.next();
 			st.push(":" + o1.getClass().getSimpleName());
-			Object pre = other;
-			other = o2;
-			Boolean e = (Boolean)traverse.traverseObject(o1);
+			Boolean e = deepEquals(o1, o2);
 			if (!e) {
+				st.pop();
 				return false;
 			}
-			other = pre;
 			st.pop();
 		}
 		return true;
 	}
 
-	@Override
-	public Boolean visitArray(Object obj) {
+	public Boolean visitArray(Object obj, Object other) {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
-	public Boolean visitPojo(Object obj) {
+	public Boolean visitPojo(Object obj, Object other) {
 		EqualityComparator customComp = getCustomComparator(obj);
 		if (customComp != null){
 			return customComp.objectsEqual(obj, other);
@@ -260,7 +274,7 @@ public class EqualityVisitor extends AbstractObjectVisitor{
 			}
 			return e;
 		}catch (NoSuchMethodException e){
-			return equalityByReflection(obj);
+			return equalityByReflection(obj, other);
 		}
 	}
 
@@ -272,8 +286,7 @@ public class EqualityVisitor extends AbstractObjectVisitor{
 		}
 		return null;
 	}
-	public Boolean equalityByReflection(Object obj) {
-		//TODO if it's sufficient to just compare public fields?
+	public Boolean equalityByReflection(Object obj, Object other) {
 		List<Field> fields = getAllFields(obj.getClass());
 		List<Field> fields2 = getAllFields(other.getClass());
 		if (!fields.equals(fields2)){
@@ -289,26 +302,25 @@ public class EqualityVisitor extends AbstractObjectVisitor{
 				continue; //skip transient fields
 			}
 			try {
-				st.push(f.getName()+ ":" + f.getType().getSimpleName());
-				Object v1 = f.get(obj);
 				Object v2 = f.get(other);
+				Object v1 = f.get(obj);
 				if (v1 == null && v2 == null){
 					continue;
 				}
+				st.push(f.getName()+ ":" + f.getType().getSimpleName());				
 				if (v1 == null || v2 == null){
 					if (!logFalseThrough){
 						__log.debug("Unequal: one field is null" + st + ".\n When dealing with " 
 							+ v1 + " and " + v2);
 					}
+					st.pop();
 					return false;
 				}
-				Object pre = other;
-				other = v2;
-				Boolean res = (Boolean)traverse.traverseObject(v1);
+				Boolean res = deepEquals(v1, v2);
 				if (!res){
+					st.pop();
 					return false;
 				}
-				other = pre;
 				st.pop();
 			} catch (Exception e) {
 				//should not get here
@@ -340,16 +352,42 @@ public class EqualityVisitor extends AbstractObjectVisitor{
 		}
 		return fields;
 	}
-	
-	public void setOther(Object other){
-		this.other = other;
+
+	/**
+	 * determine if obj is collections that order doesn't matter.
+	 * @param obj
+	 * @return
+	 */
+	protected boolean isSet(Object obj) {
+		return obj instanceof Set;
 	}
+
+	protected boolean isArray(Object old) {
+		return old.getClass().isArray();
+	}
+
+	/**
+	 * determine if obj is collections that order does matter.
+	 * @param obj
+	 * @return
+	 */
+	protected boolean isCollection(Object old) {
+		return (old instanceof Collection) && !isSet(old);
+	}
+
+	protected boolean isMap(Object old) {
+		return old instanceof Map;
+	}
+
+	private Long hash(Object obj1, Object obj2) {
+		int h1 = System.identityHashCode(obj1);
+		int h2 = System.identityHashCode(obj2);
+		return ((long)h1) << 32 | h2;
+	}
+	
 	public void addCustomComparator(EqualityComparator oe){
 		comparators.add(0, oe);
-	}
-	@Override
-	public Boolean visited(Object obj){
-		return true;
+		oe.setDeepEquality(this);
 	}
     public Stack<String> getSt() {
 		return st;

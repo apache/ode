@@ -16,28 +16,24 @@ import org.apache.ode.bpel.obj.OProcess;
 
 public class ExtensibeImplEqualityComp implements EqualityComparator{
     private static final Log __log = LogFactory.getLog(ExtensibeImplEqualityComp.class);
-	private EqualityVisitor visitor;
-	
+	private DeepEqualityHelper deepEquality;
 	public ExtensibeImplEqualityComp() {
-	}
-	public ExtensibeImplEqualityComp(EqualityVisitor visitor){
-		this.visitor = visitor;
 	}
 
 	@Override
 	public Boolean objectsEqual(Object obj1, Object obj2) {
 		if (obj2 == null) {
-			if (!visitor.logFalseThrough){
+			if (!deepEquality.logFalseThrough){
 				__log.debug("Unequal in ExtensibleImpl: Object2 is null. " +
-					visitor.getSt());
+					deepEquality.getSt());
 		}
 			return false;
 		}
 		ExtensibleImpl esi = (ExtensibleImpl)obj1;
 		ExtensibleImpl esio = null;
 		if (obj1.getClass() != obj2.getClass()){			
-			if (!visitor.logFalseThrough){
-				__log.debug("Unequal in ExtensibleImpl: Type mismatch. " + visitor.getSt() + 
+			if (!deepEquality.logFalseThrough){
+				__log.debug("Unequal in ExtensibleImpl: Type mismatch. " + deepEquality.getSt() + 
 					"\nmismatched type: " + obj1.getClass().getSimpleName() + 
 					" and " + obj2.getClass().getSimpleName());
 			}
@@ -52,8 +48,8 @@ public class ExtensibeImplEqualityComp implements EqualityComparator{
 		if (obj1 instanceof DebugInfo){
 			boolean r = obj1.equals(obj2);
 			if (!r){
-				if(!visitor.logFalseThrough){
-					__log.debug("Unequal in ExtensibleImpl: DebugInfo unequal." + visitor.getSt());
+				if(!deepEquality.logFalseThrough){
+					__log.debug("Unequal in ExtensibleImpl: DebugInfo unequal." + deepEquality.getSt());
 				}
 			}
 			return r;
@@ -66,8 +62,7 @@ public class ExtensibeImplEqualityComp implements EqualityComparator{
 			dehydrateOProcess(m1);
 			dehydrateOProcess(m2);
 		}
-		visitor.setOther(m2);
-		return (Boolean) visitor.getTraverse().traverseObject(m1);
+		return (Boolean) deepEquality.deepEquals(m1, m2);
 	}
 	private void dehydrateOProcess(Map m) {
 		m.remove("compileDate");
@@ -89,5 +84,10 @@ public class ExtensibeImplEqualityComp implements EqualityComparator{
 	@Override
 	public Boolean canHanle(Object obj) {
 		return obj instanceof ExtensibleImpl;
+	}
+
+	@Override
+	public void setDeepEquality(DeepEqualityHelper deepEquality) {
+		this.deepEquality = deepEquality;		
 	}
 }

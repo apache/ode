@@ -4,4 +4,5 @@ public interface EqualityComparator {
 
 	Boolean objectsEqual(Object obj1, Object obj2);
 	Boolean canHanle(Object obj);
+	void setDeepEquality(DeepEqualityHelper deepEquality);
 }

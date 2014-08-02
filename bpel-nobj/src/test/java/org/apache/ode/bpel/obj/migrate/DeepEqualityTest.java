@@ -24,16 +24,13 @@ public class DeepEqualityTest {
 		List<String> ls2 = new ArrayList<String>();
 		ls2.add("Hello");
 		ls2.add("world");
-		ObjectTraverser traverse = new ObjectTraverser();
-		EqualityVisitor visitor = new EqualityVisitor(ls2);
-		traverse.accept(visitor);
-		assertEquals(Boolean.TRUE, traverse.traverseObject(ls1));
+		DeepEqualityHelper de = new DeepEqualityHelper();
+		assertEquals(Boolean.TRUE, de.deepEquals(ls1, ls2));
 		ls1.add(0, "!");
 		ls2.add("!");
-		visitor.setOther(ls2);
-		assertEquals(Boolean.TRUE, traverse.traverseObject(ls1));		
+		assertEquals(Boolean.TRUE, de.deepEquals(ls1, ls2));
 	}
-	
+
 	@Test
 	public void simpleSetTest(){
 		Set<String> s1 = new LinkedHashSet();
@@ -42,11 +39,9 @@ public class DeepEqualityTest {
 		Set<String> s2 = new LinkedHashSet();
 		s2.add("world");
 		s2.add("hello");
-		
-		ObjectTraverser traverse = new ObjectTraverser();
-		EqualityVisitor visitor = new EqualityVisitor(s2);
-		traverse.accept(visitor);
-		assertEquals(Boolean.TRUE, traverse.traverseObject(s1));
+
+		DeepEqualityHelper de = new DeepEqualityHelper();
+		assertEquals(Boolean.TRUE, de.deepEquals(s1, s2));
 		
 	}
 	
@@ -60,10 +55,8 @@ public class DeepEqualityTest {
 		m2.put("item1", "string1");
 		m2.put("item2", new ArrayList());
 
-		ObjectTraverser traverse = new ObjectTraverser();
-		EqualityVisitor visitor = new EqualityVisitor(m2);
-		traverse.accept(visitor);
-		assertEquals(Boolean.TRUE, traverse.traverseObject(m1));
+		DeepEqualityHelper de = new DeepEqualityHelper();
+		assertEquals(Boolean.TRUE, de.deepEquals(m1, m2));
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -81,12 +74,10 @@ public class DeepEqualityTest {
 		URI u2 = new URI("urn://a/uri");
 		m2.put(u2, n2);
 		DebugInfo d2 = new DebugInfo("/a/path", 0, 1, m2);
-		m2.put("cylic", d2);
+		m2.put("cyclic", d2);
 
-		ObjectTraverser traverse = new ObjectTraverser();
-		EqualityVisitor visitor = new EqualityVisitor(d2);
-		visitor.addCustomComparator(new ExtensibeImplEqualityComp(visitor));
-		traverse.accept(visitor);
-		assertEquals(Boolean.TRUE, traverse.traverseObject(d1));
+		DeepEqualityHelper de = new DeepEqualityHelper();
+		de.addCustomComparator(new ExtensibeImplEqualityComp());
+		assertEquals(Boolean.TRUE, de.deepEquals(m1, m2));
 	}
 }

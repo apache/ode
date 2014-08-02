@@ -9,10 +9,9 @@ import java.net.URI;
 import java.net.URL;
 
 import org.apache.ode.bpel.obj.OProcess;
-import org.apache.ode.bpel.obj.OProcessWrapper;
-import org.apache.ode.bpel.obj.migrate.EqualityVisitor;
+import org.apache.ode.bpel.obj.migrate.DeepEqualityHelper;
+import org.apache.ode.bpel.obj.migrate.DomElementComparator;
 import org.apache.ode.bpel.obj.migrate.ExtensibeImplEqualityComp;
-import org.apache.ode.bpel.obj.migrate.ObjectTraverser;
 import org.apache.ode.bpel.obj.serde.DeSerializer;
 import org.apache.ode.bpel.obj.serde.OmSerdeFactory;
 import org.junit.Assert;
@@ -36,11 +35,10 @@ public class SerializationTest extends GoodCompileTest{
 			DeSerializer deserializer = new DeSerializer(new FileInputStream(cbpPath));
 			OProcess desered = deserializer.deserialize();
 
-			ObjectTraverser traverse = new ObjectTraverser();
-			EqualityVisitor visitor = new EqualityVisitor(desered);
-			visitor.addCustomComparator(new ExtensibeImplEqualityComp(visitor));
-			traverse.accept(visitor);
-			boolean res = (Boolean) traverse.traverseObject(origi);
+    		DeepEqualityHelper de = new DeepEqualityHelper();
+    		de.addCustomComparator(new ExtensibeImplEqualityComp());
+    		de.addCustomComparator(new DomElementComparator());
+    		boolean res = de.deepEquals(origi, desered);
 			assertEquals(Boolean.TRUE, res);
 		} catch (Exception ex) {
 			ex.printStackTrace();
