@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @JsonIdentityInfo(generator = UniqueStringIdGenerator.class, property = "@id")
 public class ExtensibleImpl  implements Extensible<Object>, Serializable{
 	public static final long serialVersionUID = -1L;
-	protected static final int CURRENT_CLASS_VERSION = 1;
+	public static final int CURRENT_CLASS_VERSION = 1;
 	
 	/** The wrapper wraps fields. Fields can be deleted, added or updated */
 	transient protected Map<String, Object> fieldContainer;

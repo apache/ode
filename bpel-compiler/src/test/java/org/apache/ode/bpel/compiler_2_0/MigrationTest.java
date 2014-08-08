@@ -16,6 +16,7 @@ import org.apache.ode.bpel.obj.migrate.DomElementComparator;
 import org.apache.ode.bpel.obj.migrate.ExtensibeImplEqualityComp;
 import org.apache.ode.bpel.obj.migrate.ObjectTraverser;
 import org.apache.ode.bpel.obj.migrate.OmOld2new;
+import org.apache.ode.bpel.obj.migrate.UpgradeChecker;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -50,6 +51,12 @@ public class MigrationTest extends GoodCompileTest{
     		de.addCustomComparator(new DomElementComparator());
     		boolean res = de.deepEquals(nu, migrated);
        		assertEquals(Boolean.TRUE, res);
+
+       		UpgradeChecker checker = new UpgradeChecker();
+    		ObjectTraverser traverser = new ObjectTraverser();
+    		traverser.accept(checker);
+    		traverser.traverseObject(migrated);
+      		assertEquals(true, checker.isNewest());
      } catch (Exception ex) {
             ex.printStackTrace();
             Assert.fail("Compilation or migration did not succeed.");
