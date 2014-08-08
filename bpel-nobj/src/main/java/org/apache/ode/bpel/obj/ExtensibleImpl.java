@@ -98,9 +98,6 @@ public class ExtensibleImpl  implements Extensible<Object>, Serializable{
 			Object value = ois.readObject();
 			fieldContainer.put(key, value);
 		}
-		
-		//migrate to newest version
-		upgrade2Newest();
 	}
 	
 	@Override

@@ -1,10 +1,12 @@
 package org.apache.ode.bpel.obj.migrate;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.apache.ode.bpel.obj.migrate.ObjectTraverser.HandleTable;
 
@@ -78,17 +80,42 @@ public abstract class AbstractObjectVisitor implements ObjectVisitor{
 		this.traverse = traverseObject;		
 	}
 	
-	@Override
 	public void addCustomVisitor(Class cls, ObjectVisitor visitor){
 		visitors.put(cls, visitor);
 	}
+	public Object visitMap(Object obj) {
+		Map m = (Map)obj;
+		Set<Entry> entries = m.entrySet();
+		for (Entry e : entries){
+			traverse.traverseObject(e.getKey());
+			traverse.traverseObject(e.getValue());
+		}
+		return null;
+	}
 
-	public abstract Object visitMap(Object obj);
-	public abstract Object visitCollection(Object obj);
-	public abstract Object visitArray(Object obj);
-	public abstract Object visitPojo(Object obj);
-	public abstract Object visitSet(Object obj);
+	public Object visitCollection(Object obj) {
+		Collection c = (Collection)obj;
+		for (Object item : c){
+			traverse.traverseObject(item);
+		}
+		return null;
+	}
+
+	public Object visitArray(Object obj) {
+		int len = Array.getLength(obj);
+		int i;
+		for (i = 0; i < len; i++){
+			traverse.traverseObject(Array.get(obj, i));
+		}
+		return null;
+	}
 	
+	public Object visitSet(Object obj) {
+		//nothing to do
+		return null;
+	}
+
+	public abstract Object visitPojo(Object obj);	
 	/**
      * Lightweight identity hash table which maps objects to replacement
      * objects.

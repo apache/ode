@@ -4,6 +4,8 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 
 import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.migrate.ObjectTraverser;
+import org.apache.ode.bpel.obj.migrate.OmUpgradeVisitor;
 
 public class JavaSerOmDeserializer implements OmDeserializer {
 	private InputStream is;

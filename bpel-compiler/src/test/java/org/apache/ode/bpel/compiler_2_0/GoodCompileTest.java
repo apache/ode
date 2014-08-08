@@ -19,19 +19,12 @@
 
 package org.apache.ode.bpel.compiler_2_0;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.File;
-import java.io.FileInputStream;
 import java.net.URI;
 import java.net.URL;
 
 import org.apache.ode.bpel.compiler.api.CompileListener;
 import org.apache.ode.bpel.obj.OProcess;
-import org.apache.ode.bpel.obj.migrate.DeepEqualityHelper;
-import org.apache.ode.bpel.obj.migrate.DomElementComparator;
-import org.apache.ode.bpel.obj.migrate.ExtensibeImplEqualityComp;
-import org.apache.ode.bpel.obj.serde.DeSerializer;
 import org.junit.Assert;
 import org.junit.Test;
 

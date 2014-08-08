@@ -8,14 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import javax.wsdl.Message;
 import javax.wsdl.OperationType;
-import javax.wsdl.Part;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.migrate.ObjectTraverser;
+import org.apache.ode.bpel.obj.migrate.OmUpgradeVisitor;
 import org.apache.ode.bpel.obj.serde.jacksonhack.TypeBeanSerializerFactory;
 import org.apache.ode.utils.NSContext;
 import org.w3c.dom.Element;

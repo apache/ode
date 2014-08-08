@@ -11,6 +11,8 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.OProcessWrapper;
+import org.apache.ode.bpel.obj.migrate.ObjectTraverser;
+import org.apache.ode.bpel.obj.migrate.OmUpgradeVisitor;
 import org.apache.ode.bpel.obj.serde.OmSerdeFactory.SerializeFormat;
 
 public class DeSerializer {
@@ -71,7 +73,13 @@ public class DeSerializer {
 		OmSerdeFactory factory = new OmSerdeFactory();
 		factory.setFormat(wrapper.getFormat());
     	OmDeserializer de = factory.createOmDeserializer(is);
-    	return de.deserialize();
+    	OProcess process = de.deserialize();
+		//upgrade
+		OmUpgradeVisitor upgrader = new OmUpgradeVisitor();
+		ObjectTraverser traverser = new ObjectTraverser();
+		traverser.accept(upgrader);
+		traverser.traverseObject(process);
+		return process;
 	}
 	
 	public OProcessWrapper getWrapper() {
