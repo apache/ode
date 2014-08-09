@@ -7,7 +7,7 @@ import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.migrate.LegacySerializerAdapter;
 
 public class OmSerdeFactory {
-	public static final SerializeFormat FORMAT_SERIALIZED_DEFAULT = SerializeFormat.FORMAT_SERIALIZED_SMILE;
+	public static final SerializeFormat FORMAT_SERIALIZED_DEFAULT = SerializeFormat.FORMAT_SERIALIZED_JAVA;
 
 	private SerializeFormat format = FORMAT_SERIALIZED_DEFAULT;
 	

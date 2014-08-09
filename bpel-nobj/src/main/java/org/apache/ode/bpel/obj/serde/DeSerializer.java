@@ -1,5 +1,6 @@
 package org.apache.ode.bpel.obj.serde;
 
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -33,7 +34,7 @@ public class DeSerializer {
 	private File writeBackFile;
 
 	public DeSerializer(InputStream is) {
-		this.is = is;
+		this.is = new BufferedInputStream(is);
 		deserializeHeader();
 	}
 
@@ -77,12 +78,12 @@ public class DeSerializer {
 	private void deserializeHeader() {
 		try {
 	        DataInputStream oin = new DataInputStream(is);
-	        is.mark(OProcessWrapper.CURRENT_MAGIC_NUMBER.length + 2);
+	        oin.mark(OProcessWrapper.CURRENT_MAGIC_NUMBER.length + 2);
 	        byte[] magic = new byte[OProcessWrapper.CURRENT_MAGIC_NUMBER.length];
 	        oin.read(magic, 0, magic.length);
 	        if (Arrays.equals(Serializer.MAGIC_NUMBER_OFH_20040908, magic) ||
 	        		Arrays.equals(Serializer.MAGIC_NUMBER_OFH_20061101, magic)){
-	        	is.reset();
+	        	oin.reset();
 	        	Serializer serializer = new Serializer(is);
 	        	wrapper.setMagic(magic);
 	        	wrapper.setGuid(serializer.guid);
@@ -113,6 +114,7 @@ public class DeSerializer {
 		factory.setFormat(wrapper.getFormat());
 		OmDeserializer de = factory.createOmDeserializer(is);
 		OProcess process = de.deserialize();
+		wrapper.setProcess(process);
 		//upgrade
 		UpgradeChecker checker = new UpgradeChecker();
 		ObjectTraverser traverser = new ObjectTraverser();
@@ -127,7 +129,6 @@ public class DeSerializer {
 				writeBack();
 			}
 		}
-		wrapper.setProcess(process);
 		return process;
 	}
 

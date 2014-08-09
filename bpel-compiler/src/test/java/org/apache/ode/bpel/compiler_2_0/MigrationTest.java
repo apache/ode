@@ -18,6 +18,7 @@ import org.apache.ode.bpel.obj.migrate.ObjectTraverser;
 import org.apache.ode.bpel.obj.migrate.OmOld2new;
 import org.apache.ode.bpel.obj.migrate.OmUpgradeVisitor;
 import org.apache.ode.bpel.obj.migrate.UpgradeChecker;
+import org.apache.ode.bpel.obj.serde.DeSerializer;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -40,19 +41,12 @@ public class MigrationTest extends GoodCompileTest{
             
             OProcess nu = _compiler.compile2OProcess(bpelFile, 0);
     		__log.debug("compiled new OProcess " + nu.getFieldContainer());
-    		org.apache.ode.bpel.o.OProcess old = new Serializer(new FileInputStream(oldCbpFile)).readOProcess();
-    		OmOld2new mig = new OmOld2new();
-    		ObjectTraverser mtraverse = new ObjectTraverser();
-    		mtraverse.accept(mig);
-    		OProcess migrated = (OProcess) mtraverse.traverseObject(old);
-    		__log.debug("migrated new OProcess " + migrated.getFieldContainer());
     		
-       		//upgrade
-			OmUpgradeVisitor upgrader = new OmUpgradeVisitor();
-			ObjectTraverser traverser = new ObjectTraverser();
-			traverser.accept(upgrader);
-			traverser.traverseObject(migrated);
-
+    		DeSerializer deSerializer = new DeSerializer(new FileInputStream(oldCbpFile));
+    		deSerializer.setWriteBackFile(oldCbpFile); //writeback newest
+    		OProcess migrated = deSerializer.deserialize();
+    		__log.debug("Read and migrated old OProcess " + migrated.getFieldContainer());
+    		
 			//check
     		DeepEqualityHelper de = new DeepEqualityHelper();
     		de.addCustomComparator(new ExtensibeImplEqualityComp());
@@ -61,7 +55,7 @@ public class MigrationTest extends GoodCompileTest{
        		assertEquals(Boolean.TRUE, res);
        		
        		UpgradeChecker checker = new UpgradeChecker();
-    		traverser = new ObjectTraverser();
+    		ObjectTraverser traverser = new ObjectTraverser();
     		traverser.accept(checker);
     		traverser.traverseObject(migrated);
       		assertEquals(true, checker.isNewest());
