@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -14,8 +15,6 @@ import javax.xml.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.obj.OProcess;
-import org.apache.ode.bpel.obj.migrate.ObjectTraverser;
-import org.apache.ode.bpel.obj.migrate.OmUpgradeVisitor;
 import org.apache.ode.bpel.obj.serde.jacksonhack.TypeBeanSerializerFactory;
 import org.apache.ode.utils.NSContext;
 import org.w3c.dom.Element;
@@ -24,16 +23,22 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.io.SerializedString;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyName;
 import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
 import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
+import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
+import com.fasterxml.jackson.databind.introspect.POJOPropertyBuilder;
 import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.module.jaxb.deser.DomElementJsonDeserializer;
+import com.ibm.wsdl.AbstractWSDLElement;
 import com.ibm.wsdl.MessageImpl;
 public class JsonOmDeserializer implements OmDeserializer {
 	protected static final Log __log = LogFactory
@@ -77,7 +82,7 @@ public class JsonOmDeserializer implements OmDeserializer {
 			simpleModule.addDeserializer((Class) d,
 					(JsonDeserializer) deserializers.get(d));
 		}
-		simpleModule.setDeserializerModifier(new OModelDeserModifier());
+		simpleModule.setDeserializerModifier(new WsdlElementDeserModifier());
 		simpleModule.addKeyDeserializer(Object.class, new KeyAsJsonDeserializer());
 		simpleModule.addKeyDeserializer(String.class, new KeyAsJsonDeserializer());
 		mapper.registerModule(simpleModule);
@@ -236,4 +241,33 @@ public class JsonOmDeserializer implements OmDeserializer {
 		
 	}
 
+	public static class WsdlElementDeserModifier extends BeanDeserializerModifier{
+		public static class MyBeanPropertyWriter extends BeanPropertyWriter{
+			public MyBeanPropertyWriter(BeanPropertyWriter origi, String newName){
+				super(origi, new SerializedString(newName));
+			}
+		}
+		@Override
+		public List<BeanPropertyDefinition> updateProperties(DeserializationConfig config,
+                BeanDescription beanDesc,
+                List<BeanPropertyDefinition> propDefs){
+			if (!AbstractWSDLElement.class.isAssignableFrom(beanDesc.getBeanClass())) {
+				return propDefs;
+			}
+			Iterator<BeanPropertyDefinition> itor = propDefs.iterator();
+			BeanPropertyDefinition modified = null;
+			while(itor.hasNext()){
+				BeanPropertyDefinition prop = itor.next();
+				if (prop.getName().equalsIgnoreCase("extensibilityElements")){
+					modified = new POJOPropertyBuilder((POJOPropertyBuilder)prop, new PropertyName("extElements"));
+					itor.remove();
+					break;
+				}
+			}
+			if (modified != null){
+				propDefs.add(modified);
+			}
+			return propDefs;
+		}
+	}
 }
