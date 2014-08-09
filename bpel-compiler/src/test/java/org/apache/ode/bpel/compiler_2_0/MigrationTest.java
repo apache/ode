@@ -16,6 +16,7 @@ import org.apache.ode.bpel.obj.migrate.DomElementComparator;
 import org.apache.ode.bpel.obj.migrate.ExtensibeImplEqualityComp;
 import org.apache.ode.bpel.obj.migrate.ObjectTraverser;
 import org.apache.ode.bpel.obj.migrate.OmOld2new;
+import org.apache.ode.bpel.obj.migrate.OmUpgradeVisitor;
 import org.apache.ode.bpel.obj.migrate.UpgradeChecker;
 import org.junit.Assert;
 import org.junit.Test;
@@ -46,14 +47,21 @@ public class MigrationTest extends GoodCompileTest{
     		OProcess migrated = (OProcess) mtraverse.traverseObject(old);
     		__log.debug("migrated new OProcess " + migrated.getFieldContainer());
     		
+       		//upgrade
+			OmUpgradeVisitor upgrader = new OmUpgradeVisitor();
+			ObjectTraverser traverser = new ObjectTraverser();
+			traverser.accept(upgrader);
+			traverser.traverseObject(migrated);
+
+			//check
     		DeepEqualityHelper de = new DeepEqualityHelper();
     		de.addCustomComparator(new ExtensibeImplEqualityComp());
     		de.addCustomComparator(new DomElementComparator());
     		boolean res = de.deepEquals(nu, migrated);
        		assertEquals(Boolean.TRUE, res);
-
+       		
        		UpgradeChecker checker = new UpgradeChecker();
-    		ObjectTraverser traverser = new ObjectTraverser();
+    		traverser = new ObjectTraverser();
     		traverser.accept(checker);
     		traverser.traverseObject(migrated);
       		assertEquals(true, checker.isNewest());

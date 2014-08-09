@@ -22,10 +22,17 @@ public class UpgradeChecker extends AbstractObjectVisitor{
 
 	private void visitExtensible(Object obj) {
 		ExtensibleImpl eobj = (ExtensibleImpl)obj;
-		if (eobj.getClassVersion() != eobj.CURRENT_CLASS_VERSION){
+		int currentVersion = 1;
+		try {
+			currentVersion = (Integer) eobj.getClass().getField("CURRENT_CLASS_VERSION").get(obj);
+		} catch (Exception e) {
+			// should never get here
+			e.printStackTrace();
+		}
+		if (eobj.getClassVersion() != currentVersion){
 			newest = false;
 			__log.debug(obj.getClass() + "hasn't upgraded to newest version. current: " 
-					+ eobj.getClassVersion() + ", newest: " + eobj.CURRENT_CLASS_VERSION);
+					+ eobj.getClassVersion() + ", newest: " + currentVersion);
 		}
 		List<Field> fields = MigUtils.getAllFields(obj.getClass());
 		for (Field f : fields){

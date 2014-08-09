@@ -29,8 +29,15 @@ public class ExtensibleImpl  implements Extensible<Object>, Serializable{
 	}
 	protected ExtensibleImpl(Map<String, Object> container) {
 		fieldContainer = container;
-		setClassVersion(CURRENT_CLASS_VERSION);
-		setOriginalVersion(CURRENT_CLASS_VERSION); //if this is called by deserializer, original will be set later.
+		int currentVersion = 0;
+		try {
+			currentVersion = (Integer) this.getClass().getField("CURRENT_CLASS_VERSION").get(this);
+		} catch (Exception e) {
+			// should never get here
+			e.printStackTrace();
+		}
+		setClassVersion(currentVersion);
+		setOriginalVersion(currentVersion); //if this is called by deserializer, original will be set later.
 	}
 	
 //	@JsonAnyGetter
@@ -103,12 +110,19 @@ public class ExtensibleImpl  implements Extensible<Object>, Serializable{
 	@Override
 	public void upgrade2Newest(){
 		int version = getClassVersion();
-		if (version == CURRENT_CLASS_VERSION) return;
-		if (version > CURRENT_CLASS_VERSION){
+		int currentVersion = version;
+		try {
+			currentVersion = (Integer) this.getClass().getField("CURRENT_CLASS_VERSION").get(this);
+		} catch (Exception e) {
+			// should never get here
+			e.printStackTrace();
+		}
+		if (version == currentVersion) return;
+		if (version > currentVersion){
 			//should never get here. 
 			throw new RuntimeException("class version is newer than newest!");
 		}
-		setClassVersion(CURRENT_CLASS_VERSION);
+		setClassVersion(currentVersion);
 		return;
 	}
 }
