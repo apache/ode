@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.migrate.LegacySerializerAdapter;
 
 public class OmSerdeFactory {
 	public static final SerializeFormat FORMAT_SERIALIZED_DEFAULT = SerializeFormat.FORMAT_SERIALIZED_SMILE;
@@ -41,6 +42,9 @@ public class OmSerdeFactory {
 		case FORMAT_SERIALIZED_JAVA:
 			deser = new JavaSerOmDeserializer(is);
 			break;
+		case FORMAT_SERIALIZED_LEGACY:
+			deser = new LegacySerializerAdapter(is);
+			break;
 		default:
 			throw new SerializaionRtException("Unsupported format");
 		}
@@ -58,7 +62,10 @@ public class OmSerdeFactory {
 		FORMAT_UNINITIALIZED(0x00),
 		FORMAT_SERIALIZED_JSON(0x10),
 		FORMAT_SERIALIZED_SMILE(0x11),
-		FORMAT_SERIALIZED_JAVA(0x20);
+		FORMAT_SERIALIZED_JAVA(0x20),
+		
+		//convenient for legacy format
+		FORMAT_SERIALIZED_LEGACY(0x90);
 		
 		private int code;
 		private SerializeFormat(int code){
