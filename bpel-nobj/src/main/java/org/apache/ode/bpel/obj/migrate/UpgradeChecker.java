@@ -7,6 +7,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.obj.ExtensibleImpl;
 
+/**
+ * Check if the specified OModel Object is newest. Used as a visitor of 
+ * {@link ObjectTraverser}.
+ * 
+ * @see ObjectTraverser
+ */
 public class UpgradeChecker extends AbstractObjectVisitor{
     private static final Log __log = LogFactory.getLog(UpgradeChecker.class);
 

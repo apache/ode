@@ -12,6 +12,10 @@ import org.apache.ode.bpel.obj.DebugInfo;
 import org.apache.ode.bpel.obj.ExtensibleImpl;
 import org.apache.ode.bpel.obj.OProcess;
 
+/**
+ * DeepEquality comparator for OModel classes. It will compare backed map recursively.
+ * @see DeepEqualityHelper
+ */
 public class ExtensibeImplEqualityComp implements EqualityComparator{
     private static final Log __log = LogFactory.getLog(ExtensibeImplEqualityComp.class);
 	private DeepEqualityHelper deepEquality;

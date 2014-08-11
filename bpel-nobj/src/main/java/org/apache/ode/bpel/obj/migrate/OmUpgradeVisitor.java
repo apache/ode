@@ -6,6 +6,11 @@ import java.util.List;
 
 import org.apache.ode.bpel.obj.Extensible;
 
+/**
+ * Upgrade Omodel Object to newest version. Used as
+ * visitor of {@link ObjectTraverser}
+ * @see ObjectTraverser
+ */
 public class OmUpgradeVisitor extends AbstractObjectVisitor{
 
 	@Override

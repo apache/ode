@@ -5,6 +5,11 @@ import java.io.OutputStream;
 
 import org.apache.ode.bpel.obj.OProcess;
 
+/**
+ * OModel Serializer that use java serializtion mechanism. 
+ * Corresponding to format {@link OmSerdeFactory.SerializeFormat#FORMAT_SERIALIZED_JAVA}
+ * @see JavaSerOmDeserializer
+ */
 public class JavaSerOmSerializer implements OmSerializer {
 	private OutputStream out;
 	OProcess process;

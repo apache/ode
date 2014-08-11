@@ -41,6 +41,11 @@ import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.module.jaxb.deser.DomElementJsonDeserializer;
 import com.ibm.wsdl.AbstractWSDLElement;
 import com.ibm.wsdl.MessageImpl;
+/**
+ * OModel Serializer that deserialize process from json using jackson.
+ * Corresponding to format {@link OmSerdeFactory.SerializeFormat#FORMAT_SERIALIZED_JSON}
+ * @see JsonOmSerializer
+ */
 public class JsonOmDeserializer implements OmDeserializer {
 	protected static final Log __log = LogFactory
 			.getLog(JsonOmDeserializer.class);
@@ -118,6 +123,9 @@ public class JsonOmDeserializer implements OmDeserializer {
 		this.is = is;
 	}
 
+	/**
+	 * @see JsonOmSerializer.OperationTypeSerializer
+	 */
 	public static class OperationTypeDeserializer extends
 			StdScalarDeserializer<OperationType> {
 		private static final long serialVersionUID = 2015036061829834379L;
@@ -154,6 +162,11 @@ public class JsonOmDeserializer implements OmDeserializer {
 		}
 	}
 
+	/**
+	 * Add type info to {@link org.w3c.dom.Element}. 
+	 * 
+	 * @see DomElementJsonDeserializer
+	 */
 	public static class DomElementDeserializerHack extends DomElementJsonDeserializer{
 		private static final long serialVersionUID = 2447322357224915181L;
 
@@ -174,7 +187,9 @@ public class JsonOmDeserializer implements OmDeserializer {
 	        return value;    
 		}
 	}
-	
+	/**
+	 * @see JsonOmSerializer.NSContextSerializer
+	 */
 	public static class NSContextDeserializer extends StdScalarDeserializer<NSContext>{
 		private static final long serialVersionUID = -4581782525089784968L;
 
@@ -194,6 +209,9 @@ public class JsonOmDeserializer implements OmDeserializer {
 		
 	}
 	
+	/**
+	 * @see JsonOmSerializer.MessageSerializer
+	 */
 	public static class MessageDeserializer extends StdScalarDeserializer<MessageImpl>{
 
 		protected MessageDeserializer(Class<?> vc) {
@@ -233,6 +251,10 @@ public class JsonOmDeserializer implements OmDeserializer {
 		
 	}
 
+	/**
+	 * BeanDeserializerModifier to deserialize {@link AbstractWSDLElement} extensibilityElements
+	 * property as field to avoid settlessProperities bug [FastXML/jackson-databind#501].
+	 */
 	public static class WsdlElementDeserModifier extends BeanDeserializerModifier{
 		public static class MyBeanPropertyWriter extends BeanPropertyWriter{
 			public MyBeanPropertyWriter(BeanPropertyWriter origi, String newName){

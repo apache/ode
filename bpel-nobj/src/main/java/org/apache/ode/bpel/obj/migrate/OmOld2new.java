@@ -19,7 +19,7 @@ import org.apache.ode.bpel.obj.ExtensibleImpl;
 /**
  * Migrate from old Omodel classes to new ones.
  * @author fangzhen
- *
+ * @see ObjectTraverser
  */
 public class OmOld2new extends AbstractObjectVisitor{
     private static final Log __log = LogFactory.getLog(OmOld2new.class);

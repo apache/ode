@@ -26,6 +26,12 @@ import org.apache.ode.bpel.obj.migrate.OmUpgradeVisitor;
 import org.apache.ode.bpel.obj.migrate.UpgradeChecker;
 import org.apache.ode.bpel.obj.serde.OmSerdeFactory.SerializeFormat;
 
+/**
+ * Main Serializer and Deserializer of OModel classes. This class handles different
+ * serialization format. (De)Serialize header information. It will upgrade the deserialized
+ * OProcess to newest version. And write it back if the write back file is specified.
+ * @see OmSerdeFactory
+ */
 public class DeSerializer {
     private static final Log __log = LogFactory.getLog(DeSerializer.class);
 
@@ -163,5 +169,4 @@ public class DeSerializer {
 	public void setWriteBackFile(File writeBack) {
 		this.writeBackFile = writeBack;
 	}
-
 }

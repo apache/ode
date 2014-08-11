@@ -32,7 +32,11 @@ import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer;
 import com.fasterxml.jackson.module.jaxb.ser.DomElementJsonSerializer;
 import com.ibm.wsdl.MessageImpl;
 
-
+/**
+ * OModel Serializer that serialize process to json using jackson.
+ * Corresponding to format {@link OmSerdeFactory.SerializeFormat#FORMAT_SERIALIZED_JSON}
+ * @see JsonOmDeserializer
+ */
 public class JsonOmSerializer implements OmSerializer {
 	protected static final Log __log = LogFactory
 			.getLog(JsonOmSerializer.class);
@@ -110,6 +114,10 @@ public class JsonOmSerializer implements OmSerializer {
 		this.os = os;
 	}
 
+	/**
+	 * Custom jackson serializer for {@link OperationType}
+	 * @see JsonOmDeserializer.OperationTypeDeserializer
+	 */
 	public static class OperationTypeSerializer extends
 			StdScalarSerializer<OperationType> {
 
@@ -154,7 +162,10 @@ public class JsonOmSerializer implements OmSerializer {
 			jgen.writeEndArray();
 		}
 	}
-	
+	/**
+	 * Custom {@link NSContext} serializer. Serialize it's map representation.
+	 * @see NSContext JsonOmDeserializer.NSContextDeserializer
+	 */
 	public static class NSContextSerializer extends StdScalarSerializer<NSContext>{
 
 	
@@ -172,6 +183,12 @@ public class JsonOmSerializer implements OmSerializer {
 		
 	}
 	
+	/**
+	 * custom serializer for {@link MessageImpl}. Additional private field 
+	 * (@link MessageImpl#additionOrderOfParts} are serialized.
+	 * 
+	 * @see JsonOmDeserializer.MessageDeserializer
+	 */
 	public static class MessageSerializer extends StdScalarSerializer<MessageImpl>{
 
 		protected MessageSerializer(Class<MessageImpl> class1) {

@@ -16,6 +16,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
+/**
+ * DeepEqual of two DomElement.
+ * @see DeepEqualityHelper
+ */
 public class DomElementComparator implements EqualityComparator{
     private static final Log __log = LogFactory.getLog(DomElementComparator.class);
 	private DeepEqualityHelper deepEquality;

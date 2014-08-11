@@ -4,9 +4,12 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 
 import org.apache.ode.bpel.obj.OProcess;
-import org.apache.ode.bpel.obj.migrate.ObjectTraverser;
-import org.apache.ode.bpel.obj.migrate.OmUpgradeVisitor;
 
+/**
+ * OModel deserializer that use java serializtion mechanism.
+ * Corresponding to format {@link OmSerdeFactory.SerializeFormat#FORMAT_SERIALIZED_JAVA}
+ * @see JavaSerOmSerializer
+ */
 public class JavaSerOmDeserializer implements OmDeserializer {
 	private InputStream is;
 	public JavaSerOmDeserializer(InputStream is) {
