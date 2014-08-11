@@ -118,15 +118,6 @@ public class JsonOmDeserializer implements OmDeserializer {
 		this.is = is;
 	}
 
-	public static class OModelDeserModifier extends BeanDeserializerModifier {
-		@Override
-		public JsonDeserializer<?> modifyDeserializer(
-				DeserializationConfig config, BeanDescription beanDesc,
-				JsonDeserializer<?> deserializer) {
-			return deserializer;
-		}
-	}
-
 	public static class OperationTypeDeserializer extends
 			StdScalarDeserializer<OperationType> {
 		private static final long serialVersionUID = 2015036061829834379L;
@@ -256,26 +247,26 @@ public class JsonOmDeserializer implements OmDeserializer {
 				return propDefs;
 			}
 			Iterator<BeanPropertyDefinition> itor = propDefs.iterator();
-			POJOPropertyBuilder modified = null;
 			while(itor.hasNext()){
 				BeanPropertyDefinition prop = itor.next();
 				if (prop.getName().equalsIgnoreCase("extensibilityElements")){
-					modified = new POJOPropertyBuilder((POJOPropertyBuilder)prop, new PropertyName("extElements"));
 					try {
 						AnnotatedField f = new AnnotatedField(AbstractWSDLElement.class.getDeclaredField("extElements"), null);
-						modified.addField(f, new PropertyName("extElements"), false, true, false);
+						((POJOPropertyBuilder)prop).addField(f, new PropertyName("extElements"), false, true, false);
 					} catch (NoSuchFieldException e) {
 						SerializaionRtException e1 =  new SerializaionRtException(
 								"cann't find field, probably implementation of AbstractWSDLElement has changed");
 						e1.initCause(e);
 						throw e1;
+					} catch (ClassCastException e){
+						SerializaionRtException e1 = new SerializaionRtException(
+								"Cast to POJOPropertyBuilder failde, probably underlying impl of "
+								+ "BeanPropertyDefinition has changed");
+						e1.initCause(e);
+						throw e1;
 					}
-					itor.remove();
 					break;
 				}
-			}
-			if (modified != null){
-				propDefs.add(modified);
 			}
 			return propDefs;
 		}

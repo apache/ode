@@ -5,8 +5,6 @@ import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -23,21 +21,15 @@ import org.w3c.dom.Element;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.io.SerializedString;
-import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
-import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer;
 import com.fasterxml.jackson.module.jaxb.ser.DomElementJsonSerializer;
-import com.ibm.wsdl.AbstractWSDLElement;
 import com.ibm.wsdl.MessageImpl;
 
 
@@ -85,7 +77,6 @@ public class JsonOmSerializer implements OmSerializer {
 		}
 
 		simpleModule.addKeySerializer(Object.class, new KeyAsJsonSerializer());
-		simpleModule.setSerializerModifier(new WsdlElementSerModifier());
 		mapper.registerModule(simpleModule);
 		
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -212,33 +203,4 @@ public class JsonOmSerializer implements OmSerializer {
 		
 	}
 
-	public static class WsdlElementSerModifier extends BeanSerializerModifier{
-		public static class MyBeanPropertyWriter extends BeanPropertyWriter{
-			public MyBeanPropertyWriter(BeanPropertyWriter origi, String newName){
-				super(origi, new SerializedString(newName));
-			}
-		}
-		public List<BeanPropertyWriter> changeProperties(SerializationConfig config,
-                BeanDescription beanDesc,
-                List<BeanPropertyWriter> beanProperties){
-			if (!AbstractWSDLElement.class.isAssignableFrom(beanDesc.getBeanClass())) {
-				return beanProperties;
-			}
-			Iterator<BeanPropertyWriter> itor = beanProperties.iterator();
-			BeanPropertyWriter modified = null;
-			while(itor.hasNext()){
-				BeanPropertyWriter prop = itor.next();
-				if (prop.getName().equalsIgnoreCase("extensibilityElements")){
-					modified = new MyBeanPropertyWriter(prop, "extElements");
-					itor.remove();
-					
-					break;
-				}
-			}
-			if (modified != null){
-				beanProperties.add(modified);
-			}
-			return beanProperties;
-		}
-	}
 }
