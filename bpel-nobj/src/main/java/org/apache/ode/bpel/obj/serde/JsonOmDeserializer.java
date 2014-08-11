@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyName;
 import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
 import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
+import com.fasterxml.jackson.databind.introspect.AnnotatedField;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.introspect.POJOPropertyBuilder;
 import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
@@ -255,11 +256,20 @@ public class JsonOmDeserializer implements OmDeserializer {
 				return propDefs;
 			}
 			Iterator<BeanPropertyDefinition> itor = propDefs.iterator();
-			BeanPropertyDefinition modified = null;
+			POJOPropertyBuilder modified = null;
 			while(itor.hasNext()){
 				BeanPropertyDefinition prop = itor.next();
 				if (prop.getName().equalsIgnoreCase("extensibilityElements")){
 					modified = new POJOPropertyBuilder((POJOPropertyBuilder)prop, new PropertyName("extElements"));
+					try {
+						AnnotatedField f = new AnnotatedField(AbstractWSDLElement.class.getDeclaredField("extElements"), null);
+						modified.addField(f, new PropertyName("extElements"), false, true, false);
+					} catch (NoSuchFieldException e) {
+						SerializaionRtException e1 =  new SerializaionRtException(
+								"cann't find field, probably implementation of AbstractWSDLElement has changed");
+						e1.initCause(e);
+						throw e1;
+					}
 					itor.remove();
 					break;
 				}

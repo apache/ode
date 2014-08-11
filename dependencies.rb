@@ -75,7 +75,7 @@ HIBERNATE           = [ "org.hibernate:hibernate-core:jar:3.3.2.GA", "javassist:
                          "asm:asm:jar:3.3.1", "cglib:cglib:jar:2.2", "net.sf.ehcache:ehcache:jar:1.2.3" ]
 HSQLDB              = "hsqldb:hsqldb:jar:1.8.0.7"
 JACKSON              = [ "com.fasterxml.jackson.core:jackson-core:jar:2.4.0", 
-                        "com.fasterxml.jackson.core:jackson-databind:jar:2.4.1-SNAPSHOT",
+                        "com.fasterxml.jackson.core:jackson-databind:jar:2.4.0",
                         "com.fasterxml.jackson.core:jackson-annotations:jar:2.4.0",
                         "com.fasterxml.jackson.dataformat:jackson-dataformat-smile:jar:2.4.0",
                         "com.fasterxml.jackson.module:jackson-module-jaxb-annotations:jar:2.4.0"]
