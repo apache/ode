@@ -84,8 +84,15 @@ public interface ProcessConf {
     /**
      * Get the CBP stream.
      * @return new stream to the CBP file.
+     * @deprecated use {@link #getCBPFile()} instead.
      */
     InputStream getCBPInputStream();
+    
+    /**
+     * Get the CBP file
+     * @return the CBP file
+     */
+    File getCBPFile();
 
     /**
      * Get the CBP file size.

@@ -3,20 +3,16 @@ package org.apache.ode.bpel.compiler_2_0;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.net.URI;
 import java.net.URL;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.migrate.DeepEqualityHelper;
 import org.apache.ode.bpel.obj.migrate.DomElementComparator;
 import org.apache.ode.bpel.obj.migrate.ExtensibeImplEqualityComp;
 import org.apache.ode.bpel.obj.migrate.ObjectTraverser;
-import org.apache.ode.bpel.obj.migrate.OmOld2new;
-import org.apache.ode.bpel.obj.migrate.OmUpgradeVisitor;
 import org.apache.ode.bpel.obj.migrate.UpgradeChecker;
 import org.apache.ode.bpel.obj.serde.DeSerializer;
 import org.junit.Assert;
@@ -42,8 +38,7 @@ public class MigrationTest extends GoodCompileTest{
             OProcess nu = _compiler.compile2OProcess(bpelFile, 0);
     		__log.debug("compiled new OProcess " + nu.getFieldContainer());
     		
-    		DeSerializer deSerializer = new DeSerializer(new FileInputStream(oldCbpFile));
-    		deSerializer.setWriteBackFile(oldCbpFile); //writeback newest
+    		DeSerializer deSerializer = new DeSerializer(oldCbpFile);
     		OProcess migrated = deSerializer.deserialize();
     		__log.debug("Read and migrated old OProcess " + migrated.getFieldContainer());
     		

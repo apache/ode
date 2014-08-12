@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.engine;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
@@ -65,10 +66,7 @@ import org.apache.ode.bpel.obj.OExpressionLanguage;
 import org.apache.ode.bpel.obj.OMessageVarType;
 import org.apache.ode.bpel.obj.OPartnerLink;
 import org.apache.ode.bpel.obj.OProcess;
-import org.apache.ode.bpel.obj.OProcessWrapper;
 import org.apache.ode.bpel.obj.serde.DeSerializer;
-import org.apache.ode.bpel.obj.serde.OmDeserializer;
-import org.apache.ode.bpel.obj.serde.OmSerdeFactory;
 import org.apache.ode.bpel.runtime.BpelRuntimeContext;
 import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
 import org.apache.ode.bpel.runtime.InvalidProcessException;
@@ -563,9 +561,9 @@ public class BpelProcess {
      *            input stream
      * @return process information from configuration database
      */
-    private OProcess deserializeCompiledProcess(InputStream is) throws Exception {
+    private OProcess deserializeCompiledProcess(File file) throws Exception {
         OProcess compiledProcess;
-        DeSerializer deserializer = new DeSerializer(is);
+        DeSerializer deserializer = new DeSerializer(file);
         compiledProcess = deserializer.deserialize();
         return compiledProcess;
     }
@@ -878,12 +876,8 @@ public class BpelProcess {
                 __log.debug("Rehydrating process " + _pconf.getProcessId());
             }
             try {
-                InputStream inputStream = _pconf.getCBPInputStream();
-                try {
-                    _oprocess = deserializeCompiledProcess(inputStream);
-                } finally {
-                    inputStream.close();
-                }
+            	File file = _pconf.getCBPFile();
+            	_oprocess = deserializeCompiledProcess(file);
             } catch (Exception e) {
                 String errmsg = "The process " + _pid + " is no longer available.";
                 __log.error(errmsg, e);

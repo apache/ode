@@ -269,6 +269,14 @@ public class ProcessConfImpl implements ProcessConf {
             throw new ContextException("File Not Found: " + cbpInfo.cbp, e);
         }
     }
+    
+    @Override
+    public File getCBPFile(){
+        CBPInfo cbpInfo = _du.getCBPInfo(getType());
+        if (cbpInfo == null)
+            throw new ContextException("CBP record not found for type " + getType());
+        return cbpInfo.cbp;
+    }
 
     public long getCBPFileSize() {
         CBPInfo cbpInfo = _du.getCBPInfo(getType());

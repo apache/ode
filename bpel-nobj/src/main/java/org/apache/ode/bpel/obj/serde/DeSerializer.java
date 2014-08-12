@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -33,17 +34,31 @@ import org.apache.ode.bpel.obj.serde.OmSerdeFactory.SerializeFormat;
  * @see OmSerdeFactory
  */
 public class DeSerializer {
-    private static final Log __log = LogFactory.getLog(DeSerializer.class);
+	private static final Log __log = LogFactory.getLog(DeSerializer.class);
 
-    private OProcessWrapper wrapper = new OProcessWrapper();
+	private OProcessWrapper wrapper = new OProcessWrapper();
 	private InputStream is;
 	private File writeBackFile;
+	private File cbpFile;
 
-	public DeSerializer(InputStream is) {
+	/**
+	 * Constructor to create deserializer to deserialize from file.
+	 * @param cbpFile the serialized compiled cbp file
+	 * @throws FileNotFoundException
+	 */
+	public DeSerializer(File cbpFile) throws FileNotFoundException {
+		this(new FileInputStream(cbpFile));
+		this.cbpFile = cbpFile;
+	}
+
+	DeSerializer(InputStream is) {
 		this.is = new BufferedInputStream(is);
 		deserializeHeader();
 	}
 
+	/**
+	 * Constructor to create serializer.
+	 */
 	public DeSerializer() {
 	}
 
@@ -58,10 +73,11 @@ public class DeSerializer {
 		wrapper.setFormat(format);
 		serialize(out);
 	}
-	private void serialize(OutputStream out){
+
+	private void serialize(OutputStream out) {
 		try {
-	        DataOutputStream dos = new DataOutputStream(out);
-	        dos.write(wrapper.getMagic());
+			DataOutputStream dos = new DataOutputStream(out);
+			dos.write(wrapper.getMagic());
 			ObjectOutputStream oos = new ObjectOutputStream(out);
 			oos.writeObject(wrapper.getFormat());
 			oos.writeLong(wrapper.getCompileTime());
@@ -83,21 +99,22 @@ public class DeSerializer {
 
 	private void deserializeHeader() {
 		try {
-	        DataInputStream oin = new DataInputStream(is);
-	        oin.mark(OProcessWrapper.CURRENT_MAGIC_NUMBER.length + 2);
-	        byte[] magic = new byte[OProcessWrapper.CURRENT_MAGIC_NUMBER.length];
-	        oin.read(magic, 0, magic.length);
-	        if (Arrays.equals(Serializer.MAGIC_NUMBER_OFH_20040908, magic) ||
-	        		Arrays.equals(Serializer.MAGIC_NUMBER_OFH_20061101, magic)){
-	        	oin.reset();
-	        	Serializer serializer = new Serializer(is);
-	        	wrapper.setMagic(magic);
-	        	wrapper.setGuid(serializer.guid);
-	        	wrapper.setCompileTime(serializer.compileTime);
-	        	wrapper.setType(serializer.type);
-	        	wrapper.setFormat(SerializeFormat.FORMAT_SERIALIZED_LEGACY);
-	        }else{
-		        ObjectInputStream ois = new ObjectInputStream(is);
+			DataInputStream oin = new DataInputStream(is);
+			oin.mark(OProcessWrapper.CURRENT_MAGIC_NUMBER.length + 2);
+			byte[] magic = new byte[OProcessWrapper.CURRENT_MAGIC_NUMBER.length];
+			oin.read(magic, 0, magic.length);
+			if (Arrays.equals(Serializer.MAGIC_NUMBER_OFH_20040908, magic)
+					|| Arrays.equals(Serializer.MAGIC_NUMBER_OFH_20061101,
+							magic)) {
+				oin.reset();
+				Serializer serializer = new Serializer(is);
+				wrapper.setMagic(magic);
+				wrapper.setGuid(serializer.guid);
+				wrapper.setCompileTime(serializer.compileTime);
+				wrapper.setType(serializer.type);
+				wrapper.setFormat(SerializeFormat.FORMAT_SERIALIZED_LEGACY);
+			} else {
+				ObjectInputStream ois = new ObjectInputStream(is);
 				wrapper = new OProcessWrapper();
 				wrapper.setMagic(magic);
 				wrapper.setFormat((SerializeFormat) ois.readObject());
@@ -106,8 +123,13 @@ public class DeSerializer {
 				wrapper.setType((QName) ois.readObject());
 				wrapper.setOtherHeaders((Map<String, Object>) (ois.readObject()));
 				wrapper.checkValid();
-	        }
+			}
 		} catch (Exception e1) {
+			try {
+				is.close();
+			} catch (IOException e2) {
+				e2.printStackTrace();
+			}
 			SerializaionRtException e = new SerializaionRtException(
 					"Error when reading Headers during deseriazation");
 			e.initCause(e1);
@@ -115,11 +137,28 @@ public class DeSerializer {
 		}
 	}
 
+	/**
+	 * Deserialize the compiled <code>OProcess</code>.
+	 * @return The deserialized OProcess
+	 */
 	public OProcess deserialize() {
 		OmSerdeFactory factory = new OmSerdeFactory();
 		factory.setFormat(wrapper.getFormat());
-		OmDeserializer de = factory.createOmDeserializer(is);
-		OProcess process = de.deserialize();
+		OProcess process = null;
+		try {
+			OmDeserializer de = factory.createOmDeserializer(is);
+			process = de.deserialize();
+		} finally {
+			if (cbpFile != null) {
+				//this means that <code>is</code> is constructed from cbpFile,
+				// and we are reaponsible to close it.
+				try {
+					is.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		wrapper.setProcess(process);
 		//upgrade
 		UpgradeChecker checker = new UpgradeChecker();
@@ -131,30 +170,48 @@ public class DeSerializer {
 			traverser = new ObjectTraverser();
 			traverser.accept(upgrader);
 			traverser.traverseObject(process);
-			if (writeBackFile != null){
-				writeBack();
-			}
+			writeBack();
 		}
 		return process;
 	}
 
 	private void writeBack() {
+		if (writeBackFile == null && cbpFile == null) {
+			// we dont kown where to writeback;
+			return;
+		}
+		if (writeBackFile == null) {
+			// write back to original cbp file;
+			writeBackFile = cbpFile;
+		}
 		byte[] magic = wrapper.getMagic();
-        if (Arrays.equals(Serializer.MAGIC_NUMBER_OFH_20040908, magic) ||
-        		Arrays.equals(Serializer.MAGIC_NUMBER_OFH_20061101, magic)){
-        	//upgrade to new omodel magic and format
-        	wrapper.setMagic(OProcessWrapper.CURRENT_MAGIC_NUMBER);
-        	wrapper.setFormat(OmSerdeFactory.FORMAT_SERIALIZED_DEFAULT);
-        }
-        OutputStream wbStream;
-		try {
-			if (writeBackFile.exists()){
-				writeBackFile.renameTo(new File(writeBackFile.getAbsolutePath()+ ".bak"));
+		if (Arrays.equals(Serializer.MAGIC_NUMBER_OFH_20040908, magic)
+				|| Arrays.equals(Serializer.MAGIC_NUMBER_OFH_20061101, magic)) {
+			//upgrade to new omodel magic and format
+			wrapper.setMagic(OProcessWrapper.CURRENT_MAGIC_NUMBER);
+			wrapper.setFormat(OmSerdeFactory.FORMAT_SERIALIZED_DEFAULT);
+		}
+		OutputStream wbStream = null;
+		if (writeBackFile.exists()) {
+			if (writeBackFile.renameTo(new File(writeBackFile.getAbsolutePath()
+					+ ".bak"))) {
+				try {
+					wbStream = new FileOutputStream(writeBackFile);
+					serialize(wbStream);
+				} catch (FileNotFoundException e) {
+					__log.info("Error when write back upgraded process. file not found");
+				} finally {
+					if (wbStream != null) {
+						try {
+							wbStream.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			} else {
+				__log.debug("backup file failed. skip writing back upgraded file");
 			}
-			wbStream = new FileOutputStream(writeBackFile);
-			serialize(wbStream);
-		} catch (FileNotFoundException e) {
-			__log.info("Error when write back upgraded process. file not found");
 		}
 	}
 

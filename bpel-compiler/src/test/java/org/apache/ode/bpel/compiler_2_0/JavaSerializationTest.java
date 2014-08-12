@@ -40,7 +40,7 @@ public class JavaSerializationTest extends GoodCompileTest{
 			serializer.serialize(new FileOutputStream(cbpPath), 
 					origi, format);
 
-			DeSerializer deserializer = new DeSerializer(new FileInputStream(cbpPath));
+			DeSerializer deserializer = new DeSerializer(new File(cbpPath));
 			OProcess desered = deserializer.deserialize();
 
     		DeepEqualityHelper de = new DeepEqualityHelper();

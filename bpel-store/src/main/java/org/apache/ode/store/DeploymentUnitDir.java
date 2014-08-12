@@ -218,8 +218,7 @@ class DeploymentUnitDir {
     private CBPInfo loadCBPInfo(File f) {
         InputStream is = null;
         try {
-            is = new FileInputStream(f);
-            DeSerializer deserializer = new DeSerializer(is);
+            DeSerializer deserializer = new DeSerializer(f);
             CBPInfo info = new CBPInfo(deserializer.getWrapper().getType(),deserializer.getWrapper().getGuid(), f);
             return info;
         } catch (Exception e) {
