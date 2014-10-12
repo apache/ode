@@ -3,7 +3,7 @@
  * TimeServiceMessageReceiverInOut.java
  *
  * This file was auto-generated from WSDL
- * by the Apache Axis2 version: 1.5.1  Built on : Oct 19, 2009 (10:59:00 EDT)
+ * by the Apache Axis2 version: 1.6.2  Built on : Apr 17, 2012 (05:33:49 IST)
  */
         package com.intalio.ws.timeservice;
 
@@ -34,6 +34,7 @@
         java.lang.String methodName;
         if((op.getName() != null) && ((methodName = org.apache.axis2.util.JavaUtils.xmlNameToJavaIdentifier(op.getName().getLocalPart())) != null)){
 
+
         
 
             if("getCityTime".equals(methodName)){
@@ -51,7 +52,8 @@
                                                          skel.getCityTime(wrappedParam)
                                                     ;
                                             
-                                        envelope = toEnvelope(getSOAPFactory(msgContext), getCityTimeResponse1, false);
+                                        envelope = toEnvelope(getSOAPFactory(msgContext), getCityTimeResponse1, false, new javax.xml.namespace.QName("http://ws.intalio.com/TimeService/",
+                                                    "getCityTime"));
                                     } else 
 
             if("getUTCTime".equals(methodName)){
@@ -69,7 +71,8 @@
                                                          skel.getUTCTime(wrappedParam)
                                                     ;
                                             
-                                        envelope = toEnvelope(getSOAPFactory(msgContext), getUTCTimeResponse3, false);
+                                        envelope = toEnvelope(getSOAPFactory(msgContext), getUTCTimeResponse3, false, new javax.xml.namespace.QName("http://ws.intalio.com/TimeService/",
+                                                    "getUTCTime"));
                                     
             } else {
               throw new java.lang.RuntimeException("method not found");
@@ -141,7 +144,7 @@
 
             }
         
-                    private  org.apache.axiom.soap.SOAPEnvelope toEnvelope(org.apache.axiom.soap.SOAPFactory factory, com.intalio.ws.timeservice.GetCityTimeResponse param, boolean optimizeContent)
+                    private  org.apache.axiom.soap.SOAPEnvelope toEnvelope(org.apache.axiom.soap.SOAPFactory factory, com.intalio.ws.timeservice.GetCityTimeResponse param, boolean optimizeContent, javax.xml.namespace.QName methodQName)
                         throws org.apache.axis2.AxisFault{
                       try{
                           org.apache.axiom.soap.SOAPEnvelope emptyEnvelope = factory.getDefaultEnvelope();
@@ -160,7 +163,7 @@
                                 return wrappedElement;
                          }
                     
-                    private  org.apache.axiom.soap.SOAPEnvelope toEnvelope(org.apache.axiom.soap.SOAPFactory factory, com.intalio.ws.timeservice.GetUTCTimeResponse param, boolean optimizeContent)
+                    private  org.apache.axiom.soap.SOAPEnvelope toEnvelope(org.apache.axiom.soap.SOAPFactory factory, com.intalio.ws.timeservice.GetUTCTimeResponse param, boolean optimizeContent, javax.xml.namespace.QName methodQName)
                         throws org.apache.axis2.AxisFault{
                       try{
                           org.apache.axiom.soap.SOAPEnvelope emptyEnvelope = factory.getDefaultEnvelope();

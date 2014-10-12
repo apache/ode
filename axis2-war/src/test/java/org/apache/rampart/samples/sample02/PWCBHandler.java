@@ -49,7 +49,7 @@ public class PWCBHandler implements CallbackHandler {
             UnsupportedCallbackException {
         for (int i = 0; i < callbacks.length; i++) {
             WSPasswordCallback pwcb = (WSPasswordCallback)callbacks[i];
-            String id = pwcb.getIdentifer();
+            String id = pwcb.getIdentifier();
             if("bob".equals(id)) {
                 pwcb.setPassword("bobPW");
             }
