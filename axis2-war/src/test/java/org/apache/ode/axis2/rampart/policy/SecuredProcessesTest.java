@@ -107,7 +107,6 @@ public class SecuredProcessesTest extends Axis2TestBase {
             String response = DOMUtils.domToString(OMUtils.toDOM(responseElement));
             System.out.println(response);
 
-            System.out.println(response);
             assertTrue("'" + response + "' didn't contain expected content.", response.contains("helloResponse") && response.contains("Hello " + bundleName + "!"));
         } finally {
             server.undeployProcess(bundleName);

@@ -60,7 +60,7 @@ public class PWCBHandler implements CallbackHandler {
         for (int i = 0; i < callbacks.length; i++) {
             WSPasswordCallback pwcb = (WSPasswordCallback) callbacks[i];
 
-            if (pwcb.getUsage() == WSPasswordCallback.KEY_NAME) {
+            if (pwcb.getUsage() == WSPasswordCallback.SECRET_KEY) {
                 pwcb.setKey(key);
             }
         }
