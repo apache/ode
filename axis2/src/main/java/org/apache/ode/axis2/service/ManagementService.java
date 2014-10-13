@@ -43,7 +43,7 @@ import org.apache.axis2.description.AxisService;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.receivers.AbstractMessageReceiver;
-import org.apache.axis2.util.Utils;
+import org.apache.axis2.util.MessageContextBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.hooks.ODEAxisService;
@@ -115,7 +115,7 @@ public class ManagementService {
 
         public void invokeBusinessLogic(MessageContext messageContext) throws AxisFault {
             DynamicService<T> service = new DynamicService<T>(_service);
-            MessageContext outMsgContext = Utils.createOutMessageContext(messageContext);
+            MessageContext outMsgContext = MessageContextBuilder.createOutMessageContext(messageContext);
             outMsgContext.getOperationContext().addMessageContext(outMsgContext);
             SOAPFactory soapFactory = getSOAPFactory(messageContext);
             SOAPEnvelope envelope = soapFactory.getDefaultEnvelope();

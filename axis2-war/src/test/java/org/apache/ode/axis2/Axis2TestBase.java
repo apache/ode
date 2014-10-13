@@ -260,7 +260,7 @@ public abstract class Axis2TestBase {
             try {
                 _ode.init(odeRootDir, new ConfigurationContext(configContext.getAxisConfiguration()));
             } catch (ServletException e) {
-                e.printStackTrace();
+                log.error(e);
             }
         }
 
@@ -348,7 +348,7 @@ public abstract class Axis2TestBase {
             try {
                 fos = new FileOutputStream(fileName);
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                log.error(e);
             }
             configContext.getAxisConfiguration().getService(serviceName).printWSDL(fos);
         }

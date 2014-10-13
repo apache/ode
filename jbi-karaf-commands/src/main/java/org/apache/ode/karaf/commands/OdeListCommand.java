@@ -117,7 +117,7 @@ public class OdeListCommand extends OdeCommandsBase {
                 collectFailedActivities(scopeInfo, failedActivites);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            __log.error(e);
         }
         return failedActivites;
     }
@@ -131,7 +131,7 @@ public class OdeListCommand extends OdeCommandsBase {
                     return scopeInfoDoc.getScopeInfo();
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                __log.error(e);
             }
         }
         return null;

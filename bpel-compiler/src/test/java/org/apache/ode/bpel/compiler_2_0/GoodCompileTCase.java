@@ -63,7 +63,7 @@ class GoodCompileTCase extends TestCase implements CompileListener {
         	File bpelFile = new File(getClass().getResource(_bpel).toURI().getPath());
         	_compiler.compile(bpelFile, 0);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            __log.error(ex);
             fail("Compilation did not succeed.");
         }
     }

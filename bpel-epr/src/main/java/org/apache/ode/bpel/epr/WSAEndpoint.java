@@ -185,7 +185,7 @@ public class WSAEndpoint implements MutableEndpoint {
             try {
                 serviceNS = _eprElmt.getOwnerDocument().lookupNamespaceURI(prefix);
             } catch (Exception e) {
-                e.printStackTrace();
+                __log.error(e);
             }
             // Lookup failed, checking directly on our element
             if (serviceNS == null) {
