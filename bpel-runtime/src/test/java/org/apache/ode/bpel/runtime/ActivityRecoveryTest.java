@@ -18,11 +18,20 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.io.File;
+import java.net.URI;
+import java.util.ArrayList;
+
+import javax.xml.namespace.QName;
+
+import junit.framework.TestCase;
+
 import org.apache.ode.bpel.engine.BpelManagementFacadeImpl;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.pmapi.BpelManagementFacade;
@@ -38,24 +47,24 @@ import org.apache.ode.bpel.pmapi.TInstanceSummary;
 import org.apache.ode.bpel.pmapi.TScopeInfo;
 import org.apache.ode.bpel.pmapi.TScopeRef;
 import org.apache.ode.utils.DOMUtils;
-import org.jmock.Mock;
-import org.jmock.MockObjectTestCase;
-import org.jmock.core.Invocation;
-import org.jmock.core.InvocationMatcher;
-import org.jmock.core.Stub;
-import org.jmock.core.matcher.StatelessInvocationMatcher;
-import org.jmock.core.stub.CustomStub;
-import org.jmock.core.stub.StubSequence;
-
-import javax.xml.namespace.QName;
-import java.io.File;
-import java.net.URI;
-import java.util.ArrayList;
+import org.hamcrest.Description;
+import org.hamcrest.Factory;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.Sequence;
+import org.jmock.api.Action;
+import org.jmock.lib.action.ActionSequence;
+import org.jmock.lib.action.CustomAction;
+import org.jmock.lib.action.ReturnValueAction;
 
 /**
  * Test activity recovery and failure handling.
  */
-public class ActivityRecoveryTest extends MockObjectTestCase {
+public class ActivityRecoveryTest extends TestCase {
+    Mockery context = new Mockery();
+
     // the maximum ammout of time to wait for an instance to reach a
     // desired status or for an activity to become available for recovery
     static final int MAX_WAIT = 10000;
@@ -68,7 +77,7 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
     BpelManagementFacade  _management;
     QName                 _processQName;
     QName                 _processId;
-    private Mock _testService;
+    private TestService _testService;
 
     static {
         // disable deferred process instance cleanup for faster testing
@@ -87,43 +96,58 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
 
     public void testInvokeSucceeds() throws Exception {
         // Since the service invocation succeeds, the process completes.
-        _testService.expects(once()).method("invoke").will(returnValue(true));
-        _testService.expects(once()).method("completed").after("invoke");
+        final Sequence seq = context.sequence("sequence");
+        context.checking(new Expectations() {{
+            exactly(1).of(_testService).invoke(); inSequence(seq); will(returnValue(true));
+            exactly(1).of(_testService).completed(); inSequence(seq);
+        }});
 
         execute("FailureToRecovery");
         assertNotNull(lastInstance(TInstanceStatus.COMPLETED));
         assertNoFailures();
+        context.assertIsSatisfied();
     }
 
     public void testFailureWithRecoveryAfterRetry() throws Exception {
         // Since the invocation is repeated 3 times, the process completes after
         // the third (successful) invocation.
-        _testService.expects(exactly(3)).method("invoke").will(failTheFirst(2));
-        _testService.expects(once()).method("completed").after("invoke");
+        final Sequence seq = context.sequence("sequence");
+        context.checking(new Expectations() {{
+            exactly(3).of(_testService).invoke(); inSequence(seq); will(failTheFirst(2));
+            exactly(1).of(_testService).completed(); inSequence(seq);
+        }});
 
         execute("FailureToRecovery");
         assertNotNull(lastInstance(TInstanceStatus.COMPLETED));
         assertNoFailures();
+        context.assertIsSatisfied();
     }
 
     public void testFailureWithManualRecovery() throws Exception {
         // Recovery required after three failures. Only one attempt made after recovery.
         // Only the fifth invocation succeeds.
-        _testService.expects(exactly(5)).method("invoke").will(failTheFirst(4));
-        _testService.expects(once()).method("completed").after("invoke");
+        final Sequence seq = context.sequence("sequence");
+        context.checking(new Expectations() {{
+            exactly(5).of(_testService).invoke(); inSequence(seq); will(failTheFirst(4));
+            exactly(1).of(_testService).completed(); inSequence(seq);
+        }});
 
         execute("FailureToRecovery");
         recover("retry");
         recover("retry");
         assertNotNull(lastInstance(TInstanceStatus.COMPLETED));
         assertNoFailures();
+        context.assertIsSatisfied();
     }
 
     public void testFailureWithFaultAction() throws Exception {
         // Recovery required after three failures. Only one attempt made after recovery.
         // Use the last failure to cause a fault.
-        _testService.expects(exactly(4)).method("invoke").will(failTheFirst(4));
-        _testService.expects(never()).method("completed").after("invoke");
+        final Sequence seq = context.sequence("sequence");
+        context.checking(new Expectations() {{
+            exactly(4).of(_testService).invoke(); inSequence(seq); will(failTheFirst(4));
+            never(_testService).completed(); inSequence(seq);
+        }});
 
         execute("FailureToRecovery");
         recover("retry");
@@ -131,79 +155,110 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
         assertNotNull(lastInstance(TInstanceStatus.FAILED));
         assertTrue(OFailureHandling.FAILURE_FAULT_NAME.equals(lastInstance(null).getFaultInfo().getName()));
         assertNoFailures();
+        context.assertIsSatisfied();
     }
 
     public void testFailureWithCancelAction() throws Exception {
         // Recovery required after three failures. Only one attempt made after recovery.
         // Use the last failure to cancel the activity, allowing the process to complete.
-        _testService.expects(exactly(4)).method("invoke").will(failTheFirst(4));
-        _testService.expects(once()).method("completed").after("invoke");
+        final Sequence seq = context.sequence("sequence");
+        context.checking(new Expectations() {{
+            exactly(4).of(_testService).invoke(); inSequence(seq); will(failTheFirst(4));
+            exactly(1).of(_testService).completed(); inSequence(seq);
+        }});
 
         execute("FailureToCancel");
         recover("retry");
         recover("cancel");
         assertNotNull(lastInstance(TInstanceStatus.COMPLETED));
         assertNoFailures();
+        context.assertIsSatisfied();
     }
 
     public void testImmediateFailure() throws Exception {
         // This process does not attempt to retry, entering recovery immediately.
-        _testService.expects(exactly(1)).method("invoke").will(returnValue(false));
-        _testService.expects(never()).method("completed").after("invoke");
+        final Sequence seq = context.sequence("sequence");
+        context.checking(new Expectations() {{
+            exactly(1).of(_testService).invoke(); inSequence(seq); will(returnValue(false));
+            never(_testService).completed(); inSequence(seq);
+        }});
 
         execute("FailureNoRetry");
         assertRecovery(1, ACTIONS);
+        context.assertIsSatisfied();
     }
 
     public void testImmediateFailureAndFault() throws Exception {
         // This process responds to failure with a fault.
-        _testService.expects(exactly(1)).method("invoke").will(returnValue(false));
-        _testService.expects(never()).method("completed").after("invoke");
+        final Sequence seq = context.sequence("sequence");
+        context.checking(new Expectations() {{
+            exactly(1).of(_testService).invoke(); inSequence(seq); will(returnValue(false));
+            never(_testService).completed(); inSequence(seq);
+        }});
 
         execute("FailureToFault");
         assertNotNull(lastInstance(TInstanceStatus.FAILED));
         assertEquals(OFailureHandling.FAILURE_FAULT_NAME, lastInstance(TInstanceStatus.FAILED).getFaultInfo().getName());
         assertNoFailures();
+        context.assertIsSatisfied();
     }
 
     public void testImmediateFailureAndFault2() throws Exception {
         // This process responds to failure with a fault.
-        _testService.expects(exactly(1)).method("invoke").will(returnValue(false));
-        _testService.expects(never()).method("completed").after("invoke");
+        final Sequence seq = context.sequence("sequence");
+        context.checking(new Expectations() {{
+            exactly(1).of(_testService).invoke(); inSequence(seq); will(returnValue(false));
+            never(_testService).completed(); inSequence(seq);
+        }});
 
         execute("FailureToFault2");
         assertNotNull(lastInstance(TInstanceStatus.FAILED));
         assertEquals(OFailureHandling.FAILURE_FAULT_NAME, lastInstance(TInstanceStatus.FAILED).getFaultInfo().getName());
         assertNoFailures();
+        context.assertIsSatisfied();
     }
 
     public void testFailureHandlingInheritence() throws Exception {
         // Since the invocation is repeated 3 times, the process completes after
         // the third (successful) invocation.
-        _testService.expects(exactly(3)).method("invoke").will(failTheFirst(2));
-        _testService.expects(once()).method("completed").after("invoke");
+        final Sequence seq = context.sequence("sequence");
+        context.checking(new Expectations() {{
+            exactly(3).of(_testService).invoke(); inSequence(seq); will(failTheFirst(2));
+            exactly(1).of(_testService).completed(); inSequence(seq);
+        }});
 
         execute("FailureInheritence");
         assertNotNull(lastInstance(TInstanceStatus.COMPLETED));
         assertNoFailures();
+        context.assertIsSatisfied();
     }
 
-    public void _testInstanceSummary() throws Exception {
+    public void testInstanceSummary() throws Exception {
         _processQName = new QName(NAMESPACE, "FailureToRecovery");
         _processId = new QName(NAMESPACE, "FailureToRecovery-1");
         // Failing the first three times and recovering, the process completes.
-        _testService.expects(exactly(4)).method("invoke").will(failTheFirst(3));
-        _testService.expects(once()).method("completed").after("invoke");
+        final Sequence seq = context.sequence("sequence");
+        context.checking(new Expectations() {{
+            exactly(4).of(_testService).invoke(); inSequence(seq); will(failTheFirst(3));
+            exactly(1).of(_testService).completed(); inSequence(seq);
+        }});
+
         _server.invoke(_processQName, "instantiate", DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
         _server.waitForBlocking();
         recover("retry"); // Completed.
         // Failing the first three times, we can then fault the process.
-        _testService.expects(exactly(3)).method("invoke").will(failTheFirst(3));
+        context.checking(new Expectations() {{
+            exactly(3).of(_testService).invoke(); will(failTheFirst(3));
+        }});
+
         _server.invoke(_processQName, "instantiate", DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
         _server.waitForBlocking();
         recover("fault"); // Faulted.
         // Failing the first three times, we can then leave it waiting for recovery.
-        _testService.expects(exactly(3)).method("invoke").will(failTheFirst(3));
+        context.checking(new Expectations() {{
+            exactly(3).of(_testService).invoke(); will(failTheFirst(3));
+        }});
+
         _server.invoke(_processQName, "instantiate", DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:RequestElement"));
         _server.waitForBlocking(); // Active, recovery.
         // Stay active, awaiting recovery.
@@ -227,46 +282,52 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
         }
         assertTrue(summary.getFailures().getCount() == 1);
         assertNotNull(summary.getFailures().getDtFailure());
+        context.assertIsSatisfied();
     }
 
 
     protected void setUp() throws Exception {
         // Override testService in test case.
-        _testService = mock(TestService.class);
+        _testService = context.mock(TestService.class);
         // We use one partner to simulate failing service and receive message upon process completion.
-        final Mock partner = mock(MessageExchangeContext.class);
+        final MessageExchangeContext partner = context.mock(MessageExchangeContext.class);
         // Some processes will complete, but not all.
-        partner.expects(atMostOnce()).match(invokeOnOperation("respond")).will(new CustomStub("process completed") {
-            public Object invoke(Invocation invocation) {
-                ((TestService)_testService.proxy()).completed();
-                return null;
-            }
-        });
-        // There will be multiple calls to invoke.
-        partner.expects(atLeastOnce()).match(invokeOnOperation("invoke")).will(new CustomStub("invoke failing service") {
-            public Object invoke(Invocation invocation) {
-                PartnerRoleMessageExchange mex = (PartnerRoleMessageExchange) invocation.parameterValues.get(0);
-                if (((TestService)_testService.proxy()).invoke()) {
-                    Message response = mex.createMessage(mex.getOperation().getOutput().getMessage().getQName());
-                    response.setMessage(DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:ResponseElement"));
-                    mex.reply(response);
-                } else {
-                    mex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, "BangGoesInvoke", null);
+        context.checking(new Expectations() {{
+            atMost(1).of(partner).invokePartner(with(aMexWithOpnameIs("respond"))); will(new CustomAction("process completed") {
+                public Object invoke(org.jmock.api.Invocation invocation) throws Throwable {
+                    _testService.completed();
+                    return null;
                 }
-                return null;
-            }
-        });
-        // Faulting a process would send the fault message asynchronously.
-        // (Which might be a bug, but right now we swallow it).
-        partner.expects(atMostOnce()).method("onAsyncReply").will(new CustomStub("async reply") {
-            public Object invoke(Invocation invocation) {
-                return null;
-            }
-        });
+            });
+        }});
+
+        context.checking(new Expectations() {{
+            atLeast(1).of(partner).invokePartner(with(aMexWithOpnameIs("invoke"))); will(new CustomAction("invoke failing service") {
+                public Object invoke(org.jmock.api.Invocation invocation) throws Throwable {
+                    PartnerRoleMessageExchange mex = (PartnerRoleMessageExchange) invocation.getParameter(0);
+                    if (_testService.invoke()) {
+                        Message response = mex.createMessage(mex.getOperation().getOutput().getMessage().getQName());
+                        response.setMessage(DOMUtils.newDocument().createElementNS(NAMESPACE, "tns:ResponseElement"));
+                        mex.reply(response);
+                    } else {
+                        mex.replyWithFailure(MessageExchange.FailureType.COMMUNICATION_ERROR, "BangGoesInvoke", null);
+                    }
+                    return null;
+                }
+            });
+        }});
+
+        context.checking(new Expectations() {{
+            atMost(1).of(partner).onAsyncReply(with(any(MyRoleMessageExchange.class))); will(new CustomAction("async reply") {
+                public Object invoke(org.jmock.api.Invocation invocation) throws Throwable {
+                    return null;
+                }
+            });
+        }});
 
         _server = new MockBpelServer() {
             protected MessageExchangeContext createMessageExchangeContext() {
-                return (MessageExchangeContext) partner.proxy();
+                return partner;
             }
         };
         _server.deploy(new File(new URI(this.getClass().getResource("/recovery").toString())));
@@ -282,27 +343,33 @@ public class ActivityRecoveryTest extends MockObjectTestCase {
      * Returns a stub that will fail (return false) for the first n number of times,
      * and on the last call succeed (return true).
      */
-    protected Stub failTheFirst(int times) {
-        Stub[] stubs = new Stub[times + 1];
+    protected Action failTheFirst(int times) {
+        Action[] actions = new Action[times + 1];
         for (int i = 0; i < times; ++i)
-            stubs[i] = returnValue(false);
-        stubs[times] = returnValue(true);
-        return new StubSequence(stubs);
+            actions[i] = new ReturnValueAction(false);
+        actions[times] = new ReturnValueAction(true);
+        return new ActionSequence(actions);
     }
 
-    protected InvocationMatcher invokeOnOperation(final String opName) {
-        // Decides which method to call the TestService mock based on the operation.
-        return new StatelessInvocationMatcher() {
-            public boolean matches(Invocation invocation) {
-                return invocation.invokedMethod.getName().equals("invokePartner") &&
-                    invocation.parameterValues.size() == 1 &&
-                    ((PartnerRoleMessageExchange) invocation.parameterValues.get(0)).getOperation().getName().equals(opName);
-            }
+    public static class MexOpNameMatcher extends TypeSafeMatcher<PartnerRoleMessageExchange> {
+        private String opName;
 
-            public StringBuffer describeTo(StringBuffer buffer) {
-                return buffer.append("check that the operation ").append(opName).append(" is invoked");
-            }
-        };
+        public MexOpNameMatcher(String opName) {
+            this.opName = opName;
+        }
+
+        public boolean matchesSafely(PartnerRoleMessageExchange mex) {
+            return mex.getOperation().getName().equals(opName);
+        }
+
+        public void describeTo(Description description) {
+            description.appendText("a mex invoking ").appendValue(opName);
+        }
+    }
+
+    @Factory
+    public static Matcher<PartnerRoleMessageExchange> aMexWithOpnameIs(String opName) {
+        return new MexOpNameMatcher(opName);
     }
 
     /**
