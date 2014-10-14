@@ -25,15 +25,18 @@ import java.util.concurrent.TimeoutException;
 
 import javax.transaction.TransactionManager;
 
+import junit.framework.TestCase;
+
 import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.engine.MyRoleMessageExchangeImpl.ResponseCallback;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
-import org.jmock.Mock;
-import org.jmock.MockObjectTestCase;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 
-public class MyRoleMessageExchangeImplTest extends MockObjectTestCase {
-    private Mock mexDao;
+public class MyRoleMessageExchangeImplTest extends TestCase {
+    Mockery context = new Mockery();
+    MessageExchangeDAO mexDao;
     
     private TestMyRoleMessageExchangeImpl myRoleMexImpl;
     Contexts contexts;
@@ -41,7 +44,9 @@ public class MyRoleMessageExchangeImplTest extends MockObjectTestCase {
     TransactionManager _txm;
     
     public void testResponseReceived() throws Exception {
-        mexDao.expects(exactly(3)).method("getCorrelationId").will(returnValue("corrId"));
+        context.checking(new Expectations() {{
+            exactly(3).of(mexDao).getCorrelationId(); will(returnValue("corrId"));
+        }});
         
         final boolean[] responded = new boolean[1];
         myRoleMexImpl.callbacks().put("corrId", new ResponseCallback() {
@@ -67,10 +72,14 @@ public class MyRoleMessageExchangeImplTest extends MockObjectTestCase {
         _txm.commit();
         
         assertTrue(responded[0]);
+        context.assertIsSatisfied();
     }
     
     public void testResponseTimeout() throws Exception {
-        mexDao.expects(atLeastOnce()).method("getCorrelationId").will(returnValue("corrId"));
+        context.checking(new Expectations() {{
+            atLeast(1).of(mexDao).getCorrelationId(); will(returnValue("corrId"));
+        }});
+
         myRoleMexImpl.callbacks().put("corrId", new MyRoleMessageExchangeImpl.ResponseCallback());
 
         _txm.begin();
@@ -81,12 +90,13 @@ public class MyRoleMessageExchangeImplTest extends MockObjectTestCase {
             new MyRoleMessageExchangeImpl.ResponseFuture("corrId").get(10, TimeUnit.MILLISECONDS);
             fail("Should throw a TimeoutException!!");
         } catch( TimeoutException te ) {}
+        context.assertIsSatisfied();
     }
     
     protected void setUp() throws Exception {
         _txm = new GeronimoTransactionManager();
         
-        mexDao = new Mock(MessageExchangeDAO.class);
+        mexDao = context.mock(MessageExchangeDAO.class);
         SimpleScheduler scheduler = new SimpleScheduler("node", null, new Properties());
         scheduler.setTransactionManager(_txm);
         
@@ -95,11 +105,12 @@ public class MyRoleMessageExchangeImplTest extends MockObjectTestCase {
         engine = new BpelEngineImpl(contexts);
 
         myRoleMexImpl = new TestMyRoleMessageExchangeImpl();
+        context.assertIsSatisfied();
     }
 
     class TestMyRoleMessageExchangeImpl extends MyRoleMessageExchangeImpl {
         public TestMyRoleMessageExchangeImpl() {
-            super(null, engine, (MessageExchangeDAO)mexDao.proxy());
+            super(null, engine, mexDao);
         }
         
         public Map<String, ResponseCallback> callbacks() {

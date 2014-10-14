@@ -18,33 +18,26 @@
  */
 package org.apache.ode.bpel.engine.cron;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import javax.xml.namespace.QName;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
+import junit.framework.TestCase;
+
 import org.apache.ode.bpel.engine.Contexts;
-import org.apache.ode.bpel.engine.cron.CronScheduler;
-import org.apache.ode.bpel.engine.cron.RuntimeDataCleanupRunnable;
-import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.iapi.ProcessConf.CleanupInfo;
+import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
-import org.apache.ode.daohib.bpel.BpelDAOConnectionImpl;
 import org.apache.ode.utils.CronExpression;
-import org.jmock.Mock;
-import org.jmock.MockObjectTestCase;
-
-public class CronSchedulerTest extends MockObjectTestCase {
+import org.jmock.Mockery;
     
+public class CronSchedulerTest extends TestCase {
+    private Mockery context = new Mockery();
     private Contexts contexts;
-    private Mock scheduler;
+    private Scheduler scheduler;
     private CronScheduler cronScheduler;
     private ExecutorService execService;
 
@@ -58,8 +51,8 @@ public class CronSchedulerTest extends MockObjectTestCase {
     
     protected void setUp() throws Exception {
         contexts = new Contexts();
-        scheduler = mock(Scheduler.class);
-        contexts.scheduler = (Scheduler)scheduler.proxy();
+        scheduler = context.mock(Scheduler.class);
+        contexts.scheduler = scheduler;
         
         cronScheduler = new CronScheduler();
         cronScheduler.setContexts(contexts);
