@@ -26,11 +26,15 @@ import javax.xml.namespace.QName;
 
 import junit.framework.TestCase;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.apache.ode.bpel.engine.Contexts;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.iapi.ProcessConf.CleanupInfo;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
+import org.apache.ode.daohib.bpel.BpelDAOConnectionImpl;
 import org.apache.ode.utils.CronExpression;
 import org.jmock.Mockery;
     
