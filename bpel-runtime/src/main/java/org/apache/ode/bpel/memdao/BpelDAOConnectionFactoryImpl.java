@@ -32,7 +32,7 @@ import java.util.Properties;
  * Connection factory for the in-memory state store.
  */
 public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactory {
-    private static final Map<QName, ProcessDaoImpl> __StateStore = new HashMap<QName, ProcessDaoImpl>();
+    private final Map<QName, ProcessDaoImpl> __StateStore = new HashMap<QName, ProcessDaoImpl>();
 
     private Scheduler _scheduler;
     private long _mexTtl = 10*60*1000;

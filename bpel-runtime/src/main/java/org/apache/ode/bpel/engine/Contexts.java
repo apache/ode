@@ -51,7 +51,7 @@ public class Contexts {
     BindingContext bindingContext;
 
     public BpelDAOConnectionFactory dao;
-    BpelDAOConnectionFactory inMemDao;
+    public BpelDAOConnectionFactory inMemDao;
 
     /** Global Message-Exchange interceptors. Must be copy-on-write!!! */ 
     final List<MessageExchangeInterceptor >globalInterceptors = new CopyOnWriteArrayList<MessageExchangeInterceptor>();
