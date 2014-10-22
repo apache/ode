@@ -279,19 +279,38 @@ public class BpelEngineImpl implements BpelEngine {
             if (__log.isDebugEnabled())
                 __log.debug("Deactivating process " + p.getPID());
 
-            Iterator<List<BpelProcess>> serviceIter = _serviceMap.values().iterator();
-            while (serviceIter.hasNext()) {
-                Iterator<BpelProcess> entryProcesses = serviceIter.next().iterator();
-                while (entryProcesses.hasNext()) {
-                    BpelProcess entryProcess = entryProcesses.next();
-                    if (entryProcess.getPID().equals(process)) {
-                        entryProcesses.remove();
+            boolean deactivate = true;
+            Iterator<Endpoint> endpointItr = p.getServiceNames().iterator();
+
+            ProcessState state = null;
+
+            while(endpointItr.hasNext()){
+                Endpoint endPoint = endpointItr.next();
+                List<BpelProcess> processList = _serviceMap.get(endPoint.serviceName);
+
+                Iterator<BpelProcess> processListItr = processList.iterator();
+
+                while(processListItr.hasNext()){
+                    BpelProcess entryProcess = processListItr.next();
+                    state = entryProcess.getConf().getState();
+                    // Don't deactivate process services if there is another process in Active/Retired state and
+                    // associated with the same service name
+                    if( (ProcessState.ACTIVE.equals(state) || ProcessState.RETIRED.equals(state)) &&
+                            !(entryProcess.getPID().equals(p.getPID()))) {
+
+                        deactivate = false;
+                    } else {
+                        if(entryProcess.getPID().equals(process)) {
+                            processListItr.remove();
+                        }
                     }
                 }
             }
 
-            // unregister the services provided by the process
-            p.deactivate();            
+            if(deactivate){
+                // unregister the services provided by the process
+                p.deactivate();
+            }
             // release the resources held by this process
             p.dehydrate();
             // update the process footprints list
