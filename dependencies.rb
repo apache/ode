@@ -104,7 +104,7 @@ KARAF               = [
                           :under=>"org.apache.felix", :version=>"0.6.1")
                       ]
 LOG4J               = "log4j:log4j:jar:1.2.17"
-OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.2.1",
+OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.2.3",
                        "net.sourceforge.serp:serp:jar:1.13.1"]
 
 SAXON               = ["net.sourceforge.saxon:saxon:jar:9.1.0.8", "net.sourceforge.saxon:saxon:jar:xpath:9.1.0.8", "net.sourceforge.saxon:saxon:jar:dom:9.1.0.8", "net.sourceforge.saxon:saxon:jar:xqj:9.1.0.8"]
