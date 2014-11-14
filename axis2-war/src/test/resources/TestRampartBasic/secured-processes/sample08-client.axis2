@@ -25,7 +25,7 @@
     <parameter name="OutflowSecurity">
 
         <action>
-            <items>Timestamp Signature NoSerialization</items>
+            <items>Timestamp Signature</items>
             <user>client</user>
             <passwordCallbackClass>org.apache.rampart.samples.sample08.PWCBHandler</passwordCallbackClass>
             <signatureKeyIdentifier>DirectReference</signatureKeyIdentifier>

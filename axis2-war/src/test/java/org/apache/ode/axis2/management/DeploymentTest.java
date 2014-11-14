@@ -56,7 +56,7 @@ public class DeploymentTest extends Axis2TestBase {
         // Setup and tear down are doing ost of the job here, just checking in the middle
 
         // Check deployment
-        OMElement listRoot = _client.buildMessage("listProcesses", new String[0], new String[0]);
+        OMElement listRoot = _client.buildMessage("listProcesses", new String[] {"filter", "orderKeys"}, new String[] {"", ""});
         OMElement result = sendToPM(listRoot);
 
         // look for DynPartnerMain-xxx

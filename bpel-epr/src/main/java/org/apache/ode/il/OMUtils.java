@@ -181,20 +181,31 @@ public class OMUtils {
     }
 
     public static OMElement toOM(Element src, OMFactory omf, OMContainer parent) {
-        OMElement omElement = parent == null ? omf.createOMElement(src.getLocalName(), null) :
-                omf.createOMElement(src.getLocalName(), null, parent);
-        if (src.getNamespaceURI() != null) {
-            if (src.getPrefix() != null)
-                omElement.setNamespace(omf.createOMNamespace(src.getNamespaceURI(), src.getPrefix()));
-            else omElement.declareDefaultNamespace(src.getNamespaceURI());
+        OMNamespace namespace = null;
+
+        String srcPrefix = src.getPrefix();
+        String srcNamespaceURI = src.getNamespaceURI();
+
+        //AXIOM 1.2.13 doesn't allow setting of default namespace unless a namespace has been associated with the OMElement at object creation,
+        //hence create the namespace first and use it during OMElement creation.
+        //Avoid using declareDefaultNamespace() as it's found to be adding an empty namespaceURI in some cases.
+        if (srcNamespaceURI != null) {
+
+            //if no prefix then it's default namespace
+            if(srcPrefix == null) srcPrefix = "";
+
+            namespace = omf.createOMNamespace(srcNamespaceURI, srcPrefix);
         }
+
+        OMElement omElement = parent == null ? omf.createOMElement(src.getLocalName(), namespace) :
+        omf.createOMElement(src.getLocalName(), namespace, parent);
 
         if (parent == null) {
             NSContext nscontext = DOMUtils.getMyNSContext(src);
-            injectNamespaces(omElement,nscontext.toMap());
+            injectNamespaces(omElement,nscontext.toMap(),omf);
         } else {
             Map<String,String> nss = DOMUtils.getMyNamespaces(src);
-            injectNamespaces(omElement, nss);
+            injectNamespaces(omElement, nss,omf);
         }
 
         NamedNodeMap attrs = src.getAttributes();
@@ -235,11 +246,11 @@ public class OMUtils {
     }
 
 
-    private static void injectNamespaces(OMElement omElement, Map<String,String> nscontext) {
+    private static void injectNamespaces(OMElement omElement, Map<String,String> nscontext,OMFactory omf) {
         for (String prefix : nscontext.keySet()) {
             String uri = nscontext.get(prefix);
             if (prefix.equals(""))
-                omElement.declareDefaultNamespace(uri);
+                omElement.declareNamespace(omf.createOMNamespace(uri, ""));
             else
                 omElement.declareNamespace(uri, prefix);
         }
