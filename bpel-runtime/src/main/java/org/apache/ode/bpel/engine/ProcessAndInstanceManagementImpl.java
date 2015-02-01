@@ -23,6 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -786,6 +787,15 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
             throw new InstanceNotFoundException("InstanceNotFoundException " + iid);
         // TODO: deal with "ERROR" state information.
         fillInstanceInfo(ii, instance);
+        Map<Long, Collection<CorrelationSetDAO>> icsets = conn.getCorrelationSets(Arrays.asList(new ProcessInstanceDAO[] { instance }));
+        Collection<CorrelationSetDAO> csets = icsets.get(instance.getInstanceId());
+        if (csets != null) {
+            for (CorrelationSetDAO cset: csets) {
+                Map<QName, String> props = cset.getProperties();
+                fillProperties(ii, instance, props);
+            }
+        }
+
         return ret;
     }
 
