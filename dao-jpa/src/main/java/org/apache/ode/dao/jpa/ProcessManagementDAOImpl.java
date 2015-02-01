@@ -108,7 +108,6 @@ public class ProcessManagementDAOImpl implements ProcessManagementDAO {
             Query query = em.createNamedQuery(ProcessInstanceDAOImpl.COUNT_FAILED_INSTANCES_BY_STATUS_AND_PROCESS_IDS);
             query.setParameter("processIds", pids);
             for (Object o : query.getResultList()) {
-                System.out.println(o);
                 Object[] row = (Object[]) o;
                 result.put(row[0].toString(), new FailedSummaryValue((Long) row[1], (Date) row[2]));
             }
