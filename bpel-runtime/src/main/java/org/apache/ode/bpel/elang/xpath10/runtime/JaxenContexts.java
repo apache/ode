@@ -69,6 +69,18 @@ class JaxenContexts implements FunctionContext, VariableContext {
     private static final FunctionContext __defaultXPathFunctions = XPathFunctionContext.getInstance();
     
     private static final QName BOOLEAN = new QName("http://www.w3.org/2001/XMLSchema", "boolean");
+    private static final QName BYTE = new QName("http://www.w3.org/2001/XMLSchema", "byte");
+    private static final QName INT = new QName("http://www.w3.org/2001/XMLSchema", "int");
+    private static final QName INTEGER = new QName("http://www.w3.org/2001/XMLSchema", "integer");
+    private static final QName LONG = new QName("http://www.w3.org/2001/XMLSchema", "long");
+    private static final QName SHORT = new QName("http://www.w3.org/2001/XMLSchema", "short");
+    private static final QName UNSIGNED_INT = new QName("http://www.w3.org/2001/XMLSchema", "unsignedInt");
+    private static final QName UNSIGNED_SHORT = new QName("http://www.w3.org/2001/XMLSchema", "unsignedShort");
+    private static final QName UNSIGNED_BYTE = new QName("http://www.w3.org/2001/XMLSchema", "unsignedByte");
+    private static final QName DECIMAL = new QName("http://www.w3.org/2001/XMLSchema", "decimal");
+    private static final QName FLOAT = new QName("http://www.w3.org/2001/XMLSchema", "float");
+    private static final QName DOUBLE = new QName("http://www.w3.org/2001/XMLSchema", "double");
+
 
     private OXPath10Expression _oxpath;
     private EvaluationContext _xpathEvalCtx;
@@ -189,10 +201,25 @@ class JaxenContexts implements FunctionContext, VariableContext {
                 if (_xpathEvalCtx.narrowTypes() && type instanceof OXsdTypeVarType && ((OXsdTypeVarType)type).simple) {
                 	String value = variableNode.getTextContent();
                 	OXsdTypeVarType theType = (OXsdTypeVarType)type;
-                	
-                	if (BOOLEAN.equals(theType.xsdType)) {
-                		return new Boolean(value) ;
-                	}
+
+                    // cast booleans to boolean
+                    if (BOOLEAN.equals(theType.xsdType)) {
+                        return new Boolean(value) ;
+                    }
+
+                    // and numbers to numbers (XPath only understands Double, so Double it shall be.
+                    if (INT.equals(theType.xsdType) || UNSIGNED_SHORT.equals(theType.xsdType) ||
+                            INTEGER.equals(theType.xsdType) ||
+                            LONG.equals(theType.xsdType) || UNSIGNED_INT.equals(theType.xsdType) ||
+                            SHORT.equals(theType.xsdType) || UNSIGNED_BYTE.equals(theType.xsdType) ||
+                            BYTE.equals(theType.xsdType) ||
+                            DECIMAL.equals(theType.xsdType) ||
+                            FLOAT.equals(theType.xsdType) ||
+                            DOUBLE.equals(theType.xsdType)
+                            ) {
+                        return new Double(value);
+                    }
+
                     return value;
                 } else {
                     return variableNode;
