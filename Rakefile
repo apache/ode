@@ -617,6 +617,9 @@ define "ode" do
   package_with_sources :except => ["jbi-karaf-examples:helloworld2-osgi", "jbi-karaf-examples:ping-pong-osgi"]
   package_with_javadoc :except => ["jbi-karaf-examples:helloworld2-osgi", "jbi-karaf-examples:ping-pong-osgi"] unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
 
+  # disable doclint for all projects, TODO: better fix javadoc comments
+  projects.each { |project| project.doc.options['Xdoclint:none'] = true }
+
   task :pmd do
     pmd_classpath = transitive('pmd:pmd:jar:4.2.5').each(&:invoke).map(&:to_s).join(File::PATH_SEPARATOR)
     mkdir_p _(:reports)
@@ -722,7 +725,7 @@ define "apache-ode" do
   end
 
   package(:zip, :id=>"#{id}-docs").include(doc.from(project("ode").projects).
-    using(:javadoc, :windowtitle=>"Apache ODE #{project.version}").target, :as=>"#{id}-docs-#{version}") unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
+    using(:javadoc, :windowtitle=>"Apache ODE #{project.version}", 'Xdoclint:none'=>true).target, :as=>"#{id}-docs-#{version}") unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
     
 
 end
