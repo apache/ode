@@ -21,7 +21,6 @@ require "buildr/openjpa"
 require "buildr/javacc"
 require "buildr/jetty"
 require "buildr/hibernate"
-require "buildr/gpg"
 
 require File.join(File.dirname(__FILE__), 'repositories.rb')
 require File.join(File.dirname(__FILE__), 'dependencies.rb')
@@ -41,13 +40,17 @@ Java.classpath << Buildr::OpenJPA::REQUIRES
 # Keep this structure to allow the build system to update version numbers.
 VERSION_NUMBER = "1.4-SNAPSHOT"
 
-# Apache Nexus Repositories
+# if SNAPSHOT version...
 if VERSION_NUMBER =~ /SNAPSHOT/
+    # ... deploy to:
     # Apache Development Snapshot Repository
     repositories.release_to[:url] = 'https://repository.apache.org/content/repositories/snapshots'
 else
+   # ... else deploy to:
     # Apache Release Distribution Repository
     repositories.release_to[:url] = 'https://repository.apache.org/service/local/staging/deploy/maven2'
+    # and make sure artifacts are signed.
+    require "buildr/gpg"
 end
 
 BUNDLE_VERSIONS = {
