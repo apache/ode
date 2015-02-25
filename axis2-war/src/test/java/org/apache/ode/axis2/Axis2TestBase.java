@@ -248,6 +248,7 @@ public abstract class Axis2TestBase {
     }
 
     public String sendRequestFile(String endpoint, String filename) {
+        log.debug("Sending SOAP request file " + filename + " to " + endpoint);
         try {
             URL url = new URL(endpoint);
             // override the port if necessary but only if the given port is the default one
