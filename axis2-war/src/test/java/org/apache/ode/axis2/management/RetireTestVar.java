@@ -58,5 +58,8 @@ public class RetireTestVar extends Axis2TestBase {
                 bundleName + "/1", "testRequest2.soap");
 
         assertTrue("'" + response + "' does not contain 'XYZ'.", response.indexOf("XYZ") > 0);
+
+        if (server.isDeployed("withVar")) server.undeployProcess(bundleName + "/withVar");
+        if (server.isDeployed("noVar")) server.undeployProcess(bundleName + "/noVar");
     }
 }

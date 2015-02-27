@@ -47,5 +47,7 @@ public class RedeployTest extends Axis2TestBase {
 
         String response = sendRequestFile("http://localhost:8888/processes/testretire",
                 bundleName + "/1", "testRequest2.soap");
+        
+        if (server.isDeployed("withVar")) server.undeployProcess(bundleName + "/withVar");
     }
 }

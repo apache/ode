@@ -52,5 +52,8 @@ public class RetireTest extends Axis2TestBase {
         System.out.println(response);
         System.out.println("###############################################");
         assertTrue(response.indexOf("DONE") > 0);
+        
+        if (server.isDeployed("1")) server.undeployProcess(bundleName + "/1");
+        if (server.isDeployed("2")) server.undeployProcess(bundleName + "/2");
     }
 }
