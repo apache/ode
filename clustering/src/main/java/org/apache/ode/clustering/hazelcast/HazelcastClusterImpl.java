@@ -39,6 +39,8 @@ public class HazelcastClusterImpl implements HazelcastCluster{
     private String message = "";
     private Member leader;
 
+    private IMap<String, String> lock_map;
+
     public HazelcastClusterImpl(HazelcastInstance hazelcastInstance) {
         _hazelcastInstance = hazelcastInstance;
         init();
@@ -57,6 +59,8 @@ public class HazelcastClusterImpl implements HazelcastCluster{
         __log.info("Registering HZ localMember ID " + localMemberID);
         _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_NODE_MAP)
                 .put(localMemberID, isMaster);
+
+        lock_map = _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_LOCK_MAP);
     }
 
     public String getHazelCastNodeID(Member member) {
@@ -65,20 +69,12 @@ public class HazelcastClusterImpl implements HazelcastCluster{
         return hostName + ":" + port;
     }
 
-    class ClusterManager {
-        IMap<String, String> lock_map;
+    public void lock(String key) {
+        lock_map.lock(key);
+    }
 
-        ClusterManager() {
-            lock_map = _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_LOCK_MAP);
-        }
-
-        void lock(String key) {
-            lock_map.lock(key);
-        }
-
-        void unlock(String key) {
-            lock_map.unlock(key);
-        }
+    public void unlock(String key) {
+        lock_map.unlock(key);
     }
 
     class ClusterMemberShipListener implements MembershipListener {

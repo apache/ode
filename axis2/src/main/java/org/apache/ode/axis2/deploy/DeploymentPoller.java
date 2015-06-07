@@ -54,6 +54,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import  org.apache.ode.clustering.hazelcast.HazelcastClusterImpl;
+
 /**
  * Polls a directory for the deployment of a new deployment unit.
  */
@@ -73,6 +75,8 @@ public class DeploymentPoller {
     private boolean _onHold = false;
 
     private SystemSchedulesConfig _systemSchedulesConf;
+
+    private boolean clusterEnabled;
 
     @SuppressWarnings("unchecked")
     private Map<String, WatchDog> dDWatchDogsByPath = new HashMap<String, WatchDog>();
@@ -96,6 +100,7 @@ public class DeploymentPoller {
     public DeploymentPoller(File deployDir, final ODEServer odeServer) {
         _odeServer = odeServer;
         _deployDir = deployDir;
+        clusterEnabled = _odeServer.getClusteringState();
         if (!_deployDir.exists()) {
             boolean isDeployDirCreated = _deployDir.mkdir();
             if (!isDeployDirCreated) {
@@ -130,50 +135,58 @@ public class DeploymentPoller {
     @SuppressWarnings("unchecked")
     private void check() {
         File[] files = _deployDir.listFiles(_fileFilter);
+        boolean duLocked;
 
         // Checking for new deployment directories
         if (isDeploymentFromODEFileSystemAllowed() && files != null) {
             for (File file : files) {
-                File deployXml = new File(file, "deploy.xml");
-                File deployedMarker = new File(_deployDir, file.getName() + ".deployed");
-
-                if (!deployXml.exists()) {
-                    // Skip if deploy.xml is abset
-                    if (__log.isDebugEnabled()) {
-                        __log.debug("Not deploying " + file + " (missing deploy.xml)");
-                    }
-                }
-
-                WatchDog ddWatchDog = ensureDeployXmlWatchDog(file, deployXml);
-
-                if (deployedMarker.exists()) {
-                    checkDeployXmlWatchDog(ddWatchDog);
-                    continue;
-                }
-
+                duLocked = lock(file.getName());
                 try {
-                    boolean isCreated = deployedMarker.createNewFile();
-                    if (!isCreated) {
-                        __log.error("Error while creating  file "
+                    if (duLocked) {
+                        File deployXml = new File(file, "deploy.xml");
+                        File deployedMarker = new File(_deployDir, file.getName() + ".deployed");
+
+                        if (!deployXml.exists()) {
+                            // Skip if deploy.xml is abset
+                            if (__log.isDebugEnabled()) {
+                                __log.debug("Not deploying " + file + " (missing deploy.xml)");
+                            }
+                        }
+
+                        WatchDog ddWatchDog = ensureDeployXmlWatchDog(file, deployXml);
+
+                        if (deployedMarker.exists()) {
+                            checkDeployXmlWatchDog(ddWatchDog);
+                            continue;
+                        }
+
+                        try {
+                            boolean isCreated = deployedMarker.createNewFile();
+                            if (!isCreated) {
+                                __log.error("Error while creating  file "
                                         + file.getName()
                                         + ".deployed ,deployment could be inconsistent");
+                            }
+                        } catch (IOException e1) {
+                            __log.error("Error creating deployed marker file, " + file + " will not be deployed");
+                            continue;
+                        }
+
+                        try {
+                            _odeServer.getProcessStore().undeploy(file);
+                        } catch (Exception ex) {
+                            __log.error("Error undeploying " + file.getName());
+                        }
+
+                        try {
+                            Collection<QName> deployed = _odeServer.getProcessStore().deploy(file);
+                            __log.info("Deployment of artifact " + file.getName() + " successful: " + deployed);
+                        } catch (Exception e) {
+                            __log.error("Deployment of " + file.getName() + " failed, aborting for now.", e);
+                        }
                     }
-                } catch (IOException e1) {
-                    __log.error("Error creating deployed marker file, " + file + " will not be deployed");
-                    continue;
-                }
-
-                try {
-                    _odeServer.getProcessStore().undeploy(file);
-                } catch (Exception ex) {
-                    __log.error("Error undeploying " + file.getName());
-                }
-
-                try {
-                    Collection<QName> deployed = _odeServer.getProcessStore().deploy(file);
-                    __log.info("Deployment of artifact " + file.getName() + " successful: " + deployed );
-                } catch (Exception e) {
-                    __log.error("Deployment of " + file.getName() + " failed, aborting for now.", e);
+                } finally {
+                    unlock(file.getName());
                 }
             }
         }
@@ -323,5 +336,20 @@ public class DeploymentPoller {
         public void init() {
             _odeServer.getProcessStore().refreshSchedules(deploymentPakage);
         }
+    }
+
+    //Implementation of IMap key Lock
+    public boolean lock(String key) {
+        if(clusterEnabled) {
+            _odeServer.getBpelServer().getContexts().hazelcastClusterImpl.lock(key);
+        }
+        return true;
+    }
+
+    public boolean unlock(String key) {
+        if(clusterEnabled) {
+            _odeServer.getBpelServer().getContexts().hazelcastClusterImpl.unlock(key);
+        }
+        return true;
     }
 }

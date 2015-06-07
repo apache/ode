@@ -109,6 +109,7 @@ public class DeploymentWebService {
             String operation = messageContext.getAxisOperation().getName().getLocalPart();
             SOAPFactory factory = getSOAPFactory(messageContext);
             boolean unknown = false;
+            boolean duLocked;
 
             try {
                 if (operation.equals("deploy")) {
@@ -166,43 +167,54 @@ public class DeploymentWebService {
                         _poller.hold();
 
                         File dest = new File(_deployPath, bundleName + "-" + _store.getCurrentVersion());
-                        boolean createDir = dest.mkdir();
-                        if(!createDir){
-                        	throw new OdeFault("Error while creating file " + dest.getName());
+
+                        //lock on deployment unit directory name
+                        duLocked = _poller.lock(dest.getName());
+
+                        if (duLocked) {
+                            boolean createDir = dest.mkdir();
+                            if (!createDir) {
+                                throw new OdeFault("Error while creating file " + dest.getName());
+                            }
+                            try {
+                                unzip(dest, (DataHandler) binaryNode.getDataHandler());
+
+                                // Check that we have a deploy.xml
+                                File deployXml = new File(dest, "deploy.xml");
+                                if (!deployXml.exists())
+                                    throw new OdeFault("The deployment doesn't appear to contain a deployment " +
+                                            "descriptor in its root directory named deploy.xml, aborting.");
+
+                                Collection<QName> deployed = _store.deploy(dest);
+
+                                File deployedMarker = new File(_deployPath, dest.getName() + ".deployed");
+                                if (!deployedMarker.createNewFile()) {
+                                    throw new OdeFault("Error while creating file " + deployedMarker.getName() + "deployment failed");
+                                }
+
+                                // Telling the poller what we deployed so that it doesn't try to deploy it again
+                                _poller.markAsDeployed(dest);
+                                __log.info("Deployment of artifact " + dest.getName() + " successful.");
+
+
+                                OMElement response = factory.createOMElement("response", null);
+
+                                if (__log.isDebugEnabled()) __log.debug("Deployed package: " + dest.getName());
+                                OMElement d = factory.createOMElement("name", _deployapi);
+                                d.setText(dest.getName());
+                                response.addChild(d);
+
+                                for (QName pid : deployed) {
+                                    if (__log.isDebugEnabled()) __log.debug("Deployed PID: " + pid);
+                                    d = factory.createOMElement("id", _deployapi);
+                                    d.setText(pid);
+                                    response.addChild(d);
+                                }
+                                sendResponse(factory, messageContext, "deployResponse", response);
+                            } finally {
+                                _poller.unlock(dest.getName());
+                            }
                         }
-                        unzip(dest, (DataHandler) binaryNode.getDataHandler());
-
-                        // Check that we have a deploy.xml
-                        File deployXml = new File(dest, "deploy.xml");
-                        if (!deployXml.exists())
-                            throw new OdeFault("The deployment doesn't appear to contain a deployment " +
-                                    "descriptor in its root directory named deploy.xml, aborting.");
-
-                        Collection<QName> deployed = _store.deploy(dest);
-
-                        File deployedMarker = new File(_deployPath, dest.getName() + ".deployed");
-                        if(!deployedMarker.createNewFile()) {
-                        	throw new OdeFault("Error while creating file " + deployedMarker.getName() + "deployment failed");
-                        }
-
-                        // Telling the poller what we deployed so that it doesn't try to deploy it again
-                        _poller.markAsDeployed(dest);
-                        __log.info("Deployment of artifact " + dest.getName() + " successful.");
-
-                        OMElement response = factory.createOMElement("response", null);
-
-                        if (__log.isDebugEnabled()) __log.debug("Deployed package: "+dest.getName());
-                        OMElement d = factory.createOMElement("name", _deployapi);
-                        d.setText(dest.getName());
-                        response.addChild(d);
-
-                        for (QName pid : deployed) {
-                            if (__log.isDebugEnabled()) __log.debug("Deployed PID: "+pid);
-                            d = factory.createOMElement("id", _deployapi);
-                            d.setText(pid);
-                            response.addChild(d);
-                        }
-                        sendResponse(factory, messageContext, "deployResponse", response);
                     } finally {
                         _poller.release();
                     }
