@@ -165,6 +165,7 @@
         <module>jbi-karaf-pmapi-httpbinding</module>
         <module>axis2-war</module>
         <module>bpel-itest</module>
+        <module>clustering</module>
     </modules>
 
     <build>

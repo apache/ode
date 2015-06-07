@@ -28,6 +28,7 @@ import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.engine.cron.CronScheduler;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
+import org.apache.ode.clustering.hazelcast.HazelcastClusterImpl;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +46,8 @@ public class Contexts {
     public Scheduler scheduler;
 
     public CronScheduler cronScheduler;
+
+    public  HazelcastClusterImpl hazelcastClusterImpl;
 
     EndpointReferenceContext eprContext;
 

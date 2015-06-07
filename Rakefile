@@ -83,10 +83,10 @@ define "ode" do
   desc "ODE Axis Integration Layer"
   define "axis2" do
     compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "bpel-epr", "bpel-runtime",
-      "scheduler-simple", "bpel-schemas", "bpel-store", "utils", "agents"),
+      "scheduler-simple", "bpel-schemas", "bpel-store", "utils", "agents", "clustering"),
       AXIOM, AXIS2_ALL, COMMONS.lang, COMMONS.collections, COMMONS.httpclient, COMMONS.lang,
       DERBY, GERONIMO.kernel, GERONIMO.transaction, JAVAX.activation, JAVAX.servlet, JAVAX.stream,
-      JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS, XMLBEANS, AXIS2_MODULES.libs, SLF4J, LOG4J
+      JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS, XMLBEANS, AXIS2_MODULES.libs, SLF4J, LOG4J, HAZELCAST
 
     test.exclude 'org.apache.ode.axis2.management.*'
     test.with project("tools"), AXIOM, JAVAX.javamail, COMMONS.codec, COMMONS.httpclient, XERCES, WOODSTOX
@@ -99,12 +99,12 @@ define "ode" do
     libs = projects("axis2", "bpel-api", "bpel-compiler", "bpel-connector", "bpel-dao",
       "bpel-epr", "bpel-obj", "bpel-ql", "bpel-runtime", "scheduler-simple",
       "bpel-schemas", "bpel-store", "dao-hibernate", "jca-ra", "jca-server",
-      "utils", "dao-jpa", "agents"),
+      "utils", "dao-jpa", "agents", "clustering"),
       AXIS2_ALL, ANNONGEN, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.fileupload, COMMONS.io, COMMONS.httpclient, COMMONS.beanutils,
       COMMONS.lang, COMMONS.pool, DERBY, DERBY_TOOLS, JACOB, JAXEN, JAVAX.activation, JAVAX.ejb, JAVAX.javamail,
       JAVAX.connector, JAVAX.jms, JAVAX.persistence, JAVAX.transaction, JAVAX.stream,  JIBX,
       GERONIMO.connector, GERONIMO.kernel, GERONIMO.transaction, LOG4J, OPENJPA, SAXON, TRANQL,
-      WOODSTOX, WSDL4J, WS_COMMONS, XALAN, XERCES, XMLBEANS, SPRING, AXIS2_MODULES.libs, SLF4J, LOG4J
+      WOODSTOX, WSDL4J, WS_COMMONS, XALAN, XERCES, XMLBEANS, SPRING, AXIS2_MODULES.libs, SLF4J, LOG4J, HAZELCAST
 
     package(:war).with(:libs=>libs).path("WEB-INF").tap do |web_inf|
       web_inf.merge project("dao-jpa-ojpa-derby").package(:zip)
@@ -166,7 +166,7 @@ define "ode" do
 
   desc "ODE APIs"
   define "bpel-api" do
-    compile.with projects("utils", "bpel-obj", "bpel-schemas"), WSDL4J, XERCES, SLF4J, LOG4J
+    compile.with projects("utils", "bpel-obj", "bpel-schemas"), WSDL4J, XERCES, SLF4J, LOG4J, HAZELCAST
     package :jar
   end
 
@@ -206,6 +206,12 @@ define "ode" do
     package :jar
   end
 
+  desc "ODE Clustering"
+   define "clustering" do
+     compile.with projects("bpel-api"),HAZELCAST, COMMONS.logging
+     package :jar
+   end
+
   desc "ODE BPEL Object Model"
   define "bpel-obj" do
     compile.with project("utils"), SAXON, WSDL4J, COMMONS.collections
@@ -225,7 +231,7 @@ define "ode" do
   desc "ODE Runtime Engine"
   define "bpel-runtime" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-epr", "bpel-obj", "bpel-schemas",
-      "bpel-store", "utils", "agents"),
+      "bpel-store", "utils", "agents","clustering"),
       COMMONS.collections, COMMONS.httpclient, JACOB, JAVAX.persistence, JAVAX.stream, JAXEN, SAXON, WSDL4J, XMLBEANS, SPRING, SLF4J, LOG4J
 
 

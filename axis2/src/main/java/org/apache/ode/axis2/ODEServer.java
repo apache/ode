@@ -82,6 +82,9 @@ import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.fs.TempFileManager;
 
+import org.apache.ode.clustering.hazelcast.*;
+import com.hazelcast.core.*;
+
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle management.
  *
@@ -132,6 +135,14 @@ public class ODEServer {
     protected IdleConnectionTimeoutThread idleConnectionTimeoutThread;
     
     public Runnable txMgrCreatedCallback;
+
+    private HazelcastInstanceConfig hazelcastInstanceConfig;
+
+    private HazelcastClusterImpl hazelcastClusterImpl;
+
+    private String clusteringState = "";
+
+    private boolean isClusteringEnabled;
 
     public void init(ServletConfig config, ConfigurationContext configContext) throws ServletException {
         init(config.getServletContext().getRealPath("/WEB-INF"), configContext);
@@ -184,6 +195,11 @@ public class ODEServer {
         if (txMgrCreatedCallback != null) {
             txMgrCreatedCallback.run();
         }
+
+        clusteringState = _odeConfig.getClusteringState();
+        if (isClusteringEnabled()) initClustering();
+        else __log.info("Clustering has not been initialized");
+
         __log.debug("Creating data source.");
         initDataSource();
         __log.debug("Starting DAO.");
@@ -455,6 +471,39 @@ public class ODEServer {
         }
     }
 
+    public boolean isClusteringEnabled() {
+        boolean state;
+        if (clusteringState.equals("true")) state = true;
+        else state = false;
+        setClustering(state);
+        return state;
+    }
+
+    public void  setClustering (boolean state) {
+        isClusteringEnabled = state;
+    }
+
+    public boolean getClusteringState() {
+        return isClusteringEnabled;
+    }
+
+    /**
+     * Initialize the clustering if it is enabled
+     */
+    private void initClustering() {
+        String hzConfig = System.getProperty("hazelcast.config");
+        if (hzConfig != null) hazelcastInstanceConfig = new HazelcastInstanceConfig();
+        else {
+            File hzXml = new File(_configRoot, "hazelcast.xml");
+            if (!hzXml.isFile())
+                __log.error("hazelcast.xml does not exist or is not a file");
+            else hazelcastInstanceConfig = new HazelcastInstanceConfig(hzXml);
+        }
+        if (hazelcastInstanceConfig != null) {
+            hazelcastClusterImpl = new HazelcastClusterImpl(hazelcastInstanceConfig.getHazelcastInstance());
+        }
+    }
+
     /**
      * Initialize the DAO.
      *
@@ -533,6 +582,7 @@ public class ODEServer {
         _bpelServer.setCronScheduler(_cronScheduler);
 
         _bpelServer.setDaoConnectionFactory(_daoCF);
+        _bpelServer.setHazelcastCluster(hazelcastClusterImpl);
         _bpelServer.setInMemDaoConnectionFactory(new BpelDAOConnectionFactoryImpl(_scheduler, _odeConfig.getInMemMexTtl()));
         _bpelServer.setEndpointReferenceContext(eprContext);
         _bpelServer.setMessageExchangeContext(new MessageExchangeContextImpl(this));
