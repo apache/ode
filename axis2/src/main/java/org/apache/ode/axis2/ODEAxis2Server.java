@@ -170,7 +170,7 @@ public class ODEAxis2Server extends AxisServer {
             try {
                 fos = new FileOutputStream(fileName);
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             }
             configContext.getAxisConfiguration().getService(serviceName).printWSDL(fos);
         }

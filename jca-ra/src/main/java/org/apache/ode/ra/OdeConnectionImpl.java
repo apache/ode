@@ -100,10 +100,8 @@ class OdeConnectionImpl implements InvocationHandler, Connection {
       String methodSig = Reflect.generateMethodSignature(method);
       return mc().getTransport().invokeConnectionMethod(methodSig, args);
     } catch (RuntimeException pe) {
-      pe.printStackTrace();
       throw new OdeConnectionException("Unexpected RuntimeException", pe);
     } catch (RemoteException re) {
-      re.printStackTrace();
       throw new OdeConnectionException("Unexpected RemoteException.", re);
     } catch (InvocationTargetException ite) {
       throw ite.getTargetException();

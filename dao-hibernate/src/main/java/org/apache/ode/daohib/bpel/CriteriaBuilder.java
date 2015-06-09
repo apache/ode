@@ -240,7 +240,7 @@ class CriteriaBuilder {
         try {
             dt = ISO8601DateParser.parse(date);
         } catch (ParseException e) {
-            e.printStackTrace();
+            __log.error(e.getMessage(), e);
         }
         Timestamp ts = new Timestamp(dt.getTime());
         return op + " '" + ts.toString() + "'";

@@ -104,7 +104,7 @@ public class BpelC extends BaseCommandlineTool {
             // This is really quite unexpected, so we should
             // print the stack trace to stderr.
             consoleErr(t.getMessage());
-            t.printStackTrace();
+            __log.error(t.getMessage(), t);
             System.exit(-2);
         }
         System.exit(0);

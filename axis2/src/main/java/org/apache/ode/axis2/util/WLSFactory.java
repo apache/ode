@@ -54,7 +54,7 @@ public class WLSFactory {
             Context ctx = new InitialContext(env);
             tm = (TransactionManager) ctx.lookup("javax.transaction.TransactionManager");
         } catch (NamingException e) {
-            e.printStackTrace();
+            throw new RuntimeException( "Error while looking up TransactionManager", e);
         }
 
         return tm;

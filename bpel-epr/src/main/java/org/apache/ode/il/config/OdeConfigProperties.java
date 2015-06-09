@@ -183,7 +183,7 @@ public class OdeConfigProperties {
                     try {
                         fis.close();
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        __log.error(ex.getMessage(), ex);
                     }
             }
         } else {
