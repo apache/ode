@@ -18,6 +18,28 @@
  */
 package org.apache.ode.bpel.compiler;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import javax.wsdl.Definition;
+import javax.wsdl.Import;
+import javax.wsdl.Message;
+import javax.wsdl.PortType;
+import javax.wsdl.Types;
+import javax.wsdl.extensions.ExtensibilityElement;
+import javax.xml.namespace.QName;
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamSource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
@@ -36,19 +58,6 @@ import org.apache.ode.utils.xsd.XSUtils;
 import org.apache.ode.utils.xsd.XsdException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
-
-import javax.wsdl.*;
-import javax.wsdl.extensions.ExtensibilityElement;
-import javax.xml.namespace.QName;
-import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamSource;
-
-import java.io.ByteArrayInputStream;
-import java.io.StringReader;
-import java.io.IOException;
-import java.net.URI;
-import java.util.*;
 
 
 /**
@@ -213,6 +222,8 @@ class WSDLRegistry {
         Types types = def.getTypes();
 
         if (types != null) {
+            addAllInternalSchemas(def);
+
             int localSchemaId = 0;
             for (Iterator<ExtensibilityElement> iter =
                     ((List<ExtensibilityElement>)def.getTypes().getExtensibilityElements()).iterator();
@@ -265,6 +276,27 @@ class WSDLRegistry {
                     _model = null;
 
                     localSchemaId ++;
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void addAllInternalSchemas(Definition def) {
+        for (Iterator<ExtensibilityElement> iter = ((List<ExtensibilityElement>) def.getTypes().getExtensibilityElements()).iterator(); iter.hasNext();) {
+            ExtensibilityElement ee = iter.next();
+
+            if (ee instanceof XMLSchemaType) {
+                byte[] schema = ((XMLSchemaType) ee).getXMLSchema();
+                try {
+                    Document doc = DOMUtils.parse(new InputSource(new ByteArrayInputStream(schema)));
+                    String schemaTargetNS = doc.getDocumentElement().getAttribute("targetNamespace");
+                    if (schemaTargetNS != null && schemaTargetNS.length() > 0) {
+                        _internalSchemas.put(new URI(schemaTargetNS), schema);
+                        _documentSchemas.put(new URI(schemaTargetNS), doc);
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException("Couldn't parse schema in " + def.getTargetNamespace(), e);
                 }
             }
         }
