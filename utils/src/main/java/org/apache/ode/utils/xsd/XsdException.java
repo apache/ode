@@ -58,6 +58,11 @@ public class XsdException extends Exception {
     _systemId = literalSystemId;
     _previous = previous;
   }
+  
+  public XsdException(XsdException previous, String message) {
+      super(__msgs.msgXsdExceptionMessage(message));
+      _message = message;
+  }
 
   public String getDetailMessage() {
     return _message;

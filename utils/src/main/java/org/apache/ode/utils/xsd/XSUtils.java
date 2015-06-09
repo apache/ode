@@ -18,24 +18,27 @@
  */
 package org.apache.ode.utils.xsd;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.utils.msg.MessageBundle;
-import org.apache.xerces.dom.DOMInputImpl;
-import org.apache.xerces.impl.xs.XMLSchemaLoader;
-import org.apache.xerces.xni.XNIException;
-import org.apache.xerces.xni.parser.XMLEntityResolver;
-import org.apache.xerces.xni.parser.XMLErrorHandler;
-import org.apache.xerces.xni.parser.XMLParseException;
-import org.apache.xerces.xs.XSModel;
-import org.w3c.dom.ls.LSInput;
-
 import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.utils.msg.MessageBundle;
+import org.apache.xerces.dom.DOMInputImpl;
+import org.apache.xerces.impl.Constants;
+import org.apache.xerces.impl.xs.XMLSchemaLoader;
+import org.apache.xerces.xni.XNIException;
+import org.apache.xerces.xni.parser.XMLEntityResolver;
+import org.apache.xerces.xni.parser.XMLErrorHandler;
+import org.apache.xerces.xni.parser.XMLParseException;
+import org.apache.xerces.xs.XSModel;
+import org.w3c.dom.DOMError;
+import org.w3c.dom.DOMErrorHandler;
+import org.w3c.dom.ls.LSInput;
 
 
 /**
@@ -93,6 +96,9 @@ public class XSUtils {
         LoggingXmlErrorHandler eh = new LoggingXmlErrorHandler(__log);
         schemaLoader.setErrorHandler(eh);
 
+        LoggingDOMErrorHandler deh = new LoggingDOMErrorHandler(__log);
+        schemaLoader.setParameter(Constants.DOM_ERROR_HANDLER, deh);
+
         XSModel model = schemaLoader.load(input);
 
         // The following mess is due to XMLSchemaLoaders funkyness in error
@@ -103,15 +109,26 @@ public class XSUtils {
             * Someone inside Xerces will have eaten this exception, for no good
             * reason.
             */
+            XsdException ex = null;
+
             List<XMLParseException> errors = eh.getErrors();
             if (errors.size() != 0) {
                 __log.error("captureSchema: XMLParseException(s) in " + input);
 
-                XsdException ex = null;
                 for (XMLParseException xpe : errors) {
                     ex = new XsdException(ex, xpe.getMessage(), xpe.getLineNumber(), xpe.getColumnNumber(),
                             xpe.getLiteralSystemId());
                 }
+            }
+
+            List<Exception> exceptions = deh.getExceptions();
+            if (exceptions.size() != 0) {
+                for (Exception e : exceptions) {
+                    ex = new XsdException(ex, e.getMessage());
+                }
+            }
+
+            if (ex != null) {
                 throw ex;
             }
 
@@ -186,6 +203,31 @@ public class XSUtils {
 
             // Should not reach here, but just in case...
             throw new XNIException("Unknown XSD error state; domain=" + domain + ", key=" +key);
+        }
+    }
+
+    static class LoggingDOMErrorHandler implements DOMErrorHandler {
+
+        private ArrayList<Exception> _exceptions = new ArrayList<Exception>();
+        private Log _log;
+
+        public LoggingDOMErrorHandler(Log log) {
+            assert log != null;
+            _log = log;
+        }
+
+        public boolean handleError(DOMError error) {
+            if (_log.isDebugEnabled()) {
+                _log.debug("Exception occurred during parsing schema: " + error.getMessage());
+            }
+            if (error != null) {
+                _exceptions.add((Exception) error.getRelatedException());
+            }
+            return false;
+        }
+
+        public ArrayList<Exception> getExceptions() {
+            return _exceptions;
         }
     }
 }
