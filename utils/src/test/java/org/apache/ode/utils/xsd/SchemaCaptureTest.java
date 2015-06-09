@@ -18,14 +18,7 @@
  */
 package org.apache.ode.utils.xsd;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.utils.StreamUtils;
-import org.apache.ode.utils.TestResources;
-import org.apache.xerces.xni.XMLResourceIdentifier;
-import org.apache.xerces.xni.XNIException;
-import org.apache.xerces.xni.parser.XMLEntityResolver;
-import org.apache.xerces.xni.parser.XMLInputSource;
+import static org.junit.Assert.*;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -35,37 +28,70 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.utils.StreamUtils;
+import org.apache.ode.utils.TestResources;
+import org.apache.xerces.xni.XMLResourceIdentifier;
+import org.apache.xerces.xni.XNIException;
+import org.apache.xerces.xni.parser.XMLEntityResolver;
+import org.apache.xerces.xni.parser.XMLInputSource;
+import org.junit.Test;
+
 /**
  * Test schema capture functionality.
  */
-public class SchemaCaptureTest extends TestCase {
+public class SchemaCaptureTest {
     private static Log __log = LogFactory.getLog(SchemaCaptureTest.class);
 
-  public void testSchemaCapture() throws Exception {
-      __log.debug("GETTING RESOURCE " + TestResources.getRetailerSchema());
-    InputStream xsdStream = TestResources.getRetailerSchema().openStream();
-    byte[] data;
-    try {
-        data = StreamUtils.read(xsdStream);
-    } finally {
-        xsdStream.close();
+    @Test
+    public void testSchemaCapture() throws Exception {
+        __log.debug("GETTING RESOURCE " + TestResources.getRetailerSchema());
+        InputStream xsdStream = TestResources.getRetailerSchema().openStream();
+        byte[] data;
+        try {
+            data = StreamUtils.read(xsdStream);
+        } finally {
+            xsdStream.close();
+        }
+
+        Map<URI, byte[]> s = XSUtils.captureSchema(URI.create("schema.xsd"), data, new XMLEntityResolver() {
+            public XMLInputSource resolveEntity(XMLResourceIdentifier resourceIdentifier) throws XNIException, IOException {
+                XMLInputSource src = new XMLInputSource(resourceIdentifier);
+                String literalUri = resourceIdentifier.getLiteralSystemId();
+
+                if (literalUri != null) {
+                    src.setByteStream(getClass().getClassLoader().getResourceAsStream(literalUri));
+                }
+
+                return src;
+            }
+        }, 0);
+        // we expect the root schema and three includes
+        __log.debug("loaded " + s.keySet());
+        assertEquals(5, s.size());
     }
 
-    Map<URI, byte[]> s = XSUtils.captureSchema(URI.create("schema.xsd"), data, new XMLEntityResolver() {
-        public XMLInputSource resolveEntity(XMLResourceIdentifier resourceIdentifier) throws XNIException, IOException {
-            XMLInputSource src = new XMLInputSource(resourceIdentifier);
-            String literalUri = resourceIdentifier.getLiteralSystemId();
-
-            if (literalUri != null) {
-              src.setByteStream(getClass().getClassLoader().getResourceAsStream(literalUri));
-            }
-
-            return src;
+    /**
+     * Test for ODE-1019, provided by Igor Vorobiov
+     */
+    @Test(expected = Exception.class)
+    public void testSchemaCaptureException() throws Exception {
+        InputStream xsdStream = new FileInputStream(TestResources.getRetailerSchema().getFile());
+        byte[] data;
+        try {
+            data = StreamUtils.read(xsdStream);
+        } finally {
+            xsdStream.close();
         }
-    }, 0);
-    // we expect the root schema and three includes
-    __log.debug("loaded " + s.keySet());
-    assertEquals(5, s.size());
-  }
+        XSUtils.captureSchema(URI.create("schema.xsd"), data, new XMLEntityResolver() {
+            public XMLInputSource resolveEntity(XMLResourceIdentifier resourceIdentifier) throws XNIException, IOException {
+                // !!! cause NullPointerException
+                return null;
+            }
+        }, 0);
+
+        __log.error("mustn't reach this place");
+    }
 
 }

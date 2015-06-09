@@ -100,6 +100,10 @@ public class XsdMessages extends MessageBundle {
         systemId, lineNumber, columnNumber);
   }
 
+  public String msgXsdExceptionMessage(String message) {
+        return this.format("Unable to process XML Schema: {0}", message);
+  }
+
   /** An unknown error occured processing schema at {0}" */
   public String msgXsdUnknownError(String systemId) {
     return this.format("An unknown error occured processing schema at {0}", systemId);
