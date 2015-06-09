@@ -341,15 +341,15 @@ public class DeploymentPoller {
     //Implementation of IMap key Lock
     public boolean lock(String key) {
         if(clusterEnabled) {
-            _odeServer.getBpelServer().getContexts().hazelcastClusterImpl.lock(key);
+            return _odeServer.getBpelServer().getContexts().hazelcastClusterImpl.lock(key);
         }
-        return true;
+        else return true;
     }
 
     public boolean unlock(String key) {
         if(clusterEnabled) {
-            _odeServer.getBpelServer().getContexts().hazelcastClusterImpl.unlock(key);
+            return _odeServer.getBpelServer().getContexts().hazelcastClusterImpl.unlock(key);
         }
-        return true;
+        else return true;
     }
 }

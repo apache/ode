@@ -69,12 +69,22 @@ public class HazelcastClusterImpl implements HazelcastCluster{
         return hostName + ":" + port;
     }
 
-    public void lock(String key) {
+    public boolean lock(String key) {
         lock_map.lock(key);
+        boolean state = lock_map.isLocked(key);
+        if (__log.isDebugEnabled()) {
+        __log.debug ("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after locking: " + state);
+        }
+        return state;
     }
 
-    public void unlock(String key) {
+    public boolean unlock(String key) {
         lock_map.unlock(key);
+        boolean state = lock_map.isLocked(key);
+        if (__log.isDebugEnabled()) {
+        __log.debug("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after unlocking: " + state);
+        }
+        return state;
     }
 
     class ClusterMemberShipListener implements MembershipListener {
