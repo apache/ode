@@ -18,9 +18,21 @@
  */
 package org.apache.ode.utils.xsd;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.xerces.dom.DOMInputImpl;
 import org.apache.xerces.impl.Constants;
 import org.apache.xerces.impl.xs.XMLSchemaLoader;
+import org.apache.xerces.impl.xs.util.LSInputListImpl;
 import org.apache.xerces.xni.XMLResourceIdentifier;
 import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLEntityResolver;
@@ -28,19 +40,9 @@ import org.apache.xerces.xni.parser.XMLInputSource;
 import org.apache.xerces.xs.LSInputList;
 import org.apache.xerces.xs.XSModel;
 import org.apache.xerces.xs.XSTypeDefinition;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.DOMErrorHandler;
 import org.w3c.dom.DOMError;
+import org.w3c.dom.DOMErrorHandler;
 import org.w3c.dom.ls.LSInput;
-
-import javax.xml.namespace.QName;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * Xerces based schema model.
@@ -79,18 +81,14 @@ public class SchemaModelImpl implements SchemaModel {
             ++idx;
         }
 
-        LSInputList list = new LSInputList() {
-            public LSInput item(int index) {
-                DOMInputImpl input = new DOMInputImpl();
-                input.setSystemId(uris[index]);
-                input.setByteStream(new ByteArrayInputStream(content[index]));
-                return input;
-            }
-
-            public int getLength() {
-                return uris.length;
-            }
-        };
+        LSInput[] inputs = new LSInput[uris.length];
+        for (int index = 0; index < uris.length; index++) {
+            DOMInputImpl input = new DOMInputImpl(); 
+            input.setSystemId(uris[index]); 
+            input.setByteStream(new ByteArrayInputStream(content[index])); 
+            inputs[index] = input;
+        }
+        LSInputList list = new LSInputListImpl(inputs, inputs.length);
 
         XSModel xsm = schemaLoader.loadInputList(list);
         return new SchemaModelImpl(xsm);
