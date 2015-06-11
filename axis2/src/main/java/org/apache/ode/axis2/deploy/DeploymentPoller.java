@@ -140,6 +140,7 @@ public class DeploymentPoller {
         // Checking for new deployment directories
         if (isDeploymentFromODEFileSystemAllowed() && files != null) {
             for (File file : files) {
+                __log.info("Trying to access the lock for " +file.getName());
                 duLocked = lock(file.getName());
                 try {
                     if (duLocked) {
@@ -186,6 +187,7 @@ public class DeploymentPoller {
                         }
                     }
                 } finally {
+                    __log.info("Trying to release the lock for " + file.getName());
                     unlock(file.getName());
                 }
             }

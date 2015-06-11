@@ -79,6 +79,7 @@ import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.scheduler.simple.JdbcDelegate;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
 import org.apache.ode.store.ProcessStoreImpl;
+import org.apache.ode.store.ClusterProcessStoreImpl;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.fs.TempFileManager;
 
@@ -526,13 +527,15 @@ public class ODEServer {
         _store.registerListener(new ProcessStoreListenerImpl());
         _store.setDeployDir(
                 _odeConfig.getDeployDir() != null ?
-                    new File(_odeConfig.getDeployDir()) :
-                    new File(_workRoot, "processes"));
+                        new File(_odeConfig.getDeployDir()) :
+                        new File(_workRoot, "processes"));
         _store.setConfigDir(_configRoot);
     }
 
     protected ProcessStoreImpl createProcessStore(EndpointReferenceContext eprContext, DataSource ds) {
-        return new ProcessStoreImpl(eprContext, ds, _odeConfig.getDAOConnectionFactory(), _odeConfig, false);
+        if (isClusteringEnabled)
+            return new ClusterProcessStoreImpl(eprContext, ds, _odeConfig.getDAOConnectionFactory(), _odeConfig, false, hazelcastClusterImpl);
+        else return new ProcessStoreImpl(eprContext, ds, _odeConfig.getDAOConnectionFactory(), _odeConfig, false);
     }
 
     protected Scheduler createScheduler() {

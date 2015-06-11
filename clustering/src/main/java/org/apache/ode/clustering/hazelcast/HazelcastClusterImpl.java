@@ -36,10 +36,12 @@ public class HazelcastClusterImpl implements HazelcastCluster{
 
     private HazelcastInstance _hazelcastInstance;
     private boolean isMaster = false;
-    private String message = "";
+    private String _duName = "";
     private Member leader;
+    private Member deployInitiator;
 
     private IMap<String, String> lock_map;
+    private ITopic<String> clusterMessageTopic;
 
     public HazelcastClusterImpl(HazelcastInstance hazelcastInstance) {
         _hazelcastInstance = hazelcastInstance;
@@ -51,7 +53,7 @@ public class HazelcastClusterImpl implements HazelcastCluster{
         _hazelcastInstance.getCluster().addMembershipListener(new ClusterMemberShipListener());
 
         // Register for listening to message listener
-        ITopic<String> clusterMessageTopic = _hazelcastInstance.getTopic("clusterMsg");
+        clusterMessageTopic = _hazelcastInstance.getTopic("deployedMsg");
         clusterMessageTopic.addMessageListener(new ClusterMessageListener());
 
         Member localMember = _hazelcastInstance.getCluster().getLocalMember();
@@ -72,18 +74,18 @@ public class HazelcastClusterImpl implements HazelcastCluster{
     public boolean lock(String key) {
         lock_map.lock(key);
         boolean state = lock_map.isLocked(key);
-        if (__log.isDebugEnabled()) {
-        __log.debug ("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after locking: " + state);
-        }
+        __log.info("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after locking: " + state);
         return state;
     }
 
     public boolean unlock(String key) {
         lock_map.unlock(key);
-        boolean state = lock_map.isLocked(key);
-        if (__log.isDebugEnabled()) {
-        __log.debug("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after unlocking: " + state);
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
         }
+        boolean state = lock_map.isLocked(key);
+        __log.info("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after unlocking: " + state);
         return state;
     }
 
@@ -96,12 +98,12 @@ public class HazelcastClusterImpl implements HazelcastCluster{
 
         @Override
         public void memberRemoved(MembershipEvent membershipEvent) {
-            isLeader();
+            markAsMaster();
             // Allow Leader to update distributed map.
             if (isMaster) {
                 String leftMemberID = getHazelCastNodeID(membershipEvent.getMember());
-                _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_NODE_MAP).remove(leftMemberID);
-                _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_NODE_MAP).replace(getHazelCastNodeID(leader), isMaster);
+               // _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_NODE_MAP).remove(leftMemberID);
+               // _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_NODE_MAP).replace(getHazelCastNodeID(leader), isMaster);
             }
         }
 
@@ -114,12 +116,20 @@ public class HazelcastClusterImpl implements HazelcastCluster{
     class ClusterMessageListener implements MessageListener<String> {
         @Override
         public void onMessage(Message<String> msg) {
-            message = msg.getMessageObject();
+            String message = msg.getMessageObject();
+            String arr[] = message.split(" ", 2);
+            String duName = arr[1];
+            if(message.contains("Deployed ")) {
+                if(_hazelcastInstance.getCluster().getLocalMember() != deployInitiator) {
+                    setDUName(duName);
+                    __log.info("Recerive deployment msg to " +_hazelcastInstance.getCluster().getLocalMember() +"for" +duName);
+                }
+            }
         }
     }
 
 
-    public void isLeader() {
+    public void markAsMaster() {
         leader = _hazelcastInstance.getCluster().getMembers().iterator().next();
         if (leader.localMember()) {
             isMaster = true;
@@ -139,8 +149,14 @@ public class HazelcastClusterImpl implements HazelcastCluster{
         return isMaster;
     }
 
-    public String getMessage() {
-        return message;
+    public void setDUName(String duName) {
+        _duName = duName;
+    }
+
+    public String publishProcessStoreEvent(String msg) {
+        deployInitiator = _hazelcastInstance.getCluster().getLocalMember();
+        clusterMessageTopic.publish(msg);
+        return _duName;
     }
 
 }

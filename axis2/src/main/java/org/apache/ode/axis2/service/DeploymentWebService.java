@@ -167,6 +167,7 @@ public class DeploymentWebService {
                         _poller.hold();
 
                         File dest = new File(_deployPath, bundleName + "-" + _store.getCurrentVersion());
+                        __log.info("Trying to access the lock for " + dest.getName());
 
                         //lock on deployment unit directory name
                         duLocked = _poller.lock(dest.getName());
@@ -212,6 +213,7 @@ public class DeploymentWebService {
                                 }
                                 sendResponse(factory, messageContext, "deployResponse", response);
                             } finally {
+                                __log.info("Trying to release the lock for " + dest.getName());
                                 _poller.unlock(dest.getName());
                             }
                         }

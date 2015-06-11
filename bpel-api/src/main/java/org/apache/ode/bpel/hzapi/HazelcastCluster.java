@@ -39,7 +39,7 @@ public interface HazelcastCluster {
     /**
      * Check whether current node is the leader or not.
      */
-    void isLeader();
+     void markAsMaster();
 
     /**
      * returns Current Nodes in the cluster.

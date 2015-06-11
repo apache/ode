@@ -88,6 +88,8 @@ public class ProcessStoreImpl implements ProcessStore {
 
     protected File _configDir;
 
+
+
     /**
      * Executor used to process DB transactions. Allows us to isolate the TX context, and to ensure that only one TX gets executed a
      * time. We don't really care to parallelize these operations because: i) HSQL does not isolate transactions and we don't want
@@ -592,7 +594,7 @@ public class ProcessStoreImpl implements ProcessStore {
             psl.onProcessStoreEvent(pse);
     }
 
-    private void fireStateChange(QName processId, ProcessState state, String duname) {
+    protected void fireStateChange(QName processId, ProcessState state, String duname) {
         switch (state) {
             case ACTIVE:
                 fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.ACTVIATED, processId, duname));
