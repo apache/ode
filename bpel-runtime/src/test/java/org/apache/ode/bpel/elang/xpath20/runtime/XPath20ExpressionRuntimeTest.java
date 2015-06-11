@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.elang.xpath20.runtime;
 
 import junit.framework.TestCase;
+
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.elang.xpath20.compiler.XPath20ExpressionCompilerBPEL20;
@@ -30,6 +31,7 @@ import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OProcess.OProperty;
 import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.Namespaces;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -109,6 +111,14 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
         assertNull(DOMUtils.getFirstChildElement((Element)retVal));
     }
 
+    public void testODE911() throws Exception {
+        OXPath20ExpressionBPEL20 exp = compile("ode:delete($ODE991var/tns:empty)");
+        Element retVal = (Element)_runtime.evaluateNode(exp, this);
+        assertNotNull(retVal);
+        assertEquals(3, retVal.getElementsByTagNameNS("http://foobar", "notempty").getLength());
+        assertEquals(0, retVal.getElementsByTagNameNS("http://foobar", "empty").getLength());
+    }
+
     public Node readVariable(Variable variable, Part part) throws FaultException {
         return _vars.get(variable.name);
     }
@@ -153,6 +163,8 @@ public class XPath20ExpressionRuntimeTest extends TestCase implements Evaluation
         doc.appendChild(e);
         e.appendChild(doc.createTextNode(xpath));
         Expression exp = new Expression(e);
+        exp.getNamespaceContext().register("tns", "http://foobar");
+        exp.getNamespaceContext().register("ode", Namespaces.ODE_EXTENSION_NS);
         return (OXPath20ExpressionBPEL20)_compiler.compileLValue(exp);
     }
     

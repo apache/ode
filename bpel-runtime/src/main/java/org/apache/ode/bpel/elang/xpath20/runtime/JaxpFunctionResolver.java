@@ -35,11 +35,13 @@ import javax.xml.xpath.XPathFunction;
 import javax.xml.xpath.XPathFunctionException;
 import javax.xml.xpath.XPathFunctionResolver;
 
+import net.sf.saxon.dom.DOMNodeList;
 import net.sf.saxon.dom.NodeWrapper;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.DayTimeDurationValue;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.QNameValue;
+import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.YearMonthDurationValue;
 
 import org.apache.commons.httpclient.URIException;
@@ -885,6 +887,15 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                     targetNodes.add((Element) ((NodeWrapper) delete).getUnderlyingNode());
                 } else if (delete instanceof Element) {
                     targetNodes.add((Element) delete);
+                } else if (delete instanceof SequenceExtent) {
+                    try {
+                        DOMNodeList nodeList= DOMNodeList.checkAndMake((SequenceExtent)delete);
+                        for (int i=0;i<nodeList.getLength();i++){
+                            targetNodes.add(nodeList.item(i));
+                        }
+                    } catch (XPathException e) {
+                        throw new XPathFunctionException(e);
+                    }
                 } else {
                     throw new XPathFunctionException("Unexpected argument type: " + delete.getClass());
                 }
@@ -918,12 +929,21 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
 		            }
 	            }
             }
+            // 2xLoops as previously the contents of the 'children' list appeared to
+            // be being changed by the clonedElmt.removeChild call, meaning the position
+            // offset was incorrect, a possibly better approach would be to sort the position
+            // indices and iterate *backwards* but for my needs this approach suffices.
+            List<Node> clonedChildrenToRemove = new ArrayList<Node>();
             final Element clonedElmt = (Element) parentElmt.cloneNode(true);
             children = clonedElmt.getChildNodes();
             for (int target = 0; target < positions.length; target++) {
 	            Element deleteElmt = (Element) children.item(positions[target]);
-	            clonedElmt.removeChild(deleteElmt);
+	            clonedChildrenToRemove.add(deleteElmt);
             }
+            for (Node deleteElmt : clonedChildrenToRemove) {
+                clonedElmt.removeChild(deleteElmt);
+            }
+
             // Saxon doesn't like clones with no children, so I'll oblige
             if (clonedElmt.getChildNodes().getLength() == 0) {
             	try {
