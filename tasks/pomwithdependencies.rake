@@ -22,14 +22,16 @@ module Buildr
     module PomWithDependencies
         include Extension
 
-    # We have to add the dependencies to the monkey patched POM before the dependencies are
-    # changed in the compile, test and run after_define
-    after_define(:compile) do |project|
-        project.package.pom.dependencies =
-        [project.compile.dependencies.select {|dep| dep.respond_to?(:to_spec) && dep.respond_to?(:to_hash)}.map { |a| a.to_hash.merge(:scope => 'compile') },
-            project.test.dependencies.select {|dep| dep.respond_to?(:to_spec) && dep.respond_to?(:to_hash) && !project.compile.dependencies.include?(dep)}.map { |a| a.to_hash.merge(:scope => 'test') },
-            project.run.classpath.select {|dep| dep.respond_to?(:to_spec) && dep.respond_to?(:to_hash) && !project.compile.dependencies.include?(dep)}.map { |a| a.to_hash.merge(:scope => 'runtime') }
-            ].flatten
+        # We have to add the dependencies to the monkey patched POM before the dependencies are
+        # changed in the compile, test and run after_define
+        after_define(:compile) do |project|
+            deps =
+                [project.compile.dependencies.select {|dep| dep.respond_to?(:to_spec) && dep.respond_to?(:to_hash)}.map { |a| a.to_hash.merge(:scope => 'compile') },
+                project.test.dependencies.select {|dep| dep.respond_to?(:to_spec) && dep.respond_to?(:to_hash) && !project.compile.dependencies.include?(dep)}.map { |a| a.to_hash.merge(:scope => 'test') },
+                project.run.classpath.select {|dep| dep.respond_to?(:to_spec) && dep.respond_to?(:to_hash) && !project.compile.dependencies.include?(dep)}.map { |a| a.to_hash.merge(:scope => 'runtime') }
+                ].flatten
+
+            project.packages.each {|pack| pack.pom.dependencies = deps}
         end
     end
 
