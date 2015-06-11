@@ -71,4 +71,14 @@
 		</tns:ExampleMessage>
 	</messageTypeVar>
 
+	<elementVar name="ODE991var"  xmlns:tns="http://foobar" >
+					<tns:ApplicationData>
+						<tns:empty/>
+						<tns:notempty/>
+						<tns:empty/>
+						<tns:notempty/>
+						<tns:empty/>
+						<tns:notempty/>
+                    </tns:ApplicationData>
+	</elementVar>
 </variables>

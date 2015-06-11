@@ -18,11 +18,11 @@
  */
 package org.apache.ode.bpel.elang.xpath20.runtime;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.net.URI;
@@ -44,6 +44,7 @@ import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OProcess.OProperty;
 import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.Namespaces;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -230,6 +231,14 @@ public class XPath20ExpressionRuntimeTest implements EvaluationContext {
         	fail("Missing '"+insertElementName+"' element has not been inserted");
         }
     }
+    
+    public void testODE911() throws Exception {
+        OXPath20ExpressionBPEL20 exp = compile("ode:delete($ODE991var/tns:empty)");
+        Element retVal = (Element)_runtime.evaluateNode(exp, this);
+        assertNotNull(retVal);
+        assertEquals(3, retVal.getElementsByTagNameNS("http://foobar", "notempty").getLength());
+        assertEquals(0, retVal.getElementsByTagNameNS("http://foobar", "empty").getLength());
+    }
 
     public Node readVariable(Variable variable, Part part) throws FaultException {
         return _vars.get(variable.name);
@@ -274,6 +283,8 @@ public class XPath20ExpressionRuntimeTest implements EvaluationContext {
         doc.appendChild(e);
         e.appendChild(doc.createTextNode(xpath));
         Expression exp = new Expression(e);
+        exp.getNamespaceContext().register("tns", "http://foobar");
+        exp.getNamespaceContext().register("ode", Namespaces.ODE_EXTENSION_NS);
         return (OXPath20ExpressionBPEL20)_compiler.compileLValue(exp);
     }
 
