@@ -33,4 +33,4 @@ BUILDR_COMMAND="su $CONTAINER_USERNAME -c '/opt/jruby/bin/jruby -S buildr $BUILD
 
 FINAL_COMMAND="$CREATE_USER_COMMAND && $BUNDLER_COMMAND && $BUILDR_COMMAND"
 
-docker run --rm -e JAVADOC=no -e JAVA_OPTS -v `pwd`:/workspace -v $HOME/.m2:/home/dummy/.m2  -v /tmp:/tmp --entrypoint bash vanto/apache-buildr:latest-jruby-jdk7 -c "$FINAL_COMMAND"
+docker run --rm -e JAVADOC=no -e JAVA_OPTS -v `pwd`:/workspace -v $HOME/.m2:/home/dummy/.m2 -v $HOME/.buildr:/home/dummy/.buildr -v /tmp:/tmp --entrypoint bash vanto/apache-buildr:latest-jruby-jdk7 -c "$FINAL_COMMAND"
