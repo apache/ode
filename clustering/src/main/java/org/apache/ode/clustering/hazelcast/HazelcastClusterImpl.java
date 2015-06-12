@@ -36,12 +36,9 @@ public class HazelcastClusterImpl implements HazelcastCluster{
 
     private HazelcastInstance _hazelcastInstance;
     private boolean isMaster = false;
-    private String _duName = "";
     private Member leader;
-    private Member deployInitiator;
 
     private IMap<String, String> lock_map;
-    private ITopic<String> clusterMessageTopic;
 
     public HazelcastClusterImpl(HazelcastInstance hazelcastInstance) {
         _hazelcastInstance = hazelcastInstance;
@@ -51,10 +48,6 @@ public class HazelcastClusterImpl implements HazelcastCluster{
     public void init() {
         // Registering this node in the cluster.
         _hazelcastInstance.getCluster().addMembershipListener(new ClusterMemberShipListener());
-
-        // Register for listening to message listener
-        clusterMessageTopic = _hazelcastInstance.getTopic("deployedMsg");
-        clusterMessageTopic.addMessageListener(new ClusterMessageListener());
 
         Member localMember = _hazelcastInstance.getCluster().getLocalMember();
         String localMemberID = getHazelCastNodeID(localMember);
@@ -113,22 +106,6 @@ public class HazelcastClusterImpl implements HazelcastCluster{
         }
     }
 
-    class ClusterMessageListener implements MessageListener<String> {
-        @Override
-        public void onMessage(Message<String> msg) {
-            String message = msg.getMessageObject();
-            String arr[] = message.split(" ", 2);
-            String duName = arr[1];
-            if(message.contains("Deployed ")) {
-                if(_hazelcastInstance.getCluster().getLocalMember() != deployInitiator) {
-                    setDUName(duName);
-                    __log.info("Recerive deployment msg to " +_hazelcastInstance.getCluster().getLocalMember() +"for" +duName);
-                }
-            }
-        }
-    }
-
-
     public void markAsMaster() {
         leader = _hazelcastInstance.getCluster().getMembers().iterator().next();
         if (leader.localMember()) {
@@ -149,14 +126,7 @@ public class HazelcastClusterImpl implements HazelcastCluster{
         return isMaster;
     }
 
-    public void setDUName(String duName) {
-        _duName = duName;
+    public HazelcastInstance getHazelcastInstance() {
+        return _hazelcastInstance;
     }
-
-    public String publishProcessStoreEvent(String msg) {
-        deployInitiator = _hazelcastInstance.getCluster().getLocalMember();
-        clusterMessageTopic.publish(msg);
-        return _duName;
-    }
-
 }

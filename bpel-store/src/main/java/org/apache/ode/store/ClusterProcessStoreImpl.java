@@ -31,14 +31,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Collection;
 
+import com.hazelcast.core.*;
+
 public class ClusterProcessStoreImpl extends ProcessStoreImpl{
     private static final Log __log = LogFactory.getLog(ClusterProcessStoreImpl.class);
 
-    private HazelcastClusterImpl _hazelcastClusterImpl;
+    private HazelcastInstance _hazelcastInstance;
+    private Member deployInitiator;
+    private ITopic<String> clusterMessageTopic;
 
     public ClusterProcessStoreImpl(EndpointReferenceContext eprContext, DataSource ds, String persistenceType, OdeConfigProperties props, boolean createDatamodel, HazelcastClusterImpl hazelcastClusterImpl) {
-        super();
-        _hazelcastClusterImpl = hazelcastClusterImpl;
+        super(eprContext,ds,persistenceType,props,createDatamodel);
+        _hazelcastInstance = hazelcastClusterImpl.getHazelcastInstance();
+
+        // Register for listening to message listener
+        clusterMessageTopic = _hazelcastInstance.getTopic("deployedMsg");
+        clusterMessageTopic.addMessageListener(new ClusterMessageListener());
     }
 
     public Collection<QName> deploy(final File deploymentUnitDirectory) {
@@ -48,8 +56,8 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl{
     }
 
     public void publishProcessStoreDeployedEvent(String duName){
-       String returnedDuName = _hazelcastClusterImpl.publishProcessStoreEvent("Deployed " +duName);
-       publishService(returnedDuName);
+        deployInitiator = _hazelcastInstance.getCluster().getLocalMember();
+        clusterMessageTopic.publish("Deployed " +duName);
     }
 
     public void publishService(final String duName) {
@@ -76,5 +84,21 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl{
             }
         }
     }
+
+    class ClusterMessageListener implements MessageListener<String> {
+        @Override
+        public void onMessage(Message<String> msg) {
+            String message = msg.getMessageObject();
+            String arr[] = message.split(" ", 2);
+            String duName = arr[1];
+            if(message.contains("Deployed ")) {
+                if(_hazelcastInstance.getCluster().getLocalMember() != deployInitiator) {
+                    __log.info("Receive deployment msg to " +_hazelcastInstance.getCluster().getLocalMember() +" for " +duName);
+                    publishService(duName);
+                }
+            }
+        }
+    }
+
 
 }
