@@ -899,4 +899,8 @@ public class ProcessStoreImpl implements ProcessStore {
             }
         }
     }
+
+    protected Map<QName, ProcessConfImpl> getProcessesMap() {
+        return _processes;
+    }
 }
