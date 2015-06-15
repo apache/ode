@@ -20,18 +20,19 @@ package org.apache.ode.clustering.hazelcast;
 
 import com.hazelcast.core.*;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.apache.ode.bpel.hzapi.HazelcastCluster;
+import org.apache.ode.bpel.clapi.ClusterManager;
 
 /**
  * This class implements necessary methods to build the cluster using hazelcast
  */
-public class HazelcastClusterImpl implements HazelcastCluster{
+public class HazelcastClusterImpl implements ClusterManager{
     private static final Log __log = LogFactory.getLog(HazelcastClusterImpl.class);
 
     private HazelcastInstance _hazelcastInstance;
@@ -40,28 +41,26 @@ public class HazelcastClusterImpl implements HazelcastCluster{
 
     private IMap<String, String> lock_map;
 
-    public HazelcastClusterImpl(HazelcastInstance hazelcastInstance) {
-        _hazelcastInstance = hazelcastInstance;
-        init();
-    }
+    public void init(File configRoot) {
+        //First,looks for the hazelcast.config system property. If it is set, its value is used as the path.
+        //Else it will load the hazelcast.xml file using FileSystemXmlConfig()
+        String hzConfig = System.getProperty("hazelcast.config");
+        if (hzConfig != null) _hazelcastInstance = Hazelcast.newHazelcastInstance();
+        else {
+            File hzXml = new File(configRoot, "hazelcast.xml");
+            if (!hzXml.isFile())
+                __log.error("hazelcast.xml does not exist or is not a file");
+            else _hazelcastInstance = Hazelcast.newHazelcastInstance(new FileSystemXmlConfig(hzXml));
+        }
 
-    public void init() {
-        // Registering this node in the cluster.
-        _hazelcastInstance.getCluster().addMembershipListener(new ClusterMemberShipListener());
-
-        Member localMember = _hazelcastInstance.getCluster().getLocalMember();
-        String localMemberID = getHazelCastNodeID(localMember);
-        __log.info("Registering HZ localMember ID " + localMemberID);
-        _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_NODE_MAP)
-                .put(localMemberID, isMaster);
-
-        lock_map = _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_LOCK_MAP);
-    }
-
-    public String getHazelCastNodeID(Member member) {
-        String hostName = member.getSocketAddress().getHostName();
-        int port = member.getSocketAddress().getPort();
-        return hostName + ":" + port;
+        if (_hazelcastInstance != null) {
+            // Registering this node in the cluster.
+            _hazelcastInstance.getCluster().addMembershipListener(new ClusterMemberShipListener());
+            Member localMember = _hazelcastInstance.getCluster().getLocalMember();
+            __log.info("Registering HZ localMember ID " + localMember);
+            markAsMaster();
+            lock_map = _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_LOCK_MAP);
+        }
     }
 
     public boolean lock(String key) {
@@ -83,7 +82,6 @@ public class HazelcastClusterImpl implements HazelcastCluster{
     }
 
     class ClusterMemberShipListener implements MembershipListener {
-
         @Override
         public void memberAdded(MembershipEvent membershipEvent) {
             // Noting to do here.
@@ -95,8 +93,6 @@ public class HazelcastClusterImpl implements HazelcastCluster{
             // Allow Leader to update distributed map.
             if (isMaster) {
                 String leftMemberID = getHazelCastNodeID(membershipEvent.getMember());
-               // _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_NODE_MAP).remove(leftMemberID);
-               // _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_NODE_MAP).replace(getHazelCastNodeID(leader), isMaster);
             }
         }
 
@@ -112,14 +108,6 @@ public class HazelcastClusterImpl implements HazelcastCluster{
             isMaster = true;
         }
         __log.info(isMaster);
-    }
-
-    public List<String> getKnownNodes() {
-        List<String> nodeList = new ArrayList<String>();
-        for (Object s : _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_NODE_MAP).keySet()) {
-            nodeList.add((String) _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_NODE_MAP).get(s));
-        }
-        return nodeList;
     }
 
     public boolean getIsMaster() {

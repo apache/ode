@@ -106,7 +106,11 @@ public class OdeConfigProperties {
 
     public static final String DEFAULT_TX_FACTORY_CLASS_NAME = "org.apache.ode.il.EmbeddedGeronimoFactory";
 
-    public static final String PROP_HAZELCAST_CLUSTERING = "hazelcast.clustering.enabled";
+    public static final String PROP_CLUSTERING_ENABLED = "clustering.enabled";
+
+    public static final String PROP_CLUSTERING_IMPL_CLASS = "clustering.impl.class";
+
+    public static final String DEFAULT_CLUSTERING_IMPL_CLASS_NAME = "org.apache.ode.clustering.hazelcast.HazelcastClusterImpl";
 
     private File _cfgFile;
 
@@ -292,7 +296,11 @@ public class OdeConfigProperties {
     }
 
     public String getClusteringState() {
-        return getProperty(OdeConfigProperties.PROP_HAZELCAST_CLUSTERING);
+        return getProperty(OdeConfigProperties.PROP_CLUSTERING_ENABLED);
+    }
+
+    public String getClusteringImplClass() {
+        return getProperty(OdeConfigProperties.PROP_CLUSTERING_IMPL_CLASS, DEFAULT_CLUSTERING_IMPL_CLASS_NAME);
     }
 
     public String getTxFactoryClass() {

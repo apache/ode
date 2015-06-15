@@ -35,6 +35,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.clapi.ClusterManager;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.dao.DeferredProcessInstanceCleanable;
@@ -59,7 +60,6 @@ import org.apache.ode.bpel.iapi.Scheduler.MapSerializableRunnable;
 import org.apache.ode.bpel.iapi.Scheduler.Synchronizer;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.clustering.hazelcast.HazelcastClusterImpl;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
@@ -535,8 +535,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         _contexts.bindingContext = bc;
     }
 
-    public void setHazelcastCluster(HazelcastClusterImpl hzCImpl) {
-        _contexts.hazelcastClusterImpl = hzCImpl;
+    public void setClusterManagerImpl(ClusterManager cm) {
+        _contexts.clusterManager = cm;
     }
 
     public DebuggerContext getDebugger(QName pid) throws BpelEngineException {

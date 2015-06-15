@@ -16,25 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.hzapi;
+package org.apache.ode.bpel.clapi;
 
-import com.hazelcast.core.Member;
-
+import java.io.File;
 import java.util.List;
 
-public interface HazelcastCluster {
+public interface ClusterManager {
 
     /**
      * Initialization of the cluster
+     * @param file
      */
-    void init();
-
-    /**
-     * Get hostName + port nu of Member
-     * @param member
-     * @return
-     */
-    String getHazelCastNodeID(Member member);
+    void init(File file);
 
     /**
      * Check whether current node is the leader or not.
@@ -42,15 +35,25 @@ public interface HazelcastCluster {
      void markAsMaster();
 
     /**
-     * returns Current Nodes in the cluster.
-     * @return
-     */
-    List<String> getKnownNodes();
-
-    /**
      * Return isMaster
      * @return
      */
     boolean getIsMaster();
+
+    /**
+     * Acquire the lock for each file in the file system
+     * @param key
+     * @return
+     */
+    boolean lock(String key);
+
+    /**
+     * Release the lock acquired by each file
+     * @param key
+     * @return
+     */
+    boolean unlock(String key);
+
+
 
 }

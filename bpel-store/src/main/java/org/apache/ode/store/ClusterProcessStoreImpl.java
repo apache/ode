@@ -30,6 +30,8 @@ import javax.sql.DataSource;
 import javax.xml.namespace.QName;
 import java.io.File;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.hazelcast.core.*;
 
@@ -66,15 +68,16 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl{
         clusterMessageTopic.publish("Deployed " +duName);
     }
 
-    //have to write code for retire previous versions
     public void publishService(final String duName) {
-        final ArrayList<ProcessConfImpl> confs = new ArrayList<ProcessConfImpl>();
-        String namePart = duName.split("-")[0];
+        final ArrayList<ProcessConfImpl> confs = new ArrayList<ProcessConfImpl>();;
         ProcessState state = ProcessState.ACTIVE;
+
+        Pattern duNamePattern = getPreviousPackageVersionPattern(duName);
 
         for (Iterator<ProcessConfImpl> iterator = loaded.iterator(); iterator.hasNext();) {
             ProcessConfImpl pconf = iterator.next();
-            if (pconf.getPackage().contains(namePart) && pconf.getState().equals(state)) {
+            Matcher matcher = duNamePattern.matcher(pconf.getPackage());
+            if (matcher.matches() && pconf.getState().equals(state)) {
                   pconf.setState(ProcessState.RETIRED);
                   confs.add(pconf);
             }
@@ -121,5 +124,19 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl{
                 else deployInitiator = null;
             }
         }
+    }
+
+    private Pattern getPreviousPackageVersionPattern(String duName) {
+        String[] nameParts = duName.split("/");
+        /* Replace the version number (if any) with regexp to match any version number */
+        nameParts[0] = nameParts[0].replaceAll("([-\\Q.\\E](\\d)+)?\\z", "");
+        nameParts[0] += "([-\\Q.\\E](\\d)+)?";
+        StringBuilder duNameRegExp = new StringBuilder(duName.length() * 2);
+        for (int i = 0, n = nameParts.length; i < n; i++) {
+            if (i > 0) duNameRegExp.append("/");
+            duNameRegExp.append(nameParts[i]);
+        }
+        Pattern duNamePattern = Pattern.compile(duNameRegExp.toString());
+        return duNamePattern;
     }
 }

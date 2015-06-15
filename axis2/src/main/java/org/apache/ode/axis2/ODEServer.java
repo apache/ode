@@ -48,7 +48,6 @@ import javax.transaction.xa.XAResource;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.util.IdleConnectionTimeoutThread;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
@@ -83,8 +82,7 @@ import org.apache.ode.store.ClusterProcessStoreImpl;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.fs.TempFileManager;
 
-import org.apache.ode.clustering.hazelcast.*;
-import com.hazelcast.core.*;
+import org.apache.ode.bpel.clapi.ClusterManager;
 
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle management.
@@ -137,9 +135,7 @@ public class ODEServer {
     
     public Runnable txMgrCreatedCallback;
 
-    private HazelcastInstanceConfig hazelcastInstanceConfig;
-
-    private HazelcastClusterImpl hazelcastClusterImpl;
+    private ClusterManager _clusterManager;
 
     private String clusteringState = "";
 
@@ -484,7 +480,7 @@ public class ODEServer {
         isClusteringEnabled = state;
     }
 
-    public boolean getClusteringState() {
+    public boolean getIsCluteringEnabled() {
         return isClusteringEnabled;
     }
 
@@ -492,17 +488,14 @@ public class ODEServer {
      * Initialize the clustering if it is enabled
      */
     private void initClustering() {
-        String hzConfig = System.getProperty("hazelcast.config");
-        if (hzConfig != null) hazelcastInstanceConfig = new HazelcastInstanceConfig();
-        else {
-            File hzXml = new File(_configRoot, "hazelcast.xml");
-            if (!hzXml.isFile())
-                __log.error("hazelcast.xml does not exist or is not a file");
-            else hazelcastInstanceConfig = new HazelcastInstanceConfig(hzXml);
+        String clusterImplName = _odeConfig.getClusteringImplClass();
+        try {
+            Class<?> clustering_class = this.getClass().getClassLoader().loadClass(clusterImplName);
+            _clusterManager = (ClusterManager) clustering_class.newInstance();
+        } catch (Exception ex) {
+            __log.error(ex);
         }
-        if (hazelcastInstanceConfig != null) {
-            hazelcastClusterImpl = new HazelcastClusterImpl(hazelcastInstanceConfig.getHazelcastInstance());
-        }
+        _clusterManager.init(_configRoot);
     }
 
     /**
@@ -534,7 +527,7 @@ public class ODEServer {
 
     protected ProcessStoreImpl createProcessStore(EndpointReferenceContext eprContext, DataSource ds) {
         if (isClusteringEnabled)
-            return new ClusterProcessStoreImpl(eprContext, ds, _odeConfig.getDAOConnectionFactory(), _odeConfig, false, hazelcastClusterImpl);
+            return new ClusterProcessStoreImpl(eprContext, ds, _odeConfig.getDAOConnectionFactory(), _odeConfig, false, _clusterManager);
         else return new ProcessStoreImpl(eprContext, ds, _odeConfig.getDAOConnectionFactory(), _odeConfig, false);
     }
 
@@ -585,7 +578,7 @@ public class ODEServer {
         _bpelServer.setCronScheduler(_cronScheduler);
 
         _bpelServer.setDaoConnectionFactory(_daoCF);
-        _bpelServer.setHazelcastCluster(hazelcastClusterImpl);
+        _bpelServer.setClusterManagerImpl(_clusterManager);
         _bpelServer.setInMemDaoConnectionFactory(new BpelDAOConnectionFactoryImpl(_scheduler, _odeConfig.getInMemMexTtl()));
         _bpelServer.setEndpointReferenceContext(eprContext);
         _bpelServer.setMessageExchangeContext(new MessageExchangeContextImpl(this));
