@@ -54,7 +54,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import  org.apache.ode.clustering.hazelcast.HazelcastClusterImpl;
+import org.apache.ode.bpel.clapi.ClusterManager;
 
 /**
  * Polls a directory for the deployment of a new deployment unit.
@@ -100,7 +100,7 @@ public class DeploymentPoller {
     public DeploymentPoller(File deployDir, final ODEServer odeServer) {
         _odeServer = odeServer;
         _deployDir = deployDir;
-        clusterEnabled = _odeServer.getClusteringState();
+        clusterEnabled = _odeServer.getIsCluteringEnabled();
         if (!_deployDir.exists()) {
             boolean isDeployDirCreated = _deployDir.mkdir();
             if (!isDeployDirCreated) {
@@ -140,10 +140,13 @@ public class DeploymentPoller {
         // Checking for new deployment directories
         if (isDeploymentFromODEFileSystemAllowed() && files != null) {
             for (File file : files) {
-                __log.info("Trying to access the lock for " +file.getName());
-                duLocked = lock(file.getName());
-                try {
-                    if (duLocked) {
+                String test = file.getName();
+                __log.info("Trying to access the lock for " + test);
+                __log.info("Test null key value " +test);
+                duLocked = pollerTryLock(test);
+
+                if (duLocked) {
+                    try {
                         File deployXml = new File(file, "deploy.xml");
                         File deployedMarker = new File(_deployDir, file.getName() + ".deployed");
 
@@ -185,10 +188,10 @@ public class DeploymentPoller {
                         } catch (Exception e) {
                             __log.error("Deployment of " + file.getName() + " failed, aborting for now.", e);
                         }
+                    } finally {
+                        __log.info("Trying to release the lock for " + file.getName());
+                        unlock(file.getName());
                     }
-                } finally {
-                    __log.info("Trying to release the lock for " + file.getName());
-                    unlock(file.getName());
                 }
             }
         }
@@ -341,16 +344,16 @@ public class DeploymentPoller {
     }
 
     //Implementation of IMap key Lock
-    public boolean lock(String key) {
+    private boolean pollerTryLock(String key) {
         if(clusterEnabled) {
-            return _odeServer.getBpelServer().getContexts().hazelcastClusterImpl.lock(key);
+            return _odeServer.getBpelServer().getContexts().clusterManager.tryLock(key);
         }
         else return true;
     }
 
-    public boolean unlock(String key) {
+    private boolean unlock(String key) {
         if(clusterEnabled) {
-            return _odeServer.getBpelServer().getContexts().hazelcastClusterImpl.unlock(key);
+            return _odeServer.getBpelServer().getContexts().clusterManager.unlock(key);
         }
         else return true;
     }

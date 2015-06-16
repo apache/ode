@@ -54,6 +54,28 @@ public interface ClusterManager {
      */
     boolean unlock(String key);
 
+    /**
+     * Tries to acquire the lock for the specified key.
+     * @param key
+     * @return
+     */
+    boolean tryLock(String key);
 
+    /**
+     * Set the Process Store object which uses for clustering
+     * @param ps
+     */
+    void setClusterProcessStore(Object ps);
 
+    /**
+     * Publish Deploy event to the cluster by deploy initiator
+     * @param event
+     */
+    void publishProcessStoreEvent(Object event);
+
+    /**
+     * Handle event according to received event
+     * @param message
+     */
+    void handleEvent(Object message);
 }

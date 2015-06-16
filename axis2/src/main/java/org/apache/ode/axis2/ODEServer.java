@@ -234,7 +234,7 @@ public class ODEServer {
 
         try {
             __log.debug("Initializing Deployment Web Service");
-            new DeploymentWebService().enableService(_configContext.getAxisConfiguration(), _store, _poller, _appRoot.getAbsolutePath(), _workRoot.getAbsolutePath());
+            new DeploymentWebService().enableService(_configContext.getAxisConfiguration(), _store, _poller, _appRoot.getAbsolutePath(), _workRoot.getAbsolutePath(),this);
         } catch (Exception e) {
             throw new ServletException(e);
         }
@@ -490,8 +490,8 @@ public class ODEServer {
     private void initClustering() {
         String clusterImplName = _odeConfig.getClusteringImplClass();
         try {
-            Class<?> clustering_class = this.getClass().getClassLoader().loadClass(clusterImplName);
-            _clusterManager = (ClusterManager) clustering_class.newInstance();
+            Class<?> clusterImplClass = this.getClass().getClassLoader().loadClass(clusterImplName);
+            _clusterManager = (ClusterManager) clusterImplClass.newInstance();
         } catch (Exception ex) {
             __log.error(ex);
         }

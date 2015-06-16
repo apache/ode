@@ -20,9 +20,9 @@ package org.apache.ode.store;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.clapi.ClusterManager;
+import org.apache.ode.bpel.clapi.ProcessStoreDeployedEvent;
 import org.apache.ode.bpel.iapi.ProcessState;
-import org.apache.ode.clustering.hazelcast.HazelcastClusterImpl;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.il.config.OdeConfigProperties;
 
@@ -33,24 +33,17 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.hazelcast.core.*;
-
 public class ClusterProcessStoreImpl extends ProcessStoreImpl{
     private static final Log __log = LogFactory.getLog(ClusterProcessStoreImpl.class);
 
-    private HazelcastInstance _hazelcastInstance;
-    private Member deployInitiator;
-    private ITopic<String> clusterMessageTopic;
     private final ArrayList<ProcessConfImpl> loaded = new ArrayList<ProcessConfImpl>();
+    private ClusterManager _clusterManager;
+    private  ProcessStoreDeployedEvent deployedEvent;
 
-
-    public ClusterProcessStoreImpl(EndpointReferenceContext eprContext, DataSource ds, String persistenceType, OdeConfigProperties props, boolean createDatamodel, HazelcastClusterImpl hazelcastClusterImpl) {
+    public ClusterProcessStoreImpl(EndpointReferenceContext eprContext, DataSource ds, String persistenceType, OdeConfigProperties props, boolean createDatamodel, ClusterManager clusterManager) {
         super(eprContext,ds,persistenceType,props,createDatamodel);
-        _hazelcastInstance = hazelcastClusterImpl.getHazelcastInstance();
-
-        // Register for listening to message listener
-        clusterMessageTopic = _hazelcastInstance.getTopic("deployedMsg");
-        clusterMessageTopic.addMessageListener(new ClusterMessageListener());
+        _clusterManager = clusterManager;
+        _clusterManager.setClusterProcessStore(this);
     }
 
     public Collection<QName> deploy(final File deploymentUnitDirectory) {
@@ -63,9 +56,9 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl{
         return deployed;
     }
 
-    public void publishProcessStoreDeployedEvent(String duName){
-        deployInitiator = _hazelcastInstance.getCluster().getLocalMember();
-        clusterMessageTopic.publish("Deployed " +duName);
+    private void publishProcessStoreDeployedEvent(String duName){
+        deployedEvent = new ProcessStoreDeployedEvent(duName);
+        _clusterManager.publishProcessStoreEvent(deployedEvent);
     }
 
     public void publishService(final String duName) {
@@ -108,22 +101,6 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl{
             }
         }
         //loadAll();
-    }
-
-    class ClusterMessageListener implements MessageListener<String> {
-        @Override
-        public void onMessage(Message<String> msg) {
-            String message = msg.getMessageObject();
-            String arr[] = message.split(" ", 2);
-            String duName = arr[1];
-            if(message.contains("Deployed ")) {
-                if(_hazelcastInstance.getCluster().getLocalMember() != deployInitiator) {
-                    __log.info("Receive deployment msg to " +_hazelcastInstance.getCluster().getLocalMember() +" for " +duName);
-                    publishService(duName);
-                }
-                else deployInitiator = null;
-            }
-        }
     }
 
     private Pattern getPreviousPackageVersionPattern(String duName) {

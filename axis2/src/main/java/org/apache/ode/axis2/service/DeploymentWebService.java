@@ -55,6 +55,7 @@ import org.apache.axis2.util.Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.lang.StringUtils;
+import org.apache.ode.axis2.ODEServer;
 import org.apache.ode.axis2.OdeFault;
 import org.apache.ode.axis2.deploy.DeploymentPoller;
 import org.apache.ode.axis2.hooks.ODEAxisService;
@@ -76,9 +77,11 @@ public class DeploymentWebService {
     private final OMNamespace _deployapi;
 
     private File _deployPath;
+    private  ODEServer _odeServer;
     private DeploymentPoller _poller;
     private ProcessStore _store;
 
+    private boolean clusterEnabled;
 
     public DeploymentWebService() {
         _pmapi = OMAbstractFactory.getOMFactory().createOMNamespace("http://www.apache.org/ode/pmapi","pmapi");
@@ -86,10 +89,12 @@ public class DeploymentWebService {
     }
 
     public void enableService(AxisConfiguration axisConfig, ProcessStore store,
-                              DeploymentPoller poller, String rootpath, String workPath) throws AxisFault, WSDLException {
+                              DeploymentPoller poller, String rootpath, String workPath, ODEServer odeServer) throws AxisFault, WSDLException {
         _deployPath = new File(workPath, "processes");
         _store = store;
         _poller = poller;
+        _odeServer = odeServer;
+        clusterEnabled = _odeServer.getIsCluteringEnabled();
 
         Definition def;
         WSDLReader wsdlReader = WSDLFactory.newInstance().newWSDLReader();
@@ -170,7 +175,7 @@ public class DeploymentWebService {
                         __log.info("Trying to access the lock for " + dest.getName());
 
                         //lock on deployment unit directory name
-                        duLocked = _poller.lock(dest.getName());
+                        duLocked = lock(dest.getName());
 
                         if (duLocked) {
                             boolean createDir = dest.mkdir();
@@ -214,7 +219,7 @@ public class DeploymentWebService {
                                 sendResponse(factory, messageContext, "deployResponse", response);
                             } finally {
                                 __log.info("Trying to release the lock for " + dest.getName());
-                                _poller.unlock(dest.getName());
+                                unlock(dest.getName());
                             }
                         }
                     } finally {
@@ -366,6 +371,18 @@ public class DeploymentWebService {
         out.close();
     }
 
+    //Implementation of IMap key Lock
+    private boolean lock(String key) {
+        if(clusterEnabled) {
+            return _odeServer.getBpelServer().getContexts().clusterManager.lock(key);
+        }
+        else return true;
+    }
 
-
+    private boolean unlock(String key) {
+        if(clusterEnabled) {
+            return _odeServer.getBpelServer().getContexts().clusterManager.unlock(key);
+        }
+        else return true;
+    }
 }

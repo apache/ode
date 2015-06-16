@@ -86,7 +86,7 @@ define "ode" do
       "scheduler-simple", "bpel-schemas", "bpel-store", "utils", "agents", "clustering"),
       AXIOM, AXIS2_ALL, COMMONS.lang, COMMONS.collections, COMMONS.httpclient, COMMONS.lang,
       DERBY, GERONIMO.kernel, GERONIMO.transaction, JAVAX.activation, JAVAX.servlet, JAVAX.stream,
-      JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS, XMLBEANS, AXIS2_MODULES.libs, SLF4J, LOG4J, HAZELCAST
+      JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS, XMLBEANS, AXIS2_MODULES.libs, SLF4J, LOG4J
 
     test.exclude 'org.apache.ode.axis2.management.*'
     test.with project("tools"), AXIOM, JAVAX.javamail, COMMONS.codec, COMMONS.httpclient, XERCES, WOODSTOX
@@ -166,7 +166,7 @@ define "ode" do
 
   desc "ODE APIs"
   define "bpel-api" do
-    compile.with projects("utils", "bpel-obj", "bpel-schemas"), WSDL4J, XERCES, SLF4J, LOG4J, HAZELCAST
+    compile.with projects("utils", "bpel-obj", "bpel-schemas"), WSDL4J, XERCES, SLF4J, LOG4J
     package :jar
   end
 
@@ -208,7 +208,7 @@ define "ode" do
 
   desc "ODE Clustering"
    define "clustering" do
-     compile.with projects("bpel-api"),HAZELCAST, COMMONS.logging
+     compile.with projects("bpel-api","bpel-store"),HAZELCAST, COMMONS.logging
      package :jar
    end
 
@@ -270,8 +270,8 @@ define "ode" do
   desc "ODE Process Store"
   define "bpel-store" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-obj", "bpel-schemas", "bpel-epr",
-      "dao-hibernate", "dao-jpa", "clustering", "utils"),
-      JAVAX.persistence, JAVAX.stream, JAVAX.transaction, HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J, OPENJPA, SPRING, SLF4J, LOG4J,HAZELCAST
+      "dao-hibernate", "dao-jpa", "utils"),
+      JAVAX.persistence, JAVAX.stream, JAVAX.transaction, HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J, OPENJPA, SPRING, SLF4J, LOG4J
     compile { open_jpa_enhance }
     resources hibernate_doclet(:package=>"org.apache.ode.store.hib", :excludedtags=>"@version,@author,@todo")
 
