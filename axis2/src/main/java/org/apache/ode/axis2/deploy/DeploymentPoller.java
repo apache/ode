@@ -41,6 +41,7 @@ package org.apache.ode.axis2.deploy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.ODEServer;
+import org.apache.ode.bpel.clapi.ClusterManager;
 import org.apache.ode.bpel.engine.cron.CronScheduler;
 import org.apache.ode.bpel.engine.cron.SystemSchedulesConfig;
 import org.apache.ode.utils.WatchDog;
@@ -53,8 +54,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.ode.bpel.clapi.ClusterManager;
 
 /**
  * Polls a directory for the deployment of a new deployment unit.
@@ -140,10 +139,9 @@ public class DeploymentPoller {
         // Checking for new deployment directories
         if (isDeploymentFromODEFileSystemAllowed() && files != null) {
             for (File file : files) {
-                String test = file.getName();
-                __log.info("Trying to access the lock for " + test);
-                __log.info("Test null key value " +test);
-                duLocked = pollerTryLock(test);
+                String duName = file.getName();
+                __log.info("Trying to acquire the lock for " + duName);
+                duLocked = pollerTryLock(duName);
 
                 if (duLocked) {
                     try {
@@ -343,7 +341,9 @@ public class DeploymentPoller {
         }
     }
 
-    //Implementation of IMap key Lock
+    /**
+     * Use to acquire the lock by poller
+     */
     private boolean pollerTryLock(String key) {
         if(clusterEnabled) {
             return _odeServer.getBpelServer().getContexts().clusterManager.tryLock(key);

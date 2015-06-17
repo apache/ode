@@ -58,6 +58,10 @@ public class Messages extends MessageBundle {
         return format("Starting ODE ServiceEngine.");
     }
 
+    public String msgOdeClusteringNotInitialized() {
+        return format("Clustering has not been initialized.");
+    }
+
     public String msgOdeStarted() {
         return format("ODE Service Engine has been started.");
     }

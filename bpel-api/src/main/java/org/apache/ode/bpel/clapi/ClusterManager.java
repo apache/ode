@@ -30,12 +30,7 @@ public interface ClusterManager {
     void init(File file);
 
     /**
-     * Check whether current node is the leader or not.
-     */
-     void markAsMaster();
-
-    /**
-     * Return isMaster
+     * Return whether the local member is Master or not
      * @return
      */
     boolean getIsMaster();
@@ -72,10 +67,4 @@ public interface ClusterManager {
      * @param event
      */
     void publishProcessStoreEvent(Object event);
-
-    /**
-     * Handle event according to received event
-     * @param message
-     */
-    void handleEvent(Object message);
 }

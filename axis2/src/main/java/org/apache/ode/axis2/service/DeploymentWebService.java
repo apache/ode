@@ -172,7 +172,7 @@ public class DeploymentWebService {
                         _poller.hold();
 
                         File dest = new File(_deployPath, bundleName + "-" + _store.getCurrentVersion());
-                        __log.info("Trying to access the lock for " + dest.getName());
+                        __log.info("Trying to acquire the lock for deploying: " + dest.getName());
 
                         //lock on deployment unit directory name
                         duLocked = lock(dest.getName());
@@ -218,7 +218,7 @@ public class DeploymentWebService {
                                 }
                                 sendResponse(factory, messageContext, "deployResponse", response);
                             } finally {
-                                __log.info("Trying to release the lock for " + dest.getName());
+                                __log.info("Trying to release the lock for deploying: " + dest.getName());
                                 unlock(dest.getName());
                             }
                         }
@@ -243,20 +243,30 @@ public class DeploymentWebService {
                         // Put the poller on hold to avoid undesired side effects
                         _poller.hold();
 
-                        Collection<QName> undeployed = _store.undeploy(deploymentDir);
+                        __log.info("Trying to acquire the lock for undeploying: " + deploymentDir.getName());
+                        duLocked = lock(deploymentDir.getName());
 
-                        File deployedMarker = new File(deploymentDir + ".deployed");
-                        boolean isDeleted = deployedMarker.delete();
+                        if (duLocked) {
+                            try {
+                                Collection<QName> undeployed = _store.undeploy(deploymentDir);
 
-                        if (!isDeleted)
-                            __log.error("Error while deleting file " + deployedMarker.getName());
+                                File deployedMarker = new File(deploymentDir + ".deployed");
+                                boolean isDeleted = deployedMarker.delete();
 
-                        FileUtils.deepDelete(deploymentDir);
+                                if (!isDeleted)
+                                    __log.error("Error while deleting file " + deployedMarker.getName());
 
-                        OMElement response = factory.createOMElement("response", null);
-                        response.setText("" + (undeployed.size() > 0));
-                        sendResponse(factory, messageContext, "undeployResponse", response);
-                        _poller.markAsUndeployed(deploymentDir);
+                                FileUtils.deepDelete(deploymentDir);
+
+                                OMElement response = factory.createOMElement("response", null);
+                                response.setText("" + (undeployed.size() > 0));
+                                sendResponse(factory, messageContext, "undeployResponse", response);
+                                _poller.markAsUndeployed(deploymentDir);
+                            } finally {
+                                __log.info("Trying to release the lock for undeploying: " + deploymentDir.getName());
+                                unlock(deploymentDir.getName());
+                            }
+                        }
                     } finally {
                         _poller.release();
                     }
@@ -371,7 +381,9 @@ public class DeploymentWebService {
         out.close();
     }
 
-    //Implementation of IMap key Lock
+    /**
+     * Acquire the lock when deploying using web service
+     */
     private boolean lock(String key) {
         if(clusterEnabled) {
             return _odeServer.getBpelServer().getContexts().clusterManager.lock(key);
@@ -379,6 +391,9 @@ public class DeploymentWebService {
         else return true;
     }
 
+    /**
+     * Release the lock after completing deploy process
+     */
     private boolean unlock(String key) {
         if(clusterEnabled) {
             return _odeServer.getBpelServer().getContexts().clusterManager.unlock(key);

@@ -29,9 +29,10 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.apache.ode.store.ClusterProcessStoreImpl;
 import org.apache.ode.bpel.clapi.ClusterManager;
 import org.apache.ode.bpel.clapi.ProcessStoreDeployedEvent;
+import org.apache.ode.bpel.clapi.ProcessStoreUndeployedEvent;
+import org.apache.ode.store.ClusterProcessStoreImpl;
 
 /**
  * This class implements necessary methods to build the cluster using hazelcast
@@ -42,14 +43,16 @@ public class HazelcastClusterImpl implements ClusterManager {
     private HazelcastInstance _hazelcastInstance;
     private boolean isMaster = false;
     private Member leader;
-    private Member deployInitiator;
+    private Member eventInitiator;
     private IMap<String, String> lock_map;
     private ITopic<Object> clusterMessageTopic;
     private ClusterProcessStoreImpl _clusterProcessStore;
 
     public void init(File configRoot) {
+
         /*First,looks for the hazelcast.config system property. If it is set, its value is used as the path.
         Else it will load the hazelcast.xml file using FileSystemXmlConfig()*/
+
         String hzConfig = System.getProperty("hazelcast.config");
         if (hzConfig != null) _hazelcastInstance = Hazelcast.newHazelcastInstance();
         else {
@@ -79,7 +82,7 @@ public class HazelcastClusterImpl implements ClusterManager {
     }
 
     public boolean lock(String key) {
-        lock_map.putIfAbsent(key,key);
+        lock_map.putIfAbsent(key, key);
         lock_map.lock(key);
         boolean state = lock_map.isLocked(key);
         __log.info("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after locking: " + state);
@@ -98,9 +101,9 @@ public class HazelcastClusterImpl implements ClusterManager {
     }
 
     public boolean tryLock(String key) {
-        lock_map.putIfAbsent(key,key);
+        lock_map.putIfAbsent(key, key);
         boolean state = lock_map.tryLock(key);
-        __log.info("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after locking: " + state );
+        __log.info("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after locking: " + state);
         return state;
     }
 
@@ -121,9 +124,9 @@ public class HazelcastClusterImpl implements ClusterManager {
         }
     }
 
-    public void publishProcessStoreEvent(Object deployedEvent) {
-        deployInitiator = _hazelcastInstance.getCluster().getLocalMember();
-        clusterMessageTopic.publish(deployedEvent);
+    public void publishProcessStoreEvent(Object event) {
+        eventInitiator = _hazelcastInstance.getCluster().getLocalMember();
+        clusterMessageTopic.publish(event);
     }
 
 
@@ -134,20 +137,30 @@ public class HazelcastClusterImpl implements ClusterManager {
         }
     }
 
-    public void handleEvent(Object message) {
+    private void handleEvent(Object message) {
         if (message instanceof ProcessStoreDeployedEvent) {
             ProcessStoreDeployedEvent event = (ProcessStoreDeployedEvent) message;
 
-            if (_hazelcastInstance.getCluster().getLocalMember() != deployInitiator) {
+            if (_hazelcastInstance.getCluster().getLocalMember() != eventInitiator) {
                 String duName = event.deploymentUnit;
                 __log.info("Receive deployment msg to " + _hazelcastInstance.getCluster().getLocalMember() + " for " + duName);
                 _clusterProcessStore.publishService(duName);
-            } else deployInitiator = null;
+            } else eventInitiator = null;
+        }
+
+        else if (message instanceof ProcessStoreUndeployedEvent) {
+            ProcessStoreUndeployedEvent event = (ProcessStoreUndeployedEvent) message;
+
+            if (_hazelcastInstance.getCluster().getLocalMember() != eventInitiator) {
+                String duName = event.deploymentUnit;
+                __log.info("Receive undeployment msg to " + _hazelcastInstance.getCluster().getLocalMember() + " for " + duName);
+                _clusterProcessStore.undeployProcesses(duName);
+            } else eventInitiator = null;
         }
 
     }
 
-    public void markAsMaster() {
+    private void markAsMaster() {
         leader = _hazelcastInstance.getCluster().getMembers().iterator().next();
         if (leader.localMember()) {
             isMaster = true;

@@ -57,6 +57,7 @@ import org.apache.ode.axis2.deploy.DeploymentPoller;
 import org.apache.ode.axis2.service.DeploymentWebService;
 import org.apache.ode.axis2.service.ManagementService;
 import org.apache.ode.axis2.util.ClusterUrlTransformer;
+import org.apache.ode.bpel.clapi.ClusterManager;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
@@ -81,8 +82,6 @@ import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.store.ClusterProcessStoreImpl;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.fs.TempFileManager;
-
-import org.apache.ode.bpel.clapi.ClusterManager;
 
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle management.
@@ -122,6 +121,8 @@ public class ODEServer {
 
     protected Database _db;
 
+    protected ClusterManager _clusterManager;
+
     private DeploymentPoller _poller;
 
     private BpelServerConnector _connector;
@@ -134,10 +135,6 @@ public class ODEServer {
     protected IdleConnectionTimeoutThread idleConnectionTimeoutThread;
     
     public Runnable txMgrCreatedCallback;
-
-    private ClusterManager _clusterManager;
-
-    private String clusteringState = "";
 
     private boolean isClusteringEnabled;
 
@@ -193,9 +190,10 @@ public class ODEServer {
             txMgrCreatedCallback.run();
         }
 
-        clusteringState = _odeConfig.getClusteringState();
-        if (isClusteringEnabled()) initClustering();
-        else __log.info("Clustering has not been initialized");
+        String clusteringState = _odeConfig.getClusteringState();
+        if (clusteringState != null && isClusteringEnabled(clusteringState)) {
+            initClustering();
+        } else __log.info(__msgs.msgOdeClusteringNotInitialized());
 
         __log.debug("Creating data source.");
         initDataSource();
@@ -384,6 +382,11 @@ public class ODEServer {
                 _txMgr = null;
             }
 
+            if (_clusterManager != null) {
+                __log.debug("shutting down cluster manager.");
+                _clusterManager = null;
+            }
+
             if (_connector != null) {
                 try {
                     __log.debug("shutdown BpelConnector");
@@ -468,7 +471,7 @@ public class ODEServer {
         }
     }
 
-    public boolean isClusteringEnabled() {
+    private boolean isClusteringEnabled(String clusteringState) {
         boolean state;
         if (clusteringState.equals("true")) state = true;
         else state = false;
@@ -476,7 +479,7 @@ public class ODEServer {
         return state;
     }
 
-    public void  setClustering (boolean state) {
+    private void  setClustering (boolean state) {
         isClusteringEnabled = state;
     }
 
@@ -493,7 +496,7 @@ public class ODEServer {
             Class<?> clusterImplClass = this.getClass().getClassLoader().loadClass(clusterImplName);
             _clusterManager = (ClusterManager) clusterImplClass.newInstance();
         } catch (Exception ex) {
-            __log.error(ex);
+            __log.error("Error while loading class : " +clusterImplName ,ex);
         }
         _clusterManager.init(_configRoot);
     }

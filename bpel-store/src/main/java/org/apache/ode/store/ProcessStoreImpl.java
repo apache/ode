@@ -903,4 +903,26 @@ public class ProcessStoreImpl implements ProcessStore {
     protected Map<QName, ProcessConfImpl> getProcessesMap() {
         return _processes;
     }
+
+    protected  Collection<QName> undeployProcesses(final String duName) {
+        Collection<QName> undeployed = Collections.emptyList();
+        DeploymentUnitDir du;
+        _rw.writeLock().lock();
+        try {
+            du = _deploymentUnits.remove(duName);
+            if (du != null) {
+                undeployed = toPids(du.getProcessNames(), du.getVersion());
+            }
+
+            for (QName pn : undeployed) {
+                fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.UNDEPLOYED, pn, du.getName()));
+                __log.info(__msgs.msgProcessUndeployed(pn));
+            }
+
+            _processes.keySet().removeAll(undeployed);
+        } finally {
+            _rw.writeLock().unlock();
+        }
+        return undeployed;
+    }
 }
