@@ -41,7 +41,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Matcher;
@@ -102,7 +101,7 @@ public class ProcessStoreImpl implements ProcessStore {
      */
     private DataSource _inMemDs;
 
-    private AtomicLong _version = new AtomicLong(0);
+
 
     public ProcessStoreImpl() {
         this(null, null, "", new OdeConfigProperties(new Properties(), ""), true);
@@ -130,46 +129,9 @@ public class ProcessStoreImpl implements ProcessStore {
             _inMemDs = hsqlds;
         }
 
-        initializeVersionCounter();
+
     }
 
-    /**
-     * Process and DU use a monotonically increased single version number by default.
-     * Reads the version number from the database and intializes the version counter which
-     * is used to assign version numbers to Deployment units and Processes. Version counter is an atomic long object.
-     * Cluster implementations need to provide a cluster wide version counter.
-     * Version counter is initialized in the constructor.
-     */
-    protected void initializeVersionCounter(){
-
-        long version = readNextVersionFromDB();
-
-        _version.compareAndSet(0, version);
-    }
-
-    /**
-     * Reads the monotonic version number from the database.
-     * @return incremented value of version.
-     */
-    protected long readNextVersionFromDB() {
-        long version = exec(new Callable<Long>() {
-            public Long call(ConfStoreConnection conn) {
-                return conn.getNextVersion();
-            }
-        });
-
-        return version;
-    }
-
-    /**
-     * Returns the current value of the version counter and increments.
-     * Cluster implementations need to override this method.
-     * @return Current value of the version counter.
-     * @see #initializeVersionCounter()
-     */
-    protected long getAndIncrementVersion(){
-        return _version.getAndIncrement();
-    }
 
     /**
      * Constructor that hardwires OpenJPA on a new in-memory database. Suitable for tests.
@@ -232,7 +194,12 @@ public class ProcessStoreImpl implements ProcessStore {
 
         long version;
         if (autoincrementVersion || du.getStaticVersion() == -1) {
-            version = version = getAndIncrementVersion();
+            // Process and DU use a monotonically increased single version number by default.
+            version = exec(new Callable<Long>() {
+                public Long call(ConfStoreConnection conn) {
+                    return conn.getNextVersion();
+                }
+            });
         } else {
             version = du.getStaticVersion();
         }
