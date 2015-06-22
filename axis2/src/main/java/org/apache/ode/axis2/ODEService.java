@@ -77,6 +77,8 @@ public class ODEService {
     private String _portName;
     private WSAEndpoint _serviceRef;
     private SoapMessageConverter _converter;
+    public static final String CALLBACK_SESSION_ENDPOINT = "callbackSessionEndpoint";
+    public static final String TARGET_SESSION_ENDPOINT = "targetSessionEndpoint";
 
     public ODEService(AxisService axisService, ProcessConf pconf, QName serviceName, String portName, BpelServer server,
                       TransactionManager txManager) throws AxisFault {
@@ -282,7 +284,7 @@ public class ODEService {
         if (correlationId != null) {
             odeMex.setProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID, correlationId);
         } else {
-            Object otse = msgContext.getProperty("targetSessionEndpoint");
+            Object otse = msgContext.getProperty(TARGET_SESSION_ENDPOINT);
             if (otse != null) {
                 Element serviceEpr = (Element) otse;
                 WSAEndpoint endpoint = new WSAEndpoint();
@@ -292,7 +294,7 @@ public class ODEService {
             }
         }
         
-        Object ocse = msgContext.getProperty("callbackSessionEndpoint");
+        Object ocse = msgContext.getProperty(CALLBACK_SESSION_ENDPOINT);
         if (ocse != null) {
             Element serviceEpr = (Element) ocse;
             WSAEndpoint endpoint = new WSAEndpoint();
@@ -322,7 +324,7 @@ public class ODEService {
         if (odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID) != null) {
             WSAEndpoint sessionAwareEndPoint = new WSAEndpoint(_serviceRef); 
             sessionAwareEndPoint.setSessionId(odeMex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID));
-            msgContext.setProperty("callbackSessionEndpoint", sessionAwareEndPoint);
+            msgContext.setProperty(CALLBACK_SESSION_ENDPOINT, sessionAwareEndPoint);
         }
 
     }

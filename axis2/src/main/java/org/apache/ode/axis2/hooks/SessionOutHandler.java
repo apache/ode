@@ -29,12 +29,13 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.handlers.AbstractHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.axis2.ODEService;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.MutableEndpoint;
 import org.apache.ode.bpel.epr.WSAEndpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.utils.Namespaces;
-import org.apache.ode.utils.Properties;
+
 
 /**
  * An outgoing handler adding session id information in the message
@@ -53,12 +54,12 @@ public class SessionOutHandler extends AbstractHandler {
             return InvocationResponse.CONTINUE;
         }
 
-        EndpointReference otargetSession = (EndpointReference) messageContext.getProperty("targetSessionEndpoint");
-        EndpointReference ocallbackSession = (EndpointReference) messageContext.getProperty("callbackSessionEndpoint");
+        EndpointReference otargetSession = (EndpointReference) messageContext.getProperty(ODEService.TARGET_SESSION_ENDPOINT);
+        EndpointReference ocallbackSession = (EndpointReference) messageContext.getProperty(ODEService.CALLBACK_SESSION_ENDPOINT);
         if (otargetSession == null)
-            otargetSession = (EndpointReference) messageContext.getOptions().getProperty("targetSessionEndpoint");
+            otargetSession = (EndpointReference) messageContext.getOptions().getProperty(ODEService.TARGET_SESSION_ENDPOINT);
         if (ocallbackSession == null)
-            ocallbackSession = (EndpointReference) messageContext.getOptions().getProperty("callbackSessionEndpoint");
+            ocallbackSession = (EndpointReference) messageContext.getOptions().getProperty(ODEService.CALLBACK_SESSION_ENDPOINT);
 
         if (otargetSession != null || ocallbackSession != null) {
             SOAPHeader header = messageContext.getEnvelope().getHeader();
@@ -117,9 +118,10 @@ public class SessionOutHandler extends AbstractHandler {
                 header.addChild(odeCallback);
                 header.addChild(intCallback);
                 OMElement address = factory.createOMElement("Address", wsAddrNS);
+                address.setText(callbackEpr.getUrl());
                 odeCallback.addChild(address);
                 intCallback.addChild(address.cloneOMElement());
-                address.setText(callbackEpr.getUrl());
+
                 if (callbackEpr.getSessionId() != null) {
                     OMElement odeSession = factory.createOMElement("session", odeSessNS);
                     OMElement intSession = factory.createOMElement("session", intalioSessNS);
