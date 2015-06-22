@@ -37,7 +37,6 @@ import java.util.regex.Pattern;
 public class ClusterProcessStoreImpl extends ProcessStoreImpl{
     private static final Log __log = LogFactory.getLog(ClusterProcessStoreImpl.class);
 
-    private final Map<QName, ProcessConfImpl> loaded = new HashMap<QName, ProcessConfImpl>();
     private ClusterManager _clusterManager;
     private  ProcessStoreDeployedEvent deployedEvent;
     private  ProcessStoreUndeployedEvent undeployedEvent;
@@ -50,10 +49,6 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl{
 
     public Collection<QName> deploy(final File deploymentUnitDirectory) {
         Collection<QName> deployed = super.deploy(deploymentUnitDirectory);
-        Map<QName, ProcessConfImpl> _processes = getProcessesMap();
-        for (QName key : deployed) {
-            loaded.put(key,_processes.get(key));
-        }
         publishProcessStoreDeployedEvent(deploymentUnitDirectory.getName());
         return deployed;
     }
@@ -64,13 +59,13 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl{
     }
 
     public void publishService(final String duName) {
-        final ArrayList<ProcessConfImpl> confs = new ArrayList<ProcessConfImpl>();;
+        final ArrayList<ProcessConfImpl> confs = new ArrayList<ProcessConfImpl>();
         ProcessState state = ProcessState.ACTIVE;
 
         Pattern duNamePattern = getPreviousPackageVersionPattern(duName);
 
-        for (QName key : loaded.keySet()) {
-            ProcessConfImpl pconf = loaded.get(key);
+        for (QName key : _processes.keySet()) {
+            ProcessConfImpl pconf = _processes.get(key);
             Matcher matcher = duNamePattern.matcher(pconf.getPackage());
             if (matcher.matches() && pconf.getState().equals(state)) {
                   pconf.setState(ProcessState.RETIRED);
@@ -85,7 +80,7 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl{
                     if (dudao != null) {
                         List<ProcessConfImpl> load = load(dudao);
                         for(ProcessConfImpl p : load) {
-                        loaded.put(p.getProcessId(),p);
+                        _processes.put(p.getProcessId(),p);
                         }
                         confs.addAll(load);
                     }
@@ -105,23 +100,11 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl{
         }
     }
 
-    private Pattern getPreviousPackageVersionPattern(String duName) {
-        String[] nameParts = duName.split("/");
-        /* Replace the version number (if any) with regexp to match any version number */
-        nameParts[0] = nameParts[0].replaceAll("([-\\Q.\\E](\\d)+)?\\z", "");
-        nameParts[0] += "([-\\Q.\\E](\\d)+)?";
-        StringBuilder duNameRegExp = new StringBuilder(duName.length() * 2);
-        for (int i = 0, n = nameParts.length; i < n; i++) {
-            if (i > 0) duNameRegExp.append("/");
-            duNameRegExp.append(nameParts[i]);
-        }
-        Pattern duNamePattern = Pattern.compile(duNameRegExp.toString());
-        return duNamePattern;
-    }
+
 
     public Collection<QName> undeploy(final File dir) {
         Collection<QName> undeployed = super.undeploy(dir);
-        loaded.keySet().removeAll(undeployed);
+        _processes.keySet().removeAll(undeployed);
         publishProcessStoreUndeployedEvent(dir.getName());
         return undeployed;
     }
@@ -138,7 +121,7 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl{
      */
     public Collection<QName> undeployProcesses(final String duName) {
         Collection<QName> undeployed = super.undeployProcesses(duName);
-        loaded.keySet().removeAll(undeployed);
+        _processes.keySet().removeAll(undeployed);
         return undeployed;
     }
 }

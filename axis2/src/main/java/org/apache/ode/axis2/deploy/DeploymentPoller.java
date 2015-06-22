@@ -346,6 +346,8 @@ public class DeploymentPoller {
      */
     private boolean pollerTryLock(String key) {
         if(clusterEnabled) {
+            ClusterManager cm = _odeServer.getBpelServer().getContexts().clusterManager;
+            cm.putIfAbsent(key,key);
             return _odeServer.getBpelServer().getContexts().clusterManager.tryLock(key);
         }
         else return true;

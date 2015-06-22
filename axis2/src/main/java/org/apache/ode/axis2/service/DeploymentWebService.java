@@ -45,6 +45,7 @@ import org.apache.axiom.om.OMText;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axis2.AxisFault;
+import org.apache.ode.bpel.clapi.ClusterManager;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.AxisOperation;
@@ -386,7 +387,9 @@ public class DeploymentWebService {
      */
     private boolean lock(String key) {
         if(clusterEnabled) {
-            return _odeServer.getBpelServer().getContexts().clusterManager.lock(key);
+            ClusterManager cm = _odeServer.getBpelServer().getContexts().clusterManager;
+            cm.putIfAbsent(key,key);
+            return cm.lock(key);
         }
         else return true;
     }

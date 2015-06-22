@@ -67,4 +67,13 @@ public interface ClusterManager {
      * @param event
      */
     void publishProcessStoreEvent(Object event);
+
+    /**
+     * Check whether the map has a value for given key, if absent put the value to map
+     * @param key
+     * @param keyVal
+     */
+    void putIfAbsent(String key, String keyVal);
+
+
 }

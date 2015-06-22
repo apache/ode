@@ -18,15 +18,40 @@
  */
 package org.apache.ode.bpel.clapi;
 
-public class ProcessStoreDeployedEvent extends ProcessStoreClusterEvent {
+import java.io.Serializable;
 
-     public ProcessStoreDeployedEvent(String deploymentUnit) {
-        super(deploymentUnit);
-        info = "Deploy Event";
+public abstract class ProcessStoreClusterEvent implements Serializable {
+    protected static final long serialVersionUID = 1L;
+
+    private String deploymentUnit;
+
+    protected String info ;
+
+    private String uuid;
+
+    public ProcessStoreClusterEvent(String deploymentUnit) {
+        this.deploymentUnit = deploymentUnit;
     }
 
     @Override
     public String toString() {
-        return "{ProcessStoreDeployedEvent#" + getDuName() +"}";
+        return "{ProcessStoreClusterEvent#" + deploymentUnit +"}";
     }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public String getDuName() {
+        return deploymentUnit;
+    }
+
+    public String getInfo() {
+        return info;
+    }
+
 }

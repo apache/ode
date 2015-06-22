@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.ode.bpel.clapi.ClusterManager;
+import org.apache.ode.bpel.clapi.ProcessStoreClusterEvent;
 import org.apache.ode.bpel.clapi.ProcessStoreDeployedEvent;
 import org.apache.ode.bpel.clapi.ProcessStoreUndeployedEvent;
 import org.apache.ode.store.ClusterProcessStoreImpl;
@@ -43,7 +44,6 @@ public class HazelcastClusterImpl implements ClusterManager {
     private HazelcastInstance _hazelcastInstance;
     private boolean isMaster = false;
     private Member leader;
-    private Member eventInitiator;
     private IMap<String, String> lock_map;
     private ITopic<Object> clusterMessageTopic;
     private ClusterProcessStoreImpl _clusterProcessStore;
@@ -81,27 +81,23 @@ public class HazelcastClusterImpl implements ClusterManager {
         }
     }
 
+    public void putIfAbsent(String key, String keyVal) {
+        lock_map.putIfAbsent(key, keyVal);
+    }
+
     public boolean lock(String key) {
-        lock_map.putIfAbsent(key, key);
         lock_map.lock(key);
-        boolean state = lock_map.isLocked(key);
-        __log.info("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after locking: " + state);
-        return state;
+        __log.info("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after locking: " + true);
+        return true;
     }
 
     public boolean unlock(String key) {
         lock_map.unlock(key);
-        try {
-            Thread.sleep(10);
-        } catch (InterruptedException e) {
-        }
-        boolean state = lock_map.isLocked(key);
-        __log.info("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after unlocking: " + state);
-        return state;
+        __log.info("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after unlocking: " + false);
+        return true;
     }
 
     public boolean tryLock(String key) {
-        lock_map.putIfAbsent(key, key);
         boolean state = lock_map.tryLock(key);
         __log.info("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after locking: " + state);
         return state;
@@ -125,8 +121,11 @@ public class HazelcastClusterImpl implements ClusterManager {
     }
 
     public void publishProcessStoreEvent(Object event) {
-        eventInitiator = _hazelcastInstance.getCluster().getLocalMember();
-        clusterMessageTopic.publish(event);
+        if (event instanceof ProcessStoreClusterEvent) {
+            ProcessStoreClusterEvent e = (ProcessStoreClusterEvent) event;
+        e.setUuid(_hazelcastInstance.getCluster().getLocalMember().getUuid());
+        clusterMessageTopic.publish(e);
+        }
     }
 
 
@@ -141,21 +140,21 @@ public class HazelcastClusterImpl implements ClusterManager {
         if (message instanceof ProcessStoreDeployedEvent) {
             ProcessStoreDeployedEvent event = (ProcessStoreDeployedEvent) message;
 
-            if (_hazelcastInstance.getCluster().getLocalMember() != eventInitiator) {
-                String duName = event.deploymentUnit;
+            if (_hazelcastInstance.getCluster().getLocalMember().getUuid() != event.getUuid()) {
+                String duName = event.getDuName();
                 __log.info("Receive deployment msg to " + _hazelcastInstance.getCluster().getLocalMember() + " for " + duName);
                 _clusterProcessStore.publishService(duName);
-            } else eventInitiator = null;
+            }
         }
 
         else if (message instanceof ProcessStoreUndeployedEvent) {
             ProcessStoreUndeployedEvent event = (ProcessStoreUndeployedEvent) message;
 
-            if (_hazelcastInstance.getCluster().getLocalMember() != eventInitiator) {
-                String duName = event.deploymentUnit;
+            if (_hazelcastInstance.getCluster().getLocalMember().getUuid() != event.getUuid()) {
+                String duName = event.getDuName();
                 __log.info("Receive undeployment msg to " + _hazelcastInstance.getCluster().getLocalMember() + " for " + duName);
                 _clusterProcessStore.undeployProcesses(duName);
-            } else eventInitiator = null;
+            }
         }
 
     }
