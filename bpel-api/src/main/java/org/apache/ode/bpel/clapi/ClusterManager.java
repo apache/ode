@@ -64,9 +64,9 @@ public interface ClusterManager {
 
     /**
      * Publish Deploy event to the cluster by deploy initiator
-     * @param event
+     * @param clusterEvent
      */
-    void publishProcessStoreEvent(Object event);
+    void publishProcessStoreClusterEvent(ProcessStoreClusterEvent clusterEvent);
 
     /**
      * Check whether the map has a value for given key, if absent put the value to map

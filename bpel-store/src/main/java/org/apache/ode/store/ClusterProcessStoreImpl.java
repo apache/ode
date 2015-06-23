@@ -55,7 +55,7 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl{
 
     private void publishProcessStoreDeployedEvent(String duName){
         deployedEvent = new ProcessStoreDeployedEvent(duName);
-        _clusterManager.publishProcessStoreEvent(deployedEvent);
+        _clusterManager.publishProcessStoreClusterEvent(deployedEvent);
     }
 
     public void publishService(final String duName) {
@@ -111,7 +111,7 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl{
 
     private void publishProcessStoreUndeployedEvent(String duName){
         undeployedEvent = new ProcessStoreUndeployedEvent(duName);
-        _clusterManager.publishProcessStoreEvent(undeployedEvent);
+        _clusterManager.publishProcessStoreClusterEvent(undeployedEvent);
     }
 
     /**
