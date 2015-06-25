@@ -30,7 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.ode.bpel.clapi.*;
-import org.apache.ode.store.ClusterProcessStoreImpl;
+
 
 /**
  * This class implements necessary methods to build the cluster using hazelcast
@@ -43,7 +43,7 @@ public class HazelcastClusterImpl implements ClusterManager {
     private Member leader;
     private IMap<String, String> lock_map;
     private ITopic<ProcessStoreClusterEvent> clusterMessageTopic;
-    private ClusterProcessStoreImpl _clusterProcessStore;
+    private ClusterProcessStore _clusterProcessStore;
 
     public void init(File configRoot) {
 
@@ -71,10 +71,7 @@ public class HazelcastClusterImpl implements ClusterManager {
             __log.info("Registering HZ localMember ID " + localMember);
             markAsMaster();
             lock_map = _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_LOCK_MAP);
-
-            // Register for listening to message listener
             clusterMessageTopic = _hazelcastInstance.getTopic("deployedMsg");
-            clusterMessageTopic.addMessageListener(new ClusterMessageListener());
         }
     }
 
@@ -103,11 +100,12 @@ public class HazelcastClusterImpl implements ClusterManager {
     class ClusterMemberShipListener implements MembershipListener {
         @Override
         public void memberAdded(MembershipEvent membershipEvent) {
-            // Noting to do here.
+            __log.info("Member Added " +membershipEvent.getMember().getUuid());
         }
 
         @Override
         public void memberRemoved(MembershipEvent membershipEvent) {
+            __log.info("Member Removed " +membershipEvent.getMember().getUuid());
             markAsMaster();
         }
 
@@ -119,7 +117,7 @@ public class HazelcastClusterImpl implements ClusterManager {
 
     public void publishProcessStoreClusterEvent(ProcessStoreClusterEvent clusterEvent) {
         clusterEvent.setUuid(_hazelcastInstance.getCluster().getLocalMember().getUuid());
-        __log.info("UUID " +clusterEvent.getUuid());
+        __log.info("Send " +clusterEvent.getInfo() +"Cluster Message " +"for " +clusterEvent.getDuName());
         clusterMessageTopic.publish(clusterEvent);
     }
 
@@ -137,8 +135,8 @@ public class HazelcastClusterImpl implements ClusterManager {
 
             if (!_hazelcastInstance.getCluster().getLocalMember().getUuid().equals(event.getUuid())) {
                 String duName = event.getDuName();
-                __log.info("Receive deployment msg to " + _hazelcastInstance.getCluster().getLocalMember() + " for " + duName);
-                _clusterProcessStore.publishService(duName);
+                __log.info("Receive " +event.getInfo() +"Cluster Message " +"for " +event.getDuName());
+                _clusterProcessStore.deployProcesses(duName);
             }
         }
 
@@ -147,7 +145,7 @@ public class HazelcastClusterImpl implements ClusterManager {
 
             if (!_hazelcastInstance.getCluster().getLocalMember().getUuid().equals(event.getUuid())) {
                 String duName = event.getDuName();
-                __log.info("Receive undeployment msg to " + _hazelcastInstance.getCluster().getLocalMember() + " for " + duName);
+                __log.info("Receive " +event.getInfo() +"Cluster Message " +"for " +event.getDuName());
                 _clusterProcessStore.undeployProcesses(duName);
             }
         }
@@ -166,9 +164,12 @@ public class HazelcastClusterImpl implements ClusterManager {
         return isMaster;
     }
 
-    public void setClusterProcessStore(Object store) {
-        if (store instanceof ClusterProcessStoreImpl)
-            _clusterProcessStore = (ClusterProcessStoreImpl) store;
+    public void setClusterProcessStore(ClusterProcessStore store) {
+            _clusterProcessStore = store;
+    }
+
+    public void registerClusterProcessStoreMessageListener() {
+        clusterMessageTopic.addMessageListener(new ClusterMessageListener());
     }
 }
 

@@ -21,6 +21,7 @@ package org.apache.ode.store;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.clapi.ClusterManager;
+import org.apache.ode.bpel.clapi.ClusterProcessStore;
 import org.apache.ode.bpel.clapi.ProcessStoreDeployedEvent;
 import org.apache.ode.bpel.clapi.ProcessStoreUndeployedEvent;
 import org.apache.ode.bpel.iapi.ProcessState;
@@ -29,12 +30,13 @@ import org.apache.ode.il.config.OdeConfigProperties;
 
 import javax.sql.DataSource;
 import javax.xml.namespace.QName;
+
 import java.io.File;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ClusterProcessStoreImpl extends ProcessStoreImpl{
+public class ClusterProcessStoreImpl extends ProcessStoreImpl implements ClusterProcessStore {
     private static final Log __log = LogFactory.getLog(ClusterProcessStoreImpl.class);
 
     private ClusterManager _clusterManager;
@@ -56,9 +58,10 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl{
     private void publishProcessStoreDeployedEvent(String duName){
         deployedEvent = new ProcessStoreDeployedEvent(duName);
         _clusterManager.publishProcessStoreClusterEvent(deployedEvent);
+        __log.info("Completed actual deployment for " +duName +" by " +deployedEvent.getUuid());
     }
 
-    public void publishService(final String duName) {
+    public void deployProcesses(final String duName) {
         final ArrayList<ProcessConfImpl> confs = new ArrayList<ProcessConfImpl>();
         ProcessState state = ProcessState.ACTIVE;
 
@@ -69,6 +72,7 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl{
             Matcher matcher = duNamePattern.matcher(pconf.getPackage());
             if (matcher.matches() && pconf.getState().equals(state)) {
                   pconf.setState(ProcessState.RETIRED);
+                __log.info("Set state of " +pconf.getProcessId() +"to " +pconf.getState());
                   confs.add(pconf);
             }
         }
@@ -79,6 +83,7 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl{
                     DeploymentUnitDAO dudao = conn.getDeploymentUnit(duName);
                     if (dudao != null) {
                         List<ProcessConfImpl> load = load(dudao);
+                        __log.info("Loading DU from store: " + duName);
                         for(ProcessConfImpl p : load) {
                         _processes.put(p.getProcessId(),p);
                         }
@@ -93,6 +98,7 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl{
 
         for (ProcessConfImpl p : confs) {
             try {
+                __log.info("Fire event of " + p.getProcessId()  +" " +p.getState());
                 fireStateChange(p.getProcessId(), p.getState(), p.getDeploymentUnit().getName());
             } catch (Exception except) {
                 __log.error("Error with process retiring or activating : pid=" + p.getProcessId() + " package="+p.getDeploymentUnit().getName(), except);
@@ -112,6 +118,7 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl{
     private void publishProcessStoreUndeployedEvent(String duName){
         undeployedEvent = new ProcessStoreUndeployedEvent(duName);
         _clusterManager.publishProcessStoreClusterEvent(undeployedEvent);
+        __log.info("Completed actual undeployment for " +duName +" by " +undeployedEvent.getUuid());
     }
 
     /**

@@ -60,7 +60,7 @@ public interface ClusterManager {
      * Set the Process Store object which uses for clustering
      * @param ps
      */
-    void setClusterProcessStore(Object ps);
+    void setClusterProcessStore(ClusterProcessStore ps);
 
     /**
      * Publish Deploy event to the cluster by deploy initiator
@@ -75,5 +75,8 @@ public interface ClusterManager {
      */
     void putIfAbsent(String key, String keyVal);
 
-
+    /**
+     * Register the cluster for message listener
+     */
+    void registerClusterProcessStoreMessageListener();
 }

@@ -213,6 +213,7 @@ public class ODEServer {
         registerExternalVariableModules();
 
         _store.loadAll();
+        _clusterManager.registerClusterProcessStoreMessageListener();
 
         try {
             _bpelServer.start();
