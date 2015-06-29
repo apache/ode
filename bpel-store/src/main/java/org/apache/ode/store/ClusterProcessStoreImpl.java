@@ -24,6 +24,7 @@ import org.apache.ode.bpel.clapi.ClusterManager;
 import org.apache.ode.bpel.clapi.ClusterProcessStore;
 import org.apache.ode.bpel.clapi.ProcessStoreDeployedEvent;
 import org.apache.ode.bpel.clapi.ProcessStoreUndeployedEvent;
+import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.il.config.OdeConfigProperties;
@@ -67,13 +68,20 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl implements Cluster
 
         Pattern duNamePattern = getPreviousPackageVersionPattern(duName);
 
-        for (QName key : _processes.keySet()) {
-            ProcessConfImpl pconf = _processes.get(key);
-            Matcher matcher = duNamePattern.matcher(pconf.getPackage());
-            if (matcher.matches() && pconf.getState().equals(state)) {
-                  pconf.setState(ProcessState.RETIRED);
-                __log.info("Set state of " +pconf.getProcessId() +"to " +pconf.getState());
-                  confs.add(pconf);
+        for (String packageName : _deploymentUnits.keySet()) {
+            Matcher matcher = duNamePattern.matcher(packageName);
+            if (matcher.matches()) {
+                DeploymentUnitDir duDir = _deploymentUnits.get(packageName);
+                if (duDir == null) throw new ContextException("Could not find package " + packageName);
+                for (QName processName : duDir.getProcessNames()) {
+                    QName pid = toPid(processName, duDir.getVersion());
+                    ProcessConfImpl pconf = _processes.get(pid);
+                    if (pconf.getState().equals(state)) {
+                        pconf.setState(ProcessState.RETIRED);
+                        __log.info("Set state of " + pconf.getProcessId() + "to " + pconf.getState());
+                        confs.add(pconf);
+                    }
+                }
             }
         }
 
@@ -84,9 +92,6 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl implements Cluster
                     if (dudao != null) {
                         List<ProcessConfImpl> load = load(dudao);
                         __log.info("Loading DU from store: " + duName);
-                        for(ProcessConfImpl p : load) {
-                        _processes.put(p.getProcessId(),p);
-                        }
                         confs.addAll(load);
                     }
                     return null;
@@ -98,19 +103,17 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl implements Cluster
 
         for (ProcessConfImpl p : confs) {
             try {
-                __log.info("Fire event of " + p.getProcessId()  +" " +p.getState());
+                __log.info("Fire event of " + p.getProcessId() + " " + p.getState());
                 fireStateChange(p.getProcessId(), p.getState(), p.getDeploymentUnit().getName());
             } catch (Exception except) {
-                __log.error("Error with process retiring or activating : pid=" + p.getProcessId() + " package="+p.getDeploymentUnit().getName(), except);
+                __log.error("Error with process retiring or activating : pid=" + p.getProcessId() + " package=" + p.getDeploymentUnit().getName(), except);
             }
         }
     }
 
 
-
     public Collection<QName> undeploy(final File dir) {
         Collection<QName> undeployed = super.undeploy(dir);
-        _processes.keySet().removeAll(undeployed);
         publishProcessStoreUndeployedEvent(dir.getName());
         return undeployed;
     }
@@ -128,7 +131,6 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl implements Cluster
      */
     public Collection<QName> undeployProcesses(final String duName) {
         Collection<QName> undeployed = super.undeployProcesses(duName);
-        _processes.keySet().removeAll(undeployed);
         return undeployed;
     }
 }

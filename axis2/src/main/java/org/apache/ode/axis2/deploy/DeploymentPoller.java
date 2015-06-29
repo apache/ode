@@ -140,7 +140,9 @@ public class DeploymentPoller {
         if (isDeploymentFromODEFileSystemAllowed() && files != null) {
             for (File file : files) {
                 String duName = file.getName();
-                __log.info("Trying to acquire the lock for " + duName);
+                if (__log.isDebugEnabled()) {
+                __log.debug("Trying to acquire the lock for " + duName);
+                }
                 duLocked = pollerTryLock(duName);
 
                 if (duLocked) {
@@ -187,7 +189,9 @@ public class DeploymentPoller {
                             __log.error("Deployment of " + file.getName() + " failed, aborting for now.", e);
                         }
                     } finally {
-                        __log.info("Trying to release the lock for " + file.getName());
+                        if (__log.isDebugEnabled()) {
+                        __log.debug("Trying to release the lock for " + file.getName());
+                        }
                         unlock(file.getName());
                     }
                 }
@@ -200,16 +204,33 @@ public class DeploymentPoller {
             String pkg = file.getName().substring(0, file.getName().length() - ".deployed".length());
             File deployDir = new File(_deployDir, pkg);
             if (!deployDir.exists()) {
-                Collection<QName> undeployed = _odeServer.getProcessStore().undeploy(deployDir);
-                boolean isDeleted = file.delete();
-                if (!isDeleted) {
-                    __log.error("Error while deleting file "
+                String duName = deployDir.getName();
+
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Trying to acquire the lock for " + duName);
+                }
+
+                duLocked = pollerTryLock(duName);
+
+                if (duLocked) {
+                    try {
+                        Collection<QName> undeployed = _odeServer.getProcessStore().undeploy(deployDir);
+                        boolean isDeleted = file.delete();
+                        if (!isDeleted) {
+                            __log.error("Error while deleting file "
                                     + file.getName()
                                     + ".deployed , please check if file is locked or if it really exist");
+                        }
+                        disposeDeployXmlWatchDog(deployDir);
+                        if (undeployed.size() > 0)
+                            __log.info("Successfully undeployed " + pkg);
+                    } finally {
+                        if (__log.isDebugEnabled()) {
+                            __log.debug("Trying to release the lock for " + duName);
+                        }
+                        unlock(duName);
+                    }
                 }
-                disposeDeployXmlWatchDog(deployDir);
-                if (undeployed.size() > 0)
-                    __log.info("Successfully undeployed " + pkg);
             }
         }
 

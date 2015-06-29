@@ -70,8 +70,8 @@ public class HazelcastClusterImpl implements ClusterManager {
             Member localMember = _hazelcastInstance.getCluster().getLocalMember();
             __log.info("Registering HZ localMember ID " + localMember);
             markAsMaster();
-            lock_map = _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_LOCK_MAP);
-            clusterMessageTopic = _hazelcastInstance.getTopic("deployedMsg");
+            lock_map = _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_DEPLOYMENT_LOCK);
+            clusterMessageTopic = _hazelcastInstance.getTopic(HazelcastConstants.ODE_CLUSTER_MSG);
         }
     }
 
@@ -81,19 +81,25 @@ public class HazelcastClusterImpl implements ClusterManager {
 
     public boolean lock(String key) {
         lock_map.lock(key);
-        __log.info("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after locking: " + true);
+        if (__log.isDebugEnabled()) {
+        __log.debug("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after locking: " + true);
+        }
         return true;
     }
 
     public boolean unlock(String key) {
         lock_map.unlock(key);
-        __log.info("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after unlocking: " + false);
+        if (__log.isDebugEnabled()) {
+        __log.debug("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after unlocking: " + false);
+        }
         return true;
     }
 
     public boolean tryLock(String key) {
         boolean state = lock_map.tryLock(key);
-        __log.info("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after locking: " + state);
+        if (__log.isDebugEnabled()) {
+        __log.debug("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after locking: " + state);
+        }
         return state;
     }
 
