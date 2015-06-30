@@ -40,6 +40,8 @@ public class HazelcastClusterImpl implements ClusterManager {
 
     private HazelcastInstance _hazelcastInstance;
     private boolean isMaster = false;
+    private String nodeID;
+    private String uuid;
     private Member leader;
     private IMap<String, String> lock_map;
     private ITopic<ProcessStoreClusterEvent> clusterMessageTopic;
@@ -68,7 +70,9 @@ public class HazelcastClusterImpl implements ClusterManager {
             // Registering this node in the cluster.
             _hazelcastInstance.getCluster().addMembershipListener(new ClusterMemberShipListener());
             Member localMember = _hazelcastInstance.getCluster().getLocalMember();
-            __log.info("Registering HZ localMember ID " + localMember);
+            nodeID = localMember.getInetSocketAddress().getHostName() +":" +localMember.getInetSocketAddress().getPort();
+            uuid = localMember.getUuid();
+            __log.info("Registering HZ localMember ID " + nodeID);
             markAsMaster();
             lock_map = _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_DEPLOYMENT_LOCK);
             clusterMessageTopic = _hazelcastInstance.getTopic(HazelcastConstants.ODE_CLUSTER_MSG);
@@ -122,8 +126,8 @@ public class HazelcastClusterImpl implements ClusterManager {
     }
 
     public void publishProcessStoreClusterEvent(ProcessStoreClusterEvent clusterEvent) {
-        clusterEvent.setUuid(_hazelcastInstance.getCluster().getLocalMember().getUuid());
-        __log.info("Send " +clusterEvent.getInfo() +"Cluster Message " +"for " +clusterEvent.getDuName());
+        clusterEvent.setUuid(uuid);
+        __log.info("Send " +clusterEvent.getInfo() +" Cluster Message " +"for " +clusterEvent.getDuName() +" [" +nodeID +"]");
         clusterMessageTopic.publish(clusterEvent);
     }
 
@@ -138,20 +142,20 @@ public class HazelcastClusterImpl implements ClusterManager {
     private void handleEvent(ProcessStoreClusterEvent message) {
         if (message instanceof ProcessStoreDeployedEvent) {
             ProcessStoreDeployedEvent event = (ProcessStoreDeployedEvent) message;
-
-            if (!_hazelcastInstance.getCluster().getLocalMember().getUuid().equals(event.getUuid())) {
+            String eventUuid =  event.getUuid();
+            if (!uuid.equals(eventUuid)) {
                 String duName = event.getDuName();
-                __log.info("Receive " +event.getInfo() +"Cluster Message " +"for " +event.getDuName());
+                __log.info("Receive " +event.getInfo() +" Cluster Message " +"for " +event.getDuName() +" [" +nodeID +"]");
                 _clusterProcessStore.deployProcesses(duName);
             }
         }
 
         else if (message instanceof ProcessStoreUndeployedEvent) {
             ProcessStoreUndeployedEvent event = (ProcessStoreUndeployedEvent) message;
-
-            if (!_hazelcastInstance.getCluster().getLocalMember().getUuid().equals(event.getUuid())) {
+            String eventUuid =  event.getUuid();
+            if (!uuid.equals(eventUuid)) {
                 String duName = event.getDuName();
-                __log.info("Receive " +event.getInfo() +"Cluster Message " +"for " +event.getDuName());
+                __log.info("Receive " +event.getInfo() +"  Cluster Message " +"for " +event.getDuName() +" [" +nodeID +"]");
                 _clusterProcessStore.undeployProcesses(duName);
             }
         }
