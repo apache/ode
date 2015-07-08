@@ -115,7 +115,7 @@ public class BpelEngineImpl implements BpelEngine {
     private SharedEndpoints _sharedEps;
 
     /** Manage instance-level locks. */
-    private final AbstractInstanceLockManager _instanceLockManager;
+    private  AbstractInstanceLockManager _instanceLockManager;
 
     final Contexts _contexts;
 

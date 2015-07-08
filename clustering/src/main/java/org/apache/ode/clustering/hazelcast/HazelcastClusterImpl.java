@@ -48,7 +48,7 @@ public class HazelcastClusterImpl implements ClusterManager {
     private ITopic<ProcessStoreClusterEvent> clusterMessageTopic;
     private ClusterProcessStore _clusterProcessStore;
     private ClusterLock _hazelcastDeploymentLock;
-    private ClusterLock _hazelcastInstanceLock;
+    private AbstractInstanceLockManager _hazelcastInstanceLock;
 
     public void init(File configRoot) {
 
@@ -82,7 +82,7 @@ public class HazelcastClusterImpl implements ClusterManager {
             clusterMessageTopic = _hazelcastInstance.getTopic(HazelcastConstants.ODE_CLUSTER_MSG);
 
             _hazelcastDeploymentLock = (ClusterLock) new HazelcastDeploymentLock(deployment_lock_map);
-            _hazelcastInstanceLock = (ClusterLock) new HazelcastInstanceLock(instance_lock_map);
+            _hazelcastInstanceLock = (AbstractInstanceLockManager) new HazelcastInstanceLock(instance_lock_map);
         }
     }
 
@@ -169,7 +169,7 @@ public class HazelcastClusterImpl implements ClusterManager {
         return _hazelcastDeploymentLock;
     }
 
-    public ClusterLock getInstanceLock(){
+    public AbstractInstanceLockManager getInstanceLock(){
         return _hazelcastInstanceLock;
     }
 }

@@ -36,7 +36,7 @@ import java.util.concurrent.locks.Lock;
  *
  * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
  */
-public class InstanceLockManager {
+public class InstanceLockManager extends AbstractInstanceLockManager {
     private static final Log __log = LogFactory.getLog(InstanceLockManager.class);
 
     private final Lock _mutex = new java.util.concurrent.locks.ReentrantLock();
@@ -137,7 +137,7 @@ public class InstanceLockManager {
     }
 
     /** Exception class indicating a time-out occured while obtaining a lock. */
-    public static final class TimeoutException extends Exception {
+    /*public static final class TimeoutException extends Exception {
         private static final long serialVersionUID = 7247629086692580285L;
-    }
+    }*/
 }
