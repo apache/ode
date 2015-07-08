@@ -41,7 +41,7 @@ package org.apache.ode.axis2.deploy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.ODEServer;
-import org.apache.ode.bpel.clapi.ClusterManager;
+import org.apache.ode.bpel.clapi.ClusterLock;
 import org.apache.ode.bpel.engine.cron.CronScheduler;
 import org.apache.ode.bpel.engine.cron.SystemSchedulesConfig;
 import org.apache.ode.utils.WatchDog;
@@ -367,16 +367,16 @@ public class DeploymentPoller {
      */
     private boolean pollerTryLock(String key) {
         if(clusterEnabled) {
-            ClusterManager cm = _odeServer.getBpelServer().getContexts().clusterManager;
-            cm.putIfAbsent(key,key);
-            return _odeServer.getBpelServer().getContexts().clusterManager.tryLock(key);
+            ClusterLock clusterLock = _odeServer.getBpelServer().getContexts().clusterManager.getDeploymentLock();
+            clusterLock.putIfAbsent(key,key);
+            return clusterLock.tryLockMap(key);
         }
         else return true;
     }
 
     private boolean unlock(String key) {
         if(clusterEnabled) {
-            return _odeServer.getBpelServer().getContexts().clusterManager.unlock(key);
+            return _odeServer.getBpelServer().getContexts().clusterManager.getDeploymentLock().unlockMap(key);
         }
         else return true;
     }

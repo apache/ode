@@ -384,8 +384,14 @@ public class ODEServer {
             }
 
             if (_clusterManager != null) {
-                __log.debug("shutting down cluster manager.");
-                _clusterManager = null;
+                try {
+                    __log.debug("shutting down cluster manager.");
+                    _clusterManager.shutdown();
+                    _clusterManager = null;
+                } catch (Exception ex) {
+                    __log.debug("Cluster manager shutdown failed.", ex);
+
+                }
             }
 
             if (_connector != null) {

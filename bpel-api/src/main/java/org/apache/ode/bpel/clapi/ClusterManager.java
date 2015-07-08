@@ -19,7 +19,6 @@
 package org.apache.ode.bpel.clapi;
 
 import java.io.File;
-import java.util.List;
 
 public interface ClusterManager {
 
@@ -30,31 +29,15 @@ public interface ClusterManager {
     void init(File file);
 
     /**
+     * shutdown the cluster instance
+     */
+    void shutdwon();
+
+    /**
      * Return whether the local member is Master or not
      * @return
      */
     boolean getIsMaster();
-
-    /**
-     * Acquire the lock for each file in the file system
-     * @param key
-     * @return
-     */
-    boolean lock(String key);
-
-    /**
-     * Release the lock acquired by each file
-     * @param key
-     * @return
-     */
-    boolean unlock(String key);
-
-    /**
-     * Tries to acquire the lock for the specified key.
-     * @param key
-     * @return
-     */
-    boolean tryLock(String key);
 
     /**
      * Set the Process Store object which uses for clustering
@@ -69,14 +52,10 @@ public interface ClusterManager {
     void publishProcessStoreClusterEvent(ProcessStoreClusterEvent clusterEvent);
 
     /**
-     * Check whether the map has a value for given key, if absent put the value to map
-     * @param key
-     * @param keyVal
-     */
-    void putIfAbsent(String key, String keyVal);
-
-    /**
      * Register the cluster for message listener
      */
     void registerClusterProcessStoreMessageListener();
+
+    ClusterLock getDeploymentLock();
+    ClusterLock getInstanceLock();
 }

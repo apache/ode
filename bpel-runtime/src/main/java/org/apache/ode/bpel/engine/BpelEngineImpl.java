@@ -115,7 +115,7 @@ public class BpelEngineImpl implements BpelEngine {
     private SharedEndpoints _sharedEps;
 
     /** Manage instance-level locks. */
-    private final InstanceLockManager _instanceLockManager = new InstanceLockManager();
+    private final AbstractInstanceLockManager _instanceLockManager;
 
     final Contexts _contexts;
 
@@ -124,8 +124,14 @@ public class BpelEngineImpl implements BpelEngine {
 
     public BpelEngineImpl(Contexts contexts) {
         _contexts = contexts;
+        if(_contexts.clusterManager != null) {
+            _instanceLockManager = _contexts.clusterManager.getInstanceLock();
+        }
+
+        else _instanceLockManager = new InstanceLockManager();
         _sharedEps = new SharedEndpoints();
         _sharedEps.init();
+
     }
 
     public SharedEndpoints getSharedEndpoints() {

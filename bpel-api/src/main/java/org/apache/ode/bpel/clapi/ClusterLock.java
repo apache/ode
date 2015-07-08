@@ -1,4 +1,24 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.apache.ode.bpel.clapi;
+
+import java.util.concurrent.TimeUnit;
 
 public interface ClusterLock {
     /**
@@ -7,7 +27,7 @@ public interface ClusterLock {
      * @param key
      * @return
      */
-    boolean lock(String key);
+    boolean lockMap(String key);
 
     /**
      * Release the lock acquired by each file
@@ -15,13 +35,28 @@ public interface ClusterLock {
      * @param key
      * @return
      */
-    boolean unlock(String key);
+    boolean unlockMap(String key);
 
     /**
-     * Tries to acquire the lock for the specified key.
-     *
+     * Tries to acquire the lock for the specified key ant time period.
      * @param key
      * @return
      */
-    boolean tryLock(String key);
+    boolean tryLockMap(String key);
+
+    /**
+     *
+     * @param key
+     * @param time
+     * @param tu
+     * @return
+     */
+    boolean tryLockMap(String key, int time, TimeUnit tu);
+
+    /**
+     * Check whether the map has a value for given key, if absent put the value to map
+     * @param key
+     * @param keyVal
+     */
+    void putIfAbsent(String key, String keyVal);
 }
