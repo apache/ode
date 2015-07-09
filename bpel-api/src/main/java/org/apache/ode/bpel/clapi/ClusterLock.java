@@ -38,14 +38,14 @@ public interface ClusterLock {
     boolean unlockMap(String key);
 
     /**
-     * Tries to acquire the lock for the specified key ant time period.
+     * Tries to acquire the lock for the specified key
      * @param key
      * @return
      */
     boolean tryLockMap(String key);
 
     /**
-     *
+     * Tries to acquire the lock for the specified key and time period.
      * @param key
      * @param time
      * @param tu

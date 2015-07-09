@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.clapi;
 
-import org.apache.ode.bpel.AbstractInstanceLockManager;
+import org.apache.ode.bpel.iapi.AbstractInstanceLockManager;
 
 import java.io.File;
 
@@ -58,7 +58,13 @@ public interface ClusterManager {
      */
     void registerClusterProcessStoreMessageListener();
 
+    /**
+     * Return deployment lock for cluster
+     */
     ClusterLock getDeploymentLock();
 
+    /**
+     * Return instance lock for cluster
+     */
     AbstractInstanceLockManager getInstanceLock();
 }

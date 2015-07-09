@@ -30,7 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.ode.bpel.clapi.*;
-import org.apache.ode.bpel.AbstractInstanceLockManager;
+import org.apache.ode.bpel.iapi.AbstractInstanceLockManager;
 
 
 /**
@@ -78,6 +78,7 @@ public class HazelcastClusterImpl implements ClusterManager {
             uuid = localMember.getUuid();
             __log.info("Registering HZ localMember ID " + nodeID);
             markAsMaster();
+
             deployment_lock_map = _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_DEPLOYMENT_LOCK);
             instance_lock_map = _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_PROCESS_INSTANCE_LOCK);
             clusterMessageTopic = _hazelcastInstance.getTopic(HazelcastConstants.ODE_CLUSTER_MSG);

@@ -20,9 +20,10 @@ package org.apache.ode.clustering.hazelcast;
 
 import com.hazelcast.core.IMap;
 import org.apache.ode.bpel.clapi.ClusterLock;
-import org.apache.ode.bpel.AbstractInstanceLockManager;
+import org.apache.ode.bpel.iapi.AbstractInstanceLockManager;
 
 import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -43,7 +44,7 @@ public class HazelcastInstanceLock extends AbstractInstanceLockManager implement
     public void lock(Long iid, int time, TimeUnit tu) throws InterruptedException,
             AbstractInstanceLockManager.TimeoutException {
         if (iid == null) {
-            if(__log.isDebugEnabled()) {
+            if (__log.isDebugEnabled()) {
                 __log.debug(" Instance Id null at lock[]");
             }
             return;
@@ -51,15 +52,15 @@ public class HazelcastInstanceLock extends AbstractInstanceLockManager implement
 
         String thrd = Thread.currentThread().toString();
 
-        if(__log.isDebugEnabled()) {
+        if (__log.isDebugEnabled()) {
             __log.debug(thrd + ": lock(iid=" + iid + ", time=" + time + tu + ")");
         }
 
-        putIfAbsent(iid.toString(),iid.toString());
+        putIfAbsent(iid.toString(), iid.toString());
 
-        if (!tryLockMap(iid.toString(),time, tu)) {
+        if (!tryLockMap(iid.toString(), time, tu)) {
 
-            if(__log.isDebugEnabled()) {
+            if (__log.isDebugEnabled()) {
                 __log.debug(thrd + ": lock(iid=" + iid + ", " +
                         "time=" + time + tu + ")-->TIMEOUT");
             }
@@ -70,7 +71,7 @@ public class HazelcastInstanceLock extends AbstractInstanceLockManager implement
 
     public void unlock(Long iid) {
         if (iid == null) {
-            if(__log.isDebugEnabled()) {
+            if (__log.isDebugEnabled()) {
                 __log.debug(" unlock, instance id is null");
             }
             return;
@@ -80,38 +81,38 @@ public class HazelcastInstanceLock extends AbstractInstanceLockManager implement
 
         unlockMap(iid.toString());
 
-        if(__log.isDebugEnabled()) {
+        if (__log.isDebugEnabled()) {
             __log.debug(thrd + " unlock(iid=" + iid + ")");
         }
     }
 
     public boolean lockMap(String key) {
-        _lock_map.lock(key);
+        // Noting to do here.
         return true;
     }
 
     public boolean unlockMap(String key) {
         if (_lock_map.get(key) == "true") {
             _lock_map.unlock(key);
-            _lock_map.replace(key,"false");
+            _lock_map.replace(key, "false");
+            return true;
         }
-        return true;
+        return false;
     }
 
     public boolean tryLockMap(String key) {
-        boolean state = _lock_map.tryLock(key);
-        return state;
+        // Noting to do here.
+        return true;
     }
 
-    public boolean tryLockMap(String key,int time, TimeUnit tu) {
-        boolean state = true;
+    public boolean tryLockMap(String key, int time, TimeUnit tu) {
+        boolean state = false;
         try {
-        state = _lock_map.tryLock(key,time,tu);
+            state = _lock_map.tryLock(key, time, tu);
         } catch (InterruptedException ex) {
-            __log.error(ex);
+            __log.error("Interruption occured" +ex);
         }
-
-        _lock_map.replace(key,"" +state);
+        _lock_map.replace(key, "" + state);
         return state;
     }
 }

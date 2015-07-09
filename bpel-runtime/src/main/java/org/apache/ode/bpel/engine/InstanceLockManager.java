@@ -20,7 +20,7 @@ package org.apache.ode.bpel.engine;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.AbstractInstanceLockManager;
+import org.apache.ode.bpel.iapi.AbstractInstanceLockManager;
 
 import java.util.HashMap;
 import java.util.Map;
