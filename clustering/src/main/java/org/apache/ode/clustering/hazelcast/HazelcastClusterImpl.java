@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.ode.bpel.clapi.*;
+import org.apache.ode.bpel.AbstractInstanceLockManager;
 
 
 /**

@@ -21,6 +21,9 @@ package org.apache.ode.clustering.hazelcast;
 import com.hazelcast.core.IMap;
 import org.apache.ode.bpel.clapi.ClusterLock;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class HazelcastDeploymentLock implements ClusterLock{
     private static final Log __log = LogFactory.getLog(HazelcastDeploymentLock.class);
 

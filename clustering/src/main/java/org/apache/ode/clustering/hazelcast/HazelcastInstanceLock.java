@@ -20,11 +20,13 @@ package org.apache.ode.clustering.hazelcast;
 
 import com.hazelcast.core.IMap;
 import org.apache.ode.bpel.clapi.ClusterLock;
-import org.apache.ode.bpel.engine.AbstractInstnaceLockManager;
+import org.apache.ode.bpel.AbstractInstanceLockManager;
 
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-public class HazelcastInstanceLock extends AbstractInstnaceLockManager implements ClusterLock {
+public class HazelcastInstanceLock extends AbstractInstanceLockManager implements ClusterLock {
     private static final Log __log = LogFactory.getLog(HazelcastInstanceLock.class);
 
     private IMap<String, String> _lock_map;

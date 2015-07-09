@@ -19,42 +19,19 @@
 
 package org.apache.ode.bpel.engine;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-
-import javax.wsdl.Operation;
-import javax.wsdl.PortType;
-import javax.xml.namespace.QName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.AbstractInstanceLockManager;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.evt.BpelEvent;
-import org.apache.ode.bpel.iapi.BpelEngine;
-import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.iapi.Endpoint;
-import org.apache.ode.bpel.iapi.Message;
-import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.OdeGlobalConfig;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.bpel.iapi.ProcessState;
-import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange.CorrelationStatus;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
-import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
 import org.apache.ode.bpel.iapi.Scheduler.JobType;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
@@ -69,6 +46,12 @@ import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import javax.wsdl.Operation;
+import javax.wsdl.PortType;
+import javax.xml.namespace.QName;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Implementation of the {@link BpelEngine} interface: provides the server methods that should be invoked in the context of a
@@ -115,7 +98,7 @@ public class BpelEngineImpl implements BpelEngine {
     private SharedEndpoints _sharedEps;
 
     /** Manage instance-level locks. */
-    private  AbstractInstanceLockManager _instanceLockManager;
+    private AbstractInstanceLockManager _instanceLockManager;
 
     final Contexts _contexts;
 
@@ -127,7 +110,6 @@ public class BpelEngineImpl implements BpelEngine {
         if(_contexts.clusterManager != null) {
             _instanceLockManager = _contexts.clusterManager.getInstanceLock();
         }
-
         else _instanceLockManager = new InstanceLockManager();
         _sharedEps = new SharedEndpoints();
         _sharedEps.init();
@@ -435,7 +417,8 @@ public class BpelEngineImpl implements BpelEngine {
         // Note that we don't want to wait too long here to get our lock, since we are likely holding
         // on to scheduler's locks of various sorts.
         try {
-            _instanceLockManager.lock(iid, 1, TimeUnit.MICROSECONDS);
+            _instanceLockManager.
+                    lock(iid, 1, TimeUnit.MICROSECONDS);
             _contexts.scheduler.registerSynchronizer(new Scheduler.Synchronizer() {
                 public void afterCompletion(boolean success) {
                     _instanceLockManager.unlock(iid);

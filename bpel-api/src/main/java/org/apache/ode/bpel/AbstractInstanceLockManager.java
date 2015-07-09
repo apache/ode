@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.ode.bpel.engine;
+package org.apache.ode.bpel;
 
 import java.util.concurrent.TimeUnit;
 
@@ -26,9 +26,9 @@ import java.util.concurrent.TimeUnit;
  * concurrent access when entering jacob
  */
 public abstract class AbstractInstanceLockManager {
-    abstract void unlock(Long iid);
+    abstract public void unlock(Long iid);
 
-    abstract void lock(Long iid, int i, TimeUnit microseconds) throws InterruptedException,
+    abstract public void lock(Long iid, int i, TimeUnit microseconds) throws InterruptedException,
             TimeoutException;
 
     /** Exception class indicating a time-out occured  while obtaining a lock. */
