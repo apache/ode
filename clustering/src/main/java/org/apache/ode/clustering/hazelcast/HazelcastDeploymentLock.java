@@ -24,6 +24,8 @@ import org.apache.ode.bpel.clapi.ClusterLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.concurrent.TimeUnit;
+
 public class HazelcastDeploymentLock implements ClusterLock{
     private static final Log __log = LogFactory.getLog(HazelcastDeploymentLock.class);
 
@@ -59,5 +61,9 @@ public class HazelcastDeploymentLock implements ClusterLock{
             __log.debug("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after locking: " + state);
         }
         return state;
+    }
+
+    public boolean tryLockMap(String key,int time, TimeUnit tu) {
+        return true;
     }
 }

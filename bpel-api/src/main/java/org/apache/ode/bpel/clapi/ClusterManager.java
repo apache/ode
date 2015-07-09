@@ -33,7 +33,7 @@ public interface ClusterManager {
     /**
      * shutdown the cluster instance
      */
-    void shutdwon();
+    void shutdown();
 
     /**
      * Return whether the local member is Master or not

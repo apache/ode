@@ -36,7 +36,7 @@ public class HazelcastInstanceLock extends AbstractInstanceLockManager implement
         _lock_map = lock_map;
     }
 
-    private void putIfAbsent(String key, String keyVal) {
+    public void putIfAbsent(String key, String keyVal) {
         _lock_map.putIfAbsent(key, keyVal);
     }
 
@@ -85,12 +85,12 @@ public class HazelcastInstanceLock extends AbstractInstanceLockManager implement
         }
     }
 
-    private boolean lockMap(String key) {
+    public boolean lockMap(String key) {
         _lock_map.lock(key);
         return true;
     }
 
-    private boolean unlockMap(String key) {
+    public boolean unlockMap(String key) {
         if (_lock_map.get(key) == "true") {
             _lock_map.unlock(key);
             _lock_map.replace(key,"false");
@@ -98,13 +98,19 @@ public class HazelcastInstanceLock extends AbstractInstanceLockManager implement
         return true;
     }
 
-    private boolean tryLockMap(String key) {
+    public boolean tryLockMap(String key) {
         boolean state = _lock_map.tryLock(key);
         return state;
     }
 
-    private boolean tryLockMap(String key,int time, TimeUnit tu) {
-        boolean state = _lock_map.tryLock(key,time,tu);
+    public boolean tryLockMap(String key,int time, TimeUnit tu) {
+        boolean state = true;
+        try {
+        state = _lock_map.tryLock(key,time,tu);
+        } catch (InterruptedException ex) {
+            __log.error(ex);
+        }
+
         _lock_map.replace(key,"" +state);
         return state;
     }

@@ -166,7 +166,7 @@ public class HazelcastClusterImpl implements ClusterManager {
         if(_hazelcastInstance != null) _hazelcastInstance.getLifecycleService().shutdown();
     }
 
-    public ClusterLock getDeplymentLock(){
+    public ClusterLock getDeploymentLock(){
         return _hazelcastDeploymentLock;
     }
 
