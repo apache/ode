@@ -19,32 +19,17 @@
 
 package org.apache.ode.scheduler.simple;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
-import java.util.Random;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicLong;
-
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
-import javax.transaction.SystemException;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Scheduler;
+
+import javax.transaction.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * A reliable and relatively simple scheduler that uses a database to persist information about
@@ -508,9 +493,9 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
             return;
 
         _todo.stop();
-        _todo.clearTasks(UpgradeJobsTask.class);
+        _todo.clearTasks(UpgradeJobsTask.class);  //check   gsoc
         _todo.clearTasks(LoadImmediateTask.class);
-        _todo.clearTasks(CheckStaleNodes.class);
+        _todo.clearTasks(CheckStaleNodes.class);  //check   gsoc
         _processedSinceLastLoadTask.clear();
         _outstandingJobs.clear();
 

@@ -30,8 +30,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.ode.bpel.clapi.*;
-import org.apache.ode.bpel.iapi.AbstractInstanceLockManager;
-
 
 /**
  * This class implements necessary methods to build the cluster using hazelcast
@@ -45,11 +43,11 @@ public class HazelcastClusterImpl implements ClusterManager {
     private String uuid;
     private Member leader;
     private IMap<String, String> deployment_lock_map;
-    private IMap<String, String> instance_lock_map;
+    private IMap<Long, Long> instance_lock_map;
     private ITopic<ProcessStoreClusterEvent> clusterMessageTopic;
     private ClusterProcessStore _clusterProcessStore;
-    private ClusterLock _hazelcastDeploymentLock;
-    private AbstractInstanceLockManager _hazelcastInstanceLock;
+    private ClusterLock<String> _hazelcastDeploymentLock;
+    private ClusterLock<Long> _hazelcastInstanceLock;
 
     public void init(File configRoot) {
 
@@ -84,7 +82,7 @@ public class HazelcastClusterImpl implements ClusterManager {
             clusterMessageTopic = _hazelcastInstance.getTopic(HazelcastConstants.ODE_CLUSTER_MSG);
 
             _hazelcastDeploymentLock = (ClusterLock) new HazelcastDeploymentLock(deployment_lock_map);
-            _hazelcastInstanceLock = (AbstractInstanceLockManager) new HazelcastInstanceLock(instance_lock_map);
+            _hazelcastInstanceLock = (ClusterLock) new HazelcastInstanceLock(instance_lock_map);
         }
     }
 
@@ -167,11 +165,11 @@ public class HazelcastClusterImpl implements ClusterManager {
         if(_hazelcastInstance != null) _hazelcastInstance.getLifecycleService().shutdown();
     }
 
-    public ClusterLock getDeploymentLock(){
+    public ClusterLock<String> getDeploymentLock(){
         return _hazelcastDeploymentLock;
     }
 
-    public AbstractInstanceLockManager getInstanceLock(){
+    public ClusterLock<Long> getInstanceLock(){
         return _hazelcastInstanceLock;
     }
 }

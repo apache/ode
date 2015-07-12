@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.concurrent.TimeUnit;
 
-public class HazelcastDeploymentLock implements ClusterLock{
+public class HazelcastDeploymentLock implements ClusterLock<String>{
     private static final Log __log = LogFactory.getLog(HazelcastDeploymentLock.class);
 
     private IMap<String, String> _lock_map;
@@ -39,23 +39,21 @@ public class HazelcastDeploymentLock implements ClusterLock{
         _lock_map.putIfAbsent(key, keyVal);
     }
 
-    public boolean lockMap(String key) {
+    public void lock(String key) {
         _lock_map.lock(key);
         if (__log.isDebugEnabled()) {
             __log.debug("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after locking: " + true);
         }
-        return true;
     }
 
-    public boolean unlockMap(String key) {
+    public void unlock(String key) {
         _lock_map.unlock(key);
         if (__log.isDebugEnabled()) {
             __log.debug("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after unlocking: " + false);
         }
-        return true;
     }
 
-    public boolean tryLockMap(String key) {
+    public boolean tryLock(String key) {
         boolean state = _lock_map.tryLock(key);
         if (__log.isDebugEnabled()) {
             __log.debug("ThreadID:" + Thread.currentThread().getId() + " duLocked value for " + key + " file" + " after locking: " + state);
@@ -63,8 +61,13 @@ public class HazelcastDeploymentLock implements ClusterLock{
         return state;
     }
 
-    public boolean tryLockMap(String key,int time, TimeUnit tu) {
+    public boolean tryLock(String key,int time, TimeUnit tu) {
         // Noting to do here.
-        return true;
+        return false;
+
+    }
+
+    public void lock(String key,int time, TimeUnit tu) {
+        // Noting to do here.
     }
 }

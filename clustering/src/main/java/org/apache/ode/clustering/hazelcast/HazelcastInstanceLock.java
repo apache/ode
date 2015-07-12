@@ -20,29 +20,31 @@ package org.apache.ode.clustering.hazelcast;
 
 import com.hazelcast.core.IMap;
 import org.apache.ode.bpel.clapi.ClusterLock;
-import org.apache.ode.bpel.iapi.AbstractInstanceLockManager;
 
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class HazelcastInstanceLock extends AbstractInstanceLockManager implements ClusterLock {
+public class HazelcastInstanceLock implements ClusterLock<Long> {
     private static final Log __log = LogFactory.getLog(HazelcastInstanceLock.class);
 
-    private IMap<String, String> _lock_map;
+    private IMap<Long, Long> _lock_map;
 
 
-    HazelcastInstanceLock(IMap<String, String> lock_map) {
+    HazelcastInstanceLock(IMap<Long, Long> lock_map) {
         _lock_map = lock_map;
     }
 
-    public void putIfAbsent(String key, String keyVal) {
+    public void putIfAbsent(Long key, Long keyVal) {
         _lock_map.putIfAbsent(key, keyVal);
     }
 
-    public void lock(Long iid, int time, TimeUnit tu) throws InterruptedException,
-            AbstractInstanceLockManager.TimeoutException {
+    public void lock(Long key) {
+        // Noting to do here.
+    }
+
+    public void lock(Long iid, int time, TimeUnit tu) throws InterruptedException,TimeoutException {
         if (iid == null) {
             if (__log.isDebugEnabled()) {
                 __log.debug(" Instance Id null at lock[]");
@@ -56,15 +58,15 @@ public class HazelcastInstanceLock extends AbstractInstanceLockManager implement
             __log.debug(thrd + ": lock(iid=" + iid + ", time=" + time + tu + ")");
         }
 
-        putIfAbsent(iid.toString(), iid.toString());
+        putIfAbsent(iid, iid);
 
-        if (!tryLockMap(iid.toString(), time, tu)) {
+        if (!_lock_map.tryLock(iid, time, tu)) {
 
             if (__log.isDebugEnabled()) {
                 __log.debug(thrd + ": lock(iid=" + iid + ", " +
                         "time=" + time + tu + ")-->TIMEOUT");
             }
-            throw new AbstractInstanceLockManager.TimeoutException();
+            throw new TimeoutException();
         }
 
     }
@@ -79,40 +81,20 @@ public class HazelcastInstanceLock extends AbstractInstanceLockManager implement
 
         String thrd = Thread.currentThread().toString();
 
-        unlockMap(iid.toString());
+        _lock_map.unlock(iid);
 
         if (__log.isDebugEnabled()) {
             __log.debug(thrd + " unlock(iid=" + iid + ")");
         }
     }
 
-    public boolean lockMap(String key) {
+    public boolean tryLock(Long key) {
         // Noting to do here.
-        return true;
-    }
-
-    public boolean unlockMap(String key) {
-        if (_lock_map.get(key) == "true") {
-            _lock_map.unlock(key);
-            _lock_map.replace(key, "false");
-            return true;
-        }
         return false;
     }
 
-    public boolean tryLockMap(String key) {
+    public boolean tryLock(Long key, int time, TimeUnit tu) {
         // Noting to do here.
-        return true;
-    }
-
-    public boolean tryLockMap(String key, int time, TimeUnit tu) {
-        boolean state = false;
-        try {
-            state = _lock_map.tryLock(key, time, tu);
-        } catch (InterruptedException ex) {
-            __log.error("Interruption occured" +ex);
-        }
-        _lock_map.replace(key, "" + state);
-        return state;
+        return false;
     }
 }

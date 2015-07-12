@@ -20,29 +20,38 @@ package org.apache.ode.bpel.clapi;
 
 import java.util.concurrent.TimeUnit;
 
-public interface ClusterLock {
+public interface ClusterLock<E> {
     /**
-     * Acquire the lock for each file in the file system
+     * Acquire the lock for specified key
      *
      * @param key
      * @return
      */
-    boolean lockMap(String key);
+    void lock(E key);
 
     /**
-     * Release the lock acquired by each file
+     * Acquire the lock for specified key and time period
+     *
      *
      * @param key
      * @return
      */
-    boolean unlockMap(String key);
+    void lock(E key,int time,TimeUnit tu) throws InterruptedException, TimeoutException;
+
+    /**
+     * Release the lock acquired for specified key
+     *
+     * @param key
+     * @return
+     */
+    void unlock(E key);
 
     /**
      * Tries to acquire the lock for the specified key
      * @param key
      * @return
      */
-    boolean tryLockMap(String key);
+    boolean tryLock(E key);
 
     /**
      * Tries to acquire the lock for the specified key and time period.
@@ -51,12 +60,17 @@ public interface ClusterLock {
      * @param tu
      * @return
      */
-    boolean tryLockMap(String key, int time, TimeUnit tu);
+    boolean tryLock(E key, int time, TimeUnit tu);
 
     /**
      * Check whether the map has a value for given key, if absent put the value to map
      * @param key
      * @param keyVal
      */
-    void putIfAbsent(String key, String keyVal);
+    void putIfAbsent(E key, E keyVal);
+
+    /** Exception class indicating a time-out occured  while obtaining a lock. */
+    public static final class  TimeoutException extends Exception {
+        private static final long serialVersionUID = 7247629086692580285L;
+    }
 }

@@ -369,15 +369,15 @@ public class DeploymentPoller {
         if(clusterEnabled) {
             ClusterLock clusterLock = _odeServer.getBpelServer().getContexts().clusterManager.getDeploymentLock();
             clusterLock.putIfAbsent(key,key);
-            return clusterLock.tryLockMap(key);
+            return clusterLock.tryLock(key);
         }
         else return true;
     }
 
     private boolean unlock(String key) {
-        if(clusterEnabled) {
-            return _odeServer.getBpelServer().getContexts().clusterManager.getDeploymentLock().unlockMap(key);
+        if (clusterEnabled) {
+            _odeServer.getBpelServer().getContexts().clusterManager.getDeploymentLock().unlock(key);
         }
-        else return true;
+        return true;
     }
 }

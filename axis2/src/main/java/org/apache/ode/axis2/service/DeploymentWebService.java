@@ -389,9 +389,9 @@ public class DeploymentWebService {
         if(clusterEnabled) {
             ClusterLock clusterLock = _odeServer.getBpelServer().getContexts().clusterManager.getDeploymentLock();
             clusterLock.putIfAbsent(key,key);
-            return clusterLock.lockMap(key);
+            clusterLock.lock(key);
         }
-        else return true;
+        return true;
     }
 
     /**
@@ -399,8 +399,8 @@ public class DeploymentWebService {
      */
     private boolean unlock(String key) {
         if(clusterEnabled) {
-            return _odeServer.getBpelServer().getContexts().clusterManager.getDeploymentLock().unlockMap(key);
+            _odeServer.getBpelServer().getContexts().clusterManager.getDeploymentLock().unlock(key);
         }
-        else return true;
+        return true;
     }
 }
