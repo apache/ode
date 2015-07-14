@@ -46,26 +46,23 @@ public class HazelcastInstanceLock implements ClusterLock<Long> {
 
     public void lock(Long iid, int time, TimeUnit tu) throws InterruptedException,TimeoutException {
         if (iid == null) {
-            if (__log.isDebugEnabled()) {
+            if (__log.isDebugEnabled())
                 __log.debug(" Instance Id null at lock[]");
-            }
             return;
         }
 
         String thrd = Thread.currentThread().toString();
 
-        if (__log.isDebugEnabled()) {
+        if (__log.isDebugEnabled())
             __log.debug(thrd + ": lock(iid=" + iid + ", time=" + time + tu + ")");
-        }
 
         putIfAbsent(iid, iid);
 
         if (!_lock_map.tryLock(iid, time, tu)) {
 
-            if (__log.isDebugEnabled()) {
+            if (__log.isDebugEnabled())
                 __log.debug(thrd + ": lock(iid=" + iid + ", " +
                         "time=" + time + tu + ")-->TIMEOUT");
-            }
             throw new TimeoutException();
         }
 
@@ -73,9 +70,8 @@ public class HazelcastInstanceLock implements ClusterLock<Long> {
 
     public void unlock(Long iid) {
         if (iid == null) {
-            if (__log.isDebugEnabled()) {
+            if (__log.isDebugEnabled())
                 __log.debug(" unlock, instance id is null");
-            }
             return;
         }
 
@@ -83,9 +79,8 @@ public class HazelcastInstanceLock implements ClusterLock<Long> {
 
         _lock_map.unlock(iid);
 
-        if (__log.isDebugEnabled()) {
+        if (__log.isDebugEnabled())
             __log.debug(thrd + " unlock(iid=" + iid + ")");
-        }
     }
 
     public boolean tryLock(Long key) {
