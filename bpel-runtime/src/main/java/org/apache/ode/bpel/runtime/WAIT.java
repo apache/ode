@@ -26,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.o.OWait;
+import org.apache.ode.bpel.obj.OWait;
 import org.apache.ode.bpel.runtime.channels.Termination;
 import org.apache.ode.bpel.runtime.channels.TimerResponse;
 import org.apache.ode.jacob.ReceiveProcess;
@@ -59,7 +59,7 @@ class WAIT extends ACTIVITY {
         } catch (EvaluationException ee) {
             String msg = "Unexpected error evaluating wait condition.";
             __log.error(msg, ee);
-            _self.parent.completed(createFault(_self.o.getOwner().constants.qnSubLanguageExecutionFault,  _self.o), CompensationHandler.emptySet());
+            _self.parent.completed(createFault(_self.o.getOwner().getConstants().getQnSubLanguageExecutionFault(),  _self.o), CompensationHandler.emptySet());
             return;
         }
 
@@ -114,11 +114,11 @@ class WAIT extends ACTIVITY {
         Date dueDate = null;
         if (wait.hasFor()) {
             Calendar cal = Calendar.getInstance();
-            Duration duration = getBpelRuntimeContext().getExpLangRuntime().evaluateAsDuration(wait.forExpression, evalCtx);
+            Duration duration = getBpelRuntimeContext().getExpLangRuntime().evaluateAsDuration(wait.getForExpression(), evalCtx);
             duration.addTo(cal);
             dueDate = cal.getTime();
         } else if (wait.hasUntil()) {
-            Calendar cal = getBpelRuntimeContext().getExpLangRuntime().evaluateAsDate(wait.untilExpression, evalCtx);
+            Calendar cal = getBpelRuntimeContext().getExpLangRuntime().evaluateAsDate(wait.getUntilExpression(), evalCtx);
             dueDate = cal.getTime();
         } else {
             throw new AssertionError("Static checks failed to find bad WaitActivity!");

@@ -122,6 +122,7 @@ public class HttpSoapSender extends BaseCommandlineTool {
             httpPostMethod.setRequestHeader("SOAPAction", "\"" + soapAction + "\"");
             httpPostMethod.setRequestHeader("Content-Type", "text/xml");
             httpPostMethod.setRequestEntity(new StringRequestEntity(sb.toString()));
+            mgr.getParams().setSoTimeout(10000);
             httpClient.executeMethod(httpPostMethod);
             return httpPostMethod.getResponseBodyAsString() + "\n";
         } finally {

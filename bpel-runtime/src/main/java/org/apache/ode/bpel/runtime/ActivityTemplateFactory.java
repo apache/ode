@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.ode.bpel.o.*;
+import org.apache.ode.bpel.obj.*;
 
 /**
  * Factory for creating activity template objects.

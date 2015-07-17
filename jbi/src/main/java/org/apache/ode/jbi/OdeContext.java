@@ -18,7 +18,7 @@
  */
 package org.apache.ode.jbi;
 
-import java.io.InputStream;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,9 +46,9 @@ import org.apache.ode.bpel.engine.ProcessAndInstanceManagementImpl;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.ProcessConf;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.Serializer;
+import org.apache.ode.bpel.obj.OPartnerLink;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.serde.DeSerializer;
 import org.apache.ode.bpel.pmapi.InstanceManagement;
 import org.apache.ode.bpel.pmapi.ProcessManagement;
 import org.apache.ode.jbi.msgmap.Mapper;
@@ -195,19 +195,16 @@ final public class OdeContext {
             service = new OdeService(this, endpoint);
         try {
             ProcessConf pc = _store.getProcessConfiguration(pid);
-            InputStream is = pc.getCBPInputStream();
+            File cbpFile = pc.getCBPFile();
             OProcess compiledProcess = null;
-            try {
-                Serializer ofh = new Serializer(is);
-                compiledProcess = ofh.readOProcess();
-            } finally {
-                is.close();
-            }
+           	DeSerializer deserializer = new DeSerializer(cbpFile);
+            compiledProcess = deserializer.deserialize();
+            
             QName portType = null;
             for (Map.Entry<String, Endpoint> provide : pc.getProvideEndpoints().entrySet()) {
                 if (provide.getValue().equals(endpoint)) {
                     OPartnerLink plink = compiledProcess.getPartnerLink(provide.getKey());
-                    portType = plink.myRolePortType.getQName();
+                    portType = plink.getMyRolePortType().getQName();
                     break;
                 }
             }

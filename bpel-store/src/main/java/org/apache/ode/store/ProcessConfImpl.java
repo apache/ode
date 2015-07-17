@@ -60,7 +60,7 @@ import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessState;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
-import org.apache.ode.bpel.o.OFailureHandling;
+import org.apache.ode.bpel.obj.OFailureHandling;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
 import org.apache.ode.utils.CollectionUtils;
 import org.apache.ode.utils.CronExpression;
@@ -190,9 +190,9 @@ public class ProcessConfImpl implements ProcessConf {
                     if (invoke.isSetFailureHandling()) {
                         FailureHandling f = invoke.getFailureHandling();
                         g = new OFailureHandling();
-                        if (f.isSetFaultOnFailure()) g.faultOnFailure = f.getFaultOnFailure();
-                        if (f.isSetRetryDelay()) g.retryDelay = f.getRetryDelay();
-                        if (f.isSetRetryFor()) g.retryFor = f.getRetryFor();
+                        if (f.isSetFaultOnFailure()) g.setFaultOnFailure(f.getFaultOnFailure());
+                        if (f.isSetRetryDelay()) g.setRetryDelay(f.getRetryDelay());
+                        if (f.isSetRetryFor()) g.setRetryFor(f.getRetryFor());
                     }
 
                     PartnerRoleConfig c = new PartnerRoleConfig(g, invoke.getUsePeer2Peer());
@@ -268,6 +268,14 @@ public class ProcessConfImpl implements ProcessConf {
         } catch (FileNotFoundException e) {
             throw new ContextException("File Not Found: " + cbpInfo.cbp, e);
         }
+    }
+    
+    @Override
+    public File getCBPFile(){
+        CBPInfo cbpInfo = _du.getCBPInfo(getType());
+        if (cbpInfo == null)
+            throw new ContextException("CBP record not found for type " + getType());
+        return cbpInfo.cbp;
     }
 
     public long getCBPFileSize() {

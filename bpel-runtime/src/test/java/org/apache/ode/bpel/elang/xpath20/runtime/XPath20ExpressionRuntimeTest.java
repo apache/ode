@@ -36,13 +36,13 @@ import javax.xml.namespace.QName;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.elang.xpath20.compiler.XPath20ExpressionCompilerBPEL20;
-import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
+import org.apache.ode.bpel.elang.xpath20.obj.OXPath20ExpressionBPEL20;
 import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.o.OProcess.OProperty;
-import org.apache.ode.bpel.o.OScope.Variable;
+import org.apache.ode.bpel.obj.OExpression;
+import org.apache.ode.bpel.obj.OLink;
+import org.apache.ode.bpel.obj.OMessageVarType.Part;
+import org.apache.ode.bpel.obj.OProcess.OProperty;
+import org.apache.ode.bpel.obj.OScope.Variable;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.junit.After;
@@ -194,7 +194,7 @@ public class XPath20ExpressionRuntimeTest implements EvaluationContext {
     	String insertElementName="InsertedNode";
     	
         OXPath20ExpressionBPEL20 exp = compile("$messageVar.parameters/"+insertElementName);
-        exp.insertMissingData = true;
+        exp.setInsertMissingData(true);
         
         // Setup root node
         _rootNode = DOMUtils.stringToDOM("<message><parameters>" +
@@ -216,7 +216,7 @@ public class XPath20ExpressionRuntimeTest implements EvaluationContext {
     	String insertElementName="InsertedNode";
     	
         OXPath20ExpressionBPEL20 exp = compile("$reallyEmptyVar/"+insertElementName);
-        exp.insertMissingData = true;
+        exp.setInsertMissingData(true);
         
         // Setup root node
         _rootNode = DOMUtils.stringToDOM("<tns:ApplicationData xmlns:tns=\"http://foobar\"/>");
@@ -241,7 +241,7 @@ public class XPath20ExpressionRuntimeTest implements EvaluationContext {
     }
 
     public Node readVariable(Variable variable, Part part) throws FaultException {
-        return _vars.get(variable.name);
+        return _vars.get(variable.getName());
     }
 
     public Node getPartData(Element message, Part part) throws FaultException {

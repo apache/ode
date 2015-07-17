@@ -64,12 +64,12 @@ import org.apache.ode.bpel.elang.xpath20.compiler.WrappedResolverException;
 import org.apache.ode.bpel.elang.xpath20.runtime.JaxpFunctionResolver;
 import org.apache.ode.bpel.elang.xpath20.runtime.JaxpVariableResolver;
 import org.apache.ode.bpel.elang.xquery10.compiler.XQuery10BpelFunctions;
-import org.apache.ode.bpel.elang.xquery10.o.OXQuery10ExpressionBPEL20;
+import org.apache.ode.bpel.elang.xquery10.obj.OXQuery10ExpressionBPEL20;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.explang.ExpressionLanguageRuntime;
-import org.apache.ode.bpel.o.OExpression;
+import org.apache.ode.bpel.obj.OExpression;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.NSContext;
@@ -116,7 +116,7 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
 
     /**
      *
-     * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluateAsString(org.apache.ode.bpel.o.OExpression,
+     * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluateAsString(org.apache.ode.bpel.obj.OExpression,
      *      org.apache.ode.bpel.explang.EvaluationContext)
      */
     public String evaluateAsString(OExpression cexp, EvaluationContext ctx)
@@ -126,7 +126,7 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
 
     /**
      *
-     * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluateAsBoolean(org.apache.ode.bpel.o.OExpression,
+     * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluateAsBoolean(org.apache.ode.bpel.obj.OExpression,
      *      org.apache.ode.bpel.explang.EvaluationContext)
      */
     public boolean evaluateAsBoolean(OExpression cexp, EvaluationContext ctx)
@@ -152,7 +152,7 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
 
     /**
      *
-     * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluate(org.apache.ode.bpel.o.OExpression,
+     * @see org.apache.ode.bpel.explang.ExpressionLanguageRuntime#evaluate(org.apache.ode.bpel.obj.OExpression,
      *      org.apache.ode.bpel.explang.EvaluationContext)
      */
     public List evaluate(OExpression cexp, EvaluationContext ctx)
@@ -230,12 +230,12 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
         List retVal = evaluate(cexp, ctx);
 
         if (retVal.size() == 0) {
-            throw new FaultException(cexp.getOwner().constants.qnSelectionFailure,
+            throw new FaultException(cexp.getOwner().getConstants().getQnSelectionFailure(),
                 "No results for expression: " + cexp);
         }
 
         if (retVal.size() > 1) {
-            throw new FaultException(cexp.getOwner().constants.qnSelectionFailure,
+            throw new FaultException(cexp.getOwner().getConstants().getQnSelectionFailure(),
                 "Multiple results for expression: " + cexp);
         }
 
@@ -259,12 +259,12 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
                     XPathConstants.NODESET));
 
         if (literal.size() == 0) {
-            throw new FaultException(cexp.getOwner().constants.qnSelectionFailure,
+            throw new FaultException(cexp.getOwner().getConstants().getQnSelectionFailure(),
                 "No results for expression: " + cexp);
         }
 
         if (literal.size() > 1) {
-            throw new FaultException(cexp.getOwner().constants.qnSelectionFailure,
+            throw new FaultException(cexp.getOwner().getConstants().getQnSelectionFailure(),
                 "Multiple results for expression: " + cexp);
         }
 
@@ -290,7 +290,7 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
         } catch (Exception ex) {
             String errmsg = "Invalid date: " + literal;
             __log.error(errmsg, ex);
-            throw new FaultException(cexp.getOwner().constants.qnInvalidExpressionValue,
+            throw new FaultException(cexp.getOwner().getConstants().getQnInvalidExpressionValue(),
                 errmsg);
         }
     }
@@ -315,7 +315,7 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
         } catch (Exception ex) {
             String errmsg = "Invalid duration: " + literal;
             __log.error(errmsg, ex);
-            throw new FaultException(cexp.getOwner().constants.qnInvalidExpressionValue,
+            throw new FaultException(cexp.getOwner().getConstants().getQnInvalidExpressionValue(),
                 errmsg);
         }
     }
@@ -346,7 +346,7 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
 
             XQStaticContext staticEnv = xqconn.getStaticContext();
 
-            NSContext nsContext = oxquery10.namespaceCtx;
+            NSContext nsContext = oxquery10.getNamespaceCtx();
             Set<String> prefixes = nsContext.getPrefixes();
             for (String prefix : prefixes) {
                 String uri = nsContext.getNamespaceURI(prefix);
@@ -357,7 +357,7 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
             xqconn.setStaticContext(staticEnv);
 
             // Prepare expression, for starters
-            String xquery = oxquery10.xquery.replaceFirst(
+            String xquery = oxquery10.getXquery().replaceFirst(
                     Constants.XQUERY_FUNCTION_HANDLER_COMPILER,
                     Constants.XQUERY_FUNCTION_HANDLER_RUNTIME);
             XQPreparedExpression exp = xqconn.prepareExpression(xquery);

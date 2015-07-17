@@ -21,11 +21,11 @@ package org.apache.ode.bpel.compiler;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.Correlation;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OReply;
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.OMessageVarType;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.OReply;
+import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.utils.msg.MessageBundle;
 
 import javax.wsdl.Fault;
@@ -54,40 +54,40 @@ class ReplyGenerator extends DefaultActivityGenerator  {
         org.apache.ode.bpel.compiler.bom.ReplyActivity replyDef = (org.apache.ode.bpel.compiler.bom.ReplyActivity) src;
         OReply oreply = (OReply) output;
 
-        oreply.isFaultReply = replyDef.getFaultName() != null;
-        oreply.partnerLink = _context.resolvePartnerLink(replyDef.getPartnerLink());
-        oreply.messageExchangeId = replyDef.getMessageExchangeId();
+        oreply.setIsFaultReply((replyDef.getFaultName()) != null);
+        oreply.setPartnerLink(_context.resolvePartnerLink(replyDef.getPartnerLink()));
+        oreply.setMessageExchangeId(replyDef.getMessageExchangeId());
         if (replyDef.getVariable() != null) {
-            oreply.variable = _context.resolveVariable(replyDef.getVariable());
-            if (!(oreply.variable.type instanceof OMessageVarType))
-                throw new CompilationException(_cmsgsGeneral.errMessageVariableRequired(oreply.variable.name));
+            oreply.setVariable(_context.resolveVariable(replyDef.getVariable()));
+            if (!(oreply.getVariable().getType() instanceof OMessageVarType))
+                throw new CompilationException(_cmsgsGeneral.errMessageVariableRequired(oreply.getVariable().getName()));
         }
 
-        if (oreply.partnerLink.myRolePortType == null)
-            throw new CompilationException(_cmsgsGeneral.errPartnerLinkDoesNotDeclareMyRole(oreply.partnerLink.getName()));
+        if (oreply.getPartnerLink().getMyRolePortType() == null)
+            throw new CompilationException(_cmsgsGeneral.errPartnerLinkDoesNotDeclareMyRole(oreply.getPartnerLink().getName()));
         // The portType on the reply is not necessary, so we check its validty only when present.
-        if (replyDef.getPortType() != null && !oreply.partnerLink.myRolePortType.getQName().equals(replyDef.getPortType()))
-            throw new CompilationException(_cmsgsGeneral.errPortTypeMismatch(replyDef.getPortType(),oreply.partnerLink.myRolePortType.getQName()));
+        if (replyDef.getPortType() != null && !oreply.getPartnerLink().getMyRolePortType().getQName().equals(replyDef.getPortType()))
+            throw new CompilationException(_cmsgsGeneral.errPortTypeMismatch(replyDef.getPortType(),oreply.getPartnerLink().getMyRolePortType().getQName()));
 
-        oreply.operation = _context.resolveMyRoleOperation(oreply.partnerLink, replyDef.getOperation());
-        if (oreply.operation.getOutput() == null)
-            throw new CompilationException(_cmsgsGeneral.errTwoWayOperationExpected(oreply.operation.getName()));
+        oreply.setOperation(_context.resolveMyRoleOperation(oreply.getPartnerLink(), replyDef.getOperation()));
+        if (oreply.getOperation().getOutput() == null)
+            throw new CompilationException(_cmsgsGeneral.errTwoWayOperationExpected(oreply.getOperation().getName()));
 
-        if (oreply.isFaultReply) {
+        if (oreply.isIsFaultReply()) {
             Fault flt = null;
-            if (replyDef.getFaultName().getNamespaceURI().equals(oreply.partnerLink.myRolePortType.getQName().getNamespaceURI()))
-                flt = oreply.operation.getFault(replyDef.getFaultName().getLocalPart());
+            if (replyDef.getFaultName().getNamespaceURI().equals(oreply.getPartnerLink().getMyRolePortType().getQName().getNamespaceURI()))
+                flt = oreply.getOperation().getFault(replyDef.getFaultName().getLocalPart());
             if (flt == null)
-                throw new CompilationException(__cmsgsLocal.errUndeclaredFault(replyDef.getFaultName().getLocalPart(), oreply.operation.getName()));
-            if (oreply.variable != null && !((OMessageVarType)oreply.variable.type).messageType.equals(flt.getMessage().getQName()))
-                throw new CompilationException(_cmsgsGeneral.errVariableTypeMismatch(oreply.variable.name, flt.getMessage().getQName(), ((OMessageVarType)oreply.variable.type).messageType));
-            oreply.fault = replyDef.getFaultName();
+                throw new CompilationException(__cmsgsLocal.errUndeclaredFault(replyDef.getFaultName().getLocalPart(), oreply.getOperation().getName()));
+            if (oreply.getVariable() != null && !((OMessageVarType)oreply.getVariable().getType()).getMessageType().equals(flt.getMessage().getQName()))
+                throw new CompilationException(_cmsgsGeneral.errVariableTypeMismatch(oreply.getVariable().getName(), flt.getMessage().getQName(), ((OMessageVarType)oreply.getVariable().getType()).getMessageType()));
+            oreply.setFault(replyDef.getFaultName());
         } else /* !oreply.isFaultReply */ {
-            assert oreply.fault == null;
-            if (oreply.variable == null)
+            assert oreply.getFault() == null;
+            if (oreply.getVariable() == null)
                 throw new CompilationException(__cmsgsLocal.errOutputVariableMustBeSpecified());
-            if (!((OMessageVarType)oreply.variable.type).messageType.equals(oreply.operation.getOutput().getMessage().getQName()))
-                throw new CompilationException(_cmsgsGeneral.errVariableTypeMismatch(oreply.variable.name, oreply.operation.getOutput().getMessage().getQName(),((OMessageVarType)oreply.variable.type).messageType));
+            if (!((OMessageVarType)oreply.getVariable().getType()).getMessageType().equals(oreply.getOperation().getOutput().getMessage().getQName()))
+                throw new CompilationException(_cmsgsGeneral.errVariableTypeMismatch(oreply.getVariable().getName(), oreply.getOperation().getOutput().getMessage().getQName(),((OMessageVarType)oreply.getVariable().getType()).getMessageType()));
         }
 
         Set<String> csetNames = new HashSet<String>(); // prevents duplicate cset in on one set of correlations
@@ -102,24 +102,24 @@ class ReplyGenerator extends DefaultActivityGenerator  {
             switch (correlation.getInitiate()) {
                 case UNSET:
                 case NO:
-                    oreply.assertCorrelations.add(cset);
+                    oreply.getAssertCorrelations().add(cset);
                     break;
                 case YES:
-                    oreply.initCorrelations.add(cset);
+                    oreply.getInitCorrelations().add(cset);
                     break;
                 case JOIN:
-                    cset.hasJoinUseCases = true;
-                    oreply.joinCorrelations.add(cset);
+                    cset.setHasJoinUseCases(true);
+                    oreply.getJoinCorrelations().add(cset);
                     break;
                 default:
                     // TODO: Make error for this.
                     throw new AssertionError();
             }
 
-            for (Iterator<OProcess.OProperty> j = cset.properties.iterator(); j.hasNext(); ) {
+            for (Iterator<OProcess.OProperty> j = cset.getProperties().iterator(); j.hasNext(); ) {
                 OProcess.OProperty property = j.next();
                 // Force resolution of alias, to make sure that we have one for this variable-property pair.
-                _context.resolvePropertyAlias(oreply.variable, property.name);
+                _context.resolvePropertyAlias(oreply.getVariable(), property.getName());
             }
 
             csetNames.add(correlation.getCorrelationSet());

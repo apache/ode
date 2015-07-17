@@ -28,10 +28,10 @@ import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.ForEachActivity;
 import org.apache.ode.bpel.compiler.bom.Scope;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OForEach;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OXsdTypeVarType;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.OForEach;
+import org.apache.ode.bpel.obj.OScope;
+import org.apache.ode.bpel.obj.OXsdTypeVarType;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.Namespaces;
 
@@ -51,15 +51,13 @@ public class ForEachGenerator extends DefaultActivityGenerator {
         if (__log.isDebugEnabled()) __log.debug("Compiling ForEach activity.");
         OForEach oforEach = (OForEach) output;
         ForEachActivity forEach = (ForEachActivity) src;
-        oforEach.parallel = forEach.isParallel();
-        oforEach.startCounterValue = _context.compileExpr(forEach.getStartCounter());
-        oforEach.finalCounterValue = _context.compileExpr(forEach.getFinalCounter());
+        oforEach.setParallel(forEach.isParallel());
+        oforEach.setStartCounterValue(_context.compileExpr(forEach.getStartCounter()));
+        oforEach.setFinalCounterValue(_context.compileExpr(forEach.getFinalCounter()));
         if (forEach.getCompletionCondition() != null) {
-            oforEach.completionCondition =
-                    new OForEach.CompletionCondition(_context.getOProcess());
-            oforEach.completionCondition.successfulBranchesOnly
-                    = forEach.getCompletionCondition().getBranch().isSuccessfulBranchesOnly();
-            oforEach.completionCondition.branchCount = _context.compileExpr(forEach.getCompletionCondition().getBranch());
+            oforEach.setCompletionCondition(new org.apache.ode.bpel.obj.OForEach.CompletionCondition(_context.getOProcess()));
+            oforEach.getCompletionCondition().setSuccessfulBranchesOnly(forEach.getCompletionCondition().getBranch().isSuccessfulBranchesOnly());
+            oforEach.getCompletionCondition().setBranchCount(_context.compileExpr(forEach.getCompletionCondition().getBranch()));
         }
 
         // ForEach 'adds' a counter variable in inner scope
@@ -75,16 +73,16 @@ public class ForEachGenerator extends DefaultActivityGenerator {
             throw new CompilationException(__cmsgs.errForEachAndScopeVariableRedundant(forEach.getCounterName()).setSource(src));
 
         OXsdTypeVarType counterType = new OXsdTypeVarType(oforEach.getOwner());
-        counterType.simple = true;
-        counterType.xsdType = new QName(Namespaces.XML_SCHEMA, "int");
+        counterType.setSimple(true);
+        counterType.setXsdType(new javax.xml.namespace.QName(org.apache.ode.utils.Namespaces.XML_SCHEMA , "int"));
         OScope.Variable counterVar = new OScope.Variable(oforEach.getOwner(), counterType);
-        counterVar.name = forEach.getCounterName();
+        counterVar.setName(forEach.getCounterName());
 
         if (__log.isDebugEnabled()) __log.debug("Compiling forEach inner scope.");
-        oforEach.innerScope = _context.compileSLC(forEach.getChild(), new OScope.Variable[]{counterVar});
+        oforEach.setInnerScope(_context.compileSLC(forEach.getChild(), new org.apache.ode.bpel.obj.OScope.Variable[]{ counterVar }));
 
         // oforEach.innerScope.addLocalVariable(counterVar);
-        oforEach.counterVariable = counterVar;
+        oforEach.setCounterVariable(counterVar);
     }
 
 }

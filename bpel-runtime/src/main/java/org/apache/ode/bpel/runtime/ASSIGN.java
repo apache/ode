@@ -26,19 +26,19 @@ import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.o.OAssign;
-import org.apache.ode.bpel.o.OAssign.DirectRef;
-import org.apache.ode.bpel.o.OAssign.LValueExpression;
-import org.apache.ode.bpel.o.OAssign.PropertyRef;
-import org.apache.ode.bpel.o.OAssign.VariableRef;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.o.OProcess.OProperty;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OScope.Variable;
+import org.apache.ode.bpel.obj.OAssign;
+import org.apache.ode.bpel.obj.OAssign.DirectRef;
+import org.apache.ode.bpel.obj.OAssign.LValueExpression;
+import org.apache.ode.bpel.obj.OAssign.PropertyRef;
+import org.apache.ode.bpel.obj.OAssign.VariableRef;
+import org.apache.ode.bpel.obj.OElementVarType;
+import org.apache.ode.bpel.obj.OExpression;
+import org.apache.ode.bpel.obj.OLink;
+import org.apache.ode.bpel.obj.OMessageVarType;
+import org.apache.ode.bpel.obj.OMessageVarType.Part;
+import org.apache.ode.bpel.obj.OProcess.OProperty;
+import org.apache.ode.bpel.obj.OScope;
+import org.apache.ode.bpel.obj.OScope.Variable;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
@@ -82,18 +82,18 @@ class ASSIGN extends ACTIVITY {
 
         FaultData faultData = null;
 
-        for (OAssign.Copy aCopy : oassign.copy) {
+        for (OAssign.Copy aCopy : oassign.getCopy()) {
             try {
                 copy(aCopy);
             } catch (FaultException fault) {
-                if (aCopy.ignoreMissingFromData) {
-                    if (fault.getQName().equals(getOAsssign().getOwner().constants.qnSelectionFailure) &&
+                if (aCopy.isIgnoreMissingFromData()) {
+                    if (fault.getQName().equals(getOAsssign().getOwner().getConstants().getQnSelectionFailure()) &&
                             (fault.getCause() != null && "ignoreMissingFromData".equals(fault.getCause().getMessage()))) {
                     continue;
                     }
                 }
-                if (aCopy.ignoreUninitializedFromVariable) {
-                    if (fault.getQName().equals(getOAsssign().getOwner().constants.qnUninitializedVariable) &&
+                if (aCopy.isIgnoreUninitializedFromVariable()) {
+                    if (fault.getQName().equals(getOAsssign().getOwner().getConstants().getQnUninitializedVariable()) &&
                             (fault.getCause() == null || !"throwUninitializedToVariable".equals(fault.getCause().getMessage()))) {
                     continue;
                     }
@@ -135,16 +135,16 @@ class ASSIGN extends ACTIVITY {
                 lvar = _scopeFrame.resolve(to.getVariable());
             } catch (RuntimeException e) {
                 __log.error("iid: " + getBpelRuntimeContext().getPid() + " error evaluating lvalue");
-                throw new FaultException(getOAsssign().getOwner().constants.qnSelectionFailure, e.getMessage());
+                throw new FaultException(getOAsssign().getOwner().getConstants().getQnSelectionFailure(), e.getMessage());
             }
             if (lvar == null) {
                 String msg = __msgs.msgEvalException(to.toString(), "Could not resolve variable in current scope");
                 if (__log.isDebugEnabled()) __log.debug(to + ": " + msg);
-                throw new FaultException(getOAsssign().getOwner().constants.qnSelectionFailure, msg);
+                throw new FaultException(getOAsssign().getOwner().getConstants().getQnSelectionFailure(), msg);
             }
             if (!napi.isVariableInitialized(lvar)) {
                 Document doc = DOMUtils.newDocument();
-                Node val = to.getVariable().type.newInstance(doc);
+                Node val = to.getVariable().getType().newInstance(doc);
                 if (val.getNodeType() == Node.TEXT_NODE) {
                     Element tempwrapper = doc.createElementNS(null, "temporary-simple-type-wrapper");
                     doc.appendChild(tempwrapper);
@@ -152,7 +152,7 @@ class ASSIGN extends ACTIVITY {
                     val = tempwrapper;
                 } else doc.appendChild(val);
                 // Only external variables need to be initialized, others are new and going to be overwtitten
-                if (lvar.declaration.extVar != null) lval = initializeVariable(lvar, val);
+                if (lvar.declaration.getExtVar() != null) lval = initializeVariable(lvar, val);
                 else lval = val;
             } else
                 lval = fetchVariableData(lvar, true);
@@ -193,25 +193,25 @@ class ASSIGN extends ACTIVITY {
         Node retVal;
         if (from instanceof DirectRef) {
             OAssign.DirectRef dref = (OAssign.DirectRef) from;
-            sendVariableReadEvent(_scopeFrame.resolve(dref.variable));
+            sendVariableReadEvent(_scopeFrame.resolve(dref.getVariable()));
             Node data = fetchVariableData(
-                    _scopeFrame.resolve(dref.variable), false);
-            retVal = DOMUtils.findChildByName((Element)data, dref.elName);
+                    _scopeFrame.resolve(dref.getVariable()), false);
+            retVal = DOMUtils.findChildByName((Element)data, dref.getElName());
         } else if (from instanceof OAssign.VariableRef) {
             OAssign.VariableRef varRef = (OAssign.VariableRef) from;
-            sendVariableReadEvent(_scopeFrame.resolve(varRef.variable));
-            Node data = fetchVariableData(_scopeFrame.resolve(varRef.variable), false);
-            retVal = evalQuery(data, varRef.part != null ? varRef.part : varRef.headerPart, varRef.location, getEvaluationContext());
+            sendVariableReadEvent(_scopeFrame.resolve(varRef.getVariable()));
+            Node data = fetchVariableData(_scopeFrame.resolve(varRef.getVariable()), false);
+            retVal = evalQuery(data, varRef.getPart() != null ? varRef.getPart() : varRef.getHeaderPart(), varRef.getLocation(), getEvaluationContext());
         } else if (from instanceof OAssign.PropertyRef) {
             OAssign.PropertyRef propRef = (OAssign.PropertyRef) from;
-            sendVariableReadEvent(_scopeFrame.resolve(propRef.variable));
-            Node data = fetchVariableData(_scopeFrame.resolve(propRef.variable), false);
-            retVal = evalQuery(data, propRef.propertyAlias.part,
-                    propRef.propertyAlias.location, getEvaluationContext());
+            sendVariableReadEvent(_scopeFrame.resolve(propRef.getVariable()));
+            Node data = fetchVariableData(_scopeFrame.resolve(propRef.getVariable()), false);
+            retVal = evalQuery(data, propRef.getPropertyAlias().getPart(),
+                    propRef.getPropertyAlias().getLocation(), getEvaluationContext());
         } else if (from instanceof OAssign.PartnerLinkRef) {
             OAssign.PartnerLinkRef pLinkRef = (OAssign.PartnerLinkRef) from;
-            PartnerLinkInstance pLink = _scopeFrame.resolve(pLinkRef.partnerLink);
-            Node tempVal =pLinkRef.isMyEndpointReference ?
+            PartnerLinkInstance pLink = _scopeFrame.resolve(pLinkRef.getPartnerLink());
+            Node tempVal =pLinkRef.isIsMyEndpointReference() ?
                     getBpelRuntimeContext().fetchMyRoleEndpointReferenceData(pLink)
                     : getBpelRuntimeContext().fetchPartnerRoleEndpointReferenceData(pLink);
             if (__log.isDebugEnabled())
@@ -220,7 +220,7 @@ class ASSIGN extends ACTIVITY {
             retVal = tempVal;
         } else if (from instanceof OAssign.Expression) {
             List<Node> l;
-            OExpression expr = ((OAssign.Expression) from).expression;
+            OExpression expr = ((OAssign.Expression) from).getExpression();
             try {
                 l = getBpelRuntimeContext().getExpLangRuntime().evaluate(expr, getEvaluationContext());
                 if (l.size() == 0 || l.get(0) == null || !(l.get(0) instanceof Element)) {
@@ -243,16 +243,16 @@ class ASSIGN extends ACTIVITY {
                 String msg = __msgs.msgEvalException(from.toString(), e.getMessage());
                 if (__log.isDebugEnabled()) __log.debug(from + ": " + msg);
                 if (e.getCause() instanceof FaultException) throw (FaultException)e.getCause();
-                throw new FaultException(getOAsssign().getOwner().constants.qnSelectionFailure, msg);
+                throw new FaultException(getOAsssign().getOwner().getConstants().getQnSelectionFailure(), msg);
             }
             if (l.size() == 0) {
                 String msg = __msgs.msgRValueNoNodesSelected(expr.toString());
                 if (__log.isDebugEnabled()) __log.debug(from + ": " + msg);
-                throw new FaultException(getOAsssign().getOwner().constants.qnSelectionFailure, msg, new Throwable("ignoreMissingFromData"));
+                throw new FaultException(getOAsssign().getOwner().getConstants().getQnSelectionFailure(), msg, new Throwable("ignoreMissingFromData"));
             } else if (l.size() > 1) {
                 String msg = __msgs.msgRValueMultipleNodesSelected(expr.toString());
                 if (__log.isDebugEnabled()) __log.debug(from + ": " + msg);
-                throw new FaultException(getOAsssign().getOwner().constants.qnSelectionFailure, msg);
+                throw new FaultException(getOAsssign().getOwner().getConstants().getQnSelectionFailure(), msg);
             }
             retVal = (Node) l.get(0);
         } else if (from instanceof OAssign.Literal) {
@@ -288,7 +288,7 @@ class ASSIGN extends ACTIVITY {
                         if (__log.isDebugEnabled())
                             __log.debug(from + ": " + msg);
                         throw new FaultException(
-                                getOAsssign().getOwner().constants.qnSelectionFailure,
+                                getOAsssign().getOwner().getConstants().getQnSelectionFailure(),
                                 msg);
 
                     }
@@ -303,7 +303,7 @@ class ASSIGN extends ACTIVITY {
                         if (__log.isDebugEnabled())
                             __log.debug(from + ": " + msg);
                         throw new FaultException(
-                                getOAsssign().getOwner().constants.qnSelectionFailure,
+                                getOAsssign().getOwner().getConstants().getQnSelectionFailure(),
                                 msg);
 
                     }
@@ -317,7 +317,7 @@ class ASSIGN extends ACTIVITY {
                 if (__log.isDebugEnabled())
                     __log.debug(from + ": " + msg);
                 throw new FaultException(
-                        getOAsssign().getOwner().constants.qnSelectionFailure,
+                        getOAsssign().getOwner().getConstants().getQnSelectionFailure(),
                         msg);
             }
         } else {
@@ -326,7 +326,7 @@ class ASSIGN extends ACTIVITY {
             if (__log.isErrorEnabled())
                 __log.error(from + ": " + msg);
             throw new FaultException(
-                    getOAsssign().getOwner().constants.qnSelectionFailure, msg);
+                    getOAsssign().getOwner().getConstants().getQnSelectionFailure(), msg);
         }
 
         // Now verify we got something.
@@ -335,7 +335,7 @@ class ASSIGN extends ACTIVITY {
             if (__log.isDebugEnabled())
                 __log.debug(from + ": " + msg);
             throw new FaultException(
-                    getOAsssign().getOwner().constants.qnSelectionFailure, msg);
+                    getOAsssign().getOwner().getConstants().getQnSelectionFailure(), msg);
         }
 
         // Now check that we got the right thing.
@@ -351,7 +351,7 @@ class ASSIGN extends ACTIVITY {
                     __log.debug(from + ": " + msg);
 
                 throw new FaultException(
-                        getOAsssign().getOwner().constants.qnSelectionFailure, msg);
+                        getOAsssign().getOwner().getConstants().getQnSelectionFailure(), msg);
 
         }
 
@@ -367,23 +367,23 @@ class ASSIGN extends ACTIVITY {
 
         // Check for message to message - copy, we can do this efficiently in
         // the database.
-        if ((ocopy.to instanceof VariableRef && ((VariableRef) ocopy.to)
+        if ((ocopy.getTo() instanceof VariableRef && ((VariableRef) ocopy.getTo())
                 .isMessageRef())
-                || (ocopy.from instanceof VariableRef && ((VariableRef) ocopy.from)
+                || (ocopy.getFrom() instanceof VariableRef && ((VariableRef) ocopy.getFrom())
                 .isMessageRef())) {
 
-            if ((ocopy.to instanceof VariableRef && ((VariableRef) ocopy.to)
+            if ((ocopy.getTo() instanceof VariableRef && ((VariableRef) ocopy.getTo())
                     .isMessageRef())
-                    && ocopy.from instanceof VariableRef
-                    && ((VariableRef) ocopy.from).isMessageRef()) {
+                    && ocopy.getFrom() instanceof VariableRef
+                    && ((VariableRef) ocopy.getFrom()).isMessageRef()) {
 
-                final VariableInstance lval = _scopeFrame.resolve(ocopy.to
+                final VariableInstance lval = _scopeFrame.resolve(ocopy.getTo()
                         .getVariable());
                 final VariableInstance rval = _scopeFrame
-                        .resolve(((VariableRef) ocopy.from).getVariable());
+                        .resolve(((VariableRef) ocopy.getFrom()).getVariable());
                 Element lvalue = (Element) fetchVariableData(rval, false);
                 initializeVariable(lval, lvalue);
-                se = new VariableModificationEvent(lval.declaration.name);
+                se = new VariableModificationEvent(lval.declaration.getName());
                 ((VariableModificationEvent)se).setNewValue(lvalue);
             } else {
                 // This really should have been caught by the compiler.
@@ -391,13 +391,13 @@ class ASSIGN extends ACTIVITY {
                         .fatal("Message/Non-Message Assignment, should be caught by compiler:"
                                 + ocopy);
                 throw new FaultException(
-                        ocopy.getOwner().constants.qnSelectionFailure,
+                        ocopy.getOwner().getConstants().getQnSelectionFailure(),
                         "Message/Non-Message Assignment:  " + ocopy);
             }
         } else {
             // Conventional Assignment logic.
-            Node rvalue = evalRValue(ocopy.from);
-            Node lvalue = evalLValue(ocopy.to);
+            Node rvalue = evalRValue(ocopy.getFrom());
+            Node lvalue = evalLValue(ocopy.getTo());
             if (__log.isDebugEnabled()) {
                 __log.debug("lvalue after eval " + lvalue);
                 if (lvalue != null) __log.debug("content " + DOMUtils.domToString(lvalue));
@@ -406,44 +406,44 @@ class ASSIGN extends ACTIVITY {
             // Get a pointer within the lvalue.
             Node lvaluePtr = lvalue;
             boolean headerAssign = false;
-            if (ocopy.to instanceof OAssign.DirectRef) {
-                DirectRef dref = ((DirectRef) ocopy.to);
-                Element el = DOMUtils.findChildByName((Element)lvalue, dref.elName);
+            if (ocopy.getTo() instanceof OAssign.DirectRef) {
+                DirectRef dref = ((DirectRef) ocopy.getTo());
+                Element el = DOMUtils.findChildByName((Element)lvalue, dref.getElName());
                 if (el == null) {
                     el = (Element) ((Element)lvalue).appendChild(lvalue.getOwnerDocument()
-                            .createElementNS(dref.elName.getNamespaceURI(), dref.elName.getLocalPart()));
+                            .createElementNS(dref.getElName().getNamespaceURI(), dref.getElName().getLocalPart()));
                 }
                 lvaluePtr = el;
-            } else if (ocopy.to instanceof OAssign.VariableRef) {
-                VariableRef varRef = ((VariableRef) ocopy.to);
-                if (varRef.headerPart != null) headerAssign = true;
-                lvaluePtr = evalQuery(lvalue, varRef.part != null ? varRef.part : varRef.headerPart, varRef.location,
+            } else if (ocopy.getTo() instanceof OAssign.VariableRef) {
+                VariableRef varRef = ((VariableRef) ocopy.getTo());
+                if (varRef.getHeaderPart() != null) headerAssign = true;
+                lvaluePtr = evalQuery(lvalue, varRef.getPart() != null ? varRef.getPart() : varRef.getHeaderPart(), varRef.getLocation(),
                         new EvaluationContextProxy(varRef.getVariable(), lvalue));
-            } else if (ocopy.to instanceof OAssign.PropertyRef) {
-                PropertyRef propRef = ((PropertyRef) ocopy.to);
-                lvaluePtr = evalQuery(lvalue, propRef.propertyAlias.part,
-                        propRef.propertyAlias.location,
+            } else if (ocopy.getTo() instanceof OAssign.PropertyRef) {
+                PropertyRef propRef = ((PropertyRef) ocopy.getTo());
+                lvaluePtr = evalQuery(lvalue, propRef.getPropertyAlias().getPart(),
+                        propRef.getPropertyAlias().getLocation(),
                         new EvaluationContextProxy(propRef.getVariable(),
                                 lvalue));
-            } else if (ocopy.to instanceof OAssign.LValueExpression) {
-                LValueExpression lexpr = (LValueExpression) ocopy.to;
-                lexpr.setInsertMissingToData(ocopy.insertMissingToData);
-                lvaluePtr = evalQuery(lvalue, null, lexpr.expression,
+            } else if (ocopy.getTo() instanceof OAssign.LValueExpression) {
+                LValueExpression lexpr = (LValueExpression) ocopy.getTo();
+                lexpr.setInsertMissingToData(ocopy.isInsertMissingToData());
+                lvaluePtr = evalQuery(lvalue, null, lexpr.getExpression(),
                         new EvaluationContextProxy(lexpr.getVariable(), lvalue));
                 if (__log.isDebugEnabled())
                     __log.debug("lvaluePtr expr res " + lvaluePtr);
             }
 
             // For partner link assignmenent, the whole content is assigned.
-            if (ocopy.to instanceof OAssign.PartnerLinkRef) {
-                OAssign.PartnerLinkRef pLinkRef = ((OAssign.PartnerLinkRef) ocopy.to);
+            if (ocopy.getTo() instanceof OAssign.PartnerLinkRef) {
+                OAssign.PartnerLinkRef pLinkRef = ((OAssign.PartnerLinkRef) ocopy.getTo());
                 PartnerLinkInstance plval = _scopeFrame
-                        .resolve(pLinkRef.partnerLink);
+                        .resolve(pLinkRef.getPartnerLink());
                 replaceEndpointRefence(plval, rvalue);
-                se = new PartnerLinkModificationEvent(((OAssign.PartnerLinkRef) ocopy.to).partnerLink.getName());
+                se = new PartnerLinkModificationEvent(((OAssign.PartnerLinkRef) ocopy.getTo()).getPartnerLink().getName());
             } else {
                 // Sneakily converting the EPR if it's not the format expected by the lvalue
-                if (ocopy.from instanceof OAssign.PartnerLinkRef) {
+                if (ocopy.getFrom() instanceof OAssign.PartnerLinkRef) {
                     rvalue = getBpelRuntimeContext().convertEndpointReference((Element)rvalue, lvaluePtr);
                     if (rvalue.getNodeType() == Node.DOCUMENT_NODE)
                         rvalue = ((Document)rvalue).getDocumentElement();
@@ -454,22 +454,22 @@ class ASSIGN extends ACTIVITY {
                     lvalue = copyInto((Element)lvalue, (Element) lvaluePtr, (Element) rvalue);
                 } else if (rvalue.getNodeType() == Node.ELEMENT_NODE && lvaluePtr.getNodeType() == Node.ELEMENT_NODE) {
                     lvalue = replaceElement((Element)lvalue, (Element) lvaluePtr, (Element) rvalue,
-                            ocopy.keepSrcElementName);
+                            ocopy.isKeepSrcElementName());
                 } else {
                     lvalue = replaceContent(lvalue, lvaluePtr, rvalue.getTextContent());
                 }
-                final VariableInstance lval = _scopeFrame.resolve(ocopy.to.getVariable());
+                final VariableInstance lval = _scopeFrame.resolve(ocopy.getTo().getVariable());
                 if (__log.isDebugEnabled())
-                    __log.debug("ASSIGN Writing variable '" + lval.declaration.name +
+                    __log.debug("ASSIGN Writing variable '" + lval.declaration.getName() +
                                 "' value '" + DOMUtils.domToString(lvalue) +"'");
                 commitChanges(lval, lvalue);
-                se = new VariableModificationEvent(lval.declaration.name);
+                se = new VariableModificationEvent(lval.declaration.getName());
                 ((VariableModificationEvent)se).setNewValue(lvalue);
             }
         }
 
-        if (ocopy.debugInfo != null)
-            se.setLineNo(ocopy.debugInfo.startLine);
+        if (ocopy.getDebugInfo() != null)
+            se.setLineNo(ocopy.getDebugInfo().getStartLine());
         sendEvent(se);
     }
 
@@ -609,7 +609,7 @@ class ASSIGN extends ACTIVITY {
                 if (__log.isDebugEnabled())
                     __log.debug(lvaluePtr + ": " + msg);
                 throw new FaultException(
-                        getOAsssign().getOwner().constants.qnSelectionFailure, msg);
+                        getOAsssign().getOwner().getConstants().getQnSelectionFailure(), msg);
         }
 
         return lvalue;
@@ -620,12 +620,12 @@ class ASSIGN extends ACTIVITY {
         assert data != null;
 
         if (part != null) {
-            QName partName = new QName(null, part.name);
+            QName partName = new QName(null, part.getName());
             Node qualLVal = DOMUtils.findChildByName((Element) data, partName);
-            if (part.type instanceof OElementVarType) {
-                QName elName = ((OElementVarType) part.type).elementType;
+            if (part.getType() instanceof OElementVarType) {
+                QName elName = ((OElementVarType) part.getType()).getElementType();
                 qualLVal = DOMUtils.findChildByName((Element) qualLVal, elName);
-            } else if (part.type == null) {
+            } else if (part.getType() == null) {
                 // Special case of header parts never referenced in the WSDL def
                 if (qualLVal != null && qualLVal.getNodeType() == Node.ELEMENT_NODE
                         && ((Element)qualLVal).getAttribute("headerPart") != null
@@ -633,7 +633,7 @@ class ASSIGN extends ACTIVITY {
                     qualLVal = DOMUtils.getFirstChildElement((Element) qualLVal);
                 // The needed part isn't there, dynamically creating it
                 if (qualLVal == null) {
-                    qualLVal = data.getOwnerDocument().createElementNS(null, part.name);
+                    qualLVal = data.getOwnerDocument().createElementNS(null, part.getName());
                     ((Element)qualLVal).setAttribute("headerPart", "true");
                     data.appendChild(qualLVal);
                 }
@@ -649,7 +649,7 @@ class ASSIGN extends ACTIVITY {
                 String msg = __msgs.msgEvalException(expression.toString(), e.getMessage());
                 if (__log.isDebugEnabled()) __log.debug(expression + ": " + msg);
                 if (e.getCause() instanceof FaultException) throw (FaultException)e.getCause();
-                throw new FaultException(getOAsssign().getOwner().constants.qnSubLanguageExecutionFault, msg);
+                throw new FaultException(getOAsssign().getOwner().getConstants().getQnSubLanguageExecutionFault(), msg);
             }
         }
 
@@ -674,7 +674,7 @@ class ASSIGN extends ACTIVITY {
         }
 
         public Node readVariable(OScope.Variable variable, OMessageVarType.Part part) throws FaultException {
-            if (variable.name.equals(_var.name)) {
+            if (variable.getName().equals(_var.getName())) {
                 if (part == null) return _varNode;
                 return _ctx.getPartData((Element)_varNode, part);
 
@@ -682,8 +682,8 @@ class ASSIGN extends ACTIVITY {
                 return _ctx.readVariable(variable, part);
 
         }       /**
-     * @see org.apache.ode.bpel.explang.EvaluationContext#readMessageProperty(org.apache.ode.bpel.o.OScope.Variable,
-     *      org.apache.ode.bpel.o.OProcess.OProperty)
+     * @see org.apache.ode.bpel.explang.EvaluationContext#readMessageProperty(org.apache.ode.bpel.obj.OScope.Variable,
+     *      org.apache.ode.bpel.obj.OProcess.OProperty)
      */
     public String readMessageProperty(Variable variable, OProperty property)
             throws FaultException {
@@ -691,7 +691,7 @@ class ASSIGN extends ACTIVITY {
     }
 
         /**
-         * @see org.apache.ode.bpel.explang.EvaluationContext#isLinkActive(org.apache.ode.bpel.o.OLink)
+         * @see org.apache.ode.bpel.explang.EvaluationContext#isLinkActive(org.apache.ode.bpel.obj.OLink)
          */
         public boolean isLinkActive(OLink olink) throws FaultException {
             return _ctx.isLinkActive(olink);
@@ -706,7 +706,7 @@ class ASSIGN extends ACTIVITY {
 
         /**
          * @see org.apache.ode.bpel.explang.EvaluationContext#evaluateQuery(org.w3c.dom.Node,
-         *      org.apache.ode.bpel.o.OExpression)
+         *      org.apache.ode.bpel.obj.OExpression)
          */
         public Node evaluateQuery(Node root, OExpression expr)
                 throws FaultException {
@@ -715,7 +715,7 @@ class ASSIGN extends ACTIVITY {
                 return getBpelRuntimeContext().getExpLangRuntime()
                         .evaluateNode(expr, this);
             } catch (org.apache.ode.bpel.explang.EvaluationException e) {
-                throw new FaultException(expr.getOwner().constants.qnSubLanguageExecutionFault, e);
+                throw new FaultException(expr.getOwner().getConstants().getQnSubLanguageExecutionFault(), e);
             }
         }
 

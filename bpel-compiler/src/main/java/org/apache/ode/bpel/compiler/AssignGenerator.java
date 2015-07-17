@@ -31,12 +31,12 @@ import org.apache.ode.bpel.compiler.bom.PartnerLinkVal;
 import org.apache.ode.bpel.compiler.bom.PropertyVal;
 import org.apache.ode.bpel.compiler.bom.To;
 import org.apache.ode.bpel.compiler.bom.VariableVal;
-import org.apache.ode.bpel.o.DebugInfo;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OAssign;
-import org.apache.ode.bpel.o.OVarType;
-import org.apache.ode.bpel.o.OAssign.RValue;
-import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.obj.DebugInfo;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.OAssign;
+import org.apache.ode.bpel.obj.OVarType;
+import org.apache.ode.bpel.obj.OAssign.RValue;
+import org.apache.ode.bpel.obj.OMessageVarType;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Document;
@@ -64,25 +64,24 @@ class AssignGenerator extends DefaultActivityGenerator {
         AssignActivity ad = (AssignActivity) source;
         for (Copy scopy : ad.getCopies()) {
             OAssign.Copy ocopy = new OAssign.Copy(_context.getOProcess());
-            ocopy.keepSrcElementName = scopy.isKeepSrcElement();
-            ocopy.ignoreMissingFromData = scopy.isIgnoreMissingFromData();
-            ocopy.ignoreUninitializedFromVariable = scopy.isIgnoreUninitializedFromVariable();
-            ocopy.insertMissingToData = scopy.isInsertMissingToData();
-            ocopy.insertMissingToData = scopy.isInsertMissingToData();
-            ocopy.debugInfo = new DebugInfo(_context.getSourceLocation(), scopy.getLineNo(),
-                    source.getExtensibilityElements());
+            ocopy.setKeepSrcElementName(scopy.isKeepSrcElement());
+            ocopy.setIgnoreMissingFromData(scopy.isIgnoreMissingFromData());
+            ocopy.setIgnoreUninitializedFromVariable(scopy.isIgnoreUninitializedFromVariable());
+            ocopy.setInsertMissingToData(scopy.isInsertMissingToData());
+            ocopy.setInsertMissingToData(scopy.isInsertMissingToData());
+            ocopy.setDebugInfo(new DebugInfo(_context.getSourceLocation() , scopy.getLineNo() , source.getExtensibilityElements()));
             try {
                 if (scopy.getTo() == null)
                     throw new CompilationException(__cmsgs.errMissingToSpec().setSource(scopy));
                 Object[] toResultType = new Object[1];
-                ocopy.to = compileTo(scopy.getTo(), toResultType);
+                ocopy.setTo(compileTo(scopy.getTo(), toResultType));
 
                 if (scopy.getFrom() == null)
                     throw new CompilationException(__cmsgs.errMissingFromSpec().setSource(scopy));
-                ocopy.from = compileFrom(scopy.getFrom(), toResultType[0]);
+                ocopy.setFrom(compileFrom(scopy.getFrom(), toResultType[0]));
 
                 verifyCopy(ocopy);
-                oassign.copy.add(ocopy);
+                oassign.getCopy().add(ocopy);
 
             } catch (CompilationException ce) {
                 _context.recoveredFromError(scopy, ce);
@@ -100,13 +99,13 @@ class AssignGenerator extends DefaultActivityGenerator {
             __log.debug("verifying copy: " + ocopy);
 
         // If direct Message->Message copy
-        if (ocopy.to instanceof OAssign.VariableRef && ((OAssign.VariableRef) ocopy.to).isMessageRef()
-                && ocopy.from instanceof OAssign.VariableRef && ((OAssign.VariableRef) ocopy.from).isMessageRef()) {
+        if (ocopy.getTo() instanceof OAssign.VariableRef && ((OAssign.VariableRef) ocopy.getTo()).isMessageRef()
+                && ocopy.getFrom() instanceof OAssign.VariableRef && ((OAssign.VariableRef) ocopy.getFrom()).isMessageRef()) {
             // Check that the LValue/RValue message types match up.
-            String lvar = ((OAssign.VariableRef) ocopy.to).variable.name;
-            String rvar = ((OAssign.VariableRef) ocopy.from).variable.name;
-            QName tlvalue = ((OMessageVarType) ((OAssign.VariableRef) ocopy.to).variable.type).messageType;
-            QName trvalue = ((OMessageVarType) ((OAssign.VariableRef) ocopy.from).variable.type).messageType;
+            String lvar = ((OAssign.VariableRef) ocopy.getTo()).getVariable().getName();
+            String rvar = ((OAssign.VariableRef) ocopy.getFrom()).getVariable().getName();
+            QName tlvalue = ((OMessageVarType) ((OAssign.VariableRef) ocopy.getTo()).getVariable().getType()).getMessageType();
+            QName trvalue = ((OMessageVarType) ((OAssign.VariableRef) ocopy.getFrom()).getVariable().getType()).getMessageType();
 
             if (!tlvalue.equals(trvalue))
                 throw new CompilationException(__cmsgs.errMismatchedMessageAssignment(lvar, tlvalue, rvar, trvalue));
@@ -114,38 +113,38 @@ class AssignGenerator extends DefaultActivityGenerator {
         }
 
         // If Message->Non-Message copy
-        else if (ocopy.from instanceof OAssign.VariableRef && ((OAssign.VariableRef) ocopy.from).isMessageRef()
-                && (!(ocopy.to instanceof OAssign.VariableRef) || !((OAssign.VariableRef) ocopy.to).isMessageRef())) {
-            String rval = ((OAssign.VariableRef) ocopy.from).variable.name;
+        else if (ocopy.getFrom() instanceof OAssign.VariableRef && ((OAssign.VariableRef) ocopy.getFrom()).isMessageRef()
+                && (!(ocopy.getTo() instanceof OAssign.VariableRef) || !((OAssign.VariableRef) ocopy.getTo()).isMessageRef())) {
+            String rval = ((OAssign.VariableRef) ocopy.getFrom()).getVariable().getName();
             throw new CompilationException(__cmsgs.errCopyFromMessageToNonMessage(rval));
 
         }
 
         // If Non-Message->Message copy
-        else if (ocopy.to instanceof OAssign.VariableRef && ((OAssign.VariableRef) ocopy.to).isMessageRef()
-                && (!(ocopy.from instanceof OAssign.VariableRef) || !((OAssign.VariableRef) ocopy.from).isMessageRef())) {
+        else if (ocopy.getTo() instanceof OAssign.VariableRef && ((OAssign.VariableRef) ocopy.getTo()).isMessageRef()
+                && (!(ocopy.getFrom() instanceof OAssign.VariableRef) || !((OAssign.VariableRef) ocopy.getFrom()).isMessageRef())) {
 
-            String lval = ((OAssign.VariableRef) ocopy.to).variable.name;
+            String lval = ((OAssign.VariableRef) ocopy.getTo()).getVariable().getName();
             throw new CompilationException(__cmsgs.errCopyToMessageFromNonMessage(lval));
         }
 
         // If *->Partner Link copy
-        else if (ocopy.to instanceof OAssign.PartnerLinkRef
-                && !((OAssign.PartnerLinkRef) ocopy.to).partnerLink.hasPartnerRole()) {
-            String lval = ((OAssign.PartnerLinkRef) ocopy.to).partnerLink.getName();
+        else if (ocopy.getTo() instanceof OAssign.PartnerLinkRef
+                && !((OAssign.PartnerLinkRef) ocopy.getTo()).getPartnerLink().hasPartnerRole()) {
+            String lval = ((OAssign.PartnerLinkRef) ocopy.getTo()).getPartnerLink().getName();
             throw new CompilationException(__cmsgs.errCopyToUndeclaredPartnerRole(lval));
         }
 
         // If Partner Link->* copy
-        else if (ocopy.from instanceof OAssign.PartnerLinkRef) {
-            if (((OAssign.PartnerLinkRef) ocopy.from).isMyEndpointReference
-                    && !((OAssign.PartnerLinkRef) ocopy.from).partnerLink.hasMyRole()) {
-                String lval = ((OAssign.PartnerLinkRef) ocopy.from).partnerLink.getName();
+        else if (ocopy.getFrom() instanceof OAssign.PartnerLinkRef) {
+            if (((OAssign.PartnerLinkRef) ocopy.getFrom()).isIsMyEndpointReference()
+                    && !((OAssign.PartnerLinkRef) ocopy.getFrom()).getPartnerLink().hasMyRole()) {
+                String lval = ((OAssign.PartnerLinkRef) ocopy.getFrom()).getPartnerLink().getName();
                 throw new CompilationException(__cmsgs.errCopyFromUndeclaredPartnerRole(lval, "myRole"));
             }
-            if (!((OAssign.PartnerLinkRef) ocopy.from).isMyEndpointReference
-                    && !((OAssign.PartnerLinkRef) ocopy.from).partnerLink.hasPartnerRole()) {
-                String lval = ((OAssign.PartnerLinkRef) ocopy.from).partnerLink.getName();
+            if (!((OAssign.PartnerLinkRef) ocopy.getFrom()).isIsMyEndpointReference()
+                    && !((OAssign.PartnerLinkRef) ocopy.getFrom()).getPartnerLink().hasPartnerRole()) {
+                String lval = ((OAssign.PartnerLinkRef) ocopy.getFrom()).getPartnerLink().getName();
                 throw new CompilationException(__cmsgs.errCopyFromUndeclaredPartnerRole(lval, "partnerRole"));
             }
         }
@@ -163,32 +162,32 @@ class AssignGenerator extends DefaultActivityGenerator {
             } else if (from.isPropertyVal()) {
                 OAssign.PropertyRef pref = new OAssign.PropertyRef(_context.getOProcess());
                 PropertyVal pval = from.getAsPropertyVal();
-                pref.variable = _context.resolveVariable(pval.getVariable());
-                pref.propertyAlias = _context.resolvePropertyAlias(pref.variable, pval.getProperty());
+                pref.setVariable(_context.resolveVariable(pval.getVariable()));
+                pref.setPropertyAlias(_context.resolvePropertyAlias(pref.getVariable(), pval.getProperty()));
                 return pref;
             } else if (from.isVariableVal()) {
                 VariableVal vv = from.getAsVariableVal();
                 OAssign.VariableRef vref = new OAssign.VariableRef(_context.getOProcess());
-                vref.variable = _context.resolveVariable(vv.getVariable());
-                OVarType rootNodeType = vref.variable.type;
+                vref.setVariable(_context.resolveVariable(vv.getVariable()));
+                OVarType rootNodeType = vref.getVariable().getType();
                 if (vv.getPart() != null) {
-                    vref.part = _context.resolvePart(vref.variable, vv.getPart());
-                    rootNodeType = vref.part.type;
+                    vref.setPart(_context.resolvePart(vref.getVariable(), vv.getPart()));
+                    rootNodeType = vref.getPart().getType();
                 }
                 if (vv.getHeader() != null) {
-                    vref.headerPart = _context.resolveHeaderPart(vref.variable, vv.getHeader());
-                    if (vref.headerPart == null)
-                        vref.headerPart = new OMessageVarType.Part(_context.getOProcess(), vv.getHeader(), null);
-                    rootNodeType = vref.headerPart.type;
+                    vref.setHeaderPart(_context.resolveHeaderPart(vref.getVariable(), vv.getHeader()));
+                    if (vref.getHeaderPart() == null)
+                        vref.setHeaderPart(new org.apache.ode.bpel.obj.OMessageVarType.Part(_context.getOProcess() , vv.getHeader() , null));
+                    rootNodeType = vref.getHeaderPart().getType();
                 }
                 if (vv.getLocation() != null && vv.getLocation().getExpression() != null)
-                    vref.location = _context.compileExpr(vv.getLocation(), rootNodeType, requestedResultType, new Object[1]);
+                    vref.setLocation(_context.compileExpr(vv.getLocation(), rootNodeType, requestedResultType, new java.lang.Object[1]));
                 return vref;
             } else if (from.isPartnerLinkVal()) {
                 PartnerLinkVal plv = from.getAsPartnerLinkVal();
                 OAssign.PartnerLinkRef plref = new OAssign.PartnerLinkRef(_context.getOProcess());
-                plref.partnerLink = _context.resolvePartnerLink(plv.getPartnerLink());
-                plref.isMyEndpointReference = (plv.getEndpointReference() == PartnerLinkVal.EndpointReference.MYROLE);
+                plref.setPartnerLink(_context.resolvePartnerLink(plv.getPartnerLink()));
+                plref.setIsMyEndpointReference((plv.getEndpointReference()) == (org.apache.ode.bpel.compiler.bom.PartnerLinkVal.EndpointReference.MYROLE));
                 return plref;
             } else if (from.getAsExpression() != null) {
                 return new OAssign.Expression(_context.getOProcess(), _context.compileExpr(from.getAsExpression(), null, requestedResultType, new Object[1]));
@@ -212,8 +211,8 @@ class AssignGenerator extends DefaultActivityGenerator {
      */
     private RValue compileExtensionVal(ExtensionVal extVal) {
         OAssign.DirectRef dref = new OAssign.DirectRef(_context.getOProcess());
-        dref.variable = _context.resolveVariable(extVal.getVariable());
-        dref.elName =  extVal.getExtension();
+        dref.setVariable(_context.resolveVariable(extVal.getVariable()));
+        dref.setElName(extVal.getExtension());
         return dref;
     }
 
@@ -231,31 +230,31 @@ class AssignGenerator extends DefaultActivityGenerator {
         try {
             if (to.isPropertyVal()) {
                 OAssign.PropertyRef pref = new OAssign.PropertyRef(_context.getOProcess());
-                pref.variable = _context.resolveVariable(to.getAsPropertyVal().getVariable());
-                pref.propertyAlias = _context.resolvePropertyAlias(pref.variable, to.getAsPropertyVal().getProperty());
+                pref.setVariable(_context.resolveVariable(to.getAsPropertyVal().getVariable()));
+                pref.setPropertyAlias(_context.resolvePropertyAlias(pref.getVariable(), to.getAsPropertyVal().getProperty()));
                 return pref;
             } else if (to.isVariableVal()) {
                 VariableVal vv = to.getAsVariableVal();
                 OAssign.VariableRef vref = new OAssign.VariableRef(_context.getOProcess());
-                vref.variable = _context.resolveVariable(vv.getVariable());
-                OVarType rootNodeType = vref.variable.type;
+                vref.setVariable(_context.resolveVariable(vv.getVariable()));
+                OVarType rootNodeType = vref.getVariable().getType();
                 if (to.getAsVariableVal().getPart() != null) {
-                    vref.part = _context.resolvePart(vref.variable, vv.getPart());
-                    rootNodeType = vref.part.type;
+                    vref.setPart(_context.resolvePart(vref.getVariable(), vv.getPart()));
+                    rootNodeType = vref.getPart().getType();
                 }
                 if (to.getAsVariableVal().getHeader() != null) {
-                    vref.headerPart = _context.resolveHeaderPart(vref.variable, vv.getHeader());
-                    if (vref.headerPart == null)
-                        vref.headerPart = new OMessageVarType.Part(_context.getOProcess(), to.getAsVariableVal().getHeader(), null);
-                    rootNodeType = vref.headerPart.type;
+                    vref.setHeaderPart(_context.resolveHeaderPart(vref.getVariable(), vv.getHeader()));
+                    if (vref.getHeaderPart() == null)
+                        vref.setHeaderPart(new org.apache.ode.bpel.obj.OMessageVarType.Part(_context.getOProcess() , to.getAsVariableVal().getHeader() , null));
+                    rootNodeType = vref.getHeaderPart().getType();
                 }
                 resultType[0] = rootNodeType;
                 if (vv.getLocation() != null && vv.getLocation().getExpression() != null)
-                    vref.location = _context.compileExpr(vv.getLocation(), rootNodeType, null, resultType);
+                    vref.setLocation(_context.compileExpr(vv.getLocation(), rootNodeType, null, resultType));
                 return vref;
             } else if (to.isPartnerLinkVal()) {
                 OAssign.PartnerLinkRef plref = new OAssign.PartnerLinkRef(_context.getOProcess());
-                plref.partnerLink = _context.resolvePartnerLink(to.getAsPartnerLinkVal().getPartnerLink());
+                plref.setPartnerLink(_context.resolvePartnerLink(to.getAsPartnerLinkVal().getPartnerLink()));
                 return plref;
             } else if (to.getAsExpression() != null){
                 return new OAssign.LValueExpression(_context.getOProcess(), _context

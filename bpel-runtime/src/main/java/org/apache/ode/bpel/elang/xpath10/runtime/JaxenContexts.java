@@ -33,17 +33,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.elang.XslRuntimeUriResolver;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10ExpressionBPEL20;
+import org.apache.ode.bpel.elang.xpath10.obj.OXPath10Expression;
+import org.apache.ode.bpel.elang.xpath10.obj.OXPath10ExpressionBPEL20;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OVarType;
-import org.apache.ode.bpel.o.OXsdTypeVarType;
-import org.apache.ode.bpel.o.OXslSheet;
+import org.apache.ode.bpel.obj.OLink;
+import org.apache.ode.bpel.obj.OMessageVarType;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.OScope;
+import org.apache.ode.bpel.obj.OVarType;
+import org.apache.ode.bpel.obj.OXsdTypeVarType;
+import org.apache.ode.bpel.obj.OXslSheet;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.xsl.XslTransformHandler;
 import org.jaxen.Context;
@@ -117,15 +117,15 @@ class JaxenContexts implements FunctionContext, VariableContext {
         if ((namespaceURI != null)) {
             QName fnQName = new QName(namespaceURI, localName);
 
-            if (fnQName.equals(_oxpath.qname_getVariableProperty))
+            if (fnQName.equals(_oxpath.getQname_getVariableProperty()))
                 return _getVariableProperty;
-            if (fnQName.equals(_oxpath.qname_getVariableData))
+            if (fnQName.equals(_oxpath.getQname_getVariableData()))
                 return _getVariableData;
-            if (fnQName.equals(_oxpath.qname_getLinkStatus))
+            if (fnQName.equals(_oxpath.getQname_getLinkStatus()))
                 return _getLinkStatus;
             if (_oxpath instanceof OXPath10ExpressionBPEL20) {
                 OXPath10ExpressionBPEL20 oxpath20 = (OXPath10ExpressionBPEL20) _oxpath;
-                if (fnQName.equals(oxpath20.qname_doXslTransform)) {
+                if (fnQName.equals(oxpath20.getQname_doXslTransform())) {
                     return _doXslTransform;
                 }
             }
@@ -159,8 +159,8 @@ class JaxenContexts implements FunctionContext, VariableContext {
         }
 
         OXPath10ExpressionBPEL20 expr = (OXPath10ExpressionBPEL20)_oxpath;
-        if(expr.isJoinExpression){
-            OLink olink = _oxpath.links.get(localName);
+        if(expr.isIsJoinExpression()){
+            OLink olink = _oxpath.getLinks().get(localName);
 
             try {
                 return _xpathEvalCtx.isLinkActive(olink) ? Boolean.TRUE : Boolean.FALSE;
@@ -178,44 +178,44 @@ class JaxenContexts implements FunctionContext, VariableContext {
                 varName = localName.substring(0, dotloc);
                 partName = localName.substring(dotloc + 1);
             }
-            OScope.Variable variable = _oxpath.vars.get(varName);
-            OMessageVarType.Part part = partName == null ? null : ((OMessageVarType)variable.type).parts.get(partName);
+            OScope.Variable variable = _oxpath.getVars().get(varName);
+            OMessageVarType.Part part = partName == null ? null : ((OMessageVarType)variable.getType()).getParts().get(partName);
 
             try{
                 Node variableNode = _xpathEvalCtx.readVariable(variable, part);
                 if (variableNode == null)
                     throw new WrappedFaultException.JaxenUnresolvableException(
-                            new FaultException(variable.getOwner().constants.qnSelectionFailure,
+                            new FaultException(variable.getOwner().getConstants().getQnSelectionFailure(),
                                     "Unknown variable " + localName));
-                OVarType type = variable.type;
+                OVarType type = variable.getType();
                 if (type instanceof OMessageVarType) {
-                    OMessageVarType.Part typePart = ((OMessageVarType)type).parts.get(partName);
+                    OMessageVarType.Part typePart = ((OMessageVarType)type).getParts().get(partName);
                     if (typePart == null) {
                         throw new WrappedFaultException.JaxenUnresolvableException(
-                                new FaultException(variable.getOwner().constants.qnSelectionFailure,
+                                new FaultException(variable.getOwner().getConstants().getQnSelectionFailure(),
                                         "Unknown part " + partName + " for variable " + localName));
                     }
-                    type = typePart.type;
+                    type = typePart.getType();
                 }
 
-                if (_xpathEvalCtx.narrowTypes() && type instanceof OXsdTypeVarType && ((OXsdTypeVarType)type).simple) {
+                if (_xpathEvalCtx.narrowTypes() && type instanceof OXsdTypeVarType && ((OXsdTypeVarType)type).isSimple()) {
                 	String value = variableNode.getTextContent();
                 	OXsdTypeVarType theType = (OXsdTypeVarType)type;
 
-                    // cast booleans to boolean
-                    if (BOOLEAN.equals(theType.xsdType)) {
+                        // cast booleans to boolean
+                	if (BOOLEAN.equals(theType.getXsdType())) {
                         return new Boolean(value) ;
                     }
 
                     // and numbers to numbers (XPath only understands Double, so Double it shall be.
-                    if (INT.equals(theType.xsdType) || UNSIGNED_SHORT.equals(theType.xsdType) ||
-                            INTEGER.equals(theType.xsdType) ||
-                            LONG.equals(theType.xsdType) || UNSIGNED_INT.equals(theType.xsdType) ||
-                            SHORT.equals(theType.xsdType) || UNSIGNED_BYTE.equals(theType.xsdType) ||
-                            BYTE.equals(theType.xsdType) ||
-                            DECIMAL.equals(theType.xsdType) ||
-                            FLOAT.equals(theType.xsdType) ||
-                            DOUBLE.equals(theType.xsdType)
+                    if (INT.equals(theType.getXsdType()) || UNSIGNED_SHORT.equals(theType.getXsdType()) ||
+                            INTEGER.equals(theType.getXsdType()) ||
+                            LONG.equals(theType.getXsdType()) || UNSIGNED_INT.equals(theType.getXsdType()) ||
+                            SHORT.equals(theType.getXsdType()) || UNSIGNED_BYTE.equals(theType.getXsdType()) ||
+                            BYTE.equals(theType.getXsdType()) ||
+                            DECIMAL.equals(theType.getXsdType()) ||
+                            FLOAT.equals(theType.getXsdType()) ||
+                            DOUBLE.equals(theType.getXsdType())
                             ) {
                         return new Double(value);
                     }
@@ -254,9 +254,9 @@ class JaxenContexts implements FunctionContext, VariableContext {
             }
 
             try {
-                Node ret = _xpathEvalCtx.readVariable(sig.variable, sig.part);
-                if (sig.location != null)
-                    ret = _xpathEvalCtx.evaluateQuery(ret, sig.location);
+                Node ret = _xpathEvalCtx.readVariable(sig.getVariable(), sig.getPart());
+                if (sig.getLocation() != null)
+                    ret = _xpathEvalCtx.evaluateQuery(ret, sig.getLocation());
 
                 if (__log.isDebugEnabled()) {
                     __log.debug("bpws:getVariableData(" + args +  ")' = " + ret);
@@ -287,8 +287,8 @@ class JaxenContexts implements FunctionContext, VariableContext {
                 throw new FunctionCallException("missing required arguments");
             }
 
-            OScope.Variable var = _oxpath.vars.get(args.get(0));
-            OProcess.OProperty property = _oxpath.properties.get(args.get(1));
+            OScope.Variable var = _oxpath.getVars().get(args.get(0));
+            OProcess.OProperty property = _oxpath.getProperties().get(args.get(1));
 
             if (__log.isDebugEnabled()) {
                 __log.debug("function call:'bpws:getVariableProperty(" + var + ","
@@ -309,7 +309,7 @@ class JaxenContexts implements FunctionContext, VariableContext {
                 throws FunctionCallException {
             assert args.size() == 1;
 
-            OLink olink = _oxpath.links.get(args.get(0));
+            OLink olink = _oxpath.getLinks().get(args.get(0));
 
             try {
                 return _xpathEvalCtx.isLinkActive(olink) ? Boolean.TRUE : Boolean.FALSE;
@@ -337,7 +337,7 @@ class JaxenContexts implements FunctionContext, VariableContext {
                 if (args.get(1) instanceof List) {
                     List elmts = (List)args.get(1);
                     if (elmts.size() != 1) throw new WrappedFaultException.JaxenFunctionException(
-                            new FaultException(_oxpath.getOwner().constants.qnXsltInvalidSource,
+                            new FaultException(_oxpath.getOwner().getConstants().getQnXsltInvalidSource(),
                                     "Second parameter of the bpws:doXslTransform function MUST point to a single " +
                                             "element node."));
                     varElmt = (Element) elmts.get(0);
@@ -350,7 +350,7 @@ class JaxenContexts implements FunctionContext, VariableContext {
                 }
             } catch (ClassCastException e) {
                 throw new WrappedFaultException.JaxenFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnXsltInvalidSource,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnXsltInvalidSource(),
                                 "Second parameter of the bpws:doXslTransform function MUST point to a single " +
                                         "element node."));
             }
@@ -369,7 +369,7 @@ class JaxenContexts implements FunctionContext, VariableContext {
 
             if (!(varElmt instanceof Element)) {
                 throw new WrappedFaultException.JaxenFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnXsltInvalidSource,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnXsltInvalidSource(),
                                 "Second parameter of the bpws:doXslTransform function MUST point to a single " +
                                         "element node."));
             }
@@ -378,7 +378,7 @@ class JaxenContexts implements FunctionContext, VariableContext {
             if (args.size() > 2) {
                 parametersMap = new HashMap<QName, Object>();
                 for (int idx = 2; idx < args.size(); idx+=2) {
-                    QName keyQName = _oxpath.namespaceCtx.derefQName((String) args.get(idx));
+                    QName keyQName = _oxpath.getNamespaceCtx().derefQName((String) args.get(idx));
                     parametersMap.put(keyQName, args.get(idx + 1));
                 }
             }
@@ -389,12 +389,12 @@ class JaxenContexts implements FunctionContext, VariableContext {
             DOMSource source = new DOMSource(varDoc);
             Object result;
             XslRuntimeUriResolver resolver = new XslRuntimeUriResolver(_oxpath, _xpathEvalCtx.getBaseResourceURI());
-            XslTransformHandler.getInstance().cacheXSLSheet(_xpathEvalCtx.getProcessQName(), xslUri, xslSheet.sheetBody, resolver);
+            XslTransformHandler.getInstance().cacheXSLSheet(_xpathEvalCtx.getProcessQName(), xslUri, xslSheet.getSheetBody(), resolver);
             try {
                 result = XslTransformHandler.getInstance().transform(_xpathEvalCtx.getProcessQName(), xslUri, source, parametersMap, resolver);
             } catch (Exception e) {
                 throw new WrappedFaultException.JaxenFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnSubLanguageExecutionFault,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnSubLanguageExecutionFault(),
                                 e.toString()));
             }
             return result;

@@ -34,13 +34,13 @@ import net.sf.saxon.value.Value;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10ExpressionBPEL20;
+import org.apache.ode.bpel.elang.xpath10.obj.OXPath10ExpressionBPEL20;
 import org.apache.ode.bpel.elang.xpath20.compiler.WrappedResolverException;
 import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OXsdTypeVarType;
+import org.apache.ode.bpel.obj.OLink;
+import org.apache.ode.bpel.obj.OMessageVarType;
+import org.apache.ode.bpel.obj.OScope;
+import org.apache.ode.bpel.obj.OXsdTypeVarType;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.w3c.dom.Node;
@@ -84,8 +84,8 @@ public class JaxpVariableResolver implements XPathVariableResolver {
         }
 
         OXPath10ExpressionBPEL20 expr = _oxpath;
-        if (expr.isJoinExpression) {
-            OLink olink = _oxpath.links.get(variableName.getLocalPart());
+        if (expr.isIsJoinExpression()) {
+            OLink olink = _oxpath.getLinks().get(variableName.getLocalPart());
 
             try {
                 return _ectx.isLinkActive(olink) ? Boolean.TRUE : Boolean.FALSE;
@@ -103,18 +103,18 @@ public class JaxpVariableResolver implements XPathVariableResolver {
                 varName = variableName.getLocalPart().substring(0, dotloc);
                 partName = variableName.getLocalPart().substring(dotloc + 1);
             }
-            OScope.Variable variable = _oxpath.vars.get(varName);
-            OMessageVarType.Part part = partName == null ? null : ((OMessageVarType) variable.type).parts.get(partName);
+            OScope.Variable variable = _oxpath.getVars().get(varName);
+            OMessageVarType.Part part = partName == null ? null : ((OMessageVarType) variable.getType()).getParts().get(partName);
 
             try {
                 final Node variableNode = _ectx.readVariable(variable, part);
                 if (variableNode == null)
-                    throw new FaultException(variable.getOwner().constants.qnSelectionFailure, "Unknown variable " + variableName.getLocalPart());
+                    throw new FaultException(variable.getOwner().getConstants().getQnSelectionFailure(), "Unknown variable " + variableName.getLocalPart());
                 if (_ectx.narrowTypes()) {
-                    if (variable.type instanceof OXsdTypeVarType && ((OXsdTypeVarType) variable.type).simple)
-                        return getSimpleContent(variableNode, ((OXsdTypeVarType) variable.type).xsdType);
-                    if (part != null && part.type instanceof OXsdTypeVarType && ((OXsdTypeVarType) part.type).simple)
-                        return getSimpleContent(variableNode, ((OXsdTypeVarType) part.type).xsdType);
+                    if (variable.getType() instanceof OXsdTypeVarType && ((OXsdTypeVarType) variable.getType()).isSimple())
+                        return getSimpleContent(variableNode, ((OXsdTypeVarType) variable.getType()).getXsdType());
+                    if (part != null && part.getType() instanceof OXsdTypeVarType && ((OXsdTypeVarType) part.getType()).isSimple())
+                        return getSimpleContent(variableNode, ((OXsdTypeVarType) part.getType()).getXsdType());
                 }
 
                 // Saxon used to expect a node list, but now a regular node will suffice.

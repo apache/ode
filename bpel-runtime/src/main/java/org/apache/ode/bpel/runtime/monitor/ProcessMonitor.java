@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.runtime.monitor;
 
-import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.obj.OProcess;
 
 
 /**

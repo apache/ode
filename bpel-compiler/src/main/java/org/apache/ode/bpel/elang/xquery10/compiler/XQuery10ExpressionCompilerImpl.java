@@ -57,16 +57,16 @@ import org.apache.ode.bpel.elang.xpath20.compiler.Constants;
 import org.apache.ode.bpel.elang.xpath20.compiler.JaxpFunctionResolver;
 import org.apache.ode.bpel.elang.xpath20.compiler.JaxpVariableResolver;
 import org.apache.ode.bpel.elang.xpath20.compiler.WrappedResolverException;
-import org.apache.ode.bpel.elang.xquery10.o.OXQuery10ExpressionBPEL20;
-import org.apache.ode.bpel.o.OConstantVarType;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OLValueExpression;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OVarType;
-import org.apache.ode.bpel.o.OXsdTypeVarType;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
+import org.apache.ode.bpel.elang.xquery10.obj.OXQuery10ExpressionBPEL20;
+import org.apache.ode.bpel.obj.OConstantVarType;
+import org.apache.ode.bpel.obj.OElementVarType;
+import org.apache.ode.bpel.obj.OExpression;
+import org.apache.ode.bpel.obj.OLValueExpression;
+import org.apache.ode.bpel.obj.OMessageVarType;
+import org.apache.ode.bpel.obj.OScope;
+import org.apache.ode.bpel.obj.OVarType;
+import org.apache.ode.bpel.obj.OXsdTypeVarType;
+import org.apache.ode.bpel.obj.OMessageVarType.Part;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.Namespaces;
@@ -139,7 +139,7 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
             throws CompilationException {
         OXQuery10ExpressionBPEL20 oexp = new OXQuery10ExpressionBPEL20(_compilerContext.getOProcess(), _qnVarData,
                 _qnVarProp, _qnLinkStatus, _qnXslTransform, isJoinCondition);
-        oexp.namespaceCtx = xquery.getNamespaceContext();
+        oexp.setNamespaceCtx(xquery.getNamespaceContext());
         doJaxpCompile(oexp, xquery);
         return oexp;
     }
@@ -210,7 +210,7 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
                 if (variable == null) {
                     continue;
                 }
-                OVarType type = variable.type;
+                OVarType type = variable.getType();
                 QName nameQName = getNameQName(variableName);
                 QName typeQName = getTypeQName(variableName, type);
                 variableTypes.put(nameQName, typeQName);
@@ -224,11 +224,11 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
             }
 
             // Add implicit declarations as prolog to the user-defined XQuery
-            out.xquery = declarations.toString() + xqueryStr;
+            out.setXquery((declarations.toString()) + xqueryStr);
 
             // Check the XQuery for compilation errors
             xqconn.setStaticContext(staticContext);
-            XQPreparedExpression exp = xqconn.prepareExpression(out.xquery);
+            XQPreparedExpression exp = xqconn.prepareExpression(out.getXquery());
 
             // Pre-evaluate variables and functions by executing query
             node.setUserData(XQuery10BpelFunctions.USER_DATA_KEY_FUNCTION_RESOLVER,
@@ -318,7 +318,7 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
     private OScope.Variable getVariable(List<OScope.Variable> variables, String variableName) {
         String declaredVariable = getVariableDeclaredName(variableName);
         for (OScope.Variable variable : variables) {
-            if (variable.name.equals(declaredVariable)) {
+            if (variable.getName().equals(declaredVariable)) {
                 return variable;
             }
         }
@@ -353,14 +353,14 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
         if (type instanceof OConstantVarType) {
             typeQName = new QName(Namespaces.XML_SCHEMA, "string", "xs");
         } else if (type instanceof OElementVarType) {
-            typeQName = ((OElementVarType) type).elementType;
+            typeQName = ((OElementVarType) type).getElementType();
         } else if (type instanceof OMessageVarType) {
-            Part part = ((OMessageVarType) type).parts.get(getVariablePartName(variableName));
+            Part part = ((OMessageVarType) type).getParts().get(getVariablePartName(variableName));
             if (part != null) {
-                typeQName = getTypeQName(variableName, part.type);
+                typeQName = getTypeQName(variableName, part.getType());
             }
         } else if (type instanceof OXsdTypeVarType) {
-            typeQName = ((OXsdTypeVarType) type).xsdType;
+            typeQName = ((OXsdTypeVarType) type).getXsdType();
         }
         return typeQName;
     }

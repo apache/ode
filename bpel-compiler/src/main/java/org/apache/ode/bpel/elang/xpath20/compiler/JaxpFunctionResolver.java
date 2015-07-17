@@ -30,10 +30,10 @@ import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.elang.xpath10.compiler.XPathMessages;
 import org.apache.ode.bpel.elang.xpath10.compiler.XslCompileUriResolver;
-import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OXslSheet;
+import org.apache.ode.bpel.elang.xpath20.obj.OXPath20ExpressionBPEL20;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.OScope;
+import org.apache.ode.bpel.obj.OXslSheet;
 import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.msg.MessageBundle;
@@ -124,7 +124,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             }
             String varName = (String) params.get(0);
             OScope.Variable v = _cctx.resolveVariable(varName);
-            _out.vars.put(varName, v);
+            _out.getVars().put(varName, v);
 
             String propName = (String) params.get(1);
             QName qname = _nsContext.derefQName(propName);
@@ -137,8 +137,8 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             // Make sure we can...
             _cctx.resolvePropertyAlias(v, qname);
 
-            _out.properties.put(propName, property);
-            _out.vars.put(varName, v);
+            _out.getProperties().put(propName, property);
+            _out.getVars().put(varName, v);
             return "";
         }
     }
@@ -153,13 +153,13 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             String xslUri = (String) params.get(0);
             OXslSheet xslSheet = _cctx.compileXslt(xslUri);
             try {
-                XslTransformHandler.getInstance().parseXSLSheet(_cctx.getOProcess().getQName(), xslSheet.uri, xslSheet.sheetBody,
+                XslTransformHandler.getInstance().parseXSLSheet(_cctx.getOProcess().getQName(), xslSheet.getUri(), xslSheet.getSheetBody(),
                         new XslCompileUriResolver(_cctx, _out));
             } catch (Exception e) {
                 throw new CompilationException(__msgs.errXslCompilation(xslUri, e.toString()));
             }
 
-            _out.setXslSheet(xslSheet.uri, xslSheet);
+            _out.setXslSheet(xslSheet.getUri(), xslSheet);
             return "";
         }
     }

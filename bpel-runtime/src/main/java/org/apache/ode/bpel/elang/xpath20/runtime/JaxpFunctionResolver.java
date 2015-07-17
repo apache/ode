@@ -49,16 +49,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.elang.XslRuntimeUriResolver;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10ExpressionBPEL20;
+import org.apache.ode.bpel.elang.xpath10.obj.OXPath10Expression;
+import org.apache.ode.bpel.elang.xpath10.obj.OXPath10ExpressionBPEL20;
 import org.apache.ode.bpel.elang.xpath20.compiler.Constants;
-import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
+import org.apache.ode.bpel.elang.xpath20.obj.OXPath20ExpressionBPEL20;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OXslSheet;
+import org.apache.ode.bpel.obj.OLink;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.OScope;
+import org.apache.ode.bpel.obj.OXslSheet;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.URITemplate;
@@ -153,7 +153,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             if (args.size() != 1)
                 throw new XPathFunctionException(new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "getLinkStatusInvalidSource"), "Illegal Arguments"));
 
-            OLink olink = _oxpath.links.get(args.get(0));
+            OLink olink = _oxpath.getLinks().get(args.get(0));
             try {
                 return _ectx.isLinkActive(olink) ? Boolean.TRUE : Boolean.FALSE;
             } catch (FaultException e) {
@@ -181,9 +181,9 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             }
 
             try {
-                Node ret = _ectx.readVariable(sig.variable, sig.part);
-                if (sig.location != null)
-                    ret = _ectx.evaluateQuery(ret, sig.location);
+                Node ret = _ectx.readVariable(sig.getVariable(), sig.getPart());
+                if (sig.getLocation() != null)
+                    ret = _ectx.evaluateQuery(ret, sig.getLocation());
 
                 if (__log.isDebugEnabled()) {
                     __log.debug("bpws:getVariableData(" + args + ")' = " + ret);
@@ -206,8 +206,8 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 throw new XPathFunctionException(new FaultException(new QName(Namespaces.ODE_EXTENSION_NS, "getVariablePropertyInvalidSource"), "Missing required arguments"));
             }
 
-            OScope.Variable var = _oxpath.vars.get(args.get(0));
-            OProcess.OProperty property = _oxpath.properties.get(args.get(1));
+            OScope.Variable var = _oxpath.getVars().get(args.get(0));
+            OProcess.OProperty property = _oxpath.getProperties().get(args.get(1));
 
             if (__log.isDebugEnabled()) {
                 __log.debug("function call:'bpws:getVariableProperty(" + var + ","
@@ -240,7 +240,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 if (args.get(1) instanceof List) {
                     List elmts = (List) args.get(1);
                     if (elmts.size() != 1) throw new XPathFunctionException(
-                            new FaultException(_oxpath.getOwner().constants.qnXsltInvalidSource,
+                            new FaultException(_oxpath.getOwner().getConstants().getQnXsltInvalidSource(),
                                     "Second parameter of the bpws:doXslTransform function MUST point to a single " +
                                             "element node."));
                     varElmt = (Element) elmts.get(0);
@@ -251,7 +251,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 }
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnXsltInvalidSource,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnXsltInvalidSource(),
                                 "Second parameter of the bpws:doXslTransform function MUST point to a single " +
                                         "element node."));
             }
@@ -270,7 +270,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
 
             if (!(varElmt instanceof Element)) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnXsltInvalidSource,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnXsltInvalidSource(),
                                 "Second parameter of the bpws:doXslTransform function MUST point to a single " +
                                         "element node."));
             }
@@ -279,7 +279,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             if (args.size() > 2) {
                 parametersMap = new HashMap<QName, Object>();
                 for (int idx = 2; idx < args.size(); idx += 2) {
-                    QName keyQName = _oxpath.namespaceCtx.derefQName((String) args.get(idx));
+                    QName keyQName = _oxpath.getNamespaceCtx().derefQName((String) args.get(idx));
                     Object paramElmt;
                     if (args.get(idx + 1) instanceof NodeWrapper) {
                         Element tmpElmt = (Element) ((NodeWrapper) args.get(idx + 1)).getUnderlyingNode();
@@ -305,13 +305,13 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             DOMSource source = new DOMSource(varDoc);
             Object result;
             XslRuntimeUriResolver resolver = new XslRuntimeUriResolver(_oxpath, _ectx.getBaseResourceURI());
-            XslTransformHandler.getInstance().cacheXSLSheet(_ectx.getProcessQName(), xslUri, xslSheet.sheetBody, resolver);
+            XslTransformHandler.getInstance().cacheXSLSheet(_ectx.getProcessQName(), xslUri, xslSheet.getSheetBody(), resolver);
             try {
                 result = XslTransformHandler.getInstance().transform(_ectx.getProcessQName(), xslUri, source, parametersMap, resolver);
             } catch (Exception e) {
             	__log.warn("Could not transform XSL sheet " + args.get(0) + " on element " + DOMUtils.domToString(varElmt), e);
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnSubLanguageExecutionFault,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnSubLanguageExecutionFault(),
                                 e.toString()));
             }
             if(result instanceof Node)
@@ -334,7 +334,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 if (args.get(0) instanceof List) {
                     List elmts = (List) args.get(0);
                     if (elmts.size() != 1) throw new XPathFunctionException(
-                            new FaultException(_oxpath.getOwner().constants.qnXsltInvalidSource,
+                            new FaultException(_oxpath.getOwner().getConstants().getQnXsltInvalidSource(),
                                     "The bpws:domToString function MUST be passed a single " +
                                             "element node."));
                     varElmt = (Element) elmts.get(0);
@@ -347,7 +347,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 }
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnXsltInvalidSource,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnXsltInvalidSource(),
                                 "The bpws:domToString function MUST be passed a single " +
                                         "element node."));
             }
@@ -536,7 +536,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 if (args.get(0) instanceof List) {
                     List elmts = (List) args.get(0);
                     if (elmts.size() != 1) throw new XPathFunctionException(
-                            new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                            new FaultException(_oxpath.getOwner().getConstants().getQnSelectionFailure(),
                                     "The bpws:insertInto function MUST be passed a single " +
                                             "element node."));
                     parentElmt = (Element) elmts.get(0);
@@ -563,11 +563,11 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnInvalidExpressionValue(),
                                 "Invalid argument: URI Template expected. " + args.get(0), e));
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnSelectionFailure(),
                                 "The bpws:insertInto function MUST be passed a single " +
                                         "element node."));
             }
@@ -641,11 +641,11 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnInvalidExpressionValue(),
                                 "Invalid argument: URI Template expected. " + siblingsArg, e));
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnSelectionFailure(),
                                 "The bpws:insertAfter function MUST be passed a single " +
                                         "element node."));
             }
@@ -718,11 +718,11 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnInvalidExpressionValue(),
                                 "Invalid argument: URI Template expected. " + childArg, e));
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnSelectionFailure(),
                                 "The bpws:insertBefore function MUST be passed a single " +
                                         "element node."));
             }
@@ -760,7 +760,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 if (args.get(0) instanceof List) {
                     List elmts = (List) args.get(0);
                     if (elmts.size() != 1) throw new XPathFunctionException(
-                            new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                            new FaultException(_oxpath.getOwner().getConstants().getQnSelectionFailure(),
                                     "The bpws:insertAsFirstInto function MUST be passed a single " +
                                             "element node."));
                     targetElmt = (Element) elmts.get(0);
@@ -786,11 +786,11 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnInvalidExpressionValue(),
                                 "Invalid argument: URI Template expected. " + args.get(0), e));
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnSelectionFailure(),
                                 "The bpws:insertAsFirstInto function MUST be passed a single " +
                                         "element node."));
             }
@@ -819,7 +819,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 if (args.get(0) instanceof List) {
                     List elmts = (List) args.get(0);
                     if (elmts.size() != 1) throw new XPathFunctionException(
-                            new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                            new FaultException(_oxpath.getOwner().getConstants().getQnSelectionFailure(),
                                     "The bpws:insertAsLastInto function MUST be passed a single " +
                                             "element node."));
                     targetElmt = (Element) elmts.get(0);
@@ -845,11 +845,11 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnInvalidExpressionValue(),
                                 "Invalid argument: URI Template expected. " + args.get(0), e));
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnSelectionFailure(),
                                 "The bpws:insertAsLastInto function MUST be passed a single " +
                                         "element node."));
             }
@@ -901,11 +901,11 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnInvalidExpressionValue(),
                                 "Invalid argument: URI Template expected. " + delete, e));
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnSelectionFailure(),
                                 "The bpws:delete function MUST be passed a valid " +
                                         "element node."));
             }
@@ -915,7 +915,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                     parentElmt = (Element) targetNode.getParentNode();
                 } else if (!parentElmt.isSameNode((Element) targetNode.getParentNode())) {
                     throw new XPathFunctionException(
-                            new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                            new FaultException(_oxpath.getOwner().getConstants().getQnSelectionFailure(),
                                     "The bpws:delete function MUST be passed nodes that have " +
                                             "the same parent."));
                 }
@@ -971,7 +971,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 if (args.get(0) instanceof List) {
                     List elmts = (List) args.get(0);
                     if (elmts.size() != 1) throw new XPathFunctionException(
-                            new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                            new FaultException(_oxpath.getOwner().getConstants().getQnSelectionFailure(),
                                     "The bpws:rename function MUST be passed a single " +
                                             "element node."));
                     targetElmt = (Element) elmts.get(0);
@@ -991,7 +991,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 } else if (args.get(1) instanceof List) {
                     List elmts = (List) args.get(1);
                     if (elmts.size() != 1) throw new XPathFunctionException(
-                            new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                            new FaultException(_oxpath.getOwner().getConstants().getQnSelectionFailure(),
                                     "The bpws:rename function MUST be passed a single " +
                                             "element node."));
                     Element nameElmt = (Element) elmts.get(0);
@@ -1064,11 +1064,11 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnInvalidExpressionValue(),
                                 "Invalid argument: URI Template expected. " + args.get(0), e));
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnSelectionFailure(),
                                 "The bpws:rename function MUST be passed a single " +
                                         "element node."));
             }
@@ -1117,7 +1117,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 if (args.get(0) instanceof List) {
                     List elmts = (List) args.get(0);
                     if (elmts.size() != 1) throw new XPathFunctionException(
-                            new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                            new FaultException(_oxpath.getOwner().getConstants().getQnSelectionFailure(),
                                     "The bpws:process-property function MUST be passed a single " +
                                             "element node."));
                     if (elmts.get(0) instanceof Element) {
@@ -1137,7 +1137,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                     if (stringValue.indexOf(":") > 0) {
                         String prefix = stringValue.substring(0, stringValue.indexOf(":"));
                         String localPart = stringValue.substring(stringValue.indexOf(":") + 1);
-                        String namespaceUri = _oxpath.namespaceCtx.getNamespaceURI(prefix);
+                        String namespaceUri = _oxpath.getNamespaceCtx().getNamespaceURI(prefix);
                         propertyName = new QName(namespaceUri, localPart, prefix);
                     } else {
                         propertyName = new QName(stringValue);
@@ -1154,11 +1154,11 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnInvalidExpressionValue(),
                                 "Invalid argument: URI Template expected. " + args.get(0), e));
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnSelectionFailure(),
                                 "The bpws:process-property function MUST be passed a single " +
                                         "element node."));
             }
@@ -1181,7 +1181,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 if (args.get(0) instanceof List) {
                     List elmts = (List) args.get(0);
                     if (elmts.size() != 1) throw new XPathFunctionException(
-                            new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                            new FaultException(_oxpath.getOwner().getConstants().getQnSelectionFailure(),
                                     "The bpws:dayTimeDuration function MUST be passed a single " +
                                             "element node."));
                     if (elmts.get(0) instanceof Element) {
@@ -1205,11 +1205,11 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnInvalidExpressionValue(),
                                 "Invalid argument: URI Template expected. " + args.get(0), e));
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnSelectionFailure(),
                                 "The bpws:dayTimeDuration function MUST be passed a single " +
                                         "element node."));
             }
@@ -1232,7 +1232,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 if (args.get(0) instanceof List) {
                     List elmts = (List) args.get(0);
                     if (elmts.size() != 1) throw new XPathFunctionException(
-                            new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                            new FaultException(_oxpath.getOwner().getConstants().getQnSelectionFailure(),
                                     "The bpws:yearMonthDuration function MUST be passed a single " +
                                             "element node."));
                     if (elmts.get(0) instanceof Element) {
@@ -1256,11 +1256,11 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
                 }
             } catch (IllegalArgumentException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnInvalidExpressionValue,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnInvalidExpressionValue(),
                                 "Invalid argument: URI Template expected. " + args.get(0), e));
             } catch (ClassCastException e) {
                 throw new XPathFunctionException(
-                        new FaultException(_oxpath.getOwner().constants.qnSelectionFailure,
+                        new FaultException(_oxpath.getOwner().getConstants().getQnSelectionFailure(),
                                 "The bpws:yearMonthDuration function MUST be passed a single " +
                                         "element node."));
             }

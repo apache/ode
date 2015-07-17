@@ -12,15 +12,16 @@ import javax.xml.namespace.QName;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.elang.xpath10.compiler.XPath10ExpressionCompilerBPEL20;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
+import org.apache.ode.bpel.elang.xpath10.obj.OXPath10Expression;
 import org.apache.ode.bpel.elang.xpath20.runtime.MockCompilerContext;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.o.OProcess.OProperty;
-import org.apache.ode.bpel.o.OScope.Variable;
+import org.apache.ode.bpel.obj.OExpression;
+import org.apache.ode.bpel.obj.OLink;
+import org.apache.ode.bpel.obj.OMessageVarType.Part;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.OScope;
+import org.apache.ode.bpel.obj.OScope.Variable;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.NSContext;
 import org.junit.After;
@@ -67,7 +68,7 @@ public class XPath10ExpressionRuntimeTest implements EvaluationContext {
         OXPath10Expression exp = compile("number('/tns:Title/tns:Data')");
         NSContext context = new NSContext();
         context.register("tns", "http://foobar");
-        exp.namespaceCtx = context;
+        exp.setNamespaceCtx(context);
 
         Node retVal = _runtime.evaluateNode(exp, this);
 
@@ -75,65 +76,53 @@ public class XPath10ExpressionRuntimeTest implements EvaluationContext {
         assertEquals(String.valueOf(Double.NaN), retVal.getTextContent());
     }
 
-    @Override
     public Node readVariable(Variable variable, Part part)
             throws FaultException {
         return null;
     }
 
-    @Override
     public Node getPartData(Element message, Part part) throws FaultException {
         return null;
     }
 
-    @Override
-    public String readMessageProperty(Variable variable, OProperty property)
+    public String readMessageProperty(OScope.Variable variable, OProcess.OProperty property)
             throws FaultException {
         return null;
     }
 
-    @Override
     public boolean isLinkActive(OLink olink) throws FaultException {
         return false;
     }
 
-    @Override
     public Node getRootNode() {
         return null;
     }
 
-    @Override
     public Node evaluateQuery(Node root, OExpression expr)
             throws FaultException, EvaluationException {
         return null;
     }
 
-    @Override
     public Long getProcessId() {
         return null;
     }
 
-    @Override
     public QName getProcessQName() {
         return null;
     }
 
-    @Override
     public boolean narrowTypes() {
         return false;
     }
 
-    @Override
     public URI getBaseResourceURI() {
         return null;
     }
 
-    @Override
     public Node getPropertyValue(QName propertyName) {
         return null;
     }
 
-    @Override
     public Date getCurrentEventDateTime() {
         return null;
     }

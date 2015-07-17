@@ -24,13 +24,13 @@ import java.util.Date;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.elang.xpath10.compiler.XPathMessages;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10ExpressionBPEL20;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OVarType;
-import org.apache.ode.bpel.o.OXsdTypeVarType;
+import org.apache.ode.bpel.elang.xpath10.obj.OXPath10ExpressionBPEL20;
+import org.apache.ode.bpel.obj.OElementVarType;
+import org.apache.ode.bpel.obj.OLink;
+import org.apache.ode.bpel.obj.OMessageVarType;
+import org.apache.ode.bpel.obj.OScope;
+import org.apache.ode.bpel.obj.OVarType;
+import org.apache.ode.bpel.obj.OXsdTypeVarType;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.msg.MessageBundle;
@@ -70,18 +70,18 @@ public class JaxpVariableResolver implements XPathVariableResolver {
 
         try {
             String name = variableName.getLocalPart();
-            if(_oxpath.isJoinExpression) {
+            if(_oxpath.isIsJoinExpression()) {
                 // these resolve to links
                 OLink olink = _cctx.resolveLink(name);
-                _oxpath.links.put(name, olink);
+                _oxpath.getLinks().put(name, olink);
                 return Boolean.TRUE;
             } else {
                 int dot = name.indexOf('.');
                 if (dot != -1)
                     name = name.substring(0,dot);
                 OScope.Variable var = _cctx.resolveVariable(name);
-                _oxpath.vars.put(name, var);
-                return extractValue(var, var.type);
+                _oxpath.getVars().put(name, var);
+                return extractValue(var, var.getType());
             }
         } catch (CompilationException e) {
             throw new WrappedResolverException(e);
@@ -90,14 +90,14 @@ public class JaxpVariableResolver implements XPathVariableResolver {
 
     private Object extractValue(OScope.Variable var, OVarType varType) {
         if (varType instanceof OXsdTypeVarType) {
-            return generateFromType(((OXsdTypeVarType)varType).xsdType);
+            return generateFromType(((OXsdTypeVarType)varType).getXsdType());
         } else if (varType instanceof OElementVarType) {
-            return generateFromType(((OElementVarType)varType).elementType);
+            return generateFromType(((OElementVarType)varType).getElementType());
         } else if (varType instanceof OMessageVarType) {
             // MR That's an ugly hack but otherwise, xpath compilation doesn't work
-            if (((OMessageVarType)varType).parts.size() == 0)
-                throw new WrappedResolverException(__msgs.errExpressionMessageNoPart(var.name));
-            return extractValue(var, ((OMessageVarType)varType).parts.values().iterator().next().type);
+            if (((OMessageVarType)varType).getParts().size() == 0)
+                throw new WrappedResolverException(__msgs.errExpressionMessageNoPart(var.getName()));
+            return extractValue(var, ((OMessageVarType)varType).getParts().values().iterator().next().getType());
         }
         return "";
     }

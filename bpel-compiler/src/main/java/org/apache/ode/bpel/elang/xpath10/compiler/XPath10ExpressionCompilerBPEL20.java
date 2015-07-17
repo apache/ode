@@ -21,10 +21,10 @@ package org.apache.ode.bpel.elang.xpath10.compiler;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.compiler.bom.Expression;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10ExpressionBPEL20;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OLValueExpression;
+import org.apache.ode.bpel.elang.xpath10.obj.OXPath10Expression;
+import org.apache.ode.bpel.elang.xpath10.obj.OXPath10ExpressionBPEL20;
+import org.apache.ode.bpel.obj.OExpression;
+import org.apache.ode.bpel.obj.OLValueExpression;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.xsl.XslTransformHandler;
 
@@ -84,7 +84,7 @@ public class XPath10ExpressionCompilerBPEL20 extends XPath10ExpressionCompilerIm
                 _qnFnGetLinkStatus,
                 _qnDoXslTransform,
                 isJoinCondition);
-        oexp.namespaceCtx = xpath.getNamespaceContext();
+        oexp.setNamespaceCtx(xpath.getNamespaceContext());
         doJaxenCompile(oexp, xpath);
         return oexp;
     }

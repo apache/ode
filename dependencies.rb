@@ -78,6 +78,11 @@ GERONIMO            = struct(
 HIBERNATE           = [ "org.hibernate:hibernate-core:jar:3.3.2.GA", "javassist:javassist:jar:3.9.0.GA", "antlr:antlr:jar:2.7.6",
                         "asm:asm:jar:3.3.1", "cglib:cglib:jar:2.2", "net.sf.ehcache:ehcache:jar:1.2.3" ]
 HSQLDB              = "hsqldb:hsqldb:jar:1.8.0.7"
+JACKSON              = [ "com.fasterxml.jackson.core:jackson-core:jar:2.4.0", 
+                        "com.fasterxml.jackson.core:jackson-databind:jar:2.4.0",
+                        "com.fasterxml.jackson.core:jackson-annotations:jar:2.4.0",
+                        "com.fasterxml.jackson.dataformat:jackson-dataformat-smile:jar:2.4.0",
+                        "com.fasterxml.jackson.module:jackson-module-jaxb-annotations:jar:2.4.0"]
 JACOB               = "org.apache.ode:jacob:jar:2.0a-SNAPSHOT"
 JAVAX               = struct(
   :activation       =>"javax.activation:activation:jar:1.1",
@@ -104,6 +109,7 @@ KARAF               = [
                           :under=>"org.apache.felix", :version=>"0.6.1")
                       ]
 LOG4J               = "log4j:log4j:jar:1.2.17"
+OBJECT_DIFF         = "de.danielbechler:java-object-diff:jar:0.13.1"
 OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.2.3",
                        "net.sourceforge.serp:serp:jar:1.13.1"]
 

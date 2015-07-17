@@ -60,9 +60,9 @@ import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.intercept.ProcessCountThrottler;
 import org.apache.ode.bpel.intercept.ProcessSizeThrottler;
-import org.apache.ode.bpel.o.OConstants;
-import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.obj.OConstants;
+import org.apache.ode.bpel.obj.OPartnerLink;
+import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.runtime.InvalidProcessException;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
@@ -239,7 +239,7 @@ public class BpelEngineImpl implements BpelEngine {
             }
             {
                 OPartnerLink plink = (OPartnerLink) process.getOProcess().getChild(mexdao.getPartnerLinkModelId());
-                PortType ptype = plink.partnerRolePortType;
+                PortType ptype = plink.getPartnerRolePortType();
                 Operation op = plink.getPartnerRoleOperation(mexdao.getOperation());
                 // TODO: recover Partner's EPR
                 mex = createPartnerRoleMessageExchangeImpl(mexdao, ptype, op, plink, process);
@@ -253,7 +253,7 @@ public class BpelEngineImpl implements BpelEngine {
                     OPartnerLink plink = (OPartnerLink) child;
                     // the partner link might not be hydrated
                     if (plink != null) {
-                        PortType ptype = plink.myRolePortType;
+                        PortType ptype = plink.getMyRolePortType();
                         Operation op = plink.getMyRoleOperation(mexdao.getOperation());
                         mex.setPortOp(ptype, op);
                     }
@@ -766,7 +766,7 @@ public class BpelEngineImpl implements BpelEngine {
             return;
         }
         QName faultQName = null;
-        OConstants constants = process.getOProcess().constants;
+        OConstants constants = process.getOProcess().getConstants();
         if (constants != null) {
             Document document = DOMUtils.newDocument();
             Element faultElement = document.createElementNS(Namespaces.SOAP_ENV_NS, "Fault");
@@ -774,15 +774,15 @@ public class BpelEngineImpl implements BpelEngine {
             faultElement.appendChild(faultDetail);
             switch (causeCode) {
             case InvalidProcessException.TOO_MANY_PROCESSES_CAUSE_CODE:
-                faultQName = constants.qnTooManyProcesses;
+                faultQName = constants.getQnTooManyProcesses();
                 faultDetail.setTextContent("The total number of processes in use is over the limit.");
                 break;
             case InvalidProcessException.TOO_HUGE_PROCESSES_CAUSE_CODE:
-                faultQName = constants.qnTooHugeProcesses;
+                faultQName = constants.getQnTooHugeProcesses();
                 faultDetail.setTextContent("The total size of processes in use is over the limit");
                 break;
             case InvalidProcessException.TOO_MANY_INSTANCES_CAUSE_CODE:
-                faultQName = constants.qnTooManyInstances;
+                faultQName = constants.getQnTooManyInstances();
                 faultDetail.setTextContent("No more instances of the process allowed at start at this time.");
                 break;
             case InvalidProcessException.RETIRED_CAUSE_CODE:
@@ -797,12 +797,12 @@ public class BpelEngineImpl implements BpelEngine {
                         return;
                     }
                 }
-                faultQName = constants.qnRetiredProcess;
+                faultQName = constants.getQnRetiredProcess();
                 faultDetail.setTextContent("The process you're trying to instantiate has been retired.");
                 break;
             case InvalidProcessException.DEFAULT_CAUSE_CODE:
             default:
-                faultQName = constants.qnUnknownFault;
+                faultQName = constants.getQnUnknownFault();
                 break;
             }
             MexDaoUtil.setFaulted((MessageExchangeImpl) mex, faultQName, faultElement);

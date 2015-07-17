@@ -27,7 +27,7 @@ import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.compiler.api.ExpressionValidator;
 import org.apache.ode.bpel.compiler.bom.Process;
 import org.apache.ode.bpel.compiler.bom.Expression;
-import org.apache.ode.bpel.o.OVarType;
+import org.apache.ode.bpel.obj.OVarType;
 
 public class ExpressionValidatorFactory {
     private static final Log __log = LogFactory.getLog(ExpressionValidatorFactory.class);

@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
-import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.obj.OPartnerLink;
 
 /**
  * @author Matthieu Riou <mriou at apache dot org>

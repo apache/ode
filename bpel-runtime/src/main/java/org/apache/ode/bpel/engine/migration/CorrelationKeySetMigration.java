@@ -28,7 +28,7 @@ import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.runtime.Selector;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.CorrelationKeySet;
-import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

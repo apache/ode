@@ -21,3 +21,4 @@ test-output
 _buildr.rb
 derby.log
 Gemfile.lock
+spoon

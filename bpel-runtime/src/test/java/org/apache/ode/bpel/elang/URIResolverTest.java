@@ -27,7 +27,7 @@ import java.net.URI;
 
 import javax.xml.transform.Source;
 
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
+import org.apache.ode.bpel.elang.xpath10.obj.OXPath10Expression;
 import org.apache.ode.utils.DOMUtils;
 import org.junit.Ignore;
 import org.junit.Test;

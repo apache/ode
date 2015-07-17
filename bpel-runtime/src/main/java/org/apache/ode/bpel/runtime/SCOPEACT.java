@@ -29,9 +29,9 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OScope.Variable;
+import org.apache.ode.bpel.obj.OLink;
+import org.apache.ode.bpel.obj.OScope;
+import org.apache.ode.bpel.obj.OScope.Variable;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.LinkStatus;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
@@ -56,7 +56,7 @@ public class SCOPEACT extends ACTIVITY {
     }
 
     public void run() {
-        if (((OScope) _self.o).isolatedScope) {
+        if (((OScope) _self.o).isIsolatedScope()) {
             __log.debug("found ISOLATED scope, instance ISOLATEDGUARD");
             instance(new ISOLATEDGUARD(createLockList(), newChannel(Synch.class)));
 
@@ -66,7 +66,7 @@ public class SCOPEACT extends ACTIVITY {
 
             // Depending on whether we are ATOMIC or not, we'll need to create outgoing link status interceptors
             LinkFrame linkframe;
-            if (((OScope) _self.o).atomicScope && !_self.o.outgoingLinks.isEmpty()) {
+            if (((OScope) _self.o).isAtomicScope() && !_self.o.getOutgoingLinks().isEmpty()) {
                 Val linkInterceptorControl = newChannel(Val.class);
                 ParentScope psc = newChannel(ParentScope.class);
                 linkframe = createInterceptorLinkFrame();
@@ -91,11 +91,11 @@ public class SCOPEACT extends ACTIVITY {
         LinkedList<IsolationLock> requiredLocks = new LinkedList<IsolationLock>();
         OScope o = ((OScope) _self.o);
 
-        Set<Variable> vrs = new HashSet<Variable>(o.variableRd);
-        vrs.addAll(o.variableWr);
+        Set<Variable> vrs = new HashSet<Variable>(o.getVariableRd());
+        vrs.addAll(o.getVariableWr());
 
         for (Variable v : vrs)
-            requiredLocks.add(new IsolationLock(v, o.variableWr.contains(v), _scopeFrame.globals._varLocks.get(v)));
+            requiredLocks.add(new IsolationLock(v, o.getVariableWr().contains(v), _scopeFrame.globals._varLocks.get(v)));
 
         // Very important, we must sort the locks to prevent deadlocks.
         Collections.sort(requiredLocks);
@@ -110,7 +110,7 @@ public class SCOPEACT extends ACTIVITY {
      */
     private LinkFrame createInterceptorLinkFrame() {
         LinkFrame newframe = new LinkFrame(_linkFrame);
-        for (OLink outlink : _self.o.outgoingLinks) {
+        for (OLink outlink : _self.o.getOutgoingLinks()) {
             LinkInfo original = _linkFrame.resolve(outlink);
             LinkStatus newchannel = newChannel(LinkStatus.class);
             newframe.links.put(original.olink, new LinkInfo(original.olink, newchannel, newchannel));
@@ -197,7 +197,7 @@ public class SCOPEACT extends ACTIVITY {
          * @return
          */
         private boolean isDone() {
-            return (_statuses.keySet().size() < SCOPEACT.this._self.o.outgoingLinks.size());
+            return (_statuses.keySet().size() < SCOPEACT.this._self.o.getOutgoingLinks().size());
         }
     }
     
@@ -344,7 +344,7 @@ public class SCOPEACT extends ACTIVITY {
                 __log.debug("UNLOCKER: unlockAll: " + _locks);
             }
 
-            if (((OScope)SCOPEACT.this._self.o).atomicScope)
+            if (((OScope)SCOPEACT.this._self.o).isAtomicScope())
                 getBpelRuntimeContext().forceFlush();
                 
             for (IsolationLock il : _locks)

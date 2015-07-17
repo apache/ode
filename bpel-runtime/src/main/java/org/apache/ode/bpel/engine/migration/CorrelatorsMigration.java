@@ -23,7 +23,7 @@ import org.apache.ode.bpel.engine.BpelProcess;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
-import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.obj.OPartnerLink;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -45,7 +45,7 @@ public class CorrelatorsMigration implements Migration {
 
             for (OPartnerLink plink : process.getOProcess().getAllPartnerLinks()) {
                 if (plink.hasMyRole()) {
-                    for (Iterator opI = plink.myRolePortType.getOperations().iterator(); opI.hasNext();) {
+                    for (Iterator opI = plink.getMyRolePortType().getOperations().iterator(); opI.hasNext();) {
                         Operation op = (Operation)opI.next();
                         try {
                             CorrelatorDAO corr = processDao.getCorrelator(plink.getId() + "." + op.getName());

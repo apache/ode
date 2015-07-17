@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.compiler.api;
 
-import org.apache.ode.bpel.o.OVarType;
+import org.apache.ode.bpel.obj.OVarType;
 import org.apache.ode.bpel.compiler.bom.Process;
 import org.apache.ode.bpel.compiler.bom.Expression;
 

@@ -21,11 +21,11 @@ package org.apache.ode.bpel.runtime;
 import java.util.Set;
 
 import org.apache.ode.bpel.evt.ProcessInstanceStartedEvent;
-import org.apache.ode.bpel.o.OBase;
-import org.apache.ode.bpel.o.OFailureHandling;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OScope.Variable;
+import org.apache.ode.bpel.obj.OBase;
+import org.apache.ode.bpel.obj.OFailureHandling;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.OScope;
+import org.apache.ode.bpel.obj.OScope.Variable;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.ReadWriteLock;
@@ -45,18 +45,18 @@ public class PROCESS extends BpelJacobRunnable {
 
     public void run() {
         BpelRuntimeContext ntive = getBpelRuntimeContext();
-        Long scopeInstanceId = ntive.createScopeInstance(null, _oprocess.procesScope);
+        Long scopeInstanceId = ntive.createScopeInstance(null, _oprocess.getProcesScope());
 
         createGlobals();
         ProcessInstanceStartedEvent evt = new ProcessInstanceStartedEvent();
         evt.setRootScopeId(scopeInstanceId);
-        evt.setScopeDeclarationId(_oprocess.procesScope.getId());
+        evt.setScopeDeclarationId(_oprocess.getProcesScope().getId());
         ntive.sendEvent(evt);
 
         ActivityInfo child = new ActivityInfo(genMonotonic(),
-            _oprocess.procesScope,
+            _oprocess.getProcesScope(),
             newChannel(Termination.class), newChannel(ParentScope.class));
-        ScopeFrame processFrame = new ScopeFrame(_oprocess.procesScope, scopeInstanceId, null, null,_globals);
+        ScopeFrame processFrame = new ScopeFrame(_oprocess.getProcesScope(), scopeInstanceId, null, null,_globals);
         instance(new SCOPE(child, processFrame, new LinkFrame(null)));
 
         object(new ReceiveProcess() {

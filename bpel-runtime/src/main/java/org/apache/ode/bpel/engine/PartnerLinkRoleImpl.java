@@ -19,7 +19,7 @@
 package org.apache.ode.bpel.engine;
 
 import org.apache.ode.bpel.iapi.EndpointReference;
-import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.obj.OPartnerLink;
 
 /**
  * @author Matthieu Riou <mriou at apache dot org>
@@ -34,7 +34,7 @@ abstract class PartnerLinkRoleImpl {
         _process = process;
     }
     String getPartnerLinkName() {
-        return _plinkDef.name;
+        return _plinkDef.getName();
     }
     /**
      * Get the initial value of this role's EPR. This value is obtained from

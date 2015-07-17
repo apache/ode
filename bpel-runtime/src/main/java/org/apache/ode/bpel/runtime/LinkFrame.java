@@ -18,7 +18,7 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.ode.bpel.o.OLink;
+import org.apache.ode.bpel.obj.OLink;
 
 import java.io.Serializable;
 import java.util.HashMap;

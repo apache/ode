@@ -21,7 +21,7 @@ package org.apache.ode.bpel.runtime;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.o.OSwitch;
+import org.apache.ode.bpel.obj.OSwitch;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 
 import java.util.Iterator;
@@ -51,13 +51,13 @@ class SWITCH extends ACTIVITY {
       OSwitch.OCase ocase = (OSwitch.OCase) i.next();
       try{
           try {
-            if(getBpelRuntimeContext().getExpLangRuntime().evaluateAsBoolean(ocase.expression, evalCtx)){
+            if(getBpelRuntimeContext().getExpLangRuntime().evaluateAsBoolean(ocase.getExpression(), evalCtx)){
               matchedOCase = ocase;
               break;
             }
           } catch (EvaluationException e) {
-              __log.error("Sub-Language execution failure evaluating " + ocase.expression, e);
-            throw new FaultException(oswitch.getOwner().constants.qnSubLanguageExecutionFault, e.getMessage());
+              __log.error("Sub-Language execution failure evaluating " + ocase.getExpression(), e);
+            throw new FaultException(oswitch.getOwner().getConstants().getQnSubLanguageExecutionFault(), e.getMessage());
           }
       }catch(FaultException e){
         __log.error(e.getMessage(),e);
@@ -66,7 +66,7 @@ class SWITCH extends ACTIVITY {
 
         // Dead path all the child activiites:
         for (Iterator<OSwitch.OCase> j = oswitch.getCases().iterator(); j.hasNext(); )
-          dpe(j.next().activity);
+          dpe(j.next().getActivity());
         return;
       }
     }
@@ -75,7 +75,7 @@ class SWITCH extends ACTIVITY {
     for (Iterator<OSwitch.OCase> i = oswitch.getCases().iterator(); i.hasNext(); ) {
       OSwitch.OCase cs = i.next();
       if (cs != matchedOCase)
-        dpe(cs.activity);
+        dpe(cs.getActivity());
     }
 
     // no conditions satisfied, we're done.
@@ -83,7 +83,7 @@ class SWITCH extends ACTIVITY {
       _self.parent.completed(null, CompensationHandler.emptySet());
     } else /* matched case */ {
       // Re-use our current channels.
-      ActivityInfo child = new ActivityInfo(genMonotonic(),matchedOCase.activity, _self.self, _self.parent);
+      ActivityInfo child = new ActivityInfo(genMonotonic(),matchedOCase.getActivity(), _self.self, _self.parent);
       instance(createChild(child,_scopeFrame,_linkFrame));
     }
   }

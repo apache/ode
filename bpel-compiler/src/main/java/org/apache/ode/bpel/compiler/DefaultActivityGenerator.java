@@ -22,8 +22,8 @@ import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.compiler.bom.BpelObject;
 import org.apache.ode.bpel.compiler.bom.ExtensibilityQNames;
 import org.apache.ode.bpel.compiler.bom.FailureHandling;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OFailureHandling;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.OFailureHandling;
 import org.w3c.dom.Element;
 
 /**
@@ -49,9 +49,9 @@ abstract class DefaultActivityGenerator implements ActivityGenerator {
             return;
         FailureHandling extElement = new FailureHandling(element);
         OFailureHandling obj = new OFailureHandling();
-        obj.retryFor = extElement.getRetryFor();
-        obj.retryDelay = extElement.getRetryDelay();
-        obj.faultOnFailure = extElement.getFaultOnFailure();
+        obj.setRetryFor(extElement.getRetryFor());
+        obj.setRetryDelay(extElement.getRetryDelay());
+        obj.setFaultOnFailure(extElement.getFaultOnFailure());
         output.setFailureHandling(obj);
     }
 

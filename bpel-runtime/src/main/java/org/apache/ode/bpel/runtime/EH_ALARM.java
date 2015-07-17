@@ -27,8 +27,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.o.OEventHandler;
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.obj.OEventHandler;
+import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.bpel.runtime.channels.EventHandlerControl;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
@@ -81,34 +81,34 @@ class EH_ALARM extends BpelJacobRunnable {
 
         Calendar alarm = Calendar.getInstance();
 
-        if (_oalarm.forExpr != null)
+        if (_oalarm.getForExpr() != null)
             try {
-                getBpelRuntimeContext().getExpLangRuntime().evaluateAsDuration(_oalarm.forExpr, getEvaluationContext()).addTo(alarm);
+                getBpelRuntimeContext().getExpLangRuntime().evaluateAsDuration(_oalarm.getForExpr(), getEvaluationContext()).addTo(alarm);
             } catch (EvaluationException e) {
                 throw new InvalidProcessException(e);
             } catch (FaultException e) {
                 __log.error(e);
-                _psc.completed(createFault(e.getQName(),_oalarm.forExpr), _comps);
+                _psc.completed(createFault(e.getQName(),_oalarm.getForExpr()), _comps);
                 return;
             }
-        else if (_oalarm.untilExpr != null)
+        else if (_oalarm.getUntilExpr() != null)
             try {
-                alarm.setTime(getBpelRuntimeContext().getExpLangRuntime().evaluateAsDate(_oalarm.untilExpr, getEvaluationContext()).getTime());
+                alarm.setTime(getBpelRuntimeContext().getExpLangRuntime().evaluateAsDate(_oalarm.getUntilExpr(), getEvaluationContext()).getTime());
             } catch (EvaluationException e) {
                 throw new InvalidProcessException(e);
             } catch (FaultException e) {
                 __log.error(e);
-                _psc.completed(createFault(e.getQName(),_oalarm.untilExpr), _comps);
+                _psc.completed(createFault(e.getQName(),_oalarm.getUntilExpr()), _comps);
                 return;
             }
-        else if (_oalarm.repeatExpr != null)
+        else if (_oalarm.getRepeatExpr() != null)
             try {
-                getBpelRuntimeContext().getExpLangRuntime().evaluateAsDuration(_oalarm.repeatExpr, getEvaluationContext()).addTo(alarm);
+                getBpelRuntimeContext().getExpLangRuntime().evaluateAsDuration(_oalarm.getRepeatExpr(), getEvaluationContext()).addTo(alarm);
             } catch (EvaluationException e) {
                 throw new InvalidProcessException(e);
             } catch (FaultException e) {
                 __log.error(e);
-                _psc.completed(createFault(e.getQName(),_oalarm.repeatExpr), _comps);
+                _psc.completed(createFault(e.getQName(),_oalarm.getRepeatExpr()), _comps);
                 return;
             }
 
@@ -176,7 +176,7 @@ class EH_ALARM extends BpelJacobRunnable {
             } else /* now is later then alarm time */ {
                 // If the alarm has passed we fire the nested activity
                 ActivityInfo child = new ActivityInfo(genMonotonic(),
-                    _oalarm.activity,
+                    _oalarm.getActivity(),
                     newChannel(Termination.class), newChannel(ParentScope.class));
                 instance(createChild(child, _scopeFrame, new LinkFrame(null) ));
                 instance(new ACTIVE(child));
@@ -193,7 +193,7 @@ class EH_ALARM extends BpelJacobRunnable {
         public void run() {
             // Start the child activity.
             ActivityInfo child = new ActivityInfo(genMonotonic(),
-                _oalarm.activity,
+                _oalarm.getActivity(),
                 newChannel(Termination.class), newChannel(ParentScope.class));
             instance(createChild(child, _scopeFrame, new LinkFrame(null) ));
             instance(new ACTIVE(child));
@@ -226,15 +226,15 @@ class EH_ALARM extends BpelJacobRunnable {
 
                 public void completed(FaultData faultData, Set<CompensationHandler> compensations) {
                     _comps.addAll(compensations);
-                    if (!_stopped && _oalarm.repeatExpr != null) {
+                    if (!_stopped && _oalarm.getRepeatExpr() != null) {
                         Calendar next = Calendar.getInstance();
                         try {
-                            getBpelRuntimeContext().getExpLangRuntime().evaluateAsDuration(_oalarm.repeatExpr, getEvaluationContext()).addTo(next);
+                            getBpelRuntimeContext().getExpLangRuntime().evaluateAsDuration(_oalarm.getRepeatExpr(), getEvaluationContext()).addTo(next);
                         } catch (EvaluationException e) {
                             throw new InvalidProcessException(e);
                         } catch (FaultException e) {
                             __log.error(e);
-                            _psc.completed(createFault(e.getQName(),_oalarm.forExpr), _comps);
+                            _psc.completed(createFault(e.getQName(),_oalarm.getForExpr()), _comps);
                             return;
                         }
                         instance(new WAIT(next));

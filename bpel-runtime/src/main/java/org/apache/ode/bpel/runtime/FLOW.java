@@ -22,10 +22,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OFlow;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.OFlow;
+import org.apache.ode.bpel.obj.OLink;
+import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.LinkStatus;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
@@ -53,13 +53,13 @@ class FLOW extends ACTIVITY {
 
     public void run() {
         LinkFrame myLinkFrame = new LinkFrame(_linkFrame);
-        for (Iterator<OLink> i = _oflow.localLinks.iterator(); i.hasNext(); ) {
+        for (Iterator<OLink> i = _oflow.getLocalLinks().iterator(); i.hasNext(); ) {
             OLink link = i.next();
             LinkStatus lsc = newChannel(LinkStatus.class);
             myLinkFrame.links.put(link,new LinkInfo(link,lsc,lsc));
         }
 
-        for (Iterator<OActivity> i = _oflow.parallelActivities.iterator(); i.hasNext();) {
+        for (Iterator<OActivity> i = _oflow.getParallelActivities().iterator(); i.hasNext();) {
             OActivity ochild = i.next();
             ChildInfo childInfo = new ChildInfo(
                 new ActivityInfo(genMonotonic(), ochild,
@@ -128,7 +128,7 @@ class FLOW extends ACTIVITY {
     }
 
     public String toString() {
-        return "<T:Act:Flow:" + _oflow.name + ">";
+        return "<T:Act:Flow:" + _oflow.getName() + ">";
     }
 
     private Iterator<ChildInfo> active() {

@@ -23,10 +23,10 @@ import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.Correlation;
 import org.apache.ode.bpel.compiler.bom.InvokeActivity;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OInvoke;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.OInvoke;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
@@ -54,11 +54,11 @@ class InvokeGenerator extends DefaultActivityGenerator {
         InvokeActivity src = (InvokeActivity) srcx;
         final OInvoke oinvoke = (OInvoke) output;
 
-        oinvoke.partnerLink = _context.resolvePartnerLink(src.getPartnerLink());
-        oinvoke.operation = _context.resolvePartnerRoleOperation(oinvoke.partnerLink, src.getOperation());
-        assert oinvoke.operation.getInput() != null; // ensured by
+        oinvoke.setPartnerLink(_context.resolvePartnerLink(src.getPartnerLink()));
+        oinvoke.setOperation(_context.resolvePartnerRoleOperation(oinvoke.getPartnerLink(), src.getOperation()));
+        assert oinvoke.getOperation().getInput() != null; // ensured by
         // resolvePartnerRoleOperation
-        assert oinvoke.operation.getInput().getMessage() != null; // ensured
+        assert oinvoke.getOperation().getInput().getMessage() != null; // ensured
         // by
         // resolvePartnerRoleOperation
         // TODO: Add portType checking if specified by user
@@ -66,20 +66,18 @@ class InvokeGenerator extends DefaultActivityGenerator {
         // !portType.equals(onMessage.partnerLink.myRolePortType.getQName()))
         // throw new CompilationException(CMSGSG.errPortTypeMismatch(portType,
         // onMessage.partnerLink.myRolePortType.getQName()));
-        if (oinvoke.operation.getInput() != null && oinvoke.operation.getInput().getMessage() != null) {
+        if (oinvoke.getOperation().getInput() != null && oinvoke.getOperation().getInput().getMessage() != null) {
             // Input var can be omitted if input message has no part
-            if (oinvoke.operation.getInput().getMessage().getParts().size() > 0) {
+            if (oinvoke.getOperation().getInput().getMessage().getParts().size() > 0) {
                 if (src.getInputVar() == null)
-                    throw new CompilationException(__imsgs.errInvokeNoInputMessageForInputOp(oinvoke.operation.getName()));
-                oinvoke.inputVar = _context.resolveMessageVariable(src.getInputVar(), oinvoke.operation.getInput()
-                        .getMessage().getQName());
+                    throw new CompilationException(__imsgs.errInvokeNoInputMessageForInputOp(oinvoke.getOperation().getName()));
+                oinvoke.setInputVar(_context.resolveMessageVariable(src.getInputVar(), oinvoke.getOperation().getInput().getMessage().getQName()));
             }
         }
-        if (oinvoke.operation.getOutput() != null && oinvoke.operation.getOutput().getMessage() != null) {
+        if (oinvoke.getOperation().getOutput() != null && oinvoke.getOperation().getOutput().getMessage() != null) {
             if (src.getOutputVar() == null)
-                throw new CompilationException(__imsgs.errInvokeNoOutputMessageForOutputOp(oinvoke.operation.getName()));
-            oinvoke.outputVar = _context.resolveMessageVariable(src.getOutputVar(), oinvoke.operation.getOutput()
-                    .getMessage().getQName());
+                throw new CompilationException(__imsgs.errInvokeNoOutputMessageForOutputOp(oinvoke.getOperation().getName()));
+            oinvoke.setOutputVar(_context.resolveMessageVariable(src.getOutputVar(), oinvoke.getOperation().getOutput().getMessage().getQName()));
         }
         List<Correlation> correlations = src.getCorrelations();
         List<Correlation> incorrelations = CollectionsX.filter(new ArrayList<Correlation>(), correlations,
@@ -94,7 +92,7 @@ class InvokeGenerator extends DefaultActivityGenerator {
                     @Override
                     public boolean isMember(Correlation o) {
                         return (o.getPattern() == Correlation.CorrelationPattern.OUT)
-                                 || (o.getPattern()== Correlation.CorrelationPattern.UNSET && oinvoke.operation.getStyle()== OperationType.ONE_WAY );
+                                 || (o.getPattern()== Correlation.CorrelationPattern.UNSET && oinvoke.getOperation().getStyle()== OperationType.ONE_WAY );
                     }
                 });
 
@@ -106,17 +104,17 @@ class InvokeGenerator extends DefaultActivityGenerator {
                     }
                 });
 
-        if (oinvoke.inputVar != null) {
-            doCorrelations(outcorrelations, oinvoke.inputVar, oinvoke.assertCorrelationsInput,
-                    oinvoke.initCorrelationsInput, oinvoke.joinCorrelationsInput);
-            doCorrelations(inoutcorrelations, oinvoke.inputVar, oinvoke.assertCorrelationsInput,
-                    oinvoke.initCorrelationsInput, oinvoke.joinCorrelationsInput);
+        if (oinvoke.getInputVar() != null) {
+            doCorrelations(outcorrelations, oinvoke.getInputVar(), oinvoke.getAssertCorrelationsInput(),
+                    oinvoke.getInitCorrelationsInput(), oinvoke.getJoinCorrelationsInput());
+            doCorrelations(inoutcorrelations, oinvoke.getInputVar(), oinvoke.getAssertCorrelationsInput(),
+                    oinvoke.getInitCorrelationsInput(), oinvoke.getJoinCorrelationsInput());
         }
-        if (oinvoke.outputVar != null) {
-            doCorrelations(incorrelations, oinvoke.outputVar,
-                    oinvoke.assertCorrelationsOutput, oinvoke.initCorrelationsOutput, oinvoke.joinCorrelationsOutput);
-            doCorrelations(inoutcorrelations, oinvoke.outputVar,
-                    oinvoke.assertCorrelationsOutput, oinvoke.initCorrelationsOutput, oinvoke.joinCorrelationsOutput);
+        if (oinvoke.getOutputVar() != null) {
+            doCorrelations(incorrelations, oinvoke.getOutputVar(),
+                    oinvoke.getAssertCorrelationsOutput(), oinvoke.getInitCorrelationsOutput(), oinvoke.getJoinCorrelationsOutput());
+            doCorrelations(inoutcorrelations, oinvoke.getOutputVar(),
+                    oinvoke.getAssertCorrelationsOutput(), oinvoke.getInitCorrelationsOutput(), oinvoke.getJoinCorrelationsOutput());
         }
 
     }
@@ -141,14 +139,14 @@ class InvokeGenerator extends DefaultActivityGenerator {
                 initCorrelations.add(cset);
                 break;
             case JOIN:
-                cset.hasJoinUseCases = true;
+                cset.setHasJoinUseCases(true);
                 joinCorrelations.add(cset);
             }
-            for (OProcess.OProperty property : cset.properties) {
+            for (OProcess.OProperty property : cset.getProperties()) {
                 // Force resolution of alias, to make sure that we have one for
                 // this variable-property pair.
                 try {
-                    _context.resolvePropertyAlias(var, property.name);
+                    _context.resolvePropertyAlias(var, property.getName());
                 } catch (CompilationException ce) {
                     if (ce.getCompilationMessage().source == null) {
                         ce.getCompilationMessage().source = correlation;

@@ -20,7 +20,7 @@ package org.apache.ode.bpel.runtime;
 
 import java.io.Serializable;
 
-import org.apache.ode.bpel.o.OActivity;
+import org.apache.ode.bpel.obj.OActivity;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
 import org.apache.ode.bpel.runtime.channels.Termination;
 

@@ -19,7 +19,7 @@
 package org.apache.ode.bpel.runtime;
 
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.o.OThrow;
+import org.apache.ode.bpel.obj.OThrow;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,18 +44,18 @@ class THROW extends ACTIVITY {
 
     public void run() {
         FaultData fault = null;
-        if(_othrow.faultVariable != null){
+        if(_othrow.getFaultVariable() != null){
             try {
-                sendVariableReadEvent(_scopeFrame.resolve(_othrow.faultVariable));
-                Node faultVariable = fetchVariableData(_scopeFrame.resolve(_othrow.faultVariable), false);
-                fault = createFault(_othrow.faultName, (Element)faultVariable,_othrow.faultVariable.type,_othrow);
+                sendVariableReadEvent(_scopeFrame.resolve(_othrow.getFaultVariable()));
+                Node faultVariable = fetchVariableData(_scopeFrame.resolve(_othrow.getFaultVariable()), false);
+                fault = createFault(_othrow.getFaultName(), (Element)faultVariable,_othrow.getFaultVariable().getType(),_othrow);
             } catch (FaultException e) {
                 // deal with this as a fault (just not the one we hoped for)
                 __log.error(e);
                 fault = createFault(e.getQName(), _othrow);
             }
         }else{
-            fault = createFault(_othrow.faultName, _othrow);
+            fault = createFault(_othrow.getFaultName(), _othrow);
         }
 
         _self.parent.completed(fault, CompensationHandler.emptySet());

@@ -24,14 +24,14 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
-import org.apache.ode.bpel.elang.xpath10.o.OXPath10ExpressionBPEL20;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
-import org.apache.ode.bpel.o.OXslSheet;
+import org.apache.ode.bpel.elang.xpath10.obj.OXPath10Expression;
+import org.apache.ode.bpel.elang.xpath10.obj.OXPath10ExpressionBPEL20;
+import org.apache.ode.bpel.obj.OExpression;
+import org.apache.ode.bpel.obj.OLink;
+import org.apache.ode.bpel.obj.OMessageVarType;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.OScope;
+import org.apache.ode.bpel.obj.OXslSheet;
 import org.apache.ode.utils.NSContext;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.xsl.XslTransformHandler;
@@ -76,16 +76,16 @@ class JaxenBpelHandler extends JaxenHandler {
     if(_out instanceof OXPath10ExpressionBPEL20){
             OXPath10ExpressionBPEL20 out = (OXPath10ExpressionBPEL20)_out;
             try{
-                if(out.isJoinExpression){
+                if(out.isIsJoinExpression()){
                     // these resolve to links
                     OLink olink = _cctx.resolveLink(variableName);
-                    _out.links.put(variableName, olink);
+                    _out.getLinks().put(variableName, olink);
                 }else{
                     int dot = variableName.indexOf('.');
                     if (dot != -1)
                         variableName = variableName.substring(0,dot);
                     OScope.Variable var = _cctx.resolveVariable(variableName);
-                    _out.vars.put(variableName, var);
+                    _out.getVars().put(variableName, var);
                 }
             }catch(CompilationException ce){
                 throw new CompilationExceptionWrapper(ce);
@@ -148,7 +148,7 @@ class JaxenBpelHandler extends JaxenHandler {
     String linkName = getLiteralFromExpression((Expr)params.get(0));
 
     OLink olink = _cctx.resolveLink(linkName);
-    _out.links.put(linkName, olink);
+    _out.getLinks().put(linkName, olink);
   }
 
   /**
@@ -195,7 +195,7 @@ class JaxenBpelHandler extends JaxenHandler {
 
     String varName = getLiteralFromExpression((Expr)params.get(0));
     OScope.Variable v = _cctx.resolveVariable(varName);
-    _out.vars.put(varName, v);
+    _out.getVars().put(varName, v);
 
     String propName = getLiteralFromExpression((Expr)params.get(1));
     QName qname = _nsContext.derefQName(propName);
@@ -208,8 +208,8 @@ class JaxenBpelHandler extends JaxenHandler {
     // Make sure we can...
     _cctx.resolvePropertyAlias(v, qname);
 
-    _out.properties.put(propName, property);
-    _out.vars.put(varName, v);
+    _out.getProperties().put(propName, property);
+    _out.getVars().put(varName, v);
   }
 
   private void compileDoXslTransform(FunctionCallExpr c) throws CompilationException {
@@ -222,14 +222,14 @@ class JaxenBpelHandler extends JaxenHandler {
     String xslUri = getLiteralFromExpression((Expr)params.get(0));
     OXslSheet xslSheet = _cctx.compileXslt(xslUri);
     try {
-      XslTransformHandler.getInstance().parseXSLSheet(_cctx.getOProcess().getQName(), xslSheet.uri, xslSheet.sheetBody,
+      XslTransformHandler.getInstance().parseXSLSheet(_cctx.getOProcess().getQName(), xslSheet.getUri(), xslSheet.getSheetBody(),
                       new XslCompileUriResolver(_cctx, _out));
     } catch (Exception e) {
       throw new CompilationException(
           __msgs.errInvalidNumberOfArguments(xslUri));
     }
 
-    _out.setXslSheet(xslSheet.uri, xslSheet);
+    _out.setXslSheet(xslSheet.getUri(), xslSheet);
   }
 
   private String getLiteralFromExpression(Expr expr)

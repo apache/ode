@@ -21,6 +21,7 @@ package org.apache.ode.bpel.compiler;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -37,8 +38,11 @@ import org.apache.ode.bpel.compiler.api.CompileListener;
 import org.apache.ode.bpel.compiler.api.SourceLocation;
 import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
 import org.apache.ode.bpel.compiler.bom.Process;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.Serializer;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.OProcessWrapper;
+import org.apache.ode.bpel.obj.serde.DeSerializer;
+import org.apache.ode.bpel.obj.serde.OmSerdeFactory;
+import org.apache.ode.bpel.obj.serde.OmSerializer;
 import org.apache.ode.utils.StreamUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.xsl.XslTransformHandler;
@@ -282,8 +286,8 @@ public class BpelC {
             }
 
             try {
-                Serializer fileHeader = new Serializer(System.currentTimeMillis());
-                fileHeader.writeOProcess(oprocess, _outputStream);
+            	DeSerializer serializer = new DeSerializer();
+            	serializer.serialize(_outputStream, oprocess);
             } finally {
                 // close & mark myself invalid
                 this.invalidate();
@@ -306,6 +310,143 @@ public class BpelC {
        compile(bpelFile, 0);
     }
 
+    public OProcess compile(final Process process, long version){
+        if (process == null)
+            throw new NullPointerException("Attempt to compile NULL process.");
+
+        logCompilationMessage(__cmsgs.infCompilingProcess());
+
+        BpelCompiler compiler;
+        ResourceFinder wf;
+
+        if (_wsdlFinder != null) {
+            wf = _wsdlFinder;
+        } else {
+            File suDir = _suDir != null ? _suDir : _bpelFile.getParentFile();
+            wf = new DefaultResourceFinder(_bpelFile.getAbsoluteFile().getParentFile(), suDir.getAbsoluteFile());
+        }
+
+        CompileListener clistener = new CompileListener() {
+            public void onCompilationMessage(CompilationMessage compilationMessage) {
+                SourceLocation location = compilationMessage.source;
+                if (location == null) {
+                    compilationMessage.source = process;
+                }
+                logCompilationMessage(compilationMessage);
+            }
+        };
+
+        try {
+            switch (process.getBpelVersion()) {
+                case BPEL20:
+                    compiler = new BpelCompiler20();
+                    compiler.setResourceFinder(wf);
+                    if (_bpel11wsdl != null) {
+                        CompilationMessage cmsg = __cmsgs.warnWsdlUriIgnoredFor20Process();
+                        logCompilationMessage(cmsg);
+                    }
+                    break;
+                case BPEL20_DRAFT:
+                    compiler = new BpelCompiler20Draft();
+                    compiler.setResourceFinder(wf);
+                    if (_bpel11wsdl != null) {
+                        CompilationMessage cmsg = __cmsgs.warnWsdlUriIgnoredFor20Process();
+                        logCompilationMessage(cmsg);
+                    }
+                    break;
+                case BPEL11:
+                    compiler = new BpelCompiler11();
+                    compiler.setResourceFinder(wf);
+                    if (_bpel11wsdl != null) {
+                        compiler.addWsdlImport(new URI(_bpelFile.getName()), _bpel11wsdl,null);
+                    } else {
+                        CompilationMessage cmsg = __cmsgs.errBpel11RequiresWsdl();
+                        logCompilationMessage(cmsg);
+                        this.invalidate();
+                        throw new CompilationException(cmsg);
+                    }
+                    break;
+                default:
+                    CompilationMessage cmsg = __cmsgs.errUnrecognizedBpelVersion();
+                    logCompilationMessage(cmsg);
+                    this.invalidate();
+                    throw new CompilationException(cmsg);
+            }
+            compiler.setCompileListener(clistener);
+            if (_compileProperties != null) {
+                if (_compileProperties.get(PROCESS_CUSTOM_PROPERTIES) != null)
+                    compiler.setCustomProperties((Map<QName, Node>) _compileProperties.get(PROCESS_CUSTOM_PROPERTIES));
+            }
+        } catch (CompilationException ce) {
+            this.invalidate();
+            throw ce;
+        } catch (Exception ex) {
+            CompilationMessage cmsg = __cmsgs.errBpelParseErr();
+            logCompilationMessage(cmsg);
+            this.invalidate();
+            throw new CompilationException(cmsg,ex);
+        }
+
+        OProcess oprocess;
+        try {
+            oprocess = compiler.compile(process,wf,version);
+        }
+        catch (CompilationException cex) {
+            this.invalidate();
+            throw cex;
+        }
+        return oprocess;
+    }
+    public OProcess compile2OProcess(File bpelFile, long version){
+        if (__log.isDebugEnabled()) {
+            __log.debug("compile(URL)");
+        }
+
+        if (bpelFile == null) {
+            this.invalidate();
+            throw new IllegalArgumentException("Null bpelFile");
+        }
+
+        _bpelFile = bpelFile;
+        Process process;
+        try {
+            InputSource isrc = new InputSource(new ByteArrayInputStream(StreamUtils.read(bpelFile.toURL())));
+            isrc.setSystemId(bpelFile.getAbsolutePath());
+
+            process = BpelObjectFactory.getInstance().parse(isrc,_bpelFile.toURI());
+        } catch (Exception e) {
+            CompilationMessage cmsg = __cmsgs.errBpelParseErr().setSource(new SourceLocationImpl(bpelFile.toURI()));
+            this.invalidate();
+            throw new CompilationException(cmsg, e);
+        }
+
+        assert process != null;
+    	return compile(process, version);
+    }
+    public void serializeOProcess(OProcess oprocess, String outputPath) throws IOException{
+        if (!_dryRun) {
+            if (outputPath != null) {
+                this.setOutputStream(new BufferedOutputStream(new FileOutputStream(outputPath)));
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Writing compilation results to " + outputPath);
+                }
+            } else if (_outputStream != null) {
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Writing compilation results to " + _outputStream.getClass().getName());
+                }
+            } else {
+                throw new IllegalStateException("must setOutputStream() or setOutputDirectory()!");
+            }
+
+            try {
+               	DeSerializer serializer = new DeSerializer();
+            	serializer.serialize(_outputStream, oprocess);
+            } finally {
+                // close & mark myself invalid
+                this.invalidate();
+            }
+        }    	
+    }
     /**
      * <p>
      * Compile a BPEL process from a file.  This method uses a {@link BpelObjectFactory}
@@ -318,7 +459,7 @@ public class BpelC {
      * @throws CompilationException if one occurs while compiling the process.
      */
     public void compile(File bpelFile, long version) throws CompilationException, IOException {
-        if (__log.isDebugEnabled()) {
+/*        if (__log.isDebugEnabled()) {
             __log.debug("compile(URL)");
         }
 
@@ -348,6 +489,13 @@ public class BpelC {
 
         compile(process, cbpPath, version);
         this.invalidate();
+        */
+    	OProcess oProcess = compile2OProcess(bpelFile, version);
+        // Output file = bpel file with a cbp extension
+        String bpelPath = bpelFile.getAbsolutePath();
+        String cbpPath = bpelPath.substring(0, bpelPath.lastIndexOf(".")) + ".cbp";
+        serializeOProcess(oProcess, cbpPath);
+
     }
 
 

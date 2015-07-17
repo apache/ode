@@ -28,13 +28,13 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.engine.BpelRuntimeContextImpl;
 import org.apache.ode.bpel.explang.EvaluationContext;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.o.OProcess;
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.obj.OElementVarType;
+import org.apache.ode.bpel.obj.OExpression;
+import org.apache.ode.bpel.obj.OLink;
+import org.apache.ode.bpel.obj.OMessageVarType;
+import org.apache.ode.bpel.obj.OMessageVarType.Part;
+import org.apache.ode.bpel.obj.OProcess;
+import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -51,15 +51,15 @@ public class PropertyAliasEvaluationContext implements EvaluationContext {
 
     public PropertyAliasEvaluationContext(Element msgData, Map<String, Node> headerParts, OProcess.OPropertyAlias alias) {
         // We need to tweak the context node based on what kind of variable (element vs non-element)
-        if (alias.header != null) {
-            _root = headerParts.get(alias.header);
-        } else if (alias.part != null) {
-            Element part = DOMUtils.findChildByName(msgData,new QName(null, alias.part.name),false);
+        if (alias.getHeader() != null) {
+            _root = headerParts.get(alias.getHeader());
+        } else if (alias.getPart() != null) {
+            Element part = DOMUtils.findChildByName(msgData,new QName(null, alias.getPart().getName()),false);
             //check if the property alias is defined on the header part of the message
             if(part == null){
-                _root = headerParts.get(alias.part.name);
-            } else if (part != null && alias.part.type instanceof OElementVarType) {
-                _root = DOMUtils.findChildByName(part, ((OElementVarType)alias.part.type).elementType);
+                _root = headerParts.get(alias.getPart().getName());
+            } else if (part != null && alias.getPart().getType() instanceof OElementVarType) {
+                _root = DOMUtils.findChildByName(part, ((OElementVarType)alias.getPart().getType()).getElementType());
             } else
                 _root = part;
         } else {

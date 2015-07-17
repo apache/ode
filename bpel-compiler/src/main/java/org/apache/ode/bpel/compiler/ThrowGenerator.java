@@ -21,8 +21,8 @@ package org.apache.ode.bpel.compiler;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.ThrowActivity;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OThrow;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.OThrow;
 import org.apache.ode.utils.msg.MessageBundle;
 
 
@@ -43,8 +43,8 @@ class ThrowGenerator extends DefaultActivityGenerator {
         if (throwDef.getFaultName() == null)
             throw new CompilationException(__cmsgs.errThrowMustDefineFaultName()); 
 
-        othrow.faultName = throwDef.getFaultName();
+        othrow.setFaultName(throwDef.getFaultName());
         if(throwDef.getFaultVariable() != null)
-            othrow.faultVariable = _context.resolveVariable(throwDef.getFaultVariable());
+            othrow.setFaultVariable(_context.resolveVariable(throwDef.getFaultVariable()));
     }
 }

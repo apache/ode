@@ -48,9 +48,9 @@ import org.apache.ode.bpel.compiler.api.ExpressionCompiler;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.elang.xpath10.compiler.XPathMessages;
 import org.apache.ode.bpel.elang.xpath10.compiler.XslCompilationErrorListener;
-import org.apache.ode.bpel.elang.xpath20.o.OXPath20ExpressionBPEL20;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OLValueExpression;
+import org.apache.ode.bpel.elang.xpath20.obj.OXPath20ExpressionBPEL20;
+import org.apache.ode.bpel.obj.OExpression;
+import org.apache.ode.bpel.obj.OLValueExpression;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.xsl.XslTransformHandler;
@@ -120,7 +120,7 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
             throws CompilationException {
         OXPath20ExpressionBPEL20 oexp = new OXPath20ExpressionBPEL20(_compilerContext.getOProcess(), _qnVarData,
                 _qnVarProp, _qnLinkStatus, _qnXslTransform, isJoinCondition);
-        oexp.namespaceCtx = _compilerContext.tryCacheNamespaceContext(xpath.getNamespaceContext());
+        oexp.setNamespaceCtx(_compilerContext.tryCacheNamespaceContext(xpath.getNamespaceContext()));
         doJaxpCompile(oexp, xpath);
         return oexp;
     }
@@ -140,7 +140,7 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
             throw new CompilationException(__msgs.warnXPath20Syntax(DOMUtils.domToString(node), "empty string"));
         }
 
-        out.xpath = xpathStr;
+        out.setXpath(xpathStr);
         try {
             __log.debug("Compiling expression " + xpathStr);
             XPathFactory xpf = new XPathFactoryImpl();

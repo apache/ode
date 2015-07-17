@@ -32,7 +32,7 @@ import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.evt.BpelEvent;
-import org.apache.ode.bpel.o.OFailureHandling;
+import org.apache.ode.bpel.obj.OFailureHandling;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.utils.CronExpression;
 import org.w3c.dom.Element;
@@ -84,8 +84,15 @@ public interface ProcessConf {
     /**
      * Get the CBP stream.
      * @return new stream to the CBP file.
+     * @deprecated use {@link #getCBPFile()} instead.
      */
     InputStream getCBPInputStream();
+    
+    /**
+     * Get the CBP file
+     * @return the CBP file
+     */
+    File getCBPFile();
 
     /**
      * Get the CBP file size.

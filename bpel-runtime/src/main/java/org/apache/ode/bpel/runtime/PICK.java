@@ -35,11 +35,11 @@ import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.bpel.o.OElementVarType;
-import org.apache.ode.bpel.o.OMessageVarType;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.o.OPickReceive;
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.obj.OElementVarType;
+import org.apache.ode.bpel.obj.OMessageVarType;
+import org.apache.ode.bpel.obj.OMessageVarType.Part;
+import org.apache.ode.bpel.obj.OPickReceive;
+import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.PickResponse;
 import org.apache.ode.bpel.runtime.channels.Termination;
@@ -81,41 +81,41 @@ class PICK extends ACTIVITY {
         Selector[] selectors;
 
         try {
-            selectors = new Selector[_opick.onMessages.size()];
+            selectors = new Selector[_opick.getOnMessages().size()];
             int idx = 0;
-            for (OPickReceive.OnMessage onMessage : _opick.onMessages) {
+            for (OPickReceive.OnMessage onMessage : _opick.getOnMessages()) {
                 // collect all initiated correlations
                 Set<OScope.CorrelationSet> matchCorrelations = new HashSet<OScope.CorrelationSet>();
-                matchCorrelations.addAll(onMessage.matchCorrelations);
-                for( OScope.CorrelationSet cset : onMessage.joinCorrelations ) {
+                matchCorrelations.addAll(onMessage.getMatchCorrelations());
+                for( OScope.CorrelationSet cset : onMessage.getJoinCorrelations() ) {
                     if(getBpelRuntimeContext().isCorrelationInitialized(_scopeFrame.resolve(cset))) {
                         matchCorrelations.add(cset);
                     }
                 }
 
-                PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(onMessage.partnerLink);
+                PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(onMessage.getPartnerLink());
                 CorrelationKeySet keySet = resolveCorrelationKey(pLinkInstance, matchCorrelations);
 
-                selectors[idx] = new Selector(idx, pLinkInstance, onMessage.operation.getName(), onMessage.operation
-                        .getOutput() == null, onMessage.messageExchangeId, keySet, onMessage.route);
+                selectors[idx] = new Selector(idx, pLinkInstance, onMessage.getOperation().getName(), onMessage.getOperation()
+                        .getOutput() == null, onMessage.getMessageExchangeId(), keySet, onMessage.getRoute());
                 idx++;
             }
 
             timeout = null;
-            for (OPickReceive.OnAlarm onAlarm : _opick.onAlarms) {
-                Date dt = onAlarm.forExpr != null ? offsetFromNow(getBpelRuntimeContext().getExpLangRuntime()
-                        .evaluateAsDuration(onAlarm.forExpr, getEvaluationContext())) : getBpelRuntimeContext()
-                        .getExpLangRuntime().evaluateAsDate(onAlarm.untilExpr, getEvaluationContext()).getTime();
+            for (OPickReceive.OnAlarm onAlarm : _opick.getOnAlarms()) {
+                Date dt = onAlarm.getForExpr() != null ? offsetFromNow(getBpelRuntimeContext().getExpLangRuntime()
+                        .evaluateAsDuration(onAlarm.getForExpr(), getEvaluationContext())) : getBpelRuntimeContext()
+                        .getExpLangRuntime().evaluateAsDate(onAlarm.getUntilExpr(), getEvaluationContext()).getTime();
                 if (timeout == null || timeout.compareTo(dt) > 0) {
                     timeout = dt;
                     _alarm = onAlarm;
                 }
             }
-            getBpelRuntimeContext().select(pickResponseChannel, timeout, _opick.createInstanceFlag, selectors);
+            getBpelRuntimeContext().select(pickResponseChannel, timeout, _opick.isCreateInstanceFlag(), selectors);
         } catch (FaultException e) {
             __log.error(e);
             FaultData fault = createFault(e.getQName(), _opick, e.getMessage());
-            dpe(_opick.outgoingLinks);
+            dpe(_opick.getOutgoingLinks());
             _self.parent.completed(fault, CompensationHandler.emptySet());
             return;
         } catch (EvaluationException e) {
@@ -125,9 +125,9 @@ class PICK extends ACTIVITY {
         }
 
         // Dead path all the alarms that have no chace of coming first.
-        for (OPickReceive.OnAlarm oa : _opick.onAlarms) {
+        for (OPickReceive.OnAlarm oa : _opick.getOnAlarms()) {
             if (!oa.equals(_alarm)) {
-                dpe(oa.activity);
+                dpe(oa.getActivity());
             }
         }
 
@@ -146,7 +146,7 @@ class PICK extends ACTIVITY {
     private CorrelationKeySet resolveCorrelationKey(PartnerLinkInstance pLinkInstance, Set<OScope.CorrelationSet> matchCorrelations) throws FaultException {
         CorrelationKeySet keySet = new CorrelationKeySet(); // is empty for the case of the createInstance activity
 
-        if (matchCorrelations.isEmpty() && !_opick.createInstanceFlag) {
+        if (matchCorrelations.isEmpty() && !_opick.isCreateInstanceFlag()) {
             // Adding a route for opaque correlation. In this case,
             // correlation is on "out-of-band" session-id
             String sessionId = getBpelRuntimeContext().fetchMySessionId(pLinkInstance);
@@ -157,8 +157,8 @@ class PICK extends ACTIVITY {
 
                 if(!getBpelRuntimeContext().isCorrelationInitialized(
                     _scopeFrame.resolve(cset))) {
-                    if (!_opick.createInstanceFlag) {
-                        throw new FaultException(_opick.getOwner().constants.qnCorrelationViolation,
+                    if (!_opick.isCreateInstanceFlag()) {
+                        throw new FaultException(_opick.getOwner().getConstants().getQnCorrelationViolation(),
                         "Correlation not initialized.");
                     }
                 } else {
@@ -191,7 +191,7 @@ class PICK extends ACTIVITY {
     @SuppressWarnings("unchecked")
     private void initVariable(String mexId, OPickReceive.OnMessage onMessage) {
         // This is allowed, if there is no parts in the message for example.
-        if (onMessage.variable == null) return;
+        if (onMessage.getVariable() == null) return;
 
         Element msgEl;
         try {
@@ -205,26 +205,26 @@ class PICK extends ACTIVITY {
             return;
         }
 
-        Collection<String> partNames = (Collection<String>) onMessage.operation.getInput().getMessage().getParts().keySet();
+        Collection<String> partNames = (Collection<String>) onMessage.getOperation().getInput().getMessage().getParts().keySet();
 
         // Let's do some sanity checks here so that we don't get weird errors in assignment later.
         // The engine should have checked to make sure that the messages that are  delivered conform
         // to the correct format; but you know what they say, don't trust anyone.
-        if (!(onMessage.variable.type instanceof OMessageVarType)) {
+        if (!(onMessage.getVariable().getType() instanceof OMessageVarType)) {
             String errmsg = "Non-message variable for receive: should have been picked up by static analysis.";
             __log.fatal(errmsg);
             throw new InvalidProcessException(errmsg);
         }
 
-        OMessageVarType vartype = (OMessageVarType) onMessage.variable.type;
+        OMessageVarType vartype = (OMessageVarType) onMessage.getVariable().getType();
 
         // Check that each part contains what we expect.
         for (String pName : partNames) {
             QName partName = new QName(null, pName);
             Element msgPart = DOMUtils.findChildByName(msgEl, partName);
-            Part part = vartype.parts.get(pName);
+            Part part = vartype.getParts().get(pName);
             if (part == null) {
-                String errmsg = "Inconsistent WSDL, part " + pName + " not found in message type " + vartype.messageType;
+                String errmsg = "Inconsistent WSDL, part " + pName + " not found in message type " + vartype.getMessageType();
                 __log.fatal(errmsg);
                 throw new InvalidProcessException(errmsg);
             }
@@ -234,8 +234,8 @@ class PICK extends ACTIVITY {
                 throw new InvalidContextException(errmsg);
             }
 
-            if (part.type instanceof OElementVarType) {
-                OElementVarType ptype = (OElementVarType) part.type;
+            if (part.getType() instanceof OElementVarType) {
+                OElementVarType ptype = (OElementVarType) part.getType();
                 Element e  = DOMUtils.getFirstChildElement(msgPart);
                 if (e == null) {
                     String errmsg = "Message (element) part " + pName + " did not contain child element.";
@@ -244,9 +244,9 @@ class PICK extends ACTIVITY {
                 }
 
                 QName qn = new QName(e.getNamespaceURI(), e.getLocalName());
-                if(!qn.equals(ptype.elementType)) {
+                if(!qn.equals(ptype.getElementType())) {
                     String errmsg = "Message (element) part " + pName + " did not contain correct child element: expected "
-                            + ptype.elementType + " but got " + qn;
+                            + ptype.getElementType() + " but got " + qn;
                     __log.fatal(errmsg);
                     throw new InvalidContextException(errmsg);
                 }
@@ -254,7 +254,7 @@ class PICK extends ACTIVITY {
 
         }
 
-        VariableInstance vinst = _scopeFrame.resolve(onMessage.variable);
+        VariableInstance vinst = _scopeFrame.resolve(onMessage.getVariable());
 
         try {
             initializeVariable(vinst, msgEl);
@@ -265,10 +265,10 @@ class PICK extends ACTIVITY {
         }
 
         // Generating event
-        VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.name);
+        VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.getName());
         se.setNewValue(msgEl);
-        if (_opick.debugInfo != null)
-            se.setLineNo(_opick.debugInfo.startLine);
+        if (_opick.getDebugInfo() != null)
+            se.setLineNo(_opick.getDebugInfo().getStartLine());
         sendEvent(se);
     }
 
@@ -286,18 +286,18 @@ class PICK extends ACTIVITY {
                 private static final long serialVersionUID = -8237296827418738011L;
             }.setChannel(_pickResponseChannel).setReceiver(new PickResponse() {
                 public void onRequestRcvd(int selectorIdx, String mexId) {
-                    OPickReceive.OnMessage onMessage = _opick.onMessages.get(selectorIdx);
+                    OPickReceive.OnMessage onMessage = _opick.getOnMessages().get(selectorIdx);
 
                     // dead path the non-selected onMessage blocks.
-                    for (OPickReceive.OnMessage onmsg : _opick.onMessages) {
+                    for (OPickReceive.OnMessage onmsg : _opick.getOnMessages()) {
                         if (!onmsg.equals(onMessage)) {
-                            dpe(onmsg.activity);
+                            dpe(onmsg.getActivity());
                         }
                     }
 
                     // dead-path the alarm (if any)
                     if (_alarm != null) {
-                        dpe(_alarm.activity);
+                        dpe(_alarm.getActivity());
                     }
 
                     getBpelRuntimeContext().cancelOutstandingRequests(ProcessUtil.exportChannel(_pickResponseChannel));
@@ -305,47 +305,47 @@ class PICK extends ACTIVITY {
                     FaultData fault;
                     initVariable(mexId, onMessage);
                     try {
-                        VariableInstance vinst = _scopeFrame.resolve(onMessage.variable);
-                        for (OScope.CorrelationSet cset : onMessage.initCorrelations) {
+                        VariableInstance vinst = _scopeFrame.resolve(onMessage.getVariable());
+                        for (OScope.CorrelationSet cset : onMessage.getInitCorrelations()) {
                             initializeCorrelation(_scopeFrame.resolve(cset), vinst);
                         }
-                        for( OScope.CorrelationSet cset : onMessage.joinCorrelations ) {
+                        for( OScope.CorrelationSet cset : onMessage.getJoinCorrelations() ) {
                             // will be ignored if already initialized
                             initializeCorrelation(_scopeFrame.resolve(cset), vinst);
                         }
-                        if (onMessage.partnerLink.hasPartnerRole()) {
+                        if (onMessage.getPartnerLink().hasPartnerRole()) {
                             // Trying to initialize partner epr based on a
                             // message-provided epr/session.
 
                             if (!getBpelRuntimeContext().isPartnerRoleEndpointInitialized(
-                                    _scopeFrame.resolve(onMessage.partnerLink))
-                                    || !onMessage.partnerLink.initializePartnerRole) {
+                                    _scopeFrame.resolve(onMessage.getPartnerLink()))
+                                    || !onMessage.getPartnerLink().isInitializePartnerRole()) {
 
                                 Node fromEpr = getBpelRuntimeContext().getSourceEPR(mexId);
                                 if (fromEpr != null) {
                                     if (__log.isDebugEnabled())
                                         __log.debug("Received callback EPR " + DOMUtils.domToString(fromEpr)
-                                                + " saving it on partner link " + onMessage.partnerLink.getName());
+                                                + " saving it on partner link " + onMessage.getPartnerLink().getName());
                                     getBpelRuntimeContext().writeEndpointReference(
-                                            _scopeFrame.resolve(onMessage.partnerLink), (Element) fromEpr);
+                                            _scopeFrame.resolve(onMessage.getPartnerLink()), (Element) fromEpr);
                                 }
                             }
 
                             String partnersSessionId = getBpelRuntimeContext().getSourceSessionId(mexId);
                             if (partnersSessionId != null)
                                 getBpelRuntimeContext().initializePartnersSessionId(
-                                        _scopeFrame.resolve(onMessage.partnerLink), partnersSessionId);
+                                        _scopeFrame.resolve(onMessage.getPartnerLink()), partnersSessionId);
 
                         }
                         // this request is now waiting for a reply
-                        getBpelRuntimeContext().processOutstandingRequest(_scopeFrame.resolve(onMessage.partnerLink),
-                                onMessage.operation.getName(), onMessage.messageExchangeId, mexId);
+                        getBpelRuntimeContext().processOutstandingRequest(_scopeFrame.resolve(onMessage.getPartnerLink()),
+                                onMessage.getOperation().getName(), onMessage.getMessageExchangeId(), mexId);
 
                     } catch (FaultException e) {
                         __log.error(e);
                         fault = createFault(e.getQName(), onMessage);
                         _self.parent.completed(fault, CompensationHandler.emptySet());
-                        dpe(onMessage.activity);
+                        dpe(onMessage.getActivity());
                         return;
                     }
 
@@ -354,21 +354,21 @@ class PICK extends ACTIVITY {
                     // Because we are done with all the DPE, we can simply
                     // re-use our control
                     // channels for the child.
-                    ActivityInfo child = new ActivityInfo(genMonotonic(), onMessage.activity, _self.self, _self.parent);
+                    ActivityInfo child = new ActivityInfo(genMonotonic(), onMessage.getActivity(), _self.self, _self.parent);
                     instance(createChild(child, _scopeFrame, _linkFrame));
                 }
 
                 public void onTimeout() {
                     // Dead path all the onMessage activiites (the other alarms
                     // have already been DPE'ed)
-                    for (OPickReceive.OnMessage onMessage : _opick.onMessages) {
-                        dpe(onMessage.activity);
+                    for (OPickReceive.OnMessage onMessage : _opick.getOnMessages()) {
+                        dpe(onMessage.getActivity());
                     }
 
                     // Because we are done with all the DPE, we can simply
                     // re-use our control
                     // channels for the child.
-                    ActivityInfo child = new ActivityInfo(genMonotonic(), _alarm.activity, _self.self, _self.parent);
+                    ActivityInfo child = new ActivityInfo(genMonotonic(), _alarm.getActivity(), _self.self, _self.parent);
                     instance(createChild(child, _scopeFrame, _linkFrame));
                 }
 

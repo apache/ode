@@ -27,8 +27,8 @@ import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
-import org.apache.ode.bpel.o.OEventHandler;
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.obj.OEventHandler;
+import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.bpel.runtime.channels.EventHandlerControl;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.ParentScope;
@@ -114,15 +114,15 @@ class EH_EVENT extends BpelJacobRunnable {
             try {
                 PickResponse pickResponseChannel = newChannel(PickResponse.class);
                 CorrelationKeySet keySet = new CorrelationKeySet();
-                PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(_oevent.partnerLink);
-                for( OScope.CorrelationSet cset : _oevent.joinCorrelations ) {
+                PartnerLinkInstance pLinkInstance = _scopeFrame.resolve(_oevent.getPartnerLink());
+                for( OScope.CorrelationSet cset : _oevent.getJoinCorrelations() ) {
                     if(getBpelRuntimeContext().isCorrelationInitialized(_scopeFrame.resolve(cset))) {
                         keySet.add(getBpelRuntimeContext().readCorrelation(_scopeFrame.resolve(cset)));
                     }
                 }
-                for( OScope.CorrelationSet cset : _oevent.matchCorrelations ) {
+                for( OScope.CorrelationSet cset : _oevent.getMatchCorrelations() ) {
                     if (!getBpelRuntimeContext().isCorrelationInitialized(_scopeFrame.resolve(cset))) {
-                        throw new FaultException(_oevent.getOwner().constants.qnCorrelationViolation,"Correlation not initialized.");
+                        throw new FaultException(_oevent.getOwner().getConstants().getQnCorrelationViolation(),"Correlation not initialized.");
                     }
                     keySet.add(getBpelRuntimeContext().readCorrelation(_scopeFrame.resolve(cset)));
                 }
@@ -132,7 +132,7 @@ class EH_EVENT extends BpelJacobRunnable {
                     keySet.add(new CorrelationKey("-1", new String[] {sessionId}));
                 }
 
-                selector =  new Selector(0,pLinkInstance,_oevent.operation.getName(), _oevent.operation.getOutput() == null, _oevent.messageExchangeId, keySet, _oevent.route);
+                selector =  new Selector(0,pLinkInstance,_oevent.getOperation().getName(), _oevent.getOperation().getOutput() == null, _oevent.getMessageExchangeId(), keySet, _oevent.getRoute());
                 getBpelRuntimeContext().select(pickResponseChannel, null, false, new Selector[] { selector} );
                 instance(new WAITING(pickResponseChannel));
             } catch(FaultException e){
@@ -228,19 +228,19 @@ class EH_EVENT extends BpelJacobRunnable {
                                     _comps,
                                     _fault);
 
-                            if (_oevent.variable != null) {
+                            if (_oevent.getVariable() != null) {
                                 Element msgEl = getBpelRuntimeContext().getMyRequest(mexId);
 
                                 if (msgEl != null) {
                                     try {
-                                        VariableInstance vinst = ehScopeFrame.resolve(_oevent.variable);
+                                        VariableInstance vinst = ehScopeFrame.resolve(_oevent.getVariable());
                                         getBpelRuntimeContext().writeVariable(vinst, msgEl);
 
-                                        VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.name);
+                                        VariableModificationEvent se = new VariableModificationEvent(vinst.declaration.getName());
                                         se.setNewValue(msgEl);
                                         _scopeFrame.fillEventInfo(se);
-                                        if (_oevent.debugInfo != null)
-                                            se.setLineNo(_oevent.debugInfo.startLine);
+                                        if (_oevent.getDebugInfo() != null)
+                                            se.setLineNo(_oevent.getDebugInfo().getStartLine());
                                         getBpelRuntimeContext().sendEvent(se);
                                     } catch (Exception ex) {
                                         __log.fatal(ex);
@@ -250,35 +250,35 @@ class EH_EVENT extends BpelJacobRunnable {
                             }
 
                             try {
-                                for (OScope.CorrelationSet cset : _oevent.initCorrelations) {
-                                    initializeCorrelation(ehScopeFrame.resolve(cset), ehScopeFrame.resolve(_oevent.variable));
+                                for (OScope.CorrelationSet cset : _oevent.getInitCorrelations()) {
+                                    initializeCorrelation(ehScopeFrame.resolve(cset), ehScopeFrame.resolve(_oevent.getVariable()));
                                 }
-                                for( OScope.CorrelationSet cset : _oevent.joinCorrelations ) {
+                                for( OScope.CorrelationSet cset : _oevent.getJoinCorrelations() ) {
                                     // will be ignored if already initialized
-                                    initializeCorrelation(ehScopeFrame.resolve(cset), ehScopeFrame.resolve(_oevent.variable));
+                                    initializeCorrelation(ehScopeFrame.resolve(cset), ehScopeFrame.resolve(_oevent.getVariable()));
                                 }
 
-                                if (_oevent.partnerLink.hasPartnerRole()) {
+                                if (_oevent.getPartnerLink().hasPartnerRole()) {
                                     // Trying to initialize partner epr based on a message-provided epr/session.
                                     if (!getBpelRuntimeContext().isPartnerRoleEndpointInitialized(ehScopeFrame
-                                            .resolve(_oevent.partnerLink)) || !_oevent.partnerLink.initializePartnerRole) {
+                                            .resolve(_oevent.getPartnerLink())) || !_oevent.getPartnerLink().isInitializePartnerRole()) {
                                         Node fromEpr = getBpelRuntimeContext().getSourceEPR(mexId);
                                         if (fromEpr != null) {
                                             getBpelRuntimeContext().writeEndpointReference(
-                                                    ehScopeFrame.resolve(_oevent.partnerLink), (Element) fromEpr);
+                                                    ehScopeFrame.resolve(_oevent.getPartnerLink()), (Element) fromEpr);
                                         }
                                     }
 
                                     String partnersSessionId = getBpelRuntimeContext().getSourceSessionId(mexId);
                                     if (partnersSessionId != null)
-                                        getBpelRuntimeContext().initializePartnersSessionId(ehScopeFrame.resolve(_oevent.partnerLink),
+                                        getBpelRuntimeContext().initializePartnersSessionId(ehScopeFrame.resolve(_oevent.getPartnerLink()),
                                                 partnersSessionId);
                                 }
 
                                 getBpelRuntimeContext().cancelOutstandingRequests(ProcessUtil.exportChannel(_pickResponseChannel));
                                 // this request is now waiting for a reply
-                                getBpelRuntimeContext().processOutstandingRequest(_scopeFrame.resolve(_oevent.partnerLink),
-                                        _oevent.operation.getName(), _oevent.messageExchangeId, mexId);
+                                getBpelRuntimeContext().processOutstandingRequest(_scopeFrame.resolve(_oevent.getPartnerLink()),
+                                        _oevent.getOperation().getName(), _oevent.getMessageExchangeId(), mexId);
 
                             } catch (FaultException e) {
                                 __log.error(e);
@@ -293,15 +293,15 @@ class EH_EVENT extends BpelJacobRunnable {
                             // load 'onMessage' activity; we'll do this even if a stop/terminate has been
                             // requested becasue we cannot undo the receipt of the message at this point.
                             ActivityInfo child = new ActivityInfo(genMonotonic(),
-                                _oevent.activity,
+                                _oevent.getActivity(),
                                 newChannel(Termination.class), newChannel(ParentScope.class));
 
                             _active.add(child);
 
                             LinkFrame lf = new LinkFrame(null);
 
-                            ScopeFrame innerScopeFrame = new ScopeFrame((OScope) _oevent.activity,
-                                getBpelRuntimeContext().createScopeInstance(_scopeFrame.scopeInstanceId, (OScope) _oevent.activity),
+                            ScopeFrame innerScopeFrame = new ScopeFrame((OScope) _oevent.getActivity(),
+                                getBpelRuntimeContext().createScopeInstance(_scopeFrame.scopeInstanceId, (OScope) _oevent.getActivity()),
                                 ehScopeFrame,
                                 _comps,
                                 _fault);

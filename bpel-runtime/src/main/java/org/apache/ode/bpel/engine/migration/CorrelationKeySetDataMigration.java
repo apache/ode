@@ -24,7 +24,7 @@ import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageRouteDAO;
-import org.apache.ode.bpel.o.OPartnerLink;
+import org.apache.ode.bpel.obj.OPartnerLink;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.commons.logging.Log;
@@ -47,7 +47,7 @@ public class CorrelationKeySetDataMigration implements Migration {
 
             for (OPartnerLink plink : process.getOProcess().getAllPartnerLinks()) {
                 if (plink.hasMyRole()) {
-                    for (Iterator opI = plink.myRolePortType.getOperations().iterator(); opI.hasNext();) {
+                    for (Iterator opI = plink.getMyRolePortType().getOperations().iterator(); opI.hasNext();) {
                         Operation op = (Operation)opI.next();
                         CorrelatorDAO corr = processDao.getCorrelator(plink.getName() + "." + op.getName());
                         // Changing all routes

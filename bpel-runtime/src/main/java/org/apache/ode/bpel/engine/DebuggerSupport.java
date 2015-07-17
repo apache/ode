@@ -35,7 +35,7 @@ import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.evt.ProcessInstanceStateChangeEvent;
 import org.apache.ode.bpel.evt.ProcessTerminationEvent;
 import org.apache.ode.bpel.evt.ScopeCompletionEvent;
-import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.pmapi.BpelManagementFacade;
 import org.apache.ode.bpel.pmapi.InstanceNotFoundException;
 import org.apache.ode.bpel.pmapi.ManagementException;

@@ -25,7 +25,7 @@ import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.dao.*;
 import org.apache.ode.bpel.iapi.BpelServer;
 import org.apache.ode.bpel.iapi.ProcessStore;
-import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.pmapi.*;
 import org.apache.ode.bpel.pmapi.TInstanceInfo.EventInfo;
 import org.apache.ode.bpel.runtime.breaks.ActivityBreakpointImpl;

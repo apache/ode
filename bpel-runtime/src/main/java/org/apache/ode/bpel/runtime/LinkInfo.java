@@ -20,7 +20,7 @@ package org.apache.ode.bpel.runtime;
 
 import java.io.Serializable;
 
-import org.apache.ode.bpel.o.OLink;
+import org.apache.ode.bpel.obj.OLink;
 import org.apache.ode.bpel.runtime.channels.LinkStatus;
 
 /**

@@ -34,12 +34,12 @@ import org.apache.ode.bpel.evt.ActivityExecStartEvent;
 import org.apache.ode.bpel.evt.ActivityFailureEvent;
 import org.apache.ode.bpel.evt.ActivityRecoveryEvent;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.o.OActivity;
-import org.apache.ode.bpel.o.OExpression;
-import org.apache.ode.bpel.o.OFailureHandling;
-import org.apache.ode.bpel.o.OInvoke;
-import org.apache.ode.bpel.o.OLink;
-import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.obj.OActivity;
+import org.apache.ode.bpel.obj.OExpression;
+import org.apache.ode.bpel.obj.OFailureHandling;
+import org.apache.ode.bpel.obj.OInvoke;
+import org.apache.ode.bpel.obj.OLink;
+import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.bpel.runtime.channels.ActivityRecovery;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.LinkStatus;
@@ -82,7 +82,7 @@ class ACTIVITYGUARD extends ACTIVITY {
             _firstTime = false;
         }
 
-        if (_linkVals.keySet().containsAll(_oactivity.targetLinks)) {
+        if (_linkVals.keySet().containsAll(_oactivity.getTargetLinks())) {
             if (evaluateJoinCondition()) {
                 ActivityExecStartEvent aese = new ActivityExecStartEvent();
                 sendEvent(aese);
@@ -91,13 +91,13 @@ class ACTIVITYGUARD extends ACTIVITY {
                 instance(createActivity(activity));
                 instance(new TCONDINTERCEPT(activity.parent));
             } else {
-                if (_oactivity.suppressJoinFailure) {
+                if (_oactivity.isSuppressJoinFailure()) {
                     _self.parent.completed(null, CompensationHandler.emptySet());
                     if (__log.isDebugEnabled())
                         __log.debug("Join condition false, suppress join failure on activity " + _self.aId);
                 } else {
                     FaultData fault = null;
-                    fault = createFault(_oactivity.getOwner().constants.qnJoinFailure,_oactivity);
+                    fault = createFault(_oactivity.getOwner().getConstants().getQnJoinFailure(),_oactivity);
                     _self.parent.completed(fault, CompensationHandler.emptySet());
                 }
 
@@ -115,7 +115,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                     dpe(_oactivity);
                 }
             }));
-            for (final OLink link : _oactivity.targetLinks) {
+            for (final OLink link : _oactivity.getTargetLinks()) {
                 mlset.or(new ReceiveProcess() {
                     private static final long serialVersionUID = 1024137371118887935L;
                 }.setChannel(_linkFrame.resolve(link).sub).setReceiver(new LinkStatus() {
@@ -152,18 +152,18 @@ class ACTIVITYGUARD extends ACTIVITY {
      */
     private boolean evaluateJoinCondition() {
         // For activities with no link targets, the join condition is always satisfied.
-        if (_oactivity.targetLinks.size() == 0)
+        if (_oactivity.getTargetLinks().size() == 0)
             return true;
 
         // For activities with no join condition, an OR condition is assumed.
-        if (_oactivity.joinCondition == null)
+        if (_oactivity.getJoinCondition() == null)
             return _linkVals.values().contains(Boolean.TRUE);
 
         try {
-            return getBpelRuntimeContext().getExpLangRuntime().evaluateAsBoolean(_oactivity.joinCondition,
+            return getBpelRuntimeContext().getExpLangRuntime().evaluateAsBoolean(_oactivity.getJoinCondition(),
                     new ExprEvaluationContextImpl(null, null,_linkVals));
         } catch (Exception e) {
-            String msg = "Unexpected error evaluating a join condition: " + _oactivity.joinCondition;
+            String msg = "Unexpected error evaluating a join condition: " + _oactivity.getJoinCondition();
             __log.error(msg,e);
             throw new InvalidProcessException(msg,e);
         }
@@ -209,21 +209,21 @@ class ACTIVITYGUARD extends ACTIVITY {
                 public void completed(FaultData faultData, Set<CompensationHandler> compensations) {
                     sendEvent(new ActivityExecEndEvent());
                     if (faultData != null) {
-                        dpe(_oactivity.sourceLinks);
+                        dpe(_oactivity.getSourceLinks());
                         _self.parent.completed(faultData, compensations);
                     } else {
                         FaultData fault = null;
-                        for (Iterator<OLink> i = _oactivity.sourceLinks.iterator();i.hasNext();) {
+                        for (Iterator<OLink> i = _oactivity.getSourceLinks().iterator();i.hasNext();) {
                             OLink olink = i.next();
                             LinkInfo linfo = _linkFrame.resolve(olink);
                             try {
-                                boolean val = evaluateTransitionCondition(olink.transitionCondition);
+                                boolean val = evaluateTransitionCondition(olink.getTransitionCondition());
                                 linfo.pub.linkStatus(val);
                             } catch (FaultException e) {
                                 linfo.pub.linkStatus(false);
                                 __log.error(e);
                                 if (fault == null)
-                                    fault = createFault(e.getQName(),olink.transitionCondition);
+                                    fault = createFault(e.getQName(),olink.getTransitionCondition());
                             }
                         }
                         _self.parent.completed(fault, compensations);
@@ -232,8 +232,8 @@ class ACTIVITYGUARD extends ACTIVITY {
 
                 public void cancelled() {
                     sendEvent(new ActivityExecEndEvent());
-                    dpe(_oactivity.outgoingLinks);
-                    dpe(_oactivity.sourceLinks);
+                    dpe(_oactivity.getOutgoingLinks());
+                    dpe(_oactivity.getSourceLinks());
                     // Implicit scope can tell the difference between cancelled and completed.
                     _self.parent.cancelled();
                 }
@@ -241,7 +241,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                 private OFailureHandling getFailureHandling() {
                     if (_oactivity instanceof OInvoke) {
                         OInvoke _oinvoke = (OInvoke) _oactivity;
-                        OFailureHandling f = getBpelRuntimeContext().getConfigForPartnerLink(_oinvoke.partnerLink).failureHandling;
+                        OFailureHandling f = getBpelRuntimeContext().getConfigForPartnerLink(_oinvoke.getPartnerLink()).failureHandling;
                         if (f != null) return f;
                     }
                     return _oactivity.getFailureHandling();
@@ -255,7 +255,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                     _failure.data = data;
 
                     OFailureHandling failureHandling = getFailureHandling();
-                    if (failureHandling != null && failureHandling.faultOnFailure && _failure.retryCount >= failureHandling.retryFor) {
+                    if (failureHandling != null && failureHandling.isFaultOnFailure() && _failure.retryCount >= failureHandling.getRetryFor()) {
                         //Fault after retries (may be 0)
                         if (__log.isDebugEnabled())
                             __log.debug("ActivityRecovery: Activity " + _self.aId + " faulting on failure");
@@ -263,7 +263,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                         completed(faultData, CompensationHandler.emptySet());
                         return;
                     }
-                    if (failureHandling == null || _failure.retryCount >= failureHandling.retryFor) {
+                    if (failureHandling == null || _failure.retryCount >= failureHandling.getRetryFor()) {
                         requireRecovery();
                         return;
                     }
@@ -271,7 +271,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                     if (__log.isDebugEnabled())
                         __log.debug("ActivityRecovery: Retrying activity " + _self.aId);
                     Date future = new Date(new Date().getTime() +
-                        (failureHandling == null ? 0L : failureHandling.retryDelay * 1000));
+                        (failureHandling == null ? 0L : failureHandling.getRetryDelay() * 1000));
                     final TimerResponse timerChannel = newChannel(TimerResponse.class);
                     getBpelRuntimeContext().registerTimer(timerChannel, future);
                     object(false, new ReceiveProcess() {
