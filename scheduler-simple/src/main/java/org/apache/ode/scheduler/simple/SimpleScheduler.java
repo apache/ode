@@ -19,32 +19,18 @@
 
 package org.apache.ode.scheduler.simple;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
-import java.util.Random;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicLong;
-
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
-import javax.transaction.SystemException;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.clapi.ClusterManager;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Scheduler;
+
+import javax.transaction.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * A reliable and relatively simple scheduler that uses a database to persist information about
@@ -66,7 +52,7 @@ import org.apache.ode.bpel.iapi.Scheduler;
  * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
  *
  */
-public class SimpleScheduler implements Scheduler, TaskRunner {
+public class SimpleScheduler implements Scheduler, TaskRunner, SchedulerListener {
     private static final Log __log = LogFactory.getLog(SimpleScheduler.class);
 
     private static final int DEFAULT_TRANSACTION_TIMEOUT = 60 * 1000;
@@ -114,6 +100,10 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
 
     private DatabaseDelegate _db;
 
+    private boolean _isClusterEnabled;
+
+    private ClusterManager _clusterManager;
+
     /** All the nodes we know about */
     private CopyOnWriteArraySet<String> _knownNodes = new CopyOnWriteArraySet<String>();
 
@@ -147,9 +137,10 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
 
     private DateFormat debugDateFormatter = new SimpleDateFormat("HH:mm:ss,SSS");
 
-    public SimpleScheduler(String nodeId, DatabaseDelegate del, Properties conf) {
+    public SimpleScheduler(String nodeId, DatabaseDelegate del, Properties conf, boolean clusterState) {
         _nodeId = nodeId;
         _db = del;
+        _isClusterEnabled = clusterState;
         _todoLimit = getIntProperty(conf, "ode.scheduler.queueLength", _todoLimit);
         _immediateInterval = getLongProperty(conf, "ode.scheduler.immediateInterval", _immediateInterval);
         _nearFutureInterval = getLongProperty(conf, "ode.scheduler.nearFutureInterval", _nearFutureInterval);
@@ -181,6 +172,10 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
 
     public void setNodeId(String nodeId) {
         _nodeId = nodeId;
+    }
+
+    public void setClusterManager(ClusterManager cm) {
+        _clusterManager = cm;
     }
 
     public void setStaleInterval(long staleInterval) {
@@ -490,10 +485,11 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         _todo.enqueue(new LoadImmediateTask(now));
 
         // schedule check for stale nodes, make it random so that the nodes don't overlap.
-        _todo.enqueue(new CheckStaleNodes(now + randomMean(_staleInterval)));
+        if (!_isClusterEnabled)
+            _todo.enqueue(new CheckStaleNodes(now + randomMean(_staleInterval)));
 
         // do the upgrade sometime (random) in the immediate interval.
-        _todo.enqueue(new UpgradeJobsTask(now + randomMean(_immediateInterval)));
+        enqueUpgradeJobsTask(now);
 
         _todo.start();
         _running = true;
@@ -519,6 +515,18 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         // graceful shutdown; any new submits will throw RejectedExecutionExceptions
 //        _exec.shutdown();
         _running = false;
+    }
+
+    public void memberAdded(final String nodeId) {
+        _todo.enqueue(new UpgradeJobsTask(System.currentTimeMillis()+ randomMean(_immediateInterval)));
+    }
+
+    public void memberRemoved(final String nodeId, final String masterId) {
+        recoverClusterStaleNodes(nodeId, masterId);
+    }
+
+    public void enqueUpgradeJobsTask(long now) {
+        _todo.enqueue(new UpgradeJobsTask(now + randomMean(_immediateInterval)));
     }
 
     class RunJob implements Callable<Void> {
@@ -814,6 +822,41 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
 
     }
 
+    boolean doClusterJobsUpgrade() {
+            __log.debug("UPGRADE started for Cluster Mode");
+            final ArrayList<String> knownNodes = _clusterManager.getKnownNodes();
+            Collections.sort(knownNodes);
+
+            // We're going to try to upgrade near future jobs using the db only.
+            // We assume that the distribution of the trailing digits in the
+            // scheduled time are uniformly distributed, and use modular division
+            // of the time by the number of nodes to create the node assignment.
+            // This can be done in a single update statement.
+            final long maxtime = System.currentTimeMillis() + _nearFutureInterval;
+            try {
+                return execTransaction(new Callable<Boolean>() {
+
+                    public Boolean call() throws Exception {
+                        int numNodes = knownNodes.size();
+                        for (int i = 0; i < numNodes; ++i) {
+                            String node = knownNodes.get(i);
+                            _db.updateAssignToNode(node, i, numNodes, maxtime);
+                        }
+                        return true;
+                    }
+
+                });
+
+            } catch (Exception ex) {
+                __log.error("Database error upgrading jobs.", ex);
+                return false;
+            } finally {
+                __log.debug("UPGRADE complete");
+            }
+
+        }
+
+
     /**
      * Re-assign stale node's jobs to self.
      * @param nodeId
@@ -856,6 +899,31 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
 //        _db.insertJob(jobRetry, _nodeId, false);
 //        return delay;
 //    }
+
+    void recoverClusterStaleNodes(final String nodeId, final String masterId) {
+        if (__log.isDebugEnabled()) {
+            __log.debug("recovering stale nodes for Cluster Mode " + nodeId);
+        }
+        try {
+            int numrows = execTransaction(new Callable<Integer>() {
+                public Integer call() throws Exception {
+                    return _db.updateReassign(nodeId, masterId);
+                }
+            });
+
+            if (__log.isDebugEnabled()) {
+                __log.debug("reassigned " + numrows + " jobs to master node. ");
+            }
+
+            // Force a load-immediate to catch anything new from the recovered node.
+            doLoadImmediate();
+
+        } catch (Exception ex) {
+            __log.error("Database error reassigning node.", ex);
+        } finally {
+            __log.debug("node recovery complete");
+        }
+    }
 
     private abstract class SchedulerTask extends Task implements Runnable {
         SchedulerTask(long schedDate) {
@@ -911,7 +979,8 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
 
             boolean success = false;
             try {
-                success = doUpgrade();
+               if (_isClusterEnabled && _clusterManager.getIsMaster()) success = doClusterJobsUpgrade();
+                else success = doUpgrade();
             } finally {
                 long future = System.currentTimeMillis() + (success ? (long) (_nearFutureInterval * .50) : 1000);
                 _nextUpgrade.set(future);

@@ -50,6 +50,7 @@ import org.apache.ode.store.ClusterProcessStoreImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.fs.TempFileManager;
+import org.omg.CORBA.StringHolder;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -195,7 +196,10 @@ public class ODEServer {
         registerExternalVariableModules();
 
         _store.loadAll();
-        if (_clusterManager != null) _clusterManager.registerClusterProcessStoreMessageListener();
+        if (_clusterManager != null) {
+            _clusterManager.registerClusterProcessStoreMessageListener();
+            _clusterManager.setScheduler(_scheduler);
+        }
 
         try {
             _bpelServer.start();
@@ -524,8 +528,10 @@ public class ODEServer {
     }
 
     protected Scheduler createScheduler() {
-        SimpleScheduler scheduler = new SimpleScheduler(new GUID().toString(),
-                new JdbcDelegate(_db.getDataSource()), _odeConfig.getProperties());
+        String nodeId;
+        if (isClusteringEnabled) nodeId = _clusterManager.getUuid();
+        else nodeId = new GUID().toString();
+        SimpleScheduler scheduler = new SimpleScheduler(nodeId, new JdbcDelegate(_db.getDataSource()), _odeConfig.getProperties(), isClusteringEnabled);
         scheduler.setExecutorService(_executorService);
         scheduler.setTransactionManager(_txMgr);
         return scheduler;

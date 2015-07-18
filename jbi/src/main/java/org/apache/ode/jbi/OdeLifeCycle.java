@@ -19,18 +19,6 @@
 
 package org.apache.ode.jbi;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.concurrent.Executors;
-
-import javax.jbi.JBIException;
-import javax.jbi.component.ComponentContext;
-import javax.jbi.component.ComponentLifeCycle;
-import javax.jbi.component.ServiceUnitManager;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import javax.transaction.TransactionManager;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
@@ -49,6 +37,17 @@ import org.apache.ode.scheduler.simple.SimpleScheduler;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.fs.TempFileManager;
+
+import javax.jbi.JBIException;
+import javax.jbi.component.ComponentContext;
+import javax.jbi.component.ComponentLifeCycle;
+import javax.jbi.component.ServiceUnitManager;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import javax.transaction.TransactionManager;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.concurrent.Executors;
 
 /**
  * This class implements ComponentLifeCycle. The JBI framework will start this engine class automatically when JBI framework starts
@@ -243,7 +242,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             _ode._executorService = Executors.newCachedThreadPool();
         else
             _ode._executorService = Executors.newFixedThreadPool(_ode._config.getThreadPoolMaxSize());
-        _ode._scheduler = new SimpleScheduler(new GUID().toString(),new JdbcDelegate(_ode._dataSource), _ode._config.getProperties());
+        _ode._scheduler = new SimpleScheduler(new GUID().toString(),new JdbcDelegate(_ode._dataSource), _ode._config.getProperties(),false);
         _ode._scheduler.setJobProcessor(_ode._server);
         _ode._scheduler.setExecutorService(_ode._executorService);
         _ode._scheduler.setTransactionManager((TransactionManager) _ode.getContext().getTransactionManager());
