@@ -50,7 +50,6 @@ import org.apache.ode.store.ClusterProcessStoreImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.fs.TempFileManager;
-import org.omg.CORBA.StringHolder;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -198,7 +197,7 @@ public class ODEServer {
         _store.loadAll();
         if (_clusterManager != null) {
             _clusterManager.registerClusterProcessStoreMessageListener();
-            _clusterManager.setScheduler(_scheduler);
+            _clusterManager.registerClusterMemberListener(_scheduler);
         }
 
         try {
@@ -489,7 +488,7 @@ public class ODEServer {
             Class<?> clusterImplClass = this.getClass().getClassLoader().loadClass(clusterImplName);
             _clusterManager = (ClusterManager) clusterImplClass.newInstance();
         } catch (Exception ex) {
-            __log.error("Error while loading class : " +clusterImplName ,ex);
+            __log.error("Error while loading class : " + clusterImplName, ex);
         }
         _clusterManager.init(_configRoot);
     }

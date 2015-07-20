@@ -30,7 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.ode.bpel.clapi.*;
-import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.scheduler.simple.SimpleScheduler;
 
 /**
  * This class implements necessary methods to build the cluster using hazelcast
@@ -47,7 +47,7 @@ public class HazelcastClusterImpl implements ClusterManager {
     private IMap<Long, Long> instance_lock_map;
     private ITopic<ProcessStoreClusterEvent> clusterMessageTopic;
     private ClusterProcessStore _clusterProcessStore;
-    private Scheduler _scheduler;
+    private SimpleScheduler _scheduler;
     private ClusterLock<String> _hazelcastDeploymentLock;
     private ClusterLock<Long> _hazelcastInstanceLock;
 
@@ -77,7 +77,6 @@ public class HazelcastClusterImpl implements ClusterManager {
             nodeID = localMember.getInetSocketAddress().getHostName() +":" +localMember.getInetSocketAddress().getPort();
             uuid = localMember.getUuid();
             __log.info("Registering HZ localMember ID " + nodeID);
-            markAsMaster();
 
             deployment_lock_map = _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_DEPLOYMENT_LOCK);
             instance_lock_map = _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_PROCESS_INSTANCE_LOCK);
@@ -93,15 +92,15 @@ public class HazelcastClusterImpl implements ClusterManager {
         public void memberAdded(MembershipEvent membershipEvent) {
             String nodeId =  membershipEvent.getMember().getUuid();
             __log.info("Member Added " +nodeId);
-            if(isMaster) _simpleScheduler.memberAdded(nodeId);
+            _scheduler.memberAdded(nodeId);
         }
 
         @Override
         public void memberRemoved(MembershipEvent membershipEvent) {
-            String nodeId =  membershipEvent.getMember().getUuid();
-            __log.info("Member Removed " +nodeId);
+            String nodeId = membershipEvent.getMember().getUuid();
+            __log.info("Member Removed " + nodeId);
             markAsMaster();
-            if(isMaster) _simpleScheduler.memberRemoved(nodeId, uuid);
+            _scheduler.memberRemoved(nodeId);
         }
 
         @Override
@@ -149,9 +148,9 @@ public class HazelcastClusterImpl implements ClusterManager {
 
     private void markAsMaster() {
         leader = _hazelcastInstance.getCluster().getMembers().iterator().next();
-        if (leader.localMember()) {
+        if (leader.localMember() && isMaster == false) {
             isMaster = true;
-            _simpleScheduler.setIsMasterNode(true);
+            _scheduler.memberElectedAsMaster();
         }
         __log.info(isMaster);
     }
@@ -168,13 +167,14 @@ public class HazelcastClusterImpl implements ClusterManager {
         _clusterProcessStore = store;
     }
 
-    public void setScheduler(Scheduler scheduler) {
-        _scheduler = scheduler;
-        _scheduler.setClusterManager(this);
-    }
-
     public void registerClusterProcessStoreMessageListener() {
         clusterMessageTopic.addMessageListener(new ClusterMessageListener());
+    }
+
+    public void registerClusterMemberListener(Object scheduler) {
+        _scheduler = (SimpleScheduler) scheduler;
+        markAsMaster();
+        _scheduler.setClusterManager(this);
     }
 
     public void shutdown() {
@@ -189,11 +189,11 @@ public class HazelcastClusterImpl implements ClusterManager {
         return _hazelcastInstanceLock;
     }
 
-    public List<String> getKnownNodes() {
-        List<String> nodesList = new ArrayList<String>();
+    public List<String> getActiveNodes() {
+        List<String> nodeList = new ArrayList<String>();
         for(Member m : _hazelcastInstance.getCluster().getMembers())
-          nodesList.add(m.getUuid()) ;
-        return nodesList;
+          nodeList.add(m.getUuid()) ;
+        return nodeList;
     }
 }
 

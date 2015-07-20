@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.clapi;
 
 import java.io.File;
+import java.util.List;
 
 public interface ClusterManager {
 
@@ -57,6 +58,12 @@ public interface ClusterManager {
     void registerClusterProcessStoreMessageListener();
 
     /**
+     * Register Scheduler as ClusterMemberListener
+     * @param scheduler
+     */
+    void registerClusterMemberListener(Object scheduler);
+
+    /**
      * Return deployment lock for cluster
      */
     ClusterLock getDeploymentLock();
@@ -65,4 +72,14 @@ public interface ClusterManager {
      * Return instance lock for cluster
      */
     ClusterLock getInstanceLock();
+
+    /**
+     * Return active node list in the cluster
+     */
+    List<String> getActiveNodes();
+
+    /**
+     * Return local member's uuid in the cluster
+     */
+    String getUuid();
 }

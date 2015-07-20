@@ -16,12 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.scheduler.simple;
+package org.apache.ode.bpel.clapi;
 
-public interface SchedulerListener {
+public interface ClusterMemberListener {
 
     void memberAdded(String nodeId);
 
-    void memberRemoved(String nodeId,String masterId);
+    void memberRemoved(String nodeId);
+
+    void memberElectedAsMaster();
 
 }

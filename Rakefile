@@ -208,7 +208,7 @@ define "ode" do
 
   desc "ODE Clustering"
    define "clustering" do
-     compile.with projects("bpel-api","bpel-store"),HAZELCAST, COMMONS.logging
+     compile.with projects("bpel-api","bpel-store","scheduler-simple"),HAZELCAST, COMMONS.logging
      package :jar
    end
 
