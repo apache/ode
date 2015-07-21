@@ -37,6 +37,13 @@ public class DeepEqualityHelper{
     
     private Map<Long, Boolean> cache = new HashMap<Long, Boolean>();
     
+    private final List<String> IGNORE_FIELDS = new ArrayList<String>();
+    {
+        // due to ODE-1023, we set all document element to null in compiled process models. Thus we need to exclude them
+        // from the comparison because the were still set in old CBP files.
+        IGNORE_FIELDS.add("protected org.w3c.dom.Element com.ibm.wsdl.AbstractWSDLElement.docEl");
+    }
+    
     public boolean deepEquals(Object obj1, Object obj2){
   //  	__log.debug("comparing Objects: " + obj1 + " and " + obj2); //will cause too much log
     	Boolean c = cachedRes(obj1, obj2);
@@ -171,7 +178,7 @@ public class DeepEqualityHelper{
 			if (contains(c2, o1) == null) {
 				if (!logFalseThrough){
 					__log.debug("Unequal in Set: Object mismatch. " + st + 
-						"\n" + "cann't find " + o1);
+						"\n" + "can't find " + o1);
 				}
 				st.pop();
 				return false;
@@ -307,6 +314,13 @@ public class DeepEqualityHelper{
 				if (v1 == null && v2 == null){
 					continue;
 				}
+				
+				if (IGNORE_FIELDS.contains(f.toString())) {
+                    __log.debug("Ignoring field " + f.getName() + " with values " + v1 + " and " + v2);
+				    
+				    continue;
+				}
+				
 				st.push(f.getName()+ ":" + f.getType().getSimpleName());				
 				if (v1 == null || v2 == null){
 					if (!logFalseThrough){
