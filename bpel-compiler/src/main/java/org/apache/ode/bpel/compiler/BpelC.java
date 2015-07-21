@@ -161,7 +161,7 @@ public class BpelC {
         _outputStream = os;
 
         if (__log.isDebugEnabled()) {
-            __log.debug("Sett output to stream " + os);
+            __log.debug("Set output to stream " + os);
         }
     }
 
