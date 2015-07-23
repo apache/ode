@@ -103,18 +103,13 @@ public class SimpleScheduler implements Scheduler, TaskRunner, ClusterMemberList
 
     private boolean _isClusterEnabled;
 
-    private String _masterId;
-
     private ClusterManager _clusterManager;
 
-    /** All the nodes which are taken from the database*/
-    private CopyOnWriteArraySet<String> _dbNodes = new CopyOnWriteArraySet<String>();
+    /** All the nodes we know about */
+    private CopyOnWriteArraySet<String> _knownNodes = new CopyOnWriteArraySet<String>();
 
     /** All the stale nodes */
     private CopyOnWriteArraySet<String> _staleNodes = new CopyOnWriteArraySet<String>();
-
-    /** All the nodes when members are added to the cluster*/
-    private CopyOnWriteArraySet<String> _clusterNodes = new CopyOnWriteArraySet<String>();
 
     /** When we last heard from our nodes. */
     //private ConcurrentHashMap<String, Long> _lastHeartBeat = new ConcurrentHashMap<String, Long>();
@@ -145,6 +140,10 @@ public class SimpleScheduler implements Scheduler, TaskRunner, ClusterMemberList
     private long _immediateTransactionRetryInterval = 1000;
 
     private DateFormat debugDateFormatter = new SimpleDateFormat("HH:mm:ss,SSS");
+
+    public SimpleScheduler(String nodeId, DatabaseDelegate del, Properties conf) {
+       this(nodeId,del,conf,false);
+    }
 
     public SimpleScheduler(String nodeId, DatabaseDelegate del, Properties conf, boolean clusterState) {
         _nodeId = nodeId;
@@ -469,24 +468,8 @@ public class SimpleScheduler implements Scheduler, TaskRunner, ClusterMemberList
         _processedSinceLastLoadTask.clear();
         _outstandingJobs.clear();
 
-        _dbNodes.clear();
-        _clusterNodes.clear();
+        _knownNodes.clear();
         _staleNodes.clear();
-
-        try {
-            execTransaction(new Callable<Void>() {
-
-                public Void call() throws Exception {
-                    _dbNodes.addAll(_db.getNodeIds());
-                    return null;
-                }
-
-            });
-        } catch (Exception ex) {
-            __log.error("Error retrieving node list.", ex);
-            throw new ContextException("Error retrieving node list.", ex);
-        }
-        _clusterNodes.add(_nodeId);
 
         long now = System.currentTimeMillis();
 
@@ -496,11 +479,11 @@ public class SimpleScheduler implements Scheduler, TaskRunner, ClusterMemberList
         // schedule immediate job loading for now!
         _todo.enqueue(new LoadImmediateTask(now));
 
-        // schedule check for stale nodes, make it random so that the nodes don't overlap.
-        _todo.enqueue(new CheckStaleNodes(now + randomMean(_staleInterval)));
+        if(!_isClusterEnabled) enqueueTasksReadnodeIds();
 
-        // do the upgrade sometime (random) in the immediate interval.
-        _todo.enqueue(new UpgradeJobsTask(now + randomMean(_immediateInterval)));
+        else {
+            if (_clusterManager.getIsMaster()) enqueueTasksReadnodeIds();
+        }
 
         _todo.start();
         _running = true;
@@ -529,7 +512,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner, ClusterMemberList
     }
 
     public void memberAdded(String nodeId) {
-        _clusterNodes.add(nodeId);
+        _knownNodes.add(nodeId);
     }
 
     public void memberRemoved(String nodeId) {
@@ -537,16 +520,16 @@ public class SimpleScheduler implements Scheduler, TaskRunner, ClusterMemberList
     }
 
     // Do enqueue CheckStaleNodes and UpgradeJobsTask after a new master is identified.
-    public void memberElectedAsMaster() {
-        _masterId = _nodeId;
-        _todo.enqueue(new CheckStaleNodes(System.currentTimeMillis() + randomMean(_staleInterval)));
-        _todo.enqueue(new UpgradeJobsTask(System.currentTimeMillis() + randomMean(_immediateInterval)));
-        _dbNodes.clear();
+    public void memberElectedAsMaster(String masterId) {
+        enqueueTasksReadnodeIds();
+    }
+
+    private void enqueueTasksReadnodeIds() {
         try {
             execTransaction(new Callable<Void>() {
 
                 public Void call() throws Exception {
-                    _dbNodes.addAll(_db.getNodeIds());
+                    _knownNodes.addAll(_db.getNodeIds());
                     return null;
                 }
 
@@ -555,6 +538,19 @@ public class SimpleScheduler implements Scheduler, TaskRunner, ClusterMemberList
             __log.error("Error retrieving node list.", ex);
             throw new ContextException("Error retrieving node list.", ex);
         }
+
+        //make double sure all the active nodes are included into _knownNodes
+        if(_isClusterEnabled) _knownNodes.addAll(_clusterManager.getActiveNodes());
+
+        else _knownNodes.add(_nodeId);
+
+        long now = System.currentTimeMillis();
+
+        // schedule check for stale nodes, make it random so that the nodes don't overlap.
+        _todo.enqueue(new CheckStaleNodes(now + randomMean(_staleInterval)));
+
+        // do the upgrade sometime (random) in the immediate interval.
+        _todo.enqueue(new UpgradeJobsTask(now + randomMean(_immediateInterval)));
     }
 
     class RunJob implements Callable<Void> {
@@ -880,9 +876,13 @@ public class SimpleScheduler implements Scheduler, TaskRunner, ClusterMemberList
 
             if(_isClusterEnabled) _staleNodes.remove(nodeId);
 
-            // If the stale node id is in _clusterNodes or _dbNodes, remove it.
-            _clusterNodes.remove(nodeId);
-            _dbNodes.remove(nodeId);
+            // If the stale node id is in _knownNodes, remove it.
+            _knownNodes.remove(nodeId);
+
+            // We can now forget about this node, if we see it again, it will be
+            // "new to us"
+            //_knownNodes.remove(nodeId);
+            //_lastHeartBeat.remove(nodeId);
 
             // Force a load-immediate to catch anything new from the recovered node.
             doLoadImmediate();
@@ -981,9 +981,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner, ClusterMemberList
             _todo.enqueue(new CheckStaleNodes(System.currentTimeMillis() + _staleInterval));
             __log.debug("CHECK STALE NODES started");
 
-            ArrayList<String> knownNodes = new ArrayList<String>();
-            knownNodes.addAll(_dbNodes);
-            knownNodes.addAll(_clusterNodes);
+            ArrayList<String> knownNodes = new ArrayList<String>(_knownNodes);
 
             // for cluster mode
             if (_isClusterEnabled && _clusterManager.getIsMaster()) {
@@ -1006,6 +1004,14 @@ public class SimpleScheduler implements Scheduler, TaskRunner, ClusterMemberList
                     if (!nodeId.equals(_nodeId)) recoverStaleNode(nodeId);
                 }
             }
+            /*for (String nodeId : _knownNodes) {
+                Long lastSeen = _lastHeartBeat.get(nodeId);
+                if ((lastSeen == null || (System.currentTimeMillis() - lastSeen) > _staleInterval)
+                        && !_nodeId.equals(nodeId))
+                {
+                    recoverStaleNode(nodeId);
+                }
+            }*/
         }
     }
 

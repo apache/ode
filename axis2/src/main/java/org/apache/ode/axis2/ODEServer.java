@@ -31,6 +31,7 @@ import org.apache.ode.axis2.service.DeploymentWebService;
 import org.apache.ode.axis2.service.ManagementService;
 import org.apache.ode.axis2.util.ClusterUrlTransformer;
 import org.apache.ode.bpel.clapi.ClusterManager;
+import org.apache.ode.bpel.clapi.ClusterMemberListener;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
@@ -197,7 +198,9 @@ public class ODEServer {
         _store.loadAll();
         if (_clusterManager != null) {
             _clusterManager.registerClusterProcessStoreMessageListener();
-            _clusterManager.registerClusterMemberListener(_scheduler);
+            if (_scheduler instanceof SimpleScheduler) {
+                _clusterManager.registerClusterMemberListener((ClusterMemberListener) _scheduler);
+            }
         }
 
         try {
@@ -527,10 +530,12 @@ public class ODEServer {
     }
 
     protected Scheduler createScheduler() {
-        String nodeId;
-        if (isClusteringEnabled) nodeId = _clusterManager.getUuid();
-        else nodeId = new GUID().toString();
-        SimpleScheduler scheduler = new SimpleScheduler(nodeId, new JdbcDelegate(_db.getDataSource()), _odeConfig.getProperties(), isClusteringEnabled);
+        SimpleScheduler scheduler;
+        if (isClusteringEnabled) {
+            scheduler = new SimpleScheduler(_clusterManager.getUuid(), new JdbcDelegate(_db.getDataSource()), _odeConfig.getProperties(), isClusteringEnabled);
+            scheduler.setClusterManager(_clusterManager);
+        } else
+            scheduler = new SimpleScheduler(new GUID().toString(), new JdbcDelegate(_db.getDataSource()), _odeConfig.getProperties());
         scheduler.setExecutorService(_executorService);
         scheduler.setTransactionManager(_txMgr);
         return scheduler;

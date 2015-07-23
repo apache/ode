@@ -24,6 +24,6 @@ public interface ClusterMemberListener {
 
     void memberRemoved(String nodeId);
 
-    void memberElectedAsMaster();
+    void memberElectedAsMaster(String masterId);
 
 }

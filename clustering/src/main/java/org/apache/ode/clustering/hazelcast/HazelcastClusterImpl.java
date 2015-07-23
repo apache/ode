@@ -30,7 +30,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.apache.ode.bpel.clapi.*;
-import org.apache.ode.scheduler.simple.SimpleScheduler;
 
 /**
  * This class implements necessary methods to build the cluster using hazelcast
@@ -47,7 +46,7 @@ public class HazelcastClusterImpl implements ClusterManager {
     private IMap<Long, Long> instance_lock_map;
     private ITopic<ProcessStoreClusterEvent> clusterMessageTopic;
     private ClusterProcessStore _clusterProcessStore;
-    private SimpleScheduler _scheduler;
+    private ClusterMemberListener _listener;
     private ClusterLock<String> _hazelcastDeploymentLock;
     private ClusterLock<Long> _hazelcastInstanceLock;
 
@@ -78,6 +77,8 @@ public class HazelcastClusterImpl implements ClusterManager {
             uuid = localMember.getUuid();
             __log.info("Registering HZ localMember ID " + nodeID);
 
+            markAsMaster();
+
             deployment_lock_map = _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_DEPLOYMENT_LOCK);
             instance_lock_map = _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_PROCESS_INSTANCE_LOCK);
             clusterMessageTopic = _hazelcastInstance.getTopic(HazelcastConstants.ODE_CLUSTER_MSG);
@@ -92,7 +93,7 @@ public class HazelcastClusterImpl implements ClusterManager {
         public void memberAdded(MembershipEvent membershipEvent) {
             String nodeId =  membershipEvent.getMember().getUuid();
             __log.info("Member Added " +nodeId);
-            _scheduler.memberAdded(nodeId);
+            if(isMaster && _listener != null) _listener.memberAdded(nodeId);
         }
 
         @Override
@@ -100,7 +101,7 @@ public class HazelcastClusterImpl implements ClusterManager {
             String nodeId = membershipEvent.getMember().getUuid();
             __log.info("Member Removed " + nodeId);
             markAsMaster();
-            _scheduler.memberRemoved(nodeId);
+            if(isMaster && _listener != null) _listener.memberRemoved(nodeId);
         }
 
         @Override
@@ -150,7 +151,7 @@ public class HazelcastClusterImpl implements ClusterManager {
         leader = _hazelcastInstance.getCluster().getMembers().iterator().next();
         if (leader.localMember() && isMaster == false) {
             isMaster = true;
-            _scheduler.memberElectedAsMaster();
+            if(_listener != null) _listener.memberElectedAsMaster(uuid);
         }
         __log.info(isMaster);
     }
@@ -171,10 +172,8 @@ public class HazelcastClusterImpl implements ClusterManager {
         clusterMessageTopic.addMessageListener(new ClusterMessageListener());
     }
 
-    public void registerClusterMemberListener(Object scheduler) {
-        _scheduler = (SimpleScheduler) scheduler;
-        markAsMaster();
-        _scheduler.setClusterManager(this);
+    public void registerClusterMemberListener(ClusterMemberListener listener) {
+        _listener = listener;
     }
 
     public void shutdown() {

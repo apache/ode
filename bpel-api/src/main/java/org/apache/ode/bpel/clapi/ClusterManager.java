@@ -59,9 +59,9 @@ public interface ClusterManager {
 
     /**
      * Register Scheduler as ClusterMemberListener
-     * @param scheduler
+     * @param listener
      */
-    void registerClusterMemberListener(Object scheduler);
+    void registerClusterMemberListener(ClusterMemberListener listener);
 
     /**
      * Return deployment lock for cluster

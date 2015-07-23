@@ -128,7 +128,7 @@ public abstract class BPELTestAbstract {
 
         {
             JdbcDelegate del = new JdbcDelegate(_dataSource);
-            scheduler = new SimpleScheduler("node", del, props,false);
+            scheduler = new SimpleScheduler("node", del, props);
             scheduler.setTransactionManager(_txManager);
             _cf = new BpelDAOConnectionFactoryImpl(scheduler);
             _server.setDaoConnectionFactory(_cf);
