@@ -27,7 +27,8 @@ public abstract class ProcessStoreClusterEvent implements Serializable {
 
     protected String info ;
 
-    private String uuid;
+    /** Unique ID of the Node in the Cluster generating the Event */
+    private String eventGeneratingNode;
 
     public ProcessStoreClusterEvent(String deploymentUnit) {
         this.deploymentUnit = deploymentUnit;
@@ -38,12 +39,12 @@ public abstract class ProcessStoreClusterEvent implements Serializable {
         return "{ProcessStoreClusterEvent#" + deploymentUnit +"}";
     }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
+    public void setEventGeneratingNode(String uuid) {
+        this.eventGeneratingNode = uuid;
     }
 
-    public String getUuid() {
-        return uuid;
+    public String getEventGeneratingNode() {
+        return eventGeneratingNode;
     }
 
     public String getDuName() {

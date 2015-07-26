@@ -15,5 +15,5 @@
 
 repositories.remote << "http://repo1.maven.org/maven2"
 repositories.remote << "http://people.apache.org/~vanto/m2/"
-repositories.remote << "https://repository.apache.org/content/groups/snapshots"
+repositories.remote << "http://repository.apache.org/content/groups/snapshots"
 repositories.release_to[:url] ||= "sftp://guest@localhost/home/guest"

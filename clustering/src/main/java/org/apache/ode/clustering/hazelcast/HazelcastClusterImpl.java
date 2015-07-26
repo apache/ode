@@ -18,8 +18,20 @@
  */
 package org.apache.ode.clustering.hazelcast;
 
-import com.hazelcast.core.*;
+import com.hazelcast.config.Config;
 import com.hazelcast.config.FileSystemXmlConfig;
+import com.hazelcast.config.ListenerConfig;
+import com.hazelcast.config.TopicConfig;
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IMap;
+import com.hazelcast.core.ITopic;
+import com.hazelcast.core.Member;
+import com.hazelcast.core.MemberAttributeEvent;
+import com.hazelcast.core.MembershipEvent;
+import com.hazelcast.core.MembershipListener;
+import com.hazelcast.core.Message;
+import com.hazelcast.core.MessageListener;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -34,21 +46,28 @@ import org.apache.ode.bpel.clapi.*;
 /**
  * This class implements necessary methods to build the cluster using hazelcast
  */
-public class HazelcastClusterImpl implements ClusterManager {
+public class HazelcastClusterImpl implements ClusterManager, ProcessStoreClusterListener {
     private static final Log __log = LogFactory.getLog(HazelcastClusterImpl.class);
 
     private HazelcastInstance _hazelcastInstance;
     private boolean isMaster = false;
+    private String nodeHostName;
     private String nodeID;
-    private String uuid;
-    private Member leader;
     private IMap<String, String> deployment_lock_map;
     private IMap<Long, Long> instance_lock_map;
-    private ITopic<ProcessStoreClusterEvent> clusterMessageTopic;
+    private ITopic<ProcessStoreClusterEvent> clusterDeploymentMessageTopic;
     private ClusterProcessStore _clusterProcessStore;
-    private ClusterMemberListener _listener;
     private ClusterLock<String> _hazelcastDeploymentLock;
     private ClusterLock<Long> _hazelcastInstanceLock;
+    private ClusterDeploymentMessageListener clusterDeploymentMessageListener;
+    private ClusterMemberShipListener clusterMemberShipListener;
+    private List<ClusterMemberListener> clusterMemberListenerList = null;
+
+    public HazelcastClusterImpl() {
+        clusterMemberShipListener = new ClusterMemberShipListener();
+        clusterDeploymentMessageListener = new ClusterDeploymentMessageListener();
+        clusterDeploymentMessageListener.registerClusterProcessStoreListener((ProcessStoreClusterListener)this);
+    }
 
     public void init(File configRoot) {
 
@@ -63,7 +82,8 @@ public class HazelcastClusterImpl implements ClusterManager {
                 __log.error("hazelcast.xml does not exist or is not a file");
             else
                 try {
-                    _hazelcastInstance = Hazelcast.newHazelcastInstance(new FileSystemXmlConfig(hzXml));
+                    Config config = loadConfig(hzXml);
+                    _hazelcastInstance = Hazelcast.newHazelcastInstance(config);
                 } catch (FileNotFoundException fnf) {
                     __log.error(fnf);
                 }
@@ -71,37 +91,71 @@ public class HazelcastClusterImpl implements ClusterManager {
 
         if (_hazelcastInstance != null) {
             // Registering this node in the cluster.
-            _hazelcastInstance.getCluster().addMembershipListener(new ClusterMemberShipListener());
+            //_hazelcastInstance.getCluster().addMembershipListener(new ClusterMemberShipListener());
             Member localMember = _hazelcastInstance.getCluster().getLocalMember();
-            nodeID = localMember.getInetSocketAddress().getHostName() +":" +localMember.getInetSocketAddress().getPort();
-            uuid = localMember.getUuid();
-            __log.info("Registering HZ localMember ID " + nodeID);
-
-            markAsMaster();
+            nodeHostName = localMember.getSocketAddress().getHostName() + ":" + localMember.getSocketAddress().getPort();
+            nodeID = localMember.getUuid();
+            __log.info("Registering HZ localMember:" + nodeHostName);
 
             deployment_lock_map = _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_DEPLOYMENT_LOCK);
             instance_lock_map = _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_PROCESS_INSTANCE_LOCK);
-            clusterMessageTopic = _hazelcastInstance.getTopic(HazelcastConstants.ODE_CLUSTER_MSG);
+            clusterDeploymentMessageTopic = _hazelcastInstance.getTopic(HazelcastConstants.ODE_CLUSTER_DEPLOYMENT_TOPIC);
 
             _hazelcastDeploymentLock = (ClusterLock) new HazelcastDeploymentLock(deployment_lock_map);
             _hazelcastInstanceLock = (ClusterLock) new HazelcastInstanceLock(instance_lock_map);
+
+            markAsMaster();
         }
     }
 
+    protected Config loadConfig(File hazelcastConfigFile) throws FileNotFoundException {
+        Config config = new FileSystemXmlConfig(hazelcastConfigFile);
+
+        //add Cluster membership listener
+        ListenerConfig clusterMemberShipListenerConfig = new ListenerConfig();
+        clusterMemberShipListenerConfig.setImplementation(clusterMemberShipListener);
+        config.addListenerConfig(clusterMemberShipListenerConfig);
+
+        //set topic message listener
+        ListenerConfig topicListenerConfig = new ListenerConfig();
+        topicListenerConfig.setImplementation(clusterDeploymentMessageListener);
+        TopicConfig topicConfig = config.getTopicConfig(HazelcastConstants.ODE_CLUSTER_DEPLOYMENT_TOPIC);
+        topicConfig.addMessageListenerConfig(topicListenerConfig);
+
+        return config;
+    }
+
     class ClusterMemberShipListener implements MembershipListener {
+
+        public ClusterMemberShipListener() {
+            clusterMemberListenerList = new ArrayList<ClusterMemberListener>();
+        }
+
+        public void registerClusterMemberListener(ClusterMemberListener listener) {
+            clusterMemberListenerList.add(listener);
+        }
+
         @Override
         public void memberAdded(MembershipEvent membershipEvent) {
-            String nodeId =  membershipEvent.getMember().getUuid();
-            __log.info("Member Added " +nodeId);
-            if(isMaster && _listener != null) _listener.memberAdded(nodeId);
+            String eventNodeID = membershipEvent.getMember().getUuid();
+            __log.info("Member Added " + eventNodeID);
+            if (isMaster) {
+                for (ClusterMemberListener listener : clusterMemberListenerList) {
+                    listener.memberAdded(eventNodeID);
+                }
+            }
         }
 
         @Override
         public void memberRemoved(MembershipEvent membershipEvent) {
-            String nodeId = membershipEvent.getMember().getUuid();
-            __log.info("Member Removed " + nodeId);
+            String eventNodeID = membershipEvent.getMember().getUuid();
+            __log.info("Member Removed " + eventNodeID);
             markAsMaster();
-            if(isMaster && _listener != null) _listener.memberRemoved(nodeId);
+            if (isMaster) {
+                for (ClusterMemberListener listener : clusterMemberListenerList) {
+                    listener.memberRemoved(eventNodeID);
+                }
+            }
         }
 
         @Override
@@ -111,36 +165,48 @@ public class HazelcastClusterImpl implements ClusterManager {
     }
 
     public void publishProcessStoreClusterEvent(ProcessStoreClusterEvent clusterEvent) {
-        clusterEvent.setUuid(uuid);
-        __log.info("Send " +clusterEvent.getInfo() +" Cluster Message " +"for " +clusterEvent.getDuName() +" [" +nodeID +"]");
-        clusterMessageTopic.publish(clusterEvent);
+        clusterEvent.setEventGeneratingNode(nodeID);
+        __log.info("Send " + clusterEvent.getInfo() + " Cluster Message " + "for " + clusterEvent.getDuName() + " [" + nodeHostName + "]");
+        clusterDeploymentMessageTopic.publish(clusterEvent);
     }
 
 
-    class ClusterMessageListener implements MessageListener<ProcessStoreClusterEvent> {
+    class ClusterDeploymentMessageListener implements MessageListener<ProcessStoreClusterEvent> {
+        List<ProcessStoreClusterListener> clusterProcessStoreListenerList = null;
+
+        public ClusterDeploymentMessageListener() {
+            clusterProcessStoreListenerList = new ArrayList<ProcessStoreClusterListener>();
+        }
+
+        public void registerClusterProcessStoreListener(ProcessStoreClusterListener listener) {
+            clusterProcessStoreListenerList.add(listener);
+        }
+
         @Override
         public void onMessage(Message<ProcessStoreClusterEvent> msg) {
-            handleEvent(msg.getMessageObject());
+            for (ProcessStoreClusterListener listener : clusterProcessStoreListenerList) {
+                listener.onProcessStoreClusterEvent(msg.getMessageObject());
+            }
         }
     }
 
-    private void handleEvent(ProcessStoreClusterEvent message) {
+    public void onProcessStoreClusterEvent(ProcessStoreClusterEvent message) {
         if (message instanceof ProcessStoreDeployedEvent) {
             ProcessStoreDeployedEvent event = (ProcessStoreDeployedEvent) message;
-            String eventUuid =  event.getUuid();
-            if (!uuid.equals(eventUuid)) {
+            String eventUuid = event.getEventGeneratingNode();
+            if (!nodeID.equals(eventUuid)) {
                 String duName = event.getDuName();
-                __log.info("Receive " +event.getInfo() +" Cluster Message " +"for " +event.getDuName() +" [" +nodeID +"]");
+                __log.info("Receive " + event.getInfo() + " Cluster Message " + "for " + event.getDuName() + " [" + nodeHostName + "]");
                 _clusterProcessStore.deployProcesses(duName);
             }
         }
 
         else if (message instanceof ProcessStoreUndeployedEvent) {
             ProcessStoreUndeployedEvent event = (ProcessStoreUndeployedEvent) message;
-            String eventUuid =  event.getUuid();
-            if (!uuid.equals(eventUuid)) {
+            String eventUuid = event.getEventGeneratingNode();
+            if (!nodeID.equals(eventUuid)) {
                 String duName = event.getDuName();
-                __log.info("Receive " +event.getInfo() +"  Cluster Message " +"for " +event.getDuName() +" [" +nodeID +"]");
+                __log.info("Receive " + event.getInfo() + "  Cluster Message " + "for " + event.getDuName() + " [" + nodeHostName + "]");
                 _clusterProcessStore.undeployProcesses(duName);
             }
         }
@@ -148,36 +214,38 @@ public class HazelcastClusterImpl implements ClusterManager {
     }
 
     private void markAsMaster() {
-        leader = _hazelcastInstance.getCluster().getMembers().iterator().next();
-        if (leader.localMember() && isMaster == false) {
+        Member member = _hazelcastInstance.getCluster().getMembers().iterator().next();
+        if (member.localMember() && isMaster == false) {
             isMaster = true;
-            if(_listener != null) _listener.memberElectedAsMaster(uuid);
+            for (ClusterMemberListener listener : clusterMemberListenerList) {
+                listener.memberElectedAsMaster(nodeID);
+            }
         }
         __log.info(isMaster);
     }
 
-    public boolean getIsMaster() {
+    public boolean isMaster() {
         return isMaster;
     }
 
-    public String getUuid() {
-        return uuid;
+    public String getNodeID() {
+        return nodeID;
     }
 
     public void setClusterProcessStore(ClusterProcessStore store) {
         _clusterProcessStore = store;
     }
 
-    public void registerClusterProcessStoreMessageListener() {
-        clusterMessageTopic.addMessageListener(new ClusterMessageListener());
+    public void registerClusterProcessStoreMessageListener(ProcessStoreClusterListener listener) {
+        clusterDeploymentMessageListener.registerClusterProcessStoreListener(listener);
     }
 
     public void registerClusterMemberListener(ClusterMemberListener listener) {
-        _listener = listener;
+        clusterMemberShipListener.registerClusterMemberListener(listener);
     }
 
     public void shutdown() {
-        if(_hazelcastInstance != null) _hazelcastInstance.getLifecycleService().shutdown();
+        if (_hazelcastInstance != null) _hazelcastInstance.shutdown();
     }
 
     public ClusterLock<String> getDeploymentLock(){

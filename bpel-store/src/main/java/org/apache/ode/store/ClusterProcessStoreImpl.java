@@ -47,7 +47,6 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl implements Cluster
     public ClusterProcessStoreImpl(EndpointReferenceContext eprContext, DataSource ds, String persistenceType, OdeConfigProperties props, boolean createDatamodel, ClusterManager clusterManager) {
         super(eprContext,ds,persistenceType,props,createDatamodel);
         _clusterManager = clusterManager;
-        _clusterManager.setClusterProcessStore(this);
     }
 
     public Collection<QName> deploy(final File deploymentUnitDirectory) {
@@ -59,7 +58,7 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl implements Cluster
     private void publishProcessStoreDeployedEvent(String duName){
         deployedEvent = new ProcessStoreDeployedEvent(duName);
         _clusterManager.publishProcessStoreClusterEvent(deployedEvent);
-        __log.info("Completed actual deployment for " +duName +" by " +deployedEvent.getUuid());
+        __log.info("Completed actual deployment for " +duName +" by " +deployedEvent.getEventGeneratingNode());
     }
 
     public void deployProcesses(final String duName) {
@@ -121,7 +120,7 @@ public class ClusterProcessStoreImpl extends ProcessStoreImpl implements Cluster
     private void publishProcessStoreUndeployedEvent(String duName){
         undeployedEvent = new ProcessStoreUndeployedEvent(duName);
         _clusterManager.publishProcessStoreClusterEvent(undeployedEvent);
-        __log.info("Completed actual undeployment for " +duName +" by " +undeployedEvent.getUuid());
+        __log.info("Completed actual undeployment for " +duName +" by " +undeployedEvent.getEventGeneratingNode());
     }
 
     /**

@@ -21,9 +21,9 @@ package org.apache.ode.clustering.hazelcast;
  * Constants used in Hazelcast based clustering implementation
  */
 public final class HazelcastConstants {
-    public static final String ODE_CLUSTER_DEPLOYMENT_LOCK = "DEPLOYMENT_LOCK";
-    public static final String ODE_CLUSTER_PROCESS_INSTANCE_LOCK  = "PROCESS_INSTANCE_LOCK ";
-    public static final String ODE_CLUSTER_MSG = "CLUSTER_MSG";
+    public static final String ODE_CLUSTER_DEPLOYMENT_LOCK = "ODE_DEPLOYMENT_LOCK";
+    public static final String ODE_CLUSTER_PROCESS_INSTANCE_LOCK  = "ODE_PROCESS_INSTANCE_LOCK ";
+    public static final String ODE_CLUSTER_DEPLOYMENT_TOPIC = "ODE_DEPLOYMENT_TOPIC";
 
     private HazelcastConstants() {
     }

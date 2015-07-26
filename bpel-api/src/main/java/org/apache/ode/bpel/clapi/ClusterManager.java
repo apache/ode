@@ -38,7 +38,7 @@ public interface ClusterManager {
      * Return whether the local member is Master or not
      * @return
      */
-    boolean getIsMaster();
+    boolean isMaster();
 
     /**
      * Set the Process Store object which uses for clustering
@@ -55,8 +55,7 @@ public interface ClusterManager {
     /**
      * Register the cluster for message listener
      */
-    void registerClusterProcessStoreMessageListener();
-
+    void registerClusterProcessStoreMessageListener(ProcessStoreClusterListener listener);
     /**
      * Register Scheduler as ClusterMemberListener
      * @param listener
@@ -81,5 +80,5 @@ public interface ClusterManager {
     /**
      * Return local member's uuid in the cluster
      */
-    String getUuid();
+    String getNodeID();
 }

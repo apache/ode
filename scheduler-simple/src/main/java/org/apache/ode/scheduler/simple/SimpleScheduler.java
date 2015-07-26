@@ -482,7 +482,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner, ClusterMemberList
         if(!_isClusterEnabled) enqueueTasksReadnodeIds();
 
         else {
-            if (_clusterManager.getIsMaster()) enqueueTasksReadnodeIds();
+            if (_clusterManager.isMaster()) enqueueTasksReadnodeIds();
         }
 
         _todo.start();
@@ -725,16 +725,16 @@ public class SimpleScheduler implements Scheduler, TaskRunner, ClusterMemberList
         }
     }
 
-    /*public void updateHeartBeat(String nodeId) {
+    public void updateHeartBeat(String nodeId) {
         if (nodeId == null)
             return;
 
-        if (_nodeId.equals(nodeId))
-            return;
+        /*if (_nodeId.equals(nodeId))
+            return;*/
 
-        _lastHeartBeat.put(nodeId, System.currentTimeMillis());
+        //_lastHeartBeat.put(nodeId, System.currentTimeMillis());
         _knownNodes.add(nodeId);
-    }*/
+    }
 
     boolean doLoadImmediate() {
         __log.debug("LOAD IMMEDIATE started");
@@ -815,7 +815,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner, ClusterMemberList
         final ArrayList<String> activeNodes;
 
         // for cluster mode
-        if (_isClusterEnabled && _clusterManager.getIsMaster()) {
+        if (_isClusterEnabled && _clusterManager.isMaster()) {
             activeNodes = (ArrayList) _clusterManager.getActiveNodes();
         }
         //for standalone ODE deployments
@@ -984,7 +984,7 @@ public class SimpleScheduler implements Scheduler, TaskRunner, ClusterMemberList
             ArrayList<String> knownNodes = new ArrayList<String>(_knownNodes);
 
             // for cluster mode
-            if (_isClusterEnabled && _clusterManager.getIsMaster()) {
+            if (_isClusterEnabled && _clusterManager.isMaster()) {
                 ArrayList<String> memberList = (ArrayList) _clusterManager.getActiveNodes();
 
                 //find stale nodes

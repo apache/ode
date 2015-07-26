@@ -49,7 +49,6 @@ import org.apache.ode.utils.WatchDog;
 import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -99,7 +98,7 @@ public class DeploymentPoller {
     public DeploymentPoller(File deployDir, final ODEServer odeServer) {
         _odeServer = odeServer;
         _deployDir = deployDir;
-        clusterEnabled = _odeServer.getIsCluteringEnabled();
+        clusterEnabled = _odeServer.isClusteringEnabled();
         if (!_deployDir.exists()) {
             boolean isDeployDirCreated = _deployDir.mkdir();
             if (!isDeployDirCreated) {

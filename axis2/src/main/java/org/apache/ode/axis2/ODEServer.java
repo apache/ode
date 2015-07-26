@@ -32,6 +32,7 @@ import org.apache.ode.axis2.service.ManagementService;
 import org.apache.ode.axis2.util.ClusterUrlTransformer;
 import org.apache.ode.bpel.clapi.ClusterManager;
 import org.apache.ode.bpel.clapi.ClusterMemberListener;
+import org.apache.ode.bpel.clapi.ClusterProcessStore;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
@@ -119,7 +120,7 @@ public class ODEServer {
     
     public Runnable txMgrCreatedCallback;
 
-    private boolean isClusteringEnabled = false;
+    private boolean clusteringEnabled = false;
 
     public void init(ServletConfig config, ConfigurationContext configContext) throws ServletException {
         init(config.getServletContext().getRealPath("/WEB-INF"), configContext);
@@ -173,8 +174,8 @@ public class ODEServer {
             txMgrCreatedCallback.run();
         }
 
-        String clusteringState = _odeConfig.getClusteringState();
-        if (clusteringState != null && isClusteringEnabled(clusteringState)) {
+        clusteringEnabled = _odeConfig.isClusteringEnabled();
+        if (clusteringEnabled) {
             initClustering();
         } else __log.info(__msgs.msgOdeClusteringNotInitialized());
 
@@ -197,10 +198,9 @@ public class ODEServer {
 
         _store.loadAll();
         if (_clusterManager != null) {
-            _clusterManager.registerClusterProcessStoreMessageListener();
-            if (_scheduler instanceof SimpleScheduler) {
-                _clusterManager.registerClusterMemberListener((ClusterMemberListener) _scheduler);
-            }
+            _clusterManager.registerClusterMemberListener((ClusterMemberListener) _scheduler);
+            _clusterManager.setClusterProcessStore((ClusterProcessStore) _store);
+            _clusterManager.init(_configRoot);
         }
 
         try {
@@ -466,20 +466,8 @@ public class ODEServer {
         }
     }
 
-    private boolean isClusteringEnabled(String clusteringState) {
-        boolean state;
-        if (clusteringState.equals("true")) state = true;
-        else state = false;
-        setClustering(state);
-        return state;
-    }
-
-    private void  setClustering (boolean state) {
-        isClusteringEnabled = state;
-    }
-
-    public boolean getIsCluteringEnabled() {
-        return isClusteringEnabled;
+    public boolean isClusteringEnabled() {
+        return clusteringEnabled;
     }
 
     /**
@@ -493,7 +481,6 @@ public class ODEServer {
         } catch (Exception ex) {
             __log.error("Error while loading class : " + clusterImplName, ex);
         }
-        _clusterManager.init(_configRoot);
     }
 
     /**
@@ -524,15 +511,15 @@ public class ODEServer {
     }
 
     protected ProcessStoreImpl createProcessStore(EndpointReferenceContext eprContext, DataSource ds) {
-        if (isClusteringEnabled)
+        if (clusteringEnabled)
             return new ClusterProcessStoreImpl(eprContext, ds, _odeConfig.getDAOConnectionFactory(), _odeConfig, false, _clusterManager);
         else return new ProcessStoreImpl(eprContext, ds, _odeConfig.getDAOConnectionFactory(), _odeConfig, false);
     }
 
     protected Scheduler createScheduler() {
         SimpleScheduler scheduler;
-        if (isClusteringEnabled) {
-            scheduler = new SimpleScheduler(_clusterManager.getUuid(), new JdbcDelegate(_db.getDataSource()), _odeConfig.getProperties(), isClusteringEnabled);
+        if (clusteringEnabled) {
+            scheduler = new SimpleScheduler(_clusterManager.getNodeID(), new JdbcDelegate(_db.getDataSource()), _odeConfig.getProperties(), clusteringEnabled);
             scheduler.setClusterManager(_clusterManager);
         } else
             scheduler = new SimpleScheduler(new GUID().toString(), new JdbcDelegate(_db.getDataSource()), _odeConfig.getProperties());

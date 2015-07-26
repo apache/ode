@@ -19,16 +19,16 @@
 
 package org.apache.ode.il.config;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.utils.SystemUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.utils.SystemUtils;
 
 /**
  * Configuration object used for configuring the intergration layer. The propereties are those likely to be common to all layers.
@@ -295,8 +295,8 @@ public class OdeConfigProperties {
         return getProperty(OdeConfigProperties.PROP_DEPLOY_DIR);
     }
 
-    public String getClusteringState() {
-        return getProperty(OdeConfigProperties.PROP_CLUSTERING_ENABLED);
+    public boolean isClusteringEnabled() {
+        return Boolean.valueOf(getProperty(OdeConfigProperties.PROP_CLUSTERING_ENABLED, "false"));
     }
 
     public String getClusteringImplClass() {
