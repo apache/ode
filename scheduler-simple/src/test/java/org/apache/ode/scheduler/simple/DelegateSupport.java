@@ -75,7 +75,7 @@ public class DelegateSupport {
                 }
             }
             
-            c.createStatement().executeUpdate("CREATE ALIAS MOD FOR \"org.apache.ode.scheduler.simple.DelegateSupport.mod\";");
+            c.createStatement().executeUpdate("CREATE FUNCTION mod(a BIGINT, b BIGINT) RETURNS BIGINT LANGUAGE JAVA DETERMINISTIC NO SQL EXTERNAL NAME 'CLASSPATH:org.apache.ode.scheduler.simple.DelegateSupport.mod';");
             c.createStatement().executeUpdate(sql.toString());
         } finally {
             c.close();
