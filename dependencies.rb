@@ -77,7 +77,7 @@ GERONIMO            = struct(
 )
 HIBERNATE           = [ "org.hibernate:hibernate:jar:3.2.5.ga", "asm:asm:jar:1.5.3",
                         "antlr:antlr:jar:2.7.6", "cglib:cglib:jar:2.1_3", "net.sf.ehcache:ehcache:jar:1.2.3" ]
-HSQLDB              = "hsqldb:hsqldb:jar:1.8.0.7"
+HSQLDB              = "org.hsqldb:hsqldb:jar:2.3.3"
 JAVAX               = struct(
   :activation       =>"javax.activation:activation:jar:1.1",
   #:activation       =>"geronimo-spec:geronimo-spec-activation:jar:1.0.2-rc4",

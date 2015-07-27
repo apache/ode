@@ -37,7 +37,7 @@ import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
 import org.apache.ode.il.EmbeddedGeronimoFactory;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
-import org.hsqldb.jdbc.jdbcDataSource;
+import org.hsqldb.jdbc.JDBCDataSource;
 import org.xml.sax.SAXException;
 
 import javax.sql.DataSource;
@@ -62,7 +62,7 @@ public class InsertObjectTest extends TestCase {
 
     @Override
 	protected void setUp() throws Exception {
-        jdbcDataSource hsqlds = new jdbcDataSource();
+        JDBCDataSource hsqlds = new JDBCDataSource();
         hsqlds.setDatabase("jdbc:hsqldb:mem:" + new GUID().toString());
         hsqlds.setUser("sa");
         hsqlds.setPassword("");

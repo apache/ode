@@ -25,17 +25,17 @@ import org.apache.ode.store.ConfStoreConnection;
 import org.apache.ode.store.ConfStoreConnectionFactory;
 import org.apache.ode.store.DeploymentUnitDAO;
 import org.apache.ode.store.ProcessConfDAO;
-import org.hsqldb.jdbc.jdbcDataSource;
+import org.hsqldb.jdbc.JDBCDataSource;
 import java.util.Properties;
 import javax.xml.namespace.QName;
 
 public class DaoTest extends TestCase {
-    jdbcDataSource hsqlds;
+    JDBCDataSource hsqlds;
 
     ConfStoreConnectionFactory cf;
 
     public void setUp() throws Exception {
-        hsqlds = new jdbcDataSource();
+        hsqlds = new JDBCDataSource();
         hsqlds.setDatabase("jdbc:hsqldb:mem:test");
         hsqlds.setUser("sa");
         hsqlds.setPassword("");

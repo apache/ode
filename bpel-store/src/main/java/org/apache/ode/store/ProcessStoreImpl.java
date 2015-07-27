@@ -29,7 +29,7 @@ import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.msg.MessageBundle;
-import org.hsqldb.jdbc.jdbcDataSource;
+import org.hsqldb.jdbc.JDBCDataSource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -861,7 +861,7 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     public static DataSource createInternalDS(String guid) {
-        jdbcDataSource hsqlds = new jdbcDataSource();
+        JDBCDataSource hsqlds = new JDBCDataSource();
         hsqlds.setDatabase("jdbc:hsqldb:mem:" + guid);
         hsqlds.setUser("sa");
         hsqlds.setPassword("");

@@ -26,7 +26,7 @@ import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
 import org.apache.ode.utils.GUID;
-import org.hsqldb.jdbc.jdbcDataSource;
+import org.hsqldb.jdbc.JDBCDataSource;
 
 
 /**
@@ -48,7 +48,7 @@ public class DelegateSupport {
     }
 
     protected void initialize(TransactionManager txm) throws Exception {
-        jdbcDataSource ds = new jdbcDataSource();
+        JDBCDataSource ds = new JDBCDataSource();
         ds.setDatabase("jdbc:hsqldb:mem:" + new GUID().toString());
         ds.setUser("sa");
         ds.setPassword("");
