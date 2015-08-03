@@ -1,7 +1,7 @@
 CREATE TABLE ode_job (
-  jobid CHAR(64)  NOT NULL,
+  jobid varchar(64)  NOT NULL DEFAULT '',
   ts BIGINT  NOT NULL,
-  nodeid char(64),
+  nodeid varchar(64),
   scheduled int  NOT NULL,
   transacted int  NOT NULL,
 
@@ -14,7 +14,7 @@ CREATE TABLE ode_job (
   correlationKeySet varchar(255),
   retryCount int,
   inMem int,
-  detailsExt binary(4096),
+  detailsExt blob(4096),
 
   PRIMARY KEY(jobid));
 

@@ -66,6 +66,9 @@ public class InsertObjectTest extends TestCase {
         hsqlds.setDatabase("jdbc:hsqldb:mem:" + new GUID().toString());
         hsqlds.setUser("sa");
         hsqlds.setPassword("");
+        Properties prop = new Properties();
+        prop.setProperty("sql.enforce_size", "false");
+        hsqlds.setProperties(prop);
         _ds = hsqlds;
 
         _txm = new EmbeddedGeronimoFactory().getTransactionManager();
