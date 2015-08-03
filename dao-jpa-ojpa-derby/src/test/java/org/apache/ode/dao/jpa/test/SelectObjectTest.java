@@ -39,7 +39,7 @@ import org.apache.ode.bpel.dao.XmlDataDAO;
 import org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl;
 import org.apache.ode.il.EmbeddedGeronimoFactory;
 import org.apache.ode.utils.GUID;
-import org.hsqldb.jdbc.jdbcDataSource;
+import org.hsqldb.jdbc.JDBCDataSource;
 
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
@@ -65,7 +65,7 @@ public class SelectObjectTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        jdbcDataSource hsqlds = new jdbcDataSource();
+        JDBCDataSource hsqlds = new JDBCDataSource();
         hsqlds.setDatabase("jdbc:hsqldb:mem:" + new GUID().toString());
         hsqlds.setUser("sa");
         hsqlds.setPassword("");

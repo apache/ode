@@ -77,7 +77,7 @@ GERONIMO            = struct(
 )
 HIBERNATE           = [ "org.hibernate:hibernate-core:jar:3.3.2.GA", "javassist:javassist:jar:3.9.0.GA", "antlr:antlr:jar:2.7.6",
                         "asm:asm:jar:3.3.1", "cglib:cglib:jar:2.2", "net.sf.ehcache:ehcache:jar:1.2.3" ]
-HSQLDB              = "hsqldb:hsqldb:jar:1.8.0.7"
+HSQLDB              = "org.hsqldb:hsqldb:jar:2.3.3"
 JACKSON              = [ "com.fasterxml.jackson.core:jackson-core:jar:2.4.0", 
                         "com.fasterxml.jackson.core:jackson-databind:jar:2.4.0",
                         "com.fasterxml.jackson.core:jackson-annotations:jar:2.4.0",

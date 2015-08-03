@@ -32,7 +32,7 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.bpel.evar.ExternalVariableModule.Locator;
 import org.apache.ode.bpel.evar.ExternalVariableModule.Value;
-import org.hsqldb.jdbc.jdbcDataSource;
+import org.hsqldb.jdbc.JDBCDataSource;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -54,12 +54,12 @@ public class JdbcExternalVariableEngineTest extends TestCase {
     final QName _varType = new QName("foo", "foobar");
 
     ExternalVariableConf _econf;
-    jdbcDataSource _ds;
+    JDBCDataSource _ds;
     JdbcExternalVariableModule _engine;
     Element _el1;
 
     public void setUp() throws Exception {
-        _ds = new org.hsqldb.jdbc.jdbcDataSource();
+        _ds = new org.hsqldb.jdbc.JDBCDataSource();
         _ds.setDatabase("jdbc:hsqldb:mem:" + new GUID().toString());
         _ds.setUser("sa");
 
