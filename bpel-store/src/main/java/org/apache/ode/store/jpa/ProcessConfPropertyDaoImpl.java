@@ -22,6 +22,7 @@ package org.apache.ode.store.jpa;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 
 /**
@@ -33,7 +34,7 @@ public class ProcessConfPropertyDaoImpl {
 
     @Basic @Column(name="PROP_KEY")
     private String _key;
-    @Basic @Column(name="PROP_VAL")
+    @Lob @Column(name="DATA")
     private String _value;
 
     public String getKey() {
