@@ -21,7 +21,7 @@ package org.apache.ode.bpel.extvar.jdbc;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.ArrayList;
-
+import java.util.Properties;
 import javax.xml.namespace.QName;
 
 import junit.framework.TestCase;
