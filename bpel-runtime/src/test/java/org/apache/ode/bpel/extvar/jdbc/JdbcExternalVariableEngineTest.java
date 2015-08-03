@@ -63,17 +63,22 @@ public class JdbcExternalVariableEngineTest extends TestCase {
         _ds.setDatabase("jdbc:hsqldb:mem:" + new GUID().toString());
         _ds.setUser("sa");
 
+        //this is to allow column names to start with underscores.
+        Properties prop = new Properties();
+        prop.setProperty("sql.regular_names", "false");
+        _ds.setProperties(prop);
+
         Connection conn = _ds.getConnection();
         Statement s = conn.createStatement();
         s.execute("create table extvartable1 (" +
-                "id1 VARCHAR PRIMARY KEY," +
-                "_id2_ VARCHAR," +
-                "pid VARCHAR, " +
+                "id1 VARCHAR(255) PRIMARY KEY," +
+                "_id2_ VARCHAR(255)," +
+                "pid VARCHAR(255), " +
                 "iid INT," +
                 "cts DATETIME," +
                 "uts DATETIME," +
-                "foo VARCHAR," +
-                "bar VARCHAR );");
+                "foo VARCHAR(255)," +
+                "bar VARCHAR(255));");
 
         _engine = new JdbcExternalVariableModule();
         _engine.registerDataSource("testds",_ds);
