@@ -57,8 +57,8 @@ public class HazelcastClusterImpl implements ClusterManager, ProcessStoreCluster
     private IMap<Long, Long> instance_lock_map;
     private ITopic<ProcessStoreClusterEvent> clusterDeploymentMessageTopic;
     private ClusterProcessStore _clusterProcessStore;
-    private ClusterLock<String> _hazelcastDeploymentLock;
-    private ClusterLock<Long> _hazelcastInstanceLock;
+    private HazelcastDeploymentLock hazelcastDeploymentLock;
+    private HazelcastInstanceLock hazelcastInstanceLock;
     private ClusterDeploymentMessageListener clusterDeploymentMessageListener;
     private ClusterMemberShipListener clusterMemberShipListener;
     private List<ClusterMemberListener> clusterMemberListenerList = null;
@@ -67,7 +67,10 @@ public class HazelcastClusterImpl implements ClusterManager, ProcessStoreCluster
         clusterMemberShipListener = new ClusterMemberShipListener();
         clusterDeploymentMessageListener = new ClusterDeploymentMessageListener();
         clusterDeploymentMessageListener.registerClusterProcessStoreListener((ProcessStoreClusterListener)this);
+        hazelcastDeploymentLock = new HazelcastDeploymentLock();
+        hazelcastInstanceLock = new HazelcastInstanceLock();
     }
+
 
     public void init(File configRoot) {
 
@@ -101,9 +104,8 @@ public class HazelcastClusterImpl implements ClusterManager, ProcessStoreCluster
             instance_lock_map = _hazelcastInstance.getMap(HazelcastConstants.ODE_CLUSTER_PROCESS_INSTANCE_LOCK);
             clusterDeploymentMessageTopic = _hazelcastInstance.getTopic(HazelcastConstants.ODE_CLUSTER_DEPLOYMENT_TOPIC);
 
-            _hazelcastDeploymentLock = (ClusterLock) new HazelcastDeploymentLock(deployment_lock_map);
-            _hazelcastInstanceLock = (ClusterLock) new HazelcastInstanceLock(instance_lock_map);
-
+            hazelcastDeploymentLock.setLockMap(deployment_lock_map);
+            hazelcastInstanceLock.setLockMap(instance_lock_map);
             markAsMaster();
         }
     }
@@ -221,7 +223,7 @@ public class HazelcastClusterImpl implements ClusterManager, ProcessStoreCluster
                 listener.memberElectedAsMaster(nodeID);
             }
         }
-        __log.info(isMaster);
+        __log.info("Master node: " +isMaster);
     }
 
     public boolean isMaster() {
@@ -249,11 +251,11 @@ public class HazelcastClusterImpl implements ClusterManager, ProcessStoreCluster
     }
 
     public ClusterLock<String> getDeploymentLock(){
-        return _hazelcastDeploymentLock;
+        return (ClusterLock)hazelcastDeploymentLock;
     }
 
     public ClusterLock<Long> getInstanceLock(){
-        return _hazelcastInstanceLock;
+        return (ClusterLock)hazelcastInstanceLock;
     }
 
     public List<String> getActiveNodes() {

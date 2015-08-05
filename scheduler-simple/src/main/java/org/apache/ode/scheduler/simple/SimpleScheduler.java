@@ -479,10 +479,10 @@ public class SimpleScheduler implements Scheduler, TaskRunner, ClusterMemberList
         // schedule immediate job loading for now!
         _todo.enqueue(new LoadImmediateTask(now));
 
-        if(!_isClusterEnabled) enqueueTasksReadnodeIds();
+        if(!_isClusterEnabled) enqueueTasksReadnodeIds(now);
 
         else {
-            if (_clusterManager.isMaster()) enqueueTasksReadnodeIds();
+            if (_clusterManager.isMaster()) enqueueTasksReadnodeIds(now);
         }
 
         _todo.start();
@@ -521,10 +521,11 @@ public class SimpleScheduler implements Scheduler, TaskRunner, ClusterMemberList
 
     // Do enqueue CheckStaleNodes and UpgradeJobsTask after a new master is identified.
     public void memberElectedAsMaster(String masterId) {
-        enqueueTasksReadnodeIds();
+        long now = System.currentTimeMillis();
+        enqueueTasksReadnodeIds(now);
     }
 
-    private void enqueueTasksReadnodeIds() {
+    private void enqueueTasksReadnodeIds(long now) {
         try {
             execTransaction(new Callable<Void>() {
 
@@ -543,8 +544,6 @@ public class SimpleScheduler implements Scheduler, TaskRunner, ClusterMemberList
         if(_isClusterEnabled) _knownNodes.addAll(_clusterManager.getActiveNodes());
 
         else _knownNodes.add(_nodeId);
-
-        long now = System.currentTimeMillis();
 
         // schedule check for stale nodes, make it random so that the nodes don't overlap.
         _todo.enqueue(new CheckStaleNodes(now + randomMean(_staleInterval)));
@@ -815,8 +814,10 @@ public class SimpleScheduler implements Scheduler, TaskRunner, ClusterMemberList
         final ArrayList<String> activeNodes;
 
         // for cluster mode
-        if (_isClusterEnabled && _clusterManager.isMaster()) {
-            activeNodes = (ArrayList) _clusterManager.getActiveNodes();
+        if (_isClusterEnabled) {
+            if (_clusterManager.isMaster()) {
+                activeNodes = (ArrayList) _clusterManager.getActiveNodes();
+            } else activeNodes = null;
         }
         //for standalone ODE deployments
         else {
@@ -984,24 +985,26 @@ public class SimpleScheduler implements Scheduler, TaskRunner, ClusterMemberList
             ArrayList<String> knownNodes = new ArrayList<String>(_knownNodes);
 
             // for cluster mode
-            if (_isClusterEnabled && _clusterManager.isMaster()) {
-                ArrayList<String> memberList = (ArrayList) _clusterManager.getActiveNodes();
+            if (_isClusterEnabled) {
+                if (_clusterManager.isMaster()) {
+                    ArrayList<String> memberList = (ArrayList) _clusterManager.getActiveNodes();
 
-                //find stale nodes
-                knownNodes.removeAll(memberList);
-                if (knownNodes.size() != 0) {
-                    for (String nodeId : knownNodes) {
-                        _staleNodes.add(nodeId);
+                    //find stale nodes
+                    knownNodes.removeAll(memberList);
+                    if (knownNodes.size() != 0) {
+                        for (String nodeId : knownNodes) {
+                            _staleNodes.add(nodeId);
+                        }
                     }
-                }
-                for (String nodeId : _staleNodes)  {
-                    recoverStaleNode(nodeId);
+                    for (String nodeId : _staleNodes) {
+                        recoverStaleNode(nodeId);
+                    }
                 }
             }
             // for standalone ode node
             else {
                 for (String nodeId : knownNodes) {
-                    if (!nodeId.equals(_nodeId)) recoverStaleNode(nodeId);
+                    if (!_nodeId.equals(nodeId)) recoverStaleNode(nodeId);
                 }
             }
             /*for (String nodeId : _knownNodes) {

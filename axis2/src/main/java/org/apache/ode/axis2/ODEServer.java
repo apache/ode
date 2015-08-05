@@ -201,6 +201,7 @@ public class ODEServer {
             _clusterManager.registerClusterMemberListener((ClusterMemberListener) _scheduler);
             _clusterManager.setClusterProcessStore((ClusterProcessStore) _store);
             _clusterManager.init(_configRoot);
+           ((SimpleScheduler)_scheduler).setNodeId(_clusterManager.getNodeID());
         }
 
         try {
@@ -482,6 +483,7 @@ public class ODEServer {
             __log.error("Error while loading class : " + clusterImplName, ex);
         }
     }
+
 
     /**
      * Initialize the DAO.

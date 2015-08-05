@@ -31,8 +31,7 @@ public class HazelcastInstanceLock implements ClusterLock<Long> {
 
     private IMap<Long, Long> _lock_map;
 
-
-    HazelcastInstanceLock(IMap<Long, Long> lock_map) {
+    public void setLockMap(IMap<Long, Long> lock_map) {
         _lock_map = lock_map;
     }
 

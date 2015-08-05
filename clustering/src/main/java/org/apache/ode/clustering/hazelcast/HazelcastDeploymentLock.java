@@ -31,7 +31,7 @@ public class HazelcastDeploymentLock implements ClusterLock<String>{
 
     private IMap<String, String> _lock_map;
 
-    HazelcastDeploymentLock(IMap<String, String> lock_map) {
+    public void setLockMap(IMap<String, String> lock_map) {
         _lock_map = lock_map;
     }
 

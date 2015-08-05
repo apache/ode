@@ -19,7 +19,15 @@
 
 package org.apache.ode.scheduler.simple;
 
-import java.util.*;
+import junit.framework.Assert;
+import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
+import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
+import org.apache.ode.bpel.iapi.Scheduler.JobProcessor;
+import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.transaction.RollbackException;
 import javax.transaction.Status;
@@ -27,18 +35,9 @@ import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
-import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
-import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.ode.bpel.iapi.Scheduler.JobInfo;
-import org.apache.ode.bpel.iapi.Scheduler.JobProcessor;
-import org.apache.ode.bpel.iapi.Scheduler.JobProcessorException;
-import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Properties;
 
 public class SimpleSchedulerTest extends Assert implements JobProcessor {
 
@@ -210,10 +209,10 @@ public class SimpleSchedulerTest extends Assert implements JobProcessor {
         _scheduler.setImmediateInterval(1000);
         _scheduler.setStaleInterval(1000);
         _scheduler.start();
-        for (int i = 0; i < 40; ++i) {
-            _scheduler.updateHeartBeat("n1");
+        /*for (int i = 0; i < 40; ++i) {
+           _scheduler.updateHeartBeat("n1");
             Thread.sleep(100);
-        }
+        }*/
 
         _scheduler.stop();
         Thread.sleep(1000);
