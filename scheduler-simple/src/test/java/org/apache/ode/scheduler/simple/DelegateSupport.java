@@ -26,7 +26,8 @@ import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
 import org.apache.ode.utils.GUID;
-import org.hsqldb.jdbc.JDBCDataSource;
+import org.h2.jdbcx.JdbcDataSource;
+
 
 
 /**
@@ -48,11 +49,10 @@ public class DelegateSupport {
     }
 
     protected void initialize(TransactionManager txm) throws Exception {
-        JDBCDataSource ds = new JDBCDataSource();
-        ds.setDatabase("jdbc:hsqldb:mem:" + new GUID().toString());
-        ds.setUser("sa");
-        ds.setPassword("");
-        _ds = ds;
+        JdbcDataSource h2 = new JdbcDataSource();
+        h2.setURL("jdbc:h2:mem:" + new GUID().toString()+";DB_CLOSE_DELAY=-1");
+        h2.setUser("sa");
+        _ds = h2;
         
         setup();
         _del = new JdbcDelegate(_ds);
@@ -68,14 +68,14 @@ public class DelegateSupport {
             StringBuffer sql = new StringBuffer();
 
             {
-                InputStream in = getClass().getResourceAsStream("/simplesched-hsql.sql");
+                InputStream in = getClass().getResourceAsStream("/simplesched-h2.sql");
                 int v;
                 while ((v = in.read()) != -1) {
                     sql.append((char) v);
                 }
             }
             
-            c.createStatement().executeUpdate("CREATE FUNCTION mod(a BIGINT, b BIGINT) RETURNS BIGINT LANGUAGE JAVA DETERMINISTIC NO SQL EXTERNAL NAME 'CLASSPATH:org.apache.ode.scheduler.simple.DelegateSupport.mod';");
+            //c.createStatement().executeUpdate("CREATE FUNCTION mod(a BIGINT, b BIGINT) RETURNS BIGINT LANGUAGE JAVA DETERMINISTIC NO SQL EXTERNAL NAME 'CLASSPATH:org.apache.ode.scheduler.simple.DelegateSupport.mod';");
             c.createStatement().executeUpdate(sql.toString());
         } finally {
             c.close();

@@ -25,26 +25,25 @@ import org.apache.ode.store.ConfStoreConnection;
 import org.apache.ode.store.ConfStoreConnectionFactory;
 import org.apache.ode.store.DeploymentUnitDAO;
 import org.apache.ode.store.ProcessConfDAO;
-import org.hsqldb.jdbc.JDBCDataSource;
+import org.apache.ode.utils.GUID;
+import org.h2.jdbcx.JdbcDataSource;
 import java.util.Properties;
 import javax.xml.namespace.QName;
 
 public class DaoTest extends TestCase {
-    JDBCDataSource hsqlds;
+    JdbcDataSource h2;
 
     ConfStoreConnectionFactory cf;
 
     public void setUp() throws Exception {
-        hsqlds = new JDBCDataSource();
-        hsqlds.setDatabase("jdbc:hsqldb:mem:test");
-        hsqlds.setUser("sa");
-        hsqlds.setPassword("");
-
-        cf = new DbConfStoreConnectionFactory(hsqlds, new Properties(), true, OdeConfigProperties.DEFAULT_TX_FACTORY_CLASS_NAME);
+        h2 = new JdbcDataSource();
+        h2.setURL("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
+        h2.setUser("sa");
+        cf = new DbConfStoreConnectionFactory(h2, new Properties(), true, OdeConfigProperties.DEFAULT_TX_FACTORY_CLASS_NAME);
     }
 
     public void tearDown() throws Exception {
-        hsqlds.getConnection().createStatement().execute("SHUTDOWN");
+        h2.getConnection().createStatement().execute("SHUTDOWN");
     }
 
     public void testEmpty() {

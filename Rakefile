@@ -232,7 +232,7 @@ define "ode" do
 
     test.with projects("scheduler-simple", "dao-jpa", "dao-hibernate", "bpel-epr"),
         BACKPORT, COMMONS.pool, COMMONS.lang, COMMONS.io, DERBY, JAVAX.connector, JAVAX.transaction,
-        GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, TRANQL, HSQLDB, JAVAX.ejb,
+        GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, TRANQL, HSQLDB, H2::REQUIRES, JAVAX.ejb,
         OPENJPA, XERCES, XALAN, LOG4J, SLF4J,
         DOM4J, HIBERNATE,
         "tranql:tranql-connector-derby-common:jar:1.1"
@@ -243,8 +243,8 @@ define "ode" do
   desc "ODE Simple Scheduler"
   define "scheduler-simple" do
     compile.with projects("bpel-api", "utils"), COMMONS.collections, COMMONS.logging, JAVAX.transaction, LOG4J
-    test.compile.with HSQLDB, GERONIMO.kernel, GERONIMO.transaction
-    test.with HSQLDB, JAVAX.transaction, JAVAX.resource, JAVAX.connector, LOG4J,
+    test.compile.with HSQLDB, H2::REQUIRES, GERONIMO.kernel, GERONIMO.transaction
+    test.with HSQLDB, H2::REQUIRES, JAVAX.transaction, JAVAX.resource, JAVAX.connector, LOG4J,
           GERONIMO.kernel, GERONIMO.transaction, GERONIMO.connector, TRANQL, BACKPORT, JAVAX.ejb
     package :jar
   end
@@ -266,7 +266,7 @@ define "ode" do
   define "bpel-store" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-obj", "bpel-schemas", "bpel-epr",
       "dao-hibernate", "dao-jpa", "utils"),
-      COMMONS.logging, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J, OPENJPA, SPRING
+      COMMONS.logging, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, HIBERNATE, HSQLDB, H2::REQUIRES, XMLBEANS, XERCES, WSDL4J, OPENJPA, SPRING
     compile { open_jpa_enhance }
     resources hibernate_doclet(:package=>"org.apache.ode.store.hib", :excludedtags=>"@version,@author,@todo")
 
@@ -285,7 +285,7 @@ define "ode" do
     test.with projects("bpel-obj", "jacob", "bpel-schemas",
       "bpel-scripts", "scheduler-simple"),
       COMMONS.collections, COMMONS.lang, COMMONS.logging, DERBY, JAVAX.connector,
-      JAVAX.stream, JAVAX.transaction, JAXEN, HSQLDB, LOG4J, SAXON, XERCES, XMLBEANS, XALAN, GERONIMO.transaction, SPRING, HIBERNATE, SLF4J, DOM4J
+      JAVAX.stream, JAVAX.transaction, JAXEN, HSQLDB, H2::REQUIRES, LOG4J, SAXON, XERCES, XMLBEANS, XALAN, GERONIMO.transaction, SPRING, HIBERNATE, SLF4J, DOM4J
 
     package :jar
   end
@@ -389,7 +389,7 @@ define "ode" do
 
     test.with projects("bpel-api", "bpel-dao", "bpel-obj", "bpel-epr", "dao-jpa", "utils"),
       BACKPORT, COMMONS.collections, COMMONS.lang, COMMONS.logging, GERONIMO.transaction,
-      GERONIMO.kernel, GERONIMO.connector, HSQLDB, JAVAX.connector, JAVAX.ejb, JAVAX.persistence,
+      GERONIMO.kernel, GERONIMO.connector, HSQLDB, H2::REQUIRES, JAVAX.connector, JAVAX.ejb, JAVAX.persistence,
       JAVAX.transaction, LOG4J, OPENJPA, XERCES, WSDL4J
 
     build derby_db

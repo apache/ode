@@ -29,7 +29,7 @@ import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.msg.MessageBundle;
-import org.hsqldb.jdbc.JDBCDataSource;
+import org.h2.jdbcx.JdbcDataSource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -49,7 +49,7 @@ import java.util.regex.Pattern;
 
 /**
  * <p>
- * JDBC-based implementation of a process store. Also provides an "in-memory" store by way of HSQL database.
+ * JDBC-based implementation of a process store. Also provides an "in-memory" store by way of H2 database.
  * </p>
  *
  * <p>
@@ -119,15 +119,15 @@ public class ProcessStoreImpl implements ProcessStore {
                 _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(ds, props.getProperties(), createDatamodel, props.getTxFactoryClass());
             }
          } else {
-            // If the datasource is not provided, then we create a HSQL-based
+            // If the datasource is not provided, then we create a H2-based
             // in-memory database. Makes testing a bit simpler.
-            DataSource hsqlds = createInternalDS(new GUID().toString());
+            DataSource h2 = createInternalDS(new GUID().toString());
             if ("hibernate".equalsIgnoreCase(persistenceType)) {
-                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(hsqlds, props.getProperties(), createDatamodel, props.getTxFactoryClass());
+                _cf = new org.apache.ode.store.hib.DbConfStoreConnectionFactory(h2, props.getProperties(), createDatamodel, props.getTxFactoryClass());
             } else {
-                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(hsqlds, props.getProperties(), createDatamodel, props.getTxFactoryClass());
+                _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(h2, props.getProperties(), createDatamodel, props.getTxFactoryClass());
             }
-            _inMemDs = hsqlds;
+            _inMemDs = h2;
         }
 
 
@@ -139,10 +139,10 @@ public class ProcessStoreImpl implements ProcessStore {
      */
     public ProcessStoreImpl(EndpointReferenceContext eprContext, DataSource inMemDs) {
         this.eprContext = eprContext;
-        DataSource hsqlds = createInternalDS(new GUID().toString());
+        DataSource h2 = createInternalDS(new GUID().toString());
         //when in memory we always create the model as we are starting from scratch
-        _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(hsqlds, true, OdeConfigProperties.DEFAULT_TX_FACTORY_CLASS_NAME);
-        _inMemDs = hsqlds;
+        _cf = new org.apache.ode.store.jpa.DbConfStoreConnectionFactory(h2, true, OdeConfigProperties.DEFAULT_TX_FACTORY_CLASS_NAME);
+        _inMemDs = h2;
     }
 
     public void shutdown() {
@@ -861,11 +861,10 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     public static DataSource createInternalDS(String guid) {
-        JDBCDataSource hsqlds = new JDBCDataSource();
-        hsqlds.setDatabase("jdbc:hsqldb:mem:" + guid);
-        hsqlds.setUser("sa");
-        hsqlds.setPassword("");
-        return hsqlds;
+        JdbcDataSource h2 = new JdbcDataSource();
+        h2.setURL("jdbc:h2:mem:" + new GUID().toString()+";DB_CLOSE_DELAY=-1");
+        h2.setUser("sa");
+        return h2;
     }
 
     public static void shutdownInternalDB(DataSource ds) {
