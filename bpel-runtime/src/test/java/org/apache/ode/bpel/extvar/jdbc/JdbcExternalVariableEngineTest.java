@@ -32,7 +32,7 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.bpel.evar.ExternalVariableModule.Locator;
 import org.apache.ode.bpel.evar.ExternalVariableModule.Value;
-import org.hsqldb.jdbc.JDBCDataSource;
+import org.h2.jdbcx.JdbcDataSource;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -54,19 +54,14 @@ public class JdbcExternalVariableEngineTest extends TestCase {
     final QName _varType = new QName("foo", "foobar");
 
     ExternalVariableConf _econf;
-    JDBCDataSource _ds;
+    JdbcDataSource _ds;
     JdbcExternalVariableModule _engine;
     Element _el1;
 
     public void setUp() throws Exception {
-        _ds = new org.hsqldb.jdbc.JDBCDataSource();
-        _ds.setDatabase("jdbc:hsqldb:mem:" + new GUID().toString());
+        _ds = new org.h2.jdbcx.JdbcDataSource();
+        _ds.setURL("jdbc:h2:mem:" + new GUID().toString()+";DB_CLOSE_DELAY=-1");
         _ds.setUser("sa");
-
-        //this is to allow column names to start with underscores.
-        Properties prop = new Properties();
-        prop.setProperty("sql.regular_names", "false");
-        _ds.setProperties(prop);
 
         Connection conn = _ds.getConnection();
         Statement s = conn.createStatement();

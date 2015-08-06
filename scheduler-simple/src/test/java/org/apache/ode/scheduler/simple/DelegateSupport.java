@@ -48,11 +48,10 @@ public class DelegateSupport {
     }
 
     protected void initialize(TransactionManager txm) throws Exception {
-        JdbcDataSource ds = new JdbcDataSource();
-        ds.setURL("jdbc:h2:mem:" + new GUID().toString() + ";DB_CLOSE_DELAY=-1");
-        ds.setUser("sa");
-        ds.setPassword("");
-        _ds = ds;
+        JdbcDataSource h2 = new JdbcDataSource();
+        h2.setURL("jdbc:h2:mem:" + new GUID().toString()+";DB_CLOSE_DELAY=-1");
+        h2.setUser("sa");
+        _ds = h2;
         
         setup();
         _del = new JdbcDelegate(_ds);
@@ -68,7 +67,7 @@ public class DelegateSupport {
             StringBuffer sql = new StringBuffer();
 
             {
-                InputStream in = getClass().getResourceAsStream("/simplesched-hsql.sql");
+                InputStream in = getClass().getResourceAsStream("/simplesched-h2.sql");
                 int v;
                 while ((v = in.read()) != -1) {
                     sql.append((char) v);

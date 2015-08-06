@@ -251,7 +251,7 @@ define "ode" do
   desc "ODE Simple Scheduler"
   define "scheduler-simple" do
     compile.with projects("bpel-api", "utils"), COMMONS.collections, JAVAX.transaction, SLF4J, LOG4J
-    test.compile.with HSQLDB, GERONIMO.kernel, GERONIMO.transaction
+    test.compile.with H2::REQUIRES, HSQLDB, GERONIMO.kernel, GERONIMO.transaction
     test.with H2::REQUIRES, HSQLDB, JAVAX.transaction, JAVAX.resource, JAVAX.connector, 
           GERONIMO.kernel, GERONIMO.transaction, GERONIMO.connector, TRANQL, BACKPORT, JAVAX.ejb
     test.exclude('*') if Buildr.environment == 'hudson'
@@ -275,7 +275,7 @@ define "ode" do
   define "bpel-store" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-nobj", "bpel-schemas", "bpel-epr",
       "dao-hibernate", "dao-jpa", "utils"),
-      JAVAX.persistence, JAVAX.stream, JAVAX.transaction, HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J, OPENJPA, SPRING, SLF4J, LOG4J, JACKSON
+      JAVAX.persistence, JAVAX.stream, JAVAX.transaction, HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J, OPENJPA, SPRING, SLF4J, LOG4J, JACKSON, H2::REQUIRES
     compile { open_jpa_enhance }
     resources hibernate_doclet(:package=>"org.apache.ode.store.hib", :excludedtags=>"@version,@author,@todo")
 
@@ -399,7 +399,7 @@ define "ode" do
     test.with projects("bpel-api", "bpel-dao", "bpel-nobj", "bpel-epr", "dao-jpa", "utils"),
       BACKPORT, COMMONS.collections, COMMONS.lang, COMMONS.logging, GERONIMO.transaction,
       GERONIMO.kernel, GERONIMO.connector, HSQLDB, JAVAX.connector, JAVAX.ejb, JAVAX.persistence,
-      JAVAX.transaction, LOG4J, OPENJPA, XERCES, WSDL4J
+      JAVAX.transaction, LOG4J, OPENJPA, XERCES, WSDL4J, H2::REQUIRES
 
     build derby_db
     build h2_db
