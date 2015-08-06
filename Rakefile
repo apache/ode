@@ -372,7 +372,7 @@ define "ode" do
 
   desc "ODE OpenJPA Derby Database"
   define "dao-jpa-ojpa-derby" do
-    %w{ derby mysql oracle postgres h2 }.each do |db|
+    %w{ derby mysql oracle postgres h2 sqlserver}.each do |db|
       db_xml = _("src/main/descriptors/persistence.#{db}.xml")
       scheduler_sql = _("src/main/scripts/simplesched-#{db}.sql")
       common_sql = _("src/main/scripts/common.sql")
