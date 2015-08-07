@@ -130,7 +130,9 @@ public class ODEServer {
 
     protected MultiThreadedHttpConnectionManager httpConnectionManager;
     protected IdleConnectionTimeoutThread idleConnectionTimeoutThread;
-    
+
+    public Runnable txMgrCreatedCallback;
+
     public void init(ServletConfig config, ConfigurationContext configContext) throws ServletException {
         init(config.getServletContext().getRealPath("/WEB-INF"), configContext);
     }
@@ -172,6 +174,9 @@ public class ODEServer {
 
         __log.debug("Initializing transaction manager");
         initTxMgr();
+        if (txMgrCreatedCallback != null) {
+            txMgrCreatedCallback.run();
+        }
         __log.debug("Creating data source.");
         initDataSource();
         __log.debug("Starting DAO.");
@@ -261,7 +266,7 @@ public class ODEServer {
     }
     
     private void initDataSource() throws ServletException {
-        _db = new Database(_odeConfig);
+        _db = Database.create(_odeConfig);
         _db.setTransactionManager(_txMgr);
         _db.setWorkRoot(_workRoot);
 
@@ -417,6 +422,10 @@ public class ODEServer {
             __log.fatal("Couldn't initialize a transaction manager with factory: " + txFactoryName, e);
             throw new ServletException("Couldn't initialize a transaction manager with factory: " + txFactoryName, e);
         }
+    }
+
+    public TransactionManager getTransactionManager() {
+        return _txMgr;
     }
 
     private void initConnector() throws ServletException {

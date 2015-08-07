@@ -20,8 +20,8 @@
 package org.apache.ode.axis2;
 
 public interface ODEConfigDirAware {
-    final String HIB_DERBY_CONF_DIR = ODEConfigDirAware.class.getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.hib-h2";
-    final String JPA_DERBY_CONF_DIR = ODEConfigDirAware.class.getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-h2";
+    final String HIB_H2_CONF_DIR = ODEConfigDirAware.class.getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.hib-h2";
+    final String JPA_H2_CONF_DIR = ODEConfigDirAware.class.getClassLoader().getResource("webapp").getFile() + "/WEB-INF/conf.jpa-h2";
 
     String getODEConfigDir();
 }

@@ -18,32 +18,56 @@
  */
 package org.apache.ode.store.hib;
 
+import java.util.Properties;
+
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import javax.xml.namespace.QName;
+
 import junit.framework.TestCase;
 
+import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.il.EmbeddedGeronimoFactory;
 import org.apache.ode.il.config.OdeConfigProperties;
+import org.apache.ode.il.dbutil.Database;
+import org.apache.ode.il.dbutil.DatabaseConfigException;
 import org.apache.ode.store.ConfStoreConnection;
 import org.apache.ode.store.ConfStoreConnectionFactory;
 import org.apache.ode.store.DeploymentUnitDAO;
 import org.apache.ode.store.ProcessConfDAO;
-import org.apache.ode.utils.GUID;
-import org.h2.jdbcx.JdbcDataSource;
-import java.util.Properties;
-import javax.xml.namespace.QName;
 
 public class DaoTest extends TestCase {
-    JdbcDataSource h2;
-
+    protected BpelDAOConnection daoConn;
+    protected TransactionManager txm;
+    private DataSource ds;
+    private Database db;
     ConfStoreConnectionFactory cf;
 
+    protected DataSource getDataSource() throws DatabaseConfigException {
+        if (ds == null) {
+            Properties props = new Properties();
+            props.setProperty(OdeConfigProperties.PROP_DAOCF, System.getProperty(OdeConfigProperties.PROP_DAOCF, OdeConfigProperties.DEFAULT_DAOCF_CLASS));
+            OdeConfigProperties odeProps = new OdeConfigProperties(props,"");
+            db = Database.create(odeProps);
+            db.setTransactionManager(txm);
+            db.start();
+            this.ds = db.getDataSource();
+        }
+        return ds;
+    }
+
     public void setUp() throws Exception {
-        h2 = new JdbcDataSource();
-        h2.setURL("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
-        h2.setUser("sa");
-        cf = new DbConfStoreConnectionFactory(h2, new Properties(), true, OdeConfigProperties.DEFAULT_TX_FACTORY_CLASS_NAME);
+        EmbeddedGeronimoFactory factory = new EmbeddedGeronimoFactory();
+        txm = factory.getTransactionManager();
+        ds = getDataSource();
+        org.springframework.mock.jndi.SimpleNamingContextBuilder.emptyActivatedContextBuilder().bind("java:comp/UserTransaction", txm);
+        txm.begin();
+
+        cf = new DbConfStoreConnectionFactory(ds, new Properties(), true, OdeConfigProperties.DEFAULT_TX_FACTORY_CLASS_NAME);
     }
 
     public void tearDown() throws Exception {
-        h2.getConnection().createStatement().execute("SHUTDOWN");
+        db.shutdown();
     }
 
     public void testEmpty() {
@@ -99,7 +123,7 @@ public class DaoTest extends TestCase {
             cf.commitTransaction();
         }
     }
-    
+
     public void testGetDeploymentUnits() {
         cf.beginTransaction();
         ConfStoreConnection conn = cf.getConnection();
@@ -124,7 +148,7 @@ public class DaoTest extends TestCase {
             cf.commitTransaction();
         }
     }
-    
+
     public void testCreateProcess() {
         QName foobar = new QName("foo","bar");
         cf.beginTransaction();
@@ -139,7 +163,7 @@ public class DaoTest extends TestCase {
         } finally {
             cf.commitTransaction();
         }
-        
+
         cf.beginTransaction();
         conn = cf.getConnection();
         try {
@@ -147,14 +171,14 @@ public class DaoTest extends TestCase {
             ProcessConfDAO p = du.getProcess(foobar);
             assertNotNull(p);
             assertNotNull(du.getProcesses());
-            
+
             assertEquals(foobar,p.getPID());
             assertEquals(foobar,p.getType());
         } finally {
             cf.commitTransaction();
         }
     }
-    
+
     public void testProcessProperties() {
         QName foobar = new QName("foo","bar");
         cf.beginTransaction();
@@ -166,7 +190,7 @@ public class DaoTest extends TestCase {
         } finally {
             cf.commitTransaction();
         }
-        
+
         cf.beginTransaction();
         conn = cf.getConnection();
         try {
@@ -179,5 +203,5 @@ public class DaoTest extends TestCase {
         } finally {
             cf.commitTransaction();
         }
-    }    
+    }
 }

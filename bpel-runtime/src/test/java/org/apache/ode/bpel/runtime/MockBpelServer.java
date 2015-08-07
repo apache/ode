@@ -18,15 +18,23 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
-import org.apache.geronimo.connector.outbound.GenericConnectionManager;
-import org.apache.geronimo.connector.outbound.connectionmanagerconfig.LocalTransactions;
-import org.apache.geronimo.connector.outbound.connectionmanagerconfig.PoolingSupport;
-import org.apache.geronimo.connector.outbound.connectionmanagerconfig.SinglePool;
-import org.apache.geronimo.connector.outbound.connectionmanagerconfig.TransactionSupport;
-import org.apache.geronimo.connector.outbound.connectiontracking.ConnectionTracker;
-import org.apache.geronimo.connector.outbound.connectiontracking.ConnectionTrackingCoordinator;
-import org.apache.geronimo.transaction.manager.RecoverableTransactionManager;
+import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
+import javax.wsdl.PortType;
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.iapi.BindingContext;
@@ -48,26 +56,8 @@ import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
-import org.tranql.connector.derby.EmbeddedLocalMCF;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.resource.spi.ConnectionManager;
-import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
-import javax.wsdl.PortType;
-import javax.xml.namespace.QName;
-import java.io.File;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Collections;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 
 class MockBpelServer {
@@ -83,13 +73,14 @@ class MockBpelServer {
     MessageExchangeContext    _mexContext;
     BindingContext            _bindContext;
     HashMap<String, QName>    _activated = new HashMap<String, QName>();
-
-    HashMap<String,EndpointReference> _endpoints = new HashMap<String,EndpointReference>();
+    @SuppressWarnings("unchecked")
+    HashMap                   _endpoints = new HashMap();
 
      public MockBpelServer() {
         try {
             _server = new BpelServerImpl();
             createTransactionManager();
+            org.springframework.mock.jndi.SimpleNamingContextBuilder.emptyActivatedContextBuilder().bind("java:comp/UserTransaction", _txManager);
             createDataSource();
             createScheduler();
             createDAOConnection();
@@ -111,6 +102,7 @@ class MockBpelServer {
             _server.start();
         } catch (Exception except) {
             System.err.println(except.getMessage());
+            except.printStackTrace(System.err);
             throw new RuntimeException(except);
         }
     }
@@ -167,6 +159,7 @@ class MockBpelServer {
         _server.stop();
         _scheduler.stop();
         _scheduler.shutdown();
+        _database.shutdown();
     }
 
     protected TransactionManager createTransactionManager() throws Exception {
@@ -177,45 +170,14 @@ class MockBpelServer {
     }
 
     protected DataSource createDataSource() throws Exception {
-        TransactionSupport transactionSupport = LocalTransactions.INSTANCE;
-        ConnectionTracker connectionTracker = new ConnectionTrackingCoordinator();
-
-        PoolingSupport poolingSupport = new SinglePool(
-                10,
-                0,
-                1000,
-                1,
-                true,
-                false,
-                false);
-
-        ConnectionManager connectionManager = new GenericConnectionManager(
-                    transactionSupport,
-                    poolingSupport,
-                    null,
-                    connectionTracker,
-                    (RecoverableTransactionManager) _txManager,
-                    getClass().getName(),
-                    getClass().getClassLoader());
-
-        
-            EmbeddedLocalMCF mcf = new org.tranql.connector.derby.EmbeddedLocalMCF();
-            mcf.setCreateDatabase(true);
-            mcf.setDatabaseName("target/testdb");
-            mcf.setUserName("sa");
-            mcf.setPassword("");
-            _dataSource = (DataSource) mcf.createConnectionFactory(connectionManager);
-            return _dataSource;
-        
-        
-//        d = org.tranql.connector.jdbc.JDBCDriverMCF();
-//        EmbeddedXADataSource ds = new EmbeddedXADataSource();
-//        ds.setCreateDatabase("create");
-//        ds.setDatabaseName("target/testdb");
-//        ds.setUser("sa");
-//        ds.setPassword("");
-//        _dataSource = ds;
-//        return _dataSource;
+        Properties props = new Properties();
+        props.setProperty(OdeConfigProperties.PROP_DAOCF, System.getProperty(OdeConfigProperties.PROP_DAOCF, OdeConfigProperties.DEFAULT_DAOCF_CLASS));
+        OdeConfigProperties odeProps = new OdeConfigProperties(props,"");
+        _database = Database.create(odeProps);
+        _database.setTransactionManager(_txManager);
+        _database.start();
+        _dataSource = _database.getDataSource();
+        return _dataSource;
     }
 
     protected Scheduler createScheduler() throws Exception {
@@ -235,7 +197,7 @@ class MockBpelServer {
         if (_dataSource == null)
             throw new RuntimeException("No data source");
 
-//        
+//
 //        BpelDAOConnectionFactoryJDBC daoCF = new BPELDAOConnectionFactoryImpl();
 //        daoCF.setDataSource(_dataSource);
 //        daoCF.setTransactionManager(_txManager);
@@ -367,9 +329,9 @@ class MockBpelServer {
         public <T> T execTransaction(Callable<T> transaction) throws Exception, ContextException {
             return _scheduler.execTransaction(transaction, 0);
         }
-        
+
         public <T> T execTransaction(Callable<T> transaction, int timeout) throws Exception, ContextException {
-       		return _scheduler.execTransaction(transaction, timeout);
+            return _scheduler.execTransaction(transaction, timeout);
         }
 
         public void beginTransaction() throws Exception {
@@ -399,7 +361,6 @@ class MockBpelServer {
         public void start() { _scheduler.start(); }
         public void stop() { _scheduler.stop(); }
         public void shutdown() { _scheduler.shutdown(); }
-        public void acquireTransactionLocks() { _scheduler.acquireTransactionLocks(); }
 
         public void registerSynchronizer(Synchronizer synch) throws ContextException {
             _scheduler.registerSynchronizer(synch);
@@ -413,8 +374,14 @@ class MockBpelServer {
         public void setPolledRunnableProcesser(JobProcessor delegatedRunnableProcessor) {
         }
 
-		public boolean amICoordinator() {
-			return true;
-		}
+        public boolean amICoordinator() {
+            return true;
+        }
+
+
+        public void acquireTransactionLocks() {
+            // TODO Auto-generated method stub
+
+        }
     }
 }

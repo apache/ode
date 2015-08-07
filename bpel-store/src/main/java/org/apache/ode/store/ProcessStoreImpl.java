@@ -109,6 +109,7 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     public ProcessStoreImpl(EndpointReferenceContext eprContext, DataSource ds, String persistenceType, OdeConfigProperties props, boolean createDatamodel) {
+        __log.debug("ds:"+ds+" persistenceType:"+persistenceType+" createDatamodel:"+createDatamodel);
         this.eprContext = eprContext;
         this.generateProcessEventsAll = props.getProperty("generateProcessEvents", "all").equals("all");
         if (ds != null) {

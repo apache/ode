@@ -46,6 +46,10 @@ public class OdeConfigProperties {
 
     public static final String PROP_DB_EMBEDDED_NAME = "db.emb.name";
 
+    public static final String PROP_DB_EMBEDDED_TYPE = "db.emb.type";
+
+    public static final String PROP_DB_EMBEDDED_CREATE = "db.emb.create";
+
     public static final String PROP_DB_INTERNAL_URL = "db.int.jdbcurl";
 
     public static final String PROP_DB_INTERNAL_DRIVER = "db.int.driver";
@@ -73,7 +77,7 @@ public class OdeConfigProperties {
     public static final String PROP_WORKING_DIR = "working.dir";
 
     public static final String PROP_DEPLOY_DIR = "deploy.dir";
-    
+
     public static final String PROP_EVENT_LISTENERS = "event.listeners";
 
     public static final String PROP_MEX_INTERCEPTORS = "mex.interceptors";
@@ -83,23 +87,23 @@ public class OdeConfigProperties {
     public static final String PROP_PROCESS_DEHYDRATION = "process.dehydration";
 
     public static final String PROP_PROCESS_DEHYDRATION_MAXIMUM_AGE = "process.dehydration.maximum.age";
-    
+
     public static final String PROP_PROCESS_DEHYDRATION_MAXIMUM_COUNT = "process.dehydration.maximum.count";
-    
+
     public static final String PROP_PROCESS_HYDRATION_LAZY = "process.hydration.lazy";
-    
+
     public static final String PROP_PROCESS_HYDRATION_LAZY_MINIMUM_SIZE = "process.hydration.lazy.minimum.size";
-    
+
     public static final String PROP_PROCESS_HYDRATION_THROTTLED_MAXIMUM_COUNT = "process.hydration.throttled.maximum.count";
-    
+
     public static final String PROP_PROCESS_HYDRATION_THROTTLED_MAXIMUM_SIZE = "process.hydration.throttled.maximum.size";
-    
+
     public static final String PROP_PROCESS_INSTANCE_THROTTLED_MAXIMUM_COUNT = "process.instance.throttled.maximum.count";
-    
+
     public static final String PROP_DAOCF = "dao.factory";
-    
+
     public static final String PROP_MIGRATION_TRANSACTION_TIMEOUT = "migration.transaction.timeout";
-    
+
     public static final String DEFAULT_TX_FACTORY_CLASS_NAME = "org.apache.ode.il.EmbeddedGeronimoFactory";
 
     private File _cfgFile;
@@ -111,6 +115,10 @@ public class OdeConfigProperties {
     /** Default defaults for the database embedded name and dao connection factory class. */
     private static String __dbEmbName = "derby-jpadb";
     private static String __daoCfClass = "org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl";
+
+    public static String DEFAULT_DB_EMB_NAME = "ode-db";
+    public static String DEFAULT_DB_EMB_TYPE = "h2";
+    public static String DEFAULT_DAOCF_CLASS = "org.apache.ode.dao.jpa.openjpa.BpelDAOConnectionFactoryImpl";
 
     static {
         String odep = System.getProperty("ode.persistence");
@@ -134,6 +142,16 @@ public class OdeConfigProperties {
 
         /** Embedded database (Ode provides default embedded database with connection pool) */
         EMBEDDED
+    }
+
+    /**
+     * Possible database implementation.
+     */
+    public enum EmbeddedDbType {
+
+        DERBY,
+
+        H2
     }
 
     public OdeConfigProperties(File cfgFile, String prefix) {
@@ -186,6 +204,14 @@ public class OdeConfigProperties {
     public String getDbEmbeddedName() {
         return getProperty(OdeConfigProperties.PROP_DB_EMBEDDED_NAME, __dbEmbName);
 
+    }
+
+    public EmbeddedDbType getDbEmbeddedType() {
+        return EmbeddedDbType.valueOf(getProperty(OdeConfigProperties.PROP_DB_EMBEDDED_TYPE, DEFAULT_DB_EMB_TYPE).trim().toUpperCase());
+    }
+
+    public boolean isDbEmbeddedCreate() {
+        return Boolean.valueOf(getProperty(OdeConfigProperties.PROP_DB_EMBEDDED_CREATE, "true"));
     }
 
     public DatabaseMode getDbMode() {

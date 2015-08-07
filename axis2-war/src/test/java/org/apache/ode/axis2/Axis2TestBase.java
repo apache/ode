@@ -163,6 +163,15 @@ public abstract class Axis2TestBase {
         String axis2RepoAbsolutePath = getClass().getClassLoader().getResource(axis2RepoDir).getFile();
         String axis2ConfAbsolutePath = axis2ConfLocation == null ? null : getClass().getClassLoader().getResource(axis2ConfLocation).getFile();
         server = new ODEAxis2Server(odeRootAbsolutePath, axis2RepoAbsolutePath, axis2ConfAbsolutePath);
+        server.txMgrCreatedCallback = new Runnable() {
+            public void run() {
+                try {
+                    org.springframework.mock.jndi.SimpleNamingContextBuilder.emptyActivatedContextBuilder().bind("java:comp/UserTransaction", server.getODEServer().getTransactionManager());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
         server.start();
     }
 
@@ -237,6 +246,7 @@ public abstract class Axis2TestBase {
 
         ODEServer _ode;
         String odeRootDir;
+        public Runnable txMgrCreatedCallback = null;
 
         protected ODEAxis2Server(String odeRootDir, String axis2RepoDir, String axis2ConfLocation) throws Exception {
             super(false);
@@ -257,6 +267,7 @@ public abstract class Axis2TestBase {
         protected void start() throws AxisFault {
             super.start();
             _ode = new ODEServer();
+            _ode.txMgrCreatedCallback = txMgrCreatedCallback;
             try {
                 _ode.init(odeRootDir, new ConfigurationContext(configContext.getAxisConfiguration()));
             } catch (ServletException e) {

@@ -16,19 +16,12 @@
 <beans xmlns:sm="http://servicemix.apache.org/config/1.0"
        xmlns:http="http://servicemix.apache.org/http/1.0"
        xmlns:eip="http://servicemix.apache.org/eip/1.0"
+       xmlns:hello="urn:/HelloWorld2.wsdl"
        xmlns:util="http://www.springframework.org/schema/util"
-       xmlns:jencks="http://jencks.org/2.0"
-       xmlns:mws="http://ode/bpel/unit-test.wsdl"
        >
 
-    <import resource="classpath:jndi-entries.xml"/>
-
-    <sm:container
-        id="jbi"
-        embedded="true"
-        rootDir="target/test/smx"
-        transactionManager="#transactionManager"
-        depends-on="jndi"
-        >
-    </sm:container>
+    <util:map id="jndiEntries">
+        <entry key="java:comp/env/jdbc/ode" value-ref="odeDS"/>
+        <entry key="java:comp/UserTransaction" value-ref="transactionManager" />
+    </util:map>
 </beans>

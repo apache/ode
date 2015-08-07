@@ -45,13 +45,13 @@ public class CronSchedulerTest extends TestCase {
     private CronScheduler cronScheduler;
     private ExecutorService execService;
 
-    static {
+  /*  static {
         BasicConfigurator.configure();
         LogManager.getRootLogger().setLevel(Level.DEBUG);
         LogManager.getLogger(RuntimeDataCleanupRunnable.class).setLevel(Level.DEBUG);
         LogManager.getLogger(BpelDAOConnectionImpl.class).setLevel(Level.DEBUG);
         LogManager.getLogger("org.apache.ode").setLevel(Level.DEBUG);
-    }
+    }*/
     
     protected void setUp() throws Exception {
         contexts = new Contexts();

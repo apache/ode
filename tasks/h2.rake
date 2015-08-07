@@ -17,14 +17,14 @@
 
 module H2
 
-  REQUIRES = "com.h2database:h2:jar:1.3.173"
+  REQUIRES = "com.h2database:h2:jar:1.3.176"
 
   #Java.classpath << REQUIRES
 
   class << self
 
     # Returns a task that will create a new H2 database. The task name is the path to
-    # the H2 database. The prerequisites are all the SQL files for inclusion in the database.
+    # the H2 database. The prerequisites are all the SQL files for inclusion in the database
     #
     # For example:
     #   H2.create "mydb"=>h2.sql
@@ -33,7 +33,7 @@ module H2
       targetDir=File.expand_path(db)
       file(targetDir=>prereqs) do |task|
         rm_rf task.name if File.exist?(task.name)
-        Java::Commands.java "org.h2.tools.RunScript", "-url", "jdbc:h2:file:"+Util.normalize_path("#{targetDir}/#{dbname}")+";DB_CLOSE_ON_EXIT=false;user=sa", "-showResults", "-script", prereqs, :classpath => REQUIRES
+        Java::Commands.java "org.h2.tools.RunScript", "-url", "jdbc:h2:file:"+Util.normalize_path("#{targetDir}/#{dbname}")+";DB_CLOSE_ON_EXIT=false", "-user", "sa", "-showResults", "-script", prereqs, :classpath => REQUIRES
         # Copy the SQL files into the database directory.
         Buildr.filter(prereqs).into(task.name).run
         touch task.name, :verbose=>false

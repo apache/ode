@@ -23,7 +23,7 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.testng.annotations.Test;
 
 public class ProcessCronCleanupTest extends CleanTestBase {
-//	@Test(dataProvider="configs")
+    //@Test(dataProvider="configs")
     public void _testCleanAll() throws Exception {
         go("TestProcessCronCleanup", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
@@ -46,9 +46,9 @@ public class ProcessCronCleanupTest extends CleanTestBase {
     }
 
     public String getODEConfigDir() {
-    	return HIB_DERBY_CONF_DIR;
+        return HIB_H2_CONF_DIR;
     }
-    
+
     protected ProcessInstanceDAO getInstance() {
         return HibDaoConnectionFactoryImpl.getInstance();
     }

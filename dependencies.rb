@@ -75,8 +75,8 @@ GERONIMO            = struct(
   :transaction      =>"org.apache.geronimo.components:geronimo-transaction:jar:2.0.1",
   :connector        =>"org.apache.geronimo.components:geronimo-connector:jar:2.0.1"
 )
-HIBERNATE           = [ "org.hibernate:hibernate:jar:3.2.5.ga", "asm:asm:jar:1.5.3",
-                        "antlr:antlr:jar:2.7.6", "cglib:cglib:jar:2.1_3", "net.sf.ehcache:ehcache:jar:1.2.3" ]
+HIBERNATE           = [ "org.hibernate:hibernate-core:jar:3.3.2.GA", "javassist:javassist:jar:3.9.0.GA", "antlr:antlr:jar:2.7.6",
+                        "asm:asm:jar:3.3.1", "cglib:cglib:jar:2.2", "net.sf.ehcache:ehcache:jar:1.2.3" ]
 HSQLDB              = "org.hsqldb:hsqldb:jar:2.3.3"
 JAVAX               = struct(
   :activation       =>"javax.activation:activation:jar:1.1",
@@ -137,6 +137,7 @@ SERVICEMIX          = [
 SLF4J = group(%w{ slf4j-api slf4j-log4j12 jcl104-over-slf4j }, :under=>"org.slf4j", :version=>"1.4.3")                        
 SPRING              = ["org.springframework:spring:jar:2.5.6"]
 SPRING_OSGI         = ["org.springframework.osgi:spring-osgi-core:jar:1.2.0"]
+SPRING_TEST         = ["org.springframework:spring-test:jar:2.5.6"]
 TRANQL              = [ "tranql:tranql-connector:jar:1.1", COMMONS.primitives ]
 WOODSTOX            = "woodstox:wstx-asl:jar:3.2.4"
 WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.3"

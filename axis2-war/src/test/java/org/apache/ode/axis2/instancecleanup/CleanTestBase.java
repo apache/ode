@@ -56,8 +56,9 @@ public abstract class CleanTestBase extends Axis2TestBase implements ODEConfigDi
                 //ignore 
             }
         }
-        EmbeddedGeronimoFactory factory = new EmbeddedGeronimoFactory();
-        txm = factory.getTransactionManager();
+        txm = server.getODEServer().getTransactionManager();
+/*        EmbeddedGeronimoFactory factory = new EmbeddedGeronimoFactory();
+        txm = factory.getTransactionManager();*/
         Database db = getDatabase();
         db.setTransactionManager(txm);
         db.start();
@@ -88,7 +89,7 @@ public abstract class CleanTestBase extends Axis2TestBase implements ODEConfigDi
         File configFile = new File(odeConfigDir);
         ODEConfigProperties odeProps = new ODEConfigProperties(configFile);
         odeProps.load();
-        Database db = new Database(odeProps);
+        Database db = Database.create(odeProps);
         String webappPath = getClass().getClassLoader().getResource("webapp").getFile();
         db.setWorkRoot(new File(webappPath, "/WEB-INF"));
         
