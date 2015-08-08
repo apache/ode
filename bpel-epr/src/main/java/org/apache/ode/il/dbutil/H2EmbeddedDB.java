@@ -35,7 +35,7 @@ public class H2EmbeddedDB extends InternalDB {
     }
 
     /**
-     * Initialize embedded (DERBY) database.
+     * Initialize embedded (H2) database.
      */
     @Override
     protected void initDataSource() throws DatabaseConfigException {
@@ -47,7 +47,7 @@ public class H2EmbeddedDB extends InternalDB {
             hds.setUser("sa");
             _datasource = hds;
         } else {
-            _dbUrl = "jdbc:h2:" + _workRoot + File.separator + db;
+            _dbUrl = "jdbc:h2:" + _workRoot + File.separator + db + ";DB_CLOSE_ON_EXIT=FALSE";
             if (!_odeConfig.isDbEmbeddedCreate()) {
                 _dbUrl += ";IFEXISTS=TRUE";
             }

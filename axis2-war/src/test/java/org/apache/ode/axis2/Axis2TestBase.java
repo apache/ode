@@ -162,7 +162,7 @@ public abstract class Axis2TestBase {
         String odeRootAbsolutePath = getClass().getClassLoader().getResource("webapp/WEB-INF").getFile();
         String axis2RepoAbsolutePath = getClass().getClassLoader().getResource(axis2RepoDir).getFile();
         String axis2ConfAbsolutePath = axis2ConfLocation == null ? null : getClass().getClassLoader().getResource(axis2ConfLocation).getFile();
-        ODEConfigProperties config = new ODEConfigProperties(new File(System.getProperty("org.apache.ode.configDir", odeRootAbsolutePath + "/conf.hib-derby")));
+        ODEConfigProperties config = new ODEConfigProperties(new File(System.getProperty("org.apache.ode.configDir", odeRootAbsolutePath + "/conf")));
         config.load();
         server = new ODEAxis2Server(odeRootAbsolutePath, axis2RepoAbsolutePath, axis2ConfAbsolutePath, getTestPort(0), config);
         server.txMgrCreatedCallback = new Runnable() {
