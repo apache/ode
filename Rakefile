@@ -345,11 +345,12 @@ define "ode" do
     end
 
     common_sql = _("src/main/sql/common.sql")
+    index_sql = _("src/main/sql/index.sql")
 
     %w{ derby mysql firebird hsql postgres sqlserver oracle h2}.each do |db|
       partial_runtime = export[ properties_for[db], dao_hibernate, _("target/partial.runtime.#{db}.sql") ]
       partial_store = export[ properties_for[db], bpel_store, _("target/partial.store.#{db}.sql") ]
-      build concat(_("target/#{db}.sql")=>[ common_sql, predefined_for[db], partial_store, partial_runtime])
+      build concat(_("target/#{db}.sql")=>[ common_sql, predefined_for[db], partial_store, partial_runtime, index_sql])
     end
 
     derby_sql = _("target/derby.sql")

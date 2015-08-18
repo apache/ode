@@ -62,7 +62,6 @@ public class HVariableProperty extends HObject{
     /**
      * @hibernate.property
      *    column="PROP_VALUE"
-     *    index="PROP_VALUE_IDX"
      */
     public String getValue() {
         return _propertyValue;
@@ -77,7 +76,6 @@ public class HVariableProperty extends HObject{
      *    type="string"
      *    length="255"
      *    not-null="true"
-     *    index="PROP_NAME_IDX"
      */
     public String getName() {
         return _propertyName;

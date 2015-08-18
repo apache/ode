@@ -45,7 +45,6 @@ public class HCorrelatorMessageKey extends HObject {
    *   not-null="true"
    * @hibernate.column
    *   name="CKEY"
-   *   index="IDX_BPEL_CORRELATOR_MESSAGE_CKEY"
    */
   public String getCanonical() {
     return _keyCanonical;
