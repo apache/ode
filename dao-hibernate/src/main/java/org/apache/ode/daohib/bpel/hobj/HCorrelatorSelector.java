@@ -52,7 +52,7 @@ public class HCorrelatorSelector extends HObject {
 
     /**
      * @hibernate.property column="SELGRPID"
-     * @hibernate.column name="SELGRPID" index="IDX_SELECTOR_SELGRPID" not-null="true"
+     * @hibernate.column name="SELGRPID" not-null="true"
      */
     public String getGroupId() {
         return _groupId;
@@ -83,7 +83,6 @@ public class HCorrelatorSelector extends HObject {
     /**
      * @hibernate.property column="CORRELATION_KEY" not-null="true"
      * @hibernate.column name="CORRELATION_KEY"
-     *                   index="IDX_SELECTOR_CKEY"
      *                   not-null="true"
      *                   unique-key="UNIQ_SELECTOR"
      *
@@ -120,8 +119,7 @@ public class HCorrelatorSelector extends HObject {
 
     /**
      * @hibernate.many-to-one not-null="true" foreign-key="none"
-     * @hibernate.column name="CORRELATOR" not-null="true"
-     *          index="IDX_SELECTOR_CORRELATOR" unique-key="UNIQ_SELECTOR"
+     * @hibernate.column name="CORRELATOR" not-null="true" unique-key="UNIQ_SELECTOR"
      */
     public HCorrelator getCorrelator() {
         return _correlator;
