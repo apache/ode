@@ -670,7 +670,11 @@ define "apache-ode" do
 
         # Include supported database schemas
         Dir["#{project("ode:dao-jpa-ojpa-derby").path_to("target")}/*.sql"].each do |f|
-          zip.include(f, :path=>"sql") unless f =~ /partial/
+          zip.include(f, :path=>"sql/openjpa") unless f =~ /partial/
+        end
+
+        Dir["#{project("ode:dao-hibernate-db").path_to("target")}/*.sql"].each do |f|
+          zip.include(f, :path=>"sql/hibernate") unless f =~ /partial/
         end
 
         # Tools scripts (like bpelc and sendsoap)
@@ -685,7 +689,7 @@ define "apache-ode" do
 
         yield zip
         project.check zip, "should contain mysql.sql" do
-          it.should contain("sql/mysql.sql")
+          it.should contain("sql/openjpa/mysql.sql")
         end
         project.check zip, "should contain sendsoap.bat" do
           it.should contain("bin/sendsoap.bat")
