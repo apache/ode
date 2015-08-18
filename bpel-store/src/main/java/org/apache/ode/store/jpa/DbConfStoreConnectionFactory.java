@@ -61,6 +61,7 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
         propMap.put("openjpa.ConnectionFactoryMode", "managed");
         propMap.put("openjpa.FlushBeforeQueries", "false");
         propMap.put("openjpa.FetchBatchSize", 1000);
+        propMap.put("openjpa.LockManager","pessimistic");
 
         //dirty hack for ODE-1015
         String skipIsolation = System.getProperty("openjpa.connection.isolation.skip", "N");

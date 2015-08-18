@@ -25,6 +25,8 @@ import org.apache.ode.store.DeploymentUnitDAO;
 import org.apache.ode.store.ProcessConfDAO;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
+import org.hibernate.LockMode;
+import org.hibernate.Query;
 import org.hibernate.Session;
 
 import javax.xml.namespace.QName;
@@ -77,20 +79,29 @@ public class ConfStoreConnectionHib implements ConfStoreConnection {
     }
 
     public long getNextVersion() {
-        VersionTrackerDAOImpl vt = (VersionTrackerDAOImpl)
-                _session.createQuery("from VersionTrackerDAOImpl v ").uniqueResult();
-        if (vt == null) return 1;
-        else return vt.getVersion() + 1;
+        Query q = _session.createQuery("from VersionTrackerDAOImpl v ");
+        q.setLockMode("v", LockMode.UPGRADE);
+        VersionTrackerDAOImpl vt = (VersionTrackerDAOImpl) q.uniqueResult();
+        if (vt == null) {
+            vt = new VersionTrackerDAOImpl();
+            vt.setVersion(1);
+        }else {
+            vt.setVersion(vt.getVersion() + 1);
+        }
+        _session.save(vt);
+        return vt.getVersion();
     }
 
     public void setVersion(long version) {
-        VersionTrackerDAOImpl vt = (VersionTrackerDAOImpl)
-                _session.createQuery("from VersionTrackerDAOImpl v ").uniqueResult();
+        Query q = _session.createQuery("from VersionTrackerDAOImpl v ");
+        q.setLockMode("v", LockMode.UPGRADE);
+        VersionTrackerDAOImpl vt = (VersionTrackerDAOImpl) q.uniqueResult();
         if (vt == null) {
             vt = new VersionTrackerDAOImpl();
-            vt.setId(1);
+            vt.setVersion(1);
+        } else {
+            vt.setVersion(version);
         }
-        vt.setVersion(version);
         _session.save(vt);
     }
 
