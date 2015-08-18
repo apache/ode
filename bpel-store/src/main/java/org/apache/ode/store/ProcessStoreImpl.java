@@ -101,7 +101,7 @@ public class ProcessStoreImpl implements ProcessStore {
      */
     private DataSource _inMemDs;
 
-
+    private static final ThreadLocal<Long> _currentVersion = new ThreadLocal<Long>();
 
     public ProcessStoreImpl() {
         this(null, null, "", new OdeConfigProperties(new Properties(), ""), true);
@@ -195,11 +195,12 @@ public class ProcessStoreImpl implements ProcessStore {
         long version;
         if (autoincrementVersion || du.getStaticVersion() == -1) {
             // Process and DU use a monotonically increased single version number by default.
-            version = exec(new Callable<Long>() {
-                public Long call(ConfStoreConnection conn) {
-                    return conn.getNextVersion();
-                }
-            });
+            try {
+                version = getCurrentVersion();
+            } finally {
+                //we need to reset the current version thread local value.
+                _currentVersion.set(null);
+            }
         } else {
             version = du.getStaticVersion();
         }
@@ -296,7 +297,6 @@ public class ProcessStoreImpl implements ProcessStore {
                             newDao.setProperty(prop.getKey(), DOMUtils.domToString(prop.getValue()));
                         }
                         deployed.add(pc.getProcessId());
-                        conn.setVersion(pc.getVersion());
                     } catch (Throwable e) {
                         String errmsg = "Error persisting deployment record for " + pc.getProcessId()
                                 + "; process will not be available after restart!";
@@ -583,12 +583,18 @@ public class ProcessStoreImpl implements ProcessStore {
     }
 
     public long getCurrentVersion() {
+        if (_currentVersion.get() != null){
+            return _currentVersion.get();
+        }
+
         long version = exec(new Callable<Long>() {
             public Long call(ConfStoreConnection conn) {
                 return conn.getNextVersion();
             }
         });
-        return version;
+
+        _currentVersion.set(version);
+        return _currentVersion.get();
     }
 
     protected void fireEvent(ProcessStoreEvent pse) {

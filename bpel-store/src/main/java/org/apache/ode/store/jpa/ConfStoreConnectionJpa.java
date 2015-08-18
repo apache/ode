@@ -25,6 +25,7 @@ import org.apache.ode.store.ConfStoreConnection;
 import org.apache.ode.store.DeploymentUnitDAO;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -64,19 +65,39 @@ public class ConfStoreConnectionJpa implements ConfStoreConnection {
     }
 
     public long getNextVersion() {
-        List<VersionTrackerDAOImpl> res = _em.createQuery("select v from VersionTrackerDAOImpl v").getResultList();
-        if (res.size() == 0) return 1;
-        else {
-            VersionTrackerDAOImpl vt = res.get(0);
-            return vt.getVersion() + 1;
-        }
+        VersionTrackerDAOImpl vt = null;
+        Query query = _em.createQuery("select v from VersionTrackerDAOImpl v");
+        query.setHint("openjpa.FetchPlan.ReadLockMode", "WRITE");
+
+        List<VersionTrackerDAOImpl> res = query.getResultList();
+
+        if(!res.isEmpty())
+            vt = res.get(0);
+
+        if (vt == null) {
+            vt = new VersionTrackerDAOImpl();
+            vt.setVersion(1);
+        } else {
+            vt.setVersion(vt.getVersion() + 1);
+         }
+
+        _em.persist(vt);
+        return vt.getVersion();
     }
 
     public void setVersion(long version) {
-        List<VersionTrackerDAOImpl> res = _em.createQuery("select v from VersionTrackerDAOImpl v").getResultList();
-        VersionTrackerDAOImpl vt;
-        if (res.size() == 0) vt = new VersionTrackerDAOImpl();
-        else vt = res.get(0);
+        VersionTrackerDAOImpl vt = null;
+        Query query = _em.createQuery("select v from VersionTrackerDAOImpl v");
+        query.setHint("openjpa.FetchPlan.ReadLockMode", "WRITE");
+
+        List<VersionTrackerDAOImpl> res = query.getResultList();
+
+        if(!res.isEmpty())
+            vt = res.get(0);
+
+        if (vt == null)
+            vt = new VersionTrackerDAOImpl();
+
         vt.setVersion(version);
         _em.persist(vt);
     }
