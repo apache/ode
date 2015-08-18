@@ -193,7 +193,7 @@ public class ProcessStoreImpl implements ProcessStore {
             // Override the package name if given from the parameter
             du.setName(duName);
         }
-        
+
         long version;
         if (autoincrementVersion || du.getStaticVersion() == -1) {
             // Process and DU use a monotonically increased single version number by default.
@@ -203,12 +203,11 @@ public class ProcessStoreImpl implements ProcessStore {
                 //we need to reset the current version thread local value.
                 _currentVersion.set(null);
             }
-
         } else {
             version = du.getStaticVersion();
         }
         du.setVersion(version);
-        
+
         try {
             du.compile();
         } catch (CompilationException ce) {
@@ -300,7 +299,6 @@ public class ProcessStoreImpl implements ProcessStore {
                             newDao.setProperty(prop.getKey(), DOMUtils.domToString(prop.getValue()));
                         }
                         deployed.add(pc.getProcessId());
-
                     } catch (Throwable e) {
                         String errmsg = "Error persisting deployment record for " + pc.getProcessId()
                                 + "; process will not be available after restart!";
@@ -311,8 +309,9 @@ public class ProcessStoreImpl implements ProcessStore {
             }
 
         });
-        
-        // We want the events to be fired outside of the bounds of the writelock.
+
+        _rw.readLock().lock();
+        boolean readLockHeld = true;
         try {
             for (ProcessConfImpl process : processes) {
                 fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.DEPLOYED, process.getProcessId(), process.getDeploymentUnit()
@@ -320,14 +319,21 @@ public class ProcessStoreImpl implements ProcessStore {
                 fireStateChange(process.getProcessId(), process.getState(), process.getDeploymentUnit().getName());
             }
         } catch (Exception e) {
+            //need to unlock as undeploy operation will need a writeLock
+            _rw.readLock().unlock();
+            readLockHeld = false;
             // A problem at that point means that engine deployment failed, we don't want the store to keep the du
             __log.warn("Deployment failed within the engine, store undeploying process.", e);
             undeploy(deploymentUnitDirectory);
             if (e instanceof ContextException) throw (ContextException) e;
             else throw new ContextException("Deployment failed within the engine.", e);
+        } finally {
+            if(readLockHeld)
+                _rw.readLock().unlock();
         }
 
         return deployed;
+
     }
 
     /**
