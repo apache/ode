@@ -308,7 +308,9 @@ public class ProcessStoreImpl implements ProcessStore {
 
         });
 
-        // We want the events to be fired outside of the bounds of the writelock.
+
+        _rw.readLock().lock();
+        boolean readLockHeld = true;
         try {
             for (ProcessConfImpl process : processes) {
                 fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.DEPLOYED, process.getProcessId(), process.getDeploymentUnit()
@@ -316,11 +318,18 @@ public class ProcessStoreImpl implements ProcessStore {
                 fireStateChange(process.getProcessId(), process.getState(), process.getDeploymentUnit().getName());
             }
         } catch (Exception e) {
+            //need to unlock as undeploy operation will need a writeLock
+            _rw.readLock().unlock();
+            readLockHeld = false;
+
             // A problem at that point means that engine deployment failed, we don't want the store to keep the du
             __log.warn("Deployment failed within the engine, store undeploying process.", e);
             undeploy(deploymentUnitDirectory);
             if (e instanceof ContextException) throw (ContextException) e;
             else throw new ContextException("Deployment failed within the engine. " + e.getMessage(), e);
+        } finally {
+            if(readLockHeld)
+                _rw.readLock().unlock();
         }
 
         return deployed;
