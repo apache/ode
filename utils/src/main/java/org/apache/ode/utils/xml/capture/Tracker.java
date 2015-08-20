@@ -21,8 +21,8 @@ package org.apache.ode.utils.xml.capture;
 import java.net.URI;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
@@ -32,7 +32,7 @@ import org.xml.sax.SAXException;
  * Base class for schema-specifc dependency trackers.
  */
 public abstract class Tracker implements ContentHandler {
-  private static final Log __log = LogFactory.getLog(Tracker.class);
+  private static final Logger __log = LoggerFactory.getLogger(Tracker.class);
 
   private Set<URI> references_ ;
   private URI base_;

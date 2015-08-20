@@ -33,8 +33,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.dao.DeferredProcessInstanceCleanable;
@@ -82,7 +82,7 @@ import org.apache.ode.utils.xsl.XslTransformHandler;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
-    private static final Log __log = LogFactory.getLog(BpelServerImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(BpelServerImpl.class);
 
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
@@ -482,7 +482,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
                     }
                 }
             } catch (InterruptedException e) {
-                __log.debug(e);
+                __log.debug("",e);
             }
         }
     }

@@ -26,15 +26,15 @@ import javax.jbi.messaging.MessageExchange;
 import javax.jbi.messaging.MessagingException;
 import javax.jbi.messaging.NormalizedMessage;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base message exchange processor; handles common JBI message exchange conditions and delegates
  * actual invocation to subclass.
  */
 public abstract class BaseMessageExchangeProcessor implements JbiMessageExchangeProcessor {
-    final Log LOG = LogFactory.getLog(getClass());
+    final Logger LOG = LoggerFactory.getLogger(getClass());
 
     DeliveryChannel _channel;
     

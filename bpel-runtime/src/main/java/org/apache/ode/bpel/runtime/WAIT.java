@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
@@ -38,7 +38,7 @@ import java.util.Date;
  */
 class WAIT extends ACTIVITY {
     private static final long serialVersionUID = 1L;
-    private static final Log __log = LogFactory.getLog(WAIT.class);
+    private static final Logger __log = LoggerFactory.getLogger(WAIT.class);
 
     WAIT(ActivityInfo self, ScopeFrame scopeFrame, LinkFrame linkFrame) {
         super(self, scopeFrame, linkFrame);

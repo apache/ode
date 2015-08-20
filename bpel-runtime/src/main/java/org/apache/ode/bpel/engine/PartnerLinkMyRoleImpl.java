@@ -27,8 +27,8 @@ import javax.wsdl.Operation;
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.common.FaultException;
@@ -60,7 +60,7 @@ import org.w3c.dom.Element;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
-    private static final Log __log = LogFactory.getLog(BpelProcess.class);
+    private static final Logger __log = LoggerFactory.getLogger(BpelProcess.class);
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
     /** The local endpoint for this "myrole". */

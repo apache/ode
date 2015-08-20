@@ -18,7 +18,7 @@
  */
 package org.apache.ode.axis2.instancecleanup;
 
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.engine.cron.SystemSchedulesConfig;
@@ -64,7 +64,7 @@ public class SystemCronCleanupTest extends CleanTestBase {
             server.sendRequestFile("http://localhost:8888/processes/FirstProcess/FirstProcess/FirstProcess/Client", bundleName, "testRequest.soap");
             // every second, clean up cron job kicks in
             Thread.sleep(2000);
-            LogFactory.getLog(SystemCronCleanupTest.class).debug("============ASSERT INSTANCE CLEANUP===============");
+            LoggerFactory.getLogger(SystemCronCleanupTest.class).debug("============ASSERT INSTANCE CLEANUP===============");
             process = assertInstanceCleanup(instances, activityRecoveries, correlationSets, faults, exchanges, routes, messsages, partnerLinks, scopes, variables, events, largeData);
         } finally {
             server.undeployProcess(bundleName);

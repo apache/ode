@@ -25,20 +25,20 @@ import javax.xml.xpath.XPathFactory;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.xpath.XPathFactoryImpl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.utils.DOMUtils;
 
 import junit.framework.TestCase;
 
 public class XsdTypesTest extends TestCase {
-    private static Log __log = LogFactory.getLog(XsdTypesTest.class);
+    private static Logger __log = LoggerFactory.getLogger(XsdTypesTest.class);
     
     public void testDateTime() throws Exception {
         XPathFactoryImpl xpf = new XPathFactoryImpl();
         JaxpVariableResolver jvr = new JaxpVariableResolver(null, null, xpf.getConfiguration());
         Object o = jvr.getSimpleContent(DOMUtils.stringToDOM("<temporary-simple-type-wrapper>2010-01-25T15:38:54.82Z</temporary-simple-type-wrapper>"), QName.valueOf("{http://www.w3.org/2001/XMLSchema}dateTime"));
-        __log.debug(o);
+        __log.debug(o.toString());
         assertTrue(o.toString().contains("2010-01-25T15:38:54.82Z"));
     }
 
@@ -46,7 +46,7 @@ public class XsdTypesTest extends TestCase {
         XPathFactoryImpl xpf = new XPathFactoryImpl();
         JaxpVariableResolver jvr = new JaxpVariableResolver(null, null, xpf.getConfiguration());
         Object o = jvr.getSimpleContent(DOMUtils.stringToDOM("<temporary-simple-type-wrapper></temporary-simple-type-wrapper>"), QName.valueOf("{http://www.w3.org/2001/XMLSchema}dateTime"));
-        __log.debug(o);
+        __log.debug(o.toString());
         assertTrue(o.toString().equals(""));
     }
 

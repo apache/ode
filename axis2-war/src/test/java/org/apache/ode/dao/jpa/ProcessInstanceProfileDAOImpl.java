@@ -19,8 +19,8 @@
 
 package org.apache.ode.dao.jpa;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.FaultDAO;
@@ -43,7 +43,7 @@ import javax.persistence.Query;
  */
 public class ProcessInstanceProfileDAOImpl extends ProcessProfileDAOImpl implements ProcessInstanceProfileDAO {
     @SuppressWarnings("unused")
-    private static final Log __log = LogFactory.getLog(ProcessInstanceProfileDAOImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(ProcessInstanceProfileDAOImpl.class);
     
     private ProcessInstanceDAOImpl instance;
 

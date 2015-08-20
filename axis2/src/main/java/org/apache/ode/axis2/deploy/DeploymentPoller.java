@@ -38,8 +38,8 @@
 
 package org.apache.ode.axis2.deploy;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.axis2.ODEServer;
 import org.apache.ode.bpel.engine.cron.CronScheduler;
 import org.apache.ode.bpel.engine.cron.SystemSchedulesConfig;
@@ -59,7 +59,7 @@ import java.util.Map;
  */
 public class DeploymentPoller {
 
-    private static Log __log = LogFactory.getLog(DeploymentPoller.class);
+    private static Logger __log = LoggerFactory.getLogger(DeploymentPoller.class);
 
     /** The polling interval. */
     private static final long POLL_TIME = 3000;
@@ -240,7 +240,7 @@ public class DeploymentPoller {
             try {
                 join();
             } catch (InterruptedException ie) {
-                __log.fatal("Thread unexpectedly interrupted.", ie);
+                __log.error("Thread unexpectedly interrupted.", ie);
             }
         }
 
@@ -257,7 +257,7 @@ public class DeploymentPoller {
                     }
                 }
             } catch (Throwable t) {
-                __log.fatal("Encountered an unexpected error.  Exiting poller...", t);
+                __log.error("Encountered an unexpected error.  Exiting poller...", t);
             }
         }
     }

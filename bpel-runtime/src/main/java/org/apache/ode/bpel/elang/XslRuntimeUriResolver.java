@@ -30,8 +30,8 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
 import org.apache.ode.bpel.o.OXslSheet;
 import org.apache.ode.utils.StreamUtils;
@@ -44,7 +44,7 @@ import org.apache.ode.utils.fs.FileUtils;
  */
 public class XslRuntimeUriResolver implements URIResolver {
 
-    private static final Log __log = LogFactory.getLog(XslRuntimeUriResolver.class);
+    private static final Logger __log = LoggerFactory.getLogger(XslRuntimeUriResolver.class);
 
     private OXPath10Expression _expr;
     private final URI _baseResourceURI;

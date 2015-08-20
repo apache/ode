@@ -27,8 +27,8 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.AddressingConstants;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.handlers.AbstractHandler;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.axis2.ODEService;
 import org.apache.ode.bpel.epr.EndpointFactory;
 import org.apache.ode.bpel.epr.MutableEndpoint;
@@ -44,7 +44,7 @@ import org.apache.ode.utils.Namespaces;
 public class SessionOutHandler extends AbstractHandler {
 
     private static final long serialVersionUID = 1L;
-    private static final Log __log = LogFactory.getLog(SessionOutHandler.class);
+    private static final Logger __log = LoggerFactory.getLogger(SessionOutHandler.class);
 
 
     public InvocationResponse invoke(MessageContext messageContext) throws AxisFault {

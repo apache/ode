@@ -52,8 +52,8 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.commons.httpclient.util.IdleConnectionTimeoutThread;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.axis2.deploy.DeploymentPoller;
 import org.apache.ode.axis2.service.DeploymentWebService;
 import org.apache.ode.axis2.service.ManagementService;
@@ -89,8 +89,8 @@ import org.apache.ode.utils.fs.TempFileManager;
  */
 public class ODEServer {
 
-    protected final Log __log = LogFactory.getLog(getClass());
-    protected final Log __logTx = LogFactory.getLog("org.apache.ode.tx");
+    protected final Logger __log = LoggerFactory.getLogger(getClass());
+    protected final Logger __logTx = LoggerFactory.getLogger("org.apache.ode.tx");
 
     private static final Messages __msgs = Messages.getMessages(Messages.class);
 
@@ -419,7 +419,7 @@ public class ODEServer {
             if (__logTx.isDebugEnabled() && System.getProperty("ode.debug.tx") != null)
                 _txMgr = new DebugTxMgr(_txMgr);
         } catch (Exception e) {
-            __log.fatal("Couldn't initialize a transaction manager with factory: " + txFactoryName, e);
+             __log.error("Couldn't initialize a transaction manager with factory: " + txFactoryName, e);
             throw new ServletException("Couldn't initialize a transaction manager with factory: " + txFactoryName, e);
         }
     }

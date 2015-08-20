@@ -19,15 +19,15 @@
 
 package org.apache.ode.utils.rmi;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Constant related to naming of ODE objects in JMX.
  * @deprecated DO NO USE: Find your own way to get this URL.
  */
 public final class RMIConstants {
-  private static final Log __log = LogFactory.getLog(RMIConstants.class);
+  private static final Logger __log = LoggerFactory.getLogger(RMIConstants.class);
 
 
   /**

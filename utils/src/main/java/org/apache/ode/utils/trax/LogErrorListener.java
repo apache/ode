@@ -21,13 +21,13 @@ package org.apache.ode.utils.trax;
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.TransformerException;
 
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 
 public class LogErrorListener implements ErrorListener {
 
-  private Log _log;
+  private Logger _log;
   
-  public LogErrorListener(Log log) {
+  public LogErrorListener(Logger log) {
     _log = log;
   }
   
@@ -37,12 +37,12 @@ public class LogErrorListener implements ErrorListener {
   }
 
   public void error(TransformerException exception) throws TransformerException {
-    _log.error(exception.getMessageAndLocation(),exception);
+    _log.error("",exception.getMessageAndLocation(),exception);
   }
 
   public void fatalError(TransformerException exception)
       throws TransformerException {
-    _log.fatal(exception.getMessageAndLocation(),exception);
+    _log.error("",exception.getMessageAndLocation(),exception);
   }
 
 }

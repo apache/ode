@@ -18,8 +18,8 @@
  */
 package org.apache.ode.jacob.vpu;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.jacob.*;
 import org.apache.ode.jacob.soup.*;
 import org.apache.ode.utils.CollectionUtils;
@@ -38,7 +38,7 @@ import java.util.Stack;
  * @author Maciej Szefler <a href="mailto:mbs@fivesight.com" />
  */
 public final class JacobVPU {
-    private static final Log __log = LogFactory.getLog(JacobVPU.class);
+    private static final Logger __log = LoggerFactory.getLogger(JacobVPU.class);
 
     /**
      * Internationalization messages.

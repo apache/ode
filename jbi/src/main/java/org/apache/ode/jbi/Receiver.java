@@ -18,8 +18,8 @@
  */
 package org.apache.ode.jbi;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.jbi.messaging.DeliveryChannel;
 import javax.jbi.messaging.MessageExchange;
@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Receiver pulls messages from the NMS and submits them to ODE for further processing.
  */
 public class Receiver implements Runnable {
-    private static final Log __log = LogFactory.getLog(Receiver.class);
+    private static final Logger __log = LoggerFactory.getLogger(Receiver.class);
 
     // default time to wait for MessageExchanges, in seconds
     private static final long ACCEPT_TIMEOUT = 1L;
@@ -111,7 +111,7 @@ public class Receiver implements Runnable {
 
                 // If it's not dead yet, we got a problem we can't deal with.
                 if (_thread.isAlive()) {
-                    __log.fatal("Receiver thread is not dying gracefully despite our insistence!.");
+                    __log.error("Receiver thread is not dying gracefully despite our insistence!.");
                 }
 
                 // In any case, next step is to shutdown the thread pool
@@ -150,11 +150,11 @@ public class Receiver implements Runnable {
         try {
             _channel = _odeContext.getContext().getDeliveryChannel();
             if (_channel == null) {
-                __log.fatal("No Channel!");
+                __log.error("No Channel!");
                 return;
             }
         } catch (MessagingException ex) {
-            __log.fatal("Error getting channel! ", ex);
+            __log.error("Error getting channel! ", ex);
             return;
         }
 

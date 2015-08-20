@@ -34,15 +34,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.jbi.messaging.*;
 import javax.jbi.servicedesc.ServiceEndpoint;
 import javax.xml.namespace.QName;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Bridge between ODE (consumers) and JBI (providers). An single object of this type handles all communications initiated by ODE
  * that is destined for other JBI providers. 
  */
 abstract class OdeConsumer extends ServiceBridge implements JbiMessageExchangeProcessor {
-    private static final Log __log = LogFactory.getLog(OdeConsumer.class);
+    private static final Logger __log = LoggerFactory.getLogger(OdeConsumer.class);
     private static final long DEFAULT_RESPONSE_TIMEOUT = Long.getLong("org.apache.ode.jbi.timeout", 2 * 60 * 1000L);
 
     protected OdeContext _ode;
@@ -232,7 +232,7 @@ abstract class OdeConsumer extends ServiceBridge implements JbiMessageExchangePr
                                                 .getName()), faultResponse);
                                     } else {
                                         // Can this even happen?
-                                        __log.fatal("Internal Error: fault found without a message type: " + wsdlFlt);
+                                        __log.error("Internal Error: fault found without a message type: " + wsdlFlt);
                                         pmex.replyWithFailure(FailureType.FORMAT_ERROR, "Fault has no message: "
                                                 + wsdlFlt.getName(), null);
                                     }

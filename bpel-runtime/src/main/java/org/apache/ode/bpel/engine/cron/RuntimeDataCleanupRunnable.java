@@ -25,8 +25,8 @@ import java.util.concurrent.Callable;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.FilteredInstanceDeletable;
@@ -38,7 +38,7 @@ import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.MapSerializableRunnable;
 
 public class RuntimeDataCleanupRunnable implements MapSerializableRunnable, ContextsAware {
-    private final Log _log = LogFactory.getLog(RuntimeDataCleanupRunnable.class);
+    private final Logger _log = LoggerFactory.getLogger(RuntimeDataCleanupRunnable.class);
 
     private static final long serialVersionUID = 1L;
 

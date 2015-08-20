@@ -170,7 +170,7 @@ public class JbiWsdl11WrapperMapper extends BaseXmlMapper implements Mapper {
                 QName elName = new QName(n.getNamespaceURI(),n.getLocalName());
                 if (!elName.equals(partElName)) {
                     String err = "Invalid NMS message format, expected " + partElName + " but found " + elName;
-                    __log.error(err);
+                    __log.error("",err);
                     throw new MessageTranslationException(err);
                 }
                 Element pdata = DOMUtils.getFirstChildElement((Element) n);

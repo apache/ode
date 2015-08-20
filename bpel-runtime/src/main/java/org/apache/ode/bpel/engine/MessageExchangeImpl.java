@@ -19,8 +19,8 @@
 
 package org.apache.ode.bpel.engine;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.iapi.BpelEngineException;
@@ -37,7 +37,7 @@ import java.util.Set;
 
 abstract class MessageExchangeImpl implements MessageExchange {
 
-    private static final Log __log = LogFactory.getLog(MessageExchangeImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(MessageExchangeImpl.class);
     protected static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
     /** Process-Instance identifier.*/

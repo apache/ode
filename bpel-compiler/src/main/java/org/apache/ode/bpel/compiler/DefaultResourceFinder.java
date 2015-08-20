@@ -25,8 +25,8 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Basic implementation of the {@link ResourceFinder} interface. Resolves
@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
  *
  */
 public class DefaultResourceFinder implements ResourceFinder {
-    private static final Log __log = LogFactory.getLog(DefaultResourceFinder.class);
+    private static final Logger __log = LoggerFactory.getLogger(DefaultResourceFinder.class);
 
     private File _relativeDir;
     private File _absoluteDir;
@@ -113,7 +113,7 @@ public class DefaultResourceFinder implements ResourceFinder {
         // return the absolute URI.
         URI relative = _relativeDir.toURI().relativize(uri);
         if (relative.isAbsolute() && !(relative.getScheme().equals("urn"))) {
-           __log.fatal("openResource: invalid scheme (should be urn:)  " + uri);
+           __log.error("openResource: invalid scheme (should be urn:)  " + uri);
            return null;
         }
 

@@ -35,8 +35,8 @@ import javax.sql.DataSource;
 import javax.swing.text.StyleContext.SmallAttributeSet;
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.extvar.jdbc.DbExternalVariable.Column;
 import org.apache.ode.bpel.extvar.jdbc.DbExternalVariable.RowKey;
 import org.apache.ode.bpel.extvar.jdbc.DbExternalVariable.RowVal;
@@ -49,7 +49,7 @@ import org.w3c.dom.Element;
 
 public class JdbcExternalVariableModule implements ExternalVariableModule {
 
-    private static final Log __log = LogFactory.getLog(JdbcExternalVariableModule.class);
+    private static final Logger __log = LoggerFactory.getLogger(JdbcExternalVariableModule.class);
 
     public static final String JDBC_NS = "http://ode.apache.org/externalVariables/jdbc";
     

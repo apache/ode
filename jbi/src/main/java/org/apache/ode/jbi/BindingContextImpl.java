@@ -24,8 +24,8 @@ import java.util.Map;
 import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
@@ -40,7 +40,7 @@ import org.apache.ode.bpel.iapi.PartnerRoleChannel;
  * 
  */
 class BindingContextImpl implements BindingContext {
-    private static final Log __log = LogFactory.getLog(BindingContextImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(BindingContextImpl.class);
 
     private final OdeContext _ode;
     

@@ -24,8 +24,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 
@@ -38,7 +38,7 @@ import org.apache.ode.utils.stl.MemberOfFunction;
  */
 class SchedulerThread implements Runnable {
 
-    private static final Log __log = LogFactory.getLog(SchedulerThread.class);
+    private static final Logger __log = LoggerFactory.getLogger(SchedulerThread.class);
 
     private static final int TODO_QUEUE_INITIAL_CAPACITY = 200;
 

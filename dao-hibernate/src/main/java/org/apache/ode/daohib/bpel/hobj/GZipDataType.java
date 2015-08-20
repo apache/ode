@@ -32,8 +32,8 @@ import java.sql.Types;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.hibernate.usertype.UserType;
 
@@ -42,7 +42,7 @@ import org.hibernate.usertype.UserType;
  * to increase performance and save disk space.
  */
 public class GZipDataType implements UserType {
-    private static final Log log = LogFactory.getLog(GZipDataType.class);
+    private static final Logger log = LoggerFactory.getLogger(GZipDataType.class);
 
     public static final int[] SQL_TYPES = new int[] { Types.BLOB };
 

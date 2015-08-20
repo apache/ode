@@ -22,8 +22,8 @@ package org.apache.ode.bpel.compiler;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.ForEachActivity;
@@ -40,7 +40,7 @@ import org.apache.ode.utils.Namespaces;
  */
 public class ForEachGenerator extends DefaultActivityGenerator {
 
-    private static final Log __log = LogFactory.getLog(AssignGenerator.class);
+    private static final Logger __log = LoggerFactory.getLogger(AssignGenerator.class);
     private static final ForEachGeneratorMessages __cmsgs = MessageBundle.getMessages(ForEachGeneratorMessages.class);
 
     public OActivity newInstance(Activity src) {

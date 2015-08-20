@@ -26,8 +26,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.utils.SystemUtils;
 
 /**
@@ -38,7 +38,7 @@ import org.apache.ode.utils.SystemUtils;
 public class OdeConfigProperties {
     private static final long serialVersionUID = 1L;
 
-    private static final Log __log = LogFactory.getLog(OdeConfigProperties.class);
+    private static final Logger __log = LoggerFactory.getLogger(OdeConfigProperties.class);
 
     public static final String PROP_DB_MODE = "db.mode";
 
@@ -182,7 +182,7 @@ public class OdeConfigProperties {
                     try {
                         fis.close();
                     } catch (Exception ex) {
-                        __log.error(ex);
+                        __log.error("",ex);
                     }
             }
         } else {

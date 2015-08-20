@@ -19,8 +19,8 @@
 
 package org.apache.ode.dao.jpa;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.dao.*;
@@ -56,7 +56,7 @@ import java.util.Set;
     @NamedQuery(name=MessageExchangeDAOImpl.SELECT_MEX_IDS_BY_PROCESS, query="select m._id from MessageExchangeDAOImpl as m where m._process = :process")
 })
 public class MessageExchangeDAOImpl extends OpenJPADAO implements MessageExchangeDAO, CorrelatorMessageDAO {
-    private static final Log __log = LogFactory.getLog(MessageExchangeDAOImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(MessageExchangeDAOImpl.class);
     
     public final static String DELETE_MEXS_BY_PROCESS = "DELETE_MEXS_BY_PROCESS";
     public final static String SELECT_MEX_IDS_BY_PROCESS = "SELECT_MEX_IDS_BY_PROCESS";

@@ -18,8 +18,8 @@
  */
 package org.apache.ode.dao.jpa;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.openjpa.ee.ManagedRuntime;
@@ -44,7 +44,7 @@ import java.util.Properties;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class BPELDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDBC {
-	static final Log __log = LogFactory.getLog(BPELDAOConnectionFactoryImpl.class);
+	static final Logger __log = LoggerFactory.getLogger(BPELDAOConnectionFactoryImpl.class);
 
     protected EntityManagerFactory _emf;
     private TransactionManager _tm;

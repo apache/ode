@@ -23,8 +23,8 @@ import java.util.Date;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ActivityFailureEvent;
 import org.apache.ode.bpel.evt.ActivityRecoveryEvent;
@@ -48,7 +48,7 @@ import org.w3c.dom.Node;
  */
 public class INVOKE extends ACTIVITY {
     private static final long serialVersionUID = 992248281026821783L;
-    private static final Log __log = LogFactory.getLog(INVOKE.class);
+    private static final Logger __log = LoggerFactory.getLogger(INVOKE.class);
 
     private OInvoke _oinvoke;
     // Records number of invocations on the activity.
@@ -71,12 +71,12 @@ public class INVOKE extends ACTIVITY {
         try {
             outboundMsg = setupOutbound(_oinvoke, _oinvoke.initCorrelationsInput, _oinvoke.joinCorrelationsInput);
         } catch (FaultException e) {
-            __log.error(e);
+            __log.error("",e);
             FaultData fault = createFault(e.getQName(), _oinvoke);
             _self.parent.completed(fault, CompensationHandler.emptySet());
             return;
         } catch (ExternalVariableModuleException e) {
-            __log.error(e);
+            __log.error("",e);
             _self.parent.failure(e.toString(), null);
             return;
         }
@@ -205,7 +205,7 @@ public class INVOKE extends ACTIVITY {
 
             }
         } catch (FaultException fault) {
-            __log.error(fault);
+            __log.error("",fault);
             FaultData faultData = createFault(fault.getQName(), _oinvoke, fault.getMessage());
             _self.parent.completed(faultData, CompensationHandler.emptySet());
         }

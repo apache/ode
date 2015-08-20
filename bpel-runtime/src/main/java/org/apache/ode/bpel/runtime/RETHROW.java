@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 
 
@@ -28,7 +28,7 @@ import org.apache.ode.bpel.runtime.channels.FaultData;
  */
 class RETHROW extends ACTIVITY {
   private static final long serialVersionUID = -6433171659586530126L;
-  private static final Log __log = LogFactory.getLog(RETHROW.class);
+  private static final Logger __log = LoggerFactory.getLogger(RETHROW.class);
 
   RETHROW(ActivityInfo self, ScopeFrame scopeFrame, LinkFrame linkFrame) {
     super(self, scopeFrame, linkFrame);

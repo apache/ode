@@ -25,14 +25,14 @@ import org.apache.ode.bpel.runtime.channels.FaultData;
 
 import java.util.Iterator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 class REPLY extends ACTIVITY {
     private static final long serialVersionUID = 3040651951885161304L;
-    private static final Log __log = LogFactory.getLog(REPLY.class);
+    private static final Logger __log = LoggerFactory.getLogger(REPLY.class);
 
     REPLY(ActivityInfo self, ScopeFrame scopeFrame, LinkFrame linkFrame) {
         super(self, scopeFrame, linkFrame);
@@ -70,7 +70,7 @@ class REPLY extends ACTIVITY {
                             oreply.messageExchangeId, (Element)msg,
                             (oreply.fault != null) ? oreply.fault : null);
         } catch (FaultException e) {
-            __log.error(e);
+            __log.error("",e);
             fault = createFault(e.getQName(), oreply);
         }
 

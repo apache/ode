@@ -19,8 +19,8 @@
 
 package org.apache.ode.dao.jpa;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.dao.*;
 
@@ -34,7 +34,7 @@ import java.util.List;
 @Table(name = "ODE_CORRELATOR")
 @NamedQueries( { @NamedQuery(name = CorrelatorDAOImpl.DELETE_CORRELATORS_BY_PROCESS, query = "delete from CorrelatorDAOImpl as c where c._process = :process") })
 public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
-    private static Log __log = LogFactory.getLog(CorrelatorDAOImpl.class);
+    private static Logger __log = LoggerFactory.getLogger(CorrelatorDAOImpl.class);
     public final static String DELETE_CORRELATORS_BY_PROCESS = "DELETE_CORRELATORS_BY_PROCESS";
     private final static String ROUTE_BY_CKEY_HEADER = "select route from MessageRouteDAOImpl as route where route._correlator._process._processType = :ptype and route._correlator._correlatorKey = :corrkey";
 

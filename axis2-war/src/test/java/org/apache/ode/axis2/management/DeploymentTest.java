@@ -33,8 +33,8 @@ import static org.testng.AssertJUnit.*;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.namespace.QName;
 import java.io.ByteArrayOutputStream;
@@ -43,7 +43,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class DeploymentTest extends Axis2TestBase {
-    private static final Log __log = LogFactory.getLog(DeploymentTest.class);
+    private static final Logger __log = LoggerFactory.getLogger(DeploymentTest.class);
 
     private OMFactory _factory;
     private ServiceClientUtil _client;

@@ -18,8 +18,8 @@
  */
 package org.apache.ode.jbi;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
@@ -47,7 +47,7 @@ import java.util.Map;
  */
 public class OdeService extends ServiceBridge implements JbiMessageExchangeProcessor {
 
-    private static final Log __log = LogFactory.getLog(OdeService.class);
+    private static final Logger __log = LoggerFactory.getLogger(OdeService.class);
 
     /** utility for tracking outstanding JBI message exchanges. */
     private final JbiMexTracker _jbiMexTracker = new JbiMexTracker();
@@ -118,7 +118,7 @@ public class OdeService extends ServiceBridge implements JbiMessageExchangeProce
     public void onJbiMessageExchange(javax.jbi.messaging.MessageExchange jbiMex) throws MessagingException {
         if (jbiMex.getRole() != javax.jbi.messaging.MessageExchange.Role.PROVIDER) {
             String errmsg = "Message exchange is not in PROVIDER role as expected: " + jbiMex.getExchangeId();
-            __log.fatal(errmsg);
+            __log.error(errmsg);
             throw new IllegalArgumentException(errmsg);
         }
 

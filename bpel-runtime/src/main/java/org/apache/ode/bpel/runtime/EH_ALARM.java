@@ -34,8 +34,8 @@ import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannelListener;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.SynchChannel;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Calendar;
 import java.util.HashSet;
@@ -52,7 +52,7 @@ import org.w3c.dom.Element;
  */
 class EH_ALARM extends BpelJacobRunnable {
 
-    private static final Log __log = LogFactory.getLog(EH_ALARM.class);
+    private static final Logger __log = LoggerFactory.getLogger(EH_ALARM.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -89,7 +89,7 @@ class EH_ALARM extends BpelJacobRunnable {
             } catch (EvaluationException e) {
                 throw new InvalidProcessException(e);
             } catch (FaultException e) {
-                __log.error(e);
+                __log.error("",e);
                 _psc.completed(createFault(e.getQName(),_oalarm.forExpr), _comps);
                 return;
             }
@@ -99,7 +99,7 @@ class EH_ALARM extends BpelJacobRunnable {
             } catch (EvaluationException e) {
                 throw new InvalidProcessException(e);
             } catch (FaultException e) {
-                __log.error(e);
+                __log.error("",e);
                 _psc.completed(createFault(e.getQName(),_oalarm.untilExpr), _comps);
                 return;
             }
@@ -109,7 +109,7 @@ class EH_ALARM extends BpelJacobRunnable {
             } catch (EvaluationException e) {
                 throw new InvalidProcessException(e);
             } catch (FaultException e) {
-                __log.error(e);
+                __log.error("",e);
                 _psc.completed(createFault(e.getQName(),_oalarm.repeatExpr), _comps);
                 return;
             }
@@ -237,7 +237,7 @@ class EH_ALARM extends BpelJacobRunnable {
                         } catch (EvaluationException e) {
                             throw new InvalidProcessException(e);
                         } catch (FaultException e) {
-                            __log.error(e);
+                            __log.error("",e);
                             _psc.completed(createFault(e.getQName(),_oalarm.forExpr), _comps);
                             return;
                         }

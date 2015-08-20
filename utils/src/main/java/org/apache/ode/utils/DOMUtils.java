@@ -50,8 +50,8 @@ import javax.xml.transform.stream.StreamSource;
 
 import net.sf.saxon.om.Name11Checker;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.utils.sax.LoggingErrorHandler;
 import org.apache.xerces.dom.DOMOutputImpl;
 import org.apache.xerces.impl.Constants;
@@ -77,7 +77,7 @@ import org.xml.sax.SAXException;
  */
 public class DOMUtils {
 
-    private static Log __log = LogFactory.getLog(DOMUtils.class);
+    private static Logger __log = LoggerFactory.getLogger(DOMUtils.class);
 
     /** The namespaceURI represented by the prefix <code>xmlns</code>. */
     public static final String NS_URI_XMLNS = "http://www.w3.org/2000/xmlns/";
@@ -1041,7 +1041,7 @@ public class DOMUtils {
                 txer = _transformerFactory.newTransformer();
             } catch (TransformerConfigurationException e) {
                 String errmsg = "Transformer configuration error!";
-                __log.fatal(errmsg, e);
+                __log.error(errmsg, e);
                 throw new Error(errmsg, e);
             }
         }
@@ -1058,7 +1058,7 @@ public class DOMUtils {
                     builder = __documentBuilderFactory.newDocumentBuilder();
                     builder.setErrorHandler(new LoggingErrorHandler());
                 } catch (ParserConfigurationException e) {
-                    __log.error(e);
+                    __log.error("",e);
                     throw new RuntimeException(e);
                 }
             }

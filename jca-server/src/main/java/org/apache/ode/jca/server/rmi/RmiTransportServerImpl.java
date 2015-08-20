@@ -26,8 +26,8 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.jca.server.ConnectionProvider;
 import org.apache.ode.ra.transports.rmi.OdeRemote;
 import org.apache.ode.ra.transports.rmi.OdeTransportPipeRemote;
@@ -37,7 +37,7 @@ import org.apache.ode.ra.transports.rmi.OdeTransportPipeRemote;
  * "pipes", each represented by its own remote object.
  */
 public class RmiTransportServerImpl implements OdeRemote {
-    private static final Log __log = LogFactory.getLog(RmiTransportServerImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(RmiTransportServerImpl.class);
 
     private List<RmiPipeServerImpl> _pipes = new ArrayList<RmiPipeServerImpl>();
 

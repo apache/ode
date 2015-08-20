@@ -24,8 +24,8 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableReadEvent;
@@ -47,8 +47,7 @@ import org.w3c.dom.Node;
  * variables, link statuses, and the like.
  */
 public class ExprEvaluationContextImpl implements EvaluationContext {
-    private static final Log __log = LogFactory
-            .getLog(ExprEvaluationContextImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(ExprEvaluationContextImpl.class);
 
     private BpelRuntimeContext _native;
 

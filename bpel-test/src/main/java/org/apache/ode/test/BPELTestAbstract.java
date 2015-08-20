@@ -44,8 +44,8 @@ import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.evt.DebugBpelEventListener;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
@@ -73,7 +73,7 @@ import org.junit.Before;
 import org.w3c.dom.Element;
 
 public abstract class BPELTestAbstract {
-    private static final Log log = LogFactory.getLog(BPELTestAbstract.class);
+    private static final Logger log = LoggerFactory.getLogger(BPELTestAbstract.class);
     public static final long WAIT_BEFORE_INVOKE_TIMEOUT = 2000;
 
     private static final String SHOW_EVENTS_ON_CONSOLE = "no";

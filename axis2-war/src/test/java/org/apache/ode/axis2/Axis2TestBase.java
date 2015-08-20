@@ -52,8 +52,8 @@ import org.apache.axis2.engine.AxisServer;
 import org.apache.axis2.engine.MessageReceiver;
 import org.apache.axis2.transport.http.SimpleHTTPServer;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.util.Axis2UriResolver;
 import org.apache.ode.axis2.util.Axis2WSDLLocator;
@@ -71,7 +71,7 @@ public abstract class Axis2TestBase {
     private static final int DEFAULT_TEST_PORT_1 = 7070;
     private static final String DEFAULT_TEST_PORTS = DEFAULT_TEST_PORT_0+","+DEFAULT_TEST_PORT_1;
 
-    private static final Log log = LogFactory.getLog(Axis2TestBase.class);
+    private static final Logger log = LoggerFactory.getLogger(Axis2TestBase.class);
 
     protected ODEAxis2Server server;
 
@@ -271,7 +271,7 @@ public abstract class Axis2TestBase {
             try {
                 _ode.init(odeRootDir, new ConfigurationContext(configContext.getAxisConfiguration()));
             } catch (ServletException e) {
-                log.error(e);
+                log.error("",e);
             }
         }
 
@@ -359,7 +359,7 @@ public abstract class Axis2TestBase {
             try {
                 fos = new FileOutputStream(fileName);
             } catch (FileNotFoundException e) {
-                log.error(e);
+                log.error("",e);
             }
             configContext.getAxisConfiguration().getService(serviceName).printWSDL(fos);
         }

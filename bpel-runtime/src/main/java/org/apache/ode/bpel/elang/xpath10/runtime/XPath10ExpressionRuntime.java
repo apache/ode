@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.elang.xpath10.runtime;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.elang.xpath10.o.OXPath10Expression;
 import org.apache.ode.bpel.explang.ConfigurationException;
@@ -54,7 +54,7 @@ import java.util.Map;
  */
 public class XPath10ExpressionRuntime implements ExpressionLanguageRuntime {
     /** Class-level logger. */
-    private static final Log __log = LogFactory.getLog(XPath10ExpressionRuntime.class);
+    private static final Logger __log = LoggerFactory.getLogger(XPath10ExpressionRuntime.class);
 
     /** Compiled expression cache. */
     private final Map<String, XPath> _compiledExpressions = new HashMap<String, XPath>();

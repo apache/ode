@@ -19,7 +19,7 @@
 
 package org.apache.ode.utils.xsd;
 
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLErrorHandler;
@@ -31,20 +31,20 @@ import org.apache.xerces.xni.parser.XMLParseException;
  */
 public class LoggingXmlErrorHandler implements XMLErrorHandler {
 
-  private Log _log;
+  private Logger _log;
 
   private static final XsdMessages __msgs = MessageBundle.getMessages(XsdMessages.class);
 
   private XMLParseException _ex;
 
   /**
-   * Create a new instance that will output to the specified {@link Log}
+   * Create a new instance that will output to the specified {@link Logger}
    * instance.
    * 
    * @param log
    *          the target log, which much be non-<code>null</code>
    */
-  public LoggingXmlErrorHandler(Log log) {
+  public LoggingXmlErrorHandler(Logger log) {
     assert log != null;
     _log = log;
   }

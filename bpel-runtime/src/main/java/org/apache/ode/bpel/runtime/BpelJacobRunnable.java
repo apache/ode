@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.o.OBase;
@@ -41,7 +41,7 @@ import javax.xml.namespace.QName;
  * @author Maciej Szefler
  */
 public abstract class BpelJacobRunnable extends JacobRunnable {
-    private static final Log __log = LogFactory.getLog(BpelJacobRunnable.class);
+    private static final Logger __log = LoggerFactory.getLogger(BpelJacobRunnable.class);
 
     protected BpelRuntimeContext getBpelRuntimeContext() {
         BpelRuntimeContext nativeApi = (BpelRuntimeContext) JacobVPU.activeJacobThread().getExtension(BpelRuntimeContext.class);
@@ -49,7 +49,7 @@ public abstract class BpelJacobRunnable extends JacobRunnable {
         return nativeApi;
     }
 
-    protected Log log() {
+    protected Logger log() {
         return __log;
     }
     

@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.common;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.pmapi.InvalidRequestException;
 import org.apache.ode.utils.ISO8601DateParser;
 import org.apache.ode.utils.RelativeDateParser;
@@ -40,7 +40,7 @@ import java.util.StringTokenizer;
  * language.
  */
 public class InstanceFilter extends Filter<InstanceFilter.Criteria> implements Serializable {
-    protected static Log LOG = LogFactory.getLog(InstanceFilter.class);
+    protected static Logger LOG = LoggerFactory.getLogger(InstanceFilter.class);
 
     private static final long serialVersionUID = 9999;
 

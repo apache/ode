@@ -19,8 +19,8 @@
 
 package org.apache.ode.bpel.elang.xpath10.compiler;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
@@ -37,7 +37,7 @@ import javax.xml.transform.TransformerException;
  */
 public class XslCompilationErrorListener implements ErrorListener {
 
-  private static final Log __log = LogFactory.getLog(XslCompilationErrorListener.class);
+  private static final Logger __log = LoggerFactory.getLogger(XslCompilationErrorListener.class);
   private CompilerContext _cc;
 
   public XslCompilationErrorListener(CompilerContext cc) {
@@ -46,23 +46,21 @@ public class XslCompilationErrorListener implements ErrorListener {
 
   public void warning(TransformerException exception) throws TransformerException {
     if (__log.isWarnEnabled()) {
-      __log.warn(exception);
+      __log.warn("",exception);
     }
     recover(CompilationMessage.WARN, exception);
   }
 
   public void error(TransformerException exception) throws TransformerException {
     if (__log.isErrorEnabled()) {
-      __log.error(exception);
+      __log.error("",exception);
     }
     recover(CompilationMessage.ERROR, exception);
     throw exception;
   }
 
   public void fatalError(TransformerException exception) throws TransformerException {
-    if (__log.isFatalEnabled()) {
-      __log.fatal(exception);
-    }
+     __log.error("",exception);
     recover(CompilationMessage.ERROR, exception);
     throw exception;
   }

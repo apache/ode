@@ -24,8 +24,8 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.w3c.dom.Element;
@@ -36,7 +36,7 @@ import org.w3c.dom.Element;
  */
 public class EndpointFactory {
 
-    private static final Log __log = LogFactory.getLog(EndpointFactory.class);
+    private static final Logger __log = LoggerFactory.getLogger(EndpointFactory.class);
 
     private static QName WSDL20_ELMT_QNAME = new QName(Namespaces.WSDL_20, "service");
 

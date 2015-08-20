@@ -40,8 +40,8 @@ import java.util.Set;
 import javax.wsdl.Definition;
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.activityRecovery.FailureHandlingDocument.FailureHandling;
 import org.apache.ode.bpel.dd.TCleanup;
 import org.apache.ode.bpel.dd.TDeployment;
@@ -78,7 +78,7 @@ import org.w3c.dom.Node;
  * @author mriou <mriou at apache dot org>
  */
 public class ProcessConfImpl implements ProcessConf {
-    private static final Log __log = LogFactory.getLog(ProcessConfImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(ProcessConfImpl.class);
 
     private final Date _deployDate;
     private File _configDir;
@@ -477,7 +477,7 @@ public class ProcessConfImpl implements ProcessConf {
                 if(it.hasNext()) msg.append(", ");
             }
             msg.append("}");
-            __log.debug(msg);
+            __log.debug(msg.toString());
         }
         return prop;
     }

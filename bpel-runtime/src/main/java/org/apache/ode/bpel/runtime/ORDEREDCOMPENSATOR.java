@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.jacob.SynchChannel;
 import org.apache.ode.jacob.SynchChannelListener;
 
@@ -31,7 +31,7 @@ import java.util.List;
 class ORDEREDCOMPENSATOR extends BpelJacobRunnable  {
   private static final long serialVersionUID = -3181661355085428370L;
 
-  private static final Log __log = LogFactory.getLog(ORDEREDCOMPENSATOR.class);
+  private static final Logger __log = LoggerFactory.getLogger(ORDEREDCOMPENSATOR.class);
 
   private List<CompensationHandler> _compensations;
   private SynchChannel _ret;
@@ -60,7 +60,7 @@ class ORDEREDCOMPENSATOR extends BpelJacobRunnable  {
 
   }
 
-  protected Log log() {
+  protected Logger log() {
     return __log;
   }
 

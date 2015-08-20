@@ -40,8 +40,8 @@ import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.compiler.bom.PartnerLinkType;
@@ -64,7 +64,7 @@ import org.xml.sax.InputSource;
  * A parsed collection of WSDL definitions, including BPEL-specific extensions.
  */
 class WSDLRegistry {
-    private static final Log __log = LogFactory.getLog(WSDLRegistry.class);
+    private static final Logger __log = LoggerFactory.getLogger(WSDLRegistry.class);
 
     private static final CommonCompilationMessages __cmsgs =
             MessageBundle.getMessages(CommonCompilationMessages.class);

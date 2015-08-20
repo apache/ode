@@ -19,8 +19,8 @@
 
 package org.apache.ode.bpel.engine;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -38,7 +38,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
  */
 public class NStateLatch {
-    static final Log __log = LogFactory.getLog(NStateLatch.class);
+    static final Logger __log = LoggerFactory.getLogger(NStateLatch.class);
 
     /** Current state. */
     private int _state = -1;

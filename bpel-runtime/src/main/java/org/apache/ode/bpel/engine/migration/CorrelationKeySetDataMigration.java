@@ -27,8 +27,8 @@ import org.apache.ode.bpel.dao.MessageRouteDAO;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.CorrelationKeySet;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.wsdl.Operation;
 import java.util.Set;
@@ -38,7 +38,7 @@ import java.util.Iterator;
  * Changes the scheme of the correlation key value in the routes to use @2[...]
  */
 public class CorrelationKeySetDataMigration implements Migration {
-    private static final Log __log = LogFactory.getLog(CorrelationKeyMigration.class);
+    private static final Logger __log = LoggerFactory.getLogger(CorrelationKeyMigration.class);
 
     public boolean migrate(Set<BpelProcess> registeredProcesses, BpelDAOConnection connection) {
         for (BpelProcess process : registeredProcesses) {

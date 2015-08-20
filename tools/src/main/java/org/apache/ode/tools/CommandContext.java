@@ -52,46 +52,46 @@ public interface CommandContext {
   public void errln(String s);
   
   /**
-   * Log an error.
+   * Logger an error.
    * @param s a descriptive message.
    */
   public void error(String s);
 
   /**
-   * Log an error that resulted from a {@link Throwable}.
+   * Logger an error that resulted from a {@link Throwable}.
    * @param s a descriptive message.
    * @param t the cause.
    */
   public void error(String s, Throwable t);
 
   /**
-   * Log a warning that resulted from a {@link Throwable}
+   * Logger a warning that resulted from a {@link Throwable}
    * @param s
    * @param t
    */
   public void warn(String s, Throwable t);
 
   /**
-   * Log a warning.
+   * Logger a warning.
    * @param s a descriptive message.
    */
   public void warn(String s);
 
   /**
-   * Log an informative message.
+   * Logger an informative message.
    * @param s a descriptive message.
    */
   public void info(String s);
 
   /**
-   * Log an informative message that resulted from a {@link Throwable}.
+   * Logger an informative message that resulted from a {@link Throwable}.
    * @param s a descriptive message.
    * @param t the cause.
    */
   public void info(String s, Throwable t);
 
   /**
-   * Log a debug-level message that resulted from a {@link Throwable}.
+   * Logger a debug-level message that resulted from a {@link Throwable}.
    * @param s a descriptive message.
    * @param t the cause.
    */
@@ -99,7 +99,7 @@ public interface CommandContext {
   public void debug(String s, Throwable t);
 
   /**
-   * Log an debug-level message.
+   * Logger an debug-level message.
    * @param s a descriptive message.
    */
   public void debug(String s);

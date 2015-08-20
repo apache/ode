@@ -18,8 +18,8 @@
  */
 package org.apache.ode.utils.xsd;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.utils.StreamUtils;
 import org.apache.ode.utils.fs.FileUtils;
 import org.apache.xerces.xni.XMLResourceIdentifier;
@@ -40,8 +40,7 @@ import java.util.Map;
  * "whole" of a schema document (including imports and other dependencies).
  */
 public class CapturingXMLEntityResolver implements XMLEntityResolver {
-  private static final Log __log = LogFactory
-      .getLog(CapturingXMLEntityResolver.class);
+  private static final Logger __log = LoggerFactory.getLogger(CapturingXMLEntityResolver.class);
 
   private XMLEntityResolver _resolver;
 

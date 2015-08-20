@@ -30,8 +30,8 @@ import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.namespace.QName;
 import java.util.Set;
@@ -45,7 +45,7 @@ import java.io.ByteArrayOutputStream;
  * Migrates the database from using single correlations to multiple correlations support.
  */
 public class CorrelationKeySetMigration implements Migration {
-    private static final Log __log = LogFactory.getLog(CorrelationKeySetMigration.class);
+    private static final Logger __log = LoggerFactory.getLogger(CorrelationKeySetMigration.class);
 
     public boolean migrate(Set<BpelProcess> registeredProcesses, BpelDAOConnection connection) {
         boolean v1First = true;

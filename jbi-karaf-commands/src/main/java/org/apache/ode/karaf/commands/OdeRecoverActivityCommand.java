@@ -19,13 +19,13 @@
 
 package org.apache.ode.karaf.commands;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.felix.gogo.commands.*;
 
 @Command(scope = "ode", name = "recoverActivity", description = "Recover a failed BPEL activity in ODE")
 public class OdeRecoverActivityCommand extends OdeCommandsBase {
-    private static final Log __log = LogFactory.getLog(OdeRecoverActivityCommand.class);
+    private static final Logger __log = LoggerFactory.getLogger(OdeRecoverActivityCommand.class);
     
     private static final String RETRY = "retry";
     private static final String FAULT = "fault";

@@ -19,8 +19,8 @@
 
 package org.apache.ode.bpel.engine;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.engine.replayer.Replayer;
 import org.apache.ode.bpel.iapi.BpelEngineException;
@@ -38,7 +38,7 @@ import javax.wsdl.PortType;
 import javax.xml.namespace.QName;
 
 public class PartnerRoleMessageExchangeImpl extends MessageExchangeImpl implements PartnerRoleMessageExchange {
-    private static final Log LOG = LogFactory.getLog(PartnerRoleMessageExchangeImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PartnerRoleMessageExchangeImpl.class);
 
     private PartnerRoleChannel _channel;
     private EndpointReference _myRoleEPR;

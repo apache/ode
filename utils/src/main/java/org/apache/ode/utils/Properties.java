@@ -35,8 +35,8 @@ import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.params.HttpParams;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -94,7 +94,7 @@ public class Properties {
     public static final String PROP_SEND_WS_ADDRESSING_HEADERS = "ws-addressing.headers";
 
 
-    protected static final Log log = LogFactory.getLog(Properties.class);
+    protected static final Logger log = LoggerFactory.getLogger(Properties.class);
 
     public static Object[] getProxyAndHeaders(Map<String, String> properties) {
         ArrayList<Header> headers = null; // /!\ Axis2 requires an ArrayList (not a List implementation)

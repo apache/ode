@@ -24,8 +24,8 @@ import java.util.PriorityQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Scheduler;
@@ -37,7 +37,7 @@ import org.apache.ode.bpel.iapi.Scheduler;
  *
  */
 public class ReplayerScheduler implements Scheduler {
-    private static final Log __log = LogFactory.getLog(ReplayerScheduler.class);
+    private static final Logger __log = LoggerFactory.getLogger(ReplayerScheduler.class);
 
     public Replayer replayer;
     

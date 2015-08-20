@@ -31,8 +31,8 @@ import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.httpclient.params.HostParams;
 import org.apache.commons.httpclient.params.HttpParams;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.utils.Properties;
 import org.apache.ode.axis2.util.URLEncodedTransformer;
 import org.apache.ode.axis2.util.UrlReplacementTransformer;
@@ -74,7 +74,7 @@ import java.util.HashSet;
 
 public class HttpMethodConverter {
 
-    private static final Log log = LogFactory.getLog(HttpMethodConverter.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpMethodConverter.class);
 
     protected static final Messages msgs = Messages.getMessages(Messages.class);
     protected Definition definition;

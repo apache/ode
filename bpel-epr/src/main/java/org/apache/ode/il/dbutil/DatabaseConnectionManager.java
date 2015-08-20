@@ -22,8 +22,8 @@ package org.apache.ode.il.dbutil;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.geronimo.connector.outbound.GenericConnectionManager;
 import org.apache.geronimo.connector.outbound.connectionmanagerconfig.LocalTransactions;
 import org.apache.geronimo.connector.outbound.connectionmanagerconfig.PoolingSupport;
@@ -38,7 +38,7 @@ import org.tranql.connector.jdbc.JDBCDriverMCF;
 public class DatabaseConnectionManager {
 
     private static final long serialVersionUID = 1L;
-    private static final Log __log = LogFactory.getLog(DatabaseConnectionManager.class);
+    private static final Logger __log = LoggerFactory.getLogger(DatabaseConnectionManager.class);
     private static final Messages __msgs = Messages.getMessages(Messages.class);
     private static final int CONNECTION_MAX_WAIT_MILLIS = 30000;
     private static final int CONNECTION_MAX_IDLE_MINUTES = 5;

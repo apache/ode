@@ -116,8 +116,8 @@ class ChannelTypeAnnotationProcessor implements AnnotationProcessor {
         pw.println();
         pw.println("package " + c.getPackage().getQualifiedName() + ";");
         pw.println();
-        pw.println("import org.apache.commons.logging.LogFactory;");
-        pw.println("import org.apache.commons.logging.Log;");
+        pw.println("import org.slf4j.LoggerFactory;");
+        pw.println("import org.slf4j.Logger;");
         pw.println();
         pw.println("/**");
         pw.println(" * An auto-generated channel listener abstract class for the ");
@@ -130,9 +130,9 @@ class ChannelTypeAnnotationProcessor implements AnnotationProcessor {
         pw.println("    implements " + c.getQualifiedName());
         pw.println("{");
         pw.println();
-        pw.println("    private static final Log __log = LogFactory.getLog(" + c.getQualifiedName() + ".class);");
+        pw.println("    private static final Logger __log = LoggerFactory.getLogger(" + c.getQualifiedName() + ".class);");
         pw.println();
-        pw.println("    protected Log log() { return __log; } " );
+        pw.println("    protected Logger log() { return __log; } " );
         pw.println();
         pw.println("    protected " + c.getSimpleName() + "ChannelListener(" + c.getQualifiedName() + "Channel channel) {");
         pw.println("       super(channel);");

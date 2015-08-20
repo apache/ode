@@ -32,8 +32,8 @@ import java.util.Map;
 
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.axis2.httpbinding.HttpBindingValidator;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 /**
@@ -41,7 +41,7 @@ import org.w3c.dom.Element;
  */
 public class HttpBindingValidatorTest extends TestCase {
 
-    private static final Log log = LogFactory.getLog(HttpBindingValidatorTest.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpBindingValidatorTest.class);
 
     private String[] resources = new String[]{"/http-binding-validator.wsdl", "/http-binding-validator-ext.wsdl"};
     private Definition[] definitions;

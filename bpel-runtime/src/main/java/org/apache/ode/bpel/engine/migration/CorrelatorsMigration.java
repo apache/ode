@@ -24,8 +24,8 @@ import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.o.OPartnerLink;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.wsdl.Operation;
 import java.util.Set;
@@ -36,7 +36,7 @@ import java.util.Iterator;
  * partnerLinkId+"."+operationName to partnerLinkName+"."+operationName
  */
 public class CorrelatorsMigration implements Migration {
-    private static final Log __log = LogFactory.getLog(CorrelatorsMigration.class);
+    private static final Logger __log = LoggerFactory.getLogger(CorrelatorsMigration.class);
 
     public boolean migrate(Set<BpelProcess> registeredProcesses, BpelDAOConnection connection) {
         for (BpelProcess process : registeredProcesses) {

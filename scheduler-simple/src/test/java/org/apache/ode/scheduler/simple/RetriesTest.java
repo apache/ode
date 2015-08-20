@@ -20,8 +20,8 @@
 package org.apache.ode.scheduler.simple;
 
 import org.apache.ode.bpel.iapi.Scheduler;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
 
 import javax.transaction.TransactionManager;
@@ -34,7 +34,7 @@ import junit.framework.TestCase;
  * @author Matthieu Riou <mriou@apache.org>
  */
 public class RetriesTest extends TestCase implements Scheduler.JobProcessor {
-    private static final Log __log = LogFactory.getLog(RetriesTest.class);
+    private static final Logger __log = LoggerFactory.getLogger(RetriesTest.class);
     
     DelegateSupport _ds;
     SimpleScheduler _scheduler;

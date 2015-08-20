@@ -29,8 +29,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
@@ -43,7 +43,7 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
  * A very simple, in-memory implementation of the {@link ProcessDAO} interface.
  */
 class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
-    private static final Log __log = LogFactory.getLog(ProcessDaoImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(ProcessDaoImpl.class);
 
     private QName _processId;
     private QName _type;

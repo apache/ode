@@ -29,7 +29,7 @@ import java.util.*;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 
 public class LoggingInterceptor<T> implements InvocationHandler {
 
@@ -54,13 +54,13 @@ public class LoggingInterceptor<T> implements InvocationHandler {
         PARAMSTYPES.add("setURL");
     }
 
-    private Log _log;
+    private Logger _log;
     private T _delegate;
     private Map<String, Object> _paramsByName = new TreeMap<String, Object>();
     private Map<Integer, Object> _paramsByIdx = new TreeMap<Integer, Object>();
 
 
-    public LoggingInterceptor(T delegate, Log log) {
+    public LoggingInterceptor(T delegate, Logger log) {
         _log = log;
         _delegate = delegate;
     }
@@ -164,7 +164,7 @@ public class LoggingInterceptor<T> implements InvocationHandler {
         else System.out.println(str);
     }
     
-    public static DataSource createLoggingDS(DataSource ds, Log log) {
+    public static DataSource createLoggingDS(DataSource ds, Logger log) {
         return (DataSource)Proxy.newProxyInstance(ds.getClass().getClassLoader(), 
                 new Class[] {DataSource.class}, new LoggingInterceptor<DataSource>(ds,log));
     }

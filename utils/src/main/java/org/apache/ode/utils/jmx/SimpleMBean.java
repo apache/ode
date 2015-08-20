@@ -24,15 +24,15 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.management.*;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An extension of {@link StandardMBean} with common features such as registeration,
  * notification, sequence generation, etc. "built-in."
  */
 public abstract class SimpleMBean extends StandardMBean implements MBeanRegistration, NotificationEmitter {
-  private static final Log __log = LogFactory.getLog(SimpleMBean.class);
+  private static final Logger __log = LoggerFactory.getLogger(SimpleMBean.class);
 
   protected MBeanServer _mbeanServer;
   protected ObjectName _myName;
@@ -91,7 +91,7 @@ public abstract class SimpleMBean extends StandardMBean implements MBeanRegistra
     } catch (InstanceNotFoundException ex) {
         // ignore
     } catch (MBeanRegistrationException ex) {
-        __log.fatal("Error unregistering mbean: " + getObjectName().getCanonicalName(), ex);
+        __log.error("Error unregistering mbean: " + getObjectName().getCanonicalName(), ex);
     }
     try {
       server.registerMBean(this, getObjectName());
@@ -136,7 +136,7 @@ public abstract class SimpleMBean extends StandardMBean implements MBeanRegistra
       return new ObjectName(buf.toString());
     } catch (Exception ex) {
       String errmsg = "DomainNodeImpl.createObjectName is broken!";
-      __log.fatal(errmsg,ex);
+      __log.error(errmsg,ex);
       throw new AssertionError(errmsg);
     }
   }

@@ -22,8 +22,8 @@ package org.apache.ode.utils.sax;
 import org.apache.ode.utils.msg.CommonMessages;
 import org.apache.ode.utils.msg.MessageBundle;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -34,8 +34,8 @@ import org.xml.sax.SAXParseException;
  */
 public class LoggingErrorHandler implements ErrorHandler {
 
-  private static final Log __log = LogFactory.getLog(LoggingErrorHandler.class);
-  private Log _l;
+  private static final Logger __log = LoggerFactory.getLogger(LoggingErrorHandler.class);
+  private Logger _l;
 
   private static final String WARNING = MessageBundle.getMessages(CommonMessages.class)
       .strWarning().toUpperCase();
@@ -59,7 +59,7 @@ public class LoggingErrorHandler implements ErrorHandler {
    * @param log
    *          the <code>Log</code> on which to dump messages.
    */
-  public LoggingErrorHandler(Log log) {
+  public LoggingErrorHandler(Logger log) {
     _l = log;
   }
 

@@ -27,8 +27,8 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.xerces.dom.DOMInputImpl;
 import org.apache.xerces.impl.Constants;
 import org.apache.xerces.impl.xs.XMLSchemaLoader;
@@ -48,7 +48,7 @@ import org.w3c.dom.ls.LSInput;
  * Xerces based schema model.
  */
 public class SchemaModelImpl implements SchemaModel {
-    private static final Log __log = LogFactory.getLog(SchemaModelImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(SchemaModelImpl.class);
     private XSModel _model;
 
     private SchemaModelImpl(XSModel model) {
@@ -99,8 +99,8 @@ public class SchemaModelImpl implements SchemaModel {
             boolean isWarning = (error.getSeverity() == DOMError.SEVERITY_WARNING);
             __log.warn("Schema error", ((Exception)error.getRelatedException()));
             __log.warn(error.getLocation().getUri() + ":" + error.getLocation().getLineNumber());
-            __log.warn(error.getRelatedData());
-            __log.warn(error.getRelatedException());
+            __log.warn("",error.getRelatedData());
+            __log.warn("",error.getRelatedException());
             return isWarning;
         }
     }

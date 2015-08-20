@@ -20,8 +20,8 @@ package org.apache.ode.bpel.compiler;
 
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.compiler.api.ExpressionValidator;
@@ -30,7 +30,7 @@ import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.o.OVarType;
 
 public class ExpressionValidatorFactory {
-    private static final Log __log = LogFactory.getLog(ExpressionValidatorFactory.class);
+    private static final Logger __log = LoggerFactory.getLogger(ExpressionValidatorFactory.class);
 	private ExpressionValidator _validator = new EmptyValidator();
 
 	public ExpressionValidatorFactory(Properties config) {

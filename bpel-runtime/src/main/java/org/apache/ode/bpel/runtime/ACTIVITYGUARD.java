@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ActivityEnabledEvent;
 import org.apache.ode.bpel.evt.ActivityExecEndEvent;
@@ -57,7 +57,7 @@ import java.util.Set;
 class ACTIVITYGUARD extends ACTIVITY {
     private static final long serialVersionUID = 1L;
 
-    private static final Log __log = LogFactory.getLog(ACTIVITYGUARD.class);
+    private static final Logger __log = LoggerFactory.getLogger(ACTIVITYGUARD.class);
 
     private static final ActivityTemplateFactory __activityTemplateFactory = new ActivityTemplateFactory();
     private OActivity _oactivity;
@@ -222,7 +222,7 @@ class ACTIVITYGUARD extends ACTIVITY {
                                 linfo.pub.linkStatus(val);
                             } catch (FaultException e) {
                                 linfo.pub.linkStatus(false);
-                                __log.error(e);
+                                __log.error("",e);
                                 if (fault == null)
                                     fault = createFault(e.getQName(),olink.transitionCondition);
                             }

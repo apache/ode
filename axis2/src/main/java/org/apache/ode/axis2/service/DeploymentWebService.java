@@ -52,8 +52,8 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.receivers.AbstractMessageReceiver;
 import org.apache.axis2.util.Utils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ode.axis2.OdeFault;
 import org.apache.ode.axis2.deploy.DeploymentPoller;
@@ -70,7 +70,7 @@ import org.apache.ode.utils.Namespaces;
  */
 public class DeploymentWebService {
 
-    private static final Log __log = LogFactory.getLog(DeploymentWebService.class);
+    private static final Logger __log = LoggerFactory.getLogger(DeploymentWebService.class);
 
     private final OMNamespace _pmapi;
     private final OMNamespace _deployapi;

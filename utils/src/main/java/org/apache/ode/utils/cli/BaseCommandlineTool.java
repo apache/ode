@@ -19,20 +19,23 @@
 
 package org.apache.ode.utils.cli;
 
-import org.apache.log4j.AppenderSkeleton;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.SimpleLayout;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Layout;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.core.appender.FileAppender;
+import org.apache.logging.log4j.core.config.AppenderRef;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.apache.ode.utils.Version;
 import org.apache.ode.utils.fs.TempFileManager;
 import org.apache.ode.utils.msg.MessageBundle;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.nio.charset.Charset;
 
 public abstract class BaseCommandlineTool {
 
@@ -91,13 +94,16 @@ public abstract class BaseCommandlineTool {
    * @param level
    */
   protected static void initLogging(int level) {
-    ConsoleAppender appender = new ConsoleAppender(new SimpleLayout());
-    appender.setName("stderr appender");
-    appender.setWriter(new PrintWriter(System.err));
-    appender.setLayout(new PatternLayout(LOGGING_PATTERN));
-    initialize(appender, level);
-    BasicConfigurator.configure(appender);
-    Logger.getRootLogger().addAppender(appender);
+      final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+      final Configuration config = ctx.getConfiguration();
+      LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+      Layout layout = PatternLayout.createLayout(LOGGING_PATTERN,config,null,Charset.forName("UTF-8"),true,false,null,null);
+      Appender appender = ConsoleAppender.createAppender(layout, null, "SYSTEM_OUT", "stderr appender", "false", "true");
+      AppenderRef ref = initialize("stderr appender", level);
+      AppenderRef[] refs = new AppenderRef[] {ref};
+      loggerConfig.addAppender(appender, ref.getLevel(), null);
+      loggerConfig.setLevel(ref.getLevel());
+      ctx.updateLoggers();
   }
 
   protected static void initLogFile() throws IOException {
@@ -105,25 +111,33 @@ public abstract class BaseCommandlineTool {
   }
 
   protected static void initLogFile(int level) throws IOException {
-    FileAppender appender = new FileAppender(new PatternLayout(LOGGING_PATTERN),
-        System.getProperty("ode.home") + "/logs/ode.log");
-    appender.setName("file appender");
-    initialize(appender, level);
-    BasicConfigurator.configure(appender);
-    Logger.getRootLogger().addAppender(appender);
+      final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+      final Configuration config = ctx.getConfiguration();
+      LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+      Layout layout = PatternLayout.createLayout(LOGGING_PATTERN,config,null,Charset.forName("UTF-8"),true,false,null,null);
+      Appender appender = FileAppender.createAppender(System.getProperty("ode.home") + "/logs/ode.log", "false", "false", "File", "false",
+          "true", "true", "8192", layout, null, "false", null, config);
+      AppenderRef ref = initialize("File", level);
+      AppenderRef[] refs = new AppenderRef[] {ref};
+      loggerConfig.addAppender(appender, ref.getLevel(), null);
+      loggerConfig.setLevel(ref.getLevel());
+      ctx.updateLoggers();
   }
 
-  private static void initialize(AppenderSkeleton appender, int level) {
-    switch (level) {
-      case EFFUSIVE :
-        appender.setThreshold(Level.DEBUG);
-        break;
-      case VERBOSE :
-        appender.setThreshold(Level.INFO);
-        break;
-      default :
-        appender.setThreshold(Level.WARN);
+  private static AppenderRef initialize(String name, int level) {
+      Level appenderLevel = null;
+      switch (level) {
+          case EFFUSIVE :
+              appenderLevel = Level.DEBUG;
+          break;
+          case VERBOSE :
+              appenderLevel = Level.INFO;
+          break;
+          default :
+              appenderLevel = Level.WARN;
+          break;
     }
+    return AppenderRef.createAppenderRef(name, appenderLevel, null);
   }
 
   protected static void setClazz(Class c) {

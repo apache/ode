@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.AssignActivity;
@@ -50,7 +50,7 @@ import javax.xml.namespace.QName;
  * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
  */
 class AssignGenerator extends DefaultActivityGenerator {
-    private static final Log __log = LogFactory.getLog(AssignGenerator.class);
+    private static final Logger __log = LoggerFactory.getLogger(AssignGenerator.class);
 
     private static final AssignGeneratorMessages __cmsgs =
         MessageBundle.getMessages(AssignGeneratorMessages.class);

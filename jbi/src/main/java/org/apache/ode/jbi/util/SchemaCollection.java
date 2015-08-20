@@ -27,8 +27,8 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.utils.XMLParserUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -43,7 +43,7 @@ import org.xml.sax.InputSource;
  */
 public class SchemaCollection {
 
-    private static Log log = LogFactory.getLog(SchemaCollection.class);
+    private static Logger log = LoggerFactory.getLogger(SchemaCollection.class);
     
     private Map schemas;
     private URI baseUri;

@@ -19,8 +19,8 @@
 
 package org.apache.ode.utils;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Map;
@@ -47,7 +47,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class WatchDog<T, C extends WatchDog.Observer> implements Runnable {
     static final public long DEFAULT_DELAY = 30000;
-    final Log log = LogFactory.getLog(WatchDog.class);
+    final Logger log = LoggerFactory.getLogger(WatchDog.class);
 
     private long expire;
     private T lastModif;

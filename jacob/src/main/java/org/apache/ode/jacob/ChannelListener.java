@@ -23,15 +23,15 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base-class for method-list objects. Method-lists objects should extends this
  * class <em>and</em> implement one <code>Channel</code> interface.
  */
 public abstract class ChannelListener<CT extends Channel> extends JacobObject {
-    private static Log __log = LogFactory.getLog(ChannelListener.class);
+    private static Logger __log = LoggerFactory.getLogger(ChannelListener.class);
 
     private transient Set<Method> _implementedMethods;
 
@@ -108,7 +108,7 @@ public abstract class ChannelListener<CT extends Channel> extends JacobObject {
         return buf.toString();
     }
 
-    protected Log log() {
+    protected Logger log() {
         return __log;
     }
 }

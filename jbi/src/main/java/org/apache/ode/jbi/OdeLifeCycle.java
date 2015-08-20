@@ -31,8 +31,8 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.transaction.TransactionManager;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
@@ -57,7 +57,7 @@ import org.apache.ode.utils.fs.TempFileManager;
 public class OdeLifeCycle implements ComponentLifeCycle {
     private static final Messages __msgs = Messages.getMessages(Messages.class);
 
-    private static final Log __log = LogFactory.getLog(OdeLifeCycle.class);
+    private static final Logger __log = LoggerFactory.getLogger(OdeLifeCycle.class);
 
     private OdeSUManager _suManager = null;
 
@@ -148,7 +148,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             _initSuccess = true;
             __log.info(__msgs.msgOdeInitialized());
         } catch (Throwable t) {
-            __log.fatal("", t);
+            __log.error("", t);
             throw new JBIException("Fatal error", t);
         }
     }
@@ -379,7 +379,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             if (!_initSuccess) {
                 String errmsg = "attempt to call start() after init() failure.";
                 IllegalStateException ex = new IllegalStateException(errmsg);
-                __log.fatal(errmsg, ex);
+                __log.error(errmsg, ex);
                 throw new JBIException(errmsg, ex);
             }
 
@@ -423,7 +423,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
                 try {
                     _receiver.cease();
                 } catch (Exception ex) {
-                    __log.fatal("Error ceasing receiver.", ex);
+                    __log.error("Error ceasing receiver.", ex);
                 } finally {
                     _receiver = null;
                 }
@@ -433,7 +433,7 @@ public class OdeLifeCycle implements ComponentLifeCycle {
                 _ode._server.stop();
 
             } catch (Throwable ex) {
-                __log.fatal("Error stopping services.", ex);
+                __log.error("Error stopping services.", ex);
             }
 
             __log.info("ODE stopped.");

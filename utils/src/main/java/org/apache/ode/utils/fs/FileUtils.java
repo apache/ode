@@ -24,15 +24,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Various file system utilities.
  */
 public class FileUtils {
 
-    private static final Log __log = LogFactory.getLog(FileUtils.class);
+    private static final Logger __log = LoggerFactory.getLogger(FileUtils.class);
 
     /**
      * Test if the given path is absolute or not.

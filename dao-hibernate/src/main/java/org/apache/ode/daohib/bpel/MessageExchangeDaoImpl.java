@@ -27,8 +27,8 @@ import java.util.Set;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
@@ -48,7 +48,7 @@ import org.w3c.dom.Element;
 public class MessageExchangeDaoImpl extends HibernateDao implements
         MessageExchangeDAO {
     @SuppressWarnings("unused")
-    private static final Log __log = LogFactory.getLog(MessageExchangeDaoImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(MessageExchangeDaoImpl.class);
     
     private HMessageExchange _hself;
 

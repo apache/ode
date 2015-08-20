@@ -38,7 +38,7 @@ public class XsdMessages extends MessageBundle {
   }
 
   /**
-   * A key to indicate that a message is fatal error.
+   * A key to indicate that a message is error error.
    */
   public String msgXsdFatal() {
     return this.format("FATAL");
@@ -48,7 +48,7 @@ public class XsdMessages extends MessageBundle {
    * Format a log message about an XSD-related warning or error.
    * 
    * @param type
-   *          the type of occurrence (e.g., warning, error, fatal)
+   *          the type of occurrence (e.g., warning, error, error)
    * @param msg
    *          the warning message
    * @param systemId

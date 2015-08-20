@@ -40,8 +40,8 @@ import java.util.regex.Pattern;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.collections.comparators.ComparatorChain;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.Filter;
 import org.apache.ode.bpel.common.InstanceFilter;
@@ -157,7 +157,7 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
     protected static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
-    protected static Log __log = LogFactory.getLog(BpelManagementFacadeImpl.class);
+    protected static Logger __log = LoggerFactory.getLogger(BpelManagementFacadeImpl.class);
 
     protected static final ProcessStatusConverter __psc = new ProcessStatusConverter();
 

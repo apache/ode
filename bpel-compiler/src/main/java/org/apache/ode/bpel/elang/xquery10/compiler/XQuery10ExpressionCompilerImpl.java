@@ -45,8 +45,8 @@ import net.sf.saxon.om.Validation;
 import net.sf.saxon.xqj.SaxonXQConnection;
 import net.sf.saxon.xqj.SaxonXQDataSource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.compiler.api.ExpressionCompiler;
@@ -81,7 +81,7 @@ import org.w3c.dom.NodeList;
  */
 public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
 
-    protected static final Log __log = LogFactory.getLog(XQuery10ExpressionCompilerImpl.class);
+    protected static final Logger __log = LoggerFactory.getLogger(XQuery10ExpressionCompilerImpl.class);
 
     protected String _bpelNS;
     protected QName _qnLinkStatus;
@@ -269,8 +269,7 @@ public class XQuery10ExpressionCompilerImpl implements ExpressionCompiler {
             	}
             }
         } catch (XQException xqe) {
-            __log.debug(xqe);
-            __log.info("Couldn't validate properly expression " + xqueryStr);
+            __log.error("Couldn't validate properly expression " + xqueryStr, xqe);
             throw new CompilationException(__msgs.errXQuery10Syntax(xqueryStr, "Couldn't validate XQuery expression"));
         } catch (WrappedResolverException wre) {
             if (wre._compilationMsg != null)

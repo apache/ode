@@ -18,8 +18,8 @@
  */
 package org.apache.ode.tools.bpelc.cline;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.tools.ClineCommandContext;
 import org.apache.ode.tools.ExecutionException;
 import org.apache.ode.tools.bpelc.BpelCompileCommand;
@@ -33,7 +33,7 @@ import org.apache.ode.utils.cli.MultiArgument;
 import java.io.File;
 
 public class BpelC extends BaseCommandlineTool {
-    private static final Log __log = LogFactory.getLog(BpelC.class);
+    private static final Logger __log = LoggerFactory.getLogger(BpelC.class);
 
     private static FlagWithArgument OUTPUT_DIR = new FlagWithArgument("od","directory",
             "output directory",true);
@@ -104,7 +104,7 @@ public class BpelC extends BaseCommandlineTool {
             // This is really quite unexpected, so we should
             // print the stack trace to stderr.
             consoleErr(t.getMessage());
-            __log.error(t);
+            __log.error("",t);
             System.exit(-2);
         }
         System.exit(0);

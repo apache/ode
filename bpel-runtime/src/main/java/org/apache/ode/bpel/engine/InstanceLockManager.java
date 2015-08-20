@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.engine;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +37,7 @@ import java.util.concurrent.locks.Lock;
  * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
  */
 public class InstanceLockManager {
-    private static final Log __log = LogFactory.getLog(InstanceLockManager.class);
+    private static final Logger __log = LoggerFactory.getLogger(InstanceLockManager.class);
     
     private final Lock _mutex = new java.util.concurrent.locks.ReentrantLock();
     private final Map<Long, InstanceInfo> _locks = new HashMap<Long,InstanceInfo> ();

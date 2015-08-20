@@ -28,8 +28,8 @@ import java.util.Set;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.evt.ScopeCompletionEvent;
 import org.apache.ode.bpel.evt.ScopeFaultEvent;
 import org.apache.ode.bpel.evt.ScopeStartEvent;
@@ -61,7 +61,7 @@ import org.w3c.dom.Element;
 class SCOPE extends ACTIVITY {
     private static final long serialVersionUID = 6111903798996023525L;
     
-    private static final Log __log = LogFactory.getLog(SCOPE.class);
+    private static final Logger __log = LoggerFactory.getLogger(SCOPE.class);
 
     private OScope _oscope;
     private ActivityInfo _child;
@@ -362,7 +362,7 @@ class SCOPE extends ACTIVITY {
                                     se.setLineNo(_oscope.debugInfo.startLine);
                                 sendEvent(se);
                             } catch (Exception ex) {
-                                __log.fatal(ex);
+                                __log.error("",ex);
                                 throw new InvalidProcessException(ex);
                             }
                         }

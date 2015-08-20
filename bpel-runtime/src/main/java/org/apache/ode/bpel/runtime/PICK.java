@@ -26,8 +26,8 @@ import java.util.Set;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.common.FaultException;
@@ -55,7 +55,7 @@ import org.w3c.dom.Node;
 class PICK extends ACTIVITY {
     private static final long serialVersionUID = 1L;
 
-    private static final Log __log = LogFactory.getLog(PICK.class);
+    private static final Logger __log = LoggerFactory.getLogger(PICK.class);
 
     private OPickReceive _opick;
 
@@ -109,7 +109,7 @@ class PICK extends ACTIVITY {
             }
             getBpelRuntimeContext().select(pickResponseChannel, timeout, _opick.createInstanceFlag, selectors);
         } catch (FaultException e) {
-            __log.error(e);
+            __log.error("",e);
             FaultData fault = createFault(e.getQName(), _opick, e.getMessage());
             dpe(_opick.outgoingLinks);
             _self.parent.completed(fault, CompensationHandler.emptySet());
@@ -208,7 +208,7 @@ class PICK extends ACTIVITY {
         // to the correct format; but you know what they say, don't trust anyone.  
         if (!(onMessage.variable.type instanceof OMessageVarType)) {
             String errmsg = "Non-message variable for receive: should have been picked up by static analysis.";
-            __log.fatal(errmsg);
+            __log.error(errmsg);
             throw new InvalidProcessException(errmsg);
         }
 
@@ -221,12 +221,12 @@ class PICK extends ACTIVITY {
             Part part = vartype.parts.get(pName);
             if (part == null) {
                 String errmsg = "Inconsistent WSDL, part " + pName + " not found in message type " + vartype.messageType;
-                __log.fatal(errmsg);
+                __log.error(errmsg);
                 throw new InvalidProcessException(errmsg);
             }
             if (msgPart == null) {
                 String errmsg = "Message missing part: " + pName;
-                __log.fatal(errmsg);
+                __log.error(errmsg);
                 throw new InvalidContextException(errmsg);
             }
 
@@ -235,7 +235,7 @@ class PICK extends ACTIVITY {
                 Element e  = DOMUtils.getFirstChildElement(msgPart);
                 if (e == null) {
                     String errmsg = "Message (element) part " + pName + " did not contain child element.";
-                    __log.fatal(errmsg);
+                    __log.error(errmsg);
                     throw new InvalidContextException(errmsg);
                 }
 
@@ -243,7 +243,7 @@ class PICK extends ACTIVITY {
                 if(!qn.equals(ptype.elementType)) {
                     String errmsg = "Message (element) part " + pName + " did not contain correct child element: expected "
                             + ptype.elementType + " but got " + qn;
-                    __log.fatal(errmsg);
+                    __log.error(errmsg);
                     throw new InvalidContextException(errmsg);
                 }
             }
@@ -338,7 +338,7 @@ class PICK extends ACTIVITY {
                                 onMessage.operation.getName(), onMessage.messageExchangeId, mexId);
                         
                     } catch (FaultException e) {
-                        __log.error(e);
+                        __log.error("",e);
                         fault = createFault(e.getQName(), onMessage);
                         _self.parent.completed(fault, CompensationHandler.emptySet());
                         dpe(onMessage.activity);

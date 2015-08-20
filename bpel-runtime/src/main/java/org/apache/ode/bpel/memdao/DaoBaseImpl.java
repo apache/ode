@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.memdao;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
@@ -28,7 +28,7 @@ import java.util.Date;
  */
 class DaoBaseImpl {
     @SuppressWarnings("unused")
-    private static final Log __logger = LogFactory.getLog(DaoBaseImpl.class);
+    private static final Logger __logger = LoggerFactory.getLogger(DaoBaseImpl.class);
 
     Date _createTime = new Date();
 

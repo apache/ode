@@ -31,8 +31,8 @@ import java.util.concurrent.TimeoutException;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.engine.replayer.Replayer;
 import org.apache.ode.bpel.iapi.Message;
@@ -52,7 +52,7 @@ import org.w3c.dom.Node;
 
 public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements MyRoleMessageExchange {
 
-    private static final Log __log = LogFactory.getLog(MyRoleMessageExchangeImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(MyRoleMessageExchangeImpl.class);
 
     protected BpelProcess _process;
 
@@ -110,7 +110,7 @@ public class MyRoleMessageExchangeImpl extends MessageExchangeImpl implements My
     public Future invoke(Message request) {
         if (request == null) {
             String errmsg = "Must pass non-null message to invoke()!";
-            __log.fatal(errmsg);
+            __log.error(errmsg);
             throw new NullPointerException(errmsg);
         }
 

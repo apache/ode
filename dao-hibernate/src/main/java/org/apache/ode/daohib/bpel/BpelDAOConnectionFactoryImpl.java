@@ -24,8 +24,8 @@ import java.util.Properties;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.daohib.DataSourceConnectionProvider;
@@ -40,7 +40,7 @@ import org.hibernate.cfg.Environment;
  * implementation.
  */
 public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDBC {
-    private static final Log __log = LogFactory.getLog(BpelDAOConnectionFactoryImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(BpelDAOConnectionFactoryImpl.class);
 
     protected SessionManager _sessionManager;
 
@@ -69,13 +69,13 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
     public void init(Properties initialProps) {
         if (_ds == null) {
             String errmsg = "setDataSource() not called!";
-            __log.fatal(errmsg);
+            __log.error(errmsg);
             throw new IllegalStateException(errmsg);
         }
 
         if (_tm == null) {
             String errmsg = "setTransactionManager() not called!";
-            __log.fatal(errmsg);
+            __log.error(errmsg);
             throw new IllegalStateException(errmsg);
         }
 

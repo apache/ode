@@ -18,8 +18,8 @@
  */
 package org.apache.ode.jacob.vpu;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.jacob.Channel;
 import org.apache.ode.jacob.ChannelListener;
 import org.apache.ode.jacob.IndexedObject;
@@ -64,7 +64,7 @@ import java.util.zip.GZIPOutputStream;
  */
 public class ExecutionQueueImpl implements ExecutionQueue {
     /** Class-level logger. */
-    private static final Log __log = LogFactory.getLog(ExecutionQueueImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(ExecutionQueueImpl.class);
 
     private ClassLoader _classLoader;
 

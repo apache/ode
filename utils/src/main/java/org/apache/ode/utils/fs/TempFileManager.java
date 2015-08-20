@@ -27,15 +27,15 @@ import java.util.Collections;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Convenience class for managing temporary files and cleanup on JVM exit.
  */
 public class TempFileManager {
   
-  private static final Log __log = LogFactory.getLog(TempFileManager.class);
+  private static final Logger __log = LoggerFactory.getLogger(TempFileManager.class);
 
   private static TempFileManager __singleton;
   private static File __baseDir;

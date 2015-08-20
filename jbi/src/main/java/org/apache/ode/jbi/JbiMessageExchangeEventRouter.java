@@ -23,15 +23,15 @@ import javax.jbi.messaging.MessageExchange;
 import javax.jbi.messaging.MessagingException;
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.iapi.Endpoint;
 
 /**
  * Route incoming JBI messages to Ode services
  */
 class JbiMessageExchangeEventRouter implements JbiMessageExchangeProcessor {
-    private static final Log __log = LogFactory.getLog(JbiMessageExchangeEventRouter.class);
+    private static final Logger __log = LoggerFactory.getLogger(JbiMessageExchangeEventRouter.class);
 
     private OdeContext _ode;
 

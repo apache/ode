@@ -22,8 +22,8 @@ import java.util.Set;
 
 import javax.jbi.messaging.NormalizedMessage;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
@@ -36,7 +36,7 @@ import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
  */
 public class ServiceBridge {
     
-    private static final Log __log = LogFactory.getLog(ServiceBridge.class);
+    private static final Logger __log = LoggerFactory.getLogger(ServiceBridge.class);
 
     /**
      * Transfer message properties from the ODE message exchange to the JBI message exchange object.

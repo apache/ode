@@ -44,8 +44,8 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.receivers.AbstractMessageReceiver;
 import org.apache.axis2.util.MessageContextBuilder;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.bpel.engine.ProcessAndInstanceManagementImpl;
 import org.apache.ode.bpel.iapi.BpelServer;
@@ -60,7 +60,7 @@ import org.apache.ode.utils.Namespaces;
  */
 public class ManagementService {
 
-    private static final Log __log = LogFactory.getLog(ManagementService.class);
+    private static final Logger __log = LoggerFactory.getLogger(ManagementService.class);
 
     public static final QName PM_SERVICE_NAME = new QName("http://www.apache.org/ode/pmapi", "ProcessManagementService");
     public static final String PM_PORT_NAME = "ProcessManagementPort";

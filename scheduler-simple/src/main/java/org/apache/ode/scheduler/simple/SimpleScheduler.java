@@ -41,8 +41,8 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Scheduler;
 
@@ -67,7 +67,7 @@ import org.apache.ode.bpel.iapi.Scheduler;
  *
  */
 public class SimpleScheduler implements Scheduler, TaskRunner {
-    private static final Log __log = LogFactory.getLog(SimpleScheduler.class);
+    private static final Logger __log = LoggerFactory.getLogger(SimpleScheduler.class);
 
     private static final int DEFAULT_TRANSACTION_TIMEOUT = 60 * 1000;
 
