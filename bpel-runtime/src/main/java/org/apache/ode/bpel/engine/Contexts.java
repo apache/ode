@@ -19,6 +19,7 @@
 
 package org.apache.ode.bpel.engine;
 
+import org.apache.ode.bpel.clapi.ClusterManager;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.BpelEventListener;
@@ -45,6 +46,8 @@ public class Contexts {
     public Scheduler scheduler;
 
     public CronScheduler cronScheduler;
+
+    public ClusterManager clusterManager;
 
     EndpointReferenceContext eprContext;
 

@@ -71,9 +71,9 @@ public class ProcessStoreImpl implements ProcessStore {
 
     private final CopyOnWriteArrayList<ProcessStoreListener> _listeners = new CopyOnWriteArrayList<ProcessStoreListener>();
 
-    private Map<QName, ProcessConfImpl> _processes = new HashMap<QName, ProcessConfImpl>();
+    protected Map<QName, ProcessConfImpl> _processes = new HashMap<QName, ProcessConfImpl>();
 
-    private Map<String, DeploymentUnitDir> _deploymentUnits = new HashMap<String, DeploymentUnitDir>();
+    protected Map<String, DeploymentUnitDir> _deploymentUnits = new HashMap<String, DeploymentUnitDir>();
 
     /** Guards access to the _processes and _deploymentUnits */
     private final ReadWriteLock _rw = new ReentrantReadWriteLock();
@@ -87,6 +87,8 @@ public class ProcessStoreImpl implements ProcessStore {
     protected File _deployDir;
 
     protected File _configDir;
+
+
 
     /**
      * Executor used to process DB transactions. Allows us to isolate the TX context, and to ensure that only one TX gets executed a
@@ -345,18 +347,9 @@ public class ProcessStoreImpl implements ProcessStore {
      * "AbsenceRequest-2/AbsenceRequest.ode" and setRetirePackage() will be called accordingly.
      */
     private void retirePreviousPackageVersions(DeploymentUnitDir du) {
-        //retire all the other versions of the same DU
-        String[] nameParts = du.getName().split("/");
-           /* Replace the version number (if any) with regexp to match any version number */
-            nameParts[0] = nameParts[0].replaceAll("([-\\Q.\\E](\\d)+)?\\z", "");
-            nameParts[0] += "([-\\Q.\\E](\\d)+)?";
-        StringBuilder duNameRegExp = new StringBuilder(du.getName().length() * 2);
-        for (int i = 0, n = nameParts.length; i < n; i++) {
-            if (i > 0) duNameRegExp.append("/");
-            duNameRegExp.append(nameParts[i]);
-        }
 
-        Pattern duNamePattern = Pattern.compile(duNameRegExp.toString());
+        Pattern duNamePattern = getPreviousPackageVersionPattern(du.getName());
+
         for (String deployedDUname : _deploymentUnits.keySet()) {
             Matcher matcher = duNamePattern.matcher(deployedDUname);
             if (matcher.matches()) {
@@ -383,26 +376,7 @@ public class ProcessStoreImpl implements ProcessStore {
             __log.error("Error synchronizing with data store; " + duName + " may be reappear after restart!");
         }
 
-        Collection<QName> undeployed = Collections.emptyList();
-        DeploymentUnitDir du;
-        _rw.writeLock().lock();
-        try {
-            du = _deploymentUnits.remove(duName);
-            if (du != null) {
-                undeployed = toPids(du.getProcessNames(), du.getVersion());
-            }
-
-            for (QName pn : undeployed) {
-                fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.UNDEPLOYED, pn, du.getName()));
-                __log.info(__msgs.msgProcessUndeployed(pn));
-            }
-
-            _processes.keySet().removeAll(undeployed);
-        } finally {
-            _rw.writeLock().unlock();
-        }
-
-        return undeployed;
+        return undeployProcesses(duName);
     }
 
     public Collection<String> getPackages() {
@@ -612,7 +586,7 @@ public class ProcessStoreImpl implements ProcessStore {
             psl.onProcessStoreEvent(pse);
     }
 
-    private void fireStateChange(QName processId, ProcessState state, String duname) {
+    protected void fireStateChange(QName processId, ProcessState state, String duname) {
         switch (state) {
             case ACTIVE:
                 fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.ACTVIATED, processId, duname));
@@ -894,7 +868,7 @@ public class ProcessStoreImpl implements ProcessStore {
         return result;
     }
 
-    private QName toPid(QName processType, long version) {
+    protected QName toPid(QName processType, long version) {
         return new QName(processType.getNamespaceURI(), processType.getLocalPart() + "-" + version);
     }
 
@@ -915,5 +889,42 @@ public class ProcessStoreImpl implements ProcessStore {
                 fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.SCHEDULE_SETTINGS_CHANGED, pid, packageName));
             }
         }
+    }
+
+    protected Pattern getPreviousPackageVersionPattern(String duName) {
+        //retire all the other versions of the same DU
+        String[] nameParts = duName.split("/");
+        /* Replace the version number (if any) with regexp to match any version number */
+        nameParts[0] = nameParts[0].replaceAll("([-\\Q.\\E](\\d)+)?\\z", "");
+        nameParts[0] += "([-\\Q.\\E](\\d)+)?";
+        StringBuilder duNameRegExp = new StringBuilder(duName.length() * 2);
+        for (int i = 0, n = nameParts.length; i < n; i++) {
+            if (i > 0) duNameRegExp.append("/");
+            duNameRegExp.append(nameParts[i]);
+        }
+        Pattern duNamePattern = Pattern.compile(duNameRegExp.toString());
+        return duNamePattern;
+    }
+
+    protected  Collection<QName> undeployProcesses(final String duName) {
+        Collection<QName> undeployed = Collections.emptyList();
+        DeploymentUnitDir du;
+        _rw.writeLock().lock();
+        try {
+            du = _deploymentUnits.remove(duName);
+            if (du != null) {
+                undeployed = toPids(du.getProcessNames(), du.getVersion());
+            }
+
+            for (QName pn : undeployed) {
+                fireEvent(new ProcessStoreEvent(ProcessStoreEvent.Type.UNDEPLOYED, pn, du.getName()));
+                __log.info(__msgs.msgProcessUndeployed(pn));
+            }
+
+            _processes.keySet().removeAll(undeployed);
+        } finally {
+            _rw.writeLock().unlock();
+        }
+        return undeployed;
     }
 }

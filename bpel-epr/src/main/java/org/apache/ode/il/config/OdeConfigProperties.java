@@ -19,16 +19,16 @@
 
 package org.apache.ode.il.config;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.ode.utils.SystemUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.ode.utils.SystemUtils;
 
 /**
  * Configuration object used for configuring the intergration layer. The propereties are those likely to be common to all layers.
@@ -105,6 +105,12 @@ public class OdeConfigProperties {
     public static final String PROP_MIGRATION_TRANSACTION_TIMEOUT = "migration.transaction.timeout";
 
     public static final String DEFAULT_TX_FACTORY_CLASS_NAME = "org.apache.ode.il.EmbeddedGeronimoFactory";
+
+    public static final String PROP_CLUSTERING_ENABLED = "clustering.enabled";
+
+    public static final String PROP_CLUSTERING_IMPL_CLASS = "clustering.impl.class";
+
+    public static final String DEFAULT_CLUSTERING_IMPL_CLASS_NAME = "org.apache.ode.clustering.hazelcast.HazelcastClusterImpl";
 
     private File _cfgFile;
 
@@ -287,6 +293,14 @@ public class OdeConfigProperties {
 
     public String getDeployDir() {
         return getProperty(OdeConfigProperties.PROP_DEPLOY_DIR);
+    }
+
+    public boolean isClusteringEnabled() {
+        return Boolean.valueOf(getProperty(OdeConfigProperties.PROP_CLUSTERING_ENABLED, "false"));
+    }
+
+    public String getClusteringImplClass() {
+        return getProperty(OdeConfigProperties.PROP_CLUSTERING_IMPL_CLASS, DEFAULT_CLUSTERING_IMPL_CLASS_NAME);
     }
 
     public String getTxFactoryClass() {

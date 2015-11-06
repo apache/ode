@@ -35,6 +35,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.clapi.ClusterManager;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.dao.DeferredProcessInstanceCleanable;
@@ -532,6 +533,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
     public void setBindingContext(BindingContext bc) {
         _contexts.bindingContext = bc;
+    }
+
+    public void setClusterManagerImpl(ClusterManager cm) {
+        _contexts.clusterManager = cm;
     }
 
     public DebuggerContext getDebugger(QName pid) throws BpelEngineException {

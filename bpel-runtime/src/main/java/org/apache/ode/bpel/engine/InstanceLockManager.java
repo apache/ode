@@ -20,6 +20,7 @@ package org.apache.ode.bpel.engine;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.ode.bpel.clapi.ClusterLock;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,11 +37,15 @@ import java.util.concurrent.locks.Lock;
  *
  * @author Maciej Szefler - m s z e f l e r @ g m a i l . c o m
  */
-public class InstanceLockManager {
+public class InstanceLockManager implements ClusterLock<Long> {
     private static final Log __log = LogFactory.getLog(InstanceLockManager.class);
 
     private final Lock _mutex = new java.util.concurrent.locks.ReentrantLock();
-    private final Map<Long, InstanceInfo> _locks = new HashMap<Long,InstanceInfo> ();
+    private final Map<Long, InstanceInfo> _locks = new HashMap<Long,InstanceInfo>();
+
+    public void lock(Long key) {
+        // Noting to do here.
+    }
 
     public void lock(Long iid, int time, TimeUnit tu) throws InterruptedException, TimeoutException {
         if (iid == null) return;
@@ -105,6 +110,20 @@ public class InstanceLockManager {
 
     }
 
+    public boolean tryLock(Long key) {
+        // Noting to do here.
+        return false;
+    }
+
+    public boolean tryLock(Long key, int time, TimeUnit tu) {
+        // Noting to do here.
+        return false;
+    }
+
+    public void putIfAbsent(Long key, Long keyVal) {
+        // Noting to do here.
+    }
+
 
     @Override
     public String toString() {
@@ -135,9 +154,6 @@ public class InstanceLockManager {
             return "{Lock for Instance #" + iid +", acquired by " +  acquierer + "}";
         }
     }
-
-    /** Exception class indicating a time-out occured while obtaining a lock. */
-    public static final class TimeoutException extends Exception {
-        private static final long serialVersionUID = 7247629086692580285L;
-    }
 }
+
+

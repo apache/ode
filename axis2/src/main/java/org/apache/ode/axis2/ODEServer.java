@@ -19,57 +19,27 @@
 
 package org.apache.ode.axis2;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-import java.util.StringTokenizer;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.sql.DataSource;
-import javax.transaction.HeuristicMixedException;
-import javax.transaction.HeuristicRollbackException;
-import javax.transaction.InvalidTransactionException;
-import javax.transaction.NotSupportedException;
-import javax.transaction.RollbackException;
-import javax.transaction.Synchronization;
-import javax.transaction.SystemException;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
-import javax.transaction.xa.XAResource;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.util.IdleConnectionTimeoutThread;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
+import org.apache.commons.httpclient.util.IdleConnectionTimeoutThread;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.deploy.DeploymentPoller;
 import org.apache.ode.axis2.service.DeploymentWebService;
 import org.apache.ode.axis2.service.ManagementService;
 import org.apache.ode.axis2.util.ClusterUrlTransformer;
+import org.apache.ode.bpel.clapi.ClusterManager;
+import org.apache.ode.bpel.clapi.ClusterMemberListener;
+import org.apache.ode.bpel.clapi.ClusterProcessStore;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
 import org.apache.ode.bpel.engine.cron.CronScheduler;
 import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
-import org.apache.ode.bpel.iapi.BpelEventListener;
-import org.apache.ode.bpel.iapi.EndpointReferenceContext;
-import org.apache.ode.bpel.iapi.ProcessConf;
-import org.apache.ode.bpel.iapi.ProcessStoreEvent;
-import org.apache.ode.bpel.iapi.ProcessStoreListener;
-import org.apache.ode.bpel.iapi.Scheduler;
+import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.bpel.pmapi.InstanceManagement;
@@ -78,9 +48,24 @@ import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.scheduler.simple.JdbcDelegate;
 import org.apache.ode.scheduler.simple.SimpleScheduler;
+import org.apache.ode.store.ClusterProcessStoreImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.fs.TempFileManager;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.sql.DataSource;
+import javax.transaction.*;
+import javax.transaction.xa.XAResource;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle management.
@@ -120,6 +105,8 @@ public class ODEServer {
 
     protected Database _db;
 
+    protected ClusterManager _clusterManager;
+
     private DeploymentPoller _poller;
 
     private BpelServerConnector _connector;
@@ -132,6 +119,8 @@ public class ODEServer {
     protected IdleConnectionTimeoutThread idleConnectionTimeoutThread;
     
     public Runnable txMgrCreatedCallback;
+
+    private boolean clusteringEnabled = false;
 
     public void init(ServletConfig config, ConfigurationContext configContext) throws ServletException {
         init(config.getServletContext().getRealPath("/WEB-INF"), configContext);
@@ -184,6 +173,12 @@ public class ODEServer {
         if (txMgrCreatedCallback != null) {
             txMgrCreatedCallback.run();
         }
+
+        clusteringEnabled = _odeConfig.isClusteringEnabled();
+        if (clusteringEnabled) {
+            initClustering();
+        } else __log.info(__msgs.msgOdeClusteringNotInitialized());
+
         __log.debug("Creating data source.");
         initDataSource();
         __log.debug("Starting DAO.");
@@ -202,6 +197,12 @@ public class ODEServer {
         registerExternalVariableModules();
 
         _store.loadAll();
+        if (_clusterManager != null) {
+            _clusterManager.registerClusterMemberListener((ClusterMemberListener) _scheduler);
+            _clusterManager.setClusterProcessStore((ClusterProcessStore) _store);
+            _clusterManager.init(_configRoot);
+           ((SimpleScheduler)_scheduler).setNodeId(_clusterManager.getNodeID());
+        }
 
         try {
             _bpelServer.start();
@@ -221,7 +222,7 @@ public class ODEServer {
 
         try {
             __log.debug("Initializing Deployment Web Service");
-            new DeploymentWebService().enableService(_configContext.getAxisConfiguration(), _store, _poller, _appRoot.getAbsolutePath(), _workRoot.getAbsolutePath());
+            new DeploymentWebService().enableService(_configContext.getAxisConfiguration(), _store, _poller, _appRoot.getAbsolutePath(), _workRoot.getAbsolutePath(),this);
         } catch (Exception e) {
             throw new ServletException(e);
         }
@@ -371,6 +372,17 @@ public class ODEServer {
                 _txMgr = null;
             }
 
+            if (_clusterManager != null) {
+                try {
+                    __log.debug("shutting down cluster manager.");
+                    _clusterManager.shutdown();
+                    _clusterManager = null;
+                } catch (Exception ex) {
+                    __log.debug("Cluster manager shutdown failed.", ex);
+
+                }
+            }
+
             if (_connector != null) {
                 try {
                     __log.debug("shutdown BpelConnector");
@@ -455,6 +467,24 @@ public class ODEServer {
         }
     }
 
+    public boolean isClusteringEnabled() {
+        return clusteringEnabled;
+    }
+
+    /**
+     * Initialize the clustering if it is enabled
+     */
+    private void initClustering() {
+        String clusterImplName = _odeConfig.getClusteringImplClass();
+        try {
+            Class<?> clusterImplClass = this.getClass().getClassLoader().loadClass(clusterImplName);
+            _clusterManager = (ClusterManager) clusterImplClass.newInstance();
+        } catch (Exception ex) {
+            __log.error("Error while loading class : " + clusterImplName, ex);
+        }
+    }
+
+
     /**
      * Initialize the DAO.
      *
@@ -477,18 +507,24 @@ public class ODEServer {
         _store.registerListener(new ProcessStoreListenerImpl());
         _store.setDeployDir(
                 _odeConfig.getDeployDir() != null ?
-                    new File(_odeConfig.getDeployDir()) :
-                    new File(_workRoot, "processes"));
+                        new File(_odeConfig.getDeployDir()) :
+                        new File(_workRoot, "processes"));
         _store.setConfigDir(_configRoot);
     }
 
     protected ProcessStoreImpl createProcessStore(EndpointReferenceContext eprContext, DataSource ds) {
-        return new ProcessStoreImpl(eprContext, ds, _odeConfig.getDAOConnectionFactory(), _odeConfig, false);
+        if (clusteringEnabled)
+            return new ClusterProcessStoreImpl(eprContext, ds, _odeConfig.getDAOConnectionFactory(), _odeConfig, false, _clusterManager);
+        else return new ProcessStoreImpl(eprContext, ds, _odeConfig.getDAOConnectionFactory(), _odeConfig, false);
     }
 
     protected Scheduler createScheduler() {
-        SimpleScheduler scheduler = new SimpleScheduler(new GUID().toString(),
-                new JdbcDelegate(_db.getDataSource()), _odeConfig.getProperties());
+        SimpleScheduler scheduler;
+        if (clusteringEnabled) {
+            scheduler = new SimpleScheduler(_clusterManager.getNodeID(), new JdbcDelegate(_db.getDataSource()), _odeConfig.getProperties(), clusteringEnabled);
+            scheduler.setClusterManager(_clusterManager);
+        } else
+            scheduler = new SimpleScheduler(new GUID().toString(), new JdbcDelegate(_db.getDataSource()), _odeConfig.getProperties());
         scheduler.setExecutorService(_executorService);
         scheduler.setTransactionManager(_txMgr);
         return scheduler;
@@ -533,6 +569,7 @@ public class ODEServer {
         _bpelServer.setCronScheduler(_cronScheduler);
 
         _bpelServer.setDaoConnectionFactory(_daoCF);
+        _bpelServer.setClusterManagerImpl(_clusterManager);
         _bpelServer.setInMemDaoConnectionFactory(new BpelDAOConnectionFactoryImpl(_scheduler, _odeConfig.getInMemMexTtl()));
         _bpelServer.setEndpointReferenceContext(eprContext);
         _bpelServer.setMessageExchangeContext(new MessageExchangeContextImpl(this));

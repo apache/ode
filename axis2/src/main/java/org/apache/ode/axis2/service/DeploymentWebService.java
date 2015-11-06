@@ -20,24 +20,6 @@
 package org.apache.ode.axis2.service;
 
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Collection;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-import javax.activation.DataHandler;
-import javax.wsdl.Definition;
-import javax.wsdl.WSDLException;
-import javax.wsdl.factory.WSDLFactory;
-import javax.wsdl.xml.WSDLReader;
-import javax.xml.namespace.QName;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNamespace;
@@ -47,23 +29,35 @@ import org.apache.axiom.soap.SOAPFactory;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
-import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.receivers.AbstractMessageReceiver;
 import org.apache.axis2.util.Utils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.StringUtils;
+import org.apache.ode.axis2.ODEServer;
 import org.apache.ode.axis2.OdeFault;
 import org.apache.ode.axis2.deploy.DeploymentPoller;
 import org.apache.ode.axis2.hooks.ODEAxisService;
-import org.apache.ode.bpel.iapi.BpelServer;
+import org.apache.ode.bpel.clapi.ClusterLock;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.ProcessStore;
 import org.apache.ode.il.OMUtils;
-import org.apache.ode.utils.fs.FileUtils;
 import org.apache.ode.utils.Namespaces;
+import org.apache.ode.utils.fs.FileUtils;
+
+import javax.activation.DataHandler;
+import javax.wsdl.Definition;
+import javax.wsdl.WSDLException;
+import javax.wsdl.factory.WSDLFactory;
+import javax.wsdl.xml.WSDLReader;
+import javax.xml.namespace.QName;
+import java.io.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * Axis wrapper for process deployment.
@@ -76,9 +70,11 @@ public class DeploymentWebService {
     private final OMNamespace _deployapi;
 
     private File _deployPath;
+    private  ODEServer _odeServer;
     private DeploymentPoller _poller;
     private ProcessStore _store;
 
+    private boolean clusterEnabled;
 
     public DeploymentWebService() {
         _pmapi = OMAbstractFactory.getOMFactory().createOMNamespace("http://www.apache.org/ode/pmapi","pmapi");
@@ -86,10 +82,12 @@ public class DeploymentWebService {
     }
 
     public void enableService(AxisConfiguration axisConfig, ProcessStore store,
-                              DeploymentPoller poller, String rootpath, String workPath) throws AxisFault, WSDLException {
+                              DeploymentPoller poller, String rootpath, String workPath, ODEServer odeServer) throws AxisFault, WSDLException {
         _deployPath = new File(workPath, "processes");
         _store = store;
         _poller = poller;
+        _odeServer = odeServer;
+        clusterEnabled = _odeServer.isClusteringEnabled();
 
         Definition def;
         WSDLReader wsdlReader = WSDLFactory.newInstance().newWSDLReader();
@@ -109,6 +107,7 @@ public class DeploymentWebService {
             String operation = messageContext.getAxisOperation().getName().getLocalPart();
             SOAPFactory factory = getSOAPFactory(messageContext);
             boolean unknown = false;
+            boolean duLocked;
 
             try {
                 if (operation.equals("deploy")) {
@@ -166,43 +165,56 @@ public class DeploymentWebService {
                         _poller.hold();
 
                         File dest = new File(_deployPath, bundleName + "-" + _store.getCurrentVersion());
-                        boolean createDir = dest.mkdir();
-                        if(!createDir){
-                        	throw new OdeFault("Error while creating file " + dest.getName());
+                        __log.info("Trying to acquire the lock for deploying: " + dest.getName());
+
+                        //lock on deployment unit directory name
+                        duLocked = lock(dest.getName());
+
+                        if (duLocked) {
+                            boolean createDir = dest.mkdir();
+                            if (!createDir) {
+                                throw new OdeFault("Error while creating file " + dest.getName());
+                            }
+                            try {
+                                unzip(dest, (DataHandler) binaryNode.getDataHandler());
+
+                                // Check that we have a deploy.xml
+                                File deployXml = new File(dest, "deploy.xml");
+                                if (!deployXml.exists())
+                                    throw new OdeFault("The deployment doesn't appear to contain a deployment " +
+                                            "descriptor in its root directory named deploy.xml, aborting.");
+
+                                Collection<QName> deployed = _store.deploy(dest);
+
+                                File deployedMarker = new File(_deployPath, dest.getName() + ".deployed");
+                                if (!deployedMarker.createNewFile()) {
+                                    throw new OdeFault("Error while creating file " + deployedMarker.getName() + "deployment failed");
+                                }
+
+                                // Telling the poller what we deployed so that it doesn't try to deploy it again
+                                _poller.markAsDeployed(dest);
+                                __log.info("Deployment of artifact " + dest.getName() + " successful.");
+
+
+                                OMElement response = factory.createOMElement("response", null);
+
+                                if (__log.isDebugEnabled()) __log.debug("Deployed package: " + dest.getName());
+                                OMElement d = factory.createOMElement("name", _deployapi);
+                                d.setText(dest.getName());
+                                response.addChild(d);
+
+                                for (QName pid : deployed) {
+                                    if (__log.isDebugEnabled()) __log.debug("Deployed PID: " + pid);
+                                    d = factory.createOMElement("id", _deployapi);
+                                    d.setText(pid);
+                                    response.addChild(d);
+                                }
+                                sendResponse(factory, messageContext, "deployResponse", response);
+                            } finally {
+                                __log.info("Trying to release the lock for deploying: " + dest.getName());
+                                unlock(dest.getName());
+                            }
                         }
-                        unzip(dest, (DataHandler) binaryNode.getDataHandler());
-
-                        // Check that we have a deploy.xml
-                        File deployXml = new File(dest, "deploy.xml");
-                        if (!deployXml.exists())
-                            throw new OdeFault("The deployment doesn't appear to contain a deployment " +
-                                    "descriptor in its root directory named deploy.xml, aborting.");
-
-                        Collection<QName> deployed = _store.deploy(dest);
-
-                        File deployedMarker = new File(_deployPath, dest.getName() + ".deployed");
-                        if(!deployedMarker.createNewFile()) {
-                        	throw new OdeFault("Error while creating file " + deployedMarker.getName() + "deployment failed");
-                        }
-
-                        // Telling the poller what we deployed so that it doesn't try to deploy it again
-                        _poller.markAsDeployed(dest);
-                        __log.info("Deployment of artifact " + dest.getName() + " successful.");
-
-                        OMElement response = factory.createOMElement("response", null);
-
-                        if (__log.isDebugEnabled()) __log.debug("Deployed package: "+dest.getName());
-                        OMElement d = factory.createOMElement("name", _deployapi);
-                        d.setText(dest.getName());
-                        response.addChild(d);
-
-                        for (QName pid : deployed) {
-                            if (__log.isDebugEnabled()) __log.debug("Deployed PID: "+pid);
-                            d = factory.createOMElement("id", _deployapi);
-                            d.setText(pid);
-                            response.addChild(d);
-                        }
-                        sendResponse(factory, messageContext, "deployResponse", response);
                     } finally {
                         _poller.release();
                     }
@@ -224,20 +236,30 @@ public class DeploymentWebService {
                         // Put the poller on hold to avoid undesired side effects
                         _poller.hold();
 
-                        Collection<QName> undeployed = _store.undeploy(deploymentDir);
+                        __log.info("Trying to acquire the lock for undeploying: " + deploymentDir.getName());
+                        duLocked = lock(deploymentDir.getName());
 
-                        File deployedMarker = new File(deploymentDir + ".deployed");
-                        boolean isDeleted = deployedMarker.delete();
+                        if (duLocked) {
+                            try {
+                                Collection<QName> undeployed = _store.undeploy(deploymentDir);
 
-                        if (!isDeleted)
-                            __log.error("Error while deleting file " + deployedMarker.getName());
+                                File deployedMarker = new File(deploymentDir + ".deployed");
+                                boolean isDeleted = deployedMarker.delete();
 
-                        FileUtils.deepDelete(deploymentDir);
+                                if (!isDeleted)
+                                    __log.error("Error while deleting file " + deployedMarker.getName());
 
-                        OMElement response = factory.createOMElement("response", null);
-                        response.setText("" + (undeployed.size() > 0));
-                        sendResponse(factory, messageContext, "undeployResponse", response);
-                        _poller.markAsUndeployed(deploymentDir);
+                                FileUtils.deepDelete(deploymentDir);
+
+                                OMElement response = factory.createOMElement("response", null);
+                                response.setText("" + (undeployed.size() > 0));
+                                sendResponse(factory, messageContext, "undeployResponse", response);
+                                _poller.markAsUndeployed(deploymentDir);
+                            } finally {
+                                __log.info("Trying to release the lock for undeploying: " + deploymentDir.getName());
+                                unlock(deploymentDir.getName());
+                            }
+                        }
                     } finally {
                         _poller.release();
                     }
@@ -352,6 +374,25 @@ public class DeploymentWebService {
         out.close();
     }
 
+    /**
+     * Acquire the lock when deploying using web service
+     */
+    private boolean lock(String key) {
+        if(clusterEnabled) {
+            ClusterLock clusterLock = _odeServer.getBpelServer().getContexts().clusterManager.getDeploymentLock();
+            clusterLock.putIfAbsent(key,key);
+            clusterLock.lock(key);
+        }
+        return true;
+    }
 
-
+    /**
+     * Release the lock after completing deploy process
+     */
+    private boolean unlock(String key) {
+        if(clusterEnabled) {
+            _odeServer.getBpelServer().getContexts().clusterManager.getDeploymentLock().unlock(key);
+        }
+        return true;
+    }
 }

@@ -41,6 +41,7 @@ package org.apache.ode.axis2.deploy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ode.axis2.ODEServer;
+import org.apache.ode.bpel.clapi.ClusterLock;
 import org.apache.ode.bpel.engine.cron.CronScheduler;
 import org.apache.ode.bpel.engine.cron.SystemSchedulesConfig;
 import org.apache.ode.utils.WatchDog;
@@ -48,7 +49,6 @@ import org.apache.ode.utils.WatchDog;
 import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -74,6 +74,8 @@ public class DeploymentPoller {
 
     private SystemSchedulesConfig _systemSchedulesConf;
 
+    private boolean clusterEnabled;
+
     @SuppressWarnings("unchecked")
     private Map<String, WatchDog> dDWatchDogsByPath = new HashMap<String, WatchDog>();
     @SuppressWarnings("unchecked")
@@ -96,6 +98,7 @@ public class DeploymentPoller {
     public DeploymentPoller(File deployDir, final ODEServer odeServer) {
         _odeServer = odeServer;
         _deployDir = deployDir;
+        clusterEnabled = _odeServer.isClusteringEnabled();
         if (!_deployDir.exists()) {
             boolean isDeployDirCreated = _deployDir.mkdir();
             if (!isDeployDirCreated) {
@@ -130,50 +133,66 @@ public class DeploymentPoller {
     @SuppressWarnings("unchecked")
     private void check() {
         File[] files = _deployDir.listFiles(_fileFilter);
+        boolean duLocked;
 
         // Checking for new deployment directories
         if (isDeploymentFromODEFileSystemAllowed() && files != null) {
             for (File file : files) {
-                File deployXml = new File(file, "deploy.xml");
-                File deployedMarker = new File(_deployDir, file.getName() + ".deployed");
-
-                if (!deployXml.exists()) {
-                    // Skip if deploy.xml is abset
-                    if (__log.isDebugEnabled()) {
-                        __log.debug("Not deploying " + file + " (missing deploy.xml)");
-                    }
+                String duName = file.getName();
+                if (__log.isDebugEnabled()) {
+                __log.debug("Trying to acquire the lock for " + duName);
                 }
+                duLocked = pollerTryLock(duName);
 
-                WatchDog ddWatchDog = ensureDeployXmlWatchDog(file, deployXml);
+                if (duLocked) {
+                    try {
+                        File deployXml = new File(file, "deploy.xml");
+                        File deployedMarker = new File(_deployDir, file.getName() + ".deployed");
 
-                if (deployedMarker.exists()) {
-                    checkDeployXmlWatchDog(ddWatchDog);
-                    continue;
-                }
+                        if (!deployXml.exists()) {
+                            // Skip if deploy.xml is abset
+                            if (__log.isDebugEnabled()) {
+                                __log.debug("Not deploying " + file + " (missing deploy.xml)");
+                            }
+                        }
 
-                try {
-                    boolean isCreated = deployedMarker.createNewFile();
-                    if (!isCreated) {
-                        __log.error("Error while creating  file "
+                        WatchDog ddWatchDog = ensureDeployXmlWatchDog(file, deployXml);
+
+                        if (deployedMarker.exists()) {
+                            checkDeployXmlWatchDog(ddWatchDog);
+                            continue;
+                        }
+
+                        try {
+                            boolean isCreated = deployedMarker.createNewFile();
+                            if (!isCreated) {
+                                __log.error("Error while creating  file "
                                         + file.getName()
                                         + ".deployed ,deployment could be inconsistent");
+                            }
+                        } catch (IOException e1) {
+                            __log.error("Error creating deployed marker file, " + file + " will not be deployed");
+                            continue;
+                        }
+
+                        try {
+                            _odeServer.getProcessStore().undeploy(file);
+                        } catch (Exception ex) {
+                            __log.error("Error undeploying " + file.getName());
+                        }
+
+                        try {
+                            Collection<QName> deployed = _odeServer.getProcessStore().deploy(file);
+                            __log.info("Deployment of artifact " + file.getName() + " successful: " + deployed);
+                        } catch (Exception e) {
+                            __log.error("Deployment of " + file.getName() + " failed, aborting for now.", e);
+                        }
+                    } finally {
+                        if (__log.isDebugEnabled()) {
+                        __log.debug("Trying to release the lock for " + file.getName());
+                        }
+                        unlock(file.getName());
                     }
-                } catch (IOException e1) {
-                    __log.error("Error creating deployed marker file, " + file + " will not be deployed");
-                    continue;
-                }
-
-                try {
-                    _odeServer.getProcessStore().undeploy(file);
-                } catch (Exception ex) {
-                    __log.error("Error undeploying " + file.getName());
-                }
-
-                try {
-                    Collection<QName> deployed = _odeServer.getProcessStore().deploy(file);
-                    __log.info("Deployment of artifact " + file.getName() + " successful: " + deployed );
-                } catch (Exception e) {
-                    __log.error("Deployment of " + file.getName() + " failed, aborting for now.", e);
                 }
             }
         }
@@ -184,16 +203,33 @@ public class DeploymentPoller {
             String pkg = file.getName().substring(0, file.getName().length() - ".deployed".length());
             File deployDir = new File(_deployDir, pkg);
             if (!deployDir.exists()) {
-                Collection<QName> undeployed = _odeServer.getProcessStore().undeploy(deployDir);
-                boolean isDeleted = file.delete();
-                if (!isDeleted) {
-                    __log.error("Error while deleting file "
+                String duName = deployDir.getName();
+
+                if (__log.isDebugEnabled()) {
+                    __log.debug("Trying to acquire the lock for " + duName);
+                }
+
+                duLocked = pollerTryLock(duName);
+
+                if (duLocked) {
+                    try {
+                        Collection<QName> undeployed = _odeServer.getProcessStore().undeploy(deployDir);
+                        boolean isDeleted = file.delete();
+                        if (!isDeleted) {
+                            __log.error("Error while deleting file "
                                     + file.getName()
                                     + ".deployed , please check if file is locked or if it really exist");
+                        }
+                        disposeDeployXmlWatchDog(deployDir);
+                        if (undeployed.size() > 0)
+                            __log.info("Successfully undeployed " + pkg);
+                    } finally {
+                        if (__log.isDebugEnabled()) {
+                            __log.debug("Trying to release the lock for " + duName);
+                        }
+                        unlock(duName);
+                    }
                 }
-                disposeDeployXmlWatchDog(deployDir);
-                if (undeployed.size() > 0)
-                    __log.info("Successfully undeployed " + pkg);
             }
         }
 
@@ -323,5 +359,24 @@ public class DeploymentPoller {
         public void init() {
             _odeServer.getProcessStore().refreshSchedules(deploymentPakage);
         }
+    }
+
+    /**
+     * Use to acquire the lock by poller
+     */
+    private boolean pollerTryLock(String key) {
+        if(clusterEnabled) {
+            ClusterLock clusterLock = _odeServer.getBpelServer().getContexts().clusterManager.getDeploymentLock();
+            clusterLock.putIfAbsent(key,key);
+            return clusterLock.tryLock(key);
+        }
+        else return true;
+    }
+
+    private boolean unlock(String key) {
+        if (clusterEnabled) {
+            _odeServer.getBpelServer().getContexts().clusterManager.getDeploymentLock().unlock(key);
+        }
+        return true;
     }
 }
