@@ -99,7 +99,7 @@ define "ode" do
   desc "ODE Axis2 Based Web Application"
   define "axis2-war" do
     libs = projects("axis2", "bpel-api", "bpel-compiler", "bpel-connector", "bpel-dao",
-      "bpel-epr", "bpel-nobj", "bpel-ql", "bpel-runtime", "scheduler-simple",
+      "bpel-epr", "bpel-nobj", "bpel-obj", "bpel-ql", "bpel-runtime", "scheduler-simple",
       "bpel-schemas", "bpel-store", "dao-hibernate", "jca-ra", "jca-server",
       "utils", "dao-jpa", "agents", "clustering"),
       AXIS2_ALL, ANNONGEN, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.fileupload, COMMONS.io, COMMONS.httpclient, COMMONS.beanutils,
@@ -559,7 +559,7 @@ define "ode" do
   desc "ODE JBI Bundle"
   define "jbi-bundle" do
     ode_libs = artifacts(projects("bpel-api", "bpel-api-jca", "bpel-compiler", "bpel-connector", "bpel-dao", "bpel-epr",
-                                  "jca-ra", "jca-server", "bpel-nobj", "bpel-ql", "bpel-runtime", "scheduler-simple",
+                                  "jca-ra", "jca-server", "bpel-nobj", "bpel-obj", "bpel-ql", "bpel-runtime", "scheduler-simple",
                                   "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa", "utils", "agents"))
     libs = artifacts(ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
                      COMMONS.primitives, COMMONS.io, DERBY, GERONIMO.connector, GERONIMO.transaction, JACOB, JAVAX.connector, 
@@ -612,7 +612,7 @@ define "ode" do
 
   desc "ODE Tools"
   define "tools" do
-    compile.with projects("bpel-compiler", "utils", "bpel-obj"), ANT, COMMONS.httpclient, SLF4J, LOG4J
+    compile.with projects("bpel-compiler", "utils", "bpel-nobj"), ANT, COMMONS.httpclient, SLF4J, LOG4J
     package :jar
   end
 
