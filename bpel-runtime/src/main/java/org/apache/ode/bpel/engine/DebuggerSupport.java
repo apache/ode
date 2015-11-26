@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.engine;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.iapi.DebuggerContext;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.JobType;
@@ -62,7 +62,7 @@ import java.util.Set;
  */
 public class DebuggerSupport implements DebuggerContext {
 
-    private static final Log __log = LogFactory.getLog(DebuggerSupport.class);
+    private static final Logger __log = LoggerFactory.getLogger(DebuggerSupport.class);
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
     static final Breakpoint[] EMPTY_BP = new Breakpoint[0];

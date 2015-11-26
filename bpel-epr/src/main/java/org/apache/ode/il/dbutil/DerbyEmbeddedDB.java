@@ -47,7 +47,7 @@ public class DerbyEmbeddedDB extends InternalDB {
             try {
                 DriverManager.getConnection(_dbUrl).close();
             } catch (SQLException se) {
-                __log.error(se);
+                __log.error("",se);
             }
             EmbeddedDataSource dds = new EmbeddedDataSource();
             dds.setDatabaseName("memory:" + _dbName);

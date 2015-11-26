@@ -24,15 +24,15 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.dd.TCleanup;
 import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 
 public class ProcessCleanupConfImpl {
-    protected static Log __log = LogFactory.getLog(ProcessCleanupConfImpl.class);
+    protected static Logger __log = LoggerFactory.getLogger(ProcessCleanupConfImpl.class);
 
     private final Set<CLEANUP_CATEGORY> successCategories = EnumSet.noneOf(CLEANUP_CATEGORY.class);
     private final Set<CLEANUP_CATEGORY> failureCategories = EnumSet.noneOf(CLEANUP_CATEGORY.class);

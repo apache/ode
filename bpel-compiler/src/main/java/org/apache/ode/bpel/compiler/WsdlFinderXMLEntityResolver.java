@@ -26,8 +26,8 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.xerces.xni.XMLResourceIdentifier;
 import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLEntityResolver;
@@ -43,8 +43,7 @@ import org.apache.xerces.xni.parser.XMLInputSource;
  */
 public class WsdlFinderXMLEntityResolver implements XMLEntityResolver {
 
-    private static final Log __log = LogFactory
-            .getLog(WsdlFinderXMLEntityResolver.class);
+    private static final Logger __log = LoggerFactory.getLogger(WsdlFinderXMLEntityResolver.class);
 
     /**
      * Flag indicating whether the resolver should fail with an exception if the

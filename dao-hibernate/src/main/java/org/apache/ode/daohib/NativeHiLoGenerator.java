@@ -33,11 +33,11 @@ import org.hibernate.id.SequenceHiLoGenerator;
 import org.hibernate.id.TableHiLoGenerator;
 import org.hibernate.type.Type;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NativeHiLoGenerator implements IdentifierGenerator, PersistentIdentifierGenerator, Configurable {
-    private static final Log __log = LogFactory.getLog(NativeHiLoGenerator.class);
+    private static final Logger __log = LoggerFactory.getLogger(NativeHiLoGenerator.class);
     private IdentifierGenerator _proxy;
 
     public NativeHiLoGenerator() {

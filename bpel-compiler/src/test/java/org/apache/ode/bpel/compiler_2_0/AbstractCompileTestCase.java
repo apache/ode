@@ -22,8 +22,8 @@ package org.apache.ode.bpel.compiler_2_0;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.compiler.BpelC;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
@@ -33,7 +33,7 @@ import org.junit.Before;
 
 public abstract class AbstractCompileTestCase implements CompileListener {
 
-    protected final Log __log = LogFactory.getLog(getClass());
+    protected final Logger __log = LoggerFactory.getLogger(getClass());
     protected BpelC _compiler;
     protected ArrayList<CompilationMessage> _errors = new ArrayList<CompilationMessage>();
 

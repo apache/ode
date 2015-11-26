@@ -27,8 +27,8 @@ import java.util.Set;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
@@ -66,7 +66,7 @@ import org.hibernate.criterion.Order;
  * Hibernate-based {@link ProcessDAO} implementation.
  */
 public class ProcessDaoImpl extends HibernateDao implements ProcessDAO, DeferredProcessInstanceCleanable {
-    private static final Log __log = LogFactory.getLog(ProcessDaoImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(ProcessDaoImpl.class);
 
     private static final String QRY_CORRELATOR = "where this.correlatorId = ?";
 

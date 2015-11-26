@@ -21,8 +21,8 @@ package org.apache.ode.bpel.runtime;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.obj.OThrow;
 import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -33,7 +33,7 @@ import org.w3c.dom.Node;
  */
 class THROW extends ACTIVITY {
     private static final long serialVersionUID = 1L;
-    private static final Log __log = LogFactory.getLog(ACTIVITY.class);
+    private static final Logger __log = LoggerFactory.getLogger(ACTIVITY.class);
 
     private OThrow _othrow;
 
@@ -51,7 +51,7 @@ class THROW extends ACTIVITY {
                 fault = createFault(_othrow.getFaultName(), (Element)faultVariable,_othrow.getFaultVariable().getType(),_othrow);
             } catch (FaultException e) {
                 // deal with this as a fault (just not the one we hoped for)
-                __log.error(e);
+                __log.error("",e);
                 fault = createFault(e.getQName(), _othrow);
             }
         }else{

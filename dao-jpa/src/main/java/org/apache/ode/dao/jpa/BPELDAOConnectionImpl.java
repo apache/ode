@@ -34,8 +34,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.Filter;
 import org.apache.ode.bpel.common.InstanceFilter;
@@ -57,7 +57,7 @@ import org.apache.openjpa.persistence.OpenJPAQuery;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class BPELDAOConnectionImpl implements BpelDAOConnection {
-    static final Log __log = LogFactory.getLog(BPELDAOConnectionImpl.class);
+    static final Logger __log = LoggerFactory.getLogger(BPELDAOConnectionImpl.class);
 
     protected EntityManager _em;
 

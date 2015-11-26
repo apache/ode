@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.obj.DebugInfo;
 import org.apache.ode.bpel.obj.ExtensibleImpl;
 import org.apache.ode.bpel.obj.OProcess;
@@ -17,7 +17,7 @@ import org.apache.ode.bpel.obj.OProcess;
  * @see DeepEqualityHelper
  */
 public class ExtensibeImplEqualityComp implements EqualityComparator{
-    private static final Log __log = LogFactory.getLog(ExtensibeImplEqualityComp.class);
+    private static final Logger __log = LoggerFactory.getLogger(ExtensibeImplEqualityComp.class);
 	private DeepEqualityHelper deepEquality;
 	public ExtensibeImplEqualityComp() {
 	}

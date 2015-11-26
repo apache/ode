@@ -32,8 +32,8 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.jms.JMSConstants;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.wsdl.WSDLConstants;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.neethi.Policy;
 import org.apache.neethi.PolicyEngine;
@@ -81,7 +81,7 @@ import java.lang.reflect.Field;
  */
 public class SoapExternalService implements ExternalService {
 
-    private static final Log __log = LogFactory.getLog(ExternalService.class);
+    private static final Logger __log = LoggerFactory.getLogger(ExternalService.class);
 
     private static final org.apache.ode.utils.wsdl.Messages msgs = Messages.getMessages(Messages.class);
 

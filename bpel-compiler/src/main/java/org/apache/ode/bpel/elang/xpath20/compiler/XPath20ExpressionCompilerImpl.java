@@ -40,8 +40,8 @@ import net.sf.saxon.om.NamespaceConstant;
 import net.sf.saxon.xpath.XPathEvaluator;
 import net.sf.saxon.xpath.XPathFactoryImpl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilerContext;
 import org.apache.ode.bpel.compiler.api.ExpressionCompiler;
@@ -62,7 +62,7 @@ import org.w3c.dom.Node;
  */
 public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
 
-    protected static final Log __log = LogFactory.getLog(XPath20ExpressionCompilerBPEL20.class);
+    protected static final Logger __log = LoggerFactory.getLogger(XPath20ExpressionCompilerBPEL20.class);
 
     protected String _bpelNS;
     protected QName _qnLinkStatus;
@@ -175,7 +175,7 @@ public class XPath20ExpressionCompilerImpl implements ExpressionCompiler {
                 }
             }
         } catch (XPathExpressionException e) {
-            __log.debug(e);
+            __log.debug("",e);
             __log.info("Couldn't validate properly expression " + xpathStr);
         } catch (WrappedResolverException wre) {
             if (wre._compilationMsg != null)

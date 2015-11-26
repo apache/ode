@@ -17,8 +17,8 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.OProcessWrapper;
@@ -34,7 +34,7 @@ import org.apache.ode.bpel.obj.serde.OmSerdeFactory.SerializeFormat;
  * @see OmSerdeFactory
  */
 public class DeSerializer {
-	private static final Log __log = LogFactory.getLog(DeSerializer.class);
+	private static final Logger __log = LoggerFactory.getLogger(DeSerializer.class);
 
 	private OProcessWrapper wrapper = new OProcessWrapper();
 	private InputStream is;

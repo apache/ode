@@ -25,8 +25,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.schedules.SchedulesDocument;
 import org.apache.ode.bpel.schedules.TSchedule;
 import org.apache.ode.bpel.dd.TCleanup;
@@ -40,7 +40,7 @@ import org.apache.xmlbeans.XmlOptions;
 
 
 public class SystemSchedulesConfig {
-    private final static Log __log = LogFactory.getLog(SystemSchedulesConfig.class);
+    private final static Logger __log = LoggerFactory.getLogger(SystemSchedulesConfig.class);
 
     public final static String SCHEDULE_CONFIG_FILE_PROP_KEY = "org.apache.ode.scheduleConfigFile";
     private File schedulesFile;

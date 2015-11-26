@@ -12,8 +12,8 @@ import java.util.Vector;
 import javax.wsdl.OperationType;
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.serde.jacksonhack.TypeBeanSerializerFactory;
 import org.apache.ode.utils.NSContext;
@@ -47,8 +47,7 @@ import com.ibm.wsdl.MessageImpl;
  * @see JsonOmSerializer
  */
 public class JsonOmDeserializer implements OmDeserializer {
-	protected static final Log __log = LogFactory
-			.getLog(JsonOmDeserializer.class);
+	protected static final Logger __log = LoggerFactory.getLogger(JsonOmDeserializer.class);
 
 	private OProcess process;
 	private InputStream is;

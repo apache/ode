@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.elang.xpath10.runtime;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.jaxen.NamespaceContext;
 
 /**
@@ -28,7 +28,7 @@ import org.jaxen.NamespaceContext;
  * @pattern Adapter
  */
 class JaxenNamespaceContextAdapter implements NamespaceContext {
-  private static final Log __log = LogFactory.getLog(JaxenNamespaceContextAdapter.class);
+  private static final Logger __log = LoggerFactory.getLogger(JaxenNamespaceContextAdapter.class);
 
   private javax.xml.namespace.NamespaceContext _namespaceContext;
 

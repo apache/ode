@@ -19,8 +19,8 @@
 
 package org.apache.ode.axis2.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.axis2.deployment.ServiceBuilder;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.AxisService;
@@ -46,7 +46,7 @@ import java.net.URI;
  */
 public class AxisUtils {
 
-    private static final Log log = LogFactory.getLog(AxisUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(AxisUtils.class);
 
     public static void configureService(AxisService axisService, URL service_file) throws IOException, XMLStreamException, AxisFault {
         configureService(new ConfigurationContext(axisService.getAxisConfiguration()), axisService, service_file);

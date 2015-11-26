@@ -23,8 +23,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
@@ -49,7 +49,7 @@ import org.w3c.dom.Node;
 public class FOREACH extends ACTIVITY {
 
     private static final long serialVersionUID = 1L;
-    private static final Log __log = LogFactory.getLog(FOREACH.class);
+    private static final Logger __log = LoggerFactory.getLogger(FOREACH.class);
 
     private OForEach _oforEach;
     private Set<ChildInfo> _children = new HashSet<ChildInfo>();
@@ -74,7 +74,7 @@ public class FOREACH extends ACTIVITY {
             }
             _currentCounter = _startCounter;
         } catch (FaultException fe) {
-            __log.error(fe);
+            __log.error("",fe);
             _self.parent.completed(createFault(fe.getQName(), _self.o), _compHandlers);
             return;
         }

@@ -36,8 +36,8 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.impl.dom.NamespaceImpl;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.pmapi.ProcessInfoCustomizer;
 import org.apache.xmlbeans.XmlObject;
 import org.w3c.dom.Node;
@@ -47,7 +47,7 @@ import org.w3c.dom.Node;
  * invocation based on top-level element name (e.g. method name) and sub-elements (e.g. parameters).
  */
 public class DynamicService<T> {
-    private final Log __log = LogFactory.getLog(getClass());
+    private final Logger __log = LoggerFactory.getLogger(getClass());
 
     static final OMFactory OM = OMAbstractFactory.getOMFactory();
 

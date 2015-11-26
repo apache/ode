@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.memdao;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.dao.*;
@@ -33,7 +33,7 @@ import java.util.Collection;
  * A very simple, in-memory implementation of the {@link CorrelatorDAO} interface.
  */
 class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
-    private static final Log __log = LogFactory.getLog(CorrelatorDaoImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(CorrelatorDaoImpl.class);
 
     private String _correlatorId;
     private List<MsgQueueEntry> _messages;

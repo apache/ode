@@ -24,8 +24,8 @@ import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.handlers.AbstractHandler;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.axis2.ODEService;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
@@ -41,7 +41,7 @@ import javax.xml.namespace.QName;
 public class SessionInHandler extends AbstractHandler {
     private static final long serialVersionUID = -806564877582696569L;
 
-    private static final Log __log = LogFactory.getLog(SessionInHandler.class);
+    private static final Logger __log = LoggerFactory.getLogger(SessionInHandler.class);
 
     public InvocationResponse invoke(MessageContext messageContext) throws AxisFault {
         SOAPHeader header = messageContext.getEnvelope().getHeader();

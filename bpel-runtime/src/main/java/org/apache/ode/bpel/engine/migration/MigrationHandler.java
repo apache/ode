@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.engine.BpelProcess;
 import org.apache.ode.bpel.engine.Contexts;
 
@@ -40,7 +40,7 @@ import org.apache.ode.bpel.engine.Contexts;
  * Checks database schema versions and migrates when necessary.
  */
 public class MigrationHandler {
-    private static final Log __log = LogFactory.getLog(MigrationHandler.class);
+    private static final Logger __log = LoggerFactory.getLogger(MigrationHandler.class);
 
     public static final int CURRENT_SCHEMA_VERSION = 7;
 

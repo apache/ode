@@ -31,8 +31,8 @@ import java.util.List;
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.common.FaultException;
@@ -108,7 +108,7 @@ import org.w3c.dom.NodeList;
 
 public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
-    private static final Log __log = LogFactory.getLog(BpelRuntimeContextImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(BpelRuntimeContextImpl.class);
 
     /** Data-access object for process instance. */
     protected ProcessInstanceDAO _dao;
@@ -1214,14 +1214,14 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (dao == null) {
             // this should not happen....
             String msg = "Engine requested non-existent message exchange: " + mexId;
-            __log.fatal(msg);
+            __log.error(msg);
             throw new BpelEngineException(msg);
         }
 
         if (dao.getDirection() != MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE) {
             // this should not happen....
             String msg = "Engine requested my-role request for a partner-role mex: " + mexId;
-            __log.fatal(msg);
+            __log.error(msg);
             throw new BpelEngineException(msg);
         }
 
@@ -1235,7 +1235,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 if (request == null) {
                     // this also should not happen
                     String msg = "Engine requested request for message exchange that did not have one: " + mexId;
-                    __log.fatal(msg);
+                    __log.error(msg);
                     throw new BpelEngineException(msg);
                 }
                 return mergeHeaders(request);
@@ -1243,7 +1243,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 // We should not be in any other state when requesting this.
                 String msg = "Engine requested response while the message exchange " + mexId + " was in the state "
                         + status;
-                __log.fatal(msg);
+                __log.error(msg);
                 throw new BpelEngineException(msg);
         }
     }
@@ -1289,13 +1289,13 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         if (dao == null) {
             // this should not happen....
             String msg = "Engine requested non-existent message exchange: " + mexId;
-            __log.fatal(msg);
+            __log.error(msg);
             throw new BpelEngineException(msg);
         }
         if (dao.getDirection() != MessageExchangeDAO.DIR_BPEL_INVOKES_PARTNERROLE) {
             // this should not happen....
             String msg = "Engine requested partner response for a my-role mex: " + mexId;
-            __log.fatal(msg);
+            __log.error(msg);
             throw new BpelEngineException(msg);
         }
 
@@ -1308,7 +1308,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 if (response == null) {
                     // this also should not happen
                     String msg = "Engine requested response for message exchange that did not have one: " + mexId;
-                    __log.fatal(msg);
+                    __log.error(msg);
                     throw new BpelEngineException(msg);
                 }
                 break;
@@ -1319,7 +1319,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
                 // We should not be in any other state when requesting this.
                 String msg = "Engine requested response while the message exchange " + mexId + " was in the state "
                         + status;
-                __log.fatal(msg);
+                __log.error(msg);
                 throw new BpelEngineException(msg);
         }
         return response;

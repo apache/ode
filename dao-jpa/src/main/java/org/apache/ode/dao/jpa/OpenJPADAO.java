@@ -18,8 +18,8 @@
  */
 package org.apache.ode.dao.jpa;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.openjpa.persistence.OpenJPAPersistence;
 import org.apache.openjpa.persistence.OpenJPAQuery;
 
@@ -34,7 +34,7 @@ import java.util.List;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class OpenJPADAO {
-    private static final Log __log = LogFactory.getLog(OpenJPADAO.class);
+    private static final Logger __log = LoggerFactory.getLogger(OpenJPADAO.class);
 
     protected BPELDAOConnectionImpl getConn() {
         return BPELDAOConnectionFactoryImpl._connections.get();

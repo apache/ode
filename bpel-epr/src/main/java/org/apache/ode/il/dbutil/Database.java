@@ -23,8 +23,8 @@ import java.io.File;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.utils.LoggingInterceptor;
@@ -34,9 +34,9 @@ import org.apache.ode.utils.LoggingInterceptor;
  *
  */
 public abstract class Database {
-    protected static final Log __log = LogFactory.getLog(Database.class);
+    protected static final Logger __log = LoggerFactory.getLogger(Database.class);
 
-    protected static final Log __logSql = LogFactory.getLog("org.apache.ode.sql");
+    protected static final Logger __logSql = LoggerFactory.getLogger("org.apache.ode.sql");
 
     protected static final Messages __msgs = Messages.getMessages(Messages.class);
 

@@ -26,14 +26,14 @@ import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.iapi.Scheduler;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Encapsulates transactional access to the BPEL database.
  */
 public class BpelDatabase {
-  static Log __log = LogFactory.getLog(BpelDatabase.class);
+  static Logger __log = LoggerFactory.getLogger(BpelDatabase.class);
 
   protected BpelDAOConnectionFactory _sscf;
   protected Scheduler _scheduler;

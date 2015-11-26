@@ -43,8 +43,8 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.TwoChannelAxisOperation;
 import org.apache.axis2.transport.jms.JMSConstants;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.axis2.util.SoapMessageConverter;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.epr.EndpointFactory;
@@ -69,7 +69,7 @@ import org.w3c.dom.Element;
  */
 public class ODEService {
 
-    private static final Log __log = LogFactory.getLog(ODEService.class);
+    private static final Logger __log = LoggerFactory.getLogger(ODEService.class);
 
     public static final String CALLBACK_SESSION_ENDPOINT = "callbackSessionEndpoint";
     public static final String TARGET_SESSION_ENDPOINT = "targetSessionEndpoint";

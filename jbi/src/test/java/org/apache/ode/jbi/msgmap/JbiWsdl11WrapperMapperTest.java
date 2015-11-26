@@ -30,12 +30,12 @@ import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.utils.DOMUtils;
 
 public class JbiWsdl11WrapperMapperTest extends junit.framework.TestCase {
-    private static Log __log = LogFactory.getLog(JbiWsdl11WrapperMapperTest.class);
+    private static Logger __log = LoggerFactory.getLogger(JbiWsdl11WrapperMapperTest.class);
 
     public static class MockJbiFault implements javax.jbi.messaging.Fault {
         private String resourceName;

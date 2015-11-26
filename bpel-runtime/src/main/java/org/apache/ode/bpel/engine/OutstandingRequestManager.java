@@ -29,8 +29,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -48,7 +48,7 @@ import org.apache.commons.logging.LogFactory;
 public class OutstandingRequestManager implements Serializable {
   private static final long serialVersionUID = -5556374398943757951L;
 
-  private static final Log __log = LogFactory.getLog(OutstandingRequestManager.class);
+  private static final Logger __log = LoggerFactory.getLogger(OutstandingRequestManager.class);
 
   public final Map<RequestIdTuple, Entry> _byRid = new HashMap<RequestIdTuple, Entry>();
   public final Map<String, Entry> _byChannel = new HashMap<String, Entry>();
@@ -88,7 +88,7 @@ public class OutstandingRequestManager implements Serializable {
 
     if (_byChannel.containsKey(pickResponseChannel)) {
       String errmsg = "INTERNAL ERROR: Duplicate ENTRY for RESPONSE CHANNEL " + pickResponseChannel;
-      __log.fatal(errmsg);
+      __log.error(errmsg);
       throw new IllegalArgumentException(errmsg);
     }
 
@@ -101,7 +101,7 @@ public class OutstandingRequestManager implements Serializable {
       final RequestIdTuple rid = new RequestIdTuple(selectors[i].plinkInstance,selectors[i].opName, selectors[i].messageExchangeId);
       if (_byRid.containsKey(rid)) {
         String errmsg = "INTERNAL ERROR: Duplicate ENTRY for RID " + rid;
-        __log.fatal(errmsg);
+        __log.error(errmsg);
         throw new IllegalStateException(errmsg);
       }
       _byRid.put(rid,  entry);
@@ -143,7 +143,7 @@ public class OutstandingRequestManager implements Serializable {
     Entry entry = _byChannel.get(pickResponseChannel);
     if (entry == null) {
       String errmsg = "INTERNAL ERROR: No ENTRY for RESPONSE CHANNEL " + pickResponseChannel;
-      __log.fatal(errmsg);
+      __log.error(errmsg);
       throw new IllegalArgumentException(errmsg);
     }
 
@@ -151,7 +151,7 @@ public class OutstandingRequestManager implements Serializable {
 //    Hence, the sanity check shown below is no longer valid
 //    if (entry.mexRef != null) {
 //      String errmsg = "INTERNAL ERROR: Duplicate ASSOCIATION for CHANEL " + pickResponseChannel;
-//      __log.fatal(errmsg);
+//      __log.error(errmsg);
 //      throw new IllegalStateException(errmsg);
 //    }
 

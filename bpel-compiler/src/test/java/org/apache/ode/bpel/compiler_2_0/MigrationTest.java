@@ -6,8 +6,8 @@ import java.io.File;
 import java.net.URI;
 import java.net.URL;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.migrate.DeepEqualityHelper;
 import org.apache.ode.bpel.obj.migrate.DomElementComparator;
@@ -19,7 +19,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class MigrationTest extends GoodCompileTest{
-    private static final Log __log = LogFactory.getLog(MigrationTest.class);
+    private static final Logger __log = LoggerFactory.getLogger(MigrationTest.class);
 
     /**
      * compare compiled OProcess with migrated ones.

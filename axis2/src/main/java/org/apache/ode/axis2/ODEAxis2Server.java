@@ -45,15 +45,15 @@ import org.apache.axis2.description.TransportInDescription;
 import org.apache.axis2.description.WSDL11ToAxisServiceBuilder;
 import org.apache.axis2.engine.AxisServer;
 import org.apache.axis2.engine.MessageReceiver;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.util.Axis2UriResolver;
 import org.apache.ode.axis2.util.Axis2WSDLLocator;
 import org.apache.axis2.transport.http.SimpleHTTPServer;
 
 public class ODEAxis2Server extends AxisServer {
-    private static final Log log = LogFactory.getLog(ODEAxis2Server.class);
+    private static final Logger log = LoggerFactory.getLogger(ODEAxis2Server.class);
 
         ODEServer _ode;
         String odeRootDir;

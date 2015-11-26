@@ -58,8 +58,8 @@ import org.apache.axiom.soap.SOAPFaultReason;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.namespace.Constants;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.axis2.OdeFault;
 import org.apache.ode.il.OMUtils;
 import org.apache.ode.utils.DOMUtils;
@@ -78,7 +78,7 @@ public class SoapMessageConverter {
 
     private static final Messages __msgs = Messages.getMessages(Messages.class);
 
-    private static final Log __log = LogFactory.getLog(SoapMessageConverter.class);
+    private static final Logger __log = LoggerFactory.getLogger(SoapMessageConverter.class);
 
     SOAPFactory _soapFactory;
 
@@ -156,7 +156,7 @@ public class SoapMessageConverter {
         BindingInput bi = bop.getBindingInput();
         if (bi == null)
             //throw new OdeFault(__msgs.msgBindingInputNotFound(_serviceName, _portName, op.getName()));
-            __log.warn(__msgs.msgBindingInputNotFound(_serviceName, _portName, op.getName()));
+            __log.warn("",__msgs.msgBindingInputNotFound(_serviceName, _portName, op.getName()));
 
         SOAPEnvelope soapEnv = msgCtx.getEnvelope();
         if (soapEnv == null) {

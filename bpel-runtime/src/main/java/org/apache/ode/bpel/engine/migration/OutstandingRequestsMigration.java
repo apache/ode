@@ -25,8 +25,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
@@ -40,7 +40,7 @@ import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
  *
  */
 public class OutstandingRequestsMigration implements Migration {
-    private static Log __log = LogFactory.getLog(OutstandingRequestsMigration.class);
+    private static Logger __log = LoggerFactory.getLogger(OutstandingRequestsMigration.class);
 
     public boolean migrate(Set<BpelProcess> registeredProcesses, BpelDAOConnection connection) {
         boolean migrationResult = true;

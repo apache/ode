@@ -32,8 +32,8 @@ import java.util.concurrent.Callable;
 import javax.wsdl.Fault;
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.agents.memory.SizingAgent;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.ProcessState;
@@ -89,7 +89,7 @@ import org.w3c.dom.Text;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class BpelProcess {
-    static final Log __log = LogFactory.getLog(BpelProcess.class);
+    static final Logger __log = LoggerFactory.getLogger(BpelProcess.class);
 
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 

@@ -31,8 +31,8 @@ import org.apache.axis2.engine.AbstractDispatcher;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.i18n.Messages;
 import org.apache.commons.collections.map.MultiKeyMap;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.rampart.RampartMessageData;
 import org.apache.neethi.Policy;
 
@@ -46,7 +46,7 @@ public class ODEAxisServiceDispatcher extends AbstractDispatcher {
 
     /** Field NAME */
     public static final String NAME = "ODEAxisServiceDispatcher";
-    private static final Log log = LogFactory.getLog(ODEAxisServiceDispatcher.class);
+    private static final Logger log = LoggerFactory.getLogger(ODEAxisServiceDispatcher.class);
     QName operationName = null;
 
     public AxisOperation findOperation(AxisService service, MessageContext messageContext)

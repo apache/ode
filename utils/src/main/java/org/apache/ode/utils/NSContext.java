@@ -34,8 +34,8 @@ import java.util.Set;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.CompositeUnaryFunction;
 import org.apache.ode.utils.stl.EqualsUnaryFunction;
@@ -54,7 +54,7 @@ public class NSContext implements NamespaceContext, Externalizable {
     private static final long serialVersionUID = 1L;
 
     /** Class-level logger. */
-    private static final Log __log = LogFactory.getLog(NSContext.class);
+    private static final Logger __log = LoggerFactory.getLogger(NSContext.class);
 
     /** Prefix-to-URI map. */
     private HashMap<String, String> _prefixToUriMap = new HashMap<String, String>() {

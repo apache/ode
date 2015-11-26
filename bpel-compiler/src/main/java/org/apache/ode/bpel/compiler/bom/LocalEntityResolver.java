@@ -19,8 +19,8 @@
 
 package org.apache.ode.bpel.compiler.bom;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -33,7 +33,7 @@ import java.util.HashMap;
  * Resolver implementation that restricts us to a known set of resources.
  */
 class LocalEntityResolver implements EntityResolver {
-  private static final Log __log = LogFactory.getLog(LocalEntityResolver.class);
+  private static final Logger __log = LoggerFactory.getLogger(LocalEntityResolver.class);
 
   private final HashMap<String, URL> _mappings = new HashMap<String,URL>();
 

@@ -18,8 +18,8 @@
  */
 package org.apache.ode.utils;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.w3c.dom.Element;
 
@@ -35,7 +35,7 @@ import java.io.Serializable;
  */
 public final class SerializableElement implements Serializable {
   private static final long serialVersionUID = -1L;
-  private static final Log __log = LogFactory.getLog(SerializableElement.class);
+  private static final Logger __log = LoggerFactory.getLogger(SerializableElement.class);
 
   private transient Element e;
 

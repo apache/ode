@@ -23,8 +23,8 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.engine.BpelProcess;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.obj.OBase;
@@ -47,7 +47,7 @@ import org.w3c.dom.Node;
  */
 public class ExternalVariableManager {
 
-    private static final Log __log = LogFactory.getLog(ExternalVariableManager.class);
+    private static final Logger __log = LoggerFactory.getLogger(ExternalVariableManager.class);
 
     /** Mapping of engine names to engine. */
     private Map<QName, ExternalVariableModule> _engines;

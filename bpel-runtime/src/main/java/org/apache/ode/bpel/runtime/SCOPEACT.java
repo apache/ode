@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.obj.OLink;
 import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.bpel.obj.OScope.Variable;
@@ -47,7 +47,7 @@ import org.w3c.dom.Element;
  * A scope activity. The scope activity creates a new scope frame and proceeeds using the {@link SCOPE} template.
  */
 public class SCOPEACT extends ACTIVITY {
-    private static final Log __log = LogFactory.getLog(SCOPEACT.class);
+    private static final Logger __log = LoggerFactory.getLogger(SCOPEACT.class);
     
     private static final long serialVersionUID = -4593029783757994939L;
 

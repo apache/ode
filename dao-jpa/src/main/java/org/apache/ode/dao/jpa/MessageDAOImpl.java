@@ -19,8 +19,8 @@
 
 package org.apache.ode.dao.jpa;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.dao.MessageDAO;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.utils.DOMUtils;
@@ -46,7 +46,7 @@ import javax.xml.namespace.QName;
 @Table(name = "ODE_MESSAGE")
 @NamedQueries( { @NamedQuery(name = MessageDAOImpl.DELETE_MESSAGES_BY_PROCESS, query = "delete from MessageDAOImpl as m where m._messageExchange._process = :process") })
 public class MessageDAOImpl implements MessageDAO {
-    private static Log __log = LogFactory.getLog(MessageDAOImpl.class);
+    private static Logger __log = LoggerFactory.getLogger(MessageDAOImpl.class);
     public final static String DELETE_MESSAGES_BY_PROCESS = "DELETE_MESSAGES_BY_PROCESS";
 
     @Id

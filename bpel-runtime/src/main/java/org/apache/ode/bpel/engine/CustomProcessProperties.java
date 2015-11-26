@@ -23,15 +23,15 @@ import java.net.InetAddress;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 public class CustomProcessProperties {
-    private static final Log __log = LogFactory.getLog(CustomProcessProperties.class);
+    private static final Logger __log = LoggerFactory.getLogger(CustomProcessProperties.class);
 
     public Node getProperty(QName propertyName) {
         String name = propertyName.getLocalPart();

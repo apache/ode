@@ -45,8 +45,8 @@ import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.YearMonthDurationValue;
 
 import org.apache.commons.httpclient.URIException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.elang.XslRuntimeUriResolver;
 import org.apache.ode.bpel.elang.xpath10.obj.OXPath10Expression;
@@ -74,7 +74,7 @@ import org.w3c.dom.Text;
  */
 public class JaxpFunctionResolver implements XPathFunctionResolver {
 
-    private static final Log __log = LogFactory.getLog(JaxpFunctionResolver.class);
+    private static final Logger __log = LoggerFactory.getLogger(JaxpFunctionResolver.class);
 
     private EvaluationContext _ectx;
     private OXPath20ExpressionBPEL20 _oxpath;
@@ -175,8 +175,7 @@ public class JaxpFunctionResolver implements XPathFunctionResolver {
             OXPath10Expression.OSigGetVariableData sig = _oxpath.resolveGetVariableDataSig(varname, partname, xpathStr);
             if (sig == null) {
                 String msg = "InternalError: Attempt to use an unknown getVariableData signature: " + args;
-                if (__log.isFatalEnabled())
-                    __log.fatal(msg);
+                __log.error(msg);
                 throw new XPathFunctionException(msg);
             }
 

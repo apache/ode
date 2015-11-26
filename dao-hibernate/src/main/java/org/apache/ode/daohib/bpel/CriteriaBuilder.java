@@ -27,8 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.Filter;
 import org.apache.ode.bpel.common.InstanceFilter;
@@ -46,7 +46,7 @@ import org.hibernate.criterion.Restrictions;
  * {@link org.hibernate.Criteria} objects.
  */
 class CriteriaBuilder {
-    static final Log __log = LogFactory.getLog(CriteriaBuilder.class);
+    static final Logger __log = LoggerFactory.getLogger(CriteriaBuilder.class);
 
     /**
      * Build a HQL query from an instance filter.

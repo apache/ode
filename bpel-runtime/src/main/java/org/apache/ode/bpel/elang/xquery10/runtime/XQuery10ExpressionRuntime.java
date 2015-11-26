@@ -56,8 +56,8 @@ import net.sf.saxon.xqj.SaxonXQConnection;
 import net.sf.saxon.xqj.SaxonXQDataSource;
 import net.sf.saxon.xqj.SaxonXQItem;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.elang.xpath20.compiler.Constants;
 import org.apache.ode.bpel.elang.xpath20.compiler.WrappedResolverException;
@@ -94,7 +94,7 @@ public class XQuery10ExpressionRuntime implements ExpressionLanguageRuntime {
     static final short NUMBER_TYPE = 5;
 
     /** Class-level logger. */
-    private static final Log __log = LogFactory.getLog(XQuery10ExpressionRuntime.class);
+    private static final Logger __log = LoggerFactory.getLogger(XQuery10ExpressionRuntime.class);
 
     /**
      * Creates a new XQuery10ExpressionRuntime object.

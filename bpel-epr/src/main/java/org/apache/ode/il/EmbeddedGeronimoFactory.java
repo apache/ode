@@ -19,14 +19,14 @@
 
 package org.apache.ode.il;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
 
 import javax.transaction.TransactionManager;
 
 public class EmbeddedGeronimoFactory {
-    private static final Log LOG = LogFactory.getLog(EmbeddedGeronimoFactory.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EmbeddedGeronimoFactory.class);
 
     /* Public no-arg contructor is required */
     public EmbeddedGeronimoFactory() {

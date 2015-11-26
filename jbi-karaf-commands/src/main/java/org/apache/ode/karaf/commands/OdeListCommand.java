@@ -22,8 +22,8 @@ package org.apache.ode.karaf.commands;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.felix.gogo.commands.*;
 import org.apache.ode.bpel.pmapi.*;
 import org.apache.ode.bpel.pmapi.TScopeInfo.Activities;
@@ -36,7 +36,7 @@ import org.apache.ode.bpel.pmapi.TScopeInfo.Activities;
 @Command(scope = "ode", name = "list", description = "Lists ode processes and active instances")
 public class OdeListCommand extends OdeCommandsBase {
 
-    private static final Log __log = LogFactory.getLog(OdeListCommand.class);
+    private static final Logger __log = LoggerFactory.getLogger(OdeListCommand.class);
 
     @Option(name = "-a", aliases = "--all", description = "Show all (even completed) instances")
     private boolean showAll;

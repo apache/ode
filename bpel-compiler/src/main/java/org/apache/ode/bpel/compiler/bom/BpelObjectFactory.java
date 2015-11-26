@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.compiler.bom;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.compiler.BpelC;
 import org.apache.ode.bpel.compiler.bom.IfActivity.Case;
 import org.apache.ode.utils.DOMUtils;
@@ -43,7 +43,7 @@ import java.util.Map;
 
 public class BpelObjectFactory {
 
-    private static final Log __log = LogFactory.getLog(BpelObjectFactory.class);
+    private static final Logger __log = LoggerFactory.getLogger(BpelObjectFactory.class);
     private static BpelObjectFactory __instance = new BpelObjectFactory();
 
     public static final String WSDL = "http://schemas.xmlsoap.org/wsdl/";
@@ -290,7 +290,7 @@ public class BpelObjectFactory {
     }
 
     public static class BOMSAXErrorHandler implements ErrorHandler {
-        private static final Log __log = LogFactory.getLog(BOMSAXErrorHandler.class);
+        private static final Logger __log = LoggerFactory.getLogger(BOMSAXErrorHandler.class);
         
     	private boolean ok = true;
     	private boolean strict = false;
@@ -316,7 +316,7 @@ public class BpelObjectFactory {
 		public void fatalError(SAXParseException exception) throws SAXException {
 			ok = false;
 			if (strict) {
-			    __log.fatal(formatException(exception));    
+			    __log.error(formatException(exception));    
 			} else {
 			    __log.warn(formatException(exception));
 			}

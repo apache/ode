@@ -25,8 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.xerces.dom.DOMInputImpl;
 import org.apache.xerces.impl.Constants;
@@ -46,7 +46,7 @@ import org.w3c.dom.ls.LSInput;
  */
 public class XSUtils {
 
-    private static final Log __log = LogFactory.getLog(XSUtils.class);
+    private static final Logger __log = LoggerFactory.getLogger(XSUtils.class);
 
     private static final XsdMessages __msgs = MessageBundle.getMessages(XsdMessages.class);
 
@@ -145,16 +145,16 @@ public class XSUtils {
      */
     static class LoggingXmlErrorHandler implements XMLErrorHandler {
 
-        private Log _log;
+        private Logger _log;
 
         private ArrayList<XMLParseException> _errors = new ArrayList<XMLParseException>();
 
         /**
-         * Create a new instance that will output to the specified {@link Log}
+         * Create a new instance that will output to the specified {@link Logger}
          * instance.
          * @param log the target log, which much be non-<code>null</code>
          */
-        public LoggingXmlErrorHandler(Log log) {
+        public LoggingXmlErrorHandler(Logger log) {
             assert log != null;
             _log = log;
         }
@@ -209,9 +209,9 @@ public class XSUtils {
     static class LoggingDOMErrorHandler implements DOMErrorHandler {
 
         private ArrayList<Exception> _exceptions = new ArrayList<Exception>();
-        private Log _log;
+        private Logger _log;
 
-        public LoggingDOMErrorHandler(Log log) {
+        public LoggingDOMErrorHandler(Logger log) {
             assert log != null;
             _log = log;
         }

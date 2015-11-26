@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.engine;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.obj.OPartnerLink;
@@ -28,7 +28,7 @@ import org.apache.ode.bpel.obj.OPartnerLink;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 class PartnerLinkPartnerRoleImpl extends PartnerLinkRoleImpl {
-    static final Log __log = LogFactory.getLog(BpelProcess.class);
+    static final Logger __log = LoggerFactory.getLogger(BpelProcess.class);
 
     Endpoint _initialPartner;
 

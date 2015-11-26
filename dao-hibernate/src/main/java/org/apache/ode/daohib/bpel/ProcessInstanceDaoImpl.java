@@ -28,8 +28,8 @@ import java.util.Set;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
@@ -75,7 +75,7 @@ import org.w3c.dom.Element;
  * Hibernate-based {@link ProcessInstanceDAO} implementation.
  */
 public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInstanceDAO {
-  private static final Log __log = LogFactory.getLog(ProcessInstanceDaoImpl.class);
+  private static final Logger __log = LoggerFactory.getLogger(ProcessInstanceDaoImpl.class);
 
   /** Query for removing selectors. */
   private static final String QRY_DELSELECTORS = "delete from "  +

@@ -35,8 +35,8 @@ import javax.xml.xquery.XQResultSequence;
 import net.sf.saxon.xqj.SaxonXQConnection;
 import net.sf.saxon.xqj.SaxonXQDataSource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.engine.BpelEngineImpl;
@@ -67,7 +67,7 @@ import org.w3c.dom.Node;
  *
  */
 public class ReplayerContext {
-    private static final Log __log = LogFactory.getLog(ReplayerContext.class);
+    private static final Logger __log = LoggerFactory.getLogger(ReplayerContext.class);
 
     public ReplayerScheduler scheduler;
 
@@ -182,7 +182,6 @@ public class ReplayerContext {
                 return answer;
             } catch (Exception e) {
                 __log.error("", e);
-                __log.error(e.getCause());
                 throw new IllegalStateException(e.getMessage());
             }
         }

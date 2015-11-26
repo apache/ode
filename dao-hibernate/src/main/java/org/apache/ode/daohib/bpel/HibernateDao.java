@@ -20,8 +20,8 @@ package org.apache.ode.daohib.bpel;
 
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HObject;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
@@ -39,7 +39,7 @@ public abstract class HibernateDao {
 
     // logger used by subclasses to track entered methods that may trigger sql query
     // we don't use the package name to avoid interferences with other logging info.
-    static final Log logDao = LogFactory.getLog("org.apache.ode.bpel.DAO");
+    static final Logger logDao = LoggerFactory.getLogger("org.apache.ode.bpel.DAO");
 
     protected final SessionManager _sm;
     protected final HObject _hobj;

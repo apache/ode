@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.PartnerLinkModificationEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
@@ -68,7 +68,7 @@ import java.util.Map;
 class ASSIGN extends ACTIVITY {
     private static final long serialVersionUID = 1L;
 
-    private static final Log __log = LogFactory.getLog(ASSIGN.class);
+    private static final Logger __log = LoggerFactory.getLogger(ASSIGN.class);
 
     private static final ASSIGNMessages __msgs = MessageBundle
             .getMessages(ASSIGNMessages.class);
@@ -118,7 +118,7 @@ class ASSIGN extends ACTIVITY {
         }
     }
 
-    protected Log log() {
+    protected Logger log() {
         return __log;
     }
 
@@ -387,8 +387,7 @@ class ASSIGN extends ACTIVITY {
                 ((VariableModificationEvent)se).setNewValue(lvalue);
             } else {
                 // This really should have been caught by the compiler.
-                __log
-                        .fatal("Message/Non-Message Assignment, should be caught by compiler:"
+                __log.error("Message/Non-Message Assignment, should be caught by compiler:"
                                 + ocopy);
                 throw new FaultException(
                         ocopy.getOwner().getConstants().getQnSelectionFailure(),

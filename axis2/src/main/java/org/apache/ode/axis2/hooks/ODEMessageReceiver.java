@@ -26,8 +26,8 @@ import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.receivers.AbstractMessageReceiver;
 import org.apache.axis2.util.MessageContextBuilder;
 import org.apache.axis2.wsdl.WSDLConstants;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.axis2.ODEService;
 
 /**
@@ -35,7 +35,7 @@ import org.apache.ode.axis2.ODEService;
  */
 public class ODEMessageReceiver extends AbstractMessageReceiver {
 
-    private static final Log __log = LogFactory.getLog(ODEMessageReceiver.class);
+    private static final Logger __log = LoggerFactory.getLogger(ODEMessageReceiver.class);
 
     private ODEService _service;
 

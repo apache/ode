@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.compiler;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 
 import javax.wsdl.xml.WSDLLocator;
@@ -30,7 +30,7 @@ import java.net.URISyntaxException;
 
 public class WSDLLocatorImpl implements WSDLLocator {
 
-    private static final Log __log = LogFactory.getLog(WSDLLocatorImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(WSDLLocatorImpl.class);
 
     private ResourceFinder _resourceFinder;
     private URI _base;

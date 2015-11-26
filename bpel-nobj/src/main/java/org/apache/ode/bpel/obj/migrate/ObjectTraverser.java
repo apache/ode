@@ -6,15 +6,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Traverse an Object with help of an {@link ObjectVisitor}, taking into consideration of cyclic references.
  * 
  */
 public class ObjectTraverser{
-    private static final Log __log = LogFactory.getLog(ObjectTraverser.class);
+    private static final Logger __log = LoggerFactory.getLogger(ObjectTraverser.class);
 
     private HandleTable htab = new HandleTable(1000, 0.8f);
 	private ObjectVisitor visitor;

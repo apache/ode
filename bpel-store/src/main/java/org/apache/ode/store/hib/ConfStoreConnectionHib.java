@@ -18,8 +18,8 @@
  */
 package org.apache.ode.store.hib;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.store.ConfStoreConnection;
 import org.apache.ode.store.DeploymentUnitDAO;
 import org.apache.ode.store.ProcessConfDAO;
@@ -40,7 +40,7 @@ import java.util.Date;
  */
 public class ConfStoreConnectionHib implements ConfStoreConnection {
 
-    private static final Log __log = LogFactory.getLog(ConfStoreConnectionHib.class);
+    private static final Logger __log = LoggerFactory.getLogger(ConfStoreConnectionHib.class);
     private Session _session;
 
     static final ThreadLocal<Session> _current = new ThreadLocal<Session>();

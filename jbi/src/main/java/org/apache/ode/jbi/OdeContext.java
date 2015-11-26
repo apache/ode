@@ -37,8 +37,8 @@ import javax.wsdl.Operation;
 import javax.wsdl.factory.WSDLFactory;
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.agents.memory.SizingAgent;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
@@ -63,7 +63,7 @@ import org.w3c.dom.Document;
  * @author mszefler
  */
 final public class OdeContext {
-    private static final Log __log = LogFactory.getLog(OdeContext.class);
+    private static final Logger __log = LoggerFactory.getLogger(OdeContext.class);
 
     public static final QName PM_SERVICE_NAME = new QName("http://www.apache.org/ode/pmapi", "ProcessManagementService");
     public static final String PM_PORT_NAME = "ProcessManagementPort";

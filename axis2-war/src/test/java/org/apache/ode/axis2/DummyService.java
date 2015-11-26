@@ -23,8 +23,8 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axis2.AxisFault;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.namespace.QName;
 
@@ -33,7 +33,7 @@ import javax.xml.namespace.QName;
  */
 public class DummyService {
 
-    private static final Log log = LogFactory.getLog(DummyService.class);
+    private static final Logger log = LoggerFactory.getLogger(DummyService.class);
 
     public String hello(String in) {
         log.debug("#### IN HELLO ####");

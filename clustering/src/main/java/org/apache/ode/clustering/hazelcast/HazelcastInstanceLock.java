@@ -23,11 +23,11 @@ import org.apache.ode.bpel.clapi.ClusterLock;
 
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HazelcastInstanceLock implements ClusterLock<Long> {
-    private static final Log __log = LogFactory.getLog(HazelcastInstanceLock.class);
+    private static final Logger __log = LoggerFactory.getLogger(HazelcastInstanceLock.class);
 
     private IMap<Long, Long> _lock_map;
 

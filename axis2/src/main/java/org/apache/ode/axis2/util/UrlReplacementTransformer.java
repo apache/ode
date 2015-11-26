@@ -21,8 +21,8 @@ package org.apache.ode.axis2.util;
 
 import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.commons.httpclient.URIException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
 
@@ -45,7 +45,7 @@ import java.util.Map;
  */
 public class UrlReplacementTransformer {
 
-    private static final Log log = LogFactory.getLog(UrlReplacementTransformer.class);
+    private static final Logger log = LoggerFactory.getLogger(UrlReplacementTransformer.class);
 
     private static final org.apache.ode.axis2.httpbinding.Messages httpMsgs = org.apache.ode.axis2.httpbinding.Messages.getMessages(org.apache.ode.axis2.httpbinding.Messages.class);
 

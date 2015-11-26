@@ -19,8 +19,8 @@
 
 package org.apache.ode.axis2;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.axis2.Axis2TestBase;
 import org.apache.ode.axis2.JettyWrapper;
 import org.apache.ode.axis2.httpbinding.HttpBindingTest;
@@ -58,7 +58,7 @@ import java.io.StringReader;
  */
 public class SoapHeader2Test extends Axis2TestBase {
 
-    private static final Log log = LogFactory.getLog(SoapHeader2Test.class);
+    private static final Logger log = LoggerFactory.getLogger(SoapHeader2Test.class);
 
     protected JettyWrapper jettyWrapper;
 

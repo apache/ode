@@ -31,8 +31,8 @@ import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Value;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.elang.xpath10.obj.OXPath10ExpressionBPEL20;
 import org.apache.ode.bpel.elang.xpath20.compiler.WrappedResolverException;
@@ -50,7 +50,7 @@ import org.w3c.dom.Node;
  */
 public class JaxpVariableResolver implements XPathVariableResolver {
 
-    private static final Log __log = LogFactory.getLog(JaxpVariableResolver.class);
+    private static final Logger __log = LoggerFactory.getLogger(JaxpVariableResolver.class);
 
     private EvaluationContext _ectx;
     private OXPath10ExpressionBPEL20 _oxpath;

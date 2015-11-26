@@ -12,8 +12,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.obj.ExtensibleImpl;
 
 /**
@@ -22,7 +22,7 @@ import org.apache.ode.bpel.obj.ExtensibleImpl;
  * @see ObjectTraverser
  */
 public class OmOld2new extends AbstractObjectVisitor{
-    private static final Log __log = LogFactory.getLog(OmOld2new.class);
+    private static final Logger __log = LoggerFactory.getLogger(OmOld2new.class);
     
 	private static Map<String, String> beanPkgMap = new HashMap<String, String>();
 	static{

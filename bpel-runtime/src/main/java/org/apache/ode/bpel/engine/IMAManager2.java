@@ -28,8 +28,8 @@ import java.util.Set;
 
 import javax.wsdl.OperationType;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.runtime.PartnerLinkInstance;
 import org.apache.ode.bpel.runtime.Selector;
@@ -44,7 +44,7 @@ import org.apache.ode.utils.ObjectPrinter;
 public class IMAManager2 implements Serializable {
     private static final long serialVersionUID = -5556374398943757951L;
 
-    private static final Log __log = LogFactory.getLog(IMAManager2.class);
+    private static final Logger __log = LoggerFactory.getLogger(IMAManager2.class);
 
     // holds rid for registered IMAs
     public final Map<RequestIdTuple, Entry> _byRid = new HashMap<RequestIdTuple, Entry>();
@@ -89,7 +89,7 @@ public class IMAManager2 implements Serializable {
 
         if (_byChannel.containsKey(pickResponseChannel)) {
             String errmsg = "INTERNAL ERROR: Duplicate ENTRY for RESPONSE CHANNEL " + pickResponseChannel;
-            __log.fatal(errmsg);
+            __log.error(errmsg);
             throw new IllegalArgumentException(errmsg);
         }
 
@@ -98,7 +98,7 @@ public class IMAManager2 implements Serializable {
             final RequestIdTuple rid = new RequestIdTuple(selectors[i].plinkInstance, selectors[i].opName, selectors[i].correlationKeySet);
             if (_byRid.containsKey(rid)) {
                 String errmsg = "INTERNAL ERROR: Duplicate ENTRY for RID " + rid;
-                __log.fatal(errmsg);
+                __log.error(errmsg);
                 throw new IllegalStateException(errmsg);
             }
             _byRid.put(rid, entry);
@@ -148,7 +148,7 @@ public class IMAManager2 implements Serializable {
             while (_byRid.values().remove(entry));
         } else if (!isTimer){
             String errmsg = "INTERNAL ERROR: No ENTRY for RESPONSE CHANNEL " + pickResponseChannel;
-            __log.fatal(errmsg);
+            __log.error(errmsg);
             throw new IllegalArgumentException(errmsg);
         }
     }

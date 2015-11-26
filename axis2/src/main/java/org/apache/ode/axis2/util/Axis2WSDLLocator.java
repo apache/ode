@@ -27,12 +27,12 @@ import java.net.URISyntaxException;
 
 import javax.wsdl.xml.WSDLLocator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 
 public class Axis2WSDLLocator implements WSDLLocator {
-    private static final Log LOG = LogFactory.getLog(Axis2WSDLLocator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Axis2WSDLLocator.class);
     private URI _baseUri;
     private String _latest;
 

@@ -28,8 +28,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
@@ -66,7 +66,7 @@ import org.apache.xmlbeans.XmlObject;
  *
  */
 public class Replayer {
-    private static final Log __log = LogFactory.getLog(Replayer.class);
+    private static final Logger __log = LoggerFactory.getLogger(Replayer.class);
     public static ThreadLocal<Replayer> replayer = new ThreadLocal<Replayer>();
     public ReplayerScheduler scheduler = new ReplayerScheduler();
     public BpelEngineImpl engine = null;

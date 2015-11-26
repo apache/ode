@@ -13,8 +13,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * compare two object for equality. default strategy:
@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class DeepEqualityHelper{
 
-	private static final Log __log = LogFactory.getLog(ObjectTraverser.class);
+	private static final Logger __log = LoggerFactory.getLogger(ObjectTraverser.class);
     public boolean logFalseThrough = false;
     private Stack<String> st = new Stack<String>();
     

@@ -44,8 +44,8 @@ import javax.wsdl.xml.WSDLReader;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
@@ -129,7 +129,7 @@ import org.w3c.dom.Node;
  */
 public abstract class BpelCompiler implements CompilerContext {
     /** Class-severity logger. */
-    protected static final Log __log = LogFactory.getLog(BpelCompiler.class);
+    protected static final Logger __log = LoggerFactory.getLogger(BpelCompiler.class);
 
     /** Standardized compiler messages. */
     private static final CommonCompilationMessages __cmsgs = MessageBundle.getMessages(CommonCompilationMessages.class);

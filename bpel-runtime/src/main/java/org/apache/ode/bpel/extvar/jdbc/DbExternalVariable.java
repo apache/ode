@@ -30,8 +30,8 @@ import java.util.Set;
 import javax.sql.DataSource;
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.ISO8601DateParser;
@@ -48,7 +48,7 @@ import org.w3c.dom.NodeList;
  * @author Maciej Szefler <mszefler at gmail dot com>
  */
 class DbExternalVariable {
-    private static final Log __log = LogFactory.getLog(DbExternalVariable.class);
+    private static final Logger __log = LoggerFactory.getLogger(DbExternalVariable.class);
 
     private static final String XSI_NS = "http://www.w3.org/2001/XMLSchema-instance";
 

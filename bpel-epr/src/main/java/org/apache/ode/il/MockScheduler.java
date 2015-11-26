@@ -36,8 +36,8 @@ import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Scheduler;
 
@@ -45,7 +45,7 @@ import org.apache.ode.bpel.iapi.Scheduler;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class MockScheduler implements Scheduler {
-    private static final Log __log = LogFactory.getLog(MockScheduler.class);
+    private static final Logger __log = LoggerFactory.getLogger(MockScheduler.class);
 
     private JobProcessor _processor;
     private ExecutorService _executorSvc = Executors.newCachedThreadPool();

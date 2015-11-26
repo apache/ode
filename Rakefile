@@ -88,7 +88,7 @@ define "ode" do
       "scheduler-simple", "bpel-schemas", "bpel-store", "utils", "agents", "clustering"),
       AXIOM, AXIS2_ALL, COMMONS.lang, COMMONS.collections, COMMONS.httpclient, COMMONS.lang,
       DERBY, GERONIMO.kernel, GERONIMO.transaction, JAVAX.activation, JAVAX.servlet, JAVAX.stream,
-      JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS, XMLBEANS, AXIS2_MODULES.libs, SLF4J, LOG4J
+      JAVAX.transaction, JENCKS, WSDL4J, WS_COMMONS, XMLBEANS, AXIS2_MODULES.libs, SLF4J, LOG4J2
 
     test.exclude 'org.apache.ode.axis2.management.*'
     test.with project("tools"), AXIOM, JAVAX.javamail, COMMONS.codec, COMMONS.httpclient, XERCES, WOODSTOX, JACKSON
@@ -105,8 +105,8 @@ define "ode" do
       AXIS2_ALL, ANNONGEN, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.fileupload, COMMONS.io, COMMONS.httpclient, COMMONS.beanutils,
       COMMONS.lang, COMMONS.pool, DERBY, DERBY_TOOLS, JACOB, JAXEN, JAVAX.activation, JAVAX.ejb, JAVAX.javamail,
       JAVAX.connector, JAVAX.jms, JAVAX.persistence, JAVAX.transaction, JAVAX.stream,  JIBX,
-      GERONIMO.connector, GERONIMO.kernel, GERONIMO.transaction, LOG4J, OPENJPA, SAXON, TRANQL,
-      WOODSTOX, WSDL4J, WS_COMMONS, XALAN, XERCES, XMLBEANS, SPRING, AXIS2_MODULES.libs, SLF4J, LOG4J, HAZELCAST
+      GERONIMO.connector, GERONIMO.kernel, GERONIMO.transaction, LOG4J2, OPENJPA, SAXON, TRANQL,
+      WOODSTOX, WSDL4J, WS_COMMONS, XALAN, XERCES, XMLBEANS, SPRING, AXIS2_MODULES.libs, SLF4J, HAZELCAST
 
     package(:war).with(:libs=>libs).path("WEB-INF").tap do |web_inf|
       web_inf.merge project("dao-jpa-ojpa-derby").package(:zip)
@@ -132,7 +132,7 @@ define "ode" do
       end
     end
 
-    test.using :testng, :forkmode=>'perTest', :properties=>{ "org.apache.commons.logging.LogFactory" => "org.apache.commons.logging.impl.LogFactoryImpl", "log4j.configuration"=>"test-log4j.properties", "test.ports" => ENV['TEST_PORTS'], "org.apache.ode.scheduler.deleteJobsOnStart" => "true", "org.apache.ode.autoRetireProcess"=>"true" } , :java_args=>['-Xmx2048m', '-XX:MaxPermSize=256m'] #'-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6001',
+    test.using :testng, :forkmode=>'perTest', :properties=>{ "log4j.configurationFile"=>"test-log4j2.xml", "test.ports" => ENV['TEST_PORTS'], "org.apache.ode.scheduler.deleteJobsOnStart" => "true", "org.apache.ode.autoRetireProcess"=>"true" } , :java_args=>['-Xmx2048m', '-XX:MaxPermSize=256m'] #'-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6001',
     test.with [projects("tools", 'bpel-obj'), libs, AXIS2_MODULES.mods, AXIOM, JAVAX.servlet, Buildr::Jetty::REQUIRES, HIBERNATE, DOM4J, H2::REQUIRES, SPRING_TEST, JACKSON].uniq
     webapp_dir = "#{test.compile.target}/webapp"
     test.setup task(:prepare_webapp) do |task|
@@ -168,7 +168,7 @@ define "ode" do
 
   desc "ODE APIs"
   define "bpel-api" do
-    compile.with projects("utils", "bpel-nobj", "bpel-schemas"), WSDL4J, XERCES, SLF4J, LOG4J
+    compile.with projects("utils", "bpel-nobj", "bpel-schemas"), WSDL4J, XERCES, SLF4J, LOG4J2
     package :jar
   end
 
@@ -181,9 +181,9 @@ define "ode" do
   desc "ODE BPEL Compiler"
   define "bpel-compiler" do
     compile.with projects("bpel-api", "bpel-nobj", "bpel-schemas", "utils"),
-      JAVAX.stream, JAXEN, SAXON, WSDL4J, XALAN, XERCES, COMMONS.collections, SLF4J, LOG4J, JACKSON, OBJECT_DIFF
+      JAVAX.stream, JAXEN, SAXON, WSDL4J, XALAN, XERCES, COMMONS.collections, SLF4J, LOG4J2, JACKSON, OBJECT_DIFF
     test.resources { filter(project("bpel-scripts").path_to("src/main/resources")).into(test.resources.target).run }
-    test.with LOG4J, projects("bpel-obj")
+    test.with LOG4J2, projects("bpel-obj")
     package :jar
   end
 
@@ -203,14 +203,14 @@ define "ode" do
   define "bpel-epr" do
     compile.with projects("utils", "bpel-dao", "bpel-api"),
       AXIOM, COMMONS.lang, COMMONS.beanutils, DERBY, JAVAX.connector, JAVAX.stream, JAVAX.transaction, 
-      GERONIMO.transaction, GERONIMO.connector, TRANQL, XMLBEANS, SLF4J, LOG4J, H2::REQUIRES
+      GERONIMO.transaction, GERONIMO.connector, TRANQL, XMLBEANS, SLF4J, LOG4J2, H2::REQUIRES
     test.with XERCES
     package :jar
   end
 
   desc "ODE Clustering"
    define "clustering" do
-     compile.with projects("bpel-api","bpel-store"),HAZELCAST, COMMONS.logging
+     compile.with projects("bpel-api","bpel-store"),HAZELCAST, SLF4J
      package :jar
    end
 
@@ -222,7 +222,7 @@ define "ode" do
 
   desc "New ODE BPEL Object Model"
   define "bpel-nobj" do
-    compile.with projects("utils", "bpel-obj"), JACKSON, LOG4J, SAXON, WSDL4J, COMMONS.collections, COMMONS.logging, OBJECT_DIFF
+    compile.with projects("utils", "bpel-obj"), JACKSON, LOG4J2, SAXON, WSDL4J, COMMONS.collections, SLF4J, OBJECT_DIFF
     package :jar
 	test.with XERCES
   end
@@ -242,7 +242,7 @@ define "ode" do
 
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-epr", "bpel-nobj", "bpel-schemas",
       "bpel-store", "utils", "agents","clustering"),
-      COMMONS.collections, COMMONS.httpclient, JACOB, JAVAX.persistence, JAVAX.stream, JAXEN, SAXON, WSDL4J, XMLBEANS, SPRING, SLF4J, LOG4J,
+      COMMONS.collections, COMMONS.httpclient, JACOB, JAVAX.persistence, JAVAX.stream, JAXEN, SAXON, WSDL4J, XMLBEANS, SPRING, SLF4J, LOG4J2,
 	  JACKSON, JAVAX.connector
 
     test.with projects("scheduler-simple", "dao-jpa", "dao-hibernate", "bpel-epr", "bpel-obj"),
@@ -256,7 +256,7 @@ define "ode" do
 
   desc "ODE Simple Scheduler"
   define "scheduler-simple" do
-    compile.with projects("bpel-api", "utils"), COMMONS.collections, JAVAX.transaction, SLF4J, LOG4J
+    compile.with projects("bpel-api", "utils"), COMMONS.collections, JAVAX.transaction, SLF4J, LOG4J2
     test.compile.with H2::REQUIRES, HSQLDB, GERONIMO.kernel, GERONIMO.transaction
     test.with H2::REQUIRES, HSQLDB, JAVAX.transaction, JAVAX.resource, JAVAX.connector, 
           GERONIMO.kernel, GERONIMO.transaction, GERONIMO.connector, TRANQL, BACKPORT, JAVAX.ejb
@@ -281,7 +281,7 @@ define "ode" do
   define "bpel-store" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-nobj", "bpel-schemas", "bpel-epr",
       "dao-hibernate", "dao-jpa", "utils"),
-      JAVAX.persistence, JAVAX.stream, JAVAX.transaction, HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J, OPENJPA, SPRING, SLF4J, LOG4J, JACKSON, H2::REQUIRES
+      JAVAX.persistence, JAVAX.stream, JAVAX.transaction, HIBERNATE, HSQLDB, XMLBEANS, XERCES, WSDL4J, OPENJPA, SPRING, SLF4J, LOG4J2, JACKSON, H2::REQUIRES
     compile { open_jpa_enhance }
     resources hibernate_doclet(:package=>"org.apache.ode.store.hib", :excludedtags=>"@version,@author,@todo")
 
@@ -297,7 +297,7 @@ define "ode" do
       "bpel-store", "utils", "bpel-epr", "dao-hibernate", "agents", "scheduler-simple"),
       DERBY, JUnit.dependencies, JAVAX.persistence, OPENJPA, WSDL4J, COMMONS.httpclient, COMMONS.io,
       GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, JAVAX.transaction, TRANQL, "tranql:tranql-connector-derby-common:jar:1.1",
-      SPRING_TEST, COMMONS.codec, SLF4J, LOG4J
+      SPRING_TEST, COMMONS.codec, SLF4J, LOG4J2
 
     test.using :properties=>{ "org.apache.ode.autoRetireProcess"=>"true" }
     test.with projects("bpel-nobj", "bpel-obj", "bpel-schemas", "bpel-scripts"),
@@ -310,7 +310,7 @@ define "ode" do
   desc "ODE Hibernate DAO Implementation"
   define "dao-hibernate" do
     compile.with projects("bpel-api", "bpel-dao", "bpel-ql", "utils"),
-      COMMONS.lang, JAVAX.transaction, HIBERNATE, DOM4J, SLF4J, LOG4J
+      COMMONS.lang, JAVAX.transaction, HIBERNATE, DOM4J, SLF4J, LOG4J2
     resources hibernate_doclet(:package=>"org.apache.ode.daohib.bpel.hobj", :excludedtags=>"@version,@author,@todo")
 
     # doclet does not support not-found="ignore"
@@ -381,7 +381,7 @@ define "ode" do
   desc "ODE OpenJPA DAO Implementation"
   define "dao-jpa" do
     compile.with projects("bpel-api", "bpel-dao", "utils"),
-      COMMONS.collections, JAVAX.connector, JAVAX.persistence, JAVAX.transaction, OPENJPA, XERCES, COMMONS.logging, SLF4J, LOG4J
+      COMMONS.collections, JAVAX.connector, JAVAX.persistence, JAVAX.transaction, OPENJPA, XERCES, SLF4J, LOG4J2
     compile { open_jpa_enhance }
     package :jar
   end
@@ -404,9 +404,9 @@ define "ode" do
     h2_db = H2.create("ode-jpa-h2", _("target/h2-jpadb")=>_("target/h2.sql"))
 
     test.with projects("bpel-api", "bpel-dao", "bpel-nobj", "bpel-epr", "dao-jpa", "utils"),
-      BACKPORT, COMMONS.collections, COMMONS.lang, COMMONS.logging, GERONIMO.transaction,
+      BACKPORT, COMMONS.collections, COMMONS.lang, GERONIMO.transaction,
       GERONIMO.kernel, GERONIMO.connector, HSQLDB, JAVAX.connector, JAVAX.ejb, JAVAX.persistence,
-      JAVAX.transaction, LOG4J, OPENJPA, XERCES, WSDL4J, H2::REQUIRES
+      JAVAX.transaction, LOG4J2, OPENJPA, XERCES, WSDL4J, H2::REQUIRES, SLF4J
 
     build derby_db
     build h2_db
@@ -420,7 +420,7 @@ define "ode" do
   define "jbi" do
     compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "bpel-epr", "bpel-nobj", 
       "bpel-runtime", "scheduler-simple", "bpel-schemas", "bpel-store", "utils", "agents"),
-      AXIOM, COMMONS.logging, COMMONS.pool, JAVAX.transaction, GERONIMO.transaction, JBI, SLF4J, LOG4J, WSDL4J, XERCES
+      AXIOM, COMMONS.pool, JAVAX.transaction, GERONIMO.transaction, JBI, SLF4J, LOG4J2, WSDL4J, XERCES
 
     package(:jar)
     package(:jbi).tap do |jbi|
@@ -448,7 +448,7 @@ define "ode" do
       JAVAX.transaction, JAXEN, JBI, OPENJPA, SAXON, SERVICEMIX, SPRING, TRANQL,
       XALAN, XBEAN, XMLBEANS,
       SLF4J,
-      LOG4J,
+      LOG4J2,
       DOM4J,
       HIBERNATE,
 	  JACKSON
@@ -465,8 +465,8 @@ define "ode" do
 
   desc "ODE Commmands for Karaf"
   define "jbi-karaf-commands" do
-    compile.with projects("bpel-schemas", "jbi"), JBI, KARAF, XMLBEANS, SLF4J, LOG4J
-    libs = artifacts(projects("bpel-schemas", "jbi"), JBI, KARAF, XMLBEANS, SLF4J, LOG4J)
+    compile.with projects("bpel-schemas", "jbi"), JBI, KARAF, XMLBEANS, SLF4J, LOG4J2
+    libs = artifacts(projects("bpel-schemas", "jbi"), JBI, KARAF, XMLBEANS, SLF4J, LOG4J2)
     package(:bundle).tap do |bnd|
       bnd.classpath = [_("target/classes"), libs].flatten
       BUNDLE_VERSIONS.each {|key, value| bnd[key] = value }
@@ -563,7 +563,7 @@ define "ode" do
                                   "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa", "utils", "agents"))
     libs = artifacts(ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
                      COMMONS.primitives, COMMONS.io, DERBY, GERONIMO.connector, GERONIMO.transaction, JACOB, JAVAX.connector, 
-                     JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, JAXEN, LOG4J, OPENJPA, 
+                     JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, JAXEN, LOG4J2, OPENJPA, 
                      SAXON, TRANQL, XALAN, XERCES, XMLBEANS, WSDL4J, KARAF)
     compile.with projects("bpel-schemas", "jbi", "bpel-api"), JBI, libs, KARAF, SPRING, SPRING_OSGI
 
@@ -606,19 +606,19 @@ define "ode" do
 
   desc "ODE JCA Server"
   define "jca-server" do
-    compile.with projects("jca-ra", "utils"), SLF4J, LOG4J
+    compile.with projects("jca-ra", "utils"), SLF4J, LOG4J2
     package :jar
   end
 
   desc "ODE Tools"
   define "tools" do
-    compile.with projects("bpel-compiler", "utils", "bpel-nobj"), ANT, COMMONS.httpclient, SLF4J, LOG4J
+    compile.with projects("bpel-compiler", "utils", "bpel-nobj"), ANT, COMMONS.httpclient, SLF4J, LOG4J2
     package :jar
   end
 
   desc "ODE Utils"
   define "utils" do
-    compile.with AXIOM, AXIS2_ALL, COMMONS.lang, COMMONS.collections, COMMONS.pool, COMMONS.httpclient, COMMONS.codec, XERCES, JAVAX.stream, WSDL4J, SAXON, SLF4J, LOG4J
+    compile.with AXIOM, AXIS2_ALL, COMMONS.lang, COMMONS.collections, COMMONS.pool, COMMONS.httpclient, COMMONS.codec, XERCES, JAVAX.stream, WSDL4J, SAXON, SLF4J, LOG4J2
     # env variable required by HierarchicalPropertiesTest
     test.using :environment=>{ 'TEST_DUMMY_ENV_VAR'=>42}
     test.exclude "*TestResources"
@@ -669,7 +669,7 @@ define "apache-ode" do
 
         # Libraries
         zip.path("lib").include artifacts(COMMONS.codec, COMMONS.httpclient,
-          COMMONS.pool, COMMONS.collections, JAXEN, SAXON, WSDL4J, XALAN, XERCES, SLF4J, LOG4J)
+          COMMONS.pool, COMMONS.collections, JAXEN, SAXON, WSDL4J, XALAN, XERCES, SLF4J, LOG4J2)
         project("ode").projects("utils", "tools", "bpel-compiler", "bpel-api", "bpel-nobj", "bpel-schemas").
           map(&:packages).flatten.each do |pkg|
             zip.include(pkg.to_s, :as=>"#{pkg.id}.#{pkg.type}", :path=>"lib") unless ['sources', 'javadoc'].include?(pkg.classifier)

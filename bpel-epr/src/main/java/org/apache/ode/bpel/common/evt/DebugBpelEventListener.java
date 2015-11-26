@@ -21,8 +21,8 @@ package org.apache.ode.bpel.common.evt;
 import java.util.Properties;
 
 import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.evt.BpelEvent;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 
@@ -40,7 +40,7 @@ import org.apache.ode.bpel.iapi.BpelEventListener;
  * @author Tammo van Lessen (University of Stuttgart)
  */
 public class DebugBpelEventListener implements BpelEventListener {
-    private static final Log __log = LogFactory.getLog(BpelEventListener.class);
+    private static final Logger __log = LoggerFactory.getLogger(BpelEventListener.class);
 
     private static final String SYSOUT_KEY = "debugeventlistener.dumpToStdOut";
     private boolean _dumpToStdOut = false;

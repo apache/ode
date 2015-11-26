@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
  */
 class EMPTY extends ACTIVITY {
     private static final long serialVersionUID = 1L;
-    private static final Log __log = LogFactory.getLog(EMPTY.class);
+    private static final Logger __log = LoggerFactory.getLogger(EMPTY.class);
 
   public EMPTY(ActivityInfo self, ScopeFrame frame, LinkFrame linkFrame) {
     super(self, frame, linkFrame);

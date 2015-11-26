@@ -31,8 +31,8 @@ import javax.jbi.messaging.InOnly;
 import javax.jbi.messaging.InOut;
 import javax.jbi.messaging.MessagingException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 
@@ -40,7 +40,7 @@ import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
  * Asynchronous JBI service consumer
  */
 class OdeConsumerAsync extends OdeConsumer {
-    private static final Log __log = LogFactory.getLog(OdeConsumerAsync.class);
+    private static final Logger __log = LoggerFactory.getLogger(OdeConsumerAsync.class);
 
     /**
      * We create an executor to handle all the asynchronous invocations/timeouts. Note, we don't need a lot of threads

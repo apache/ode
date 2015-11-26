@@ -18,8 +18,8 @@
  */
 package org.apache.ode.daohib;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.daohib.bpel.hobj.*;
 import org.apache.ode.utils.uuid.UUID;
 import org.hibernate.HibernateException;
@@ -44,7 +44,7 @@ import java.util.Properties;
  * managing sessions.
  */
 public class SessionManager {
-    private static final Log __log = LogFactory.getLog(SessionManager.class);
+    private static final Logger __log = LoggerFactory.getLogger(SessionManager.class);
 
     public static final String PROP_GUID = "ode.hibernate.guid";
 

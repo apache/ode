@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.memdao;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.Filter;
 import org.apache.ode.bpel.common.InstanceFilter;
@@ -56,7 +56,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * A very simple, in-memory implementation of the {@link BpelDAOConnection} interface.
  */
 class BpelDAOConnectionImpl implements BpelDAOConnection {
-    private static final Log __log = LogFactory.getLog(BpelDAOConnectionImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(BpelDAOConnectionImpl.class);
 
     private Scheduler _scheduler;
     private Map<QName, ProcessDaoImpl> _store;

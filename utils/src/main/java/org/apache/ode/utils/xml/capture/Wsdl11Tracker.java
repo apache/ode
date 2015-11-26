@@ -18,8 +18,8 @@
  */
 package org.apache.ode.utils.xml.capture;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
@@ -29,7 +29,7 @@ import org.xml.sax.SAXException;
  * document may have in-line schemas.
  */
 public class Wsdl11Tracker extends XmlSchemaTracker {
-  private static final Log __log = LogFactory.getLog(Wsdl11Tracker.class);
+  private static final Logger __log = LoggerFactory.getLogger(Wsdl11Tracker.class);
 
   public static final String NS = "http://schemas.xmlsoap.org/wsdl/";
 

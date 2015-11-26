@@ -19,8 +19,8 @@
 
 package org.apache.ode.daohib.bpel;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.dao.ActivityRecoveryDAO;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.FaultDAO;
@@ -54,7 +54,7 @@ import java.util.List;
  */
 public class ProcessInstanceProfileDaoImpl extends ProcessProfileDaoImpl implements ProcessInstanceProfileDAO {
     @SuppressWarnings("unused")
-    private static final Log __log = LogFactory.getLog(ProcessInstanceProfileDaoImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(ProcessInstanceProfileDaoImpl.class);
 
     private ProcessInstanceDaoImpl instance;
 

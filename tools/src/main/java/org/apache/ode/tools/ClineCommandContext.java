@@ -18,13 +18,13 @@
  */
 package org.apache.ode.tools;
 
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 
 public class ClineCommandContext implements CommandContext {
 
-  private Log _log;
+  private Logger _log;
 
-  public ClineCommandContext(Log l) {
+  public ClineCommandContext(Logger l) {
     _log = l;
   }
 

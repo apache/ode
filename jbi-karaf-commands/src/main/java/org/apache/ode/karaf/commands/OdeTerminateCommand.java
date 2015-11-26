@@ -22,15 +22,15 @@ package org.apache.ode.karaf.commands;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.felix.gogo.commands.*;
 import org.apache.ode.bpel.pmapi.TInstanceInfo;
 
 @Command(scope = "ode", name = "terminate", description = "Terminate active ODE process instances")
 public class OdeTerminateCommand extends OdeCommandsBase {
 
-    private static final Log __log = LogFactory.getLog(OdeTerminateCommand.class);
+    private static final Logger __log = LoggerFactory.getLogger(OdeTerminateCommand.class);
 
     @Argument(name = "iids", description = "Instance IDs to terminate", multiValued = true)
     private static Long[] iids;

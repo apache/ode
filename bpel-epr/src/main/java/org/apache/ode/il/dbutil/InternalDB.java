@@ -68,7 +68,7 @@ public class InternalDB extends Database {
     protected void shutdownDB() {}
     
     protected void initDataSource() throws DatabaseConfigException {
-        __log.info(__msgs.msgOdeUsingInternalDb(_odeConfig.getDbIntenralJdbcUrl(), _odeConfig.getDbInternalJdbcDriverClass()));
+        __log.info("",__msgs.msgOdeUsingInternalDb(_odeConfig.getDbIntenralJdbcUrl(), _odeConfig.getDbInternalJdbcDriverClass()));
         initInternalDb(_odeConfig.getDbIntenralJdbcUrl(), _odeConfig.getDbInternalJdbcDriverClass(),
                 _odeConfig.getDbInternalUserName(), _odeConfig.getDbInternalPassword());
     }

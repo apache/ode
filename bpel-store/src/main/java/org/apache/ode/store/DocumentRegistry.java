@@ -22,8 +22,8 @@ import java.util.ArrayList;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 
@@ -31,7 +31,7 @@ import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
  * A parsed collection of WSDL definitions, including BPEL-specific extensions.
  */
 public class DocumentRegistry {
-    private static final Log __log = LogFactory.getLog(DocumentRegistry.class);
+    private static final Logger __log = LoggerFactory.getLogger(DocumentRegistry.class);
 
     private final ArrayList<Definition4BPEL> _definitions = new ArrayList<Definition4BPEL>();
 

@@ -33,8 +33,8 @@ import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.httpclient.params.HttpParams;
 import org.apache.commons.httpclient.params.HostParams;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ode.utils.Properties;
 import org.apache.ode.utils.DOMUtils;
@@ -50,7 +50,7 @@ import java.util.Collections;
 
 public class HttpHelper {
 
-    private static final Log log = LogFactory.getLog(HttpHelper.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpHelper.class);
 
 
     public static void configure(HttpClient client, URI targetURI, Element authPart, HttpParams params) throws URIException {
@@ -269,7 +269,7 @@ public class HttpHelper {
             sb.append("HTTP Request Details: \n").append(m.getName()).append(" ").append(m.getURI());
         } catch (URIException e) {
             // not that important
-            if (log.isDebugEnabled()) log.debug(e);
+            if (log.isDebugEnabled()) log.debug("",e);
         }
         sb.append("\nRequest Headers:");
         Header[] headers = m.getRequestHeaders();
@@ -302,7 +302,7 @@ public class HttpHelper {
             sb.append("HTTP Response Details: \n").append(m.getName()).append(" ").append(m.getURI());
         } catch (URIException e) {
             // not that important
-            if (log.isDebugEnabled()) log.debug(e);
+            if (log.isDebugEnabled()) log.debug("",e);
         }
         sb.append("\nStatus-Line: ").append(m.getStatusLine());
         Header[] headers = m.getResponseHeaders();
@@ -316,7 +316,7 @@ public class HttpHelper {
                 sb.append("\nResponse Entity:\n").append(m.getResponseBodyAsString());
             }
         } catch (IOException e) {
-            log.error(e);
+            log.error("",e);
         }
         Header[] footers = m.getResponseFooters();
         if (footers.length != 0) sb.append("\nResponse Footers: ");

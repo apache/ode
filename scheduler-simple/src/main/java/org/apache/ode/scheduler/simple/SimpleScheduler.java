@@ -19,8 +19,8 @@
 
 package org.apache.ode.scheduler.simple;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.clapi.ClusterManager;
 import org.apache.ode.bpel.clapi.ClusterMemberListener;
 import org.apache.ode.bpel.iapi.ContextException;
@@ -54,7 +54,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  */
 public class SimpleScheduler implements Scheduler, TaskRunner, ClusterMemberListener {
-    private static final Log __log = LogFactory.getLog(SimpleScheduler.class);
+    private static final Logger __log = LoggerFactory.getLogger(SimpleScheduler.class);
 
     private static final int DEFAULT_TRANSACTION_TIMEOUT = 60 * 1000;
 

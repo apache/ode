@@ -37,8 +37,8 @@ import javax.transaction.TransactionManager;
 import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.servicemix.client.DefaultServiceMixClient;
 import org.apache.servicemix.jbi.container.ActivationSpec;
 import org.apache.servicemix.jbi.container.JBIContainer;
@@ -53,7 +53,7 @@ import org.springframework.context.support.AbstractXmlApplicationContext;
 
 @Ignore
 public class JbiTestBase extends SpringTestSupport {
-    private static Log log = LogFactory.getLog(JbiTestBase.class);
+    private static Logger log = LoggerFactory.getLogger(JbiTestBase.class);
 
     protected OdeComponent odeComponent;
     protected JBIContainer jbiContainer;

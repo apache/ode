@@ -3,8 +3,8 @@ package org.apache.ode.bpel.obj.migrate;
 import java.lang.reflect.Field;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.obj.ExtensibleImpl;
 
 /**
@@ -14,7 +14,7 @@ import org.apache.ode.bpel.obj.ExtensibleImpl;
  * @see ObjectTraverser
  */
 public class UpgradeChecker extends AbstractObjectVisitor{
-    private static final Log __log = LogFactory.getLog(UpgradeChecker.class);
+    private static final Logger __log = LoggerFactory.getLogger(UpgradeChecker.class);
 
     private boolean newest = true;
 	@Override

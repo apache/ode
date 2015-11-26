@@ -19,8 +19,8 @@
 
 package org.apache.ode.store.jpa;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.store.ConfStoreConnection;
 import org.apache.ode.store.DeploymentUnitDAO;
 
@@ -34,7 +34,7 @@ import java.util.List;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class ConfStoreConnectionJpa implements ConfStoreConnection {
-    private static Log LOG = LogFactory.getLog(ConfStoreConnectionJpa.class);
+    private static Logger LOG = LoggerFactory.getLogger(ConfStoreConnectionJpa.class);
 
     private EntityManager _em;
     static final ThreadLocal<EntityManager> _current = new ThreadLocal<EntityManager>();

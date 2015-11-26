@@ -30,8 +30,8 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
@@ -56,7 +56,7 @@ import org.xml.sax.InputSource;
  * </p>
 s */
 public class BpelC {
-    private static final Log __log = LogFactory.getLog(BpelC.class);
+    private static final Logger __log = LoggerFactory.getLogger(BpelC.class);
     private static final CommonCompilationMessages __cmsgs =
             MessageBundle.getMessages(CommonCompilationMessages.class);
 
@@ -500,7 +500,7 @@ public class BpelC {
 
 
     /**
-     * Log a compilation message, both to the log, and to the listener (if any).
+     * Logger a compilation message, both to the log, and to the listener (if any).
      * @param cmsg
      */
     private void logCompilationMessage(CompilationMessage cmsg) {

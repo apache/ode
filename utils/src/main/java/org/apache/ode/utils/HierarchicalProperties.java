@@ -20,8 +20,8 @@
 package org.apache.ode.utils;
 
 import org.apache.commons.collections.map.MultiKeyMap;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.lang.StringUtils;
 
 import javax.xml.namespace.QName;
@@ -80,7 +80,7 @@ import java.util.regex.Pattern;
  */
 public class HierarchicalProperties {
 
-    private static final Log log = LogFactory.getLog(HierarchicalProperties.class);
+    private static final Logger log = LoggerFactory.getLogger(HierarchicalProperties.class);
 
     public static final String ODE_PREFFIX = "ode";
 

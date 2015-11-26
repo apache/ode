@@ -24,14 +24,14 @@ import org.apache.ode.bpel.iapi.Scheduler;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Encapusulates access to a BPEL process database.
  */
 class BpelProcessDatabase extends BpelDatabase {
-  static Log __log = LogFactory.getLog(BpelProcessDatabase.class);
+  static Logger __log = LoggerFactory.getLogger(BpelProcessDatabase.class);
 
   private QName _processId;
 

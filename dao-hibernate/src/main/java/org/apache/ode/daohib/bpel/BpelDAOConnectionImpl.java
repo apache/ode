@@ -34,8 +34,8 @@ import java.util.Set;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.BpelEventFilter;
 import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.bpel.common.ProcessState;
@@ -77,7 +77,7 @@ import org.hibernate.criterion.Projections;
  * Hibernate-based {@link BpelDAOConnection} implementation.
  */
 public class BpelDAOConnectionImpl implements BpelDAOConnection, FilteredInstanceDeletable {
-    private static final Log __log = LogFactory.getLog(BpelDAOConnectionImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(BpelDAOConnectionImpl.class);
 
     public SessionManager _sm;
 
@@ -238,7 +238,7 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection, FilteredInstanc
             hevent.setData(bos.toByteArray());
         } catch (Throwable ex) {
             // this is really unexpected.
-            __log.fatal("InternalError: BpelEvent serialization failed.", ex);
+            __log.error("InternalError: BpelEvent serialization failed.", ex);
         }
         sess.save(hevent);
     }
@@ -275,7 +275,7 @@ public class BpelDAOConnectionImpl implements BpelDAOConnection, FilteredInstanc
 
             });
         } catch (Exception ex) {
-            __log.fatal("Internal error: unable to transform HBpelEvent", ex);
+            __log.error("Internal error: unable to transform HBpelEvent", ex);
             throw new RuntimeException(ex);
         }
         return ret;

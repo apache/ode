@@ -21,8 +21,8 @@ package org.apache.ode.bpel.runtime;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.explang.EvaluationException;
 import org.apache.ode.bpel.obj.OScope;
@@ -43,7 +43,7 @@ import static org.apache.ode.jacob.ProcessUtil.compose;
 class WHILE extends ACTIVITY {
     private static final long serialVersionUID = 1L;
 
-    private static final Log __log = LogFactory.getLog(WHILE.class);
+    private static final Logger __log = LoggerFactory.getLogger(WHILE.class);
 
     private Set<CompensationHandler> _compHandlers = new HashSet<CompensationHandler>();
 
@@ -58,7 +58,7 @@ class WHILE extends ACTIVITY {
         try {
             condResult = checkCondition();
         } catch (FaultException fe) {
-            __log.error(fe);
+            __log.error("",fe);
             _self.parent.completed(createFault(fe.getQName(), _self.o),_compHandlers);
             return;
         }
@@ -81,7 +81,7 @@ class WHILE extends ACTIVITY {
         return "<T:Act:While:" + _self.o + ">";
     }
 
-    protected Log log() {
+    protected Logger log() {
         return __log;
     }
 

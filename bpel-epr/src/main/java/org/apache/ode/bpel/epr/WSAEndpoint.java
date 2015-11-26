@@ -19,8 +19,8 @@
 
 package org.apache.ode.bpel.epr;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.w3c.dom.Document;
@@ -37,7 +37,7 @@ import java.util.Map;
  */
 public class WSAEndpoint implements MutableEndpoint {
 
-    private static final Log __log = LogFactory.getLog(WSAEndpoint.class);
+    private static final Logger __log = LoggerFactory.getLogger(WSAEndpoint.class);
 
     private Element _eprElmt;
 

@@ -21,11 +21,11 @@ package org.apache.ode.axis2.util;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClusterUrlTransformer {
-    private static final Log __log = LogFactory.getLog(ClusterUrlTransformer.class);
+    private static final Logger __log = LoggerFactory.getLogger(ClusterUrlTransformer.class);
 
     private final List<String> targets;
     private final String base;

@@ -18,8 +18,8 @@
  */
 package org.apache.ode.store;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.clapi.ClusterManager;
 import org.apache.ode.bpel.clapi.ClusterProcessStore;
 import org.apache.ode.bpel.clapi.ProcessStoreDeployedEvent;
@@ -38,7 +38,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ClusterProcessStoreImpl extends ProcessStoreImpl implements ClusterProcessStore {
-    private static final Log __log = LogFactory.getLog(ClusterProcessStoreImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(ClusterProcessStoreImpl.class);
 
     private ClusterManager _clusterManager;
     private  ProcessStoreDeployedEvent deployedEvent;

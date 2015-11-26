@@ -35,8 +35,8 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.OMText;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.NSContext;
 import org.w3c.dom.Attr;
@@ -54,7 +54,7 @@ import org.xml.sax.InputSource;
  */
 public class OMUtils {
 
-    private static Log __log = LogFactory.getLog(OMUtils.class);
+    private static Logger __log = LoggerFactory.getLogger(OMUtils.class);
 
     public static OMElement getFirstChildWithName(OMElement parent, String name) {
         if (parent == null)

@@ -18,8 +18,8 @@
  */
 package org.apache.ode.utils.xml.capture;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
@@ -27,7 +27,7 @@ import org.xml.sax.SAXException;
  * {@link Tracker} for XML schema imports / includes.
  */
 public class XmlSchemaTracker extends Tracker {
-  private static final Log __log = LogFactory.getLog(XmlSchemaTracker.class);
+  private static final Logger __log = LoggerFactory.getLogger(XmlSchemaTracker.class);
 
   private static final String NS="http://www.w3.org/2001/XMLSchema" ;
 

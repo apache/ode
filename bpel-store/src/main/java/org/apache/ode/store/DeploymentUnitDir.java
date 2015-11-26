@@ -37,8 +37,8 @@ import javax.wsdl.WSDLException;
 import javax.wsdl.xml.WSDLReader;
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.compiler.BpelC;
 import org.apache.ode.bpel.compiler.BpelCompiler;
 import org.apache.ode.bpel.compiler.DefaultResourceFinder;
@@ -71,7 +71,7 @@ import org.w3c.dom.Node;
 class DeploymentUnitDir {
 
 
-    private static Log __log = LogFactory.getLog(DeploymentUnitDir.class);
+    private static Logger __log = LoggerFactory.getLogger(DeploymentUnitDir.class);
 
     private String _name;
     private File _duDirectory;

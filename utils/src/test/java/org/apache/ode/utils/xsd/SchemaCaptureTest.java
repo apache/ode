@@ -28,8 +28,8 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.utils.StreamUtils;
 import org.apache.ode.utils.TestResources;
 import org.apache.xerces.xni.XMLResourceIdentifier;
@@ -42,7 +42,7 @@ import org.junit.Test;
  * Test schema capture functionality.
  */
 public class SchemaCaptureTest {
-    private static Log __log = LogFactory.getLog(SchemaCaptureTest.class);
+    private static Logger __log = LoggerFactory.getLogger(SchemaCaptureTest.class);
 
     @Test
     public void testSchemaCapture() throws Exception {

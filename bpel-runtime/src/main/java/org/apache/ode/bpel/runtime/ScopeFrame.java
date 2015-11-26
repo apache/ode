@@ -18,8 +18,8 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.iapi.BpelEngineException;
@@ -49,7 +49,7 @@ import javax.xml.namespace.QName;
  */
 class ScopeFrame implements Serializable {
     private static final long serialVersionUID = 1L;
-    private static final Log __log = LogFactory.getLog(ScopeFrame.class);
+    private static final Logger __log = LoggerFactory.getLogger(ScopeFrame.class);
 
     /** The compiled scope representation. */
     final OScope oscope;

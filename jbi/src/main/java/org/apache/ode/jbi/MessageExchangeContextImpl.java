@@ -20,8 +20,8 @@
 package org.apache.ode.jbi;
 
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
@@ -37,8 +37,7 @@ import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
  */
 public class MessageExchangeContextImpl implements MessageExchangeContext {
 
-  private static final Log __log = LogFactory
-      .getLog(MessageExchangeContextImpl.class);
+  private static final Logger __log = LoggerFactory.getLogger(MessageExchangeContextImpl.class);
 
   private OdeContext _ode;
 

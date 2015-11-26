@@ -19,8 +19,8 @@
 
 package org.apache.ode.il.config;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.utils.SystemUtils;
 
 import java.io.File;
@@ -38,7 +38,7 @@ import java.util.Properties;
 public class OdeConfigProperties {
     private static final long serialVersionUID = 1L;
 
-    private static final Log __log = LogFactory.getLog(OdeConfigProperties.class);
+    private static final Logger __log = LoggerFactory.getLogger(OdeConfigProperties.class);
 
     public static final String PROP_DB_MODE = "db.mode";
 

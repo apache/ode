@@ -29,8 +29,8 @@ import javax.xml.transform.dom.DOMSource;
 
 import net.sf.saxon.dom.NodeWrapper;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.elang.XslRuntimeUriResolver;
 import org.apache.ode.bpel.elang.xpath10.obj.OXPath10Expression;
@@ -63,7 +63,7 @@ import org.w3c.dom.Node;
  * {@link EvaluationContext}.
  */
 class JaxenContexts implements FunctionContext, VariableContext {
-    private static final Log __log = LogFactory.getLog(JaxenContexts.class);
+    private static final Logger __log = LoggerFactory.getLogger(JaxenContexts.class);
 
     /** Static, thread-safe singleton implementing default XPath functions */
     private static final FunctionContext __defaultXPathFunctions = XPathFunctionContext.getInstance();
@@ -247,9 +247,8 @@ class JaxenContexts implements FunctionContext, VariableContext {
 
             OXPath10Expression.OSigGetVariableData sig = _oxpath.resolveGetVariableDataSig(varname,partname,xpathStr);
             if (sig == null) {
-                String msg = "InternalError: Attempt to use an unknown getVariableData signature: " + args;
-                if (__log.isFatalEnabled())
-                    __log.fatal(msg);
+                String msg = "InternalError: Attempt to use an unknown getVariableData signature: " + args;                
+                __log.error(msg);
                 throw new FunctionCallException(msg);
             }
 

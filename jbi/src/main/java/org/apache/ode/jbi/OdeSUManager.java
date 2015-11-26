@@ -27,8 +27,8 @@ import javax.jbi.management.DeploymentException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -36,7 +36,7 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.XMLParserUtils;
 
 public class OdeSUManager implements ServiceUnitManager {
-  private static final Log __log = LogFactory.getLog(OdeSUManager.class);
+  private static final Logger __log = LoggerFactory.getLogger(OdeSUManager.class);
 
   private static final Messages __msgs = Messages.getMessages(Messages.class);
 

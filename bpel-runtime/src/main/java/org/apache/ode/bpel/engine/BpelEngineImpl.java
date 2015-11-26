@@ -19,8 +19,8 @@
 
 package org.apache.ode.bpel.engine;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.clapi.ClusterLock;
 import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
@@ -76,7 +76,7 @@ import java.util.concurrent.TimeUnit;
  * @author Matthieu Riou <mriou at apache dot org>
  */
 public class BpelEngineImpl implements BpelEngine {
-    private static final Log __log = LogFactory.getLog(BpelEngineImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(BpelEngineImpl.class);
 
     /** RNG, for delays */
     private Random _random = new Random(System.currentTimeMillis());
@@ -265,7 +265,7 @@ public class BpelEngineImpl implements BpelEngine {
             break;
         default:
             String errmsg = "BpelEngineImpl: internal error, invalid MexDAO direction: " + mexId;
-            __log.fatal(errmsg);
+            __log.error(errmsg);
             throw new BpelEngineException(errmsg);
         }
 

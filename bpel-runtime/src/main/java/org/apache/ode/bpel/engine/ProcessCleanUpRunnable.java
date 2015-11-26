@@ -24,8 +24,8 @@ import java.util.concurrent.Callable;
 
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.dao.DeferredProcessInstanceCleanable;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.engine.BpelServerImpl.ContextsAware;
@@ -35,7 +35,7 @@ import org.apache.ode.bpel.iapi.Scheduler.MapSerializableRunnable;
 public class ProcessCleanUpRunnable implements MapSerializableRunnable, ContextsAware {
     private static final long serialVersionUID = 1L;
 
-    private static final Log __log = LogFactory.getLog(ProcessCleanUpRunnable.class);
+    private static final Logger __log = LoggerFactory.getLogger(ProcessCleanUpRunnable.class);
 
     public final static int PROCESS_CLEANUP_TRANSACTION_SIZE = Integer.getInteger("org.apache.ode.processInstanceDeletion.transactionSize", 10);
 

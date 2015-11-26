@@ -46,8 +46,8 @@ import org.apache.axis2.description.*;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.MessageReceiver;
 import org.apache.axis2.transport.jms.JMSConstants;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.axis2.OdeFault;
 import org.apache.ode.axis2.util.Axis2UriResolver;
 import org.apache.ode.axis2.util.Axis2WSDLLocator;
@@ -67,7 +67,7 @@ import org.w3c.dom.Element;
  */
 public class ODEAxisService {
 
-    private static final Log LOG = LogFactory.getLog(ODEAxisService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ODEAxisService.class);
 
     public static AxisService createService(AxisConfiguration axisConfig, ProcessConf pconf, QName wsdlServiceName, String portName) throws AxisFault {
         Definition wsdlDefinition = pconf.getDefinitionForService(wsdlServiceName);

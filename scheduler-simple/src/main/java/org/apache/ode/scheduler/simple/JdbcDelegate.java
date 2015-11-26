@@ -42,8 +42,8 @@ import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.utils.DbIsolation;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.utils.DbIsolation;
 import org.apache.ode.utils.StreamUtils;
 
@@ -55,7 +55,7 @@ import org.apache.ode.utils.StreamUtils;
  */
 public class JdbcDelegate implements DatabaseDelegate {
 
-    private static final Log __log = LogFactory.getLog(JdbcDelegate.class);
+    private static final Logger __log = LoggerFactory.getLogger(JdbcDelegate.class);
 
     private static final String DELETE_JOB = "delete from ODE_JOB where jobid = ? and nodeid = ?";
 

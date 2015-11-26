@@ -110,6 +110,7 @@ KARAF               = [
                           :under=>"org.apache.felix", :version=>"0.6.1")
                       ]
 LOG4J               = "log4j:log4j:jar:1.2.17"
+LOG4J2              = group("log4j-api", "log4j-core", "log4j-slf4j-impl", "log4j-web", :under=>"org.apache.logging.log4j", :version=>"2.3")
 OBJECT_DIFF         = "de.danielbechler:java-object-diff:jar:0.13.1"
 OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.2.3",
                        "net.sourceforge.serp:serp:jar:1.13.1"]
@@ -142,7 +143,7 @@ SERVICEMIX          = [
                         "commons-beanutils:commons-beanutils:jar:1.7.0",
                         "tranql:tranql-connector-derby-common:jar:1.1"
                         ]
-SLF4J = group(%w{ slf4j-api slf4j-log4j12 jcl-over-slf4j }, :under=>"org.slf4j", :version=>"1.7.2")
+SLF4J               = group(%w{ slf4j-api jcl-over-slf4j}, :under=>"org.slf4j", :version=>"1.7.12")
 SPRING              = ["org.springframework:spring:jar:2.5.6"]
 SPRING_OSGI         = ["org.springframework.osgi:spring-osgi-core:jar:1.2.0"]
 SPRING_TEST         = ["org.springframework:spring-test:jar:2.5.6"]

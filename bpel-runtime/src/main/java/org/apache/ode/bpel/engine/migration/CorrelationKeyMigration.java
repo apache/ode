@@ -27,8 +27,8 @@ import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.obj.*;
 import org.apache.ode.bpel.runtime.Selector;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.namespace.QName;
 import javax.wsdl.Operation;
@@ -43,7 +43,7 @@ import java.io.ByteArrayOutputStream;
  * set id to one using its name. So something like 1~abc~de will become foo~abc~de.
  */
 public class CorrelationKeyMigration implements Migration {
-    private static final Log __log = LogFactory.getLog(CorrelationKeyMigration.class);
+    private static final Logger __log = LoggerFactory.getLogger(CorrelationKeyMigration.class);
 
     public boolean migrate(Set<BpelProcess> registeredProcesses, BpelDAOConnection connection) {
         // Map only used to avoid duplicates, set would force to re-implement equals

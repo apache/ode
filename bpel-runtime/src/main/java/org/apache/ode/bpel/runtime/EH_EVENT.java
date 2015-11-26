@@ -21,8 +21,8 @@ package org.apache.ode.bpel.runtime;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.common.FaultException;
@@ -49,7 +49,7 @@ class EH_EVENT extends BpelJacobRunnable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log __log = LogFactory.getLog(EH_EVENT.class);
+    private static final Logger __log = LoggerFactory.getLogger(EH_EVENT.class);
 
     private EventHandlerControl _ehc;
     private Termination _tc;
@@ -136,7 +136,7 @@ class EH_EVENT extends BpelJacobRunnable {
                 getBpelRuntimeContext().select(pickResponseChannel, null, false, new Selector[] { selector} );
                 instance(new WAITING(pickResponseChannel));
             } catch(FaultException e){
-                __log.error(e);
+                __log.error("",e);
                 if (_fault == null) {
                     _fault = createFault(e.getQName(), _oevent);
                 }
@@ -243,7 +243,7 @@ class EH_EVENT extends BpelJacobRunnable {
                                             se.setLineNo(_oevent.getDebugInfo().getStartLine());
                                         getBpelRuntimeContext().sendEvent(se);
                                     } catch (Exception ex) {
-                                        __log.fatal(ex);
+                                        __log.error("",ex);
                                         throw new InvalidProcessException(ex);
                                     }
                                 }
@@ -281,7 +281,7 @@ class EH_EVENT extends BpelJacobRunnable {
                                         _oevent.getOperation().getName(), _oevent.getMessageExchangeId(), mexId);
 
                             } catch (FaultException e) {
-                                __log.error(e);
+                                __log.error("",e);
                                 if (_fault == null) {
                                     _fault = createFault(e.getQName(), _oevent);
                                     terminateActive();

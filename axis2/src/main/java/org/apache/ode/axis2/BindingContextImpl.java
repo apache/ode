@@ -36,8 +36,8 @@ import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.engine.AxisConfigurator;
 import org.apache.commons.collections.map.MultiKeyMap;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.agents.memory.SizingAgent;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.apache.ode.axis2.hooks.ODEMessageReceiver;
@@ -58,7 +58,7 @@ import org.apache.ode.utils.wsdl.WsdlUtils;
  *
  */
 public class BindingContextImpl implements BindingContext {
-    protected final Log __log = LogFactory.getLog(getClass());
+    protected final Logger __log = LoggerFactory.getLogger(getClass());
 
     private ODEServer _server;
     private MultiKeyMap _services = new MultiKeyMap();

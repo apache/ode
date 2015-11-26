@@ -21,13 +21,13 @@ package org.apache.ode.axis2.util;
 import java.io.InputStream;
 import java.net.URI;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.axis2.hooks.ODEAxisService;
 import org.xml.sax.InputSource;
 
 public class Axis2UriResolver implements org.apache.ws.commons.schema.resolver.URIResolver {
-    private static final Log LOG = LogFactory.getLog(ODEAxisService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ODEAxisService.class);
 
     public InputSource resolveEntity(String targetNamespace, String schemaLocation, String baseUri) {
         if (LOG.isDebugEnabled()) {

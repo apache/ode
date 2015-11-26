@@ -9,8 +9,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.ls.DOMImplementationLS;
@@ -21,7 +21,7 @@ import org.w3c.dom.ls.LSSerializer;
  * @see DeepEqualityHelper
  */
 public class DomElementComparator implements EqualityComparator{
-    private static final Log __log = LogFactory.getLog(DomElementComparator.class);
+    private static final Logger __log = LoggerFactory.getLogger(DomElementComparator.class);
 	private DeepEqualityHelper deepEquality;
 	@Override
 	public Boolean objectsEqual(Object obj1, Object obj2) {

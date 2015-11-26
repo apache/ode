@@ -29,8 +29,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.daohib.HibernateTransactionManagerLookup;
 import org.apache.ode.daohib.SessionManager;
@@ -47,7 +47,7 @@ import org.hibernate.connection.ConnectionProvider;
 import org.hibernate.dialect.Dialect;
 
 public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory {
-    private static final Log __log = LogFactory.getLog(DbConfStoreConnectionFactory.class);
+    private static final Logger __log = LoggerFactory.getLogger(DbConfStoreConnectionFactory.class);
 
     private static final Messages __msgs = MessageBundle.getMessages(Messages.class);
 
@@ -112,7 +112,7 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
             Object txFact = txFactClass.newInstance();
             _txMgr = (TransactionManager) txFactClass.getMethod("getTransactionManager", (Class[]) null).invoke(txFact);
         } catch (Exception e) {
-            __log.fatal("Couldn't initialize a transaction manager with factory: " + txFactoryClassName, e);
+            __log.error("Couldn't initialize a transaction manager with factory: " + txFactoryClassName, e);
             throw new RuntimeException("Couldn't initialize a transaction manager with factory: " + txFactoryClassName, e);
         }
     }

@@ -24,8 +24,8 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.params.HttpParams;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.axis2.ExternalService;
 import org.apache.ode.axis2.ODEService;
 import org.apache.ode.utils.Properties;
@@ -66,7 +66,7 @@ import java.net.MalformedURLException;
  */
 public class HttpExternalService implements ExternalService {
 
-    private static final Log log = LogFactory.getLog(ExternalService.class);
+    private static final Logger log = LoggerFactory.getLogger(ExternalService.class);
     private static final Messages msgs = Messages.getMessages(Messages.class);
 
     private MultiThreadedHttpConnectionManager connections;

@@ -23,14 +23,14 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility to set Ode-specific isolation level on DataSource connections.
  */
 public class DbIsolation {
-    private static final Log __log = LogFactory.getLog(DbIsolation.class);
+    private static final Logger __log = LoggerFactory.getLogger(DbIsolation.class);
     private static int _isolationLevel;
 
     // Read Ode-specific isolation level configuration

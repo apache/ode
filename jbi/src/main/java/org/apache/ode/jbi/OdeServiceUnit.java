@@ -31,15 +31,15 @@ import java.util.List;
 import javax.jbi.management.DeploymentException;
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Representation of a JBI service unit. A JBI service unit may actually consist
  * of multiple processes.
  */
 class OdeServiceUnit {
-    private static final Log __log = LogFactory.getLog(OdeServiceUnit.class);
+    private static final Logger __log = LoggerFactory.getLogger(OdeServiceUnit.class);
 
     private static final Messages __msgs = Messages.getMessages(Messages.class);
 

@@ -29,8 +29,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.InstanceFilter;
 import org.apache.ode.bpel.common.InstanceFilter.StatusKeys;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
@@ -38,7 +38,7 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ProcessManagementDAO;
 
 public class ProcessManagementDAOImpl implements ProcessManagementDAO {
-    private static final Log __log = LogFactory.getLog(ProcessManagementDAOImpl.class);
+    private static final Logger __log = LoggerFactory.getLogger(ProcessManagementDAOImpl.class);
 
     private EntityManager em;
 

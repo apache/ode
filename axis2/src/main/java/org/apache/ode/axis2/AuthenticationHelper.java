@@ -22,8 +22,8 @@ package org.apache.ode.axis2;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.transport.http.HttpTransportProperties;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.utils.DOMUtils;
 import org.w3c.dom.Element;
@@ -35,7 +35,7 @@ import org.w3c.dom.Element;
  */
 public class AuthenticationHelper {
 
-    private static final Log __log = LogFactory.getLog(AuthenticationHelper.class);
+    private static final Logger __log = LoggerFactory.getLogger(AuthenticationHelper.class);
 
     private static final String AUTHENTICATE_ELEMENT = "authenticate";
 

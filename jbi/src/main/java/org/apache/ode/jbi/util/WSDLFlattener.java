@@ -38,14 +38,14 @@ import javax.wsdl.extensions.schema.SchemaImport;
 import javax.wsdl.factory.WSDLFactory;
 import javax.xml.namespace.QName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ibm.wsdl.extensions.schema.SchemaImpl;
 
 public class WSDLFlattener {
 
-    private static Log __log = LogFactory.getLog(WSDLFlattener.class);
+    private static Logger __log = LoggerFactory.getLogger(WSDLFlattener.class);
 
     private Definition _definition;
     private SchemaCollection _schemas;
