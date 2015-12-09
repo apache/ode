@@ -19,6 +19,7 @@
 
 package org.apache.ode.karaf.commands;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -98,17 +99,17 @@ public abstract class OdeCommandsBase extends OsgiCommandSupport {
                 new String[] {String.class.getName(), String.class.getName(), int.class.getName()}, 
                 timeoutInSeconds);
         if (instances != null) {
-            return instances.getInstanceInfoList().getInstanceInfoList();
+            return Arrays.asList(instances.getInstanceInfoList().getInstanceInfoArray());
         }
         return null;
     }
-    
+
     protected List<TInstanceInfo> getAllInstances(long timeoutInSeconds)
             throws Exception {
         InstanceInfoListDocument instances = invoke(LIST_ALL_INSTANCES, null,
                 null, timeoutInSeconds);
         if (instances != null) {
-            return instances.getInstanceInfoList().getInstanceInfoList();
+            return Arrays.asList(instances.getInstanceInfoList().getInstanceInfoArray());
         }
         return null;
     }
@@ -117,7 +118,7 @@ public abstract class OdeCommandsBase extends OsgiCommandSupport {
             throws Exception {
         ProcessInfoListDocument result = invoke(LIST_ALL_PROCESSES, null, null, timeoutInSeconds);
         if (result != null) {
-            return result.getProcessInfoList().getProcessInfoList();
+            return Arrays.asList(result.getProcessInfoList().getProcessInfoArray());
         }
         return null;
     }
@@ -133,12 +134,12 @@ public abstract class OdeCommandsBase extends OsgiCommandSupport {
         invoke(TERMINATE, new Long[] { iid }, new String[] { Long.class
                 .getName() }, timeoutInSeconds);
     }
-    
+
     protected void suspend(Long iid, long timeoutInSeconds) throws Exception {
         invoke(SUSPEND, new Long[] { iid }, new String[] { Long.class
                 .getName() }, timeoutInSeconds);
     }
-    
+
     protected void resume(Long iid, long timeoutInSeconds) throws Exception {
         invoke(RESUME, new Long[] { iid }, new String[] { Long.class
                 .getName() }, timeoutInSeconds);

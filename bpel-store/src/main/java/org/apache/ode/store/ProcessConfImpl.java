@@ -163,15 +163,15 @@ public class ProcessConfImpl implements ProcessConf {
 
     private void initMexInterceptors() {
         if (_pinfo.getMexInterceptors() != null) {
-            for (TMexInterceptor mexInterceptor : _pinfo.getMexInterceptors().getMexInterceptorList()) {
+            for (TMexInterceptor mexInterceptor : _pinfo.getMexInterceptors().getMexInterceptorArray()) {
                 _mexi.add(mexInterceptor.getClassName());
             }
         }
     }
 
     private void initLinks() {
-        if (_pinfo.getInvokeList() != null) {
-            for (TInvoke invoke : _pinfo.getInvokeList()) {
+        if (_pinfo.getInvokeArray() != null) {
+            for (TInvoke invoke : _pinfo.getInvokeArray()) {
                 String plinkName = invoke.getPartnerLink();
                 TService service = invoke.getService();
                 // NOTE: service can be null for partner links
@@ -199,8 +199,8 @@ public class ProcessConfImpl implements ProcessConf {
             }
         }
 
-        if (_pinfo.getProvideList() != null) {
-            for (TProvide provide : _pinfo.getProvideList()) {
+        if (_pinfo.getProvideArray() != null) {
+            for (TProvide provide : _pinfo.getProvideArray()) {
                 String plinkName = provide.getPartnerLink();
                 TService service = provide.getService();
                 if (service == null) {
@@ -417,20 +417,19 @@ public class ProcessConfImpl implements ProcessConf {
         }
 
         // Events filtered at the process level
-        if (processEvents.getEnableEventList() != null && !processEvents.getEnableEventList().isEmpty()) {
-            List<String> enabled = processEvents.getEnableEventList();
+        if (processEvents.getEnableEventArray() != null && processEvents.getEnableEventArray().length > 0) {
             HashSet<BpelEvent.TYPE> evtSet = new HashSet<BpelEvent.TYPE>();
-            for (String enEvt : enabled) {
+            for (String enEvt : processEvents.getEnableEventArray()) {
                 evtSet.add(BpelEvent.TYPE.valueOf(enEvt));
             }
             _events.put(null, evtSet);
         }
 
         // Events filtered at the scope level
-        if (processEvents.getScopeEventsList() != null) {
-            for (TScopeEvents tScopeEvents : processEvents.getScopeEventsList()) {
+        if (processEvents.getScopeEventsArray() != null) {
+            for (TScopeEvents tScopeEvents : processEvents.getScopeEventsArray()) {
                 HashSet<BpelEvent.TYPE> evtSet = new HashSet<BpelEvent.TYPE>();
-                for (String enEvt : tScopeEvents.getEnableEventList()) {
+                for (String enEvt : tScopeEvents.getEnableEventArray()) {
                     evtSet.add(BpelEvent.TYPE.valueOf(enEvt));
                 }
                 _events.put(tScopeEvents.getName(), evtSet);
@@ -527,9 +526,9 @@ public class ProcessConfImpl implements ProcessConf {
     }
     
     private void initSchedules() {
-        for(TSchedule schedule : _pinfo.getScheduleList()) {
-            for(TCleanup cleanup : schedule.getCleanupList()) {
-                assert !cleanup.getFilterList().isEmpty();
+        for(TSchedule schedule : _pinfo.getScheduleArray()) {
+            for(TCleanup cleanup : schedule.getCleanupArray()) {
+                assert cleanup.getFilterArray().length > 0;
             }
         }
     }
@@ -537,15 +536,15 @@ public class ProcessConfImpl implements ProcessConf {
     public List<CronJob> getCronJobs() {
         List<CronJob> jobs = new ArrayList<CronJob>();
         
-        for(TSchedule schedule : _pinfo.getScheduleList()) {
+        for(TSchedule schedule : _pinfo.getScheduleArray()) {
             CronJob job = new CronJob();
             try {
                 job.setCronExpression(new CronExpression(schedule.getWhen()));
-                for(TCleanup aCleanup : schedule.getCleanupList()) {
+                for(TCleanup aCleanup : schedule.getCleanupArray()) {
                     CleanupInfo cleanupInfo = new CleanupInfo();
-                    assert !aCleanup.getFilterList().isEmpty();
-                    cleanupInfo.setFilters(aCleanup.getFilterList());
-                    ProcessCleanupConfImpl.processACleanup(cleanupInfo.getCategories(), aCleanup.getCategoryList());
+                    assert aCleanup.getFilterArray().length > 0;
+                    cleanupInfo.setFilters(Arrays.asList(aCleanup.getFilterArray()));
+                    ProcessCleanupConfImpl.processACleanup(cleanupInfo.getCategories(), Arrays.asList(aCleanup.getCategoryArray()));
                     
                     JobDetails runnableDetails = new JobDetails();
                     runnableDetails.getDetailsExt().put("cleanupInfo", cleanupInfo);

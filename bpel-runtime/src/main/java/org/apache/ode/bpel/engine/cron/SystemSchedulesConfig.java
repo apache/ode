@@ -21,6 +21,7 @@ package org.apache.ode.bpel.engine.cron;
 import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,15 +74,15 @@ public class SystemSchedulesConfig {
         List<CronJob> jobs = new ArrayList<CronJob>();
         
         if( schedulesFile != null && schedulesFile.exists() ) {
-            for(TSchedule schedule : getSystemSchedulesDocument().getSchedules().getScheduleList()) {
+            for(TSchedule schedule : getSystemSchedulesDocument().getSchedules().getScheduleArray()) {
                 CronJob job = new CronJob();
                 try {
                     job.setCronExpression(new CronExpression(schedule.getWhen()));
-                    for(final TCleanup aCleanup : schedule.getCleanupList()) {
+                    for(final TCleanup aCleanup : schedule.getCleanupArray()) {
                         CleanupInfo cleanupInfo = new CleanupInfo();
-                        assert !aCleanup.getFilterList().isEmpty();
-                        cleanupInfo.setFilters(aCleanup.getFilterList());
-                        ProcessCleanupConfImpl.processACleanup(cleanupInfo.getCategories(), aCleanup.getCategoryList());
+                        assert aCleanup.getFilterArray().length > 0;
+                        cleanupInfo.setFilters(Arrays.asList(aCleanup.getFilterArray()));
+                        ProcessCleanupConfImpl.processACleanup(cleanupInfo.getCategories(), Arrays.asList(aCleanup.getCategoryArray()));
                         
                         JobDetails runnableDetails = new JobDetails();
                         

@@ -76,8 +76,8 @@ define "ode" do
   project.version = VERSION_NUMBER
   project.group = "org.apache.ode"
 
-  compile.options.source = "1.5"
-  compile.options.target = "1.5"
+  compile.options.source = "1.6"
+  compile.options.target = "1.6"
   manifest["Implementation-Vendor"] = "Apache Software Foundation"
   meta_inf << file("NOTICE")
 
@@ -225,7 +225,7 @@ define "ode" do
 
   desc "ODE Runtime Engine"
   define "bpel-runtime" do
-    compile.from apt
+
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-epr", "bpel-obj", "bpel-schemas",
       "bpel-store", "jacob", "jacob-ap", "utils", "agents"),
        COMMONS.collections, COMMONS.httpclient, JAXEN, JAVAX.persistence, JAVAX.stream, SAXON, WSDL4J, XMLBEANS,
@@ -407,7 +407,7 @@ define "ode" do
   desc "ODE JAva Concurrent OBjects"
   define "jacob" do
     compile.with projects("utils", "jacob-ap"),  SLF4J
-    compile.from apt
+
 
     package :jar
   end

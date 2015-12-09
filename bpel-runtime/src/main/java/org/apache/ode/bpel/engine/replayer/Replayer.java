@@ -19,6 +19,7 @@
 package org.apache.ode.bpel.engine.replayer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -87,13 +88,16 @@ public class Replayer {
                 List<Long> toDelete = new ArrayList<Long>();
                 List<CommunicationType> toRestore = new ArrayList<CommunicationType>();
     
-                toDelete.addAll(request.getReplaceInstanceList());
+                for (Long iid : request.getReplaceInstanceArray()) {
+                    toDelete.add(iid);
+                }
+
     
-                for (Long iid : request.getUpgradeInstanceList()) {
+                for (Long iid : request.getUpgradeInstanceArray()) {
                     toDelete.add(iid);
                     toRestore.add(CommunicationType.Factory.parse(getCommunication(iid, conn).toString()));
                 }
-                toRestore.addAll(request.getRestoreInstanceList());
+                toRestore.addAll(Arrays.asList(request.getRestoreInstanceArray()));
     
                 {
                     Set<CLEANUP_CATEGORY> cleanupCategory = new HashSet<CLEANUP_CATEGORY>();
@@ -141,7 +145,7 @@ public class Replayer {
 
     public GetCommunicationResponse getCommunication(GetCommunication request, BpelDAOConnection conn) throws Exception {
         GetCommunicationResponse response = GetCommunicationResponse.Factory.newInstance();
-        for (Long iid : request.getIidList()) {
+        for (Long iid : request.getIidArray()) {
             response.addNewRestoreInstance().set(getCommunication(iid, conn));
         }
         return response;
