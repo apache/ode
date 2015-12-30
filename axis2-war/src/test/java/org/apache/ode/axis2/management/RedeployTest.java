@@ -26,33 +26,28 @@ import org.testng.annotations.Test;
 import javax.xml.namespace.QName;
 
 /**
- * @author Matthieu Riou <mriou@apache.org>
+ * @author Anurag Aggarwal <anurag@intalio.com>
  */
-public class RetireTest extends Axis2TestBase {
+public class RedeployTest extends Axis2TestBase {
 
-    @Test(dataProvider="configs")
-    public void testRetiredInstance() throws Exception {
+    // @Test(dataProvider="configs")
+    // not supposed to work, user should not rm .deploy folder maybe ?
+    public void testRedeploy() throws Exception {
         String bundleName = "TestInstanceRetire";
         System.out.println("=> " + server.getODEServer().getProcessStore().getPackages());
-        if (server.isDeployed("1")) server.undeployProcess(bundleName + "/1");
-        if (server.isDeployed("2")) server.undeployProcess(bundleName + "/2");
-        
-        QName deployedQName = server.deployProcess(bundleName + "/1").iterator().next();
+        if (server.isDeployed("withVar")) server.undeployProcess(bundleName + "/withVar");
+
+        QName deployedQName = server.deployProcess(bundleName + "/withVar").iterator().next();
 
         server.sendRequestFile("http://localhost:8888/processes/testretire",
                 bundleName + "/1", "testRequest1.soap");
 
-        server.getODEServer().getProcessManagement().setRetired(deployedQName, true);
-        server.deployProcess(bundleName + "/2");
-        
+        server.undeployProcess(bundleName + "/withVar");
+        server.deployProcess(bundleName + "/withVar").iterator().next();
+
         String response = server.sendRequestFile("http://localhost:8888/processes/testretire",
                 bundleName + "/1", "testRequest2.soap");
-
-        System.out.println("###############################################");
-        System.out.println(response);
-        System.out.println("###############################################");
-        assertTrue(response.indexOf("DONE") > 0);
-        if (server.isDeployed("1")) server.undeployProcess(bundleName + "/1");
-        if (server.isDeployed("2")) server.undeployProcess(bundleName + "/2");
+        
+        if (server.isDeployed("withVar")) server.undeployProcess(bundleName + "/withVar");
     }
 }

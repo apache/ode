@@ -270,7 +270,7 @@ public class ReplayerContext {
                                     }
                                     return false;
                                 }
-                            });
+                            },true);
 
                     for (Exchange e : exchanges) {
                         if (e.getType() == ExchangeType.M) {

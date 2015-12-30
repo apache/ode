@@ -418,9 +418,9 @@ public class BpelEngineImpl implements BpelEngine {
         final JobDetails we = jobInfo.jobDetail;
 
         if( __log.isTraceEnabled() ) __log.trace("[JOB] onScheduledJob " + jobInfo + "" + we.getInstanceId());
-        
+
         acquireInstanceLock(we.getInstanceId());
-        
+
         // DONT PUT CODE HERE-need this method real tight in a try/catch block, we need to handle
         // all types of failure here, the scheduler is not going to know how to handle our errors,
         // ALSO we have to release the lock obtained above (IMPORTANT), lest the whole system come
@@ -452,10 +452,10 @@ public class BpelEngineImpl implements BpelEngine {
 
             ClassLoader cl = Thread.currentThread().getContextClassLoader();
             try {
-                Thread.currentThread().setContextClassLoader(process._classLoader);            
+                Thread.currentThread().setContextClassLoader(process._classLoader);
                 if (we.getType().equals(JobType.INVOKE_CHECK)) {
                     if (__log.isDebugEnabled()) __log.debug("handleJobDetails: InvokeCheck event for mexid " + we.getMexId());
-               
+
                     sendPartnerRoleFailure(we, MessageExchange.FailureType.COMMUNICATION_ERROR);
                     return;
                 } else if (we.getType().equals(JobType.INVOKE_INTERNAL)) {
@@ -476,7 +476,24 @@ public class BpelEngineImpl implements BpelEngine {
                         }
                     }
                 }
-                process.handleJobDetails(jobInfo.jobDetail);
+
+                if (we.getType().equals(JobType.INVOKE_INTERNAL)) {
+                    List<BpelProcess> processes = getAllProcesses(we.getProcessId());
+                    boolean routed = false;
+                    jobInfo.jobDetail.detailsExt.put("enqueue", false);
+
+                    for(BpelProcess proc : processes) {
+                        routed = routed || proc.handleJobDetails(jobInfo.jobDetail);
+                    }
+
+                    if(!routed) {
+                        jobInfo.jobDetail.detailsExt.put("enqueue", true);
+                        process.handleJobDetails(jobInfo.jobDetail);
+                    }
+                }
+                else {
+                    process.handleJobDetails(jobInfo.jobDetail);
+                }
                 debuggingDelay();
             } finally {
                 Thread.currentThread().setContextClassLoader(cl);
@@ -782,6 +799,22 @@ public class BpelEngineImpl implements BpelEngine {
             }
         }
         return q;
+    }
+
+    private List<BpelProcess> getAllProcesses(QName processId) {
+        String qName =  processId.toString();
+        if(qName.lastIndexOf("-") > 0) {
+            qName = qName.substring(0, qName.lastIndexOf("-"));
+        }
+        List<BpelProcess> ret = new ArrayList<BpelProcess>();
+        Iterator<Map.Entry<QName, BpelProcess>> it = _activeProcesses.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<QName, BpelProcess> pairs = it.next();
+            if(pairs.getKey().toString().startsWith(qName)) {
+                ret.add(pairs.getValue());
+            }
+        }
+        return ret;
     }
 }
 

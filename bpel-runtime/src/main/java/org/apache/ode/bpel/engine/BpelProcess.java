@@ -203,25 +203,25 @@ public class BpelProcess {
     public interface InvokeHandler {
         boolean invoke(PartnerLinkMyRoleImpl target, PartnerLinkMyRoleImpl.RoutingInfo routingInfo, boolean createInstance);
     }
-    
-    public void invokeProcess(MyRoleMessageExchangeImpl mex, InvokeHandler invokeHandler) {
+
+    public boolean invokeProcess(MyRoleMessageExchangeImpl mex, InvokeHandler invokeHandler, boolean enqueue) {
         boolean routed = false;
 
         try {
             _hydrationLatch.latch(1);
             List<PartnerLinkMyRoleImpl> targets = getMyRolesForService(mex.getServiceName());
             if (targets.isEmpty()) {
-                String errmsg = __msgs.msgMyRoleRoutingFailure(mex.getMessageExchangeId());
-                __log.error(errmsg);
-                mex.setFailure(MessageExchange.FailureType.UNKNOWN_ENDPOINT, errmsg, null);
-                return;
+                //String errmsg = __msgs.msgMyRoleRoutingFailure(mex.getMessageExchangeId());
+                //__log.error(errmsg);
+                //mex.setFailure(MessageExchange.FailureType.UNKNOWN_ENDPOINT, errmsg, null);
+                return false;
             }
 
             mex.getDAO().setProcess(getProcessDAO());
 
             if (!processInterceptors(mex, InterceptorInvoker.__onProcessInvoked)) {
                 __log.debug("Aborting processing of mex " + mex + " due to interceptors.");
-                return;
+                return false;
             }
 
             markused();
@@ -233,7 +233,7 @@ public class BpelProcess {
                 routings = target.findRoute(mex);
                 boolean createInstance = target.isCreateInstance(mex);
 
-                if (mex.getStatus() != MessageExchange.Status.FAILURE) {
+                if (mex.getStatus() != MessageExchange.Status.FAILURE && routings!=null) {
                     for (PartnerLinkMyRoleImpl.RoutingInfo routing : routings) {
                         routed = routed || invokeHandler.invoke(target, routing, createInstance);
                     }
@@ -244,7 +244,7 @@ public class BpelProcess {
             }
 
             // Nothing found, saving for later
-            if (!routed) {
+            if (!routed  && enqueue) {
                 // TODO this is kind of hackish when no match and more than one myrole is selected.
                 // we save the routing on the last myrole
                 // actually the message queue should be attached to the instance instead of the correlator
@@ -268,29 +268,35 @@ public class BpelProcess {
         if (mex.getPattern().equals(MessageExchange.MessageExchangePattern.REQUEST_ONLY) && routed && getCleanupCategories(false).contains(CLEANUP_CATEGORY.MESSAGES)) {
             mex.release();
         }
+
+        return routed;
     }
-    
+
+    private boolean isActive() {
+        return _pconf.getState() == org.apache.ode.bpel.iapi.ProcessState.ACTIVE;
+    }
+
     /**
      * Entry point for message exchanges aimed at the my role.
      *
      * @param mex
      */
-    void invokeProcess(final MyRoleMessageExchangeImpl mex) {
-        invokeProcess(mex, new InvokeHandler() {
-            public boolean invoke(PartnerLinkMyRoleImpl target, PartnerLinkMyRoleImpl.RoutingInfo routing, boolean createInstance) {
-                  if (routing.messageRoute == null && createInstance) {
-                      // No route but we can create a new instance
-                      target.invokeNewInstance(mex, routing);
-                      return true;
-                  } else if (routing.messageRoute != null) {
-                      // Found a route, hitting it
-                      _engine.acquireInstanceLock(routing.messageRoute.getTargetInstance().getInstanceId());
-                      target.invokeInstance(mex, routing);
-                      return true;
-                  }
-                  return false;
-            }
-        });
+    boolean invokeProcess(final MyRoleMessageExchangeImpl mex, boolean enqueue) {
+        return invokeProcess(mex, new InvokeHandler() {
+                    public boolean invoke(PartnerLinkMyRoleImpl target, PartnerLinkMyRoleImpl.RoutingInfo routing, boolean createInstance) {
+                          if (routing.messageRoute == null && createInstance  && isActive()) {
+                              // No route but we can create a new instance
+                              target.invokeNewInstance(mex, routing);
+                              return true;
+                          } else if (routing.messageRoute != null) {
+                              // Found a route, hitting it
+                              _engine.acquireInstanceLock(routing.messageRoute.getTargetInstance().getInstanceId());
+                              target.invokeInstance(mex, routing);
+                              return true;
+                          }
+                          return false;
+                    }
+                },enqueue);
     }
 
     /** Several myroles can use the same service in a given process */
@@ -407,7 +413,8 @@ public class BpelProcess {
     /**
      * @see org.apache.ode.bpel.engine.BpelProcess#handleJobDetails(java.util.Map<java.lang.String,java.lang.Object>)
      */
-    public void handleJobDetails(JobDetails jobData) {
+    public boolean handleJobDetails(JobDetails jobData) {
+        boolean ret = true;
         try {
             _hydrationLatch.latch(1);
             markused();
@@ -423,7 +430,7 @@ public class BpelProcess {
                     __log.debug("InvokeInternal event for mexid " + we.getMexId());
                 }
                 MyRoleMessageExchangeImpl mex = (MyRoleMessageExchangeImpl) _engine.getMessageExchange(we.getMexId());
-                invokeProcess(mex);
+                ret = invokeProcess(mex, (Boolean) jobData.detailsExt.get("enqueue"));
             } else {
                 // Instance level events
                 ProcessInstanceDAO procInstance = getProcessDAO().getInstance(we.getInstanceId());
@@ -431,7 +438,7 @@ public class BpelProcess {
                     if (__log.isDebugEnabled()) {
                         __log.debug("handleJobDetails: no ProcessInstance found with iid " + we.getInstanceId() + "; ignoring.");
                     }
-                    return;
+                    return true;
                 }
 
                 BpelRuntimeContextImpl processInstance = createRuntimeContext(procInstance, null, null);
@@ -462,7 +469,7 @@ public class BpelProcess {
                         if( procInstance.getState() == ProcessState.STATE_COMPLETED_OK 
                                 || procInstance.getState() == ProcessState.STATE_COMPLETED_WITH_FAULT ) {
                             __log.debug("A matcher event was aborted. The process is already completed.");
-                            return;
+                            return true;
                         }
                         processInstance.matcherEvent(we.getCorrelatorId(), we.getCorrelationKeySet());
                 }
@@ -470,6 +477,7 @@ public class BpelProcess {
         } finally {
             _hydrationLatch.release(1);
         }
+        return ret;
     }
 
     private void setRoles(OProcess oprocess) {
