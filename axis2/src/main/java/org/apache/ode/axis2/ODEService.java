@@ -112,7 +112,7 @@ public class ODEService {
             String messageId = new GUID().toString();
             odeMex = _server.getEngine().createMessageExchange("" + messageId, _serviceName,
                     msgContext.getAxisOperation().getName().getLocalPart());
-            __log.debug("ODE routed to operation " + odeMex.getOperation() + " from service " + _serviceName);
+            __log.debug("ODE routed to portType " + odeMex.getPortType() + " operation " + odeMex.getOperation() + " from service " + _serviceName);
             odeMex.setProperty("isTwoWay", Boolean.toString(msgContext.getAxisOperation() instanceof TwoChannelAxisOperation));
             if (odeMex.getOperation() != null) {
                 // Preparing message to send to ODE

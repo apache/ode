@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.dao.*;
+import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HCorrelator;
 import org.apache.ode.daohib.bpel.hobj.HCorrelatorMessage;
@@ -36,6 +37,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.LockMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.exception.LockAcquisitionException;
 
 import javax.xml.namespace.QName;
 
@@ -82,7 +84,12 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         // We really should consider the possibility of multiple messages matching a criteria.
         // When the message is handled, its not too convenient to attempt to determine if the
         // received message conflicts with one already received.
-        Iterator mcors = qry.iterate();
+        Iterator mcors;
+        try {
+            mcors = qry.setLockMode("this", LockMode.UPGRADE).iterate();
+        } catch (LockAcquisitionException e) {
+            throw new Scheduler.JobProcessorException(e, true);
+        }
         try {
             if (!mcors.hasNext()) {
                 if (__log.isDebugEnabled())
@@ -122,7 +129,13 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         q.setLockMode("hs", LockMode.UPGRADE);
 
         List<HProcessInstance> targets = new ArrayList<HProcessInstance>();
-        for (HCorrelatorSelector selector : (List<HCorrelatorSelector>)q.list()) {
+        List<HCorrelatorSelector> list;
+        try {
+            list = (List<HCorrelatorSelector>) q.list();
+        } catch (LockAcquisitionException e) {
+            throw new Scheduler.JobProcessorException(e, true);
+        }
+        for (HCorrelatorSelector selector : list) {
             if (selector != null) {
                 boolean isRoutePolicyOne = selector.getRoute() == null || "one".equals(selector.getRoute());
                 if ("all".equals(selector.getRoute()) ||
@@ -134,13 +147,6 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         }
 
         if(__log.isDebugEnabled()) __log.debug(hdr + "found " + routes);
-
-        // obtain a lock on the correlator to eliminate potential race condition.
-        if(__log.isDebugEnabled()) __log.debug("Obtain record lock on " + _hobj);
-        Query correlatorLockQuery = getSession().createQuery("from HCorrelator as hc where id = :id");
-        correlatorLockQuery.setLong("id", _hobj.getId());
-        correlatorLockQuery.setLockMode("hc", LockMode.UPGRADE);
-        correlatorLockQuery.list();
 
         return routes;
     }
@@ -221,7 +227,11 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         hsel.setCorrelator(_hobj);
         hsel.setCreated(new Date());
         hsel.setRoute(routePolicy);
-        getSession().save(hsel);
+        try {
+            getSession().save(hsel);
+        } catch (LockAcquisitionException e) {
+            throw new Scheduler.JobProcessorException(e, true);
+        }
 
         if (__log.isDebugEnabled())
             __log.debug(hdr + "saved " + hsel);

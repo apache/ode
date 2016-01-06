@@ -208,7 +208,14 @@ public interface Scheduler {
          * out, checks whether a response has arrived and if not, it marks the MEX as
          * faulted.
          */
-        INVOKE_CHECK
+        INVOKE_CHECK,
+
+        /**
+         * is used to avoid the race condition when a message has been correlated but
+         * no process instance is able to process it and the route has been added
+         * meanwhile. It just retries the correlation.
+         */
+        MEX_MATCHER
     }
     
     public static class JobDetails {

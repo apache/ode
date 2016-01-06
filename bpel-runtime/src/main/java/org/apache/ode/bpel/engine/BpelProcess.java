@@ -414,7 +414,7 @@ public class BpelProcess {
      * @see org.apache.ode.bpel.engine.BpelProcess#handleJobDetails(java.util.Map<java.lang.String,java.lang.Object>)
      */
     public boolean handleJobDetails(JobDetails jobData) {
-        boolean ret = true;
+        boolean routed = true;
         try {
             _hydrationLatch.latch(1);
             markused();
@@ -425,12 +425,20 @@ public class BpelProcess {
             JobDetails we = jobData;
 
             // Process level events
-            if (we.getType().equals(JobType.INVOKE_INTERNAL)) {
+            if (we.getType() == JobType.INVOKE_INTERNAL || we.getType() == JobType.MEX_MATCHER) {
                 if (__log.isDebugEnabled()) {
-                    __log.debug("InvokeInternal event for mexid " + we.getMexId());
+                    __log.debug(we.getType() + " event for mexid " + we.getMexId());
                 }
                 MyRoleMessageExchangeImpl mex = (MyRoleMessageExchangeImpl) _engine.getMessageExchange(we.getMexId());
-                ret = invokeProcess(mex, (Boolean) jobData.detailsExt.get("enqueue"));
+                if (we.getType() == JobType.MEX_MATCHER && !mex.getDAO().lockPremieMessages()) {
+                    //Skip if already processed
+                    return true;
+                }
+
+                routed = invokeProcess(mex, (Boolean) jobData.detailsExt.get("enqueue"));
+                if (we.getType() == JobType.MEX_MATCHER && routed) {
+                    mex.getDAO().releasePremieMessages();
+                }
             } else {
                 // Instance level events
                 ProcessInstanceDAO procInstance = getProcessDAO().getInstance(we.getInstanceId());
@@ -477,7 +485,7 @@ public class BpelProcess {
         } finally {
             _hydrationLatch.release(1);
         }
-        return ret;
+        return routed;
     }
 
     private void setRoles(OProcess oprocess) {

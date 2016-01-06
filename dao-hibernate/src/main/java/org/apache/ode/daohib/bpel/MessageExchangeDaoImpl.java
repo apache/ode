@@ -34,6 +34,7 @@ import org.apache.ode.bpel.dao.MessageExchangeDAO;
 import org.apache.ode.bpel.dao.PartnerLinkDAO;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HCorrelatorMessage;
 import org.apache.ode.daohib.bpel.hobj.HMessage;
@@ -43,6 +44,8 @@ import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.UnaryFunctionEx;
+import org.hibernate.LockMode;
+import org.hibernate.exception.LockAcquisitionException;
 import org.w3c.dom.Element;
 
 public class MessageExchangeDaoImpl extends HibernateDao implements
@@ -377,5 +380,13 @@ public class MessageExchangeDaoImpl extends HibernateDao implements
         getSession().delete(_hself);
         // This deletes endpoint LData, callbackEndpoint LData, request HMessage, response HMessage, HMessageExchangeProperty 
     }
-    
+
+    public boolean lockPremieMessages() {
+        try {
+            return getSession().getNamedQuery(HCorrelatorMessage.SELECT_CORMESSAGE_BY_MEX).setLockMode("m", LockMode.UPGRADE).setParameter("mex", _hself).list().size() > 0;
+        } catch (LockAcquisitionException e) {
+            throw new Scheduler.JobProcessorException(e, true);
+        }
+    }
+
 }

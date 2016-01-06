@@ -247,13 +247,16 @@ public class BpelEngineImpl implements BpelEngine {
         case MessageExchangeDAO.DIR_PARTNER_INVOKES_MYROLE:
             mex = new MyRoleMessageExchangeImpl(process, this, mexdao);
             if (process != null) {
-                OPartnerLink plink = (OPartnerLink) process.getOProcess().getChild(mexdao.getPartnerLinkModelId());
-                // the partner link might not be hydrated
-                if (plink != null) {
-                    PortType ptype = plink.myRolePortType;
-                    Operation op = plink.getMyRoleOperation(mexdao.getOperation());
-                    mex.setPortOp(ptype, op);
-                }
+				Object child = process.getOProcess().getChild(mexdao.getPartnerLinkModelId());
+				if (child instanceof OPartnerLink) {
+				    OPartnerLink plink = (OPartnerLink) child;
+				    // the partner link might not be hydrated
+					if (plink != null) {
+					    PortType ptype = plink.myRolePortType;
+					    Operation op = plink.getMyRoleOperation(mexdao.getOperation());
+					    mex.setPortOp(ptype, op);
+					}
+				}
             }
             break;
         default:
@@ -477,7 +480,7 @@ public class BpelEngineImpl implements BpelEngine {
                     }
                 }
 
-                if (we.getType().equals(JobType.INVOKE_INTERNAL)) {
+                if (we.getType() == JobType.INVOKE_INTERNAL || we.getType() == JobType.MEX_MATCHER) {
                     List<BpelProcess> processes = getAllProcesses(we.getProcessId());
                     boolean routed = false;
                     jobInfo.jobDetail.detailsExt.put("enqueue", false);
@@ -486,7 +489,7 @@ public class BpelEngineImpl implements BpelEngine {
                         routed = routed || proc.handleJobDetails(jobInfo.jobDetail);
                     }
 
-                    if(!routed) {
+                    if(!routed && we.getType() == JobType.INVOKE_INTERNAL) {
                         jobInfo.jobDetail.detailsExt.put("enqueue", true);
                         process.handleJobDetails(jobInfo.jobDetail);
                     }

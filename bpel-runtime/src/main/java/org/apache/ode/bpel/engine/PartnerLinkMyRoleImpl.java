@@ -45,6 +45,8 @@ import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessState;
+import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
+import org.apache.ode.bpel.iapi.Scheduler.JobType;
 import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OPartnerLink;
@@ -275,6 +277,18 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
 	
 	            // No match, means we add message exchange to the queue.
 	            routing.correlator.enqueueMessage(mex.getDAO(), routing.wholeKeySet);
+
+                //Second matcher needs to be registered here
+                JobDetails we = new JobDetails();
+                we.setType(JobType.MEX_MATCHER);
+                we.setProcessId(_process.getPID());
+                we.setMexId(mex.getMessageExchangeId());
+                we.setInMem(_process.isInMemory());
+                if(_process.isInMemory()){
+                    _process._engine._contexts.scheduler.scheduleVolatileJob(true, we);
+                }else{
+                    _process._engine._contexts.scheduler.schedulePersistedJob(we, null);
+                }
         	}
         }
     }
