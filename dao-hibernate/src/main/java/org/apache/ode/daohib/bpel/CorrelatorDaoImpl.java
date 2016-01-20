@@ -50,9 +50,10 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
     /** filter for finding a matching selector. */
     private static final String LOCK_SELECTORS = "update from HCorrelatorSelector as hs set hs.lock = hs.lock+1 where hs.processType = :processType";
     private static final String CHECK_SELECTORS = "from HCorrelatorSelector as hs where hs.processType = :processType and hs.correlator.correlatorId = :correlatorId";
-    private static final String FLTR_SELECTORS = "from HCorrelatorSelector as hs where hs.processType = :processType and hs.correlator.correlatorId = :correlatorId";
+    //private static final String FLTR_SELECTORS = "from HCorrelatorSelector as hs where hs.processType = :processType and hs.correlator.correlatorId = :correlatorId";
+    private static final String FLTR_SELECTORS = "from HCorrelatorSelector as hs where hs.correlator = :correlator";
     private static final String FLTR_SELECTORS_SUBQUERY = ("from HCorrelatorSelector as hs where hs.processType = :processType and hs.correlatorId = " +
-            "(select hc.id from HCorrelator as hc where hc.correlatorId = :correlatorId )").intern();
+            "(select hc.id from HCorrelator as hc where hc.correlatorId = :correlatorId)").intern();
 
     /** Query for removing routes. */
     private static final String QRY_DELSELECTORS = "delete from HCorrelatorSelector where groupId = ? and instance = ?";
@@ -115,12 +116,12 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         String hdr = "findRoute(keySet=" + keySet + "): ";
         if (__log.isDebugEnabled()) __log.debug(hdr);
 
-        String processType = new QName(_hobj.getProcess().getTypeNamespace(), _hobj.getProcess().getTypeName()).toString();
+        //String processType = new QName(_hobj.getProcess().getTypeNamespace(), _hobj.getProcess().getTypeName()).toString();
         List<CorrelationKeySet> subSets = keySet.findSubSets();
 
-        Query q = getSession().createQuery(generateSelectorQuery(_sm.canJoinForUpdate() ? FLTR_SELECTORS : FLTR_SELECTORS_SUBQUERY, subSets));
-        q.setString("processType", processType);
-        q.setString("correlatorId", _hobj.getCorrelatorId());
+        //Query q = getSession().createQuery(generateSelectorQuery(_sm.canJoinForUpdate() ? FLTR_SELECTORS : FLTR_SELECTORS_SUBQUERY, subSets));
+        Query q = getSession().createQuery(generateSelectorQuery(FLTR_SELECTORS, subSets));
+        q.setEntity("correlator", getHibernateObj());
 
         for( int i = 0; i < subSets.size(); i++ ) {
             q.setString("s" + i, subSets.get(i).toCanonicalString());

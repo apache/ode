@@ -323,7 +323,7 @@ public class MessageExchangeDAOImpl extends OpenJPADAO implements MessageExchang
     }
 
     void setCorrelationKeySet(CorrelationKeySet correlationKeySet) {
-        _correlationKeys = correlationKeySet.toCanonicalString();
+        _correlationKeys = correlationKeySet != null ? correlationKeySet.toCanonicalString() : null;
     }
 
     CorrelationKeySet getCorrelationKeySet() {

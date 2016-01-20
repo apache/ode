@@ -1517,6 +1517,11 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
             MyRoleMessageExchangeImpl mex = new MyRoleMessageExchangeImpl(_bpelProcess, _bpelProcess._engine, mexdao);
 
+            mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.MATCHED);
+            mex.getDAO().setInstance(_dao);
+            if (mex.getDAO().getCreateTime() == null)
+                mex.getDAO().setCreateTime(getCurrentEventDateTime());
+
             inputMsgMatch(mroute.getGroupId(), mroute.getIndex(), mex);
             execute();
 

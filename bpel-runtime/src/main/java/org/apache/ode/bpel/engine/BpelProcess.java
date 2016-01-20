@@ -21,9 +21,11 @@ package org.apache.ode.bpel.engine;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,12 +38,15 @@ import javax.xml.namespace.QName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.ode.agents.memory.SizingAgent;
+import org.apache.ode.bpel.common.CorrelationKey;
+import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.DeferredProcessInstanceCleanable;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.engine.PartnerLinkMyRoleImpl.RoutingInfo;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableConf;
 import org.apache.ode.bpel.engine.extvar.ExternalVariableManager;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
@@ -51,6 +56,7 @@ import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.MessageExchange;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.ProcessConf;
 import org.apache.ode.bpel.iapi.Scheduler;
@@ -217,38 +223,17 @@ public class BpelProcess {
                 return false;
             }
 
-            mex.getDAO().setProcess(getProcessDAO());
-
-            if (!processInterceptors(mex, InterceptorInvoker.__onProcessInvoked)) {
-                __log.debug("Aborting processing of mex " + mex + " due to interceptors.");
-                return false;
-            }
-
-            markused();
-
-            // Ideally, if Java supported closure, the routing code would return null or the appropriate
-            // closure to handle the route.
-            List<PartnerLinkMyRoleImpl.RoutingInfo> routings = null;
-            for (PartnerLinkMyRoleImpl target : targets) {
-                routings = target.findRoute(mex);
-                boolean createInstance = target.isCreateInstance(mex);
-
-                if (mex.getStatus() != MessageExchange.Status.FAILURE && routings!=null) {
-                    for (PartnerLinkMyRoleImpl.RoutingInfo routing : routings) {
-                        routed = routed || invokeHandler.invoke(target, routing, createInstance);
-                    }
-                }
-                if (routed) {
-                    break;
-                }
+            //Actual identification of the routes and invocation of the target process will happen when enqueue is disabled.
+            //This is the main conditional block of code that does the actual work.
+            //Its only after running this block with enqueue disabled, it can be identified that mex was not routable.
+            //There is a separate logic following this 'if' condition to handle the mex when enqueue is enabled.
+            if(!enqueue) {
+                routed = findRouteAndInvoke(targets, mex, invokeHandler);
             }
 
             // Nothing found, saving for later
-            if (!routed  && enqueue) {
-                // TODO this is kind of hackish when no match and more than one myrole is selected.
-                // we save the routing on the last myrole
-                // actually the message queue should be attached to the instance instead of the correlator
-                targets.get(targets.size()-1).noRoutingMatch(mex, routings);
+            if (enqueue && !routed) {
+                routed = noRoutingMatch(targets, mex);
             } else {
                 // Now we have to update our message exchange status. If the <reply> was not hit during the
                 // invocation, then we will be in the "REQUEST" phase which means that either this was a one-way
@@ -263,12 +248,100 @@ public class BpelProcess {
             _hydrationLatch.release(1);
         }
 
-        // For a one way, once the engine is done, the mex can be safely released.
-        // Sean: not really, if route is not found, we cannot delete the mex yet
-//        if (mex.getPattern().equals(MessageExchange.MessageExchangePattern.REQUEST_ONLY) && routed && getCleanupCategories(false).contains(CLEANUP_CATEGORY.MESSAGES)) {
-//            mex.release();
-//        }
+        return routed;
+    }
 
+    //this method should be invoked within the ambit of _hydrationLatch
+    private boolean findRouteAndInvoke(List<PartnerLinkMyRoleImpl> targets, MyRoleMessageExchangeImpl mex, InvokeHandler invokeHandler) {
+        boolean routed = false;
+
+        //if mex is already queued then disallow overriding of process on the mex
+        if(!MyRoleMessageExchange.CorrelationStatus.QUEUED.equals(mex.getCorrelationStatus()))
+            mex.getDAO().setProcess(getProcessDAO());
+
+        if (!processInterceptors(mex, InterceptorInvoker.__onProcessInvoked)) {
+            __log.debug("Aborting processing of mex " + mex + " due to interceptors.");
+            return false;
+        }
+
+        markused();
+
+        // Ideally, if Java supported closure, the routing code would return null or the appropriate
+        // closure to handle the route.
+        List<PartnerLinkMyRoleImpl.RoutingInfo> routings = null;
+        for (PartnerLinkMyRoleImpl target : targets) {
+            routings = target.findRoute(mex);
+            boolean createInstance = target.isCreateInstance(mex);
+
+            if (mex.getStatus() != MessageExchange.Status.FAILURE && routings!=null) {
+                for (PartnerLinkMyRoleImpl.RoutingInfo routing : routings) {
+                    routed = routed || invokeHandler.invoke(target, routing, createInstance);
+                }
+            }
+            if (routed) {
+                break;
+            }
+        }
+        return routed;
+    }
+
+    //this method should be invoked within the ambit of _hydrationLatch
+    private boolean noRoutingMatch(List<PartnerLinkMyRoleImpl> targets,MyRoleMessageExchangeImpl mex) {
+        boolean routed = false;
+        boolean enqueue = true;
+        List<PartnerLinkMyRoleImpl.RoutingInfo> routings = null;
+
+        /* try to find the active instance that is waiting on the correlated value and then associate the corresponding
+         * processDAO,correlator on the mex and enqueue for later processing.
+         */
+
+        // Need to iterate over the partnerlinks to identify the partnerlink that has the operation defined in the mex.
+        for (Iterator<PartnerLinkMyRoleImpl> targetItr = targets.iterator();
+                (targetItr.hasNext() && !routed);) {
+
+            PartnerLinkMyRoleImpl target = targetItr.next();
+            routings = target.findRoute(mex,enqueue);
+
+            //routings will be null if the mex operation is no defined in this myRole, iterate over next myRole.
+            if (routings != null) {
+                RoutingInfo routing = routings.get(routings.size()-1);
+
+                if (routing != null) {
+
+                    for( Iterator<CorrelationKeySet> aSubSetItr = routing.wholeKeySet.findSubSets().iterator();
+                            (aSubSetItr.hasNext() && !routed);) {
+
+                        CorrelationKeySet aSubSet = aSubSetItr.next();
+
+                        for(Iterator<CorrelationKey> keyItr = aSubSet.iterator();
+                                (keyItr.hasNext() && !routed);) {
+
+                            CorrelationKey key = keyItr.next();
+                            __log.info("noRoutingMatch: Finding active instance correlated with {} and process pid {}",new Object[]{key,_pid});
+
+                            // Assumption is, process instance is uniquely identifiable by any single initiated correlation key across multiple versions
+                            // of a same process type.
+
+                            // We need to make sure the PID of process of the instance is same as that of the
+                            // partnerlink's associated process in the iteration. Otherwise we might end up
+                            // associating wrong correlator with the mex.
+                            Collection<ProcessInstanceDAO> instanceDaoList = getProcessDAO().findInstance(key,ProcessState.STATE_ACTIVE);
+
+                            if (!instanceDaoList.isEmpty()) {
+                                ProcessInstanceDAO instance = instanceDaoList.iterator().next();
+                                mex.getDAO().setProcess(instance.getProcess());
+                                target.noRoutingMatch(mex, routing);
+                                routed = true;
+
+                                __log.info("noRoutingMatch: Active instance found instanceID: {} correlated with {} and process pid {}",
+                                        new Object[]{instance.getInstanceId(),key,_pid});
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
         return routed;
     }
 

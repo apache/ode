@@ -251,4 +251,10 @@ class ProcessDaoImpl extends DaoBaseImpl implements ProcessDAO {
             }
         }
     }
+
+    @Override
+    public Collection<ProcessInstanceDAO> findInstance(CorrelationKey cckey, short processInstanceState) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

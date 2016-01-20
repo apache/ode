@@ -94,8 +94,12 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
     }
 
     public List<RoutingInfo> findRoute(MyRoleMessageExchangeImpl mex) {
-    	List<RoutingInfo> routingInfos = new ArrayList<RoutingInfo>();
-    	
+        return findRoute(mex, false);
+    }
+
+    public List<RoutingInfo> findRoute(MyRoleMessageExchangeImpl mex, boolean enqueue) {
+        List<RoutingInfo> routingInfos = new ArrayList<RoutingInfo>();
+
         if (__log.isTraceEnabled()) {
             __log.trace(ObjectPrinter.stringifyMethodEnter(this + ":inputMsgRcvd", new Object[] {
                     "messageExchange", mex }));
@@ -132,7 +136,7 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
             mex.setFailure(MessageExchange.FailureType.FORMAT_ERROR, ime.getMessage(), null);
             return null;
         }
-        
+
         String mySessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_MYROLE_SESSIONID);
         String partnerSessionId = mex.getProperty(MessageExchange.PROPERTY_SEP_PARTNERROLE_SESSIONID);
         if (__log.isDebugEnabled()) {
@@ -141,19 +145,22 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
                     + " partnerSessionId=" + partnerSessionId);
         }
 
-        // Try to find a route for one of our keys.
-        List<MessageRouteDAO> messageRoutes = correlator.findRoute(keySet);
-        if (messageRoutes != null && messageRoutes.size() > 0) {
-            for (MessageRouteDAO messageRoute : messageRoutes) {
-                if (__log.isDebugEnabled()) {
-                    __log.debug("INPUTMSG: " + correlatorId + ": ckeySet " + messageRoute.getCorrelationKeySet() + " route is to " + messageRoute);
+        //Avoid searching for message route when enqueue is enabled. It is only when no message route is found, enqueue will be enabled.
+        if(!enqueue){
+            // Try to find a route for one of our keys.
+            List<MessageRouteDAO> messageRoutes = correlator.findRoute(keySet);
+            if (messageRoutes != null && messageRoutes.size() > 0) {
+                for (MessageRouteDAO messageRoute : messageRoutes) {
+                    if (__log.isDebugEnabled()) {
+                        __log.debug("INPUTMSG: " + correlatorId + ": ckeySet " + messageRoute.getCorrelationKeySet() + " route is to " + messageRoute);
+                    }
+                    routingInfos.add(new RoutingInfo(messageRoute, messageRoute.getCorrelationKeySet(), correlator, keySet));
                 }
-                routingInfos.add(new RoutingInfo(messageRoute, messageRoute.getCorrelationKeySet(), correlator, keySet));
             }
         }
-        
+
         if (routingInfos.size() == 0) {
-        	routingInfos.add(new RoutingInfo(null, null, correlator, keySet));
+            routingInfos.add(new RoutingInfo(null, null, correlator, keySet));
         }
 
         return routingInfos;
@@ -252,31 +259,38 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
         instance.execute();
     }
 
+    /**
+     * @deprecated - Now an attempt is made to identify the correct routing in the BpelProcess.invokeProcess() with enqueue enabled.
+     * @param mex
+     * @param routings
+     */
     public void noRoutingMatch(MyRoleMessageExchangeImpl mex, List<RoutingInfo> routings) {
+        // enqueue message with the last message route, as per the comments in caller (@see BpelProcess.invokeProcess())
+        RoutingInfo routing = (routings != null && routings.size() > 0) ? routings.get(routings.size() - 1) : null;
+        noRoutingMatch(mex, routing);
+    }
+
+    public void noRoutingMatch(MyRoleMessageExchangeImpl mex, RoutingInfo routing) {
         if (!mex.isAsynchronous()) {
             mex.setFailure(MessageExchange.FailureType.NOMATCH, "No process instance matching correlation keys.", null);
         } else {
-        	// enqueue message with the last message route, as per the comments in caller (@see BpelProcess.invokeProcess())
-        	RoutingInfo routing = 
-        		(routings != null && routings.size() > 0) ? 
-        				routings.get(routings.size() - 1) : null;
-        	if (routing != null) {
+            if (routing != null) {
                 if (__log.isDebugEnabled()) {
                     __log.debug("INPUTMSG: " + routing.correlator.getCorrelatorId() + ": SAVING to DB (no match) ");
                 }
 
-	            // send event
-	            CorrelationNoMatchEvent evt = new CorrelationNoMatchEvent(mex.getPortType().getQName(), mex
-	                    .getOperation().getName(), mex.getMessageExchangeId(), routing.wholeKeySet);
-	
-	            evt.setProcessId(_process.getProcessDAO().getProcessId());
-	            evt.setProcessName(new QName(_process.getOProcess().targetNamespace, _process.getOProcess().getName()));
-	            _process._debugger.onEvent(evt);
-	
-	            mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.QUEUED);
-	
-	            // No match, means we add message exchange to the queue.
-	            routing.correlator.enqueueMessage(mex.getDAO(), routing.wholeKeySet);
+                // send event
+                CorrelationNoMatchEvent evt = new CorrelationNoMatchEvent(mex.getPortType().getQName(), mex
+                        .getOperation().getName(), mex.getMessageExchangeId(), routing.wholeKeySet);
+
+                evt.setProcessId(_process.getProcessDAO().getProcessId());
+                evt.setProcessName(new QName(_process.getOProcess().targetNamespace, _process.getOProcess().getName()));
+                _process._debugger.onEvent(evt);
+
+                mex.setCorrelationStatus(MyRoleMessageExchange.CorrelationStatus.QUEUED);
+
+                // No match, means we add message exchange to the queue.
+                routing.correlator.enqueueMessage(mex.getDAO(), routing.wholeKeySet);
 
                 //Second matcher needs to be registered here
                 JobDetails we = new JobDetails();
@@ -289,7 +303,7 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
                 }else{
                     _process._engine._contexts.scheduler.schedulePersistedJob(we, null);
                 }
-        	}
+            }
         }
     }
 
