@@ -42,7 +42,8 @@
         <properties>
             <!-- Properties for an embedded Derby connection -->
             <property name="openjpa.ConnectionDriverName" value="org.apache.commons.dbcp.BasicDataSource"/>
-            <property name="openjpa.jdbc.DBDictionary" value="org.apache.openjpa.jdbc.sql.MySQLDictionary"/>
+            <!-- We disable TableType generation as it is appeneded in the Rakefile to handle both mysql5 and mysql 5.5-->
+            <property name="openjpa.jdbc.DBDictionary" value="org.apache.openjpa.jdbc.sql.MySQLDictionary(TableType='')"/>
             <!-- To validate DBSchema and create DDL at runtime - use this property. Currently the DDL is created at build time -->
             <property name="openjpa.jdbc.SynchronizeMappings" value="buildSchema(ForeignKeys=true)"/>
 

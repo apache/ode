@@ -343,6 +343,27 @@ define "ode" do
       end
     end
 
+    mysql_sql = lambda do |src_file,dest_file,engineType|
+        File.open(project.path_to(dest_file).to_s,"a") do |w|
+            File.open(project.path_to(src_file).to_s,"r") do |f|
+                isCT="no"
+                f.each_line do |line|
+                    if line.index(/[ ]*create[ ]+table/i) && line.index(";") then
+                        w << line.insert(line.index(";"),engineType)
+                    elsif line.index(/[ ]*create[ ]+table/i) && !line.index(";") then
+                        isCT="yes"
+                        w << line
+                    elsif isCT=="yes" && line.index(";") then
+                        isCT="no"
+                        w << line.insert(line.index(";"),engineType)
+                    else
+                        w << line
+                    end
+                end
+            end
+        end
+    end
+
     common_sql = _("src/main/sql/common.sql")
     index_sql = _("src/main/sql/index.sql")
 
@@ -350,6 +371,11 @@ define "ode" do
       partial_runtime = export[ properties_for[db], dao_hibernate, _("target/partial.runtime.#{db}.sql") ]
       partial_store = export[ properties_for[db], bpel_store, _("target/partial.store.#{db}.sql") ]
       build concat(_("target/#{db}.sql")=>[ common_sql, predefined_for[db], partial_store, partial_runtime, index_sql])
+    end
+
+    build do
+        mysql_sql["target/mysql.sql","target/mysql5.sql"," TYPE=INNODB"]
+        mysql_sql["target/mysql.sql","target/mysql55.sql"," ENGINE=INNODB"]
     end
 
     derby_sql = _("target/derby.sql")
@@ -376,6 +402,28 @@ define "ode" do
 
   desc "ODE OpenJPA Derby Database"
   define "dao-jpa-ojpa-derby" do
+
+    mysql_sql = lambda do |src_file,dest_file,engineType|
+        File.open(project.path_to(dest_file).to_s,"a") do |w|
+            File.open(project.path_to(src_file).to_s,"r") do |f|
+                isCT="no"
+                f.each_line do |line|
+                    if line.index(/[ ]*create[ ]+table/i) && line.index(";") then
+                        w << line.insert(line.index(";"),engineType)
+                    elsif line.index(/[ ]*create[ ]+table/i) && !line.index(";") then
+                        isCT="yes"
+                        w << line
+                    elsif isCT=="yes" && line.index(";") then
+                        isCT="no"
+                        w << line.insert(line.index(";"),engineType)
+                    else
+                        w << line
+                    end
+                end
+            end
+        end
+    end
+
     %w{ derby mysql oracle postgres h2 sqlserver}.each do |db|
       db_xml = _("src/main/descriptors/persistence.#{db}.xml")
       scheduler_sql = _("src/main/scripts/simplesched-#{db}.sql")
@@ -388,6 +436,12 @@ define "ode" do
       sql = concat(_("target/#{db}.sql")=>[_("src/main/scripts/license-header.sql"), common_sql, partial_sql, scheduler_sql])
       build sql
     end
+
+    build do
+        mysql_sql["target/mysql.sql","target/mysql5.sql"," TYPE=INNODB"]
+        mysql_sql["target/mysql.sql","target/mysql55.sql"," ENGINE=INNODB"]
+    end
+
     derby_db = Derby.create(_("target/derby-jpadb")=>_("target/derby.sql"))
     h2_db = H2.create("ode-jpa-h2", _("target/h2-jpadb")=>_("target/h2.sql"))
 
