@@ -1,0 +1,151 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<bpel:process name="TestCorrelationMultiScopeComplex"
+	targetNamespace="http://ode/bpel/unit-test/TestCorrelationMultiScopeComplex"
+	suppressJoinFailure="yes"
+	xmlns:tns="http://ode/bpel/unit-test/TestCorrelationMultiScopeComplex"
+	xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+	xmlns:ns1="http://www.w3.org/2001/XMLSchema"
+	xmlns:ode="http://www.apache.org/ode/type/extension">
+
+	<!-- Import the client WSDL -->
+	<bpel:import location="TestCorrelationMultiScopeComplexArtifacts.wsdl"
+		namespace="http://ode/bpel/unit-test/TestCorrelationMultiScopeComplex"
+		importType="http://schemas.xmlsoap.org/wsdl/" />
+
+	<!-- ================================================================= -->
+	<!-- PARTNERLINKS -->
+	<!-- List of services participating in this BPEL process -->
+	<!-- ================================================================= -->
+    <bpel:partnerLinks>
+        <bpel:partnerLink name="client" partnerLinkType="tns:client" myRole="myRole"></bpel:partnerLink>
+    </bpel:partnerLinks>
+    <!-- ================================================================= -->         
+    <!-- VARIABLES                                                         -->
+    <!-- List of messages and XML documents used within this BPEL process  -->
+    <!-- ================================================================= -->         
+
+    <!-- ================================================================= -->         
+    <!-- ORCHESTRATION LOGIC                                               -->
+    <!-- Set of activities coordinating the flow of messages across the    -->
+    <!-- services integrated within this business process                  -->
+    <!-- ================================================================= -->         
+
+        <bpel:scope name="ancestorScope">
+            <bpel:variables>
+                <bpel:variable name="initiateRequest" messageType="tns:initiateRequest"></bpel:variable>
+                <bpel:variable name="initiateResponse" messageType="tns:initiateResponse"></bpel:variable>
+            </bpel:variables>
+            <bpel:correlationSets>
+                <bpel:correlationSet name="CorrSet1" properties="tns:corrProperty1"></bpel:correlationSet>
+            </bpel:correlationSets>
+            <bpel:sequence name="ancestorSequence">
+	            <bpel:receive name="initiateRequest" partnerLink="client" operation="initiate" portType="tns:TestCorrelationMultiScopeComplexPort" variable="initiateRequest" createInstance="yes">
+	                <bpel:correlations>
+	                    <bpel:correlation initiate="yes" set="CorrSet1"></bpel:correlation>
+	                </bpel:correlations>
+	            </bpel:receive>
+            <bpel:assign validate="no" name="AssignPID">
+                <bpel:copy>
+                    <bpel:from><bpel:literal><tns:initiateResponse xmlns:tns="http://ode/bpel/unit-test/TestCorrelationMultiScopeComplex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <iid>iid</iid>
+</tns:initiateResponse>
+</bpel:literal></bpel:from>
+                    <bpel:to variable="initiateResponse" part="parameters"></bpel:to>
+                </bpel:copy>
+                <bpel:copy>
+                    <bpel:from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+                        <![CDATA[$ode:pid]]>
+                    </bpel:from>
+                    <bpel:to part="parameters" variable="initiateResponse">
+                        <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"><![CDATA[iid]]></bpel:query>
+                    </bpel:to>
+                </bpel:copy>
+            </bpel:assign>
+            <bpel:reply name="initiateReply" partnerLink="client" operation="initiate" portType="tns:TestCorrelationMultiScopeComplexPort" variable="initiateResponse"></bpel:reply>
+
+                <bpel:scope name="grandParentScope">
+                    <bpel:variables><bpel:variable name="receive2Request" messageType="tns:receive2Request"></bpel:variable></bpel:variables>
+                    <bpel:correlationSets>
+                        <bpel:correlationSet name="CorrSet2" properties="tns:corrProperty2"></bpel:correlationSet>
+                    </bpel:correlationSets>
+                    <bpel:sequence name="grandParentSequence">
+                        <bpel:receive name="receive2Request" partnerLink="client" operation="receive2" portType="tns:TestCorrelationMultiScopeComplexPort" variable="receive2Request">
+                        <bpel:correlations>
+                            <bpel:correlation initiate="no" set="CorrSet1"></bpel:correlation>
+                            <bpel:correlation initiate="yes" set="CorrSet2"></bpel:correlation>
+                        </bpel:correlations>
+                    </bpel:receive>
+
+                    <bpel:scope name="parentScope">
+                            <bpel:variables>
+                                <bpel:variable name="receive3Request" messageType="tns:receive3Request"></bpel:variable>
+                            </bpel:variables>
+                            <bpel:correlationSets>
+                                <bpel:correlationSet name="CorrSet3" properties="tns:corrProperty3"></bpel:correlationSet>
+                            </bpel:correlationSets>
+                            <bpel:sequence name="parentSequence">
+                                <bpel:receive name="receive3Request" partnerLink="client" operation="receive3" portType="tns:TestCorrelationMultiScopeComplexPort" variable="receive3Request">
+                                    <bpel:correlations>
+                                        <bpel:correlation initiate="no" set="CorrSet1"></bpel:correlation>
+                                        <bpel:correlation initiate="no" set="CorrSet2"></bpel:correlation>
+                                        <bpel:correlation initiate="yes" set="CorrSet3"></bpel:correlation>
+                                    </bpel:correlations>
+                                </bpel:receive>
+
+                                <bpel:scope name="childScope">
+                                    <bpel:variables><bpel:variable name="completeRequest" messageType="tns:completeRequest"></bpel:variable><bpel:variable name="completeResponse" messageType="tns:completeResponse">
+                                    </bpel:variable></bpel:variables>
+                                    <bpel:sequence name="childSequence">
+                                        <bpel:receive name="completeRequest" partnerLink="client" operation="complete" portType="tns:TestCorrelationMultiScopeComplexPort" variable="completeRequest">
+                                            <bpel:correlations>
+                                                <bpel:correlation initiate="no" set="CorrSet1"></bpel:correlation>
+                                                <bpel:correlation initiate="no" set="CorrSet2"></bpel:correlation>
+                                                <bpel:correlation initiate="no" set="CorrSet3"></bpel:correlation>
+                                            
+                                        </bpel:correlations>
+                                        </bpel:receive>
+                                    <bpel:assign validate="no" name="AssignPID">
+                                        <bpel:copy>
+                                            <bpel:from><bpel:literal><tns:completeResponse xmlns:tns="http://ode/bpel/unit-test/TestCorrelationMultiScopeComplex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <iid>iid</iid>
+</tns:completeResponse>
+</bpel:literal></bpel:from>
+                                            <bpel:to variable="completeResponse" part="parameters"></bpel:to>
+                                        </bpel:copy>
+                                        <bpel:copy>
+                                            <bpel:from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+                                                <![CDATA[$ode:pid]]>
+                                            </bpel:from>
+                                            <bpel:to part="parameters" variable="completeResponse">
+                                                <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"><![CDATA[iid]]></bpel:query>
+                                            </bpel:to>
+                                        </bpel:copy>
+                                    </bpel:assign>
+                                    <bpel:reply name="completeReply" partnerLink="client" operation="complete" portType="tns:TestCorrelationMultiScopeComplexPort" variable="completeResponse"></bpel:reply>
+                                    </bpel:sequence>
+                                </bpel:scope>
+                            </bpel:sequence>
+                    </bpel:scope>
+                </bpel:sequence>
+            </bpel:scope>
+        </bpel:sequence>
+    </bpel:scope>
+</bpel:process>
+
