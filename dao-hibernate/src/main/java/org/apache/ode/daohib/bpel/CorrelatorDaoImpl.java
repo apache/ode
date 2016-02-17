@@ -71,9 +71,9 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         entering("CorrelatorDaoImpl.dequeueMessage");
 
         MessageExchangeDAO mex = null;
+        CorrelationKeySet keyInLoop;
 
-        String hdr = "dequeueMessage(" + keySet + "): ";
-        __log.debug(hdr);
+        __log.debug("dequeueMessage({}): ",keySet);
 
         List<CorrelationKeySet> subSets = keySet.findSubSets();
         Query qry = getSession().createFilter(_hobj.getMessageCorrelations(),
@@ -93,13 +93,23 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         }
         try {
             if (!mcors.hasNext()) {
-                if (__log.isDebugEnabled())
-                    __log.debug(hdr + "did not find a MESSAGE entry.");
+                __log.debug("dequeueMessage({}): did not find a MESSAGE entry.",keySet);
             } else {
-                HCorrelatorMessage mcor = (HCorrelatorMessage) mcors.next();
-                if (__log.isDebugEnabled())
-                    __log.debug(hdr + "found MESSAGE entry " + mcor.getMessageExchange());
-                mex = new MessageExchangeDaoImpl(_sm, mcor.getMessageExchange());
+                boolean keysNotMatched = true;
+
+                for( ; mcors.hasNext() && keysNotMatched ; ) {
+                    HCorrelatorMessage mcor = (HCorrelatorMessage) mcors.next();
+                    keyInLoop = new CorrelationKeySet(mcor.getCorrelationKey());
+
+                    __log.debug("KeySet in enqueued message is {} and KeySet to be dequeued {}",keyInLoop,keySet);
+
+                    if(keyInLoop.isRoutableTo(keySet, false)) {
+                        __log.debug("dequeueMessage({}): found MESSAGE entry {}", keySet, mcor.getMessageExchange());
+
+                        mex = new MessageExchangeDaoImpl(_sm, mcor.getMessageExchange());
+                        keysNotMatched = false;
+                    }
+                }
             }
         } finally {
             Hibernate.close(mcors);
