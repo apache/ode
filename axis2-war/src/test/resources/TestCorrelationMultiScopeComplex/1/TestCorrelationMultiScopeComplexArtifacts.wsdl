@@ -43,6 +43,9 @@
   </vprop:propertyAlias>
 
   <vprop:property name="corrProperty2" type="p:string"/>
+  <vprop:propertyAlias messageType="tns:initiateRequest" part="parameters" propertyName="tns:corrProperty2">
+    <vprop:query><![CDATA[/corr2]]></vprop:query>
+  </vprop:propertyAlias>
   <vprop:propertyAlias messageType="tns:receive2Request" part="parameters" propertyName="tns:corrProperty2">
     <vprop:query><![CDATA[/corr2]]></vprop:query>
   </vprop:propertyAlias>
@@ -54,10 +57,16 @@
   </vprop:propertyAlias>
   
   <vprop:property name="corrProperty3" type="p:string"/>
-  <vprop:propertyAlias messageType="tns:completeRequest" part="parameters" propertyName="tns:corrProperty3">
+  <vprop:propertyAlias messageType="tns:initiateRequest" part="parameters" propertyName="tns:corrProperty3">
+    <vprop:query><![CDATA[/corr3]]></vprop:query>
+  </vprop:propertyAlias>
+  <vprop:propertyAlias messageType="tns:receive2Request" part="parameters" propertyName="tns:corrProperty3">
     <vprop:query><![CDATA[/corr3]]></vprop:query>
   </vprop:propertyAlias>
   <vprop:propertyAlias messageType="tns:receive3Request" part="parameters" propertyName="tns:corrProperty3">
+    <vprop:query><![CDATA[/corr3]]></vprop:query>
+</vprop:propertyAlias>
+  <vprop:propertyAlias messageType="tns:completeRequest" part="parameters" propertyName="tns:corrProperty3">
     <vprop:query><![CDATA[/corr3]]></vprop:query>
   </vprop:propertyAlias>
   

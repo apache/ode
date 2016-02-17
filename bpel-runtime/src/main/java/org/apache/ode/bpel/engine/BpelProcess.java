@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,7 +40,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.ode.agents.memory.SizingAgent;
 import org.apache.ode.bpel.common.CorrelationKey;
-import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
@@ -290,6 +290,7 @@ public class BpelProcess {
         boolean routed = false;
         boolean enqueue = true;
         List<PartnerLinkMyRoleImpl.RoutingInfo> routings = null;
+        LinkedHashSet<ProcessInstanceDAO> intersectionInstanceSet = new LinkedHashSet<ProcessInstanceDAO>();
 
         /* try to find the active instance that is waiting on the correlated value and then associate the corresponding
          * processDAO,correlator on the mex and enqueue for later processing.
@@ -308,36 +309,35 @@ public class BpelProcess {
 
                 if (routing != null) {
 
-                    for( Iterator<CorrelationKeySet> aSubSetItr = routing.wholeKeySet.findSubSets().iterator();
-                            (aSubSetItr.hasNext() && !routed);) {
+                    for( Iterator<CorrelationKey> keyItr = routing.wholeKeySet.iterator();
+                            (keyItr.hasNext() && !routed);) {
 
-                        CorrelationKeySet aSubSet = aSubSetItr.next();
+                        CorrelationKey key = keyItr.next();
+                        __log.info("noRoutingMatch: Finding active instance correlated with {} and process pid {}",key,_pid);
 
-                        for(Iterator<CorrelationKey> keyItr = aSubSet.iterator();
-                                (keyItr.hasNext() && !routed);) {
+                        // We need to make sure the PID of process of the instance is same as that of the
+                        // partnerlink's associated process in the iteration. Otherwise we might end up
+                        // associating wrong correlator with the mex.
+                        Collection<ProcessInstanceDAO> instanceDaoList = getProcessDAO().findInstance(key,ProcessState.STATE_ACTIVE);
 
-                            CorrelationKey key = keyItr.next();
-                            __log.info("noRoutingMatch: Finding active instance correlated with {} and process pid {}",new Object[]{key,_pid});
+                        if (!(instanceDaoList.isEmpty())) {
+                            //find the intersection
+                            if(!intersectionInstanceSet.isEmpty())
+                                intersectionInstanceSet.retainAll(instanceDaoList);
+                            else
+                                intersectionInstanceSet.addAll(instanceDaoList);
 
-                            // Assumption is, process instance is uniquely identifiable by any single initiated correlation key across multiple versions
-                            // of a same process type.
-
-                            // We need to make sure the PID of process of the instance is same as that of the
-                            // partnerlink's associated process in the iteration. Otherwise we might end up
-                            // associating wrong correlator with the mex.
-                            Collection<ProcessInstanceDAO> instanceDaoList = getProcessDAO().findInstance(key,ProcessState.STATE_ACTIVE);
-
-                            if (!instanceDaoList.isEmpty()) {
-                                ProcessInstanceDAO instance = instanceDaoList.iterator().next();
-                                mex.getDAO().setProcess(instance.getProcess());
-                                target.noRoutingMatch(mex, routing);
-                                routed = true;
-
-                                __log.info("noRoutingMatch: Active instance found instanceID: {} correlated with {} and process pid {}",
-                                        new Object[]{instance.getInstanceId(),key,_pid});
-
-                            }
+                            __log.debug("noRoutingMatch: intersection Instance set : {} ",intersectionInstanceSet);
                         }
+                    }
+
+                    if(!(intersectionInstanceSet.isEmpty())) {
+                        ProcessInstanceDAO instance = intersectionInstanceSet.iterator().next();
+                        mex.getDAO().setProcess(instance.getProcess());
+                        target.noRoutingMatch(mex, routing);
+                        routed = true;
+
+                        __log.info("noRoutingMatch: Active instance found instanceID: {} and process pid {}",instance.getInstanceId(),_pid);
                     }
                 }
             }
