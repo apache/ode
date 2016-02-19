@@ -95,10 +95,10 @@ public class CorrelationMultiScopeEarlyMessageTest extends Axis2TestBase impleme
             log.info("response from instance 4 {}",instance4Response);
             assertTrue(instance4Response.contains("iid"));
         } finally {
-            if (server.isDeployed(bundleName+"/1")) 
-                server.undeployProcess(bundleName + "/1");
-            if (server.isDeployed(bundleName+"/2")) 
-                server.undeployProcess(bundleName + "/2");
+            log.info("undeploying process {}",bundleName+"/1");
+            server.undeployProcess(bundleName + "/1");
+            log.info("undeploying process {}",bundleName+"/2");
+            server.undeployProcess(bundleName + "/2");
         }
     }
 
