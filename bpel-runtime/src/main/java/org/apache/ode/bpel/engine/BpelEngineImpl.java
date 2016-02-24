@@ -486,6 +486,7 @@ public class BpelEngineImpl implements BpelEngine {
 
                     //try to find the target process and execute
                     jobInfo.jobDetail.detailsExt.put("enqueue", false);
+                    jobInfo.jobDetail.detailsExt.put("enqueueForFutureInstance", false);
 
                     for(BpelProcess proc : processes) {
                         routed = proc.handleJobDetails(jobInfo.jobDetail);
@@ -496,11 +497,19 @@ public class BpelEngineImpl implements BpelEngine {
                     //no target process was identified, enqueue the mex for later processing
                     if(!routed && we.getType() == JobType.INVOKE_INTERNAL) {
                         jobInfo.jobDetail.detailsExt.put("enqueue", true);
+                        jobInfo.jobDetail.detailsExt.put("enqueueForFutureInstance", false);
 
+                        //try to identify any waiting instance to register this early message
                         for(BpelProcess proc : processes) {
                             routed = proc.handleJobDetails(jobInfo.jobDetail);
 
                             if(routed) break;
+                        }
+
+                        //no active instance was found, then enqueue this early message for a future instance.
+                        if(!routed){
+                            jobInfo.jobDetail.detailsExt.put("enqueueForFutureInstance", true);
+                            process.handleJobDetails(jobInfo.jobDetail);
                         }
                     }
                 }
