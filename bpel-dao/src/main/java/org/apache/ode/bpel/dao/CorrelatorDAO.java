@@ -83,9 +83,11 @@ public interface CorrelatorDAO {
     Collection<CorrelatorMessageDAO> getAllMessages();
 
   /**
+   * @deprecated
    * Find a route matching the given correlation key.
    * @param correlationKey correlation key
    * @return route matching the given correlation key
+   * @see findRoute(CorrelationKeySet correlationKeySet,boolean isCorrleationKeySetPreInitialized)
    */
   List<MessageRouteDAO> findRoute(CorrelationKeySet correlationKeySet);
 
@@ -115,4 +117,17 @@ public interface CorrelatorDAO {
      * @return all routes registered on this correlator, use with care as it can potentially return a lot of values
      */
     Collection<MessageRouteDAO> getAllRoutes();
+
+    /**
+     * Find a route matching the given correlation key set.
+     * If the correlationKeySet is known to be pre initialized then isCorrleationKeySetPreInitialized can be set to true or false otherwise.
+     * Depending on the value of isCorrleationKeySetPreInitialized,
+     *  true -  canonical value of the correlationKeySet might be used to find the route.
+     *  false - canonical value of each of the subset of correlationKeySet might be used to find the route.
+     *
+     * @param correlationKeySet correlation key
+     * @param isCorrleationKeySetPreInitialized
+     * @return route matching the given correlation key
+     */
+    List<MessageRouteDAO> findRoute(CorrelationKeySet correlationKeySet,boolean isCorrleationKeySetPreInitialized);
 }

@@ -56,7 +56,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
             "(select hc.id from HCorrelator as hc where hc.correlatorId = :correlatorId)").intern();
 
     /** Query for removing routes. */
-    private static final String QRY_DELSELECTORS = "delete from HCorrelatorSelector where groupId = ? and instance = ?";
+    private static final String QRY_DELSELECTORS = "delete from HCorrelatorSelector where instance = ? and groupId = ?";
 
     private HCorrelator _hobj;
 
@@ -75,12 +75,8 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
 
         __log.debug("dequeueMessage({}): ",keySet);
 
-        List<CorrelationKeySet> subSets = keySet.findSubSets();
-        Query qry = getSession().createFilter(_hobj.getMessageCorrelations(),
-                generateUnmatchedQuery(subSets));
-        for( int i = 0; i < subSets.size(); i++ ) {
-            qry.setString("s" + i, subSets.get(i).toCanonicalString());
-        }
+        Query qry = getSession().createFilter(_hobj.getMessageCorrelations()," where this.correlationKey = :s0");
+        qry.setString("s0", keySet.toCanonicalString());
 
         // We really should consider the possibility of multiple messages matching a criteria.
         // When the message is handled, its not too convenient to attempt to determine if the
@@ -120,46 +116,7 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
 
     @SuppressWarnings("unchecked")
     public List<MessageRouteDAO> findRoute(CorrelationKeySet keySet) {
-        List<MessageRouteDAO> routes = new ArrayList<MessageRouteDAO>();
-
-        entering("CorrelatorDaoImpl.findRoute");
-        String hdr = "findRoute(keySet=" + keySet + "): ";
-        if (__log.isDebugEnabled()) __log.debug(hdr);
-
-        //String processType = new QName(_hobj.getProcess().getTypeNamespace(), _hobj.getProcess().getTypeName()).toString();
-        List<CorrelationKeySet> subSets = keySet.findSubSets();
-
-        //Query q = getSession().createQuery(generateSelectorQuery(_sm.canJoinForUpdate() ? FLTR_SELECTORS : FLTR_SELECTORS_SUBQUERY, subSets));
-        Query q = getSession().createQuery(generateSelectorQuery(FLTR_SELECTORS, subSets));
-        q.setEntity("correlator", getHibernateObj());
-
-        for( int i = 0; i < subSets.size(); i++ ) {
-            q.setString("s" + i, subSets.get(i).toCanonicalString());
-        }
-        // Make sure we obtain a lock for the selector we want to find.
-        q.setLockMode("hs", LockMode.UPGRADE);
-
-        List<HProcessInstance> targets = new ArrayList<HProcessInstance>();
-        List<HCorrelatorSelector> list;
-        try {
-            list = (List<HCorrelatorSelector>) q.list();
-        } catch (LockAcquisitionException e) {
-            throw new Scheduler.JobProcessorException(e, true);
-        }
-        for (HCorrelatorSelector selector : list) {
-            if (selector != null) {
-                boolean isRoutePolicyOne = selector.getRoute() == null || "one".equals(selector.getRoute());
-                if ("all".equals(selector.getRoute()) ||
-                        (isRoutePolicyOne && !targets.contains(selector.getInstance()))) {
-                    routes.add(new MessageRouteDaoImpl(_sm, selector));
-                    targets.add(selector.getInstance());
-                }
-            }
-        }
-
-        if(__log.isDebugEnabled()) __log.debug(hdr + "found " + routes);
-
-        return routes;
+        return findRoute(keySet,false);
     }
 
     private String generateUnmatchedQuery(List<CorrelationKeySet> subSets) {
@@ -271,8 +228,8 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         __log.debug(hdr);
         Session session = getSession();
         Query q = session.createQuery(QRY_DELSELECTORS);
-        q.setString(0, routeGroupId); // groupId
-        q.setEntity(1, ((ProcessInstanceDaoImpl) target).getHibernateObj()); // instance
+        q.setEntity(0, ((ProcessInstanceDaoImpl) target).getHibernateObj()); // instance
+        q.setString(1, routeGroupId); // groupId
         int updates = q.executeUpdate();
         session.flush(); // explicit flush to ensure route removed
         if (__log.isDebugEnabled())
@@ -293,4 +250,52 @@ class CorrelatorDaoImpl extends HibernateDao implements CorrelatorDAO {
         return routes;
     }
 
+    public List<MessageRouteDAO> findRoute(CorrelationKeySet keySet,boolean isCorrleationKeySetPreInitialized) {
+        List<MessageRouteDAO> routes = new ArrayList<MessageRouteDAO>();
+
+        entering("CorrelatorDaoImpl.findRoute");
+        __log.debug("findRoute(keySet={})",keySet);
+
+        //Query q = getSession().createQuery(generateSelectorQuery(_sm.canJoinForUpdate() ? FLTR_SELECTORS : FLTR_SELECTORS_SUBQUERY, subSets));
+        Query q = null;
+        if(isCorrleationKeySetPreInitialized){
+            q = getSession().createQuery(FLTR_SELECTORS + " and hs.correlationKey = :s0");
+            q.setEntity("correlator", getHibernateObj());
+            q.setString("s0", keySet.toCanonicalString());
+        } else {
+            List<CorrelationKeySet> subSets = keySet.findSubSets();
+            q = getSession().createQuery(generateSelectorQuery(FLTR_SELECTORS, subSets));
+            q.setEntity("correlator", getHibernateObj());
+
+            for( int i = 0; i < subSets.size(); i++ ) {
+                q.setString("s" + i, subSets.get(i).toCanonicalString());
+            }
+        }
+        // Make sure we obtain a lock for the selector we want to find.
+        q.setLockMode("hs", LockMode.UPGRADE);
+
+        List<HProcessInstance> targets = new ArrayList<HProcessInstance>();
+        List<HCorrelatorSelector> list;
+        try {
+            list = (List<HCorrelatorSelector>) q.list();
+        } catch (LockAcquisitionException e) {
+            throw new Scheduler.JobProcessorException(e, true);
+        }
+        for (HCorrelatorSelector selector : list) {
+            __log.debug("selector returned form findRoute {} and targets {}", selector.getInstance().getId(),targets);
+            if (selector != null) {
+                boolean isRoutePolicyOne = selector.getRoute() == null || "one".equals(selector.getRoute());
+                if ("all".equals(selector.getRoute()) ||
+                        (isRoutePolicyOne && !targets.contains(selector.getInstance()))) {
+                    __log.debug("selector added for targets {}", selector.getInstance().getId());
+                    routes.add(new MessageRouteDaoImpl(_sm, selector));
+                    targets.add(selector.getInstance());
+                }
+            }
+        }
+
+        __log.debug("findRoute(keySet={}) found {}",keySet,routes);
+
+        return routes;
+    }
 }
