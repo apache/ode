@@ -292,7 +292,8 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
                 // No match, means we add message exchange to the queue.
                 routing.correlator.enqueueMessage(mex.getDAO(), routing.wholeKeySet);
 
-                //Second matcher needs to be registered here
+                // Do we really need this? Check ODE-1048
+/*                //Second matcher needs to be registered here
                 JobDetails we = new JobDetails();
                 we.setType(JobType.MEX_MATCHER);
                 we.setProcessId(_process.getPID());
@@ -303,6 +304,7 @@ public class PartnerLinkMyRoleImpl extends PartnerLinkRoleImpl {
                 }else{
                     _process._engine._contexts.scheduler.schedulePersistedJob(we, null);
                 }
+*/
             }
         }
     }
