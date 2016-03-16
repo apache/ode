@@ -30,7 +30,7 @@ import java.util.Collection;
  * @hibernate.query name="SELECT_CORSETS_BY_PROCESS_STATES" query="from HCorrelationSet as c left join fetch c.process left join fetch c.instance where c.instance.state in (:states)"
  * @hibernate.query name="SELECT_INSTANCES_BY_CORSETS" query="select cs.scope.instance from HCorrelationSet as cs where cs.value = :ckey"
  * @hibernate.query name="SELECT_INSTANCES_BY_CORSETS_STATE_PROCESS" query="select cs.scope.instance from HCorrelationSet as cs where cs.value = :ckey and
- *                          cs.process = :process and cs.instance.state = :state"
+ *                          cs.process.typeNamespace = :processTypeNamespace and cs.process.typeName = :processTypeName and cs.instance.state = :state"
  */
 public class HCorrelationSet extends HObject{
     public static final String SELECT_CORSET_IDS_BY_INSTANCES = "SELECT_CORSET_IDS_BY_INSTANCES";

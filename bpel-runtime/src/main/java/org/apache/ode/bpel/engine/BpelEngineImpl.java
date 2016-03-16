@@ -20,6 +20,8 @@
 package org.apache.ode.bpel.engine;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -68,6 +70,8 @@ import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+
 
 /**
  * Implementation of the {@link BpelEngine} interface: provides the server methods that should be invoked in the context of a
@@ -482,6 +486,20 @@ public class BpelEngineImpl implements BpelEngine {
 
                 if (we.getType() == JobType.INVOKE_INTERNAL || we.getType() == JobType.MEX_MATCHER) {
                     List<BpelProcess> processes = getAllProcesses(we.getProcessId());
+
+                    if(processes.size() > 1) {
+                        //sort the processes so that the active process is at end of the list, required for enqueueing an early message
+                        Comparator<BpelProcess> compartor = new Comparator<BpelProcess>(){
+                            @Override
+                            public int compare(BpelProcess o1, BpelProcess o2) {
+                                if ( o1.isActive() && !o2.isActive() ) return 1;
+                                if ( !o1.isActive() && o2.isActive() ) return -1;
+                                return 0;
+                            }
+                        };
+                        Collections.sort(processes, compartor);
+                    }
+
                     boolean routed = false;
 
                     //try to find the target process and execute

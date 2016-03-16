@@ -43,6 +43,7 @@ import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
+import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.DeferredProcessInstanceCleanable;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
@@ -313,7 +314,7 @@ public class BpelProcess {
                         target.noRoutingMatch(mex, routing);
                         routed = true;
 
-                        __log.info("noRoutingMatch: mex has been registered for a future Instance and process pid {}",_pid);
+                        __log.debug("noRoutingMatch: mex has been registered for a future Instance of process pid {}",_pid);
 
                         return routed;
                     }
@@ -323,11 +324,9 @@ public class BpelProcess {
                                 (keyItr.hasNext() && !routed);) {
 
                             CorrelationKey key = keyItr.next();
-                            __log.info("noRoutingMatch: Finding active instance correlated with {} and process pid {}",key,_pid);
+                            __log.debug("noRoutingMatch: Finding active instance correlated with {}",key);
 
-                            // We need to make sure the PID of process of the instance is same as that of the
-                            // partnerlink's associated process in the iteration. Otherwise we might end up
-                            // associating wrong correlator with the mex.
+                             //Find instances across all version of a process that match the correlation key and instance state.
                             Collection<ProcessInstanceDAO> instanceDaoList = getProcessDAO().findInstance(key,ProcessState.STATE_ACTIVE);
 
                             if (!(instanceDaoList.isEmpty())) {
@@ -344,10 +343,16 @@ public class BpelProcess {
                         if(!(intersectionInstanceSet.isEmpty())) {
                             ProcessInstanceDAO instance = intersectionInstanceSet.iterator().next();
                             mex.getDAO().setProcess(instance.getProcess());
-                            target.noRoutingMatch(mex, routing);
+
+                            // correlator should be the one obtained from the instance's process itself, as the findInstance query might return 
+                            // instances of other process version.
+                            CorrelatorDAO correlator = instance.getProcess().getCorrelator(routing.correlator.getCorrelatorId());
+                            RoutingInfo matchedRouting = new RoutingInfo(routing.messageRoute,routing.matchedKeySet,correlator,routing.wholeKeySet);
+
+                            target.noRoutingMatch(mex, matchedRouting);
                             routed = true;
 
-                            __log.info("noRoutingMatch: Active instance found instanceID: {} and process pid {}",instance.getInstanceId(),_pid);
+                            __log.info("noRoutingMatch: Active instance found instanceID: {} and process pid {}",instance.getInstanceId(),instance.getProcess().getType());
                         }
                     }
                 }
@@ -356,7 +361,7 @@ public class BpelProcess {
         return routed;
     }
 
-    private boolean isActive() {
+    protected boolean isActive() {
         return _pconf.getState() == org.apache.ode.bpel.iapi.ProcessState.ACTIVE;
     }
 
