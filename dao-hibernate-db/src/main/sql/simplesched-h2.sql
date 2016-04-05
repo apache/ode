@@ -3,7 +3,7 @@
 -- MySQL scripts by Maciej Szefler.
 --
 --
-DROP TABLE IF EXISTS ODE_JOB;
+
 
 CREATE TABLE ODE_JOB (
   jobid CHAR(64)  NOT NULL DEFAULT '',

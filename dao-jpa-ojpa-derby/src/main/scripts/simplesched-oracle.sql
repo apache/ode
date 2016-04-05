@@ -4,7 +4,7 @@
 -- 
 -- 
 
-DROP TABLE ode_job;
+
 
 CREATE TABLE ode_job (
   jobid VARCHAR(64)  NOT NULL,
