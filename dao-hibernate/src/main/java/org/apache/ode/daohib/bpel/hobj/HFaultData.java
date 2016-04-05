@@ -48,7 +48,7 @@ public class HFaultData extends HObject {
     /**
      * @hibernate.property type="org.apache.ode.daohib.bpel.hobj.GZipDataType"
      *
-     * @hibernate.column name="DATA" sql-type="blob(2G)"
+     * @hibernate.column name="DATA"
      */
     public byte[] getData() {
         return _data;

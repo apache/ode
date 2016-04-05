@@ -100,7 +100,7 @@ public class HActivityRecovery extends HObject {
     /**
      * @hibernate.property type="org.apache.ode.daohib.bpel.hobj.GZipDataType"
      *
-     * @hibernate.column name="DETAILS" sql-type="blob(2G)"
+     * @hibernate.column name="DETAILS"
      */
     public byte[] getDetails() {
         return _details;
