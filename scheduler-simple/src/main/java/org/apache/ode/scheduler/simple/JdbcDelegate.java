@@ -211,7 +211,7 @@ public class JdbcDelegate implements DatabaseDelegate {
             ps.setObject(i++, details.inMem, Types.INTEGER);
             
             if (details.detailsExt == null || details.detailsExt.size() == 0) {
-                ps.setObject(i++, null, Types.BLOB);
+                ps.setBytes(i++, null);
             } else {
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 try {
