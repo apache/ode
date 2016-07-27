@@ -411,10 +411,12 @@ public class BpelProcess {
         PartnerLinkMyRoleImpl target = null;
         for (Map.Entry<PartnerLinkMyRoleImpl,Endpoint> e : getEndpointToMyRoleMap().entrySet()) {
             if (e.getValue().serviceName.equals(mex.getServiceName())) {
-                // First one is fine as we're only interested in the portType and operation here and
-                // even if a process has 2 myrole partner links
                 target = e.getKey();
-                break;
+                //Multiple partnerlinks with myRole defined under the same service endpoint requires
+                // iteration to identify the portType, which contains the operation
+                if(target._plinkDef.getMyRoleOperation(mex.getOperationName()) != null) {
+                    break;
+                }
             }
         }
         if (target != null) {
