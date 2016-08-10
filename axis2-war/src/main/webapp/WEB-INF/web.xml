@@ -27,6 +27,11 @@
           version="2.5">
     <display-name>Apache-Axis2</display-name>
 
+    <context-param>
+        <param-name>isLog4jAutoInitializationDisabled</param-name>
+        <param-value>true</param-value>
+    </context-param>
+
     <listener>
         <listener-class>org.apache.logging.log4j.web.Log4jServletContextListener</listener-class>
     </listener>
@@ -47,8 +52,8 @@
     </filter-mapping>
 
     <servlet>
-        <servlet-name>AxisServlet</servlet-name>
         <display-name>Apache-Axis Servlet</display-name>
+        <servlet-name>AxisServlet</servlet-name>
         <servlet-class>org.apache.ode.axis2.hooks.ODEAxisServlet</servlet-class>
         <!--<init-param>-->
         <!--<param-name>axis2.xml.path</param-name>-->

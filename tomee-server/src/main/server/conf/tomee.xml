@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tomee>
+
+<TransactionManager type="TransactionManager">
+</TransactionManager>
+
+<Resource id="jdbc/ode" type="DataSource">
+    jdbcDriver=org.apache.derby.jdbc.EmbeddedDriver
+    jdbcUrl=jdbc:derby:database/derby-jpadb
+    userName=sa
+    password=
+    defaultAutoCommit=false
+    jtaManaged=true
+    initialSize=5
+    maxActive=20
+    defaultTransactionIsolation=2
+</Resource>
+
+</tomee>

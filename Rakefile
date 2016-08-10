@@ -21,6 +21,7 @@ require "buildr/openjpa"
 require "buildr/javacc"
 require "buildr/jetty"
 require "buildr/hibernate"
+require "nokogiri"
 
 require File.join(File.dirname(__FILE__), 'repositories.rb')
 require File.join(File.dirname(__FILE__), 'dependencies.rb')
@@ -693,7 +694,93 @@ define "ode" do
     pp transitive(['org.apache.axis2:axis2-webapp:jar:1.5.6', 'org.apache.rampart:rampart-project:jar:1.5.2']).group_by {|s| "#{s.group}:#{s.id}:#{s.classifier}:#{s.type}" }.map {|i,v| v.sort_by(&:version).first.to_spec}.sort
   end
 
+
+  desc "tomee"
+  define "tomee" do
+      compile.with TOMEE, SLF4J
+      package :jar
+  end
+
+  desc "tomee-server"
+  define "tomee-server" do
+    libs = projects("axis2", "bpel-api", "bpel-compiler", "bpel-connector", "bpel-dao",
+      "bpel-epr", "bpel-obj", "bpel-ql", "bpel-runtime", "scheduler-simple",
+      "bpel-schemas", "bpel-store", "dao-hibernate", "jacob", "jca-ra", "jca-server",
+      "utils", "dao-jpa", "agents","tomee"),
+      AXIS2_ALL, AXIS2_MODULES.libs, ANNONGEN, BACKPORT, COMMONS.codec, COMMONS.fileupload, COMMONS.io, COMMONS.httpclient, COMMONS.lang, COMMONS.pool,
+      DERBY, DERBY_TOOLS, GERONIMO.kernel, H2::REQUIRES, JAXEN, JAVAX.activation, JIBX, LOG4J2, SAXON, SPRING, TRANQL, WOODSTOX, WSDL4J, WS_COMMONS, XALAN,
+      XERCES, XMLBEANS,  SLF4J, TOMEE
+
+    # dependecies of ODE removed as it is provided by TOMEE
+    #COMMONS.beanutils,COMMONS.collections, GERONIMO.connector,GERONIMO.transaction, OPENJPA, JAVAX.persistence, JAVAX.ejb, JAVAX.javamail, JAVAX.connector, JAVAX.jms, JAVAX.transaction, JAVAX.stream,
+
+    tomee_libs = projects("tomee"), TOMEE, DERBY, DERBY_TOOLS, SLF4J, LOG4J2
+
+    exploded_ode = unzip(_(:target, 'ode') => project("ode:axis2-war").package(:war)).target
+
+    package(:zip).enhance do |zip|
+        zip.include path_to(:src,:main,:server,'*')
+        zip.include(tomee_libs,:path=>"lib")
+        zip.include(:path=>"logs")
+        zip.merge project("dao-jpa-ojpa-derby").package(:zip),:path=>"database"
+        zip.merge project("dao-hibernate-db").package(:zip),:path=>"database"
+
+        exploded_ode.invoke
+
+        # remove conflicting jar from ODE
+        rm _(:target, "ode/WEB-INF/lib/geronimo-jta_1.1_spec-1.1.jar")
+        rm _(:target, "ode/WEB-INF/lib/geronimo-transaction-2.0.1.jar")
+        rm _(:target, "ode/WEB-INF/lib/geronimo-spec-jms-1.1-rc4.jar")
+        rm _(:target, "ode/WEB-INF/lib/geronimo-javamail_1.4_spec-1.7.1.jar")
+        rm _(:target, "ode/WEB-INF/lib/geronimo-connector-2.0.1.jar")
+        rm _(:target, "ode/WEB-INF/lib/geronimo-ejb_2.1_spec-1.1.jar")
+        rm _(:target, "ode/WEB-INF/lib/geronimo-j2ee-connector_1.5_spec-1.0.jar")
+        rm _(:target, "ode/WEB-INF/lib/geronimo-kernel-2.0.1.jar")
+        rm _(:target, "ode/WEB-INF/lib/persistence-api-1.0.jar")
+        rm _(:target, "ode/WEB-INF/lib/openjpa-1.2.3.jar")
+        rm _(:target, "ode/WEB-INF/lib/derby-10.5.3.0_1.jar")
+        rm _(:target, "ode/WEB-INF/lib/derbytools-10.5.3.0_1.jar")
+        remove_entry_secure _(:target, "ode/WEB-INF/classes/")
+        rm _(:target, "ode/WEB-INF/lib/log4j-api-2.3.jar")
+        rm _(:target, "ode/WEB-INF/lib/log4j-core-2.3.jar")
+        rm _(:target, "ode/WEB-INF/lib/log4j-slf4j-impl-2.3.jar")
+        rm _(:target, "ode/WEB-INF/lib/log4j-web-2.3.jar")
+        rm _(:target, "ode/WEB-INF/lib/slf4j-api-1.7.12.jar")
+        rm _(:target, "ode/WEB-INF/lib/jcl-over-slf4j-1.7.12.jar")
+
+
+      # add resources to web.xml
+      resourcesxml  = Nokogiri::XML <<-eos
+        <resource-ref>
+            <res-ref-name>jdbc/ode</res-ref-name>
+            <res-type>javax.sql.DataSource</res-type>
+            <res-auth>Container</res-auth>
+            <res-sharing-scope>Shareable</res-sharing-scope>
+        </resource-ref>
+      eos
+
+      webxml = Nokogiri::XML(File.open(_(:target, "ode/WEB-INF/web.xml")))
+      webxml.xpath('//xmlns:web-app').first.add_child(resourcesxml.root)
+
+      File.open(_(:target, "ode/WEB-INF/web.xml"),'w') {|f| webxml.write_xml_to f}
+
+      # add TomcatFactory to ode-axis2.properties
+      File.open(_(:target, "ode/WEB-INF/conf/ode-axis2.properties"), 'a') do |file|
+        file.puts "\node-axis2.tx.factory.class=org.apache.ode.axis2.util.TomcatFactory"
+        file.puts "ode-axis2.db.mode=EXTERNAL"
+        file.puts "ode-axis2.db.ext.dataSource=java:comp/env/jdbc/ode"
+        file.puts "ode-axis2.dao.factory=org.apache.ode.dao.jpa.BPELDAOConnectionFactoryImpl"
+        file.puts "ode-axis2.threads.pool.size=20"
+        file.puts "ode-axis2.http.connection-manager.max-per-host=100"
+        file.puts "ode-axis2.http.connection-manager.max-total=100"
+      end
+
+      zip.include.path("webapps").include _(:target, "ode")
+    end
+  end
 end
+
+
 
 define "apache-ode" do
   [:version, :group, :manifest, :meta_inf].each { |prop| send "#{prop}=", project("ode").send(prop) }
@@ -752,6 +839,8 @@ define "apache-ode" do
   define "distro" do
     parent.distro(self, "-war") { |zip| zip.include project("ode:axis2-war").package(:war), :as=>"ode.war" }
     parent.distro(self, "-jbi") { |zip| zip.include project("ode:jbi").package(:zip) }
+    parent.distro(self, "-war") { |zip| zip.include project("ode:tomee-server").package(:zip) }
+
 
     # Preparing third party licenses
     build do
