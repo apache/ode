@@ -109,7 +109,7 @@ public class BPELDAOConnectionImpl implements BpelDAOConnection {
     public ProcessDAO getProcess(QName processId) {
         List l = _em.createQuery("select x from ProcessDAOImpl x where x._processId = ?1")
                 .setParameter(1, processId.toString()).getResultList();
-        if (l.size() == 0) return null;
+        if (l.isEmpty()) return null;
         ProcessDAOImpl p = (ProcessDAOImpl) l.get(0);
         return p;
     }
