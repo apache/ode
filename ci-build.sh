@@ -38,7 +38,7 @@ FINAL_COMMAND="$CREATE_USER_COMMAND && $BUNDLER_COMMAND && $BUILDR_COMMAND"
 
 
 ## For release set these arguments with proper values
-##  export JAVADOC=ON
+export JAVADOC=off
 ##  export BUILDR_ENV=production
 ##  export NEXT_VERSION=
 ##  export GNUPGHOME="$HOME/.gnupg"
