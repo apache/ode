@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-
+<?xml version="1.0"?>
 <!--
   ~ Licensed to the Apache Software Foundation (ASF) under one
   ~ or more contributor license agreements.  See the NOTICE file
@@ -18,71 +17,33 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
+  <web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" 
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+           xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
 
-
-<web-app xmlns="http://java.sun.com/xml/ns/javaee"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
-          http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-          version="2.5">
     <display-name>Apache-Axis2</display-name>
-
-    <context-param>
-        <param-name>isLog4jAutoInitializationDisabled</param-name>
-        <param-value>true</param-value>
-    </context-param>
-
-    <listener>
-        <listener-class>org.apache.logging.log4j.web.Log4jServletContextListener</listener-class>
-    </listener>
 
     <filter>
         <filter-name>UrlRewriteFilter</filter-name>
         <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+    <init-param>
+        <param-name>confReloadCheckInterval</param-name>
+        <param-value>10</param-value>
+    </init-param>
     </filter>
     <filter-mapping>
         <filter-name>UrlRewriteFilter</filter-name>
         <url-pattern>/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
-    </filter-mapping>
-
-    <filter>
-        <filter-name>log4jServletFilter</filter-name>
-        <filter-class>org.apache.logging.log4j.web.Log4jServletFilter</filter-class>
-    </filter>
-
-    <filter-mapping>
-        <filter-name>log4jServletFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-        <dispatcher>INCLUDE</dispatcher>
-        <dispatcher>ERROR</dispatcher>
-        <dispatcher>ASYNC</dispatcher><!-- Servlet 3.0 w/ disabled auto-initialization only; not supported in 2.5 -->
     </filter-mapping>
 
     <servlet>
         <display-name>Apache-Axis Servlet</display-name>
         <servlet-name>AxisServlet</servlet-name>
         <servlet-class>org.apache.ode.axis2.hooks.ODEAxisServlet</servlet-class>
-        <!--<init-param>-->
-        <!--<param-name>axis2.xml.path</param-name>-->
-        <!--<param-value>/WEB-INF/conf/axis2.xml</param-value>-->
-        <!--<param-name>axis2.xml.url</param-name>-->
-        <!--<param-value>http://localhot/myrepo/axis2.xml</param-value>-->
-        <!--<param-name>axis2.repository.path</param-name>-->
-        <!--<param-value>/WEB-INF</param-value>-->
-        <!--<param-name>axis2.repository.url</param-name>-->
-        <!--<param-value>http://localhot/myrepo</param-value>-->
-        <!--</init-param>-->
         <load-on-startup>1</load-on-startup>
     </servlet>
-<!--    <servlet>
-        <servlet-name>AxisAdminServlet</servlet-name>
-        <display-name>Apache-Axis AxisAdmin Servlet (REST)</display-name>
-        <servlet-class>org.apache.axis2.webapp.AxisAdminServlet</servlet-class>
-    </servlet>-->
 
     <servlet-mapping>
         <servlet-name>AxisServlet</servlet-name>
@@ -109,32 +70,19 @@
         <url-pattern>/deployment/*</url-pattern>
     </servlet-mapping>
 
-    <!--<servlet-mapping>
-        <servlet-name>AxisAdminServlet</servlet-name>
-        <url-pattern>/axis2-admin/*</url-pattern>
-    </servlet-mapping>-->
-
    <welcome-file-list>
       <welcome-file>/index.html</welcome-file>
     </welcome-file-list>
 
     <error-page>
       <error-code>404</error-code>
-      <location>/axis2-web/Error/error404.jsp</location>
+      <location>/404.html</location>
     </error-page>
 
-    <error-page>
-        <error-code>500</error-code>
-        <location>/axis2-web/Error/error500.jsp</location>
-    </error-page>
-
-    <!-- UNCOMMENT TO USE APPSERVER DATASOURCE
     <resource-ref>
-        <res-ref-name>jdbc/ode-ds</res-ref-name>
+        <res-ref-name>jdbc/ode</res-ref-name>
         <res-type>javax.sql.DataSource</res-type>
         <res-auth>Container</res-auth>
         <res-sharing-scope>Shareable</res-sharing-scope>
     </resource-ref>
-         UNCOMMENT TO USE APPSERVER DATASOURCE -->
-
 </web-app>

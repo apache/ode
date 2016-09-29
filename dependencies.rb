@@ -275,3 +275,6 @@ TOMEE = struct(
         :openjpa => ["org.apache.openjpa:openjpa:jar:2.4.1","net.sourceforge.serp:serp:jar:1.15.1"]
 
 )
+
+ODE_WEB_CONSOLE     = "org.apache.ode:ode-console:jar:0.1.0-SNAPSHOT"
+TUCKEY_URLREWRITE   = "org.tuckey:urlrewritefilter:jar:4.0.4"

@@ -107,7 +107,7 @@ define "ode" do
       JAVAX.connector, JAVAX.jms, JAVAX.persistence, JAVAX.transaction, JAVAX.stream,  JIBX,
       GERONIMO.connector, GERONIMO.kernel, GERONIMO.transaction, LOG4J2, OPENJPA, SAXON, TRANQL,
       WOODSTOX, WSDL4J, WS_COMMONS, XALAN, XERCES, XMLBEANS, SPRING,
-      AXIS2_MODULES.libs, H2::REQUIRES, SLF4J
+      AXIS2_MODULES.libs, H2::REQUIRES, SLF4J, ODE_WEB_CONSOLE, TUCKEY_URLREWRITE
 
     package(:war).with(:libs=>libs).path("WEB-INF").tap do |web_inf|
       web_inf.merge project("dao-jpa-ojpa-derby").package(:zip)
@@ -707,8 +707,7 @@ define "ode" do
     tomee_libs = projects("tomee"), TOMEE, DERBY, DERBY_TOOLS, SLF4J, LOG4J2
 
     #liraries to be rmomved from ODE war
-    rm_libs = GERONIMO, JAVAX.transaction, JAVAX.connector, JAVAX.ejb, JAVAX.javamail, JAVAX.jms, JAVAX.persistence, JAVAX.resource, DERBY, DERBY_TOOLS, SLF4J, LOG4J2, OPENJPA, TRANQL,
-            artifacts(AXIS2_MODULES.libs).keep_if {|a| a.group == 'velocity' && a.id == 'velocity'}
+    rm_libs = GERONIMO, JAVAX.transaction, JAVAX.connector, JAVAX.ejb, JAVAX.javamail, JAVAX.jms, JAVAX.persistence, JAVAX.resource, DERBY, DERBY_TOOLS, SLF4J, LOG4J2, OPENJPA, TRANQL, artifacts(AXIS2_MODULES.libs).keep_if {|a| a.group == 'velocity' && a.id == 'velocity'}
 
     # extract ode war
     exploded_ode = unzip(_(:target, 'ode') => project("ode:axis2-war").package(:war)).target
@@ -727,20 +726,9 @@ define "ode" do
         #remove classes folder, as there is nothing
         remove_entry_secure _(:target, "ode/WEB-INF/classes/")
 
-      # add resources to web.xml
-      resourcesxml  = Nokogiri::XML <<-eos
-        <resource-ref>
-            <res-ref-name>jdbc/ode</res-ref-name>
-            <res-type>javax.sql.DataSource</res-type>
-            <res-auth>Container</res-auth>
-            <res-sharing-scope>Shareable</res-sharing-scope>
-        </resource-ref>
-      eos
+        #copy Servlet 3.0 enabled web.xml
+        cp path_to("src/main/webapp/WEB-INF/web.xml"), _(:target, "ode/WEB-INF/web.xml")
 
-      webxml = Nokogiri::XML(File.open(_(:target, "ode/WEB-INF/web.xml")))
-      webxml.xpath('//xmlns:web-app').first.add_child(resourcesxml.root)
-
-      File.open(_(:target, "ode/WEB-INF/web.xml"),'w') {|f| webxml.write_xml_to f}
 
       # add TomcatFactory to ode-axis2.properties
       File.open(_(:target, "ode/WEB-INF/conf/ode-axis2.properties"), 'a') do |file|
