@@ -15,3 +15,4 @@
 
 repositories.remote << "http://repo1.maven.org/maven2"
 repositories.remote << "http://people.apache.org/~vanto/m2/"
+repositories.remote << "https://repository.apache.org/content/repositories/snapshots"
