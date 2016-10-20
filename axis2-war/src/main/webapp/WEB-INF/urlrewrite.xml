@@ -27,15 +27,18 @@
     http://www.tuckey.org/urlrewrite/
 
 -->
-<urlrewrite>
+<urlrewrite default-match-type="wildcard">
 
     <rule>
         <note>
-            The rule means that requests to /ode will be redirected to 
+            The rule means that requests to /ode will be redirected to
             /ode/webjars/ode-console/${version} the url will be rewritten.
         </note>
-        <from>^/$</from>
-        <to type="redirect">webjars/ode-console/0.1.0-SNAPSHOT</to>
+        <condition type="request-uri" operator="notequal">/*/webjars/**</condition>
+        <condition type="request-uri" operator="notequal">/*/processes/**</condition>
+        <condition type="request-uri" operator="notequal">/*/services/**</condition>
+        <condition type="request-uri" operator="notequal">/*/deployment/**</condition>
+        <from>/**</from>
+        <to>/webjars/ode-console/0.1.0-SNAPSHOT/$1</to>
     </rule>
 </urlrewrite>
-
