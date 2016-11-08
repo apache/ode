@@ -814,7 +814,7 @@ define "apache-ode" do
   define "distro" do
     parent.distro(self, "-war") { |zip| zip.include project("ode:axis2-war").package(:war), :as=>"ode.war" }
     parent.distro(self, "-jbi") { |zip| zip.include project("ode:jbi").package(:zip) }
-
+    parent.distro(self, "-server") { |zip| zip.include project("ode:tomee-server").package(:zip) }
 
     # Preparing third party licenses
     build do
