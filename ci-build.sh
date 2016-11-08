@@ -38,14 +38,16 @@ FINAL_COMMAND="$CREATE_USER_COMMAND && $BUNDLER_COMMAND && $BUILDR_COMMAND"
 
 
 ## For release set these arguments with proper values
-export JAVADOC=off
+##  export JAVADOC=on
 ##  export BUILDR_ENV=production
-##  export NEXT_VERSION=
+##  (Append -SNAPSHOT for ever next version)
+##  export NEXT_VERSION=1.3.8-SNAPSHOT
 ##  export GNUPGHOME="$HOME/.gnupg"
 ##  export GPG_USER=
 ##  export GPG_PASS=
 
-#mount volume for release -v $GNUPGHOME:/home/dummy/.gnupg
+##  mount volume for release
+##  -v $GNUPGHOME:/home/dummy/.gnupg
 
 docker run --rm \
     -e JAVADOC=$JAVADOC \

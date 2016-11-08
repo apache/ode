@@ -2,76 +2,88 @@
 Apache ODE Release Notes
 ========================
 
-Apache ODE 1.3.6 includes about 42 bug fixes and improvements.
+Apache ODE 1.3.7 includes about 48 bug fixes and improvements.
 
-Apache ODE 1.3.6 requires Java 1.5.x or higher. The WAR distribution can 
+Apache ODE 1.3.7 requires Java 1.6.x or higher. The WAR distribution can 
 run in most J2EE servlet containers. The JBI distribution should be able 
 to run in any JBI container but has only been tested with ServiceMix 3.x
 and latest ServiceMix 4.5.x (OSGi bundle) so far. See the BUILDING file if you 
 want to build your own distribution from the source release. 
 
 The most notable improvements:
-  - Alignment with ServiceMix 4.5.x
-  - Show a warning if datasources/TX mgrs are not correctly configured
-  - Upgrade to Axis2 1.5.6 / Rampart 1.5.2
-  - Fairer job scheduling / more reliable under load
-  - Namespace declarations are now retained correctly in assigns
-  - Integer to string conversion in XPath 1.0 fixed (found via Betsy)
-  - Foreach completion condition is now implemented (found via Betsy)
-  - Termination handlers are now implemented
-  - Some minor Betsy complaints (foreach boundary checks, partnerlink
-    assignments, rethrow fault data) addressed
+  - Moved to minimum binary compatibility to JDK 6 from JDK 5.
+  - ODE server with embedded Apache Tomee.
+  - New ODE management console based on AngularJS.
+  - Upgrade of Axis2, OpenJPA, Hibernate.
+  - Moved to SLF4J logging with Log4j2 as the implementation.
+  - There is database migration required from earlier versions.
+  - Some major memory leaks have got fixed
 
 Changes:
 ------- 
 
+Release Notes - ODE - Version 1.3.7
+
+** Sub-task
+    * [ODE-757] - checked in the generated classes from apt tool.
+
 ** Bug
-    * [ODE-302] - Use embedded TransactionManager if database mode is EMBEDDED or INTERNAL
-    * [ODE-359] - The sendsoap script does not work if there is a space in the PATH_TO_ODE
-    * [ODE-380] - Message#setHeaderPart should overwrite any previous value
-    * [ODE-454] - forEach activity compilation bugs  when compiling completionCondition
-    * [ODE-461] - Axis generates incorrect SOAP faults with some ODE exceptions
-    * [ODE-570] - Integer to string conversion does not work as expected
-    * [ODE-656] - ODE strips namespaces and namespace prefix in request
-    * [ODE-664] - Namespace declarations not being copied in ASSIGN.replaceElement
-    * [ODE-670] - MessageExhange is deleted too early
-    * [ODE-783] - ODE does not preserve XML namespace prefixes
-    * [ODE-787] - column "detailsext" is of type bytea but expression is of type oid
-    * [ODE-894] - BPEL with <pick> followed by <invoke> fails with NPE when using JPA persistence
-    * [ODE-913] - Termination handler in sub-scope does not appear to be called when parent scope enters fault handler
-    * [ODE-942] - Intermittent issue when calling partner services asynchronously.
-    * [ODE-943] - NoClassDefFoundError for org.apache.log4j.helpers.AbsoluteTimeDateFormat in SimpleScheduler.doLoadImmediate() leads memory leak
-    * [ODE-952] - Callback Session Endpoint is not getting set in the MessageContext during Stateful Message Exchange
-    * [ODE-957] - Invocation of a WSDL operation that doesn't have a request message part gives NPE at runtime
-    * [ODE-958] - ODE allows activating a retired process when there is already an active version
-    * [ODE-960] - Attribute of a xml element is missing after an <assign/> a value for that xml element
-    * [ODE-966] - SQL scripts fail on newest MySQL
-    * [ODE-971] - Process name cannot just have one char
-    * [ODE-973] - RepeatEvery within OnAlarm fires immediately without taking into consideration of the wait time
-    * [ODE-976] - Mex is released too early for one-way message
-    * [ODE-981] - Upgrade XMLBeans to 2.6.0
-    * [ODE-982] - axiom is not on ODE features list
-    * [ODE-989] - Intermittent IllegalArgumentException: No such channel when running an asynchronous process 
-    * [ODE-994] - Cleanup problem when service is destroyed with axis2 1.6
-    * [ODE-995] - Upgrade to Axis2 1.5.6
-    * [ODE-997] - External datasource pool is not transaction aware
-    * [ODE-998] - hard-coded service endpont in fileupload.jsp
-    * [ODE-999] - Make ODE ready for ServiceMix 4.5.x
-    * [ODE-1000] - Partnerlink assignments do not work
-    * [ODE-1002] - ForEach: When counters are negative or too large an InvalidExpressionValue fault must be thrown
-    * [ODE-1004] - Rethrown fault data must be immutable
+    * [ODE-829] - if process is retired the inflight instances dont work
+    * [ODE-974] - On process versioning, instances of retired version are not picking the data from BPEL_UNMATCHED
+    * [ODE-991] - ode:delete fails when removing multiple elements
+    * [ODE-996] - Multiple instances of axis2 ConfigurationContext objects
+    * [ODE-1008] - WAR and JBI distros package source jars instead binary ODE jars in lib folder
+    * [ODE-1013] - Missing context information in Service Endpoint in auto generated WSDL from Axis2
+    * [ODE-1015] - ODE not working with PostgreSQL
+    * [ODE-1016] - ASSIGN returns 0 when number function with String argument is used
+    * [ODE-1018] - Change in test ports on jenkins results in test failures
+    * [ODE-1019] - Schema load exception is not handled for captureSchema
+    * [ODE-1020] - Deployment memory leak
+    * [ODE-1023] - Deployment fails with StackOverflowError
+    * [ODE-1026] - Deployment deadlock
+    * [ODE-1027] - Variables as number predicates don't work with XPath 1.0
+    * [ODE-1031] - Deployment error - captureSchema: NULL model (unknown error)
+    * [ODE-1033] - Assignment of monotonic version numbers in ProcessStore are not thread safe
+    * [ODE-1035] - Process properties defined in deploy.xml is currently restricted to a maximum of 255 character per property in the database
+    * [ODE-1036] - Generate SQLServer database script for OpenJPA
+    * [ODE-1038] - Rectify the build system to include database column index in the generated scripts by Hibernate
+    * [ODE-1039] - Rectify the build system to package OPENJPA and HIBERNATE generated database scripts in the ODE distribution
+    * [ODE-1045] - Problem starting ODE 1.3.7 SNAPSHOT with Embedded database mode using Hibernate
+    * [ODE-1048] - Disable MEX_MATCHER job
+    * [ODE-1051] - Database migration from ODE 1.3.6 to 1.3.7
+    * [ODE-1052] - Improper database column definitions in Hibernate persistent classes 
+    * [ODE-1053] - Removal of Drop table statement in database table creation scripts for scheduler
+    * [ODE-1054] - Add Apache license terms to auto generated database scripts
+    * [ODE-1055] - Hibernate 3.3.2 creates Derby scripts with BLOB and CLOB column types with only 255 max length
+    * [ODE-1056] - Override Hibernate's behavoir to mark BLOB as BYTEA instead of OID for PostgreSQL
+    * [ODE-1063] - Postgres complains that column "detailsext" is of type bytea but expression is of type oid
+    * [ODE-1064] - NPE onAxisMessageExchange(ODEService.java:159)
 
 ** Improvement
-    * [ODE-505] - Upgrade to Apache Axis2 1.5.1
-    * [ODE-813] - Upgrade to Xerces 2.9.1
-    * [ODE-917] - Upgrade to Karaf 2.2.x to support ServiceMix 4.4.0
-    * [ODE-984] - Upgrade ODE OSGi headers to be compliant with modern Apache Smx/Fuse ESB
-    * [ODE-990] - Ordering of jobs in the scheduler queue having same execution time
-    * [ODE-992] - Compiler should accept CDATA sections in propertyAlias/query expressions
-    * [ODE-993] - Include generation of postgres database script during the build of dao-jpa-ojpa-derby
+    * [ODE-730] - Respect partner role partner link definitions for instances of old process revisions
+    * [ODE-928] - Get rid of e.printStackTrace() from the code
+    * [ODE-983] - Switch from commons.logging to slf4j
+    * [ODE-1006] - ODE.js compatibility with Firefox
+    * [ODE-1014] - Change Default transportReceiver in axis2 configuration
+    * [ODE-1017] - Backport SetVariable in PMAPI from trunk
+    * [ODE-1021] - Upgrade to Axis2 1.6.2
+    * [ODE-1022] - Upgrade to OpenJPA 1.2.3
+    * [ODE-1034] - Upgrade HSQLDB to Latest Release 2.3.3
+    * [ODE-1041] - Move towards binary compatibility to JDK 6 for 1.3.7 Release
+    * [ODE-1049] - Query optimization to findRoute and dequeueMessage queries - MATCHER job
+    * [ODE-1062] - Upgrade Hibernate from 3.2.5 to 3.3.2
+    * [ODE-1065] - PMAPI - Enhance process-info to include myRole EPR
+
+** New Feature
+    * [ODE-1028] - New ODE console
+    * [ODE-1060] - ODE Standalone Server on TomEE
 
 ** Task
     * [ODE-666] - Migrate from Derby to H2 as the default embedded test database
 
+** Wish
+    * [ODE-1032] - Update xerces to the latest 2.11.0 version
+
+
   See our Jira for more information: 
-    * https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12310270&version=12323509
+    * https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12310270&version=12324967
