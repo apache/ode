@@ -60,4 +60,5 @@ docker run --rm \
     -v $HOME/.m2:/home/dummy/.m2 \
     -v $HOME/.buildr:/home/dummy/.buildr \
     -v /tmp:/tmp \
+    -v $GNUPGHOME:/home/dummy/.gnupg \
     --entrypoint bash sathwik/apache-buildr:latest-jruby-jdk7 -c "$FINAL_COMMAND";
