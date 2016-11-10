@@ -40,7 +40,7 @@ Buildr::OpenJPA::REQUIRES[0] = "org.apache.openjpa:openjpa:jar:1.2.0"
 Java.classpath << Buildr::OpenJPA::REQUIRES
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "1.3.7"
+VERSION_NUMBER = "1.3.8-SNAPSHOT"
 
 # if SNAPSHOT version...
 if VERSION_NUMBER =~ /SNAPSHOT/
