@@ -753,6 +753,12 @@ define "ode" do
       zip.include.path("webapps").include _(:target, "ode")
     end
   end
+
+  if not VERSION_NUMBER =~ /SNAPSHOT/
+      # required to sign the -sources and -javadoc jars
+    gpg_sign_before_upload
+  end
+
 end
 
 
@@ -850,5 +856,10 @@ define "apache-ode" do
 
   package(:zip, :id=>"#{id}-docs").include(doc.from(project("ode").projects).
     using(:javadoc, :windowtitle=>"Apache ODE #{project.version}").target, :as=>"#{id}-docs-#{version}") unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
+
+  if not VERSION_NUMBER =~ /SNAPSHOT/
+      # required to sign the -sources and -javadoc jars
+    gpg_sign_before_upload
+  end
 
 end
