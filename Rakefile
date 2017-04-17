@@ -109,6 +109,7 @@ define "ode" do
       WOODSTOX, WSDL4J, WS_COMMONS, XALAN, XERCES, XMLBEANS, SPRING,
       AXIS2_MODULES.libs, H2::REQUIRES, SLF4J, ODE_WEB_CONSOLE, TUCKEY_URLREWRITE
 
+
     package(:war).with(:libs=>libs).path("WEB-INF").tap do |web_inf|
       web_inf.merge project("dao-jpa-ojpa-derby").package(:zip)
       web_inf.merge project("dao-hibernate-db").package(:zip)
@@ -116,9 +117,12 @@ define "ode" do
       web_inf.include project("bpel-schemas").path_to("src/main/xsd/pmapi.xsd")
     end
     package(:war).path("WEB-INF/modules").include(artifacts(AXIS2_MODULES.mods))
-    package(:war).tap do |root|
-        root.merge(artifact(AXIS2_WAR)).exclude("WEB-INF/*").exclude("META-INF/*")
-    end
+
+    #exlude old console that uses json.org, due to licensing issues
+    package(:war).exclude("css").exclude("images").exclude("js")
+    # package(:war).tap do |root|
+    #     root.merge(artifact(AXIS2_WAR)).exclude("WEB-INF/*").exclude("META-INF/*")
+    # end
 
     #specify version of web console in urlrewrite.xml
     build do
@@ -861,6 +865,8 @@ define "apache-ode" do
     else
       zip.include Dir.pwd, :as=>"."
     end
+    #exlude old console that uses json.org, due to licensing issues
+    zip.exclude('axis2-war/src/main/webapp/css').exclude('axis2-war/src/main/webapp/images').exclude('axis2-war/src/main/webapp/js')
   end
 
   package(:zip, :id=>"#{id}-docs").include(doc.from(project("ode").projects).
