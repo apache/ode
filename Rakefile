@@ -120,6 +120,15 @@ define "ode" do
         root.merge(artifact(AXIS2_WAR)).exclude("WEB-INF/*").exclude("META-INF/*")
     end
 
+    #specify version of web console in urlrewrite.xml
+    build do
+        cp _("src/main/webapp/WEB-INF/urlrewrite.xml"), _(:target)
+        text = File.read(_(:target, "urlrewrite.xml"))
+        changed_text = text.gsub(/\$\{version\}/, artifact(ODE_WEB_CONSOLE).version)
+        File.open(_(:target, "urlrewrite.xml"),'w') {|f| f.puts changed_text}
+        package(:war).path("WEB-INF").include(_(:target, "urlrewrite.xml"))
+    end
+
     task("start"=>[package(:war), jetty.use]) do |task|
       class << task ; attr_accessor :url, :path ; end
       task.url = "http://localhost:8080/ode"

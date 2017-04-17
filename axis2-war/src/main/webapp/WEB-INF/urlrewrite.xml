@@ -39,6 +39,6 @@
         <condition type="request-uri" operator="notequal">/*/services/**</condition>
         <condition type="request-uri" operator="notequal">/*/deployment/**</condition>
         <from>/**</from>
-        <to>/webjars/ode-console/0.1.0-SNAPSHOT/$1</to>
+        <to>/webjars/ode-console/${version}/$1</to>
     </rule>
 </urlrewrite>
