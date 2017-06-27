@@ -35,6 +35,7 @@ import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.DeferredProcessInstanceCleanable;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
+import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.daohib.bpel.hobj.HActivityRecovery;
@@ -54,6 +55,8 @@ import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
 import org.apache.ode.daohib.bpel.hobj.HScope;
 import org.apache.ode.daohib.bpel.hobj.HVariableProperty;
 import org.apache.ode.daohib.bpel.hobj.HXmlData;
+import org.apache.ode.utils.stl.CollectionsX;
+import org.apache.ode.utils.stl.UnaryFunction;
 import org.hibernate.Criteria;
 import org.hibernate.Hibernate;
 import org.hibernate.Query;
@@ -138,11 +141,18 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO, Deferred
     @SuppressWarnings("unchecked")
     public Collection<ProcessInstanceDAO> findInstance(CorrelationKey ckeyValue) {
         entering("ProcessDaoImpl.findInstance");
-        Criteria criteria = getSession().createCriteria(HCorrelationSet.class);
-        criteria.add(Expression.eq("scope.instance.process.id",_process.getId()));
-        criteria.add(Expression.eq("value", ckeyValue.toCanonicalString()));
-        criteria.addOrder(Order.desc("scope.instance.created"));
-        return criteria.list();
+        Query qry = getSession().getNamedQuery(HCorrelationSet.SELECT_INSTANCES_BY_CORSETS);
+        qry.setParameter("ckey", ckeyValue.toCanonicalString());
+        Collection<HProcessInstance> resultList = qry.list();
+
+        ArrayList<ProcessInstanceDAO> ret = new ArrayList<ProcessInstanceDAO>();
+        CollectionsX.transform(ret, resultList, new UnaryFunction<HProcessInstance,ProcessInstanceDAO> () {
+          public ProcessInstanceDAO apply(HProcessInstance x) {
+            return new ProcessInstanceDaoImpl(_sm, x);
+          }
+         });
+
+        return ret;
     }
 
     /**
@@ -299,6 +309,25 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO, Deferred
 
     public String getGuid() {
         return _process.getGuid();
+    }
+
+    @Override
+    public Collection<ProcessInstanceDAO> findInstance(CorrelationKey ckey, short processInstanceState) {
+        entering("ProcessDaoImpl.findInstance");
+        Query qry = getSession().getNamedQuery(HCorrelationSet.SELECT_INSTANCES_BY_CORSETS_STATE_PROCESS);
+        qry.setParameter("ckey", ckey.toCanonicalString());
+        qry.setEntity("process", getHibernateObj());
+        qry.setShort("state", processInstanceState);
+        Collection<HProcessInstance> resultList = qry.list();
+
+        ArrayList<ProcessInstanceDAO> ret = new ArrayList<ProcessInstanceDAO>();
+        CollectionsX.transform(ret, resultList, new UnaryFunction<HProcessInstance,ProcessInstanceDAO> () {
+          public ProcessInstanceDAO apply(HProcessInstance x) {
+            return new ProcessInstanceDaoImpl(_sm, x);
+          }
+         });
+
+        return ret;
     }
 
 }

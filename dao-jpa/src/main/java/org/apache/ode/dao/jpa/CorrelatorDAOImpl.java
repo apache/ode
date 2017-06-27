@@ -36,7 +36,7 @@ import java.util.List;
 public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
     private static Logger __log = LoggerFactory.getLogger(CorrelatorDAOImpl.class);
     public final static String DELETE_CORRELATORS_BY_PROCESS = "DELETE_CORRELATORS_BY_PROCESS";
-    private final static String ROUTE_BY_CKEY_HEADER = "select route from MessageRouteDAOImpl as route where route._correlator._process._processType = :ptype and route._correlator._correlatorKey = :corrkey";
+    private final static String ROUTE_BY_CKEY_HEADER = "select route from MessageRouteDAOImpl as route where route._correlator = :corr ";
 
     @Id
     @Column(name = "CORRELATOR_ID")
@@ -77,6 +77,11 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
             MessageExchangeDAOImpl mex = itr.next();
             if (mex.getCorrelationKeySet().isRoutableTo(correlationKeySet, false)) {
                 itr.remove();
+                MessageExchangeDAOImpl mexImpl = (MessageExchangeDAOImpl) mex;
+                mexImpl.setCorrelationKeySet(null);
+                mexImpl.setCorrelator(null);
+                //getEM().remove(mex);
+                //getEM().flush();
                 return mex;
             }
         }
@@ -101,8 +106,7 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
         }
         List<CorrelationKeySet> subSets = correlationKeySet.findSubSets();
         Query qry = getEM().createQuery(generateSelectorQuery(ROUTE_BY_CKEY_HEADER, subSets));
-        qry.setParameter("ptype", _process.getType().toString());
-        qry.setParameter("corrkey", _correlatorKey);
+        qry.setParameter("corr", this);
         for (int i = 0; i < subSets.size(); i++) {
             qry.setParameter("s" + i, subSets.get(i).toCanonicalString());
         }

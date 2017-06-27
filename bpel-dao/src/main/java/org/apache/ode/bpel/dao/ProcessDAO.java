@@ -118,4 +118,15 @@ public interface ProcessDAO {
      * @return all instances that haven't completed, use with care as there could be a lot of them
      */
     Collection<ProcessInstanceDAO> getActiveInstances();
+
+
+    /**
+     * Locates process instances for a specific process version that matches correlation key and instance state
+     * @param ckey
+     *          Correlation key
+     * @param processInstanceState
+     *           Instance state org.apache.ode.bpel.common.ProcessState
+     * @return collection of {@link ProcessInstanceDAO} that match correlation key, instance state
+     */
+    Collection<ProcessInstanceDAO> findInstance(CorrelationKey ckey,short processInstanceState);
 }

@@ -44,7 +44,9 @@ import java.util.List;
 @NamedQueries({
     @NamedQuery(name="ActiveInstances", query="select i from ProcessInstanceDAOImpl as i where i._process = :process and i._state = :state"),
     @NamedQuery(name="InstanceByCKey", query="select cs._scope._processInstance from CorrelationSetDAOImpl as cs where cs._correlationKey = :ckey"),
-    @NamedQuery(name="CorrelatorByKey", query="select c from CorrelatorDAOImpl as c where c._correlatorKey = :ckey and c._process = :process")
+    @NamedQuery(name="CorrelatorByKey", query="select c from CorrelatorDAOImpl as c where c._correlatorKey = :ckey and c._process = :process"),
+    @NamedQuery(name="InstanceByCKeyProcessState", query="select cs._scope._processInstance from CorrelationSetDAOImpl as cs where cs._correlationKey = :ckey and "
+            + "cs._scope._processInstance._process = :process and cs._scope._processInstance._state = :state")
 })
 public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
     private static final Logger __log = LoggerFactory.getLogger(ProcessDAOImpl.class);
@@ -222,6 +224,16 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
     @SuppressWarnings("unchecked")
     public Collection<ProcessInstanceDAO> getActiveInstances() {
         Query qry = getEM().createNamedQuery("ActiveInstances");
+        qry.setParameter("process", this);
+        qry.setParameter("state", ProcessState.STATE_ACTIVE);
+        return qry.getResultList();
+    }
+
+    @Override
+    public Collection<ProcessInstanceDAO> findInstance(CorrelationKey ckey, short processInstanceState) {
+        //need to make this query more efficient
+        Query qry = getEM().createNamedQuery("InstanceByCKeyProcessState");
+        qry.setParameter("ckey", ckey.toCanonicalString());
         qry.setParameter("process", this);
         qry.setParameter("state", ProcessState.STATE_ACTIVE);
         return qry.getResultList();

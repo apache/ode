@@ -517,13 +517,24 @@ public class BpelEngineImpl implements BpelEngine {
                 if (we.getType() == JobType.INVOKE_INTERNAL || we.getType() == JobType.MEX_MATCHER) {
                     List<BpelProcess> processes = getAllProcesses(we.getProcessId());
                     boolean routed = false;
+
+                    //try to find the target process and execute
                     jobInfo.jobDetail.detailsExt.put("enqueue", false);
                     for(BpelProcess proc : processes) {
-                        routed = routed || proc.handleJobDetails(jobInfo.jobDetail);
+                        routed = proc.handleJobDetails(jobInfo.jobDetail);
+
+                        if(routed) break;
                     }
+
+                    //no target process was identified, enqueue the mex for later processing
                     if(!routed && we.getType() == JobType.INVOKE_INTERNAL) {
                         jobInfo.jobDetail.detailsExt.put("enqueue", true);
-                        process.handleJobDetails(jobInfo.jobDetail);
+
+                        for(BpelProcess proc : processes) {
+                            routed = proc.handleJobDetails(jobInfo.jobDetail);
+
+                            if(routed) break;
+                        }
                     }
                 }
                 else {
