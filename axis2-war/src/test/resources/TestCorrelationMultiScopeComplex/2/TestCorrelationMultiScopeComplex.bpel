@@ -54,13 +54,17 @@
             </bpel:variables>
             <bpel:correlationSets>
                 <bpel:correlationSet name="CorrSet1" properties="tns:corrProperty1"></bpel:correlationSet>
+                <bpel:correlationSet name="CorrSet2" properties="tns:corrProperty1 tns:corrProperty2"></bpel:correlationSet>
+                <bpel:correlationSet name="CorrSet3" properties="tns:corrProperty1 tns:corrProperty2 tns:corrProperty3"></bpel:correlationSet>
             </bpel:correlationSets>
             <bpel:sequence name="ancestorSequence">
-	            <bpel:receive name="initiateRequest" partnerLink="client" operation="initiate" portType="tns:TestCorrelationMultiScopeComplexPort" variable="initiateRequest" createInstance="yes">
-	                <bpel:correlations>
-	                    <bpel:correlation initiate="yes" set="CorrSet1"></bpel:correlation>
-	                </bpel:correlations>
-	            </bpel:receive>
+            <bpel:receive name="initiateRequest" partnerLink="client" operation="initiate" portType="tns:TestCorrelationMultiScopeComplexPort" variable="initiateRequest" createInstance="yes">
+                <bpel:correlations>
+                    <bpel:correlation initiate="yes" set="CorrSet1"></bpel:correlation>
+                    <bpel:correlation initiate="yes" set="CorrSet2"></bpel:correlation>
+                    <bpel:correlation initiate="yes" set="CorrSet3"></bpel:correlation>
+                </bpel:correlations>
+            </bpel:receive>
             <bpel:assign validate="no" name="AssignPID">
                 <bpel:copy>
                     <bpel:from><bpel:literal><tns:initiateResponse xmlns:tns="http://ode/bpel/unit-test/TestCorrelationMultiScopeComplex" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -82,14 +86,12 @@
 
                 <bpel:scope name="grandParentScope">
                     <bpel:variables><bpel:variable name="receive2Request" messageType="tns:receive2Request"></bpel:variable></bpel:variables>
-                    <bpel:correlationSets>
-                        <bpel:correlationSet name="CorrSet2" properties="tns:corrProperty2"></bpel:correlationSet>
-                    </bpel:correlationSets>
                     <bpel:sequence name="grandParentSequence">
                         <bpel:receive name="receive2Request" partnerLink="client" operation="receive2" portType="tns:TestCorrelationMultiScopeComplexPort" variable="receive2Request">
                         <bpel:correlations>
                             <bpel:correlation initiate="no" set="CorrSet1"></bpel:correlation>
-                            <bpel:correlation initiate="yes" set="CorrSet2"></bpel:correlation>
+                            <bpel:correlation initiate="no" set="CorrSet2"></bpel:correlation>
+                            <bpel:correlation initiate="no" set="CorrSet3"></bpel:correlation>
                         </bpel:correlations>
                     </bpel:receive>
 
@@ -97,15 +99,12 @@
                             <bpel:variables>
                                 <bpel:variable name="receive3Request" messageType="tns:receive3Request"></bpel:variable>
                             </bpel:variables>
-                            <bpel:correlationSets>
-                                <bpel:correlationSet name="CorrSet3" properties="tns:corrProperty3"></bpel:correlationSet>
-                            </bpel:correlationSets>
                             <bpel:sequence name="parentSequence">
                                 <bpel:receive name="receive3Request" partnerLink="client" operation="receive3" portType="tns:TestCorrelationMultiScopeComplexPort" variable="receive3Request">
                                     <bpel:correlations>
                                         <bpel:correlation initiate="no" set="CorrSet1"></bpel:correlation>
                                         <bpel:correlation initiate="no" set="CorrSet2"></bpel:correlation>
-                                        <bpel:correlation initiate="yes" set="CorrSet3"></bpel:correlation>
+                                        <bpel:correlation initiate="no" set="CorrSet3"></bpel:correlation>
                                     </bpel:correlations>
                                 </bpel:receive>
 
