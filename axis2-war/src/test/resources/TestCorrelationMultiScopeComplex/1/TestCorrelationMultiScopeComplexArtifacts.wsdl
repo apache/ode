@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:p="http://www.w3.org/2001/XMLSchema" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://ode/bpel/unit-test/TestCorrelationMultiScopeComplex" xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" name="TestCorrelationMultiScopeComplex" targetNamespace="http://ode/bpel/unit-test/TestCorrelationMultiScopeComplex">
+
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+		TYPE DEFINITION - List of types participating in this BPEL process The BPEL 
+		Designer will generate default request and response types but you can define 
+		or import any XML Schema type and use them as part of the message types. 
+		~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <plnk:partnerLinkType name="client">
+    <plnk:role name="myRole" portType="tns:TestCorrelationMultiScopeComplexPort"/>
+  </plnk:partnerLinkType>
+
+  <vprop:property name="corrProperty1" type="p:string"/>
+  <vprop:propertyAlias messageType="tns:initiateRequest" part="parameters" propertyName="tns:corrProperty1">
+    <vprop:query><![CDATA[/corr1]]></vprop:query>
+  </vprop:propertyAlias>
+  <vprop:propertyAlias messageType="tns:receive2Request" part="parameters" propertyName="tns:corrProperty1">
+    <vprop:query><![CDATA[/corr1]]></vprop:query>
+  </vprop:propertyAlias>
+  <vprop:propertyAlias messageType="tns:receive3Request" part="parameters" propertyName="tns:corrProperty1">
+    <vprop:query><![CDATA[/corr1]]></vprop:query>
+  </vprop:propertyAlias>
+  <vprop:propertyAlias messageType="tns:completeRequest" part="parameters" propertyName="tns:corrProperty1">
+    <vprop:query><![CDATA[/corr1]]></vprop:query>
+  </vprop:propertyAlias>
+
+  <vprop:property name="corrProperty2" type="p:string"/>
+  <vprop:propertyAlias messageType="tns:receive2Request" part="parameters" propertyName="tns:corrProperty2">
+    <vprop:query><![CDATA[/corr2]]></vprop:query>
+  </vprop:propertyAlias>
+  <vprop:propertyAlias messageType="tns:receive3Request" part="parameters" propertyName="tns:corrProperty2">
+    <vprop:query><![CDATA[/corr2]]></vprop:query>
+  </vprop:propertyAlias>
+  <vprop:propertyAlias messageType="tns:completeRequest" part="parameters" propertyName="tns:corrProperty2">
+    <vprop:query><![CDATA[/corr2]]></vprop:query>
+  </vprop:propertyAlias>
+  
+  <vprop:property name="corrProperty3" type="p:string"/>
+  <vprop:propertyAlias messageType="tns:completeRequest" part="parameters" propertyName="tns:corrProperty3">
+    <vprop:query><![CDATA[/corr3]]></vprop:query>
+  </vprop:propertyAlias>
+  <vprop:propertyAlias messageType="tns:receive3Request" part="parameters" propertyName="tns:corrProperty3">
+    <vprop:query><![CDATA[/corr3]]></vprop:query>
+  </vprop:propertyAlias>
+  
+    <types>
+		<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://ode/bpel/unit-test/TestCorrelationMultiScopeComplex">
+
+			<xsd:element name="initiate" type="tns:inputType"/>
+
+			<xsd:element name="initiateResponse" type="tns:ouputType"/>
+
+			<xsd:element name="receive2" type="tns:inputType"/>
+
+			<xsd:element name="receive3" type="tns:inputType"/>
+
+			<xsd:element name="complete" type="tns:inputType"/>
+
+			<xsd:element name="completeResponse" type="tns:ouputType">
+			</xsd:element>
+
+			<xsd:complexType name="inputType">
+				<xsd:sequence>
+					<xsd:element name="corr1" type="xsd:string"/>
+					<xsd:element name="corr2" type="xsd:string"/>
+					<xsd:element name="corr3" type="xsd:string"/>
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:complexType name="ouputType">
+				<xsd:sequence>
+					<xsd:element name="iid" type="xsd:string"/>
+				</xsd:sequence>
+			</xsd:complexType>
+        </xsd:schema>
+    </types>
+
+
+    <plnk:partnerLinkType name="TestCorrelationMultiScopeComplex">
+        <plnk:role name="TestCorrelationMultiScopeComplexProvider" portType="tns:TestCorrelationMultiScopeComplex"/>
+    </plnk:partnerLinkType>
+    
+
+    <message name="initiateRequest">
+    	<part element="tns:initiate" name="parameters"/>
+    </message>
+    <message name="initiateResponse">
+    	<part element="tns:initiateResponse" name="parameters"/>
+    </message>
+    <message name="receive2Request">
+    	<part element="tns:receive2" name="parameters"/>
+    </message>
+    <message name="receive3Request">
+        <part element="tns:receive3" name="parameters"/>
+    </message>
+    <message name="completeRequest">
+    	<part element="tns:complete" name="parameters"/>
+    </message>
+    <message name="completeResponse">
+    	<part element="tns:completeResponse" name="parameters"/>
+    </message>
+    <portType name="TestCorrelationMultiScopeComplexPort">
+        <operation name="initiate">
+        	<input message="tns:initiateRequest"/>
+        	<output message="tns:initiateResponse"/>
+        </operation>
+        <operation name="receive2">
+        	<input message="tns:receive2Request"/>
+        </operation>
+        <operation name="receive3">
+        	<input message="tns:receive3Request"/>
+        </operation>
+        <operation name="complete">
+        	<input message="tns:completeRequest"/>
+        	<output message="tns:completeResponse"/>
+        </operation>
+    </portType>
+    <binding name="TestCorrelationMultiScopeComplexBinding" type="tns:TestCorrelationMultiScopeComplexPort">
+    	<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    	<operation name="initiate">
+    		<soap:operation soapAction="http://ode/bpel/unit-test/TestCorrelationMultiScopeComplex/initiate"/>
+    		<input>
+    			<soap:body use="literal"/>
+    		</input>
+    		<output>
+    			<soap:body use="literal"/>
+    		</output>
+    	</operation>
+    	<operation name="receive2">
+    		<soap:operation soapAction="http://ode/bpel/unit-test/TestCorrelationMultiScopeComplex/receive2"/>
+    		<input>
+    			<soap:body use="literal"/>
+    		</input>
+    	</operation>
+    	<operation name="receive3">
+    		<soap:operation soapAction="http://ode/bpel/unit-test/TestCorrelationMultiScopeComplex/receive3"/>
+    		<input>
+    			<soap:body use="literal"/>
+    		</input>
+    	</operation>
+    	<operation name="complete">
+    		<soap:operation soapAction="http://ode/bpel/unit-test/TestCorrelationMultiScopeComplex/complete"/>
+    		<input>
+    			<soap:body use="literal"/>
+    		</input>
+    		<output>
+    			<soap:body use="literal"/>
+    		</output>
+    	</operation>
+    </binding>
+    <service name="TestCorrelationMultiScopeComplexService">
+        <port binding="tns:TestCorrelationMultiScopeComplexBinding" name="TestCorrelationMultiScopeComplexPort">
+        	<soap:address location="http://localhost:8888/ode/processes/TestCorrelationMultiScopeComplexService"/>
+    </port>
+    </service>
+</definitions>
