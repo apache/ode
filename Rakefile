@@ -702,51 +702,25 @@ define "ode" do
 
   desc "tomee-server"
   define "tomee-server" do
-    libs = projects("axis2", "bpel-api", "bpel-compiler", "bpel-connector", "bpel-dao",
-      "bpel-epr", "bpel-obj", "bpel-ql", "bpel-runtime", "scheduler-simple",
-      "bpel-schemas", "bpel-store", "dao-hibernate", "jca-ra", "jca-server",
-      "utils", "dao-jpa", "agents","tomee"),
-      AXIS2_ALL, AXIS2_MODULES.libs, ANNONGEN, BACKPORT, COMMONS.codec, COMMONS.fileupload, COMMONS.io, COMMONS.httpclient, COMMONS.lang, COMMONS.pool,
-      DERBY, DERBY_TOOLS, GERONIMO.kernel, H2::REQUIRES, JAXEN, JAVAX.activation, JIBX, LOG4J2, SAXON, SPRING, TRANQL, WOODSTOX, WSDL4J, WS_COMMONS, XALAN,
-      XERCES, XMLBEANS,  SLF4J, TOMEE, JACOB
-
-    # dependecies of ODE removed as it is provided by TOMEE
-    #COMMONS.beanutils,COMMONS.collections, GERONIMO.connector,GERONIMO.transaction, OPENJPA, JAVAX.persistence, JAVAX.ejb, JAVAX.javamail, JAVAX.connector, JAVAX.jms, JAVAX.transaction, JAVAX.stream,
 
     tomee_libs = projects("tomee"), TOMEE, DERBY, DERBY_TOOLS, SLF4J, LOG4J2
 
+    #liraries to be rmomved from ODE war
+    rm_libs = GERONIMO, JAVAX.transaction, JAVAX.connector, JAVAX.ejb, JAVAX.javamail, JAVAX.jms, JAVAX.persistence, JAVAX.resource, DERBY, DERBY_TOOLS, SLF4J, LOG4J2, OPENJPA, TRANQL
+
+    # extract ode war
     exploded_ode = unzip(_(:target, 'ode') => project("ode:axis2-war").package(:war)).target
 
     package(:zip).enhance do |zip|
         zip.include path_to(:src,:main,:server,'*')
         zip.include(tomee_libs,:path=>"lib")
-        zip.include(:path=>"logs")
         zip.merge project("dao-jpa-ojpa-derby").package(:zip),:path=>"database"
         zip.merge project("dao-hibernate-db").package(:zip),:path=>"database"
 
         exploded_ode.invoke
 
-        # remove conflicting jar from ODE
-        rm _(:target, "ode/WEB-INF/lib/geronimo-jta_1.1_spec-1.1.jar")
-        rm _(:target, "ode/WEB-INF/lib/geronimo-transaction-2.0.1.jar")
-        rm _(:target, "ode/WEB-INF/lib/geronimo-spec-jms-1.1-rc4.jar")
-        rm _(:target, "ode/WEB-INF/lib/geronimo-javamail_1.4_spec-1.7.1.jar")
-        rm _(:target, "ode/WEB-INF/lib/geronimo-connector-2.0.1.jar")
-        rm _(:target, "ode/WEB-INF/lib/geronimo-ejb_2.1_spec-1.1.jar")
-        rm _(:target, "ode/WEB-INF/lib/geronimo-j2ee-connector_1.5_spec-1.0.jar")
-        rm _(:target, "ode/WEB-INF/lib/geronimo-kernel-2.0.1.jar")
-        rm _(:target, "ode/WEB-INF/lib/persistence-api-1.0.jar")
-        rm _(:target, "ode/WEB-INF/lib/openjpa-1.2.3.jar")
-        rm _(:target, "ode/WEB-INF/lib/derby-10.5.3.0_1.jar")
-        rm _(:target, "ode/WEB-INF/lib/derbytools-10.5.3.0_1.jar")
-        remove_entry_secure _(:target, "ode/WEB-INF/classes/")
-        rm _(:target, "ode/WEB-INF/lib/log4j-api-2.3.jar")
-        rm _(:target, "ode/WEB-INF/lib/log4j-core-2.3.jar")
-        rm _(:target, "ode/WEB-INF/lib/log4j-slf4j-impl-2.3.jar")
-        rm _(:target, "ode/WEB-INF/lib/log4j-web-2.3.jar")
-        rm _(:target, "ode/WEB-INF/lib/slf4j-api-1.7.12.jar")
-        rm _(:target, "ode/WEB-INF/lib/jcl-over-slf4j-1.7.12.jar")
-
+        #remove conflicting artifacts from ODE war
+        artifacts(rm_libs).each {|a| rm _(:target, "ode/WEB-INF/lib/"+Artifact.hash_to_file_name(a.to_hash)) }
 
       # add resources to web.xml
       resourcesxml  = Nokogiri::XML <<-eos

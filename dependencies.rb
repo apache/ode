@@ -279,7 +279,7 @@ TOMEE = struct(
                  ),
         #:jaxb => ["javax.xml.bind:jaxb-api:jar:2.2.6","com.sun.xml.bind:jaxb-impl:jar:2.2.6"],
         :ecj => "org.eclipse.jdt.core.compiler:ecj:jar:4.4",
-        :velovity => "org.apache.velocity:velocity:jar:1.6.4",
+        :velocity => "org.apache.velocity:velocity:jar:1.6.4",
         :oro => "oro:oro:jar:2.0.8",
         :openjpa => ["org.apache.openjpa:openjpa:jar:2.4.1","net.sourceforge.serp:serp:jar:1.15.1"]
 
