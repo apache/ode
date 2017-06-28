@@ -952,8 +952,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
                     if (pepr != null) {
                         TEndpointReferences.EndpointRef epr = eprs.addNewEndpointRef();
-                        epr.setPartnerLink(oplink.name);
-                        epr.setPartnerRole(oplink.partnerRoleName);
+                        epr.setPartnerLink(oplink.getName());
+                        epr.setPartnerRole(oplink.getPartnerRoleName());
                         Document eprNodeDoc = epr.getDomNode().getOwnerDocument();
                         epr.getDomNode().appendChild(eprNodeDoc.importNode(pepr.toXML().getDocumentElement(), true));
                     }
@@ -964,8 +964,8 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
                     if (pepr != null) {
                         TEndpointReferences.EndpointRef epr = eprs.addNewEndpointRef();
-                        epr.setPartnerLink(oplink.name);
-                        epr.setMyRole(oplink.myRoleName);
+                        epr.setPartnerLink(oplink.getName());
+                        epr.setMyRole(oplink.getMyRoleName());
                         Document eprNodeDoc = epr.getDomNode().getOwnerDocument();
                         epr.getDomNode().appendChild(eprNodeDoc.importNode(pepr.toXML().getDocumentElement(), true));
                     }
