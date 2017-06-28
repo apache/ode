@@ -24,19 +24,25 @@ import java.io.File;
 public class Main {
     public static void main(String[] args) {
         String home = System.getProperty("ode.server.home");
-        TomeeLauncher launcher = new TomeeLauncher(home);
+        final TomeeLauncher launcher = new TomeeLauncher(home);
         try {
             launcher.initialize();
             launcher.start();
+
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                public void run() {
+                    try {
+                        launcher.stop();
+                        System.out.println("Continer stopped");
+                    } catch (final Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+
             launcher.deploy(new File(home,"webapps/ode"), "ode");
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            try {
-                launcher.stop();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
     }
 }
