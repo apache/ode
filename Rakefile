@@ -107,7 +107,7 @@ define "ode" do
       COMMONS.lang, COMMONS.pool, DERBY, DERBY_TOOLS, JACOB, JAXEN, JAVAX.activation, JAVAX.ejb, JAVAX.javamail,
       JAVAX.connector, JAVAX.jms, JAVAX.persistence, JAVAX.transaction, JAVAX.stream,  JIBX,
       GERONIMO.connector, GERONIMO.kernel, GERONIMO.transaction, LOG4J2, OPENJPA, SAXON, TRANQL,
-      WOODSTOX, WSDL4J, WS_COMMONS, XALAN, XERCES, XMLBEANS, SPRING, AXIS2_MODULES.libs, SLF4J, HAZELCAST
+      WOODSTOX, WSDL4J, WS_COMMONS, XALAN, XERCES, XMLBEANS, SPRING, AXIS2_MODULES.libs, SLF4J, HAZELCAST, ODE_WEB_CONSOLE, TUCKEY_URLREWRITE
 
     package(:war).with(:libs=>libs).path("WEB-INF").tap do |web_inf|
       web_inf.merge project("dao-jpa-ojpa-derby").package(:zip)
@@ -722,21 +722,10 @@ define "ode" do
         #remove conflicting artifacts from ODE war
         artifacts(rm_libs).each {|a| rm _(:target, "ode/WEB-INF/lib/"+Artifact.hash_to_file_name(a.to_hash)) }
 
-      # add resources to web.xml
-      resourcesxml  = Nokogiri::XML <<-eos
-        <resource-ref>
-            <res-ref-name>jdbc/ode</res-ref-name>
-            <res-type>javax.sql.DataSource</res-type>
-            <res-auth>Container</res-auth>
-            <res-sharing-scope>Shareable</res-sharing-scope>
-        </resource-ref>
-      eos
+        #copy Servlet 3.0 enabled web.xml
+        cp path_to("src/main/webapp/WEB-INF/web.xml"), _(:target, "ode/WEB-INF/web.xml")
 
-      webxml = Nokogiri::XML(File.open(_(:target, "ode/WEB-INF/web.xml")))
-      webxml.xpath('//xmlns:web-app').first.add_child(resourcesxml.root)
-
-      File.open(_(:target, "ode/WEB-INF/web.xml"),'w') {|f| webxml.write_xml_to f}
-      # add TomcatFactory to ode-axis2.properties
+       # add TomcatFactory to ode-axis2.properties
       File.open(_(:target, "ode/WEB-INF/conf/ode-axis2.properties"), 'a') do |file|
         file.puts "\node-axis2.tx.factory.class=org.apache.ode.axis2.util.TomcatFactory"
         file.puts "ode-axis2.db.mode=EXTERNAL"
