@@ -714,6 +714,9 @@ define "ode" do
     package(:zip).enhance do |zip|
         zip.include path_to(:src,:main,:server,'*')
         zip.include(tomee_libs,:path=>"lib")
+        projects("tomee").map(&:packages).flatten.each do |pkg|
+          zip.include(pkg.to_s, :path=>"lib") unless ['sources', 'javadoc'].include?(pkg.classifier)
+        end
         zip.merge project("dao-jpa-ojpa-derby").package(:zip),:path=>"database"
         zip.merge project("dao-hibernate-db").package(:zip),:path=>"database"
 
@@ -724,6 +727,13 @@ define "ode" do
 
         #copy Servlet 3.0 enabled web.xml
         cp path_to("src/main/webapp/WEB-INF/web.xml"), _(:target, "ode/WEB-INF/web.xml")
+
+        # Preparing third party licenses
+        cp project.parent.path_to("LICENSE"), project.path_to("target/LICENSE")
+        File.open(project.path_to("target/LICENSE"), "a+") do |l|
+            l <<  Dir["#{project.path_to(:src,:main,:server,'lib')}/*LICENSE"].map { |f| "lib/"+f[/[^\/]*$/] }.join("\n")
+        end
+        zip.include _(:target, 'LICENSE')
 
        # add TomcatFactory to ode-axis2.properties
       File.open(_(:target, "ode/WEB-INF/conf/ode-axis2.properties"), 'a') do |file|

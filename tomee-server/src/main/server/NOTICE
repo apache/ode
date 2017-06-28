@@ -1,0 +1,1400 @@
+  =========================================================================
+  ==  NOTICE file for use with the Apache License, Version 2.0,          ==
+  ==  in this case for the Apache ODE distribution.                      ==
+  =========================================================================
+
+  Apache Ode
+  This product includes software developed at
+  The Apache Software Foundation (http://www.apache.org/).
+
+COPYRIGHT NOTICES
+
+Copyright 1999-2006 Intalio
+
+This product includes software developed by Intalio
+http://www.intalio.com
+
+Copyright 2006 Sybase
+
+This product includes software developed by Sybase.
+http://www.sybase.com
+
+=========================================================================
+==  Bubbling Notice                                                    ==
+=========================================================================
+
+This product includes software (Javascript Bubbling Library) under a 
+BSD license.
+
+Copyright (c) 2007, Caridy Patiño. All rights reserved.
+Portions Copyright (c) 2007, Yahoo!, Inc. All rights reserved.
+Code licensed under the BSD License:
+http://www.bubbling-library.com/eng/licence
+version: 1.5.0
+
+=========================================================================
+==  Derby Notice                                                       ==
+=========================================================================
+
+Portions of Derby were orginally developed by
+International Business Machines Corporation and are
+licensed to the Apache Software Foundation under the
+"Software Grant and Corporate Contribution License Agreement",
+informally known as the "Derby CLA".
+
+The portion of the functionTests under 'nist' was originally 
+developed by the National Institute of Standards and Technology (NIST), 
+an agency of the United States Department of Commerce, and adapted by
+International Business Machines Corporation in accordance with the NIST
+Software Acknowledgment and Redistribution document at
+http://www.itl.nist.gov/div897/ctg/sql_form.htm
+
+
+=========================================================================
+==  OpenJPA Notice                                                     ==
+=========================================================================
+
+* OpenJPA includes software developed by the SERP project
+    Copyright (c) 2002-2006, A. Abram White. All rights reserved.
+
+* OpenJPA is bundled with the binaries from the JPA specification, by
+    Sun Microsystems and licensed under the CDDL 1.0. The source code is
+    available at: https://glassfish.dev.java.net/source/browse/glassfish/
+
+=========================================================================
+==  Saxon Notice                                                      ==
+=========================================================================
+
+The Program includes all or portions of the following software: "The 
+Saxon XSLT and XQuery Processor from Saxonica Limited" distributed under
+an MPL v1.0 license. Please refer to the homepage URL at 
+http://www.saxonica.com/.
+
+=========================================================================
+==  Sun Notice                                                         ==
+=========================================================================
+
+This product includes software (Java Activation Framework) which was 
+developed by Sun Microsystems under a CDDL license.
+(http://www.sun.com/) 
+
+=========================================================================
+==  Woodstox Notice                                                    ==
+=========================================================================
+
+This product includes software developed by the Woodstox Project 
+(http://woodstox.codehaus.org/).
+
+=========================================================================
+==  WSDL4J Notice                                                      ==
+=========================================================================
+
+The Program includes all or portions of the following software which is 
+subject to the Common Public License ("CPL Code").  This software 
+consists of voluntary contributions made by many individuals on behalf of
+the WSDL4J project.
+
+You may download the source version of the WSDL4J component at 
+http://sourceforge.net/projects/wsdl4j
+
+=========================================================================
+==  Xalan Notice                                                      ==
+=========================================================================
+
+Apache Xalan (Xalan serializer)
+Copyright 1999-2006 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+Portions of this software was originally based on the following:
+    - software copyright (c) 1999-2002, Lotus Development Corporation.,
+    http://www.lotus.com.
+    - software copyright (c) 2001-2002, Sun Microsystems.,
+    http://www.sun.com.
+    - software copyright (c) 2003, IBM Corporation., 
+    http://www.ibm.com.
+
+=========================================================================
+==  Xerces Notice                                                      ==
+=========================================================================
+
+Portions of this software were originally based on the following:
+  - software copyright (c) 1999, IBM Corporation., http://www.ibm.com.
+  - software copyright (c) 1999, Sun Microsystems., http://www.sun.com.
+  - voluntary contributions made by Paul Eng on behalf of the 
+    Apache Software Foundation that were originally developed at 
+    iClick, Inc., software copyright (c) 1999.
+
+
+=========================================================================
+==  XmlBeans Notice                                                    ==
+=========================================================================
+
+Portions of this software were originally based on the following:
+  - software copyright (c) 2000-2003, BEA Systems, <http://www.bea.com/>.
+
+Aside from contributions to the Apache XMLBeans project, this
+software also includes:
+
+ - one or more source files from the Apache Xerces-J and Apache Axis
+   products, Copyright (c) 1999-2003 Apache Software Foundation
+
+ - W3C XML Schema documents Copyright 2001-2003 (c) World Wide Web
+   Consortium (Massachusetts Institute of Technology, European Research
+   Consortium for Informatics and Mathematics, Keio University)
+
+ - resolver.jar from Apache Xml Commons project,
+   Copyright (c) 2001-2003 Apache Software Foundation
+
+ - Piccolo XML Parser for Java from http://piccolo.sourceforge.net/,
+   Copyright 2002 Yuval Oren under the terms of the Apache Software 
+   License 2.0
+
+=========================================================================
+==  YUI Notice                                                         ==
+=========================================================================
+
+This product includes software developed by the Yahoo! Inc.
+Copyright (c) 2008, Yahoo! Inc. All rights reserved.
+Code licensed under the BSD License:
+http://developer.yahoo.net/yui/license.txt
+version: 2.5.2
+
+=========================================================================
+==  OASIS Notice                                                       ==
+=========================================================================
+
+OASIS takes no position regarding the validity or scope of any 
+intellectual property or other rights that might be claimed to pertain 
+to the implementation or use of the technology described in this 
+document or the extent to which any license under such rights might or 
+might not be available; neither does it represent that it has made any 
+effort to identify any such rights. Information on OASIS's procedures 
+with respect to rights in OASIS specifications can be found at the 
+OASIS website. Copies of claims of rights made available for 
+publication and any assurances of licenses to be made available, or the
+result of an attempt made to obtain a general license or permission for 
+the use of such proprietary rights by implementors or users of this 
+specification, can be obtained from the OASIS Executive Director.
+
+OASIS invites any interested party to bring to its attention any 
+copyrights, patents or patent applications, or other proprietary rights 
+which may cover technology that may be required to implement this 
+specification. Please address the information to the OASIS Executive 
+Director.
+
+Copyright (C) OASIS Open (2004-2005). All Rights Reserved.
+
+This document and translations of it may be copied and furnished to 
+others, and derivative works that comment on or otherwise explain it or 
+assist in its implementation may be prepared, copied, published and 
+distributed, in whole or in part, without restriction of any kind, 
+provided that the above copyright notice and this paragraph are included 
+on all such copies and derivative works. However, this document itself 
+may not be modified in any way, such as by removing the copyright notice 
+or references to OASIS, except as needed for the purpose of developing 
+OASIS specifications, in which case the procedures for copyrights 
+defined in the OASIS Intellectual Property Rights document must be 
+followed, or as required to translate it into languages other than 
+English. 
+
+The limited permissions granted above are perpetual and will not be 
+revoked by OASIS or its successors or assigns. 
+
+This document and the information contained herein is provided on an 
+"AS IS" basis and OASIS DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE 
+INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED 
+WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+ActiveMQ :: Openwire Legacy Support
+Copyright 2005-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+Apache Tomcat
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+OpenEJB :: Server :: Client
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+Apache Tomcat
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+ActiveMQ :: Client
+Copyright 2005-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+OpenEJB :: Container :: JPA Integration
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+OpenEJB :: Container :: API
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+Web plugin
+Copyright 2008-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+Apache Tomcat
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+Apache Tomcat
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+=========================================================================
+==  NOTICE file corresponding to section 4(d) of the Apache License,   ==
+==  Version 2.0, in this case for the Apache Derby distribution.       ==
+=========================================================================
+
+Apache Derby
+Copyright 2004-2009 The Apache Software Foundation
+
+This product includes software developed by
+The Apache Software Foundation (http://www.apache.org/).
+
+Portions of Derby were originally developed by
+International Business Machines Corporation and are
+licensed to the Apache Software Foundation under the
+"Software Grant and Corporate Contribution License Agreement",
+informally known as the "Derby CLA".
+The following copyright notice(s) were affixed to portions of the code
+with which this file is now or was at one time distributed
+and are placed here unaltered.
+
+(C) Copyright 1997,2004 International Business Machines Corporation.  All rights reserved.
+
+(C) Copyright IBM Corp. 2003. 
+
+=========================================================================
+
+The portion of the functionTests under 'nist' was originally 
+developed by the National Institute of Standards and Technology (NIST), 
+an agency of the United States Department of Commerce, and adapted by
+International Business Machines Corporation in accordance with the NIST
+Software Acknowledgment and Redistribution document at
+http://www.itl.nist.gov/div897/ctg/sql_form.htm
+
+
+=========================================================================
+
+The JDBC apis for small devices and JDBC3 (under java/stubs/jsr169 and
+java/stubs/jdbc3) were produced by trimming sources supplied by the
+Apache Harmony project. The following notice covers the Harmony sources:
+
+Portions of Harmony were originally developed by
+Intel Corporation and are licensed to the Apache Software
+Foundation under the "Software Grant and Corporate Contribution
+License Agreement", informally known as the "Intel Harmony CLA".
+
+
+=========================================================================
+
+The Derby build relies on source files supplied by the Apache Felix
+project. The following notice covers the Felix files:
+
+  Apache Felix Main
+  Copyright 2009 The Apache Software Foundation
+
+
+  I. Included Software
+
+  This product includes software developed at
+  The Apache Software Foundation (http://www.apache.org/).
+  Licensed under the Apache License 2.0.
+
+  This product includes software developed at
+  The OSGi Alliance (http://www.osgi.org/).
+  Copyright (c) OSGi Alliance (2000, 2007).
+  Licensed under the Apache License 2.0.
+
+  This product includes software from http://kxml.sourceforge.net.
+  Copyright (c) 2002,2003, Stefan Haustein, Oberhausen, Rhld., Germany.
+  Licensed under BSD License.
+
+  II. Used Software
+
+  This product uses software developed at
+  The OSGi Alliance (http://www.osgi.org/).
+  Copyright (c) OSGi Alliance (2000, 2007).
+  Licensed under the Apache License 2.0.
+
+
+  III. License Summary
+  - Apache License 2.0
+  - BSD License
+
+=========================================================================
+
+The Derby build relies on jar files supplied by the Apache Xalan
+project. The following notice covers the Xalan jar files:
+
+   =========================================================================
+   ==  NOTICE file corresponding to section 4(d) of the Apache License,   ==
+   ==  Version 2.0, in this case for the Apache Xalan Java distribution.  ==
+   =========================================================================
+
+   Apache Xalan (Xalan XSLT processor)
+   Copyright 1999-2006 The Apache Software Foundation
+
+   Apache Xalan (Xalan serializer)
+   Copyright 1999-2006 The Apache Software Foundation
+
+   This product includes software developed at
+   The Apache Software Foundation (http://www.apache.org/).
+
+   =========================================================================
+   Portions of this software was originally based on the following:
+     - software copyright (c) 1999-2002, Lotus Development Corporation.,
+       http://www.lotus.com.
+     - software copyright (c) 2001-2002, Sun Microsystems.,
+       http://www.sun.com.
+     - software copyright (c) 2003, IBM Corporation., 
+       http://www.ibm.com.
+       
+   =========================================================================
+   The binary distribution package (ie. jars, samples and documentation) of
+   this product includes software developed by the following:
+       
+     - The Apache Software Foundation 
+         - Xerces Java - see LICENSE.txt 
+         - JAXP 1.3 APIs - see LICENSE.txt
+         - Bytecode Engineering Library - see LICENSE.txt
+         - Regular Expression - see LICENSE.txt
+       
+     - Scott Hudson, Frank Flannery, C. Scott Ananian 
+         - CUP Parser Generator runtime (javacup\runtime) - see LICENSE.txt 
+ 
+   ========================================================================= 
+   The source distribution package (ie. all source and tools required to build
+   Xalan Java) of this product includes software developed by the following:
+       
+     - The Apache Software Foundation
+         - Xerces Java - see LICENSE.txt 
+         - JAXP 1.3 APIs - see LICENSE.txt
+         - Bytecode Engineering Library - see LICENSE.txt
+         - Regular Expression - see LICENSE.txt
+         - Ant - see LICENSE.txt
+         - Stylebook doc tool - see LICENSE.txt    
+       
+     - Elliot Joel Berk and C. Scott Ananian 
+         - Lexical Analyzer Generator (JLex) - see LICENSE.txt
+
+   =========================================================================       
+   Apache Xerces Java
+   Copyright 1999-2006 The Apache Software Foundation
+
+   This product includes software developed at
+   The Apache Software Foundation (http://www.apache.org/).
+
+   Portions of Apache Xerces Java in xercesImpl.jar and xml-apis.jar
+   were originally based on the following:
+     - software copyright (c) 1999, IBM Corporation., http://www.ibm.com.
+     - software copyright (c) 1999, Sun Microsystems., http://www.sun.com.
+     - voluntary contributions made by Paul Eng on behalf of the 
+       Apache Software Foundation that were originally developed at iClick, Inc.,
+       software copyright (c) 1999.    
+
+   =========================================================================   
+   Apache xml-commons xml-apis (redistribution of xml-apis.jar)
+
+   Apache XML Commons
+   Copyright 2001-2003,2006 The Apache Software Foundation.
+
+   This product includes software developed at
+   The Apache Software Foundation (http://www.apache.org/).
+
+   Portions of this software were originally based on the following:
+     - software copyright (c) 1999, IBM Corporation., http://www.ibm.com.
+     - software copyright (c) 1999, Sun Microsystems., http://www.sun.com.
+     - software copyright (c) 2000 World Wide Web Consortium, http://www.w3.org
+
+=========================================================================
+
+
+Apache BVal :: bval-core
+Copyright 2010-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+The following copyright notice(s) were affixed to portions of this code
+with which this file is now or was at one time distributed.
+
+This product includes software developed by agimatec GmbH.
+Copyright 2007-2010 Agimatec GmbH. All rights reserved.
+
+Apache Commons Lang
+Copyright 2001-2008 The Apache Software Foundation
+
+This product includes software developed by
+The Apache Software Foundation (http://www.apache.org/).
+
+OpenEJB :: Container :: Loader
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+ActiveMQ :: RA
+Copyright 2005-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+OpenEJB :: JavaEE Full API (zip and jar files)
+Copyright 2014 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+Apache BVal :: bval-jsr
+Copyright 2010-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+
+The following copyright notice(s) were affixed to portions of this code
+with which this file is now or was at one time distributed.
+
+This product includes software developed by agimatec GmbH.
+Copyright 2007-2010 Agimatec GmbH. All rights reserved.
+
+
+OpenEJB :: TomEE :: JDBC
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+Apache Tomcat
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+The original XML Schemas for Java EE Deployment Descriptors:
+ - javaee_5.xsd
+ - javaee_web_services_1_2.xsd
+ - javaee_web_services_client_1_2.xsd
+ - javaee_6.xsd
+ - javaee_web_services_1_3.xsd
+ - javaee_web_services_client_1_3.xsd
+ - jsp_2_2.xsd
+ - web-app_3_0.xsd
+ - web-common_3_0.xsd
+ - web-fragment_3_0.xsd
+ - javaee_7.xsd
+ - javaee_web_services_1_4.xsd
+ - javaee_web_services_client_1_4.xsd
+ - jsp_2_3.xsd
+ - web-app_3_1.xsd
+ - web-common_3_1.xsd
+ - web-fragment_3_1.xsd
+
+may be obtained from:
+http://www.oracle.com/webfolder/technetwork/jsc/xml/ns/javaee/index.html
+
+Apache XBean :: Reflect
+Copyright 2005-2015 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+SPI definition
+Copyright 2008-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+OpenEJB :: TomEE :: TomEE Embedded
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+OpenEJB :: TomEE :: Loader
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+OpenWebBeans Core
+Copyright 2008-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+OpenEJB :: Container :: Java EE Accessors
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+OpenEJB :: TomEE :: Juli
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+ActiveMQ :: KahaDB Store
+Copyright 2005-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+Apache Commons Pool
+Copyright 2001-2014 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+Apache Tomcat
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+Apache Commons DBCP
+Copyright 2001-2015 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+Apache Commons CLI
+Copyright 2001-2009 The Apache Software Foundation
+
+This product includes software developed by
+The Apache Software Foundation (http://www.apache.org/).
+
+ActiveMQ :: JDBC Store
+Copyright 2005-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+Apache Log4j API
+Copyright 1999-2015 Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+Apache Tomcat JDBC Pool
+Copyright 2008-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+Apache Commons BeanUtils
+Copyright 2000-2010 The Apache Software Foundation
+
+This product includes software developed by
+The Apache Software Foundation (http://www.apache.org/).
+
+Apache XBean :: Naming
+Copyright 2005-2015 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+Apache Tomcat
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+Apache Commons Collections
+Copyright 2001-2015 The Apache Software Foundation
+
+This product includes software developed by
+The Apache Software Foundation (http://www.apache.org/).
+Apache Velocity
+
+Copyright (C) 2000-2007 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+OpenJPA Aggregate Jar
+Copyright 2006-2016 Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+
+OpenJPA includes software developed by the SERP project
+Copyright (c) 2002-2006, A. Abram White. All rights reserved.
+
+OpenJPA includes the persistence and orm schemas from the JPA specifications.
+Copyright 2005-2007 Sun Microsystems, Inc. All rights reserved.
+OpenJPA elects to include this software in this distribution under the
+CDDL license.  You can obtain a copy of the License at:
+    https://glassfish.dev.java.net/public/CDDL+GPL.html
+The source code is available at:
+    https://glassfish.dev.java.net/source/browse/glassfish/
+
+OpenJPA includes software written by Miroslav Nachev
+
+OpenJPA uses test code written by Charles Tillman.
+
+
+EL 2.2 plugin
+Copyright 2008-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+OpenEJB :: Server :: Core
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+Apache OpenEJB Patch :: JSTL
+Copyright 1999-2011 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+=========================================================================
+==  NOTICE file corresponding to section 4(d) of the Apache License,   ==
+==  Version 2.0, in this case for the Apache Derby distribution.       ==
+=========================================================================
+
+Apache Derby
+Copyright 2004-2009 The Apache Software Foundation
+
+This product includes software developed by
+The Apache Software Foundation (http://www.apache.org/).
+
+Portions of Derby were originally developed by
+International Business Machines Corporation and are
+licensed to the Apache Software Foundation under the
+"Software Grant and Corporate Contribution License Agreement",
+informally known as the "Derby CLA".
+The following copyright notice(s) were affixed to portions of the code
+with which this file is now or was at one time distributed
+and are placed here unaltered.
+
+(C) Copyright 1997,2004 International Business Machines Corporation.  All rights reserved.
+
+(C) Copyright IBM Corp. 2003. 
+
+=========================================================================
+
+The portion of the functionTests under 'nist' was originally 
+developed by the National Institute of Standards and Technology (NIST), 
+an agency of the United States Department of Commerce, and adapted by
+International Business Machines Corporation in accordance with the NIST
+Software Acknowledgment and Redistribution document at
+http://www.itl.nist.gov/div897/ctg/sql_form.htm
+
+
+=========================================================================
+
+The JDBC apis for small devices and JDBC3 (under java/stubs/jsr169 and
+java/stubs/jdbc3) were produced by trimming sources supplied by the
+Apache Harmony project. The following notice covers the Harmony sources:
+
+Portions of Harmony were originally developed by
+Intel Corporation and are licensed to the Apache Software
+Foundation under the "Software Grant and Corporate Contribution
+License Agreement", informally known as the "Intel Harmony CLA".
+
+
+=========================================================================
+
+The Derby build relies on source files supplied by the Apache Felix
+project. The following notice covers the Felix files:
+
+  Apache Felix Main
+  Copyright 2009 The Apache Software Foundation
+
+
+  I. Included Software
+
+  This product includes software developed at
+  The Apache Software Foundation (http://www.apache.org/).
+  Licensed under the Apache License 2.0.
+
+  This product includes software developed at
+  The OSGi Alliance (http://www.osgi.org/).
+  Copyright (c) OSGi Alliance (2000, 2007).
+  Licensed under the Apache License 2.0.
+
+  This product includes software from http://kxml.sourceforge.net.
+  Copyright (c) 2002,2003, Stefan Haustein, Oberhausen, Rhld., Germany.
+  Licensed under BSD License.
+
+  II. Used Software
+
+  This product uses software developed at
+  The OSGi Alliance (http://www.osgi.org/).
+  Copyright (c) OSGi Alliance (2000, 2007).
+  Licensed under the Apache License 2.0.
+
+
+  III. License Summary
+  - Apache License 2.0
+  - BSD License
+
+=========================================================================
+
+The Derby build relies on jar files supplied by the Apache Xalan
+project. The following notice covers the Xalan jar files:
+
+   =========================================================================
+   ==  NOTICE file corresponding to section 4(d) of the Apache License,   ==
+   ==  Version 2.0, in this case for the Apache Xalan Java distribution.  ==
+   =========================================================================
+
+   Apache Xalan (Xalan XSLT processor)
+   Copyright 1999-2006 The Apache Software Foundation
+
+   Apache Xalan (Xalan serializer)
+   Copyright 1999-2006 The Apache Software Foundation
+
+   This product includes software developed at
+   The Apache Software Foundation (http://www.apache.org/).
+
+   =========================================================================
+   Portions of this software was originally based on the following:
+     - software copyright (c) 1999-2002, Lotus Development Corporation.,
+       http://www.lotus.com.
+     - software copyright (c) 2001-2002, Sun Microsystems.,
+       http://www.sun.com.
+     - software copyright (c) 2003, IBM Corporation., 
+       http://www.ibm.com.
+       
+   =========================================================================
+   The binary distribution package (ie. jars, samples and documentation) of
+   this product includes software developed by the following:
+       
+     - The Apache Software Foundation 
+         - Xerces Java - see LICENSE.txt 
+         - JAXP 1.3 APIs - see LICENSE.txt
+         - Bytecode Engineering Library - see LICENSE.txt
+         - Regular Expression - see LICENSE.txt
+       
+     - Scott Hudson, Frank Flannery, C. Scott Ananian 
+         - CUP Parser Generator runtime (javacup\runtime) - see LICENSE.txt 
+ 
+   ========================================================================= 
+   The source distribution package (ie. all source and tools required to build
+   Xalan Java) of this product includes software developed by the following:
+       
+     - The Apache Software Foundation
+         - Xerces Java - see LICENSE.txt 
+         - JAXP 1.3 APIs - see LICENSE.txt
+         - Bytecode Engineering Library - see LICENSE.txt
+         - Regular Expression - see LICENSE.txt
+         - Ant - see LICENSE.txt
+         - Stylebook doc tool - see LICENSE.txt    
+       
+     - Elliot Joel Berk and C. Scott Ananian 
+         - Lexical Analyzer Generator (JLex) - see LICENSE.txt
+
+   =========================================================================       
+   Apache Xerces Java
+   Copyright 1999-2006 The Apache Software Foundation
+
+   This product includes software developed at
+   The Apache Software Foundation (http://www.apache.org/).
+
+   Portions of Apache Xerces Java in xercesImpl.jar and xml-apis.jar
+   were originally based on the following:
+     - software copyright (c) 1999, IBM Corporation., http://www.ibm.com.
+     - software copyright (c) 1999, Sun Microsystems., http://www.sun.com.
+     - voluntary contributions made by Paul Eng on behalf of the 
+       Apache Software Foundation that were originally developed at iClick, Inc.,
+       software copyright (c) 1999.    
+
+   =========================================================================   
+   Apache xml-commons xml-apis (redistribution of xml-apis.jar)
+
+   Apache XML Commons
+   Copyright 2001-2003,2006 The Apache Software Foundation.
+
+   This product includes software developed at
+   The Apache Software Foundation (http://www.apache.org/).
+
+   Portions of this software were originally based on the following:
+     - software copyright (c) 1999, IBM Corporation., http://www.ibm.com.
+     - software copyright (c) 1999, Sun Microsystems., http://www.sun.com.
+     - software copyright (c) 2000 World Wide Web Consortium, http://www.w3.org
+
+=========================================================================
+
+
+Apache XBean OSGI Bundle Utilities
+Copyright 2005-2015 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+OpenEJB :: Container :: Java Agent
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+OpenEJB :: Server :: EJBd
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+EE Common plugin
+Copyright 2008-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+Apache Tomcat
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+OpenEJB :: Server :: Http
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+OpenEJB :: Container :: Java EE
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+This product includes schema files developed for the Glassfish Java EE
+reference implementation (http://java.sun.com/xml/ns/j2ee/).
+Apache OpenEJB elects to include this software in this distribution
+under the CDDL license.  You can obtain a copy of the License at:
+    https://glassfish.dev.java.net/public/CDDL+GPL.html
+
+OpenEJB :: Dependencies :: Quartz Shade
+Copyright 2014 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+Apache Tomcat
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+Geronimo TxManager :: Connector
+Copyright 2003-2015 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+Apache XBean :: ASM 5 shaded (repackaged)
+Copyright 2005-2015 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+--------------------------------------
+
+
+This product includes software developed at
+OW2 Consortium (http://asm.ow2.org/)Apache Tomcat
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+Apache Tomcat
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+OpenEJB :: TomEE :: Common
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+Apache Tomcat
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+Apache Tomcat
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+Apache Tomcat
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+  =========================================================================
+  ==  NOTICE file for use with the Apache License, Version 2.0,          ==
+  ==  in this case for the Apache ODE distribution.                      ==
+  =========================================================================
+
+  Apache Ode
+  This product includes software developed at
+  The Apache Software Foundation (http://www.apache.org/).
+
+COPYRIGHT NOTICES
+
+Copyright 1999-2006 Intalio
+
+This product includes software developed by Intalio
+http://www.intalio.com
+
+Copyright 2006 Sybase
+
+This product includes software developed by Sybase.
+http://www.sybase.com
+
+=========================================================================
+==  Bubbling Notice                                                    ==
+=========================================================================
+
+This product includes software (Javascript Bubbling Library) under a 
+BSD license.
+
+Copyright (c) 2007, Caridy Patiño. All rights reserved.
+Portions Copyright (c) 2007, Yahoo!, Inc. All rights reserved.
+Code licensed under the BSD License:
+http://www.bubbling-library.com/eng/licence
+version: 1.5.0
+
+=========================================================================
+==  Derby Notice                                                       ==
+=========================================================================
+
+Portions of Derby were orginally developed by
+International Business Machines Corporation and are
+licensed to the Apache Software Foundation under the
+"Software Grant and Corporate Contribution License Agreement",
+informally known as the "Derby CLA".
+
+The portion of the functionTests under 'nist' was originally 
+developed by the National Institute of Standards and Technology (NIST), 
+an agency of the United States Department of Commerce, and adapted by
+International Business Machines Corporation in accordance with the NIST
+Software Acknowledgment and Redistribution document at
+http://www.itl.nist.gov/div897/ctg/sql_form.htm
+
+
+=========================================================================
+==  OpenJPA Notice                                                     ==
+=========================================================================
+
+* OpenJPA includes software developed by the SERP project
+    Copyright (c) 2002-2006, A. Abram White. All rights reserved.
+
+* OpenJPA is bundled with the binaries from the JPA specification, by
+    Sun Microsystems and licensed under the CDDL 1.0. The source code is
+    available at: https://glassfish.dev.java.net/source/browse/glassfish/
+
+=========================================================================
+==  Saxon Notice                                                      ==
+=========================================================================
+
+The Program includes all or portions of the following software: "The 
+Saxon XSLT and XQuery Processor from Saxonica Limited" distributed under
+an MPL v1.0 license. Please refer to the homepage URL at 
+http://www.saxonica.com/.
+
+=========================================================================
+==  Sun Notice                                                         ==
+=========================================================================
+
+This product includes software (Java Activation Framework) which was 
+developed by Sun Microsystems under a CDDL license.
+(http://www.sun.com/) 
+
+=========================================================================
+==  Woodstox Notice                                                    ==
+=========================================================================
+
+This product includes software developed by the Woodstox Project 
+(http://woodstox.codehaus.org/).
+
+=========================================================================
+==  WSDL4J Notice                                                      ==
+=========================================================================
+
+The Program includes all or portions of the following software which is 
+subject to the Common Public License ("CPL Code").  This software 
+consists of voluntary contributions made by many individuals on behalf of
+the WSDL4J project.
+
+You may download the source version of the WSDL4J component at 
+http://sourceforge.net/projects/wsdl4j
+
+=========================================================================
+==  Xalan Notice                                                      ==
+=========================================================================
+
+Apache Xalan (Xalan serializer)
+Copyright 1999-2006 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+Portions of this software was originally based on the following:
+    - software copyright (c) 1999-2002, Lotus Development Corporation.,
+    http://www.lotus.com.
+    - software copyright (c) 2001-2002, Sun Microsystems.,
+    http://www.sun.com.
+    - software copyright (c) 2003, IBM Corporation., 
+    http://www.ibm.com.
+
+=========================================================================
+==  Xerces Notice                                                      ==
+=========================================================================
+
+Portions of this software were originally based on the following:
+  - software copyright (c) 1999, IBM Corporation., http://www.ibm.com.
+  - software copyright (c) 1999, Sun Microsystems., http://www.sun.com.
+  - voluntary contributions made by Paul Eng on behalf of the 
+    Apache Software Foundation that were originally developed at 
+    iClick, Inc., software copyright (c) 1999.
+
+
+=========================================================================
+==  XmlBeans Notice                                                    ==
+=========================================================================
+
+Portions of this software were originally based on the following:
+  - software copyright (c) 2000-2003, BEA Systems, <http://www.bea.com/>.
+
+Aside from contributions to the Apache XMLBeans project, this
+software also includes:
+
+ - one or more source files from the Apache Xerces-J and Apache Axis
+   products, Copyright (c) 1999-2003 Apache Software Foundation
+
+ - W3C XML Schema documents Copyright 2001-2003 (c) World Wide Web
+   Consortium (Massachusetts Institute of Technology, European Research
+   Consortium for Informatics and Mathematics, Keio University)
+
+ - resolver.jar from Apache Xml Commons project,
+   Copyright (c) 2001-2003 Apache Software Foundation
+
+ - Piccolo XML Parser for Java from http://piccolo.sourceforge.net/,
+   Copyright 2002 Yuval Oren under the terms of the Apache Software 
+   License 2.0
+
+=========================================================================
+==  YUI Notice                                                         ==
+=========================================================================
+
+This product includes software developed by the Yahoo! Inc.
+Copyright (c) 2008, Yahoo! Inc. All rights reserved.
+Code licensed under the BSD License:
+http://developer.yahoo.net/yui/license.txt
+version: 2.5.2
+
+=========================================================================
+==  OASIS Notice                                                       ==
+=========================================================================
+
+OASIS takes no position regarding the validity or scope of any 
+intellectual property or other rights that might be claimed to pertain 
+to the implementation or use of the technology described in this 
+document or the extent to which any license under such rights might or 
+might not be available; neither does it represent that it has made any 
+effort to identify any such rights. Information on OASIS's procedures 
+with respect to rights in OASIS specifications can be found at the 
+OASIS website. Copies of claims of rights made available for 
+publication and any assurances of licenses to be made available, or the
+result of an attempt made to obtain a general license or permission for 
+the use of such proprietary rights by implementors or users of this 
+specification, can be obtained from the OASIS Executive Director.
+
+OASIS invites any interested party to bring to its attention any 
+copyrights, patents or patent applications, or other proprietary rights 
+which may cover technology that may be required to implement this 
+specification. Please address the information to the OASIS Executive 
+Director.
+
+Copyright (C) OASIS Open (2004-2005). All Rights Reserved.
+
+This document and translations of it may be copied and furnished to 
+others, and derivative works that comment on or otherwise explain it or 
+assist in its implementation may be prepared, copied, published and 
+distributed, in whole or in part, without restriction of any kind, 
+provided that the above copyright notice and this paragraph are included 
+on all such copies and derivative works. However, this document itself 
+may not be modified in any way, such as by removing the copyright notice 
+or references to OASIS, except as needed for the purpose of developing 
+OASIS specifications, in which case the procedures for copyrights 
+defined in the OASIS Intellectual Property Rights document must be 
+followed, or as required to translate it into languages other than 
+English. 
+
+The limited permissions granted above are perpetual and will not be 
+revoked by OASIS or its successors or assigns. 
+
+This document and the information contained herein is provided on an 
+"AS IS" basis and OASIS DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE 
+INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED 
+WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+Apache Log4j Core
+Copyright 1999-2012 Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+ResolverUtil.java
+Copyright 2005-2006 Tim Fennell
+OpenEJB :: TomEE :: Util
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+Geronimo JavaMail 1.4 :: Mail
+Copyright 2003-2015 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+Apache Log4j SLF4J Binding
+Copyright 1999-2015 Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+OpenEJB :: Container :: MBean Annotation API
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+OpenEJB :: Container :: Core
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+OpenEJB :: TomEE :: Catalina
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+Apache Tomcat
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+Java EE plugin
+Copyright 2008-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+Apache XBean :: Finder shaded (repackaged)
+Copyright 2005-2015 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+Apache Tomcat
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+ActiveMQ :: Broker
+Copyright 2005-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+
+EJB plugin
+Copyright 2008-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+=========================================================================
+==  Apache Notice                                                      ==
+=========================================================================
+
+Apache ActiveMQ
+Copyright 2005-2008 The Apache Software Foundation
+
+This product includes software developed by
+The Apache Software Foundation (http://www.apache.org/).
+
+=========================================================================
+==  Protocol Buffers Notice                                            ==
+=========================================================================
+
+This product includes software developed by the Protocol Buffers
+project (http://code.google.com/apis/protocolbuffers).
+
+
+Geronimo TxManager :: Transaction
+Copyright 2003-2015 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+Apache Tomcat
+Copyright 1999-2016 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+Apache Commons Lang
+Copyright 2001-2015 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+This product includes software from the Spring Framework,
+under the Apache License 2.0 (see: StringUtils.containsWhitespace())
+Apache Commons Lang
+Copyright 2001-2008 The Apache Software Foundation
+
+This product includes software developed by
+The Apache Software Foundation (http://www.apache.org/).
+Apache Commons Pool
+Copyright 2001-2014 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+Apache Commons DBCP
+Copyright 2001-2015 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+Apache Commons CLI
+Copyright 2001-2009 The Apache Software Foundation
+
+This product includes software developed by
+The Apache Software Foundation (http://www.apache.org/).
+Apache Commons BeanUtils
+Copyright 2000-2010 The Apache Software Foundation
+
+This product includes software developed by
+The Apache Software Foundation (http://www.apache.org/).
+Apache Commons Collections
+Copyright 2001-2015 The Apache Software Foundation
+
+This product includes software developed by
+The Apache Software Foundation (http://www.apache.org/).
+Apache Commons Lang
+Copyright 2001-2015 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+This product includes software from the Spring Framework,
+under the Apache License 2.0 (see: StringUtils.containsWhitespace())
