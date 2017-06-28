@@ -20,7 +20,7 @@ CREATE TABLE ode_job (
   correlationKeySet varchar(255),
   retryCount int,
   inMem int,
-  detailsExt blob(4096),
+  detailsExt bytea,
 
   PRIMARY KEY(jobid));
 
