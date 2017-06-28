@@ -164,3 +164,123 @@ XBEAN               = [
   "org.apache.xbean:xbean-classloader:jar:3.4.3"
 ]
 XMLBEANS            = "org.apache.xmlbeans:xmlbeans:jar:2.6.0"
+
+TOMEE = struct(
+    :tomee =>  [
+                  group(
+                    "tomee-embedded",
+                    "tomee-catalina",
+                    "tomee-common",
+                    "tomee-loader",
+                    "tomee-jdbc",
+                    "tomee-juli",
+                    "tomee-util",
+                    :under=>"org.apache.tomee", :version=>"7.0.1"
+                    )
+                 ],
+    :openejb => [
+                    group(
+                      "openejb-server",
+                      "openejb-ejbd",
+                      "openejb-http",
+                      "openejb-core",
+                      "openejb-api",
+                      "openejb-javaagent",
+                      "openejb-jee",
+                      "openejb-jee-accessors",
+                      "openejb-loader",
+                      "openejb-jpa-integration",
+                      "openejb-client",
+                      "mbean-annotation-api",
+                      :under=>"org.apache.tomee", :version=>"7.0.1"
+                    ),
+                      "org.apache.openejb.patch:openejb-jstl:jar:1.2",
+                      "org.apache.openejb.shade:quartz-openejb-shade:jar:2.2.1"
+                  ],
+    :tomcat => [
+                  group(
+                      "tomcat-websocket-api",
+                      "tomcat-jdbc",
+                      "tomcat-dbcp",
+                      "tomcat-catalina",
+                      "tomcat-servlet-api",
+                      "tomcat-jsp-api",
+                      "tomcat-api",
+                      "tomcat-jni",
+                      "tomcat-util",
+                      "tomcat-util-scan",
+                      "tomcat-catalina-ha",
+                      "tomcat-tribes",
+                      "tomcat-coyote",
+                      "tomcat-jasper",
+                      "tomcat-el-api",
+                      "tomcat-jasper-el",
+                      "tomcat-websocket",
+                      "tomcat-juli",
+                      :under=>"org.apache.tomcat", :version=>"8.5.3"
+                    )
+               ],
+    :javaee_api => "org.apache.tomee:javaee-api:jar:tomcat:7.0",
+    :commons => ["org.apache.commons:commons-lang3:jar:3.4",
+                  "org.apache.commons:commons-dbcp2:jar:2.1",
+                  "org.apache.commons:commons-pool2:jar:2.3"
+                ],
+    :commons_cli => "commons-cli:commons-cli:jar:1.2",
+    :commons_collections => "commons-collections:commons-collections:jar:3.2.2",
+    :commons_beanutils => "commons-beanutils:commons-beanutils-core:jar:1.8.3",
+    :commons_lang => "commons-lang:commons-lang:jar:2.4",
+    :sxc => [
+              group(
+                "sxc-jaxb-core",
+                "sxc-runtime",
+                :under=>"org.metatype.sxc", :version=>"0.8"
+              )
+            ],
+     :activemq => [group(
+                    "activemq-ra",
+                    "activemq-kahadb-store",
+                    "activemq-broker",
+                    "activemq-client",
+                    "activemq-openwire-legacy",
+                    "activemq-jdbc-store",
+                    :under=>"org.apache.activemq", :version=>"5.13.3"
+                  ),
+                    "org.apache.activemq.protobuf:activemq-protobuf:jar:1.1"
+                  ],
+      :geronimo => ["org.apache.geronimo.components:geronimo-transaction:jar:3.1.3",
+                    "org.apache.geronimo.javamail:geronimo-javamail_1.4_mail:jar:1.9.0-alpha-2",
+                    "org.apache.geronimo.components:geronimo-connector:jar:3.1.3",
+                    ],
+      :howl => "org.objectweb.howl:howl:jar:1.0.1-1",
+      :xbean => group(
+                  "xbean-asm5-shaded",
+                  "xbean-finder-shaded",
+                  "xbean-naming",
+                  "xbean-reflect",
+                  "xbean-bundleutils",
+                  :under=>"org.apache.xbean", :version=>"4.5"
+                ),
+       :hsqldb => "org.hsqldb:hsqldb:jar:2.3.2",
+       :swizzle => "org.codehaus.swizzle:swizzle-stream:jar:1.6.2",
+       :openwebbeans => group(
+                        "openwebbeans-impl",
+                        "openwebbeans-spi",
+                        "openwebbeans-ejb",
+                        "openwebbeans-ee",
+                        "openwebbeans-ee-common",
+                        "openwebbeans-web",
+                        "openwebbeans-el22",
+                        :under=>"org.apache.openwebbeans", :version=>"1.6.3"
+                        ),
+        :bval => group(
+                    "bval-core",
+                    "bval-jsr",
+                    :under=>"org.apache.bval", :version=>"1.1.1"
+                 ),
+        #:jaxb => ["javax.xml.bind:jaxb-api:jar:2.2.6","com.sun.xml.bind:jaxb-impl:jar:2.2.6"],
+        :ecj => "org.eclipse.jdt.core.compiler:ecj:jar:4.4",
+        :velovity => "org.apache.velocity:velocity:jar:1.6.4",
+        :oro => "oro:oro:jar:2.0.8",
+        :openjpa => ["org.apache.openjpa:openjpa:jar:2.4.1","net.sourceforge.serp:serp:jar:1.15.1"]
+
+)
