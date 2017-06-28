@@ -57,7 +57,7 @@ public class HMessage extends HObject {
     /**
      * @hibernate.property type="org.apache.ode.daohib.bpel.hobj.GZipDataType"
      *
-     * @hibernate.column name="MESSAGE_DATA" sql-type="blob(2G)"
+     * @hibernate.column name="MESSAGE_DATA"
      */
     public byte[] getMessageData() {
         return _data;
@@ -70,7 +70,7 @@ public class HMessage extends HObject {
     /**
      * @hibernate.property type="org.apache.ode.daohib.bpel.hobj.GZipDataType"
      *
-     * @hibernate.column name="MESSAGE_HEADER" sql-type="blob(2G)"
+     * @hibernate.column name="MESSAGE_HEADER"
      */
     public byte[] getHeader() {
         return _header;

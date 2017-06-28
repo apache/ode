@@ -109,7 +109,7 @@ public class HProcessInstance extends HObject {
     /**
      * @hibernate.property type="org.apache.ode.daohib.bpel.hobj.GZipDataType"
      *
-     * @hibernate.column name="JACOB_STATE_DATA" sql-type="blob(2G)"
+     * @hibernate.column name="JACOB_STATE_DATA"
      */
     public byte[] getJacobState() {
         return _jacobState;

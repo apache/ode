@@ -86,7 +86,7 @@ public class HPartnerLink extends HObject {
     /**
      * @hibernate.property type="org.apache.ode.daohib.bpel.hobj.GZipDataType"
      *
-     * @hibernate.column name="MYROLE_EPR_DATA" sql-type="blob(2G)"
+     * @hibernate.column name="MYROLE_EPR_DATA"
      */
     public byte[] getMyEPR() {
         return _myEPR;
@@ -99,7 +99,7 @@ public class HPartnerLink extends HObject {
     /**
      * @hibernate.property type="org.apache.ode.daohib.bpel.hobj.GZipDataType"
      *
-     * @hibernate.column name="PARTNERROLE_EPR_DATA" sql-type="blob(2G)"
+     * @hibernate.column name="PARTNERROLE_EPR_DATA"
      */
     public byte[] getPartnerEPR() {
         return _partnerEPR;

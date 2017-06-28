@@ -123,7 +123,7 @@ public class HMessageExchange extends HObject {
     /**
      * @hibernate.property type="org.apache.ode.daohib.bpel.hobj.GZipDataType"
      *
-     * @hibernate.column name="ENDPOINT" sql-type="blob(2G)"
+     * @hibernate.column name="ENDPOINT"
      */
     public byte[] getEndpoint() {
         return _endpoint;
@@ -136,7 +136,7 @@ public class HMessageExchange extends HObject {
      /**
      * @hibernate.property type="org.apache.ode.daohib.bpel.hobj.GZipDataType"
      *
-     * @hibernate.column name="CALLBACK_ENDPOINT" sql-type="blob(2G)"
+     * @hibernate.column name="CALLBACK_ENDPOINT"
      */
     public byte[] getCallbackEndpoint() {
         return _callbackEndpoint;
