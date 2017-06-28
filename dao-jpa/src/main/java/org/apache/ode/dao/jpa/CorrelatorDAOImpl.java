@@ -101,41 +101,7 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
 
     @SuppressWarnings("unchecked")
     public List<MessageRouteDAO> findRoute(CorrelationKeySet correlationKeySet) {
-        if (__log.isDebugEnabled()) {
-            __log.debug("findRoute " + correlationKeySet);
-        }
-        List<CorrelationKeySet> subSets = correlationKeySet.findSubSets();
-        Query qry = getEM().createQuery(generateSelectorQuery(ROUTE_BY_CKEY_HEADER, subSets));
-        qry.setParameter("corr", this);
-        for (int i = 0; i < subSets.size(); i++) {
-            qry.setParameter("s" + i, subSets.get(i).toCanonicalString());
-        }
-
-        List<MessageRouteDAO> candidateRoutes = (List<MessageRouteDAO>) qry.getResultList();
-        if (candidateRoutes.size() > 0) {
-            List<MessageRouteDAO> matchingRoutes = new ArrayList<MessageRouteDAO>();
-            boolean routed = false;
-            for (int i = 0; i < candidateRoutes.size(); i++) {
-                MessageRouteDAO route = candidateRoutes.get(i);
-                if ("all".equals(route.getRoute())) {
-                    matchingRoutes.add(route);
-                } else {
-                    if (!routed) {
-                        matchingRoutes.add(route);
-                    }
-                    routed = true;
-                }
-            }
-            if (__log.isDebugEnabled()) {
-                __log.debug("findRoute found " + matchingRoutes);
-            }
-            return matchingRoutes;
-        } else {
-            if (__log.isDebugEnabled()) {
-                __log.debug("findRoute found nothing");
-            }
-            return null;
-        }
+        return findRoute(correlationKeySet, false);
     }
 
     private String generateSelectorQuery(String header, List<CorrelationKeySet> subSets) {
@@ -198,5 +164,47 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
     public boolean checkRoute(CorrelationKeySet correlationKeySet) {
         // TODO Auto-generated method stub
         return true;
+    }
+
+    public List<MessageRouteDAO> findRoute(CorrelationKeySet correlationKeySet,boolean isCorrleationKeySetPreInitialized) {
+        __log.debug("findRoute {}", correlationKeySet);
+
+        Query qry = null;
+
+        if(isCorrleationKeySetPreInitialized){
+            qry = getEM().createQuery(ROUTE_BY_CKEY_HEADER + " and route._correlationKey = :s0");
+            qry.setParameter("corr", this);
+            qry.setParameter("s0", correlationKeySet.toCanonicalString());
+        } else {
+            List<CorrelationKeySet> subSets = correlationKeySet.findSubSets();
+            qry = getEM().createQuery(generateSelectorQuery(ROUTE_BY_CKEY_HEADER, subSets));
+            qry.setParameter("corr", this);
+            for (int i = 0; i < subSets.size(); i++) {
+                qry.setParameter("s" + i, subSets.get(i).toCanonicalString());
+            }
+        }
+
+        List<MessageRouteDAO> candidateRoutes = (List<MessageRouteDAO>) qry.getResultList();
+        if (candidateRoutes.size() > 0) {
+            List<MessageRouteDAO> matchingRoutes = new ArrayList<MessageRouteDAO>();
+            boolean routed = false;
+            for (int i = 0; i < candidateRoutes.size(); i++) {
+                MessageRouteDAO route = candidateRoutes.get(i);
+                if ("all".equals(route.getRoute())) {
+                    matchingRoutes.add(route);
+                } else {
+                    if (!routed) {
+                        matchingRoutes.add(route);
+                    }
+                    routed = true;
+                }
+            }
+
+            __log.debug("findRoute found {}",matchingRoutes);
+            return matchingRoutes;
+        } else {
+            __log.debug("findRoute found nothing");
+            return null;
+        }
     }
 }

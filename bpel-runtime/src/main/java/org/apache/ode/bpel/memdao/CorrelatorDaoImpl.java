@@ -66,30 +66,7 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
     }
 
     public List<MessageRouteDAO> findRoute(CorrelationKeySet keySet) {
-        List<MessageRouteDAO> routes = new ArrayList<MessageRouteDAO>();
-
-        assert keySet != null;
-
-        if (__log.isDebugEnabled()) {
-            __log.debug("findRoute: keySet=" + keySet);
-        }
-        boolean routed = false;
-        for (MessageRouteDaoImpl route : _routes) {
-            assert route._ckeySet != null;
-
-            if(keySet.isRoutableTo(route._ckeySet, "all".equals(route.getRoute()))) {
-                if ("all".equals(route.getRoute()))  {
-                    routes.add(route);
-                } else {
-                    if (!routed) {
-                        routes.add(route);
-                    }
-                    routed = true;
-                }
-            }
-        }
-
-        return routes;
+        return findRoute(keySet, false);
     }
 
     public String getCorrelatorId() {
@@ -186,4 +163,29 @@ class CorrelatorDaoImpl extends DaoBaseImpl implements CorrelatorDAO {
         return true;
     }
 
+    public List<MessageRouteDAO> findRoute(CorrelationKeySet correlationKeySet,boolean isCorrleationKeySetPreInitialized) {
+        List<MessageRouteDAO> routes = new ArrayList<MessageRouteDAO>();
+
+        assert correlationKeySet != null;
+        boolean routed = false;
+
+        __log.debug("findRoute: keySet={}",correlationKeySet);
+
+        for (MessageRouteDaoImpl route : _routes) {
+            assert route._ckeySet != null;
+
+            if(correlationKeySet.isRoutableTo(route._ckeySet, "all".equals(route.getRoute()))) {
+                if ("all".equals(route.getRoute()))  {
+                    routes.add(route);
+                } else {
+                    if (!routed) {
+                        routes.add(route);
+                    }
+                    routed = true;
+                }
+            }
+        }
+
+        return routes;
+    }
 }

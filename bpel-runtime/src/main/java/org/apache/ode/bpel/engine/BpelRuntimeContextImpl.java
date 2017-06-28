@@ -1429,7 +1429,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
         // Find the route first, this is a SELECT FOR UPDATE on the "selector" row,
         // So we want to acquire the lock before we do anthing else.
-        List<MessageRouteDAO> mroutes = correlator.findRoute(ckeySet);
+        List<MessageRouteDAO> mroutes = correlator.findRoute(ckeySet,true);
         if (mroutes == null || mroutes.size() == 0) {
             // Ok, this means that a message arrived before we did, so nothing to do.
             __log.debug("MatcherEvent handling: nothing to do, route no longer in DB");
@@ -1445,6 +1445,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             }
 
             for (MessageRouteDAO mroute : mroutes) {
+                __log.debug("Removing routes for GroupID: {} Instance: {}",mroute.getGroupId(),_dao.getInstanceId());
                 // We have a match, so we can get rid of the routing entries.
                 correlator.removeRoutes(mroute.getGroupId(), _dao);
             }
