@@ -14,7 +14,6 @@
 .classpath
 .project
 .metadata
-bin
 target
 reports
 test-output
