@@ -285,5 +285,5 @@ TOMEE = struct(
 
 )
 
-ODE_WEB_CONSOLE     = "org.apache.ode:ode-console:jar:0.1.0-SNAPSHOT"
+ODE_WEB_CONSOLE     = "org.apache.ode:ode-console:jar:0.1.0"
 TUCKEY_URLREWRITE   = "org.tuckey:urlrewritefilter:jar:4.0.4"
