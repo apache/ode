@@ -45,15 +45,15 @@ public class CorrelationMultiScopeEarlyMessageTest extends Axis2TestBase impleme
             server.deployProcess(bundleName + "/1");
 
             //create an instance of version 1
-            String instance1Response = server.sendRequestFile(endpoint,bundleName + "/1", "initiate.soap");
+            String instance1Response = sendRequestFile(endpoint,bundleName + "/1", "initiate.soap");
             log.info("response from instance 1 {}",instance1Response);
             assertTrue(instance1Response.contains("iid"));
 
-            String instance2Response = server.sendRequestFile(endpoint,bundleName + "/1", "second_initiate.soap");
+            String instance2Response = sendRequestFile(endpoint,bundleName + "/1", "second_initiate.soap");
             log.info("response from instance 2 {}",instance2Response);
             assertTrue(instance2Response.contains("iid"));
 
-            String instance3Response = server.sendRequestFile(endpoint,bundleName + "/1", "third_initiate.soap");
+            String instance3Response = sendRequestFile(endpoint,bundleName + "/1", "third_initiate.soap");
             log.info("response from instance 3 {}",instance3Response);
             assertTrue(instance3Response.contains("iid"));
 
@@ -61,37 +61,37 @@ public class CorrelationMultiScopeEarlyMessageTest extends Axis2TestBase impleme
             server.deployProcess(bundleName + "/2");
 
             //create and instance of version 2
-            String instance4Response = server.sendRequestFile(endpoint,bundleName + "/2", "initiate.soap");
+            String instance4Response = sendRequestFile(endpoint,bundleName + "/2", "initiate.soap");
             log.info("response from instance 4 {}",instance4Response);
             assertTrue(instance4Response.contains("iid"));
 
             //early messages to instance of retired process version 1
-            server.sendRequestFile(endpoint,bundleName + "/1", "receive3.soap");
-            server.sendRequestFile(endpoint,bundleName + "/1", "second_receive3.soap");
-            server.sendRequestFile(endpoint,bundleName + "/1", "third_receive3.soap");
+            sendRequestFile(endpoint,bundleName + "/1", "receive3.soap");
+            sendRequestFile(endpoint,bundleName + "/1", "second_receive3.soap");
+            sendRequestFile(endpoint,bundleName + "/1", "third_receive3.soap");
 
             //early message to instance of active process version 2
-            server.sendRequestFile(endpoint,bundleName + "/2", "receive3.soap");
+            sendRequestFile(endpoint,bundleName + "/2", "receive3.soap");
 
-            server.sendRequestFile(endpoint,bundleName + "/1", "receive2.soap");
-            server.sendRequestFile(endpoint,bundleName + "/1", "second_receive2.soap");
-            server.sendRequestFile(endpoint,bundleName + "/1", "third_receive2.soap");
+            sendRequestFile(endpoint,bundleName + "/1", "receive2.soap");
+            sendRequestFile(endpoint,bundleName + "/1", "second_receive2.soap");
+            sendRequestFile(endpoint,bundleName + "/1", "third_receive2.soap");
 
-            server.sendRequestFile(endpoint,bundleName + "/2", "receive2.soap");
+            sendRequestFile(endpoint,bundleName + "/2", "receive2.soap");
 
-            instance1Response = server.sendRequestFile(endpoint,bundleName + "/1", "complete.soap");
+            instance1Response = sendRequestFile(endpoint,bundleName + "/1", "complete.soap");
             log.info("response from instance 1 {}",instance1Response);
             assertTrue(instance1Response.contains("iid"));
 
-            instance2Response = server.sendRequestFile(endpoint,bundleName + "/1", "second_complete.soap");
+            instance2Response = sendRequestFile(endpoint,bundleName + "/1", "second_complete.soap");
             log.info("response from instance 2 {}",instance2Response);
             assertTrue(instance2Response.contains("iid"));
 
-            instance3Response = server.sendRequestFile(endpoint,bundleName + "/1", "third_complete.soap");
+            instance3Response = sendRequestFile(endpoint,bundleName + "/1", "third_complete.soap");
             log.info("response from instance 3 {}",instance3Response);
             assertTrue(instance3Response.contains("iid"));
 
-            instance4Response = server.sendRequestFile(endpoint,bundleName + "/2", "complete.soap");
+            instance4Response = sendRequestFile(endpoint,bundleName + "/2", "complete.soap");
             log.info("response from instance 4 {}",instance4Response);
             assertTrue(instance4Response.contains("iid"));
         } finally {
