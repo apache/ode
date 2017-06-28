@@ -319,7 +319,7 @@ public class ReplayerBpelRuntimeContextImpl extends BpelRuntimeContextImpl {
                 }
                 return false;
             }
-        }, true);
+        }, true,false);
 
     }
 

@@ -212,7 +212,7 @@ public class BpelProcess {
         boolean invoke(PartnerLinkMyRoleImpl target, PartnerLinkMyRoleImpl.RoutingInfo routingInfo, boolean createInstance);
     }
 
-    public boolean invokeProcess(MyRoleMessageExchangeImpl mex, InvokeHandler invokeHandler, boolean enqueue) {
+    public boolean invokeProcess(MyRoleMessageExchangeImpl mex, InvokeHandler invokeHandler, boolean enqueue, boolean enqueueForFutureInstance) {
         boolean routed = false;
 
         try {
@@ -225,17 +225,17 @@ public class BpelProcess {
                 return false;
             }
 
-            //Actual identification of the routes and invocation of the target process will happen when enqueue is disabled.
+            //Actual identification of the routes and invocation of the target process will happen when enqueue and enqueueForFutureInstance is disabled.
             //This is the main conditional block of code that does the actual work.
-            //Its only after running this block with enqueue disabled, it can be identified that mex was not routable.
-            //There is a separate logic following this 'if' condition to handle the mex when enqueue is enabled.
-            if(!enqueue) {
+            //Its only after running this block with enqueue and enqueueForFutureInstance disabled, it can be identified that mex was not routable.
+            //There is a separate logic following this 'if' condition to handle the mex when enqueue or enqueueForFutureInstance is enabled.
+            if(!(enqueue || enqueueForFutureInstance)) {
                 routed = findRouteAndInvoke(targets, mex, invokeHandler);
             }
 
             // Nothing found, saving for later
-            if (enqueue && !routed) {
-                routed = noRoutingMatch(targets, mex);
+            if ((enqueue || enqueueForFutureInstance) && !routed) {
+                routed = noRoutingMatch(targets, mex, enqueue, enqueueForFutureInstance);
             } else {
                 // Now we have to update our message exchange status. If the <reply> was not hit during the
                 // invocation, then we will be in the "REQUEST" phase which means that either this was a one-way
@@ -288,9 +288,8 @@ public class BpelProcess {
     }
 
     //this method should be invoked within the ambit of _hydrationLatch
-    private boolean noRoutingMatch(List<PartnerLinkMyRoleImpl> targets,MyRoleMessageExchangeImpl mex) {
+    private boolean noRoutingMatch(List<PartnerLinkMyRoleImpl> targets,MyRoleMessageExchangeImpl mex, boolean enqueue, boolean enqueueForFutureInstance) {
         boolean routed = false;
-        boolean enqueue = true;
         List<PartnerLinkMyRoleImpl.RoutingInfo> routings = null;
         LinkedHashSet<ProcessInstanceDAO> intersectionInstanceSet = new LinkedHashSet<ProcessInstanceDAO>();
 
@@ -303,7 +302,7 @@ public class BpelProcess {
                 (targetItr.hasNext() && !routed);) {
 
             PartnerLinkMyRoleImpl target = targetItr.next();
-            routings = target.findRoute(mex,enqueue);
+            routings = target.findRoute(mex,enqueue||enqueueForFutureInstance);
 
             //routings will be null if the mex operation is no defined in this myRole, iterate over next myRole.
             if (routings != null) {
@@ -311,34 +310,46 @@ public class BpelProcess {
 
                 if (routing != null) {
 
-                    for( Iterator<CorrelationKey> keyItr = routing.wholeKeySet.iterator();
-                            (keyItr.hasNext() && !routed);) {
-                        CorrelationKey key = keyItr.next();
-                        __log.info("noRoutingMatch: Finding active instance correlated with {} and process pid {}",key,_pid);
-
-                        // We need to make sure the PID of process of the instance is same as that of the
-                        // partnerlink's associated process in the iteration. Otherwise we might end up
-                        // associating wrong correlator with the mex.
-                        Collection<ProcessInstanceDAO> instanceDaoList = getProcessDAO().findInstance(key,ProcessState.STATE_ACTIVE);
-
-                        if (!(instanceDaoList.isEmpty())) {
-                            //find the intersection
-                            if(!intersectionInstanceSet.isEmpty())
-                                intersectionInstanceSet.retainAll(instanceDaoList);
-                            else
-                                intersectionInstanceSet.addAll(instanceDaoList);
-
-                            __log.debug("noRoutingMatch: intersection Instance set : {} ",intersectionInstanceSet);
-                        }
-                    }
-
-                    if(!(intersectionInstanceSet.isEmpty())) {
-                        ProcessInstanceDAO instance = intersectionInstanceSet.iterator().next();
-                        mex.getDAO().setProcess(instance.getProcess());
+                    if(enqueueForFutureInstance && isActive()) {
+                        mex.getDAO().setProcess(getProcessDAO());
                         target.noRoutingMatch(mex, routing);
                         routed = true;
 
-                        __log.info("noRoutingMatch: Active instance found instanceID: {} and process pid {}",instance.getInstanceId(),_pid);
+                        __log.info("noRoutingMatch: mex has been registered for a future Instance and process pid {}",_pid);
+
+                        return routed;
+                    }
+
+                    if(enqueue) {
+                        for( Iterator<CorrelationKey> keyItr = routing.wholeKeySet.iterator();
+                                (keyItr.hasNext() && !routed);) {
+                            CorrelationKey key = keyItr.next();
+                            __log.info("noRoutingMatch: Finding active instance correlated with {} and process pid {}",key,_pid);
+
+                            // We need to make sure the PID of process of the instance is same as that of the
+                            // partnerlink's associated process in the iteration. Otherwise we might end up
+                            // associating wrong correlator with the mex.
+                            Collection<ProcessInstanceDAO> instanceDaoList = getProcessDAO().findInstance(key,ProcessState.STATE_ACTIVE);
+
+                            if (!(instanceDaoList.isEmpty())) {
+                                //find the intersection
+                                if(!intersectionInstanceSet.isEmpty())
+                                    intersectionInstanceSet.retainAll(instanceDaoList);
+                                else
+                                    intersectionInstanceSet.addAll(instanceDaoList);
+
+                                __log.debug("noRoutingMatch: intersection Instance set : {} ",intersectionInstanceSet);
+                            }
+                        }
+
+                        if(!(intersectionInstanceSet.isEmpty())) {
+                            ProcessInstanceDAO instance = intersectionInstanceSet.iterator().next();
+                            mex.getDAO().setProcess(instance.getProcess());
+                            target.noRoutingMatch(mex, routing);
+                            routed = true;
+
+                            __log.info("noRoutingMatch: Active instance found instanceID: {} and process pid {}",instance.getInstanceId(),_pid);
+                        }
                     }
                 }
             }
@@ -354,8 +365,16 @@ public class BpelProcess {
      * Entry point for message exchanges aimed at the my role.
      *
      * @param mex
+     * @param enqueue - if enabled, mex will be considered as an early arriving message and an attempt will be made to identify the process instance which might be waiting for it. 
+     * @param enqueueForFutureInstance - if enabled, mex will be considered as an early arriving message and will be registered with the Active Process as no Instance 
+     * was waiting for it.
+     *
+     * Note: if both enqueueForFutureInstance and enqueue are enabled, then enqueueForFutureInstance will take precedence.
+     * if(enqueueForFutureInstance and current process is active)  mex is registered with the active process
+     * else if(enqueue) an attempt is made to identify any instance that might be waiting
+     *
      */
-    boolean invokeProcess(final MyRoleMessageExchangeImpl mex, boolean enqueue) {
+    boolean invokeProcess(final MyRoleMessageExchangeImpl mex, boolean enqueue,boolean enqueueForFutureInstance) {
         return invokeProcess(mex, new InvokeHandler() {
             public boolean invoke(PartnerLinkMyRoleImpl target, PartnerLinkMyRoleImpl.RoutingInfo routing, boolean createInstance) {
                   if (routing.messageRoute == null && createInstance && isActive()) {
@@ -370,7 +389,7 @@ public class BpelProcess {
                   }
                   return false;
             }
-        }, enqueue);
+        }, enqueue,enqueueForFutureInstance);
     }
 
     /** Several myroles can use the same service in a given process */
@@ -509,7 +528,7 @@ public class BpelProcess {
             		return true;
             	}
 
-                routed = invokeProcess(mex, (Boolean) jobData.detailsExt.get("enqueue"));
+                routed = invokeProcess(mex, (Boolean) jobData.detailsExt.get("enqueue"),(Boolean) jobData.detailsExt.get("enqueueForFutureInstance"));
                 if (we.getType() == JobType.MEX_MATCHER && routed) {
                 	mex.getDAO().releasePremieMessages();
                 }

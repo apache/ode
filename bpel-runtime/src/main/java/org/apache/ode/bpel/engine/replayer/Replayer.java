@@ -272,7 +272,7 @@ public class Replayer {
                             }
                             return false;
                         }
-                    }, true);
+                    }, true,false);
         } else if (we.getType() == JobType.INVOKE_RESPONSE) {
             __log.debug("reply for live communication");
             ReplayerContext ctx = findReplayedInstance(we.getInstanceId());
