@@ -121,7 +121,7 @@ public interface ProcessDAO {
 
 
     /**
-     * Locates process instances for a specific process version that matches correlation key and instance state
+     * Find process instances that matches correlation key and instance state
      * @param ckey
      *          Correlation key
      * @param processInstanceState

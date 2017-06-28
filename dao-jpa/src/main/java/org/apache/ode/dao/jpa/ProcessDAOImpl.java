@@ -46,7 +46,7 @@ import java.util.List;
     @NamedQuery(name="InstanceByCKey", query="select cs._scope._processInstance from CorrelationSetDAOImpl as cs where cs._correlationKey = :ckey"),
     @NamedQuery(name="CorrelatorByKey", query="select c from CorrelatorDAOImpl as c where c._correlatorKey = :ckey and c._process = :process"),
     @NamedQuery(name="InstanceByCKeyProcessState", query="select cs._scope._processInstance from CorrelationSetDAOImpl as cs where cs._correlationKey = :ckey and "
-            + "cs._scope._processInstance._process = :process and cs._scope._processInstance._state = :state")
+            + "cs._scope._processInstance._process._processType = :processType and cs._scope._processInstance._state = :state")
 })
 public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
     private static final Logger __log = LoggerFactory.getLogger(ProcessDAOImpl.class);
@@ -229,13 +229,15 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
         return qry.getResultList();
     }
 
-    @Override
+    /**
+     * Find instances across all versions of a process that match the correlation key and instance state.
+     */
     public Collection<ProcessInstanceDAO> findInstance(CorrelationKey ckey, short processInstanceState) {
         //need to make this query more efficient
         Query qry = getEM().createNamedQuery("InstanceByCKeyProcessState");
         qry.setParameter("ckey", ckey.toCanonicalString());
-        qry.setParameter("process", this);
-        qry.setParameter("state", ProcessState.STATE_ACTIVE);
+        qry.setParameter("processType", getType().toString());
+        qry.setParameter("state", processInstanceState);
         return qry.getResultList();
     }
 }

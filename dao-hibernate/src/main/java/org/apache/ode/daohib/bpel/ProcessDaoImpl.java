@@ -311,12 +311,15 @@ public class ProcessDaoImpl extends HibernateDao implements ProcessDAO, Deferred
         return _process.getGuid();
     }
 
-    @Override
+    /**
+     * Find instances across all versions of a process that match the correlation key and instance state.
+     */
     public Collection<ProcessInstanceDAO> findInstance(CorrelationKey ckey, short processInstanceState) {
         entering("ProcessDaoImpl.findInstance");
         Query qry = getSession().getNamedQuery(HCorrelationSet.SELECT_INSTANCES_BY_CORSETS_STATE_PROCESS);
         qry.setParameter("ckey", ckey.toCanonicalString());
-        qry.setEntity("process", getHibernateObj());
+        qry.setString("processTypeNamespace", _process.getTypeNamespace());
+        qry.setString("processTypeName", _process.getTypeName());
         qry.setShort("state", processInstanceState);
         Collection<HProcessInstance> resultList = qry.list();
 
