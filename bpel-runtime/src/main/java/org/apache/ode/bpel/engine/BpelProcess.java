@@ -354,7 +354,6 @@ public class BpelProcess {
                             routed = true;
 
                             __log.info("noRoutingMatch: Active instance found instanceID: {} and process pid {}",instance.getInstanceId(),instance.getProcess().getType());
-                         }
                         }
                     }
                 }
