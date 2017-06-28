@@ -412,6 +412,11 @@
                             <documentation>Name of the partner role this endpoint reference is associated with.</documentation>
                         </annotation>
                     </attribute>
+                    <attribute name="my-role" type="xs:string">
+                        <annotation>
+                            <documentation>Name of the my role this endpoint reference is associated with.</documentation>
+                        </annotation>
+                    </attribute>
                 </complexType>
             </element>
         </sequence>

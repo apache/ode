@@ -952,6 +952,20 @@ public class ProcessAndInstanceManagementImpl implements InstanceManagement, Pro
 
                     if (pepr != null) {
                         TEndpointReferences.EndpointRef epr = eprs.addNewEndpointRef();
+                        epr.setPartnerLink(oplink.name);
+                        epr.setPartnerRole(oplink.partnerRoleName);
+                        Document eprNodeDoc = epr.getDomNode().getOwnerDocument();
+                        epr.getDomNode().appendChild(eprNodeDoc.importNode(pepr.toXML().getDocumentElement(), true));
+                    }
+                }
+                if (oplink.hasMyRole()) {
+                    EndpointReference pepr = _server._engine._activeProcesses.get(pconf.getProcessId())
+                            .getInitialMyRoleEPR(oplink);
+
+                    if (pepr != null) {
+                        TEndpointReferences.EndpointRef epr = eprs.addNewEndpointRef();
+                        epr.setPartnerLink(oplink.name);
+                        epr.setMyRole(oplink.myRoleName);
                         Document eprNodeDoc = epr.getDomNode().getOwnerDocument();
                         epr.getDomNode().appendChild(eprNodeDoc.importNode(pepr.toXML().getDocumentElement(), true));
                     }
