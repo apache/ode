@@ -3,33 +3,68 @@
         <File name="FILE" fileName="${sys:ode.server.home}/logs/ode.log" append="false">
             <PatternLayout pattern="%d{ABSOLUTE} %-5p [%c] %m%n"/>
         </File>
-        <Console name="STDOUT" target="SYSTEM_OUT">
+        <File name="TOMEE_FILE" fileName="${sys:ode.server.home}/logs/tomee.log" append="false">
             <PatternLayout pattern="%d{ABSOLUTE} %-5p [%c] %m%n"/>
-        </Console>
+        </File>
         <Async name="Async">
-            <!--<AppenderRef ref="FILE"/> -->
-            <AppenderRef ref="STDOUT"/>
+            <AppenderRef ref="FILE"/>
+            <AppenderRef ref="TOMEE_FILE"/>
         </Async>
     </Appenders>
 
     <Loggers>
-        <Logger name="org.apache.ode" level="info" additivity="false">
+        <Logger name="org.apache.ode" level="INFO" additivity="false">
             <AppenderRef ref="FILE"/>
         </Logger>
-        <Logger name="org.apache.axis2" level="info" additivity="false">
+        <Logger name="org.apache.axis2" level="INFO" additivity="false">
             <AppenderRef ref="FILE"/>
         </Logger>
-        <Logger name="org.hibernate" level="info" additivity="false">
+        <Logger name="org.apache.xml" level="OFF" additivity="false">
             <AppenderRef ref="FILE"/>
         </Logger>
-        <Logger name="org.apache.openjpa" level="info" additivity="false">
+        <Logger name="org.opensaml" level="OFF" additivity="false">
+            <AppenderRef ref="FILE"/>
+        </Logger>
+        <Logger name="org.hibernate" level="INFO" additivity="false">
             <AppenderRef ref="FILE"/>
         </Logger>
         <Logger name="org.springframework" level="error" additivity="false">
             <AppenderRef ref="FILE"/>
         </Logger>
 
-        <Root level="error">
+        <!-- Tomee container logs -->
+        <Logger name="OpenEJB" level="INFO" additivity="false">
+            <AppenderRef ref="TOMEE_FILE"/>
+        </Logger>
+        <Logger name="Transaction" level="INFO" additivity="false">
+            <AppenderRef ref="TOMEE_FILE"/>
+        </Logger>
+        <Logger name="org.apache.geronimo" level="INFO" additivity="false">
+            <AppenderRef ref="TOMEE_FILE"/>
+        </Logger>
+        <Logger name="org.apache.activemq" level="INFO" additivity="false">
+            <AppenderRef ref="TOMEE_FILE"/>
+        </Logger>
+        <Logger name="openjpa" level="INFO" additivity="false">
+            <AppenderRef ref="TOMEE_FILE"/>
+        </Logger>
+        <Logger name="org.apache.catalina" level="INFO" additivity="false">
+            <AppenderRef ref="TOMEE_FILE"/>
+        </Logger>
+        <Logger name="org.apache.tomcat" level="INFO" additivity="false">
+            <AppenderRef ref="TOMEE_FILE"/>
+        </Logger>
+        <Logger name="org.apache.coyote" level="INFO" additivity="false">
+            <AppenderRef ref="TOMEE_FILE"/>
+        </Logger>
+        <Logger name="org.apache.jasper" level="INFO" additivity="false">
+            <AppenderRef ref="TOMEE_FILE"/>
+        </Logger>
+        <Logger name="org.apache.naming" level="INFO" additivity="false">
+            <AppenderRef ref="TOMEE_FILE"/>
+        </Logger>
+
+        <Root level="INFO">
             <AppenderRef ref="Async"/>
         </Root>
     </Loggers>
