@@ -706,7 +706,7 @@ define "ode" do
     tomee_libs = projects("tomee"), TOMEE, DERBY, DERBY_TOOLS, SLF4J, LOG4J2
 
     #liraries to be rmomved from ODE war
-    rm_libs = GERONIMO, JAVAX.transaction, JAVAX.connector, JAVAX.ejb, JAVAX.javamail, JAVAX.jms, JAVAX.persistence, JAVAX.resource, DERBY, DERBY_TOOLS, SLF4J, LOG4J2, OPENJPA, TRANQL
+    rm_libs = GERONIMO, JAVAX.transaction, JAVAX.connector, JAVAX.ejb, JAVAX.javamail, JAVAX.jms, JAVAX.persistence, JAVAX.resource, DERBY, DERBY_TOOLS, SLF4J, LOG4J2, OPENJPA, TRANQL, artifacts(AXIS2_MODULES.libs).keep_if {|a| a.group == 'velocity' && a.id == 'velocity'}
 
     # extract ode war
     exploded_ode = unzip(_(:target, 'ode') => project("ode:axis2-war").package(:war)).target
