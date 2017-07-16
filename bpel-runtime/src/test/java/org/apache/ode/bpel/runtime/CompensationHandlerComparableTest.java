@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
+import java.util.Arrays;
 import junit.framework.TestCase;
 
 /**
