@@ -66,7 +66,25 @@ public class CompensationHandler implements Serializable, Comparable<Compensatio
   }
 
   public int compareTo(CompensationHandler that) {
-    return (int) (that.scopeStartTime - this.scopeEndTime);
+
+      if (that.equals(this)) {
+          return 0;
+      }
+
+      //desc order on end time
+      int result = Long.compare(that.scopeEndTime, this.scopeEndTime);
+
+      if (result == 0) {
+          //asc order on start time
+          result = Long.compare(this.scopeStartTime, that.scopeStartTime);
+
+          //compare the hashcode incase both start and stop times are equal
+          if (result == 0) {
+              result = System.identityHashCode(this) > System.identityHashCode(that) ? 1 : -1;
+          }
+      }
+
+      return result;
   }
 
 }
