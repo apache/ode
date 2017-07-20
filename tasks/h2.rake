@@ -17,7 +17,7 @@
 
 module H2
 
-  REQUIRES = "com.h2database:h2:jar:1.3.176"
+  REQUIRES = "com.h2database:h2:jar:1.4.196"
 
   #Java.classpath << REQUIRES
 

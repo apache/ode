@@ -56,12 +56,11 @@ public class DbIsolation {
     public static void setIsolationLevel(Connection c) throws SQLException {
         try {
             if (_isolationLevel != 0 && c.getTransactionIsolation() != _isolationLevel) {
-                if (__log.isDebugEnabled()) __log.debug("Set isolation level to "+_isolationLevel);
+                __log.debug("Set isolation level to "+_isolationLevel);
                 c.setTransactionIsolation(_isolationLevel);
             }
         } catch (Exception e) {
-            if (__log.isDebugEnabled()) 
-                __log.debug("Error while setting isolation level to "+_isolationLevel, e);
+            __log.debug("Error while setting isolation level to "+_isolationLevel, e);
         }
     }
 

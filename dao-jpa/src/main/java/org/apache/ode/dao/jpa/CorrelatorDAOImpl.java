@@ -185,11 +185,10 @@ public class CorrelatorDAOImpl extends OpenJPADAO implements CorrelatorDAO {
         }
 
         List<MessageRouteDAO> candidateRoutes = (List<MessageRouteDAO>) qry.getResultList();
-        if (candidateRoutes.size() > 0) {
+        if (!candidateRoutes.isEmpty()) {
             List<MessageRouteDAO> matchingRoutes = new ArrayList<MessageRouteDAO>();
             boolean routed = false;
-            for (int i = 0; i < candidateRoutes.size(); i++) {
-                MessageRouteDAO route = candidateRoutes.get(i);
+            for (MessageRouteDAO route: candidateRoutes) {
                 if ("all".equals(route.getRoute())) {
                     matchingRoutes.add(route);
                 } else {
