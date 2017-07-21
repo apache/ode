@@ -15,7 +15,7 @@
 
 #!/bin/sh
 
-docker pull sathwik/apache-buildr:latest-jruby-jdk7
+docker pull sathwik/apache-buildr:latest-jruby-jdk8
 
 export JAVA_OPTS="-Xmx1024M -XX:MaxPermSize=512M"
 BUILDR_ARGS="$@"
@@ -60,4 +60,4 @@ docker run --rm \
     -v $HOME/.m2:/home/dummy/.m2 \
     -v $HOME/.buildr:/home/dummy/.buildr \
     -v /tmp:/tmp \
-    --entrypoint bash sathwik/apache-buildr:latest-jruby-jdk7 -c "$FINAL_COMMAND";
+    --entrypoint bash sathwik/apache-buildr:latest-jruby-jdk8 -c "$FINAL_COMMAND";
