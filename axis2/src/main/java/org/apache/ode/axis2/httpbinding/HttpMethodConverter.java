@@ -153,11 +153,12 @@ public class HttpMethodConverter {
         if (useUrlReplacement) {
             // insert part values in the url
             completeUri = new UrlReplacementTransformer().transform(completeUri, partValues);
-        } else if (useUrlEncoded) {
+        }
+        if (useUrlEncoded) {
             // encode part values
             encodedParams = new URLEncodedTransformer().transform(partValues);
         }
-
+        log.debug("completeUri {}, encodedParams {}",completeUri,encodedParams);
         // http-client api is not really neat
         // something similar to the following would save some if/else manipulations.
         // But we have to deal with it as-is.
