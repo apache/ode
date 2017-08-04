@@ -31,5 +31,8 @@
         <class>org.apache.ode.store.jpa.ProcessConfPropertyDaoImpl</class>
         <class>org.apache.ode.store.jpa.DeploymentUnitDaoImpl</class>
         <class>org.apache.ode.store.jpa.VersionTrackerDAOImpl</class>
+        <properties>
+            <property name="openjpa.DynamicEnhancementAgent" value="false"/>
+        </properties>
     </persistence-unit>
 </persistence>
