@@ -95,7 +95,7 @@ public class HBpelEvent extends HObject {
     /**
      * @hibernate.property
      *    column="DETAIL"
-     *    type="text"
+     *    type="materialized_clob"
      *    length="32000"
      */
     public String getDetail() {
