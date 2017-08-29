@@ -24,29 +24,35 @@ import javax.transaction.TransactionManager;
 import javax.transaction.Transaction;
 
 import org.hibernate.HibernateException;
-import org.hibernate.transaction.TransactionManagerLookup;
+//import org.hibernate.transaction.TransactionManagerLookup;
 
 /**
  * Implementation of the {@link org.hibernate.transaction.TransactionManagerLookup} interface that
  * uses {@link SessionManager} to obtain the JTA {@link TransactionManager} object.
  */
-public class HibernateTransactionManagerLookup implements TransactionManagerLookup {
+// public class HibernateTransactionManagerLookup implements TransactionManagerLookup {
+//
+//      /** Constructor. */
+//      public HibernateTransactionManagerLookup() {
+//          super();
+//      }
+//
+//      public TransactionManager getTransactionManager(Properties props)
+//          throws HibernateException {
+//          return SessionManager.getTransactionManager(props);
+//      }
+//
+//      public String getUserTransactionName() {
+//          return null;
+//      }
+//
+//     public Object getTransactionIdentifier(Transaction transaction) {
+//         return transaction;
+//     }
+// }
 
-	/** Constructor. */
-	public HibernateTransactionManagerLookup() {
-		super();
-	}
-
-	public TransactionManager getTransactionManager(Properties props)
-			throws HibernateException {
-		return SessionManager.getTransactionManager(props);
-	}
-
-	public String getUserTransactionName() {
-		return null;
-	}
-
-    public Object getTransactionIdentifier(Transaction transaction) {
-        return transaction;
-    }
-}
+/**
+* @Depreicated 
+* Replaced by org.apache.ode.daohib.HibertenateJtaPlatform
+*/
+public class HibernateTransactionManagerLookup {}

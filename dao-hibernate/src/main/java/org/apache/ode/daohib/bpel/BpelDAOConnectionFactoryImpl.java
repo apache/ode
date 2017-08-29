@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.daohib.DataSourceConnectionProvider;
-import org.apache.ode.daohib.HibernateTransactionManagerLookup;
+import org.apache.ode.daohib.HibertenateJtaPlatform;
 import org.apache.ode.daohib.SessionManager;
 import org.hibernate.HibernateException;
 import org.hibernate.cfg.Environment;
@@ -90,14 +90,22 @@ public class BpelDAOConnectionFactoryImpl implements BpelDAOConnectionFactoryJDB
         // the client.
         if (properties.containsKey(Environment.CONNECTION_PROVIDER))
             __log.warn("Ignoring user-specified Hibernate property: " + Environment.CONNECTION_PROVIDER);
-        if (properties.containsKey(Environment.TRANSACTION_MANAGER_STRATEGY))
-            __log.warn("Ignoring user-specified Hibernate property: " + Environment.TRANSACTION_MANAGER_STRATEGY);
+        if (properties.containsKey(Environment.JTA_PLATFORM))
+            __log.warn("Ignoring user-specified Hibernate property: " + Environment.JTA_PLATFORM);
         if (properties.containsKey(Environment.SESSION_FACTORY_NAME))
             __log.warn("Ignoring user-specified Hibernate property: " + Environment.SESSION_FACTORY_NAME);
+        if (properties.containsKey(Environment.TRANSACTION_STRATEGY))
+            __log.warn("Ignoring user-specified Hibernate property: " + Environment.TRANSACTION_STRATEGY);
+        if (properties.containsKey(Environment.CURRENT_SESSION_CONTEXT_CLASS))
+            __log.warn("Ignoring user-specified Hibernate property: " + Environment.CURRENT_SESSION_CONTEXT_CLASS);
 
         properties.put(Environment.CONNECTION_PROVIDER, DataSourceConnectionProvider.class.getName());
-        properties.put(Environment.TRANSACTION_MANAGER_STRATEGY, HibernateTransactionManagerLookup.class.getName());
-        properties.put(Environment.TRANSACTION_STRATEGY, "org.hibernate.transaction.JTATransactionFactory");
+        properties.put(Environment.JTA_PLATFORM, HibertenateJtaPlatform.class.getName());
+
+        // Need to use CMTTransactionFactory instead of JTATransactionFactory in Hibernate 4
+        // Refer: https://jira.spring.io/browse/SPR-9480?focusedCommentId=81419&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-81419
+        properties.put(Environment.TRANSACTION_STRATEGY, "org.hibernate.transaction.CMTTransactionFactory");
+
         properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "jta");
 
         // Isolation levels override; when you use a ConnectionProvider, this has no effect
