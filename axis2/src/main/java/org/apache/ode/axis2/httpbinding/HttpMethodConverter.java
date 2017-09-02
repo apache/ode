@@ -192,6 +192,7 @@ public class HttpMethodConverter {
             final String contentCharset = method.getParams().getContentCharset();
             if (log.isDebugEnabled()) log.debug("Content-Type [" + contentType + "] Charset [" + contentCharset + "]");
             if (useUrlEncoded) {
+                encodedParams = new URLEncodedTransformer().transform(partValues);
                 requestEntity = new StringRequestEntity(encodedParams, PostMethod.FORM_URL_ENCODED_CONTENT_TYPE, contentCharset);
             } else {
                 // get the part to be put in the body
