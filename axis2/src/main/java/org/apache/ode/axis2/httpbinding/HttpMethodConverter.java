@@ -153,8 +153,7 @@ public class HttpMethodConverter {
         if (useUrlReplacement) {
             // insert part values in the url
             completeUri = new UrlReplacementTransformer().transform(completeUri, partValues);
-        }
-        if (useUrlEncoded) {
+        } else if (useUrlEncoded) {
             // encode part values
             encodedParams = new URLEncodedTransformer().transform(partValues);
         }
