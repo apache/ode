@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.compiler.bom;
 
+import org.apache.ode.bpel.compiler.bom.AssignActivity.AssignOperation;
 import org.w3c.dom.Element;
 
 /**
@@ -25,7 +26,7 @@ import org.w3c.dom.Element;
  * (L-value) and a "right hand side (R-value). The value on the right hand side
  * is copied to the location referenced in the left hand side.
  */
-public class Copy extends BpelObject {
+public class Copy extends BpelObject implements AssignOperation {
 
     public Copy(Element el) {
         super(el);

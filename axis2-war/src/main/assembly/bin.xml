@@ -171,7 +171,9 @@
 	<include>xml-apis:xml-apis</include>
 	<include>javax.mail:mail</include>
 	<include>axion:axion</include>    
-	<include>org.springframework:spring</include>    
+	<include>org.springframework:spring</include>
+    <!--@hahnml: Include the OpenTOSCA BPEL REST Extension Bundle -->
+	<include>org.opentosca.bpel4restlight:bpelextension</include>    
    </includes>
     </dependencySet>
 

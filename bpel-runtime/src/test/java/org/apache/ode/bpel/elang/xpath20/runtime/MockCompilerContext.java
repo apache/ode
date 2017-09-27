@@ -35,23 +35,24 @@ import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.BpelObject;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.compiler.bom.ScopeLikeActivity;
+import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLValueExpression;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.o.OProcess.OProperty;
+import org.apache.ode.bpel.o.OProcess.OPropertyAlias;
 import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OScope.CorrelationSet;
+import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.o.OVarType;
 import org.apache.ode.bpel.o.OXsdTypeVarType;
 import org.apache.ode.bpel.o.OXslSheet;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.o.OProcess.OProperty;
-import org.apache.ode.bpel.o.OProcess.OPropertyAlias;
-import org.apache.ode.bpel.o.OScope.CorrelationSet;
-import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.utils.NSContext;
 
 public class MockCompilerContext implements CompilerContext {
@@ -228,6 +229,16 @@ public class MockCompilerContext implements CompilerContext {
 	public OLValueExpression compileLValueExpr(Expression expr,
 			OVarType rootNodeType, Object requestedResultType,
 			Object[] resultType) throws CompilationException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public boolean isExtensionDeclared(String namespace) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public ExtensionValidator getExtensionValidator(QName extensionElementName) {
 		// TODO Auto-generated method stub
 		return null;
 	}

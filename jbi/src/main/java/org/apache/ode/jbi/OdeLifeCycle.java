@@ -21,6 +21,9 @@ package org.apache.ode.jbi;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.concurrent.Executors;
 
 import javax.jbi.JBIException;
@@ -30,14 +33,16 @@ import javax.jbi.component.ServiceUnitManager;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.transaction.TransactionManager;
+import javax.xml.namespace.QName;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.geronimo.transaction.manager.GeronimoTransactionManager;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactoryJDBC;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.ProcessAndInstanceManagementMBean;
+import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
+import org.apache.ode.bpel.extension.ExtensionBundleValidation;
+import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
@@ -49,6 +54,8 @@ import org.apache.ode.scheduler.simple.SimpleScheduler;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.fs.TempFileManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class implements ComponentLifeCycle. The JBI framework will start this engine class automatically when JBI framework starts
@@ -135,6 +142,8 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             registerEventListeners();
 
             registerMexInterceptors();
+            
+            registerExtensionActivityBundles();
 
             registerMBean();
 
@@ -368,6 +377,61 @@ public class OdeLifeCycle implements ComponentLifeCycle {
             }
         }
     }
+    
+    // @hahnml: Added support for extension bundles based on ODE 2.0 alpha branch
+    private void registerExtensionActivityBundles() {
+		String extensionsRTStr = _ode._config.getExtensionActivityBundlesRT();
+		String extensionsValStr = _ode._config
+				.getExtensionActivityBundlesValidation();
+		if (extensionsRTStr != null) {
+			// TODO replace StringTokenizer by regex
+			for (StringTokenizer tokenizer = new StringTokenizer(
+					extensionsRTStr, ",;"); tokenizer.hasMoreTokens();) {
+				String bundleCN = tokenizer.nextToken();
+				
+				//@hahnml: Remove any whitespaces
+				bundleCN = bundleCN.replaceAll(" ", "");
+				
+				try {
+					// instantiate bundle
+					ExtensionBundleRuntime bundleRT = (ExtensionBundleRuntime) Class
+							.forName(bundleCN).newInstance();
+					// register extension bundle (BPEL server)
+					_ode._server.registerExtensionBundle(bundleRT);
+				} catch (Exception e) {
+					__log.warn("Couldn't register the extension bundle runtime "
+							+ bundleCN
+							+ ", the class couldn't be "
+							+ "loaded properly.");
+				}
+			}
+		}
+		if (extensionsValStr != null) {
+			Map<QName, ExtensionValidator> validators = new HashMap<QName, ExtensionValidator>();
+			for (StringTokenizer tokenizer = new StringTokenizer(
+					extensionsValStr, ",;"); tokenizer.hasMoreTokens();) {
+				String bundleCN = tokenizer.nextToken();
+				
+				//@hahnml: Remove any whitespaces
+				bundleCN = bundleCN.replaceAll(" ", "");
+				
+				try {
+					// instantiate bundle
+					ExtensionBundleValidation bundleVal = (ExtensionBundleValidation) Class
+							.forName(bundleCN).newInstance();
+					// add validators
+					validators.putAll(bundleVal.getExtensionValidators());
+				} catch (Exception e) {
+					__log.warn("Couldn't register the extension bundle validator "
+							+ bundleCN
+							+ ", the class couldn't be "
+							+ "loaded properly.");
+				}
+			}
+			// register extension bundle (BPEL store)
+			_ode._store.setExtensionValidators(validators);
+		}
+	}
 
     public synchronized void start() throws JBIException {
         if (_started)

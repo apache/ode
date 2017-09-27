@@ -101,7 +101,7 @@ define "ode" do
     libs = projects("axis2", "bpel-api", "bpel-compiler", "bpel-connector", "bpel-dao",
       "bpel-epr", "bpel-obj", "bpel-ql", "bpel-runtime", "scheduler-simple",
       "bpel-schemas", "bpel-store", "dao-hibernate", "jacob", "jca-ra", "jca-server",
-      "utils", "dao-jpa", "agents"),
+      "utils", "dao-jpa", "agents", "bpel-rest-extensions"),
       AXIS2_ALL, ANNONGEN, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.fileupload, COMMONS.io, COMMONS.httpclient, COMMONS.beanutils,
       COMMONS.lang, COMMONS.pool, DERBY, DERBY_TOOLS, JAXEN, JAVAX.activation, JAVAX.ejb, JAVAX.javamail,
       JAVAX.connector, JAVAX.jms, JAVAX.persistence, JAVAX.transaction, JAVAX.stream,  JIBX,
@@ -485,6 +485,12 @@ define "ode" do
   define "jacob-ap" do
     package :jar
   end
+  
+  desc "OpenTOSCA BPEL REST Extensions"
+  define "bpel-rest-extensions" do
+    compile.with projects("bpel-api", "bpel-obj", "bpel-runtime"), COMMONS.codec, COMMONS.httpclient, SLF4J, LOG4J2
+    package :jar
+  end
 
   desc "ODE JBI Integration Layer"
   define "jbi" do
@@ -498,7 +504,7 @@ define "ode" do
         projects("bpel-api", "bpel-api-jca", "bpel-compiler", "bpel-connector", "bpel-dao",
         "bpel-epr", "jca-ra", "jca-server", "bpel-obj", "bpel-ql", "bpel-runtime",
         "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
-        "jacob", "jacob-ap", "utils", "agents"),
+        "jacob", "jacob-ap", "utils", "agents", "bpel-rest-extensions"),
         ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
         COMMONS.primitives, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector,
         JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J2, OPENJPA,
@@ -628,7 +634,7 @@ define "ode" do
     ode_libs = artifacts(projects("bpel-api", "bpel-api-jca", "bpel-compiler", "bpel-connector", "bpel-dao",
                                   "bpel-epr", "jca-ra", "jca-server", "bpel-obj", "bpel-ql", "bpel-runtime",
                                   "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
-                                  "jacob", "jacob-ap", "utils", "agents"))
+                                  "jacob", "jacob-ap", "utils", "agents", "bpel-rest-extensions"))
     libs = artifacts(ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
                      COMMONS.primitives, COMMONS.io, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector,
                      JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J2, OPENJPA,
@@ -855,19 +861,19 @@ define "apache-ode" do
     end
   end
 
-  package(:zip, :id=>"#{id}-sources").path("#{id}-sources-#{version}").tap do |zip|
-    if File.exist?(".svn")
-      `svn status -v`.reject { |l| l[0] == ?? || l[0] == ?D || l.strip.empty? || l[0...3] == "---"}.
-        map { |l| l.split.last }.reject { |f| File.directory?(f) }.
-        each { |f| zip.include f, :as=>f.gsub("\\", "/") }
-    elsif File.exist? '.git/config'
-      `git ls-files`.split("\n").each { |f| zip.include f, :as=>f.gsub("\\", "/") }
-    else
-      zip.include Dir.pwd, :as=>"."
-    end
-    #exlude old console that uses json.org, due to licensing issues
-    zip.exclude('axis2-war/src/main/webapp/css').exclude('axis2-war/src/main/webapp/images').exclude('axis2-war/src/main/webapp/js')
-  end
+  # package(:zip, :id=>"#{id}-sources").path("#{id}-sources-#{version}").tap do |zip|
+  #   if File.exist?(".svn")
+  #     `svn status -v`.reject { |l| l[0] == ?? || l[0] == ?D || l.strip.empty? || l[0...3] == "---"}.
+  #       map { |l| l.split.last }.reject { |f| File.directory?(f) }.
+  #       each { |f| zip.include f, :as=>f.gsub("\\", "/") }
+  #   elsif File.exist? '.git/config'
+  #     `git ls-files`.split("\n").each { |f| zip.include f, :as=>f.gsub("\\", "/") }
+  #   else
+  #     zip.include Dir.pwd, :as=>"."
+  #   end
+  #   #exlude old console that uses json.org, due to licensing issues
+  #  zip.exclude('axis2-war/src/main/webapp/css').exclude('axis2-war/src/main/webapp/images').exclude('axis2-war/src/main/webapp/js')
+  # end
 
   package(:zip, :id=>"#{id}-docs").include(doc.from(project("ode").projects).
     using(:javadoc, :windowtitle=>"Apache ODE #{project.version}").target, :as=>"#{id}-docs-#{version}") unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i

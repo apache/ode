@@ -41,10 +41,10 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Scheduler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A reliable and relatively simple scheduler that uses a database to persist information about
@@ -379,13 +379,17 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
         boolean nearfuture = !immediate && when.getTime() <= ctime + _nearFutureInterval;
         try {
             if (immediate) {
-                // Immediate scheduling means we put it in the DB for safe keeping
-                _db.insertJob(job, _nodeId, true);
+            	// Immediate scheduling means we put it in the DB for safe
+				// keeping. Adding to the db
+				// upon the commit of the transaction.
 
-                // And add it to our todo list .
-                if (_outstandingJobs.size() < _todoLimit) {
-                    addTodoOnCommit(job);
-                }
+				// And add it to our todo list .
+				// @hahnml: Patch ODE-942
+				if (_outstandingJobs.size() < _todoLimit) {
+					addTodoOnCommit(job, _nodeId, true);
+				} else {
+					addToDbOnCommit(job, _nodeId, true);
+				}
                 __log.debug("scheduled immediate job: " + job.jobId);
             } else if (nearfuture) {
                 // Near future, assign the job to ourselves (why? -- this makes it very unlikely that we
@@ -620,6 +624,47 @@ public class SimpleScheduler implements Scheduler, TaskRunner {
     protected void runPolledRunnable(final Job job) {
          _exec.submit(new RunJob(job, _polledRunnableProcessor));
     }
+    
+ // @hahnml: Patch ODE-942
+	private void addTodoOnCommit(final Job job, final String nodeId,
+			final boolean loaded) {
+		registerSynchronizer(new Synchronizer() {
+			public void afterCompletion(boolean success) {
+				if (success) {
+					try {
+						_db.insertJob(job, nodeId, loaded);
+					} catch (DatabaseException dbe) {
+						__log.error("Database error.", dbe);
+						throw new ContextException("Database error.", dbe);
+					}
+					enqueue(job);
+				}
+			}
+
+			public void beforeCompletion() {
+			}
+		});
+	}
+
+	// @hahnml: Patch ODE-942
+	private void addToDbOnCommit(final Job job, final String nodeId,
+			final boolean loaded) {
+		registerSynchronizer(new Synchronizer() {
+			public void afterCompletion(boolean success) {
+				if (success) {
+					try {
+						_db.insertJob(job, nodeId, loaded);
+					} catch (DatabaseException dbe) {
+						__log.error("Database error.", dbe);
+						throw new ContextException("Database error.", dbe);
+					}
+				}
+			}
+
+			public void beforeCompletion() {
+			}
+		});
+	}
 
     private void addTodoOnCommit(final Job job) {
         registerSynchronizer(new Synchronizer() {

@@ -109,6 +109,10 @@ public abstract class Bpel20QNames {
     public static final QName FINAL_PROPQUERY = new QName(NS_WSBPEL2_0_FINAL_VARPROP, "query");
     public static final QName FINAL_PLINKTYPE = new QName(NS_WSBPEL2_0_FINAL_PLINK, "partnerLinkType");
     public static final QName FINAL_PLINKROLE = new QName(NS_WSBPEL2_0_FINAL_PLINK, "role");
+    public static final QName FINAL_EXTENSIONS = newFinalQName("extensions");
+    public static final QName FINAL_EXTENSION = newFinalQName("extension");
+    public static final QName FINAL_EXTENSION_ASSIGN_OPERATION = newFinalQName("extensionAssignOperation");
+    public static final QName FINAL_EXTENSION_ACTIVITY = newFinalQName("extensionActivity");
 
     /** Some BPEL 2.0 Draft Elements **/
     public static final QName PROCESS = newQName("process");
@@ -182,6 +186,10 @@ public abstract class Bpel20QNames {
     public static final QName PROPERTY = newQName("property");
     public static final QName PLINKTYPE = new QName(NS_WSBPEL_PARTNERLINK_2004_03, "partnerLinkType");
     public static final QName PLINKROLE = new QName(NS_WSBPEL_PARTNERLINK_2004_03, "role");
+    public static final QName EXTENSIONS = newQName("extensions");
+    public static final QName EXTENSION = newQName("extension");
+    public static final QName EXTENSIBLE_ASSIGN = newQName("extensibleAssign");
+    public static final QName EXTENSION_ACTIVITY = newQName("extensionActivity");
 
     /** Not part of BPEL, but handy to have. */
     public static final String NS_RDF = "http://www.w3.org/2000/01/rdf-schema#";

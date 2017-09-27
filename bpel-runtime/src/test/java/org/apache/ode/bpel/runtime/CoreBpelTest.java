@@ -32,20 +32,22 @@ import junit.framework.TestCase;
 
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
+import org.apache.ode.bpel.extension.ExtensionOperation;
+import org.apache.ode.bpel.iapi.ProcessConf.PartnerRoleConfig;
 import org.apache.ode.bpel.o.OCatch;
 import org.apache.ode.bpel.o.OEmpty;
-import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.o.OFaultHandler;
 import org.apache.ode.bpel.o.OFlow;
 import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.o.OSequence;
 import org.apache.ode.bpel.o.OThrow;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponseChannel;
@@ -53,8 +55,6 @@ import org.apache.ode.bpel.runtime.channels.PickResponseChannel;
 import org.apache.ode.bpel.runtime.channels.TimerResponseChannel;
 import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
-import org.apache.ode.bpel.evar.ExternalVariableModuleException;
-import org.apache.ode.bpel.iapi.ProcessConf.PartnerRoleConfig;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -472,4 +472,21 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
     public PartnerRoleConfig getConfigForPartnerLink(OPartnerLink pLink) {
         return new PartnerRoleConfig(null, true);
     }
+    
+    public Node initializeVariable(VariableInstance var, ScopeFrame scopeFrame,
+			Node val) throws ExternalVariableModuleException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Node fetchVariableData(VariableInstance variable,
+			ScopeFrame scopeFrame, boolean forWriting) throws FaultException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public ExtensionOperation createExtensionActivityImplementation(QName name) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

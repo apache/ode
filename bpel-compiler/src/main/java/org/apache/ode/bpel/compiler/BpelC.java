@@ -37,6 +37,7 @@ import org.apache.ode.bpel.compiler.api.CompileListener;
 import org.apache.ode.bpel.compiler.api.SourceLocation;
 import org.apache.ode.bpel.compiler.bom.BpelObjectFactory;
 import org.apache.ode.bpel.compiler.bom.Process;
+import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.Serializer;
 import org.apache.ode.utils.StreamUtils;
@@ -67,6 +68,8 @@ public class BpelC {
     private URI _bpel11wsdl;
     private Map<String,Object> _compileProperties;
     private boolean _dryRun = false;
+    
+    private Map<QName, ExtensionValidator> _extensionValidators;
 
     public static BpelC newBpelCompiler() {
         return new BpelC();
@@ -248,6 +251,9 @@ public class BpelC {
                 if (_compileProperties.get(PROCESS_CUSTOM_PROPERTIES) != null)
                     compiler.setCustomProperties((Map<QName, Node>) _compileProperties.get(PROCESS_CUSTOM_PROPERTIES));
             }
+            if (_extensionValidators != null) {
+            	compiler.setExtensionValidators(_extensionValidators);
+            }
         } catch (CompilationException ce) {
             this.invalidate();
             throw ce;
@@ -359,4 +365,12 @@ public class BpelC {
         }
     }
 
+    /**
+     * Registers extension validators to eventually validate the content of extensibility
+     * elements. 
+     * @param extensionValidators
+     */
+    public void setExtensionValidators(Map<QName, ExtensionValidator> extensionValidators) {
+        _extensionValidators = extensionValidators;
+    }
 }

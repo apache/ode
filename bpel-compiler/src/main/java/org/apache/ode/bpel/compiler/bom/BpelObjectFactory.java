@@ -126,6 +126,10 @@ public class BpelObjectFactory {
         _mappings.put(Bpel20QNames.FINAL_EVENTHANDLERS, BpelObject.class);
         _mappings.put(Bpel20QNames.FINAL_TARGETS,Targets.class);
         _mappings.put(Bpel20QNames.FINAL_SOURCES,Sources.class);
+        _mappings.put(Bpel20QNames.FINAL_EXTENSIONS,Extensions.class);
+        _mappings.put(Bpel20QNames.FINAL_EXTENSION,Extension.class);
+        _mappings.put(Bpel20QNames.FINAL_EXTENSION_ACTIVITY,ExtensionActivity.class);
+        _mappings.put(Bpel20QNames.FINAL_EXTENSION_ASSIGN_OPERATION,ExtensionAssignOperation.class);
 
         //
         // BPEL 2.0 draft Mappings
@@ -201,6 +205,10 @@ public class BpelObjectFactory {
         _mappings.put(Bpel20QNames.TARGETS,Targets.class);
         _mappings.put(Bpel20QNames.SOURCES,Sources.class);
         _mappings.put(Bpel20QNames.RDF_LABEL,RdfLabel.class);
+        _mappings.put(Bpel20QNames.EXTENSIONS,Extensions.class);
+        _mappings.put(Bpel20QNames.EXTENSION,Extension.class);
+        _mappings.put(Bpel20QNames.EXTENSION_ACTIVITY,ExtensionActivity.class);
+        _mappings.put(Bpel20QNames.EXTENSIBLE_ASSIGN,ExtensionAssignOperation.class);
 
         //
         // BPEL 1.1 Mappings

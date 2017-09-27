@@ -62,6 +62,7 @@
         <prop key="ode-jbi.messageMapper">org.apache.ode.jbi.msgmap.ServiceMixMapper,org.apache.ode.jbi.msgmap.JbiWsdl11WrapperMapper</prop>
         <prop key="ode-jbi.jca.port">0</prop>
         <prop key="javax.persistence.provider">org.apache.openjpa.persistence.PersistenceProviderImpl</prop>
+        <prop key="ode-jbi.extension.bundles.runtime">de.unistuttgart.iaas.bpel.extensions.bpel4restlight.Bpel4RestLightExtensionBundle</prop>
     </osgix:cm-properties>
 
     <!-- ODE Extender Service -->

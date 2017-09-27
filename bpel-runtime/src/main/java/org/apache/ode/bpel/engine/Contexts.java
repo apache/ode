@@ -19,21 +19,24 @@
 
 package org.apache.ode.bpel.engine;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.engine.cron.CronScheduler;
+import org.apache.ode.bpel.evar.ExternalVariableModule;
+import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
 import org.apache.ode.bpel.iapi.MessageExchangeContext;
 import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
-import org.apache.ode.bpel.engine.cron.CronScheduler;
-import org.apache.ode.bpel.evar.ExternalVariableModule;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import javax.xml.namespace.QName;
 
 /**
  * Aggregation of all the contexts provided to the BPEL engine by the
@@ -62,4 +65,6 @@ public class Contexts {
     /** Mapping from external variable engine identifier to the engine implementation. */
     final HashMap<QName, ExternalVariableModule> externalVariableEngines = new HashMap<QName, ExternalVariableModule>();
 
+    /** Global extension bundle registry **/
+    final Map<String, ExtensionBundleRuntime> extensionRegistry = new ConcurrentHashMap<String, ExtensionBundleRuntime>();
 }

@@ -75,6 +75,12 @@ public class OProcess extends OBase {
     public final HashMap<QName, OXsdTypeVarType> xsdTypes = new HashMap<QName, OXsdTypeVarType>();
 
     public final HashMap<URI, OXslSheet> xslSheets = new HashMap<URI, OXslSheet>();
+    
+    /** All declared extensions in the process. **/
+    public final Set<OExtension> declaredExtensions = new HashSet<OExtension>();
+
+    /** All must-understand extensions in the process. **/
+    public final Set<OExtension> mustUnderstandExtensions = new HashSet<OExtension>();
 
     public OProcess(String bpelVersion) {
         super(null);
@@ -185,6 +191,18 @@ public class OProcess extends OBase {
             return buf.toString();
         }
 
+    }
+    
+    public static class OExtension extends OBase {
+        static final long serialVersionUID = -1L  ;
+        public String namespaceURI;
+        public boolean mustUnderstand;
+        
+        public OExtension(OProcess process) { super(process); }
+
+        public String toString() {
+            return "{OExtension " + namespaceURI + (mustUnderstand ? " mustUnderstand" : "") + "}";
+        }
     }
 
     public QName getQName() {

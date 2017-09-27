@@ -96,10 +96,17 @@ public class DeploymentPoller {
     public DeploymentPoller(File deployDir, final ODEServer odeServer) {
         _odeServer = odeServer;
         _deployDir = deployDir;
-        if (!_deployDir.exists())
-            _deployDir.mkdir();
-        _systemSchedulesConf = createSystemSchedulesConfig(odeServer.getConfigRoot());
-        _systemCronConfigWatchDog = createSystemCronConfigWatchDog(odeServer.getBpelServer().getContexts().cronScheduler);
+		if (!_deployDir.exists()) {
+            boolean isDeployDirCreated = _deployDir.mkdir();
+            if (!isDeployDirCreated) {
+                __log.error("Error while creating deploy directory "
+                        + deployDir.getName());
+            }
+        }
+		_systemSchedulesConf = createSystemSchedulesConfig(odeServer
+				.getConfigRoot());
+		_systemCronConfigWatchDog = createSystemCronConfigWatchDog(odeServer
+				.getBpelServer().getContexts().cronScheduler);
     }
 
     public void start() {
@@ -133,8 +140,10 @@ public class DeploymentPoller {
 
                 if (!deployXml.exists()) {
                     // Skip if deploy.xml is abset
+					if (__log.isDebugEnabled()) {
                     __log.debug("Not deploying " + file + " (missing deploy.xml)");
                 }
+				}
 
                 WatchDog ddWatchDog = ensureDeployXmlWatchDog(file, deployXml);
                 
@@ -144,9 +153,15 @@ public class DeploymentPoller {
                 }
     
                 try {
-                    deployedMarker.createNewFile();
+					boolean isCreated = deployedMarker.createNewFile();
+                    if (!isCreated) {
+                        __log.error("Error while creating  file "
+                                        + file.getName()
+                                        + ".deployed ,deployment could be inconsistent");
+                    }
                 } catch (IOException e1) {
-                    __log.error("Error creating deployed marker file, " + file + " will not be deployed");
+					__log.error("Error creating deployed marker file, " + file
+							+ " will not be deployed");
                     continue;
                 }
     
@@ -171,8 +186,14 @@ public class DeploymentPoller {
             String pkg = file.getName().substring(0, file.getName().length() - ".deployed".length());
             File deployDir = new File(_deployDir, pkg);
             if (!deployDir.exists()) {
-                Collection<QName> undeployed = _odeServer.getProcessStore().undeploy(deployDir);
-                file.delete();
+				Collection<QName> undeployed = _odeServer.getProcessStore()
+						.undeploy(deployDir);
+				boolean isDeleted = file.delete();
+                if (!isDeleted) {
+                    __log.error("Error while deleting file "
+                                    + file.getName()
+                                    + ".deployed , please check if file is locked or if it really exist");
+                }
                 disposeDeployXmlWatchDog(deployDir);
                 if (undeployed.size() > 0)
                     __log.info("Successfully undeployed " + pkg);
@@ -273,7 +294,11 @@ public class DeploymentPoller {
     public void markAsDeployed(File file) {
         File deployedMarker = new File(_deployDir, file.getName() + ".deployed");
         try {
-            deployedMarker.createNewFile();
+			boolean isCreated = deployedMarker.createNewFile();
+            if (!isCreated) {
+                __log.error("Error while creating  file " + file.getName()
+                        + ".deployed ,deployment could be inconsistent");
+            }
         } catch (IOException e) {
             __log.error("Couldn't create marker file for " + file.getName());
         }
@@ -281,7 +306,13 @@ public class DeploymentPoller {
 
     public void markAsUndeployed(File file) {
         File deployedMarker = new File(_deployDir, file.getName() + ".deployed");
-        deployedMarker.delete();
+		boolean isDeleted = deployedMarker.delete();
+        if (!isDeleted) {
+            __log
+                    .error("Error while deleting file "
+                            + file.getName()
+                            + ".deployed , please check if file is locked or if it really exist");
+        }
     }
 
     @SuppressWarnings("unchecked")

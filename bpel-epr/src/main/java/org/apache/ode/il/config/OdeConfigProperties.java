@@ -105,12 +105,19 @@ public class OdeConfigProperties {
     public static final String PROP_MIGRATION_TRANSACTION_TIMEOUT = "migration.transaction.timeout";
 
     public static final String DEFAULT_TX_FACTORY_CLASS_NAME = "org.apache.ode.il.EmbeddedGeronimoFactory";
+    
+    public static final String PROP_EXTENSION_BUNDLES_RT = "extension.bundles.runtime";
+    
+    public static final String PROP_EXTENSION_BUNDLES_VAL = "extension.bundles.validation";
 
     private File _cfgFile;
 
     private String _prefix;
 
     private Properties _props;
+    
+    // @hahnml: Regular expression to identify and resolve system ENVIRONMENT VARIABLES inside a *.properties file
+	public static final String ENV_VARIABLE_REGEX = "\\$\\{.+\\}";
 
     /** Default defaults for the database embedded name and dao connection factory class. */
     private static String __dbEmbName = "derby-jpadb";
@@ -344,14 +351,27 @@ public class OdeConfigProperties {
         return Boolean.valueOf(getProperty(OdeConfigProperties.PROP_DB_LOGGING, "false"));
     }
 
-
     public String getProperty(String pname) {
-        return _props.getProperty(_prefix + pname);
-    }
+		String result = _props.getProperty(_prefix + pname);
+		
+		//@hahnml: Check if the value references an environment variable and resolve it
+		if (result != null && result.matches(ENV_VARIABLE_REGEX)) {
+			result = System.getenv(result.substring(2, result.length()-1));
+		}
+		
+		return result;
+	}
 
-    public String getProperty(String key, String dflt) {
-        return _props.getProperty(_prefix + key, dflt);
-    }
+	public String getProperty(String key, String dflt) {
+		String result = _props.getProperty(_prefix + key, dflt);
+
+		//@hahnml: Check if the value references an environment variable and resolve it
+		if (result != null && result.matches(ENV_VARIABLE_REGEX)) {
+			result = System.getenv(result.substring(2, result.length()-1));
+		}
+		
+		return result;
+	}
 
     public Properties getProperties() {
         return _props;
@@ -369,4 +389,11 @@ public class OdeConfigProperties {
         return Integer.valueOf(getProperty(PROP_MIGRATION_TRANSACTION_TIMEOUT, String.valueOf(0)));
     }
 
+    public String getExtensionActivityBundlesRT() {
+		return getProperty(PROP_EXTENSION_BUNDLES_RT);
+	}
+
+	public String getExtensionActivityBundlesValidation() {
+		return getProperty(PROP_EXTENSION_BUNDLES_VAL);
+	}
 }

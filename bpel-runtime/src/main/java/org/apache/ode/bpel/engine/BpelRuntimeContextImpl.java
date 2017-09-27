@@ -25,16 +25,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.wsdl.Fault;
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.common.FaultException;
@@ -50,8 +46,8 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.ScopeStateEnum;
 import org.apache.ode.bpel.dao.XmlDataDAO;
-import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evar.ExternalVariableModule.Value;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.CorrelationSetWriteEvent;
 import org.apache.ode.bpel.evt.ProcessCompletionEvent;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
@@ -62,25 +58,25 @@ import org.apache.ode.bpel.evt.ScopeCompletionEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.ScopeFaultEvent;
 import org.apache.ode.bpel.evt.ScopeStartEvent;
+import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
+import org.apache.ode.bpel.extension.ExtensionOperation;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
 import org.apache.ode.bpel.iapi.Message;
 import org.apache.ode.bpel.iapi.MessageExchange;
-import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
-import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
-import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.MessageExchange.FailureType;
 import org.apache.ode.bpel.iapi.MessageExchange.MessageExchangePattern;
 import org.apache.ode.bpel.iapi.MessageExchange.Status;
+import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
+import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.iapi.ProcessConf.PartnerRoleConfig;
+import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.JobType;
-import org.apache.ode.bpel.intercept.InterceptorInvoker;
 import org.apache.ode.bpel.memdao.ProcessInstanceDaoImpl;
-import org.apache.ode.bpel.o.OFailureHandling;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
@@ -92,6 +88,7 @@ import org.apache.ode.bpel.runtime.CorrelationSetInstance;
 import org.apache.ode.bpel.runtime.ExpressionLanguageRuntimeRegistry;
 import org.apache.ode.bpel.runtime.PROCESS;
 import org.apache.ode.bpel.runtime.PartnerLinkInstance;
+import org.apache.ode.bpel.runtime.ScopeFrame;
 import org.apache.ode.bpel.runtime.Selector;
 import org.apache.ode.bpel.runtime.VariableInstance;
 import org.apache.ode.bpel.runtime.channels.ActivityRecoveryChannel;
@@ -106,12 +103,12 @@ import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.ObjectPrinter;
-import org.apache.ode.bpel.evar.ExternalVariableModuleException;
-import org.apache.ode.bpel.evar.ExternalVariableModule.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.Document;
 
 public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 
@@ -1589,4 +1586,27 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         }
     }
 
+    public Node initializeVariable(VariableInstance var, ScopeFrame scopeFrame,
+			Node val) throws ExternalVariableModuleException {
+		return scopeFrame.initializeVariable(this, var, val);
+	}
+
+	public Node fetchVariableData(VariableInstance variable,
+			ScopeFrame scopeFrame, boolean forWriting) throws FaultException {
+		return scopeFrame.fetchVariableData(this, variable, forWriting);
+	}
+
+	public ExtensionOperation createExtensionActivityImplementation(QName name) {
+		if (name == null) return null;
+        ExtensionBundleRuntime bundle = _bpelProcess._extensionRegistry.get(name.getNamespaceURI());
+        if (bundle == null) {
+            return null;
+        } else {
+            try {
+                return bundle.getExtensionOperationInstance(name.getLocalPart());
+            } catch (Exception e) {
+                return null;
+            }
+        }
+	}
 }

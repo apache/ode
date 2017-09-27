@@ -50,14 +50,14 @@ import javax.xml.transform.stream.StreamSource;
 
 import net.sf.saxon.om.Name11Checker;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.ode.utils.sax.LoggingErrorHandler;
 import org.apache.xerces.dom.DOMOutputImpl;
 import org.apache.xerces.impl.Constants;
 import org.apache.xml.serialize.DOMSerializerImpl;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.CharacterData;
@@ -700,6 +700,10 @@ public class DOMUtils {
             }
         }
         return true;
+    }
+    
+    public static QName getElementQName(Element el) {
+        return new QName(el.getNamespaceURI(),el.getLocalName());
     }
 
     public static QName getNodeQName(Node el) {

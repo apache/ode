@@ -29,6 +29,7 @@ import javax.xml.transform.Source;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.compiler.bom.ScopeLikeActivity;
+import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLValueExpression;
@@ -43,7 +44,6 @@ import org.apache.ode.bpel.o.OXslSheet;
 import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.utils.NSContext;
 
-
 /**
  * Interface providing access to the compiler.
  * 
@@ -51,105 +51,105 @@ import org.apache.ode.utils.NSContext;
  */
 public interface CompilerContext {
 
-    OExpression constantExpr(boolean value);
+	OExpression constantExpr(boolean value);
 
-    OExpression compileJoinCondition(Expression expr)
-            throws CompilationException;
+	OExpression compileJoinCondition(Expression expr)
+			throws CompilationException;
 
-    OExpression compileExpr(Expression expr)
-    throws CompilationException;
-    
-    OExpression compileExpr(Expression expr, OVarType rootNodeType, Object requestedResultType, Object[] resultType)
-            throws CompilationException;
+	OExpression compileExpr(Expression expr) throws CompilationException;
 
-    OLValueExpression compileLValueExpr(Expression expr)
-    throws CompilationException;
-    
-    OLValueExpression compileLValueExpr(Expression expr, OVarType rootNodeType, Object requestedResultType, Object[] resultType)
-            throws CompilationException;
+	OExpression compileExpr(Expression expr, OVarType rootNodeType,
+			Object requestedResultType, Object[] resultType)
+			throws CompilationException;
 
-    /**
-     * BPEL 1.1 legacy. 
-     * @param locationstr
-     * @param nsContext
-     * @return
-     * @throws CompilationException
-     */
-    OExpression compileExpr(String locationstr, NSContext nsContext)
-            throws CompilationException;
+	OLValueExpression compileLValueExpr(Expression expr)
+			throws CompilationException;
 
-    OXslSheet compileXslt(String docStrUri)
-            throws CompilationException;
-
-    OXsdTypeVarType resolveXsdType(QName typeName)
-            throws CompilationException;
-
-    OProcess.OProperty resolveProperty(QName name)
-            throws CompilationException;
-
-    OScope.Variable resolveVariable(String name)
-            throws CompilationException;
-
-    List<OScope.Variable> getAccessibleVariables();
-
-    OScope.Variable resolveMessageVariable(String inputVar)
-            throws CompilationException;
-
-    OScope.Variable resolveMessageVariable(String inputVar, QName messageType)
-            throws CompilationException;
-
-    OMessageVarType.Part resolvePart(OScope.Variable variable, String partname)
-            throws CompilationException;
-
-    OMessageVarType.Part resolveHeaderPart(OScope.Variable variable, String partname)
-            throws CompilationException;
-
-    OActivity compile(Activity child)
-            throws CompilationException;
-
-    OScope compileSLC(ScopeLikeActivity child, Variable[] variables);
-
-    OPartnerLink resolvePartnerLink(String name)
-            throws CompilationException;
-
-    Operation resolvePartnerRoleOperation(OPartnerLink partnerLink, String operationName)
-            throws CompilationException;
-
-    Operation resolveMyRoleOperation(OPartnerLink partnerLink, String operationName)
-            throws CompilationException;
-
-    OProcess.OPropertyAlias resolvePropertyAlias(OScope.Variable variable, QName property)
-            throws CompilationException;
-
-    void recoveredFromError(SourceLocation where, CompilationException bce)
-            throws CompilationException;
-
-    OLink resolveLink(String linkName)
-            throws CompilationException;
-
-    OScope resolveCompensatableScope(String scopeToCompensate)
-            throws CompilationException;
-
-    OProcess getOProcess()
-            throws CompilationException;
-
-    OScope.CorrelationSet resolveCorrelationSet(String csetName)
-            throws CompilationException;
-
-    String getSourceLocation();
-
-    boolean isPartnerLinkAssigned(String plink);
-
-    List<OActivity> getActivityStack();
-
-    OActivity getCurrent();
-    
-    Map<URI, Source> getSchemaSources();
+	OLValueExpression compileLValueExpr(Expression expr, OVarType rootNodeType,
+			Object requestedResultType, Object[] resultType)
+			throws CompilationException;
 
 	/**
-	 * Retrieves the base URI that the BPEL Process execution contextis running relative to.
+	 * BPEL 1.1 legacy.
 	 * 
-	 * @return URI - the URI representing the absolute physical file path location that this process is defined within.
+	 * @param locationstr
+	 * @param nsContext
+	 * @return
+	 * @throws CompilationException
+	 */
+	OExpression compileExpr(String locationstr, NSContext nsContext)
+			throws CompilationException;
+
+	OXslSheet compileXslt(String docStrUri) throws CompilationException;
+
+	OXsdTypeVarType resolveXsdType(QName typeName) throws CompilationException;
+
+	OProcess.OProperty resolveProperty(QName name) throws CompilationException;
+
+	OScope.Variable resolveVariable(String name) throws CompilationException;
+
+	List<OScope.Variable> getAccessibleVariables();
+
+	OScope.Variable resolveMessageVariable(String inputVar)
+			throws CompilationException;
+
+	OScope.Variable resolveMessageVariable(String inputVar, QName messageType)
+			throws CompilationException;
+
+	OMessageVarType.Part resolvePart(OScope.Variable variable, String partname)
+			throws CompilationException;
+
+	OMessageVarType.Part resolveHeaderPart(OScope.Variable variable,
+			String partname) throws CompilationException;
+
+	OActivity compile(Activity child) throws CompilationException;
+
+	OScope compileSLC(ScopeLikeActivity child, Variable[] variables);
+
+	OPartnerLink resolvePartnerLink(String name) throws CompilationException;
+
+	Operation resolvePartnerRoleOperation(OPartnerLink partnerLink,
+			String operationName) throws CompilationException;
+
+	Operation resolveMyRoleOperation(OPartnerLink partnerLink,
+			String operationName) throws CompilationException;
+
+	OProcess.OPropertyAlias resolvePropertyAlias(OScope.Variable variable,
+			QName property) throws CompilationException;
+
+	void recoveredFromError(SourceLocation where, CompilationException bce)
+			throws CompilationException;
+
+	OLink resolveLink(String linkName) throws CompilationException;
+
+	OScope resolveCompensatableScope(String scopeToCompensate)
+			throws CompilationException;
+
+	OProcess getOProcess() throws CompilationException;
+
+	OScope.CorrelationSet resolveCorrelationSet(String csetName)
+			throws CompilationException;
+
+	String getSourceLocation();
+
+	boolean isPartnerLinkAssigned(String plink);
+
+	List<OActivity> getActivityStack();
+
+	OActivity getCurrent();
+
+	Map<URI, Source> getSchemaSources();
+
+	boolean isExtensionDeclared(String namespace);
+
+	ExtensionValidator getExtensionValidator(QName extensionElementName);
+
+	/**
+	 * Retrieves the base URI that the BPEL Process execution contextis running
+	 * relative to.
+	 * 
+	 * @return URI - the URI representing the absolute physical file path
+	 *         location that this process is defined within.
 	 */
 	URI getBaseResourceURI();
 }

@@ -43,10 +43,7 @@ import javax.wsdl.WSDLException;
 import javax.wsdl.xml.WSDLReader;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.api.CompilationMessage;
 import org.apache.ode.bpel.compiler.api.CompileListener;
@@ -64,6 +61,7 @@ import org.apache.ode.bpel.compiler.bom.Correlation;
 import org.apache.ode.bpel.compiler.bom.CorrelationSet;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.compiler.bom.Expression11;
+import org.apache.ode.bpel.compiler.bom.Extension;
 import org.apache.ode.bpel.compiler.bom.FaultHandler;
 import org.apache.ode.bpel.compiler.bom.Import;
 import org.apache.ode.bpel.compiler.bom.LinkSource;
@@ -82,6 +80,7 @@ import org.apache.ode.bpel.compiler.bom.TerminationHandler;
 import org.apache.ode.bpel.compiler.bom.Variable;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
+import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.o.DebugInfo;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OAssign;
@@ -125,6 +124,8 @@ import org.apache.ode.utils.xsd.XSUtils;
 import org.apache.ode.utils.xsd.XsdException;
 import org.apache.ode.utils.xsl.XslTransformHandler;
 import org.apache.xerces.xni.parser.XMLEntityResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -183,6 +184,9 @@ public abstract class BpelCompiler implements CompilerContext {
     private Map<QName, Node> _customProcessProperties;
 
     private URI _processURI;
+    
+    private final Set<String> _declaredExtensionNS = new HashSet<String>();
+	private Map<QName, ExtensionValidator> _extensionValidators = new HashMap<QName, ExtensionValidator>();
     
     BpelCompiler(WSDLFactory4BPEL wsdlFactory) {
         _wsdlFactory = wsdlFactory;
@@ -735,6 +739,11 @@ public abstract class BpelCompiler implements CompilerContext {
             }
         }
 
+        // compile extensions
+		for (Extension e : _processDef.getExtensions()) {
+			compileExtension(e);
+		}
+		
         OScope procesScope = new OScope(_oprocess, null);
         procesScope.name = "__PROCESS_SCOPE:" + process.getName();
         procesScope.debugInfo = createDebugInfo(process, null);
@@ -1626,19 +1635,46 @@ public abstract class BpelCompiler implements CompilerContext {
     }
 
     public boolean isPartnerLinkAssigned(String plink) {
-        for (OActivity act : _compiledActivities) {
-            if (act instanceof OAssign) {
-                OAssign assign = (OAssign) act;
-                for (OAssign.Copy copy : assign.copy) {
-                    if (copy.to instanceof OAssign.PartnerLinkRef) {
-                        if (((OAssign.PartnerLinkRef) copy.to).partnerLink.getName().equals(plink))
-                            return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
+		for (OActivity act : _compiledActivities) {
+			if (act instanceof OAssign) {
+				OAssign assign = (OAssign) act;
+				for (OAssign.OAssignOperation operation : assign.operations) {
+					if (operation instanceof OAssign.Copy) {
+						OAssign.Copy copy = (OAssign.Copy) operation;
+						if (copy.to instanceof OAssign.PartnerLinkRef) {
+							if (((OAssign.PartnerLinkRef) copy.to).partnerLink
+									.getName().equals(plink))
+								return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+    
+    /**
+	 * Registers a declared extension. Since compilation may take place
+	 * independently of the target engine configuration, the compiler will not
+	 * check whether a extension implementation is registered.
+	 */
+	private void compileExtension(Extension ext) {
+		OProcess.OExtension oextension = new OProcess.OExtension(_oprocess);
+		oextension.namespaceURI = ext.getNamespaceURI();
+		oextension.mustUnderstand = ext.isMustUnderstand();
+
+		oextension.debugInfo = createDebugInfo(_processDef,
+				"Extension " + ext.getNamespaceURI());
+
+		_declaredExtensionNS.add(ext.getNamespaceURI());
+		_oprocess.declaredExtensions.add(oextension);
+		if (ext.isMustUnderstand()) {
+			_oprocess.mustUnderstandExtensions.add(oextension);
+		}
+
+		if (__log.isDebugEnabled())
+			__log.debug("Compiled extension " + oextension);
+	}
 
     public Definition[] getWsdlDefinitions() {
         Definition[] result = new Definition[_wsdlRegistry.getDefinitions().length];
@@ -1715,6 +1751,19 @@ public abstract class BpelCompiler implements CompilerContext {
         Class cls = Class.forName(classname);
         registerExpressionLanguage(expLangUri, (ExpressionCompiler) cls.newInstance());
     }
+    
+    public void setExtensionValidators(
+			Map<QName, ExtensionValidator> extensionValidators) {
+		_extensionValidators = extensionValidators;
+	}
+
+	public boolean isExtensionDeclared(String namespace) {
+		return _declaredExtensionNS.contains(namespace);
+	}
+
+	public ExtensionValidator getExtensionValidator(QName extensionElementName) {
+		return _extensionValidators.get(extensionElementName);
+	}
 
     public List<OActivity> getActivityStack() {
         ArrayList<OActivity> rval = new ArrayList<OActivity>(_structureStack._stack);

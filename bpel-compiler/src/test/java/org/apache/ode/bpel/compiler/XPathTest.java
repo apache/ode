@@ -44,23 +44,24 @@ import org.apache.ode.bpel.elang.xpath10.compiler.XPath10ExpressionCompilerBPEL2
 import org.apache.ode.bpel.elang.xpath10.compiler.XPath10ExpressionCompilerBPEL20Draft;
 import org.apache.ode.bpel.elang.xpath20.compiler.XPath20ExpressionCompilerBPEL20;
 import org.apache.ode.bpel.elang.xpath20.compiler.XPath20ExpressionCompilerBPEL20Draft;
+import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLValueExpression;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OMessageVarType;
+import org.apache.ode.bpel.o.OMessageVarType.Part;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
+import org.apache.ode.bpel.o.OProcess.OProperty;
+import org.apache.ode.bpel.o.OProcess.OPropertyAlias;
 import org.apache.ode.bpel.o.OScope;
+import org.apache.ode.bpel.o.OScope.CorrelationSet;
+import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.o.OVarType;
 import org.apache.ode.bpel.o.OXsdTypeVarType;
 import org.apache.ode.bpel.o.OXslSheet;
-import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.o.OProcess.OProperty;
-import org.apache.ode.bpel.o.OProcess.OPropertyAlias;
-import org.apache.ode.bpel.o.OScope.CorrelationSet;
-import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.NSContext;
 import org.w3c.dom.Element;
@@ -295,6 +296,14 @@ class MockCompilerContext implements CompilerContext {
 			OVarType rootNodeType, Object requestedResultType,
 			Object[] resultType) throws CompilationException {
 		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public boolean isExtensionDeclared(String namespace) {
+		return false;
+	}
+
+	public ExtensionValidator getExtensionValidator(QName extensionElementName) {
 		return null;
 	}
 }

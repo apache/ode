@@ -18,34 +18,55 @@
  */
 package org.apache.ode.store;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.sql.DataSource;
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.dd.DeployDocument;
 import org.apache.ode.bpel.dd.TDeployment;
-import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.extension.ExtensionValidator;
+import org.apache.ode.bpel.iapi.ContextException;
+import org.apache.ode.bpel.iapi.EndpointReferenceContext;
+import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.iapi.ProcessState;
+import org.apache.ode.bpel.iapi.ProcessStore;
+import org.apache.ode.bpel.iapi.ProcessStoreEvent;
+import org.apache.ode.bpel.iapi.ProcessStoreListener;
 import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.h2.jdbcx.JdbcDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import javax.sql.DataSource;
-import javax.xml.namespace.QName;
-
-import java.io.File;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * <p>
@@ -88,6 +109,8 @@ public class ProcessStoreImpl implements ProcessStore {
     protected File _deployDir;
 
     protected File _configDir;
+    
+    private Map<QName, ExtensionValidator> _extensionValidators = new HashMap<QName, ExtensionValidator>();
 
     /**
      * Executor used to process DB transactions. Allows us to isolate the TX context, and to ensure that only one TX gets executed a
@@ -189,6 +212,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
         // Create the DU and compile/scan it before acquiring lock.
         final DeploymentUnitDir du = new DeploymentUnitDir(deploymentUnitDirectory);
+        du.setExtensionValidators(_extensionValidators);
         if( duName != null ) {
             // Override the package name if given from the parameter
             du.setName(duName);
@@ -918,4 +942,13 @@ public class ProcessStoreImpl implements ProcessStore {
             }
         }
     }
+    
+    public void setExtensionValidators(
+			Map<QName, ExtensionValidator> extensionValidators) {
+		_extensionValidators = extensionValidators;
+	}
+	
+	public Map<QName, ExtensionValidator> getExtensionValidators() {
+		return _extensionValidators;
+	}
 }

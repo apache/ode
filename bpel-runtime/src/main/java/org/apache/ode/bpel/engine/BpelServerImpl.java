@@ -33,8 +33,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.xml.namespace.QName;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.dao.DeferredProcessInstanceCleanable;
@@ -43,6 +41,7 @@ import org.apache.ode.bpel.engine.cron.CronScheduler;
 import org.apache.ode.bpel.engine.migration.MigrationHandler;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
 import org.apache.ode.bpel.evt.BpelEvent;
+import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.BpelEngine;
 import org.apache.ode.bpel.iapi.BpelEngineException;
@@ -63,6 +62,8 @@ import org.apache.ode.utils.msg.MessageBundle;
 import org.apache.ode.utils.stl.CollectionsX;
 import org.apache.ode.utils.stl.MemberOfFunction;
 import org.apache.ode.utils.xsl.XslTransformHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -172,6 +173,15 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
         } finally {
             _mngmtLock.writeLock().unlock();
         }
+    }
+    
+    public void registerExtensionBundle(ExtensionBundleRuntime bundle) {
+        _contexts.extensionRegistry.put(bundle.getNamespaceURI(), bundle);
+        bundle.registerExtensionActivities();
+    }
+
+    public void unregisterExtensionBundle(String nsURI) {
+        _contexts.extensionRegistry.remove(nsURI);
     }
     
     public void registerExternalVariableEngine(ExternalVariableModule eve) {
@@ -316,7 +326,10 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             __log.debug("Registering process " + conf.getProcessId() + " with server.");
 
             BpelProcess process = createBpelProcess(conf);
-	    process._classLoader = Thread.currentThread().getContextClassLoader();
+            
+            process.setExtensionRegistry(_contexts.extensionRegistry);
+            
+	        process._classLoader = Thread.currentThread().getContextClassLoader();
 
             _engine.registerProcess(process);
             _registeredProcesses.add(process);

@@ -47,7 +47,7 @@ import javax.xml.namespace.QName;
 /**
  * N-tuple representing a scope "frame" (as in stack frame).
  */
-class ScopeFrame implements Serializable {
+public class ScopeFrame implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final Logger __log = LoggerFactory.getLogger(ScopeFrame.class);
 
@@ -159,7 +159,8 @@ class ScopeFrame implements Serializable {
     // context.
     // 
 
-    Node fetchVariableData(BpelRuntimeContext brc, VariableInstance variable, boolean forWriting)
+    //@hahnml: Changed to public to use with extension activities
+	public Node fetchVariableData(BpelRuntimeContext brc, VariableInstance variable, boolean forWriting)
             throws FaultException
     {
         if (variable.declaration.extVar != null) {
@@ -204,7 +205,7 @@ class ScopeFrame implements Serializable {
     }
 
 
-    Node fetchVariableData(BpelRuntimeContext brc, VariableInstance var, OMessageVarType.Part part, boolean forWriting)
+	Node fetchVariableData(BpelRuntimeContext brc, VariableInstance var, OMessageVarType.Part part, boolean forWriting)
             throws FaultException {
         Node container = fetchVariableData(brc, var, forWriting);
 
@@ -217,7 +218,8 @@ class ScopeFrame implements Serializable {
     }
 
 
-    Node initializeVariable(BpelRuntimeContext context, VariableInstance var, Node value)
+	//@hahnml: Changed to public to use with extension activities
+	public Node initializeVariable(BpelRuntimeContext context, VariableInstance var, Node value)
             throws ExternalVariableModuleException {
         if (var.declaration.extVar != null) /* external variable */ {
             if (__log.isDebugEnabled())
