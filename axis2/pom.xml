@@ -26,13 +26,9 @@
     <parent>
         <groupId>org.apache.ode</groupId>
         <artifactId>ode</artifactId>
-        <version>1.3.5</version>
+        <version>1.3.7</version>
     </parent>
-    
-    <properties>
-        <servlet.version>2.4</servlet.version>
-    </properties>
-     
+       
     <dependencies>
         <dependency>
             <groupId>org.apache.ode</groupId>
@@ -79,9 +75,8 @@
             <artifactId>ode-utils</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>${servlet.version}</version>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-servlet_2.4_spec</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.rampart</groupId>

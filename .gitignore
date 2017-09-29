@@ -8,6 +8,7 @@
 *.orig
 *.rej
 *~
+*.versionsBackup
 .classpath
 .project
 .metadata
@@ -17,5 +18,7 @@ test-output
 _buildr.rb
 *.log
 .settings
+.m2
+.buildr
 build
 Gemfile.lock

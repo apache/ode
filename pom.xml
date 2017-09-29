@@ -3,10 +3,10 @@
     <groupId>org.apache.ode</groupId>
     <artifactId>ode</artifactId>
     <name>ODE</name>
-
+    
     <packaging>pom</packaging>
     <modelVersion>4.0.0</modelVersion>
-    <version>1.3.5</version>
+    <version>1.3.7</version>
     <url>http://ode.apache.org</url>
     <issueManagement>
         <system>jira</system>
@@ -19,130 +19,147 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-
+    
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/ode/tags/ode-1.3.5</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/ode/tags/ode-1.3.5</developerConnection>
-        <url>http://svn.apache.org/repos/asf/ode/tags/ode-1.3.5</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/ode/tags/ode-1.3.7</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/ode/tags/ode-1.3.7</developerConnection>
+        <url>http://svn.apache.org/repos/asf/ode/tags/ode-1.3.7</url>
     </scm>
-
+    
     <organization>
         <name>Apache Software Foundation</name>
         <url>http://www.apache.org</url>
     </organization>
-
+    
     <prerequisites>
         <maven>2.2.1</maven>
     </prerequisites>
-
+    
     <properties>
-        <ode.version>1.3.5</ode.version>
+        <ode.version>1.3.7</ode.version>
+        <jbi.version>1.1.0</jbi.version>
         <activation.version>1.1</activation.version>
+        <apache.logging.version>[2.3,)</apache.logging.version>
         <annogen.version>0.1.0</annogen.version>
-	<antlr.version>2.7.7</antlr.version>
-	<axiom.version>1.2.7</axiom.version>
-	<axis2.version>1.3</axis2.version>
-        <rampart.version>1.3</rampart.version>
+        <antlr.version>2.7.6</antlr.version>
+        <asm.version>3.3.1</asm.version>
+        <axiom.version>1.2.13</axiom.version>
+        <axis2.version>1.6.2</axis2.version>
+        <rampart.version>1.6.2</rampart.version>
         <commons.codec.version>1.3</commons.codec.version>
-	<backport.concurrent.version>3.1</backport.concurrent.version>
+        <backport.concurrent.version>3.1</backport.concurrent.version>
+        <cglib.version>2.2</cglib.version>
         <commons.fileupload.version>1.2</commons.fileupload.version>
         <commons.collections.version>3.2.1</commons.collections.version>
         <commons.httpclient.version>3.1</commons.httpclient.version>
-	<commons.io.version>1.4</commons.io.version>
+        <commons.io.version>1.4</commons.io.version>
         <commons.lang.version>2.4</commons.lang.version>
-        <commons.logging.version>1.1</commons.logging.version>
+        <commons.logging.version>1.1.1</commons.logging.version>
         <commons.pool.version>1.4</commons.pool.version>
         <commons.primitives.version>1.0</commons.primitives.version>
-	<commons.dbcp.version>1.2.1</commons.dbcp.version>
-	<httpcomponents.version>4.0-beta1</httpcomponents.version>
-	<jaxb-api.version>2.1</jaxb-api.version>
-	<jaxb.version>2.1.6</jaxb.version>
-	<jaxen.version>1.1.1</jaxen.version>
-	<jettison.version>1.0-RC2</jettison.version>
-	<jibx.version>1.1.5</jibx.version>
-	<neethi.version>2.0.4</neethi.version>
-	<woden.version>1.0M8</woden.version>
-        <wsdl4j.version>1.6.2</wsdl4j.version>
-	<woodstox.version>3.2.4</woodstox.version>
-	<javax.mail.version>1.4</javax.mail.version>
-        <hibernate.version>3.2.5.ga</hibernate.version>
-	<spring.version>2.5.6</spring.version>
+        <commons.dbcp.version>1.2.2</commons.dbcp.version>
+        <commons.beanutils.version>1.8.2</commons.beanutils.version>
+        <httpcomponents.version>4.0-beta1</httpcomponents.version>
+        <ehcache.version>1.2.3</ehcache.version>
+        <felix.osgi.version>1.4.0</felix.osgi.version>
+        <jaxb-api.version>2.1</jaxb-api.version>
+        <jaxb.version>2.1.6</jaxb.version>
+        <jaxen.version>1.1.4</jaxen.version>
+        <jettison.version>1.0-RC2</jettison.version>
+        <jibx.version>1.2.1</jibx.version>
+        <neethi.version>3.0.2</neethi.version>
+        <woden.version>1.0M9</woden.version>
+        <wsdl4j.version>1.6.3</wsdl4j.version>
+        <woodstox.version>3.2.4</woodstox.version>
+        <javax.mail.version>1.4</javax.mail.version>
+        <hibernate.version>3.3.2.GA</hibernate.version>
+        <spring.version>2.5.6</spring.version>
+        <spring.osgi.version>1.2.0</spring.osgi.version>
         <geronimo.specs.version>1.0</geronimo.specs.version>
         <geronimo.version>2.0.1</geronimo.version>
-	<geronimo.activation.version>1.0.1</geronimo.activation.version>
-	<geronimo.annotation.version>1.1</geronimo.annotation.version>
-	<geronimo.javamail.version>1.2</geronimo.javamail.version>
-	<geronimo.stax-api.version>1.0.1</geronimo.stax-api.version>
+        <geronimo.annotation.version>1.1</geronimo.annotation.version>
+        <geronimo.javamail.version>1.7.1</geronimo.javamail.version>
+        <geronimo.stax-api.version>1.0.1</geronimo.stax-api.version>
         <geronimo.specs.jta.version>1.1</geronimo.specs.jta.version>
-	<geronimo.specs.ejb.version>1.1</geronimo.specs.ejb.version>
+        <geronimo.specs.ejb.version>1.1</geronimo.specs.ejb.version>
+        <geronimo.specs.jms.version>1.1-rc4</geronimo.specs.jms.version>
+        <geronimo.servlet.version>1.0</geronimo.servlet.version>
         <jetty.version>6.1.12rc1</jetty.version>
-        <jencks.version>2.1</jencks.version>
+        <jencks.version>1.3</jencks.version>
         <jasper.version>4.2.20RC0</jasper.version>
-        <log4j.version>1.2.13</log4j.version>
+        <log4j.version>1.2.17</log4j.version>
         <saxon.version>9.1.0.8</saxon.version>
-        <servicemix.version>3.3</servicemix.version>
-        <slf4j.version>1.4.3</slf4j.version>
-        <stax-api.version>1.0</stax-api.version>
-        <xerces.version>2.9.0</xerces.version>
+        <servicemix.core.version>3.3</servicemix.core.version>
+        <slf4j.version>1.7.12</slf4j.version>
+        <stax-api.version>1.0.1</stax-api.version>
+        <xerces.version>2.11.0</xerces.version>
         <xmlresolver.version>1.2</xmlresolver.version>
-        <xmlbeans.version>2.3.0</xmlbeans.version>
+        <xmlbeans.version>2.6.0</xmlbeans.version>
         <xstream.version>1.2</xstream.version>
-	<junit.version>4.4</junit.version>
-        <hsqldb.version>1.8.0.7</hsqldb.version>
-	<persistence-api.version>1.0</persistence-api.version>
-	<xalan.version>2.7.1</xalan.version>
+        <junit.version>4.4</junit.version>
+        <hsqldb.version>2.3.3</hsqldb.version>
+        <persistence-api.version>1.0</persistence-api.version>
+        <xalan.version>2.7.1</xalan.version>
         <ant.version>1.6.5</ant.version>
-	<openjpa.version>1.2.1</openjpa.version>
+        <openjpa.version>1.2.3</openjpa.version>
         <serp.version>1.13.1</serp.version>
-	<dom4j.version>1.6.1</dom4j.version>
+        <dom4j.version>1.6.1</dom4j.version>
         <derby.version>10.5.3.0_1</derby.version>
         <jmock.version>1.2.0</jmock.version>
         <xml.parser.version>2.6.2</xml.parser.version>
         <activemq.version>4.1.1</activemq.version>
-        <xml-apis.version>1.3.04</xml-apis.version>
+        <xml-apis.version>1.4.01</xml-apis.version>
+        <xml-schema.version>1.4.7</xml-schema.version>
         <servicemix.nmr.version>1.1.0-SNAPSHOT</servicemix.nmr.version>
+        <servicemix.component.version>2008.01</servicemix.component.version>
+        <servicemix.utils.version>1.0.0</servicemix.utils.version>
         <bpel4restlight.version>1.0.0</bpel4restlight.version>
+        
+        <jibx.version>1.1.5</jibx.version>
+        <tranql.version>1.1</tranql.version>
+        
+        <testng.version>5.8</testng.version>
     </properties>
-
-
+    
+    
     <modules>
-      <module>agents</module>
-      <module>utils</module>
-      <module>jacob-ap</module>
-      <module>jacob</module>
-      <module>bpel-schemas</module>
-      <module>bpel-scripts</module>
-      <module>bpel-api</module>
-      <module>bpel-api-jca</module>
-      <module>bpel-dao</module>
-      <module>bpel-obj</module>
-      <module>dao-jpa</module>
-      <module>jca-ra</module>
-      <module>jca-server</module>
-      <module>scheduler-simple</module>
-      <module>bpel-compiler</module>
-      <module>bpel-epr</module>
-      <module>bpel-ql</module>
-      <module>dao-hibernate</module>
-      <module>tools</module>
-      <module>bpel-store</module>
-	  <module>dao-jpa-ojpa-derby</module>
-      <module>dao-hibernate-db</module>
-      <module>bpel-runtime</module>
-      <module>bpel-rest-extensions</module>
-      <module>bpel-connector</module>
-	  <module>bpel-test</module>
-	  <module>axis2</module>
-	  <module>jbi</module>
-	  <module>jbi-bundle</module>
-	  <module>jbi-karaf</module>
-      <module>distro/src/examples-jbi/maven2/ping-pong-osgi</module>
-      <module>distro/src/examples-jbi/maven2/helloworld2-osgi</module>
-      <module>jbi-karaf-pmapi-httpbinding</module>
-	  <module>axis2-war</module>
-	  <module>distro</module>
+        <module>agents</module>
+        <module>utils</module>
+        <module>jacob-ap</module>
+        <module>jacob</module>
+        <module>bpel-schemas</module>
+        <module>bpel-scripts</module>
+        <module>bpel-api</module>
+        <module>bpel-api-jca</module>
+        <module>bpel-dao</module>
+        <module>bpel-obj</module>
+        <module>dao-jpa</module>
+        <module>jca-ra</module>
+        <module>jca-server</module>
+        <module>scheduler-simple</module>
+        <module>bpel-compiler</module>
+        <module>bpel-epr</module>
+        <module>bpel-ql</module>
+        <module>dao-hibernate</module>
+        <module>tools</module>
+        <module>bpel-store</module>
+        <module>dao-jpa-ojpa-derby</module>
+        <module>dao-hibernate-db</module>
+        <module>bpel-runtime</module>
+        <module>bpel-rest-extensions</module>
+        <module>bpel-connector</module>
+        <module>bpel-test</module>
+        <module>axis2</module>
+        <module>jbi</module>
+        <module>jbi-bundle</module>
+        <module>jbi-karaf</module>
+        <module>distro/src/examples-jbi/maven2/ping-pong-osgi</module>
+        <module>distro/src/examples-jbi/maven2/helloworld2-osgi</module>
+        <module>jbi-karaf-pmapi-httpbinding</module>
+        <module>axis2-war</module>
+        <module>distro</module>
     </modules>
-
+    
     <build>
         <pluginManagement>
             <plugins>
@@ -151,66 +168,66 @@
                     <artifactId>maven-assembly-plugin</artifactId>
                     <version>2.2-beta-5</version>
                 </plugin>
-
+                
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-		    <version>2.0.2</version>
+                    <version>2.0.2</version>
                     <configuration>
                         <source>1.5</source>
                         <target>1.5</target>
                     </configuration>
                 </plugin>
-
+                
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.4.3</version>
                 </plugin>
-
-
+                
+                
                 <!--|
-            | This version uses xjavadoc-1.1-j5, which doesn't
-            | complain on Java 5.0 constructs.
-            |
-        -->
+                | This version uses xjavadoc-1.1-j5, which doesn't
+                | complain on Java 5.0 constructs.
+                |
+                -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>xdoclet-maven-plugin</artifactId>
                     <version>1.0</version>
                     <dependencies>
-                      <dependency>
-                        <groupId>xdoclet</groupId>
-                        <artifactId>xjavadoc</artifactId>
-                        <version>1.1-j5</version>
-                      </dependency>
+                        <dependency>
+                            <groupId>xdoclet</groupId>
+                            <artifactId>xjavadoc</artifactId>
+                            <version>1.1-j5</version>
+                        </dependency>
                     </dependencies>
                 </plugin>
-
+                
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>xmlbeans-maven-plugin</artifactId>
-                    <version>${xmlbeans.version}</version>
+                    <version>2.3.0</version>
                 </plugin>
-
-	      <plugin>
-		<groupId>org.codehaus.mojo</groupId>
-		<artifactId>sql-maven-plugin</artifactId>
-		<version>1.2</version>
-		<dependencies>
-		    <dependency>
-		      <groupId>org.apache.derby</groupId>
-		      <artifactId>derby</artifactId>
-		      <version>${derby.version}</version>
-		    </dependency>
-		    <dependency>
-		      <groupId>org.apache.derby</groupId>
-		      <artifactId>derbytools</artifactId>
-		      <version>${derby.version}</version>
-		    </dependency> 
-		</dependencies>
-	      </plugin>
-
+                
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>sql-maven-plugin</artifactId>
+                    <version>1.2</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.derby</groupId>
+                            <artifactId>derby</artifactId>
+                            <version>${derby.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.apache.derby</groupId>
+                            <artifactId>derbytools</artifactId>
+                            <version>${derby.version}</version>
+                        </dependency> 
+                    </dependencies>
+                </plugin>
+                
                 <!-- Allows direct usage of the javadoc:javadoc goal. -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -224,123 +241,60 @@
             </plugins>
         </pluginManagement>
     </build>
-
-
-
+    
+    
+    
     <!--|
-        | List of repositories for all the various dependencies,
-        | and Maven plugins.
-        |
+    | List of repositories for all the various dependencies,
+    | and Maven plugins.
+    |
     -->
-  <repositories>
-    <repository>
-      <id>servicemix-repo</id>
-      <name>ServiceMix Repository</name>
-      <url>https://repository.apache.org/content/groups/public</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <!--
-    <repository>
-      <id>servicemix</id>
-      <name>Apache ServiceMix Repository</name>
-      <url>http://svn.apache.org/repos/asf/servicemix/m2-repo</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    -->
-    <repository>
-      <id>saxon-repo</id>
-      <name>Saxon Repo</name>
-      <url>http://people.apache.org/~rr/saxon-repo</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-
-    <!--
     <repositories>
         <repository>
             <id>central</id>
-            <name>Maven Repository Switchboard</name>
+            <name>Maven Central Repository</name>
             <url>http://repo1.maven.org/maven2</url>
         </repository>
         <repository>
-            <id>ibiblio</id>
-            <name>ibiblio</name>
-            <url>http://www.ibiblio.org/maven2</url>
+            <id>vanto</id>
+            <name>Vanto Maven Repository</name>
+            <url>http://people.apache.org/~vanto/m2/</url>
         </repository>
         <repository>
-            <id>apache.snapshots</id>
-            <name>Apache snapshots</name>
-            <url>http://repository.apache.org/snapshots/</url>
+            <id>atlassian</id>
+            <name>Atlassian 3rd Party Repository</name>
+            <url>https://maven.atlassian.com/3rdparty/</url>
         </repository>
         <repository>
-            <id>intalio</id>
-            <name>ODE Maven2 repository</name>
-            <url>http://pxe.intalio.org/public/maven2</url>
+            <id>enonic</id>
+            <name>Enonic Repository</name>
+            <url>http://repo.enonic.com/public/</url>
         </repository>
         <repository>
-            <id>JBoss</id>
-            <name>JBoss Repository</name>
-            <url>http://repository.jboss.com/maven2/</url>
-        </repository>
+            <id>wso2</id>
+            <name>WSO2 Repository</name>
+            <url>http://dist.wso2.org/maven2/</url>
+        </repository> 
     </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-          <id>central</id>
-          <name>Maven Repository Switchboard</name>
-          <url>http://repo1.maven.org/maven2</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>ibiblio</id>
-            <name>ibiblio</name>
-            <url>http://www.ibiblio.org/maven2</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>apache.snapshots</id>
-            <name>Apache snapshots</name>
-            <url>http://repository.apache.org/snapshots/</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>intalio</id>
-            <name>Intalio Maven2 repository</name>
-            <url>http://pxe.intalio.org/public/maven2</url>
-        </pluginRepository>
-    </pluginRepositories>
-
--->
+    
     <!-- |
-	 | Repository for distributing new releases.
-	 |
+    | Repository for distributing new releases.
+    |
     -->
-    <distributionManagement>
-        <repository>
-            <id>apache.releases.https</id>
-            <name>Apache Release Distribution Repository</name>
-            <url>https://repository.apache.org/service/local/staging/deploy/maven2</url>
-        </repository>
-        <snapshotRepository>
-            <id>apache.snapshots.https</id>
-            <name>Apache Development Snapshot Repository</name>
-            <url>https://repository.apache.org/content/repositories/snapshots</url>
-            <uniqueVersion>false</uniqueVersion>
-        </snapshotRepository>
-    </distributionManagement>
-
+    <!-- <distributionManagement>
+    <repository>
+    <id>apache.releases.https</id>
+    <name>Apache Release Distribution Repository</name>
+    <url>https://repository.apache.org/service/local/staging/deploy/maven2</url>
+    </repository>
+    <snapshotRepository>
+    <id>apache.snapshots.https</id>
+    <name>Apache Development Snapshot Repository</name>
+    <url>https://repository.apache.org/content/repositories/snapshots</url>
+    <uniqueVersion>false</uniqueVersion>
+    </snapshotRepository>
+    </distributionManagement> -->
+    
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -500,6 +454,21 @@
                 <version>${antlr.version}</version>
             </dependency>
             <dependency>
+                <groupId>asm</groupId>
+                <artifactId>asm</artifactId>
+                <version>${asm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cglib</groupId>
+                <artifactId>cglib</artifactId>
+                <version>${cglib.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.sf.ehcache</groupId>
+                <artifactId>ehcache</artifactId>
+                <version>${ehcache.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.ws.commons.axiom</groupId>
                 <artifactId>axiom-api</artifactId>
                 <version>${axiom.version}</version>
@@ -509,7 +478,7 @@
                 <artifactId>axiom-impl</artifactId>
                 <version>${axiom.version}</version>
             </dependency>
-	    <dependency>
+            <dependency>
                 <groupId>org.apache.ws.commons.axiom</groupId>
                 <artifactId>axiom-dom</artifactId>
                 <version>${axiom.version}</version>
@@ -523,6 +492,11 @@
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>${commons.codec.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>${commons.beanutils.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-fileupload</groupId>
@@ -559,11 +533,11 @@
                 <artifactId>commons-dbcp</artifactId>
                 <version>${commons.dbcp.version}</version>
             </dependency>
-	    <dependency>
-		<groupId>commons-primitives</groupId>
-		<artifactId>commons-primitives</artifactId>
-	        <version>${commons.primitives.version}</version>
-	    </dependency>
+            <dependency>
+                <groupId>commons-primitives</groupId>
+                <artifactId>commons-primitives</artifactId>
+                <version>${commons.primitives.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.geronimo.specs</groupId>
                 <artifactId>geronimo-jta_1.1_spec</artifactId>
@@ -596,11 +570,6 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.geronimo.specs</groupId>
-                <artifactId>geronimo-activation_1.1_spec</artifactId>
-                <version>${geronimo.activation.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.specs</groupId>
                 <artifactId>geronimo-annotation_1.0_spec</artifactId>
                 <version>${geronimo.annotation.version}</version>
             </dependency>
@@ -614,7 +583,28 @@
                 <artifactId>geronimo-stax-api_1.0_spec</artifactId>
                 <version>${geronimo.stax-api.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-servlet_2.4_spec</artifactId>
+                <version>${geronimo.servlet.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.apache.karaf.shell</groupId>
+                <artifactId>org.apache.karaf.shell.console</artifactId>
+                <version>2.2.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.gogo.command</artifactId>
+                <version>0.6.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.gogo.runtime</artifactId>
+                <version>0.6.1</version>
+            </dependency>
+            
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpcore</artifactId>
@@ -701,26 +691,36 @@
                 <artifactId>mail</artifactId>
                 <version>${javax.mail.version}</version>
             </dependency>
-	    <dependency>
-	      <groupId>org.apache.openjpa</groupId>
-	      <artifactId>openjpa</artifactId>
-	      <version>${openjpa.version}</version>
-	    </dependency>
-	    <dependency>
-	      <groupId>net.sourceforge.serp</groupId>
-	      <artifactId>serp</artifactId>
-	      <version>${serp.version}</version>
-	    </dependency>
-	    <dependency>
-	      <groupId>dom4j</groupId>
-	      <artifactId>dom4j</artifactId>
-	      <version>${dom4j.version}</version>
-	    </dependency>
-	    <dependency>
-	      <groupId>xml-apis</groupId>
-	      <artifactId>xml-apis</artifactId>
-	      <version>${xml-apis.version}</version>
-	    </dependency>
+            <dependency>
+                <groupId>org.apache.openjpa</groupId>
+                <artifactId>openjpa</artifactId>
+                <version>${openjpa.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.sourceforge.serp</groupId>
+                <artifactId>serp</artifactId>
+                <version>${serp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dom4j</groupId>
+                <artifactId>dom4j</artifactId>
+                <version>${dom4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>xml-apis</groupId>
+                <artifactId>xml-apis</artifactId>
+                <version>${xml-apis.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.schema</groupId>
+                <artifactId>XmlSchema</artifactId>
+                <version>${xml-schema.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>stax</groupId>
+                <artifactId>stax-api</artifactId>
+                <version>${stax-api.version}</version>
+            </dependency>
             <dependency>
                 <groupId>commons-pool</groupId>
                 <artifactId>commons-pool</artifactId>
@@ -731,28 +731,34 @@
                         <artifactId>xerces</artifactId>
                         <groupId>xerces</groupId>
                     </exclusion>
-
+                    
                     <exclusion>
                         <artifactId>xml-apis</artifactId>
                         <groupId>xml-apis</groupId>
                     </exclusion>
                 </exclusions>
             </dependency>
-
+            
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate</artifactId>
                 <version>${hibernate.version}</version>
                 <!--
                 <exclusions>
-                    <exclusion>
-                        <artifactId>jta</artifactId>
-                        <groupId>javax.transaction</groupId>
-                    </exclusion>
+                <exclusion>
+                <artifactId>jta</artifactId>
+                <groupId>javax.transaction</groupId>
+                </exclusion>
                 </exclusions>
                 -->
             </dependency>
- 
+            
+            <dependency>
+                <groupId>javassist</groupId>
+                <artifactId>javassist</artifactId>
+                <version>3.9.0.GA</version>
+            </dependency>
+            
             <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
@@ -776,26 +782,50 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-
+            
             <dependency>
-                <groupId>net.sf.saxon</groupId>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${apache.logging.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${apache.logging.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j-impl</artifactId>
+                <version>${apache.logging.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-web</artifactId>
+                <version>${apache.logging.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>net.sourceforge.saxon</groupId>
                 <artifactId>saxon</artifactId>
                 <version>${saxon.version}</version>
             </dependency>
             <dependency>
-                <groupId>net.sf.saxon</groupId>
-                <artifactId>saxon-dom</artifactId>
+                <groupId>net.sourceforge.saxon</groupId>
+                <artifactId>saxon</artifactId>
                 <version>${saxon.version}</version>
+                <classifier>xpath</classifier>
             </dependency>
             <dependency>
-                <groupId>net.sf.saxon</groupId>
-                <artifactId>saxon-xpath</artifactId>
+                <groupId>net.sourceforge.saxon</groupId>
+                <artifactId>saxon</artifactId>
                 <version>${saxon.version}</version>
+                <classifier>dom</classifier>
             </dependency>
             <dependency>
-                <groupId>net.sf.saxon</groupId>
-                <artifactId>saxon-xqj</artifactId>
+                <groupId>net.sourceforge.saxon</groupId>
+                <artifactId>saxon</artifactId>
                 <version>${saxon.version}</version>
+                <classifier>xqj</classifier>
             </dependency>
             <dependency>
                 <groupId>xerces</groupId>
@@ -817,7 +847,28 @@
                 <artifactId>xmlbeans</artifactId>
                 <version>${xmlbeans.version}</version>
             </dependency>
-
+            
+            <dependency>
+                <groupId>org.apache.xbean</groupId>
+                <artifactId>xbean-kernel</artifactId>
+                <version>3.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.xbean</groupId>
+                <artifactId>xbean-server</artifactId>
+                <version>3.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.xbean</groupId>
+                <artifactId>xbean-spring</artifactId>
+                <version>3.4.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.xbean</groupId>
+                <artifactId>xbean-classloader</artifactId>
+                <version>3.4.3</version>
+            </dependency>
+            
             <dependency>
                 <groupId>com.thoughtworks.xstream</groupId>
                 <artifactId>xstream</artifactId>
@@ -833,7 +884,7 @@
                 <artifactId>apache-activemq</artifactId>
                 <version>${activemq.version}</version>
             </dependency>
-
+            
             <dependency>
                 <groupId>org.apache.derby</groupId>
                 <artifactId>derby</artifactId>
@@ -845,11 +896,11 @@
                 <version>${derby.version}</version>
             </dependency>
             <dependency>
-                <groupId>hsqldb</groupId>
+                <groupId>org.hsqldb</groupId>
                 <artifactId>hsqldb</artifactId>
                 <version>${hsqldb.version}</version>
             </dependency>
-
+            
             <!-- AXIS2 dependencies -->
             <dependency>
                 <groupId>org.apache.axis2</groupId>
@@ -922,24 +973,109 @@
                 <version>${axis2.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-transports</artifactId>
+                <version>1.0-i6</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-transport-http</artifactId>
+                <version>${axis2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-transport-local</artifactId>
+                <version>${axis2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-transport-tcp</artifactId>
+                <version>1.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-transport-jms</artifactId>
+                <version>1.0.0</version>
+            </dependency>
+            <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>jcl104-over-slf4j</artifactId>
+                <artifactId>jcl-over-slf4j</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>tranql</groupId>
                 <artifactId>tranql-connector</artifactId>
+                <version>${tranql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tranql</groupId>
+                <artifactId>tranql-connector-derby-common</artifactId>
+                <version>${tranql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ws.security</groupId>
+                <artifactId>wss4j</artifactId>
+                <version>1.6.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.santuario</groupId>
+                <artifactId>xmlsec</artifactId>
+                <version>1.4.6</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>mex</artifactId>
+                <version>${axis2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>opensaml1</artifactId>
                 <version>1.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>opensaml</artifactId>
+                <version>2.5.1-1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>openws</artifactId>
+                <version>1.4.2-1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>xmltooling</artifactId>
+                <version>1.3.2-1</version>
+            </dependency>
+            <dependency>
+                <groupId>bouncycastle</groupId>
+                <artifactId>bcprov-jdk15</artifactId>
+                <version>140</version>
+            </dependency>
+            <dependency>
+                <groupId>velocity</groupId>
+                <artifactId>velocity</artifactId>
+                <version>1.5</version>
+            </dependency>
+            <dependency>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>2.5</version>
+            </dependency>
+            <dependency>
+                <groupId>org.owasp.esapi</groupId>
+                <artifactId>esapi</artifactId>
+                <version>2.0GA</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.james</groupId>
+                <artifactId>apache-mime4j-core</artifactId>
+                <version>0.7.2</version>
             </dependency>
             
             <dependency>
@@ -949,5 +1085,5 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
+    
 </project>

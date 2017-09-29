@@ -26,7 +26,7 @@
     <parent>
         <groupId>org.apache.ode</groupId>
         <artifactId>ode</artifactId>
-        <version>1.3.5</version>
+        <version>1.3.7</version>
     </parent>
 
     <dependencies>
@@ -107,8 +107,8 @@
           <artifactId>geronimo-jta_1.1_spec</artifactId>
         </dependency>
         <dependency>
-          <groupId>org.apache.geronimo.specs</groupId>
-          <artifactId>geronimo-stax-api_1.0_spec</artifactId>
+          <groupId>stax</groupId>
+          <artifactId>stax-api</artifactId>
         </dependency>
         <dependency>
           <groupId>javax.persistence</groupId>
@@ -123,20 +123,23 @@
           <artifactId>xmlbeans</artifactId>
         </dependency>
         <dependency>
-          <groupId>net.sf.saxon</groupId>
+          <groupId>net.sourceforge.saxon</groupId>
           <artifactId>saxon</artifactId>
         </dependency>
         <dependency>
-          <groupId>net.sf.saxon</groupId>
-          <artifactId>saxon-xpath</artifactId>
+            <groupId>net.sourceforge.saxon</groupId>
+            <artifactId>saxon</artifactId>
+            <classifier>xpath</classifier>
         </dependency>
         <dependency>
-          <groupId>net.sf.saxon</groupId>
-          <artifactId>saxon-dom</artifactId>
+            <groupId>net.sourceforge.saxon</groupId>
+            <artifactId>saxon</artifactId>
+            <classifier>dom</classifier>
         </dependency>
         <dependency>
-          <groupId>net.sf.saxon</groupId>
-          <artifactId>saxon-xqj</artifactId>
+            <groupId>net.sourceforge.saxon</groupId>
+            <artifactId>saxon</artifactId>
+            <classifier>xqj</classifier>
         </dependency>
         <dependency>
           <groupId>xerces</groupId>
