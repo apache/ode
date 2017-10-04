@@ -23,7 +23,6 @@ SET HOMEDIR=/home/%CONTAINER_USERNAME%
 SET GROUP_ID=$(id -g)
 SET USER_ID=$(id -u)
 
-REM SET PWD=c:/TraDE/simtech/branches/hahnml/ode-OpenTOSCA
 SET PWD=%CD:\=/%
 
 SET CREATE_USER_COMMAND=groupadd -f -g %GROUP_ID% %CONTAINER_GROUPNAME% ^&^& useradd -o -u %USER_ID% -g %CONTAINER_GROUPNAME% %CONTAINER_USERNAME% ^&^& mkdir --parent %HOMEDIR% ^&^& chown -R %CONTAINER_USERNAME%:%CONTAINER_GROUPNAME% %HOMEDIR% 

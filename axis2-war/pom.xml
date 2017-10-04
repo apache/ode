@@ -84,6 +84,20 @@
             <groupId>org.apache.ode</groupId>
             <artifactId>ode-axis2</artifactId>
         </dependency>
+	<dependency>
+	    <groupId>org.apache.ode</groupId>
+	    <artifactId>ode-console</artifactId>
+	    <version>0.1.0</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.tuckey</groupId>
+	    <artifactId>urlrewritefilter</artifactId>
+	    <version>4.0.4</version>
+	</dependency>
+	<dependency>
+            <groupId>org.opentosca.bpel4restlight</groupId>
+            <artifactId>bpel-rest-extensions</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-fastinfoset</artifactId>
@@ -98,17 +112,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.axis2</groupId>
-            <artifactId>axis2-jaxws-api</artifactId>
-            <version>${axis2.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-json</artifactId>
-            <version>${axis2.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.axis2</groupId>
-            <artifactId>axis2-jws-api</artifactId>
             <version>${axis2.version}</version>
         </dependency>
         <dependency>
@@ -119,6 +123,33 @@
             <groupId>org.apache.axis2</groupId>
             <artifactId>axis2-spring</artifactId>
             <version>${axis2.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-beans</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-context</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-web</artifactId>
+                    </exclusion>
+                </exclusions>
+        </dependency>
+		<dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-transport-tcp</artifactId>
+        </dependency>
+	<dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-transports</artifactId>
+            <version>1.0-i6</version>
         </dependency>
         <dependency>
             <groupId>xerces</groupId>
@@ -144,6 +175,21 @@
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml</artifactId>
         </dependency>
+	<dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml1</artifactId>
+            <version>1.1</version>
+        </dependency>
+	<dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>openws</artifactId>
+            <version>1.4.2-1</version>
+        </dependency>
+	<dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>xmltooling</artifactId>
+            <version>1.3.2-1</version>
+        </dependency>
         <dependency>
             <groupId>bouncycastle</groupId>
             <artifactId>bcprov-jdk15</artifactId>
@@ -165,38 +211,103 @@
             <groupId>xml-apis</groupId>
             <artifactId>xml-apis</artifactId>
         </dependency>
-        <!--
+	<dependency>
+	    <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>annogen</groupId>
+            <artifactId>annogen</artifactId>
+        </dependency>
+	<dependency>
+            <groupId>org.apache.james</groupId>
+            <artifactId>apache-mime4j-core</artifactId>
+            <version>0.7.2</version>
+        </dependency>
+	<dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-jibx</artifactId>
+        </dependency>
+	<dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-xmlbeans</artifactId>
+        </dependency>
+	<dependency>
+            <groupId>org.apache.xmlbeans</groupId>
+            <artifactId>xmlbeans</artifactId>
+        </dependency>
+        
         <dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rampart</artifactId>
             <type>mar</type>
-            <version>${rampart.version}</version>
+            <version>${axis2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.rampart</groupId>
             <artifactId>rahas</artifactId>
             <type>mar</type>
-            <version>${rampart.version}</version>
+            <version>${axis2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>addressing</artifactId>
             <type>mar</type>
-            <version>${rampart.version}</version>
+            <version>${axis2.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>mex</artifactId>
             <type>mar</type>
-            <version>${mex.version}</version>
+            <version>${axis2.version}</version>
         </dependency>
-        -->
+
+	<dependency>
+            <groupId>org.owasp.esapi</groupId>
+            <artifactId>esapi</artifactId>
+            <version>2.0GA</version>
+        </dependency>
+
+	<dependency>
+            <groupId>net.sourceforge.saxon</groupId>
+            <artifactId>saxon</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.saxon</groupId>
+            <artifactId>saxon</artifactId>
+            <classifier>xpath</classifier>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.saxon</groupId>
+            <artifactId>saxon</artifactId>
+            <classifier>dom</classifier>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.saxon</groupId>
+            <artifactId>saxon</artifactId>
+            <classifier>xqj</classifier>
+        </dependency>
+
+	<dependency>
+            <groupId>stax</groupId>
+            <artifactId>stax-api</artifactId>
+        </dependency>
+	<dependency>
+            <groupId>velocity</groupId>
+            <artifactId>velocity</artifactId>
+            <version>1.5</version>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.axis2</groupId>
             <artifactId>mex</artifactId>
             <classifier>impl</classifier>
             <version>${axis2.version}</version>
         </dependency>
+	<dependency>
+        	<groupId>backport-util-concurrent</groupId>
+        	<artifactId>backport-util-concurrent</artifactId>
+        </dependency> 
         <dependency>
           <groupId>org.testng</groupId>
           <artifactId>testng</artifactId>
@@ -222,12 +333,49 @@
           <version>${jetty.version}</version>
 	      <scope>test</scope>
         </dependency>      
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-web</artifactId>
+        </dependency>
     </dependencies>
 
 
    <build>
+     <resources>
+        <resource>
+          <directory>src/main/webapp/WEB-INF</directory>
+          <filtering>true</filtering>
+        </resource>
+     </resources>
      <plugins>
-       <plugin>
+       <!-- <plugin>
          <groupId>org.apache.maven.plugins</groupId>
          <artifactId>maven-dependency-plugin</artifactId>
          <executions>
@@ -254,8 +402,22 @@
              </configuration>
            </execution>
          </executions>
-        </plugin>
+        </plugin> -->
 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+           <execution>
+              <id>filter</id>
+              <phase>generate-resources</phase>
+              <goals>
+                <goal>resources</goal>
+              </goals>
+           </execution>
+        </executions>
+      </plugin>
+    
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>

@@ -32,13 +32,13 @@
     <rule>
         <note>
             The rule means that requests to /ode will be redirected to
-            /ode/webjars/ode-console/${version} the url will be rewritten.
+            /ode/webjars/ode-console/${ode-console.version} the url will be rewritten.
         </note>
         <condition type="request-uri" operator="notequal">/*/webjars/**</condition>
         <condition type="request-uri" operator="notequal">/*/processes/**</condition>
         <condition type="request-uri" operator="notequal">/*/services/**</condition>
         <condition type="request-uri" operator="notequal">/*/deployment/**</condition>
         <from>/**</from>
-        <to>/webjars/ode-console/${version}/$1</to>
+        <to>/webjars/ode-console/${ode-console.version}/$1</to>
     </rule>
 </urlrewrite>

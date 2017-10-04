@@ -25,7 +25,6 @@
   <version>1.0.0</version>
   
   <properties>
-      <jbi-maven-plugin-version>4.0</jbi-maven-plugin-version>
       <processRevision>1</processRevision>
   </properties>
 

@@ -128,7 +128,7 @@ define "ode" do
     build do
         cp _("src/main/webapp/WEB-INF/urlrewrite.xml"), _(:target)
         text = File.read(_(:target, "urlrewrite.xml"))
-        changed_text = text.gsub(/\$\{version\}/, artifact(ODE_WEB_CONSOLE).version)
+        changed_text = text.gsub(/\$\{ode-console.version\}/, artifact(ODE_WEB_CONSOLE).version)
         File.open(_(:target, "urlrewrite.xml"),'w') {|f| f.puts changed_text}
         package(:war).path("WEB-INF").include(_(:target, "urlrewrite.xml"))
     end
