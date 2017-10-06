@@ -43,6 +43,6 @@ CMD dockerize -template ${CATALINA_HOME}/conf/tomcat-users.xml.tpl:${CATALINA_HO
 #
 # Manually build by running:
 #
-#   docker build -t opentosca/engine-plan-ode .
+#   docker build -f Dockerfile-mvn -t opentosca/engine-plan-ode .
 #
 # 

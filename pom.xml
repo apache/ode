@@ -44,10 +44,10 @@
         <annogen.version>0.1.0</annogen.version>
         <antlr.version>2.7.7</antlr.version>
         <asm.version>3.3.1</asm.version>
-        <axiom.version>1.2.10</axiom.version>
+        <axiom.version>1.2.13</axiom.version>
         <axis2.version>1.6.2</axis2.version>
         <rampart.version>1.6.2</rampart.version>
-        <commons.codec.version>1.6</commons.codec.version>
+        <commons.codec.version>1.3</commons.codec.version>
         <backport.concurrent.version>3.1</backport.concurrent.version>
         <cglib.version>2.2</cglib.version>
         <commons.fileupload.version>1.2</commons.fileupload.version>
@@ -60,17 +60,17 @@
         <commons.primitives.version>1.0</commons.primitives.version>
         <commons.dbcp.version>1.2.1</commons.dbcp.version>
         <commons.beanutils.version>1.8.2</commons.beanutils.version>
-        <httpcomponents.version>4.3.1</httpcomponents.version>
+        <httpcomponents.version>4.0</httpcomponents.version>
         <ehcache.version>1.2.3</ehcache.version>
         <felix.osgi.version>1.4.0</felix.osgi.version>
         <jaxb-api.version>2.1</jaxb-api.version>
         <jaxb.version>2.1.6</jaxb.version>
-        <jaxen.version>1.1.1</jaxen.version>
+        <jaxen.version>1.1.4</jaxen.version>
         <jettison.version>1.0-RC2</jettison.version>
-        <jibx.version>1.1.5</jibx.version>
-        <neethi.version>2.0.4</neethi.version>
-        <woden.version>1.0M8</woden.version>
-        <wsdl4j.version>1.6.2</wsdl4j.version>
+        <jibx.version>1.2.1</jibx.version>
+        <neethi.version>3.0.2</neethi.version>
+        <woden.version>1.0M9</woden.version>
+        <wsdl4j.version>1.6.3</wsdl4j.version>
         <woodstox.version>3.2.4</woodstox.version>
         <javax.mail.version>1.4</javax.mail.version>
         <hibernate.version>3.3.2.GA</hibernate.version>
@@ -81,7 +81,7 @@
         <geronimo.version>2.0.1</geronimo.version>
         <geronimo.activation.version>1.0.1</geronimo.activation.version>
         <geronimo.annotation.version>1.1</geronimo.annotation.version>
-        <geronimo.javamail.version>1.2</geronimo.javamail.version>
+        <geronimo.javamail.version>1.7.1</geronimo.javamail.version>
         <geronimo.stax-api.version>1.0.1</geronimo.stax-api.version>
         <geronimo.specs.jta.version>1.1</geronimo.specs.jta.version>
         <geronimo.specs.ejb.version>1.1</geronimo.specs.ejb.version>
@@ -94,17 +94,17 @@
         <saxon.version>9.1.0.8</saxon.version>
         <servicemix.core.version>3.3</servicemix.core.version>
         <slf4j.version>1.7.12</slf4j.version>
-        <stax-api.version>1.0</stax-api.version>
+        <stax-api.version>1.0.1</stax-api.version>
         <xerces.version>2.11.0</xerces.version>
         <xmlresolver.version>1.2</xmlresolver.version>
-        <xmlbeans.version>2.3.0</xmlbeans.version>
+        <xmlbeans.version>2.6.0</xmlbeans.version>
         <xstream.version>1.2</xstream.version>
         <junit.version>4.4</junit.version>
         <hsqldb.version>2.3.3</hsqldb.version>
         <persistence-api.version>1.0</persistence-api.version>
         <xalan.version>2.7.1</xalan.version>
         <ant.version>1.6.5</ant.version>
-        <openjpa.version>1.2.1</openjpa.version>
+        <openjpa.version>1.2.3</openjpa.version>
         <serp.version>1.13.1</serp.version>
         <dom4j.version>1.6.1</dom4j.version>
         <derby.version>10.5.3.0_1</derby.version>
@@ -112,12 +112,12 @@
         <hamcrest.version>1.1</hamcrest.version>
         <xml.parser.version>2.6.2</xml.parser.version>
         <activemq.version>4.1.1</activemq.version>
-        <xml-apis.version>1.3.04</xml-apis.version>
+        <xml-apis.version>1.4.01</xml-apis.version>
         <xml-schema.version>1.4.7</xml-schema.version>
         <servicemix.nmr.version>1.1.0-SNAPSHOT</servicemix.nmr.version>
         <servicemix.component.version>2008.01</servicemix.component.version>
         <servicemix.utils.version>1.0.0</servicemix.utils.version>
-        <h2.version>1.1.117</h2.version>
+        <h2.version>1.3.176</h2.version>
         <bpel4restlight.version>1.0.0</bpel4restlight.version>
         
         <tranql.version>1.1</tranql.version>

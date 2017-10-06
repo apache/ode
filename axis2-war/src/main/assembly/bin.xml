@@ -191,7 +191,6 @@
 	<include>org.apache.httpcomponents:httpcore-nio</include>
 	<include>xml-apis:xml-apis</include>
 	<include>javax.mail:mail</include>
-	<include>axion:axion</include>    
 	<include>org.springframework:spring</include>
         <include>joda-time:joda-time</include>
         <include>org.apache.james:apache-mime4j-core</include>

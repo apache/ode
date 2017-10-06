@@ -209,7 +209,7 @@
                         </goals>
                         <configuration>
                             <driver>org.apache.derby.jdbc.EmbeddedDriver</driver>
-                            <url>jdbc:derby:${basedir}/target/derby/jpadb;create=true</url>
+                            <url>jdbc:derby:${basedir}/target/derby/derby-jpadb;create=true</url>
                             <username>sa</username>
                             <password />
                             <autocommit>true</autocommit>
