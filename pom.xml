@@ -3,7 +3,7 @@
     <groupId>org.apache.ode</groupId>
     <artifactId>ode</artifactId>
     <name>ODE</name>
-    
+
     <packaging>pom</packaging>
     <modelVersion>4.0.0</modelVersion>
     <version>1.3.7</version>
@@ -19,22 +19,22 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-    
+
     <scm>
         <connection>scm:svn:http://svn.apache.org/repos/asf/ode/tags/ode-1.3.7</connection>
         <developerConnection>scm:svn:https://svn.apache.org/repos/asf/ode/tags/ode-1.3.7</developerConnection>
         <url>http://svn.apache.org/repos/asf/ode/tags/ode-1.3.7</url>
     </scm>
-    
+
     <organization>
         <name>Apache Software Foundation</name>
         <url>http://www.apache.org</url>
     </organization>
-    
+
     <prerequisites>
         <maven>2.2.1</maven>
     </prerequisites>
-    
+
     <properties>
         <ode.version>1.3.7</ode.version>
         <ode-console.version>0.1.0</ode-console.version>
@@ -119,13 +119,12 @@
         <servicemix.utils.version>1.0.0</servicemix.utils.version>
         <h2.version>1.3.176</h2.version>
         <bpel4restlight.version>1.0.0</bpel4restlight.version>
-        
         <tranql.version>1.1</tranql.version>
-        
         <testng.version>5.8</testng.version>
+        <javassist.version>3.9.0.GA</javassist.version>
     </properties>
-    
-    
+
+
     <modules>
         <module>agents</module>
         <module>utils</module>
@@ -163,7 +162,7 @@
         <module>axis2-war</module>
         <module>distro</module>
     </modules>
-    
+
     <build>
         <pluginManagement>
             <plugins>
@@ -172,7 +171,7 @@
                     <artifactId>maven-assembly-plugin</artifactId>
                     <version>2.2-beta-5</version>
                 </plugin>
-                
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -182,14 +181,14 @@
                         <target>1.5</target>
                     </configuration>
                 </plugin>
-                
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.5</version>
                 </plugin>
-                
-                
+
+
                 <!--|
                 | This version uses xjavadoc-1.1-j5, which doesn't
                 | complain on Java 5.0 constructs.
@@ -207,13 +206,13 @@
                         </dependency>
                     </dependencies>
                 </plugin>
-                
+
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>xmlbeans-maven-plugin</artifactId>
                     <version>2.3.0</version>
                 </plugin>
-                
+
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>sql-maven-plugin</artifactId>
@@ -228,10 +227,10 @@
                             <groupId>org.apache.derby</groupId>
                             <artifactId>derbytools</artifactId>
                             <version>${derby.version}</version>
-                        </dependency> 
+                        </dependency>
                     </dependencies>
                 </plugin>
-                
+
                 <!-- Allows direct usage of the javadoc:javadoc goal. -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -245,9 +244,9 @@
             </plugins>
         </pluginManagement>
     </build>
-    
-    
-    
+
+
+
     <!--|
     | List of repositories for all the various dependencies,
     | and Maven plugins.
@@ -270,7 +269,7 @@
             <url>http://people.apache.org/~vanto/m2/</url>
         </repository>
     </repositories>
-    
+
     <!-- |
     | Repository for distributing new releases.
     |
@@ -288,9 +287,16 @@
     <uniqueVersion>false</uniqueVersion>
     </snapshotRepository>
     </distributionManagement> -->
-    
+
     <dependencyManagement>
         <dependencies>
+            <!-- OpenTOSCA Extension -->
+            <dependency>
+                <groupId>org.opentosca.bpel4restlight</groupId>
+                <artifactId>bpel-rest-extensions</artifactId>
+                <version>${ode.version}</version>
+            </dependency>
+            <!-- ODE Core -->
             <dependency>
                 <groupId>org.apache.ode</groupId>
                 <artifactId>ode-agents</artifactId>
@@ -592,7 +598,7 @@
                 <artifactId>geronimo-servlet_2.4_spec</artifactId>
                 <version>${geronimo.servlet.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.apache.karaf.shell</groupId>
                 <artifactId>org.apache.karaf.shell.console</artifactId>
@@ -619,7 +625,7 @@
 	    	<artifactId>urlrewritefilter</artifactId>
 	    	<version>4.0.4</version>
 	    </dependency>
-            
+
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpcore</artifactId>
@@ -746,14 +752,14 @@
                         <artifactId>xerces</artifactId>
                         <groupId>xerces</groupId>
                     </exclusion>
-                    
+
                     <exclusion>
                         <artifactId>xml-apis</artifactId>
                         <groupId>xml-apis</groupId>
                     </exclusion>
                 </exclusions>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
@@ -767,13 +773,7 @@
                 </exclusions>
                 -->
             </dependency>
-            
-            <dependency>
-                <groupId>javassist</groupId>
-                <artifactId>javassist</artifactId>
-                <version>3.9.0.GA</version>
-            </dependency>
-            
+
             <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
@@ -797,7 +797,7 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-api</artifactId>
@@ -818,7 +818,7 @@
                 <artifactId>log4j-web</artifactId>
                 <version>${apache.logging.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>net.sourceforge.saxon</groupId>
                 <artifactId>saxon</artifactId>
@@ -862,7 +862,7 @@
                 <artifactId>xmlbeans</artifactId>
                 <version>${xmlbeans.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.apache.xbean</groupId>
                 <artifactId>xbean-kernel</artifactId>
@@ -901,7 +901,7 @@
                 <artifactId>xbean-classloader</artifactId>
                 <version>3.4.3</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>com.thoughtworks.xstream</groupId>
                 <artifactId>xstream</artifactId>
@@ -927,7 +927,7 @@
                 <artifactId>apache-activemq</artifactId>
                 <version>${activemq.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.apache.derby</groupId>
                 <artifactId>derby</artifactId>
@@ -943,13 +943,13 @@
                 <artifactId>hsqldb</artifactId>
                 <version>${hsqldb.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>com.h2database</groupId>
                 <artifactId>h2</artifactId>
                 <version>${h2.version}</version>
             </dependency>
-            
+
             <!-- AXIS2 dependencies -->
             <dependency>
                 <groupId>org.apache.axis2</groupId>
@@ -1126,13 +1126,7 @@
                 <artifactId>apache-mime4j-core</artifactId>
                 <version>0.7.2</version>
             </dependency>
-            
-            <dependency>
-                <groupId>org.opentosca.bpel4restlight</groupId>
-                <artifactId>bpel-rest-extensions</artifactId>
-                <version>${bpel4restlight.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
-    
+
 </project>
