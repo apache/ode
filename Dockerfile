@@ -1,13 +1,20 @@
 FROM sathwik/apache-buildr:latest-jruby-jdk7 as builder
 
-ENV JAVA_OPTS="-Xmx1024M -XX:MaxPermSize=512M" BUILDR_ARGS="clean package test=no JAVADOC=off"
+ENV JAVA_OPTS="-Xmx1024M -XX:MaxPermSize=512M"
+ENV BUILDR_ARGS="clean package test=no JAVADOC=off"
 
-RUN mkdir /build
+RUN apt-get update -qq && apt-get install -qqy \
+        unzip \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY . /workspace
 
 RUN jruby -S bundler install --gemfile=/workspace/Gemfile \
-    && buildr $BUILDR_ARGS && cp /workspace/axis2-war/target/ode-axis2-war-1.3.7.war /build/ode.war
+    && buildr $BUILDR_ARGS \
+    && mkdir /build \
+    && cp /workspace/axis2-war/target/ode-axis2-war-1.3.7.war /build/ode.war \
+    && unzip /build/ode.war -d /build/ode
+
 
 FROM tomcat:8.5-jre8
 LABEL maintainer "Johannes Wettinger <jowettinger@gmail.com>, Michael Wurster <miwurster@gmail.com>, Michael Hahn <mhahn.dev@gmail.com>"
@@ -23,17 +30,11 @@ RUN rm /dev/random && ln -s /dev/urandom /dev/random \
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
-RUN apt-get update -qq && apt-get install -qqy \
-        unzip \
-    && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /build/ode ${CATALINA_HOME}/webapps/ode
 
 ADD tomcat-users.xml.tpl ${CATALINA_HOME}/conf/tomcat-users.xml.tpl
 ADD manager.xml ${CATALINA_HOME}/conf/Catalina/localhost/manager.xml
 ADD server.xml.tpl ${CATALINA_HOME}/conf/server.xml.tpl
-
-COPY --from=builder /build/ode.war ${CATALINA_HOME}/webapps
-RUN unzip ${CATALINA_HOME}/webapps/ode.war -d ${CATALINA_HOME}/webapps/ode
-
 ADD axis2.xml.tpl ${CATALINA_HOME}/webapps/ode/WEB-INF/conf/axis2.xml.tpl
 
 EXPOSE 9763
@@ -46,6 +47,6 @@ CMD dockerize -template ${CATALINA_HOME}/conf/tomcat-users.xml.tpl:${CATALINA_HO
 #
 # Manually build by running:
 #
-#   docker build -t opentosca/engine-plan-ode .
+#   docker build -t opentosca/ode:local .
+#   docker run -it opentosca/ode:local
 #
-# 
