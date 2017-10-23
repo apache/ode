@@ -96,7 +96,7 @@ done
 ODE_SERVER_JAVAOPTS="$JAVA_OPTS \
 -Dode.server.home=$ODE_SERVER_HOME \
 -Dderby.system.home=$ODE_SERVER_HOME \
--Djava.naming.factory.initial=org.apache.openejb.core.LocalInitialContextFactory \
+-Djava.naming.factory.initial=org.apache.openejb.core.OpenEJBInitialContextFactory \
 -Dorg.jboss.logging.provider=slf4j"
 
 

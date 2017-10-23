@@ -72,8 +72,8 @@ DERBY_TOOLS         = "org.apache.derby:derbytools:jar:10.5.3.0_1"
 DOM4J               = "dom4j:dom4j:jar:1.6.1"
 GERONIMO            = struct(
   :kernel           =>"org.apache.geronimo.modules:geronimo-kernel:jar:2.0.1",
-  :transaction      =>"org.apache.geronimo.components:geronimo-transaction:jar:3.1.3",
-  :connector        =>"org.apache.geronimo.components:geronimo-connector:jar:3.1.3"
+  :transaction      =>"org.apache.geronimo.components:geronimo-transaction:jar:3.1.4",
+  :connector        =>"org.apache.geronimo.components:geronimo-connector:jar:3.1.4"
 )
 HIBERNATE           = ["org.hibernate:hibernate-core:jar:4.3.11.Final", "org.javassist:javassist:jar:3.18.1-GA", "antlr:antlr:jar:2.7.7",
                         "dom4j:dom4j:jar:1.6.1", "org.hibernate.common:hibernate-commons-annotations:jar:4.0.5.Final", 
@@ -171,7 +171,7 @@ TOMEE = struct(
                     "tomee-jdbc",
                     "tomee-juli",
                     "tomee-util",
-                    :under=>"org.apache.tomee", :version=>"7.0.1"
+                    :under=>"org.apache.tomee", :version=>"7.0.4"
                     )
                  ],
     :openejb => [
@@ -188,9 +188,8 @@ TOMEE = struct(
                       "openejb-jpa-integration",
                       "openejb-client",
                       "mbean-annotation-api",
-                      :under=>"org.apache.tomee", :version=>"7.0.1"
+                      :under=>"org.apache.tomee", :version=>"7.0.4"
                     ),
-                      "org.apache.openejb.patch:openejb-jstl:jar:1.2",
                       "org.apache.openejb.shade:quartz-openejb-shade:jar:2.2.1"
                   ],
     :tomcat => [
@@ -213,18 +212,18 @@ TOMEE = struct(
                       "tomcat-jasper-el",
                       "tomcat-websocket",
                       "tomcat-juli",
-                      :under=>"org.apache.tomcat", :version=>"8.5.3"
+                      :under=>"org.apache.tomcat", :version=>"8.5.23"
                     )
                ],
-    :javaee_api => "org.apache.tomee:javaee-api:jar:tomcat:7.0",
-    :commons => ["org.apache.commons:commons-lang3:jar:3.4",
+    :javaee_api => "org.apache.tomee:javaee-api:jar:7.0-1",
+    :commons => ["org.apache.commons:commons-lang3:jar:3.5",
                   "org.apache.commons:commons-dbcp2:jar:2.1",
                   "org.apache.commons:commons-pool2:jar:2.3"
                 ],
     :commons_cli => "commons-cli:commons-cli:jar:1.2",
     :commons_collections => "commons-collections:commons-collections:jar:3.2.2",
-    :commons_beanutils => "commons-beanutils:commons-beanutils-core:jar:1.8.3",
-    :commons_lang => "commons-lang:commons-lang:jar:2.4",
+    :commons_beanutils => "commons-beanutils:commons-beanutils:jar:1.9.3",
+    :commons_lang => "commons-lang:commons-lang:jar:2.6",
     :sxc => [
               group(
                 "sxc-jaxb-core",
@@ -239,14 +238,14 @@ TOMEE = struct(
                     "activemq-client",
                     "activemq-openwire-legacy",
                     "activemq-jdbc-store",
-                    :under=>"org.apache.activemq", :version=>"5.13.3"
+                    :under=>"org.apache.activemq", :version=>"5.14.5"
                   ),
                     "org.apache.activemq.protobuf:activemq-protobuf:jar:1.1"
                   ],
-      :geronimo => ["org.apache.geronimo.components:geronimo-transaction:jar:3.1.3",
+      :geronimo => ["org.apache.geronimo.components:geronimo-transaction:jar:3.1.4",
                     "org.apache.geronimo.javamail:geronimo-javamail_1.4_mail:jar:1.9.0-alpha-2",
-                    "org.apache.geronimo.components:geronimo-connector:jar:3.1.3",
-                    ],
+                    "org.apache.geronimo.components:geronimo-connector:jar:3.1.4",
+                   ],
       :howl => "org.objectweb.howl:howl:jar:1.0.1-1",
       :xbean => group(
                   "xbean-asm5-shaded",
@@ -266,18 +265,16 @@ TOMEE = struct(
                         "openwebbeans-ee-common",
                         "openwebbeans-web",
                         "openwebbeans-el22",
-                        :under=>"org.apache.openwebbeans", :version=>"1.6.3"
+                        :under=>"org.apache.openwebbeans", :version=>"1.7.4"
                         ),
         :bval => group(
                     "bval-core",
                     "bval-jsr",
-                    :under=>"org.apache.bval", :version=>"1.1.1"
+                    :under=>"org.apache.bval", :version=>"1.1.2"
                  ),
-        :ecj => "org.eclipse.jdt.core.compiler:ecj:jar:4.4",
         :velocity => "org.apache.velocity:velocity:jar:1.6.4",
         :oro => "oro:oro:jar:2.0.8",
-        :openjpa => ["org.apache.openjpa:openjpa:jar:2.4.1","net.sourceforge.serp:serp:jar:1.15.1"]
-
+        :openjpa => ["org.apache.openjpa:openjpa:jar:2.4.2","net.sourceforge.serp:serp:jar:1.15.1"]
 )
 
 ODE_WEB_CONSOLE     = "org.apache.ode:ode-console:jar:0.1.0"
