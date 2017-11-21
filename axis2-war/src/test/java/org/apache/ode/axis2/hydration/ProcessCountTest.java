@@ -21,36 +21,21 @@ package org.apache.ode.axis2.hydration;
 
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
-import static org.testng.AssertJUnit.assertTrue;
+
 
 import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.OMNamespace;
-import org.apache.axiom.om.OMText;
-import org.apache.axiom.om.util.Base64;
 
 import org.apache.ode.axis2.Axis2TestBase;
 import org.apache.ode.axis2.DummyService;
 import org.apache.ode.axis2.service.ServiceClientUtil;
-import org.apache.ode.tools.sendsoap.cline.HttpSoapSender;
-import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.Namespaces;
 
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.w3c.dom.Element;
-
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-
-import java.net.URL;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-
-import javax.xml.namespace.QName;
 
 
 /**

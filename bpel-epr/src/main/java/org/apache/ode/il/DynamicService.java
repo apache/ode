@@ -35,7 +35,6 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
-import org.apache.axiom.om.impl.dom.NamespaceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.pmapi.ProcessInfoCustomizer;

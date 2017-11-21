@@ -16,53 +16,53 @@
 ANNONGEN            = "annogen:annogen:jar:0.1.0"
 ANT                 = "ant:ant:jar:1.6.5"
 AXIOM               = [ group("axiom-api", "axiom-impl", "axiom-dom",
-                        :under=>"org.apache.ws.commons.axiom", :version=>"1.2.13") ]
+                        :under=>"org.apache.ws.commons.axiom", :version=>"1.2.20") ]
 AXIS2_ALL           = [ group("axis2-adb", "axis2-codegen", "axis2-kernel",
                         "axis2-java2wsdl", "axis2-jibx", "axis2-saaj", "axis2-xmlbeans",
-                        :under=>"org.apache.axis2", :version=>"1.6.2"),
-                        group("woden-api", "woden-impl-dom",
+                        :under=>"org.apache.axis2", :version=>"1.7.6"),
+                        group("woden-core",
                               :under=>"org.apache.woden",
-                              :version=>"1.0M9"),
+                              :version=>"1.0M10"),
                       "org.apache.axis2:axis2-transports:jar:1.0-i6",
-                      "org.apache.axis2:axis2-transport-http:jar:1.6.2",
-                      "org.apache.axis2:axis2-transport-local:jar:1.6.2",
-                      "org.apache.axis2:axis2-transport-tcp:jar:1.0.0",
-                      "org.apache.axis2:axis2-transport-jms:jar:1.0.0",
-                      "org.apache.httpcomponents:httpcore:jar:4.0"]
+                      "org.apache.axis2:axis2-transport-http:jar:1.7.6",
+                      "org.apache.axis2:axis2-transport-local:jar:1.7.6",
+                      "org.apache.axis2:axis2-transport-tcp:jar:1.7.6",
+                      "org.apache.axis2:axis2-transport-jms:jar:1.7.6",
+                      "org.apache.httpcomponents:httpcore:jar:4.4.4"]
 AXIS2_TEST          = group("httpcore", "httpcore-nio", 
-                           :under=>"org.apache.httpcomponents", :version=>"4.0")
+                           :under=>"org.apache.httpcomponents", :version=>"4.4.4")
 AXIS2_MODULES        = struct(
- :mods              => ["org.apache.rampart:rampart:mar:1.6.2",
-                         "org.apache.rampart:rahas:mar:1.6.2",
-                         "org.apache.axis2:addressing:mar:1.6.2",
-                         "org.apache.axis2:mex:mar:1.6.2"],
+ :mods              => ["org.apache.rampart:rampart:mar:1.7.1",
+                         "org.apache.rampart:rahas:mar:1.7.1",
+                         "org.apache.axis2:addressing:mar:1.7.6",
+                         "org.apache.axis2:mex:mar:1.7.6"],
  :libs              => [group("rampart-core", "rampart-policy", "rampart-trust",
                               :under=>"org.apache.rampart",
-                              :version=>"1.6.2"),
-                        "org.apache.ws.security:wss4j:jar:1.6.4",
-                        "org.apache.santuario:xmlsec:jar:1.4.6",
-                        "org.apache.axis2:mex:jar:impl:1.6.2",
+                              :version=>"1.7.1"),
+                        "org.apache.ws.security:wss4j:jar:1.6.16",
+                        "org.apache.santuario:xmlsec:jar:1.5.7",
+                        "org.apache.axis2:mex:jar:impl:1.7.6",
                         "org.opensaml:opensaml1:jar:1.1",
                         "org.opensaml:opensaml:jar:2.5.1-1",
                         "org.opensaml:openws:jar:1.4.2-1",
                         "org.opensaml:xmltooling:jar:1.3.2-1",
-                        "bouncycastle:bcprov-jdk15:jar:140",
+                        "org.bouncycastle:bcprov-jdk15on:jar:1.49",
                         "velocity:velocity:jar:1.5",
                         "joda-time:joda-time:jar:2.5",
                         "org.owasp.esapi:esapi:jar:2.0GA",
                         "org.apache.james:apache-mime4j-core:jar:0.7.2"]
 )
-AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.6.2"
+AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.7.6"
 BACKPORT            = "backport-util-concurrent:backport-util-concurrent:jar:3.1"
 COMMONS             = struct(
   :codec            =>"commons-codec:commons-codec:jar:1.3",
   :collections      =>"commons-collections:commons-collections:jar:3.2.2",
   :dbcp             =>"commons-dbcp:commons-dbcp:jar:1.4",
-  :fileupload       =>"commons-fileupload:commons-fileupload:jar:1.2",
+  :fileupload       =>"commons-fileupload:commons-fileupload:jar:1.3.3",
   :httpclient       =>"commons-httpclient:commons-httpclient:jar:3.1",
   :lang             =>"commons-lang:commons-lang:jar:2.6",
   :logging          =>"commons-logging:commons-logging:jar:1.1.1",
-  :io               =>"commons-io:commons-io:jar:1.4",
+  :io               =>"commons-io:commons-io:jar:2.1",
   :pool             =>"commons-pool:commons-pool:jar:1.6",
   :primitives       =>"commons-primitives:commons-primitives:jar:1.0",
   :beanutils        =>"commons-beanutils:commons-beanutils:jar:1.8.2"
@@ -90,11 +90,11 @@ JAVAX               = struct(
   :jms              =>"org.apache.geronimo.specs:geronimo-jms_1.1_spec:jar:1.1.1",
   :persistence      =>"org.apache.geronimo.specs:geronimo-jpa_2.0_spec:jar:1.1",
   :servlet          =>"org.apache.geronimo.specs:geronimo-servlet_2.4_spec:jar:1.0",
-  :stream           =>"stax:stax-api:jar:1.0.1",
+  :stream           =>"org.codehaus.woodstox:stax2-api:jar:4.0.0",
   :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.1_spec:jar:1.1.1",
   :resource         =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.6_spec:jar:1.0"
 )
-JAXEN               = "jaxen:jaxen:jar:1.1.4"
+JAXEN               = "jaxen:jaxen:jar:1.1.6"
 JBI                 = group("org.apache.servicemix.specs.jbi-api-1.0", :under=>"org.apache.servicemix.specs", :version=>"1.1.0")
 JENCKS              = "org.jencks:jencks:jar:all:2.2"
 JIBX                = "org.jibx:jibx-run:jar:1.2.1"
@@ -144,14 +144,14 @@ SPRING              = ["org.springframework:spring:jar:2.5.6"]
 SPRING_OSGI         = ["org.springframework.osgi:spring-osgi-core:jar:1.2.0"]
 SPRING_TEST         = ["org.springframework:spring-test:jar:2.5.6"]
 TRANQL              = [ "org.tranql:tranql-connector:jar:1.8", COMMONS.primitives ]
-WOODSTOX            = "woodstox:wstx-asl:jar:3.2.4"
+WOODSTOX            = "org.codehaus.woodstox:woodstox-core-asl:jar:4.2.0"
 WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.3"
 XALAN               = "xalan:xalan:jar:2.7.1"
 XERCES              = ["xerces:xercesImpl:jar:2.11.0", "xml-apis:xml-apis:jar:1.4.01"]
 WS_COMMONS          = struct(
   :axiom            =>AXIOM,
-  :neethi           =>"org.apache.neethi:neethi:jar:3.0.2",
-  :xml_schema       =>"org.apache.ws.commons.schema:XmlSchema:jar:1.4.7"
+  :neethi           =>"org.apache.neethi:neethi:jar:3.0.3",
+  :xml_schema       =>"org.apache.ws.xmlschema:xmlschema-core:jar:2.2.1"
 )
 XBEAN               = [
   "org.apache.xbean:xbean-kernel:jar:3.3",

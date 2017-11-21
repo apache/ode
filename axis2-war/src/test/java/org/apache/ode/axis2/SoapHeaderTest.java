@@ -30,7 +30,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.engine.MessageReceiver;
-import org.apache.axis2.util.Utils;
+import org.apache.axis2.util.MessageContextBuilder;
 import org.apache.ode.utils.DOMUtils;
 import static org.testng.AssertJUnit.assertEquals;
 import org.testng.annotations.Test;
@@ -55,7 +55,7 @@ public class SoapHeaderTest extends Axis2TestBase {
                 assertEquals("ConversationId", cidElmt.getLocalName());
                 assertEquals("ZZZXYZ", cidElmt.getText());
 
-                MessageContext outMsgContext = Utils.createOutMessageContext(messageCtx);
+                MessageContext outMsgContext = MessageContextBuilder.createOutMessageContext(messageCtx);
                 outMsgContext.getOperationContext().addMessageContext(outMsgContext);
 
                 // Far too many lines of code...
