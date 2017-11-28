@@ -54,7 +54,7 @@ public class OpenJPADAO {
     @SuppressWarnings("unchecked")
     protected <T> T getSingleResult(Query qry) {
         List res = qry.getResultList();
-        if (res.size() == 0) return null;
+        if (res.isEmpty()) return null;
         return (T) res.get(0);
     }
 

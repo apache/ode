@@ -56,14 +56,14 @@ AXIS2_MODULES        = struct(
 AXIS2_WAR           = "org.apache.axis2:axis2-webapp:war:1.6.2"
 COMMONS             = struct(
   :codec            =>"commons-codec:commons-codec:jar:1.3",
-  :collections      =>"commons-collections:commons-collections:jar:3.2.1",
-  :dbcp             =>"commons-dbcp:commons-dbcp:jar:1.2.2",
+  :collections      =>"commons-collections:commons-collections:jar:3.2.2",
+  :dbcp             =>"commons-dbcp:commons-dbcp:jar:1.4",
   :fileupload       =>"commons-fileupload:commons-fileupload:jar:1.2",
   :httpclient       =>"commons-httpclient:commons-httpclient:jar:3.1",
-  :lang             =>"commons-lang:commons-lang:jar:2.4",
+  :lang             =>"commons-lang:commons-lang:jar:2.6",
   :logging          =>"commons-logging:commons-logging:jar:1.1.1",
   :io               =>"commons-io:commons-io:jar:1.4",
-  :pool             =>"commons-pool:commons-pool:jar:1.4",
+  :pool             =>"commons-pool:commons-pool:jar:1.6",
   :primitives       =>"commons-primitives:commons-primitives:jar:1.0",
   :beanutils        =>"commons-beanutils:commons-beanutils:jar:1.8.2"
 )
@@ -72,8 +72,8 @@ DERBY_TOOLS         = "org.apache.derby:derbytools:jar:10.5.3.0_1"
 DOM4J               = "dom4j:dom4j:jar:1.6.1"
 GERONIMO            = struct(
   :kernel           =>"org.apache.geronimo.modules:geronimo-kernel:jar:2.0.1",
-  :transaction      =>"org.apache.geronimo.components:geronimo-transaction:jar:2.0.1",
-  :connector        =>"org.apache.geronimo.components:geronimo-connector:jar:2.0.1"
+  :transaction      =>"org.apache.geronimo.components:geronimo-transaction:jar:3.1.3",
+  :connector        =>"org.apache.geronimo.components:geronimo-connector:jar:3.1.3"
 )
 HAZELCAST           ="com.hazelcast:hazelcast:jar:3.4.2"
 HIBERNATE           = [ "org.hibernate:hibernate-core:jar:3.3.2.GA", "javassist:javassist:jar:3.9.0.GA", "antlr:antlr:jar:2.7.6",
@@ -88,19 +88,19 @@ JACOB               = "org.apache.ode:jacob:jar:2.0a-SNAPSHOT"
 JAVAX               = struct(
   :activation       =>"javax.activation:activation:jar:1.1",
   #:activation       =>"geronimo-spec:geronimo-spec-activation:jar:1.0.2-rc4",
-  :connector        =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec:jar:1.0",
+  :connector        =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.6_spec:jar:1.0",
   :ejb              =>"org.apache.geronimo.specs:geronimo-ejb_2.1_spec:jar:1.1",
   :javamail         =>"org.apache.geronimo.specs:geronimo-javamail_1.4_spec:jar:1.7.1",
   :jms              =>"geronimo-spec:geronimo-spec-jms:jar:1.1-rc4",
-  :persistence      =>"javax.persistence:persistence-api:jar:1.0",
+  :persistence      =>"javax.persistence:persistence-api:jar:2.0",
   :servlet          =>"org.apache.geronimo.specs:geronimo-servlet_2.4_spec:jar:1.0",
   :stream           =>"stax:stax-api:jar:1.0.1",
-  :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.1_spec:jar:1.1",
-  :resource         =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.5_spec:jar:1.0"
+  :transaction      =>"org.apache.geronimo.specs:geronimo-jta_1.1_spec:jar:1.1.1",
+  :resource         =>"org.apache.geronimo.specs:geronimo-j2ee-connector_1.6_spec:jar:1.0"
 )
 JAXEN               = "jaxen:jaxen:jar:1.1.4"
 JBI                 = group("org.apache.servicemix.specs.jbi-api-1.0", :under=>"org.apache.servicemix.specs", :version=>"1.1.0")
-JENCKS              = "org.jencks:jencks:jar:all:1.3"
+JENCKS              = "org.jencks:jencks:jar:all:2.2"
 JIBX                = "org.jibx:jibx-run:jar:1.2.1"
 KARAF               = [
                         "org.apache.felix:org.osgi.core:jar:1.4.0",
@@ -112,8 +112,9 @@ KARAF               = [
 LOG4J               = "log4j:log4j:jar:1.2.17"
 LOG4J2              = group("log4j-api", "log4j-core", "log4j-slf4j-impl", "log4j-web", :under=>"org.apache.logging.log4j", :version=>"2.3")
 OBJECT_DIFF         = "de.danielbechler:java-object-diff:jar:0.13.1"
-OPENJPA             = ["org.apache.openjpa:openjpa:jar:1.2.3",
-                       "net.sourceforge.serp:serp:jar:1.13.1"]
+OPENJPA             = ["org.apache.openjpa:openjpa:jar:2.4.2",
+                       "net.sourceforge.serp:serp:jar:1.15.1",
+                       "org.apache.xbean:xbean-asm5-shaded:jar:4.5"]
 
 SAXON               = ["net.sourceforge.saxon:saxon:jar:9.1.0.8", "net.sourceforge.saxon:saxon:jar:xpath:9.1.0.8", "net.sourceforge.saxon:saxon:jar:dom:9.1.0.8", "net.sourceforge.saxon:saxon:jar:xqj:9.1.0.8"]
 SERVICEMIX          = [
@@ -147,7 +148,7 @@ SLF4J               = group(%w{ slf4j-api jcl-over-slf4j}, :under=>"org.slf4j", 
 SPRING              = ["org.springframework:spring:jar:2.5.6"]
 SPRING_OSGI         = ["org.springframework.osgi:spring-osgi-core:jar:1.2.0"]
 SPRING_TEST         = ["org.springframework:spring-test:jar:2.5.6"]
-TRANQL              = [ "tranql:tranql-connector:jar:1.1", COMMONS.primitives ]
+TRANQL              = [ "org.tranql:tranql-connector:jar:1.8", COMMONS.primitives ]
 WOODSTOX            = "woodstox:wstx-asl:jar:3.2.4"
 WSDL4J              = "wsdl4j:wsdl4j:jar:1.6.3"
 XALAN               = "xalan:xalan:jar:2.7.1"

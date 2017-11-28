@@ -61,16 +61,19 @@ public class GeronimoDelegateSupport extends DelegateSupport {
                 false, // match all
                 false); // select one assume match
 
+        JDBCDriverMCF mcf = new JDBCDriverMCF();
+
         _connectionManager = new GenericConnectionManager(
                     transactionSupport,
                     poolingSupport,
                     null,
                     connectionTracker,
                     (RecoverableTransactionManager) txm,
+                    mcf,
                     getClass().getName(),
                     getClass().getClassLoader());
 
-        JDBCDriverMCF mcf = new JDBCDriverMCF();
+
         try {
             mcf.setDriver(driverClass);
             mcf.setConnectionURL(url);
@@ -81,7 +84,7 @@ public class GeronimoDelegateSupport extends DelegateSupport {
                 mcf.setPassword(password);
             }
             _connectionManager.doStart();
-            return (DataSource) mcf.createConnectionFactory(_connectionManager);
+            return (DataSource) _connectionManager.createConnectionFactory();
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }

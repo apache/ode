@@ -35,7 +35,7 @@ Buildr::Hibernate::REQUIRES[:xdoclet] = Buildr.group("xdoclet", "xdoclet-xdoclet
 # XMLBeans addon must use the same version as we do.
 Buildr::XMLBeans::REQUIRES.xmlbeans.version = artifact(XMLBEANS).version
 
-Buildr::OpenJPA::REQUIRES[0] = "org.apache.openjpa:openjpa:jar:1.2.0"
+Buildr::OpenJPA::REQUIRES=[ OPENJPA, COMMONS.lang, COMMONS.collections, JAVAX.transaction, JAVAX.persistence]
 # dirty workaround for BUILDR-541/BUILDR-508
 Java.classpath << Buildr::OpenJPA::REQUIRES
 
@@ -124,6 +124,7 @@ define "ode" do
 
     #specify version of web console in urlrewrite.xml
     build do
+        mkdir_p project.path_to("target")
         cp _("src/main/webapp/WEB-INF/urlrewrite.xml"), _(:target)
         text = File.read(_(:target, "urlrewrite.xml"))
         changed_text = text.gsub(/\$\{version\}/, artifact(ODE_WEB_CONSOLE).version)
