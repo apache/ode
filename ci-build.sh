@@ -30,7 +30,7 @@ CREATE_USER_COMMAND="groupadd -f -g $GROUP_ID $CONTAINER_GROUPNAME \
 && mkdir --parent $HOMEDIR \
 && chown -R $CONTAINER_USERNAME:$CONTAINER_GROUPNAME $HOMEDIR"
 
-BUNDLER_COMMAND="jruby -S bundler install --gemfile=/workspace/Gemfile"
+BUNDLER_COMMAND="jruby -S bundler install --gemfile=/workspace/Gemfile && jruby -S bundle update diff-lcs"
  
 BUILDR_COMMAND="su $CONTAINER_USERNAME -c 'buildr $BUILDR_ARGS'"
 
