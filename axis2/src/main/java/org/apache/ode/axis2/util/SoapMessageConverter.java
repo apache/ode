@@ -259,7 +259,8 @@ public class SoapMessageConverter {
         for (Iterator<OMNode> i = omPart.getChildren(); i.hasNext();) {
             OMNode node = i.next();
             i.remove();
-            soaphdr.addChild(node);
+            if(node.getType() == OMNode.ELEMENT_NODE)
+                soaphdr.addChild(node);
         }
     }
 
@@ -466,7 +467,7 @@ public class SoapMessageConverter {
             Message hdrMsg = _def.getMessage(headerDef.getMessage());
             for (Object o : hdrMsg.getParts().values()) {
                 Part p = (Part) o;
-                if (p.getElementName().equals(elmtName) && p.getName().equals(headerDef.getPart()))
+                if (p.getElementName() != null && p.getElementName().equals(elmtName) && p.getName().equals(headerDef.getPart()))
                     return p.getName();
             }
         }
