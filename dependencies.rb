@@ -229,7 +229,7 @@ TOMEE = struct(
                 ],
     :commons_cli => "commons-cli:commons-cli:jar:1.2",
     :commons_collections => "commons-collections:commons-collections:jar:3.2.2",
-    :commons_beanutils => "commons-beanutils:commons-beanutils-core:jar:1.9.3",
+    :commons_beanutils => "commons-beanutils:commons-beanutils:jar:1.9.3",
     :commons_lang => "commons-lang:commons-lang:jar:2.6",
     :sxc => [
               group(
