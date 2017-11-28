@@ -76,8 +76,10 @@ GERONIMO            = struct(
   :connector        =>"org.apache.geronimo.components:geronimo-connector:jar:3.1.3"
 )
 HAZELCAST           ="com.hazelcast:hazelcast:jar:3.4.2"
-HIBERNATE           = [ "org.hibernate:hibernate-core:jar:3.3.2.GA", "javassist:javassist:jar:3.9.0.GA", "antlr:antlr:jar:2.7.6",
-                        "asm:asm:jar:3.3.1", "cglib:cglib:jar:2.2", "net.sf.ehcache:ehcache:jar:1.2.3" ]
+HIBERNATE           = ["org.hibernate:hibernate-core:jar:3.6.10.Final", "commons-collections:commons-collections:jar:3.1",
+                        "javassist:javassist:jar:3.12.0.GA", "antlr:antlr:jar:2.7.6",
+                        "dom4j:dom4j:jar:1.6.1", "org.hibernate:hibernate-commons-annotations:jar:3.2.0.Final",
+                        "org.hibernate.javax.persistence:hibernate-jpa-2.0-api:jar:1.0.1.Final"]
 HSQLDB              = "org.hsqldb:hsqldb:jar:2.3.3"
 JACKSON              = [ "com.fasterxml.jackson.core:jackson-core:jar:2.4.0", 
                         "com.fasterxml.jackson.core:jackson-databind:jar:2.4.0",
