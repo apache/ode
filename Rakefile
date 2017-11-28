@@ -298,6 +298,16 @@ define "ode" do
     compile { open_jpa_enhance }
     resources hibernate_doclet(:package=>"org.apache.ode.store.hib", :excludedtags=>"@version,@author,@todo")
 
+    task "hbm-replace-namespace" do |task|
+        Dir["#{_("target/classes/org/apache/ode/store/hib")}/*.hbm.xml"].each do |f|
+            file_content = File.read(f)
+            file_content.gsub!("http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd","http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd")
+            File.open(f,'w') {|wf| wf << file_content}
+        end
+    end
+
+    task "compile" => ["hbm-replace-namespace"]
+
     test.with projects("bpel-obj"), COMMONS.collections, COMMONS.lang, JAVAX.connector, JAVAX.transaction, DOM4J, 
       XERCES, XALAN, JAXEN, SAXON, OPENJPA, GERONIMO.transaction, SLF4J, SPRING_TEST, DERBY,
       GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, H2::REQUIRES
@@ -335,7 +345,16 @@ define "ode" do
         File.open(process_instance_hbm_file, "w") { |f| f << process_instance_hbm }
       end
     end
-    task "compile" => "hbm-hack"
+
+    task "hbm-replace-namespace" do |task|
+        Dir["#{_("target/classes/org/apache/ode/daohib/bpel/hobj")}/*.hbm.xml"].each do |f|
+            file_content = File.read(f)
+            file_content.gsub!("http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd","http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd")
+            File.open(f,'w') {|wf| wf << file_content}
+        end
+    end
+
+    task "compile" => ["hbm-hack", "hbm-replace-namespace"]
 
     test.with project("bpel-epr"), BACKPORT, COMMONS.collections, COMMONS.lang, DERBY, COMMONS.pool, COMMONS.dbcp,
       GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, SPRING, SPRING_TEST

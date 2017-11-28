@@ -32,7 +32,7 @@ import javax.transaction.TransactionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.iapi.BpelEngineException;
-import org.apache.ode.daohib.HibernateTransactionManagerLookup;
+import org.apache.ode.daohib.HibertenateJtaPlatform;
 import org.apache.ode.daohib.SessionManager;
 import org.apache.ode.store.ConfStoreConnectionFactory;
 import org.apache.ode.store.Messages;
@@ -41,9 +41,13 @@ import org.apache.ode.utils.msg.MessageBundle;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
 import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
-import org.hibernate.connection.ConnectionProvider;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.service.UnknownUnwrapTypeException;
+import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
+import org.hibernate.service.spi.Configurable;
 import org.hibernate.dialect.Dialect;
 
 public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory {
@@ -81,15 +85,22 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
         // Note that we don't allow the following properties to be overriden by the client.
         if (properties.containsKey(Environment.CONNECTION_PROVIDER))
             __log.warn("Ignoring user-specified Hibernate property: " + Environment.CONNECTION_PROVIDER);
-        if (properties.containsKey(Environment.TRANSACTION_MANAGER_STRATEGY))
-            __log.warn("Ignoring user-specified Hibernate property: " + Environment.TRANSACTION_MANAGER_STRATEGY);
+        if (properties.containsKey(Environment.JTA_PLATFORM))
+            __log.warn("Ignoring user-specified Hibernate property: " + Environment.JTA_PLATFORM);
         if (properties.containsKey(Environment.SESSION_FACTORY_NAME))
             __log.warn("Ignoring user-specified Hibernate property: " + Environment.SESSION_FACTORY_NAME);
+        if (properties.containsKey(Environment.TRANSACTION_STRATEGY))
+            __log.warn("Ignoring user-specified Hibernate property: " + Environment.TRANSACTION_STRATEGY);
+        if (properties.containsKey(Environment.CURRENT_SESSION_CONTEXT_CLASS))
+            __log.warn("Ignoring user-specified Hibernate property: " + Environment.CURRENT_SESSION_CONTEXT_CLASS);
 
         properties.put(SessionManager.PROP_GUID, _guid);
         properties.put(Environment.CONNECTION_PROVIDER, DataSourceConnectionProvider.class.getName());
-        properties.put(Environment.TRANSACTION_MANAGER_STRATEGY, HibernateTransactionManagerLookup.class.getName());
-        properties.put(Environment.TRANSACTION_STRATEGY, "org.hibernate.transaction.JTATransactionFactory");
+        properties.put(Environment.JTA_PLATFORM, HibertenateJtaPlatform.class.getName());
+
+        // Need to use CMTTransactionFactory instead of JTATransactionFactory in Hibernate 4
+        // Refer: https://jira.spring.io/browse/SPR-9480?focusedCommentId=81419&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-81419
+        properties.put(Environment.TRANSACTION_STRATEGY, "org.hibernate.transaction.CMTTransactionFactory");
         properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "jta");
 
         if(__log.isDebugEnabled()) __log.debug("Store connection properties: " + properties );
@@ -97,7 +108,10 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
         initTxMgr(txFactoryClassName);
         SessionManager.registerTransactionManager(_guid, _txMgr);
 
-        _sessionFactory = getDefaultConfiguration().setProperties(properties).buildSessionFactory();
+        Configuration configuration = getDefaultConfiguration().setProperties(properties);
+
+        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties()).build();
+        _sessionFactory = configuration.buildSessionFactory(serviceRegistry);
     }
 
     public ConfStoreConnectionHib getConnection() {
@@ -146,14 +160,14 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
                 .addClass(VersionTrackerDAOImpl.class);
     }
 
-    public static class DataSourceConnectionProvider implements ConnectionProvider {
+    public static class DataSourceConnectionProvider implements ConnectionProvider, Configurable {
         private String _guid;
 
         public DataSourceConnectionProvider() {
         }
 
-        public void configure(Properties props) throws HibernateException {
-            _guid = props.getProperty(SessionManager.PROP_GUID);
+        public void configure(Map props) throws HibernateException {
+            _guid = (String) props.get(SessionManager.PROP_GUID);
         }
 
         public Connection getConnection() throws SQLException {
@@ -169,6 +183,20 @@ public class DbConfStoreConnectionFactory implements ConfStoreConnectionFactory 
 
         public boolean supportsAggressiveRelease() {
             return true;
+        }
+
+        public boolean isUnwrappableAs(Class unwrapType) {
+            return ConnectionProvider.class.equals(unwrapType) ||
+                    DataSourceConnectionProvider.class.isAssignableFrom(unwrapType);
+        }
+
+        public <T> T unwrap(Class<T> unwrapType) {
+            if (ConnectionProvider.class.equals(unwrapType) ||
+                    DataSourceConnectionProvider.class.isAssignableFrom(unwrapType)) {
+                return (T) this;
+            } else {
+                throw new UnknownUnwrapTypeException( unwrapType );
+            }
         }
     }
 

@@ -39,10 +39,15 @@ import org.apache.ode.daohib.bpel.ProcessProfileDaoImpl;
 import org.apache.ode.daohib.bpel.hobj.HProcess;
 import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
 import org.hibernate.MappingException;
-import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.SessionFactoryObserver;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.event.PostInsertEvent;
-import org.hibernate.event.PostInsertEventListener;
+import org.hibernate.event.service.spi.EventListenerRegistry;
+import org.hibernate.event.spi.EventType;
+import org.hibernate.event.spi.PostInsertEvent;
+import org.hibernate.event.spi.PostInsertEventListener;
+import org.hibernate.persister.entity.EntityPersister;
+
 
 @SuppressWarnings("serial")
 public class HibDaoConnectionFactoryImpl extends BpelDAOConnectionFactoryImpl implements PostInsertEventListener {
@@ -56,12 +61,28 @@ public class HibDaoConnectionFactoryImpl extends BpelDAOConnectionFactoryImpl im
             @Override
             public Configuration getDefaultConfiguration() throws MappingException {
                 Configuration conf = super.getDefaultConfiguration();
-                conf.setListener("post-insert", HibDaoConnectionFactoryImpl.this);
+
+                conf.setSessionFactoryObserver(new SessionFactoryObserver() {
+                    @Override
+                    public void sessionFactoryCreated(SessionFactory sessionFactory) {
+                        ((org.hibernate.internal.SessionFactoryImpl) sessionFactory).getServiceRegistry()
+                        .getService( EventListenerRegistry.class )
+                        .appendListeners(EventType.POST_INSERT, HibDaoConnectionFactoryImpl.this);
+                    }
+
+                    @Override
+                    public void sessionFactoryClosed(SessionFactory arg0) {
+                    }
+                });
                 return conf;
             }
         };
 
         return _staticSessionManager;
+    }
+
+    public boolean requiresPostCommitHanding(EntityPersister paramEntityPersister) {
+        return false;
     }
 
     public BpelDAOConnection getConnection() {

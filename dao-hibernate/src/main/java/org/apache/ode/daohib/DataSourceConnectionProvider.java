@@ -21,23 +21,27 @@ package org.apache.ode.daohib;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.ode.utils.DbIsolation;
 
 import org.hibernate.HibernateException;
-import org.hibernate.connection.ConnectionProvider;
+import org.hibernate.service.UnknownUnwrapTypeException;
+import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
+import org.hibernate.service.spi.Configurable;
 
 
-public class DataSourceConnectionProvider implements ConnectionProvider {
+public class DataSourceConnectionProvider implements ConnectionProvider, Configurable {
 
   private Properties _props;
 
   public DataSourceConnectionProvider() {
   }
 
-  public void configure(Properties props) throws HibernateException {
-    _props = props;
+  public void configure(Map props) throws HibernateException {
+     _props = new Properties();
+     _props.putAll(props);
   }
 
   public Connection getConnection() throws SQLException {
@@ -58,4 +62,17 @@ public class DataSourceConnectionProvider implements ConnectionProvider {
     return true;
   }
 
+  public boolean isUnwrappableAs(Class unwrapType) {
+      return ConnectionProvider.class.equals(unwrapType) ||
+              DataSourceConnectionProvider.class.isAssignableFrom(unwrapType);
+  }
+
+  public <T> T unwrap(Class<T> unwrapType) {
+      if (ConnectionProvider.class.equals(unwrapType) ||
+              DataSourceConnectionProvider.class.isAssignableFrom(unwrapType)) {
+          return (T) this;
+      } else {
+          throw new UnknownUnwrapTypeException( unwrapType );
+      }
+  }
 }

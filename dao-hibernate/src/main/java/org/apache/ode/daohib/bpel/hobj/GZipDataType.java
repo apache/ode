@@ -34,7 +34,7 @@ import java.util.zip.GZIPOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.usertype.UserType;
 
 /**
@@ -108,7 +108,7 @@ public class GZipDataType implements UserType {
     }
 
     /** Retrieve an instance of the mapped class from a JDBC resultset. */
-    public Object nullSafeGet(ResultSet rs, String[] names, Object owner) throws SQLException {
+    public Object nullSafeGet(ResultSet rs, String[] names, SessionImplementor sessionImplementor, Object owner) throws SQLException {
         if (names.length != 1) throw new IllegalStateException("Expected a single column name instead of "+names.length);
         byte[] buf = rs.getBytes(names[0]);
         if (buf == null) {
@@ -130,7 +130,7 @@ public class GZipDataType implements UserType {
     }
 
     /** Write an instance of the mapped class to a prepared statement. */
-    public void nullSafeSet(PreparedStatement st, Object value, int index) throws SQLException {
+    public void nullSafeSet(PreparedStatement st, Object value, int index, SessionImplementor sessionImplementor) throws SQLException {
         byte[] buf = (byte[]) value;
         if (buf != null) {
             synchronized (STATS_LOCK) {
