@@ -71,11 +71,11 @@ public class H2EmbeddedDB extends InternalDB {
                 __log.error("unable to shutdown connection pool", ex);
             }
         }
-        try {
+        /*try {
             Connection conn = getDataSource().getConnection();
             conn.createStatement().execute("SHUTDOWN");
         } catch (Throwable ex) {
             __log.debug("Error shutting down H2.", ex);
-        }
+        }*/
     }
 }
