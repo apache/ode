@@ -123,7 +123,7 @@ public class SoapHeader2Test extends Axis2TestBase {
         // deploy the required service
         if (!server.isDeployed(bundleName)) server.deployProcess(bundleName);
         try {
-            String response = server.sendRequestFile("http://localhost:8888/processes/hello_world_header_wsdl",
+            String response = sendRequestFile("http://localhost:8888/processes/hello_world_header_wsdl",
                     bundleName, "testRequest.soap");
             log.debug(response);
             assertTrue(response!=null);

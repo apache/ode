@@ -39,6 +39,7 @@ import org.apache.ode.daohib.bpel.ProcessProfileDaoImpl;
 import org.apache.ode.daohib.bpel.hobj.HProcess;
 import org.apache.ode.daohib.bpel.hobj.HProcessInstance;
 import org.hibernate.MappingException;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.SessionFactoryObserver;
 import org.hibernate.cfg.Configuration;
