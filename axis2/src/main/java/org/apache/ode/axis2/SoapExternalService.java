@@ -122,7 +122,7 @@ public class SoapExternalService implements ExternalService {
         File fileToWatch = new File(_pconf.getBaseURI().resolve(_serviceName.getLocalPart() + ".axis2"));
         _axisServiceWatchDog = WatchDog.watchFile(fileToWatch, new ServiceFileObserver(fileToWatch));
         _axisOptionsWatchDog = new WatchDog<Map, OptionsObserver>(new EndpointPropertiesMutable(), new OptionsObserver());
-        _configContext.setProperty(HTTPConstants.MUTTITHREAD_HTTP_CONNECTION_MANAGER, connManager);
+        _configContext.setProperty(HTTPConstants.MULTITHREAD_HTTP_CONNECTION_MANAGER, connManager);
         // make sure the client is not shared, see also org.apache.ode.axis2.Properties.Axis2
         _configContext.setProperty(HTTPConstants.REUSE_HTTP_CLIENT, "false");
 

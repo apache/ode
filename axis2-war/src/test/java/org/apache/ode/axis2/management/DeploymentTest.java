@@ -24,7 +24,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMText;
-import org.apache.axiom.om.util.Base64;
+import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.axis2.AxisFault;
 import org.apache.ode.axis2.Axis2TestBase;
 import org.apache.ode.axis2.service.ServiceClientUtil;
@@ -195,7 +195,7 @@ public class DeploymentTest extends Axis2TestBase {
         while((len = is.read(buffer)) >= 0) {
             outputStream.write(buffer, 0, len);
         }
-        String base64Enc = Base64.encode(outputStream.toByteArray());
+        String base64Enc = Base64Utils.encode(outputStream.toByteArray());
         OMText zipContent = _factory.createOMText(base64Enc, "application/zip", true);
         root.addChild(namePart);
         root.addChild(zipPart);

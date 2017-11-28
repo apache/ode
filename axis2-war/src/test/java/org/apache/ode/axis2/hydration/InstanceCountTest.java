@@ -27,7 +27,6 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMText;
-import org.apache.axiom.om.util.Base64;
 
 import org.apache.ode.axis2.Axis2TestBase;
 import org.apache.ode.axis2.DummyService;

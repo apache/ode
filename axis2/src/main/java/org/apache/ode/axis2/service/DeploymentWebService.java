@@ -32,6 +32,7 @@ import org.apache.axis2.description.AxisService;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.engine.AxisEngine;
 import org.apache.axis2.receivers.AbstractMessageReceiver;
+import org.apache.axis2.util.MessageContextBuilder;
 import org.apache.axis2.util.Utils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -342,7 +343,7 @@ public class DeploymentWebService {
 
         private void sendResponse(SOAPFactory factory, MessageContext messageContext, String op,
                                   OMElement response) throws AxisFault {
-            MessageContext outMsgContext = Utils.createOutMessageContext(messageContext);
+            MessageContext outMsgContext = MessageContextBuilder.createOutMessageContext(messageContext);
             outMsgContext.getOperationContext().addMessageContext(outMsgContext);
 
             SOAPEnvelope envelope = factory.getDefaultEnvelope();

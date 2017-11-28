@@ -24,6 +24,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.axis2.util.PolicyUtil;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.AxisDescription;
 import org.apache.axis2.description.AxisOperation;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.HandlerDescription;
@@ -35,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.rampart.RampartMessageData;
 import org.apache.neethi.Policy;
-
+import org.apache.neethi.PolicyComponent;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 
@@ -83,7 +84,8 @@ public class ODEAxisServiceDispatcher extends AbstractDispatcher {
 
                     // Axis2 >1.3 is less clever than 1.3. See ODE-509
                     // We have to do additional work for him.
-                    Policy policy = PolicyUtil.getMergedPolicy(new ArrayList(service.getPolicySubject().getAttachedPolicyComponents()), service);
+                    ArrayList<PolicyComponent> policyComponents = new ArrayList<PolicyComponent>(service.getPolicySubject().getAttachedPolicyComponents());
+                    Policy policy = PolicyUtil.getMergedPolicy(policyComponents, (AxisDescription)service);
                     if (policy != null) {
                         if (log.isDebugEnabled()) log.debug("Apply policy: " + policy.getName());
                         messageContext.setProperty(RampartMessageData.KEY_RAMPART_POLICY, policy);

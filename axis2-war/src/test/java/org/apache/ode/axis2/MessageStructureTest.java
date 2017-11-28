@@ -21,6 +21,7 @@ package org.apache.ode.axis2;
 
 import org.apache.ode.utils.DOMUtils;
 import static org.testng.AssertJUnit.assertTrue;
+import javax.xml.namespace.QName;
 import org.testng.annotations.Test;
 import org.w3c.dom.Element;
 
@@ -36,7 +37,8 @@ public class MessageStructureTest extends Axis2TestBase {
             String response = sendRequestFile("http://localhost:8888/processes/attrNSWorld",
                     bundleName, "testRequest.soap");
             Element domResponse = DOMUtils.stringToDOM(response);
-            Element out = DOMUtils.getFirstChildElement(DOMUtils.getFirstChildElement(DOMUtils.getFirstChildElement(domResponse)));
+            Element soapBody = DOMUtils.findChildByName(domResponse, new QName("http://schemas.xmlsoap.org/soap/envelope/", "Body"));
+            Element out = DOMUtils.getFirstChildElement(DOMUtils.getFirstChildElement(soapBody));
             String nsAttr = out.getAttribute("xmlns:myns");
             System.out.println("=> " + response);
             assertTrue(nsAttr != null);

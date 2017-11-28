@@ -21,7 +21,7 @@ package org.apache.ode.axis2;
 
 import org.apache.axis2.client.Options;
 import org.apache.axis2.transport.http.HTTPConstants;
-import org.apache.axis2.transport.http.HttpTransportProperties;
+import org.apache.axis2.transport.http.impl.httpclient3.HttpTransportPropertiesImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.iapi.PartnerRoleMessageExchange;
@@ -91,7 +91,7 @@ public class AuthenticationHelper {
             e = DOMUtils.getNextSiblingElement(e);
         }
 
-        HttpTransportProperties.Authenticator authenticator = new HttpTransportProperties.Authenticator();
+        HttpTransportPropertiesImpl.Authenticator authenticator = new HttpTransportPropertiesImpl.Authenticator();
         authenticator.setUsername(username);
         authenticator.setPassword(password);
         authenticator.setDomain(domain);
