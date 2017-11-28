@@ -14,7 +14,7 @@
 #    limitations under the License.
 #
 
-gem "buildr", "~>1.4.3"
+gem "buildr", "~>1.5.3"
 require "buildr"
 require "buildr/xmlbeans.rb"
 require "buildr/openjpa"
