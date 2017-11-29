@@ -21,8 +21,6 @@ package org.apache.ode.bpel.o;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.namespace.QName;
-
 import org.apache.ode.utils.SerializableElement;
 
 /**
@@ -36,7 +34,6 @@ public class OExtensionActivity extends OActivity {
 	static final long serialVersionUID = -1L;
 	public final List<OActivity> children = new ArrayList<OActivity>();
 	public SerializableElement nestedElement;
-	public QName extensionName;
 
 	public OExtensionActivity(OProcess owner, OActivity parent) {
 		super(owner, parent);

@@ -26,12 +26,13 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.utils.DOMUtils;
+import org.apache.ode.utils.SerializableElement;
 import org.w3c.dom.Document;
 
 public class OAssign extends OActivity {
     static final long serialVersionUID = -1L  ;
 
-    public final List<Copy> copy = new ArrayList<Copy>();
+    public final List<OAssignOperation> operations = new ArrayList<OAssignOperation>();
 
     public OAssign(OProcess owner, OActivity parent) {
         super(owner, parent);
@@ -41,11 +42,26 @@ public class OAssign extends OActivity {
     public String toString() {
         return "{OAssign : " + name + ", joinCondition=" + joinCondition + "}";
     }
+    
+    /** 
+     * Base class for assign operations.
+     */
+    public static abstract class OAssignOperation extends OBase {
+		private static final long serialVersionUID = -3042873658302758854L;
+
+		public enum Type { Copy, ExtensionOperation }
+
+    	public OAssignOperation(OProcess owner) {
+    		super(owner);
+    	}
+    	
+    	public abstract Type getType();
+    }
 
     /**
      * Assignmenet copy entry, i.e. what the assignment consits of.
      */
-    public static class Copy extends OBase {
+    public static class Copy extends OAssignOperation {
         private static final long serialVersionUID = 1L;
         public LValue to;
         public RValue from;
@@ -68,6 +84,36 @@ public class OAssign extends OActivity {
             to = null;
             from = null;
         }
+        
+        public Type getType() {
+        	return Type.Copy;
+        }
+    }
+    
+    /**
+     * Assignment extension operation entry, i.e. what the assignment consists of.
+     */
+    public static class ExtensionAssignOperation extends OAssignOperation {
+        private static final long serialVersionUID = 1L;
+        public SerializableElement nestedElement;
+
+        public ExtensionAssignOperation(OProcess owner) {
+            super(owner);
+        }
+
+        public String toString() {
+            return "{OExtensionAssignOperation; " + nestedElement.getElement().getTagName() + "}";
+        }
+        
+        @Override
+		public void dehydrate() {
+			super.dehydrate();
+			nestedElement = null;
+		}
+
+        public Type getType() {
+			return Type.ExtensionOperation;
+		}
     }
 
     public interface LValue {
@@ -255,8 +301,12 @@ public class OAssign extends OActivity {
     @Override
     public void dehydrate() {
         super.dehydrate();
-        for (Copy copy : this.copy) {
-            copy.dehydrate();
+		for (OAssignOperation operation : this.operations) {
+			if (operation.getType().equals(OAssignOperation.Type.Copy)) {
+				((Copy)operation).dehydrate();
+			} else if (operation.getType().equals(OAssignOperation.Type.ExtensionOperation)) {
+				((ExtensionAssignOperation)operation).dehydrate();
+			}
         }
     }
 }
