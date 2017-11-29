@@ -94,8 +94,6 @@ public class OProcess extends OBase  implements Serializable{
 	
 	/** All declared extensions in the process. **/
 	private static final String DECLAREDEXTENSIONS = "declaredExtensions";
-	/** All must-understand extensions in the process. **/
-	private static final String MUSTUNDERSTANDEXTENSIONS = "mustUnderstandExtensions";
 	
 	/**
 	 * This constructor should only be used by Jackson when deserialize.
@@ -119,7 +117,6 @@ public class OProcess extends OBase  implements Serializable{
 		setXslSheets(new HashMap<URI, OXslSheet>());
 		
 		setDeclaredExtensions(new HashSet<OExtension>());
-		setMustUnderstandExtensions(new HashSet<OExtension>());
 		
 		setChildIdCounter(0);
 	}
@@ -138,7 +135,6 @@ public class OProcess extends OBase  implements Serializable{
 		getXsdTypes().clear();
 		getXslSheets().clear();
 		getDeclaredExtensions().clear();
-		getMustUnderstandExtensions().clear();
 	}
 
 	@Override
@@ -329,13 +325,6 @@ public class OProcess extends OBase  implements Serializable{
 				.get(DECLAREDEXTENSIONS);
 	}
 	
-	@SuppressWarnings("unchecked")
-	@JsonIgnore
-	public Set<OExtension> getMustUnderstandExtensions() {
-		return (Set<OExtension>) fieldContainer
-				.get(MUSTUNDERSTANDEXTENSIONS);
-	}
-
 	public void setAllPartnerLinks(Set<OPartnerLink> allPartnerLinks) {
 		if (getAllPartnerLinks() == null) {
 			fieldContainer.put(ALLPARTNERLINKS, allPartnerLinks);
@@ -429,12 +418,6 @@ public class OProcess extends OBase  implements Serializable{
 		}
 	}
 	
-	public void setMustUnderstandExtensions(Set<OExtension> extensions) {
-		if (getMustUnderstandExtensions() == null) {
-			fieldContainer.put(MUSTUNDERSTANDEXTENSIONS, extensions);
-		}
-	}
-
 	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException{
 		ois.defaultReadObject();
 		fieldContainer.remove(NAMESPACECONTEXT);

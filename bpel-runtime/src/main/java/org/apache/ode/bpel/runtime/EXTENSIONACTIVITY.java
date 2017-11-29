@@ -19,14 +19,16 @@
 package org.apache.ode.bpel.runtime;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.extension.ExtensionOperation;
+import org.apache.ode.bpel.compiler.bom.ExtensibilityQNames;
+import org.apache.ode.bpel.eapi.ExtensionContext;
 import org.apache.ode.bpel.obj.OExtensionActivity;
-import org.apache.ode.bpel.obj.OProcess;
-import org.apache.ode.bpel.runtime.common.extension.AbstractSyncExtensionOperation;
-import org.apache.ode.bpel.runtime.common.extension.ExtensibilityQNames;
-import org.apache.ode.bpel.runtime.common.extension.ExtensionContext;
+import org.apache.ode.bpel.runtime.channels.ExtensionResponse;
+import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.utils.DOMUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,54 +45,50 @@ public class EXTENSIONACTIVITY extends ACTIVITY {
 	private static final Logger __log = LoggerFactory
 			.getLogger(EXTENSIONACTIVITY.class);
 
+    private OExtensionActivity _oext;
+
 	public EXTENSIONACTIVITY(ActivityInfo self, ScopeFrame scopeFrame,
 			LinkFrame linkFrame) {
 		super(self, scopeFrame, linkFrame);
+            _oext = (OExtensionActivity) _self.o;
 	}
 
 	public final void run() {
-		final ExtensionContext context = new ExtensionContextImpl(this,
-				getBpelRuntimeContext());
-		final OExtensionActivity oea = (OExtensionActivity) _self.o;
+        try {
+        	final ExtensionResponse responseChannel = newChannel(ExtensionResponse.class);
+        	final ExtensionContext helper = new ExtensionContextImpl(_scopeFrame, getBpelRuntimeContext());
 
-		try {
-			ExtensionOperation ea = getBpelRuntimeContext()
-					.createExtensionActivityImplementation(oea.getExtensionName());
-			if (ea == null) {
-				for (OProcess.OExtension oe : oea.getOwner().getMustUnderstandExtensions()) {
-					if (oea.getExtensionName().getNamespaceURI().equals(
-							oe.getNamespace())) {
-						__log.warn("Lookup of extension activity "
-								+ oea.getExtensionName() + " failed.");
-						throw new FaultException(
-								ExtensibilityQNames.UNKNOWN_EA_FAULT_NAME,
-								"Lookup of extension activity "
-										+ oea.getExtensionName()
-										+ " failed. No implementation found.");
+        	getBpelRuntimeContext().executeExtension(_oext.getExtensionName(), helper, DOMUtils.stringToDOM(_oext.getNestedElement()), responseChannel);
+        	
+        	object(new ReceiveProcess() {
+					private static final long serialVersionUID = 3643564901004147956L;
+				}.setChannel(responseChannel).setReceiver(new ExtensionResponse() {
+					private static final long serialVersionUID = -6977609968638662977L;
+
+					public void onCompleted() {
+						_self.parent.completed(null, CompensationHandler.emptySet());
 					}
-				}
-				// act like <empty> - do nothing
-				context.complete();
-				return;
-			}
 
-			ea.run(context, DOMUtils.stringToDOM(oea.getNestedElement()));
+	            	public void onFailure(Throwable t) {
+	            		StringWriter sw = new StringWriter();
+	            		t.printStackTrace(new PrintWriter(sw));
+	            		FaultData fault = createFault(_oext.getOwner().getConstants().getQnSubLanguageExecutionFault(), _oext, sw.getBuffer().toString());
+	                    _self.parent.completed(fault, CompensationHandler.emptySet());
+	            	};
+            }));
 
-			// Complete the context for sync extension operations. Asynchronous
-			// operations have to control their completion themselves.
-			if (ea instanceof AbstractSyncExtensionOperation) {
-				context.complete();
-			}
 		} catch (FaultException fault) {
-			__log.error("Execution of extension activity caused an exception.",
-					fault);
-			context.completeWithFault(fault);
+			__log.error("Exception while invoking extension activity '" + _oext.getName() + "'.", fault);
+            FaultData faultData = createFault(fault.getQName(), _oext, fault.getMessage());
+            _self.parent.completed(faultData, CompensationHandler.emptySet());
 		} catch (SAXException e) {
-        	FaultException fault = new FaultException(ExtensibilityQNames.INVALID_EXTENSION_ELEMENT, "The nested element of extension activity '" + oea.getName() + "' for extension '" + oea.getExtensionName() + "' is no valid XML.");
-        	context.completeWithFault(fault);
+        	__log.error("Exception while invoking extension activity '" + _oext.getName() + "'.", e);
+    		FaultData faultData = createFault(ExtensibilityQNames.INVALID_EXTENSION_ELEMENT, _self.o, "The nested element of extension activity '" + _oext.getName() + "' for extension '" + _oext.getExtensionName() + "' is no valid XML.");
+    		_self.parent.completed(faultData, CompensationHandler.emptySet());
 		} catch (IOException e) {
-			FaultException fault = new FaultException(ExtensibilityQNames.INVALID_EXTENSION_ELEMENT, "The nested element of extension activity '" + oea.getName() + "' for extension '" + oea.getExtensionName() + "' is no valid XML.");
-			context.completeWithFault(fault);
+			__log.error("Exception while invoking extension activity '" + _oext.getName() + "'.", e);
+    		FaultData faultData = createFault(ExtensibilityQNames.INVALID_EXTENSION_ELEMENT, _self.o, "The nested element of extension activity '" + _oext.getName() + "' for extension '" + _oext.getExtensionName() + "' is no valid XML.");
+    		_self.parent.completed(faultData, CompensationHandler.emptySet());
 		}
 
 	}

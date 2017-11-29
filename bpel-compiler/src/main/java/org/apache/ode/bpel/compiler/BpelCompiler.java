@@ -82,7 +82,6 @@ import org.apache.ode.bpel.compiler.bom.TerminationHandler;
 import org.apache.ode.bpel.compiler.bom.Variable;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
-import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.obj.DebugInfo;
 import org.apache.ode.bpel.obj.OActivity;
 import org.apache.ode.bpel.obj.OAssign;
@@ -185,7 +184,6 @@ public abstract class BpelCompiler implements CompilerContext {
     private URI _processURI;
 
     private final Set<String> _declaredExtensionNS = new HashSet<String>();
-	private Map<QName, ExtensionValidator> _extensionValidators = new HashMap<QName, ExtensionValidator>();
 
     BpelCompiler(WSDLFactory4BPEL wsdlFactory) {
         _wsdlFactory = wsdlFactory;
@@ -1668,9 +1666,6 @@ public abstract class BpelCompiler implements CompilerContext {
 
 		_declaredExtensionNS.add(ext.getNamespaceURI());
 		_oprocess.getDeclaredExtensions().add(oextension);
-		if (ext.isMustUnderstand()) {
-			_oprocess.getMustUnderstandExtensions().add(oextension);
-		}
 
 		if (__log.isDebugEnabled())
 			__log.debug("Compiled extension " + oextension);
@@ -1752,17 +1747,8 @@ public abstract class BpelCompiler implements CompilerContext {
         registerExpressionLanguage(expLangUri, (ExpressionCompiler) cls.newInstance());
     }
 
-    public void setExtensionValidators(
-			Map<QName, ExtensionValidator> extensionValidators) {
-		_extensionValidators = extensionValidators;
-	}
-
 	public boolean isExtensionDeclared(String namespace) {
 		return _declaredExtensionNS.contains(namespace);
-	}
-
-	public ExtensionValidator getExtensionValidator(QName extensionElementName) {
-		return _extensionValidators.get(extensionElementName);
 	}
 
     public List<OActivity> getActivityStack() {

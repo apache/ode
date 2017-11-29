@@ -76,12 +76,6 @@ public class OProcess extends OBase {
 
     public final HashMap<URI, OXslSheet> xslSheets = new HashMap<URI, OXslSheet>();
 
-    /** All declared extensions in the process. **/
-    public final Set<OExtension> declaredExtensions = new HashSet<OExtension>();
-
-    /** All must-understand extensions in the process. **/
-    public final Set<OExtension> mustUnderstandExtensions = new HashSet<OExtension>();
-
     public OProcess(String bpelVersion) {
         super(null);
         this.version = bpelVersion;
@@ -120,12 +114,12 @@ public class OProcess extends OBase {
         return processName;
     }
 
-    @SuppressWarnings("rawtypes")
-	public Collection getExpressionLanguages() {
+    @SuppressWarnings("unchecked")
+    public Collection getExpressionLanguages() {
         throw new UnsupportedOperationException(); // TODO: implement me!
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings("unchecked")
     public List<String> getCorrelators() {
         // MOVED from ProcessSchemaGenerator
         List<String> correlators = new ArrayList<String>();
@@ -191,18 +185,6 @@ public class OProcess extends OBase {
             return buf.toString();
         }
 
-    }
-    
-    public static class OExtension extends OBase {
-        static final long serialVersionUID = -1L  ;
-        public String namespaceURI;
-        public boolean mustUnderstand;
-        
-        public OExtension(OProcess process) { super(process); }
-
-        public String toString() {
-            return "{OExtension " + namespaceURI + (mustUnderstand ? " mustUnderstand" : "") + "}";
-        }
     }
 
     public QName getQName() {

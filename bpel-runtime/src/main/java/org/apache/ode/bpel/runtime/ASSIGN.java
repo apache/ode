@@ -18,15 +18,26 @@
  */
 package org.apache.ode.bpel.runtime;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.URI;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.compiler.bom.ExtensibilityQNames;
+import org.apache.ode.bpel.eapi.ExtensionContext;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.PartnerLinkModificationEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.extension.ExtensionOperation;
 import org.apache.ode.bpel.obj.OAssign;
 import org.apache.ode.bpel.obj.OAssign.DirectRef;
 import org.apache.ode.bpel.obj.OAssign.LValueExpression;
@@ -37,17 +48,17 @@ import org.apache.ode.bpel.obj.OExpression;
 import org.apache.ode.bpel.obj.OLink;
 import org.apache.ode.bpel.obj.OMessageVarType;
 import org.apache.ode.bpel.obj.OMessageVarType.Part;
-import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.OProcess.OProperty;
 import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.bpel.obj.OScope.Variable;
+import org.apache.ode.bpel.runtime.channels.ExtensionResponse;
 import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.common.extension.ExtensibilityQNames;
-import org.apache.ode.bpel.runtime.common.extension.ExtensionContext;
+import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.msg.MessageBundle;
-import org.apache.ode.bpel.evar.ExternalVariableModuleException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -57,17 +68,11 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
-import javax.xml.namespace.QName;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Assign activity run-time template.
+ * 
+ * @author Ode team
+ * @author Tammo van Lessen (University of Stuttgart) - extensionAssignOperation
  */
 class ASSIGN extends ACTIVITY {
     private static final long serialVersionUID = 1L;
@@ -82,7 +87,7 @@ class ASSIGN extends ACTIVITY {
     }
 
     public void run() {
-        OAssign oassign = getOAsssign();
+        OAssign oassign = getOAssign();
 
         FaultData faultData = null;
 
@@ -98,7 +103,7 @@ class ASSIGN extends ACTIVITY {
 					if (((OAssign.Copy) operation).isIgnoreMissingFromData()) {
 						if (fault
 								.getQName()
-								.equals(getOAsssign().getOwner().getConstants().getQnSelectionFailure())
+								.equals(getOAssign().getOwner().getConstants().getQnSelectionFailure())
 								&& (fault.getCause() != null && "ignoreMissingFromData"
 										.equals(fault.getCause().getMessage()))) {
 							continue;
@@ -107,7 +112,7 @@ class ASSIGN extends ACTIVITY {
 					if (((OAssign.Copy) operation).isIgnoreUninitializedFromVariable()) {
 						if (fault
 								.getQName()
-								.equals(getOAsssign().getOwner().getConstants().getQnUninitializedVariable())
+								.equals(getOAssign().getOwner().getConstants().getQnUninitializedVariable())
 								&& (fault.getCause() == null || !"throwUninitializedToVariable"
 										.equals(fault.getCause().getMessage()))) {
 							continue;
@@ -139,7 +144,7 @@ class ASSIGN extends ACTIVITY {
         return __log;
     }
 
-    private OAssign getOAsssign() {
+    private OAssign getOAssign() {
         return (OAssign) _self.o;
     }
 
@@ -152,12 +157,12 @@ class ASSIGN extends ACTIVITY {
                 lvar = _scopeFrame.resolve(to.getVariable());
             } catch (RuntimeException e) {
                 __log.error("iid: " + getBpelRuntimeContext().getPid() + " error evaluating lvalue");
-                throw new FaultException(getOAsssign().getOwner().getConstants().getQnSelectionFailure(), e.getMessage());
+                throw new FaultException(getOAssign().getOwner().getConstants().getQnSelectionFailure(), e.getMessage());
             }
             if (lvar == null) {
                 String msg = __msgs.msgEvalException(to.toString(), "Could not resolve variable in current scope");
                 if (__log.isDebugEnabled()) __log.debug(to + ": " + msg);
-                throw new FaultException(getOAsssign().getOwner().getConstants().getQnSelectionFailure(), msg);
+                throw new FaultException(getOAssign().getOwner().getConstants().getQnSelectionFailure(), msg);
             }
             if (!napi.isVariableInitialized(lvar)) {
                 Document doc = DOMUtils.newDocument();
@@ -260,16 +265,16 @@ class ASSIGN extends ACTIVITY {
                 String msg = __msgs.msgEvalException(from.toString(), e.getMessage());
                 if (__log.isDebugEnabled()) __log.debug(from + ": " + msg);
                 if (e.getCause() instanceof FaultException) throw (FaultException)e.getCause();
-                throw new FaultException(getOAsssign().getOwner().getConstants().getQnSelectionFailure(), msg);
+                throw new FaultException(getOAssign().getOwner().getConstants().getQnSelectionFailure(), msg);
             }
             if (l.size() == 0) {
                 String msg = __msgs.msgRValueNoNodesSelected(expr.toString());
                 if (__log.isDebugEnabled()) __log.debug(from + ": " + msg);
-                throw new FaultException(getOAsssign().getOwner().getConstants().getQnSelectionFailure(), msg, new Throwable("ignoreMissingFromData"));
+                throw new FaultException(getOAssign().getOwner().getConstants().getQnSelectionFailure(), msg, new Throwable("ignoreMissingFromData"));
             } else if (l.size() > 1) {
                 String msg = __msgs.msgRValueMultipleNodesSelected(expr.toString());
                 if (__log.isDebugEnabled()) __log.debug(from + ": " + msg);
-                throw new FaultException(getOAsssign().getOwner().getConstants().getQnSelectionFailure(), msg);
+                throw new FaultException(getOAssign().getOwner().getConstants().getQnSelectionFailure(), msg);
             }
             retVal = (Node) l.get(0);
         } else if (from instanceof OAssign.Literal) {
@@ -305,7 +310,7 @@ class ASSIGN extends ACTIVITY {
                         if (__log.isDebugEnabled())
                             __log.debug(from + ": " + msg);
                         throw new FaultException(
-                                getOAsssign().getOwner().getConstants().getQnSelectionFailure(),
+                                getOAssign().getOwner().getConstants().getQnSelectionFailure(),
                                 msg);
 
                     }
@@ -320,7 +325,7 @@ class ASSIGN extends ACTIVITY {
                         if (__log.isDebugEnabled())
                             __log.debug(from + ": " + msg);
                         throw new FaultException(
-                                getOAsssign().getOwner().getConstants().getQnSelectionFailure(),
+                                getOAssign().getOwner().getConstants().getQnSelectionFailure(),
                                 msg);
 
                     }
@@ -334,7 +339,7 @@ class ASSIGN extends ACTIVITY {
                 if (__log.isDebugEnabled())
                     __log.debug(from + ": " + msg);
                 throw new FaultException(
-                        getOAsssign().getOwner().getConstants().getQnSelectionFailure(),
+                        getOAssign().getOwner().getConstants().getQnSelectionFailure(),
                         msg);
             }
         } else {
@@ -343,7 +348,7 @@ class ASSIGN extends ACTIVITY {
             if (__log.isErrorEnabled())
                 __log.error(from + ": " + msg);
             throw new FaultException(
-                    getOAsssign().getOwner().getConstants().getQnSelectionFailure(), msg);
+                    getOAssign().getOwner().getConstants().getQnSelectionFailure(), msg);
         }
 
         // Now verify we got something.
@@ -352,7 +357,7 @@ class ASSIGN extends ACTIVITY {
             if (__log.isDebugEnabled())
                 __log.debug(from + ": " + msg);
             throw new FaultException(
-                    getOAsssign().getOwner().getConstants().getQnSelectionFailure(), msg);
+                    getOAssign().getOwner().getConstants().getQnSelectionFailure(), msg);
         }
 
         // Now check that we got the right thing.
@@ -368,7 +373,7 @@ class ASSIGN extends ACTIVITY {
                     __log.debug(from + ": " + msg);
 
                 throw new FaultException(
-                        getOAsssign().getOwner().getConstants().getQnSelectionFailure(), msg);
+                        getOAssign().getOwner().getConstants().getQnSelectionFailure(), msg);
 
         }
 
@@ -625,7 +630,7 @@ class ASSIGN extends ACTIVITY {
                 if (__log.isDebugEnabled())
                     __log.debug(lvaluePtr + ": " + msg);
                 throw new FaultException(
-                        getOAsssign().getOwner().getConstants().getQnSelectionFailure(), msg);
+                        getOAssign().getOwner().getConstants().getQnSelectionFailure(), msg);
         }
 
         return lvalue;
@@ -665,7 +670,7 @@ class ASSIGN extends ACTIVITY {
                 String msg = __msgs.msgEvalException(expression.toString(), e.getMessage());
                 if (__log.isDebugEnabled()) __log.debug(expression + ": " + msg);
                 if (e.getCause() instanceof FaultException) throw (FaultException)e.getCause();
-                throw new FaultException(getOAsssign().getOwner().getConstants().getQnSubLanguageExecutionFault(), msg);
+                throw new FaultException(getOAssign().getOwner().getConstants().getQnSubLanguageExecutionFault(), msg);
             }
         }
 
@@ -673,31 +678,41 @@ class ASSIGN extends ACTIVITY {
     }
 
 	private void invokeExtensionAssignOperation(OAssign.ExtensionAssignOperation eao) throws FaultException {
-        final ExtensionContext context = new ExtensionContextImpl(this, getBpelRuntimeContext());
+    	try {
+	    	final ExtensionContext helper = new ExtensionContextImpl(this._scopeFrame, getBpelRuntimeContext());
+	    	final ExtensionResponse responseChannel = newChannel(ExtensionResponse.class);
 
-        try {
-            ExtensionOperation ea = getBpelRuntimeContext().createExtensionActivityImplementation(eao.getExtensionName());
-            if (ea == null) {
-                for (OProcess.OExtension oe : eao.getOwner().getMustUnderstandExtensions()) {
-                    if (eao.getExtensionName().getNamespaceURI().equals(oe.getNamespace())) {
-                        __log.warn("Lookup of extension assign operation " + eao.getExtensionName() + " failed.");
-                        throw new FaultException(ExtensibilityQNames.UNKNOWN_EA_FAULT_NAME, "Lookup of extension assign operation " + eao.getExtensionName() + " failed. No implementation found.");
-                    }
-                }
-                // act like <empty> - do nothing
-                context.complete();
-                return;
-            }
+    		getBpelRuntimeContext().executeExtension(eao.getExtensionName(), helper, DOMUtils.stringToDOM(eao.getNestedElement()), responseChannel);
 
-            ea.run(context, DOMUtils.stringToDOM(eao.getNestedElement()));
-        } catch (FaultException fault) {
-            context.completeWithFault(fault);
-        } catch (SAXException e) {
-        	FaultException fault = new FaultException(ExtensibilityQNames.INVALID_EXTENSION_ELEMENT, "The nested element of extension assign operation '" + eao.getExtensionName() + "' is no valid XML.");
-        	context.completeWithFault(fault);
+    		object(new ReceiveProcess() {
+					private static final long serialVersionUID = 1467660715539203917L;
+				}.setChannel(responseChannel).setReceiver(new ExtensionResponse() {
+					private static final long serialVersionUID = 509910466826372712L;
+
+					public void onCompleted() {
+						_self.parent.completed(null, CompensationHandler.emptySet());
+	            	}
+	            	
+	            	public void onFailure(Throwable t) {
+	            		StringWriter sw = new StringWriter();
+	            		t.printStackTrace(new PrintWriter(sw));
+	            		FaultData fault = createFault(_self.o.getOwner().getConstants().getQnSubLanguageExecutionFault(), _self.o, sw.getBuffer().toString());
+	                    _self.parent.completed(fault, CompensationHandler.emptySet());
+	            	};
+            }));
+
+    	} catch (FaultException fault) {
+            __log.error("Exception while invoking extension assign operation", fault);
+            FaultData faultData = createFault(fault.getQName(), _self.o, fault.getMessage());
+            _self.parent.completed(faultData, CompensationHandler.emptySet());
+    	} catch (SAXException e) {
+    		__log.error("Exception while invoking extension assign operation", e);
+    		FaultData faultData = createFault(ExtensibilityQNames.INVALID_EXTENSION_ELEMENT, _self.o, "The nested element of extension assign operation '" + eao.getExtensionName() + "' is no valid XML.");
+    		_self.parent.completed(faultData, CompensationHandler.emptySet());
 		} catch (IOException e) {
-			FaultException fault = new FaultException(ExtensibilityQNames.INVALID_EXTENSION_ELEMENT, "The nested element of extension assign operation '" + eao.getExtensionName() + "' is no valid XML.");
-			context.completeWithFault(fault);
+			__log.error("Exception while invoking extension assign operation", e);
+			FaultData faultData = createFault(ExtensibilityQNames.INVALID_EXTENSION_ELEMENT, _self.o, "The nested element of extension assign operation '" + eao.getExtensionName() + "' is no valid XML.");
+			_self.parent.completed(faultData, CompensationHandler.emptySet());
 		}
     }
 

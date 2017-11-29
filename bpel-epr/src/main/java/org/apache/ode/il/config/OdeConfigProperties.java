@@ -112,10 +112,8 @@ public class OdeConfigProperties {
 
     public static final String DEFAULT_CLUSTERING_IMPL_CLASS_NAME = "org.apache.ode.clustering.hazelcast.HazelcastClusterImpl";
 
-    public static final String PROP_EXTENSION_BUNDLES_RT = "extension.bundles.runtime";
+    public static final String PROP_EXTENSION_BUNDLES = "extension.bundles";
     
-    public static final String PROP_EXTENSION_BUNDLES_VAL = "extension.bundles.validation";
-
     private File _cfgFile;
 
     private String _prefix;
@@ -388,11 +386,7 @@ public class OdeConfigProperties {
         return Integer.valueOf(getProperty(PROP_MIGRATION_TRANSACTION_TIMEOUT, String.valueOf(0)));
     }
 
-    public String getExtensionActivityBundlesRT() {
-	return getProperty(PROP_EXTENSION_BUNDLES_RT);
-    }
-
-    public String getExtensionActivityBundlesValidation() {
-	return getProperty(PROP_EXTENSION_BUNDLES_VAL);
+    public String getExtensionActivityBundles() {
+    	return getProperty(PROP_EXTENSION_BUNDLES);
     }
 }

@@ -20,7 +20,6 @@ package org.apache.ode.store;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -49,12 +48,8 @@ import org.apache.ode.bpel.compiler.wsdl.WSDLFactoryBPEL20;
 import org.apache.ode.bpel.dd.DeployDocument;
 import org.apache.ode.bpel.dd.TDeployment;
 import org.apache.ode.bpel.dd.TDeployment.Process;
-import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.iapi.ContextException;
-import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.serde.DeSerializer;
-import org.apache.ode.bpel.obj.serde.OmDeserializer;
-import org.apache.ode.bpel.obj.serde.OmSerdeFactory;
 import org.apache.ode.utils.InternPool;
 import org.apache.ode.utils.InternPool.InternableBlock;
 import org.apache.ode.utils.fs.FileUtils;
@@ -84,8 +79,6 @@ class DeploymentUnitDir {
 
     private volatile DeployDocument _dd;
     private volatile DocumentRegistry _docRegistry;
-
-    private Map<QName, ExtensionValidator> _extensionValidators;
 
     private long _version = -1;
 
@@ -202,7 +195,6 @@ class DeploymentUnitDir {
             bpelc.setProcessWSDL(bpel11wsdl.toURI());
 
         bpelc.setCompileProperties(prepareCompileProperties(bpelFile));
-        bpelc.setExtensionValidators(_extensionValidators);
         bpelc.setBaseDirectory(_duDirectory);
         // Create process such that immutable objects are intern'ed.
         InternPool.runBlock(new InternableBlock() {
@@ -350,10 +342,6 @@ class DeploymentUnitDir {
             }
         }
         return result;
-    }
-
-    public void setExtensionValidators(Map<QName, ExtensionValidator> extensionValidators) {
-    	_extensionValidators = extensionValidators;
     }
 
     public final class CBPInfo {

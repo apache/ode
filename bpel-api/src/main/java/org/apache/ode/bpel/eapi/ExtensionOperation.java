@@ -16,30 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.runtime.common.extension;
+package org.apache.ode.bpel.eapi;
 
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.extension.ExtensionOperation;
 import org.w3c.dom.Element;
 
 /**
- * Base class for creating new extension implementations.
+ * This is the basis interface for implementations of  
+ * <code>&lt;extensionAssignOperation&gt;</code> and <code>&lt;extensionActivity&gt;</code>
+ * nodes.
+ * 
+ * Implementations of this interface must provide a default constructor as they are created
+ * using reflection.
+ * 
+ * @see AbstractExtensionBundle
  * 
  * @author Tammo van Lessen (University of Stuttgart)
  */
-public abstract class AbstractSyncExtensionOperation implements
-		ExtensionOperation {
+public interface ExtensionOperation {
 
-	protected abstract void runSync(ExtensionContext context, Element element)
-			throws FaultException;
-
-	public void run(Object contexto, Element element) throws FaultException {
-		ExtensionContext context = (ExtensionContext) contexto;
-		try {
-			runSync(context, element);
-		} catch (FaultException f) {
-			throw f;
-		}
-	}
-	
+	void run(ExtensionContext context, Element element) throws FaultException;
 }

@@ -22,7 +22,6 @@ import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.CompositeActivity;
 import org.apache.ode.bpel.compiler.bom.ExtensionActivity;
-import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.obj.OActivity;
 import org.apache.ode.bpel.obj.OExtensionActivity;
 import org.apache.ode.utils.DOMUtils;
@@ -41,7 +40,7 @@ public class ExtensionActivtityGenerator extends DefaultActivityGenerator {
 	public void compile(OActivity output, Activity srcx) {
 		ExtensionActivity src = (ExtensionActivity) srcx;
 		OExtensionActivity oactivity = (OExtensionActivity) output;
-		Element child = src.getFirstExtensibilityElementElement();
+		Element child = src.getFirstExtensibilityElement();
 		try {
 			if (child == null) {
 				throw new CompilationException(
@@ -51,11 +50,7 @@ public class ExtensionActivtityGenerator extends DefaultActivityGenerator {
 				throw new CompilationException(__cmsgs
 						.errUndeclaredExtensionActivity().setSource(src));
 			}
-			ExtensionValidator validator = _context
-					.getExtensionValidator(DOMUtils.getElementQName(child));
-			if (validator != null) {
-				validator.validate(_context, src);
-			}
+			
 			oactivity.setExtensionName(DOMUtils.getElementQName(child));
 			oactivity.setNestedElement(DOMUtils.domToString(child));
 

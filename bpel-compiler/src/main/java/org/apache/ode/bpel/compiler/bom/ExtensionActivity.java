@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.w3c.dom.Element;
-import org.apache.ode.bpel.extension.ExtensibleElement;
 
 /**
  * BOM representation of the BPEL <code>&lt;extensionActivity&gt;</code>
@@ -35,16 +34,15 @@ import org.apache.ode.bpel.extension.ExtensibleElement;
  * 
  * @author Tammo van Lessen (University of Stuttgart)
  */
-public class ExtensionActivity extends CompositeActivity implements
-		ExtensibleElement {
+public class ExtensionActivity extends CompositeActivity {
 	private Activity _childActivity;
 
 	public ExtensionActivity(Element el) {
 		super(el);
 		_childActivity = null;
-		Element child = getFirstExtensibilityElementElement();
+                Element child = getFirstExtensibilityElement();
 		if (child != null) {
-			_childActivity = new Activity(getFirstExtensibilityElementElement());
+        	    _childActivity = new Activity(getFirstExtensibilityElement());
 		}
 	}
 
@@ -95,10 +93,6 @@ public class ExtensionActivity extends CompositeActivity implements
 		}
 
 		return _childActivity.getChildren(Activity.class);
-	}
-
-	public Element getNestedElement() {
-		return getFirstExtensibilityElementElement();
 	}
 
 }

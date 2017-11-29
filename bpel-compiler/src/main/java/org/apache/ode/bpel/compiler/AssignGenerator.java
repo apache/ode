@@ -33,7 +33,6 @@ import org.apache.ode.bpel.compiler.bom.PartnerLinkVal;
 import org.apache.ode.bpel.compiler.bom.PropertyVal;
 import org.apache.ode.bpel.compiler.bom.To;
 import org.apache.ode.bpel.compiler.bom.VariableVal;
-import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.obj.DebugInfo;
 import org.apache.ode.bpel.obj.OActivity;
 import org.apache.ode.bpel.obj.OAssign;
@@ -51,6 +50,7 @@ import javax.xml.namespace.QName;
  * Generates code for <code>&lt;assign&gt;</code> activities.
  *
  * @author Maciej Szefler ( m s z e f l e r @ g m a i l . c o m )
+ * @author Tammo van Lessen (University of Stuttgart)
  */
 class AssignGenerator extends DefaultActivityGenerator {
     private static final Logger __log = LoggerFactory.getLogger(AssignGenerator.class);
@@ -112,11 +112,6 @@ class AssignGenerator extends DefaultActivityGenerator {
 						throw new CompilationException(__cmsgs
 								.errUndeclaredExtensionAssignOperation()
 								.setSource(sop));
-					}
-					ExtensionValidator validator = _context
-							.getExtensionValidator(DOMUtils.getElementQName(el));
-					if (validator != null) {
-						validator.validate(_context, sop);
 					}
 					oext.setExtensionName(DOMUtils.getElementQName(el));
 					oext.setNestedElement(DOMUtils.domToString(el));

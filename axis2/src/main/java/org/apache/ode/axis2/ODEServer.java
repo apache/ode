@@ -19,13 +19,38 @@
 
 package org.apache.ode.axis2;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.sql.DataSource;
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.InvalidTransactionException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.Synchronization;
+import javax.transaction.SystemException;
+import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
+import javax.transaction.xa.XAResource;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.commons.httpclient.util.IdleConnectionTimeoutThread;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.ode.axis2.deploy.DeploymentPoller;
 import org.apache.ode.axis2.service.DeploymentWebService;
 import org.apache.ode.axis2.service.ManagementService;
@@ -35,19 +60,21 @@ import org.apache.ode.bpel.clapi.ClusterMemberListener;
 import org.apache.ode.bpel.clapi.ClusterProcessStore;
 import org.apache.ode.bpel.connector.BpelServerConnector;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.eapi.AbstractExtensionBundle;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
 import org.apache.ode.bpel.engine.cron.CronScheduler;
-import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
-import org.apache.ode.bpel.extension.ExtensionBundleValidation;
-import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
-import org.apache.ode.bpel.iapi.*;
+import org.apache.ode.bpel.iapi.BpelEventListener;
+import org.apache.ode.bpel.iapi.EndpointReferenceContext;
+import org.apache.ode.bpel.iapi.ProcessConf;
+import org.apache.ode.bpel.iapi.ProcessStoreEvent;
+import org.apache.ode.bpel.iapi.ProcessStoreListener;
+import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.bpel.pmapi.InstanceManagement;
 import org.apache.ode.bpel.pmapi.ProcessManagement;
-import org.apache.ode.bpel.runtime.common.extension.AbstractExtensionBundle;
 import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.scheduler.simple.JdbcDelegate;
@@ -56,22 +83,8 @@ import org.apache.ode.store.ClusterProcessStoreImpl;
 import org.apache.ode.store.ProcessStoreImpl;
 import org.apache.ode.utils.GUID;
 import org.apache.ode.utils.fs.TempFileManager;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.sql.DataSource;
-import javax.transaction.*;
-import javax.transaction.xa.XAResource;
-import javax.xml.namespace.QName;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Server class called by our Axis hooks to handle all ODE lifecycle management.
@@ -700,38 +713,18 @@ public class ODEServer {
 
     // Add support for extension bundles based on ODE 2.0 alpha branch
     private void registerExtensionActivityBundles() {
-		String extensionsRTStr = _odeConfig.getExtensionActivityBundlesRT();
-		String extensionsValStr = _odeConfig
-				.getExtensionActivityBundlesValidation();
-		if (extensionsRTStr != null) {
+		String extensionsStr = _odeConfig.getExtensionActivityBundles();
+		
+		if (extensionsStr != null) {
 			// TODO replace StringTokenizer by regex
-			for (StringTokenizer tokenizer = new StringTokenizer(
-					extensionsRTStr, ",;"); tokenizer.hasMoreTokens();) {
-				String bundleCN = tokenizer.nextToken();
-				
-				//@hahnml: Remove any whitespaces
-				bundleCN = bundleCN.replaceAll(" ", "");
-				
+			for (String bundleCN : extensionsStr.split("\\s*(,|;)\\s*")) {
 				try {
 					// instantiate bundle
-					ExtensionBundleRuntime bundleRT = (ExtensionBundleRuntime) Class
+					AbstractExtensionBundle bundle = (AbstractExtensionBundle) Class
 							.forName(bundleCN).newInstance();
 					
 					// register extension bundle (BPEL server)
-					_bpelServer.registerExtensionBundle(bundleRT);
-					
-					if (bundleRT instanceof AbstractExtensionBundle) {
-						AbstractExtensionBundle bundle = (AbstractExtensionBundle) bundleRT;
-						
-						//@hahnml: Get the registered validators from the process store
-						Map<QName, ExtensionValidator> validators = _store.getExtensionValidators();
-						
-						//Add the validators of this bundle to the existing validators
-						validators.putAll(bundle.getExtensionValidators());
-						
-						// register extension bundle (BPEL store)
-						_store.setExtensionValidators(validators);
-					}
+					_bpelServer.registerExtensionBundle(bundle);
 				} catch (Exception e) {
 					__log.warn("Couldn't register the extension bundle runtime "
 							+ bundleCN
@@ -739,45 +732,9 @@ public class ODEServer {
 							+ "loaded properly.");
 				}
 			}
-		}
-		if (extensionsValStr != null) {
-			Map<QName, ExtensionValidator> validators = new HashMap<QName, ExtensionValidator>();
-			for (StringTokenizer tokenizer = new StringTokenizer(
-					extensionsValStr, ",;"); tokenizer.hasMoreTokens();) {
-				String bundleCN = tokenizer.nextToken();
-				
-				//@hahnml: Remove any whitespaces
-				bundleCN = bundleCN.replaceAll(" ", "");
-				
-				try {
-					// instantiate bundle
-					ExtensionBundleValidation bundleVal = (ExtensionBundleValidation) Class
-							.forName(bundleCN).newInstance();
-					// add validators
-					validators.putAll(bundleVal.getExtensionValidators());
-				} catch (Exception e) {
-					__log.warn("Couldn't register the extension bundle validator "
-							+ bundleCN
-							+ ", the class couldn't be "
-							+ "loaded properly.");
-				}
-			}
-			// register extension bundle (BPEL store)
-			//@hahnml: Check if validators are registered already
-			if (_store.getExtensionValidators().isEmpty()) {
-				_store.setExtensionValidators(validators);
-			} else {
-				//@hahnml: Get the registered validators from the process store
-				Map<QName, ExtensionValidator> allValidators = _store.getExtensionValidators();
-				
-				//Add the registered validators to the existing validators
-				allValidators.putAll(validators);
-				
-				// register extension bundle (BPEL store)
-				_store.setExtensionValidators(allValidators);
-			}
-		}
-	}
+		}		
+    }
+
     private class ProcessStoreListenerImpl implements ProcessStoreListener {
 
         public void onProcessStoreEvent(ProcessStoreEvent event) {

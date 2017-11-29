@@ -27,6 +27,9 @@ import org.w3c.dom.Element;
  * BOM representation of the BPEL <code>&lt;assign&gt;</code> activity. The
  * <code>&lt;assign&gt;</code> activity is simply a collection of
  * <code>&lt;copy&gt;</code> entries ({@link Copy}).
+ * 
+ * @author Ode team
+ * @author Tammo van Lessen (University of Stuttgart)
  */
 public class AssignActivity extends Activity {
 

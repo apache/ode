@@ -16,23 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.ode.bpel.extension;
+package org.apache.ode.bpel.runtime.channels;
 
-import org.apache.ode.bpel.extension.ExtensibleElement;
+import org.apache.ode.jacob.Channel;
 
 /**
- * Interface that allows Ode extensions to validate an extension element's
- * content during compilation.
- * 
+ * Response channel for extension activity executions.
+ *
  * @author Tammo van Lessen (University of Stuttgart)
  */
-public interface ExtensionValidator {
+public interface ExtensionResponse extends Channel {
 
-	/**
-	 * 
-	 * @param compilerContext
-	 * @param element
-	 */
-	void validate(Object compilerContext, ExtensibleElement element);
-
+	void onCompleted();
+	
+	void onFailure(Throwable t);
+	
 }

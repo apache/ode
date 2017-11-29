@@ -18,28 +18,29 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.net.URI;
 import java.util.Collection;
 import java.util.Date;
-import java.net.URI;
 
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.eapi.ExtensionContext;
+import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
-import org.apache.ode.bpel.extension.ExtensionOperation;
+import org.apache.ode.bpel.iapi.ProcessConf.PartnerRoleConfig;
 import org.apache.ode.bpel.obj.OPartnerLink;
 import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.bpel.obj.OScope.Variable;
 import org.apache.ode.bpel.runtime.channels.ActivityRecovery;
+import org.apache.ode.bpel.runtime.channels.ExtensionResponse;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponse;
 import org.apache.ode.bpel.runtime.channels.PickResponse;
 import org.apache.ode.bpel.runtime.channels.TimerResponse;
-import org.apache.ode.bpel.evar.ExternalVariableModuleException;
-import org.apache.ode.bpel.iapi.ProcessConf.PartnerRoleConfig;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -313,12 +314,5 @@ public interface BpelRuntimeContext {
     
     void checkInvokeExternalPermission();
     
-    /**
-     * Create a new extension operation based on the given qualified name.
-     * 
-     * @param name The qualified name for which a corresponding extension operation should be created.
-     * 
-     * @return The created extension operation or NULL if no extension bundle registered a corresponding extension operation for the given qualified name.
-     */
-    ExtensionOperation createExtensionActivityImplementation(QName name);
+    void executeExtension(QName extensionId, ExtensionContext context, Element element, ExtensionResponse extResponseChannel) throws FaultException;
 }

@@ -21,6 +21,7 @@ package org.apache.ode.bpel.engine;
 
 import org.apache.ode.bpel.clapi.ClusterManager;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
+import org.apache.ode.bpel.eapi.AbstractExtensionBundle;
 import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
@@ -29,7 +30,6 @@ import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.engine.cron.CronScheduler;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
-import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 
 import java.util.HashMap;
 import java.util.List;
@@ -70,7 +70,7 @@ public class Contexts {
     
     public CustomProcessProperties customProcessProperties = new CustomProcessProperties(); 
 
-    /** Global extension bundle registry **/
-    final Map<String, ExtensionBundleRuntime> extensionRegistry = new ConcurrentHashMap<String, ExtensionBundleRuntime>();
+    	/** Global extension bundle registry **/
+    final Map<String, AbstractExtensionBundle> extensionRegistry = new ConcurrentHashMap<String, AbstractExtensionBundle>();
 
 }

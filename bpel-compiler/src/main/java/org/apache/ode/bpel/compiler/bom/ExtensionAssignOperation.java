@@ -19,7 +19,6 @@
 package org.apache.ode.bpel.compiler.bom;
 
 import org.apache.ode.bpel.compiler.bom.AssignActivity.AssignOperation;
-import org.apache.ode.bpel.extension.ExtensibleElement;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -29,8 +28,7 @@ import org.w3c.dom.NodeList;
  * 
  * @author Tammo van Lessen (University of Stuttgart)
  */
-public class ExtensionAssignOperation extends BpelObject implements
-		AssignOperation, ExtensibleElement {
+public class ExtensionAssignOperation extends BpelObject implements AssignOperation {
 	private Element _childElement;
 
 	public ExtensionAssignOperation(Element el) {
@@ -38,15 +36,12 @@ public class ExtensionAssignOperation extends BpelObject implements
 	}
 
 	public Element getNestedElement() {
-		// XXX
-		// return getFirstExtensibilityElement();
 		if (_childElement == null) {
 			NodeList nl = getElement().getChildNodes();
 			for (int i = 0; i < nl.getLength(); ++i) {
 				Node node = nl.item(i);
-				if (node.getNodeType() == Node.ELEMENT_NODE
-						&& !Bpel20QNames.NS_WSBPEL2_0.equals(node
-								.getNamespaceURI())) {
+	            if (node.getNodeType() == Node.ELEMENT_NODE && 
+	            		!Bpel20QNames.NS_WSBPEL2_0.equals(node.getNamespaceURI())) {
 					_childElement = (Element) node;
 					break;
 				}

@@ -51,7 +51,6 @@ import org.apache.ode.bpel.engine.extvar.ExternalVariableManager;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
@@ -131,8 +130,7 @@ public class BpelProcess {
     private ReplacementMap _replacementMap;
     final ProcessConf _pconf;
 
-	Set<String> _mustUnderstandExtensions;
-	Map<String, ExtensionBundleRuntime> _extensionRegistry;
+    Set<String> _mustUnderstandExtensions;
     
     /** {@link MessageExchangeInterceptor}s registered for this process. */
     private final List<MessageExchangeInterceptor> _mexInterceptors = new ArrayList<MessageExchangeInterceptor>();
@@ -591,10 +589,6 @@ public class BpelProcess {
         return routed;
     }
 
-	public void setExtensionRegistry(Map<String, ExtensionBundleRuntime> extensionRegistry) {
-		_extensionRegistry = extensionRegistry;
-	}
-    
     private void setRoles(OProcess oprocess) {
         _partnerRoles = new HashMap<OPartnerLink, PartnerLinkPartnerRoleImpl>();
         _myRoles = new HashMap<OPartnerLink, PartnerLinkMyRoleImpl>();
@@ -966,7 +960,7 @@ public class BpelProcess {
 //            }
             _replacementMap = null;
             _expLangRuntimeRegistry = null;
-	    _extensionRegistry = null;
+            _mustUnderstandExtensions = null;
         }
 
         private void doHydrate() {
@@ -1013,8 +1007,8 @@ public class BpelProcess {
 			_mustUnderstandExtensions = new HashSet<String>();
 			for (OProcess.OExtension extension : _oprocess.getDeclaredExtensions()) {
 				if (extension.isMustUnderstand()) {
-					if (_extensionRegistry.get(extension.getNamespace()) == null) {
-						String msg = __msgs.msgExtensionMustUnderstandError(_pconf.getProcessId(),
+					if (_engine._contexts.extensionRegistry.get(extension.getNamespace()) == null) {
+						String msg = __msgs.msgExtensionMustUnderstandError(_pid,
 								extension.getNamespace());
 						__log.error(msg);
 						throw new BpelEngineException(msg);

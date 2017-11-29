@@ -35,7 +35,6 @@ import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.BpelObject;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.compiler.bom.ScopeLikeActivity;
-import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.obj.OActivity;
 import org.apache.ode.bpel.obj.OElementVarType;
 import org.apache.ode.bpel.obj.OExpression;
@@ -254,11 +253,5 @@ public class MockCompilerContext implements CompilerContext {
     public boolean isExtensionDeclared(String namespace) {
 		// TODO Auto-generated method stub
 		return false;
-	}
-    
-	@Override
-	public ExtensionValidator getExtensionValidator(QName extensionElementName) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }
