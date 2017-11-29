@@ -23,6 +23,7 @@ import org.apache.ode.bpel.compiler.bom.Bpel20QNames;
 import org.apache.ode.bpel.compiler.bom.CompensateActivity;
 import org.apache.ode.bpel.compiler.bom.CompensateScopeActivity;
 import org.apache.ode.bpel.compiler.bom.EmptyActivity;
+import org.apache.ode.bpel.compiler.bom.ExtensionActivity;
 import org.apache.ode.bpel.compiler.bom.FlowActivity;
 import org.apache.ode.bpel.compiler.bom.ForEachActivity;
 import org.apache.ode.bpel.compiler.bom.IfActivity;
@@ -71,6 +72,7 @@ public class BpelCompiler20 extends BpelCompiler {
         registerActivityCompiler(TerminateActivity.class, new TerminateGenerator());
         registerActivityCompiler(RethrowActivity.class, new RethrowGenerator());
         registerActivityCompiler(ForEachActivity.class, new ForEachGenerator());
+        registerActivityCompiler(ExtensionActivity.class, new ExtensionActivtityGenerator());
 
         registerExpressionLanguage(OASIS_EXPLANG_XPATH_1_0, new XPath10ExpressionCompilerBPEL20());
 

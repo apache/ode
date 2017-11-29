@@ -34,6 +34,7 @@ import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
+import org.apache.ode.bpel.extension.ExtensionOperation;
 import org.apache.ode.bpel.iapi.ProcessConf.PartnerRoleConfig;
 import org.apache.ode.bpel.obj.OCatch;
 import org.apache.ode.bpel.obj.OEmpty;
@@ -480,4 +481,20 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 
     public void checkInvokeExternalPermission() {}
 
+    public Node initializeVariable(VariableInstance var, ScopeFrame scopeFrame,
+			Node val) throws ExternalVariableModuleException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Node fetchVariableData(VariableInstance variable,
+			ScopeFrame scopeFrame, boolean forWriting) throws FaultException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public ExtensionOperation createExtensionActivityImplementation(QName name) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

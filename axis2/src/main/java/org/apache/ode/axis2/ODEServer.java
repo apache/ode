@@ -38,12 +38,16 @@ import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.BpelServerImpl;
 import org.apache.ode.bpel.engine.CountLRUDehydrationPolicy;
 import org.apache.ode.bpel.engine.cron.CronScheduler;
+import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
+import org.apache.ode.bpel.extension.ExtensionBundleValidation;
+import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.extvar.jdbc.JdbcExternalVariableModule;
 import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.memdao.BpelDAOConnectionFactoryImpl;
 import org.apache.ode.bpel.pmapi.InstanceManagement;
 import org.apache.ode.bpel.pmapi.ProcessManagement;
+import org.apache.ode.bpel.runtime.common.extension.AbstractExtensionBundle;
 import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.il.dbutil.Database;
 import org.apache.ode.scheduler.simple.JdbcDelegate;
@@ -58,6 +62,8 @@ import javax.servlet.ServletException;
 import javax.sql.DataSource;
 import javax.transaction.*;
 import javax.transaction.xa.XAResource;
+import javax.xml.namespace.QName;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -195,6 +201,7 @@ public class ODEServer {
         registerEventListeners();
         registerMexInterceptors();
         registerExternalVariableModules();
+        registerExtensionActivityBundles();
 
         _store.loadAll();
         if (_clusterManager != null) {
@@ -691,6 +698,86 @@ public class ODEServer {
 
     }
 
+    // Add support for extension bundles based on ODE 2.0 alpha branch
+    private void registerExtensionActivityBundles() {
+		String extensionsRTStr = _odeConfig.getExtensionActivityBundlesRT();
+		String extensionsValStr = _odeConfig
+				.getExtensionActivityBundlesValidation();
+		if (extensionsRTStr != null) {
+			// TODO replace StringTokenizer by regex
+			for (StringTokenizer tokenizer = new StringTokenizer(
+					extensionsRTStr, ",;"); tokenizer.hasMoreTokens();) {
+				String bundleCN = tokenizer.nextToken();
+				
+				//@hahnml: Remove any whitespaces
+				bundleCN = bundleCN.replaceAll(" ", "");
+				
+				try {
+					// instantiate bundle
+					ExtensionBundleRuntime bundleRT = (ExtensionBundleRuntime) Class
+							.forName(bundleCN).newInstance();
+					
+					// register extension bundle (BPEL server)
+					_bpelServer.registerExtensionBundle(bundleRT);
+					
+					if (bundleRT instanceof AbstractExtensionBundle) {
+						AbstractExtensionBundle bundle = (AbstractExtensionBundle) bundleRT;
+						
+						//@hahnml: Get the registered validators from the process store
+						Map<QName, ExtensionValidator> validators = _store.getExtensionValidators();
+						
+						//Add the validators of this bundle to the existing validators
+						validators.putAll(bundle.getExtensionValidators());
+						
+						// register extension bundle (BPEL store)
+						_store.setExtensionValidators(validators);
+					}
+				} catch (Exception e) {
+					__log.warn("Couldn't register the extension bundle runtime "
+							+ bundleCN
+							+ ", the class couldn't be "
+							+ "loaded properly.");
+				}
+			}
+		}
+		if (extensionsValStr != null) {
+			Map<QName, ExtensionValidator> validators = new HashMap<QName, ExtensionValidator>();
+			for (StringTokenizer tokenizer = new StringTokenizer(
+					extensionsValStr, ",;"); tokenizer.hasMoreTokens();) {
+				String bundleCN = tokenizer.nextToken();
+				
+				//@hahnml: Remove any whitespaces
+				bundleCN = bundleCN.replaceAll(" ", "");
+				
+				try {
+					// instantiate bundle
+					ExtensionBundleValidation bundleVal = (ExtensionBundleValidation) Class
+							.forName(bundleCN).newInstance();
+					// add validators
+					validators.putAll(bundleVal.getExtensionValidators());
+				} catch (Exception e) {
+					__log.warn("Couldn't register the extension bundle validator "
+							+ bundleCN
+							+ ", the class couldn't be "
+							+ "loaded properly.");
+				}
+			}
+			// register extension bundle (BPEL store)
+			//@hahnml: Check if validators are registered already
+			if (_store.getExtensionValidators().isEmpty()) {
+				_store.setExtensionValidators(validators);
+			} else {
+				//@hahnml: Get the registered validators from the process store
+				Map<QName, ExtensionValidator> allValidators = _store.getExtensionValidators();
+				
+				//Add the registered validators to the existing validators
+				allValidators.putAll(validators);
+				
+				// register extension bundle (BPEL store)
+				_store.setExtensionValidators(allValidators);
+			}
+		}
+	}
     private class ProcessStoreListenerImpl implements ProcessStoreListener {
 
         public void onProcessStoreEvent(ProcessStoreEvent event) {

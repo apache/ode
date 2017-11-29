@@ -701,6 +701,10 @@ public class DOMUtils {
         }
         return true;
     }
+    
+    public static QName getElementQName(Element el) {
+        return new QName(el.getNamespaceURI(),el.getLocalName());
+    }
 
     public static QName getNodeQName(Node el) {
         String localName = el.getLocalName();

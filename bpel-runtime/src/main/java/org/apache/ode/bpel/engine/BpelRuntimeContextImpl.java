@@ -60,6 +60,8 @@ import org.apache.ode.bpel.evt.ScopeCompletionEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.ScopeFaultEvent;
 import org.apache.ode.bpel.evt.ScopeStartEvent;
+import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
+import org.apache.ode.bpel.extension.ExtensionOperation;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
@@ -1531,4 +1533,18 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
     public void forceFlush() {
         _forceFlush = true;
     }
+
+	public ExtensionOperation createExtensionActivityImplementation(QName name) {
+		if (name == null) return null;
+        ExtensionBundleRuntime bundle = _bpelProcess._extensionRegistry.get(name.getNamespaceURI());
+        if (bundle == null) {
+            return null;
+        } else {
+            try {
+                return bundle.getExtensionOperationInstance(name.getLocalPart());
+            } catch (Exception e) {
+                return null;
+            }
+        }
+	}
 }

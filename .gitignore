@@ -22,3 +22,5 @@ derby.log
 Gemfile.lock
 spoon
 *.log
+.m2/
+tmp/

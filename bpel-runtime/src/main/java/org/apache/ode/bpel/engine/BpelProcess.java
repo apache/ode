@@ -19,7 +19,6 @@
 package org.apache.ode.bpel.engine;
 
 import java.io.File;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,6 +51,7 @@ import org.apache.ode.bpel.engine.extvar.ExternalVariableManager;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.explang.EvaluationException;
+import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
@@ -131,6 +131,9 @@ public class BpelProcess {
     private ReplacementMap _replacementMap;
     final ProcessConf _pconf;
 
+	Set<String> _mustUnderstandExtensions;
+	Map<String, ExtensionBundleRuntime> _extensionRegistry;
+    
     /** {@link MessageExchangeInterceptor}s registered for this process. */
     private final List<MessageExchangeInterceptor> _mexInterceptors = new ArrayList<MessageExchangeInterceptor>();
 
@@ -588,6 +591,10 @@ public class BpelProcess {
         return routed;
     }
 
+	public void setExtensionRegistry(Map<String, ExtensionBundleRuntime> extensionRegistry) {
+		_extensionRegistry = extensionRegistry;
+	}
+    
     private void setRoles(OProcess oprocess) {
         _partnerRoles = new HashMap<OPartnerLink, PartnerLinkPartnerRoleImpl>();
         _myRoles = new HashMap<OPartnerLink, PartnerLinkMyRoleImpl>();
@@ -959,6 +966,7 @@ public class BpelProcess {
 //            }
             _replacementMap = null;
             _expLangRuntimeRegistry = null;
+	    _extensionRegistry = null;
         }
 
         private void doHydrate() {
@@ -999,6 +1007,25 @@ public class BpelProcess {
             // Create an expression language registry for this process
             _expLangRuntimeRegistry = new ExpressionLanguageRuntimeRegistry();
             registerExprLang(_oprocess);
+
+			// Checking for registered extension bundles, throw an exception when
+			// a "mustUnderstand" extension is not available
+			_mustUnderstandExtensions = new HashSet<String>();
+			for (OProcess.OExtension extension : _oprocess.getDeclaredExtensions()) {
+				if (extension.isMustUnderstand()) {
+					if (_extensionRegistry.get(extension.getNamespace()) == null) {
+						String msg = __msgs.msgExtensionMustUnderstandError(_pconf.getProcessId(),
+								extension.getNamespace());
+						__log.error(msg);
+						throw new BpelEngineException(msg);
+					} else {
+						_mustUnderstandExtensions.add(extension.getNamespace());
+					}
+				} else {
+					__log.warn("The process declares the extension namespace " + extension.getNamespace()
+							+ " that is unkown to the engine");
+				}
+			}
 
             setRoles(_oprocess);
             initExternalVariables();

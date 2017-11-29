@@ -29,9 +29,12 @@ import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.intercept.MessageExchangeInterceptor;
 import org.apache.ode.bpel.engine.cron.CronScheduler;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
+import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.xml.namespace.QName;
@@ -66,5 +69,8 @@ public class Contexts {
     final HashMap<QName, ExternalVariableModule> externalVariableEngines = new HashMap<QName, ExternalVariableModule>();
     
     public CustomProcessProperties customProcessProperties = new CustomProcessProperties(); 
+
+    /** Global extension bundle registry **/
+    final Map<String, ExtensionBundleRuntime> extensionRegistry = new ConcurrentHashMap<String, ExtensionBundleRuntime>();
 
 }

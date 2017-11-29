@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.dd.DeployDocument;
 import org.apache.ode.bpel.dd.TDeployment;
+import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.iapi.*;
 import org.apache.ode.il.config.OdeConfigProperties;
 import org.apache.ode.store.DeploymentUnitDir.CBPInfo;
@@ -88,7 +89,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
     protected File _configDir;
 
-
+    private Map<QName, ExtensionValidator> _extensionValidators = new HashMap<QName, ExtensionValidator>();
 
     /**
      * Executor used to process DB transactions. Allows us to isolate the TX context, and to ensure that only one TX gets executed a
@@ -189,6 +190,7 @@ public class ProcessStoreImpl implements ProcessStore {
 
         // Create the DU and compile/scan it before acquiring lock.
         final DeploymentUnitDir du = new DeploymentUnitDir(deploymentUnitDirectory);
+        du.setExtensionValidators(_extensionValidators);
         if( duName != null ) {
             // Override the package name if given from the parameter
             du.setName(duName);
@@ -927,4 +929,13 @@ public class ProcessStoreImpl implements ProcessStore {
         }
         return undeployed;
     }
+
+    public void setExtensionValidators(
+			Map<QName, ExtensionValidator> extensionValidators) {
+		_extensionValidators = extensionValidators;
+	}
+	
+	public Map<QName, ExtensionValidator> getExtensionValidators() {
+		return _extensionValidators;
+	}
 }

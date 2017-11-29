@@ -28,6 +28,7 @@ import javax.xml.namespace.QName;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
+import org.apache.ode.bpel.extension.ExtensionOperation;
 import org.apache.ode.bpel.obj.OPartnerLink;
 import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.OScope;
@@ -311,4 +312,13 @@ public interface BpelRuntimeContext {
     ClassLoader getProcessClassLoader();
     
     void checkInvokeExternalPermission();
+    
+    /**
+     * Create a new extension operation based on the given qualified name.
+     * 
+     * @param name The qualified name for which a corresponding extension operation should be created.
+     * 
+     * @return The created extension operation or NULL if no extension bundle registered a corresponding extension operation for the given qualified name.
+     */
+    ExtensionOperation createExtensionActivityImplementation(QName name);
 }

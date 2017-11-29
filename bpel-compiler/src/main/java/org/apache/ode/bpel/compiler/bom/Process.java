@@ -20,6 +20,7 @@ package org.apache.ode.bpel.compiler.bom;
 
 import org.w3c.dom.Element;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -111,4 +112,16 @@ public class Process extends Scope {
         return getChildren(Import.class);
     }
 
+    /**
+     * Get the <code>&lt;extensions&gt;</code>(s) of the process.
+     * 
+     * @return {@link Set} of {@link Extension}s
+     */
+    public List<Extension> getExtensions() {
+        Extensions extensions = getFirstChild(Extensions.class);
+        if (extensions == null)
+            return Collections.emptyList();
+        return extensions.getChildren(Extension.class);
+
+    }
 }

@@ -26,6 +26,7 @@ import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
+import org.apache.ode.bpel.extension.ExtensionOperation;
 import org.apache.ode.bpel.obj.OAssign;
 import org.apache.ode.bpel.obj.OAssign.DirectRef;
 import org.apache.ode.bpel.obj.OAssign.LValueExpression;
@@ -36,10 +37,13 @@ import org.apache.ode.bpel.obj.OExpression;
 import org.apache.ode.bpel.obj.OLink;
 import org.apache.ode.bpel.obj.OMessageVarType;
 import org.apache.ode.bpel.obj.OMessageVarType.Part;
+import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.OProcess.OProperty;
 import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.bpel.obj.OScope.Variable;
 import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.apache.ode.bpel.runtime.common.extension.ExtensibilityQNames;
+import org.apache.ode.bpel.runtime.common.extension.ExtensionContext;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.msg.MessageBundle;
@@ -82,23 +86,36 @@ class ASSIGN extends ACTIVITY {
 
         FaultData faultData = null;
 
-        for (OAssign.Copy aCopy : oassign.getCopy()) {
+		for (OAssign.OAssignOperation operation : oassign.getOperations()) {
             try {
-                copy(aCopy);
+                if (operation instanceof OAssign.Copy) {
+					copy((OAssign.Copy) operation);
+				} else if (operation instanceof OAssign.ExtensionAssignOperation) {
+					invokeExtensionAssignOperation((OAssign.ExtensionAssignOperation) operation);
+				}
             } catch (FaultException fault) {
-                if (aCopy.isIgnoreMissingFromData()) {
-                    if (fault.getQName().equals(getOAsssign().getOwner().getConstants().getQnSelectionFailure()) &&
-                            (fault.getCause() != null && "ignoreMissingFromData".equals(fault.getCause().getMessage()))) {
-                    continue;
-                    }
-                }
-                if (aCopy.isIgnoreUninitializedFromVariable()) {
-                    if (fault.getQName().equals(getOAsssign().getOwner().getConstants().getQnUninitializedVariable()) &&
-                            (fault.getCause() == null || !"throwUninitializedToVariable".equals(fault.getCause().getMessage()))) {
-                    continue;
-                    }
-                }
-                faultData = createFault(fault.getQName(), aCopy, fault
+            	if (operation instanceof OAssign.Copy) {
+					if (((OAssign.Copy) operation).isIgnoreMissingFromData()) {
+						if (fault
+								.getQName()
+								.equals(getOAsssign().getOwner().getConstants().getQnSelectionFailure())
+								&& (fault.getCause() != null && "ignoreMissingFromData"
+										.equals(fault.getCause().getMessage()))) {
+							continue;
+						}
+					}
+					if (((OAssign.Copy) operation).isIgnoreUninitializedFromVariable()) {
+						if (fault
+								.getQName()
+								.equals(getOAsssign().getOwner().getConstants().getQnUninitializedVariable())
+								&& (fault.getCause() == null || !"throwUninitializedToVariable"
+										.equals(fault.getCause().getMessage()))) {
+							continue;
+						}
+					}
+				}
+                
+                faultData = createFault(fault.getQName(), operation, fault
                         .getMessage());
                 break;
             } catch (ExternalVariableModuleException e) {
@@ -653,6 +670,35 @@ class ASSIGN extends ACTIVITY {
         }
 
         return data;
+    }
+
+	private void invokeExtensionAssignOperation(OAssign.ExtensionAssignOperation eao) throws FaultException {
+        final ExtensionContext context = new ExtensionContextImpl(this, getBpelRuntimeContext());
+
+        try {
+            ExtensionOperation ea = getBpelRuntimeContext().createExtensionActivityImplementation(eao.getExtensionName());
+            if (ea == null) {
+                for (OProcess.OExtension oe : eao.getOwner().getMustUnderstandExtensions()) {
+                    if (eao.getExtensionName().getNamespaceURI().equals(oe.getNamespace())) {
+                        __log.warn("Lookup of extension assign operation " + eao.getExtensionName() + " failed.");
+                        throw new FaultException(ExtensibilityQNames.UNKNOWN_EA_FAULT_NAME, "Lookup of extension assign operation " + eao.getExtensionName() + " failed. No implementation found.");
+                    }
+                }
+                // act like <empty> - do nothing
+                context.complete();
+                return;
+            }
+
+            ea.run(context, DOMUtils.stringToDOM(eao.getNestedElement()));
+        } catch (FaultException fault) {
+            context.completeWithFault(fault);
+        } catch (SAXException e) {
+        	FaultException fault = new FaultException(ExtensibilityQNames.INVALID_EXTENSION_ELEMENT, "The nested element of extension assign operation '" + eao.getExtensionName() + "' is no valid XML.");
+        	context.completeWithFault(fault);
+		} catch (IOException e) {
+			FaultException fault = new FaultException(ExtensibilityQNames.INVALID_EXTENSION_ELEMENT, "The nested element of extension assign operation '" + eao.getExtensionName() + "' is no valid XML.");
+			context.completeWithFault(fault);
+		}
     }
 
     private class EvaluationContextProxy implements EvaluationContext {

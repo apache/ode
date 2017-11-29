@@ -32,36 +32,37 @@ import org.w3c.dom.Document;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class OAssign extends OActivity  implements Serializable{
+public class OAssign extends OActivity implements Serializable {
 	public static final long serialVersionUID = -1L;
-	private static final String COPY = "copy";
+	private static final String OPERATION = "operation";
 
 	@JsonCreator
 	public OAssign(){
 	}
+	
 	public OAssign(OProcess owner, OActivity parent) {
 		super(owner, parent);
-		setCopy(new ArrayList<Copy>());
+		setOperations(new ArrayList<OAssignOperation>());
 	}
 
 	@Override
 	public void dehydrate() {
 		super.dehydrate();
-		for (Copy copy : getCopy()) {
-			copy.dehydrate();
+		for (OAssignOperation operation : getOperations()) {
+			operation.dehydrate();
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	@JsonIgnore
-	public List<Copy> getCopy() {
-		Object o = fieldContainer.get(COPY);
-		return o == null ? null : (List<Copy>)o;
+	public List<OAssignOperation> getOperations() {
+		Object o = fieldContainer.get(OPERATION);
+		return o == null ? null : (List<OAssignOperation>)o;
 	}
 
-	public void setCopy(List<Copy> copy) {
-		if (getCopy() == null){
-			fieldContainer.put(COPY, copy);
+	public void setOperations(List<OAssignOperation> operation) {
+		if (getOperations() == null){
+			fieldContainer.put(OPERATION, operation);
 		}
 	}
 
@@ -69,12 +70,31 @@ public class OAssign extends OActivity  implements Serializable{
 		return "{OAssign : " + getName() + ", joinCondition="
 				+ getJoinCondition() + "}";
 	}
+	
+	/** 
+     * Base class for assign operations.
+     */
+    public static abstract class OAssignOperation extends OBase implements Serializable {
+		private static final long serialVersionUID = -3042873658302758854L;
+
+		public enum Type { Copy, ExtensionOperation }
+
+		@JsonCreator
+		public OAssignOperation() {
+		}
+		
+    	public OAssignOperation(OProcess owner) {
+    		super(owner);
+    	}
+    	
+    	public abstract Type getType();
+    }
 
 	/**
-	 * Assignmenet copy entry, i.e. what the assignment consits of.
+	 * Assignment copy entry, i.e. what the assignment consists of.
 	 */
-	public static class Copy extends OBase  implements Serializable{
-	public static final long serialVersionUID = -1L;
+	public static class Copy extends OAssignOperation implements Serializable {
+	    public static final long serialVersionUID = -1L;
 		private static final String TO = "to";
 		private static final String FROM = "from";
 		private static final String KEEPSRCELEMENTNAME = "keepSrcElementName";
@@ -86,10 +106,12 @@ public class OAssign extends OActivity  implements Serializable{
 		public Copy(){
 			initPrimitive();
 		}
+		
 		public Copy(OProcess owner) {
 			super(owner);
 			initPrimitive();
 		}
+		
 		private void initPrimitive(){
 			setIgnoreMissingFromData(false);
 			setIgnoreUninitializedFromVariable(false);
@@ -107,13 +129,13 @@ public class OAssign extends OActivity  implements Serializable{
 		@JsonIgnore
 		public RValue getFrom() {
 			Object o = fieldContainer.get(FROM);
-		return o == null ? null : (RValue)o;
+			return o == null ? null : (RValue)o;
 		}
 
 		@JsonIgnore
 		public boolean isIgnoreMissingFromData() {
 			Object o = fieldContainer.get(IGNOREMISSINGFROMDATA);
-		return o == null ? false : (Boolean)o;
+			return o == null ? false : (Boolean)o;
 		}
 
 		@JsonIgnore
@@ -125,19 +147,19 @@ public class OAssign extends OActivity  implements Serializable{
 		@JsonIgnore
 		public boolean isInsertMissingToData() {
 			Object o = fieldContainer.get(INSERTMISSINGTODATA);
-		return o == null ? false : (Boolean)o;
+			return o == null ? false : (Boolean)o;
 		}
 
 		@JsonIgnore
 		public boolean isKeepSrcElementName() {
 			Object o = fieldContainer.get(KEEPSRCELEMENTNAME);
-		return o == null ? false : (Boolean)o;
+			return o == null ? false : (Boolean)o;
 		}
 
 		@JsonIgnore
 		public LValue getTo() {
 			Object o = fieldContainer.get(TO);
-		return o == null ? null : (LValue)o;
+			return o == null ? null : (LValue)o;
 		}
 
 		public void setFrom(RValue from) {
@@ -169,7 +191,65 @@ public class OAssign extends OActivity  implements Serializable{
 		public String toString() {
 			return "{OCopy " + getTo() + "=" + getFrom() + "}";
 		}
+		
+		@JsonIgnore
+		public Type getType() {
+        	return Type.Copy;
+        }
 	}
+	
+	/**
+     * Assignment extension operation entry, i.e. what the assignment consists of.
+     */
+    public static class ExtensionAssignOperation extends OAssignOperation {
+        private static final long serialVersionUID = 1L;
+        
+        private static final String EXTENSIONNAME = "extensionName";
+		private static final String NESTEDELEMENT = "nestedElement";
+		
+		@JsonCreator
+		public ExtensionAssignOperation(){
+		}
+
+        public ExtensionAssignOperation(OProcess owner) {
+            super(owner);
+        }
+
+        @JsonIgnore
+		public QName getExtensionName() {
+			Object o = fieldContainer.get(EXTENSIONNAME);
+			return o == null ? null : (QName) o;
+		}
+        
+        @JsonIgnore
+		public String getNestedElement() {
+			Object o = fieldContainer.get(NESTEDELEMENT);
+			return o == null ? null : (String)o;
+		}
+        
+        public void setExtensionName(QName extensionName) {
+			fieldContainer.put(EXTENSIONNAME, extensionName);
+		}
+        
+        public void setNestedElement(String nestedElement) {
+			fieldContainer.put(NESTEDELEMENT, nestedElement);
+		}
+
+        public String toString() {
+            return "{OExtensionAssignOperation; " + getExtensionName() + "}";
+        }
+        
+        @Override
+		public void dehydrate() {
+			super.dehydrate();
+			setExtensionName(null);
+			setNestedElement(null);
+		}
+
+        public Type getType() {
+			return Type.ExtensionOperation;
+		}
+    }
 
 	/**
 	 * Direct reference: selects named child of the message document element.

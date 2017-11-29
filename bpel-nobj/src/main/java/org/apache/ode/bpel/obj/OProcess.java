@@ -20,7 +20,6 @@ package org.apache.ode.bpel.obj;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
@@ -92,7 +91,12 @@ public class OProcess extends OBase  implements Serializable{
 	private static final String XSDTYPES = "xsdTypes";
 	private static final String XSLSHEETS = "xslSheets";
 	private static final String NAMESPACECONTEXT = "namespaceContext";
-
+	
+	/** All declared extensions in the process. **/
+	private static final String DECLAREDEXTENSIONS = "declaredExtensions";
+	/** All must-understand extensions in the process. **/
+	private static final String MUSTUNDERSTANDEXTENSIONS = "mustUnderstandExtensions";
+	
 	/**
 	 * This constructor should only be used by Jackson when deserialize.
 	 */
@@ -114,6 +118,9 @@ public class OProcess extends OBase  implements Serializable{
 		setXsdTypes(new HashMap<QName, OXsdTypeVarType>());
 		setXslSheets(new HashMap<URI, OXslSheet>());
 		
+		setDeclaredExtensions(new HashSet<OExtension>());
+		setMustUnderstandExtensions(new HashSet<OExtension>());
+		
 		setChildIdCounter(0);
 	}
 
@@ -130,6 +137,8 @@ public class OProcess extends OBase  implements Serializable{
 		getElementTypes().clear();
 		getXsdTypes().clear();
 		getXslSheets().clear();
+		getDeclaredExtensions().clear();
+		getMustUnderstandExtensions().clear();
 	}
 
 	@Override
@@ -164,6 +173,7 @@ public class OProcess extends OBase  implements Serializable{
 		return o == null ? 0 : (Integer)o;
 	}
 
+	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public List<OBase> getChildren() {
 		Object o = fieldContainer.get(CHILDREN);
@@ -182,9 +192,9 @@ public class OProcess extends OBase  implements Serializable{
 		return o == null ? null : (OConstants)o;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@ObjectDiffProperty(ignore = true)
 	@JsonIgnore
-	@SuppressWarnings("unchecked")
 	public List<String> getCorrelators() {
 		// MOVED from ProcessSchemaGenerator
 		List<String> correlators = new ArrayList<String>();
@@ -311,6 +321,20 @@ public class OProcess extends OBase  implements Serializable{
 		Object o = fieldContainer.get(XSLSHEETS);
 		return o == null ? null : (HashMap<URI, OXslSheet>)o;
 	}
+	
+	@SuppressWarnings("unchecked")
+	@JsonIgnore
+	public Set<OExtension> getDeclaredExtensions() {
+		return (Set<OExtension>) fieldContainer
+				.get(DECLAREDEXTENSIONS);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@JsonIgnore
+	public Set<OExtension> getMustUnderstandExtensions() {
+		return (Set<OExtension>) fieldContainer
+				.get(MUSTUNDERSTANDEXTENSIONS);
+	}
 
 	public void setAllPartnerLinks(Set<OPartnerLink> allPartnerLinks) {
 		if (getAllPartnerLinks() == null) {
@@ -396,6 +420,18 @@ public class OProcess extends OBase  implements Serializable{
 	public void setXslSheets(HashMap<URI, OXslSheet> xslSheets) {
 		if (getXslSheets() == null) {
 			fieldContainer.put(XSLSHEETS, xslSheets);
+		}
+	}
+	
+	public void setDeclaredExtensions(Set<OExtension> extensions) {
+		if (getDeclaredExtensions() == null) {
+			fieldContainer.put(DECLAREDEXTENSIONS, extensions);
+		}
+	}
+	
+	public void setMustUnderstandExtensions(Set<OExtension> extensions) {
+		if (getMustUnderstandExtensions() == null) {
+			fieldContainer.put(MUSTUNDERSTANDEXTENSIONS, extensions);
 		}
 	}
 
@@ -535,6 +571,42 @@ public class OProcess extends OBase  implements Serializable{
 		}
 
 	}
+	
+	public static class OExtension extends OBase implements Serializable {
+		public static final long serialVersionUID = -1L  ;
+        
+        private static final String NAMESPACE = "namespaceURI";
+		private static final String MUSTUNDERSTAND = "mustUnderstand";
+        
+        @JsonCreator
+		public OExtension(){}
+        
+        public OExtension(OProcess process) { super(process); }
+        
+        @JsonIgnore
+		public String getNamespace() {
+			Object o = fieldContainer.get(NAMESPACE);
+			return o == null ? null : (String)o;
+		}
+
+		@JsonIgnore
+		public boolean isMustUnderstand() {
+			Object o = fieldContainer.get(MUSTUNDERSTAND);
+			return o == null ? false : (Boolean)o;
+		}
+		
+		public void setNamespace(String namespaceURI) {
+			fieldContainer.put(NAMESPACE, namespaceURI);
+		}
+
+		public void setMustUnderstand(boolean mustUnderstand) {
+			fieldContainer.put(MUSTUNDERSTAND, mustUnderstand);
+		}
+
+        public String toString() {
+            return "{OExtension " + getNamespace() + (isMustUnderstand() ? " mustUnderstand" : "") + "}";
+        }
+    }
 
 	/**
 	 * custom deserializer of OProcess.

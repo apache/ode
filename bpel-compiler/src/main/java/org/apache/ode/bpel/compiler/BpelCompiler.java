@@ -63,6 +63,7 @@ import org.apache.ode.bpel.compiler.bom.Correlation;
 import org.apache.ode.bpel.compiler.bom.CorrelationSet;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.compiler.bom.Expression11;
+import org.apache.ode.bpel.compiler.bom.Extension;
 import org.apache.ode.bpel.compiler.bom.FaultHandler;
 import org.apache.ode.bpel.compiler.bom.Import;
 import org.apache.ode.bpel.compiler.bom.LinkSource;
@@ -81,6 +82,7 @@ import org.apache.ode.bpel.compiler.bom.TerminationHandler;
 import org.apache.ode.bpel.compiler.bom.Variable;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
+import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.obj.DebugInfo;
 import org.apache.ode.bpel.obj.OActivity;
 import org.apache.ode.bpel.obj.OAssign;
@@ -138,7 +140,7 @@ public abstract class BpelCompiler implements CompilerContext {
 
     private Date _generatedDate;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     private HashMap<Class, ActivityGenerator> _actGenerators = new HashMap<Class, ActivityGenerator>();
 
     private boolean _supressJoinFailure = false;
@@ -181,6 +183,9 @@ public abstract class BpelCompiler implements CompilerContext {
     private Map<QName, Node> _customProcessProperties;
 
     private URI _processURI;
+
+    private final Set<String> _declaredExtensionNS = new HashSet<String>();
+	private Map<QName, ExtensionValidator> _extensionValidators = new HashMap<QName, ExtensionValidator>();
 
     BpelCompiler(WSDLFactory4BPEL wsdlFactory) {
         _wsdlFactory = wsdlFactory;
@@ -732,6 +737,11 @@ public abstract class BpelCompiler implements CompilerContext {
                 compile(propertyAlias);
             }
         }
+
+        // compile extensions
+	for (Extension e : _processDef.getExtensions()) {
+		compileExtension(e);
+	}
 
         OScope procesScope = new OScope(_oprocess, null);
         procesScope.setName("__PROCESS_SCOPE:" + (process.getName()));
@@ -1628,16 +1638,43 @@ public abstract class BpelCompiler implements CompilerContext {
         for (OActivity act : _compiledActivities) {
             if (act instanceof OAssign) {
                 OAssign assign = (OAssign) act;
-                for (OAssign.Copy copy : assign.getCopy()) {
-                    if (copy.getTo() instanceof OAssign.PartnerLinkRef) {
-                        if (((OAssign.PartnerLinkRef) copy.getTo()).getPartnerLink().getName().equals(plink))
-                            return true;
-                    }
-                }
+                for (OAssign.OAssignOperation operation : assign.getOperations()) {
+					if (operation instanceof OAssign.Copy) {
+						OAssign.Copy copy = (OAssign.Copy) operation;
+						if (copy.getTo() instanceof OAssign.PartnerLinkRef) {
+							if (((OAssign.PartnerLinkRef) copy.getTo()).getPartnerLink()
+									.getName().equals(plink))
+								return true;
+						}
+					}
+				}
             }
         }
         return false;
     }
+
+    /**
+	 * Registers a declared extension. Since compilation may take place
+	 * independently of the target engine configuration, the compiler will not
+	 * check whether a extension implementation is registered.
+	 */
+	private void compileExtension(Extension ext) {
+		OProcess.OExtension oextension = new OProcess.OExtension(_oprocess);
+		oextension.setNamespace(ext.getNamespaceURI());
+		oextension.setMustUnderstand(ext.isMustUnderstand());
+
+		oextension.setDebugInfo(createDebugInfo(_processDef,
+				"Extension " + ext.getNamespaceURI()));
+
+		_declaredExtensionNS.add(ext.getNamespaceURI());
+		_oprocess.getDeclaredExtensions().add(oextension);
+		if (ext.isMustUnderstand()) {
+			_oprocess.getMustUnderstandExtensions().add(oextension);
+		}
+
+		if (__log.isDebugEnabled())
+			__log.debug("Compiled extension " + oextension);
+	}
 
     public Definition[] getWsdlDefinitions() {
         Definition[] result = new Definition[_wsdlRegistry.getDefinitions().length];
@@ -1657,7 +1694,7 @@ public abstract class BpelCompiler implements CompilerContext {
         return type;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     private ActivityGenerator findActivityGen(Activity source) {
 
         Class actClass = source.getClass();
@@ -1674,7 +1711,7 @@ public abstract class BpelCompiler implements CompilerContext {
         throw new CompilationException(__cmsgs.errUnknownActivity(actClass.getName()).setSource(source));
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     protected void registerActivityCompiler(Class defClass, ActivityGenerator generator) {
         if (__log.isDebugEnabled()) {
             __log.debug("Adding compiler for nodes class \"" + defClass.getName() + " = " + generator);
@@ -1709,11 +1746,24 @@ public abstract class BpelCompiler implements CompilerContext {
         _expLanguageCompilers.put(expLangUri, expressionCompiler);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     protected void registerExpressionLanguage(String expLangUri, String classname) throws Exception {
         Class cls = Class.forName(classname);
         registerExpressionLanguage(expLangUri, (ExpressionCompiler) cls.newInstance());
     }
+
+    public void setExtensionValidators(
+			Map<QName, ExtensionValidator> extensionValidators) {
+		_extensionValidators = extensionValidators;
+	}
+
+	public boolean isExtensionDeclared(String namespace) {
+		return _declaredExtensionNS.contains(namespace);
+	}
+
+	public ExtensionValidator getExtensionValidator(QName extensionElementName) {
+		return _extensionValidators.get(extensionElementName);
+	}
 
     public List<OActivity> getActivityStack() {
         ArrayList<OActivity> rval = new ArrayList<OActivity>(_structureStack._stack);

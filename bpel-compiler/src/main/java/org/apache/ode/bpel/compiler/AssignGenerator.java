@@ -23,7 +23,9 @@ import org.slf4j.LoggerFactory;
 import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.AssignActivity;
+import org.apache.ode.bpel.compiler.bom.AssignActivity.AssignOperation;
 import org.apache.ode.bpel.compiler.bom.Copy;
+import org.apache.ode.bpel.compiler.bom.ExtensionAssignOperation;
 import org.apache.ode.bpel.compiler.bom.ExtensionVal;
 import org.apache.ode.bpel.compiler.bom.From;
 import org.apache.ode.bpel.compiler.bom.LiteralVal;
@@ -31,6 +33,7 @@ import org.apache.ode.bpel.compiler.bom.PartnerLinkVal;
 import org.apache.ode.bpel.compiler.bom.PropertyVal;
 import org.apache.ode.bpel.compiler.bom.To;
 import org.apache.ode.bpel.compiler.bom.VariableVal;
+import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.obj.DebugInfo;
 import org.apache.ode.bpel.obj.OActivity;
 import org.apache.ode.bpel.obj.OAssign;
@@ -62,7 +65,9 @@ class AssignGenerator extends DefaultActivityGenerator {
     public void compile(OActivity dest, Activity source) {
         OAssign oassign = (OAssign) dest;
         AssignActivity ad = (AssignActivity) source;
-        for (Copy scopy : ad.getCopies()) {
+		for (AssignOperation operation : ad.getOperations()) {
+			if (operation instanceof Copy) {
+				Copy scopy = (Copy) operation;
             OAssign.Copy ocopy = new OAssign.Copy(_context.getOProcess());
             ocopy.setKeepSrcElementName(scopy.isKeepSrcElement());
             ocopy.setIgnoreMissingFromData(scopy.isIgnoreMissingFromData());
@@ -81,11 +86,45 @@ class AssignGenerator extends DefaultActivityGenerator {
                 ocopy.setFrom(compileFrom(scopy.getFrom(), toResultType[0]));
 
                 verifyCopy(ocopy);
-                oassign.getCopy().add(ocopy);
+                oassign.getOperations().add(ocopy);
 
             } catch (CompilationException ce) {
                 _context.recoveredFromError(scopy, ce);
             }
+			} else if (operation instanceof ExtensionAssignOperation) {
+				ExtensionAssignOperation sop = (ExtensionAssignOperation) operation;
+				OAssign.ExtensionAssignOperation oext = new OAssign.ExtensionAssignOperation(
+						_context.getOProcess());
+				oext.setDebugInfo(new DebugInfo(_context.getSourceLocation(),
+						sop.getLineNo(), source.getExtensibilityElements()));
+				try {
+					if (source.is20Draft()) {
+						throw new CompilationException(
+								__cmsgs.errExtensibleAssignNotSupported());
+					}
+					Element el = sop.getNestedElement();
+					if (el == null) {
+						throw new CompilationException(__cmsgs
+								.errMissingExtensionAssignOperationElement()
+								.setSource(sop));
+					}
+					if (!_context.isExtensionDeclared(el.getNamespaceURI())) {
+						throw new CompilationException(__cmsgs
+								.errUndeclaredExtensionAssignOperation()
+								.setSource(sop));
+					}
+					ExtensionValidator validator = _context
+							.getExtensionValidator(DOMUtils.getElementQName(el));
+					if (validator != null) {
+						validator.validate(_context, sop);
+					}
+					oext.setExtensionName(DOMUtils.getElementQName(el));
+					oext.setNestedElement(DOMUtils.domToString(el));
+					oassign.getOperations().add(oext);
+				} catch (CompilationException ce) {
+					_context.recoveredFromError(sop, ce);
+				}
+			}
         }
     }
 
