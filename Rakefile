@@ -78,8 +78,8 @@ define "ode" do
   project.version = VERSION_NUMBER
   project.group = "org.apache.ode"
 
-  compile.options.source = "1.7"
-  compile.options.target = "1.7"
+  compile.options.source = "1.8"
+  compile.options.target = "1.8"
   manifest["Implementation-Vendor"] = "Apache Software Foundation"
   meta_inf << file("NOTICE")
 
