@@ -287,7 +287,7 @@ public class DeepEqualityHelper{
 
 	private EqualityComparator getCustomComparator(Object obj) {
 		for (EqualityComparator c : comparators){
-			if (c.canHanle(obj)){
+			if (c.canHandle(obj)){
 				return c;
 			}
 		}

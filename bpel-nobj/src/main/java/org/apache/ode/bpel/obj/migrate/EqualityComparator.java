@@ -13,7 +13,7 @@ public interface EqualityComparator {
 	 * decide if the comparator can handle the specified object.
 	 * Usually called before {@link EqualityComparator#objectsEqual(Object, Object)} are invoked.
 	 */
-	Boolean canHanle(Object obj);
+	Boolean canHandle(Object obj);
 	
 	void setDeepEquality(DeepEqualityHelper deepEquality);
 }

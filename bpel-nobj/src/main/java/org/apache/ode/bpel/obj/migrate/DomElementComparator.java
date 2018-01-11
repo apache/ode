@@ -76,7 +76,7 @@ public class DomElementComparator implements EqualityComparator{
 		return str;
 	}
 	@Override
-	public Boolean canHanle(Object obj) {
+	public Boolean canHandle(Object obj) {
 		return obj instanceof Element;
 	}
 

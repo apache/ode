@@ -84,7 +84,7 @@ public class ExtensibeImplEqualityComp implements EqualityComparator{
 		}
 	}
 	@Override
-	public Boolean canHanle(Object obj) {
+	public Boolean canHandle(Object obj) {
 		return obj instanceof ExtensibleImpl;
 	}
 
