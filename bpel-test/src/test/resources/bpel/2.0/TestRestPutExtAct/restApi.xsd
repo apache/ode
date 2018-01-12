@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/restApi"
+	xmlns:tns="http://www.example.org/restApi" xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+	<xsd:complexType name="putRequestType">
+		<xsd:sequence>
+			<xsd:element name="value" type="xsd:string"></xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="putResponseType">
+		<xsd:sequence>
+			<xsd:element name="result" type="xsd:string"></xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:element name="putRequest" type="tns:putRequestType"></xsd:element>
+	<xsd:element name="putResponse" type="tns:putResponseType"></xsd:element>
+</schema>

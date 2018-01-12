@@ -102,7 +102,7 @@ define "ode" do
     libs = projects("axis2", "bpel-api", "bpel-compiler", "bpel-connector", "bpel-dao",
       "bpel-epr", "bpel-nobj", "bpel-obj", "bpel-ql", "bpel-runtime", "scheduler-simple",
       "bpel-schemas", "bpel-store", "dao-hibernate", "jca-ra", "jca-server",
-      "utils", "dao-jpa", "agents", "clustering"),
+      "utils", "dao-jpa", "agents", "clustering", "bpel-rest-extensions"),
       AXIS2_ALL, ANNONGEN, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.fileupload, COMMONS.io, COMMONS.httpclient, COMMONS.beanutils,
       COMMONS.lang, COMMONS.pool, DERBY, DERBY_TOOLS, JACOB, JAXEN, JAVAX.activation, JAVAX.ejb, JAVAX.javamail,
       JAVAX.connector, JAVAX.jms, JAVAX.persistence, JAVAX.transaction, JAVAX.stream,  JIBX,
@@ -323,7 +323,7 @@ define "ode" do
       SPRING_TEST, COMMONS.codec, SLF4J, LOG4J2
 
     test.using :properties=>{ "org.apache.ode.autoRetireProcess"=>"true" }
-    test.with projects("bpel-nobj", "bpel-obj", "bpel-schemas", "bpel-scripts"),
+    test.with projects("bpel-nobj", "bpel-obj", "bpel-schemas", "bpel-scripts", "bpel-rest-extensions"),
       COMMONS.collections, COMMONS.lang, DERBY, JACOB, JAVAX.connector,
       JAVAX.stream, JAVAX.transaction, JAVAX.connector, JAXEN, HSQLDB, SAXON, XERCES, XMLBEANS, XALAN, GERONIMO.transaction, SPRING, HIBERNATE, DOM4J, H2::REQUIRES, JACKSON
 
@@ -514,7 +514,7 @@ define "ode" do
 #       libs = artifacts(package(:jar),
 #         projects("bpel-api", "bpel-api-jca", "bpel-compiler", "bpel-connector", "bpel-dao",
 #         "bpel-epr", "jca-ra", "jca-server", "bpel-nobj", "bpel-ql", "bpel-runtime",
-#         "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa", "utils", "agents"),
+#         "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa", "utils", "agents", "bpel-rest-extensions"),
 #         ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
 #         COMMONS.primitives, DERBY, GERONIMO.connector, GERONIMO.transaction, JACOB, JAVAX.connector,
 #         JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, JAXEN, OPENJPA,
@@ -647,7 +647,7 @@ define "ode" do
 #   define "jbi-bundle" do
 #     ode_libs = artifacts(projects("bpel-api", "bpel-api-jca", "bpel-compiler", "bpel-connector", "bpel-dao", "bpel-epr",
 #                                   "jca-ra", "jca-server", "bpel-nobj", "bpel-obj", "bpel-ql", "bpel-runtime", "scheduler-simple",
-#                                   "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa", "utils", "agents"))
+#                                   "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa", "utils", "agents", "bpel-rest-extensions"))
 #     libs = artifacts(ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
 #                      COMMONS.primitives, COMMONS.io, DERBY, GERONIMO.connector, GERONIMO.transaction, JACOB, JAVAX.connector,
 #                      JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, JAXEN, LOG4J2, OPENJPA,
@@ -716,6 +716,12 @@ define "ode" do
   define "agents" do
      compile
      package(:jar).with :manifest=>_("src/main/resources/META-INF/MANIFEST.MF")
+  end
+
+  desc "BPEL REST Extensions"
+  define "bpel-rest-extensions" do
+    compile.with projects("bpel-api", "bpel-nobj", "bpel-runtime", "utils"), COMMONS.codec, COMMONS.httpclient, SLF4J, LOG4J2
+    package :jar
   end
 
   # sources and javadocs of jbi-karaf-examples are packaged separately.

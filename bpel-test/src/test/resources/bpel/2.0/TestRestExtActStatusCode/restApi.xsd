@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/restApi"
+	xmlns:tns="http://www.example.org/restApi" xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+	<xsd:complexType name="deleteResponseType">
+		<xsd:sequence>
+			<xsd:element name="result" type="xsd:string"></xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:element name="deleteResponse" type="tns:deleteResponseType"></xsd:element>
+</schema>
