@@ -713,26 +713,24 @@ public class ODEServer {
 
     // Add support for extension bundles based on ODE 2.0 alpha branch
     private void registerExtensionActivityBundles() {
-		String extensionsStr = _odeConfig.getExtensionActivityBundles();
-		
-		if (extensionsStr != null) {
-			// TODO replace StringTokenizer by regex
-			for (String bundleCN : extensionsStr.split("\\s*(,|;)\\s*")) {
-				try {
-					// instantiate bundle
-					AbstractExtensionBundle bundle = (AbstractExtensionBundle) Class
-							.forName(bundleCN).newInstance();
-					
-					// register extension bundle (BPEL server)
-					_bpelServer.registerExtensionBundle(bundle);
-				} catch (Exception e) {
-					__log.warn("Couldn't register the extension bundle runtime "
-							+ bundleCN
-							+ ", the class couldn't be "
-							+ "loaded properly.");
-				}
-			}
-		}		
+        String extensionsStr = _odeConfig.getExtensionActivityBundles();
+
+        if (extensionsStr != null) {
+            // TODO replace StringTokenizer by regex
+            for (String bundleCN : extensionsStr.split("\\s*(,|;)\\s*")) {
+                try {
+                    // instantiate bundle
+                    AbstractExtensionBundle bundle =
+                            (AbstractExtensionBundle) Class.forName(bundleCN).newInstance();
+
+                    // register extension bundle (BPEL server)
+                    _bpelServer.registerExtensionBundle(bundle);
+                } catch (Exception e) {
+                    __log.warn("Couldn't register the extension bundle runtime " + bundleCN
+                            + ", the class couldn't be " + "loaded properly.");
+                }
+            }
+        }
     }
 
     private class ProcessStoreListenerImpl implements ProcessStoreListener {

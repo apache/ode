@@ -303,6 +303,6 @@ class MockCompilerContext implements CompilerContext {
     }
 
     public boolean isExtensionDeclared(String namespace) {
-		return false;
+        return false;
     }
 }

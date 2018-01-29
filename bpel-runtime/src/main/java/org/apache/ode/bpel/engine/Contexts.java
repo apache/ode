@@ -70,7 +70,7 @@ public class Contexts {
     
     public CustomProcessProperties customProcessProperties = new CustomProcessProperties(); 
 
-    	/** Global extension bundle registry **/
+    /** Global extension bundle registry **/
     final Map<String, AbstractExtensionBundle> extensionRegistry = new ConcurrentHashMap<String, AbstractExtensionBundle>();
 
 }

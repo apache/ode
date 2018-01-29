@@ -1002,24 +1002,24 @@ public class BpelProcess {
             _expLangRuntimeRegistry = new ExpressionLanguageRuntimeRegistry();
             registerExprLang(_oprocess);
 
-			// Checking for registered extension bundles, throw an exception when
-			// a "mustUnderstand" extension is not available
-			_mustUnderstandExtensions = new HashSet<String>();
-			for (OProcess.OExtension extension : _oprocess.getDeclaredExtensions()) {
-				if (extension.isMustUnderstand()) {
-					if (_engine._contexts.extensionRegistry.get(extension.getNamespace()) == null) {
-						String msg = __msgs.msgExtensionMustUnderstandError(_pid,
-								extension.getNamespace());
-						__log.error(msg);
-						throw new BpelEngineException(msg);
-					} else {
-						_mustUnderstandExtensions.add(extension.getNamespace());
-					}
-				} else {
-					__log.warn("The process declares the extension namespace " + extension.getNamespace()
-							+ " that is unkown to the engine");
-				}
-			}
+            // Checking for registered extension bundles, throw an exception when
+            // a "mustUnderstand" extension is not available
+            _mustUnderstandExtensions = new HashSet<String>();
+            for (OProcess.OExtension extension : _oprocess.getDeclaredExtensions()) {
+                if (extension.isMustUnderstand()) {
+                    if (_engine._contexts.extensionRegistry.get(extension.getNamespace()) == null) {
+                        String msg = __msgs.msgExtensionMustUnderstandError(_pid,
+                                extension.getNamespace());
+                        __log.error(msg);
+                        throw new BpelEngineException(msg);
+                    } else {
+                        _mustUnderstandExtensions.add(extension.getNamespace());
+                    }
+                } else {
+                    __log.warn("The process declares the extension namespace "
+                            + extension.getNamespace() + " that is unkown to the engine");
+                }
+            }
 
             setRoles(_oprocess);
             initExternalVariables();

@@ -677,43 +677,52 @@ class ASSIGN extends ACTIVITY {
         return data;
     }
 
-	private void invokeExtensionAssignOperation(OAssign.ExtensionAssignOperation eao) throws FaultException {
-    	try {
-	    	final ExtensionContext helper = new ExtensionContextImpl(this._scopeFrame, getBpelRuntimeContext());
-	    	final ExtensionResponse responseChannel = newChannel(ExtensionResponse.class);
+    private void invokeExtensionAssignOperation(OAssign.ExtensionAssignOperation eao)
+            throws FaultException {
+        try {
+            final ExtensionContext helper =
+                    new ExtensionContextImpl(this._scopeFrame, getBpelRuntimeContext());
+            final ExtensionResponse responseChannel = newChannel(ExtensionResponse.class);
 
-    		getBpelRuntimeContext().executeExtension(eao.getExtensionName(), helper, DOMUtils.stringToDOM(eao.getNestedElement()), responseChannel);
+            getBpelRuntimeContext().executeExtension(eao.getExtensionName(), helper,
+                    DOMUtils.stringToDOM(eao.getNestedElement()), responseChannel);
 
-    		object(new ReceiveProcess() {
-					private static final long serialVersionUID = 1467660715539203917L;
-				}.setChannel(responseChannel).setReceiver(new ExtensionResponse() {
-					private static final long serialVersionUID = 509910466826372712L;
+            object(new ReceiveProcess() {
+                private static final long serialVersionUID = 1467660715539203917L;
+            }.setChannel(responseChannel).setReceiver(new ExtensionResponse() {
+                private static final long serialVersionUID = 509910466826372712L;
 
-					public void onCompleted() {
-						_self.parent.completed(null, CompensationHandler.emptySet());
-	            	}
-	            	
-	            	public void onFailure(Throwable t) {
-	            		StringWriter sw = new StringWriter();
-	            		t.printStackTrace(new PrintWriter(sw));
-	            		FaultData fault = createFault(_self.o.getOwner().getConstants().getQnSubLanguageExecutionFault(), _self.o, sw.getBuffer().toString());
-	                    _self.parent.completed(fault, CompensationHandler.emptySet());
-	            	};
+                public void onCompleted() {
+                    _self.parent.completed(null, CompensationHandler.emptySet());
+                }
+
+                public void onFailure(Throwable t) {
+                    StringWriter sw = new StringWriter();
+                    t.printStackTrace(new PrintWriter(sw));
+                    FaultData fault = createFault(
+                            _self.o.getOwner().getConstants().getQnSubLanguageExecutionFault(),
+                            _self.o, sw.getBuffer().toString());
+                    _self.parent.completed(fault, CompensationHandler.emptySet());
+                };
             }));
 
-    	} catch (FaultException fault) {
+        } catch (FaultException fault) {
             __log.error("Exception while invoking extension assign operation", fault);
             FaultData faultData = createFault(fault.getQName(), _self.o, fault.getMessage());
             _self.parent.completed(faultData, CompensationHandler.emptySet());
-    	} catch (SAXException e) {
-    		__log.error("Exception while invoking extension assign operation", e);
-    		FaultData faultData = createFault(ExtensibilityQNames.INVALID_EXTENSION_ELEMENT, _self.o, "The nested element of extension assign operation '" + eao.getExtensionName() + "' is no valid XML.");
-    		_self.parent.completed(faultData, CompensationHandler.emptySet());
-		} catch (IOException e) {
-			__log.error("Exception while invoking extension assign operation", e);
-			FaultData faultData = createFault(ExtensibilityQNames.INVALID_EXTENSION_ELEMENT, _self.o, "The nested element of extension assign operation '" + eao.getExtensionName() + "' is no valid XML.");
-			_self.parent.completed(faultData, CompensationHandler.emptySet());
-		}
+        } catch (SAXException e) {
+            __log.error("Exception while invoking extension assign operation", e);
+            FaultData faultData = createFault(ExtensibilityQNames.INVALID_EXTENSION_ELEMENT,
+                    _self.o, "The nested element of extension assign operation '"
+                            + eao.getExtensionName() + "' is no valid XML.");
+            _self.parent.completed(faultData, CompensationHandler.emptySet());
+        } catch (IOException e) {
+            __log.error("Exception while invoking extension assign operation", e);
+            FaultData faultData = createFault(ExtensibilityQNames.INVALID_EXTENSION_ELEMENT,
+                    _self.o, "The nested element of extension assign operation '"
+                            + eao.getExtensionName() + "' is no valid XML.");
+            _self.parent.completed(faultData, CompensationHandler.emptySet());
+        }
     }
 
     private class EvaluationContextProxy implements EvaluationContext {

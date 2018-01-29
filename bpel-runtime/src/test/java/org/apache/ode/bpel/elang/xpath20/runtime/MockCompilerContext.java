@@ -251,7 +251,7 @@ public class MockCompilerContext implements CompilerContext {
     }
 
     public boolean isExtensionDeclared(String namespace) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

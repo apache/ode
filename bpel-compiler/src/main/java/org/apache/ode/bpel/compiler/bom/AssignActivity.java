@@ -56,25 +56,24 @@ public class AssignActivity extends Activity {
     }
 
     /**
-     * Get the list of all assign operation entries (<code>copy</code> 
-     * and <code>extensionAssignOperation</code>) for this activity.
+     * Get the list of all assign operation entries (<code>copy</code> and
+     * <code>extensionAssignOperation</code>) for this activity.
      * 
      * @return assign operation entries
      */
     public List<AssignOperation> getOperations() {
-    	//all children objects
-    	List<BpelObject> children = getChildren(BpelObject.class);
-    	
-    	//aggregate only copy and extensionAssignOperation entries
-    	List<AssignOperation> ops = new ArrayList<AssignOperation>();
-    	for (BpelObject bo: children) {
-    		if ((bo instanceof Copy)
-    				||(bo instanceof ExtensionAssignOperation)) {
-    			ops.add((AssignOperation)bo);				
-			}
-    	}    	
+        // all children objects
+        List<BpelObject> children = getChildren(BpelObject.class);
 
-    	return ops;
+        // aggregate only copy and extensionAssignOperation entries
+        List<AssignOperation> ops = new ArrayList<AssignOperation>();
+        for (BpelObject bo : children) {
+            if ((bo instanceof Copy) || (bo instanceof ExtensionAssignOperation)) {
+                ops.add((AssignOperation) bo);
+            }
+        }
+
+        return ops;
     }
 
     /** Marker interface for assign operations */

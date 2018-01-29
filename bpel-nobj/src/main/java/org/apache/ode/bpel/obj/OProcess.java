@@ -317,14 +317,13 @@ public class OProcess extends OBase  implements Serializable{
 		Object o = fieldContainer.get(XSLSHEETS);
 		return o == null ? null : (HashMap<URI, OXslSheet>)o;
 	}
-	
-	@SuppressWarnings("unchecked")
-	@JsonIgnore
-	public Set<OExtension> getDeclaredExtensions() {
-		return (Set<OExtension>) fieldContainer
-				.get(DECLAREDEXTENSIONS);
-	}
-	
+
+    @SuppressWarnings("unchecked")
+    @JsonIgnore
+    public Set<OExtension> getDeclaredExtensions() {
+        return (Set<OExtension>) fieldContainer.get(DECLAREDEXTENSIONS);
+    }
+
 	public void setAllPartnerLinks(Set<OPartnerLink> allPartnerLinks) {
 		if (getAllPartnerLinks() == null) {
 			fieldContainer.put(ALLPARTNERLINKS, allPartnerLinks);
@@ -412,11 +411,11 @@ public class OProcess extends OBase  implements Serializable{
 		}
 	}
 	
-	public void setDeclaredExtensions(Set<OExtension> extensions) {
-		if (getDeclaredExtensions() == null) {
-			fieldContainer.put(DECLAREDEXTENSIONS, extensions);
-		}
-	}
+    public void setDeclaredExtensions(Set<OExtension> extensions) {
+        if (getDeclaredExtensions() == null) {
+            fieldContainer.put(DECLAREDEXTENSIONS, extensions);
+        }
+    }
 	
 	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException{
 		ois.defaultReadObject();
@@ -554,40 +553,43 @@ public class OProcess extends OBase  implements Serializable{
 		}
 
 	}
-	
-	public static class OExtension extends OBase implements Serializable {
-		public static final long serialVersionUID = -1L  ;
-        
+
+    public static class OExtension extends OBase implements Serializable {
+        public static final long serialVersionUID = -1L;
+
         private static final String NAMESPACE = "namespaceURI";
-		private static final String MUSTUNDERSTAND = "mustUnderstand";
-        
+        private static final String MUSTUNDERSTAND = "mustUnderstand";
+
         @JsonCreator
-		public OExtension(){}
-        
-        public OExtension(OProcess process) { super(process); }
-        
+        public OExtension() {}
+
+        public OExtension(OProcess process) {
+            super(process);
+        }
+
         @JsonIgnore
-		public String getNamespace() {
-			Object o = fieldContainer.get(NAMESPACE);
-			return o == null ? null : (String)o;
-		}
+        public String getNamespace() {
+            Object o = fieldContainer.get(NAMESPACE);
+            return o == null ? null : (String) o;
+        }
 
-		@JsonIgnore
-		public boolean isMustUnderstand() {
-			Object o = fieldContainer.get(MUSTUNDERSTAND);
-			return o == null ? false : (Boolean)o;
-		}
-		
-		public void setNamespace(String namespaceURI) {
-			fieldContainer.put(NAMESPACE, namespaceURI);
-		}
+        @JsonIgnore
+        public boolean isMustUnderstand() {
+            Object o = fieldContainer.get(MUSTUNDERSTAND);
+            return o == null ? false : (Boolean) o;
+        }
 
-		public void setMustUnderstand(boolean mustUnderstand) {
-			fieldContainer.put(MUSTUNDERSTAND, mustUnderstand);
-		}
+        public void setNamespace(String namespaceURI) {
+            fieldContainer.put(NAMESPACE, namespaceURI);
+        }
+
+        public void setMustUnderstand(boolean mustUnderstand) {
+            fieldContainer.put(MUSTUNDERSTAND, mustUnderstand);
+        }
 
         public String toString() {
-            return "{OExtension " + getNamespace() + (isMustUnderstand() ? " mustUnderstand" : "") + "}";
+            return "{OExtension " + getNamespace() + (isMustUnderstand() ? " mustUnderstand" : "")
+                    + "}";
         }
     }
 

@@ -387,6 +387,6 @@ public class OdeConfigProperties {
     }
 
     public String getExtensionActivityBundles() {
-    	return getProperty(PROP_EXTENSION_BUNDLES);
+        return getProperty(PROP_EXTENSION_BUNDLES);
     }
 }

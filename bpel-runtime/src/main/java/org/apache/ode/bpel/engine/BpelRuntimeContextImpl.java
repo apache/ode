@@ -1537,32 +1537,34 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _forceFlush = true;
     }
 
-    public void executeExtension(QName extensionId, ExtensionContext context, Element element, ExtensionResponse extResponseChannel) throws FaultException {
-		__log.debug("Execute extension activity");
-		final String extResponseChannelStr = ProcessUtil.exportChannel(extResponseChannel);
-		
-		ExtensionOperation ea = createExtensionActivityImplementation(extensionId);
-		if (ea == null) {
-			if (_bpelProcess._mustUnderstandExtensions.contains(extensionId.getNamespaceURI())) {
-				//TODO
-				__log.warn("Lookup of extension activity " + extensionId + " failed.");
-				throw new FaultException(ExtensibilityQNames.UNKNOWN_EO_FAULT_NAME, "Lookup of extension operation " + extensionId + " failed.");
-			} else {
-				// act like <empty> - do nothing
-				completeExtensionExecution(extResponseChannelStr, null);
-				return;
-			}
-		}
-		
-		try {
-			// should be running in a pooled thread
-			ea.run(context, element);
-			completeExtensionExecution(extResponseChannelStr, null);
-		} catch (RuntimeException e) {
-			__log.error("Error during execution of extension activity.", e);
-			completeExtensionExecution(extResponseChannelStr, e);
-		} 
-	}
+    public void executeExtension(QName extensionId, ExtensionContext context, Element element,
+            ExtensionResponse extResponseChannel) throws FaultException {
+        __log.debug("Execute extension activity");
+        final String extResponseChannelStr = ProcessUtil.exportChannel(extResponseChannel);
+
+        ExtensionOperation ea = createExtensionActivityImplementation(extensionId);
+        if (ea == null) {
+            if (_bpelProcess._mustUnderstandExtensions.contains(extensionId.getNamespaceURI())) {
+                // TODO
+                __log.warn("Lookup of extension activity " + extensionId + " failed.");
+                throw new FaultException(ExtensibilityQNames.UNKNOWN_EO_FAULT_NAME,
+                        "Lookup of extension operation " + extensionId + " failed.");
+            } else {
+                // act like <empty> - do nothing
+                completeExtensionExecution(extResponseChannelStr, null);
+                return;
+            }
+        }
+
+        try {
+            // should be running in a pooled thread
+            ea.run(context, element);
+            completeExtensionExecution(extResponseChannelStr, null);
+        } catch (RuntimeException e) {
+            __log.error("Error during execution of extension activity.", e);
+            completeExtensionExecution(extResponseChannelStr, e);
+        }
+    }
 
 	private void completeExtensionExecution(final String channelId, final Throwable t) {
 		if (t != null) {

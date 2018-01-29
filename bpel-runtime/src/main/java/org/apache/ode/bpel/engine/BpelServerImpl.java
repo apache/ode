@@ -177,12 +177,12 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
     }
 
     public void registerExtensionBundle(AbstractExtensionBundle bundle) {
-    	_contexts.extensionRegistry.put(bundle.getNamespaceURI(), bundle);
-    	bundle.registerExtensionActivities();
+        _contexts.extensionRegistry.put(bundle.getNamespaceURI(), bundle);
+        bundle.registerExtensionActivities();
     }
 
     public void unregisterExtensionBundle(String nsURI) {
-    	_contexts.extensionRegistry.remove(nsURI);
+        _contexts.extensionRegistry.remove(nsURI);
     }
 
     public void registerExternalVariableEngine(ExternalVariableModule eve) {

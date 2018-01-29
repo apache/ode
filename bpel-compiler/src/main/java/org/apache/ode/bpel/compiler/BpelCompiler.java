@@ -737,9 +737,9 @@ public abstract class BpelCompiler implements CompilerContext {
         }
 
         // compile extensions
-	for (Extension e : _processDef.getExtensions()) {
-		compileExtension(e);
-	}
+        for (Extension e : _processDef.getExtensions()) {
+            compileExtension(e);
+        }
 
         OScope procesScope = new OScope(_oprocess, null);
         procesScope.setName("__PROCESS_SCOPE:" + (process.getName()));
@@ -1637,39 +1637,38 @@ public abstract class BpelCompiler implements CompilerContext {
             if (act instanceof OAssign) {
                 OAssign assign = (OAssign) act;
                 for (OAssign.OAssignOperation operation : assign.getOperations()) {
-					if (operation instanceof OAssign.Copy) {
-						OAssign.Copy copy = (OAssign.Copy) operation;
-						if (copy.getTo() instanceof OAssign.PartnerLinkRef) {
-							if (((OAssign.PartnerLinkRef) copy.getTo()).getPartnerLink()
-									.getName().equals(plink))
-								return true;
-						}
-					}
-				}
+                    if (operation instanceof OAssign.Copy) {
+                        OAssign.Copy copy = (OAssign.Copy) operation;
+                        if (copy.getTo() instanceof OAssign.PartnerLinkRef) {
+                            if (((OAssign.PartnerLinkRef) copy.getTo()).getPartnerLink().getName()
+                                    .equals(plink))
+                                return true;
+                        }
+                    }
+                }
             }
         }
         return false;
     }
 
     /**
-	 * Registers a declared extension. Since compilation may take place
-	 * independently of the target engine configuration, the compiler will not
-	 * check whether a extension implementation is registered.
-	 */
-	private void compileExtension(Extension ext) {
-		OProcess.OExtension oextension = new OProcess.OExtension(_oprocess);
-		oextension.setNamespace(ext.getNamespaceURI());
-		oextension.setMustUnderstand(ext.isMustUnderstand());
+     * Registers a declared extension. Since compilation may take place independently of the target
+     * engine configuration, the compiler will not check whether a extension implementation is
+     * registered.
+     */
+    private void compileExtension(Extension ext) {
+        OProcess.OExtension oextension = new OProcess.OExtension(_oprocess);
+        oextension.setNamespace(ext.getNamespaceURI());
+        oextension.setMustUnderstand(ext.isMustUnderstand());
 
-		oextension.setDebugInfo(createDebugInfo(_processDef,
-				"Extension " + ext.getNamespaceURI()));
+        oextension.setDebugInfo(createDebugInfo(_processDef, "Extension " + ext.getNamespaceURI()));
 
-		_declaredExtensionNS.add(ext.getNamespaceURI());
-		_oprocess.getDeclaredExtensions().add(oextension);
+        _declaredExtensionNS.add(ext.getNamespaceURI());
+        _oprocess.getDeclaredExtensions().add(oextension);
 
-		if (__log.isDebugEnabled())
-			__log.debug("Compiled extension " + oextension);
-	}
+        if (__log.isDebugEnabled())
+            __log.debug("Compiled extension " + oextension);
+    }
 
     public Definition[] getWsdlDefinitions() {
         Definition[] result = new Definition[_wsdlRegistry.getDefinitions().length];
@@ -1747,9 +1746,9 @@ public abstract class BpelCompiler implements CompilerContext {
         registerExpressionLanguage(expLangUri, (ExpressionCompiler) cls.newInstance());
     }
 
-	public boolean isExtensionDeclared(String namespace) {
-		return _declaredExtensionNS.contains(namespace);
-	}
+    public boolean isExtensionDeclared(String namespace) {
+        return _declaredExtensionNS.contains(namespace);
+    }
 
     public List<OActivity> getActivityStack() {
         ArrayList<OActivity> rval = new ArrayList<OActivity>(_structureStack._stack);

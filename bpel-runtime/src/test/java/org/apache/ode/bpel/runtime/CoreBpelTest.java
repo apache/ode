@@ -482,10 +482,9 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 
     public void checkInvokeExternalPermission() {}
 
-    public void executeExtension(QName extensionId, ExtensionContext context,
-			Element element,
-			ExtensionResponse extResponseChannel) throws FaultException {
-		// TODO Auto-generated method stub
-		
-	}
+    public void executeExtension(QName extensionId, ExtensionContext context, Element element,
+            ExtensionResponse extResponseChannel) throws FaultException {
+        // TODO Auto-generated method stub
+
+    }
 }

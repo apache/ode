@@ -86,18 +86,21 @@ public class AssignGeneratorMessages extends CompilationMessageBundle {
         return this.formatCompilationMessage("To-spec format is unrecognized.");
     }
 
-    /**ExtensionAssignOperation's nested element missing*/
-    public CompilationMessage errMissingExtensionAssignOperationElement(){
-    	return this.formatCompilationMessage("Extensibility element in <extensionAssignOperation> is missing.");
+    /** ExtensionAssignOperation's nested element missing */
+    public CompilationMessage errMissingExtensionAssignOperationElement() {
+        return this.formatCompilationMessage(
+                "Extensibility element in <extensionAssignOperation> is missing.");
     }
 
-    /**ExtensionAssignOperation's nested element missing*/
-    public CompilationMessage errUndeclaredExtensionAssignOperation(){
-    	return this.formatCompilationMessage("Extension namespace of <extensionAssignOperation> has not been declared.");
+    /** ExtensionAssignOperation's nested element missing */
+    public CompilationMessage errUndeclaredExtensionAssignOperation() {
+        return this.formatCompilationMessage(
+                "Extension namespace of <extensionAssignOperation> has not been declared.");
     }
 
-    /**Draft extensibleAssign is not supported.*/
-    public CompilationMessage errExtensibleAssignNotSupported(){
-    	return this.formatCompilationMessage("ExtensibleAssign is not supported, please upgrade to BPEL 2.0 final.");
+    /** Draft extensibleAssign is not supported. */
+    public CompilationMessage errExtensibleAssignNotSupported() {
+        return this.formatCompilationMessage(
+                "ExtensibleAssign is not supported, please upgrade to BPEL 2.0 final.");
     }
 }
