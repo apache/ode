@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'buildr', '>= 1.5.3'
+gem 'buildr', '= 1.5.3'
 
 # rspec dependencies for check()
 gem 'rspec-expectations',   '= 2.14.3'
