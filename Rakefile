@@ -21,7 +21,6 @@ require "buildr/openjpa"
 require "buildr/javacc"
 require "buildr/jetty"
 require "buildr/hibernate"
-require "nokogiri"
 
 require File.join(File.dirname(__FILE__), 'repositories.rb')
 require File.join(File.dirname(__FILE__), 'dependencies.rb')
