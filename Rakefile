@@ -41,6 +41,8 @@ Java.classpath << Buildr::OpenJPA::REQUIRES
 # Keep this structure to allow the build system to update version numbers.
 VERSION_NUMBER = "1.3.8-SNAPSHOT"
 
+repositories.release_to[:options] = {:digests => [:md5, :sha1, :sha512]}
+
 # if SNAPSHOT version...
 if VERSION_NUMBER =~ /SNAPSHOT/
     # ... deploy to:
