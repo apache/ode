@@ -1,9 +1,9 @@
 <Configuration>
     <Appenders>
-        <File name="FILE" fileName="${sys:ode.server.home}/logs/ode.log" append="false">
+        <File name="FILE" fileName="${sys:ode.server.home}/logs/ode.log" append="true">
             <PatternLayout pattern="%d{ABSOLUTE} %-5p [%c] %m%n"/>
         </File>
-        <File name="TOMEE_FILE" fileName="${sys:ode.server.home}/logs/tomee.log" append="false">
+        <File name="TOMEE_FILE" fileName="${sys:ode.server.home}/logs/tomee.log" append="true">
             <PatternLayout pattern="%d{ABSOLUTE} %-5p [%c] %m%n"/>
         </File>
         <Async name="Async">

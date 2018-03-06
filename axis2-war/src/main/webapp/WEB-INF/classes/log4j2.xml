@@ -1,14 +1,14 @@
 <Configuration>
     <Appenders>
-        <File name="FILE" fileName="ode.log" append="false">
+        <File name="FILE" fileName="ode.log" append="true">
             <PatternLayout pattern="%d{ABSOLUTE} %-5p [%c{1}] %m%n"/>
         </File>
         <Console name="STDOUT" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{ABSOLUTE} %-5p [%c{1}] %m%n"/>
         </Console>
         <Async name="Async">
-            <!--<AppenderRef ref="FILE"/> -->
-            <AppenderRef ref="STDOUT"/>
+            <AppenderRef ref="FILE"/>
+            <!--<AppenderRef ref="STDOUT"/>-->
         </Async>
     </Appenders>
 
