@@ -28,7 +28,7 @@ ADD tomcat-users.xml.tpl ${CATALINA_HOME}/conf/tomcat-users.xml.tpl
 ADD manager.xml ${CATALINA_HOME}/conf/Catalina/localhost/manager.xml
 ADD server.xml.tpl ${CATALINA_HOME}/conf/server.xml.tpl
 
-COPY --from=builder /opt/opentosca/ode/axis2-war/target/ode-axis2-war-1.3.7.war ${CATALINA_HOME}/webapps/ode.war
+COPY --from=builder /opt/opentosca/ode/axis2-war/target/ode-axis2-war-1.3.8.war ${CATALINA_HOME}/webapps/ode.war
 RUN unzip ${CATALINA_HOME}/webapps/ode.war -d ${CATALINA_HOME}/webapps/ode
 
 ADD axis2.xml.tpl ${CATALINA_HOME}/webapps/ode/WEB-INF/conf/axis2.xml.tpl

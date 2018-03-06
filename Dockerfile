@@ -12,7 +12,7 @@ COPY . /workspace
 RUN jruby -S bundler install --gemfile=/workspace/Gemfile \
     && buildr $BUILDR_ARGS \
     && mkdir /build \
-    && cp /workspace/axis2-war/target/ode-axis2-war-1.3.7.war /build/ode.war \
+    && cp /workspace/axis2-war/target/ode-axis2-war-1.3.8.war /build/ode.war \
     && unzip /build/ode.war -d /build/ode
 
 
