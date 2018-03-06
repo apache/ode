@@ -68,7 +68,7 @@ public class ProcessConfDaoImpl extends HibObj implements ProcessConfDAO {
      * @hibernate.map table="STORE_PROCESS_PROP" role="properties_"
      * @hibernate.collection-key column="propId" foreign-key="none"
      * @hibernate.collection-index column="name" type="string" 
-     * @hibernate.collection-element column="data" type="text"
+     * @hibernate.collection-element column="data" type="materialized_clob"
      */
     public Map<String,String> getProperties_() {
         return _properties;

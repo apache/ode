@@ -29,10 +29,10 @@ import javax.xml.stream.XMLStreamReader;
 
 import junit.framework.TestCase;
 
-import org.apache.axiom.om.impl.llom.factory.OMXMLBuilderFactory;
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.soap.SOAPEnvelope;
-import org.apache.axiom.soap.impl.builder.StAXSOAPModelBuilder;
-import org.apache.axiom.soap.impl.dom.soap11.SOAP11Factory;
+import org.apache.axiom.soap.SOAPModelBuilder;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.ode.axis2.util.SoapMessageConverter;
@@ -159,7 +159,7 @@ public class SoapMessageConverterTest extends TestCase {
 
         XMLStreamReader sr = XMLInputFactory.newInstance().createXMLStreamReader(
                 getClass().getResourceAsStream("/HelloWorldRequest.soap"));
-        StAXSOAPModelBuilder builder = OMXMLBuilderFactory.createStAXSOAPModelBuilder(new SOAP11Factory(), sr);
+        SOAPModelBuilder builder = OMXMLBuilderFactory.createStAXSOAPModelBuilder(OMAbstractFactory.getMetaFactory(), sr);
         SOAPEnvelope se = builder.getSOAPEnvelope();
 
         Element msg = DOMUtils.stringToDOM("<message/>");

@@ -1,0 +1,50 @@
+  Mozilla Public License
+
+Conditions of Use
+
+These conditions of use apply to the open source version of the Saxon 
+product, on both the Java and .NET platforms. Additional terms and 
+conditions apply to the commercial Saxon-SA product.
+
+Saxon
+
+The contents of the downloaded file (saxon[version].zip) are subject to 
+the Mozilla Public License Version 1.0 (the "License"); you may not use 
+this file except in compliance with the License. You may obtain a copy 
+of the License at http://www.mozilla.org/MPL/
+
+Software distributed under the License is distributed on an "AS IS" 
+basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the 
+License for the specific language governing rights and limitations under 
+the License.
+
+The Original Code of Saxon comprises all those components which are not 
+explicitly attributed to other parties.
+
+The Initial Developer of the Original Code is Michael Kay. Until February 
+2001 Michael Kay was an employee of International Computers Limited (now 
+part of Fujitsu Limited), and original code developed during that time 
+was released under this license by permission from International 
+Computers Limited. From February 2001 until February 2004 Michael Kay was 
+an employee of Software AG, and code developed during that time was 
+released under this license by permission from Software AG, acting as a 
+"Contributor". Subsequent code has been developed by Saxonica Limited, 
+of which Michael Kay is a Director, again acting as a "Contributor". A 
+small number of modules, or enhancements to modules, have been developed 
+by other individuals (either written specially for Saxon, or incorporated 
+into Saxon having initially been released as part of another open source 
+product). Such contributions are acknowledged individually in comments 
+attached to the relevant code modules. All Rights Reserved.
+
+If you produce a product that includes or requires Saxon, please refer to 
+it prominently as "The Saxon XSLT and XQuery Processor from Saxonica 
+Limited", and include the URL of the home page, which is at 
+http://www.saxonica.com/. As a courtesy, please take reasonable steps to 
+ensure that your users know that they are running Saxon.
+
+There is no guarantee of technical support, though I am usually able to 
+answer enquiries within a few days. Please subscribe to the mailing list 
+available at http://lists.sourceforge.net/lists/listinfo/saxon-help and 
+raise any enquiries there. Also check the Saxon project pages on 
+SourceForge for details of known errors; all bugs are listed there as soon 
+as I have sufficient evidence to describe the nature of the problem. 

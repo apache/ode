@@ -19,8 +19,9 @@
   -->
 
 <persistence xmlns="http://java.sun.com/xml/ns/persistence"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    version="1.0">
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+             version="2.0">
     <persistence-unit name="ode-store">
         <!-- 
             This properties file is used specifically by the
@@ -31,5 +32,8 @@
         <class>org.apache.ode.store.jpa.ProcessConfPropertyDaoImpl</class>
         <class>org.apache.ode.store.jpa.DeploymentUnitDaoImpl</class>
         <class>org.apache.ode.store.jpa.VersionTrackerDAOImpl</class>
+        <properties>
+            <property name="openjpa.DynamicEnhancementAgent" value="false"/>
+        </properties>
     </persistence-unit>
 </persistence>

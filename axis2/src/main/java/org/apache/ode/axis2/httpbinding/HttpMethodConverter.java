@@ -157,7 +157,7 @@ public class HttpMethodConverter {
             // encode part values
             encodedParams = new URLEncodedTransformer().transform(partValues);
         }
-
+        log.debug("completeUri {}, encodedParams {}",completeUri,encodedParams);
         // http-client api is not really neat
         // something similar to the following would save some if/else manipulations.
         // But we have to deal with it as-is.
@@ -192,6 +192,7 @@ public class HttpMethodConverter {
             final String contentCharset = method.getParams().getContentCharset();
             if (log.isDebugEnabled()) log.debug("Content-Type [" + contentType + "] Charset [" + contentCharset + "]");
             if (useUrlEncoded) {
+                encodedParams = new URLEncodedTransformer().transform(partValues);
                 requestEntity = new StringRequestEntity(encodedParams, PostMethod.FORM_URL_ENCODED_CONTENT_TYPE, contentCharset);
             } else {
                 // get the part to be put in the body

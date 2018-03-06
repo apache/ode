@@ -166,7 +166,7 @@ public class HProcess extends HObject{
      * @hibernate.column
      *  name="PROCID"
      *  not-null="true"
-     *  unique="true"
+     *  unique-key="UNIQ_PROCID"
      */
     public String getProcessId() {
         return _processId;

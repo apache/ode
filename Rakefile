@@ -14,14 +14,13 @@
 #    limitations under the License.
 #
 
-gem "buildr", "~>1.4.3"
+gem "buildr", "~>1.5.3"
 require "buildr"
 require "buildr/xmlbeans.rb"
 require "buildr/openjpa"
 require "buildr/javacc"
 require "buildr/jetty"
 require "buildr/hibernate"
-require "nokogiri"
 
 require File.join(File.dirname(__FILE__), 'repositories.rb')
 require File.join(File.dirname(__FILE__), 'dependencies.rb')
@@ -35,12 +34,14 @@ Buildr::Hibernate::REQUIRES[:xdoclet] = Buildr.group("xdoclet", "xdoclet-xdoclet
 # XMLBeans addon must use the same version as we do.
 Buildr::XMLBeans::REQUIRES.xmlbeans.version = artifact(XMLBEANS).version
 
-Buildr::OpenJPA::REQUIRES[0] = "org.apache.openjpa:openjpa:jar:1.2.0"
+Buildr::OpenJPA::REQUIRES=[ OPENJPA, COMMONS.lang, COMMONS.collections, JAVAX.transaction, JAVAX.persistence]
 # dirty workaround for BUILDR-541/BUILDR-508
 Java.classpath << Buildr::OpenJPA::REQUIRES
 
 # Keep this structure to allow the build system to update version numbers.
-VERSION_NUMBER = "1.3.7"
+VERSION_NUMBER = "1.3.8-SNAPSHOT"
+
+repositories.release_to[:options] = {:digests => [:md5, :sha1, :sha512]}
 
 # if SNAPSHOT version...
 if VERSION_NUMBER =~ /SNAPSHOT/
@@ -77,8 +78,8 @@ define "ode" do
   project.version = VERSION_NUMBER
   project.group = "org.apache.ode"
 
-  compile.options.source = "1.6"
-  compile.options.target = "1.6"
+  compile.options.source = "1.8"
+  compile.options.target = "1.8"
   manifest["Implementation-Vendor"] = "Apache Software Foundation"
   meta_inf << file("NOTICE")
 
@@ -126,6 +127,7 @@ define "ode" do
 
     #specify version of web console in urlrewrite.xml
     build do
+        mkdir_p project.path_to("target")
         cp _("src/main/webapp/WEB-INF/urlrewrite.xml"), _(:target)
         text = File.read(_(:target, "urlrewrite.xml"))
         changed_text = text.gsub(/\$\{ode-console.version\}/, artifact(ODE_WEB_CONSOLE).version)
@@ -286,6 +288,16 @@ define "ode" do
     compile { open_jpa_enhance }
     resources hibernate_doclet(:package=>"org.apache.ode.store.hib", :excludedtags=>"@version,@author,@todo")
 
+    task "hbm-replace-namespace" do |task|
+        Dir["#{_("target/classes/org/apache/ode/store/hib")}/*.hbm.xml"].each do |f|
+            file_content = File.read(f)
+            file_content.gsub!("http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd","http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd")
+            File.open(f,'w') {|wf| wf << file_content}
+        end
+    end
+
+    task "compile" => ["hbm-replace-namespace"]
+
     test.with COMMONS.collections, COMMONS.lang, JAVAX.connector, JAVAX.transaction, DOM4J, LOG4J2,
       XERCES, XALAN, JAXEN, SAXON, OPENJPA, GERONIMO.transaction, SLF4J, SPRING_TEST, DERBY,
       GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, H2::REQUIRES
@@ -323,7 +335,16 @@ define "ode" do
         File.open(process_instance_hbm_file, "w") { |f| f << process_instance_hbm }
       end
     end
-    task "compile" => "hbm-hack"
+
+    task "hbm-replace-namespace" do |task|
+        Dir["#{_("target/classes/org/apache/ode/daohib/bpel/hobj")}/*.hbm.xml"].each do |f|
+            file_content = File.read(f)
+            file_content.gsub!("http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd","http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd")
+            File.open(f,'w') {|wf| wf << file_content}
+        end
+    end
+
+    task "compile" => ["hbm-hack", "hbm-replace-namespace"]
 
     test.with project("bpel-epr"), BACKPORT, COMMONS.collections, COMMONS.lang, DERBY, COMMONS.pool, COMMONS.dbcp,
       GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, SPRING, SPRING_TEST
@@ -382,7 +403,7 @@ define "ode" do
     common_sql = _("src/main/sql/common.sql")
     index_sql = _("src/main/sql/index.sql")
 
-    %w{ derby mysql firebird hsql postgres sqlserver oracle h2}.each do |db|
+    %w{ derby mysql hsql postgres sqlserver oracle h2}.each do |db|
       partial_runtime = export[ properties_for[db], dao_hibernate, _("target/partial.runtime.#{db}.sql") ]
       partial_store = export[ properties_for[db], bpel_store, _("target/partial.store.#{db}.sql") ]
       build concat(_("target/#{db}.sql")=>[ license_sql, common_sql, predefined_for[db], partial_store, partial_runtime, index_sql])
@@ -492,185 +513,185 @@ define "ode" do
     package :jar
   end
 
-  desc "ODE JBI Integration Layer"
-  define "jbi" do
-    compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "bpel-epr", "bpel-obj",
-      "bpel-runtime", "scheduler-simple", "bpel-schemas", "bpel-store", "utils", "agents"),
-      AXIOM,  COMMONS.pool, JAVAX.transaction, GERONIMO.transaction, JBI, LOG4J2, WSDL4J, XERCES, SLF4J
-
-    package(:jar)
-    package(:jbi).tap do |jbi|
-      libs = artifacts(package(:jar),
-        projects("bpel-api", "bpel-api-jca", "bpel-compiler", "bpel-connector", "bpel-dao",
-        "bpel-epr", "jca-ra", "jca-server", "bpel-obj", "bpel-ql", "bpel-runtime",
-        "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
-        "jacob", "jacob-ap", "utils", "agents", "bpel-rest-extensions"),
-        ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
-        COMMONS.primitives, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector,
-        JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J2, OPENJPA,
-        SAXON, TRANQL, XALAN, XERCES, XMLBEANS, WSDL4J)
-
-      jbi.component :type=>:service_engine, :name=>"OdeBpelEngine", :description=>self.comment
-      jbi.component :class_name=>"org.apache.ode.jbi.OdeComponent", :libs=>libs
-      jbi.bootstrap :class_name=>"org.apache.ode.jbi.OdeBootstrap", :libs=>libs
-      jbi.merge project("dao-hibernate-db").package(:zip)
-      jbi.merge project("dao-jpa-ojpa-derby").package(:zip)
-      jbi.include path_to("src/main/jbi/ode-jbi.properties")
-    end
-
-    test.using :properties=>{ "java.naming.factory.initial" => "org.apache.xbean.spring.jndi.SpringInitialContextFactory"}, :java_args=>ENV['TEST_JVM_ARGS']
-    test.with projects("dao-jpa", "dao-hibernate", "bpel-compiler", "bpel-api-jca", "jca-ra",
-      "jca-server", "jacob"),
-      BACKPORT, COMMONS.lang, COMMONS.io, COMMONS.collections, DERBY, GERONIMO.connector, GERONIMO.kernel,
-      GERONIMO.transaction, JAVAX.connector, JAVAX.ejb, JAVAX.persistence, JAVAX.stream,
-      JAVAX.transaction, JAXEN, JBI, OPENJPA, SAXON, SERVICEMIX, SPRING, TRANQL,
-      XALAN, XBEAN, XMLBEANS, SLF4J, LOG4J2, DOM4J, HIBERNATE
-      test.exclude '*TestBase', 'org.apache.ode.jbi.OdeJbiComponentLifeCycleTest', 'org.apache.ode.jbi.ReplayerJbiTest'
-      test.setup unzip(_("target/test/smx/ode")=>project("dao-jpa-ojpa-derby").package(:zip))
-      test.setup unzip(_("target/test/smx/ode")=>project("dao-hibernate-db").package(:zip))
-      test.setup task(:prepare_jbi_tests) do |task|
-      cp _("src/test/jbi/ode-jbi.properties"), _("target/test/smx/ode")
-      cp _("src/main/jbi/hibernate.properties"), _("target/test/smx/ode")
-      rm_rf Dir["target/test/resources"]
-      cp_r _("src/test/resources"), _("target/test/resources")
-    end
-  end
-
-  desc "ODE Commmands for Karaf"
-  define "jbi-karaf-commands" do
-    compile.with projects("bpel-schemas", "jbi"), JBI, KARAF, XMLBEANS,  SLF4J
-    libs = artifacts(projects("bpel-schemas", "jbi"), JBI, KARAF, XMLBEANS, )
-    package(:bundle).tap do |bnd|
-      bnd.classpath = [_("target/classes"), libs].flatten
-      BUNDLE_VERSIONS.each {|key, value| bnd[key] = value }
-      bnd['Bundle-Name'] = "Apache ODE :: Commands"
-      bnd['Bundle-Version'] = VERSION_NUMBER
-      bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;bundle-version=#{osgi_version_for(VERSION_NUMBER)}"
-      bnd['Import-Package'] = 'org.apache.karaf.shell.console,*'
-      bnd['Private-Package'] = "org.apache.ode.karaf.commands;version=#{VERSION_NUMBER}"
-      bnd['Include-Resource'] = _('src/main/resources')
-      bnd['-versionpolicy'] = BND_VERSION_POLICY
-    end
-  end
-
-  desc "ODE Examples for Karaf"
-  define "jbi-karaf-examples",
-    :group => "org.apache.ode.examples",
-    :base_dir => "distro/src/examples-jbi/maven2" do
-
-    define "helloworld2-osgi" do
-      package(:bundle, :id => "helloworld-bundle").tap do |bnd|
-        bnd.classpath = [KARAF, project("ode:jbi-bundle")]
-        bnd['Bundle-Name'] = "Apache ODE :: Hello World Example"
-        bnd['Bundle-SymbolicName'] = "org.apache.ode.examples-helloworld2-bundle"
-        bnd['Bundle-Version'] = VERSION_NUMBER
-        bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;bundle-version=#{osgi_version_for(VERSION_NUMBER)}"
-        bnd['Import-Package'] = "org.apache.servicemix.cxfbc,org.apache.servicemix.common.osgi"
-        bnd['Export-Package'] = ""
-        bnd['-exportcontents'] = ""
-        bnd['Include-Resource'] = _('src/main/resources')
-        bnd['-versionpolicy'] = BND_VERSION_POLICY
-      end
-      # we package sources and javadocs separately to give them a custom id
-      package(:sources, :id => "helloworld-bundle")
-
-      # This project does not contain java classes, hence there are no javadocs.
-      # But since Nexus will complain about a missing javadoc artifact, we make sure that an empty one is created.
-      package(:javadoc, :id => "helloworld-bundle").enhance { mkdir_p _("target/doc") }
-    end
-
-    define "ping-pong-osgi" do
-      compile
-      package(:bundle, :id => "ping-pong-bundle").tap do |bnd|
-        bnd.classpath = [_("target/classes"), KARAF, project("ode:jbi-bundle")].flatten
-        bnd['Bundle-Name'] = "Apache ODE :: Ping-Pong Example"
-        bnd['Bundle-SymbolicName'] = "org.apache.ode.examples-ping-pong-bundle"
-        bnd['Bundle-Version'] = VERSION_NUMBER
-        bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;bundle-version=#{osgi_version_for(VERSION_NUMBER)}"
-        bnd['Import-Package'] = "org.apache.servicemix.cxfbc,org.apache.servicemix.common.osgi"
-        bnd['Export-Package'] = "org.apache.ode.ping"
-        bnd['Include-Resource'] = _('src/main/resources')
-        bnd['-versionpolicy'] = BND_VERSION_POLICY
-      end
-
-      # we package sources and javadocs separately to give them a custom id
-      package(:sources, :id => "ping-pong-bundle")
-      package(:javadoc, :id => "ping-pong-bundle")
-    end
-  end
-
-  define "jbi-karaf-pmapi-httpbinding" do
-    package(:bundle).tap do |bnd|
-      bnd.classpath = [KARAF, project("ode:jbi-bundle")]
-      bnd['Bundle-Name'] = "Apache ODE :: PMAPI HTTP Binding"
-      bnd['Bundle-SymbolicName'] = "org.apache.ode-pmapi-httpbinding"
-      bnd['Bundle-Version'] = VERSION_NUMBER
-      bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;bundle-version=#{osgi_version_for(VERSION_NUMBER)}"
-      bnd['Import-Package'] = "org.apache.servicemix.cxfbc,org.apache.servicemix.common.osgi"
-      bnd['-exportcontents'] = ""
-      bnd['Include-Resource'] = _('src/main/resources')
-    end
-  end
-
-  desc "ODE JBI Packaging for Karaf"
-  define "jbi-karaf" do
-    resources.filter.using(BUNDLE_VERSIONS)
-    package :jar
-    # Generate features.xml
-    def package_as_feature(file_name)
-      file file_name => [_("src/main/resources/features.xml")] do
-        filter(_("src/main/resources")).include("features.xml").into(_("target")).using(BUNDLE_VERSIONS).run
-        mv _("target/features.xml"), file_name
-      end
-    end
-    def package_as_feature_spec(spec)
-      spec.merge({ :type=>:xml, :classifier=>'features' })
-    end
-    package(:feature)
-  end
-
-  desc "ODE JBI Bundle"
-  define "jbi-bundle" do
-    ode_libs = artifacts(projects("bpel-api", "bpel-api-jca", "bpel-compiler", "bpel-connector", "bpel-dao",
-                                  "bpel-epr", "jca-ra", "jca-server", "bpel-obj", "bpel-ql", "bpel-runtime",
-                                  "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
-                                  "jacob", "jacob-ap", "utils", "agents", "bpel-rest-extensions"))
-    libs = artifacts(ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
-                     COMMONS.primitives, COMMONS.io, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector,
-                     JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J2, OPENJPA,
-                     SAXON, TRANQL, XALAN, XERCES, XMLBEANS, WSDL4J, KARAF)
-    compile.with projects("bpel-schemas", "jbi", "bpel-api"), JBI, libs, KARAF, SPRING, SPRING_OSGI
-
-    package(:bundle).tap do |bnd|
-      # inline dao zip files
-      zips = artifacts(project("dao-hibernate-db").package(:zip), project("dao-jpa-ojpa-derby").package(:zip))
-      inlines = zips.map{|item| "@" + item.to_s}
-
-      # embed jars
-      bnd_libs = ode_libs + artifacts(AXIOM, BACKPORT, GERONIMO.connector, JAXEN,
-                                      JAVAX.connector, JAVAX.persistence, JAVAX.ejb,
-                                      OPENJPA, SAXON, TRANQL,
-                                      XALAN, XERCES, XMLBEANS, WSDL4J)
-      includes = bnd_libs.map{|item| File.basename(item.to_s)}
-      bnd["includes"] = includes.join(', ')
-
-      # embedd *.xsd, *.xml, xmlbeans* from ode libs
-      embedres = ode_libs.map {|pkg| ['**.xsd', '**.xml', 'schemaorg_apache_xmlbeans/**'].map {|x| '@' + pkg.to_s + '!/' + x}}.join(', ')
-      bnd['Export-Package'] = "org.apache.ode*;version=#{VERSION_NUMBER};-split-package:=merge-first"
-      bnd['Import-Package'] = '!org.apache.axis2.client*, !org.apache.ode*, javax.jbi*;version="1.0", javax.transaction*;version="[1.1,1.2)", javax.xml.stream;version="[1.0,2)", org.apache.axiom*;resolution:=optional, org.apache.axis2*;resolution:=optional, org.apache.commons.beanutils;version="[1.8,2)", org.apache.commons.collections*;version="[3.2,4)", org.apache.commons.httpclient*;resolution:=optional, org.apache.commons.io;version="[1.4,2)", org.apache.commons.lang;version="[2.4,3)", org.apache.commons.logging*;version="[1.1,1.2)", org.apache.derby.jdbc;resolution:=optional, org.apache.geronimo.transaction.manager;version="[2,3)", org.apache.openjpa.jdbc.kernel;version="1.2.1", org.springframework.osgi.service.exporter.support, org.osgi.service.cm, org.springframework.osgi.compendium.cm, com.ibm.wsdl*;version="[1.6,2)", org.apache.xmlbeans.impl.schema;version="[2.5,3)", org.apache.xmlbeans*;version="[2.5,3)", org.hibernate*;resolution:=optional, org.hsqldb.jdbc;resolution:=optional, org.osgi.framework;version="[1.5,2)", org.osgi.util.tracker;version="[1.4,2)", org.springframework.beans.factory*;version="[2.5,4)", org.springframework.context*;version="[2.5,4)", org.springframework.osgi.context;version="[1.2,2)", net.sf.saxon.event;version="[9.1,9.2)", net.sf.saxon*;version="[9.1,9.2)",javax.wsdl*;version="[1.2,2)",javax.resource*;version="[1.5, 2]",org.apache.geronimo.connector.outbound*;version="[2.1,3)",org.apache.log4j*;version="[1.2,2)",org.apache.openjpa*;version="[1.2,2)",*'
-      bnd['Embed-Dependency'] = '*;inline=**.xsd|schemaorg_apache_xmlbeans/**|**.xml'
-      bnd['DynamicImport-Package'] = '*'
-      bnd['Include-Resource'] = [embedres, _('src/main/resources'), inlines].flatten.join(', ')
-      bnd['Bundle-Vendor'] = 'Apache Software Foundation'
-      bnd['Bundle-License'] = 'http://www.apache.org/licenses/LICENSE-2.0'
-      bnd['Bundle-DocURL'] = 'http://ode.apache.org'
-      bnd['Bundle-Name'] = 'Apache ODE :: BPEL Service Engine'
-      bnd['-versionpolicy'] = BND_VERSION_POLICY
-      bnd.classpath = [project.compile.target, bnd_libs, artifacts(project("jbi").package(:jar)), libs].flatten
-
-      BUNDLE_VERSIONS.each {|key, value| bnd[key] = value }
-    end
-  end
+#   desc "ODE JBI Integration Layer"
+#   define "jbi" do
+#     compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "bpel-epr", "bpel-obj",
+#       "bpel-runtime", "scheduler-simple", "bpel-schemas", "bpel-store", "utils", "agents"),
+#       AXIOM,  COMMONS.pool, JAVAX.transaction, GERONIMO.transaction, JBI, LOG4J2, WSDL4J, XERCES, SLF4J
+#
+#     package(:jar)
+#     package(:jbi).tap do |jbi|
+#       libs = artifacts(package(:jar),
+#         projects("bpel-api", "bpel-api-jca", "bpel-compiler", "bpel-connector", "bpel-dao",
+#         "bpel-epr", "jca-ra", "jca-server", "bpel-obj", "bpel-ql", "bpel-runtime",
+#         "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
+#         "jacob", "jacob-ap", "utils", "agents"),
+#         ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
+#         COMMONS.primitives, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector,
+#         JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J2, OPENJPA,
+#         SAXON, TRANQL, XALAN, XERCES, XMLBEANS, WSDL4J)
+#
+#       jbi.component :type=>:service_engine, :name=>"OdeBpelEngine", :description=>self.comment
+#       jbi.component :class_name=>"org.apache.ode.jbi.OdeComponent", :libs=>libs
+#       jbi.bootstrap :class_name=>"org.apache.ode.jbi.OdeBootstrap", :libs=>libs
+#       jbi.merge project("dao-hibernate-db").package(:zip)
+#       jbi.merge project("dao-jpa-ojpa-derby").package(:zip)
+#       jbi.include path_to("src/main/jbi/ode-jbi.properties")
+#     end
+#
+#     test.using :properties=>{ "java.naming.factory.initial" => "org.apache.xbean.spring.jndi.SpringInitialContextFactory"}, :java_args=>ENV['TEST_JVM_ARGS']
+#     test.with projects("dao-jpa", "dao-hibernate", "bpel-compiler", "bpel-api-jca", "jca-ra",
+#       "jca-server", "jacob"),
+#       BACKPORT, COMMONS.lang, COMMONS.io, COMMONS.collections, DERBY, GERONIMO.connector, GERONIMO.kernel,
+#       GERONIMO.transaction, JAVAX.connector, JAVAX.ejb, JAVAX.persistence, JAVAX.stream,
+#       JAVAX.transaction, JAXEN, JBI, OPENJPA, SAXON, SERVICEMIX, SPRING, TRANQL,
+#       XALAN, XBEAN, XMLBEANS, SLF4J, LOG4J2, DOM4J, HIBERNATE
+#       test.exclude '*TestBase', 'org.apache.ode.jbi.OdeJbiComponentLifeCycleTest', 'org.apache.ode.jbi.ReplayerJbiTest'
+#       test.setup unzip(_("target/test/smx/ode")=>project("dao-jpa-ojpa-derby").package(:zip))
+#       test.setup unzip(_("target/test/smx/ode")=>project("dao-hibernate-db").package(:zip))
+#       test.setup task(:prepare_jbi_tests) do |task|
+#       cp _("src/test/jbi/ode-jbi.properties"), _("target/test/smx/ode")
+#       cp _("src/main/jbi/hibernate.properties"), _("target/test/smx/ode")
+#       rm_rf Dir["target/test/resources"]
+#       cp_r _("src/test/resources"), _("target/test/resources")
+#     end
+#   end
+#
+#   desc "ODE Commmands for Karaf"
+#   define "jbi-karaf-commands" do
+#     compile.with projects("bpel-schemas", "jbi"), JBI, KARAF, XMLBEANS,  SLF4J
+#     libs = artifacts(projects("bpel-schemas", "jbi"), JBI, KARAF, XMLBEANS, )
+#     package(:bundle).tap do |bnd|
+#       bnd.classpath = [_("target/classes"), libs].flatten
+#       BUNDLE_VERSIONS.each {|key, value| bnd[key] = value }
+#       bnd['Bundle-Name'] = "Apache ODE :: Commands"
+#       bnd['Bundle-Version'] = VERSION_NUMBER
+#       bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;bundle-version=#{osgi_version_for(VERSION_NUMBER)}"
+#       bnd['Import-Package'] = 'org.apache.karaf.shell.console,*'
+#       bnd['Private-Package'] = "org.apache.ode.karaf.commands;version=#{VERSION_NUMBER}"
+#       bnd['Include-Resource'] = _('src/main/resources')
+#       bnd['-versionpolicy'] = BND_VERSION_POLICY
+#     end
+#   end
+#
+#   desc "ODE Examples for Karaf"
+#   define "jbi-karaf-examples",
+#     :group => "org.apache.ode.examples",
+#     :base_dir => "distro/src/examples-jbi/maven2" do
+#
+#     define "helloworld2-osgi" do
+#       package(:bundle, :id => "helloworld-bundle").tap do |bnd|
+#         bnd.classpath = [KARAF, project("ode:jbi-bundle")]
+#         bnd['Bundle-Name'] = "Apache ODE :: Hello World Example"
+#         bnd['Bundle-SymbolicName'] = "org.apache.ode.examples-helloworld2-bundle"
+#         bnd['Bundle-Version'] = VERSION_NUMBER
+#         bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;bundle-version=#{osgi_version_for(VERSION_NUMBER)}"
+#         bnd['Import-Package'] = "org.apache.servicemix.cxfbc,org.apache.servicemix.common.osgi"
+#         bnd['Export-Package'] = ""
+#         bnd['-exportcontents'] = ""
+#         bnd['Include-Resource'] = _('src/main/resources')
+#         bnd['-versionpolicy'] = BND_VERSION_POLICY
+#       end
+#       # we package sources and javadocs separately to give them a custom id
+#       package(:sources, :id => "helloworld-bundle")
+#
+#       # This project does not contain java classes, hence there are no javadocs.
+#       # But since Nexus will complain about a missing javadoc artifact, we make sure that an empty one is created.
+#       package(:javadoc, :id => "helloworld-bundle").enhance { mkdir_p _("target/doc") }
+#     end
+#
+#     define "ping-pong-osgi" do
+#       compile
+#       package(:bundle, :id => "ping-pong-bundle").tap do |bnd|
+#         bnd.classpath = [_("target/classes"), KARAF, project("ode:jbi-bundle")].flatten
+#         bnd['Bundle-Name'] = "Apache ODE :: Ping-Pong Example"
+#         bnd['Bundle-SymbolicName'] = "org.apache.ode.examples-ping-pong-bundle"
+#         bnd['Bundle-Version'] = VERSION_NUMBER
+#         bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;bundle-version=#{osgi_version_for(VERSION_NUMBER)}"
+#         bnd['Import-Package'] = "org.apache.servicemix.cxfbc,org.apache.servicemix.common.osgi"
+#         bnd['Export-Package'] = "org.apache.ode.ping"
+#         bnd['Include-Resource'] = _('src/main/resources')
+#         bnd['-versionpolicy'] = BND_VERSION_POLICY
+#       end
+#
+#       # we package sources and javadocs separately to give them a custom id
+#       package(:sources, :id => "ping-pong-bundle")
+#       package(:javadoc, :id => "ping-pong-bundle")
+#     end
+#   end
+#
+#   define "jbi-karaf-pmapi-httpbinding" do
+#     package(:bundle).tap do |bnd|
+#       bnd.classpath = [KARAF, project("ode:jbi-bundle")]
+#       bnd['Bundle-Name'] = "Apache ODE :: PMAPI HTTP Binding"
+#       bnd['Bundle-SymbolicName'] = "org.apache.ode-pmapi-httpbinding"
+#       bnd['Bundle-Version'] = VERSION_NUMBER
+#       bnd['Require-Bundle'] = "org.apache.ode.ode-jbi-bundle;bundle-version=#{osgi_version_for(VERSION_NUMBER)}"
+#       bnd['Import-Package'] = "org.apache.servicemix.cxfbc,org.apache.servicemix.common.osgi"
+#       bnd['-exportcontents'] = ""
+#       bnd['Include-Resource'] = _('src/main/resources')
+#     end
+#   end
+#
+#   desc "ODE JBI Packaging for Karaf"
+#   define "jbi-karaf" do
+#     resources.filter.using(BUNDLE_VERSIONS)
+#     package :jar
+#     # Generate features.xml
+#     def package_as_feature(file_name)
+#       file file_name => [_("src/main/resources/features.xml")] do
+#         filter(_("src/main/resources")).include("features.xml").into(_("target")).using(BUNDLE_VERSIONS).run
+#         mv _("target/features.xml"), file_name
+#       end
+#     end
+#     def package_as_feature_spec(spec)
+#       spec.merge({ :type=>:xml, :classifier=>'features' })
+#     end
+#     package(:feature)
+#   end
+#
+#   desc "ODE JBI Bundle"
+#   define "jbi-bundle" do
+#     ode_libs = artifacts(projects("bpel-api", "bpel-api-jca", "bpel-compiler", "bpel-connector", "bpel-dao",
+#                                   "bpel-epr", "jca-ra", "jca-server", "bpel-obj", "bpel-ql", "bpel-runtime",
+#                                   "scheduler-simple", "bpel-schemas", "bpel-store", "dao-hibernate", "dao-jpa",
+#                                   "jacob", "jacob-ap", "utils", "agents"))
+#     libs = artifacts(ANT, AXIOM, BACKPORT, COMMONS.codec, COMMONS.collections, COMMONS.dbcp, COMMONS.lang, COMMONS.pool,
+#                      COMMONS.primitives, COMMONS.io, DERBY, GERONIMO.connector, GERONIMO.transaction, JAXEN, JAVAX.connector,
+#                      JAVAX.ejb, JAVAX.jms, JAVAX.persistence, JAVAX.stream, JAVAX.transaction, LOG4J2, OPENJPA,
+#                      SAXON, TRANQL, XALAN, XERCES, XMLBEANS, WSDL4J, KARAF)
+#     compile.with projects("bpel-schemas", "jbi", "bpel-api"), JBI, libs, KARAF, SPRING, SPRING_OSGI
+#
+#     package(:bundle).tap do |bnd|
+#       # inline dao zip files
+#       zips = artifacts(project("dao-hibernate-db").package(:zip), project("dao-jpa-ojpa-derby").package(:zip))
+#       inlines = zips.map{|item| "@" + item.to_s}
+#
+#       # embed jars
+#       bnd_libs = ode_libs + artifacts(AXIOM, BACKPORT, GERONIMO.connector, JAXEN,
+#                                       JAVAX.connector, JAVAX.persistence, JAVAX.ejb,
+#                                       OPENJPA, SAXON, TRANQL,
+#                                       XALAN, XERCES, XMLBEANS, WSDL4J)
+#       includes = bnd_libs.map{|item| File.basename(item.to_s)}
+#       bnd["includes"] = includes.join(', ')
+#
+#       # embedd *.xsd, *.xml, xmlbeans* from ode libs
+#       embedres = ode_libs.map {|pkg| ['**.xsd', '**.xml', 'schemaorg_apache_xmlbeans/**'].map {|x| '@' + pkg.to_s + '!/' + x}}.join(', ')
+#       bnd['Export-Package'] = "org.apache.ode*;version=#{VERSION_NUMBER};-split-package:=merge-first"
+#       bnd['Import-Package'] = '!org.apache.axis2.client*, !org.apache.ode*, javax.jbi*;version="1.0", javax.transaction*;version="[1.1,1.2)", javax.xml.stream;version="[1.0,2)", org.apache.axiom*;resolution:=optional, org.apache.axis2*;resolution:=optional, org.apache.commons.beanutils;version="[1.8,2)", org.apache.commons.collections*;version="[3.2,4)", org.apache.commons.httpclient*;resolution:=optional, org.apache.commons.io;version="[1.4,2)", org.apache.commons.lang;version="[2.4,3)", org.apache.commons.logging*;version="[1.1,1.2)", org.apache.derby.jdbc;resolution:=optional, org.apache.geronimo.transaction.manager;version="[2,3)", org.apache.openjpa.jdbc.kernel;version="1.2.1", org.springframework.osgi.service.exporter.support, org.osgi.service.cm, org.springframework.osgi.compendium.cm, com.ibm.wsdl*;version="[1.6,2)", org.apache.xmlbeans.impl.schema;version="[2.5,3)", org.apache.xmlbeans*;version="[2.5,3)", org.hibernate*;resolution:=optional, org.hsqldb.jdbc;resolution:=optional, org.osgi.framework;version="[1.5,2)", org.osgi.util.tracker;version="[1.4,2)", org.springframework.beans.factory*;version="[2.5,4)", org.springframework.context*;version="[2.5,4)", org.springframework.osgi.context;version="[1.2,2)", net.sf.saxon.event;version="[9.1,9.2)", net.sf.saxon*;version="[9.1,9.2)",javax.wsdl*;version="[1.2,2)",javax.resource*;version="[1.5, 2]",org.apache.geronimo.connector.outbound*;version="[2.1,3)",org.apache.log4j*;version="[1.2,2)",org.apache.openjpa*;version="[1.2,2)",*'
+#       bnd['Embed-Dependency'] = '*;inline=**.xsd|schemaorg_apache_xmlbeans/**|**.xml'
+#       bnd['DynamicImport-Package'] = '*'
+#       bnd['Include-Resource'] = [embedres, _('src/main/resources'), inlines].flatten.join(', ')
+#       bnd['Bundle-Vendor'] = 'Apache Software Foundation'
+#       bnd['Bundle-License'] = 'http://www.apache.org/licenses/LICENSE-2.0'
+#       bnd['Bundle-DocURL'] = 'http://ode.apache.org'
+#       bnd['Bundle-Name'] = 'Apache ODE :: BPEL Service Engine'
+#       bnd['-versionpolicy'] = BND_VERSION_POLICY
+#       bnd.classpath = [project.compile.target, bnd_libs, artifacts(project("jbi").package(:jar)), libs].flatten
+#
+#       BUNDLE_VERSIONS.each {|key, value| bnd[key] = value }
+#     end
+#   end
 
   desc "ODE JCA Resource Archive"
   define "jca-ra" do
@@ -706,8 +727,8 @@ define "ode" do
   end
 
   # sources and javadocs of jbi-karaf-examples are packaged separately.
-  package_with_sources :except => ["jbi-karaf-examples:helloworld2-osgi", "jbi-karaf-examples:ping-pong-osgi"]
-  package_with_javadoc :except => ["jbi-karaf-examples:helloworld2-osgi", "jbi-karaf-examples:ping-pong-osgi"] unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
+#   package_with_sources :except => ["jbi-karaf-examples:helloworld2-osgi", "jbi-karaf-examples:ping-pong-osgi"]
+#   package_with_javadoc :except => ["jbi-karaf-examples:helloworld2-osgi", "jbi-karaf-examples:ping-pong-osgi"] unless ENV["JAVADOC"] =~ /^(no|off|false|skip)$/i
 
   task :aligndeps do
     pp transitive(['org.apache.axis2:axis2-webapp:jar:1.5.6', 'org.apache.rampart:rampart-project:jar:1.5.2']).group_by {|s| "#{s.group}:#{s.id}:#{s.classifier}:#{s.type}" }.map {|i,v| v.sort_by(&:version).first.to_spec}.sort
@@ -838,7 +859,7 @@ define "apache-ode" do
   desc "ODE Axis2 Based Distribution"
   define "distro" do
     parent.distro(self, "-war") { |zip| zip.include project("ode:axis2-war").package(:war), :as=>"ode.war" }
-    parent.distro(self, "-jbi") { |zip| zip.include project("ode:jbi").package(:zip) }
+#    parent.distro(self, "-jbi") { |zip| zip.include project("ode:jbi").package(:zip) }
     parent.distro(self, "-server") { |zip| zip.include project("ode:tomee-server").package(:zip) }
 
     # Preparing third party licenses

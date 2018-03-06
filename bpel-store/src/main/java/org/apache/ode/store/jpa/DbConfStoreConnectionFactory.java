@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.apache.ode.dao.jpa.JpaTxMgrProvider;
 import org.apache.ode.store.ConfStoreConnection;
 import org.apache.ode.store.ConfStoreConnectionFactory;
-import org.hibernate.cfg.Environment;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;

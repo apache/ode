@@ -54,12 +54,14 @@ public class GeronimoDelegateSupport extends DelegateSupport {
         TransactionSupport transactionSupport = LocalTransactions.INSTANCE;
         ConnectionTracker connectionTracker = new ConnectionTrackingCoordinator();
 
-        PoolingSupport poolingSupport = new SinglePool(1, 1, 
+        PoolingSupport poolingSupport = new SinglePool(1, 1,
                 CONNECTION_MAX_WAIT_MILLIS,
                 CONNECTION_MAX_IDLE_MINUTES,
                 true, // match one
                 false, // match all
                 false); // select one assume match
+
+        JDBCDriverMCF mcf = new JDBCDriverMCF();
 
         _connectionManager = new GenericConnectionManager(
                     transactionSupport,
@@ -67,10 +69,11 @@ public class GeronimoDelegateSupport extends DelegateSupport {
                     null,
                     connectionTracker,
                     (RecoverableTransactionManager) txm,
+                    mcf,
                     getClass().getName(),
                     getClass().getClassLoader());
 
-        JDBCDriverMCF mcf = new JDBCDriverMCF();
+
         try {
             mcf.setDriver(driverClass);
             mcf.setConnectionURL(url);
@@ -81,7 +84,7 @@ public class GeronimoDelegateSupport extends DelegateSupport {
                 mcf.setPassword(password);
             }
             _connectionManager.doStart();
-            return (DataSource) mcf.createConnectionFactory(_connectionManager);
+            return (DataSource) _connectionManager.createConnectionFactory();
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }

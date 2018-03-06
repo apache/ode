@@ -1,0 +1,5 @@
+http://www.h2database.com/html/license.html
+H2 is dual licensed and available under the MPL 2.0 (Mozilla Public License Version 2.0) or under the EPL 1.0 (Eclipse Public License)
+
+EPL 1.0 chosen
+http://www.h2database.com/html/license.html#eclipse_license

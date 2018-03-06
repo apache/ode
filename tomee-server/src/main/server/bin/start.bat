@@ -29,7 +29,8 @@ set ODE_SERVER_CONF=%~dp0..\conf
 
 set ODE_SERVER_JAVAOPTS=%JAVA_OPTS%
 set ODE_SERVER_JAVAOPTS=%ODE_SERVER_JAVAOPTS% -Dode.server.home=%ODE_SERVER_HOME% -Dderby.syste.home=%ODE_SERVER_HOME%
-set ODE_SERVER_JAVAOPTS=%ODE_SERVER_JAVAOPTS% -Djava.naming.factory.initial=org.apache.openejb.core.LocalInitialContextFactory
+set ODE_SERVER_JAVAOPTS=%ODE_SERVER_JAVAOPTS% -Djava.naming.factory.initial=org.apache.openejb.core.OpenEJBInitialContextFactory
+set ODE_SERVER_JAVAOPTS=%ODE_SERVER_JAVAOPTS% -Dorg.jboss.logging.provider=slf4j
 
 if "%JAVA_HOME%"=="" goto noJavaHome
 if not exist "%JAVA_HOME%"\bin\java.exe goto noJava

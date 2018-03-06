@@ -95,7 +95,7 @@ public class ProcessDAOImpl extends OpenJPADAO implements ProcessDAO {
         qry.setParameter("ckey", correlatorId);
         qry.setParameter("process", this);
         List res = qry.getResultList();
-        if (res.size() == 0) return null;
+        if (res.isEmpty()) return null;
         return (CorrelatorDAO) res.get(0);
     }
 

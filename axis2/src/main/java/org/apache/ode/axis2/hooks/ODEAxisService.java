@@ -80,7 +80,7 @@ public class ODEAxisService {
             WSDL11ToAxisServiceBuilder serviceBuilder = new WSDL11ToAxisPatchedBuilder(is, wsdlServiceName, portName);
             serviceBuilder.setBaseUri(baseUri.toString());
             serviceBuilder.setCustomResolver(new Axis2UriResolver());
-            serviceBuilder.setCustomWSLD4JResolver(new Axis2WSDLLocator(baseUri));
+            serviceBuilder.setCustomWSDLResolver(new Axis2WSDLLocator(baseUri));
             serviceBuilder.setServerSide(true);
 
             String axisServiceName = ODEAxisService.extractServiceName(pconf, wsdlServiceName, portName);

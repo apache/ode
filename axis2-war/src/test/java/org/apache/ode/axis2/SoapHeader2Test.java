@@ -23,25 +23,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.ode.axis2.Axis2TestBase;
 import org.apache.ode.axis2.JettyWrapper;
-import org.apache.ode.axis2.httpbinding.HttpBindingTest;
 import org.apache.ode.utils.DOMUtils;
 import static org.testng.AssertJUnit.assertTrue;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.w3c.dom.Element;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.AbstractHandler;
-import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Request;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.namespace.QName;
 import javax.servlet.ServletException;
-import java.util.concurrent.CountDownLatch;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.io.IOException;
-import java.io.StringReader;
+
 
 /**
  * <p/>
@@ -112,11 +109,27 @@ public class SoapHeader2Test extends Axis2TestBase {
         try {
             String response = server.sendRequestFile("http://localhost:8888/processes/hello/hello/process/client",
                     bundleName, "testRequest.soap");
-            if (log.isDebugEnabled()) log.debug(response);
+            log.debug(response);
             assertTrue("Soap headers missing!", response.contains("TestSoapHeader2 passed"));
         } finally {
             server.undeployProcess(bundleName);
         }
     }
 
+    @Test
+    public void testSoapHeaders3() throws Exception {
+        String bundleName = "TestSoapHeader3";
+        // deploy the required service
+        if (!server.isDeployed(bundleName)) server.deployProcess(bundleName);
+        try {
+            String response = server.sendRequestFile("http://localhost:8888/processes/hello_world_header_wsdl",
+                    bundleName, "testRequest.soap");
+            log.debug(response);
+            assertTrue(response!=null);
+            Element resEle = DOMUtils.stringToDOM(response);
+            assertTrue(DOMUtils.findChildByName(resEle, new QName("http://www.example.org/cid","conversationId","cid"),true) != null);
+        } finally {
+            server.undeployProcess(bundleName);
+        }
+    }
 }

@@ -57,6 +57,7 @@ ODE_SERVER_LIB="$ODE_SERVER_HOME/lib"
 ODE_SERVER_CONF="$ODE_SERVER_HOME/conf"
 
 
+
 if [ -z "$JAVACMD" ] ; then
   if [ -n "$JAVA_HOME"  ] ; then
     if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
@@ -96,7 +97,13 @@ done
 ODE_SERVER_JAVAOPTS="$JAVA_OPTS \
 -Dode.server.home=$ODE_SERVER_HOME \
 -Dderby.system.home=$ODE_SERVER_HOME \
--Djava.naming.factory.initial=org.apache.openejb.core.LocalInitialContextFactory"
+-Dcatalina.base=$ODE_SERVER_HOME \
+-Dcatalina.home=$ODE_SERVER_HOME \
+-Djava.naming.factory.initial=org.apache.openejb.core.OpenEJBInitialContextFactory \
+-Dorg.jboss.logging.provider=slf4j \
+-Djava.util.logging.config.file=$ODE_SERVER_HOME/conf/logging.properties \
+-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager"
+
 
 
 # For Cygwin, switch paths to Windows format before running java

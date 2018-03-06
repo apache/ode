@@ -469,7 +469,8 @@ public class ProcessInstanceDaoImpl extends HibernateDao implements ProcessInsta
     EventsFirstLastCountTuple flc = new EventsFirstLastCountTuple();
     flc.first = (Date) ret[0];
     flc.last = (Date) ret[1];
-    flc.count = (Integer)ret[2];
+    Long count = (Long) ret[2];
+    flc.count = count.intValue();
     return flc;
   }
 

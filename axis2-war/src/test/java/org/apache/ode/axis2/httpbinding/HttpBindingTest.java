@@ -101,6 +101,12 @@ public class HttpBindingTest extends Axis2TestBase {
     }
 
     @Test(dataProvider="configs")
+    public void testHttpBindingExt_POST_FORM_URL_ENCODED() throws Exception {
+        String bundleName = "TestHttpBindingExt_POST_FORM_URL_ENCODED";
+        executeBundle(bundleName);
+    }
+
+    @Test(dataProvider="configs")
     public void testHttpBindingExt_PUT() throws Exception {
         String bundleName = "TestHttpBindingExt_PUT";
         executeBundle(bundleName);

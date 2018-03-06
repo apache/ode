@@ -73,16 +73,19 @@ public class DatabaseConnectionManager {
                 false, // match all
                 false); // select one assume match
 
+        JDBCDriverMCF mcf = new JDBCDriverMCF();
+
         _connectionManager = new GenericConnectionManager(
                 transactionSupport,
                 poolingSupport,
                 null,
                 connectionTracker,
                 (RecoverableTransactionManager) _txm,
+                mcf,
                 getClass().getName(),
                 getClass().getClassLoader());
 
-        JDBCDriverMCF mcf = new JDBCDriverMCF();
+
         try {
             mcf.setDriver(driverClass);
             mcf.setConnectionURL(url);
@@ -93,7 +96,7 @@ public class DatabaseConnectionManager {
                 mcf.setPassword(password);
             }
             _connectionManager.doStart();
-            _dataSource = (DataSource) mcf.createConnectionFactory(_connectionManager);
+            _dataSource = (DataSource) _connectionManager.createConnectionFactory();
         } catch (Exception ex) {
             String errmsg = __msgs.msgOdeDbPoolStartupFailed(url);
             __log.error(errmsg, ex);
