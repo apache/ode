@@ -83,6 +83,11 @@ define "ode" do
   manifest["Implementation-Vendor"] = "Apache Software Foundation"
   meta_inf << file("NOTICE")
 
+  pom.add_apache_v2_license
+  pom.url = 'https://ode.apache.org'
+  pom.issues_url = 'https://issues.apache.org/jira/projects/ODE/summary'
+  pom.issues_system = 'jira'
+
   desc "ODE Axis Integration Layer"
   define "axis2" do
     compile.with projects("bpel-api", "bpel-connector", "bpel-dao", "bpel-epr", "bpel-runtime",
