@@ -2,88 +2,48 @@
 Apache ODE Release Notes
 ========================
 
-Apache ODE 1.3.7 includes about 48 bug fixes and improvements.
+Apache ODE 1.3.8 includes about 10 bug fixes and improvements.
 
-Apache ODE 1.3.7 requires Java 1.6.x or higher. The WAR distribution can 
-run in most J2EE servlet containers. The JBI distribution should be able 
-to run in any JBI container but has only been tested with ServiceMix 3.x
-and latest ServiceMix 4.5.x (OSGi bundle) so far. See the BUILDING file if you 
-want to build your own distribution from the source release. 
+Apache ODE 1.3.8 requires Java 1.8.x or higher. The WAR distribution can 
+run in most J2EE servlet containers. See the BUILDING file if you
+want to build your own distribution from the source release.
 
 The most notable improvements:
-  - Moved to minimum binary compatibility to JDK 6 from JDK 5.
-  - ODE server with embedded Apache Tomee.
-  - New ODE management console based on AngularJS.
-  - Upgrade of Axis2, OpenJPA, Hibernate.
-  - Moved to SLF4J logging with Log4j2 as the implementation.
-  - There is database migration required from earlier versions.
-  - Some major memory leaks have got fixed
+  - Minimum binary compatibility to JDK 8
+  - Upgraded to JPA 2 complaint from JPA 1
+    - With Hibernate 4.3.11 and OpenJPA 2.4.2
+  - Upgraded to Axis2 1.7.6
+  - Upgraded to TOMEE 7.0.4
+  - Upgraded to TOMCAT 8.5.28
 
 Changes:
 ------- 
 
-Release Notes - ODE - Version 1.3.7
+Release Notes - ODE - Version 1.3.8
 
 ** Sub-task
-    * [ODE-757] - checked in the generated classes from apt tool.
+
+   * [ODE-1068] - Upgrade Hibernate
 
 ** Bug
-    * [ODE-829] - if process is retired the inflight instances dont work
-    * [ODE-974] - On process versioning, instances of retired version are not picking the data from BPEL_UNMATCHED
-    * [ODE-991] - ode:delete fails when removing multiple elements
-    * [ODE-996] - Multiple instances of axis2 ConfigurationContext objects
-    * [ODE-1008] - WAR and JBI distros package source jars instead binary ODE jars in lib folder
-    * [ODE-1013] - Missing context information in Service Endpoint in auto generated WSDL from Axis2
-    * [ODE-1015] - ODE not working with PostgreSQL
-    * [ODE-1016] - ASSIGN returns 0 when number function with String argument is used
-    * [ODE-1018] - Change in test ports on jenkins results in test failures
-    * [ODE-1019] - Schema load exception is not handled for captureSchema
-    * [ODE-1020] - Deployment memory leak
-    * [ODE-1023] - Deployment fails with StackOverflowError
-    * [ODE-1026] - Deployment deadlock
-    * [ODE-1027] - Variables as number predicates don't work with XPath 1.0
-    * [ODE-1031] - Deployment error - captureSchema: NULL model (unknown error)
-    * [ODE-1033] - Assignment of monotonic version numbers in ProcessStore are not thread safe
-    * [ODE-1035] - Process properties defined in deploy.xml is currently restricted to a maximum of 255 character per property in the database
-    * [ODE-1036] - Generate SQLServer database script for OpenJPA
-    * [ODE-1038] - Rectify the build system to include database column index in the generated scripts by Hibernate
-    * [ODE-1039] - Rectify the build system to package OPENJPA and HIBERNATE generated database scripts in the ODE distribution
-    * [ODE-1045] - Problem starting ODE 1.3.7 SNAPSHOT with Embedded database mode using Hibernate
-    * [ODE-1048] - Disable MEX_MATCHER job
-    * [ODE-1051] - Database migration from ODE 1.3.6 to 1.3.7
-    * [ODE-1052] - Improper database column definitions in Hibernate persistent classes 
-    * [ODE-1053] - Removal of Drop table statement in database table creation scripts for scheduler
-    * [ODE-1054] - Add Apache license terms to auto generated database scripts
-    * [ODE-1055] - Hibernate 3.3.2 creates Derby scripts with BLOB and CLOB column types with only 255 max length
-    * [ODE-1056] - Override Hibernate's behavoir to mark BLOB as BYTEA instead of OID for PostgreSQL
-    * [ODE-1063] - Postgres complains that column "detailsext" is of type bytea but expression is of type oid
-    * [ODE-1064] - NPE onAxisMessageExchange(ODEService.java:159)
+
+   * [ODE-716] - NullPointerException when binding message parts to SOAP header
+   * [ODE-1066] - Unstable work of compensation activity
+   * [ODE-1067] - Decommission JBI Development and Support
 
 ** Improvement
-    * [ODE-730] - Respect partner role partner link definitions for instances of old process revisions
-    * [ODE-928] - Get rid of e.printStackTrace() from the code
-    * [ODE-983] - Switch from commons.logging to slf4j
-    * [ODE-1006] - ODE.js compatibility with Firefox
-    * [ODE-1014] - Change Default transportReceiver in axis2 configuration
-    * [ODE-1017] - Backport SetVariable in PMAPI from trunk
-    * [ODE-1021] - Upgrade to Axis2 1.6.2
-    * [ODE-1022] - Upgrade to OpenJPA 1.2.3
-    * [ODE-1034] - Upgrade HSQLDB to Latest Release 2.3.3
-    * [ODE-1041] - Move towards binary compatibility to JDK 6 for 1.3.7 Release
-    * [ODE-1049] - Query optimization to findRoute and dequeueMessage queries - MATCHER job
-    * [ODE-1062] - Upgrade Hibernate from 3.2.5 to 3.3.2
-    * [ODE-1065] - PMAPI - Enhance process-info to include myRole EPR
 
-** New Feature
-    * [ODE-1028] - New ODE console
-    * [ODE-1060] - ODE Standalone Server on TomEE
-
-** Task
-    * [ODE-666] - Migrate from Derby to H2 as the default embedded test database
+   * [ODE-602] - invocation fails if urlReplacement and form encoded used
+   * [ODE-1042] - Move towards JPA 2
+   * [ODE-1069] - Upgrade ODE Server to TOMEE 7.0.4
+   * [ODE-1070] - Upgrade to Axis2 1.7.6
+   * [ODE-1071] - Move towards binary compatibility to JDK 8
 
 ** Wish
-    * [ODE-1032] - Update xerces to the latest 2.11.0 version
+
+   * [ODE-1043] - Move towards binary compatibility to JDK 7
 
 
-  See our Jira for more information: 
-    * https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12310270&version=12324967
+See our Jira for more information:
+---------------------------------
+https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12310270&version=12332764
