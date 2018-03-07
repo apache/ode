@@ -212,7 +212,7 @@ TOMEE = struct(
                       "tomcat-jasper-el",
                       "tomcat-websocket",
                       "tomcat-juli",
-                      :under=>"org.apache.tomcat", :version=>"8.5.23"
+                      :under=>"org.apache.tomcat", :version=>"8.5.28"
                     ),
                 "org.apache.tomcat.extras:tomcat-extras-juli:jar:8.5.2"
                ],
