@@ -13,7 +13,7 @@ REM WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 REM See the License for the specific language governing permissions and
 REM limitations under the License.
 
-docker pull sathwik/apache-buildr:latest-jruby-jdk7
+docker pull sathwik/apache-buildr:latest-jruby-jdk8
 
 SET JAVA_OPTS=-Xmx1024M -XX:MaxPermSize=512M
 SET BUILDR_ARGS=%*
@@ -44,4 +44,4 @@ REM  mount volume for release
 REM  -v %GNUPGHOME%:/home/dummy/.gnupg
 
 REM @hahnml: Use the current working directory for caching maven and buildr artifacts
-docker run --rm -e JAVADOC="%JAVADOC%" -e NEXT_VERSION="%NEXT_VERSION%" -e GPG_USER="%GPG_USER%" -e GPG_PASS="%GPG_PASS%" -e BUILDR_ENV="%BUILDR_ENV%" -e JAVA_OPTS="%JAVA_OPTS%" -v %PWD%:/workspace -v %PWD%/.m2:/home/dummy/.m2 -v %PWD%/.buildr:/home/dummy/.buildr -v %PWD%/tmp:/tmp --entrypoint bash sathwik/apache-buildr:latest-jruby-jdk7 -c "%CREATE_USER_COMMAND% && %BUNDLER_COMMAND% && %BUILDR_COMMAND%"
+docker run --rm -e JAVADOC="%JAVADOC%" -e NEXT_VERSION="%NEXT_VERSION%" -e GPG_USER="%GPG_USER%" -e GPG_PASS="%GPG_PASS%" -e BUILDR_ENV="%BUILDR_ENV%" -e JAVA_OPTS="%JAVA_OPTS%" -v %PWD%:/workspace -v %PWD%/.m2:/home/dummy/.m2 -v %PWD%/.buildr:/home/dummy/.buildr -v %PWD%/tmp:/tmp --entrypoint bash sathwik/apache-buildr:latest-jruby-jdk8 -c "%CREATE_USER_COMMAND% && %BUNDLER_COMMAND% && %BUILDR_COMMAND%"

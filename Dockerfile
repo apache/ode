@@ -1,4 +1,4 @@
-FROM sathwik/apache-buildr:latest-jruby-jdk7 as builder
+FROM sathwik/apache-buildr:latest-jruby-jdk8 as builder
 
 ENV JAVA_OPTS="-Xmx1024M -XX:MaxPermSize=512M"
 ENV BUILDR_ARGS="clean package test=no JAVADOC=off"
