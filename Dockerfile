@@ -1,7 +1,7 @@
 FROM sathwik/apache-buildr:latest-jruby-jdk8 as builder
 
 ENV JAVA_OPTS="-Xmx1024M -XX:MaxPermSize=512M"
-ENV BUILDR_ARGS="clean package test=no JAVADOC=off"
+ENV BUILDR_ARGS="-f Rakefile clean package test=no JAVADOC=off"
 
 RUN apt-get update -qq && apt-get install -qqy \
         unzip \
@@ -12,7 +12,7 @@ COPY . /workspace
 RUN jruby -S bundler install --gemfile=/workspace/Gemfile \
     && buildr $BUILDR_ARGS \
     && mkdir /build \
-    && cp /workspace/axis2-war/target/ode-axis2-war-1.3.8.war /build/ode.war \
+    && cp /workspace/axis2-war/target/ode-axis2-war-1.3.8-SNAPSHOT.war /build/ode.war \
     && unzip /build/ode.war -d /build/ode
 
 
