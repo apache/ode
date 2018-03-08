@@ -129,8 +129,6 @@ public class BpelProcess {
     ExpressionLanguageRuntimeRegistry _expLangRuntimeRegistry;
     private ReplacementMap _replacementMap;
     final ProcessConf _pconf;
-
-    Set<String> _mustUnderstandExtensions;
     
     /** {@link MessageExchangeInterceptor}s registered for this process. */
     private final List<MessageExchangeInterceptor> _mexInterceptors = new ArrayList<MessageExchangeInterceptor>();
@@ -960,7 +958,6 @@ public class BpelProcess {
 //            }
             _replacementMap = null;
             _expLangRuntimeRegistry = null;
-            _mustUnderstandExtensions = null;
         }
 
         private void doHydrate() {
@@ -1004,16 +1001,13 @@ public class BpelProcess {
 
             // Checking for registered extension bundles, throw an exception when
             // a "mustUnderstand" extension is not available
-            _mustUnderstandExtensions = new HashSet<String>();
-            for (OProcess.OExtension extension : _oprocess.getDeclaredExtensions()) {
+            for (OProcess.OExtension extension : _oprocess.getMustUnderstandExtensions()) {
                 if (extension.isMustUnderstand()) {
                     if (_engine._contexts.extensionRegistry.get(extension.getNamespace()) == null) {
                         String msg = __msgs.msgExtensionMustUnderstandError(_pid,
                                 extension.getNamespace());
                         __log.error(msg);
                         throw new BpelEngineException(msg);
-                    } else {
-                        _mustUnderstandExtensions.add(extension.getNamespace());
                     }
                 } else {
                     __log.warn("The process declares the extension namespace "

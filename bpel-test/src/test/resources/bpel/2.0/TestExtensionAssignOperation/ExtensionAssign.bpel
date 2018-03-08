@@ -1,0 +1,56 @@
+<process name="ExtensionAssign"
+    targetNamespace="http://ode/bpel/unit-test" 
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:tns="http://ode/bpel/unit-test"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:test="http://ode/bpel/unit-test.wsdl"
+    xmlns:ext="urn:ode:test-extension-bundle">
+
+  <import location="ExtensionAssign.wsdl"
+     namespace="http://ode/bpel/unit-test.wsdl"
+     importType="http://schemas.xmlsoap.org/wsdl/" />
+
+   <partnerLinks>
+      <partnerLink name="helloPartnerLink" 
+         partnerLinkType="test:HelloPartnerLinkType" 
+         myRole="me" />
+   </partnerLinks>
+
+   <extensions>
+      <extension namespace="urn:ode:test-extension-bundle" mustUnderstand="yes"/>
+   </extensions>
+
+   <variables>
+     <variable name="myVar" messageType="test:HelloMessage"/>
+     <variable name="tmpVar" type="xsd:string"/>
+   </variables>
+        
+   <sequence>   
+       <receive 
+          name="start"
+          partnerLink="helloPartnerLink"
+          portType="test:HelloPortType"
+          operation="hello"
+          variable="myVar"
+          createInstance="yes"/>
+
+      <assign name="assign1">
+         <copy>
+            <from variable="myVar" part="TestPart"/>
+            <to variable="tmpVar"/>
+         </copy>
+		 <extensionAssignOperation>
+	     	<ext:doAssign/> <!-- assigns 'Small' to tmpVar -->
+	     </extensionAssignOperation>
+         <copy>
+             <from>concat($tmpVar,' World')"</from>
+             <to variable="myVar" part="TestPart"/>
+         </copy>
+      </assign>
+       <reply name="end"  
+              partnerLink="helloPartnerLink"
+              portType="test:HelloPortType" 
+              operation="hello"
+              variable="myVar"/>
+   </sequence>
+</process>

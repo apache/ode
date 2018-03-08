@@ -14,11 +14,10 @@
  */
 package org.apache.ode.bpel.eapi;
 
-import java.util.List;
 import java.util.Map;
 
 import org.apache.ode.bpel.common.FaultException;
-import org.apache.ode.bpel.obj.OLink;
+import org.apache.ode.bpel.obj.OActivity;
 import org.apache.ode.bpel.obj.OProcess;
 import org.apache.ode.bpel.obj.OScope;
 import org.w3c.dom.Node;
@@ -40,14 +39,6 @@ public interface ExtensionContext {
      * @throws FaultException
      */
     Map<String, OScope.Variable> getVisibleVariables() throws FaultException;
-
-    /**
-     * Returns a list of links.
-     * 
-     * @return an unmodifiable list of visible variables.
-     * @throws FaultException
-     */
-    List<OLink> getLinks() throws FaultException;
 
     /**
      * Read the value of a BPEL variable.
@@ -96,18 +87,27 @@ public interface ExtensionContext {
             throws FaultException;
 
     /**
-     * Obtain the status of a control link.
-     *
-     * @param olink link to check
-     * @return <code>true</code> if the link is active, <code>false</code> otherwise.
-     */
-    boolean isLinkActive(OLink olink) throws FaultException;
-
-    /**
      * Reads the current process instance id.
      * 
      * @return instance id
      */
     Long getProcessId();
 
+    /**
+     * Returns the name of the invoking activity.
+     * @return activity name
+     */
+    String getActivityName();
+    
+    /**
+     * Low-level-method
+     */
+    OActivity getOActivity();
+    
+    //ScopeFrame getScopeFrame();
+    void complete();
+    
+    void completeWithFault(Throwable t);
+    
+    void completeWithFault(FaultException fault);
 }

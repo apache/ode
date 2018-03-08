@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<wsdl:definitions 
+    targetNamespace="http://ode/bpel/unit-test.wsdl"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:tns="http://ode/bpel/unit-test.wsdl"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+	xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype">
+    
+    <wsdl:message name="HelloMessage">
+        <wsdl:part name="TestPart" type="xsd:string"/>
+    </wsdl:message>
+    
+    <wsdl:portType name="HelloPortType">
+        <wsdl:operation name="hello">
+            <wsdl:input message="tns:HelloMessage" name="TestIn"/>
+            <wsdl:output message="tns:HelloMessage" name="TestOut"/>
+        </wsdl:operation>    
+    </wsdl:portType>
+    
+     <wsdl:binding name="HelloSoapBinding" type="tns:HelloPortType">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="hello">
+            <soap:operation soapAction="" style="rpc"/>
+            <wsdl:input>
+                <soap:body
+                    namespace="http://ode/bpel/unit-test.wsdl"
+                    use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body
+                    namespace="http://ode/bpel/unit-test.wsdl" 
+                    use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="HelloService">
+		<wsdl:port name="HelloPort" binding="tns:HelloSoapBinding">
+     		<soap:address location="http://localhost:8080/ode/processes/helloWorld"/>
+		</wsdl:port>
+    </wsdl:service>
+    
+   <plnk:partnerLinkType name="HelloPartnerLinkType">
+       <plnk:role name="me" portType="tns:HelloPortType"/>
+       <plnk:role name="you" portType="tns:HelloPortType"/>
+   </plnk:partnerLinkType>
+</wsdl:definitions>
+

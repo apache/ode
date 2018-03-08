@@ -1,0 +1,12 @@
+<deploy xmlns="http://ode.fivesight.com/schemas/2006/06/27/dd" 
+	xmlns:pns="http://ode/bpel/unit-test" 
+	xmlns:wns="http://ode/bpel/unit-test.wsdl">
+
+
+	<process name="pns:ExtensionActivityMustUnderstand">
+		<active>true</active>
+		<provide partnerLink="helloPartnerLink">
+			<service name="wns:HelloService" port="HelloPort"/>
+		</provide>
+	</process>
+</deploy>
