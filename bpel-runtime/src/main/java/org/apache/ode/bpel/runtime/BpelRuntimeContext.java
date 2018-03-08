@@ -27,9 +27,9 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.eapi.ExtensionOperation;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
-import org.apache.ode.bpel.extension.ExtensionOperation;
 import org.apache.ode.bpel.iapi.ProcessConf.PartnerRoleConfig;
 import org.apache.ode.bpel.o.OPartnerLink;
 import org.apache.ode.bpel.o.OProcess;
@@ -87,8 +87,7 @@ public interface BpelRuntimeContext {
 	 * @param parentScopeId
 	 * @param partnerLinks
 	 */
-	void initializePartnerLinks(Long parentScopeId,
-			Collection<OPartnerLink> partnerLinks);
+	void initializePartnerLinks(Long parentScopeId, Collection<OPartnerLink> partnerLinks);
 
 	/**
 	 * 
@@ -96,8 +95,7 @@ public interface BpelRuntimeContext {
 	 *            variable to read
 	 * @return
 	 */
-	Node readVariable(Long scopeInstanceId, String varname, boolean forWriting)
-			throws FaultException;
+	Node readVariable(Long scopeInstanceId, String varname, boolean forWriting) throws FaultException;
 
 	/**
 	 * Fetches the my-role endpoint reference data.
@@ -109,8 +107,7 @@ public interface BpelRuntimeContext {
 	 */
 	Element fetchMyRoleEndpointReferenceData(PartnerLinkInstance pLink);
 
-	Element fetchPartnerRoleEndpointReferenceData(PartnerLinkInstance pLink)
-			throws FaultException;
+	Element fetchPartnerRoleEndpointReferenceData(PartnerLinkInstance pLink) throws FaultException;
 
 	/**
 	 * Determine if the partner role of an endpoint has been initialized (either
@@ -131,8 +128,8 @@ public interface BpelRuntimeContext {
 	PartnerRoleConfig getConfigForPartnerLink(OPartnerLink pLink);
 
 	/**
-	 * Fetches our session id associated with the partner link instance. This
-	 * will always return a non-null value.
+	 * Fetches our session id associated with the partner link instance. This will
+	 * always return a non-null value.
 	 * 
 	 * @param pLink
 	 *            partner link
@@ -140,8 +137,7 @@ public interface BpelRuntimeContext {
 	String fetchMySessionId(PartnerLinkInstance pLink);
 
 	/**
-	 * Fetches the partner's session id associated with the partner link
-	 * instance.
+	 * Fetches the partner's session id associated with the partner link instance.
 	 * 
 	 * @param pLink
 	 *            partner link
@@ -159,8 +155,8 @@ public interface BpelRuntimeContext {
 	void initializePartnersSessionId(PartnerLinkInstance pLink, String session);
 
 	/**
-	 * Evaluate a property alias query expression against a variable, returning
-	 * the normalized {@link String} representation of the property value.
+	 * Evaluate a property alias query expression against a variable, returning the
+	 * normalized {@link String} representation of the property value.
 	 * 
 	 * @param var
 	 *            variable to read
@@ -170,8 +166,7 @@ public interface BpelRuntimeContext {
 	 * @throws FaultException
 	 *             in case of selection or other fault
 	 */
-	String readProperty(VariableInstance var, OProcess.OProperty property)
-			throws FaultException;
+	String readProperty(VariableInstance var, OProcess.OProperty property) throws FaultException;
 
 	/**
 	 * Writes a partner EPR.
@@ -180,8 +175,7 @@ public interface BpelRuntimeContext {
 	 * @param data
 	 * @throws FaultException
 	 */
-	void writeEndpointReference(PartnerLinkInstance variable, Element data)
-			throws FaultException;
+	void writeEndpointReference(PartnerLinkInstance variable, Element data) throws FaultException;
 
 	Node convertEndpointReference(Element epr, Node targetNode);
 
@@ -193,18 +187,15 @@ public interface BpelRuntimeContext {
 	Node fetchVariableData(VariableInstance variable, ScopeFrame scopeFrame,
 			boolean forWriting) throws FaultException;
 
-	ExtensionOperation createExtensionActivityImplementation(QName name);
-
 	boolean isCorrelationInitialized(CorrelationSetInstance cset);
 
 	CorrelationKey readCorrelation(CorrelationSetInstance cset);
 
-	void writeCorrelation(CorrelationSetInstance cset,
-			CorrelationKey correlation);
+	void writeCorrelation(CorrelationSetInstance cset, CorrelationKey correlation);
 
 	/**
-	 * Should be invoked by process template, signalling process completion with
-	 * no faults.
+	 * Should be invoked by process template, signalling process completion with no
+	 * faults.
 	 * 
 	 */
 	void completedOk();
@@ -218,8 +209,8 @@ public interface BpelRuntimeContext {
 	/**
 	 * Non-deterministic selection on incoming message-exchanges.
 	 */
-	void select(PickResponseChannel response, Date timeout,
-			boolean createInstnace, Selector[] selectors) throws FaultException;
+	void select(PickResponseChannel response, Date timeout, boolean createInstnace, Selector[] selectors)
+			throws FaultException;
 
 	/**
 	 * Cancel a timer, or pick.
@@ -236,11 +227,9 @@ public interface BpelRuntimeContext {
 	 * @param msg
 	 *            response message
 	 * @param fault
-	 *            fault name, if this is a fault reply, otherwise
-	 *            <code>null</code>
+	 *            fault name, if this is a fault reply, otherwise <code>null</code>
 	 */
-	void reply(PartnerLinkInstance plink, String opName, String mexId,
-			Element msg, QName fault) throws FaultException;
+	void reply(PartnerLinkInstance plink, String opName, String mexId, Element msg, QName fault) throws FaultException;
 
 	/**
 	 * Called back when the process executes an invokation.
@@ -260,8 +249,7 @@ public interface BpelRuntimeContext {
 	 *             When the response is a fault or when the invoke could not be
 	 *             executed in which case it is one of the bpel standard fault.
 	 */
-	String invoke(int activityId, PartnerLinkInstance partnerLinkInstance,
-			Operation operation, Element outboundMsg,
+	String invoke(int activityId, PartnerLinkInstance partnerLinkInstance, Operation operation, Element outboundMsg,
 			InvokeResponseChannel invokeResponseChannel) throws FaultException;
 
 	/**
@@ -308,14 +296,12 @@ public interface BpelRuntimeContext {
 
 	Element getSourceEPR(String mexId);
 
-	void registerActivityForRecovery(ActivityRecoveryChannel channel,
-			long activityId, String reason, Date dateTime, Element details,
-			String[] actions, int retries);
+	void registerActivityForRecovery(ActivityRecoveryChannel channel, long activityId, String reason, Date dateTime,
+			Element details, String[] actions, int retries);
 
 	void unregisterActivityForRecovery(ActivityRecoveryChannel channel);
 
-	void recoverActivity(String channel, long activityId, String action,
-			FaultData fault);
+	void recoverActivity(String channel, long activityId, String action, FaultData fault);
 
 	String getSourceSessionId(String mexId);
 
@@ -324,8 +310,7 @@ public interface BpelRuntimeContext {
 	/**
 	 * Read an external variable.
 	 */
-	Node readExtVar(Variable variable, Node reference)
-			throws ExternalVariableModuleException;
+	Node readExtVar(Variable variable, Node reference) throws ExternalVariableModuleException;
 
 	/**
 	 * Write an external variable.
@@ -339,11 +324,11 @@ public interface BpelRuntimeContext {
 	}
 
 	/**
-	 * Retrieves the base URI that this BPEL Process instance is running
-	 * relative to.
+	 * Retrieves the base URI that this BPEL Process instance is running relative
+	 * to.
 	 * 
-	 * @return URI - the URI representing the absolute physical file path
-	 *         location that this process is defined within.
+	 * @return URI - the URI representing the absolute physical file path location
+	 *         that this process is defined within.
 	 */
 	URI getBaseResourceURI();
 
@@ -351,18 +336,18 @@ public interface BpelRuntimeContext {
 	 * Retrieves the property value that has been defined for this BPEL Process
 	 * type.
 	 * 
-	 * @return propertyValue - the value corresponding to the process property
-	 *         name.
+	 * @return propertyValue - the value corresponding to the process property name.
 	 */
 	Node getProcessProperty(QName propertyName);
 
 	QName getProcessQName();
 
-	void processOutstandingRequest(PartnerLinkInstance partnerLink,
-			String opName, String bpelMexId, String odeMexId)
+	void processOutstandingRequest(PartnerLinkInstance partnerLink, String opName, String bpelMexId, String odeMexId)
 			throws FaultException;
 
 	Date getCurrentEventDateTime();
 
 	ClassLoader getProcessClassLoader();
+
+	ExtensionOperation createExtensionActivityImplementation(QName name);
 }

@@ -30,7 +30,7 @@ import javax.xml.namespace.QName;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.engine.cron.CronScheduler;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
-import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
+import org.apache.ode.bpel.eapi.AbstractExtensionBundle;
 import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.BpelEventListener;
 import org.apache.ode.bpel.iapi.EndpointReferenceContext;
@@ -66,5 +66,6 @@ public class Contexts {
     final HashMap<QName, ExternalVariableModule> externalVariableEngines = new HashMap<QName, ExternalVariableModule>();
 
     /** Global extension bundle registry **/
-    final Map<String, ExtensionBundleRuntime> extensionRegistry = new ConcurrentHashMap<String, ExtensionBundleRuntime>();
+    final Map<String, AbstractExtensionBundle> extensionRegistry = new ConcurrentHashMap<String, AbstractExtensionBundle>();
+
 }

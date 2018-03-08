@@ -1,0 +1,100 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+<process name="TestRestPutExtAct"
+    targetNamespace="http://ode/bpel/unit-test"
+    xmlns:bpws="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:tns="http://ode/bpel/unit-test"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:test="http://ode/bpel/unit-test.wsdl"
+    xmlns:service="http://www.example.org/restApi"
+    xmlns:bpel4RestLight="http://www.apache.org/ode/bpel/extensions/bpel4restlight"
+    queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0"
+    expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath2.0">
+
+   <import location="TestRestPutExtAct.wsdl"
+     namespace="http://ode/bpel/unit-test.wsdl"
+     importType="http://schemas.xmlsoap.org/wsdl/" />
+     
+   <import location="restApi.xsd"
+     namespace="http://www.example.org/restApi"
+     importType="http://www.w3.org/2001/XMLSchema"/>
+     
+   <extensions>
+     <extension mustUnderstand="yes" namespace="http://www.apache.org/ode/bpel/extensions/bpel4restlight"/>
+   </extensions>
+
+   <partnerLinks>
+      <partnerLink name="helloPartnerLink"
+         partnerLinkType="test:HelloPartnerLinkType"
+         myRole="me" />
+   </partnerLinks>
+
+   <variables>
+     <variable name="myVar" messageType="test:HelloMessage"/>
+     <variable name="restUrl" type="xsd:string"/>
+     <variable name="restRequest" element="service:putRequest"/>
+     <variable name="restResponse" element="service:putResponse"/>
+     <variable name="response" messageType="test:ResponseMessage"></variable>
+    </variables>
+
+   <sequence>
+       <receive
+          name="start"
+          partnerLink="helloPartnerLink"
+          portType="test:HelloPortType"
+          operation="hello"
+          variable="myVar"
+          createInstance="yes"/>
+
+      <assign name="assign1">
+         <copy>
+             <from><literal>http://localhost:8085/test</literal></from>
+             <to variable="restUrl"/>
+         </copy>
+         <copy>
+             <from>
+             	<literal>
+                    <service:putRequest xmlns:service="http://www.example.org/restApi">
+                        <service:value>PUT Method Test</service:value>
+                    </service:putRequest>
+                </literal>
+             </from>
+             <to variable="restRequest"/>
+         </copy>
+      </assign>
+      
+      <extensionActivity>
+         <bpel4RestLight:PUT accept="application/xml" request="restRequest" response="restResponse" uri="$bpelvar[restUrl]"/>
+	  </extensionActivity>
+	  
+	  <assign name="assign2">
+	      <copy>
+	          <from variable="restResponse"></from>
+	          <to part="TestPart" variable="response"></to>
+	      </copy>
+      </assign>
+      
+      <reply name="end"
+             partnerLink="helloPartnerLink"
+             portType="test:HelloPortType"
+             operation="hello"
+             variable="response"/>
+   </sequence>
+</process>

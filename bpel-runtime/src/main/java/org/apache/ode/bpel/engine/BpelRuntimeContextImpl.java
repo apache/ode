@@ -46,6 +46,8 @@ import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.ScopeStateEnum;
 import org.apache.ode.bpel.dao.XmlDataDAO;
+import org.apache.ode.bpel.eapi.AbstractExtensionBundle;
+import org.apache.ode.bpel.eapi.ExtensionOperation;
 import org.apache.ode.bpel.evar.ExternalVariableModule.Value;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.CorrelationSetWriteEvent;
@@ -58,8 +60,6 @@ import org.apache.ode.bpel.evt.ScopeCompletionEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.ScopeFaultEvent;
 import org.apache.ode.bpel.evt.ScopeStartEvent;
-import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
-import org.apache.ode.bpel.extension.ExtensionOperation;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.ContextException;
 import org.apache.ode.bpel.iapi.Endpoint;
@@ -1585,7 +1585,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
             return c;
         }
     }
-
+    
     public Node initializeVariable(VariableInstance var, ScopeFrame scopeFrame,
 			Node val) throws ExternalVariableModuleException {
 		return scopeFrame.initializeVariable(this, var, val);
@@ -1597,16 +1597,18 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
 	}
 
 	public ExtensionOperation createExtensionActivityImplementation(QName name) {
-		if (name == null) return null;
-        ExtensionBundleRuntime bundle = _bpelProcess._extensionRegistry.get(name.getNamespaceURI());
-        if (bundle == null) {
-            return null;
-        } else {
-            try {
-                return bundle.getExtensionOperationInstance(name.getLocalPart());
-            } catch (Exception e) {
-                return null;
-            }
+		if (name == null) {
+			return null;
+		}
+		AbstractExtensionBundle bundle = _bpelProcess._engine._contexts.extensionRegistry.get(name.getNamespaceURI());
+		if (bundle == null) {
+			return null;
+		} else {
+			try {
+				return (ExtensionOperation)bundle.getExtensionOperationInstance(name.getLocalPart());
+			} catch (Exception e) {
+				return null;
+			}
         }
-	}
+    }
 }

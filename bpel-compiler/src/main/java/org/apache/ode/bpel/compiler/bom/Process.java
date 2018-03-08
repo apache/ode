@@ -73,7 +73,7 @@ public class Process extends Scope {
      * @return BPEL source URL.
      */
     public String getSource() {
-        return "todo";
+        return getName();
     }
 
     /**

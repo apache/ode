@@ -106,9 +106,7 @@ public class OdeConfigProperties {
 
     public static final String DEFAULT_TX_FACTORY_CLASS_NAME = "org.apache.ode.il.EmbeddedGeronimoFactory";
     
-    public static final String PROP_EXTENSION_BUNDLES_RT = "extension.bundles.runtime";
-    
-    public static final String PROP_EXTENSION_BUNDLES_VAL = "extension.bundles.validation";
+    public static final String PROP_EXTENSION_BUNDLES = "extension.bundles";
 
     private File _cfgFile;
 
@@ -189,7 +187,7 @@ public class OdeConfigProperties {
                     try {
                         fis.close();
                     } catch (Exception ex) {
-                        __log.error("",ex);
+                        __log.error(ex.getMessage(), ex);
                     }
             }
         } else {
@@ -389,11 +387,7 @@ public class OdeConfigProperties {
         return Integer.valueOf(getProperty(PROP_MIGRATION_TRANSACTION_TIMEOUT, String.valueOf(0)));
     }
 
-    public String getExtensionActivityBundlesRT() {
-		return getProperty(PROP_EXTENSION_BUNDLES_RT);
-	}
-
-	public String getExtensionActivityBundlesValidation() {
-		return getProperty(PROP_EXTENSION_BUNDLES_VAL);
-	}
+    public String getExtensionActivityBundles() {
+        return getProperty(PROP_EXTENSION_BUNDLES);
+    }
 }

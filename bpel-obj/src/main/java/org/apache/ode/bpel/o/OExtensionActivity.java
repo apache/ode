@@ -23,8 +23,6 @@ import java.util.List;
 
 import javax.xml.namespace.QName;
 
-import org.apache.ode.utils.SerializableElement;
-
 /**
  * Compiled representation of the BPEL <code>&lt;extensionActivity&gt;</code>
  * activity.
@@ -35,11 +33,23 @@ public class OExtensionActivity extends OActivity {
 
 	static final long serialVersionUID = -1L;
 	public final List<OActivity> children = new ArrayList<OActivity>();
-	public SerializableElement nestedElement;
+	public String nestedElement;
 	public QName extensionName;
 
 	public OExtensionActivity(OProcess owner, OActivity parent) {
 		super(owner, parent);
 	}
 	
+    @Override
+    public void dehydrate() {
+        super.dehydrate();
+        extensionName = null;
+        nestedElement = null;
+
+        for (OBase obase : children) {
+            obase.dehydrate();
+        }
+
+        children.clear();
+    }
 }

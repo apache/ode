@@ -307,13 +307,13 @@ define "ode" do
   desc "ODE BPEL Tests"
   define "bpel-test" do
     compile.with projects("bpel-api", "bpel-compiler", "bpel-dao", "bpel-runtime",
-      "bpel-store", "utils", "bpel-epr", "dao-hibernate", "agents", "scheduler-simple"),
+      "bpel-store",  "utils", "bpel-epr", "dao-hibernate", "agents", "scheduler-simple", "bpel-obj"),
       DERBY, JUnit.dependencies, JAVAX.persistence, OPENJPA, WSDL4J, COMMONS.httpclient, COMMONS.io,
       GERONIMO.transaction, GERONIMO.kernel, GERONIMO.connector, JAVAX.connector, JAVAX.ejb, JAVAX.transaction, TRANQL, "tranql:tranql-connector-derby-common:jar:1.1",
       SPRING_TEST, COMMONS.codec, SLF4J, LOG4J2
 
     test.with projects("bpel-obj", "jacob", "bpel-schemas",
-      "bpel-scripts", "scheduler-simple"),
+      "bpel-scripts", "scheduler-simple", "bpel-rest-extensions"),
       COMMONS.collections, COMMONS.lang,  DERBY, JAVAX.connector,
       JAVAX.stream, JAVAX.transaction, JAXEN, HSQLDB, H2::REQUIRES, LOG4J2, SAXON, XERCES, XMLBEANS, XALAN, GERONIMO.transaction, SPRING, HIBERNATE, SLF4J, DOM4J
 
@@ -509,7 +509,7 @@ define "ode" do
   
   desc "OpenTOSCA BPEL REST Extensions"
   define "bpel-rest-extensions" do
-    compile.with projects("bpel-api", "bpel-obj", "bpel-runtime"), COMMONS.codec, COMMONS.httpclient, SLF4J, LOG4J2
+    compile.with projects("bpel-api", "bpel-obj", "bpel-runtime", "utils"), COMMONS.codec, COMMONS.httpclient, SLF4J, LOG4J2
     package :jar
   end
 

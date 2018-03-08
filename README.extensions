@@ -1,0 +1,22 @@
+=============================================
+  Apache ODE - Extension Installation Guide
+=============================================
+
+BPEL 2.0 introduces extensibility mechanisms, which allow you to extend
+the set of activities and/or variable assignment mechanisms.
+With BPEL 2.0 it is possible to extend the language by user-defined
+activities and custom assignment logic.
+
+Since version 1.2 Apache ODE supports these extensibility mechanismns
+and provides a plug-in architecture that allows for registering
+third-party extensions.
+
+1.) Installation of extensions (WAR)
+  1) Copy the extension 
+      TBC
+  
+2.) Installation of extensions (JBI)
+      TBW
+
+3.) Writing ODE extensions
+TBW

@@ -26,7 +26,6 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.SerializableElement;
 import org.w3c.dom.Document;
 
 public class OAssign extends OActivity {
@@ -95,7 +94,7 @@ public class OAssign extends OActivity {
      */
     public static class ExtensionAssignOperation extends OAssignOperation {
         private static final long serialVersionUID = 1L;
-        public SerializableElement nestedElement;
+        public String nestedElement;
         public QName extensionName;
 
         public ExtensionAssignOperation(OProcess owner) {
@@ -103,7 +102,7 @@ public class OAssign extends OActivity {
         }
 
         public String toString() {
-            return "{OExtensionAssignOperation; " + nestedElement.getElement().getTagName() + "}";
+            return "{OExtensionAssignOperation; " + extensionName + "}";
         }
         
         @Override
@@ -305,11 +304,7 @@ public class OAssign extends OActivity {
 	public void dehydrate() {
 		super.dehydrate();
 		for (OAssignOperation operation : this.operations) {
-			if (operation.getType().equals(OAssignOperation.Type.Copy)) {
-				((Copy)operation).dehydrate();
-			} else if (operation.getType().equals(OAssignOperation.Type.ExtensionOperation)) {
-				((ExtensionAssignOperation)operation).dehydrate();
-			}
+			operation.dehydrate();
 		}
 	}
 }

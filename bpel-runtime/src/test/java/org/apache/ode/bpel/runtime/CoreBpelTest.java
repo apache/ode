@@ -32,9 +32,9 @@ import junit.framework.TestCase;
 
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.eapi.ExtensionOperation;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
-import org.apache.ode.bpel.extension.ExtensionOperation;
 import org.apache.ode.bpel.iapi.ProcessConf.PartnerRoleConfig;
 import org.apache.ode.bpel.o.OCatch;
 import org.apache.ode.bpel.o.OEmpty;
@@ -484,9 +484,9 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	public ExtensionOperation createExtensionActivityImplementation(QName name) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    
+    public ExtensionOperation createExtensionActivityImplementation(QName name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

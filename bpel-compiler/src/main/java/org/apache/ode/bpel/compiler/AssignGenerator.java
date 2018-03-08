@@ -33,7 +33,6 @@ import org.apache.ode.bpel.compiler.bom.PartnerLinkVal;
 import org.apache.ode.bpel.compiler.bom.PropertyVal;
 import org.apache.ode.bpel.compiler.bom.To;
 import org.apache.ode.bpel.compiler.bom.VariableVal;
-import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.o.DebugInfo;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OAssign;
@@ -119,13 +118,8 @@ class AssignGenerator extends DefaultActivityGenerator {
 								.errUndeclaredExtensionAssignOperation()
 								.setSource(sop));
 					}
-					ExtensionValidator validator = _context
-							.getExtensionValidator(DOMUtils.getElementQName(el));
-					if (validator != null) {
-						validator.validate(_context, sop);
-					}
 					oext.extensionName = DOMUtils.getElementQName(el);
-					oext.nestedElement = new SerializableElement(el);
+					oext.nestedElement = DOMUtils.domToString(el);
 					oassign.operations.add(oext);
 				} catch (CompilationException ce) {
 					_context.recoveredFromError(sop, ce);

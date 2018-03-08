@@ -29,7 +29,6 @@ import javax.xml.transform.Source;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.Expression;
 import org.apache.ode.bpel.compiler.bom.ScopeLikeActivity;
-import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLValueExpression;
@@ -141,8 +140,6 @@ public interface CompilerContext {
 	Map<URI, Source> getSchemaSources();
 
 	boolean isExtensionDeclared(String namespace);
-
-	ExtensionValidator getExtensionValidator(QName extensionElementName);
 
 	/**
 	 * Retrieves the base URI that the BPEL Process execution contextis running

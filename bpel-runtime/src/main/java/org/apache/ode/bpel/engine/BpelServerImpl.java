@@ -37,11 +37,11 @@ import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.BpelDAOConnectionFactory;
 import org.apache.ode.bpel.dao.DeferredProcessInstanceCleanable;
 import org.apache.ode.bpel.dao.ProcessDAO;
+import org.apache.ode.bpel.eapi.AbstractExtensionBundle;
 import org.apache.ode.bpel.engine.cron.CronScheduler;
 import org.apache.ode.bpel.engine.migration.MigrationHandler;
 import org.apache.ode.bpel.evar.ExternalVariableModule;
 import org.apache.ode.bpel.evt.BpelEvent;
-import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 import org.apache.ode.bpel.iapi.BindingContext;
 import org.apache.ode.bpel.iapi.BpelEngine;
 import org.apache.ode.bpel.iapi.BpelEngineException;
@@ -174,8 +174,8 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
             _mngmtLock.writeLock().unlock();
         }
     }
-    
-    public void registerExtensionBundle(ExtensionBundleRuntime bundle) {
+
+    public void registerExtensionBundle(AbstractExtensionBundle bundle) {
         _contexts.extensionRegistry.put(bundle.getNamespaceURI(), bundle);
         bundle.registerExtensionActivities();
     }
@@ -327,9 +327,7 @@ public class BpelServerImpl implements BpelServer, Scheduler.JobProcessor {
 
             BpelProcess process = createBpelProcess(conf);
             
-            process.setExtensionRegistry(_contexts.extensionRegistry);
-            
-	        process._classLoader = Thread.currentThread().getContextClassLoader();
+            process._classLoader = Thread.currentThread().getContextClassLoader();
 
             _engine.registerProcess(process);
             _registeredProcesses.add(process);

@@ -80,7 +80,6 @@ import org.apache.ode.bpel.compiler.bom.TerminationHandler;
 import org.apache.ode.bpel.compiler.bom.Variable;
 import org.apache.ode.bpel.compiler.wsdl.Definition4BPEL;
 import org.apache.ode.bpel.compiler.wsdl.WSDLFactory4BPEL;
-import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.o.DebugInfo;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OAssign;
@@ -186,8 +185,7 @@ public abstract class BpelCompiler implements CompilerContext {
     private URI _processURI;
     
     private final Set<String> _declaredExtensionNS = new HashSet<String>();
-	private Map<QName, ExtensionValidator> _extensionValidators = new HashMap<QName, ExtensionValidator>();
-    
+
     BpelCompiler(WSDLFactory4BPEL wsdlFactory) {
         _wsdlFactory = wsdlFactory;
         _wsdlRegistry = new WSDLRegistry(this);
@@ -1666,11 +1664,11 @@ public abstract class BpelCompiler implements CompilerContext {
 		oextension.debugInfo = createDebugInfo(_processDef,
 				"Extension " + ext.getNamespaceURI());
 
-		_declaredExtensionNS.add(ext.getNamespaceURI());
-		_oprocess.declaredExtensions.add(oextension);
-		if (ext.isMustUnderstand()) {
-			_oprocess.mustUnderstandExtensions.add(oextension);
-		}
+        _declaredExtensionNS.add(ext.getNamespaceURI());
+        _oprocess.declaredExtensions.add(oextension);
+        if (ext.isMustUnderstand()) {
+            _oprocess.mustUnderstandExtensions.add(oextension);
+        }
 
 		if (__log.isDebugEnabled())
 			__log.debug("Compiled extension " + oextension);
@@ -1751,19 +1749,10 @@ public abstract class BpelCompiler implements CompilerContext {
         Class cls = Class.forName(classname);
         registerExpressionLanguage(expLangUri, (ExpressionCompiler) cls.newInstance());
     }
-    
-    public void setExtensionValidators(
-			Map<QName, ExtensionValidator> extensionValidators) {
-		_extensionValidators = extensionValidators;
-	}
 
-	public boolean isExtensionDeclared(String namespace) {
-		return _declaredExtensionNS.contains(namespace);
-	}
-
-	public ExtensionValidator getExtensionValidator(QName extensionElementName) {
-		return _extensionValidators.get(extensionElementName);
-	}
+    public boolean isExtensionDeclared(String namespace) {
+        return _declaredExtensionNS.contains(namespace);
+    }
 
     public List<OActivity> getActivityStack() {
         ArrayList<OActivity> rval = new ArrayList<OActivity>(_structureStack._stack);

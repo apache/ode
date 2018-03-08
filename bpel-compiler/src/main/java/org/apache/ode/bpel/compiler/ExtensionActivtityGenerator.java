@@ -22,11 +22,9 @@ import org.apache.ode.bpel.compiler.api.CompilationException;
 import org.apache.ode.bpel.compiler.bom.Activity;
 import org.apache.ode.bpel.compiler.bom.CompositeActivity;
 import org.apache.ode.bpel.compiler.bom.ExtensionActivity;
-import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OExtensionActivity;
 import org.apache.ode.utils.DOMUtils;
-import org.apache.ode.utils.SerializableElement;
 import org.apache.ode.utils.msg.MessageBundle;
 import org.w3c.dom.Element;
 
@@ -42,7 +40,7 @@ public class ExtensionActivtityGenerator extends DefaultActivityGenerator {
 	public void compile(OActivity output, Activity srcx) {
 		ExtensionActivity src = (ExtensionActivity) srcx;
 		OExtensionActivity oactivity = (OExtensionActivity) output;
-		Element child = src.getFirstExtensibilityElementElement();
+		Element child = src.getFirstExtensibilityElement();
 		try {
 			if (child == null) {
 				throw new CompilationException(
@@ -52,13 +50,9 @@ public class ExtensionActivtityGenerator extends DefaultActivityGenerator {
 				throw new CompilationException(__cmsgs
 						.errUndeclaredExtensionActivity().setSource(src));
 			}
-			ExtensionValidator validator = _context
-					.getExtensionValidator(DOMUtils.getElementQName(child));
-			if (validator != null) {
-				validator.validate(_context, src);
-			}
+			
 			oactivity.extensionName = DOMUtils.getElementQName(child);
-			oactivity.nestedElement = new SerializableElement(child);
+			oactivity.nestedElement = DOMUtils.domToString(child);
 
 			compileChildren(oactivity, (ExtensionActivity) src);
 

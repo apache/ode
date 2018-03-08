@@ -18,6 +18,7 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.Calendar;
 import java.util.Date;
@@ -27,13 +28,15 @@ import java.util.Map;
 import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.compiler.bom.ExtensibilityQNames;
+import org.apache.ode.bpel.eapi.ExtensionContext;
+import org.apache.ode.bpel.eapi.ExtensionOperation;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.PartnerLinkModificationEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
 import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.explang.EvaluationContext;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.extension.ExtensionOperation;
 import org.apache.ode.bpel.o.OAssign;
 import org.apache.ode.bpel.o.OAssign.DirectRef;
 import org.apache.ode.bpel.o.OAssign.LValueExpression;
@@ -44,13 +47,10 @@ import org.apache.ode.bpel.o.OExpression;
 import org.apache.ode.bpel.o.OLink;
 import org.apache.ode.bpel.o.OMessageVarType;
 import org.apache.ode.bpel.o.OMessageVarType.Part;
-import org.apache.ode.bpel.o.OProcess;
 import org.apache.ode.bpel.o.OProcess.OProperty;
 import org.apache.ode.bpel.o.OScope;
 import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.bpel.runtime.common.extension.ExtensibilityQNames;
-import org.apache.ode.bpel.runtime.common.extension.ExtensionContext;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.msg.MessageBundle;
@@ -63,9 +63,13 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
+import org.xml.sax.SAXException;
 
 /**
  * Assign activity run-time template.
+ * 
+ * @author Ode team
+ * @author Tammo van Lessen (University of Stuttgart) - extensionAssignOperation
  */
 class ASSIGN extends ACTIVITY {
 	private static final long serialVersionUID = 1L;
@@ -745,28 +749,52 @@ class ASSIGN extends ACTIVITY {
 		return data;
 	}
 	
-	private void invokeExtensionAssignOperation(OAssign.ExtensionAssignOperation eao) throws FaultException {
-        final ExtensionContext context = new ExtensionContextImpl(this, getBpelRuntimeContext());
+	private void invokeExtensionAssignOperation(OAssign.ExtensionAssignOperation eao)
+            throws FaultException {
+        final ExtensionContext context =
+                new ExtensionContextImpl(this._self, this._scopeFrame, getBpelRuntimeContext());
+        final QName extensionId = eao.extensionName;
 
         try {
-            ExtensionOperation ea = getBpelRuntimeContext().createExtensionActivityImplementation(eao.extensionName);
+            ExtensionOperation ea =
+                    getBpelRuntimeContext().createExtensionActivityImplementation(extensionId);
             if (ea == null) {
-                for (OProcess.OExtension oe : eao.getOwner().mustUnderstandExtensions) {
-                    if (eao.extensionName.getNamespaceURI().equals(oe.namespaceURI)) {
-                        __log.warn("Lookup of extension activity " + eao.extensionName + " failed.");
-                        throw new FaultException(ExtensibilityQNames.UNKNOWN_EA_FAULT_NAME, "Lookup of extension activity " + eao.extensionName + " failed. No implementation found.");
-                    }
+                if (eao.getOwner().hasMustUnderstandExtension(extensionId.getNamespaceURI())) {
+                    __log.warn("Lookup of extension activity " + extensionId + " failed.");
+                    throw new FaultException(ExtensibilityQNames.UNKNOWN_EA_FAULT_NAME,
+                            "Lookup of extension assign operation " + extensionId
+                                    + " failed. No implementation found.");
+                } else {
+                    // act like <empty> - do nothing
+                    context.complete();
+                    return;
                 }
-                // act like <empty> - do nothing
-                context.complete();
-                return;
             }
 
-            ea.run(context, eao.nestedElement.getElement());
+            ea.run(context, DOMUtils.stringToDOM(eao.nestedElement));
+
         } catch (FaultException fault) {
+            __log.error("Exception while invoking extension assign operation", fault);
             context.completeWithFault(fault);
+        } catch (SAXException e) {
+            __log.error("Exception while invoking extension assign operation",
+                    e);
+            FaultException faultData =
+                    new FaultException(ExtensibilityQNames.INVALID_EXTENSION_ELEMENT,
+                            "The nested element of extension assign operation '"
+                                    + eao.extensionName + "' is no valid XML.", e);
+            context.completeWithFault(faultData);
+        } catch (IOException e) {
+            __log.error("Exception while invoking extension assign operation",
+                    e);
+            FaultException faultData =
+                    new FaultException(ExtensibilityQNames.INVALID_EXTENSION_ELEMENT,
+                            "The nested element of extension assign operation '"
+                                    + eao.extensionName + "' is no valid XML.", e);
+            context.completeWithFault(faultData);
         }
     }
+
 
 	private class EvaluationContextProxy implements EvaluationContext {
 

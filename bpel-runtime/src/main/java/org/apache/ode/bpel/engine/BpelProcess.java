@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -31,22 +30,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import javax.xml.namespace.QName;
 import javax.wsdl.Operation;
 import javax.wsdl.PortType;
+import javax.xml.namespace.QName;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.ode.agents.memory.SizingAgent;
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.ProcessState;
 import org.apache.ode.bpel.dao.BpelDAOConnection;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
-import org.apache.ode.bpel.dao.DeferredProcessInstanceCleanable;
 import org.apache.ode.bpel.dao.ProcessDAO;
 import org.apache.ode.bpel.dao.ProcessInstanceDAO;
 import org.apache.ode.bpel.engine.PartnerLinkMyRoleImpl.RoutingInfo;
@@ -55,7 +49,6 @@ import org.apache.ode.bpel.engine.extvar.ExternalVariableManager;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
 import org.apache.ode.bpel.explang.ConfigurationException;
 import org.apache.ode.bpel.explang.EvaluationException;
-import org.apache.ode.bpel.extension.ExtensionBundleRuntime;
 import org.apache.ode.bpel.iapi.BpelEngineException;
 import org.apache.ode.bpel.iapi.Endpoint;
 import org.apache.ode.bpel.iapi.EndpointReference;
@@ -63,7 +56,6 @@ import org.apache.ode.bpel.iapi.MessageExchange;
 import org.apache.ode.bpel.iapi.MyRoleMessageExchange;
 import org.apache.ode.bpel.iapi.PartnerRoleChannel;
 import org.apache.ode.bpel.iapi.ProcessConf;
-import org.apache.ode.bpel.iapi.Scheduler;
 import org.apache.ode.bpel.iapi.ProcessConf.CLEANUP_CATEGORY;
 import org.apache.ode.bpel.iapi.Scheduler.JobDetails;
 import org.apache.ode.bpel.iapi.Scheduler.JobType;
@@ -85,6 +77,8 @@ import org.apache.ode.jacob.soup.ReplacementMap;
 import org.apache.ode.utils.ObjectPrinter;
 import org.apache.ode.utils.Properties;
 import org.apache.ode.utils.msg.MessageBundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -134,9 +128,6 @@ public class BpelProcess {
 	ExpressionLanguageRuntimeRegistry _expLangRuntimeRegistry;
 	private ReplacementMap _replacementMap;
 	final ProcessConf _pconf;
-
-	Set<String> _mustUnderstandExtensions;
-	Map<String, ExtensionBundleRuntime> _extensionRegistry;
 
 	/** {@link MessageExchangeInterceptor}s registered for this process. */
 	private final List<MessageExchangeInterceptor> _mexInterceptors = new ArrayList<MessageExchangeInterceptor>();
@@ -655,10 +646,6 @@ public class BpelProcess {
 		return routed;
 	}
 
-	public void setExtensionRegistry(Map<String, ExtensionBundleRuntime> extensionRegistry) {
-		_extensionRegistry = extensionRegistry;
-	}
-
 	private void setRoles(OProcess oprocess) {
 		_partnerRoles = new HashMap<OPartnerLink, PartnerLinkPartnerRoleImpl>();
 		_myRoles = new HashMap<OPartnerLink, PartnerLinkMyRoleImpl>();
@@ -1025,7 +1012,6 @@ public class BpelProcess {
 			// }
 			_replacementMap = null;
 			_expLangRuntimeRegistry = null;
-			_extensionRegistry = null;
 		}
 
 		private void doHydrate() {
@@ -1070,23 +1056,20 @@ public class BpelProcess {
 			registerExprLang(_oprocess);
 
 			// Checking for registered extension bundles, throw an exception when
-			// a "mustUnderstand" extension is not available
-			_mustUnderstandExtensions = new HashSet<String>();
-			for (OProcess.OExtension extension : _oprocess.declaredExtensions) {
-				if (extension.mustUnderstand) {
-					if (_extensionRegistry.get(extension.namespaceURI) == null) {
-						String msg = __msgs.msgExtensionMustUnderstandError(_pconf.getProcessId(),
-								extension.namespaceURI);
-						__log.error(msg);
-						throw new BpelEngineException(msg);
-					} else {
-						_mustUnderstandExtensions.add(extension.namespaceURI);
-					}
-				} else {
-					__log.warn("The process declares the extension namespace " + extension.namespaceURI
-							+ " that is unkown to the engine");
-				}
-			}
+            // a "mustUnderstand" extension is not available
+            for (OProcess.OExtension extension : _oprocess.mustUnderstandExtensions) {
+                if (extension.mustUnderstand) {
+                    if (_engine._contexts.extensionRegistry.get(extension.namespaceURI) == null) {
+                        String msg = __msgs.msgExtensionMustUnderstandError(_pid,
+                                extension.namespaceURI);
+                        __log.error(msg);
+                        throw new BpelEngineException(msg);
+                    }
+                } else {
+                    __log.warn("The process declares the extension namespace "
+                            + extension.namespaceURI + " that is unkown to the engine");
+                }
+            }
 
 			setRoles(_oprocess);
 			initExternalVariables();

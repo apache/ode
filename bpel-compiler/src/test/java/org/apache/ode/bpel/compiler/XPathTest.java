@@ -44,7 +44,6 @@ import org.apache.ode.bpel.elang.xpath10.compiler.XPath10ExpressionCompilerBPEL2
 import org.apache.ode.bpel.elang.xpath10.compiler.XPath10ExpressionCompilerBPEL20Draft;
 import org.apache.ode.bpel.elang.xpath20.compiler.XPath20ExpressionCompilerBPEL20;
 import org.apache.ode.bpel.elang.xpath20.compiler.XPath20ExpressionCompilerBPEL20Draft;
-import org.apache.ode.bpel.extension.ExtensionValidator;
 import org.apache.ode.bpel.o.OActivity;
 import org.apache.ode.bpel.o.OElementVarType;
 import org.apache.ode.bpel.o.OExpression;
@@ -299,11 +298,7 @@ class MockCompilerContext implements CompilerContext {
 		return null;
 	}
 	
-	public boolean isExtensionDeclared(String namespace) {
-		return false;
-	}
-
-	public ExtensionValidator getExtensionValidator(QName extensionElementName) {
-		return null;
-	}
+    public boolean isExtensionDeclared(String namespace) {
+        return false;
+    }
 }
