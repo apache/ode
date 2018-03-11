@@ -31,10 +31,15 @@ CREATE_USER_COMMAND="groupadd -f -g $GROUP_ID $CONTAINER_GROUPNAME \
 && chown -R $CONTAINER_USERNAME:$CONTAINER_GROUPNAME $HOMEDIR"
 
 BUNDLER_COMMAND="jruby -S bundler install --gemfile=/workspace/Gemfile"
- 
+
+# The gpg agent daemon should be started explicitly in the docker container.
+# "pinentry-mode loopback" option should be added in gpg.conf in the host machine
+# for non interactive execution.
+GNUPG_COMMAND="su $CONTAINER_USERNAME -c 'gpg-agent --daemon'"
+
 BUILDR_COMMAND="su $CONTAINER_USERNAME -c 'buildr $BUILDR_ARGS'"
 
-FINAL_COMMAND="$CREATE_USER_COMMAND && $BUNDLER_COMMAND && $BUILDR_COMMAND"
+FINAL_COMMAND="$CREATE_USER_COMMAND && $BUNDLER_COMMAND && $GNUPG_COMMAND && $BUILDR_COMMAND"
 
 
 ## For release set these arguments with proper values
