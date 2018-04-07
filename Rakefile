@@ -43,6 +43,8 @@ VERSION_NUMBER = "1.3.9-SNAPSHOT"
 
 repositories.release_to[:options] = {:digests => [:md5, :sha1]}
 
+repositories.release_to[:options] = {:digests => [:md5, :sha1, :sha512]}
+
 # if SNAPSHOT version...
 if VERSION_NUMBER =~ /SNAPSHOT/
     # ... deploy to:
