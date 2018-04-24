@@ -110,7 +110,7 @@ public class DeepEqualityHelper{
 		Set ks2 = m2.keySet();
 		for (Object k1 : ks1){
 			st.push(k1.toString());
-			Object k2 = contains(ks2, k1);
+			Object k2 = find(ks2, k1);
 			if (k2 == null){
 				if (!logFalseThrough){
 					__log.debug("Unequal in Map: cant find key. " + st + "\n missing key: " + k1);
@@ -175,7 +175,7 @@ public class DeepEqualityHelper{
 		while (i1.hasNext()){
 			Object o1 = i1.next();
 			st.push(":" + o1.getClass().getSimpleName());
-			if (contains(c2, o1) == null) {
+			if (find(c2, o1) == null) {
 				if (!logFalseThrough){
 					__log.debug("Unequal in Set: Object mismatch. " + st + 
 						"\n" + "can't find " + o1);
@@ -188,7 +188,7 @@ public class DeepEqualityHelper{
 		return true;
 	}
 	
-	private Object contains(Collection c, Object t1) {
+	private Object find(Collection c, Object t1) {
 		Iterator itor = c.iterator();
 		Object t2;
 		logFalseThrough = true;
