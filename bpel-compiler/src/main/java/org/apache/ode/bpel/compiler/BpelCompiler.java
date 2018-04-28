@@ -1665,6 +1665,9 @@ public abstract class BpelCompiler implements CompilerContext {
 
         _declaredExtensionNS.add(ext.getNamespaceURI());
         _oprocess.getDeclaredExtensions().add(oextension);
+        if (ext.isMustUnderstand()) {
+            _oprocess.getMustUnderstandExtensions().add(oextension);
+        }
 
         if (__log.isDebugEnabled())
             __log.debug("Compiled extension " + oextension);

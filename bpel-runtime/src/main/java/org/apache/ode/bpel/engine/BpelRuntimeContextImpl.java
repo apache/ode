@@ -37,7 +37,6 @@ import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.CorrelationKeySet;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.common.ProcessState;
-import org.apache.ode.bpel.compiler.bom.ExtensibilityQNames;
 import org.apache.ode.bpel.dao.CorrelationSetDAO;
 import org.apache.ode.bpel.dao.CorrelatorDAO;
 import org.apache.ode.bpel.dao.MessageDAO;
@@ -50,7 +49,6 @@ import org.apache.ode.bpel.dao.ScopeDAO;
 import org.apache.ode.bpel.dao.ScopeStateEnum;
 import org.apache.ode.bpel.dao.XmlDataDAO;
 import org.apache.ode.bpel.eapi.AbstractExtensionBundle;
-import org.apache.ode.bpel.eapi.ExtensionContext;
 import org.apache.ode.bpel.eapi.ExtensionOperation;
 import org.apache.ode.bpel.evar.ExternalVariableModule.Value;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
@@ -93,7 +91,6 @@ import org.apache.ode.bpel.runtime.PartnerLinkInstance;
 import org.apache.ode.bpel.runtime.Selector;
 import org.apache.ode.bpel.runtime.VariableInstance;
 import org.apache.ode.bpel.runtime.channels.ActivityRecovery;
-import org.apache.ode.bpel.runtime.channels.ExtensionResponse;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponse;
 import org.apache.ode.bpel.runtime.channels.PickResponse;
@@ -1537,56 +1534,7 @@ public class BpelRuntimeContextImpl implements BpelRuntimeContext {
         _forceFlush = true;
     }
 
-    public void executeExtension(QName extensionId, ExtensionContext context, Element element,
-            ExtensionResponse extResponseChannel) throws FaultException {
-        __log.debug("Execute extension activity");
-        final String extResponseChannelStr = ProcessUtil.exportChannel(extResponseChannel);
-
-        ExtensionOperation ea = createExtensionActivityImplementation(extensionId);
-        if (ea == null) {
-            if (_bpelProcess._mustUnderstandExtensions.contains(extensionId.getNamespaceURI())) {
-                // TODO
-                __log.warn("Lookup of extension activity " + extensionId + " failed.");
-                throw new FaultException(ExtensibilityQNames.UNKNOWN_EO_FAULT_NAME,
-                        "Lookup of extension operation " + extensionId + " failed.");
-            } else {
-                // act like <empty> - do nothing
-                completeExtensionExecution(extResponseChannelStr, null);
-                return;
-            }
-        }
-
-        try {
-            // should be running in a pooled thread
-            ea.run(context, element);
-            completeExtensionExecution(extResponseChannelStr, null);
-        } catch (RuntimeException e) {
-            __log.error("Error during execution of extension activity.", e);
-            completeExtensionExecution(extResponseChannelStr, e);
-        }
-    }
-
-	private void completeExtensionExecution(final String channelId, final Throwable t) {
-		if (t != null) {
-	        _vpu.inject(new BpelJacobRunnable() {
-	            private static final long serialVersionUID = -1L;
-
-	            public void run() {
-	               importChannel(channelId, ExtensionResponse.class).onFailure(t);
-	            }
-	        });
-		} else {
-	        _vpu.inject(new BpelJacobRunnable() {
-	            private static final long serialVersionUID = -1L;
-
-	            public void run() {
-	               importChannel(channelId, ExtensionResponse.class).onCompleted();
-	            }
-	        });
-		}
-	}
-
-	private ExtensionOperation createExtensionActivityImplementation(QName name) {
+	public ExtensionOperation createExtensionActivityImplementation(QName name) {
 		if (name == null) {
 			return null;
 		}

@@ -14,27 +14,45 @@
  */
 package org.apache.ode.bpel.runtime;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.namespace.QName;
+
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.compiler.bom.Bpel20QNames;
 import org.apache.ode.bpel.eapi.ExtensionContext;
+import org.apache.ode.bpel.evt.ScopeEvent;
+import org.apache.ode.bpel.evt.VariableModificationEvent;
 import org.apache.ode.bpel.obj.OActivity;
 import org.apache.ode.bpel.obj.OLink;
 import org.apache.ode.bpel.obj.OProcess.OProperty;
 import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.bpel.obj.OScope.Variable;
+import org.apache.ode.bpel.runtime.channels.FaultData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 
 /**
  * @author Tammo van Lessen (University of Stuttgart)
  */
 public class ExtensionContextImpl implements ExtensionContext {
+
+    private static final Logger __log = LoggerFactory.getLogger(ExtensionContextImpl.class);
+
     private BpelRuntimeContext _context;
     private ScopeFrame _scopeFrame;
+    private ActivityInfo _activityInfo;
 
-    public ExtensionContextImpl(ScopeFrame scopeFrame, BpelRuntimeContext context) {
+    private boolean hasCompleted = false;
+
+    public ExtensionContextImpl(ActivityInfo activityInfo, ScopeFrame scopeFrame,
+            BpelRuntimeContext context) {
+        _activityInfo = activityInfo;
         _context = context;
         _scopeFrame = scopeFrame;
     }
@@ -46,6 +64,14 @@ public class ExtensionContextImpl implements ExtensionContext {
 
     public Long getProcessId() {
         return _context.getPid();
+    }
+
+    public String getActivityName() {
+        return _activityInfo.o.getName();
+    }
+
+    public OActivity getOActivity() {
+        return _activityInfo.o;
     }
 
     public Map<String, OScope.Variable> getVisibleVariables() throws FaultException {
@@ -66,11 +92,6 @@ public class ExtensionContextImpl implements ExtensionContext {
         return visVars;
     }
 
-    public boolean isLinkActive(OLink olink) throws FaultException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
     public String readMessageProperty(Variable variable, OProperty property) throws FaultException {
         VariableInstance vi = _scopeFrame.resolve(variable);
         return _context.readProperty(vi, property);
@@ -84,6 +105,10 @@ public class ExtensionContextImpl implements ExtensionContext {
     public void writeVariable(String variableName, Node value) throws FaultException {
         VariableInstance vi = _scopeFrame.resolve(getVisibleVariable(variableName));
         _context.writeVariable(vi, value);
+
+        VariableModificationEvent vme = new VariableModificationEvent(variableName);
+        vme.setNewValue(value);
+        sendEvent(vme);
     }
 
     public Node readVariable(String variableName) throws FaultException {
@@ -99,4 +124,60 @@ public class ExtensionContextImpl implements ExtensionContext {
     private Variable getVisibleVariable(String varName) {
         return _scopeFrame.oscope.getVisibleVariable(varName);
     }
+
+    public BpelRuntimeContext getBpelRuntimeContext() {
+        return _context;
+    }
+
+    public void sendEvent(ScopeEvent event) {
+        if (event.getLineNo() == -1 && _activityInfo.o.getDebugInfo() != null) {
+            event.setLineNo(_activityInfo.o.getDebugInfo().getStartLine());
+        }
+        _scopeFrame.fillEventInfo(event);
+        getBpelRuntimeContext().sendEvent(event);
+    }
+
+    public void complete() {
+        if (!hasCompleted) {
+            _activityInfo.parent.completed(null, CompensationHandler.emptySet());
+            hasCompleted = true;
+        } else {
+            if (__log.isWarnEnabled()) {
+                __log.warn(
+                        "Activity '" + _activityInfo.o.getName() + "' has already been completed.");
+            }
+        }
+    }
+
+    public void completeWithFault(Throwable t) {
+        if (!hasCompleted) {
+            StringWriter sw = new StringWriter();
+            t.printStackTrace(new PrintWriter(sw));
+            FaultData fault =
+                    new FaultData(new QName(Bpel20QNames.NS_WSBPEL2_0, "subLanguageExecutionFault"),
+                            _activityInfo.o, sw.getBuffer().toString());
+            _activityInfo.parent.completed(fault, CompensationHandler.emptySet());
+            hasCompleted = true;
+        } else {
+            if (__log.isWarnEnabled()) {
+                __log.warn(
+                        "Activity '" + _activityInfo.o.getName() + "' has already been completed.");
+            }
+        }
+    }
+
+    public void completeWithFault(FaultException ex) {
+        if (!hasCompleted) {
+            FaultData fault = new FaultData(ex.getQName(), _activityInfo.o, ex.getMessage());
+            _activityInfo.parent.completed(fault, CompensationHandler.emptySet());
+            hasCompleted = true;
+        } else {
+            if (__log.isWarnEnabled()) {
+                __log.warn(
+                        "Activity '" + _activityInfo.o.getName() + "' has already been completed.");
+            }
+        }
+
+    }
+    
 }

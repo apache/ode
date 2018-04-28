@@ -46,7 +46,7 @@ public abstract class ExtensibilityQNames {
 
     public static final String NS_BPEL_EXTENSIBILITY = "http://ode.apache.org/bpelExtensibility";
     	
-    public static final QName UNKNOWN_EO_FAULT_NAME = new QName(NS_BPEL_EXTENSIBILITY, "unknownExtensionOperation");
+    public static final QName UNKNOWN_EA_FAULT_NAME = new QName(NS_BPEL_EXTENSIBILITY, "unknownExtensionImplementation");
     	
     public static final QName INVALID_EXTENSION_ELEMENT = new QName(NS_BPEL_EXTENSIBILITY, "invalidExtensionElement");
 }

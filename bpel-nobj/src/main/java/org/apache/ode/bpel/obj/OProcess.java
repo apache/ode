@@ -1,20 +1,16 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.apache.ode.bpel.obj;
 
@@ -51,272 +47,272 @@ import de.danielbechler.diff.annotation.ObjectDiffProperty;
 /**
  * Compiled BPEL process representation.
  */
-public class OProcess extends OBase  implements Serializable{
-	public static final long serialVersionUID = -1L;
-	
-	/**
-	 * Change log of class version
-	 * initial 1
-	 * current 2
-	 * 
-	 * 1->2:
-	 * 	added namespaceContext attribute
-	 *  */
-	public static final int CURRENT_CLASS_VERSION = 2;
+public class OProcess extends OBase implements Serializable {
+    public static final long serialVersionUID = -1L;
 
-	public static int instanceCount = 0;
-	private static final String GUID = "guid";
-	/** BPEL version. */
-	private static final String VERSION = "version";
-	/** Various constants that are needed at runtime. */
-	private static final String CONSTANTS = "constants";
-	/** Universally Unique Identifier */
-	private static final String UUID = "uuid";
-	/** Namespace of the process. */
-	private static final String TARGETNAMESPACE = "targetNamespace";
-	/** Name of the process. */
-	private static final String PROCESSNAME = "processName";
-	/** ProcessImpl-level scope. */
-	private static final String PROCESSCOPE = "procesScope";
-	/** All partner links in the process. */
-	private static final String ALLPARTNERLINKS = "allPartnerLinks";
-	private static final String PROPERTIES = "properties";
-	/** Date process was compiled. */
-	private static final String COMPILEDATE = "compileDate";
-	private static final String CHILDIDCOUNTER = "_childIdCounter";
-	private static final String CHILDREN = "_children";
-	private static final String EXPRESSIONLANGUAGES = "expressionLanguages";
-	private static final String MESSAGETYPES = "messageTypes";
-	private static final String ELEMENTTYPES = "elementTypes";
-	private static final String XSDTYPES = "xsdTypes";
-	private static final String XSLSHEETS = "xslSheets";
-	private static final String NAMESPACECONTEXT = "namespaceContext";
-	
-	/** All declared extensions in the process. **/
-	private static final String DECLAREDEXTENSIONS = "declaredExtensions";
-	
-	/**
-	 * This constructor should only be used by Jackson when deserialize.
-	 */
-	@JsonCreator
-	public OProcess() {
-		instanceCount ++;
-		setChildIdCounter(0);
-	}
-	public OProcess(String version) {
-		super(null);
-		setVersion(version);
-		instanceCount++;
-		setAllPartnerLinks(new HashSet<OPartnerLink>());
-		setProperties(new ArrayList<OProperty>());
-		setChildren(new ArrayList<OBase>());
-		setExpressionLanguages(new HashSet<OExpressionLanguage>());
-		setMessageTypes(new HashMap<QName, OMessageVarType>());
-		setElementTypes(new HashMap<QName, OElementVarType>());
-		setXsdTypes(new HashMap<QName, OXsdTypeVarType>());
-		setXslSheets(new HashMap<URI, OXslSheet>());
-		
-		setDeclaredExtensions(new HashSet<OExtension>());
-		
-		setChildIdCounter(0);
-	}
+    /**
+     * Change log of class version initial 1 current 2
+     * 
+     * 1->2: added namespaceContext attribute
+     */
+    public static final int CURRENT_CLASS_VERSION = 2;
 
-	@Override
-	public void dehydrate() {
-		super.dehydrate();
-		getProcesScope().dehydrate();
-		getAllPartnerLinks().clear();
-		for (OBase obase : getChildren()) {
-			obase.dehydrate();
-		}
-		getChildren().clear();
-		getMessageTypes().clear();
-		getElementTypes().clear();
-		getXsdTypes().clear();
-		getXslSheets().clear();
-		getDeclaredExtensions().clear();
-	}
+    public static int instanceCount = 0;
+    private static final String GUID = "guid";
+    /** BPEL version. */
+    private static final String VERSION = "version";
+    /** Various constants that are needed at runtime. */
+    private static final String CONSTANTS = "constants";
+    /** Universally Unique Identifier */
+    private static final String UUID = "uuid";
+    /** Namespace of the process. */
+    private static final String TARGETNAMESPACE = "targetNamespace";
+    /** Name of the process. */
+    private static final String PROCESSNAME = "processName";
+    /** ProcessImpl-level scope. */
+    private static final String PROCESSCOPE = "procesScope";
+    /** All partner links in the process. */
+    private static final String ALLPARTNERLINKS = "allPartnerLinks";
+    private static final String PROPERTIES = "properties";
+    /** Date process was compiled. */
+    private static final String COMPILEDATE = "compileDate";
+    private static final String CHILDIDCOUNTER = "_childIdCounter";
+    private static final String CHILDREN = "_children";
+    private static final String EXPRESSIONLANGUAGES = "expressionLanguages";
+    private static final String MESSAGETYPES = "messageTypes";
+    private static final String ELEMENTTYPES = "elementTypes";
+    private static final String XSDTYPES = "xsdTypes";
+    private static final String XSLSHEETS = "xslSheets";
+    private static final String NAMESPACECONTEXT = "namespaceContext";
 
-	@Override
-	public String digest() {
-		return getProcessName() + ";" + getProcesScope().digest();
-	}
+    /** All declared extensions in the process. **/
+    private static final String DECLAREDEXTENSIONS = "declaredExtensions";
 
-	protected void finalize() throws Throwable {
-		instanceCount--;
-	}
+    /** All must-understand extensions in the process. **/
+    private static final String MUSTUNDERSTANDEXTENSIONS = "mustUnderstandExtensions";
 
-	@SuppressWarnings("unchecked")
-	@JsonIgnore
-	public Set<OPartnerLink> getAllPartnerLinks() {
-		Set<OPartnerLink> links = (Set<OPartnerLink>) fieldContainer
-				.get(ALLPARTNERLINKS);
-		return links;
-	}
+    /**
+     * This constructor should only be used by Jackson when deserialize.
+     */
+    @JsonCreator
+    public OProcess() {
+        instanceCount++;
+        setChildIdCounter(0);
+    }
 
-	public OBase getChild(final int id) {
-		for (int i = getChildren().size() - 1; i >= 0; i--) {
-			OBase child = getChildren().get(i);
-			if (child.getId() == id)
-				return child;
-		}
-		return null;
-	}
+    public OProcess(String version) {
+        super(null);
+        setVersion(version);
+        instanceCount++;
+        setAllPartnerLinks(new HashSet<OPartnerLink>());
+        setProperties(new ArrayList<OProperty>());
+        setChildren(new ArrayList<OBase>());
+        setExpressionLanguages(new HashSet<OExpressionLanguage>());
+        setMessageTypes(new HashMap<QName, OMessageVarType>());
+        setElementTypes(new HashMap<QName, OElementVarType>());
+        setXsdTypes(new HashMap<QName, OXsdTypeVarType>());
+        setXslSheets(new HashMap<URI, OXslSheet>());
 
-	@JsonIgnore
-	int getChildIdCounter() {
-		Object o = fieldContainer.get(CHILDIDCOUNTER);
-		return o == null ? 0 : (Integer)o;
-	}
+        setDeclaredExtensions(new HashSet<OExtension>());
 
-	@SuppressWarnings("unchecked")
-	@JsonIgnore
-	public List<OBase> getChildren() {
-		Object o = fieldContainer.get(CHILDREN);
-		return o == null ? null : (List<OBase>)o;
-	}
+        setMustUnderstandExtensions(new HashSet<OExtension>());
 
-	@JsonIgnore
-	public Date getCompileDate() {
-		Object o = fieldContainer.get(COMPILEDATE);
-		return o == null ? null : (Date)o;
-	}
+        setChildIdCounter(0);
+    }
 
-	@JsonIgnore
-	public OConstants getConstants() {
-		Object o = fieldContainer.get(CONSTANTS);
-		return o == null ? null : (OConstants)o;
-	}
+    @Override
+    public void dehydrate() {
+        super.dehydrate();
+        getProcesScope().dehydrate();
+        getAllPartnerLinks().clear();
+        for (OBase obase : getChildren()) {
+            obase.dehydrate();
+        }
+        getChildren().clear();
+        getMessageTypes().clear();
+        getElementTypes().clear();
+        getXsdTypes().clear();
+        getXslSheets().clear();
+        getDeclaredExtensions().clear();
+        getMustUnderstandExtensions().clear();
+    }
 
-	@SuppressWarnings("rawtypes")
-	@ObjectDiffProperty(ignore = true)
-	@JsonIgnore
-	public List<String> getCorrelators() {
-		// MOVED from ProcessSchemaGenerator
-		List<String> correlators = new ArrayList<String>();
+    @Override
+    public String digest() {
+        return getProcessName() + ";" + getProcesScope().digest();
+    }
 
-		for (OPartnerLink plink : getAllPartnerLinks()) {
-			if (plink.hasMyRole()) {
-				for (Iterator opI = plink.getMyRolePortType().getOperations()
-						.iterator(); opI.hasNext();) {
-					Operation op = (Operation) opI.next();
-					correlators.add(plink.getName() + "." + op.getName());
-				}
-			}
-		}
+    protected void finalize() throws Throwable {
+        instanceCount--;
+    }
 
-		return correlators;
-	}
+    @SuppressWarnings("unchecked")
+    @JsonIgnore
+    public Set<OPartnerLink> getAllPartnerLinks() {
+        Set<OPartnerLink> links = (Set<OPartnerLink>) fieldContainer.get(ALLPARTNERLINKS);
+        return links;
+    }
 
-	@SuppressWarnings("unchecked")
-	@JsonIgnore
-	public HashMap<QName, OElementVarType> getElementTypes() {
-		return (HashMap<QName, OElementVarType>) fieldContainer
-				.get(ELEMENTTYPES);
-	}
+    public OBase getChild(final int id) {
+        for (int i = getChildren().size() - 1; i >= 0; i--) {
+            OBase child = getChildren().get(i);
+            if (child.getId() == id)
+                return child;
+        }
+        return null;
+    }
 
-	@JsonIgnore
-	@SuppressWarnings("unchecked")
-	public HashSet<OExpressionLanguage> getExpressionLanguages() {
-		//TODO conflicts with legacy impl of this method
-		return (HashSet<OExpressionLanguage>) fieldContainer
-				.get(EXPRESSIONLANGUAGES);
-	}
+    @JsonIgnore
+    int getChildIdCounter() {
+        Object o = fieldContainer.get(CHILDIDCOUNTER);
+        return o == null ? 0 : (Integer) o;
+    }
 
-	@JsonIgnore
-	public String getGuid() {
-		Object o = fieldContainer.get(GUID);
-		return o == null ? null : (String)o;
-	}
+    @SuppressWarnings("unchecked")
+    @JsonIgnore
+    public List<OBase> getChildren() {
+        Object o = fieldContainer.get(CHILDREN);
+        return o == null ? null : (List<OBase>) o;
+    }
 
-	@SuppressWarnings("unchecked")
-	@JsonIgnore
-	public HashMap<QName, OMessageVarType> getMessageTypes() {
-		return (HashMap<QName, OMessageVarType>) fieldContainer
-				.get(MESSAGETYPES);
-	}
+    @JsonIgnore
+    public Date getCompileDate() {
+        Object o = fieldContainer.get(COMPILEDATE);
+        return o == null ? null : (Date) o;
+    }
 
-	@JsonIgnore
-	public String getName() {
-		return getProcessName();
-	}
+    @JsonIgnore
+    public OConstants getConstants() {
+        Object o = fieldContainer.get(CONSTANTS);
+        return o == null ? null : (OConstants) o;
+    }
 
-	@JsonIgnore
-	public NSContext getNamespaceContext() {
-		Object o = fieldContainer.get(NAMESPACECONTEXT);
-		return o == null ? null : (NSContext)o;
-	}
+    @SuppressWarnings("rawtypes")
+    @ObjectDiffProperty(ignore = true)
+    @JsonIgnore
+    public List<String> getCorrelators() {
+        // MOVED from ProcessSchemaGenerator
+        List<String> correlators = new ArrayList<String>();
 
-	@JsonIgnore
-	public OPartnerLink getPartnerLink(String name) {
-		for (OPartnerLink partnerLink : getAllPartnerLinks()) {
-			if (partnerLink.getName().equals(name)) {
-				return partnerLink;
-			}
-		}
-		return null;
-	}
+        for (OPartnerLink plink : getAllPartnerLinks()) {
+            if (plink.hasMyRole()) {
+                for (Iterator opI = plink.getMyRolePortType().getOperations().iterator(); opI
+                        .hasNext();) {
+                    Operation op = (Operation) opI.next();
+                    correlators.add(plink.getName() + "." + op.getName());
+                }
+            }
+        }
 
-	@JsonIgnore
-	public OScope getProcesScope() {
-		Object o = fieldContainer.get(PROCESSCOPE);
-		return o == null ? null : (OScope)o;
-	}
+        return correlators;
+    }
 
-	@JsonIgnore
-	public String getProcessName() {
-		Object o = fieldContainer.get(PROCESSNAME);
-		return o == null ? null : (String)o;
-	}
+    @SuppressWarnings("unchecked")
+    @JsonIgnore
+    public HashMap<QName, OElementVarType> getElementTypes() {
+        return (HashMap<QName, OElementVarType>) fieldContainer.get(ELEMENTTYPES);
+    }
 
-	@SuppressWarnings("unchecked")
-	@JsonIgnore
-	public List<OProperty> getProperties() {
-		Object o = fieldContainer.get(PROPERTIES);
-		return o == null ? null : (List<OProperty>)o;
-	}
+    @JsonIgnore
+    @SuppressWarnings("unchecked")
+    public HashSet<OExpressionLanguage> getExpressionLanguages() {
+        // TODO conflicts with legacy impl of this method
+        return (HashSet<OExpressionLanguage>) fieldContainer.get(EXPRESSIONLANGUAGES);
+    }
 
-	@ObjectDiffProperty(ignore = true)
-	@JsonIgnore
-	public QName getQName() {
-		return new QName(getTargetNamespace(), getProcessName());
-	}
+    @JsonIgnore
+    public String getGuid() {
+        Object o = fieldContainer.get(GUID);
+        return o == null ? null : (String) o;
+    }
 
-	public OScope getScope(String scopeName) {
-		throw new UnsupportedOperationException();
-	}
+    @SuppressWarnings("unchecked")
+    @JsonIgnore
+    public HashMap<QName, OMessageVarType> getMessageTypes() {
+        return (HashMap<QName, OMessageVarType>) fieldContainer.get(MESSAGETYPES);
+    }
 
-	@JsonIgnore
-	public String getTargetNamespace() {
-		Object o = fieldContainer.get(TARGETNAMESPACE);
-		return o == null ? null : (String)o;
-	}
+    @JsonIgnore
+    public String getName() {
+        return getProcessName();
+    }
 
-	@JsonIgnore
-	public String getUuid() {
-		Object o = fieldContainer.get(UUID);
-		return o == null ? null : (String)o;
-	}
+    @JsonIgnore
+    public NSContext getNamespaceContext() {
+        Object o = fieldContainer.get(NAMESPACECONTEXT);
+        return o == null ? null : (NSContext) o;
+    }
 
-	@JsonIgnore
-	public String getVersion() {
-		Object o = fieldContainer.get(VERSION);
-		return o == null ? null : (String)o;
-	}
+    @JsonIgnore
+    public OPartnerLink getPartnerLink(String name) {
+        for (OPartnerLink partnerLink : getAllPartnerLinks()) {
+            if (partnerLink.getName().equals(name)) {
+                return partnerLink;
+            }
+        }
+        return null;
+    }
 
-	@SuppressWarnings("unchecked")
-	@JsonIgnore
-	public HashMap<QName, OXsdTypeVarType> getXsdTypes() {
-		Object o = fieldContainer.get(XSDTYPES);
-		return o == null ? null : (HashMap<QName, OXsdTypeVarType>)o;
-	}
+    @JsonIgnore
+    public OScope getProcesScope() {
+        Object o = fieldContainer.get(PROCESSCOPE);
+        return o == null ? null : (OScope) o;
+    }
 
-	@SuppressWarnings("unchecked")
-	@JsonIgnore
-	public HashMap<URI, OXslSheet> getXslSheets() {
-		Object o = fieldContainer.get(XSLSHEETS);
-		return o == null ? null : (HashMap<URI, OXslSheet>)o;
-	}
+    @JsonIgnore
+    public String getProcessName() {
+        Object o = fieldContainer.get(PROCESSNAME);
+        return o == null ? null : (String) o;
+    }
+
+    @SuppressWarnings("unchecked")
+    @JsonIgnore
+    public List<OProperty> getProperties() {
+        Object o = fieldContainer.get(PROPERTIES);
+        return o == null ? null : (List<OProperty>) o;
+    }
+
+    @ObjectDiffProperty(ignore = true)
+    @JsonIgnore
+    public QName getQName() {
+        return new QName(getTargetNamespace(), getProcessName());
+    }
+
+    public OScope getScope(String scopeName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @JsonIgnore
+    public String getTargetNamespace() {
+        Object o = fieldContainer.get(TARGETNAMESPACE);
+        return o == null ? null : (String) o;
+    }
+
+    @JsonIgnore
+    public String getUuid() {
+        Object o = fieldContainer.get(UUID);
+        return o == null ? null : (String) o;
+    }
+
+    @JsonIgnore
+    public String getVersion() {
+        Object o = fieldContainer.get(VERSION);
+        return o == null ? null : (String) o;
+    }
+
+    @SuppressWarnings("unchecked")
+    @JsonIgnore
+    public HashMap<QName, OXsdTypeVarType> getXsdTypes() {
+        Object o = fieldContainer.get(XSDTYPES);
+        return o == null ? null : (HashMap<QName, OXsdTypeVarType>) o;
+    }
+
+    @SuppressWarnings("unchecked")
+    @JsonIgnore
+    public HashMap<URI, OXslSheet> getXslSheets() {
+        Object o = fieldContainer.get(XSLSHEETS);
+        return o == null ? null : (HashMap<URI, OXslSheet>) o;
+    }
 
     @SuppressWarnings("unchecked")
     @JsonIgnore
@@ -324,235 +320,261 @@ public class OProcess extends OBase  implements Serializable{
         return (Set<OExtension>) fieldContainer.get(DECLAREDEXTENSIONS);
     }
 
-	public void setAllPartnerLinks(Set<OPartnerLink> allPartnerLinks) {
-		if (getAllPartnerLinks() == null) {
-			fieldContainer.put(ALLPARTNERLINKS, allPartnerLinks);
-		}
-	}
+    @SuppressWarnings("unchecked")
+    @JsonIgnore
+    public Set<OExtension> getMustUnderstandExtensions() {
+        return (Set<OExtension>) fieldContainer.get(MUSTUNDERSTANDEXTENSIONS);
+    }
 
-	void setChildIdCounter(int childIdCounter) {
-		fieldContainer.put(CHILDIDCOUNTER, childIdCounter);
-	}
+    @JsonIgnore
+    public boolean hasMustUnderstandExtension(String namespaceURI) {
+        boolean found = false;
+        
+        // Check if an extension implementation is registered for the given namespareURI that the
+        // engine must understand
+        Iterator<OExtension> iter = getMustUnderstandExtensions().iterator();
+        while (!found && iter.hasNext()) {
+            OExtension ext = iter.next();
+            if (ext.getNamespace().equals(namespaceURI)) {
+                found = true;
+            }
+        }
+        
+        return found;
+    }
 
-	void setChildren(List<OBase> children) {
-		fieldContainer.put(CHILDREN, children);
-	}
+    public void setAllPartnerLinks(Set<OPartnerLink> allPartnerLinks) {
+        if (getAllPartnerLinks() == null) {
+            fieldContainer.put(ALLPARTNERLINKS, allPartnerLinks);
+        }
+    }
 
-	public void setCompileDate(Date compileDate) {
-		fieldContainer.put(COMPILEDATE, compileDate);
-	}
+    void setChildIdCounter(int childIdCounter) {
+        fieldContainer.put(CHILDIDCOUNTER, childIdCounter);
+    }
 
-	public void setConstants(OConstants constants) {
-		fieldContainer.put(CONSTANTS, constants);
-	}
+    void setChildren(List<OBase> children) {
+        fieldContainer.put(CHILDREN, children);
+    }
 
-	public void setElementTypes(HashMap<QName, OElementVarType> elementTypes) {
-		if (getElementTypes() == null) {
-			fieldContainer.put(ELEMENTTYPES, elementTypes);
-		}
-	}
+    public void setCompileDate(Date compileDate) {
+        fieldContainer.put(COMPILEDATE, compileDate);
+    }
 
-	public void setExpressionLanguages(
-			HashSet<OExpressionLanguage> expressionLanguages) {
-		if (getExpressionLanguages() == null) {
-			fieldContainer.put(EXPRESSIONLANGUAGES, expressionLanguages);
-		}
-	}
+    public void setConstants(OConstants constants) {
+        fieldContainer.put(CONSTANTS, constants);
+    }
 
-	public void setGuid(String guid) {
-		fieldContainer.put(GUID, guid);
-	}
+    public void setElementTypes(HashMap<QName, OElementVarType> elementTypes) {
+        if (getElementTypes() == null) {
+            fieldContainer.put(ELEMENTTYPES, elementTypes);
+        }
+    }
 
-	public void setMessageTypes(HashMap<QName, OMessageVarType> messageTypes) {
-		if (getMessageTypes() == null) {
-			fieldContainer.put(MESSAGETYPES, messageTypes);
-		}
-	}
+    public void setExpressionLanguages(HashSet<OExpressionLanguage> expressionLanguages) {
+        if (getExpressionLanguages() == null) {
+            fieldContainer.put(EXPRESSIONLANGUAGES, expressionLanguages);
+        }
+    }
 
-	public void setNamespaceContext(NSContext namespaceContext) {
-		fieldContainer.put(NAMESPACECONTEXT, namespaceContext);
-	}
+    public void setGuid(String guid) {
+        fieldContainer.put(GUID, guid);
+    }
 
-	public void setProcesScope(OScope procesScope) {
-		fieldContainer.put(PROCESSCOPE, procesScope);
-	}
+    public void setMessageTypes(HashMap<QName, OMessageVarType> messageTypes) {
+        if (getMessageTypes() == null) {
+            fieldContainer.put(MESSAGETYPES, messageTypes);
+        }
+    }
 
-	public void setProcessName(String processName) {
-		fieldContainer.put(PROCESSNAME, processName);
-	}
+    public void setNamespaceContext(NSContext namespaceContext) {
+        fieldContainer.put(NAMESPACECONTEXT, namespaceContext);
+    }
 
-	public void setProperties(List<OProperty> properties) {
-		if (getProperties() == null) {
-			fieldContainer.put(PROPERTIES, properties);
-		}
-	}
+    public void setProcesScope(OScope procesScope) {
+        fieldContainer.put(PROCESSCOPE, procesScope);
+    }
 
-	public void setTargetNamespace(String targetNamespace) {
-		fieldContainer.put(TARGETNAMESPACE, targetNamespace);
-	}
+    public void setProcessName(String processName) {
+        fieldContainer.put(PROCESSNAME, processName);
+    }
 
-	public void setUuid(String uuid) {
-		fieldContainer.put(UUID, uuid);
-	}
+    public void setProperties(List<OProperty> properties) {
+        if (getProperties() == null) {
+            fieldContainer.put(PROPERTIES, properties);
+        }
+    }
 
-	public void setVersion(String version) {
-		fieldContainer.put(VERSION, version);
-	}
+    public void setTargetNamespace(String targetNamespace) {
+        fieldContainer.put(TARGETNAMESPACE, targetNamespace);
+    }
 
-	public void setXsdTypes(HashMap<QName, OXsdTypeVarType> xsdTypes) {
-		if (getXsdTypes() == null) {
-			fieldContainer.put(XSDTYPES, xsdTypes);
-		}
-	}
+    public void setUuid(String uuid) {
+        fieldContainer.put(UUID, uuid);
+    }
 
-	public void setXslSheets(HashMap<URI, OXslSheet> xslSheets) {
-		if (getXslSheets() == null) {
-			fieldContainer.put(XSLSHEETS, xslSheets);
-		}
-	}
-	
+    public void setVersion(String version) {
+        fieldContainer.put(VERSION, version);
+    }
+
+    public void setXsdTypes(HashMap<QName, OXsdTypeVarType> xsdTypes) {
+        if (getXsdTypes() == null) {
+            fieldContainer.put(XSDTYPES, xsdTypes);
+        }
+    }
+
+    public void setXslSheets(HashMap<URI, OXslSheet> xslSheets) {
+        if (getXslSheets() == null) {
+            fieldContainer.put(XSLSHEETS, xslSheets);
+        }
+    }
+
     public void setDeclaredExtensions(Set<OExtension> extensions) {
         if (getDeclaredExtensions() == null) {
             fieldContainer.put(DECLAREDEXTENSIONS, extensions);
         }
     }
-	
-	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException{
-		ois.defaultReadObject();
-		fieldContainer.remove(NAMESPACECONTEXT);
-	}
 
-	public static class OProperty extends OBase  implements Serializable{
-	public static final long serialVersionUID = -1L;
+    public void setMustUnderstandExtensions(Set<OExtension> extensions) {
+        if (getMustUnderstandExtensions() == null) {
+            fieldContainer.put(MUSTUNDERSTANDEXTENSIONS, extensions);
+        }
+    }
 
-		private static final String ALIASES = "aliases";
-		private static final String NAME = "name";
-		
-		@JsonCreator
-		public OProperty(){}
-		public OProperty(OProcess process) {
-			super(process);
-			setAliases(new ArrayList<OPropertyAlias>());
-		}
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        ois.defaultReadObject();
+        fieldContainer.remove(NAMESPACECONTEXT);
+    }
 
-		public OPropertyAlias getAlias(OVarType messageType) {
-			for (OPropertyAlias aliase : getAliases())
-				if (aliase.getVarType().equals(messageType))
-					return aliase;
-			return null;
-		}
+    public static class OProperty extends OBase implements Serializable {
+        public static final long serialVersionUID = -1L;
 
-		@SuppressWarnings("unchecked")
-		@JsonIgnore
-		public List<OPropertyAlias> getAliases() {
-			Object o = fieldContainer.get(ALIASES);
-		return o == null ? null : (List<OPropertyAlias>)o;
-		}
+        private static final String ALIASES = "aliases";
+        private static final String NAME = "name";
 
-		@JsonIgnore
-		public QName getName() {
-			Object o = fieldContainer.get(NAME);
-		return o == null ? null : (QName)o;
-		}
+        @JsonCreator
+        public OProperty() {}
 
-		public void setAliases(List<OPropertyAlias> aliases) {
-			fieldContainer.put(ALIASES, aliases);
-		}
+        public OProperty(OProcess process) {
+            super(process);
+            setAliases(new ArrayList<OPropertyAlias>());
+        }
 
-		public void setName(QName name) {
-			fieldContainer.put(NAME, name);
-		}
+        public OPropertyAlias getAlias(OVarType messageType) {
+            for (OPropertyAlias aliase : getAliases())
+                if (aliase.getVarType().equals(messageType))
+                    return aliase;
+            return null;
+        }
 
-		public String toString() {
-			return "{OProperty " + getName() + "}";
-		}
-	}
+        @SuppressWarnings("unchecked")
+        @JsonIgnore
+        public List<OPropertyAlias> getAliases() {
+            Object o = fieldContainer.get(ALIASES);
+            return o == null ? null : (List<OPropertyAlias>) o;
+        }
 
-	public static class OPropertyAlias extends OBase  implements Serializable{
-		public static final long serialVersionUID = -1L;
-		/**
-		 * Change log of class version
-		 * initial 1
-		 * current 2
-		 * 
-		 * 1->2:
-		 * 	added header attribute
-		 *  */
-		public static final int CURRENT_CLASS_VERSION = 2;
+        @JsonIgnore
+        public QName getName() {
+            Object o = fieldContainer.get(NAME);
+            return o == null ? null : (QName) o;
+        }
 
-		private static final String VARTYPE = "varType";
+        public void setAliases(List<OPropertyAlias> aliases) {
+            fieldContainer.put(ALIASES, aliases);
+        }
 
-		/** For BPEL 1.1 */
-		private static final String PART = "part";
-		private static final String HEADER = "header";
-		private static final String LOCATION = "location";
+        public void setName(QName name) {
+            fieldContainer.put(NAME, name);
+        }
 
-		@JsonCreator
-		public OPropertyAlias(){}
-		
-		public OPropertyAlias(OProcess owner) {
-			super(owner);
-		}
+        public String toString() {
+            return "{OProperty " + getName() + "}";
+        }
+    }
 
-		@JsonIgnore
-		public String getDescription() {
-			StringBuffer buf = new StringBuffer(getVarType().toString());
-			buf.append('[');
-			buf.append(getPart() != null ? getPart().getName() : "");
-			buf.append(getHeader() != null ? "header: " + getHeader() : "");
-			if (getLocation() != null) {
-				buf.append("][");
-				buf.append(getLocation().toString());
-			}
-			buf.append(']');
-			return buf.toString();
-		}
+    public static class OPropertyAlias extends OBase implements Serializable {
+        public static final long serialVersionUID = -1L;
+        /**
+         * Change log of class version initial 1 current 2
+         * 
+         * 1->2: added header attribute
+         */
+        public static final int CURRENT_CLASS_VERSION = 2;
 
-		@JsonIgnore
-		public String getHeader() {
-			Object o = fieldContainer.get(HEADER);
-			return o == null ? null : (String)o;
-		}
+        private static final String VARTYPE = "varType";
 
-		@JsonIgnore
-		public OExpression getLocation() {
-			Object o = fieldContainer.get(LOCATION);
-		return o == null ? null : (OExpression)o;
-		}
+        /** For BPEL 1.1 */
+        private static final String PART = "part";
+        private static final String HEADER = "header";
+        private static final String LOCATION = "location";
 
-		@JsonIgnore
-		public Part getPart() {
-			Object o = fieldContainer.get(PART);
-		return o == null ? null : (Part)o;
-		}
+        @JsonCreator
+        public OPropertyAlias() {}
 
-		@JsonIgnore
-		public OVarType getVarType() {
-			Object o = fieldContainer.get(VARTYPE);
-		return o == null ? null : (OVarType)o;
-		}
+        public OPropertyAlias(OProcess owner) {
+            super(owner);
+        }
 
-		public void setHeader(String header) {
-			fieldContainer.put(HEADER, header);
-		}
+        @JsonIgnore
+        public String getDescription() {
+            StringBuffer buf = new StringBuffer(getVarType().toString());
+            buf.append('[');
+            buf.append(getPart() != null ? getPart().getName() : "");
+            buf.append(getHeader() != null ? "header: " + getHeader() : "");
+            if (getLocation() != null) {
+                buf.append("][");
+                buf.append(getLocation().toString());
+            }
+            buf.append(']');
+            return buf.toString();
+        }
 
-		public void setLocation(OExpression location) {
-			fieldContainer.put(LOCATION, location);
-		}
+        @JsonIgnore
+        public String getHeader() {
+            Object o = fieldContainer.get(HEADER);
+            return o == null ? null : (String) o;
+        }
 
-		public void setPart(Part part) {
-			fieldContainer.put(PART, part);
-		}
+        @JsonIgnore
+        public OExpression getLocation() {
+            Object o = fieldContainer.get(LOCATION);
+            return o == null ? null : (OExpression) o;
+        }
 
-		public void setVarType(OVarType varType) {
-			fieldContainer.put(VARTYPE, varType);
-		}
+        @JsonIgnore
+        public Part getPart() {
+            Object o = fieldContainer.get(PART);
+            return o == null ? null : (Part) o;
+        }
 
-		public String toString() {
-			return "{OPropertyAlias " + getDescription() + "}";
-		}
+        @JsonIgnore
+        public OVarType getVarType() {
+            Object o = fieldContainer.get(VARTYPE);
+            return o == null ? null : (OVarType) o;
+        }
 
-	}
+        public void setHeader(String header) {
+            fieldContainer.put(HEADER, header);
+        }
+
+        public void setLocation(OExpression location) {
+            fieldContainer.put(LOCATION, location);
+        }
+
+        public void setPart(Part part) {
+            fieldContainer.put(PART, part);
+        }
+
+        public void setVarType(OVarType varType) {
+            fieldContainer.put(VARTYPE, varType);
+        }
+
+        public String toString() {
+            return "{OPropertyAlias " + getDescription() + "}";
+        }
+
+    }
 
     public static class OExtension extends OBase implements Serializable {
         public static final long serialVersionUID = -1L;
@@ -593,36 +615,36 @@ public class OProcess extends OBase  implements Serializable{
         }
     }
 
-	/**
-	 * custom deserializer of OProcess.
-	 * @author fangzhen
-	 * @deprecated unnecessary now
-	 */
-	public static class OProcessDeser extends StdDeserializer<OProcess>
-			implements ResolvableDeserializer {
-		private static final long serialVersionUID = 7750214662590623362L;
-		private JsonDeserializer<?> defaultDeserializer;
+    /**
+     * custom deserializer of OProcess.
+     * 
+     * @author fangzhen
+     * @deprecated unnecessary now
+     */
+    public static class OProcessDeser extends StdDeserializer<OProcess>
+            implements ResolvableDeserializer {
+        private static final long serialVersionUID = 7750214662590623362L;
+        private JsonDeserializer<?> defaultDeserializer;
 
-		public OProcessDeser(JsonDeserializer<?> defaultDeserializer) {
-			super(OProcess.class);
-			this.defaultDeserializer = defaultDeserializer;
-		}
+        public OProcessDeser(JsonDeserializer<?> defaultDeserializer) {
+            super(OProcess.class);
+            this.defaultDeserializer = defaultDeserializer;
+        }
 
-		@Override
-		public OProcess deserialize(JsonParser jp, DeserializationContext ctxt)
-				throws IOException, JsonProcessingException {
-			OProcess process = (OProcess) defaultDeserializer.deserialize(jp,
-					ctxt);
-			OProcess.instanceCount++;
-			return process;
-		}
+        @Override
+        public OProcess deserialize(JsonParser jp, DeserializationContext ctxt)
+                throws IOException, JsonProcessingException {
+            OProcess process = (OProcess) defaultDeserializer.deserialize(jp, ctxt);
+            OProcess.instanceCount++;
+            return process;
+        }
 
-		// for some reason you have to implement ResolvableDeserializer when modifying BeanDeserializer
-		// otherwise deserializing throws JsonMappingException??
-		@Override
-		public void resolve(DeserializationContext ctxt)
-				throws JsonMappingException {
-			((ResolvableDeserializer) defaultDeserializer).resolve(ctxt);
-		}
-	}
+        // for some reason you have to implement ResolvableDeserializer when modifying
+        // BeanDeserializer
+        // otherwise deserializing throws JsonMappingException??
+        @Override
+        public void resolve(DeserializationContext ctxt) throws JsonMappingException {
+            ((ResolvableDeserializer) defaultDeserializer).resolve(ctxt);
+        }
+    }
 }

@@ -16,10 +16,10 @@ package org.apache.ode.bpel.extension.bpel4restlight;
 
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.eapi.ExtensionContext;
-import org.apache.ode.bpel.eapi.ExtensionOperation;
 import org.apache.ode.bpel.extension.bpel4restlight.http.HighLevelRestApi;
 import org.apache.ode.bpel.extension.bpel4restlight.http.HttpMethod;
 import org.apache.ode.bpel.extension.bpel4restlight.http.HttpResponseMessage;
+import org.apache.ode.bpel.runtime.extension.AbstractSyncExtensionOperation;
 import org.w3c.dom.Element;
 
 /**
@@ -30,9 +30,9 @@ import org.w3c.dom.Element;
  * @author Michael Hahn (mhahn.dev@gmail.com)
  * 
  */
-public class Bpel4RestLightOperation implements ExtensionOperation {
+public class Bpel4RestLightOperation extends AbstractSyncExtensionOperation {
 
-    public void run(ExtensionContext context, Element element) throws FaultException {
+    public void runSync(ExtensionContext context, Element element) throws FaultException {
         String httpMethod = element.getLocalName();
 
         // Extract requestUri

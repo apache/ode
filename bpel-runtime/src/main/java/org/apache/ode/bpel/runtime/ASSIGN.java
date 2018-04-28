@@ -19,8 +19,6 @@
 package org.apache.ode.bpel.runtime;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.URI;
 import java.util.Calendar;
 import java.util.Date;
@@ -32,6 +30,7 @@ import javax.xml.namespace.QName;
 import org.apache.ode.bpel.common.FaultException;
 import org.apache.ode.bpel.compiler.bom.ExtensibilityQNames;
 import org.apache.ode.bpel.eapi.ExtensionContext;
+import org.apache.ode.bpel.eapi.ExtensionOperation;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.PartnerLinkModificationEvent;
 import org.apache.ode.bpel.evt.ScopeEvent;
@@ -51,9 +50,7 @@ import org.apache.ode.bpel.obj.OMessageVarType.Part;
 import org.apache.ode.bpel.obj.OProcess.OProperty;
 import org.apache.ode.bpel.obj.OScope;
 import org.apache.ode.bpel.obj.OScope.Variable;
-import org.apache.ode.bpel.runtime.channels.ExtensionResponse;
 import org.apache.ode.bpel.runtime.channels.FaultData;
-import org.apache.ode.jacob.ReceiveProcess;
 import org.apache.ode.utils.DOMUtils;
 import org.apache.ode.utils.Namespaces;
 import org.apache.ode.utils.msg.MessageBundle;
@@ -679,49 +676,47 @@ class ASSIGN extends ACTIVITY {
 
     private void invokeExtensionAssignOperation(OAssign.ExtensionAssignOperation eao)
             throws FaultException {
+        final ExtensionContext context =
+                new ExtensionContextImpl(this._self, this._scopeFrame, getBpelRuntimeContext());
+        final QName extensionId = eao.getExtensionName();
+
         try {
-            final ExtensionContext helper =
-                    new ExtensionContextImpl(this._scopeFrame, getBpelRuntimeContext());
-            final ExtensionResponse responseChannel = newChannel(ExtensionResponse.class);
-
-            getBpelRuntimeContext().executeExtension(eao.getExtensionName(), helper,
-                    DOMUtils.stringToDOM(eao.getNestedElement()), responseChannel);
-
-            object(new ReceiveProcess() {
-                private static final long serialVersionUID = 1467660715539203917L;
-            }.setChannel(responseChannel).setReceiver(new ExtensionResponse() {
-                private static final long serialVersionUID = 509910466826372712L;
-
-                public void onCompleted() {
-                    _self.parent.completed(null, CompensationHandler.emptySet());
+            ExtensionOperation ea =
+                    getBpelRuntimeContext().createExtensionActivityImplementation(extensionId);
+            if (ea == null) {
+                if (eao.getOwner().hasMustUnderstandExtension(extensionId.getNamespaceURI())) {
+                    __log.warn("Lookup of extension activity " + extensionId + " failed.");
+                    throw new FaultException(ExtensibilityQNames.UNKNOWN_EA_FAULT_NAME,
+                            "Lookup of extension assign operation " + extensionId
+                                    + " failed. No implementation found.");
+                } else {
+                    // act like <empty> - do nothing
+                    context.complete();
+                    return;
                 }
+            }
 
-                public void onFailure(Throwable t) {
-                    StringWriter sw = new StringWriter();
-                    t.printStackTrace(new PrintWriter(sw));
-                    FaultData fault = createFault(
-                            _self.o.getOwner().getConstants().getQnSubLanguageExecutionFault(),
-                            _self.o, sw.getBuffer().toString());
-                    _self.parent.completed(fault, CompensationHandler.emptySet());
-                };
-            }));
+            ea.run(context, DOMUtils.stringToDOM(eao.getNestedElement()));
 
         } catch (FaultException fault) {
             __log.error("Exception while invoking extension assign operation", fault);
-            FaultData faultData = createFault(fault.getQName(), _self.o, fault.getMessage());
-            _self.parent.completed(faultData, CompensationHandler.emptySet());
+            context.completeWithFault(fault);
         } catch (SAXException e) {
-            __log.error("Exception while invoking extension assign operation", e);
-            FaultData faultData = createFault(ExtensibilityQNames.INVALID_EXTENSION_ELEMENT,
-                    _self.o, "The nested element of extension assign operation '"
-                            + eao.getExtensionName() + "' is no valid XML.");
-            _self.parent.completed(faultData, CompensationHandler.emptySet());
+            __log.error("Exception while invoking extension assign operation",
+                    e);
+            FaultException faultData =
+                    new FaultException(ExtensibilityQNames.INVALID_EXTENSION_ELEMENT,
+                            "The nested element of extension assign operation '"
+                                    + eao.getExtensionName() + "' is no valid XML.", e);
+            context.completeWithFault(faultData);
         } catch (IOException e) {
-            __log.error("Exception while invoking extension assign operation", e);
-            FaultData faultData = createFault(ExtensibilityQNames.INVALID_EXTENSION_ELEMENT,
-                    _self.o, "The nested element of extension assign operation '"
-                            + eao.getExtensionName() + "' is no valid XML.");
-            _self.parent.completed(faultData, CompensationHandler.emptySet());
+            __log.error("Exception while invoking extension assign operation",
+                    e);
+            FaultException faultData =
+                    new FaultException(ExtensibilityQNames.INVALID_EXTENSION_ELEMENT,
+                            "The nested element of extension assign operation '"
+                                    + eao.getExtensionName() + "' is no valid XML.", e);
+            context.completeWithFault(faultData);
         }
     }
 

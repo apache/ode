@@ -28,13 +28,11 @@ import java.util.HashMap;
 import javax.wsdl.Operation;
 import javax.xml.namespace.QName;
 
-import junit.framework.TestCase;
-
 import org.apache.ode.bpel.common.CorrelationKey;
 import org.apache.ode.bpel.common.FaultException;
+import org.apache.ode.bpel.eapi.ExtensionOperation;
 import org.apache.ode.bpel.evar.ExternalVariableModuleException;
 import org.apache.ode.bpel.evt.ProcessInstanceEvent;
-import org.apache.ode.bpel.eapi.ExtensionContext;
 import org.apache.ode.bpel.iapi.ProcessConf.PartnerRoleConfig;
 import org.apache.ode.bpel.obj.OCatch;
 import org.apache.ode.bpel.obj.OEmpty;
@@ -49,7 +47,6 @@ import org.apache.ode.bpel.obj.OScope.Variable;
 import org.apache.ode.bpel.obj.OSequence;
 import org.apache.ode.bpel.obj.OThrow;
 import org.apache.ode.bpel.runtime.channels.ActivityRecovery;
-import org.apache.ode.bpel.runtime.channels.ExtensionResponse;
 import org.apache.ode.bpel.runtime.channels.FaultData;
 import org.apache.ode.bpel.runtime.channels.InvokeResponse;
 import org.apache.ode.bpel.runtime.channels.PickResponse;
@@ -58,6 +55,8 @@ import org.apache.ode.jacob.vpu.ExecutionQueueImpl;
 import org.apache.ode.jacob.vpu.JacobVPU;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import junit.framework.TestCase;
 
 /**
  * Test core BPEL processing capabilities.
@@ -482,9 +481,8 @@ public class CoreBpelTest extends TestCase implements BpelRuntimeContext {
 
     public void checkInvokeExternalPermission() {}
 
-    public void executeExtension(QName extensionId, ExtensionContext context, Element element,
-            ExtensionResponse extResponseChannel) throws FaultException {
+    public ExtensionOperation createExtensionActivityImplementation(QName name) {
         // TODO Auto-generated method stub
-
+        return null;
     }
 }

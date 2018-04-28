@@ -194,10 +194,11 @@ public class OmOld2new extends AbstractObjectVisitor {
             }
         }
 
-        // @hahnml: We need to add the new "declaredExtensions" field to the process for
+        // @hahnml: We need to add the new "declaredExtensions" and "mustUnderstandExtensions" fields to the process for
         // equality.
         if (old.getClass().getSimpleName().equals("OProcess")) {
             fieldMap.put("declaredExtensions", new HashSet<OExtension>());
+            fieldMap.put("mustUnderstandExtensions", new HashSet<OExtension>());
         }
 
         n.setClassVersion(1);
