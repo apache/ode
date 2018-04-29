@@ -50,7 +50,8 @@ public class CorrelationCustomSoapHeaderTest extends Axis2TestBase {
 
         //Take out the IID from the response which is used as the correlation value
         Element rootElemt = DOMUtils.stringToDOM(response1);
-        Element soapBody = DOMUtils.getFirstChildElement(rootElemt);
+        Element soapHeader = DOMUtils.getFirstChildElement(rootElemt);
+        Element soapBody = DOMUtils.getNextSiblingElement(soapHeader);
         assertEquals("Body", soapBody.getLocalName());
 
         Element responseElem = DOMUtils.getFirstChildElement(soapBody);
