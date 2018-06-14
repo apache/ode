@@ -18,6 +18,8 @@ import javax.xml.namespace.QName;
 
 import org.apache.ode.bpel.eapi.AbstractExtensionBundle;
 import org.apache.ode.utils.Namespaces;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Extension bundle for basic REST operation support in BPEL.
@@ -26,6 +28,8 @@ import org.apache.ode.utils.Namespaces;
  * 
  */
 public class Bpel4RestLightExtensionBundle extends AbstractExtensionBundle {
+	
+	private static final Logger logger = LoggerFactory.getLogger(Bpel4RestLightExtensionBundle.class);
 
     public static final String NAMESPACE =
             "http://www.apache.org/ode/bpel/extensions/bpel4restlight";
@@ -44,5 +48,9 @@ public class Bpel4RestLightExtensionBundle extends AbstractExtensionBundle {
         super.registerExtensionOperation("GET", Bpel4RestLightOperation.class);
         super.registerExtensionOperation("POST", Bpel4RestLightOperation.class);
         super.registerExtensionOperation("DELETE", Bpel4RestLightOperation.class);
+        
+        if (logger.isDebugEnabled()) {
+        	logger.debug("Bpel4RestLightExtensionBundle is registered under namespace '" + NAMESPACE + "'.");
+        }
     }
 }

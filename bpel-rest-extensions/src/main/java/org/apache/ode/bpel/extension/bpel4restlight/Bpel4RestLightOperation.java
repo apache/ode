@@ -20,6 +20,9 @@ import org.apache.ode.bpel.extension.bpel4restlight.http.HighLevelRestApi;
 import org.apache.ode.bpel.extension.bpel4restlight.http.HttpMethod;
 import org.apache.ode.bpel.extension.bpel4restlight.http.HttpResponseMessage;
 import org.apache.ode.bpel.runtime.extension.AbstractSyncExtensionOperation;
+import org.apache.ode.utils.DOMUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 /**
@@ -31,13 +34,28 @@ import org.w3c.dom.Element;
  * 
  */
 public class Bpel4RestLightOperation extends AbstractSyncExtensionOperation {
+	
+	private static final Logger logger = LoggerFactory.getLogger(Bpel4RestLightOperation.class);
 
     public void runSync(ExtensionContext context, Element element) throws FaultException {
         String httpMethod = element.getLocalName();
-
+        
         // Extract requestUri
         String requestUri = Bpel4RestLightUtil.getMethodAttributeValue(context, element,
                 MethodAttribute.REQUEST_URI);
+        // Extract accept header
+        String acceptHeader = Bpel4RestLightUtil.getMethodAttributeValue(context, element,
+        		MethodAttribute.ACCEPT_HEADER);
+        // Extract content type
+        String contentType = Bpel4RestLightUtil.getMethodAttributeValue(context, element,
+        		MethodAttribute.CONTENTTYPE);
+        
+        if (logger.isDebugEnabled()) {
+        	logger.debug("Starting REST call for extension activity: \n" + DOMUtils.domToString(element));
+        	logger.debug("Request URI (resolved): " + requestUri);
+        	logger.debug("Request accept header (resolved): " + acceptHeader);
+        	logger.debug("Request content-type header (resolved): " + contentType);
+        }
 
         HttpResponseMessage responseMessage = null;
 
@@ -46,27 +64,35 @@ public class Bpel4RestLightOperation extends AbstractSyncExtensionOperation {
 
             case PUT: {
                 String requestPayload = Bpel4RestLightUtil.extractRequestPayload(context, element);
-                String acceptHeader = Bpel4RestLightUtil.extractAcceptHeader(context, element);
-                responseMessage = HighLevelRestApi.Put(requestUri, requestPayload, acceptHeader);
+                
+                responseMessage = HighLevelRestApi.Put(requestUri, requestPayload, acceptHeader, contentType);
+                
+                if (logger.isDebugEnabled()) {
+                	logger.debug("Request message payload: " + requestPayload);
+                }
+                
                 break;
             }
 
             case POST: {
                 String requestPayload = Bpel4RestLightUtil.extractRequestPayload(context, element);
-                String acceptHeader = Bpel4RestLightUtil.extractAcceptHeader(context, element);
-                responseMessage = HighLevelRestApi.Post(requestUri, requestPayload, acceptHeader);
+                
+                responseMessage = HighLevelRestApi.Post(requestUri, requestPayload, acceptHeader, contentType);
+                
+                if (logger.isDebugEnabled()) {
+                	logger.debug("Request message payload: \n" + requestPayload);
+                }
+                
                 break;
             }
 
             case GET: {
-                String acceptHeader = Bpel4RestLightUtil.extractAcceptHeader(context, element);
-                responseMessage = HighLevelRestApi.Get(requestUri, acceptHeader);
+                responseMessage = HighLevelRestApi.Get(requestUri, acceptHeader, contentType);
                 break;
             }
 
             case DELETE: {
-                String acceptHeader = Bpel4RestLightUtil.extractAcceptHeader(context, element);
-                responseMessage = HighLevelRestApi.Delete(requestUri, acceptHeader);
+                responseMessage = HighLevelRestApi.Delete(requestUri, acceptHeader, contentType);
                 break;
             }
             default:
@@ -74,6 +100,10 @@ public class Bpel4RestLightOperation extends AbstractSyncExtensionOperation {
         }
 
         processResponseMessage(responseMessage, context, element);
+        
+        if (logger.isDebugEnabled()) {
+        	logger.debug("Completed REST call for extension activity: \n" + DOMUtils.domToString(element));
+        }
     }
 
     private void processResponseMessage(HttpResponseMessage responseMessage,
@@ -83,16 +113,23 @@ public class Bpel4RestLightOperation extends AbstractSyncExtensionOperation {
                 element, MethodAttribute.RESPONSE_PAYLOAD_VARIABLE);
         String statusCodeVariableName = Bpel4RestLightUtil.getMethodAttributeValue(context, element,
                 MethodAttribute.STATUS_CODE_VARIABLE);
-
-
+        
+        String responsePayload = responseMessage.getResponseBody().trim();
+        int statusCode = responseMessage.getStatusCode();
+        
         if (responsePayloadVariableName != null && !responsePayloadVariableName.isEmpty()) {
-            Bpel4RestLightUtil.writeResponsePayload(context, responseMessage.getResponseBody(),
+            Bpel4RestLightUtil.writeResponsePayload(context, responsePayload,
                     responsePayloadVariableName);
         }
 
         if (statusCodeVariableName != null && !statusCodeVariableName.isEmpty()) {
-            Bpel4RestLightUtil.writeResponsePayload(context, responseMessage.getStatusCode(),
+            Bpel4RestLightUtil.writeResponsePayload(context, statusCode,
                     statusCodeVariableName);
+        }
+        
+        if (logger.isDebugEnabled()) {
+        	logger.debug("Response status code: " + statusCode);
+        	logger.debug("Response message payload: \n" + responsePayload);
         }
     }
 }

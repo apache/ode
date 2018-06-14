@@ -23,6 +23,8 @@ import org.apache.ode.bpel.o.OScope.Variable;
 import org.apache.ode.bpel.o.OVarType;
 import org.apache.ode.bpel.o.OXsdTypeVarType;
 import org.apache.ode.utils.DOMUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -35,7 +37,9 @@ import org.xml.sax.SAXException;
  * 
  */
 public class Bpel4RestLightUtil {
-
+	
+	private static final Logger logger = LoggerFactory.getLogger(Bpel4RestLightUtil.class);
+	
     private static final String VARIABLE_VALUE_REFERENCE = "$bpelvar[";
 
     /**
@@ -64,6 +68,10 @@ public class Bpel4RestLightUtil {
             // Check if the specified variable provides data
             if (requestVariableNode != null) {
                 requestPayload = variableData2String(requestVariableNode);
+            }
+            
+            if (logger.isDebugEnabled()) {
+            	logger.debug("Extract request message payload from BPEL variable: " + requestPayloadVariableName);
             }
         }
 
@@ -104,6 +112,10 @@ public class Bpel4RestLightUtil {
             // Create a new instance of the variables' type, to see if we need a wrapper
             Document doc = DOMUtils.newDocument();
             Node val = bpelVariable.type.newInstance(doc);
+            
+            if (logger.isDebugEnabled()) {
+            	logger.debug("Write response message payload to BPEL variable: " + processVariableName);
+            }
 
             // Check if we need a temporary simple type wrapper
             if (val.getNodeType() == Node.TEXT_NODE) {
@@ -122,12 +134,16 @@ public class Bpel4RestLightUtil {
                 try {
                     val = DOMUtils.stringToDOM(responsePayload.toString());
                 } catch (SAXException e) {
+                	logger.error("Writing the response payload to BPEL variable '" 
+                	        + processVariableName + "' caused an exception", e);
                     throw new FaultException(Bpel4RestLightExtensionBundle.FAULT_QNAME,
                             "BPEL4REST: Writing the response payload to BPEL variable '"
                                     + processVariableName + "' caused an exception: "
                                     + e.getMessage(),
                             e);
                 } catch (IOException e) {
+                	logger.error("Writing the response payload to BPEL variable '" 
+                	        + processVariableName + "' caused an exception", e);
                     throw new FaultException(Bpel4RestLightExtensionBundle.FAULT_QNAME,
                             "BPEL4REST: Writing the response payload to BPEL variable '"
                                     + processVariableName + "' caused an exception: "
@@ -139,11 +155,6 @@ public class Bpel4RestLightUtil {
             // Write the variable value
             context.writeVariable(bpelVariable, val);
         }
-    }
-
-    public static String extractAcceptHeader(ExtensionContext context, Element element)
-            throws FaultException {
-        return getMethodAttributeValue(context, element, MethodAttribute.ACCEPT_HEADER);
     }
 
     /**
@@ -201,6 +212,9 @@ public class Bpel4RestLightUtil {
                 }
 
                 break;
+            case CONTENTTYPE:
+            	result = element.getAttribute("contenttype");
+            	break;
         }
 
         return result;
@@ -223,11 +237,15 @@ public class Bpel4RestLightUtil {
         String variableValue = variableValueReference;
 
         // Check if a concrete variable name ("varName") or a reference to the value of
-        // a variable
-        // is specified ("$bpelVar[varName]")
-        if (variableValueReference.startsWith(VARIABLE_VALUE_REFERENCE)) {
-            String variableName = variableValueReference.substring(
-                    variableValueReference.indexOf("[") + 1, variableValueReference.indexOf("]"));
+        // a variable is specified ("$bpelVar[varName]")
+        if (variableValueReference.contains(VARIABLE_VALUE_REFERENCE)) {
+        	int startIndexOfVarReference = variableValueReference.indexOf(VARIABLE_VALUE_REFERENCE);
+            int endIndexOfVarReference = variableValueReference.indexOf("]");
+        	
+            String variableName = variableValueReference.substring(startIndexOfVarReference + VARIABLE_VALUE_REFERENCE.length(), endIndexOfVarReference);
+            
+            String prefix = variableValueReference.startsWith(VARIABLE_VALUE_REFERENCE) ? "" : variableValue.substring(0, startIndexOfVarReference);
+        	String suffix = variableValue.length() > endIndexOfVarReference + 1 ? variableValue.substring(endIndexOfVarReference + 1) : "";
 
             Variable variable = context.getVisibleVariables().get(variableName);
 
@@ -237,7 +255,8 @@ public class Bpel4RestLightUtil {
                 Node variableContent = context.readVariable(variableName);
 
                 if (variableContent.getTextContent() != null) {
-                    variableValue = variableContent.getTextContent();
+                	// Return the value of the variable plus the optionally specified prefix and suffix as result 
+                    variableValue = prefix + variableContent.getTextContent() + suffix;
                 }
             } else {
                 throw new FaultException(Bpel4RestLightExtensionBundle.FAULT_QNAME,

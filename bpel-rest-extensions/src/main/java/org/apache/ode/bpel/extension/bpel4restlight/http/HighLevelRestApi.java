@@ -45,11 +45,12 @@ public class HighLevelRestApi {
      * @exception FaultException
      */
     public static HttpResponseMessage Put(String uri, String requestPayload,
-            String acceptHeaderValue) throws FaultException {
+            String acceptHeaderValue, String contentType) throws FaultException {
 
         PutMethod method = new PutMethod(uri);
 
         HighLevelRestApi.setAcceptHeader(method, acceptHeaderValue);
+        HighLevelRestApi.setContentTypeHeader(method, contentType);
         try {
             method.setRequestEntity(
                     new StringRequestEntity(requestPayload, "application/xml", "UTF-8"));
@@ -78,7 +79,7 @@ public class HighLevelRestApi {
      * @exception FaultException
      */
     public static HttpResponseMessage Post(String uri, String requestPayload,
-            String acceptHeaderValue) throws FaultException {
+            String acceptHeaderValue, String contentType) throws FaultException {
 
         PostMethod method = null;
         if (uri.contains("?")) {
@@ -100,6 +101,7 @@ public class HighLevelRestApi {
         }
 
         HighLevelRestApi.setAcceptHeader(method, acceptHeaderValue);
+        HighLevelRestApi.setContentTypeHeader(method, contentType);
         HttpResponseMessage responseMessage = LowLevelRestApi.executeHttpMethod(method);
         // Remove <?xml... in front of response
         HighLevelRestApi.cleanResponseBody(responseMessage);
@@ -116,7 +118,7 @@ public class HighLevelRestApi {
      * 
      * @exception FaultException
      */
-    public static HttpResponseMessage Get(String uri, String acceptHeaderValue)
+    public static HttpResponseMessage Get(String uri, String acceptHeaderValue, String contentType)
             throws FaultException {
         GetMethod method = null;
         if (uri.contains("?")) {
@@ -127,6 +129,7 @@ public class HighLevelRestApi {
             method = new GetMethod(uri);
         }
         HighLevelRestApi.setAcceptHeader(method, acceptHeaderValue);
+        HighLevelRestApi.setContentTypeHeader(method, contentType);
         HttpResponseMessage responseMessage = LowLevelRestApi.executeHttpMethod(method);
         HighLevelRestApi.cleanResponseBody(responseMessage);
         return responseMessage;
@@ -141,11 +144,12 @@ public class HighLevelRestApi {
      * 
      * @exception FaultException
      */
-    public static HttpResponseMessage Delete(String uri, String acceptHeaderValue)
+    public static HttpResponseMessage Delete(String uri, String acceptHeaderValue, String contentType)
             throws FaultException {
 
         DeleteMethod method = new DeleteMethod(uri);
         HighLevelRestApi.setAcceptHeader(method, acceptHeaderValue);
+        HighLevelRestApi.setContentTypeHeader(method, contentType);
         HttpResponseMessage responseMessage = LowLevelRestApi.executeHttpMethod(method);
         HighLevelRestApi.cleanResponseBody(responseMessage);
         return responseMessage;
@@ -169,10 +173,18 @@ public class HighLevelRestApi {
     }
 
     private static void setAcceptHeader(HttpMethodBase method, String value) {
-        if (!value.equals("")) {
+        if (value != null && !value.isEmpty()) {
             method.setRequestHeader("Accept", value);
         } else {
             method.setRequestHeader("Accept", "application/xml");
+        }
+    }
+    
+    private static void setContentTypeHeader(HttpMethodBase method, String value) {
+        if (value != null && !value.isEmpty()) {
+            method.setRequestHeader("Content-Type", value);
+        } else {
+            method.setRequestHeader("Content-Type", "application/xml");
         }
     }
 
