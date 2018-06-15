@@ -51,5 +51,14 @@ CMD dockerize -template ${CATALINA_HOME}/conf/tomcat-users.xml.tpl:${CATALINA_HO
 # Manually build by running:
 #
 #   docker build -t opentosca/ode:local .
+# 
+# Run ODE container:
+# 
 #   docker run -d -p 9763:9763 --name ode opentosca/ode:local
-#
+# 
+# Set a logging level different than "warn", e.g., for debugging process executions.
+# Possible values are: all, trace, debug, info, warn, error, fatal, off.
+# Visit Apache Log4j2 website for more details: https://logging.apache.org/log4j/2.x/.
+# 
+#   docker run -d -p 9763:9763 -e "LOG_LEVEL=debug" --name ode opentosca/ode:local
+# 
