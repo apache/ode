@@ -40,6 +40,7 @@ public class HighLevelRestApi {
      * @param uri The URI of the target resource
      * @param requestPayload The payload of the request message
      * @param acceptHeaderValue The value of the accept header field to be set
+     * @param contentType The contentType of the request payload
      * @return A HttpResponseMessage providing the response message payload and status code.
      * 
      * @exception FaultException
@@ -67,6 +68,28 @@ public class HighLevelRestApi {
 
         return responseMessage;
     }
+    
+    /**
+     * This method implements the HTTP PUT Method
+     * 
+     * @param uri The URI of the target resource
+     * @param acceptHeaderValue The value of the accept header field to be set
+     * @return A HttpResponseMessage providing the response message payload and status code.
+     * 
+     * @exception FaultException
+     */
+    public static HttpResponseMessage Put(String uri, 
+            String acceptHeaderValue) throws FaultException {
+    	PutMethod method = new PutMethod(uri);
+
+        HighLevelRestApi.setAcceptHeader(method, acceptHeaderValue);
+
+        HttpResponseMessage responseMessage = LowLevelRestApi.executeHttpMethod(method);
+        // Remove <?xml... in front of response
+        HighLevelRestApi.cleanResponseBody(responseMessage);
+
+        return responseMessage;
+    }
 
     /**
      * This method implements the HTTP POST Method
@@ -74,6 +97,7 @@ public class HighLevelRestApi {
      * @param uri The URI of the target resource
      * @param requestPayload The payload of the request message
      * @param acceptHeaderValue The value of the accept header field to be set
+     * @param contentType The contentType of the request payload
      * @return A HttpResponseMessage providing the response message payload and status code.
      * 
      * @exception FaultException
@@ -107,6 +131,34 @@ public class HighLevelRestApi {
         HighLevelRestApi.cleanResponseBody(responseMessage);
 
         return responseMessage;
+    }
+    
+    /**
+     * This method implements the HTTP POST Method
+     * 
+     * @param uri The URI of the target resource
+     * @param acceptHeaderValue The value of the accept header field to be set
+     * @return A HttpResponseMessage providing the response message payload and status code.
+     * 
+     * @exception FaultException
+     */
+    public static HttpResponseMessage Post(String uri,
+            String acceptHeaderValue) throws FaultException {
+    	  PostMethod method = null;
+          if (uri.contains("?")) {
+              String[] split = uri.split("\\?");
+              method = new PostMethod(split[0]);
+              method.setQueryString(HighLevelRestApi.createNameValuePairArrayFromQuery(split[1]));
+          } else {
+              method = new PostMethod(uri);
+          }
+
+          HighLevelRestApi.setAcceptHeader(method, acceptHeaderValue);
+          HttpResponseMessage responseMessage = LowLevelRestApi.executeHttpMethod(method);
+          // Remove <?xml... in front of response
+          HighLevelRestApi.cleanResponseBody(responseMessage);
+
+          return responseMessage;
     }
 
     /**
