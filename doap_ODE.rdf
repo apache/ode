@@ -18,7 +18,7 @@
     <license rdf:resource="http://usefulinc.com/doap/licenses/asl20" />
     <name>Apache ODE</name>
     <homepage rdf:resource="http://ode.apache.org" />
-    <asfext:pmc rdf:resource="http://ode.apache.org" />
+    <asfext:pmc rdf:resource="http://attic.apache.org" />
     <shortdesc>Apache ODE is a WS-BPEL implementation that supports web services orchestration using flexible process definitions.</shortdesc>
     <description>Apache ODE (Orchestration Director Engine) executes business processes written following the WS-BPEL standard. It talks to web services, sending and receiving messages, handling data manipulation and error recovery as described by your process definition. It supports both long and short living process executions to orchestrate all the services that are part of your application.
 
@@ -29,6 +29,7 @@ WS-BPEL is an XML-based language defining several constructs to write business p
     <programming-language>Java</programming-language>
     <category rdf:resource="http://projects.apache.org/category/xml" />
     <category rdf:resource="http://projects.apache.org/category/network-server" />
+    <category rdf:resource="http://projects.apache.org/category/retired" />
     <release>
       <Version>
         <name>1.3.4</name>
